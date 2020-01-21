@@ -1,0 +1,27 @@
+{
+  "required": true,
+  "package": "minegame159.meteorclient.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+  ],
+  "client": [
+    "MinecraftClientMixin",
+    "WorldRendererMixin",
+    "InGameHudMixin",
+    "KeyboardMixin",
+    "ChatHudMixin",
+    "ClientPlayerEntityMixin",
+    "ClientPlayNetworkHandlerMixin",
+    "LivingEntityMixin",
+    "ClientWorldMixin",
+    "BlockMixin",
+    "LivingEntityRendererMixin",
+    "BackgroundRendererMixin",
+    "GameRendererMixin",
+
+    "IMinecraftClient"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "id": "meteor-client",
+  "version": "${version}",
+
+  "name": "Meteor Client",
+  "description": "Utility mod.",
+  "authors": [
+    "MineGame159"
+  ],
+
+  "license": "MIT",
+  "icon": "assets/meteor-client/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "minegame159.meteorclient.MeteorClient"
+    ]
+  },
+  "mixins": [
+    "meteor-client.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.7.2",
+    "fabric": "*",
+    "minecraft": "1.15.x"
+  },
+  "suggests": {
+    "flamingo": "*"
+  }
+}
