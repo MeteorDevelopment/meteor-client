@@ -4,7 +4,8 @@ import minegame159.jes.SubscribeEvent;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.settings.EnumSetting;
+import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.builders.EnumSettingBuilder;
 import minegame159.meteorclient.utils.KeyBindings;
 
 public class AutoSprint extends Module {
@@ -13,10 +14,15 @@ public class AutoSprint extends Module {
         Legit
     }
 
-    private static EnumSetting<Mode> mode = new EnumSetting<>("mode", "Mode.", Mode.Always);
+    private Setting<Mode> mode = addSetting(new EnumSettingBuilder<Mode>()
+            .name("mode")
+            .description("Mode.")
+            .defaultValue(Mode.Always)
+            .build()
+    );
 
     public AutoSprint() {
-        super(Category.Movement, "auto-sprint", "Automatically sprints.", mode);
+        super(Category.Movement, "auto-sprint", "Automatically sprints.");
     }
 
     @Override
@@ -25,7 +31,7 @@ public class AutoSprint extends Module {
     }
 
     private void setSprinting(boolean sprinting) {
-        if (mode.value == Mode.Always) mc.player.setSprinting(sprinting);
+        if (mode.value() == Mode.Always) mc.player.setSprinting(sprinting);
         else KeyBindings.sprint.setPressed(sprinting);
     }
 

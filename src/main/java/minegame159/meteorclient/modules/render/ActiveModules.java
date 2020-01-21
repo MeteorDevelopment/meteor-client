@@ -25,11 +25,6 @@ public class ActiveModules extends Module {
         recalculate();
     }
 
-    @Override
-    public void onSettingChanges() {
-        recalculate();
-    }
-
     private void recalculate() {
         modules.clear();
         modules.addAll(ModuleManager.getActive());

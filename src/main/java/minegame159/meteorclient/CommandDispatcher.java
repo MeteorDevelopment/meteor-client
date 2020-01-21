@@ -40,18 +40,11 @@ public class CommandDispatcher {
 
             if (args.length <= 0) {
                 // Send setting's value if nothing is after it's name
-                setting.sendValue();
+                Utils.sendMessage("#yellowValue of #blue'%s' #yellow is #blue'%s'#yellow.", setting.name, setting.value().toString());
             } else {
                 // Parse setting's value and report usage if error
-                int parseResult = setting.parse(args);
-                if (parseResult > 0) {
-                    args = subArray(args, parseResult);
-                    module.onSettingChanges();
-                }
-                else if (parseResult == 0) setting.sendUsage(module.name, true);
-                else {
-                    args = subArray(args, -parseResult);
-                    setting.sendUsage(module.name, true);
+                if (!setting.setFromString(String.join(", ", args))) {
+                    Utils.sendMessage("#redUsage of #blue'%s' #redis #gray%s#red.", setting.name, setting.usage);
                 }
             }
         }

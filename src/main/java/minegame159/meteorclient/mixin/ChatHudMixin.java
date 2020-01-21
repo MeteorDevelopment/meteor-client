@@ -58,14 +58,14 @@ public abstract class ChatHudMixin {
             }
         }
 
-        while(this.visibleMessages.size() > (LongerChat.active ? LongerChat.lines.value : 100)) {
+        while(this.visibleMessages.size() > (LongerChat.active ? LongerChat.linesInt : 100)) {
             this.visibleMessages.remove(this.visibleMessages.size() - 1);
         }
 
         if (!bl) {
             this.messages.add(0, new ChatHudLine(timestamp, message, messageId));
 
-            while(this.visibleMessages.size() > (LongerChat.active ? LongerChat.lines.value : 100)) {
+            while(this.visibleMessages.size() > (LongerChat.active ? LongerChat.linesInt : 100)) {
                 this.messages.remove(this.messages.size() - 1);
             }
         }

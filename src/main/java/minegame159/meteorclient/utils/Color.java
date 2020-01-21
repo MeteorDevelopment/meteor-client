@@ -12,6 +12,8 @@ public class Color {
         this.g = g;
         this.b = b;
         this.a = a;
+
+        validate();
     }
 
     public void set(Color value) {
@@ -19,6 +21,22 @@ public class Color {
         g = value.g;
         b = value.b;
         a = value.a;
+
+        validate();
+    }
+
+    private void validate() {
+        if (r < 0) r = 0;
+        else if (r > 255) r = 255;
+
+        if (g < 0) g = 0;
+        else if (g > 255) g = 255;
+
+        if (b < 0) b = 0;
+        else if (b > 255) b = 255;
+
+        if (a < 0) a = 0;
+        else if (a > 255) a = 255;
     }
 
     public int getPacked() {
@@ -27,7 +45,7 @@ public class Color {
 
     @Override
     public String toString() {
-        return r + " " + g + " " + b + " " + a;
+        return r + ", " + g + ", " + b + ", " + a;
     }
 
     public static int fromRGBA(int r, int g, int b, int a) {

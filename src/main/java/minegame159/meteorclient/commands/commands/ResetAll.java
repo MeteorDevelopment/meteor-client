@@ -7,7 +7,7 @@ import minegame159.meteorclient.settings.Setting;
 
 public class ResetAll extends Command {
     public ResetAll() {
-        super("reset-all", "Resets all modules settings.");
+        super("reset-all", "Resets all modules oldsettings.");
     }
 
     @Override

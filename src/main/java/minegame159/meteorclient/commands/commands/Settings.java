@@ -7,7 +7,7 @@ import minegame159.meteorclient.utils.Utils;
 
 public class Settings extends Command {
     public Settings() {
-        super("settings", "Displays all settings of specified module.");
+        super("oldsettings", "Displays all oldsettings of specified module.");
     }
 
     @Override
@@ -17,7 +17,7 @@ public class Settings extends Command {
 
         Utils.sendMessage("#pink%s:", module.title);
         for (Setting setting : module.settings) {
-            setting.sendUsage(module.name, false);
+            Utils.sendMessage("  #yellowUsage of #blue'%s' #yellowis #gray%s#yellow.", setting.usage);
         }
     }
 }

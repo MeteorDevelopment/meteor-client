@@ -1,35 +1,58 @@
 package minegame159.meteorclient.settings;
 
-import minegame159.meteorclient.Config;
-import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.StringConverter;
 
-public abstract class Setting<T> {
-    public final SettingType type;
-    public final String name, description;
-    public T value;
-    private final T defaultValue;
+import java.util.function.BiConsumer;
+import java.util.function.Predicate;
 
-    public Setting(SettingType type, String name, String description, T defaultValue) {
-        this.type = type;
+public class Setting<T> {
+    public String name;
+    public String description;
+    public String usage;
+
+    private T value;
+    private T defaultValue;
+
+    private Predicate<T> restriction;
+    private BiConsumer<T, T> consumer;
+    private StringConverter<T> converter;
+
+    public Setting(String name, String description, String usage, T defaultValue, Predicate<T> restriction, BiConsumer<T, T> consumer, StringConverter<T> converter) {
         this.name = name;
         this.description = description;
+        this.usage = usage;
         value = defaultValue;
         this.defaultValue = defaultValue;
+        this.restriction = restriction;
+        this.consumer = consumer;
+        this.converter = converter;
+    }
+
+    public T value() {
+        return value;
+    }
+
+    public boolean value(T value) {
+        T old = this.value;
+        if (restriction != null && !restriction.test(value)) return false;
+        this.value = value;
+        if (consumer != null) consumer.accept(old, value);
+        return true;
     }
 
     public void reset() {
         value = defaultValue;
     }
 
-    public abstract int parse(String[] args);
-
-    public abstract String getUsage();
-
-    public void sendUsage(String moduleName, boolean usage) {
-        if (usage) Utils.sendMessage("#redUsage#white:");
-        Utils.sendMessage("  #yellow%s %s %s #gray(%s) #yellow- %s", Config.instance.prefix + moduleName, name, getUsage(), value.toString(), description);
+    public boolean setFromString(String string) {
+        T newValue = converter.convert(string);
+        if (newValue == null) return false;
+        value = newValue;
+        return true;
     }
-    public void sendValue() {
-        Utils.sendMessage("#yellowValue of #blue'%s'#yellow is #blue'%s'#yellow.", name, value.toString());
+
+    @Override
+    public String toString() {
+        return value.toString();
     }
 }

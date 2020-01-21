@@ -4,24 +4,37 @@ import minegame159.jes.SubscribeEvent;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.settings.EnumSetting;
-import minegame159.meteorclient.settings.FloatSetting;
+import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.builders.EnumSettingBuilder;
+import minegame159.meteorclient.settings.builders.FloatSettingBuilder;
 
 public class Flight extends Module {
     public enum Mode {
         Vanilla
     }
 
-    private static EnumSetting<Mode> mode = new EnumSetting<>("mode", "Mode.", Mode.Vanilla);
-    private static FloatSetting speed = new FloatSetting("speed", "Speed.", 0.1f, 0f, null);
+    private Setting<Mode> mode = addSetting(new EnumSettingBuilder<Mode>()
+            .name("mode")
+            .description("Mode.")
+            .defaultValue(Mode.Vanilla)
+            .build()
+    );
+
+    private Setting<Float> speed = addSetting(new FloatSettingBuilder()
+            .name("speed")
+            .description("Speed.")
+            .defaultValue(0.1f)
+            .min(0f)
+            .build()
+    );
 
     public Flight() {
-        super(Category.Movement, "flight", "FLYYYY! You will take fall damage so enable no fall.", speed);
+        super(Category.Movement, "flight", "FLYYYY! You will take fall damage so enable no fall.");
     }
 
     @Override
     public void onActivate() {
-        if (mode.value == Mode.Vanilla) {
+        if (mode.value() == Mode.Vanilla) {
             mc.player.abilities.flying = true;
             if (mc.player.abilities.creativeMode) return;
             mc.player.abilities.allowFlying = true;
@@ -30,7 +43,7 @@ public class Flight extends Module {
 
     @Override
     public void onDeactivate() {
-        if (mode.value == Mode.Vanilla) {
+        if (mode.value() == Mode.Vanilla) {
             mc.player.abilities.flying = false;
             mc.player.abilities.setFlySpeed(0.05f);
             if (mc.player.abilities.creativeMode) return;
@@ -40,9 +53,9 @@ public class Flight extends Module {
 
     @SubscribeEvent
     private void onTick(TickEvent e) {
-        switch (mode.value) {
+        switch (mode.value()) {
             case Vanilla:
-                mc.player.abilities.setFlySpeed(speed.value);
+                mc.player.abilities.setFlySpeed(speed.value());
                 mc.player.abilities.flying = true;
                 if (mc.player.abilities.creativeMode) return;
                 mc.player.abilities.allowFlying = true;
