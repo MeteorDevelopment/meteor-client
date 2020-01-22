@@ -14,6 +14,12 @@ public class Modules extends Command {
     public void run(String[] args) {
         Utils.sendMessage("#yellowAll #gray%d #yellowmodules:", ModuleManager.getCount());
 
+        // Combat
+        Utils.sendMessage("  #pinkPlayer #gray(%d)#pink:", ModuleManager.combatCount());
+        ModuleManager.combatForEach(module -> {
+            Utils.sendMessage("    #yellow%s%s #gray- #yellow%s", Config.instance.prefix, module.name, module.description);
+        });
+
         // Player
         Utils.sendMessage("  #pinkPlayer #gray(%d)#pink:", ModuleManager.playerCount());
         ModuleManager.playerForEach(module -> {

@@ -2,6 +2,7 @@ package minegame159.meteorclient.modules;
 
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.EventStore;
+import minegame159.meteorclient.modules.combat.Criticals;
 import minegame159.meteorclient.modules.misc.LongerChat;
 import minegame159.meteorclient.modules.movement.*;
 import minegame159.meteorclient.modules.player.AutoFish;
@@ -16,6 +17,7 @@ import java.util.function.Consumer;
 
 public class ModuleManager {
     private static List<Module> modules = new ArrayList<>();
+    private static List<Module> combat = new ArrayList<>();
     private static List<Module> player = new ArrayList<>();
     private static List<Module> movement = new ArrayList<>();
     private static List<Module> render = new ArrayList<>();
@@ -26,10 +28,12 @@ public class ModuleManager {
     public static Module moduleToBind;
 
     public static void init() {
+        initCombat();
         initPlayer();
         initMovement();
         initRender();
         initMisc();
+
         System.out.println("Meteor Client loaded " + modules.size() + " modules.");
     }
 
@@ -68,6 +72,13 @@ public class ModuleManager {
 
     public static List<Module> getActive() {
         return active;
+    }
+
+    public static void combatForEach(Consumer<Module> consumer) {
+        combat.forEach(consumer);
+    }
+    public static int combatCount() {
+        return combat.size();
     }
 
     public static void playerForEach(Consumer<Module> consumer) {
@@ -122,16 +133,24 @@ public class ModuleManager {
 
     private static void addModule(Module module) {
         switch (module.category) {
+            case Combat:   combat.add(module); break;
             case Player:   player.add(module); break;
             case Movement: movement.add(module); break;
             case Render:   render.add(module); break;
             case Misc:     misc.add(module); break;
         }
+
         modules.add(module);
     }
 
-    private static void initMisc() {
-        addModule(new LongerChat());
+    private static void initCombat() {
+        addModule(new Criticals());
+    }
+
+    private static void initPlayer() {
+        addModule(new AutoFish());
+        addModule(new DeathPosition());
+        addModule(new FastUse());
     }
 
     private static void initMovement() {
@@ -145,12 +164,6 @@ public class ModuleManager {
         addModule(new Flight());
     }
 
-    private static void initPlayer() {
-        addModule(new AutoFish());
-        addModule(new DeathPosition());
-        addModule(new FastUse());
-    }
-
     private static void initRender() {
         addModule(new ActiveModules());
         addModule(new FullBright());
@@ -161,5 +174,9 @@ public class ModuleManager {
         addModule(new Chams());
         addModule(new AntiFog());
         addModule(new NoHurtCam());
+    }
+
+    private static void initMisc() {
+        addModule(new LongerChat());
     }
 }

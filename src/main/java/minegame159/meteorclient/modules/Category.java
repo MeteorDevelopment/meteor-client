@@ -1,8 +1,9 @@
 package minegame159.meteorclient.modules;
 
 public enum Category {
-    Movement,
+    Combat,
     Player,
+    Movement,
     Render,
     Misc
 }
