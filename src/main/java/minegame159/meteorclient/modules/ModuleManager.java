@@ -3,6 +3,7 @@ package minegame159.meteorclient.modules;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.modules.combat.Criticals;
+import minegame159.meteorclient.modules.misc.AutoSign;
 import minegame159.meteorclient.modules.misc.LongerChat;
 import minegame159.meteorclient.modules.movement.*;
 import minegame159.meteorclient.modules.player.AutoFish;
@@ -180,5 +181,6 @@ public class ModuleManager {
 
     private static void initMisc() {
         addModule(new LongerChat());
+        addModule(new AutoSign());
     }
 }
