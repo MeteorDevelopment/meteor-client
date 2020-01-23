@@ -45,12 +45,12 @@ public class ColorSettingBuilder extends SettingBuilder<Color> {
 
     @Override
     public Setting<Color> build() {
-        if (usage == null) usage = "0-255, 0-255, 0-255, 0-255";
+        if (usage == null) usage = "0-255 0-255 0-255 0-255";
 
         if (converter == null) {
             converter = string -> {
                 try {
-                    String[] a = string.split(",");
+                    String[] a = string.split(" ");
                     return new Color(Integer.parseInt(a[0].trim()), Integer.parseInt(a[1].trim()), Integer.parseInt(a[2].trim()), Integer.parseInt(a[3].trim()));
                 } catch (IndexOutOfBoundsException | NumberFormatException ignored) {
                     return null;

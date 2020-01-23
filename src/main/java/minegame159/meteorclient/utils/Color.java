@@ -45,7 +45,7 @@ public class Color {
 
     @Override
     public String toString() {
-        return r + ", " + g + ", " + b + ", " + a;
+        return r + " " + g + " " + b + " " + a;
     }
 
     public static int fromRGBA(int r, int g, int b, int a) {

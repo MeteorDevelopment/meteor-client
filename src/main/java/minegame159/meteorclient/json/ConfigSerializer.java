@@ -2,7 +2,6 @@ package minegame159.meteorclient.json;
 
 import com.google.gson.*;
 import minegame159.meteorclient.Config;
-import minegame159.meteorclient.modules.ModuleJson;
 import minegame159.meteorclient.modules.ModuleManager;
 
 import java.lang.reflect.Type;

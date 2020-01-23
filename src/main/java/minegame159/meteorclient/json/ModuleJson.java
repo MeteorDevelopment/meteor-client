@@ -1,8 +1,10 @@
-package minegame159.meteorclient.modules;
+package minegame159.meteorclient.json;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.settings.Setting;
 
 public class ModuleJson {
