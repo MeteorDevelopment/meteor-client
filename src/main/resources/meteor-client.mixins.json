@@ -15,7 +15,6 @@
     "LivingEntityMixin",
     "ClientWorldMixin",
     "BlockMixin",
-    "LivingEntityRendererMixin",
     "BackgroundRendererMixin",
     "GameRendererMixin",
 
