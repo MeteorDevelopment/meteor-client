@@ -47,8 +47,7 @@ public class Setting<T> {
     public boolean setFromString(String string) {
         T newValue = converter.convert(string);
         if (newValue == null) return false;
-        value = newValue;
-        return true;
+        return value(newValue);
     }
 
     @Override

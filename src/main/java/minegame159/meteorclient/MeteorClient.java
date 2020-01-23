@@ -7,6 +7,7 @@ import minegame159.jes.eventbuses.EventBus;
 import minegame159.meteorclient.commands.CommandManager;
 import minegame159.meteorclient.json.ConfigSerializer;
 import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.utils.EntityUtils;
 import minegame159.meteorclient.utils.Utils;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
@@ -23,7 +24,9 @@ public class MeteorClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         System.out.println("Initializing Meteor Client.");
+
         Utils.mc = MinecraftClient.getInstance();
+        EntityUtils.mc = MinecraftClient.getInstance();
 
         gson = new GsonBuilder()
                 .registerTypeAdapter(Config.class, new ConfigSerializer())
