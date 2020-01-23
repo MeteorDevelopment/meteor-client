@@ -29,18 +29,18 @@ public class ESP extends Module {
             .build()
     );
 
-    private Setting<Color> color = addSetting(new ColorSettingBuilder()
-            .name("color")
-            .description("Color.")
-            .defaultValue(new Color(175, 175, 175, 255))
-            .consumer((color1, color2) -> recalculateColor())
-            .build()
-    );
-
     private Setting<Boolean> players = addSetting(new BoolSettingBuilder()
             .name("players")
             .description("See players.")
             .defaultValue(true)
+            .build()
+    );
+
+    private Setting<Color> playersColor = addSetting(new ColorSettingBuilder()
+            .name("players-color")
+            .description("Players color.")
+            .defaultValue(new Color(255, 255, 255, 255))
+            .consumer((color1, color2) -> recalculateColor())
             .build()
     );
 
@@ -51,10 +51,26 @@ public class ESP extends Module {
             .build()
     );
 
+    private Setting<Color> animalsColor = addSetting(new ColorSettingBuilder()
+            .name("animals-color")
+            .description("Animals color.")
+            .defaultValue(new Color(145, 255, 145, 255))
+            .consumer((color1, color2) -> recalculateColor())
+            .build()
+    );
+
     private Setting<Boolean> mobs = addSetting(new BoolSettingBuilder()
             .name("mobs")
             .description("See mobs.")
             .defaultValue(true)
+            .build()
+    );
+
+    private Setting<Color> mobsColor = addSetting(new ColorSettingBuilder()
+            .name("mobs-color")
+            .description("Mobs color.")
+            .defaultValue(new Color(255, 145, 145, 255))
+            .consumer((color1, color2) -> recalculateColor())
             .build()
     );
 
@@ -65,10 +81,26 @@ public class ESP extends Module {
             .build()
     );
 
+    private Setting<Color> itemsColor = addSetting(new ColorSettingBuilder()
+            .name("items-color")
+            .description("Items color.")
+            .defaultValue(new Color(145, 145, 145, 255))
+            .consumer((color1, color2) -> recalculateColor())
+            .build()
+    );
+
     private Setting<Boolean> crystals = addSetting(new BoolSettingBuilder()
             .name("crystals")
             .description("See crystals.")
             .defaultValue(true)
+            .build()
+    );
+
+    private Setting<Color> crystalsColor = addSetting(new ColorSettingBuilder()
+            .name("crystals-color")
+            .description("Crystals color.")
+            .defaultValue(new Color(160, 40, 235, 255))
+            .consumer((color1, color2) -> recalculateColor())
             .build()
     );
 
@@ -79,8 +111,26 @@ public class ESP extends Module {
             .build()
     );
 
-    private Color lineColor = new Color(0, 0, 0, 0);
-    private Color sideColor = new Color(0, 0, 0, 0);
+    private Setting<Color> vehiclesColor = addSetting(new ColorSettingBuilder()
+            .name("vehicles-color")
+            .description("Vehicles color.")
+            .defaultValue(new Color(100, 100, 100, 255))
+            .consumer((color1, color2) -> recalculateColor())
+            .build()
+    );
+
+    private Color playersLineColor = new Color();
+    private Color playersSideColor = new Color();
+    private Color animalsLineColor = new Color();
+    private Color animalsSideColor = new Color();
+    private Color mobsLineColor = new Color();
+    private Color mobsSideColor = new Color();
+    private Color itemsLineColor = new Color();
+    private Color itemsSideColor = new Color();
+    private Color crystalsLineColor = new Color();
+    private Color crystalsSideColor = new Color();
+    private Color vehiclesLineColor = new Color();
+    private Color vehiclesSideColor = new Color();
 
     public ESP() {
         super(Category.Render, "esp", "See entities through walls.");
@@ -97,14 +147,50 @@ public class ESP extends Module {
     }
 
     private void recalculateColor() {
-        lineColor.set(color.value());
+        // Players
+        playersLineColor.set(playersColor.value());
 
-        sideColor.set(lineColor);
-        sideColor.a -= 225;
-        if (sideColor.a < 0) sideColor.a = 0;
+        playersSideColor.set(playersLineColor);
+        playersSideColor.a -= 225;
+        if (playersSideColor.a < 0) playersSideColor.a = 0;
+
+        // Animals
+        animalsLineColor.set(animalsColor.value());
+
+        animalsSideColor.set(animalsLineColor);
+        animalsSideColor.a -= 225;
+        if (animalsSideColor.a < 0) animalsSideColor.a = 0;
+
+        // Mobs
+        mobsLineColor.set(mobsColor.value());
+
+        mobsSideColor.set(mobsLineColor);
+        mobsSideColor.a -= 225;
+        if (mobsSideColor.a < 0) mobsSideColor.a = 0;
+
+        // Items
+        itemsLineColor.set(itemsColor.value());
+
+        itemsSideColor.set(itemsLineColor);
+        itemsSideColor.a -= 225;
+        if (itemsSideColor.a < 0) itemsSideColor.a = 0;
+
+        // Crystals
+        crystalsLineColor.set(crystalsColor.value());
+
+        crystalsSideColor.set(crystalsLineColor);
+        crystalsSideColor.a -= 225;
+        if (crystalsSideColor.a < 0) crystalsSideColor.a = 0;
+
+        // Vehicles
+        vehiclesLineColor.set(vehiclesColor.value());
+
+        vehiclesSideColor.set(vehiclesLineColor);
+        vehiclesSideColor.a -= 225;
+        if (vehiclesSideColor.a < 0) vehiclesSideColor.a = 0;
     }
 
-    private void render(Entity entity) {
+    private void render(Entity entity, Color lineColor, Color sideColor) {
         switch (mode.value()) {
             case Lines: {
                 Box box = entity.getBoundingBox();
@@ -128,12 +214,12 @@ public class ESP extends Module {
     @SubscribeEvent
     private void onRender(RenderEvent e) {
         for (Entity entity : mc.world.getEntities()) {
-            if (players.value() && EntityUtils.isPlayer(entity) && entity != mc.player) render(entity);
-            else if (animals.value() && EntityUtils.isAnimal(entity)) render(entity);
-            else if (mobs.value() && EntityUtils.isMob(entity)) render(entity);
-            else if (items.value() && EntityUtils.isItem(entity)) render(entity);
-            else if (crystals.value() && EntityUtils.isCrystal(entity)) render(entity);
-            else if (vehicles.value() && EntityUtils.isVehicle(entity)) render(entity);
+            if (players.value() && EntityUtils.isPlayer(entity) && entity != mc.player) render(entity, playersLineColor, playersSideColor);
+            else if (animals.value() && EntityUtils.isAnimal(entity)) render(entity, animalsLineColor, animalsSideColor);
+            else if (mobs.value() && EntityUtils.isMob(entity)) render(entity, mobsLineColor, mobsSideColor);
+            else if (items.value() && EntityUtils.isItem(entity)) render(entity, itemsLineColor, itemsSideColor);
+            else if (crystals.value() && EntityUtils.isCrystal(entity)) render(entity, crystalsLineColor, crystalsSideColor);
+            else if (vehicles.value() && EntityUtils.isVehicle(entity)) render(entity, vehiclesLineColor, vehiclesSideColor);
         }
     }
 }
