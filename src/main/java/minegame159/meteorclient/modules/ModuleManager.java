@@ -174,6 +174,7 @@ public class ModuleManager {
         addModule(new AntiFog());
         addModule(new NoHurtCam());
         addModule(new ESP());
+        addModule(new Freecam());
     }
 
     private static void initMisc() {
