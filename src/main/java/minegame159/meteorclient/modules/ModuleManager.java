@@ -171,7 +171,6 @@ public class ModuleManager {
         addModule(new Position());
         addModule(new StorageESP());
         addModule(new XRay());
-        addModule(new Chams());
         addModule(new AntiFog());
         addModule(new NoHurtCam());
         addModule(new ESP());
