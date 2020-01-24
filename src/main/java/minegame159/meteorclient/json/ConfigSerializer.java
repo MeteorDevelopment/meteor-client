@@ -2,6 +2,7 @@ package minegame159.meteorclient.json;
 
 import com.google.gson.*;
 import minegame159.meteorclient.Config;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
 
 import java.lang.reflect.Type;
@@ -14,7 +15,7 @@ public class ConfigSerializer implements JsonSerializer<Config>, JsonDeserialize
         obj.addProperty("prefix", src.prefix);
 
         JsonArray modules = new JsonArray();
-        ModuleManager.forEachAll(module -> modules.add(ModuleJson.saveModule(module)));
+        for (Module module : ModuleManager.getAll()) modules.add(ModuleJson.saveModule(module));
         obj.add("modules", modules);
 
         return obj;

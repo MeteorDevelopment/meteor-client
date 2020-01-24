@@ -12,17 +12,11 @@ import minegame159.meteorclient.modules.player.FastUse;
 import minegame159.meteorclient.modules.render.*;
 import minegame159.meteorclient.utils.Utils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
+import java.util.*;
 
 public class ModuleManager {
     private static List<Module> modules = new ArrayList<>();
-    private static List<Module> combat = new ArrayList<>();
-    private static List<Module> player = new ArrayList<>();
-    private static List<Module> movement = new ArrayList<>();
-    private static List<Module> render = new ArrayList<>();
-    private static List<Module> misc = new ArrayList<>();
+    private static Map<Category, List<Module>> groups = new HashMap<>();
 
     private static List<Module> active = new ArrayList<>();
 
@@ -36,6 +30,36 @@ public class ModuleManager {
         initMisc();
 
         System.out.println("Meteor Client loaded " + modules.size() + " modules.");
+    }
+
+    public static List<Module> getGroup(Category category) {
+        return groups.computeIfAbsent(category, k -> new ArrayList<>());
+    }
+
+    public static Set<Category> getCategories() {
+        return groups.keySet();
+    }
+
+    public static Module get(String name) {
+        name = name.toLowerCase();
+        for (Module module : modules) {
+            if (module.name.equals(name)) return module;
+        }
+
+        return null;
+    }
+
+    public static List<Module> getActive() {
+        return active;
+    }
+
+    public static List<Module> getAll() {
+        return modules;
+    }
+
+    public static void deactivateAll() {
+        List<Module> active2 = new ArrayList<>(active);
+        for (Module module : active2) module.toggle();
     }
 
     public static boolean onKeyPress(int key) {
@@ -58,67 +82,6 @@ public class ModuleManager {
         return false;
     }
 
-    public static Module get(String name) {
-        name = name.toLowerCase();
-        for (Module module : modules) {
-            if (module.name.equals(name)) return module;
-        }
-
-        return null;
-    }
-
-    public static void forEachAll(Consumer<Module> consumer) {
-        modules.forEach(consumer);
-    }
-
-    public static List<Module> getActive() {
-        return active;
-    }
-
-    public static void combatForEach(Consumer<Module> consumer) {
-        combat.forEach(consumer);
-    }
-    public static int combatCount() {
-        return combat.size();
-    }
-
-    public static void playerForEach(Consumer<Module> consumer) {
-        player.forEach(consumer);
-    }
-    public static int playerCount() {
-        return player.size();
-    }
-
-    public static void movementForEach(Consumer<Module> consumer) {
-        movement.forEach(consumer);
-    }
-    public static int movementCount() {
-        return movement.size();
-    }
-
-    public static void renderForEach(Consumer<Module> consumer) {
-        render.forEach(consumer);
-    }
-    public static int renderCount() {
-        return render.size();
-    }
-
-    public static void miscForEach(Consumer<Module> consumer) {
-        misc.forEach(consumer);
-    }
-    public static int miscCount() {
-        return misc.size();
-    }
-
-    public static int getCount() {
-        return modules.size();
-    }
-
-    public static void deactivateAll() {
-        List<Module> active2 = new ArrayList<>(active);
-        for (Module module : active2) module.toggle();
-    }
-
     static void addActive(Module module) {
         active.add(module);
         MeteorClient.eventBus.post(EventStore.activeModulesChangedEvent());
@@ -128,20 +91,9 @@ public class ModuleManager {
         MeteorClient.eventBus.post(EventStore.activeModulesChangedEvent());
     }
 
-    public static List<Module> getAll() {
-        return modules;
-    }
-
     private static void addModule(Module module) {
-        switch (module.category) {
-            case Combat:   combat.add(module); break;
-            case Player:   player.add(module); break;
-            case Movement: movement.add(module); break;
-            case Render:   render.add(module); break;
-            case Misc:     misc.add(module); break;
-        }
-
         modules.add(module);
+        getGroup(module.category).add(module);
     }
 
     private static void initCombat() {
