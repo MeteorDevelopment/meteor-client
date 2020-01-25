@@ -18,8 +18,7 @@ public class ESP extends Module {
     public enum Mode {
         Lines,
         Sides,
-        Both,
-        Glowing
+        Both
     }
 
     private Setting<Mode> mode = addSetting(new EnumSettingBuilder<Mode>()
@@ -135,15 +134,6 @@ public class ESP extends Module {
     public ESP() {
         super(Category.Render, "esp", "See entities through walls.");
         recalculateColor();
-    }
-
-    @Override
-    public void onDeactivate() {
-        if (mode.value() == Mode.Glowing) {
-            for (Entity entity : mc.world.getEntities()) {
-                if (entity != mc.player) entity.setGlowing(false);
-            }
-        }
     }
 
     private void recalculateColor() {
