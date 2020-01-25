@@ -88,6 +88,9 @@ public class ModuleGroup {
         Color backgroundColor = this.backgroundColor;
         if (module.isActive() || isMouseOverModule(mouseX, mosueY, i)) backgroundColor = backgroundActiveColor;
 
+        Color outlineColor = this.outlineColor;
+        if (highlighted) outlineColor = outlineHighlightedColor;
+
         quad(x, y, x + width, y + height, backgroundColor); // Background
 
         quad(x, y, x + width, y + 1, outlineColor); // Top
