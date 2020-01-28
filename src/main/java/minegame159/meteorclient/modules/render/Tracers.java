@@ -19,6 +19,13 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
 public class Tracers extends Module {
+    private Setting<Boolean> center = addSetting(new BoolSettingBuilder()
+            .name("center")
+            .description("Tracers go to the center of the entity instead of its head.")
+            .defaultValue(false)
+            .build()
+    );
+
     private Setting<Boolean> players = addSetting(new BoolSettingBuilder()
             .name("players")
             .description("See players.")
@@ -93,7 +100,8 @@ public class Tracers extends Module {
 
     @SubscribeEvent
     private void onRender(RenderEvent e) {
-        vec1 = new Vec3d(0, 0, 75).rotateX(-(float) Math.toRadians(mc.cameraEntity.pitch)).rotateY(-(float) Math.toRadians(mc.cameraEntity.yaw)).add(mc.cameraEntity.getPos().add(0, mc.cameraEntity.getEyeHeight(mc.cameraEntity.getPose()), 0));
+        vec1 = new Vec3d(0, 0, 75).rotateX(-(float) Math.toRadians(mc.cameraEntity.pitch)).rotateY(-(float) Math.toRadians(mc.cameraEntity.yaw));
+        if (!center.value()) vec1.add(mc.cameraEntity.getPos().add(0, mc.cameraEntity.getEyeHeight(mc.cameraEntity.getPose()), 0));
 
         for (Entity entity : mc.world.getEntities()) {
             if (players.value() && EntityUtils.isPlayer(entity) && entity != mc.player) render(entity, playersColor.value());
