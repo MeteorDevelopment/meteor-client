@@ -30,7 +30,7 @@ public class ActiveModules extends Module {
         modules.addAll(ModuleManager.getActive());
 
         modules.sort((o1, o2) -> {
-            int a = Integer.compare(o1.getInfoString() == null ? o1.title.length() : (o1.title + " " + o1.getInfoString()).length(), o2.getInfoString() == null ? o2.title.length() : (o2.title + " " + o2.getInfoString()).length());
+            int a = Integer.compare(o1.getInfoString() == null ? Utils.getTextWidth(o1.title) : Utils.getTextWidth(o1.title + " " + o1.getInfoString()), o2.getInfoString() == null ? Utils.getTextWidth(o2.title) : Utils.getTextWidth(o2.title + " " + o2.getInfoString()));
             if (a == 0) return 0;
             return a < 0 ? 1 : -1;
         });
