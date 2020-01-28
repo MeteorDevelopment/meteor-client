@@ -29,8 +29,8 @@ dependencies {
 	// PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
 	// You may need to force-disable transitiveness on them.
 
-	modCompile "com.github.MineGame159:jes:a3142f9842"
-	include "com.github.MineGame159:jes:a3142f9842"
+	modCompile "com.github.MineGame159:jes:6365690039"
+	include "com.github.MineGame159:jes:6365690039"
 
 	modCompile "com.gitlab.CDAGaming:fabritone:1.15.1-SNAPSHOT"
 	include "com.gitlab.CDAGaming:fabritone:1.15.1-SNAPSHOT"

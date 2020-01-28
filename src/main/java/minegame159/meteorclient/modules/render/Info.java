@@ -3,12 +3,12 @@ package minegame159.meteorclient.modules.render;
 import com.google.common.collect.Iterables;
 import minegame159.jes.SubscribeEvent;
 import minegame159.meteorclient.events.Render2DEvent;
+import minegame159.meteorclient.mixininterface.IMinecraftClient;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.builders.BoolSettingBuilder;
 import minegame159.meteorclient.utils.Color;
-import minegame159.meteorclient.utils.Reflection;
 import minegame159.meteorclient.utils.Utils;
 
 public class Info extends Module {
@@ -40,7 +40,7 @@ public class Info extends Module {
         int y = 2;
 
         if (fps.value()) {
-            drawInfo("FPS: ", Reflection.MinecraftClient_currentFps.get(mc) + "", y);
+            drawInfo("FPS: ", ((IMinecraftClient) mc).getCurrentFps() + "", y);
             y += Utils.getTextHeight() + 2;
         }
 

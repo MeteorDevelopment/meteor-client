@@ -17,8 +17,8 @@
     "BlockMixin",
     "BackgroundRendererMixin",
     "GameRendererMixin",
-
-    "IMinecraftClient"
+    "KeyBindingMixin",
+    "SignEditScreenMixin"
   ],
   "injectors": {
     "defaultRequire": 1

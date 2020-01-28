@@ -1,6 +1,6 @@
 package minegame159.meteorclient.utils;
 
-import minegame159.meteorclient.mixin.IMinecraftClient;
+import minegame159.meteorclient.mixininterface.IMinecraftClient;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
 import net.minecraft.client.MinecraftClient;

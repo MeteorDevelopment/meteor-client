@@ -3,12 +3,12 @@ package minegame159.meteorclient.modules.movement;
 import baritone.api.BaritoneAPI;
 import minegame159.jes.SubscribeEvent;
 import minegame159.meteorclient.events.TickEvent;
+import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.builders.EnumSettingBuilder;
 import minegame159.meteorclient.utils.GoalDirection;
-import minegame159.meteorclient.utils.KeyBindings;
 
 public class AutoWalk extends Module {
     public enum Mode {
@@ -41,14 +41,14 @@ public class AutoWalk extends Module {
 
     @Override
     public void onDeactivate() {
-        if (mode.value() == Mode.Simple) KeyBindings.forward.setPressed(false);
+        if (mode.value() == Mode.Simple) ((IKeyBinding) mc.options.keyForward).setPressed(false);
         else BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
     }
 
     @SubscribeEvent
     private void onTick(TickEvent e) {
         if (mode.value() == Mode.Simple) {
-            KeyBindings.forward.setPressed(true);
+            ((IKeyBinding) mc.options.keyForward).setPressed(true);
         } else {
             if (timer > 20) {
                 timer = 0;

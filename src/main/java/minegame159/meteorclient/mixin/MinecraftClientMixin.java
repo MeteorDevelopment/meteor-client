@@ -3,6 +3,7 @@ package minegame159.meteorclient.mixin;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.events.OpenScreenEvent;
+import minegame159.meteorclient.mixininterface.IMinecraftClient;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.RunArgs;
@@ -15,10 +16,16 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(MinecraftClient.class)
-public abstract class MinecraftClientMixin {
+public abstract class MinecraftClientMixin implements IMinecraftClient {
     @Shadow public ClientWorld world;
 
-    @Shadow private static MinecraftClient instance;
+    @Shadow private static int currentFps;
+
+    @Shadow private int itemUseCooldown;
+
+    @Shadow protected abstract void doItemUse();
+
+    @Shadow protected abstract void doAttack();
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void onInit(RunArgs args, CallbackInfo info) {
@@ -39,5 +46,25 @@ public abstract class MinecraftClientMixin {
         MeteorClient.eventBus.post(event);
 
         if (event.isCancelled()) info.cancel();
+    }
+
+    @Override
+    public void leftClick() {
+        doItemUse();
+    }
+
+    @Override
+    public void rightClick() {
+        doAttack();
+    }
+
+    @Override
+    public int getCurrentFps() {
+        return currentFps;
+    }
+
+    @Override
+    public void setItemUseCooldown(int cooldown) {
+        itemUseCooldown = cooldown;
     }
 }
