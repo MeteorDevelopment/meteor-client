@@ -6,6 +6,7 @@ import minegame159.meteorclient.modules.Module;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.network.packet.PlaySoundS2CPacket;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.network.Packet;
 
@@ -25,6 +26,8 @@ public class EventStore {
     private static OpenScreenEvent openScreenEvent = new OpenScreenEvent();
     private static ModuleBindChangedEvent moduleBindChangedEvent = new ModuleBindChangedEvent();
     private static CharTypedEvent charTypedEvent = new CharTypedEvent();
+    private static EntityAddedEvent entityAddedEvent = new EntityAddedEvent();
+    private static EntityRemovedEvent entityRemovedEvent = new EntityRemovedEvent();
 
     public static ActiveModulesChangedEvent activeModulesChangedEvent() {
         activeModulesChangedEvent.setCancelled(false);
@@ -114,5 +117,17 @@ public class EventStore {
         charTypedEvent.setCancelled(false);
         charTypedEvent.c = c;
         return charTypedEvent;
+    }
+
+    public static EntityAddedEvent entityAddedEvent(Entity entity) {
+        entityAddedEvent.setCancelled(false);
+        entityAddedEvent.entity = entity;
+        return entityAddedEvent;
+    }
+
+    public static EntityRemovedEvent entityRemovedEvent(Entity entity) {
+        entityRemovedEvent.setCancelled(false);
+        entityRemovedEvent.entity = entity;
+        return entityRemovedEvent;
     }
 }
