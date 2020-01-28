@@ -7,6 +7,15 @@ public class Color {
         this(255, 255, 255, 255);
     }
 
+    public Color(int r, int g, int b) {
+        this.r = r;
+        this.g = g;
+        this.b = b;
+        a = 255;
+
+        validate();
+    }
+
     public Color(int r, int g, int b, int a) {
         this.r = r;
         this.g = g;
@@ -14,6 +23,13 @@ public class Color {
         this.a = a;
 
         validate();
+    }
+
+    public Color(Color color) {
+        this.r = color.r;
+        this.g = color.g;
+        this.b = color.b;
+        this.a = color.a;
     }
 
     public void set(Color value) {
@@ -25,7 +41,7 @@ public class Color {
         validate();
     }
 
-    private void validate() {
+    public void validate() {
         if (r < 0) r = 0;
         else if (r > 255) r = 255;
 

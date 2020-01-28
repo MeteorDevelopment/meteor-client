@@ -1,12 +1,17 @@
 package minegame159.meteorclient.settings;
 
+import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.StringConverter;
+import org.apache.commons.lang3.StringUtils;
 
+import java.util.Arrays;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class Setting<T> {
     public String name;
+    public String title;
     public String description;
     public String usage;
 
@@ -19,6 +24,7 @@ public class Setting<T> {
 
     public Setting(String name, String description, String usage, T defaultValue, Predicate<T> restriction, BiConsumer<T, T> consumer, StringConverter<T> converter) {
         this.name = name;
+        title = Arrays.stream(name.split("-")).map(StringUtils::capitalize).collect(Collectors.joining(" "));
         this.description = description;
         this.usage = usage;
         value = defaultValue;
@@ -41,7 +47,10 @@ public class Setting<T> {
     }
 
     public void reset() {
-        value = defaultValue;
+        T oldValue = value;
+        if (defaultValue instanceof Color) value = (T) new Color((Color) defaultValue);
+        else value = defaultValue;
+        if (consumer != null) consumer.accept(oldValue, value);
     }
 
     public boolean setFromString(String string) {

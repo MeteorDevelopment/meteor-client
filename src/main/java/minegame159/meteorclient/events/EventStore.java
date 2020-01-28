@@ -2,6 +2,7 @@ package minegame159.meteorclient.events;
 
 import minegame159.meteorclient.events.packets.PlaySoundPacketEvent;
 import minegame159.meteorclient.events.packets.SendPacketEvent;
+import minegame159.meteorclient.modules.Module;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.network.packet.PlaySoundS2CPacket;
@@ -22,6 +23,8 @@ public class EventStore {
     private static RenderFogEvent renderFogEvent = new RenderFogEvent();
     private static HurtCamEvent hurtCamEvent = new HurtCamEvent();
     private static OpenScreenEvent openScreenEvent = new OpenScreenEvent();
+    private static ModuleBindChangedEvent moduleBindChangedEvent = new ModuleBindChangedEvent();
+    private static CharTypedEvent charTypedEvent = new CharTypedEvent();
 
     public static ActiveModulesChangedEvent activeModulesChangedEvent() {
         activeModulesChangedEvent.setCancelled(false);
@@ -99,5 +102,17 @@ public class EventStore {
         openScreenEvent.setCancelled(false);
         openScreenEvent.screen = screen;
         return openScreenEvent;
+    }
+
+    public static ModuleBindChangedEvent moduleBindChangedEvent(Module module) {
+        moduleBindChangedEvent.setCancelled(false);
+        moduleBindChangedEvent.module = module;
+        return moduleBindChangedEvent;
+    }
+
+    public static CharTypedEvent charTypedEvent(char c) {
+        charTypedEvent.setCancelled(false);
+        charTypedEvent.c = c;
+        return charTypedEvent;
     }
 }

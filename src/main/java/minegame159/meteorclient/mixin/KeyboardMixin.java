@@ -1,8 +1,9 @@
 package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.MeteorClient;
+import minegame159.meteorclient.events.CharTypedEvent;
 import minegame159.meteorclient.events.EventStore;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.events.KeyEvent;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.Keyboard;
 import net.minecraft.client.MinecraftClient;
@@ -17,15 +18,23 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class KeyboardMixin {
     @Shadow @Final private MinecraftClient client;
 
-    @Inject(at = @At("HEAD"), method = "onKey", cancellable = true)
-    public void onKeyHead(long window, int key, int scancode, int i, int j, CallbackInfo info) {
-        if (Utils.canUpdate() && client.currentScreen == null && !client.isPaused() && i == 1) {
-            if (ModuleManager.onKeyPress(key)) info.cancel();
+    @Inject(method = "onKey", at = @At("HEAD"), cancellable = true)
+    public void onKey(long window, int key, int scancode, int i, int j, CallbackInfo info) {
+        if (Utils.canUpdate() && !client.isPaused()) {
+            KeyEvent event = EventStore.keyEvent(key, i == 1);
+            MeteorClient.eventBus.post(event);
+
+            if (event.isCancelled()) info.cancel();
         }
     }
 
-    @Inject(at = @At("TAIL"), method = "onKey")
-    public void onKeyTail(long window, int key, int scancode, int i, int j, CallbackInfo info) {
-        MeteorClient.eventBus.post(EventStore.keyEvent(key, i == 1));
+    @Inject(method = "onChar", at = @At("HEAD"), cancellable = true)
+    private void onChar(long window, int i, int j, CallbackInfo info) {
+        if (Utils.canUpdate() && !client.isPaused()) {
+            CharTypedEvent event = EventStore.charTypedEvent((char) i);
+            MeteorClient.eventBus.post(event);
+
+            if (event.isCancelled()) info.cancel();
+        }
     }
 }

@@ -5,6 +5,7 @@ import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.events.OpenScreenEvent;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.RunArgs;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.world.ClientWorld;
 import org.spongepowered.asm.mixin.Mixin;
@@ -18,6 +19,11 @@ public abstract class MinecraftClientMixin {
     @Shadow public ClientWorld world;
 
     @Shadow private static MinecraftClient instance;
+
+    @Inject(method = "<init>", at = @At("TAIL"))
+    private void onInit(RunArgs args, CallbackInfo info) {
+        MeteorClient.instance.onInitializeClient();
+    }
 
     @Inject(at = @At("TAIL"), method = "tick")
     private void onTick(CallbackInfo info) {

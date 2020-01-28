@@ -20,6 +20,11 @@ public class DoubleSettingBuilder extends SettingBuilder<Double> {
     }
 
     @Override
+    public DoubleSettingBuilder usage(String usage) {
+        return (DoubleSettingBuilder) super.usage(usage);
+    }
+
+    @Override
     public DoubleSettingBuilder defaultValue(Double defaultValue) {
         return (DoubleSettingBuilder) super.defaultValue(defaultValue);
     }

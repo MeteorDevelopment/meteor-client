@@ -15,6 +15,6 @@ public class ResetBind extends Command {
         if (module == null) return;
 
         Utils.sendMessage("#yellowBind has been reset.");
-        module.key = -1;
+        module.setKey(-1);
     }
 }

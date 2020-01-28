@@ -1,6 +1,7 @@
 package minegame159.meteorclient.modules;
 
 import minegame159.meteorclient.MeteorClient;
+import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.Utils;
@@ -21,7 +22,7 @@ public abstract class Module {
     public final String description;
     public final int color;
     public final List<Setting> settings = new ArrayList<>();
-    public int key = -1;
+    private int key = -1;
 
     private boolean active;
 
@@ -71,6 +72,15 @@ public abstract class Module {
 
     public String getInfoString() {
         return null;
+    }
+
+    public void setKey(int key) {
+        this.key = key;
+        MeteorClient.eventBus.post(EventStore.moduleBindChangedEvent(this));
+    }
+
+    public int getKey() {
+        return key;
     }
 
     @Override

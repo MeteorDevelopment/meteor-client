@@ -1,7 +1,9 @@
 package minegame159.meteorclient.modules;
 
+import minegame159.jes.eventsubscribers.MethodEventSubscriber;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.EventStore;
+import minegame159.meteorclient.events.KeyEvent;
 import minegame159.meteorclient.modules.combat.Criticals;
 import minegame159.meteorclient.modules.misc.AutoSign;
 import minegame159.meteorclient.modules.misc.LongerChat;
@@ -11,6 +13,7 @@ import minegame159.meteorclient.modules.player.DeathPosition;
 import minegame159.meteorclient.modules.player.FastUse;
 import minegame159.meteorclient.modules.render.*;
 import minegame159.meteorclient.utils.Utils;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.*;
 
@@ -30,6 +33,11 @@ public class ModuleManager {
         initMisc();
 
         System.out.println("Meteor Client loaded " + modules.size() + " modules.");
+        try {
+            MeteorClient.eventBus.register(new MethodEventSubscriber(ModuleManager.class.getDeclaredMethod("onKeyPress", KeyEvent.class), null, KeyEvent.class, 1));
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
     }
 
     public static List<Module> getGroup(Category category) {
@@ -62,24 +70,25 @@ public class ModuleManager {
         for (Module module : active2) module.toggle();
     }
 
-    public static boolean onKeyPress(int key) {
+    private static void onKeyPress(KeyEvent e) {
+        if (!e.push) return;
+
         // Check if binding module
         if (moduleToBind != null) {
-            moduleToBind.key = key;
+            moduleToBind.setKey(e.key);
+            Utils.sendMessage("#yellowModule #blue'%s' #yellowbound to #blue%s#yellow.", moduleToBind.title, GLFW.glfwGetKeyName(e.key, 0));
             moduleToBind = null;
-            Utils.sendMessage("#yellowModule bound.");
-            return true;
+            e.setCancelled(true);
+            return;
         }
 
         // Find module bound to that key
         for (Module module : modules) {
-            if (module.key == key) {
+            if (module.getKey() == e.key) {
                 module.toggle();
-                return true;
+                e.setCancelled(true);
             }
         }
-
-        return false;
     }
 
     static void addActive(Module module) {
