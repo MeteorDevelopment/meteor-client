@@ -34,7 +34,7 @@ public class Criticals extends Module {
     }
 
     private boolean shouldDoCriticals() {
-        boolean a = !mc.player.isInWater() && !mc.player.isInLava() && !mc.player.isClimbing();
+        boolean a = !mc.player.isSubmergedInWater() && !mc.player.isInLava() && !mc.player.isClimbing();
         if (onlyOnGround.value()) return a && mc.player.onGround;
         return a;
     }
