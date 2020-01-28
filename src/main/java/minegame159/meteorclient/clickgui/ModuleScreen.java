@@ -33,7 +33,7 @@ public class ModuleScreen extends WidgetScreen {
 
         // Description
         list.addWidget(new Label(0, module.description));
-        list.addWidget(new Separator());
+        if (module.settings.size() > 0) list.addWidget(new Separator());
 
         // Settings
         Grid grid = new Grid(0, 3, 4, 4);
