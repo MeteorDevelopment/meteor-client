@@ -23,7 +23,7 @@ public class Criticals extends Module {
 
     @SubscribeEvent
     private void onSendPacket(SendPacketEvent e) {
-        if (!(e.packet instanceof PlayerInteractEntityC2SPacket) || ((PlayerInteractEntityC2SPacket) e.packet).getType() == PlayerInteractEntityC2SPacket.InteractionType.ATTACK || !shouldDoCriticals()) return;
+        if (!(e.packet instanceof PlayerInteractEntityC2SPacket) || ((PlayerInteractEntityC2SPacket) e.packet).getType() != PlayerInteractEntityC2SPacket.InteractionType.ATTACK || !shouldDoCriticals()) return;
 
         double x = mc.player.getX();
         double y = mc.player.getY();
