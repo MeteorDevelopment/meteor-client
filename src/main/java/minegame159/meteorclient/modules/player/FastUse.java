@@ -16,6 +16,7 @@ public class FastUse extends Module {
 
         try {
             itemUseCooldown = MinecraftClient.class.getDeclaredField("itemUseCooldown");
+            itemUseCooldown.setAccessible(true);
         } catch (NoSuchFieldException e) {
             e.printStackTrace();
         }
