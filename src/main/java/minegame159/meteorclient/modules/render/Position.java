@@ -8,17 +8,13 @@ import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.world.dimension.DimensionType;
 
-import java.text.DecimalFormat;
-
 public class Position extends Module {
-    private DecimalFormat decimalFormat = new DecimalFormat(".#");
-
     public Position() {
         super(Category.Render, "position", "Displays your position.");
     }
 
     private void drawPosition(int screenWidth, String text, int yy, double x, double y, double z) {
-        String msg1 = decimalFormat.format(x) + " " + decimalFormat.format(y) + " " + decimalFormat.format(z);
+        String msg1 = String.format("%.1f %.1f %.1f", x, y, z);
         int x1 = screenWidth - Utils.getTextWidth(msg1) - 2;
         int x2 = screenWidth - Utils.getTextWidth(msg1) - Utils.getTextWidth(text) - 2;
         Utils.drawText(msg1, x1, yy, Color.fromRGBA(185, 185, 185, 255));
