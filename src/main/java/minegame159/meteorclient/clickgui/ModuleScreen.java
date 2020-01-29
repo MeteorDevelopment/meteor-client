@@ -90,7 +90,8 @@ public class ModuleScreen extends WidgetScreen {
 
         // Active
         HorizontalContainer activeContainer = new HorizontalContainer(0, 4);
-        activeContainer.addWidget(new Label(0, "Active: "));
+        Label activeLabel = activeContainer.addWidget(new Label(0, "Active: "));
+        activeLabel.tooltip = "Visible in active modules.";
         activeContainer.addWidget(new Checkbox(0, module.isActive(), checkbox -> {
             if (module.isActive() != checkbox.checked) module.toggle();
         }));
