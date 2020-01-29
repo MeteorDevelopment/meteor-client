@@ -14,6 +14,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class BackgroundRendererMixin {
     @Inject(method = "applyFog", at = @At("HEAD"), cancellable = true)
     private static void onApplyFog(Camera camera, BackgroundRenderer.FogType fogType, float viewDistance, boolean thickFog, CallbackInfo info) {
+        if (fogType != BackgroundRenderer.FogType.FOG_TERRAIN) return;
+
         RenderFogEvent event = EventStore.renderFogEvent();
         MeteorClient.eventBus.post(event);
 

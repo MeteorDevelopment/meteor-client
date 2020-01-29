@@ -7,6 +7,7 @@ import minegame159.meteorclient.events.KeyEvent;
 import minegame159.meteorclient.modules.combat.AutoLog;
 import minegame159.meteorclient.modules.combat.AutoTotem;
 import minegame159.meteorclient.modules.combat.Criticals;
+import minegame159.meteorclient.modules.misc.AntiWeather;
 import minegame159.meteorclient.modules.misc.AutoSign;
 import minegame159.meteorclient.modules.misc.LongerChat;
 import minegame159.meteorclient.modules.movement.*;
@@ -147,5 +148,6 @@ public class ModuleManager {
     private static void initMisc() {
         addModule(new LongerChat());
         addModule(new AutoSign());
+        addModule(new AntiWeather());
     }
 }
