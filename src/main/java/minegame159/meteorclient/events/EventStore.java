@@ -18,7 +18,7 @@ public class EventStore {
     private static RenderEvent renderEvent = new RenderEvent();
     private static KeyEvent keyEvent = new KeyEvent();
     private static SendPacketEvent sendPacketEvent = new SendPacketEvent();
-    private static DeathEvent deathEvent = new DeathEvent();
+    private static TookDamageEvent tookDamageEvent = new TookDamageEvent();
     private static BlockShouldDrawSideEvent blockShouldDrawSideEvent = new BlockShouldDrawSideEvent();
     private static ChamsEvent chamsEvent = new ChamsEvent();
     private static RenderFogEvent renderFogEvent = new RenderFogEvent();
@@ -73,9 +73,10 @@ public class EventStore {
         return sendPacketEvent;
     }
 
-    public static DeathEvent deathEvent() {
-        deathEvent.setCancelled(false);
-        return deathEvent;
+    public static TookDamageEvent tookDamageEvent(LivingEntity entity) {
+        tookDamageEvent.setCancelled(false);
+        tookDamageEvent.entity = entity;
+        return tookDamageEvent;
     }
 
     public static BlockShouldDrawSideEvent blockShouldDrawSideEvent(BlockState state) {

@@ -4,6 +4,7 @@ import minegame159.jes.eventsubscribers.MethodEventSubscriber;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.events.KeyEvent;
+import minegame159.meteorclient.modules.combat.AutoLog;
 import minegame159.meteorclient.modules.combat.AutoTotem;
 import minegame159.meteorclient.modules.combat.Criticals;
 import minegame159.meteorclient.modules.misc.AutoSign;
@@ -109,6 +110,7 @@ public class ModuleManager {
     private static void initCombat() {
         addModule(new Criticals());
         addModule(new AutoTotem());
+        addModule(new AutoLog());
     }
 
     private static void initPlayer() {
