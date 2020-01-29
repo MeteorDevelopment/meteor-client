@@ -42,12 +42,48 @@ public class ModuleScreen extends WidgetScreen {
             title.tooltip = setting.description;
 
             Widget value;
-            if (setting.value() instanceof Boolean) value = new Checkbox(0, (boolean) setting.value(), checkbox -> setting.value(checkbox.checked));
-            else if (setting.value() instanceof Integer) value = new TextBox(3, Integer.toString((int) setting.value()), 8, TextBoxFilters.integer, textBox -> setting.setFromString(textBox.text));
-            else if (setting.value() instanceof Float) value = new TextBox(3, Float.toString((float) setting.value()), 8, TextBoxFilters.floating, textBox -> setting.setFromString(textBox.text));
-            else if (setting.value() instanceof Double) value = new TextBox(3, Double.toString((double) setting.value()), 8, TextBoxFilters.floating, textBox -> setting.setFromString(textBox.text));
-            else if (setting.value() instanceof Color) value = new ColorEdit(0, 4, (Color) setting.value(), colorEdit -> setting.value(new Color(colorEdit.color)));
-            else if (setting.value() instanceof Enum<?>) value = new EnumButton<>(4, (Enum) setting.value(), enumEnumButton -> setting.value(enumEnumButton.value));
+            if (setting.value() instanceof Boolean) value = new Checkbox(0, (boolean) setting.value(), checkbox -> {
+                setting.value(checkbox.checked);
+                checkbox.checked = (boolean) setting.value();
+            });
+            else if (setting.value() instanceof Integer) value = new TextBox(3, Integer.toString((int) setting.value()), 8, TextBoxFilters.integer, textBox -> {
+                boolean a = false;
+                String val = textBox.text.isEmpty() ? "0" : textBox.text;
+                if (val.length() == 1 && val.charAt(0) == '-') {
+                    a = true;
+                    val = "-0";
+                }
+                setting.setFromString(val);
+                if (!textBox.text.isEmpty() && !a) textBox.text = setting.value().toString();
+            });
+            else if (setting.value() instanceof Float) value = new TextBox(3, Float.toString((float) setting.value()), 8, TextBoxFilters.floating, textBox -> {
+                boolean a = false;
+                String val = textBox.text.isEmpty() ? "0" : textBox.text;
+                if (val.length() == 1 && val.charAt(0) == '-') {
+                    a = true;
+                    val = "-0";
+                }
+                setting.setFromString(val);
+                if (!textBox.text.isEmpty() && !a) textBox.text = setting.value().toString();
+            });
+            else if (setting.value() instanceof Double) value = new TextBox(3, Double.toString((double) setting.value()), 8, TextBoxFilters.floating, textBox -> {
+                boolean a = false;
+                String val = textBox.text.isEmpty() ? "0" : textBox.text;
+                if (val.length() == 1 && val.charAt(0) == '-') {
+                    a = true;
+                    val = "-0";
+                }
+                setting.setFromString(val);
+                if (!textBox.text.isEmpty() && !a) textBox.text = setting.value().toString();
+            });
+            else if (setting.value() instanceof Color) value = new ColorEdit(0, 4, (Color) setting.value(), colorEdit -> {
+                setting.value(new Color(colorEdit.color));
+                colorEdit.setColor((Color) setting.value());
+            });
+            else if (setting.value() instanceof Enum<?>) value = new EnumButton<>(4, (Enum) setting.value(), enumEnumButton -> {
+                setting.value(enumEnumButton.value);
+                enumEnumButton.setValue((Enum) setting.value());
+            });
             else value = new Label(0, "not-implemented");
 
             Button reset = new Button(4, "Reset", button -> {
