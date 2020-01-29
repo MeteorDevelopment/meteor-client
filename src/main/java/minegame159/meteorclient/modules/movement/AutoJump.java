@@ -15,8 +15,6 @@ public class AutoJump extends Module {
         Always
     }
 
-    //private static EnumSetting<JumpIf> jumpIf = new EnumSetting<>("jump-if", "Jump if.", JumpIf.Always);
-
     private Setting<JumpIf> jumpIf = addSetting(new EnumSettingBuilder<JumpIf>()
             .name("jump-if")
             .description("Jump if.")
