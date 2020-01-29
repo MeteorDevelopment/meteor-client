@@ -25,14 +25,20 @@ public abstract class Module {
     private int key = -1;
 
     private boolean active;
+    private boolean visible;
 
-    public Module(Category category, String name, String description) {
+    public Module(Category category, String name, String description, boolean visible) {
         this.category = category;
         this.name = name.toLowerCase();
         title = Arrays.stream(name.split("-")).map(StringUtils::capitalize).collect(Collectors.joining(" "));
         this.description = description;
+        this.visible = visible;
         color = Color.fromRGBA(Utils.random(180, 255), Utils.random(180, 255), Utils.random(180, 255), 255);
         mc = MinecraftClient.getInstance();
+    }
+
+    public Module(Category category, String name, String description) {
+        this(category, name, description, true);
     }
 
     public void onActivate() {}
@@ -81,6 +87,15 @@ public abstract class Module {
 
     public int getKey() {
         return key;
+    }
+
+    public void setVisible(boolean visible) {
+        this.visible = visible;
+        MeteorClient.eventBus.post(EventStore.moduleVisibilityChangedEvent(this));
+    }
+
+    public boolean isVisible() {
+        return visible;
     }
 
     @Override

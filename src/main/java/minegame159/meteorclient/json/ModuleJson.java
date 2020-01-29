@@ -13,6 +13,7 @@ public class ModuleJson {
 
         obj.addProperty("name", module.name);
         obj.addProperty("active", module.isActive());
+        obj.addProperty("visible", module.isVisible());
         if (module.getKey() != -1) obj.addProperty("key", module.getKey());
 
         JsonArray settings = new JsonArray();
@@ -35,6 +36,7 @@ public class ModuleJson {
         Module module = ModuleManager.get(obj.get("name").getAsString());
         if (module == null) return;
 
+        if (obj.has("visible")) module.setVisible(obj.get("visible").getAsBoolean());
         if (obj.has("key")) module.setKey(obj.get("key").getAsInt());
 
         for (JsonElement sE : obj.get("settings").getAsJsonArray()) {

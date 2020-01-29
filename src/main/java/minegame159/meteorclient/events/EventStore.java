@@ -28,6 +28,7 @@ public class EventStore {
     private static CharTypedEvent charTypedEvent = new CharTypedEvent();
     private static EntityAddedEvent entityAddedEvent = new EntityAddedEvent();
     private static EntityRemovedEvent entityRemovedEvent = new EntityRemovedEvent();
+    private static ModuleVisibilityChangedEvent moduleVisibilityChangedEvent = new ModuleVisibilityChangedEvent();
 
     public static ActiveModulesChangedEvent activeModulesChangedEvent() {
         activeModulesChangedEvent.setCancelled(false);
@@ -129,5 +130,11 @@ public class EventStore {
         entityRemovedEvent.setCancelled(false);
         entityRemovedEvent.entity = entity;
         return entityRemovedEvent;
+    }
+
+    public static ModuleVisibilityChangedEvent moduleVisibilityChangedEvent(Module module) {
+        moduleVisibilityChangedEvent.setCancelled(false);
+        moduleVisibilityChangedEvent.module = module;
+        return moduleVisibilityChangedEvent;
     }
 }

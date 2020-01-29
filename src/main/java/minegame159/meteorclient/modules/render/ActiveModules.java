@@ -2,6 +2,7 @@ package minegame159.meteorclient.modules.render;
 
 import minegame159.jes.SubscribeEvent;
 import minegame159.meteorclient.events.ActiveModulesChangedEvent;
+import minegame159.meteorclient.events.ModuleVisibilityChangedEvent;
 import minegame159.meteorclient.events.Render2DEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
@@ -17,7 +18,7 @@ public class ActiveModules extends Module {
     private int infoColor = Color.fromRGBA(175, 175, 175, 255);
 
     public ActiveModules() {
-        super(Category.Render, "active-modules", "Displays active modules.");
+        super(Category.Render, "active-modules", "Displays active modules.", false);
     }
 
     @Override
@@ -27,7 +28,10 @@ public class ActiveModules extends Module {
 
     private void recalculate() {
         modules.clear();
-        modules.addAll(ModuleManager.getActive());
+
+        for (Module module : ModuleManager.getActive()) {
+            if (module.isVisible()) modules.add(module);
+        }
 
         modules.sort((o1, o2) -> {
             int a = Integer.compare(o1.getInfoString() == null ? Utils.getTextWidth(o1.title) : Utils.getTextWidth(o1.title + " " + o1.getInfoString()), o2.getInfoString() == null ? Utils.getTextWidth(o2.title) : Utils.getTextWidth(o2.title + " " + o2.getInfoString()));
@@ -39,6 +43,11 @@ public class ActiveModules extends Module {
     @SubscribeEvent
     private void onActiveModulesChanged(ActiveModulesChangedEvent e) {
         recalculate();
+    }
+
+    @SubscribeEvent
+    private void onModuleVisibilityChanged(ModuleVisibilityChangedEvent e) {
+        if (e.module.isActive()) recalculate();
     }
 
     @SubscribeEvent

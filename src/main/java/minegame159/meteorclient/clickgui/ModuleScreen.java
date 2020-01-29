@@ -80,6 +80,14 @@ public class ModuleScreen extends WidgetScreen {
         list.addWidget(bindContainer);
         list.addWidget(new Separator());
 
+        // Visible
+        HorizontalContainer visibleContainer = new HorizontalContainer(0, 4);
+        visibleContainer.addWidget(new Label(0, "Visible: "));
+        visibleContainer.addWidget(new Checkbox(0, module.isVisible(), checkbox -> {
+            if (module.isVisible() != checkbox.checked) module.setVisible(checkbox.checked);
+        }));
+        list.addWidget(visibleContainer);
+
         // Active
         HorizontalContainer activeContainer = new HorizontalContainer(0, 4);
         activeContainer.addWidget(new Label(0, "Active: "));
