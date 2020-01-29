@@ -1,6 +1,6 @@
 package minegame159.meteorclient.modules;
 
-import minegame159.jes.eventsubscribers.MethodEventSubscriber;
+import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.events.KeyEvent;
@@ -36,11 +36,7 @@ public class ModuleManager {
         initMisc();
 
         System.out.println("Meteor Client loaded " + modules.size() + " modules.");
-        try {
-            MeteorClient.eventBus.register(new MethodEventSubscriber(ModuleManager.class.getDeclaredMethod("onKeyPress", KeyEvent.class), null, KeyEvent.class, 1));
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        }
+        MeteorClient.eventBus.subscribe(onKey);
     }
 
     public static List<Module> getGroup(Category category) {
@@ -73,26 +69,26 @@ public class ModuleManager {
         for (Module module : active2) module.toggle();
     }
 
-    private static void onKeyPress(KeyEvent e) {
-        if (!e.push) return;
+    private static Listener<KeyEvent> onKey = new Listener<>(event -> {
+        if (!event.push) return;
 
         // Check if binding module
         if (moduleToBind != null) {
-            moduleToBind.setKey(e.key);
-            Utils.sendMessage("#yellowModule #blue'%s' #yellowbound to #blue%s#yellow.", moduleToBind.title, GLFW.glfwGetKeyName(e.key, 0));
+            moduleToBind.setKey(event.key);
+            Utils.sendMessage("#yellowModule #blue'%s' #yellowbound to #blue%s#yellow.", moduleToBind.title, GLFW.glfwGetKeyName(event.key, 0));
             moduleToBind = null;
-            e.setCancelled(true);
+            event.cancel();
             return;
         }
 
         // Find module bound to that key
         for (Module module : modules) {
-            if (module.getKey() == e.key) {
+            if (module.getKey() == event.key) {
                 module.toggle();
-                e.setCancelled(true);
+                event.cancel();
             }
         }
-    }
+    });
 
     static void addActive(Module module) {
         active.add(module);

@@ -1,6 +1,7 @@
 package minegame159.meteorclient.modules.combat;
 
-import minegame159.jes.SubscribeEvent;
+import me.zero.alpine.listener.EventHandler;
+import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
@@ -17,8 +18,8 @@ public class AutoTotem extends Module {
         super(Category.Combat, "auto-totem", "Automatically equips totems.");
     }
 
-    @SubscribeEvent
-    private void onTick(TickEvent e) {
+    @EventHandler
+    private Listener<TickEvent> onTick = new Listener<>(event -> {
         if (mc.currentScreen instanceof ContainerScreen<?>) return;
 
         boolean foundTotem = false;
@@ -38,7 +39,7 @@ public class AutoTotem extends Module {
         }
 
         if (totemCount != preTotemCount) totemCountString = Integer.toString(totemCount);
-    }
+    });
 
     @Override
     public String getInfoString() {

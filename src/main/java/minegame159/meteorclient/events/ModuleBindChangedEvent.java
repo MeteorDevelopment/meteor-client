@@ -1,13 +1,7 @@
 package minegame159.meteorclient.events;
 
-import minegame159.jes.Event;
 import minegame159.meteorclient.modules.Module;
 
-public class ModuleBindChangedEvent extends Event {
+public class ModuleBindChangedEvent {
     public Module module;
-
-    @Override
-    public boolean isCancellable() {
-        return false;
-    }
 }

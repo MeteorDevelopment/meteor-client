@@ -1,6 +1,7 @@
 package minegame159.meteorclient.modules.render;
 
-import minegame159.jes.SubscribeEvent;
+import me.zero.alpine.listener.EventHandler;
+import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.RenderEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
@@ -98,8 +99,8 @@ public class Tracers extends Module {
         RenderUtils.line(vec1.x, vec1.y, vec1.z, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5f, storageColor.value());
     }
 
-    @SubscribeEvent
-    private void onRender(RenderEvent e) {
+    @EventHandler
+    private Listener<RenderEvent> onRender = new Listener<>(event -> {
         vec1 = new Vec3d(0, 0, 75).rotateX(-(float) Math.toRadians(mc.cameraEntity.pitch)).rotateY(-(float) Math.toRadians(mc.cameraEntity.yaw));
         if (!center.value()) vec1.add(mc.cameraEntity.getPos().add(0, mc.cameraEntity.getEyeHeight(mc.cameraEntity.getPose()), 0));
 
@@ -116,5 +117,5 @@ public class Tracers extends Module {
                 }
             }
         }
-    }
+    });
 }

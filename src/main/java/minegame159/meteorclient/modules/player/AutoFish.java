@@ -1,6 +1,7 @@
 package minegame159.meteorclient.modules.player;
 
-import minegame159.jes.SubscribeEvent;
+import me.zero.alpine.listener.EventHandler;
+import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.KeyEvent;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.events.packets.PlaySoundPacketEvent;
@@ -50,17 +51,17 @@ public class AutoFish extends Module {
         if (autoCast.value() && mc.player.getMainHandStack().getItem() instanceof FishingRodItem) Utils.rightClick();
     }
 
-    @SubscribeEvent
-    private void onPlaySoundPacket(PlaySoundPacketEvent e) {
-        if (e.packet.getSound().getId().getPath().equals("entity.fishing_bobber.splash")) {
+    @EventHandler
+    private Listener<PlaySoundPacketEvent> onPlaySoundPacket = new Listener<>(event -> {
+        if (event.packet.getSound().getId().getPath().equals("entity.fishing_bobber.splash")) {
             ticksEnabled = true;
             ticksToRightClick = ticksCatch.value();
             ticksData = 0;
         }
-    }
+    });
 
-    @SubscribeEvent
-    private void onTick(TickEvent e) {
+    @EventHandler
+    private Listener<TickEvent> onTick = new Listener<>(event -> {
         if (ticksEnabled && ticksToRightClick <= 0) {
             if (ticksData == 0) {
                 Utils.rightClick();
@@ -74,10 +75,10 @@ public class AutoFish extends Module {
         }
 
         ticksToRightClick--;
-    }
+    });
 
-    @SubscribeEvent
-    public void onInput(KeyEvent event) {
+    @EventHandler
+    private Listener<KeyEvent> onKey = new Listener<>(event -> {
         if (mc.options.keyUse.isPressed()) ticksEnabled = false;
-    }
+    });
 }

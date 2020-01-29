@@ -1,6 +1,7 @@
 package minegame159.meteorclient.modules.combat;
 
-import minegame159.jes.SubscribeEvent;
+import me.zero.alpine.listener.EventHandler;
+import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.events.TookDamageEvent;
@@ -29,21 +30,21 @@ public class AutoLog extends Module {
         super(Category.Combat, "auto-log", "Automatically disconnects when low on health.");
     }
 
-    @SubscribeEvent
-    private void onTookDamage(TookDamageEvent e) {
-        if (!shouldLog && e.entity.getUuid().equals(mc.player.getUuid()) && e.entity.getHealth() <= health.value()) {
+    @EventHandler
+    private Listener<TookDamageEvent> onTookDamage = new Listener<>(event -> {
+        if (!shouldLog && event.entity.getUuid().equals(mc.player.getUuid()) && event.entity.getHealth() <= health.value()) {
             shouldLog = true;
             lastLog = System.currentTimeMillis();
         }
-    }
+    });
 
-    @SubscribeEvent
-    private void onTick(TickEvent e) {
+    @EventHandler
+    private Listener<TickEvent> onTick = new Listener<>(event -> {
         if (shouldLog && System.currentTimeMillis() - lastLog <= 1000) {
             shouldLog = false;
             MeteorClient.saveConfig();
             ModuleManager.deactivateAll();
             mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(new LiteralText("AutoLog")));
         }
-    }
+    });
 }

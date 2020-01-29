@@ -1,6 +1,7 @@
 package minegame159.meteorclient.modules.movement;
 
-import minegame159.jes.SubscribeEvent;
+import me.zero.alpine.listener.EventHandler;
+import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.events.packets.SendPacketEvent;
 import minegame159.meteorclient.modules.Category;
@@ -25,17 +26,15 @@ public class Blink extends Module {
         timer = 0;
     }
 
-    @SubscribeEvent
-    private void onTick(TickEvent e) {
-        timer++;
-    }
+    @EventHandler
+    private Listener<TickEvent> onTick = new Listener<>(event -> timer++);
 
-    @SubscribeEvent
-    private void onSendPacket(SendPacketEvent e) {
-        if (!(e.packet instanceof PlayerMoveC2SPacket)) return;
-        e.setCancelled(true);
+    @EventHandler
+    private Listener<SendPacketEvent> onSendPacket = new Listener<>(event -> {
+        if (!(event.packet instanceof PlayerMoveC2SPacket)) return;
+        event.cancel();
 
-        PlayerMoveC2SPacket p = (PlayerMoveC2SPacket) e.packet;
+        PlayerMoveC2SPacket p = (PlayerMoveC2SPacket) event.packet;
         PlayerMoveC2SPacket prev = packets.size() == 0 ? null : packets.get(packets.size() - 1);
 
         if (prev != null &&
@@ -48,7 +47,7 @@ public class Blink extends Module {
         ) return;
 
         packets.add(p);
-    }
+    });
 
     @Override
     public String getInfoString() {

@@ -1,6 +1,7 @@
 package minegame159.meteorclient.modules.render;
 
-import minegame159.jes.SubscribeEvent;
+import me.zero.alpine.listener.EventHandler;
+import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.EntityAddedEvent;
 import minegame159.meteorclient.events.EntityRemovedEvent;
 import minegame159.meteorclient.events.Render2DEvent;
@@ -66,26 +67,26 @@ public class Info extends Module {
         recalculateEntityCounts();
     }
 
-    @SubscribeEvent
-    private void onEntityAdded(EntityAddedEvent e) {
-        if (e.entity instanceof PlayerEntity || e.entity instanceof ItemEntity) return;
+    @EventHandler
+    private Listener<EntityAddedEvent> onEntityAdded = new Listener<>(event -> {
+        if (event.entity instanceof PlayerEntity || event.entity instanceof ItemEntity) return;
 
-        EntityInfo a = entityCounts.computeIfAbsent(e.entity.getClass(), aClass -> new EntityInfo(e.entity.getDisplayName().asString()));
+        EntityInfo a = entityCounts.computeIfAbsent(event.entity.getClass(), aClass -> new EntityInfo(event.entity.getDisplayName().asString()));
         a.increment();
 
         calculateMaxLetterCount();
-    }
+    });
 
-    @SubscribeEvent
-    private void onEntityRemoved(EntityRemovedEvent e) {
-        if (e.entity instanceof PlayerEntity || e.entity instanceof ItemEntity) return;
+    @EventHandler
+    private Listener<EntityRemovedEvent> onEntityRemoved = new Listener<>(event -> {
+        if (event.entity instanceof PlayerEntity || event.entity instanceof ItemEntity) return;
 
-        EntityInfo a = entityCounts.get(e.entity.getClass());
+        EntityInfo a = entityCounts.get(event.entity.getClass());
         a.decrement();
-        if (a.count <= 0) entityCounts.remove(e.entity.getClass());
+        if (a.count <= 0) entityCounts.remove(event.entity.getClass());
 
         calculateMaxLetterCount();
-    }
+    });
 
     private void drawInfo(String text1, String text2, int y) {
         Utils.drawText(text1, 2, y, Color.fromRGBA(255, 255, 255, 255));
@@ -97,8 +98,8 @@ public class Info extends Module {
         Utils.drawText(entityInfo.name, 2 + (maxLetterCount - entityInfo.countStr.length()) * 4 + 4 + Utils.getTextWidth(entityInfo.countStr), y, Color.fromRGBA(255, 255, 255, 255));
     }
 
-    @SubscribeEvent
-    private void onRender2D(Render2DEvent e) {
+    @EventHandler
+    private Listener<Render2DEvent> onRender2D = new Listener<>(event -> {
         int y = 2;
 
         if (fps.value()) {
@@ -112,7 +113,7 @@ public class Info extends Module {
                 y += Utils.getTextHeight() + 2;
             }
         }
-    }
+    });
 
     private static class EntityInfo {
         public String name;

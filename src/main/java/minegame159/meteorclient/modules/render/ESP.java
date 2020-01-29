@@ -1,6 +1,7 @@
 package minegame159.meteorclient.modules.render;
 
-import minegame159.jes.SubscribeEvent;
+import me.zero.alpine.listener.EventHandler;
+import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.RenderEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
@@ -201,8 +202,8 @@ public class ESP extends Module {
         }
     }
 
-    @SubscribeEvent
-    private void onRender(RenderEvent e) {
+    @EventHandler
+    private Listener<RenderEvent> onRender = new Listener<>(event -> {
         for (Entity entity : mc.world.getEntities()) {
             if (players.value() && EntityUtils.isPlayer(entity) && entity != mc.player) render(entity, playersLineColor, playersSideColor);
             else if (animals.value() && EntityUtils.isAnimal(entity)) render(entity, animalsLineColor, animalsSideColor);
@@ -211,5 +212,5 @@ public class ESP extends Module {
             else if (crystals.value() && EntityUtils.isCrystal(entity)) render(entity, crystalsLineColor, crystalsSideColor);
             else if (vehicles.value() && EntityUtils.isVehicle(entity)) render(entity, vehiclesLineColor, vehiclesSideColor);
         }
-    }
+    });
 }

@@ -1,4 +1,4 @@
 package minegame159.meteorclient.events;
 
-public class ActiveModulesChangedEvent {
+public interface IEvent {
 }

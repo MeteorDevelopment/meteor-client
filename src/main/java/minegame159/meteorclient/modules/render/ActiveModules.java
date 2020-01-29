@@ -1,6 +1,7 @@
 package minegame159.meteorclient.modules.render;
 
-import minegame159.jes.SubscribeEvent;
+import me.zero.alpine.listener.EventHandler;
+import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.ActiveModulesChangedEvent;
 import minegame159.meteorclient.events.ModuleVisibilityChangedEvent;
 import minegame159.meteorclient.events.Render2DEvent;
@@ -40,32 +41,30 @@ public class ActiveModules extends Module {
         });
     }
 
-    @SubscribeEvent
-    private void onActiveModulesChanged(ActiveModulesChangedEvent e) {
-        recalculate();
-    }
+    @EventHandler
+    private Listener<ActiveModulesChangedEvent> activeModulesChangedEventListener = new Listener<>(event -> recalculate());
 
-    @SubscribeEvent
-    private void onModuleVisibilityChanged(ModuleVisibilityChangedEvent e) {
-        if (e.module.isActive()) recalculate();
-    }
+    @EventHandler
+    private Listener<ModuleVisibilityChangedEvent> onModuleVisibilityChanged = new Listener<>(event -> {
+        if (event.module.isActive()) recalculate();
+    });
 
-    @SubscribeEvent
-    private void onRender2D(Render2DEvent e) {
+    @EventHandler
+    private Listener<Render2DEvent> onRender2D = new Listener<>(event -> {
         int y = 2;
 
         for (Module module : modules) {
             String infoString = module.getInfoString();
             if (infoString == null) {
-                int x = e.screenWidth - Utils.getTextWidth(module.title) - 2;
+                int x = event.screenWidth - Utils.getTextWidth(module.title) - 2;
                 Utils.drawText(module.title, x, y, module.color);
                 y += Utils.getTextHeight() + 1;
             } else {
-                int x = e.screenWidth - Utils.getTextWidth(module.title + " " + infoString) - 2;
+                int x = event.screenWidth - Utils.getTextWidth(module.title + " " + infoString) - 2;
                 Utils.drawText(module.title, x, y, module.color);
                 Utils.drawText(module.getInfoString(), x + Utils.getTextWidth(module.title + " "), y, infoColor);
                 y += Utils.getTextHeight() + 1;
             }
         }
-    }
+    });
 }

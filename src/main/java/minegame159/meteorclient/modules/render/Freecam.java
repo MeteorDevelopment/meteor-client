@@ -1,6 +1,7 @@
 package minegame159.meteorclient.modules.render;
 
-import minegame159.jes.SubscribeEvent;
+import me.zero.alpine.listener.EventHandler;
+import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.events.packets.SendPacketEvent;
 import minegame159.meteorclient.modules.Category;
@@ -57,13 +58,13 @@ public class Freecam extends Module {
         mc.world.removeEntity(dummy.getEntityId());
     }
 
-    @SubscribeEvent
-    private void onPacketSend(SendPacketEvent e) {
-        if (e.packet instanceof ClientCommandC2SPacket || e.packet instanceof PlayerMoveC2SPacket || e.packet instanceof PlayerInputC2SPacket) e.setCancelled(true);
-    }
+    @EventHandler
+    private Listener<SendPacketEvent> onSendPacket = new Listener<>(event -> {
+        if (event.packet instanceof ClientCommandC2SPacket || event.packet instanceof PlayerMoveC2SPacket || event.packet instanceof PlayerInputC2SPacket) event.cancel();
+    });
 
-    @SubscribeEvent
-    private void onTick(TickEvent e) {
+    @EventHandler
+    private Listener<TickEvent> onTick = new Listener<>(event -> {
         camera.setVelocity(0, 0, 0);
 
         camera.yaw = mc.player.yaw;
@@ -86,5 +87,5 @@ public class Freecam extends Module {
         if (mc.options.keySneak.isPressed()) vel = vel.subtract(0, speed, 0);
 
         camera.setPos(camera.getX() + vel.x, camera.getY() + vel.y, camera.getZ() + vel.z);
-    }
+    });
 }

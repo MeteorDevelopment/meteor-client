@@ -1,6 +1,7 @@
 package minegame159.meteorclient.modules.combat;
 
-import minegame159.jes.SubscribeEvent;
+import me.zero.alpine.listener.EventHandler;
+import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.packets.SendPacketEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
@@ -21,9 +22,9 @@ public class Criticals extends Module {
         super(Category.Combat, "criticals", "Critical attacks.");
     }
 
-    @SubscribeEvent
-    private void onSendPacket(SendPacketEvent e) {
-        if (!(e.packet instanceof PlayerInteractEntityC2SPacket) || ((PlayerInteractEntityC2SPacket) e.packet).getType() != PlayerInteractEntityC2SPacket.InteractionType.ATTACK || !shouldDoCriticals()) return;
+    @EventHandler
+    private Listener<SendPacketEvent> onSendPacket = new Listener<>(event -> {
+        if (!(event.packet instanceof PlayerInteractEntityC2SPacket) || ((PlayerInteractEntityC2SPacket) event.packet).getType() != PlayerInteractEntityC2SPacket.InteractionType.ATTACK || !shouldDoCriticals()) return;
 
         double x = mc.player.getX();
         double y = mc.player.getY();
@@ -31,7 +32,7 @@ public class Criticals extends Module {
 
         mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(x, y + 0.0625, z, true));
         mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(x, y, z, false));
-    }
+    });
 
     private boolean shouldDoCriticals() {
         boolean a = !mc.player.isSubmergedInWater() && !mc.player.isInLava() && !mc.player.isClimbing();

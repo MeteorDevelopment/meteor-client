@@ -1,13 +1,6 @@
 package minegame159.meteorclient.events;
 
-import minegame159.jes.Event;
-
-public class KeyEvent extends Event {
+public class KeyEvent extends Cancellable {
     public int key;
     public boolean push;
-
-    @Override
-    public boolean isCancellable() {
-        return true;
-    }
 }

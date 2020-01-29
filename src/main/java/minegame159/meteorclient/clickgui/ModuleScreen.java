@@ -1,6 +1,8 @@
 package minegame159.meteorclient.clickgui;
 
-import minegame159.jes.SubscribeEvent;
+import me.zero.alpine.listener.EventHandler;
+import me.zero.alpine.listener.Listenable;
+import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.clickgui.widgets.*;
 import minegame159.meteorclient.events.ModuleBindChangedEvent;
@@ -11,7 +13,7 @@ import minegame159.meteorclient.utils.Color;
 import net.minecraft.client.gui.screen.Screen;
 import org.lwjgl.glfw.GLFW;
 
-public class ModuleScreen extends WidgetScreen {
+public class ModuleScreen extends WidgetScreen implements Listenable {
     private Screen parent;
     private Module module;
     private Label bindLabel;
@@ -137,21 +139,21 @@ public class ModuleScreen extends WidgetScreen {
         root.addWidget(bg);
         addWidget(root);
 
-        MeteorClient.eventBus.register(this);
+        MeteorClient.eventBus.subscribe(this);
     }
 
     private String getBindString() {
         return "Bind: " + (module.getKey() == -1 ? "none" : GLFW.glfwGetKeyName(module.getKey(), 0));
     }
 
-    @SubscribeEvent
-    private void onModuleBindChanged(ModuleBindChangedEvent e) {
-        bindLabel.setText(getBindString());
-    }
+    @EventHandler
+    private Listener<ModuleBindChangedEvent> onModuleBindChanged = new Listener<>(event -> {
+        if (event.module.equals(module)) bindLabel.setText(getBindString());
+    });
 
     @Override
     public void onClose() {
-        MeteorClient.eventBus.unregister(this);
+        MeteorClient.eventBus.unsubscribe(this);
         minecraft.openScreen(parent);
     }
 }

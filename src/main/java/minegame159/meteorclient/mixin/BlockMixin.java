@@ -1,7 +1,7 @@
 package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.BlockShouldDrawSideEvent;
+import minegame159.meteorclient.events.BlockShouldRenderSideEvent;
 import minegame159.meteorclient.events.EventStore;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class BlockMixin {
     @Inject(at = @At("HEAD"), method = "shouldDrawSide", cancellable = true)
     private static void onShouldDrawSide(BlockState state, BlockView view, BlockPos pos, Direction facing, CallbackInfoReturnable<Boolean> info) {
-        BlockShouldDrawSideEvent e = EventStore.blockShouldDrawSideEvent(state);
+        BlockShouldRenderSideEvent e = EventStore.blockShouldRenderSideEvent(state);
         MeteorClient.eventBus.post(e);
 
         if (e.isCancelled()) info.setReturnValue(e.shouldRenderSide);

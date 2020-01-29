@@ -1,6 +1,7 @@
 package minegame159.meteorclient.modules.movement;
 
-import minegame159.jes.SubscribeEvent;
+import me.zero.alpine.listener.EventHandler;
+import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
@@ -51,8 +52,8 @@ public class Flight extends Module {
         }
     }
 
-    @SubscribeEvent
-    private void onTick(TickEvent e) {
+    @EventHandler
+    private Listener<TickEvent> onTick = new Listener<>(event -> {
         switch (mode.value()) {
             case Vanilla:
                 mc.player.abilities.setFlySpeed(speed.value());
@@ -61,5 +62,5 @@ public class Flight extends Module {
                 mc.player.abilities.allowFlying = true;
                 break;
         }
-    }
+    });
 }

@@ -1,6 +1,7 @@
 package minegame159.meteorclient.modules.render;
 
-import minegame159.jes.SubscribeEvent;
+import me.zero.alpine.listener.EventHandler;
+import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.RenderEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
@@ -68,8 +69,8 @@ public class StorageESP extends Module {
         }
     }
 
-    @SubscribeEvent
-    private void onRender(RenderEvent e) {
+    @EventHandler
+    private Listener<RenderEvent> onRender = new Listener<>(event -> {
         for (BlockEntity blockEntity : mc.world.blockEntities) {
             getTileEntityColor(blockEntity);
             if (render) {
@@ -85,5 +86,5 @@ public class StorageESP extends Module {
                 }
             }
         }
-    }
+    });
 }

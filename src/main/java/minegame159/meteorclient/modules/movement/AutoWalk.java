@@ -1,7 +1,8 @@
 package minegame159.meteorclient.modules.movement;
 
 import baritone.api.BaritoneAPI;
-import minegame159.jes.SubscribeEvent;
+import me.zero.alpine.listener.EventHandler;
+import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.Category;
@@ -45,8 +46,8 @@ public class AutoWalk extends Module {
         else BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
     }
 
-    @SubscribeEvent
-    private void onTick(TickEvent e) {
+    @EventHandler
+    private Listener<TickEvent> onTick = new Listener<>(event -> {
         if (mode.value() == Mode.Simple) {
             ((IKeyBinding) mc.options.keyForward).setPressed(true);
         } else {
@@ -57,5 +58,5 @@ public class AutoWalk extends Module {
 
             timer++;
         }
-    }
+    });
 }

@@ -2,9 +2,11 @@ package minegame159.meteorclient;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import minegame159.jes.SubscribeEvent;
-import minegame159.jes.eventbuses.DefaultEventBus;
-import minegame159.jes.eventbuses.EventBus;
+import me.zero.alpine.bus.EventBus;
+import me.zero.alpine.bus.EventManager;
+import me.zero.alpine.listener.EventHandler;
+import me.zero.alpine.listener.Listenable;
+import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.clickgui.ClickGUI;
 import minegame159.meteorclient.commands.CommandManager;
 import minegame159.meteorclient.events.TickEvent;
@@ -23,9 +25,9 @@ import org.lwjgl.glfw.GLFW;
 
 import java.io.*;
 
-public class MeteorClient implements ClientModInitializer {
+public class MeteorClient implements ClientModInitializer, Listenable {
     public static MeteorClient instance;
-    public static EventBus eventBus = new DefaultEventBus();
+    public static EventBus eventBus = new EventManager();
     public static Gson gson;
 
     private static MinecraftClient mc;
@@ -60,15 +62,15 @@ public class MeteorClient implements ClientModInitializer {
 
         KeyBindingRegistry.INSTANCE.register(openClickGui);
 
-        eventBus.register(this);
+        eventBus.subscribe(this);
     }
 
-    @SubscribeEvent
-    private void onTick(TickEvent e) {
+    @EventHandler
+    private Listener<TickEvent> onTick = new Listener<>(event -> {
         if (openClickGui.isPressed() && !mc.isPaused()) {
             mc.openScreen(new ClickGUI());
         }
-    }
+    });
 
     public static void saveConfig() {
         try {

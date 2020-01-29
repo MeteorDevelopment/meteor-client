@@ -1,6 +1,7 @@
 package minegame159.meteorclient.modules.misc;
 
-import minegame159.jes.SubscribeEvent;
+import me.zero.alpine.listener.EventHandler;
+import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.OpenScreenEvent;
 import minegame159.meteorclient.events.packets.SendPacketEvent;
 import minegame159.meteorclient.mixininterface.ISignEditScreen;
@@ -23,21 +24,21 @@ public class AutoSign extends Module {
         text = null;
     }
 
-    @SubscribeEvent
-    private void onSendPacket(SendPacketEvent e) {
-        if (!(e.packet instanceof UpdateSignC2SPacket)) return;
+    @EventHandler
+    private Listener<SendPacketEvent> onSendPacket = new Listener<>(event -> {
+        if (!(event.packet instanceof UpdateSignC2SPacket)) return;
 
-        text = ((UpdateSignC2SPacket) e.packet).getText();
-    }
+        text = ((UpdateSignC2SPacket) event.packet).getText();
+    });
 
-    @SubscribeEvent
-    private void onOpenScreen(OpenScreenEvent e) {
-        if (!(e.screen instanceof SignEditScreen) || text == null) return;
+    @EventHandler
+    private Listener<OpenScreenEvent> onOpenScreen = new Listener<>(event -> {
+        if (!(event.screen instanceof SignEditScreen) || text == null) return;
 
-        SignBlockEntity sign = ((ISignEditScreen) e.screen).getSign();
+        SignBlockEntity sign = ((ISignEditScreen) event.screen).getSign();
 
         mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(sign.getPos(), new LiteralText(text[0]), new LiteralText(text[1]), new LiteralText(text[2]), new LiteralText(text[3])));
 
-        e.setCancelled(true);
-    }
+        event.cancel();
+    });
 }

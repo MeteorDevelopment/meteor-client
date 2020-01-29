@@ -1,6 +1,7 @@
 package minegame159.meteorclient.modules.player;
 
-import minegame159.jes.SubscribeEvent;
+import me.zero.alpine.listener.EventHandler;
+import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.mixininterface.IMinecraftClient;
 import minegame159.meteorclient.modules.Category;
@@ -11,8 +12,6 @@ public class FastUse extends Module {
         super(Category.Player, "fast-use", "Fast item use.");
     }
 
-    @SubscribeEvent
-    private void onTick(TickEvent e) {
-        ((IMinecraftClient) mc).setItemUseCooldown(0);
-    }
+    @EventHandler
+    private Listener<TickEvent> onTick = new Listener<>(event -> ((IMinecraftClient) mc).setItemUseCooldown(0));
 }

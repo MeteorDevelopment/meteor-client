@@ -1,6 +1,7 @@
 package minegame159.meteorclient.modules.render;
 
-import minegame159.jes.SubscribeEvent;
+import me.zero.alpine.listener.EventHandler;
+import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.Render2DEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
@@ -21,20 +22,20 @@ public class Position extends Module {
         Utils.drawText(text, x2, yy, Color.fromRGBA(255, 255, 255, 255));
     }
 
-    @SubscribeEvent
-    private void onRender2D(Render2DEvent e) {
-        int y = e.screenHeight - Utils.getTextHeight() - 2;
+    @EventHandler
+    private Listener<Render2DEvent> onRender2D = new Listener<>(event -> {
+        int y = event.screenHeight - Utils.getTextHeight() - 2;
 
         if (mc.player.dimension == DimensionType.OVERWORLD) {
-            drawPosition(e.screenWidth, "Nether Pos: ", y, mc.player.getX() / 8.0, mc.player.getY() / 8.0, mc.player.getZ() / 8.0);
+            drawPosition(event.screenWidth, "Nether Pos: ", y, mc.player.getX() / 8.0, mc.player.getY() / 8.0, mc.player.getZ() / 8.0);
             y -= Utils.getTextHeight() + 2;
-            drawPosition(e.screenWidth, "Pos: ", y, mc.player.getX(), mc.player.getY(), mc.player.getZ());
+            drawPosition(event.screenWidth, "Pos: ", y, mc.player.getX(), mc.player.getY(), mc.player.getZ());
         } else if (mc.player.dimension == DimensionType.THE_NETHER) {
-            drawPosition(e.screenWidth, "Overworld Pos: ", y, mc.player.getX() * 8.0, mc.player.getY() * 8.0, mc.player.getZ() * 8.0);
+            drawPosition(event.screenWidth, "Overworld Pos: ", y, mc.player.getX() * 8.0, mc.player.getY() * 8.0, mc.player.getZ() * 8.0);
             y -= Utils.getTextHeight() + 2;
-            drawPosition(e.screenWidth, "Pos: ", y, mc.player.getX(), mc.player.getY(), mc.player.getZ());
+            drawPosition(event.screenWidth, "Pos: ", y, mc.player.getX(), mc.player.getY(), mc.player.getZ());
         } else if (mc.player.dimension == DimensionType.THE_END) {
-            drawPosition(e.screenWidth, "Pos: ", y, mc.player.getX(), mc.player.getY(), mc.player.getZ());
+            drawPosition(event.screenWidth, "Pos: ", y, mc.player.getX(), mc.player.getY(), mc.player.getZ());
         }
-    }
+    });
 }

@@ -1,6 +1,7 @@
 package minegame159.meteorclient.modules.movement;
 
-import minegame159.jes.SubscribeEvent;
+import me.zero.alpine.listener.EventHandler;
+import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.Category;
@@ -35,9 +36,9 @@ public class AutoSprint extends Module {
         else ((IKeyBinding) mc.options.keySprint).setPressed(sprinting);
     }
 
-    @SubscribeEvent
-    private void onTick(TickEvent e) {
+    @EventHandler
+    private Listener<TickEvent> onTick = new Listener<>(event -> {
         if (mc.player.forwardSpeed > 0 && !mc.player.horizontalCollision && !mc.player.isSneaking()) setSprinting(true);
         else setSprinting(false);
-    }
+    });
 }

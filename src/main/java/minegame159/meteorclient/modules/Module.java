@@ -1,5 +1,6 @@
 package minegame159.meteorclient.modules;
 
+import me.zero.alpine.listener.Listenable;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.settings.Setting;
@@ -13,7 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public abstract class Module {
+public abstract class Module implements Listenable {
     protected static MinecraftClient mc;
 
     public final Category category;
@@ -48,13 +49,13 @@ public abstract class Module {
         if (!active) {
             active = true;
             ModuleManager.addActive(this);
-            MeteorClient.eventBus.register(this);
+            MeteorClient.eventBus.subscribe(this);
             onActivate();
         }
         else {
             active = false;
             ModuleManager.removeActive(this);
-            MeteorClient.eventBus.unregister(this);
+            MeteorClient.eventBus.unsubscribe(this);
             onDeactivate();
         }
     }
