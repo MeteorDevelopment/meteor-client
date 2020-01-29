@@ -20,7 +20,7 @@ public abstract class KeyboardMixin {
 
     @Inject(method = "onKey", at = @At("HEAD"), cancellable = true)
     public void onKey(long window, int key, int scancode, int i, int j, CallbackInfo info) {
-        if (Utils.canUpdate() && !client.isPaused()) {
+        if (Utils.canUpdate() && !client.isPaused() && client.currentScreen == null) {
             KeyEvent event = EventStore.keyEvent(key, i == 1);
             MeteorClient.eventBus.post(event);
 
@@ -30,7 +30,7 @@ public abstract class KeyboardMixin {
 
     @Inject(method = "onChar", at = @At("HEAD"), cancellable = true)
     private void onChar(long window, int i, int j, CallbackInfo info) {
-        if (Utils.canUpdate() && !client.isPaused()) {
+        if (Utils.canUpdate() && !client.isPaused() && client.currentScreen == null) {
             CharTypedEvent event = EventStore.charTypedEvent((char) i);
             MeteorClient.eventBus.post(event);
 
