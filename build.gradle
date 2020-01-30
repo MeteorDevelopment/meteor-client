@@ -29,10 +29,11 @@ dependencies {
 	// PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
 	// You may need to force-disable transitiveness on them.
 
-	modCompile "com.github.ZeroMemes:Alpine:1.9"
+	modImplementation "com.github.ZeroMemes:Alpine:1.9"
 	include "com.github.ZeroMemes:Alpine:1.9"
+	include "net.jodah:typetools:0.5.0"
 
-	modCompile "com.gitlab.CDAGaming:fabritone:1.15.1-SNAPSHOT"
+	modImplementation "com.gitlab.CDAGaming:fabritone:1.15.1-SNAPSHOT"
 	include "com.gitlab.CDAGaming:fabritone:1.15.1-SNAPSHOT"
 }
 
