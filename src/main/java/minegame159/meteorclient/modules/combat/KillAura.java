@@ -71,7 +71,7 @@ public class KillAura extends Module {
     }
 
     private boolean isInRange(Entity entity) {
-        return entity.squaredDistanceTo(mc.player) <= range.value();
+        return entity.distanceTo(mc.player) <= range.value();
     }
 
     private boolean canAttackEntity(Entity entity) {
@@ -92,8 +92,8 @@ public class KillAura extends Module {
 
     private int sort(LivingEntity e1, LivingEntity e2) {
         switch (priority.value()) {
-            case LowestDistance:  return Double.compare(e1.squaredDistanceTo(mc.player), e2.squaredDistanceTo(mc.player));
-            case HighestDistance: return invertSort(Double.compare(e1.squaredDistanceTo(mc.player), e2.squaredDistanceTo(mc.player)));
+            case LowestDistance:  return Double.compare(e1.distanceTo(mc.player), e2.distanceTo(mc.player));
+            case HighestDistance: return invertSort(Double.compare(e1.distanceTo(mc.player), e2.distanceTo(mc.player)));
             case LowestHealth:    return Float.compare(e1.getHealth(), e2.getHealth());
             case HighestHealth:   return invertSort(Float.compare(e1.getHealth(), e2.getHealth()));
             default:              return 0;
@@ -109,6 +109,7 @@ public class KillAura extends Module {
                 .filter(this::canAttackEntity)
                 .filter(this::canSeeEntity)
                 .map(entity -> (LivingEntity) entity)
+                .filter(entity -> entity.getHealth() > 0)
                 .min(this::sort)
                 .ifPresent(entity -> {
                     mc.interactionManager.attackEntity(mc.player, entity);
