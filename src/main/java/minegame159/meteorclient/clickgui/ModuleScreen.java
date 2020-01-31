@@ -18,13 +18,14 @@ public class ModuleScreen extends WidgetScreen implements Listenable {
     private Screen parent;
     private Module module;
     private Label bindLabel;
+    private WindowCenter root;
 
     public ModuleScreen(Screen parent, Module module) {
         super(module.title);
         this.parent = parent;
         this.module = module;
 
-        WindowCenter root = new WindowCenter(0);
+        root = new WindowCenter(0);
         Background bg = new Background(0);
         VerticalContainer list = new VerticalContainer(8, 4);
 
@@ -110,10 +111,12 @@ public class ModuleScreen extends WidgetScreen implements Listenable {
         bindBtnContainer.addWidget(new Button(4, "Set Bind", button -> {
             ModuleManager.moduleToBind = module;
             bindLabel.setText("Bind: press key");
+            root.layout();
         }));
         bindBtnContainer.addWidget(new Button(4, "Reset Bind", button -> {
             module.setKey(-1);
             bindLabel.setText(getBindString());
+            root.layout();
         }));
         bindContainer.addWidget(bindBtnContainer);
         list.addWidget(bindContainer);
@@ -150,6 +153,7 @@ public class ModuleScreen extends WidgetScreen implements Listenable {
     @EventHandler
     private Listener<ModuleBindChangedEvent> onModuleBindChanged = new Listener<>(event -> {
         if (event.module.equals(module)) bindLabel.setText(getBindString());
+        root.layout();
     });
 
     @Override
