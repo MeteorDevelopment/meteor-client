@@ -1,6 +1,7 @@
 package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.MeteorClient;
+import minegame159.meteorclient.clickgui.WidgetScreen;
 import minegame159.meteorclient.events.CharTypedEvent;
 import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.events.KeyEvent;
@@ -20,7 +21,7 @@ public abstract class KeyboardMixin {
 
     @Inject(method = "onKey", at = @At("HEAD"), cancellable = true)
     public void onKey(long window, int key, int scancode, int i, int j, CallbackInfo info) {
-        if (Utils.canUpdate() && !client.isPaused() && client.currentScreen == null) {
+        if (Utils.canUpdate() && !client.isPaused() && (client.currentScreen == null || client.currentScreen instanceof WidgetScreen)) {
             KeyEvent event = EventStore.keyEvent(key, i == 1);
             MeteorClient.eventBus.post(event);
 
@@ -30,7 +31,7 @@ public abstract class KeyboardMixin {
 
     @Inject(method = "onChar", at = @At("HEAD"), cancellable = true)
     private void onChar(long window, int i, int j, CallbackInfo info) {
-        if (Utils.canUpdate() && !client.isPaused() && client.currentScreen == null) {
+        if (Utils.canUpdate() && !client.isPaused() && (client.currentScreen == null || client.currentScreen instanceof WidgetScreen)) {
             CharTypedEvent event = EventStore.charTypedEvent((char) i);
             MeteorClient.eventBus.post(event);
 
