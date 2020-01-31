@@ -10,6 +10,7 @@ import minegame159.meteorclient.modules.misc.AutoSign;
 import minegame159.meteorclient.modules.misc.LongerChat;
 import minegame159.meteorclient.modules.movement.*;
 import minegame159.meteorclient.modules.player.AutoFish;
+import minegame159.meteorclient.modules.player.AutoRespawn;
 import minegame159.meteorclient.modules.player.DeathPosition;
 import minegame159.meteorclient.modules.player.FastUse;
 import minegame159.meteorclient.modules.render.*;
@@ -114,6 +115,7 @@ public class ModuleManager {
         addModule(new AutoFish());
         addModule(new DeathPosition());
         addModule(new FastUse());
+        addModule(new AutoRespawn());
     }
 
     private static void initMovement() {
