@@ -7,6 +7,7 @@ import minegame159.meteorclient.events.KeyEvent;
 import minegame159.meteorclient.modules.combat.AutoLog;
 import minegame159.meteorclient.modules.combat.AutoTotem;
 import minegame159.meteorclient.modules.combat.Criticals;
+import minegame159.meteorclient.modules.combat.KillAura;
 import minegame159.meteorclient.modules.misc.AntiWeather;
 import minegame159.meteorclient.modules.misc.AutoSign;
 import minegame159.meteorclient.modules.misc.LongerChat;
@@ -108,6 +109,7 @@ public class ModuleManager {
         addModule(new Criticals());
         addModule(new AutoTotem());
         addModule(new AutoLog());
+        addModule(new KillAura());
     }
 
     private static void initPlayer() {

@@ -84,6 +84,7 @@ public class MeteorClient implements ClientModInitializer, Listenable {
 
     public static void loadConfig() {
         if (configFile.exists()) {
+            ModuleManager.deactivateAll();
             try {
                 Config.instance = gson.fromJson(new FileReader(configFile), Config.class);
             } catch (FileNotFoundException e) {
