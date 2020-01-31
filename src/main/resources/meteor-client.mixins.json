@@ -20,7 +20,8 @@
     "KeyBindingMixin",
     "SignEditScreenMixin",
     "DisconnectedScreenMixin",
-    "AbstractButtonWidgetMixin"
+    "AbstractButtonWidgetMixin",
+    "ClientConnectionMixin"
   ],
   "injectors": {
     "defaultRequire": 1
