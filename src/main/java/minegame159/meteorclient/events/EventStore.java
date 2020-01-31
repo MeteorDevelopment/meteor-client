@@ -29,6 +29,7 @@ public class EventStore {
     private static RenderFogEvent renderFogEvent = new RenderFogEvent();
     private static TickEvent tickEvent = new TickEvent();
     private static TookDamageEvent tookDamageEvent = new TookDamageEvent();
+    private static ChangeChatLengthEvent changeChatLengthEvent = new ChangeChatLengthEvent();
 
     public static PlaySoundPacketEvent playSoundPacketEvent(PlaySoundS2CPacket packet) {
         playSoundPacketEvent.packet = packet;
@@ -127,5 +128,10 @@ public class EventStore {
     public static TookDamageEvent tookDamageEvent(LivingEntity entity) {
         tookDamageEvent.entity = entity;
         return tookDamageEvent;
+    }
+
+    public static ChangeChatLengthEvent changeChatLengthEvent(int length) {
+        changeChatLengthEvent.length = length;
+        return changeChatLengthEvent;
     }
 }
