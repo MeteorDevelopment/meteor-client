@@ -2,12 +2,10 @@ package minegame159.meteorclient.modules.combat;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.events.TookDamageEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.builders.IntSettingBuilder;
 import net.minecraft.client.network.packet.DisconnectS2CPacket;
@@ -42,8 +40,6 @@ public class AutoLog extends Module {
     private Listener<TickEvent> onTick = new Listener<>(event -> {
         if (shouldLog && System.currentTimeMillis() - lastLog <= 1000) {
             shouldLog = false;
-            MeteorClient.saveConfig();
-            ModuleManager.deactivateAll();
             mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(new LiteralText("AutoLog")));
         }
     });
