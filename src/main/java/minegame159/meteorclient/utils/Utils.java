@@ -63,4 +63,14 @@ public class Utils {
         }
         return module;
     }
+
+    public static String floatToString(float number) {
+        if (number % 1 == 0) return Integer.toString((int) number);
+        return Float.toString(number);
+    }
+
+    public static String doubleToString(double number) {
+        if (number % 1 == 0) return Integer.toString((int) number);
+        return Double.toString(number);
+    }
 }

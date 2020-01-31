@@ -10,6 +10,7 @@ import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.utils.Color;
+import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.gui.screen.Screen;
 import org.lwjgl.glfw.GLFW;
 
@@ -58,25 +59,25 @@ public class ModuleScreen extends WidgetScreen implements Listenable {
                 setting.setFromString(val);
                 if (!textBox.text.isEmpty() && !a) textBox.text = setting.value().toString();
             });
-            else if (setting.value() instanceof Float) value = new TextBox(3, Float.toString((float) setting.value()), 8, TextBoxFilters.floating, textBox -> {
+            else if (setting.value() instanceof Float) value = new TextBox(3, Utils.floatToString((float) setting.value()), 8, TextBoxFilters.floating, textBox -> {
                 boolean a = false;
                 String val = textBox.text.isEmpty() ? "0" : textBox.text;
                 if (val.length() == 1 && val.charAt(0) == '-') {
                     a = true;
                     val = "-0";
-                }
+                } else if (val.charAt(val.length() - 1) == '.') a = true;
                 setting.setFromString(val);
-                if (!textBox.text.isEmpty() && !a) textBox.text = setting.value().toString();
+                if (!textBox.text.isEmpty() && !a) textBox.text = Utils.floatToString((float) setting.value());
             });
-            else if (setting.value() instanceof Double) value = new TextBox(3, Double.toString((double) setting.value()), 8, TextBoxFilters.floating, textBox -> {
+            else if (setting.value() instanceof Double) value = new TextBox(3, Utils.doubleToString((double) setting.value()), 8, TextBoxFilters.floating, textBox -> {
                 boolean a = false;
                 String val = textBox.text.isEmpty() ? "0" : textBox.text;
                 if (val.length() == 1 && val.charAt(0) == '-') {
                     a = true;
                     val = "-0";
-                }
+                } else if (val.charAt(val.length() - 1) == '.') a = true;
                 setting.setFromString(val);
-                if (!textBox.text.isEmpty() && !a) textBox.text = setting.value().toString();
+                if (!textBox.text.isEmpty() && !a) textBox.text = Utils.doubleToString((double) setting.value());
             });
             else if (setting.value() instanceof Color) value = new ColorEdit(0, 4, (Color) setting.value(), colorEdit -> {
                 setting.value(new Color(colorEdit.color));
