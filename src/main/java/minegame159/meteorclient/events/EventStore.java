@@ -30,6 +30,7 @@ public class EventStore {
     private static TickEvent tickEvent = new TickEvent();
     private static TookDamageEvent tookDamageEvent = new TookDamageEvent();
     private static ChangeChatLengthEvent changeChatLengthEvent = new ChangeChatLengthEvent();
+    private static GameJoinedEvent gameJoinedEvent = new GameJoinedEvent();
 
     public static PlaySoundPacketEvent playSoundPacketEvent(PlaySoundS2CPacket packet) {
         playSoundPacketEvent.packet = packet;
@@ -133,5 +134,9 @@ public class EventStore {
     public static ChangeChatLengthEvent changeChatLengthEvent(int length) {
         changeChatLengthEvent.length = length;
         return changeChatLengthEvent;
+    }
+
+    public static GameJoinedEvent gameJoinedEvent() {
+        return gameJoinedEvent;
     }
 }

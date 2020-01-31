@@ -9,6 +9,7 @@ import me.zero.alpine.listener.Listenable;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.clickgui.ClickGUI;
 import minegame159.meteorclient.commands.CommandManager;
+import minegame159.meteorclient.events.GameJoinedEvent;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.json.ConfigSerializer;
 import minegame159.meteorclient.modules.ModuleManager;
@@ -71,6 +72,9 @@ public class MeteorClient implements ClientModInitializer, Listenable {
             mc.openScreen(new ClickGUI());
         }
     });
+
+    @EventHandler
+    private Listener<GameJoinedEvent> onGameJoined = new Listener<>(event -> MeteorClient.loadConfig());
 
     public static void saveConfig() {
         try {

@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class ClientPlayNetworkHandlerMixin {
     @Inject(at = @At("TAIL"), method = "onGameJoin")
     private void onGameJoin(GameJoinS2CPacket packet, CallbackInfo info) {
-        MeteorClient.loadConfig();
+        MeteorClient.eventBus.post(EventStore.gameJoinedEvent());
     }
 
     @Inject(at = @At("HEAD"), method = "sendPacket", cancellable = true)

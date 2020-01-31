@@ -18,7 +18,9 @@
     "BackgroundRendererMixin",
     "GameRendererMixin",
     "KeyBindingMixin",
-    "SignEditScreenMixin"
+    "SignEditScreenMixin",
+    "DisconnectedScreenMixin",
+    "AbstractButtonWidgetMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -6,6 +6,7 @@ import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.events.KeyEvent;
 import minegame159.meteorclient.modules.combat.*;
 import minegame159.meteorclient.modules.misc.AntiWeather;
+import minegame159.meteorclient.modules.misc.AutoReconnect;
 import minegame159.meteorclient.modules.misc.AutoSign;
 import minegame159.meteorclient.modules.misc.LongerChat;
 import minegame159.meteorclient.modules.movement.*;
@@ -147,5 +148,6 @@ public class ModuleManager {
         addModule(new LongerChat());
         addModule(new AutoSign());
         addModule(new AntiWeather());
+        addModule(new AutoReconnect());
     }
 }
