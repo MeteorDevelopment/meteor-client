@@ -7,10 +7,7 @@ import minegame159.meteorclient.events.KeyEvent;
 import minegame159.meteorclient.modules.combat.*;
 import minegame159.meteorclient.modules.misc.*;
 import minegame159.meteorclient.modules.movement.*;
-import minegame159.meteorclient.modules.player.AutoFish;
-import minegame159.meteorclient.modules.player.AutoRespawn;
-import minegame159.meteorclient.modules.player.DeathPosition;
-import minegame159.meteorclient.modules.player.FastUse;
+import minegame159.meteorclient.modules.player.*;
 import minegame159.meteorclient.modules.render.*;
 import minegame159.meteorclient.utils.Utils;
 import org.lwjgl.glfw.GLFW;
@@ -114,6 +111,7 @@ public class ModuleManager {
         addModule(new DeathPosition());
         addModule(new FastUse());
         addModule(new AutoRespawn());
+        addModule(new AntiFire());
     }
 
     private static void initMovement() {
