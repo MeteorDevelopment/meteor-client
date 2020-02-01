@@ -94,7 +94,12 @@ public class ModuleScreen extends WidgetScreen implements Listenable {
                 setting.reset();
 
                 if (value instanceof Checkbox) ((Checkbox) value).checked = (boolean) setting.value();
-                else if (value instanceof TextBox) ((TextBox) value).text = setting.value().toString();
+                else if (value instanceof TextBox) {
+                    Object val = setting.value();
+                    if (val instanceof Integer) ((TextBox) value).text = val.toString();
+                    else if (val instanceof Float) ((TextBox) value).text = Utils.floatToString((float) val);
+                    else if (val instanceof Double) ((TextBox) value).text = Utils.doubleToString((double) val);
+                }
                 else if (value instanceof ColorEdit) ((ColorEdit) value).setColor((Color) setting.value());
                 else if (value instanceof EnumButton) ((EnumButton) value).setValue((Enum) setting.value());
             });

@@ -51,6 +51,7 @@ public class ActiveModules extends Module {
 
     @EventHandler
     private Listener<Render2DEvent> onRender2D = new Listener<>(event -> {
+        if (mc.options.debugEnabled) return;
         int y = 2;
 
         for (Module module : modules) {
