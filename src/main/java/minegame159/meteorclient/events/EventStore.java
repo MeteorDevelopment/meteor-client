@@ -31,6 +31,7 @@ public class EventStore {
     private static TookDamageEvent tookDamageEvent = new TookDamageEvent();
     private static ChangeChatLengthEvent changeChatLengthEvent = new ChangeChatLengthEvent();
     private static GameJoinedEvent gameJoinedEvent = new GameJoinedEvent();
+    private static BetterShulkerTooltipEvent betterShulkerTooltipEvent = new BetterShulkerTooltipEvent();
 
     public static PlaySoundPacketEvent playSoundPacketEvent(PlaySoundS2CPacket packet) {
         playSoundPacketEvent.packet = packet;
@@ -138,5 +139,10 @@ public class EventStore {
 
     public static GameJoinedEvent gameJoinedEvent() {
         return gameJoinedEvent;
+    }
+
+    public static BetterShulkerTooltipEvent betterShulkerTooltipEvent(boolean enabled) {
+        betterShulkerTooltipEvent.enabled = enabled;
+        return betterShulkerTooltipEvent;
     }
 }

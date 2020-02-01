@@ -5,10 +5,7 @@ import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.events.KeyEvent;
 import minegame159.meteorclient.modules.combat.*;
-import minegame159.meteorclient.modules.misc.AntiWeather;
-import minegame159.meteorclient.modules.misc.AutoReconnect;
-import minegame159.meteorclient.modules.misc.AutoSign;
-import minegame159.meteorclient.modules.misc.LongerChat;
+import minegame159.meteorclient.modules.misc.*;
 import minegame159.meteorclient.modules.movement.*;
 import minegame159.meteorclient.modules.player.AutoFish;
 import minegame159.meteorclient.modules.player.AutoRespawn;
@@ -149,5 +146,6 @@ public class ModuleManager {
         addModule(new AutoSign());
         addModule(new AntiWeather());
         addModule(new AutoReconnect());
+        addModule(new ShulkerTooltip());
     }
 }

@@ -1,8 +1,6 @@
 package minegame159.meteorclient.mixin;
 
-import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.ChangeChatLengthEvent;
+import minegame159.meteorclient.MixinValues;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.hud.ChatHud;
 import net.minecraft.client.gui.hud.ChatHudLine;
@@ -41,12 +39,6 @@ public abstract class ChatHudMixin {
 
     @Shadow @Final private List<ChatHudLine> messages;
 
-    private int chatLength = 100;
-
-    public ChatHudMixin() {
-        MeteorClient.eventBus.subscribe(new Listener<ChangeChatLengthEvent>(event -> chatLength = event.length));
-    }
-
     @Inject(at = @At("HEAD"), method = "addMessage(Lnet/minecraft/text/Text;IIZ)V", cancellable = true)
     private void onAddMessage(Text message, int messageId, int timestamp, boolean bl, CallbackInfo info) {
         if (messageId != 0) {
@@ -66,14 +58,14 @@ public abstract class ChatHudMixin {
             }
         }
 
-        while(this.visibleMessages.size() > chatLength) {
+        while(this.visibleMessages.size() > MixinValues.getChatLength()) {
             this.visibleMessages.remove(this.visibleMessages.size() - 1);
         }
 
         if (!bl) {
             this.messages.add(0, new ChatHudLine(timestamp, message, messageId));
 
-            while(this.visibleMessages.size() > chatLength) {
+            while(this.visibleMessages.size() > MixinValues.getChatLength()) {
                 this.messages.remove(this.messages.size() - 1);
             }
         }

@@ -21,7 +21,8 @@
     "SignEditScreenMixin",
     "DisconnectedScreenMixin",
     "AbstractButtonWidgetMixin",
-    "ClientConnectionMixin"
+    "ClientConnectionMixin",
+    "ShulkerBoxBlockMixin"
   ],
   "injectors": {
     "defaultRequire": 1

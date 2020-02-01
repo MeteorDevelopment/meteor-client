@@ -58,6 +58,7 @@ public class MeteorClient implements ClientModInitializer, Listenable {
 
         configFile = new File(FabricLoader.getInstance().getGameDirectory(), "meteor-client.json");
 
+        MixinValues.init();
         CommandManager.init();
         ModuleManager.init();
 
