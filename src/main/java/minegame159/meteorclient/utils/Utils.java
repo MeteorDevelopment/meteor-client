@@ -11,6 +11,8 @@ import java.util.Random;
 
 public class Utils {
     public static MinecraftClient mc;
+    public static int offhandSlotId = 45;
+
     private static Random random = new Random();
 
     public static boolean canUpdate() {
@@ -72,5 +74,10 @@ public class Utils {
     public static String doubleToString(double number) {
         if (number % 1 == 0) return Integer.toString((int) number);
         return Double.toString(number);
+    }
+
+    public static int invIndexToSlotId(int invIndex) {
+        if (invIndex < 9) return 44 - (8 - invIndex);
+        return invIndex;
     }
 }

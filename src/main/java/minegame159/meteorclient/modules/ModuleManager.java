@@ -112,6 +112,7 @@ public class ModuleManager {
         addModule(new FastUse());
         addModule(new AutoRespawn());
         addModule(new AntiFire());
+        addModule(new AutoMend());
     }
 
     private static void initMovement() {

@@ -5,6 +5,7 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.gui.screen.ingame.ContainerScreen;
 import net.minecraft.container.SlotActionType;
 import net.minecraft.item.ItemStack;
@@ -32,8 +33,8 @@ public class AutoTotem extends Module {
             totemCount += itemStack.getCount();
 
             if (!foundTotem && mc.player.getOffHandStack().isEmpty()) {
-                mc.interactionManager.clickSlot(0, i, 0, SlotActionType.PICKUP, mc.player);
-                mc.interactionManager.clickSlot(0, 45, 0, SlotActionType.PICKUP, mc.player);
+                mc.interactionManager.clickSlot(0, Utils.invIndexToSlotId(i), 0, SlotActionType.PICKUP, mc.player);
+                mc.interactionManager.clickSlot(0, Utils.offhandSlotId, 0, SlotActionType.PICKUP, mc.player);
                 foundTotem = true;
             }
         }
