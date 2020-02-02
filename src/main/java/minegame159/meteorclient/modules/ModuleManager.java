@@ -9,6 +9,7 @@ import minegame159.meteorclient.modules.misc.*;
 import minegame159.meteorclient.modules.movement.*;
 import minegame159.meteorclient.modules.player.*;
 import minegame159.meteorclient.modules.render.*;
+import minegame159.meteorclient.modules.setting.GUI;
 import minegame159.meteorclient.utils.Utils;
 import org.lwjgl.glfw.GLFW;
 
@@ -28,6 +29,7 @@ public class ModuleManager {
         initMovement();
         initRender();
         initMisc();
+        initSetting();
 
         System.out.println("Meteor Client loaded " + modules.size() + " modules.");
         MeteorClient.eventBus.subscribe(onKey);
@@ -60,7 +62,11 @@ public class ModuleManager {
 
     public static void deactivateAll() {
         List<Module> active2 = new ArrayList<>(active);
-        for (Module module : active2) module.toggle();
+        for (Module module : active2) {
+            if (module.setting) continue;
+
+            module.toggle();
+        }
     }
 
     private static Listener<KeyEvent> onKey = new Listener<>(event -> {
@@ -68,6 +74,11 @@ public class ModuleManager {
 
         // Check if binding module
         if (moduleToBind != null) {
+            if (moduleToBind.setting) {
+                moduleToBind = null;
+                return;
+            }
+
             moduleToBind.setKey(event.key);
             Utils.sendMessage("#yellowModule #blue'%s' #yellowbound to #blue%s#yellow.", moduleToBind.title, GLFW.glfwGetKeyName(event.key, 0));
             moduleToBind = null;
@@ -77,6 +88,8 @@ public class ModuleManager {
 
         // Find module bound to that key
         for (Module module : modules) {
+            if (module.setting) continue;
+
             if (module.getKey() == event.key) {
                 module.toggle();
                 event.cancel();
@@ -146,5 +159,9 @@ public class ModuleManager {
         addModule(new AntiWeather());
         addModule(new AutoReconnect());
         addModule(new ShulkerTooltip());
+    }
+
+    private static void initSetting() {
+        addModule(new GUI());
     }
 }

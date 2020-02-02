@@ -1,6 +1,6 @@
-package minegame159.meteorclient.clickgui.widgets;
+package minegame159.meteorclient.gui.widgets;
 
-import minegame159.meteorclient.clickgui.WidgetColors;
+import minegame159.meteorclient.modules.setting.GUI;
 import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.Utils;
 
@@ -33,15 +33,15 @@ public class Checkbox extends Widget {
 
     @Override
     public void render(double mouseX, double mouseY) {
-        Color backgroundColor = WidgetColors.background;
-        Color outlineColor = WidgetColors.outline;
+        Color backgroundColor = GUI.background;
+        Color outlineColor = GUI.outline;
         if (isMouseOver(mouseX, mouseY)) {
-            backgroundColor = WidgetColors.backgroundHighlighted;
-            outlineColor = WidgetColors.outlineHighlighted;
+            backgroundColor = GUI.backgroundHighlighted;
+            outlineColor = GUI.outlineHighlighted;
         }
 
         renderBackgroundWithOutline(backgroundColor, outlineColor);
-        if (checked) quad(x + margin + 4, y + margin + 4, x + width - 4, y + height - 4, WidgetColors.checkbox);
+        if (checked) quad(x + margin + 4, y + margin + 4, x + width - 4, y + height - 4, GUI.checkbox);
 
         super.render(mouseX, mouseY);
     }

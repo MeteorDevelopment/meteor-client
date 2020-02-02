@@ -1,6 +1,8 @@
-package minegame159.meteorclient.clickgui;
+package minegame159.meteorclient.gui;
 
-import minegame159.meteorclient.clickgui.widgets.Widget;
+import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
+import minegame159.meteorclient.gui.widgets.Widget;
 import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.RenderUtils;
 import net.minecraft.client.MinecraftClient;
@@ -85,9 +87,12 @@ public class WidgetScreen extends Screen {
     public void render(int mouseX, int mouseY, float delta) {
         fill(0, 0, width, height, bgColor);
 
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
         RenderUtils.beginQuads();
         for (Widget widget : widgets) widget.render(mouseX, mouseY);
         RenderUtils.endQuads();
+        RenderSystem.disableBlend();
 
         for (Widget widget : widgets) widget.renderText(mouseX, mouseY, font);
     }

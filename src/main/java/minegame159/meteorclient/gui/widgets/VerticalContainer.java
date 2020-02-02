@@ -1,4 +1,4 @@
-package minegame159.meteorclient.clickgui.widgets;
+package minegame159.meteorclient.gui.widgets;
 
 public class VerticalContainer extends Widget {
     private double spacing;

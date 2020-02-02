@@ -1,6 +1,6 @@
-package minegame159.meteorclient.clickgui.widgets;
+package minegame159.meteorclient.gui.widgets;
 
-import minegame159.meteorclient.clickgui.TextBoxFilters;
+import minegame159.meteorclient.gui.TextBoxFilters;
 import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.Utils;
 
@@ -16,22 +16,22 @@ public class ColorEdit extends HorizontalContainer {
         this.color = color;
 
         r = new TextBox(3, Integer.toString(color.r), 3, TextBoxFilters.integer, textBox -> {
-            color.r = Integer.parseInt(textBox.text);
+            color.r = textBox.text.isEmpty() ? 0 : Integer.parseInt(textBox.text);
             color.validate();
             action.accept(this);
         });
         g = new TextBox(3, Integer.toString(color.g), 3, TextBoxFilters.integer, textBox -> {
-            color.g = Integer.parseInt(textBox.text);
+            color.g = textBox.text.isEmpty() ? 0 : Integer.parseInt(textBox.text);
             color.validate();
             action.accept(this);
         });
         b = new TextBox(3, Integer.toString(color.b), 3, TextBoxFilters.integer, textBox -> {
-            color.b = Integer.parseInt(textBox.text);
+            color.b = textBox.text.isEmpty() ? 0 : Integer.parseInt(textBox.text);
             color.validate();
             action.accept(this);
         });
         a = new TextBox(3, Integer.toString(color.a), 3, TextBoxFilters.integer, textBox -> {
-            color.a = Integer.parseInt(textBox.text);
+            color.a = textBox.text.isEmpty() ? 0 : Integer.parseInt(textBox.text);
             color.validate();
             action.accept(this);
         });

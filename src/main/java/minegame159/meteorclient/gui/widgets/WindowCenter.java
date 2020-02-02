@@ -1,4 +1,4 @@
-package minegame159.meteorclient.clickgui.widgets;
+package minegame159.meteorclient.gui.widgets;
 
 import net.minecraft.client.MinecraftClient;
 

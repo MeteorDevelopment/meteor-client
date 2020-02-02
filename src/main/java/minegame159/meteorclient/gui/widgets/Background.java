@@ -1,6 +1,6 @@
-package minegame159.meteorclient.clickgui.widgets;
+package minegame159.meteorclient.gui.widgets;
 
-import minegame159.meteorclient.clickgui.WidgetColors;
+import minegame159.meteorclient.modules.setting.GUI;
 
 public class Background extends Widget {
     public Background(double margin) {
@@ -15,7 +15,7 @@ public class Background extends Widget {
 
     @Override
     public void render(double mouseX, double mouseY) {
-        renderBackgroundWithOutline(WidgetColors.background, WidgetColors.outline);
+        renderBackgroundWithOutline(GUI.background, GUI.outline);
 
         super.render(mouseX, mouseY);
     }

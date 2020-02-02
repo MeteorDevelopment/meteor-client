@@ -1,6 +1,6 @@
-package minegame159.meteorclient.clickgui.widgets;
+package minegame159.meteorclient.gui.widgets;
 
-import minegame159.meteorclient.clickgui.WidgetColors;
+import minegame159.meteorclient.modules.setting.GUI;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.font.TextRenderer;
 
@@ -33,8 +33,8 @@ public class Label extends Widget {
 
     @Override
     public void renderText(double mouseX, double mouseY, TextRenderer font) {
-        if (shadow) font.drawWithShadow(text, (float) (x + margin), (float) (y + margin), WidgetColors.textC);
-        else font.draw(text, (float) (x + margin), (float) (y + margin), WidgetColors.textC);
+        if (shadow) font.drawWithShadow(text, (float) (x + margin), (float) (y + margin), GUI.textC);
+        else font.draw(text, (float) (x + margin), (float) (y + margin), GUI.textC);
 
         super.renderText(mouseX, mouseY, font);
     }

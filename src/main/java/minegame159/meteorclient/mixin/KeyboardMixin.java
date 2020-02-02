@@ -1,7 +1,7 @@
 package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.clickgui.WidgetScreen;
+import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.events.CharTypedEvent;
 import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.events.KeyEvent;

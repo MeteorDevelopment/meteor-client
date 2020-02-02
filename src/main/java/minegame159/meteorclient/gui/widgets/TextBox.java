@@ -1,6 +1,6 @@
-package minegame159.meteorclient.clickgui.widgets;
+package minegame159.meteorclient.gui.widgets;
 
-import minegame159.meteorclient.clickgui.WidgetColors;
+import minegame159.meteorclient.modules.setting.GUI;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.font.TextRenderer;
 import org.lwjgl.glfw.GLFW;
@@ -74,12 +74,12 @@ public class TextBox extends Widget {
 
     @Override
     public void render(double mouseX, double mouseY) {
-        renderBackgroundWithOutline(WidgetColors.backgroundTextBox, WidgetColors.outline);
+        renderBackgroundWithOutline(GUI.backgroundTextBox, GUI.outline);
 
         // Cursor
         if (cursorVisible && focused) {
             double textWidth = Utils.getTextWidth(text);
-            quad(x + margin + textWidth, y + margin, x + margin + textWidth + 1, y + margin + Utils.getTextHeight(), WidgetColors.text);
+            quad(x + margin + textWidth, y + margin, x + margin + textWidth + 1, y + margin + Utils.getTextHeight(), GUI.text);
         }
 
         super.render(mouseX, mouseY);
@@ -87,7 +87,7 @@ public class TextBox extends Widget {
 
     @Override
     public void renderText(double mouseX, double mouseY, TextRenderer font) {
-        font.draw(text, (float) (x + margin), (float) (y + margin + 1), WidgetColors.textC);
+        font.draw(text, (float) (x + margin), (float) (y + margin + 1),GUI.textC);
 
         super.renderText(mouseX, mouseY, font);
     }

@@ -1,6 +1,6 @@
-package minegame159.meteorclient.clickgui.widgets;
+package minegame159.meteorclient.gui.widgets;
 
-import minegame159.meteorclient.clickgui.WidgetColors;
+import minegame159.meteorclient.modules.setting.GUI;
 import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.RenderUtils;
 import net.minecraft.client.font.TextRenderer;
@@ -119,7 +119,7 @@ public abstract class Widget {
 
     public void renderText(double mouseX, double mouseY, TextRenderer font) {
         if (mouseOver && tooltipTimer <= 0 && tooltip != null) {
-            font.drawWithShadow(tooltip, (float) (mouseX + 8), (float) (mouseY + 8), WidgetColors.textC);
+            font.drawWithShadow(tooltip, (float) (mouseX + 8), (float) (mouseY + 8), GUI.textC);
         }
 
         for (Widget widget : widgets) widget.renderText(mouseX, mouseY, font);

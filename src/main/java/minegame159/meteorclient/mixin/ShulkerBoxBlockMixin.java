@@ -1,6 +1,5 @@
 package minegame159.meteorclient.mixin;
 
-import com.sun.istack.internal.Nullable;
 import minegame159.meteorclient.MixinValues;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -31,7 +30,7 @@ public class ShulkerBoxBlockMixin {
      */
     @Overwrite
     @Environment(EnvType.CLIENT)
-    public void buildTooltip(ItemStack stack, @Nullable BlockView view, List<Text> tooltip, TooltipContext options) {
+    public void buildTooltip(ItemStack stack, BlockView view, List<Text> tooltip, TooltipContext options) {
         CompoundTag compoundTag = stack.getSubTag("BlockEntityTag");
         if (compoundTag != null) {
             if (compoundTag.contains("LootTable", 8)) {

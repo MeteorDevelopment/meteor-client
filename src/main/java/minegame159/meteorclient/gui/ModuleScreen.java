@@ -1,10 +1,10 @@
-package minegame159.meteorclient.clickgui;
+package minegame159.meteorclient.gui;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listenable;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.clickgui.widgets.*;
+import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.events.ModuleBindChangedEvent;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
@@ -107,42 +107,45 @@ public class ModuleScreen extends WidgetScreen implements Listenable {
             grid.addRow(title, value, reset);
         }
         list.addWidget(grid);
-        list.addWidget(new Separator());
 
-        // Bind
-        HorizontalContainer bindContainer = new HorizontalContainer(0, 12);
-        bindLabel = bindContainer.addWidget(new Label(0, getBindString()));
-        HorizontalContainer bindBtnContainer = new HorizontalContainer(0, 4);
-        bindBtnContainer.addWidget(new Button(4, "Set Bind", button -> {
-            ModuleManager.moduleToBind = module;
-            bindLabel.setText("Bind: press key");
-            root.layout();
-        }));
-        bindBtnContainer.addWidget(new Button(4, "Reset Bind", button -> {
-            module.setKey(-1);
-            bindLabel.setText(getBindString());
-            root.layout();
-        }));
-        bindContainer.addWidget(bindBtnContainer);
-        list.addWidget(bindContainer);
-        list.addWidget(new Separator());
+        if (!module.setting) {
+            list.addWidget(new Separator());
 
-        // Visible
-        HorizontalContainer visibleContainer = new HorizontalContainer(0, 4);
-        visibleContainer.addWidget(new Label(0, "Visible: "));
-        visibleContainer.addWidget(new Checkbox(0, module.isVisible(), checkbox -> {
-            if (module.isVisible() != checkbox.checked) module.setVisible(checkbox.checked);
-        }));
-        list.addWidget(visibleContainer);
+            // Bind
+            HorizontalContainer bindContainer = new HorizontalContainer(0, 12);
+            bindLabel = bindContainer.addWidget(new Label(0, getBindString()));
+            HorizontalContainer bindBtnContainer = new HorizontalContainer(0, 4);
+            bindBtnContainer.addWidget(new Button(4, "Set Bind", button -> {
+                ModuleManager.moduleToBind = module;
+                bindLabel.setText("Bind: press key");
+                root.layout();
+            }));
+            bindBtnContainer.addWidget(new Button(4, "Reset Bind", button -> {
+                module.setKey(-1);
+                bindLabel.setText(getBindString());
+                root.layout();
+            }));
+            bindContainer.addWidget(bindBtnContainer);
+            list.addWidget(bindContainer);
+            list.addWidget(new Separator());
 
-        // Active
-        HorizontalContainer activeContainer = new HorizontalContainer(0, 4);
-        Label activeLabel = activeContainer.addWidget(new Label(0, "Active: "));
-        activeLabel.tooltip = "Visible in active modules.";
-        activeContainer.addWidget(new Checkbox(0, module.isActive(), checkbox -> {
-            if (module.isActive() != checkbox.checked) module.toggle();
-        }));
-        list.addWidget(activeContainer);
+            // Visible
+            HorizontalContainer visibleContainer = new HorizontalContainer(0, 4);
+            visibleContainer.addWidget(new Label(0, "Visible: "));
+            visibleContainer.addWidget(new Checkbox(0, module.isVisible(), checkbox -> {
+                if (module.isVisible() != checkbox.checked) module.setVisible(checkbox.checked);
+            }));
+            list.addWidget(visibleContainer);
+
+            // Active
+            HorizontalContainer activeContainer = new HorizontalContainer(0, 4);
+            Label activeLabel = activeContainer.addWidget(new Label(0, "Active: "));
+            activeLabel.tooltip = "Visible in active modules.";
+            activeContainer.addWidget(new Checkbox(0, module.isActive(), checkbox -> {
+                if (module.isActive() != checkbox.checked) module.toggle();
+            }));
+            list.addWidget(activeContainer);
+        }
 
         bg.addWidget(list);
         root.addWidget(bg);

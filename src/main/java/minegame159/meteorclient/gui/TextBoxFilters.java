@@ -1,6 +1,6 @@
-package minegame159.meteorclient.clickgui;
+package minegame159.meteorclient.gui;
 
-import minegame159.meteorclient.clickgui.widgets.TextBoxFilter;
+import minegame159.meteorclient.gui.widgets.TextBoxFilter;
 
 public class TextBoxFilters {
     public static TextBoxFilter integer = (textBox, c) -> {

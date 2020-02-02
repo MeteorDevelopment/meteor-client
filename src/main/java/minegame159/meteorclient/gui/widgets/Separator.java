@@ -1,6 +1,6 @@
-package minegame159.meteorclient.clickgui.widgets;
+package minegame159.meteorclient.gui.widgets;
 
-import minegame159.meteorclient.clickgui.WidgetColors;
+import minegame159.meteorclient.modules.setting.GUI;
 import minegame159.meteorclient.utils.Color;
 
 public class Separator extends Widget {
@@ -20,7 +20,7 @@ public class Separator extends Widget {
     }
 
     public Separator(double margin) {
-        this(margin, WidgetColors.separator);
+        this(margin, GUI.separator);
     }
 
     public Separator() {

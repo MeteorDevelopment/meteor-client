@@ -1,8 +1,8 @@
-package minegame159.meteorclient.clickgui;
+package minegame159.meteorclient.gui;
 
-import minegame159.meteorclient.clickgui.widgets.Label;
-import minegame159.meteorclient.clickgui.widgets.ModuleGroup;
-import minegame159.meteorclient.clickgui.widgets.ModuleGroupController;
+import minegame159.meteorclient.gui.widgets.Label;
+import minegame159.meteorclient.gui.widgets.ModuleGroup;
+import minegame159.meteorclient.gui.widgets.ModuleGroupController;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.utils.Utils;

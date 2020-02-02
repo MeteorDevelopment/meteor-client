@@ -7,7 +7,7 @@ import me.zero.alpine.bus.EventManager;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listenable;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.clickgui.ClickGUI;
+import minegame159.meteorclient.gui.ClickGUI;
 import minegame159.meteorclient.commands.CommandManager;
 import minegame159.meteorclient.events.GameJoinedEvent;
 import minegame159.meteorclient.events.TickEvent;

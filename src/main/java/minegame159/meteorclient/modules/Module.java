@@ -23,29 +23,37 @@ public abstract class Module implements Listenable {
     public final String description;
     public final int color;
     public final List<Setting> settings = new ArrayList<>();
+    public final boolean setting;
     private int key = -1;
 
     private boolean active;
     private boolean visible;
 
-    public Module(Category category, String name, String description, boolean visible) {
+    public Module(Category category, String name, String description, boolean setting, boolean visible) {
         this.category = category;
         this.name = name.toLowerCase();
         title = Arrays.stream(name.split("-")).map(StringUtils::capitalize).collect(Collectors.joining(" "));
         this.description = description;
+        this.setting = setting;
         this.visible = visible;
         color = Color.fromRGBA(Utils.random(180, 255), Utils.random(180, 255), Utils.random(180, 255), 255);
         mc = MinecraftClient.getInstance();
     }
 
+    public Module(Category category, String name, String description, boolean setting) {
+        this(category, name, description, setting, true);
+    }
+
     public Module(Category category, String name, String description) {
-        this(category, name, description, true);
+        this(category, name, description, false);
     }
 
     public void onActivate() {}
     public void onDeactivate() {}
 
     public void toggle() {
+        if (setting) return;
+
         if (!active) {
             active = true;
             ModuleManager.addActive(this);
@@ -82,6 +90,8 @@ public abstract class Module implements Listenable {
     }
 
     public void setKey(int key) {
+        if (setting) return;
+
         this.key = key;
         MeteorClient.eventBus.post(EventStore.moduleBindChangedEvent(this));
     }
@@ -91,6 +101,8 @@ public abstract class Module implements Listenable {
     }
 
     public void setVisible(boolean visible) {
+        if (setting) return;
+
         this.visible = visible;
         MeteorClient.eventBus.post(EventStore.moduleVisibilityChangedEvent(this));
     }

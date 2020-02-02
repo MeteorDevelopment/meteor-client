@@ -1,6 +1,6 @@
-package minegame159.meteorclient.clickgui.widgets;
+package minegame159.meteorclient.gui.widgets;
 
-import minegame159.meteorclient.clickgui.WidgetColors;
+import minegame159.meteorclient.modules.setting.GUI;
 import minegame159.meteorclient.utils.Color;
 
 import java.util.function.Consumer;
@@ -39,11 +39,11 @@ public class Button extends Widget {
 
     @Override
     public void render(double mouseX, double mouseY) {
-        Color backgroundColor = WidgetColors.background;
-        Color outlineColor = WidgetColors.outline;
+        Color backgroundColor = GUI.background;
+        Color outlineColor = GUI.outline;
         if (isMouseOver(mouseX, mouseY)) {
-            backgroundColor = WidgetColors.backgroundHighlighted;
-            outlineColor = WidgetColors.outlineHighlighted;
+            backgroundColor = GUI.backgroundHighlighted;
+            outlineColor = GUI.outlineHighlighted;
         }
 
         renderBackgroundWithOutline(backgroundColor, outlineColor);

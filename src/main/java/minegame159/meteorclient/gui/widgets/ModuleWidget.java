@@ -1,8 +1,8 @@
-package minegame159.meteorclient.clickgui.widgets;
+package minegame159.meteorclient.gui.widgets;
 
-import minegame159.meteorclient.clickgui.ModuleScreen;
-import minegame159.meteorclient.clickgui.WidgetColors;
+import minegame159.meteorclient.gui.ModuleScreen;
 import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.setting.GUI;
 import minegame159.meteorclient.utils.Color;
 import net.minecraft.client.MinecraftClient;
 
@@ -25,12 +25,19 @@ public class ModuleWidget extends Widget {
 
     @Override
     public boolean onMouseClicked(double mouseX, double mouseY, int button) {
-        if (isMouseOver(mouseX, mouseY) && button == 0) {
-            module.toggle();
-            return true;
-        } else if (isMouseOver(mouseX, mouseY) && button == 1) {
-            MinecraftClient.getInstance().openScreen(new ModuleScreen(MinecraftClient.getInstance().currentScreen, module));
-            return true;
+        if (module.setting) {
+            if (isMouseOver(mouseX, mouseY) && (button == 0 || button == 1)) {
+                MinecraftClient.getInstance().openScreen(new ModuleScreen(MinecraftClient.getInstance().currentScreen, module));
+                return true;
+            }
+        } else {
+            if (isMouseOver(mouseX, mouseY) && button == 0) {
+                module.toggle();
+                return true;
+            } else if (isMouseOver(mouseX, mouseY) && button == 1) {
+                MinecraftClient.getInstance().openScreen(new ModuleScreen(MinecraftClient.getInstance().currentScreen, module));
+                return true;
+            }
         }
 
         return super.onMouseClicked(mouseX, mouseY, button);
@@ -51,8 +58,8 @@ public class ModuleWidget extends Widget {
 
     @Override
     public void render(double mouseX, double mouseY) {
-        Color backgroundColor = WidgetColors.background;
-        if (isMouseOver(mouseX, mouseY) || module.isActive()) backgroundColor = WidgetColors.backgroundHighlighted;
+        Color backgroundColor = GUI.background;
+        if (isMouseOver(mouseX, mouseY) || module.isActive()) backgroundColor = GUI.backgroundHighlighted;
 
         quad(x + margin, y, x + parent.width - margin, y + heightMargin(), backgroundColor);
 
