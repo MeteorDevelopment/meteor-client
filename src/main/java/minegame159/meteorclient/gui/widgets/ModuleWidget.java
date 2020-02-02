@@ -3,11 +3,16 @@ package minegame159.meteorclient.gui.widgets;
 import minegame159.meteorclient.gui.ModuleScreen;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.setting.GUI;
-import minegame159.meteorclient.utils.Color;
 import net.minecraft.client.MinecraftClient;
 
 public class ModuleWidget extends Widget {
     private Module module;
+
+    private long current, last;
+
+    private boolean mouseOver, lastMouseOver;
+    private double hoverProgress;
+    private boolean hoverProgressIncreasing;
 
     public ModuleWidget(Module module) {
         super(0, 0, 5);
@@ -21,6 +26,16 @@ public class ModuleWidget extends Widget {
     @Override
     public boolean isMouseOver(double mouseX, double mouseY) {
         return mouseX >= x + margin && mouseX <= x + parent.width - margin && mouseY >= y && mouseY <= y + heightMargin();
+    }
+
+    @Override
+    public void onMouseMoved(double mouseX, double mouseY) {
+        mouseOver = isMouseOver(mouseX, mouseY);
+        if (!lastMouseOver && mouseOver) hoverProgressIncreasing = true;
+        else if (lastMouseOver && !mouseOver) hoverProgressIncreasing = false;
+        lastMouseOver = mouseOver;
+
+        super.onMouseMoved(mouseX, mouseY);
     }
 
     @Override
@@ -58,10 +73,33 @@ public class ModuleWidget extends Widget {
 
     @Override
     public void render(double mouseX, double mouseY) {
-        Color backgroundColor = GUI.background;
-        if (isMouseOver(mouseX, mouseY) || module.isActive()) backgroundColor = GUI.backgroundHighlighted;
+        current = System.currentTimeMillis();
+        if (last == 0) last = current;
+        double delta = (current - last) / 1000.0;
+        last = current;
 
-        quad(x + margin, y, x + parent.width - margin, y + heightMargin(), backgroundColor);
+        if (hoverProgressIncreasing || module.isActive()) {
+            hoverProgress += delta * GUI.hoverAnimationSpeedMultiplier;
+            if (hoverProgress > 1) hoverProgress = 1;
+        } else {
+            hoverProgress -= delta * GUI.hoverAnimationSpeedMultiplier;
+            if (hoverProgress < 0) hoverProgress = 0;
+        }
+
+        quad(x + margin, y, x + parent.width - margin, y + heightMargin(), GUI.background);
+
+        if (mouseOver || (!hoverProgressIncreasing && hoverProgress > 0)) {
+            if (GUI.hoverAnimation == GUI.HoverAnimation.FromLeft) {
+                quad(x + margin, y, x + margin + hoverProgress * parent.width - hoverProgress * (margin * 2), y + heightMargin(), GUI.backgroundHighlighted);
+            } else if (GUI.hoverAnimation == GUI.HoverAnimation.FromRight) {
+                quad(x + parent.width - margin, y, x + parent.width - margin - hoverProgress * parent.width + hoverProgress * (margin * 2), y + heightMargin(), GUI.backgroundHighlighted);
+            } else if (GUI.hoverAnimation == GUI.HoverAnimation.FromCenter) {
+                double x = this.x + parent.width / 2;
+
+                quad(x, y, x + (hoverProgress / 2) * parent.width - (hoverProgress / 2) * (margin * 2), y + heightMargin(), GUI.backgroundHighlighted);
+                quad(x - (hoverProgress / 2) * parent.width + (hoverProgress / 2) * (margin * 2), y, x, y + heightMargin(), GUI.backgroundHighlighted);
+            }
+        }
 
         super.render(mouseX, mouseY);
     }

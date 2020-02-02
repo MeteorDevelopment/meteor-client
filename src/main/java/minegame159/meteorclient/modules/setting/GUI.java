@@ -4,9 +4,17 @@ import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.builders.ColorSettingBuilder;
+import minegame159.meteorclient.settings.builders.DoubleSettingBuilder;
+import minegame159.meteorclient.settings.builders.EnumSettingBuilder;
 import minegame159.meteorclient.utils.Color;
 
 public class GUI extends Module {
+    public enum HoverAnimation {
+        FromLeft,
+        FromRight,
+        FromCenter
+    }
+
     public static Color background = new Color();
     public static Color backgroundHighlighted = new Color();
     public static Color backgroundTextBox = new Color();
@@ -20,6 +28,9 @@ public class GUI extends Module {
 
     public static Color text = new Color();
     public static int textC;
+
+    public static HoverAnimation hoverAnimation;
+    public static double hoverAnimationSpeedMultiplier;
 
 
 
@@ -35,6 +46,9 @@ public class GUI extends Module {
     private static Setting<Color> checkboxS;
 
     private static Setting<Color> textS;
+
+    private static Setting<HoverAnimation> hoverAnimationS;
+    private static Setting<Double> hoverAnimationSpeedMultiplierS;
 
     public GUI() {
         super(Category.Setting, "gui", "GUI settings.", true);
@@ -111,5 +125,24 @@ public class GUI extends Module {
         );
         text.set(textS.value());
         textC = text.getPacked();
+
+        hoverAnimationS = addSetting(new EnumSettingBuilder<HoverAnimation>()
+                .name("hover-animation")
+                .description("Module hover animation.")
+                .defaultValue(HoverAnimation.FromLeft)
+                .consumer((hoverAnimation1, hoverAnimation2) -> hoverAnimation = hoverAnimation2)
+                .build()
+        );
+        hoverAnimation = hoverAnimationS.value();
+
+        hoverAnimationSpeedMultiplierS = addSetting(new DoubleSettingBuilder()
+                .name("hover-animation-speed-multiplier")
+                .description("Module hover animation speed multiplier.")
+                .defaultValue(4.0)
+                .min(0.0)
+                .consumer((aDouble, aDouble2) -> hoverAnimationSpeedMultiplier = aDouble2)
+                .build()
+        );
+        hoverAnimationSpeedMultiplier = hoverAnimationSpeedMultiplierS.value();
     }
 }
