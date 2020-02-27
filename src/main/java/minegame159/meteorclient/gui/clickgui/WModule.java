@@ -1,12 +1,12 @@
 package minegame159.meteorclient.gui.clickgui;
 
-import com.sun.javafx.util.Utils;
 import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.gui.widgets.WLabel;
 import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.setting.GUI;
 import minegame159.meteorclient.utils.RenderUtils;
+import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 
 public class WModule extends WWidget {

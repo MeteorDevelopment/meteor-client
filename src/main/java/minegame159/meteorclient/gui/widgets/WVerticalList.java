@@ -1,9 +1,9 @@
 package minegame159.meteorclient.gui.widgets;
 
-import com.sun.javafx.util.Utils;
 import minegame159.meteorclient.gui.WidgetLayout;
 import minegame159.meteorclient.utils.Box;
 import minegame159.meteorclient.utils.RenderUtils;
+import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.Vector2;
 import net.minecraft.client.MinecraftClient;
 import org.lwjgl.opengl.GL11;
