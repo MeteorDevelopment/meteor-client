@@ -24,6 +24,9 @@ public class RenderUtils {
          lineBuf.vertex(x1, y1, z1).color(color.r, color.g, color.b, color.a).next();
          lineBuf.vertex(x2, y2, z2).color(color.r, color.g, color.b, color.a).next();
      }
+     public static void line(double x1, double y1, double x2, double y2, Color color) {
+         line(x1, y1, 0, x2, y2, 0, color);
+     }
      
      public static void boxEdges(double x1, double y1, double z1, double x2, double y2, double z2, Color color) {
          line(x1, y1, z1, x2, y1, z1, color);

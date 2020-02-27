@@ -48,7 +48,9 @@ public class WVerticalList extends WWidget {
     private void beginRender(boolean resetQuads) {
         if (scrollingActive) {
             if (resetQuads) {
+                RenderUtils.endLines();
                 RenderUtils.endQuads();
+                RenderUtils.beginLines();
                 RenderUtils.beginQuads();
             }
             GL11.glEnable(GL11.GL_SCISSOR_TEST);
@@ -60,7 +62,9 @@ public class WVerticalList extends WWidget {
     private void endRender(boolean resetQuads) {
         if (scrollingActive) {
             if (resetQuads) {
+                RenderUtils.endLines();
                 RenderUtils.endQuads();
+                RenderUtils.beginLines();
                 RenderUtils.beginQuads();
             }
             GL11.glDisable(GL11.GL_SCISSOR_TEST);

@@ -69,5 +69,10 @@ public class WModule extends WWidget {
                 }
             }
         }
+
+        RenderUtils.line(boundingBox.x, boundingBox.y, boundingBox.x + boundingBox.getWidth(), boundingBox.y, GUI.outline);
+        RenderUtils.line(boundingBox.x, boundingBox.y + boundingBox.getHeight(), boundingBox.x + boundingBox.getWidth(), boundingBox.y + boundingBox.getHeight(), GUI.outline);
+        RenderUtils.line(boundingBox.x, boundingBox.y, boundingBox.x, boundingBox.y + boundingBox.getHeight(), GUI.outline);
+        RenderUtils.line(boundingBox.x + boundingBox.getWidth(), boundingBox.y, boundingBox.x + boundingBox.getWidth(), boundingBox.y + boundingBox.getHeight(), GUI.outline);
     }
 }

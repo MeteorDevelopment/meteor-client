@@ -57,7 +57,7 @@ public class GUI extends Module {
         backgroundS = addSetting(new ColorSettingBuilder()
                 .name("background")
                 .description("Background color.")
-                .defaultValue(new Color(120, 120, 120))
+                .defaultValue(new Color(50, 50, 50, 225))
                 .consumer((color1, color2) -> background.set(color2))
                 .build()
         );
@@ -65,7 +65,7 @@ public class GUI extends Module {
         backgroundHighlightedS = addSetting(new ColorSettingBuilder()
                 .name("background-highlighted")
                 .description("Background highlighted color.")
-                .defaultValue(new Color(145, 145, 145))
+                .defaultValue(new Color(75, 75, 75, 225))
                 .consumer((color1, color2) -> backgroundHighlighted.set(color2))
                 .build()
         );
@@ -73,7 +73,7 @@ public class GUI extends Module {
         backgroundTextBoxS = addSetting(new ColorSettingBuilder()
                 .name("background-text-box")
                 .description("Background text box color.")
-                .defaultValue(new Color(80, 80, 80))
+                .defaultValue(new Color(60, 60, 60, 200))
                 .consumer((color1, color2) -> backgroundTextBox.set(color2))
                 .build()
         );
@@ -82,7 +82,7 @@ public class GUI extends Module {
         separatorS = addSetting(new ColorSettingBuilder()
                 .name("separator")
                 .description("Separator color.")
-                .defaultValue(new Color(135, 135, 135))
+                .defaultValue(new Color(75, 75, 75, 225))
                 .consumer((color1, color2) -> {
                     separator.set(color2);
                     separatorC = color2.getPacked();
@@ -95,7 +95,7 @@ public class GUI extends Module {
         outlineS = addSetting(new ColorSettingBuilder()
                 .name("outline")
                 .description("Outline color.")
-                .defaultValue(new Color(40, 40, 40))
+                .defaultValue(new Color(0, 0, 0, 225))
                 .consumer((color1, color2) -> outline.set(color2))
                 .build()
         );
@@ -103,7 +103,7 @@ public class GUI extends Module {
         outlineHighlightedS = addSetting(new ColorSettingBuilder()
                 .name("outline-highlighted")
                 .description("Outline highlighted color.")
-                .defaultValue(new Color(125, 125, 125))
+                .defaultValue(new Color(50, 50, 50, 225))
                 .consumer((color1, color2) -> outlineHighlighted.set(color2))
                 .build()
         );

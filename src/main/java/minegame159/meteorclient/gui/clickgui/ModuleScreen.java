@@ -35,10 +35,11 @@ public class ModuleScreen extends WidgetScreen implements Listenable {
         panel.boundingBox.alignment.set(Alignment.X.Center, Alignment.Y.Center);
 
         list = panel.add(new WVerticalList(4));
+        list.maxHeight = MinecraftClient.getInstance().getWindow().getScaledHeight() - 32;
 
         // Name
         list.add(new WLabel(module.title, true)).boundingBox.alignment.x = Alignment.X.Center;
-        list.add(new WHorizontalSeparator());
+        list.add(new WHorizontalSeparatorBigger());
 
         // Description
         list.add(new WLabel(module.description));
@@ -83,30 +84,32 @@ public class ModuleScreen extends WidgetScreen implements Listenable {
 
             grid.addRow(name, s, reset);
         }
-        if (module.settings.size() > 0) list.add(new WHorizontalSeparator());
+        if (module.settings.size() > 0 && !module.setting) list.add(new WHorizontalSeparator());
 
-        // Bind
-        WHorizontalList bind = list.add(new WHorizontalList(4));
-        bindLabel = bind.add(new WLabel(getBindLabelText()));
-        list.add(new WButton("Set bind")).action = () -> {
-            ModuleManager.moduleToBind = module;
-            canResetBind = false;
-            bindLabel.text = "Bind: press any key";
-            layout();
-        };
-        list.add(new WButton("Reset bind")).action = () -> {
-            if (canResetBind) {
-                module.setKey(-1);
-                bindLabel.text = getBindLabelText();
+        if (!module.setting) {
+            // Bind
+            WHorizontalList bind = list.add(new WHorizontalList(4));
+            bindLabel = bind.add(new WLabel(getBindLabelText()));
+            bind.add(new WButton("Set bind")).action = () -> {
+                ModuleManager.moduleToBind = module;
+                canResetBind = false;
+                bindLabel.text = "Bind: press any key";
                 layout();
-            }
-        };
-        list.add(new WHorizontalSeparator());
+            };
+            bind.add(new WButton("Reset bind")).action = () -> {
+                if (canResetBind) {
+                    module.setKey(-1);
+                    bindLabel.text = getBindLabelText();
+                    layout();
+                }
+            };
+            list.add(new WHorizontalSeparator());
 
-        // Active
-        WHorizontalList active = list.add(new WHorizontalList(4));
-        active.add(new WLabel("Active:"));
-        active.add(new WCheckbox(module.isActive())).setAction(wCheckbox -> module.toggle());
+            // Active
+            WHorizontalList active = list.add(new WHorizontalList(4));
+            active.add(new WLabel("Active:"));
+            active.add(new WCheckbox(module.isActive())).setAction(wCheckbox -> module.toggle());
+        }
 
         layout();
         MeteorClient.eventBus.subscribe(this);
@@ -127,10 +130,8 @@ public class ModuleScreen extends WidgetScreen implements Listenable {
 
     @Override
     public void resize(MinecraftClient client, int width, int height) {
-        super.resize(client, width, height);
         list.maxHeight = height - 32;
-        list.calculateSize();
-        list.calculatePosition();
+        super.resize(client, width, height);
     }
 
     @Override

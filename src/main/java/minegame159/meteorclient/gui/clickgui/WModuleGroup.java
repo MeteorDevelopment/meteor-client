@@ -1,13 +1,13 @@
 package minegame159.meteorclient.gui.clickgui;
 
 import minegame159.meteorclient.gui.Alignment;
-import minegame159.meteorclient.gui.widgets.WHorizontalSeparator;
 import minegame159.meteorclient.gui.widgets.WLabel;
 import minegame159.meteorclient.gui.widgets.WPanel;
 import minegame159.meteorclient.gui.widgets.WVerticalList;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
+import net.minecraft.client.MinecraftClient;
 
 import java.util.List;
 
@@ -17,24 +17,27 @@ public class WModuleGroup extends WPanel {
     private WVerticalList list;
 
     public WModuleGroup(Category category) {
-        boundingBox.setMargin(6, 1);
-        boundingBox.marginTop = 6;
+        boundingBox.autoSize = true;
+        boundingBox.setMargin(6);
 
         this.category = category;
 
-        list = add(new WVerticalList(0));
+        WVerticalList rootList = add(new WVerticalList(0));
+
+        List<Module> group = ModuleManager.getGroup(category);
 
         // Name
-        WLabel name = list.add(new WLabel(category.toString(), true));
+        WLabel name = rootList.add(new WLabel(category.toString(), true));
         name.boundingBox.alignment.x = Alignment.X.Center;
         name.boundingBox.marginBottom = 4;
 
+        list = rootList.add(new WVerticalList(0));
+        list.boundingBox.fullWidth = true;
+        list.maxHeight = MinecraftClient.getInstance().getWindow().getHeight() - 32;
+
         // Modules
-        List<Module> group = ModuleManager.getGroup(category);
         for (int i = 0; i < group.size(); i++) {
             Module module = group.get(i);
-
-            list.add(new WHorizontalSeparator());
 
             WModule wModule = list.add(new WModule(module));
             wModule.boundingBox.fullWidth = true;

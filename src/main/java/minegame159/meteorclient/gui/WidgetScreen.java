@@ -1,6 +1,5 @@
 package minegame159.meteorclient.gui;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.gui.widgets.WDebugRenderer;
 import minegame159.meteorclient.gui.widgets.WWidget;
@@ -10,6 +9,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.LiteralText;
 import org.lwjgl.glfw.GLFW;
+import org.lwjgl.opengl.GL11;
 
 public class WidgetScreen extends Screen {
     private WRoot root = new WRoot();
@@ -76,9 +76,12 @@ public class WidgetScreen extends Screen {
         RenderSystem.disableAlphaTest();
         RenderSystem.enableBlend();
 
+        GL11.glLineWidth(1);
+        RenderUtils.beginLines();
         RenderUtils.beginQuads();
         root.render(delta);
         RenderUtils.endQuads();
+        RenderUtils.endLines();
         root.renderPost(delta, mouseX, mouseY);
         root.renderTooltip(mouseX, mouseY);
 
