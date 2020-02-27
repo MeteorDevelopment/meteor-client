@@ -6,8 +6,8 @@ import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.builders.DoubleSettingBuilder;
 import minegame159.meteorclient.settings.builders.EnumSettingBuilder;
-import minegame159.meteorclient.settings.builders.FloatSettingBuilder;
 
 public class Flight extends Module {
     public enum Mode {
@@ -21,11 +21,11 @@ public class Flight extends Module {
             .build()
     );
 
-    private Setting<Float> speed = addSetting(new FloatSettingBuilder()
+    private Setting<Double> speed = addSetting(new DoubleSettingBuilder()
             .name("speed")
             .description("Speed.")
-            .defaultValue(0.1f)
-            .min(0f)
+            .defaultValue(0.1)
+            .min(0.0)
             .build()
     );
 
@@ -56,7 +56,7 @@ public class Flight extends Module {
     private Listener<TickEvent> onTick = new Listener<>(event -> {
         switch (mode.value()) {
             case Vanilla:
-                mc.player.abilities.setFlySpeed(speed.value());
+                mc.player.abilities.setFlySpeed(speed.value().floatValue());
                 mc.player.abilities.flying = true;
                 if (mc.player.abilities.creativeMode) return;
                 mc.player.abilities.allowFlying = true;

@@ -31,6 +31,9 @@ public class Utils {
     }
 
     public static void drawText(String text, float x, float y, int color) {
+        mc.textRenderer.draw(text, x, y, color);
+    }
+    public static void drawTextWithShadow(String text, float x, float y, int color) {
         mc.textRenderer.drawWithShadow(text, x, y, color);
     }
 

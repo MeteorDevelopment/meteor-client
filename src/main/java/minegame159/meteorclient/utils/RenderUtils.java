@@ -1,5 +1,6 @@
 package minegame159.meteorclient.utils;
 
+import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormats;
@@ -59,6 +60,9 @@ public class RenderUtils {
          quadBuf.vertex(x2, y2, z2).color(color.r, color.g, color.b, color.a).next();
          quadBuf.vertex(x3, y3, z3).color(color.r, color.g, color.b, color.a).next();
          quadBuf.vertex(x4, y4, z4).color(color.r, color.g, color.b, color.a).next();
+     }
+     public static void quad(double x, double y, double width, double height, Color color) {
+         quad(x, y, 0, x + width, y, 0, x + width, y + height, 0, x, y + height, 0, color);
      }
 
      public static void boxSides(double x1, double y1, double z1, double x2, double y2, double z2, Color color) {

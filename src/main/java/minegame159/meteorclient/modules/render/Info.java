@@ -89,13 +89,13 @@ public class Info extends Module {
     });
 
     private void drawInfo(String text1, String text2, int y) {
-        Utils.drawText(text1, 2, y, Color.fromRGBA(255, 255, 255, 255));
-        Utils.drawText(text2, 2 + Utils.getTextWidth(text1), y, Color.fromRGBA(185, 185, 185, 255));
+        Utils.drawTextWithShadow(text1, 2, y, Color.fromRGBA(255, 255, 255, 255));
+        Utils.drawTextWithShadow(text2, 2 + Utils.getTextWidth(text1), y, Color.fromRGBA(185, 185, 185, 255));
     }
 
     private void drawEntityCount(EntityInfo entityInfo, int y) {
-        Utils.drawText(entityInfo.countStr, 2, y, Color.fromRGBA(185, 185, 185, 255));
-        Utils.drawText(entityInfo.name, 2 + (maxLetterCount - entityInfo.countStr.length()) * 4 + 4 + Utils.getTextWidth(entityInfo.countStr), y, Color.fromRGBA(255, 255, 255, 255));
+        Utils.drawTextWithShadow(entityInfo.countStr, 2, y, Color.fromRGBA(185, 185, 185, 255));
+        Utils.drawTextWithShadow(entityInfo.name, 2 + (maxLetterCount - entityInfo.countStr.length()) * 4 + 4 + Utils.getTextWidth(entityInfo.countStr), y, Color.fromRGBA(255, 255, 255, 255));
     }
 
     @EventHandler

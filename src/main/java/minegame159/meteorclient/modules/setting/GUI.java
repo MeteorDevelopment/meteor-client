@@ -20,6 +20,7 @@ public class GUI extends Module {
     public static Color backgroundTextBox = new Color();
 
     public static Color separator = new Color();
+    public static int separatorC;
 
     public static Color outline = new Color();
     public static Color outlineHighlighted = new Color();
@@ -82,10 +83,14 @@ public class GUI extends Module {
                 .name("separator")
                 .description("Separator color.")
                 .defaultValue(new Color(135, 135, 135))
-                .consumer((color1, color2) -> separator.set(color2))
+                .consumer((color1, color2) -> {
+                    separator.set(color2);
+                    separatorC = color2.getPacked();
+                })
                 .build()
         );
         separator.set(separatorS.value());
+        separatorC = separator.getPacked();
 
         outlineS = addSetting(new ColorSettingBuilder()
                 .name("outline")
@@ -138,7 +143,7 @@ public class GUI extends Module {
         hoverAnimationSpeedMultiplierS = addSetting(new DoubleSettingBuilder()
                 .name("hover-animation-speed-multiplier")
                 .description("Module hover animation speed multiplier.")
-                .defaultValue(4.0)
+                .defaultValue(1.0)
                 .min(0.0)
                 .consumer((aDouble, aDouble2) -> hoverAnimationSpeedMultiplier = aDouble2)
                 .build()

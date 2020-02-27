@@ -18,8 +18,8 @@ public class Position extends Module {
         String msg1 = String.format("%.1f %.1f %.1f", x, y, z);
         int x1 = screenWidth - Utils.getTextWidth(msg1) - 2;
         int x2 = screenWidth - Utils.getTextWidth(msg1) - Utils.getTextWidth(text) - 2;
-        Utils.drawText(msg1, x1, yy, Color.fromRGBA(185, 185, 185, 255));
-        Utils.drawText(text, x2, yy, Color.fromRGBA(255, 255, 255, 255));
+        Utils.drawTextWithShadow(msg1, x1, yy, Color.fromRGBA(185, 185, 185, 255));
+        Utils.drawTextWithShadow(text, x2, yy, Color.fromRGBA(255, 255, 255, 255));
     }
 
     @EventHandler
