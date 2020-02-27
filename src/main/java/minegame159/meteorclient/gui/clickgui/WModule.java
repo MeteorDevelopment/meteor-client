@@ -51,7 +51,7 @@ public class WModule extends WWidget {
         if (module.isActive()) animationMultiplier = 1;
 
         animationProgress += delta / 10 * GUI.hoverAnimationSpeedMultiplier * animationMultiplier;
-        animationProgress = Utils.clamp(0, animationProgress, 1);
+        animationProgress = Utils.clamp(animationProgress, 0, 1);
 
         if (animationProgress > 0) {
             if (animationProgress == 1) RenderUtils.quad(boundingBox.x, boundingBox.y, boundingBox.getWidth(), boundingBox.getHeight(), GUI.backgroundHighlighted);

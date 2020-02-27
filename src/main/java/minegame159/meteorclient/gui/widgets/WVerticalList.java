@@ -26,7 +26,7 @@ public class WVerticalList extends WWidget {
         if ((!scrollOnlyWhenMouseOver || mouseOver) && scrollingActive) {
             double preScroll = scroll;
             scroll -= amount * 8;
-            scroll = Utils.clamp(0, scroll, maxScroll);
+            scroll = Utils.clamp(scroll, 0, maxScroll);
             double deltaScroll = scroll - preScroll;
 
             for (WWidget widget : widgets) {
