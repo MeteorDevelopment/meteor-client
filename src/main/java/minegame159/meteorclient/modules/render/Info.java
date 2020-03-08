@@ -14,7 +14,9 @@ import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
+import net.minecraft.entity.passive.SheepEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
 
@@ -34,11 +36,37 @@ public class Info extends Module {
             .build()
     );
 
-    private HashMap<Class, EntityInfo> entityCounts = new HashMap<>();
+    private Setting<Boolean> entityCustomNames = addSetting(new BoolSettingBuilder()
+            .name("entity-custom-names")
+            .description("Use custom names.")
+            .defaultValue(true)
+            .consumer((aBoolean, aBoolean2) -> recalculateEntityCounts())
+            .build()
+    );
+
+    private Setting<Boolean> separateSheepsByColor = addSetting(new BoolSettingBuilder()
+            .name("separate-sheeps-by-color")
+            .description("Separates sheeps by color in entity list.")
+            .defaultValue(false)
+            .consumer((aBoolean, aBoolean2) -> recalculateEntityCounts())
+            .build()
+    );
+
+    private HashMap<String, EntityInfo> entityCounts = new HashMap<>();
     private int maxLetterCount = 0;
 
     public Info() {
         super(Category.Render, "info", "Displays various info.");
+    }
+
+    private String getEntityName(Entity entity) {
+        String name = entityCustomNames.value() ? entity.getDisplayName().asString() : entity.getType().getName().asString();
+        if (separateSheepsByColor.value() && entity instanceof SheepEntity) return StringUtils.capitalize(((SheepEntity) entity).getColor().getName()) + " - " + name;
+        return name;
+    }
+
+    private EntityInfo getEntityInfo(Entity entity) {
+        return entityCounts.computeIfAbsent(getEntityName(entity), EntityInfo::new);
     }
 
     private void recalculateEntityCounts() {
@@ -47,8 +75,7 @@ public class Info extends Module {
         for (Entity entity : mc.world.getEntities()) {
             if (entity instanceof PlayerEntity || entity instanceof ItemEntity) continue;
 
-            EntityInfo a = entityCounts.computeIfAbsent(entity.getClass(), aClass -> new EntityInfo(entity.getDisplayName().asString()));
-            a.increment();
+            getEntityInfo(entity).increment();
         }
 
         calculateMaxLetterCount();
@@ -71,8 +98,7 @@ public class Info extends Module {
     private Listener<EntityAddedEvent> onEntityAdded = new Listener<>(event -> {
         if (event.entity instanceof PlayerEntity || event.entity instanceof ItemEntity) return;
 
-        EntityInfo a = entityCounts.computeIfAbsent(event.entity.getClass(), aClass -> new EntityInfo(event.entity.getDisplayName().asString()));
-        a.increment();
+        getEntityInfo(event.entity).increment();
 
         calculateMaxLetterCount();
     });
@@ -81,9 +107,9 @@ public class Info extends Module {
     private Listener<EntityRemovedEvent> onEntityRemoved = new Listener<>(event -> {
         if (event.entity instanceof PlayerEntity || event.entity instanceof ItemEntity) return;
 
-        EntityInfo a = entityCounts.get(event.entity.getClass());
-        a.decrement();
-        if (a.count <= 0) entityCounts.remove(event.entity.getClass());
+        EntityInfo entityInfo = getEntityInfo(event.entity);
+        entityInfo.decrement();
+        if (entityInfo.count <= 0) entityCounts.remove(getEntityName(event.entity));
 
         calculateMaxLetterCount();
     });
