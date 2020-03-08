@@ -22,9 +22,9 @@ public class AutoMend extends Module {
             ItemStack itemStack = mc.player.inventory.getInvStack(i);
             if (EnchantmentHelper.getLevel(Enchantments.MENDING, itemStack) == 0 || !itemStack.isDamaged()) continue;
 
-            //mc.interactionManager.clickSlot(0, Utils.invIndexToSlotId(i), 0, SlotActionType.PICKUP, mc.player);
-            //mc.interactionManager.clickSlot(0, Utils.offhandSlotId, 0, SlotActionType.PICKUP, mc.player);
-            //if (!offhandEmpty) mc.interactionManager.clickSlot(0, Utils.invIndexToSlotId(i), 0, SlotActionType.PICKUP, mc.player);
+            mc.interactionManager.method_2906(0, Utils.invIndexToSlotId(i), 0, SlotActionType.PICKUP, mc.player);
+            mc.interactionManager.method_2906(0, Utils.offhandSlotId, 0, SlotActionType.PICKUP, mc.player);
+            if (!offhandEmpty) mc.interactionManager.method_2906(0, Utils.invIndexToSlotId(i), 0, SlotActionType.PICKUP, mc.player);
 
             break;
         }
