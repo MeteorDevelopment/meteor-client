@@ -159,6 +159,9 @@ public class ModuleManager {
         addModule(new AntiWeather());
         addModule(new AutoReconnect());
         addModule(new ShulkerTooltip());
+        addModule(new AutoShearer());
+        addModule(new AutoNametag());
+        addModule(new AutoBreeder());
     }
 
     private static void initSetting() {

@@ -35,12 +35,9 @@ public class MeteorClient implements ClientModInitializer, Listenable {
     private static File configFile;
     private static FabricKeyBinding openClickGui = FabricKeyBinding.Builder.create(new Identifier("meteor-client", "open-click-gui"), InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_RIGHT_SHIFT, "key.categories.misc").build();
 
-    boolean init;
-
     @Override
     public void onInitializeClient() {
-        if (!init) {
-            init = true;
+        if (instance == null) {
             instance = this;
             return;
         }

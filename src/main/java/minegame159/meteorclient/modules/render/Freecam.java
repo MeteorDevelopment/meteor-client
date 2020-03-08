@@ -10,9 +10,9 @@ import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.builders.DoubleSettingBuilder;
 import net.minecraft.client.network.OtherClientPlayerEntity;
 import net.minecraft.entity.Entity;
-import net.minecraft.server.network.packet.ClientCommandC2SPacket;
-import net.minecraft.server.network.packet.PlayerInputC2SPacket;
-import net.minecraft.server.network.packet.PlayerMoveC2SPacket;
+import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
+import net.minecraft.network.packet.c2s.play.PlayerInputC2SPacket;
+import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.math.Vec3d;
 
 public class Freecam extends Module {
@@ -69,7 +69,6 @@ public class Freecam extends Module {
 
         camera.yaw = mc.player.yaw;
         camera.headYaw = mc.player.headYaw;
-        camera.bodyYaw = mc.player.bodyYaw;
         camera.elytraYaw = mc.player.elytraYaw;
         camera.pitch = mc.player.pitch;
         camera.elytraPitch = mc.player.elytraPitch;
@@ -86,6 +85,8 @@ public class Freecam extends Module {
         if (mc.options.keyJump.isPressed()) vel = vel.add(0, speed, 0);
         if (mc.options.keySneak.isPressed()) vel = vel.subtract(0, speed, 0);
 
-        camera.setPos(camera.getX() + vel.x, camera.getY() + vel.y, camera.getZ() + vel.z);
+        camera.x += vel.x;
+        camera.y += vel.y;
+        camera.z += vel.z;
     });
 }

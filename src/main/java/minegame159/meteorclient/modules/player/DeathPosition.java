@@ -20,7 +20,7 @@ public class DeathPosition extends Module {
     @EventHandler
     private Listener<TookDamageEvent> onTookDamage = new Listener<>(event -> {
         if (event.entity.getUuid().equals(mc.player.getUuid()) && event.entity.getHealth() <= 0) {
-            Utils.sendMessage("#yellowDied at #blue%.1f#yellow, #blue%.1f#yellow, #blue%.1f#yellow on #blue%s.", mc.player.getX(), mc.player.getY(), mc.player.getZ(), dateFormat.format(new Date()));
+            Utils.sendMessage("#yellowDied at #blue%.1f#yellow, #blue%.1f#yellow, #blue%.1f#yellow on #blue%s.", mc.player.x, mc.player.y, mc.player.z, dateFormat.format(new Date()));
         }
     });
 }

@@ -65,7 +65,7 @@ public class GUI extends Module {
         backgroundHighlightedS = addSetting(new ColorSettingBuilder()
                 .name("background-highlighted")
                 .description("Background highlighted color.")
-                .defaultValue(new Color(75, 75, 75, 225))
+                .defaultValue(new Color(90, 90, 90, 225))
                 .consumer((color1, color2) -> backgroundHighlighted.set(color2))
                 .build()
         );

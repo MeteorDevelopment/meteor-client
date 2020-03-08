@@ -33,8 +33,8 @@ dependencies {
 	include "com.github.ZeroMemes:Alpine:1.9"
 	include "net.jodah:typetools:0.5.0"
 
-	modImplementation "com.gitlab.CDAGaming:fabritone:1.15.2-SNAPSHOT"
-	include "com.gitlab.CDAGaming:fabritone:1.15.2-SNAPSHOT"
+	modImplementation "com.gitlab.CDAGaming:fabritone:master-SNAPSHOT"
+	include "com.gitlab.CDAGaming:fabritone:master-SNAPSHOT"
 }
 
 processResources {

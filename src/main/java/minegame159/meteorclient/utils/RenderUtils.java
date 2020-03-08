@@ -1,16 +1,15 @@
 package minegame159.meteorclient.utils;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormats;
 import org.lwjgl.opengl.GL11;
 
 public class RenderUtils {
-     private static Tessellator lineTesselator = new Tessellator();
+     private static Tessellator lineTesselator = new Tessellator(1000);
      private static BufferBuilder lineBuf = lineTesselator.getBuffer();
 
-     private static Tessellator quadTesselator = new Tessellator();
+     private static Tessellator quadTesselator = new Tessellator(1000);
      private static BufferBuilder quadBuf = quadTesselator.getBuffer();
 
      public static void beginLines() {

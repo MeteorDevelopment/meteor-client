@@ -33,7 +33,7 @@ public class WModuleGroup extends WPanel {
 
         list = rootList.add(new WVerticalList(0));
         list.boundingBox.fullWidth = true;
-        list.maxHeight = MinecraftClient.getInstance().getWindow().getHeight() - 32;
+        list.maxHeight = MinecraftClient.getInstance().window.getHeight() - 32;
 
         // Modules
         for (int i = 0; i < group.size(); i++) {

@@ -1,8 +1,8 @@
 package minegame159.meteorclient.events;
 
 import minegame159.meteorclient.events.packets.SendPacketEvent;
-import net.minecraft.server.network.packet.HandSwingC2SPacket;
-import net.minecraft.server.network.packet.PlayerInteractEntityC2SPacket;
+import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
+import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
 
 import java.util.function.Predicate;
 

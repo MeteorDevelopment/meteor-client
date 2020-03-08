@@ -6,7 +6,6 @@
   ],
   "client": [
     "MinecraftClientMixin",
-    "WorldRendererMixin",
     "InGameHudMixin",
     "KeyboardMixin",
     "ChatHudMixin",

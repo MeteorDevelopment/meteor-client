@@ -5,10 +5,10 @@ import minegame159.meteorclient.events.packets.SendPacketEvent;
 import minegame159.meteorclient.modules.Module;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.network.packet.PlaySoundS2CPacket;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.network.Packet;
+import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
 
 public class EventStore {
     private static PlaySoundPacketEvent playSoundPacketEvent = new PlaySoundPacketEvent();

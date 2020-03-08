@@ -35,7 +35,7 @@ public class ModuleScreen extends WidgetScreen implements Listenable {
         panel.boundingBox.alignment.set(Alignment.X.Center, Alignment.Y.Center);
 
         list = panel.add(new WVerticalList(4));
-        list.maxHeight = MinecraftClient.getInstance().getWindow().getScaledHeight() - 32;
+        list.maxHeight = MinecraftClient.getInstance().window.getScaledHeight() - 32;
 
         // Name
         list.add(new WLabel(module.title, true)).boundingBox.alignment.x = Alignment.X.Center;

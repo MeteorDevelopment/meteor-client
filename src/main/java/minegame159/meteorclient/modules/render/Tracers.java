@@ -101,8 +101,10 @@ public class Tracers extends Module {
 
     @EventHandler
     private Listener<RenderEvent> onRender = new Listener<>(event -> {
-        vec1 = new Vec3d(0, 0, 75).rotateX(-(float) Math.toRadians(mc.cameraEntity.pitch)).rotateY(-(float) Math.toRadians(mc.cameraEntity.yaw));
-        if (!center.value()) vec1.add(mc.cameraEntity.getPos().add(0, mc.cameraEntity.getEyeHeight(mc.cameraEntity.getPose()), 0));
+        vec1 = new Vec3d(0, 0, 1).rotateX(-(float) Math.toRadians(mc.cameraEntity.pitch)).rotateY(-(float) Math.toRadians(mc.cameraEntity.yaw));
+        vec1 = vec1.add(mc.cameraEntity.getPos());
+
+        if (!center.value()) vec1 = vec1.add(0, mc.cameraEntity.getEyeHeight(mc.cameraEntity.getPose()), 0);
 
         for (Entity entity : mc.world.getEntities()) {
             if (players.value() && EntityUtils.isPlayer(entity) && entity != mc.player) render(entity, playersColor.value());

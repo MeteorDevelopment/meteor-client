@@ -33,8 +33,8 @@ public class AutoTotem extends Module {
             totemCount += itemStack.getCount();
 
             if (!foundTotem && mc.player.getOffHandStack().isEmpty()) {
-                mc.interactionManager.clickSlot(0, Utils.invIndexToSlotId(i), 0, SlotActionType.PICKUP, mc.player);
-                mc.interactionManager.clickSlot(0, Utils.offhandSlotId, 0, SlotActionType.PICKUP, mc.player);
+                //mc.interactionManager.clickSlot(0, Utils.invIndexToSlotId(i), 0, SlotActionType.PICKUP, mc.player);
+                //mc.interactionManager.clickSlot(0, Utils.offhandSlotId, 0, SlotActionType.PICKUP, mc.player);
                 foundTotem = true;
             }
         }

@@ -27,15 +27,15 @@ public class Position extends Module {
         int y = event.screenHeight - Utils.getTextHeight() - 2;
 
         if (mc.player.dimension == DimensionType.OVERWORLD) {
-            drawPosition(event.screenWidth, "Nether Pos: ", y, mc.player.getX() / 8.0, mc.player.getY() / 8.0, mc.player.getZ() / 8.0);
+            drawPosition(event.screenWidth, "Nether Pos: ", y, mc.player.x / 8.0, mc.player.y / 8.0, mc.player.z / 8.0);
             y -= Utils.getTextHeight() + 2;
-            drawPosition(event.screenWidth, "Pos: ", y, mc.player.getX(), mc.player.getY(), mc.player.getZ());
+            drawPosition(event.screenWidth, "Pos: ", y, mc.player.x, mc.player.y, mc.player.z);
         } else if (mc.player.dimension == DimensionType.THE_NETHER) {
-            drawPosition(event.screenWidth, "Overworld Pos: ", y, mc.player.getX() * 8.0, mc.player.getY() * 8.0, mc.player.getZ() * 8.0);
+            drawPosition(event.screenWidth, "Overworld Pos: ", y, mc.player.x * 8.0, mc.player.y * 8.0, mc.player.z * 8.0);
             y -= Utils.getTextHeight() + 2;
-            drawPosition(event.screenWidth, "Pos: ", y, mc.player.getX(), mc.player.getY(), mc.player.getZ());
+            drawPosition(event.screenWidth, "Pos: ", y, mc.player.x, mc.player.y, mc.player.z);
         } else if (mc.player.dimension == DimensionType.THE_END) {
-            drawPosition(event.screenWidth, "Pos: ", y, mc.player.getX(), mc.player.getY(), mc.player.getZ());
+            drawPosition(event.screenWidth, "Pos: ", y, mc.player.x, mc.player.y, mc.player.z);
         }
     });
 }

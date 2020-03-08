@@ -8,7 +8,7 @@ import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.builders.BoolSettingBuilder;
-import net.minecraft.server.network.packet.PlayerMoveC2SPacket;
+import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 
 public class Criticals extends Module {
     private Setting<Boolean> onlyOnGround = addSetting(new BoolSettingBuilder()
@@ -24,9 +24,9 @@ public class Criticals extends Module {
 
     @EventHandler
     private Listener<SendPacketEvent> onSendPacket = new Listener<>(event -> {
-        double x = mc.player.getX();
-        double y = mc.player.getY();
-        double z = mc.player.getZ();
+        double x = mc.player.x;
+        double y = mc.player.y;
+        double z = mc.player.z;
 
         mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(x, y + 0.0625, z, true));
         mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(x, y, z, false));

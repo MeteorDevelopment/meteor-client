@@ -8,7 +8,7 @@ import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.builders.IntSettingBuilder;
-import net.minecraft.client.network.packet.DisconnectS2CPacket;
+import net.minecraft.network.packet.s2c.play.DisconnectS2CPacket;
 import net.minecraft.text.LiteralText;
 
 public class AutoLog extends Module {

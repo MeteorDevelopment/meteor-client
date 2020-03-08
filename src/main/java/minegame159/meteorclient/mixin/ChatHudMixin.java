@@ -21,19 +21,19 @@ import java.util.List;
 public abstract class ChatHudMixin {
     @Shadow public abstract void removeMessage(int messageId);
 
-    @Shadow public abstract int getWidth();
-
     @Shadow public abstract double getChatScale();
-
-    @Shadow public abstract boolean isChatFocused();
 
     @Shadow @Final private MinecraftClient client;
 
+    @Shadow public abstract boolean isChatFocused();
+
     @Shadow @Final private List<ChatHudLine> visibleMessages;
+
+    @Shadow public abstract int getWidth();
 
     @Shadow private int scrolledLines;
 
-    @Shadow private boolean hasUnreadNewMessages;
+    @Shadow private boolean field_2067;
 
     @Shadow public abstract void scroll(double amount);
 
@@ -53,7 +53,7 @@ public abstract class ChatHudMixin {
         for(Iterator var8 = list.iterator(); var8.hasNext(); this.visibleMessages.add(0, new ChatHudLine(timestamp, text, messageId))) {
             text = (Text)var8.next();
             if (bl2 && this.scrolledLines > 0) {
-                this.hasUnreadNewMessages = true;
+                this.field_2067 = true;
                 this.scroll(1.0D);
             }
         }
@@ -65,7 +65,7 @@ public abstract class ChatHudMixin {
         if (!bl) {
             this.messages.add(0, new ChatHudLine(timestamp, message, messageId));
 
-            while(this.visibleMessages.size() > MixinValues.getChatLength()) {
+            while(this.messages.size() > MixinValues.getChatLength()) {
                 this.messages.remove(this.messages.size() - 1);
             }
         }

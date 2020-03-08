@@ -5,7 +5,5 @@ public interface IMinecraftClient {
 
     public void rightClick();
 
-    public int getCurrentFps();
-
     public void setItemUseCooldown(int cooldown);
 }

@@ -8,11 +8,9 @@ import minegame159.meteorclient.mixininterface.IMinecraftClient;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.Mouse;
-import net.minecraft.client.RunArgs;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.Window;
 import net.minecraft.client.world.ClientWorld;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -31,12 +29,12 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
 
     @Shadow protected abstract void doAttack();
 
-    @Shadow @Final public Mouse mouse;
+    @Shadow public Mouse mouse;
 
-    @Shadow @Final private Window window;
+    @Shadow public Window window;
 
-    @Inject(method = "<init>", at = @At("TAIL"))
-    private void onInit(RunArgs args, CallbackInfo info) {
+    @Inject(method = "init", at = @At("TAIL"))
+    private void onInit(CallbackInfo info) {
         MeteorClient.instance.onInitializeClient();
     }
 
@@ -66,11 +64,6 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
     @Override
     public void rightClick() {
         doAttack();
-    }
-
-    @Override
-    public int getCurrentFps() {
-        return currentFps;
     }
 
     @Override
