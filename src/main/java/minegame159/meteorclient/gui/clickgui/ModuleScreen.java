@@ -91,7 +91,7 @@ public class ModuleScreen extends WidgetScreen implements Listenable {
             WHorizontalList bind = list.add(new WHorizontalList(4));
             bindLabel = bind.add(new WLabel(getBindLabelText()));
             bind.add(new WButton("Set bind")).action = () -> {
-                ModuleManager.moduleToBind = module;
+                ModuleManager.INSTANCE.setModuleToBind(module);
                 canResetBind = false;
                 bindLabel.text = "Bind: press any key";
                 layout();

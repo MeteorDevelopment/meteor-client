@@ -22,7 +22,7 @@ public class CommandDispatcher {
         }
 
         // Get module
-        Module module = ModuleManager.get(args[0]);
+        Module module = ModuleManager.INSTANCE.get(args[0]);
         if (module == null) return;
         args = subArray(args, 1);
 

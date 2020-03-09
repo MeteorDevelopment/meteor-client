@@ -61,7 +61,7 @@ public class Utils {
             Utils.sendMessage("#redYou must specify module name.");
             return null;
         }
-        Module module = ModuleManager.get(args[0]);
+        Module module = ModuleManager.INSTANCE.get(args[0]);
         if (module == null) {
             Utils.sendMessage("#redModule with name #blue'%s' #reddoesn't exist.", args[0]);
             return null;

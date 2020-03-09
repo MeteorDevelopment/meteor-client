@@ -16,7 +16,7 @@ public class WModuleController extends WWidget {
         layout = new ModuleControllerLayout();
         boundingBox.setMargin(16);
 
-        for (Category category : ModuleManager.getCategories()) {
+        for (Category category : ModuleManager.CATEGORIES) {
             add(new WModuleGroup(category));
         }
     }
@@ -49,7 +49,7 @@ public class WModuleController extends WWidget {
     public void onMouseMove(double mouseX, double mouseY) {
         if (grabbing != null) {
             move(grabbing, mouseX - lastMouseX, mouseY - lastMouseY);
-            Vector2 pos = Config.instance.guiPositions.computeIfAbsent(grabbing.category, category -> new Vector2());
+            Vector2 pos = Config.INSTANCE.guiPositions.computeIfAbsent(grabbing.category, category -> new Vector2());
             pos.x = grabbing.boundingBox.x;
             pos.y = grabbing.boundingBox.y;
         }
@@ -80,7 +80,7 @@ public class WModuleController extends WWidget {
 
         @Override
         public Box layoutWidget(WWidget widget, WWidget child) {
-            Vector2 pos = Config.instance.guiPositions.get(((WModuleGroup) child).category);
+            Vector2 pos = Config.INSTANCE.guiPositions.get(((WModuleGroup) child).category);
 
             if (pos != null) {
                 box.x = pos.x;

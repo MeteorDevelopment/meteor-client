@@ -12,8 +12,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class ClientPlayerEntityMixin {
     @Inject(at = @At("HEAD"), method = "sendChatMessage", cancellable = true)
     private void onSendChatMessage(String msg, CallbackInfo info) {
-        if (!msg.startsWith(Config.instance.prefix)) return;
+        if (!msg.startsWith(Config.INSTANCE.prefix)) return;
         info.cancel();
-        CommandDispatcher.run(msg.substring(Config.instance.prefix.length()));
+        CommandDispatcher.run(msg.substring(Config.INSTANCE.prefix.length()));
     }
 }

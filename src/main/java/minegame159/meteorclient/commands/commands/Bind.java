@@ -16,6 +16,6 @@ public class Bind extends Command {
         if (module == null) return;
 
         Utils.sendMessage("#yellowPress some key.");
-        ModuleManager.moduleToBind = module;
+        ModuleManager.INSTANCE.setModuleToBind(module);
     }
 }

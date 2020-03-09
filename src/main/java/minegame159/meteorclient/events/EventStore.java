@@ -9,6 +9,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.network.Packet;
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
+import net.minecraft.text.Text;
 
 public class EventStore {
     private static PlaySoundPacketEvent playSoundPacketEvent = new PlaySoundPacketEvent();
@@ -32,6 +33,7 @@ public class EventStore {
     private static ChangeChatLengthEvent changeChatLengthEvent = new ChangeChatLengthEvent();
     private static GameJoinedEvent gameJoinedEvent = new GameJoinedEvent();
     private static BetterShulkerTooltipEvent betterShulkerTooltipEvent = new BetterShulkerTooltipEvent();
+    private static GameDisconnectedEvent gameDisconnectedEvent = new GameDisconnectedEvent();
 
     public static PlaySoundPacketEvent playSoundPacketEvent(PlaySoundS2CPacket packet) {
         playSoundPacketEvent.packet = packet;
@@ -144,5 +146,10 @@ public class EventStore {
     public static BetterShulkerTooltipEvent betterShulkerTooltipEvent(boolean enabled) {
         betterShulkerTooltipEvent.enabled = enabled;
         return betterShulkerTooltipEvent;
+    }
+
+    public static GameDisconnectedEvent gameDisconnectedEvent(Text disconnectReason) {
+        gameDisconnectedEvent.disconnectReason = disconnectReason;
+        return gameDisconnectedEvent;
     }
 }

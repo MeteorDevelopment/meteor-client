@@ -30,7 +30,7 @@ public class ActiveModules extends Module {
     private void recalculate() {
         modules.clear();
 
-        for (Module module : ModuleManager.getActive()) {
+        for (Module module : ModuleManager.INSTANCE.getActive()) {
             if (module.isVisible()) modules.add(module);
         }
 

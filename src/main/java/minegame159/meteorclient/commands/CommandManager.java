@@ -19,8 +19,6 @@ public class CommandManager {
         addCommand(new Reset());
         addCommand(new Panic());
         addCommand(new ResetAll());
-
-        System.out.println("Meteor Client loaded " + commands.size() + " commands.");
     }
 
     public static Command get(String name) {

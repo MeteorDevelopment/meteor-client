@@ -12,7 +12,7 @@ public class ResetAll extends Command {
 
     @Override
     public void run(String[] args) {
-        for (Module module : ModuleManager.getAll()) {
+        for (Module module : ModuleManager.INSTANCE.getAll()) {
             for (Setting setting : module.settings) setting.reset();
         }
     }

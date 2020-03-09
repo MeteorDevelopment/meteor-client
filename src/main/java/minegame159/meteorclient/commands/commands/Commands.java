@@ -14,7 +14,7 @@ public class Commands extends Command {
     public void run(String[] args) {
         Utils.sendMessage("#pinkAll #gray%d #yellowcommands:", CommandManager.getCount());
         CommandManager.forEach(command -> {
-            Utils.sendMessage("  #yellow%s%s #gray- #yellow%s", Config.instance.prefix, command.name, command.description);
+            Utils.sendMessage("  #yellow%s%s #gray- #yellow%s", Config.INSTANCE.prefix, command.name, command.description);
         });
     }
 }

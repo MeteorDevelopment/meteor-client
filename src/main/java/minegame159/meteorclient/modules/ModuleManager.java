@@ -1,5 +1,7 @@
 package minegame159.meteorclient.modules;
 
+import me.zero.alpine.listener.EventHandler;
+import me.zero.alpine.listener.Listenable;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.EventStore;
@@ -13,63 +15,57 @@ import minegame159.meteorclient.modules.setting.GUI;
 import minegame159.meteorclient.utils.Utils;
 import org.lwjgl.glfw.GLFW;
 
-import java.util.*;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-public class ModuleManager {
-    private static List<Module> modules = new ArrayList<>();
-    private static Map<Category, List<Module>> groups = new HashMap<>();
+public class ModuleManager implements Listenable {
+    public static ModuleManager INSTANCE;
+    public static final Category[] CATEGORIES = { Category.Combat, Category.Player, Category.Movement, Category.Render, Category.Misc, Category.Setting };
+    private static final File file = new File(MeteorClient.directory, "modules.json");
 
-    private static List<Module> active = new ArrayList<>();
+    private List<Module> modules = new ArrayList<>();
+    private Map<Category, List<Module>> groups = new HashMap<>();
+    private List<Module> active = new ArrayList<>();
+    private Module moduleToBind;
 
-    public static Module moduleToBind;
-
-    public static void init() {
+    public ModuleManager() {
         initCombat();
         initPlayer();
         initMovement();
         initRender();
         initMisc();
         initSetting();
-
-        System.out.println("Meteor Client loaded " + modules.size() + " modules.");
-        MeteorClient.eventBus.subscribe(onKey);
     }
 
-    public static List<Module> getGroup(Category category) {
-        return groups.computeIfAbsent(category, k -> new ArrayList<>());
+    public List<Module> getGroup(Category category) {
+        return groups.computeIfAbsent(category, category1 -> new ArrayList<>());
     }
 
-    public static Set<Category> getCategories() {
-        return groups.keySet();
+    public List<Module> getAll() {
+        return modules;
     }
 
-    public static Module get(String name) {
-        name = name.toLowerCase();
+    public List<Module> getActive() {
+        return active;
+    }
+
+    public Module get(String name) {
         for (Module module : modules) {
-            if (module.name.equals(name)) return module;
+            if (module.name.equalsIgnoreCase(name)) return module;
         }
 
         return null;
     }
 
-    public static List<Module> getActive() {
-        return active;
+    public void setModuleToBind(Module moduleToBind) {
+        this.moduleToBind = moduleToBind;
     }
 
-    public static List<Module> getAll() {
-        return modules;
-    }
-
-    public static void deactivateAll() {
-        List<Module> active2 = new ArrayList<>(active);
-        for (Module module : active2) {
-            if (module.setting) continue;
-
-            module.toggle();
-        }
-    }
-
-    private static Listener<KeyEvent> onKey = new Listener<>(event -> {
+    @EventHandler
+    private Listener<KeyEvent> onKey = new Listener<>(event -> {
         if (!event.push) return;
 
         // Check if binding module
@@ -97,21 +93,22 @@ public class ModuleManager {
         }
     });
 
-    static void addActive(Module module) {
+    void addActive(Module module) {
         active.add(module);
         MeteorClient.eventBus.post(EventStore.activeModulesChangedEvent());
     }
-    static void removeActive(Module module) {
+
+    void removeActive(Module module) {
         active.remove(module);
         MeteorClient.eventBus.post(EventStore.activeModulesChangedEvent());
     }
 
-    private static void addModule(Module module) {
+    private void addModule(Module module) {
         modules.add(module);
         getGroup(module.category).add(module);
     }
 
-    private static void initCombat() {
+    private void initCombat() {
         addModule(new Criticals());
         addModule(new AutoTotem());
         addModule(new AutoLog());
@@ -119,7 +116,7 @@ public class ModuleManager {
         addModule(new CrystalAura());
     }
 
-    private static void initPlayer() {
+    private void initPlayer() {
         addModule(new AutoFish());
         addModule(new DeathPosition());
         addModule(new FastUse());
@@ -128,7 +125,7 @@ public class ModuleManager {
         addModule(new AutoMend());
     }
 
-    private static void initMovement() {
+    private void initMovement() {
         addModule(new AutoSprint());
         addModule(new AutoWalk());
         addModule(new Blink());
@@ -139,7 +136,7 @@ public class ModuleManager {
         addModule(new Flight());
     }
 
-    private static void initRender() {
+    private void initRender() {
         addModule(new ActiveModules());
         addModule(new FullBright());
         addModule(new Info());
@@ -153,7 +150,7 @@ public class ModuleManager {
         addModule(new Tracers());
     }
 
-    private static void initMisc() {
+    private void initMisc() {
         addModule(new LongerChat());
         addModule(new AutoSign());
         addModule(new AntiWeather());
@@ -164,7 +161,41 @@ public class ModuleManager {
         addModule(new AutoBreeder());
     }
 
-    private static void initSetting() {
+    private void initSetting() {
         addModule(new GUI());
+    }
+
+    static {
+        file.getParentFile().mkdirs();
+    }
+
+    public static void save() {
+        try {
+            Writer writer = new FileWriter(file);
+            MeteorClient.gson.toJson(INSTANCE, writer);
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void load() {
+        if (!file.exists()) {
+            if (INSTANCE == null) {
+                INSTANCE = new ModuleManager();
+                MeteorClient.eventBus.subscribe(INSTANCE);
+            }
+            return;
+        }
+
+        try {
+            FileReader reader = new FileReader(file);
+            if (INSTANCE != null) MeteorClient.eventBus.unsubscribe(INSTANCE);
+            INSTANCE = MeteorClient.gson.fromJson(reader, ModuleManager.class);
+            MeteorClient.eventBus.subscribe(INSTANCE);
+            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

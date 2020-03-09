@@ -56,13 +56,13 @@ public abstract class Module implements Listenable {
 
         if (!active) {
             active = true;
-            ModuleManager.addActive(this);
+            ModuleManager.INSTANCE.addActive(this);
             MeteorClient.eventBus.subscribe(this);
             onActivate();
         }
         else {
             active = false;
-            ModuleManager.removeActive(this);
+            ModuleManager.INSTANCE.removeActive(this);
             MeteorClient.eventBus.unsubscribe(this);
             onDeactivate();
         }

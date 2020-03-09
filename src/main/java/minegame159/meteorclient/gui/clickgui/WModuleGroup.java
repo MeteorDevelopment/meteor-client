@@ -24,7 +24,7 @@ public class WModuleGroup extends WPanel {
 
         WVerticalList rootList = add(new WVerticalList(0));
 
-        List<Module> group = ModuleManager.getGroup(category);
+        List<Module> group = ModuleManager.INSTANCE.getGroup(category);
 
         // Name
         WLabel name = rootList.add(new WLabel(category.toString(), true));

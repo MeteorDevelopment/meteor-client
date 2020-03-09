@@ -16,14 +16,14 @@ public class Modules extends Command {
 
     @Override
     public void run(String[] args) {
-        Utils.sendMessage("#yellowAll #gray%d #yellowmodules:", ModuleManager.getAll().size());
+        Utils.sendMessage("#yellowAll #gray%d #yellowmodules:", ModuleManager.INSTANCE.getAll().size());
 
-        for (Category category : ModuleManager.getCategories()) {
-            List<Module> group = ModuleManager.getGroup(category);
+        for (Category category : ModuleManager.CATEGORIES) {
+            List<Module> group = ModuleManager.INSTANCE.getGroup(category);
             Utils.sendMessage("  #pink%s #gray(%d)#pink:", category.toString(), group.size());
 
             for (Module module : group) {
-                Utils.sendMessage("    #yellow%s%s #gray- #yellow%s", Config.instance.prefix, module.name, module.description);
+                Utils.sendMessage("    #yellow%s%s #gray- #yellow%s", Config.INSTANCE.prefix, module.name, module.description);
             }
         }
     }
