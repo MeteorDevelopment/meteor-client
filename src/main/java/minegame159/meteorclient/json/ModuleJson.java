@@ -27,7 +27,7 @@ public class ModuleJson {
         JsonObject obj = new JsonObject();
 
         obj.addProperty("name", setting.name);
-        obj.addProperty("value", setting.value().toString());
+        obj.addProperty("value", setting.get().toString());
 
         return obj;
     }
@@ -46,7 +46,7 @@ public class ModuleJson {
             for (Setting setting : module.settings) {
                 if (!setting.name.equalsIgnoreCase(name)) continue;
 
-                setting.setFromString(sO.get("value").getAsString());
+                setting.parse(sO.get("value").getAsString());
 
                 break;
             }

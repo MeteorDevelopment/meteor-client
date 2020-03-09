@@ -5,8 +5,8 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.settings.builders.EnumSettingBuilder;
 
 public class AutoJump extends Module {
     public enum JumpIf {
@@ -15,7 +15,7 @@ public class AutoJump extends Module {
         Always
     }
 
-    private Setting<JumpIf> jumpIf = addSetting(new EnumSettingBuilder<JumpIf>()
+    private Setting<JumpIf> jumpIf = addSetting(new EnumSetting.Builder<JumpIf>()
             .name("jump-if")
             .description("Jump if.")
             .defaultValue(JumpIf.Always)
@@ -27,7 +27,7 @@ public class AutoJump extends Module {
     }
 
     private boolean jump() {
-        switch (jumpIf.value()) {
+        switch (jumpIf.get()) {
             case Sprinting: return mc.player.isSprinting() && (mc.player.forwardSpeed != 0 || mc.player.sidewaysSpeed != 0);
             case Walking:   return mc.player.forwardSpeed != 0 || mc.player.sidewaysSpeed != 0;
             case Always:    return true;

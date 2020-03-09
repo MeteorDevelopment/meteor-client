@@ -2,10 +2,10 @@ package minegame159.meteorclient.modules.setting;
 
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.settings.ColorSetting;
+import minegame159.meteorclient.settings.DoubleSetting;
+import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.settings.builders.ColorSettingBuilder;
-import minegame159.meteorclient.settings.builders.DoubleSettingBuilder;
-import minegame159.meteorclient.settings.builders.EnumSettingBuilder;
 import minegame159.meteorclient.utils.Color;
 
 public class GUI extends Module {
@@ -54,100 +54,100 @@ public class GUI extends Module {
     public GUI() {
         super(Category.Setting, "gui", "GUI settings.", true);
 
-        backgroundS = addSetting(new ColorSettingBuilder()
+        backgroundS = addSetting(new ColorSetting.Builder()
                 .name("background")
                 .description("Background color.")
                 .defaultValue(new Color(50, 50, 50, 225))
-                .consumer((color1, color2) -> background.set(color2))
+                .onChanged(color1 -> background.set(color1))
                 .build()
         );
-        background.set(backgroundS.value());
-        backgroundHighlightedS = addSetting(new ColorSettingBuilder()
+        background.set(backgroundS.get());
+        backgroundHighlightedS = addSetting(new ColorSetting.Builder()
                 .name("background-highlighted")
                 .description("Background highlighted color.")
                 .defaultValue(new Color(90, 90, 90, 225))
-                .consumer((color1, color2) -> backgroundHighlighted.set(color2))
+                .onChanged(color1 -> backgroundHighlighted.set(color1))
                 .build()
         );
-        backgroundHighlighted.set(backgroundHighlightedS.value());
-        backgroundTextBoxS = addSetting(new ColorSettingBuilder()
+        backgroundHighlighted.set(backgroundHighlightedS.get());
+        backgroundTextBoxS = addSetting(new ColorSetting.Builder()
                 .name("background-text-box")
                 .description("Background text box color.")
                 .defaultValue(new Color(60, 60, 60, 200))
-                .consumer((color1, color2) -> backgroundTextBox.set(color2))
+                .onChanged(color1 -> backgroundTextBox.set(color1))
                 .build()
         );
-        backgroundTextBox.set(backgroundTextBoxS.value());
+        backgroundTextBox.set(backgroundTextBoxS.get());
 
-        separatorS = addSetting(new ColorSettingBuilder()
+        separatorS = addSetting(new ColorSetting.Builder()
                 .name("separator")
                 .description("Separator color.")
                 .defaultValue(new Color(75, 75, 75, 225))
-                .consumer((color1, color2) -> {
-                    separator.set(color2);
-                    separatorC = color2.getPacked();
+                .onChanged(color1 -> {
+                    separator.set(color1);
+                    separatorC = color1.getPacked();
                 })
                 .build()
         );
-        separator.set(separatorS.value());
+        separator.set(separatorS.get());
         separatorC = separator.getPacked();
 
-        outlineS = addSetting(new ColorSettingBuilder()
+        outlineS = addSetting(new ColorSetting.Builder()
                 .name("outline")
                 .description("Outline color.")
                 .defaultValue(new Color(0, 0, 0, 225))
-                .consumer((color1, color2) -> outline.set(color2))
+                .onChanged(color1 -> outline.set(color1))
                 .build()
         );
-        outline.set(outlineS.value());
-        outlineHighlightedS = addSetting(new ColorSettingBuilder()
+        outline.set(outlineS.get());
+        outlineHighlightedS = addSetting(new ColorSetting.Builder()
                 .name("outline-highlighted")
                 .description("Outline highlighted color.")
                 .defaultValue(new Color(50, 50, 50, 225))
-                .consumer((color1, color2) -> outlineHighlighted.set(color2))
+                .onChanged(color1 -> outlineHighlighted.set(color1))
                 .build()
         );
-        outlineHighlighted.set(outlineHighlightedS.value());
+        outlineHighlighted.set(outlineHighlightedS.get());
 
-        checkboxS = addSetting(new ColorSettingBuilder()
+        checkboxS = addSetting(new ColorSetting.Builder()
                 .name("checkbox")
                 .description("Checkbox color.")
                 .defaultValue(new Color(45, 225, 45))
-                .consumer((color1, color2) -> checkbox.set(color2))
+                .onChanged(color1 -> checkbox.set(color1))
                 .build()
         );
-        checkbox.set(checkboxS.value());
+        checkbox.set(checkboxS.get());
 
-        textS = addSetting(new ColorSettingBuilder()
+        textS = addSetting(new ColorSetting.Builder()
                 .name("text")
                 .description("Text color.")
                 .defaultValue(new Color(255, 255, 255))
-                .consumer((color1, color2) -> {
-                    text.set(color2);
-                    textC = color2.getPacked();
+                .onChanged(color1 -> {
+                    text.set(color1);
+                    textC = color1.getPacked();
                 })
                 .build()
         );
-        text.set(textS.value());
+        text.set(textS.get());
         textC = text.getPacked();
 
-        hoverAnimationS = addSetting(new EnumSettingBuilder<HoverAnimation>()
+        hoverAnimationS = addSetting(new EnumSetting.Builder<HoverAnimation>()
                 .name("hover-animation")
                 .description("Module hover animation.")
                 .defaultValue(HoverAnimation.FromLeft)
-                .consumer((hoverAnimation1, hoverAnimation2) -> hoverAnimation = hoverAnimation2)
+                .onChanged(hoverAnimation1 -> hoverAnimation = hoverAnimation1)
                 .build()
         );
-        hoverAnimation = hoverAnimationS.value();
+        hoverAnimation = hoverAnimationS.get();
 
-        hoverAnimationSpeedMultiplierS = addSetting(new DoubleSettingBuilder()
+        hoverAnimationSpeedMultiplierS = addSetting(new DoubleSetting.Builder()
                 .name("hover-animation-speed-multiplier")
                 .description("Module hover animation speed multiplier.")
                 .defaultValue(1.0)
                 .min(0.0)
-                .consumer((aDouble, aDouble2) -> hoverAnimationSpeedMultiplier = aDouble2)
+                .onChanged(aDouble -> hoverAnimationSpeedMultiplier = aDouble)
                 .build()
         );
-        hoverAnimationSpeedMultiplier = hoverAnimationSpeedMultiplierS.value();
+        hoverAnimationSpeedMultiplier = hoverAnimationSpeedMultiplierS.get();
     }
 }

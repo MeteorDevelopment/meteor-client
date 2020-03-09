@@ -8,8 +8,8 @@ import minegame159.meteorclient.events.Render2DEvent;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.settings.builders.BoolSettingBuilder;
 import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
@@ -23,34 +23,34 @@ import java.util.HashMap;
 import java.util.Objects;
 
 public class Info extends Module {
-    private Setting<Boolean> fps = addSetting(new BoolSettingBuilder()
+    private Setting<Boolean> fps = addSetting(new BoolSetting.Builder()
             .name("fps")
             .description("Display fps.")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<Boolean> entities = addSetting(new BoolSettingBuilder()
+    private Setting<Boolean> entities = addSetting(new BoolSetting.Builder()
             .name("entities")
             .description("Display number of entities.")
             .defaultValue(true)
-            .consumer((aBoolean, aBoolean2) -> updateEntities = true)
+            .onChanged(aBoolean -> updateEntities = true)
             .build()
     );
 
-    private Setting<Boolean> entityCustomNames = addSetting(new BoolSettingBuilder()
+    private Setting<Boolean> entityCustomNames = addSetting(new BoolSetting.Builder()
             .name("entity-custom-names")
             .description("Use custom names.")
             .defaultValue(true)
-            .consumer((aBoolean, aBoolean2) -> updateEntities = true)
+            .onChanged(aBoolean -> updateEntities = true)
             .build()
     );
 
-    private Setting<Boolean> separateSheepsByColor = addSetting(new BoolSettingBuilder()
+    private Setting<Boolean> separateSheepsByColor = addSetting(new BoolSetting.Builder()
             .name("separate-sheeps-by-color")
             .description("Separates sheeps by color in entity list.")
             .defaultValue(false)
-            .consumer((aBoolean, aBoolean2) -> updateEntities = true)
+            .onChanged(aBoolean -> updateEntities = true)
             .build()
     );
 
@@ -66,8 +66,8 @@ public class Info extends Module {
     private String getEntityName(Entity entity) {
         if (entity instanceof PlayerEntity) return "Player";
         if (entity instanceof ItemEntity) return "Item";
-        String name = entityCustomNames.value() ? entity.getDisplayName().asString() : entity.getType().getName().asString();
-        if (separateSheepsByColor.value() && entity instanceof SheepEntity) return StringUtils.capitalize(((SheepEntity) entity).getColor().getName().replace('_', ' ')) + " - " + name;
+        String name = entityCustomNames.get() ? entity.getDisplayName().asString() : entity.getType().getName().asString();
+        if (separateSheepsByColor.get() && entity instanceof SheepEntity) return StringUtils.capitalize(((SheepEntity) entity).getColor().getName().replace('_', ' ')) + " - " + name;
         return name;
     }
 
@@ -118,7 +118,7 @@ public class Info extends Module {
     private Listener<TickEvent> onTick = new Listener<>(event -> {
         updateEntitiesTimer--;
 
-        if (updateEntities && updateEntitiesTimer <= 0 && entities.value()) {
+        if (updateEntities && updateEntitiesTimer <= 0 && entities.get()) {
             for (EntityInfo entityInfo : entityCounts.values()) {
                 entityInfo.reset();
             }
@@ -140,12 +140,12 @@ public class Info extends Module {
         if (mc.options.debugEnabled) return;
         int y = 2;
 
-        if (fps.value()) {
+        if (fps.get()) {
             drawInfo("FPS: ", MinecraftClient.getCurrentFps() + "", y);
             y += Utils.getTextHeight() + 2;
         }
 
-        if (entities.value()) {
+        if (entities.get()) {
             for (EntityInfo renderInfo : entityCounts.values()) {
                 if (!renderInfo.render) continue;
 

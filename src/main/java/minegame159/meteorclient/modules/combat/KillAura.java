@@ -6,10 +6,10 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.settings.BoolSetting;
+import minegame159.meteorclient.settings.DoubleSetting;
+import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.settings.builders.BoolSettingBuilder;
-import minegame159.meteorclient.settings.builders.DoubleSettingBuilder;
-import minegame159.meteorclient.settings.builders.EnumSettingBuilder;
 import minegame159.meteorclient.utils.EntityUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -23,28 +23,28 @@ public class KillAura extends Module {
         HighestHealth
     }
 
-    public Setting<Boolean> players = addSetting(new BoolSettingBuilder()
+    public Setting<Boolean> players = addSetting(new BoolSetting.Builder()
             .name("players")
             .description("Attack players.")
             .defaultValue(true)
             .build()
     );
 
-    public Setting<Boolean> animals = addSetting(new BoolSettingBuilder()
+    public Setting<Boolean> animals = addSetting(new BoolSetting.Builder()
             .name("animals")
             .description("Attack animals.")
             .defaultValue(true)
             .build()
     );
 
-    public Setting<Boolean> mobs = addSetting(new BoolSettingBuilder()
+    public Setting<Boolean> mobs = addSetting(new BoolSetting.Builder()
             .name("mobs")
             .description("Attack mobs.")
             .defaultValue(true)
             .build()
     );
 
-    public Setting<Double> range = addSetting(new DoubleSettingBuilder()
+    public Setting<Double> range = addSetting(new DoubleSetting.Builder()
             .name("range")
             .description("Attack range.")
             .defaultValue(5.5)
@@ -52,14 +52,14 @@ public class KillAura extends Module {
             .build()
     );
 
-    public Setting<Boolean> ignoreWalls = addSetting(new BoolSettingBuilder()
+    public Setting<Boolean> ignoreWalls = addSetting(new BoolSetting.Builder()
             .name("ignore-walls")
             .description("Attack through walls.")
             .defaultValue(true)
             .build()
     );
 
-    public Setting<Priority> priority = addSetting(new EnumSettingBuilder<Priority>()
+    public Setting<Priority> priority = addSetting(new EnumSetting.Builder<Priority>()
             .name("priority")
             .description("What entities to target.")
             .defaultValue(Priority.LowestHealth)
@@ -71,18 +71,18 @@ public class KillAura extends Module {
     }
 
     private boolean isInRange(Entity entity) {
-        return entity.distanceTo(mc.player) <= range.value();
+        return entity.distanceTo(mc.player) <= range.get();
     }
 
     private boolean canAttackEntity(Entity entity) {
         if (entity.getUuid().equals(mc.player.getUuid())) return false;
-        if (EntityUtils.isPlayer(entity) && players.value()) return true;
-        if (EntityUtils.isAnimal(entity) && animals.value()) return true;
-        return EntityUtils.isMob(entity) && mobs.value();
+        if (EntityUtils.isPlayer(entity) && players.get()) return true;
+        if (EntityUtils.isAnimal(entity) && animals.get()) return true;
+        return EntityUtils.isMob(entity) && mobs.get();
     }
 
     private boolean canSeeEntity(Entity entity) {
-        return ignoreWalls.value() || mc.player.canSee(entity);
+        return ignoreWalls.get() || mc.player.canSee(entity);
     }
 
     private int invertSort(int sort) {
@@ -91,7 +91,7 @@ public class KillAura extends Module {
     }
 
     private int sort(LivingEntity e1, LivingEntity e2) {
-        switch (priority.value()) {
+        switch (priority.get()) {
             case LowestDistance:  return Double.compare(e1.distanceTo(mc.player), e2.distanceTo(mc.player));
             case HighestDistance: return invertSort(Double.compare(e1.distanceTo(mc.player), e2.distanceTo(mc.player)));
             case LowestHealth:    return Float.compare(e1.getHealth(), e2.getHealth());

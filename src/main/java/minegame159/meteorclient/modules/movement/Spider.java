@@ -5,12 +5,12 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.settings.builders.DoubleSettingBuilder;
 import net.minecraft.util.math.Vec3d;
 
 public class Spider extends Module {
-    private Setting<Double> speed = addSetting(new DoubleSettingBuilder()
+    private Setting<Double> speed = addSetting(new DoubleSetting.Builder()
             .name("speed")
             .description("Speed.")
             .defaultValue(0.2)
@@ -29,6 +29,6 @@ public class Spider extends Module {
         Vec3d velocity = mc.player.getVelocity();
         if (velocity.y >= 0.2) return;
 
-        mc.player.setVelocity(velocity.x, speed.value(), velocity.z);
+        mc.player.setVelocity(velocity.x, speed.get(), velocity.z);
     });
 }

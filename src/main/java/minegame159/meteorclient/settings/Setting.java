@@ -1,66 +1,84 @@
 package minegame159.meteorclient.settings;
 
-import minegame159.meteorclient.utils.Color;
-import minegame159.meteorclient.utils.StringConverter;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
-import java.util.function.BiConsumer;
-import java.util.function.Predicate;
+import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public class Setting<T> {
-    public String name;
-    public String title;
-    public String description;
-    public String usage;
+public abstract class Setting<T> {
+    public final String name, title, description;
+    private String usage;
 
+    private final T defaultValue;
     private T value;
-    private T defaultValue;
 
-    private Predicate<T> restriction;
-    private BiConsumer<T, T> consumer;
-    private StringConverter<T> converter;
+    private final Consumer<T> onChanged;
 
-    public Setting(String name, String description, String usage, T defaultValue, Predicate<T> restriction, BiConsumer<T, T> consumer, StringConverter<T> converter) {
+    public Setting(String name, String description, T defaultValue, Consumer<T> onChanged) {
         this.name = name;
-        title = Arrays.stream(name.split("-")).map(StringUtils::capitalize).collect(Collectors.joining(" "));
+        this.title = Arrays.stream(name.split("-")).map(StringUtils::capitalize).collect(Collectors.joining(" "));;
         this.description = description;
-        this.usage = usage;
-        value = defaultValue;
         this.defaultValue = defaultValue;
-        this.restriction = restriction;
-        this.consumer = consumer;
-        this.converter = converter;
+        this.value = defaultValue;
+        this.onChanged = onChanged;
     }
 
-    public T value() {
+    public T get() {
         return value;
     }
 
-    public boolean value(T value) {
-        T old = this.value;
-        if (restriction != null && !restriction.test(value)) return false;
+    public void set(T value) {
+        if (!isValueValid(value)) return;
         this.value = value;
-        if (consumer != null) consumer.accept(old, value);
-        return true;
+        if (onChanged != null) onChanged.accept(value);
     }
 
     public void reset() {
-        T oldValue = value;
-        if (defaultValue instanceof Color) value = (T) new Color((Color) defaultValue);
-        else value = defaultValue;
-        if (consumer != null) consumer.accept(oldValue, value);
+        value = defaultValue;
+        if (onChanged != null) onChanged.accept(value);
     }
 
-    public boolean setFromString(String string) {
-        T newValue = converter.convert(string);
-        if (newValue == null) return false;
-        return value(newValue);
+    public boolean parse(String str) {
+        T newValue = parseImpl(str);
+
+        if (newValue != null) {
+            if (isValueValid(newValue)) {
+                value = newValue;
+                if (onChanged != null) onChanged.accept(value);
+            }
+        }
+
+        return newValue != null;
     }
+
+    protected abstract T parseImpl(String str);
+
+    protected abstract boolean isValueValid(T value);
+
+    public String getUsage() {
+        if (usage == null) usage = generateUsage();
+        return usage;
+    }
+
+    protected abstract String generateUsage();
 
     @Override
     public String toString() {
         return value.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Setting<?> setting = (Setting<?>) o;
+        return Objects.equals(name, setting.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name);
     }
 }

@@ -5,8 +5,8 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.settings.builders.DoubleSettingBuilder;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -14,7 +14,7 @@ import net.minecraft.item.NameTagItem;
 import net.minecraft.util.Hand;
 
 public class AutoNametag extends Module {
-    private Setting<Double> distance = addSetting(new DoubleSettingBuilder()
+    private Setting<Double> distance = addSetting(new DoubleSetting.Builder()
             .name("distance")
             .description("Maximum distance.")
             .min(0.0)
@@ -29,7 +29,7 @@ public class AutoNametag extends Module {
     @EventHandler
     private Listener<TickEvent> onTick = new Listener<>(event -> {
         for (Entity entity : mc.world.getEntities()) {
-            if (entity instanceof PlayerEntity || entity.hasCustomName() || mc.player.distanceTo(entity) > distance.value()) continue;
+            if (entity instanceof PlayerEntity || entity.hasCustomName() || mc.player.distanceTo(entity) > distance.get()) continue;
 
             boolean findNametag = true;
             boolean offHand = false;

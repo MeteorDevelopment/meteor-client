@@ -9,8 +9,8 @@ import minegame159.meteorclient.mixininterface.IAbstractButtonWidget;
 import minegame159.meteorclient.mixininterface.IDisconnectedScreen;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.settings.builders.DoubleSettingBuilder;
 import net.minecraft.client.gui.screen.ConnectScreen;
 import net.minecraft.client.gui.screen.DisconnectedScreen;
 import net.minecraft.client.gui.screen.TitleScreen;
@@ -19,7 +19,7 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.network.ServerInfo;
 
 public class AutoReconnect extends Module {
-    private Setting<Double> time = addSetting(new DoubleSettingBuilder()
+    private Setting<Double> time = addSetting(new DoubleSetting.Builder()
             .name("time")
             .description("Time to wait before connecting.")
             .defaultValue(2.0)
@@ -56,7 +56,7 @@ public class AutoReconnect extends Module {
         public AutoReconnectScreen(DisconnectedScreen screen) {
             super(((IDisconnectedScreen) screen).getParent(), screen.getTitle().asString(), ((IDisconnectedScreen) screen).getReason());
             reasonHeight = ((IDisconnectedScreen) screen).getReasonHeight();
-            timer = (int) (time.value() * 20);
+            timer = (int) (time.get() * 20);
         }
 
         @Override

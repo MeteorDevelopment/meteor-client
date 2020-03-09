@@ -6,13 +6,13 @@ import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.events.TookDamageEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.settings.builders.IntSettingBuilder;
 import net.minecraft.network.packet.s2c.play.DisconnectS2CPacket;
 import net.minecraft.text.LiteralText;
 
 public class AutoLog extends Module {
-    private Setting<Integer> health = addSetting(new IntSettingBuilder()
+    private Setting<Integer> health = addSetting(new IntSetting.Builder()
             .name("health")
             .description("Disconnects when health is lower or equal to this value.")
             .defaultValue(6)
@@ -30,7 +30,7 @@ public class AutoLog extends Module {
 
     @EventHandler
     private Listener<TookDamageEvent> onTookDamage = new Listener<>(event -> {
-        if (!shouldLog && event.entity.getUuid().equals(mc.player.getUuid()) && event.entity.getHealth() <= health.value()) {
+        if (!shouldLog && event.entity.getUuid().equals(mc.player.getUuid()) && event.entity.getHealth() <= health.get()) {
             shouldLog = true;
             lastLog = System.currentTimeMillis();
         }

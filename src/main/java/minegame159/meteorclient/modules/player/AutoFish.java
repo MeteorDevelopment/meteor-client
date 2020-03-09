@@ -7,21 +7,21 @@ import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.events.packets.PlaySoundPacketEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.settings.BoolSetting;
+import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.settings.builders.BoolSettingBuilder;
-import minegame159.meteorclient.settings.builders.IntSettingBuilder;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.item.FishingRodItem;
 
 public class AutoFish extends Module {
-    private Setting<Boolean> autoCast = addSetting(new BoolSettingBuilder()
+    private Setting<Boolean> autoCast = addSetting(new BoolSetting.Builder()
             .name("auto-cast")
             .description("Automatically casts when activated.")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<Integer> ticksCatch = addSetting(new IntSettingBuilder()
+    private Setting<Integer> ticksCatch = addSetting(new IntSetting.Builder()
             .name("ticks-catch")
             .description("Ticks to wait before catching the fish")
             .defaultValue(6)
@@ -29,7 +29,7 @@ public class AutoFish extends Module {
             .build()
     );
 
-    private Setting<Integer> ticksThrow = addSetting(new IntSettingBuilder()
+    private Setting<Integer> ticksThrow = addSetting(new IntSetting.Builder()
             .name("ticks-throw")
             .description("Ticks to wait before throwing the bobber.")
             .defaultValue(14)
@@ -48,14 +48,14 @@ public class AutoFish extends Module {
     @Override
     public void onActivate() {
         ticksEnabled = false;
-        if (autoCast.value() && mc.player.getMainHandStack().getItem() instanceof FishingRodItem) Utils.rightClick();
+        if (autoCast.get() && mc.player.getMainHandStack().getItem() instanceof FishingRodItem) Utils.rightClick();
     }
 
     @EventHandler
     private Listener<PlaySoundPacketEvent> onPlaySoundPacket = new Listener<>(event -> {
         if (event.packet.getSound().getId().getPath().equals("entity.fishing_bobber.splash")) {
             ticksEnabled = true;
-            ticksToRightClick = ticksCatch.value();
+            ticksToRightClick = ticksCatch.get();
             ticksData = 0;
         }
     });
@@ -65,7 +65,7 @@ public class AutoFish extends Module {
         if (ticksEnabled && ticksToRightClick <= 0) {
             if (ticksData == 0) {
                 Utils.rightClick();
-                ticksToRightClick = ticksThrow.value();
+                ticksToRightClick = ticksThrow.get();
                 ticksData = 1;
             }
             else if (ticksData == 1) {

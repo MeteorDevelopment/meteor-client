@@ -6,8 +6,8 @@ import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.events.packets.SendPacketEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.settings.builders.DoubleSettingBuilder;
 import net.minecraft.client.network.OtherClientPlayerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
@@ -16,7 +16,7 @@ import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.math.Vec3d;
 
 public class Freecam extends Module {
-    private Setting<Double> speed = addSetting(new DoubleSettingBuilder()
+    private Setting<Double> speed = addSetting(new DoubleSetting.Builder()
             .name("speed")
             .description("Speed")
             .defaultValue(1.0)
@@ -73,7 +73,7 @@ public class Freecam extends Module {
         camera.pitch = mc.player.pitch;
         camera.elytraPitch = mc.player.elytraPitch;
 
-        double speed = this.speed.value() / 2;
+        double speed = this.speed.get() / 2;
         Vec3d vel = camera.getVelocity();
         Vec3d forward = new Vec3d(0, 0, speed).rotateY(-(float) Math.toRadians(camera.headYaw));
         Vec3d strafe = forward.rotateY((float) Math.toRadians(90));

@@ -12,7 +12,7 @@ public class Commands extends Command {
 
     @Override
     public void run(String[] args) {
-        Utils.sendMessage("#pingAll #gray%d #yellowcommands:", CommandManager.getCount());
+        Utils.sendMessage("#pinkAll #gray%d #yellowcommands:", CommandManager.getCount());
         CommandManager.forEach(command -> {
             Utils.sendMessage("  #yellow%s%s #gray- #yellow%s", Config.instance.prefix, command.name, command.description);
         });

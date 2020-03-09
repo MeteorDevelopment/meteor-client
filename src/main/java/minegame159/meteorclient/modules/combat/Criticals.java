@@ -6,12 +6,12 @@ import minegame159.meteorclient.events.EventFilters;
 import minegame159.meteorclient.events.packets.SendPacketEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.settings.builders.BoolSettingBuilder;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 
 public class Criticals extends Module {
-    private Setting<Boolean> onlyOnGround = addSetting(new BoolSettingBuilder()
+    private Setting<Boolean> onlyOnGround = addSetting(new BoolSetting.Builder()
             .name("only-on-ground")
             .description("Do criticals only on ground.")
             .defaultValue(false)
@@ -34,7 +34,7 @@ public class Criticals extends Module {
 
     private boolean shouldDoCriticals() {
         boolean a = !mc.player.isSubmergedInWater() && !mc.player.isInLava() && !mc.player.isClimbing();
-        if (onlyOnGround.value()) return a && mc.player.onGround;
+        if (onlyOnGround.get()) return a && mc.player.onGround;
         return a;
     }
 }

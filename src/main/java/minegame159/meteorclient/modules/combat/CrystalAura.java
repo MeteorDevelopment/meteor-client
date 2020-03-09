@@ -7,16 +7,16 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.settings.BoolSetting;
+import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.settings.builders.BoolSettingBuilder;
-import minegame159.meteorclient.settings.builders.DoubleSettingBuilder;
 import net.minecraft.entity.decoration.EnderCrystalEntity;
 import net.minecraft.util.Hand;
 
 import java.util.Comparator;
 
 public class CrystalAura extends Module {
-    public Setting<Double> range = addSetting(new DoubleSettingBuilder()
+    public Setting<Double> range = addSetting(new DoubleSetting.Builder()
             .name("range")
             .description("Attack range.")
             .defaultValue(5.5)
@@ -24,7 +24,7 @@ public class CrystalAura extends Module {
             .build()
     );
 
-    public Setting<Boolean> ignoreWalls = addSetting(new BoolSettingBuilder()
+    public Setting<Boolean> ignoreWalls = addSetting(new BoolSetting.Builder()
             .name("ignore-walls")
             .description("Attack through walls.")
             .defaultValue(true)
@@ -41,8 +41,8 @@ public class CrystalAura extends Module {
 
         Streams.stream(mc.world.getEntities())
                 .filter(entity -> entity instanceof EnderCrystalEntity)
-                .filter(entity -> entity.distanceTo(mc.player) <= range.value())
-                .filter(entity -> ignoreWalls.value() || mc.player.canSee(entity))
+                .filter(entity -> entity.distanceTo(mc.player) <= range.get())
+                .filter(entity -> ignoreWalls.get() || mc.player.canSee(entity))
                 .min(Comparator.comparingDouble(o -> o.distanceTo(mc.player)))
                 .ifPresent(entity -> {
                     mc.interactionManager.attackEntity(mc.player, entity);

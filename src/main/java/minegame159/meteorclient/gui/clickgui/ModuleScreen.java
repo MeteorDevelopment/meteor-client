@@ -51,35 +51,35 @@ public class ModuleScreen extends WidgetScreen implements Listenable {
             WLabel name = new WLabel(setting.title + ":");
 
             WWidget s;
-            if (setting.value() instanceof Boolean) {
-                s = new WCheckbox((boolean) setting.value());
-                ((WCheckbox) s).setAction(wCheckbox -> setting.value(wCheckbox.checked));
+            if (setting.get() instanceof Boolean) {
+                s = new WCheckbox((boolean) setting.get());
+                ((WCheckbox) s).setAction(wCheckbox -> setting.set(wCheckbox.checked));
             }
-            else if (setting.value() instanceof Integer) {
-                s = new WIntTextBox((int) setting.value(), 9);
-                ((WIntTextBox) s).action = wIntTextBox -> setting.value(wIntTextBox.value);
+            else if (setting.get() instanceof Integer) {
+                s = new WIntTextBox((int) setting.get(), 9);
+                ((WIntTextBox) s).action = wIntTextBox -> setting.set(wIntTextBox.value);
             }
-            else if (setting.value() instanceof Double) {
-                s = new WDoubleTextBox((double) setting.value(), 9);
-                ((WDoubleTextBox) s).action = wDoubleTextBox -> setting.value(wDoubleTextBox.value);
+            else if (setting.get() instanceof Double) {
+                s = new WDoubleTextBox((double) setting.get(), 9);
+                ((WDoubleTextBox) s).action = wDoubleTextBox -> setting.set(wDoubleTextBox.value);
             }
-            else if (setting.value() instanceof Enum) {
-                s = new WEnumButton<>((Enum<?>) setting.value());
-                ((WEnumButton) s).action = o -> setting.value(((WEnumButton) o).value);
+            else if (setting.get() instanceof Enum) {
+                s = new WEnumButton<>((Enum<?>) setting.get());
+                ((WEnumButton) s).action = o -> setting.set(((WEnumButton) o).value);
             }
-            else if (setting.value() instanceof Color) {
-                s = new WColorEdit((Color) setting.value());
-                ((WColorEdit) s).action = wColorEdit -> setting.value(wColorEdit.color);
+            else if (setting.get() instanceof Color) {
+                s = new WColorEdit((Color) setting.get());
+                ((WColorEdit) s).action = wColorEdit -> setting.set(wColorEdit.color);
             } else s = new WLabel("Setting type not supported.");
 
             WButton reset = new WButton("Reset");
             reset.action = () -> {
                 setting.reset();
-                if (s instanceof WCheckbox) ((WCheckbox) s).checked = (boolean) setting.value();
-                else if (s instanceof WIntTextBox) ((WIntTextBox) s).setValue((Integer) setting.value());
-                else if (s instanceof WDoubleTextBox) ((WDoubleTextBox) s).setValue((Double) setting.value());
-                else if (s instanceof WEnumButton) ((WEnumButton) s).setValue((Enum<?>) setting.value());
-                else if (s instanceof WColorEdit) ((WColorEdit) s).set((Color) setting.value());
+                if (s instanceof WCheckbox) ((WCheckbox) s).checked = (boolean) setting.get();
+                else if (s instanceof WIntTextBox) ((WIntTextBox) s).setValue((Integer) setting.get());
+                else if (s instanceof WDoubleTextBox) ((WDoubleTextBox) s).setValue((Double) setting.get());
+                else if (s instanceof WEnumButton) ((WEnumButton) s).setValue((Enum<?>) setting.get());
+                else if (s instanceof WColorEdit) ((WColorEdit) s).set((Color) setting.get());
             };
 
             grid.addRow(name, s, reset);

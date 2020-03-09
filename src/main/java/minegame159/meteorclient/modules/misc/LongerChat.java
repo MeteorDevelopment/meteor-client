@@ -4,17 +4,17 @@ import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.settings.builders.IntSettingBuilder;
 
 public class LongerChat extends Module {
-    public Setting<Integer> lines = addSetting(new IntSettingBuilder()
+    public Setting<Integer> lines = addSetting(new IntSetting.Builder()
             .name("lines")
             .description("Chat lines.")
             .defaultValue(1000)
             .min(1)
-            .consumer((integer, integer2) -> {
-                if (isActive()) MeteorClient.eventBus.post(EventStore.changeChatLengthEvent(integer2));
+            .onChanged(integer -> {
+                if (isActive()) MeteorClient.eventBus.post(EventStore.changeChatLengthEvent(integer));
             })
             .build()
     );
@@ -25,7 +25,7 @@ public class LongerChat extends Module {
 
     @Override
     public void onActivate() {
-        MeteorClient.eventBus.post(EventStore.changeChatLengthEvent(lines.value()));
+        MeteorClient.eventBus.post(EventStore.changeChatLengthEvent(lines.get()));
     }
 
     @Override

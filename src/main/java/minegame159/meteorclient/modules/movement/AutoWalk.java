@@ -7,8 +7,8 @@ import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.settings.builders.EnumSettingBuilder;
 import minegame159.meteorclient.utils.GoalDirection;
 
 public class AutoWalk extends Module {
@@ -17,7 +17,7 @@ public class AutoWalk extends Module {
         Smart
     }
 
-    private Setting<Mode> mode = addSetting(new EnumSettingBuilder<Mode>()
+    private Setting<Mode> mode = addSetting(new EnumSetting.Builder<Mode>()
             .name("mode")
             .description("Walking mode.")
             .defaultValue(Mode.Smart)
@@ -33,7 +33,7 @@ public class AutoWalk extends Module {
 
     @Override
     public void onActivate() {
-        if (mode.value() == Mode.Smart) {
+        if (mode.get() == Mode.Smart) {
             timer = 0;
             goal = new GoalDirection(mc.player.getPos(), mc.player.yaw);
             BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(goal);
@@ -42,13 +42,13 @@ public class AutoWalk extends Module {
 
     @Override
     public void onDeactivate() {
-        if (mode.value() == Mode.Simple) ((IKeyBinding) mc.options.keyForward).setPressed(false);
+        if (mode.get() == Mode.Simple) ((IKeyBinding) mc.options.keyForward).setPressed(false);
         else BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
     }
 
     @EventHandler
     private Listener<TickEvent> onTick = new Listener<>(event -> {
-        if (mode.value() == Mode.Simple) {
+        if (mode.get() == Mode.Simple) {
             ((IKeyBinding) mc.options.keyForward).setPressed(true);
         } else {
             if (timer > 20) {

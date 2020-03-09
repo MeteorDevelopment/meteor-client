@@ -6,8 +6,8 @@ import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.settings.builders.EnumSettingBuilder;
 
 public class AutoSprint extends Module {
     public enum Mode {
@@ -15,7 +15,7 @@ public class AutoSprint extends Module {
         Legit
     }
 
-    private Setting<Mode> mode = addSetting(new EnumSettingBuilder<Mode>()
+    private Setting<Mode> mode = addSetting(new EnumSetting.Builder<Mode>()
             .name("mode")
             .description("Mode.")
             .defaultValue(Mode.Always)
@@ -32,7 +32,7 @@ public class AutoSprint extends Module {
     }
 
     private void setSprinting(boolean sprinting) {
-        if (mode.value() == Mode.Always) mc.player.setSprinting(sprinting);
+        if (mode.get() == Mode.Always) mc.player.setSprinting(sprinting);
         else ((IKeyBinding) mc.options.keySprint).setPressed(sprinting);
     }
 

@@ -5,9 +5,9 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.RenderEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.settings.BoolSetting;
+import minegame159.meteorclient.settings.ColorSetting;
 import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.settings.builders.BoolSettingBuilder;
-import minegame159.meteorclient.settings.builders.ColorSettingBuilder;
 import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.EntityUtils;
 import minegame159.meteorclient.utils.RenderUtils;
@@ -20,63 +20,63 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
 public class Tracers extends Module {
-    private Setting<Boolean> center = addSetting(new BoolSettingBuilder()
+    private Setting<Boolean> center = addSetting(new BoolSetting.Builder()
             .name("center")
             .description("Tracers go to the center of the entity instead of its head.")
             .defaultValue(false)
             .build()
     );
 
-    private Setting<Boolean> players = addSetting(new BoolSettingBuilder()
+    private Setting<Boolean> players = addSetting(new BoolSetting.Builder()
             .name("players")
             .description("See players.")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<Color> playersColor = addSetting(new ColorSettingBuilder()
+    private Setting<Color> playersColor = addSetting(new ColorSetting.Builder()
             .name("players-color")
             .description("Players color.")
             .defaultValue(new Color(255, 255, 255, 255))
             .build()
     );
 
-    private Setting<Boolean> animals = addSetting(new BoolSettingBuilder()
+    private Setting<Boolean> animals = addSetting(new BoolSetting.Builder()
             .name("animals")
             .description("See animals.")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<Color> animalsColor = addSetting(new ColorSettingBuilder()
+    private Setting<Color> animalsColor = addSetting(new ColorSetting.Builder()
             .name("animals-color")
             .description("Animals color.")
             .defaultValue(new Color(145, 255, 145, 255))
             .build()
     );
 
-    private Setting<Boolean> mobs = addSetting(new BoolSettingBuilder()
+    private Setting<Boolean> mobs = addSetting(new BoolSetting.Builder()
             .name("mobs")
             .description("See mobs.")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<Color> mobsColor = addSetting(new ColorSettingBuilder()
+    private Setting<Color> mobsColor = addSetting(new ColorSetting.Builder()
             .name("mobs-color")
             .description("Mobs color.")
             .defaultValue(new Color(255, 145, 145, 255))
             .build()
     );
 
-    private Setting<Boolean> storage = addSetting(new BoolSettingBuilder()
+    private Setting<Boolean> storage = addSetting(new BoolSetting.Builder()
             .name("storage")
             .description("See chests, barrels and shulkers.")
             .defaultValue(false)
             .build()
     );
 
-    private Setting<Color> storageColor = addSetting(new ColorSettingBuilder()
+    private Setting<Color> storageColor = addSetting(new ColorSetting.Builder()
             .name("storage-color")
             .description("Storage color.")
             .defaultValue(new Color(255, 160, 0, 255))
@@ -96,7 +96,7 @@ public class Tracers extends Module {
 
     private void render(BlockEntity blockEntity) {
         BlockPos pos = blockEntity.getPos();
-        RenderUtils.line(vec1.x, vec1.y, vec1.z, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5f, storageColor.value());
+        RenderUtils.line(vec1.x, vec1.y, vec1.z, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5f, storageColor.get());
     }
 
     @EventHandler
@@ -104,15 +104,15 @@ public class Tracers extends Module {
         vec1 = new Vec3d(0, 0, 1).rotateX(-(float) Math.toRadians(mc.cameraEntity.pitch)).rotateY(-(float) Math.toRadians(mc.cameraEntity.yaw));
         vec1 = vec1.add(mc.cameraEntity.getPos());
 
-        if (!center.value()) vec1 = vec1.add(0, mc.cameraEntity.getEyeHeight(mc.cameraEntity.getPose()), 0);
+        if (!center.get()) vec1 = vec1.add(0, mc.cameraEntity.getEyeHeight(mc.cameraEntity.getPose()), 0);
 
         for (Entity entity : mc.world.getEntities()) {
-            if (players.value() && EntityUtils.isPlayer(entity) && entity != mc.player) render(entity, playersColor.value());
-            else if (animals.value() && EntityUtils.isAnimal(entity)) render(entity, animalsColor.value());
-            else if (mobs.value() && EntityUtils.isMob(entity)) render(entity, mobsColor.value());
+            if (players.get() && EntityUtils.isPlayer(entity) && entity != mc.player) render(entity, playersColor.get());
+            else if (animals.get() && EntityUtils.isAnimal(entity)) render(entity, animalsColor.get());
+            else if (mobs.get() && EntityUtils.isMob(entity)) render(entity, mobsColor.get());
         }
 
-        if (storage.value()) {
+        if (storage.get()) {
             for (BlockEntity blockEntity : mc.world.blockEntities) {
                 if (blockEntity instanceof ChestBlockEntity || blockEntity instanceof BarrelBlockEntity || blockEntity instanceof ShulkerBoxBlockEntity) {
                     render(blockEntity);
