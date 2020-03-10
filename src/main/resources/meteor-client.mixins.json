@@ -21,7 +21,8 @@
     "DisconnectedScreenMixin",
     "AbstractButtonWidgetMixin",
     "ClientConnectionMixin",
-    "ShulkerBoxBlockMixin"
+    "ShulkerBoxBlockMixin",
+    "MultiplayerScreenMixin"
   ],
   "injectors": {
     "defaultRequire": 1

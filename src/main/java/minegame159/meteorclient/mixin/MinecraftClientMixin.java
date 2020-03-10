@@ -21,8 +21,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class MinecraftClientMixin implements IMinecraftClient {
     @Shadow public ClientWorld world;
 
-    @Shadow private static int currentFps;
-
     @Shadow private int itemUseCooldown;
 
     @Shadow protected abstract void doItemUse();
@@ -35,7 +33,7 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
 
     @Inject(method = "init", at = @At("TAIL"))
     private void onInit(CallbackInfo info) {
-        MeteorClient.instance.onInitializeClient();
+        MeteorClient.INSTANCE.onInitializeClient();
     }
 
     @Inject(at = @At("TAIL"), method = "tick")
