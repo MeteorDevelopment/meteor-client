@@ -47,10 +47,11 @@ public class FriendsScreen extends WidgetScreen implements Listenable {
         list.add(new WHorizontalSeparator());
 
         // Add
-        WHorizontalList addList = list.add(new WHorizontalList(4));
-        WTextBox username = addList.add(new WTextBox("", 16));
+        WTextBox username = new WTextBox("", 16);
         username.focused = true;
-        addList.add(new WPlus()).action = () -> FriendManager.INSTANCE.add(username.text);
+        WPlus add = new WPlus();
+        add.action = () -> FriendManager.INSTANCE.add(username.text);
+        grid.addRow(username, add);
 
         layout();
     }
