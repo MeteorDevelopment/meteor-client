@@ -26,6 +26,7 @@ import minegame159.meteorclient.json.GameProfileSerializer;
 import minegame159.meteorclient.json.ModuleManagerSerializer;
 import minegame159.meteorclient.json.ModuleSerializer;
 import minegame159.meteorclient.json.SettingSerializer;
+import minegame159.meteorclient.macros.MacroManager;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.settings.Setting;
@@ -43,6 +44,7 @@ import org.lwjgl.glfw.GLFW;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.UUID;
 
 public class MeteorClient implements ClientModInitializer, Listenable {
@@ -71,6 +73,7 @@ public class MeteorClient implements ClientModInitializer, Listenable {
         EntityUtils.mc = mc;
 
         gson = new GsonBuilder()
+                .excludeFieldsWithModifiers(Modifier.TRANSIENT, Modifier.STATIC)
                 .registerTypeAdapter(ModuleManager.class, new ModuleManagerSerializer())
                 .registerTypeAdapter(Module.class, new ModuleSerializer())
                 .registerTypeAdapter(Setting.class, new SettingSerializer())
@@ -126,6 +129,7 @@ public class MeteorClient implements ClientModInitializer, Listenable {
         Config.load();
         ModuleManager.load();
         FriendManager.load();
+        MacroManager.load();
     });
 
     @EventHandler

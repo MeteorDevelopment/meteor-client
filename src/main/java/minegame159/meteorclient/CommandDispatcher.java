@@ -6,6 +6,7 @@ import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.utils.Utils;
+import net.minecraft.client.MinecraftClient;
 
 import java.util.Arrays;
 
@@ -28,7 +29,8 @@ public class CommandDispatcher {
 
         if (args.length <= 0) {
             // Toggle module if nothing is after it's name
-            module.toggle();
+            if (module.setting) module.openScreen();
+            else module.toggle();
         } else {
             // Set or get module setting
             Setting setting = module.getSetting(args[0]);

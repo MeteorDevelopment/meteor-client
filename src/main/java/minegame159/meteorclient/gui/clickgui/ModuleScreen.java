@@ -25,7 +25,6 @@ public class ModuleScreen extends WidgetScreen implements Listenable {
 
     public ModuleScreen(Module module) {
         super(module.title);
-        parent = mc.currentScreen instanceof WidgetScreen ? mc.currentScreen : null;
         this.module = module;
 
         WPanel panel = add(new WPanel());

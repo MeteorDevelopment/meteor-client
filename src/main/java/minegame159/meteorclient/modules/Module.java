@@ -4,10 +4,12 @@ import me.zero.alpine.listener.Listenable;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.gui.WidgetScreen;
+import minegame159.meteorclient.gui.clickgui.ModuleScreen;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.Screen;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -67,6 +69,11 @@ public abstract class Module implements Listenable {
             MeteorClient.eventBus.unsubscribe(this);
             onDeactivate();
         }
+    }
+
+    public void openScreen() {
+        Screen customScreen = getCustomScreen();
+        mc.openScreen(customScreen != null ? customScreen : new ModuleScreen(this));
     }
 
     public Setting getSetting(String name) {

@@ -23,7 +23,7 @@ public abstract class KeyboardMixin {
 
     @Inject(method = "onKey", at = @At("HEAD"), cancellable = true)
     public void onKey(long window, int key, int scancode, int i, int j, CallbackInfo info) {
-        if (key != GLFW.GLFW_KEY_UNKNOWN && Utils.canUpdate() && !client.isPaused() && (client.currentScreen == null || client.currentScreen instanceof ModuleScreen)) {
+        if (key != GLFW.GLFW_KEY_UNKNOWN && Utils.canUpdate() && !client.isPaused() && (client.currentScreen == null || client.currentScreen instanceof WidgetScreen)) {
             KeyEvent event = EventStore.keyEvent(key, i == 1);
             MeteorClient.eventBus.post(event);
 

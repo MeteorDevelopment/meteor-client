@@ -1,5 +1,6 @@
 package minegame159.meteorclient.modules;
 
+import me.zero.alpine.event.EventPriority;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listenable;
 import me.zero.alpine.listener.Listener;
@@ -13,6 +14,7 @@ import minegame159.meteorclient.modules.player.*;
 import minegame159.meteorclient.modules.render.*;
 import minegame159.meteorclient.modules.setting.Friends;
 import minegame159.meteorclient.modules.setting.GUI;
+import minegame159.meteorclient.modules.setting.Macros;
 import minegame159.meteorclient.utils.Utils;
 import org.lwjgl.glfw.GLFW;
 
@@ -92,7 +94,7 @@ public class ModuleManager implements Listenable {
                 event.cancel();
             }
         }
-    });
+    }, EventPriority.HIGHEST + 1);
 
     void addActive(Module module) {
         active.add(module);
@@ -166,6 +168,7 @@ public class ModuleManager implements Listenable {
     private void initSetting() {
         addModule(new GUI());
         addModule(new Friends());
+        addModule(new Macros());
     }
 
     static {

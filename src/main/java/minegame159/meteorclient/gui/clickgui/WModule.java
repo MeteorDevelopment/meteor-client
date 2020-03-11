@@ -34,11 +34,11 @@ public class WModule extends WWidget {
     @Override
     public boolean onMousePressed(int button) {
         if (mouseOver && button == 0) {
-            module.toggle();
+            if (module.setting) module.openScreen();
+            else module.toggle();
             return true;
         } else if (mouseOver && button == 1) {
-            Screen customScreen = module.getCustomScreen();
-            MinecraftClient.getInstance().openScreen(customScreen != null ? customScreen : new ModuleScreen(module));
+            module.openScreen();
             return true;
         }
 

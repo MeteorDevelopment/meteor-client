@@ -37,6 +37,16 @@ public class WGrid extends WWidget {
         rows.add(row);
     }
 
+    public void removeRow(int i) {
+        WWidget[] toRemove = rows.remove(i);
+        for (WWidget widget : toRemove) {
+            widgets.remove(widget);
+        }
+    }
+    public void removeLastRow() {
+        removeRow(rows.size() - 1);
+    }
+
     @Override
     public void calculatePosition() {
         layout.reset(this);

@@ -20,8 +20,9 @@ public class WidgetScreen extends Screen {
 
     public WidgetScreen(String title) {
         super(new LiteralText(title));
-
         mc = MinecraftClient.getInstance();
+
+        parent = mc.currentScreen instanceof WidgetScreen ? mc.currentScreen : null;
 
         WWidget trueRoot = new WWidget();
         trueRoot.layout = new TrueRootLayout();
@@ -72,6 +73,7 @@ public class WidgetScreen extends Screen {
 
     public void layout() {
         root.layout();
+        root.mouseMove(MinecraftClient.getInstance().mouse.getX() / MinecraftClient.getInstance().window.getScaleFactor(), MinecraftClient.getInstance().mouse.getY() / MinecraftClient.getInstance().window.getScaleFactor());
     }
 
     @Override
@@ -106,8 +108,7 @@ public class WidgetScreen extends Screen {
     @Override
     public void resize(MinecraftClient client, int width, int height) {
         super.resize(client, width, height);
-        root.layout();
-        root.mouseMove(MinecraftClient.getInstance().mouse.getX() / MinecraftClient.getInstance().window.getScaleFactor(), MinecraftClient.getInstance().mouse.getY() / MinecraftClient.getInstance().window.getScaleFactor());
+        layout();
         root.windowResized(width, height);
     }
 

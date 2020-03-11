@@ -36,6 +36,7 @@ public class EventStore {
     private static GameDisconnectedEvent gameDisconnectedEvent = new GameDisconnectedEvent();
     private static MiddleMouseButtonEvent middleMouseButtonEvent = new MiddleMouseButtonEvent();
     private static FriendListChangedEvent friendListChangedEvent = new FriendListChangedEvent();
+    private static MacroListChangedEvent macroListChangedEvent = new MacroListChangedEvent();
 
     public static PlaySoundPacketEvent playSoundPacketEvent(PlaySoundS2CPacket packet) {
         playSoundPacketEvent.packet = packet;
@@ -161,5 +162,9 @@ public class EventStore {
 
     public static FriendListChangedEvent friendListChangedEvent() {
         return friendListChangedEvent;
+    }
+
+    public static MacroListChangedEvent macroListChangedEvent() {
+        return macroListChangedEvent;
     }
 }
