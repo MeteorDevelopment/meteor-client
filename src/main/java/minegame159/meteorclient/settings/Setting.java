@@ -15,14 +15,16 @@ public abstract class Setting<T> {
     private T value;
 
     private final Consumer<T> onChanged;
+    public final Consumer<Setting<T>> onModuleActivated;
 
-    public Setting(String name, String description, T defaultValue, Consumer<T> onChanged) {
+    public Setting(String name, String description, T defaultValue, Consumer<T> onChanged, Consumer<Setting<T>> onModuleActivated) {
         this.name = name;
         this.title = Arrays.stream(name.split("-")).map(StringUtils::capitalize).collect(Collectors.joining(" "));;
         this.description = description;
         this.defaultValue = defaultValue;
         this.value = defaultValue;
         this.onChanged = onChanged;
+        this.onModuleActivated = onModuleActivated;
     }
 
     public T get() {

@@ -5,8 +5,8 @@ import minegame159.meteorclient.utils.Color;
 import java.util.function.Consumer;
 
 public class ColorSetting extends Setting<Color> {
-    public ColorSetting(String name, String description, Color defaultValue, Consumer<Color> onChanged) {
-        super(name, description, defaultValue, onChanged);
+    public ColorSetting(String name, String description, Color defaultValue, Consumer<Color> onChanged, Consumer<Setting<Color>> onModuleActivated) {
+        super(name, description, defaultValue, onChanged, onModuleActivated);
     }
 
     @Override
@@ -34,6 +34,7 @@ public class ColorSetting extends Setting<Color> {
         private String name = "undefined", description = "";
         private Color defaultValue;
         private Consumer<Color> onChanged;
+        private Consumer<Setting<Color>> onModuleActivated;
 
         public Builder name(String name) {
             this.name = name;
@@ -55,8 +56,13 @@ public class ColorSetting extends Setting<Color> {
             return this;
         }
 
+        public Builder onModuleActivated(Consumer<Setting<Color>> onModuleActivated) {
+            this.onModuleActivated = onModuleActivated;
+            return this;
+        }
+
         public ColorSetting build() {
-            return new ColorSetting(name, description, defaultValue, onChanged);
+            return new ColorSetting(name, description, defaultValue, onChanged, onModuleActivated);
         }
     }
 }

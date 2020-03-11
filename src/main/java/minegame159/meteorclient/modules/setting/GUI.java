@@ -35,6 +35,8 @@ public class GUI extends Module {
     public static HoverAnimation hoverAnimation;
     public static double hoverAnimationSpeedMultiplier;
 
+    public static double scrollMultiplier;
+
 
 
     private static Setting<Color> backgroundS;
@@ -54,6 +56,8 @@ public class GUI extends Module {
 
     private static Setting<HoverAnimation> hoverAnimationS;
     private static Setting<Double> hoverAnimationSpeedMultiplierS;
+
+    private static Setting<Double> scrollMultiplierS;
 
     public GUI() {
         super(Category.Setting, "gui", "GUI settings.", true);
@@ -169,5 +173,15 @@ public class GUI extends Module {
                 .build()
         );
         hoverAnimationSpeedMultiplier = hoverAnimationSpeedMultiplierS.get();
+
+        scrollMultiplierS = addSetting(new DoubleSetting.Builder()
+                .name("scroll-multiplier")
+                .description("Scroll multiplier.")
+                .defaultValue(1)
+                .min(0)
+                .onChanged(aDouble -> scrollMultiplier = aDouble)
+                .build()
+        );
+        scrollMultiplier = scrollMultiplierS.get();
     }
 }

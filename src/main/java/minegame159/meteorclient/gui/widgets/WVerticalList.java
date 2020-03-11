@@ -1,6 +1,7 @@
 package minegame159.meteorclient.gui.widgets;
 
 import minegame159.meteorclient.gui.WidgetLayout;
+import minegame159.meteorclient.modules.setting.GUI;
 import minegame159.meteorclient.utils.Box;
 import minegame159.meteorclient.utils.RenderUtils;
 import minegame159.meteorclient.utils.Utils;
@@ -25,7 +26,7 @@ public class WVerticalList extends WWidget {
     public boolean onMouseScrolled(double amount) {
         if ((!scrollOnlyWhenMouseOver || mouseOver) && scrollingActive) {
             double preScroll = scroll;
-            scroll -= amount * 8;
+            scroll -= amount * 8 * GUI.scrollMultiplier;
             scroll = Utils.clamp(scroll, 0, maxScroll);
             double deltaScroll = scroll - preScroll;
 

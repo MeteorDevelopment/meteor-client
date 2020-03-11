@@ -25,6 +25,13 @@ public class Color {
         validate();
     }
 
+    public Color(int packed) {
+        r = toRGBAR(packed);
+        g = toRGBAG(packed);
+        b = toRGBAB(packed);
+        a = toRGBAA(packed);
+    }
+
     public Color(Color color) {
         this.r = color.r;
         this.g = color.g;

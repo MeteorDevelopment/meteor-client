@@ -12,6 +12,7 @@ import minegame159.meteorclient.modules.misc.*;
 import minegame159.meteorclient.modules.movement.*;
 import minegame159.meteorclient.modules.player.*;
 import minegame159.meteorclient.modules.render.*;
+import minegame159.meteorclient.modules.setting.Baritone;
 import minegame159.meteorclient.modules.setting.Friends;
 import minegame159.meteorclient.modules.setting.GUI;
 import minegame159.meteorclient.modules.setting.Macros;
@@ -169,6 +170,7 @@ public class ModuleManager implements Listenable {
         addModule(new GUI());
         addModule(new Friends());
         addModule(new Macros());
+        addModule(new Baritone());
     }
 
     static {

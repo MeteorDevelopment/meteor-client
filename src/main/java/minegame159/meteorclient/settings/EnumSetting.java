@@ -6,8 +6,8 @@ import java.util.function.Consumer;
 public class EnumSetting<T extends Enum<?>> extends Setting<T> {
     private T[] values;
 
-    private EnumSetting(String name, String description, T defaultValue, Consumer<T> onChanged) {
-        super(name, description, defaultValue, onChanged);
+    private EnumSetting(String name, String description, T defaultValue, Consumer<T> onChanged, Consumer<Setting<T>> onModuleActivated) {
+        super(name, description, defaultValue, onChanged, onModuleActivated);
 
         try {
             values = (T[]) defaultValue.getClass().getMethod("values").invoke(null);
@@ -46,6 +46,7 @@ public class EnumSetting<T extends Enum<?>> extends Setting<T> {
         private String name = "undefined", description = "";
         private T defaultValue;
         private Consumer<T> onChanged;
+        private Consumer<Setting<T>> onModuleActivated;
 
         public Builder<T> name(String name) {
             this.name = name;
@@ -67,8 +68,13 @@ public class EnumSetting<T extends Enum<?>> extends Setting<T> {
             return this;
         }
 
+        public Builder onModuleActivated(Consumer<Setting<T>> onModuleActivated) {
+            this.onModuleActivated = onModuleActivated;
+            return this;
+        }
+
         public EnumSetting<T> build() {
-            return new EnumSetting<>(name, description, defaultValue, onChanged);
+            return new EnumSetting<>(name, description, defaultValue, onChanged, onModuleActivated);
         }
     }
 }

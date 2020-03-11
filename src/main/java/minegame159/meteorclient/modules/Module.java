@@ -61,6 +61,11 @@ public abstract class Module implements Listenable {
             active = true;
             ModuleManager.INSTANCE.addActive(this);
             MeteorClient.eventBus.subscribe(this);
+
+            for (Setting setting : settings) {
+                if (setting.onModuleActivated != null) setting.onModuleActivated.accept(setting);
+            }
+
             onActivate();
         }
         else {
@@ -72,6 +77,10 @@ public abstract class Module implements Listenable {
     }
 
     public void openScreen() {
+        for (Setting setting : settings) {
+            if (setting.onModuleActivated != null) setting.onModuleActivated.accept(setting);
+        }
+
         Screen customScreen = getCustomScreen();
         mc.openScreen(customScreen != null ? customScreen : new ModuleScreen(this));
     }
