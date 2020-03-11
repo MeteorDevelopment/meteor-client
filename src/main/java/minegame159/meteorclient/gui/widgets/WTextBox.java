@@ -18,7 +18,7 @@ public class WTextBox extends WWidget {
     public Consumer<WTextBox> action;
 
     private double maxCharCount;
-    private boolean focused;
+    public boolean focused;
     private boolean cursorVisible;
     private int blinkTimer = 0;
 

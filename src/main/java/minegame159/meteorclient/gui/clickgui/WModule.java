@@ -1,6 +1,5 @@
 package minegame159.meteorclient.gui.clickgui;
 
-import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.gui.widgets.WLabel;
 import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.modules.Module;
@@ -8,6 +7,7 @@ import minegame159.meteorclient.modules.setting.GUI;
 import minegame159.meteorclient.utils.RenderUtils;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.Screen;
 
 public class WModule extends WWidget {
     private Module module;
@@ -37,7 +37,8 @@ public class WModule extends WWidget {
             module.toggle();
             return true;
         } else if (mouseOver && button == 1) {
-            MinecraftClient.getInstance().openScreen(new ModuleScreen((WidgetScreen) MinecraftClient.getInstance().currentScreen, module));
+            Screen customScreen = module.getCustomScreen();
+            MinecraftClient.getInstance().openScreen(customScreen != null ? customScreen : new ModuleScreen(module));
             return true;
         }
 

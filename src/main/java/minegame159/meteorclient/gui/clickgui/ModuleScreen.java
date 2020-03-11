@@ -17,18 +17,16 @@ import org.lwjgl.glfw.GLFW;
 
 public class ModuleScreen extends WidgetScreen implements Listenable {
     private Module module;
-    private WidgetScreen parent;
 
     private WVerticalList list;
 
     private WLabel bindLabel;
     private boolean canResetBind = true;
 
-    public ModuleScreen(WidgetScreen parent, Module module) {
+    public ModuleScreen(Module module) {
         super(module.title);
-
+        parent = mc.currentScreen instanceof WidgetScreen ? mc.currentScreen : null;
         this.module = module;
-        this.parent = parent;
 
         WPanel panel = add(new WPanel());
         panel.boundingBox.setMargin(6);
@@ -137,6 +135,6 @@ public class ModuleScreen extends WidgetScreen implements Listenable {
     @Override
     public void onClose() {
         MeteorClient.eventBus.unsubscribe(this);
-        minecraft.openScreen(parent);
+        super.onClose();
     }
 }

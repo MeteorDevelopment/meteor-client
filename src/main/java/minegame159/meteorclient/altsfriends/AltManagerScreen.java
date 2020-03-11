@@ -1,4 +1,4 @@
-package minegame159.meteorclient.alts;
+package minegame159.meteorclient.altsfriends;
 
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.utils.Color;

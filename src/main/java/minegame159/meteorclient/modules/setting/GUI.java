@@ -26,6 +26,8 @@ public class GUI extends Module {
     public static Color outlineHighlighted = new Color();
 
     public static Color checkbox = new Color();
+    public static Color plus = new Color();
+    public static Color minus = new Color();
 
     public static Color text = new Color();
     public static int textC;
@@ -45,6 +47,8 @@ public class GUI extends Module {
     private static Setting<Color> outlineHighlightedS;
 
     private static Setting<Color> checkboxS;
+    private static Setting<Color> plusS;
+    private static Setting<Color> minusS;
 
     private static Setting<Color> textS;
 
@@ -117,6 +121,22 @@ public class GUI extends Module {
                 .build()
         );
         checkbox.set(checkboxS.get());
+        plusS = addSetting(new ColorSetting.Builder()
+                .name("plus")
+                .description("Plus color.")
+                .defaultValue(new Color(45, 225, 45))
+                .onChanged(color1 -> plus.set(color1))
+                .build()
+        );
+        plus.set(plusS.get());
+        minusS = addSetting(new ColorSetting.Builder()
+                .name("minus")
+                .description("Minus color.")
+                .defaultValue(new Color(225, 45, 45))
+                .onChanged(color1 -> minus.set(color1))
+                .build()
+        );
+        minus.set(minusS.get());
 
         textS = addSetting(new ColorSetting.Builder()
                 .name("text")

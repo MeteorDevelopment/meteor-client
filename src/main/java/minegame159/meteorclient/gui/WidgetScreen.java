@@ -3,24 +3,25 @@ package minegame159.meteorclient.gui;
 import com.mojang.blaze3d.platform.GlStateManager;
 import minegame159.meteorclient.gui.widgets.WDebugRenderer;
 import minegame159.meteorclient.gui.widgets.WWidget;
-import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.RenderUtils;
 import minegame159.meteorclient.utils.Vector2;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.Tessellator;
-import net.minecraft.client.render.VertexFormats;
 import net.minecraft.text.LiteralText;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
 public class WidgetScreen extends Screen {
+    protected Screen parent;
     private WRoot root = new WRoot();
     private boolean renderDebug = false;
 
+    protected MinecraftClient mc;
+
     public WidgetScreen(String title) {
         super(new LiteralText(title));
+
+        mc = MinecraftClient.getInstance();
 
         WWidget trueRoot = new WWidget();
         trueRoot.layout = new TrueRootLayout();
@@ -29,6 +30,10 @@ public class WidgetScreen extends Screen {
 
     public <T extends WWidget> T add(T widget) {
         return root.add(widget);
+    }
+
+    public void clear() {
+        root.widgets.clear();
     }
 
     @Override
@@ -109,6 +114,11 @@ public class WidgetScreen extends Screen {
     @Override
     public boolean isPauseScreen() {
         return false;
+    }
+
+    @Override
+    public void onClose() {
+        minecraft.openScreen(parent);
     }
 
     private static class WRoot extends WWidget {

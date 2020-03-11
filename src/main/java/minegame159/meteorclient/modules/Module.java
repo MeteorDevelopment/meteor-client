@@ -3,6 +3,7 @@ package minegame159.meteorclient.modules;
 import me.zero.alpine.listener.Listenable;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.EventStore;
+import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.Utils;
@@ -86,6 +87,10 @@ public abstract class Module implements Listenable {
     }
 
     public String getInfoString() {
+        return null;
+    }
+
+    public WidgetScreen getCustomScreen() {
         return null;
     }
 

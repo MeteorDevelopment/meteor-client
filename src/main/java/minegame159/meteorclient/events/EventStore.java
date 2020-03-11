@@ -34,6 +34,8 @@ public class EventStore {
     private static GameJoinedEvent gameJoinedEvent = new GameJoinedEvent();
     private static BetterShulkerTooltipEvent betterShulkerTooltipEvent = new BetterShulkerTooltipEvent();
     private static GameDisconnectedEvent gameDisconnectedEvent = new GameDisconnectedEvent();
+    private static MiddleMouseButtonEvent middleMouseButtonEvent = new MiddleMouseButtonEvent();
+    private static FriendListChangedEvent friendListChangedEvent = new FriendListChangedEvent();
 
     public static PlaySoundPacketEvent playSoundPacketEvent(PlaySoundS2CPacket packet) {
         playSoundPacketEvent.packet = packet;
@@ -151,5 +153,13 @@ public class EventStore {
     public static GameDisconnectedEvent gameDisconnectedEvent(Text disconnectReason) {
         gameDisconnectedEvent.disconnectReason = disconnectReason;
         return gameDisconnectedEvent;
+    }
+
+    public static MiddleMouseButtonEvent middleMouseButtonEvent() {
+        return middleMouseButtonEvent;
+    }
+
+    public static FriendListChangedEvent friendListChangedEvent() {
+        return friendListChangedEvent;
     }
 }

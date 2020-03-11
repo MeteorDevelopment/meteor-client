@@ -3,6 +3,7 @@ package minegame159.meteorclient.modules.combat;
 import com.google.common.collect.Streams;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
+import minegame159.meteorclient.altsfriends.FriendManager;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
@@ -13,6 +14,7 @@ import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.utils.EntityUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Hand;
 
 public class KillAura extends Module {
@@ -27,6 +29,13 @@ public class KillAura extends Module {
             .name("players")
             .description("Attack players.")
             .defaultValue(true)
+            .build()
+    );
+
+    public Setting<Boolean> friends = addSetting(new BoolSetting.Builder()
+            .name("friends")
+            .description("Attack friends, useful only if attack friends is on.")
+            .defaultValue(false)
             .build()
     );
 
@@ -76,7 +85,10 @@ public class KillAura extends Module {
 
     private boolean canAttackEntity(Entity entity) {
         if (entity.getUuid().equals(mc.player.getUuid())) return false;
-        if (EntityUtils.isPlayer(entity) && players.get()) return true;
+        if (EntityUtils.isPlayer(entity) && players.get()) {
+            if (friends.get()) return true;
+            return FriendManager.INSTANCE.contains((PlayerEntity) entity);
+        }
         if (EntityUtils.isAnimal(entity) && animals.get()) return true;
         return EntityUtils.isMob(entity) && mobs.get();
     }

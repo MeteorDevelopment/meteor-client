@@ -16,6 +16,7 @@ import me.zero.alpine.bus.EventManager;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listenable;
 import me.zero.alpine.listener.Listener;
+import minegame159.meteorclient.altsfriends.FriendManager;
 import minegame159.meteorclient.commands.CommandManager;
 import minegame159.meteorclient.events.GameDisconnectedEvent;
 import minegame159.meteorclient.events.GameJoinedEvent;
@@ -124,6 +125,7 @@ public class MeteorClient implements ClientModInitializer, Listenable {
     private Listener<GameJoinedEvent> onGameJoined = new Listener<>(event -> {
         Config.load();
         ModuleManager.load();
+        FriendManager.load();
     });
 
     @EventHandler

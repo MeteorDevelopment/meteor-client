@@ -11,6 +11,7 @@ import minegame159.meteorclient.modules.misc.*;
 import minegame159.meteorclient.modules.movement.*;
 import minegame159.meteorclient.modules.player.*;
 import minegame159.meteorclient.modules.render.*;
+import minegame159.meteorclient.modules.setting.Friends;
 import minegame159.meteorclient.modules.setting.GUI;
 import minegame159.meteorclient.utils.Utils;
 import org.lwjgl.glfw.GLFW;
@@ -159,10 +160,12 @@ public class ModuleManager implements Listenable {
         addModule(new AutoShearer());
         addModule(new AutoNametag());
         addModule(new AutoBreeder());
+        addModule(new MiddleClickFriend());
     }
 
     private void initSetting() {
         addModule(new GUI());
+        addModule(new Friends());
     }
 
     static {

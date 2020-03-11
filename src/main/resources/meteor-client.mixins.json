@@ -22,7 +22,8 @@
     "AbstractButtonWidgetMixin",
     "ClientConnectionMixin",
     "ShulkerBoxBlockMixin",
-    "MultiplayerScreenMixin"
+    "MultiplayerScreenMixin",
+    "MouseMixin"
   ],
   "injectors": {
     "defaultRequire": 1
