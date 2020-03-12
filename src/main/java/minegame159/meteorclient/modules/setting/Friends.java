@@ -7,7 +7,7 @@ import minegame159.meteorclient.modules.Module;
 
 public class Friends extends Module {
     public Friends() {
-        super(Category.Setting, "friends", "Friend list.", true);
+        super(Category.Setting, "friends", "Friend list.", true, true, false);
     }
 
     @Override

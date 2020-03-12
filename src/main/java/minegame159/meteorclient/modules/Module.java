@@ -27,20 +27,26 @@ public abstract class Module implements Listenable {
     public final int color;
     public final List<Setting> settings = new ArrayList<>();
     public final boolean setting;
+    public final boolean serialize;
     private int key = -1;
 
     private boolean active;
     private boolean visible;
 
-    public Module(Category category, String name, String description, boolean setting, boolean visible) {
+    public Module(Category category, String name, String description, boolean setting, boolean visible, boolean serialize) {
         this.category = category;
         this.name = name.toLowerCase();
         title = Arrays.stream(name.split("-")).map(StringUtils::capitalize).collect(Collectors.joining(" "));
         this.description = description;
         this.setting = setting;
         this.visible = visible;
+        this.serialize = serialize;
         color = Color.fromRGBA(Utils.random(180, 255), Utils.random(180, 255), Utils.random(180, 255), 255);
         mc = MinecraftClient.getInstance();
+    }
+
+    public Module(Category category, String name, String description, boolean setting, boolean visible) {
+        this(category, name, description, setting, visible, true);
     }
 
     public Module(Category category, String name, String description, boolean setting) {

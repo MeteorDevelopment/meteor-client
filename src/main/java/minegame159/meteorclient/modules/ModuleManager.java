@@ -19,7 +19,6 @@ import minegame159.meteorclient.modules.setting.Macros;
 import minegame159.meteorclient.utils.Utils;
 import org.lwjgl.glfw.GLFW;
 
-import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,7 +27,6 @@ import java.util.Map;
 public class ModuleManager implements Listenable {
     public static ModuleManager INSTANCE;
     public static final Category[] CATEGORIES = { Category.Combat, Category.Player, Category.Movement, Category.Render, Category.Misc, Category.Setting };
-    private static final File file = new File(MeteorClient.directory, "modules.json");
 
     private List<Module> modules = new ArrayList<>();
     private Map<Category, List<Module>> groups = new HashMap<>();
@@ -171,39 +169,5 @@ public class ModuleManager implements Listenable {
         addModule(new Friends());
         addModule(new Macros());
         addModule(new Baritone());
-    }
-
-    static {
-        file.getParentFile().mkdirs();
-    }
-
-    public static void save() {
-        try {
-            Writer writer = new FileWriter(file);
-            MeteorClient.gson.toJson(INSTANCE, writer);
-            writer.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void load() {
-        if (!file.exists()) {
-            if (INSTANCE == null) {
-                INSTANCE = new ModuleManager();
-                MeteorClient.eventBus.subscribe(INSTANCE);
-            }
-            return;
-        }
-
-        try {
-            FileReader reader = new FileReader(file);
-            if (INSTANCE != null) MeteorClient.eventBus.unsubscribe(INSTANCE);
-            INSTANCE = MeteorClient.gson.fromJson(reader, ModuleManager.class);
-            MeteorClient.eventBus.subscribe(INSTANCE);
-            reader.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 }

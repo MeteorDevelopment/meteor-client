@@ -12,7 +12,9 @@ public class ModuleManagerSerializer implements JsonSerializer<ModuleManager>, J
         JsonArray a = new JsonArray();
 
         for (Module module : src.getAll()) {
-            a.add(context.serialize(module, Module.class));
+            if (module.serialize) {
+                a.add(context.serialize(module, Module.class));
+            }
         }
 
         return a;

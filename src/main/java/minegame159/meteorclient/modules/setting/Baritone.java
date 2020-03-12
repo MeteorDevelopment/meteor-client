@@ -12,7 +12,7 @@ import minegame159.meteorclient.utils.Color;
 
 public class Baritone extends Module {
     public Baritone() {
-        super(Category.Setting, "baritone", "Some most of the most useful Baritone settings.", true);
+        super(Category.Setting, "baritone", "Some most of the most useful Baritone settings.", true, true, false);
 
         Settings s = BaritoneAPI.getSettings();
 

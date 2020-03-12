@@ -8,13 +8,14 @@ import minegame159.meteorclient.gui.widgets.WWidget;
 import net.minecraft.client.MinecraftClient;
 
 public class PanelListScreen extends WidgetScreen {
+    private WPanel panel;
     private WVerticalList list;
 
     public PanelListScreen(String title) {
         super(title);
 
         // Panel
-        WPanel panel = super.add(new WPanel());
+        panel = super.add(new WPanel());
         panel.boundingBox.setMargin(6);
         panel.boundingBox.alignment.set(Alignment.X.Center, Alignment.Y.Center);
 
@@ -30,6 +31,12 @@ public class PanelListScreen extends WidgetScreen {
     @Override
     public <T extends WWidget> T add(T widget) {
         return list.add(widget);
+    }
+
+    @Override
+    public void clear() {
+        super.clear();
+        super.add(panel);
     }
 
     @Override

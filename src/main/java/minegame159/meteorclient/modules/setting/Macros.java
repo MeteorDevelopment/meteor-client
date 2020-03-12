@@ -7,7 +7,7 @@ import minegame159.meteorclient.modules.Module;
 
 public class Macros extends Module {
     public Macros() {
-        super(Category.Setting, "macros", "Macro list.", true);
+        super(Category.Setting, "macros", "Macro list.", true, true, false);
     }
 
     @Override

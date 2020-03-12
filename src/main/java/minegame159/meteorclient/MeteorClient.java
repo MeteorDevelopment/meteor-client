@@ -87,6 +87,11 @@ public class MeteorClient implements ClientModInitializer, Listenable {
         MixinValues.init();
         CommandManager.init();
 
+        SaveManager.register(Config.class, "config");
+        SaveManager.register(ModuleManager.class, "modules");
+        SaveManager.register(FriendManager.class, "friends");
+        SaveManager.register(MacroManager.class, "macros");
+
         try {
             Field authenticationServiceField = BaseMinecraftSessionService.class.getDeclaredField("authenticationService");
             authenticationServiceField.setAccessible(true);
@@ -126,15 +131,15 @@ public class MeteorClient implements ClientModInitializer, Listenable {
 
     @EventHandler
     private Listener<GameJoinedEvent> onGameJoined = new Listener<>(event -> {
-        Config.load();
-        ModuleManager.load();
-        FriendManager.load();
-        MacroManager.load();
+        SaveManager.load(Config.class);
+        SaveManager.load(ModuleManager.class);
+        SaveManager.load(FriendManager.class);
+        SaveManager.load(MacroManager.class);
     });
 
     @EventHandler
     private Listener<GameDisconnectedEvent> onGameDisconnected = new Listener<>(event -> {
-        Config.save();
-        ModuleManager.save();
+        SaveManager.save(Config.class);
+        SaveManager.save(ModuleManager.class);
     });
 }

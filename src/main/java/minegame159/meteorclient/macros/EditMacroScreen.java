@@ -5,6 +5,7 @@ import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listenable;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.MeteorClient;
+import minegame159.meteorclient.SaveManager;
 import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.events.KeyEvent;
 import minegame159.meteorclient.gui.Alignment;
@@ -29,17 +30,17 @@ public class EditMacroScreen extends PanelListScreen implements Listenable {
         name.add(new WTextBox(newMacro ? "" : macro.name, 16)).action = textBox -> macro.name = textBox.text.trim();
         add(new WHorizontalSeparator());
 
-        // Commands
-        add(new WLabel("Commands:"));
+        // Messages
+        add(new WLabel("Messages:"));
         WGrid grid = add(new WGrid(4, 4, 2));
-        for (int i = 0; i < macro.commands.size(); i++) {
+        for (int i = 0; i < macro.messages.size(); i++) {
             int ii = i;
 
-            WTextBox command = new WTextBox(macro.commands.get(ii), 32);
-            command.action = textBox -> macro.commands.set(ii, textBox.text.trim());
+            WTextBox command = new WTextBox(macro.messages.get(ii), 32);
+            command.action = textBox -> macro.messages.set(ii, textBox.text.trim());
             WMinus remove = new WMinus();
             remove.action = () -> {
-                macro.removeCommand(ii);
+                macro.removeMessage(ii);
                 grid.removeRow(ii);
                 layout();
             };
@@ -51,14 +52,14 @@ public class EditMacroScreen extends PanelListScreen implements Listenable {
         WPlus add = new WPlus();
         add.action = () -> {
             grid.removeLastRow();
-            macro.commands.add(newCommand.text.trim());
+            macro.messages.add(newCommand.text.trim());
 
             WTextBox command = new WTextBox(newCommand.text.trim(), 32);
-            command.action = textBox -> macro.commands.set(macro.commands.size() - 1, textBox.text.trim());
+            command.action = textBox -> macro.messages.set(macro.messages.size() - 1, textBox.text.trim());
             WMinus remove = new WMinus();
             remove.action = () -> {
-                macro.removeCommand(macro.commands.size() - 1);
-                grid.removeRow(macro.commands.size() - 1);
+                macro.removeMessage(macro.messages.size() - 1);
+                grid.removeRow(macro.messages.size() - 1);
                 layout();
             };
 
@@ -86,12 +87,12 @@ public class EditMacroScreen extends PanelListScreen implements Listenable {
         applyAdd.boundingBox.alignment.x = Alignment.X.Center;
         applyAdd.action = () -> {
             if (newMacro) {
-                if (macro.name != null && !macro.name.isEmpty() && macro.commands.size() > 0 && macro.key != -1) {
+                if (macro.name != null && !macro.name.isEmpty() && macro.messages.size() > 0 && macro.key != -1) {
                     MacroManager.INSTANCE.add(macro);
                     onClose();
                 }
             } else {
-                MacroManager.save();
+                SaveManager.save(MacroManager.class);
                 MeteorClient.eventBus.post(EventStore.macroListChangedEvent());
                 onClose();
             }

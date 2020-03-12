@@ -12,21 +12,21 @@ import java.util.Objects;
 
 public class Macro implements Listenable {
     public String name;
-    public List<String> commands = new ArrayList<>();
+    public List<String> messages = new ArrayList<>();
     public int key = -1;
 
-    public void addCommand(String command) {
-        commands.add(command);
+    public void addMessage(String command) {
+        messages.add(command);
     }
 
-    public void removeCommand(int i) {
-        commands.remove(i);
+    public void removeMessage(int i) {
+        messages.remove(i);
     }
 
     @EventHandler
     private transient Listener<KeyEvent> onKey = new Listener<>(event -> {
         if (event.push && event.key == key && MinecraftClient.getInstance().currentScreen == null) {
-            for (String command : commands) {
+            for (String command : messages) {
                 MinecraftClient.getInstance().player.sendChatMessage(command);
             }
             event.cancel();
