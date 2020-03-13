@@ -116,11 +116,14 @@ public abstract class Module implements Listenable {
         return null;
     }
 
-    public void setKey(int key) {
+    public void setKey(int key, boolean postEvent) {
         if (setting) return;
 
         this.key = key;
-        MeteorClient.eventBus.post(EventStore.moduleBindChangedEvent(this));
+        if (postEvent) MeteorClient.eventBus.post(EventStore.moduleBindChangedEvent(this));
+    }
+    public void setKey(int key) {
+        setKey(key, true);
     }
 
     public int getKey() {

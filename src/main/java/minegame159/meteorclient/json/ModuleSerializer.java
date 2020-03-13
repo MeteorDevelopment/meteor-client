@@ -19,6 +19,7 @@ public class ModuleSerializer implements JsonSerializer<Module> {
         if (!src.setting) {
             o.addProperty("active", src.isActive());
             o.addProperty("visible", src.isVisible());
+            o.addProperty("key", src.getKey());
         }
 
         o.add("settings", context.serialize(src.settings, new TypeToken<List<Setting>>() {}.getType()));
@@ -32,6 +33,7 @@ public class ModuleSerializer implements JsonSerializer<Module> {
             if (module.isActive() != active) module.toggle();
 
             module.setVisible(json.get("visible").getAsBoolean());
+            module.setKey(json.get("key").getAsInt(), false);
         }
 
         for (JsonElement e : json.get("settings").getAsJsonArray()) {
