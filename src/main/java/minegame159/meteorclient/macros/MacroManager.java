@@ -1,5 +1,6 @@
 package minegame159.meteorclient.macros;
 
+import me.zero.alpine.listener.Listenable;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.SaveManager;
 import minegame159.meteorclient.events.EventStore;
@@ -7,7 +8,7 @@ import minegame159.meteorclient.events.EventStore;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MacroManager {
+public class MacroManager implements Listenable {
     public static MacroManager INSTANCE;
 
     private List<Macro> macros = new ArrayList<>();

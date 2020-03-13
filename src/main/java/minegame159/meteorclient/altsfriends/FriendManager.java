@@ -1,5 +1,6 @@
 package minegame159.meteorclient.altsfriends;
 
+import me.zero.alpine.listener.Listenable;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.SaveManager;
 import minegame159.meteorclient.events.EventStore;
@@ -8,7 +9,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FriendManager {
+public class FriendManager implements Listenable {
     public static FriendManager INSTANCE;
 
     private List<String> friends = new ArrayList<>();

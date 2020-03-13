@@ -1,5 +1,7 @@
 package minegame159.meteorclient;
 
+import me.zero.alpine.listener.Listenable;
+
 import java.io.*;
 import java.lang.reflect.Field;
 import java.util.HashMap;
@@ -33,9 +35,14 @@ public class SaveManager {
             Field instance = klass.getField("INSTANCE");
 
             if (!file.exists()) {
-                if (instance.get(null) == null) instance.set(null, klass.newInstance());
+                if (instance.get(null) == null) {
+                    instance.set(null, klass.newInstance());
+                    MeteorClient.eventBus.subscribe((Listenable) instance.get(null));
+                }
                 return;
             }
+
+            if (instance.get(null) != null) MeteorClient.eventBus.unsubscribe((Listenable) instance.get(null));
 
             Reader reader = new FileReader(file);
             instance.set(null, MeteorClient.gson.fromJson(reader, klass));
@@ -45,7 +52,10 @@ public class SaveManager {
                 System.out.println("Meteor-Client: Failed to load " + klass + ", resetting.");
                 file.delete();
                 load(klass);
+                return;
             }
+
+            MeteorClient.eventBus.subscribe((Listenable) instance.get(null));
         } catch (NoSuchFieldException | IllegalAccessException | InstantiationException | IOException e) {
             e.printStackTrace();
         }
