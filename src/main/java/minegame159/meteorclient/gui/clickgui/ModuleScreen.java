@@ -31,6 +31,7 @@ public class ModuleScreen extends PanelListScreen implements Listenable {
         WGrid grid = add(new WGrid(4, 4, 3));
         for (Setting setting : module.settings) {
             WLabel name = new WLabel(setting.title + ":");
+            name.tooltip = setting.description;
 
             WWidget s;
             if (setting.get() instanceof Boolean) {
@@ -53,6 +54,7 @@ public class ModuleScreen extends PanelListScreen implements Listenable {
                 s = new WColorEdit((Color) setting.get());
                 ((WColorEdit) s).action = wColorEdit -> setting.set(wColorEdit.color);
             } else s = new WLabel("Setting type not supported.");
+            s.tooltip = setting.description;
 
             WButton reset = new WButton("Reset");
             reset.action = () -> {
