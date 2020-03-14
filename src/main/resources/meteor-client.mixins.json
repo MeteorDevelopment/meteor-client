@@ -27,7 +27,8 @@
     "ChunkOcclusionDataBuilderMixin",
     "CameraMixin",
     "TitleScreenMixin",
-    "EntityMixin"
+    "EntityMixin",
+    "PlayerMoveC2SPacketMixin"
   ],
   "injectors": {
     "defaultRequire": 1
