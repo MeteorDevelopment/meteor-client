@@ -54,6 +54,14 @@ public class ModuleManager implements Listenable {
         return active;
     }
 
+    public <T extends Module> T get(Class<T> klass) {
+        for (Module module : modules) {
+            if (module.getClass() == klass) return (T) module;
+        }
+
+        return null;
+    }
+
     public Module get(String name) {
         for (Module module : modules) {
             if (module.name.equalsIgnoreCase(name)) return module;

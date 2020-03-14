@@ -23,7 +23,9 @@
     "ClientConnectionMixin",
     "ShulkerBoxBlockMixin",
     "MultiplayerScreenMixin",
-    "MouseMixin"
+    "MouseMixin",
+    "ChunkOcclusionDataBuilderMixin",
+    "CameraMixin"
   ],
   "injectors": {
     "defaultRequire": 1
