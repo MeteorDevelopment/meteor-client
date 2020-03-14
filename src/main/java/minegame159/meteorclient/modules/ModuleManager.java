@@ -144,6 +144,7 @@ public class ModuleManager implements Listenable {
         addModule(new Spider());
         addModule(new AutoJump());
         addModule(new Flight());
+        addModule(new NoPush());
     }
 
     private void initRender() {
