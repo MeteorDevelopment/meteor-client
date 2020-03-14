@@ -118,8 +118,11 @@ public class EventStore {
         return render2DEvent;
     }
 
-    public static RenderEvent renderEvent(float tickDelta) {
+    public static RenderEvent renderEvent(float tickDelta, double offsetX, double offsetY, double offsetZ) {
         renderEvent.tickDelta = tickDelta;
+        renderEvent.offsetX = offsetX;
+        renderEvent.offsetY = offsetY;
+        renderEvent.offsetZ = offsetZ;
         return renderEvent;
     }
 

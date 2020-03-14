@@ -20,13 +20,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
 public class Tracers extends Module {
-    private Setting<Boolean> center = addSetting(new BoolSetting.Builder()
-            .name("center")
-            .description("Tracers go to the center of the entity instead of its head.")
-            .defaultValue(false)
-            .build()
-    );
-
     private Setting<Boolean> players = addSetting(new BoolSetting.Builder()
             .name("players")
             .description("See players.")
@@ -89,33 +82,34 @@ public class Tracers extends Module {
         super(Category.Render, "tracers", "Displays lines to entities.");
     }
 
-    private void render(Entity entity, Color color) {
+    private void render(Entity entity, Color color, RenderEvent event) {
         Vec3d vec2 = entity.getPos().add(0, entity.getEyeHeight(entity.getPose()), 0);
-        RenderUtils.line(vec1.x, vec1.y, vec1.z, vec2.x, vec2.y, vec2.z, color);
+        double y = (entity.getBoundingBox().y2 - entity.getBoundingBox().y1) / 2.0;
+        RenderUtils.line(vec1.x - (mc.cameraEntity.x - event.offsetX), vec1.y - (mc.cameraEntity.y - event.offsetY), vec1.z - (mc.cameraEntity.z - event.offsetZ), vec2.x, vec2.y - y, vec2.z, color);
     }
 
-    private void render(BlockEntity blockEntity) {
+    private void render(BlockEntity blockEntity, RenderEvent event) {
         BlockPos pos = blockEntity.getPos();
-        RenderUtils.line(vec1.x, vec1.y, vec1.z, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5f, storageColor.get());
+        RenderUtils.line(vec1.x - (mc.cameraEntity.x - event.offsetX), vec1.y - (mc.cameraEntity.y - event.offsetY), vec1.z - (mc.cameraEntity.z - event.offsetZ), pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5f, storageColor.get());
     }
 
     @EventHandler
     private Listener<RenderEvent> onRender = new Listener<>(event -> {
-        vec1 = new Vec3d(0, 0, 1).rotateX(-(float) Math.toRadians(mc.cameraEntity.pitch)).rotateY(-(float) Math.toRadians(mc.cameraEntity.yaw));
-        vec1 = vec1.add(mc.cameraEntity.getPos());
-
-        if (!center.get()) vec1 = vec1.add(0, mc.cameraEntity.getEyeHeight(mc.cameraEntity.getPose()), 0);
+        vec1 = new Vec3d(0, 0, 1)
+                .rotateX(-(float) Math.toRadians(mc.cameraEntity.pitch))
+                .rotateY(-(float) Math.toRadians(mc.cameraEntity.yaw))
+                .add(mc.cameraEntity.getPos());
 
         for (Entity entity : mc.world.getEntities()) {
-            if (players.get() && EntityUtils.isPlayer(entity) && entity != mc.player) render(entity, playersColor.get());
-            else if (animals.get() && EntityUtils.isAnimal(entity)) render(entity, animalsColor.get());
-            else if (mobs.get() && EntityUtils.isMob(entity)) render(entity, mobsColor.get());
+            if (players.get() && EntityUtils.isPlayer(entity) && entity != mc.player) render(entity, playersColor.get(), event);
+            else if (animals.get() && EntityUtils.isAnimal(entity)) render(entity, animalsColor.get(), event);
+            else if (mobs.get() && EntityUtils.isMob(entity)) render(entity, mobsColor.get(), event);
         }
 
         if (storage.get()) {
             for (BlockEntity blockEntity : mc.world.blockEntities) {
                 if (blockEntity instanceof ChestBlockEntity || blockEntity instanceof BarrelBlockEntity || blockEntity instanceof ShulkerBoxBlockEntity) {
-                    render(blockEntity);
+                    render(blockEntity, event);
                 }
             }
         }

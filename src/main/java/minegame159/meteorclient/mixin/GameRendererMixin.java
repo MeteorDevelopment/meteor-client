@@ -8,7 +8,6 @@ import minegame159.meteorclient.utils.RenderUtils;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.GameRenderer;
-import net.minecraft.entity.EntityPose;
 import org.lwjgl.opengl.GL11;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -34,15 +33,15 @@ public abstract class GameRendererMixin {
         GL11.glEnable(GL11.GL_LINE_SMOOTH);
 
         GlStateManager.pushMatrix();
-        double px = client.player.prevX + (client.player.x - client.player.prevX) * tickDelta;
-        double py = client.player.prevY + (client.player.y - client.player.prevY) * tickDelta + client.player.getEyeHeight(client.player.getPose());
-        double pz = client.player.prevZ + (client.player.z - client.player.prevZ) * tickDelta;
+        double px = client.cameraEntity.prevX + (client.cameraEntity.x - client.cameraEntity.prevX) * tickDelta;
+        double py = client.cameraEntity.prevY + (client.cameraEntity.y - client.cameraEntity.prevY) * tickDelta + client.cameraEntity.getEyeHeight(client.cameraEntity.getPose());
+        double pz = client.cameraEntity.prevZ + (client.cameraEntity.z - client.cameraEntity.prevZ) * tickDelta;
         GlStateManager.translated(-px, -py, -pz);
         GlStateManager.color4f(1, 1, 1, 1);
         RenderUtils.beginLines();
         RenderUtils.beginQuads();
 
-        MeteorClient.eventBus.post(EventStore.renderEvent(tickDelta));
+        MeteorClient.eventBus.post(EventStore.renderEvent(tickDelta, px, py, pz));
 
         RenderUtils.endQuads();
         RenderUtils.endLines();
