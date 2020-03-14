@@ -25,7 +25,8 @@
     "MultiplayerScreenMixin",
     "MouseMixin",
     "ChunkOcclusionDataBuilderMixin",
-    "CameraMixin"
+    "CameraMixin",
+    "TitleScreenMixin"
   ],
   "injectors": {
     "defaultRequire": 1
