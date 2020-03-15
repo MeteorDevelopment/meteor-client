@@ -11,6 +11,7 @@ import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.utils.Color;
+import minegame159.meteorclient.utils.TickRate;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
@@ -23,9 +24,27 @@ import java.util.HashMap;
 import java.util.Objects;
 
 public class Info extends Module {
+    private static int white = Color.fromRGBA(255, 255, 255, 255);
+    private static int gray = Color.fromRGBA(185, 185, 185, 255);
+    private static int red = Color.fromRGBA(225, 45, 45, 255);
+
     private Setting<Boolean> fps = addSetting(new BoolSetting.Builder()
             .name("fps")
             .description("Display fps.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private Setting<Boolean> tps = addSetting(new BoolSetting.Builder()
+            .name("tps")
+            .description("Display tps.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private Setting<Boolean> speed = addSetting(new BoolSetting.Builder()
+            .name("speed")
+            .description("Display speed in blocks per second.")
             .defaultValue(true)
             .build()
     );
@@ -104,14 +123,17 @@ public class Info extends Module {
         updateEntities = true;
     });
 
+    private void drawInfo(String text1, String text2, int y, int text1Color) {
+        Utils.drawTextWithShadow(text1, 2, y, text1Color);
+        Utils.drawTextWithShadow(text2, 2 + Utils.getTextWidth(text1), y, gray);
+    }
     private void drawInfo(String text1, String text2, int y) {
-        Utils.drawTextWithShadow(text1, 2, y, Color.fromRGBA(255, 255, 255, 255));
-        Utils.drawTextWithShadow(text2, 2 + Utils.getTextWidth(text1), y, Color.fromRGBA(185, 185, 185, 255));
+        drawInfo(text1, text2, y, white);
     }
 
     private void drawEntityCount(EntityInfo entityInfo, int y) {
-        Utils.drawTextWithShadow(entityInfo.countStr, 2, y, Color.fromRGBA(185, 185, 185, 255));
-        Utils.drawTextWithShadow(entityInfo.name, 2 + (maxLetterCount - entityInfo.countStr.length()) * 4 + 4 + Utils.getTextWidth(entityInfo.countStr), y, Color.fromRGBA(255, 255, 255, 255));
+        Utils.drawTextWithShadow(entityInfo.countStr, 2, y, gray);
+        Utils.drawTextWithShadow(entityInfo.name, 2 + (maxLetterCount - entityInfo.countStr.length()) * 4 + 4 + Utils.getTextWidth(entityInfo.countStr), y, white);
     }
 
     @EventHandler
@@ -142,6 +164,32 @@ public class Info extends Module {
 
         if (fps.get()) {
             drawInfo("FPS: ", MinecraftClient.getCurrentFps() + "", y);
+            y += Utils.getTextHeight() + 2;
+        }
+
+        float tickRate = -1;
+        if (tps.get()) {
+            tickRate = TickRate.INSTANCE.getTickRate();
+
+            drawInfo("TPS: ", String.format("%.1f", tickRate), y);
+            y += Utils.getTextHeight() + 2;
+        }
+
+        float timeSinceLastTick = TickRate.INSTANCE.getTimeSinceLastTick();
+        if (timeSinceLastTick >= 1f) {
+            drawInfo("Since last tick: ", String.format("%.1f", timeSinceLastTick), y, red);
+            y += Utils.getTextHeight() + 2;
+        }
+
+        if (speed.get()) {
+            if (tickRate == -1) tickRate = TickRate.INSTANCE.getTickRate();
+
+            double tX = Math.abs(mc.player.x - mc.player.prevX);
+            double tY = Math.abs(mc.player.y - mc.player.prevY);
+            double tZ = Math.abs(mc.player.z - mc.player.prevZ);
+            double length = Math.sqrt(tX * tX + tY * tY + tZ * tZ);
+
+            drawInfo("Speed: ", String.format("%.1f", length * tickRate), y);
             y += Utils.getTextHeight() + 2;
         }
 

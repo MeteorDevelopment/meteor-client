@@ -1,6 +1,7 @@
 package minegame159.meteorclient.events;
 
 import minegame159.meteorclient.events.packets.PlaySoundPacketEvent;
+import minegame159.meteorclient.events.packets.ReceivePacketEvent;
 import minegame159.meteorclient.events.packets.SendPacketEvent;
 import minegame159.meteorclient.modules.Module;
 import net.minecraft.block.BlockState;
@@ -37,6 +38,7 @@ public class EventStore {
     private static MiddleMouseButtonEvent middleMouseButtonEvent = new MiddleMouseButtonEvent();
     private static FriendListChangedEvent friendListChangedEvent = new FriendListChangedEvent();
     private static MacroListChangedEvent macroListChangedEvent = new MacroListChangedEvent();
+    private static ReceivePacketEvent receivePacketEvent = new ReceivePacketEvent();
 
     public static PlaySoundPacketEvent playSoundPacketEvent(PlaySoundS2CPacket packet) {
         playSoundPacketEvent.packet = packet;
@@ -169,5 +171,11 @@ public class EventStore {
 
     public static MacroListChangedEvent macroListChangedEvent() {
         return macroListChangedEvent;
+    }
+
+    public static ReceivePacketEvent receivePacketEvent(Packet<?> packet) {
+        receivePacketEvent.setCancelled(false);
+        receivePacketEvent.packet = packet;
+        return receivePacketEvent;
     }
 }
