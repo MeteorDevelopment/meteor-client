@@ -12,7 +12,7 @@ import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
 public class WidgetScreen extends Screen {
-    protected Screen parent;
+    public Screen parent;
     private WRoot root = new WRoot();
     private boolean renderDebug = false;
 
@@ -83,6 +83,8 @@ public class WidgetScreen extends Screen {
 
     @Override
     public void render(int mouseX, int mouseY, float delta) {
+        renderBackground();
+
         GlStateManager.disableTexture();
         GlStateManager.enableBlend();
         GlStateManager.disableCull();

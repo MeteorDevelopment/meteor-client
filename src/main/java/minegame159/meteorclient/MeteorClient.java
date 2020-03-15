@@ -18,8 +18,6 @@ import me.zero.alpine.listener.Listenable;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.altsfriends.FriendManager;
 import minegame159.meteorclient.commands.CommandManager;
-import minegame159.meteorclient.events.GameDisconnectedEvent;
-import minegame159.meteorclient.events.GameJoinedEvent;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.gui.clickgui.ClickGUI;
 import minegame159.meteorclient.json.GameProfileSerializer;
@@ -103,9 +101,35 @@ public class MeteorClient implements ClientModInitializer, Listenable {
             e.printStackTrace();
         }
 
-        KeyBindingRegistry.INSTANCE.register(openClickGui);
+        SaveManager.load(Config.class);
+        SaveManager.load(ModuleManager.class);
+        SaveManager.load(FriendManager.class);
+        SaveManager.load(MacroManager.class);
 
+        KeyBindingRegistry.INSTANCE.register(openClickGui);
         eventBus.subscribe(this);
+    }
+
+    public void stop() {
+        SaveManager.save(Config.class);
+        SaveManager.save(ModuleManager.class);
+        SaveManager.save(FriendManager.class);
+        SaveManager.save(MacroManager.class);
+    }
+
+    @EventHandler
+    private Listener<TickEvent> onTick = new Listener<>(event -> {
+        if (openClickGui.isPressed() && mc.currentScreen == null) {
+            mc.openScreen(new ClickGUI());
+        }
+    });
+
+    public void onKeyInMainMenu(int key) {
+        if (key == openClickGui.getBoundKey().getKeyCode()) {
+            ClickGUI clickGUI = new ClickGUI();
+            clickGUI.parent = mc.currentScreen;
+            mc.openScreen(clickGUI);
+        }
     }
 
     public boolean logIn(String username, String password) {
@@ -121,25 +145,4 @@ public class MeteorClient implements ClientModInitializer, Listenable {
             return false;
         }
     }
-
-    @EventHandler
-    private Listener<TickEvent> onTick = new Listener<>(event -> {
-        if (openClickGui.isPressed() && !mc.isPaused()) {
-            mc.openScreen(new ClickGUI());
-        }
-    });
-
-    @EventHandler
-    private Listener<GameJoinedEvent> onGameJoined = new Listener<>(event -> {
-        SaveManager.load(Config.class);
-        SaveManager.load(ModuleManager.class);
-        SaveManager.load(FriendManager.class);
-        SaveManager.load(MacroManager.class);
-    });
-
-    @EventHandler
-    private Listener<GameDisconnectedEvent> onGameDisconnected = new Listener<>(event -> {
-        SaveManager.save(Config.class);
-        SaveManager.save(ModuleManager.class);
-    });
 }

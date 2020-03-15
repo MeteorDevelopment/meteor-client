@@ -5,7 +5,6 @@ import minegame159.meteorclient.events.CharTypedEvent;
 import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.events.KeyEvent;
 import minegame159.meteorclient.gui.WidgetScreen;
-import minegame159.meteorclient.gui.clickgui.ModuleScreen;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.Keyboard;
 import net.minecraft.client.MinecraftClient;
@@ -23,11 +22,18 @@ public abstract class KeyboardMixin {
 
     @Inject(method = "onKey", at = @At("HEAD"), cancellable = true)
     public void onKey(long window, int key, int scancode, int i, int j, CallbackInfo info) {
-        if (key != GLFW.GLFW_KEY_UNKNOWN && Utils.canUpdate() && !client.isPaused() && (client.currentScreen == null || client.currentScreen instanceof WidgetScreen)) {
-            KeyEvent event = EventStore.keyEvent(key, i == 1);
-            MeteorClient.eventBus.post(event);
+        if (key != GLFW.GLFW_KEY_UNKNOWN) {
+            if (!Utils.canUpdate() && i == 1) {
+                MeteorClient.INSTANCE.onKeyInMainMenu(key);
+                return;
+            }
 
-            if (event.isCancelled()) info.cancel();
+            if (!client.isPaused() && (client.currentScreen == null || client.currentScreen instanceof WidgetScreen)) {
+                KeyEvent event = EventStore.keyEvent(key, i == 1);
+                MeteorClient.eventBus.post(event);
+
+                if (event.isCancelled()) info.cancel();
+            }
         }
     }
 
