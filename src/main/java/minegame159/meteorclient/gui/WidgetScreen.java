@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import minegame159.meteorclient.gui.widgets.WDebugRenderer;
 import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.utils.RenderUtils;
+import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.Vector2;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
@@ -83,7 +84,7 @@ public class WidgetScreen extends Screen {
 
     @Override
     public void render(int mouseX, int mouseY, float delta) {
-        renderBackground();
+        if (!Utils.canUpdate()) renderBackground();
 
         GlStateManager.disableTexture();
         GlStateManager.enableBlend();

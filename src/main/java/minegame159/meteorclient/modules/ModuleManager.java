@@ -147,6 +147,7 @@ public class ModuleManager implements Listenable {
         addModule(new Flight());
         addModule(new NoPush());
         addModule(new ElytraPlus());
+        addModule(new HighJump());
     }
 
     private void initRender() {
