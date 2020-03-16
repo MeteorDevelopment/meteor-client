@@ -7,10 +7,9 @@ import me.zero.alpine.listener.Listenable;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.SaveManager;
 import minegame159.meteorclient.events.EventStore;
+import minegame159.meteorclient.mixininterface.IMinecraftClient;
 import net.minecraft.client.MinecraftClient;
 
-import java.lang.reflect.Field;
-import java.net.Proxy;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,7 +17,6 @@ public class AccountManager implements Listenable {
     public static AccountManager INSTANCE;
 
     static YggdrasilUserAuthentication userAuthentication;
-    static Field sessionField;
 
     private List<Account> accounts = new ArrayList<>();
 
@@ -51,15 +49,6 @@ public class AccountManager implements Listenable {
     }
 
     public static void init() {
-        try {
-            Field proxyField = MinecraftClient.class.getDeclaredField("netProxy");
-            proxyField.setAccessible(true);
-            userAuthentication = (YggdrasilUserAuthentication) new YggdrasilAuthenticationService((Proxy) proxyField.get(MinecraftClient.getInstance()), "48c1eb24-b218-4e50-844e-0a34975441da").createUserAuthentication(Agent.MINECRAFT);
-
-            sessionField = MinecraftClient.class.getDeclaredField("session");
-            sessionField.setAccessible(true);
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            e.printStackTrace();
-        }
+        userAuthentication = (YggdrasilUserAuthentication) new YggdrasilAuthenticationService(((IMinecraftClient) MinecraftClient.getInstance()).getProxy(), "48c1eb24-b218-4e50-844e-0a34975441da").createUserAuthentication(Agent.MINECRAFT);
     }
 }

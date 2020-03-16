@@ -2,6 +2,7 @@ package minegame159.meteorclient.altsfriends;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.exceptions.AuthenticationException;
+import minegame159.meteorclient.mixininterface.IMinecraftClient;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.Session;
 
@@ -41,11 +42,11 @@ public class Account {
         try {
             AccountManager.userAuthentication.logIn();
             GameProfile profile = AccountManager.userAuthentication.getSelectedProfile();
-            AccountManager.sessionField.set(MinecraftClient.getInstance(), new Session(profile.getName(), profile.getId().toString(), AccountManager.userAuthentication.getAuthenticatedToken(), AccountManager.userAuthentication.getUserType().getName()));
+            ((IMinecraftClient) MinecraftClient.getInstance()).setSession(new Session(profile.getName(), profile.getId().toString(), AccountManager.userAuthentication.getAuthenticatedToken(), AccountManager.userAuthentication.getUserType().getName()));
 
             username = AccountManager.userAuthentication.getSelectedProfile().getName();
             return true;
-        } catch (AuthenticationException | IllegalAccessException e) {
+        } catch (AuthenticationException e) {
             return false;
         }
     }

@@ -9,13 +9,17 @@ import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.Mouse;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.util.Session;
 import net.minecraft.client.util.Window;
 import net.minecraft.client.world.ClientWorld;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import java.net.Proxy;
 
 @Mixin(MinecraftClient.class)
 public abstract class MinecraftClientMixin implements IMinecraftClient {
@@ -30,6 +34,10 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
     @Shadow public Mouse mouse;
 
     @Shadow public Window window;
+
+    @Shadow @Final private Proxy netProxy;
+
+    @Shadow private Session session;
 
     @Inject(method = "init", at = @At("TAIL"))
     private void onInit(CallbackInfo info) {
@@ -67,5 +75,15 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
     @Override
     public void setItemUseCooldown(int cooldown) {
         itemUseCooldown = cooldown;
+    }
+
+    @Override
+    public Proxy getProxy() {
+        return netProxy;
+    }
+
+    @Override
+    public void setSession(Session session) {
+        this.session = session;
     }
 }
