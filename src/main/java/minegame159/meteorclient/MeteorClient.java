@@ -108,9 +108,10 @@ public class MeteorClient implements ClientModInitializer, Listenable {
 
         KeyBindingRegistry.INSTANCE.register(openClickGui);
         eventBus.subscribe(this);
+        Runtime.getRuntime().addShutdownHook(new Thread(this::stop));
     }
 
-    public void stop() {
+    private void stop() {
         SaveManager.save(Config.class);
         SaveManager.save(ModuleManager.class);
         SaveManager.save(FriendManager.class);

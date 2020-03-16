@@ -36,11 +36,6 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
         MeteorClient.INSTANCE.onInitializeClient();
     }
 
-    @Inject(method = "stop", at = @At("TAIL"))
-    private void onStop(CallbackInfo info) {
-        MeteorClient.INSTANCE.stop();
-    }
-
     @Inject(at = @At("TAIL"), method = "tick")
     private void onTick(CallbackInfo info) {
         if (Utils.canUpdate()) {
