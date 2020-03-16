@@ -28,7 +28,8 @@
     "CameraMixin",
     "TitleScreenMixin",
     "EntityMixin",
-    "PlayerMoveC2SPacketMixin"
+    "PlayerMoveC2SPacketMixin",
+    "Vec3dMixin"
   ],
   "injectors": {
     "defaultRequire": 1

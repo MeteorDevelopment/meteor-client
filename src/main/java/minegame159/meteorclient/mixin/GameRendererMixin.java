@@ -7,6 +7,7 @@ import minegame159.meteorclient.events.HurtCamEvent;
 import minegame159.meteorclient.utils.RenderUtils;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.GameRenderer;
 import org.lwjgl.opengl.GL11;
 import org.spongepowered.asm.mixin.Final;
@@ -19,6 +20,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(GameRenderer.class)
 public abstract class GameRendererMixin {
     @Shadow @Final private MinecraftClient client;
+
+    @Shadow @Final private Camera camera;
 
     @Inject(at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiler/Profiler;swap(Ljava/lang/String;)V", args = { "ldc=hand" }), method = "renderCenter")
     public void onRenderCenter(float tickDelta, long endTime, CallbackInfo info) {
@@ -33,9 +36,9 @@ public abstract class GameRendererMixin {
         GL11.glEnable(GL11.GL_LINE_SMOOTH);
 
         GlStateManager.pushMatrix();
-        double px = client.cameraEntity.prevX + (client.cameraEntity.x - client.cameraEntity.prevX) * tickDelta;
-        double py = client.cameraEntity.prevY + (client.cameraEntity.y - client.cameraEntity.prevY) * tickDelta + client.cameraEntity.getEyeHeight(client.cameraEntity.getPose());
-        double pz = client.cameraEntity.prevZ + (client.cameraEntity.z - client.cameraEntity.prevZ) * tickDelta;
+        double px = camera.getPos().x;
+        double py = camera.getPos().y;
+        double pz = camera.getPos().z;
         GlStateManager.translated(-px, -py, -pz);
         GlStateManager.color4f(1, 1, 1, 1);
         RenderUtils.beginLines();

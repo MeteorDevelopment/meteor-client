@@ -1,16 +1,24 @@
 package minegame159.meteorclient.mixin;
 
+import minegame159.meteorclient.MeteorClient;
+import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.movement.NoPush;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.MovementType;
+import net.minecraft.util.math.Vec3d;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 @Mixin(Entity.class)
 public abstract class EntityMixin {
+    @Shadow public float yaw;
+    @Shadow protected Vec3d movementMultiplier;
     private NoPush noPush;
 
     private NoPush getNoPush() {
@@ -34,5 +42,12 @@ public abstract class EntityMixin {
         if (getNoPush().isActive()) {
             info.cancel();
         }
+    }
+
+    @Inject(method = "move", at = @At("HEAD"))
+    private void onMove(MovementType type, Vec3d movement, CallbackInfo info) {
+        if ((Object) this != MinecraftClient.getInstance().player) return;
+
+        MeteorClient.eventBus.post(EventStore.playerMoveEvent(type, movement));
     }
 }

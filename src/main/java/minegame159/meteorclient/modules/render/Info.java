@@ -167,11 +167,8 @@ public class Info extends Module {
             y += Utils.getTextHeight() + 2;
         }
 
-        float tickRate = -1;
         if (tps.get()) {
-            tickRate = TickRate.INSTANCE.getTickRate();
-
-            drawInfo("TPS: ", String.format("%.1f", tickRate), y);
+            drawInfo("TPS: ", String.format("%.1f", TickRate.INSTANCE.getTickRate()), y);
             y += Utils.getTextHeight() + 2;
         }
 
@@ -182,14 +179,11 @@ public class Info extends Module {
         }
 
         if (speed.get()) {
-            if (tickRate == -1) tickRate = TickRate.INSTANCE.getTickRate();
-
             double tX = Math.abs(mc.player.x - mc.player.prevX);
-            double tY = Math.abs(mc.player.y - mc.player.prevY);
             double tZ = Math.abs(mc.player.z - mc.player.prevZ);
-            double length = Math.sqrt(tX * tX + tY * tY + tZ * tZ);
+            double length = Math.sqrt(tX * tX + tZ * tZ);
 
-            drawInfo("Speed: ", String.format("%.1f", length * tickRate), y);
+            drawInfo("Speed: ", String.format("%.1f", length * 20), y);
             y += Utils.getTextHeight() + 2;
         }
 

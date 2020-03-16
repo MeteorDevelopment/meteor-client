@@ -8,9 +8,11 @@ import net.minecraft.block.BlockState;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.MovementType;
 import net.minecraft.network.Packet;
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
 import net.minecraft.text.Text;
+import net.minecraft.util.math.Vec3d;
 
 public class EventStore {
     private static PlaySoundPacketEvent playSoundPacketEvent = new PlaySoundPacketEvent();
@@ -39,6 +41,7 @@ public class EventStore {
     private static FriendListChangedEvent friendListChangedEvent = new FriendListChangedEvent();
     private static MacroListChangedEvent macroListChangedEvent = new MacroListChangedEvent();
     private static ReceivePacketEvent receivePacketEvent = new ReceivePacketEvent();
+    private static PlayerMoveEvent playerMoveEvent = new PlayerMoveEvent();
 
     public static PlaySoundPacketEvent playSoundPacketEvent(PlaySoundS2CPacket packet) {
         playSoundPacketEvent.packet = packet;
@@ -177,5 +180,11 @@ public class EventStore {
         receivePacketEvent.setCancelled(false);
         receivePacketEvent.packet = packet;
         return receivePacketEvent;
+    }
+
+    public static PlayerMoveEvent playerMoveEvent(MovementType type, Vec3d movement) {
+        playerMoveEvent.type = type;
+        playerMoveEvent.movement = movement;
+        return playerMoveEvent;
     }
 }
