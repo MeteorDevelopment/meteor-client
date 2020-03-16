@@ -1,5 +1,6 @@
 package minegame159.meteorclient.gui.widgets;
 
+import minegame159.meteorclient.gui.Alignment;
 import minegame159.meteorclient.modules.setting.GUI;
 import minegame159.meteorclient.utils.Color;
 
@@ -17,6 +18,7 @@ public class WButton extends WWidget {
         boundingBox.autoSize = true;
 
         label = add(new WLabel(text));
+        label.boundingBox.alignment.x = Alignment.X.Center;
     }
 
     @Override

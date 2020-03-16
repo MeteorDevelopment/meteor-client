@@ -42,6 +42,7 @@ public class EventStore {
     private static MacroListChangedEvent macroListChangedEvent = new MacroListChangedEvent();
     private static ReceivePacketEvent receivePacketEvent = new ReceivePacketEvent();
     private static PlayerMoveEvent playerMoveEvent = new PlayerMoveEvent();
+    private static AccountListChangedEvent accountListChangedEvent = new AccountListChangedEvent();
 
     public static PlaySoundPacketEvent playSoundPacketEvent(PlaySoundS2CPacket packet) {
         playSoundPacketEvent.packet = packet;
@@ -186,5 +187,9 @@ public class EventStore {
         playerMoveEvent.type = type;
         playerMoveEvent.movement = movement;
         return playerMoveEvent;
+    }
+
+    public static AccountListChangedEvent accountListChangedEvent() {
+        return accountListChangedEvent;
     }
 }

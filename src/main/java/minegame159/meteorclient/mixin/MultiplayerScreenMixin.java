@@ -1,6 +1,6 @@
 package minegame159.meteorclient.mixin;
 
-import minegame159.meteorclient.altsfriends.AltManagerScreen;
+import minegame159.meteorclient.altsfriends.AccountsScreen;
 import minegame159.meteorclient.utils.Color;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
@@ -27,8 +27,8 @@ public class MultiplayerScreenMixin extends Screen {
     private void onInit(CallbackInfo info) {
         loggedInAsLength = font.getStringWidth(loggedInAs);
 
-        addButton(new ButtonWidget(this.width - 75 - 3, 3, 75, 20, "Alts", button -> {
-            minecraft.openScreen(new AltManagerScreen(this));
+        addButton(new ButtonWidget(this.width - 75 - 3, 3, 75, 20, "Accounts", button -> {
+            minecraft.openScreen(new AccountsScreen());
         }));
     }
 

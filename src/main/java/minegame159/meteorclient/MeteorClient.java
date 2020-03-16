@@ -2,13 +2,8 @@ package minegame159.meteorclient;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.mojang.authlib.Agent;
 import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.exceptions.AuthenticationException;
-import com.mojang.authlib.minecraft.BaseMinecraftSessionService;
 import com.mojang.authlib.properties.PropertyMap;
-import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
-import com.mojang.authlib.yggdrasil.YggdrasilUserAuthentication;
 import com.mojang.authlib.yggdrasil.response.ProfileSearchResultsResponse;
 import com.mojang.util.UUIDTypeAdapter;
 import me.zero.alpine.bus.EventBus;
@@ -16,6 +11,7 @@ import me.zero.alpine.bus.EventManager;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listenable;
 import me.zero.alpine.listener.Listener;
+import minegame159.meteorclient.altsfriends.AccountManager;
 import minegame159.meteorclient.altsfriends.FriendManager;
 import minegame159.meteorclient.commands.CommandManager;
 import minegame159.meteorclient.events.TickEvent;
@@ -36,12 +32,10 @@ import net.fabricmc.fabric.api.client.keybinding.KeyBindingRegistry;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.InputUtil;
-import net.minecraft.client.util.Session;
 import net.minecraft.util.Identifier;
 import org.lwjgl.glfw.GLFW;
 
 import java.io.File;
-import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.UUID;
 
@@ -54,8 +48,6 @@ public class MeteorClient implements ClientModInitializer, Listenable {
 
     private MinecraftClient mc;
     private FabricKeyBinding openClickGui = FabricKeyBinding.Builder.create(new Identifier("meteor-client", "open-click-gui"), InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_RIGHT_SHIFT, "key.categories.misc").build();
-    private YggdrasilUserAuthentication userAuthentication;
-    private Field sessionField;
 
     @Override
     public void onInitializeClient() {
@@ -84,27 +76,19 @@ public class MeteorClient implements ClientModInitializer, Listenable {
 
         MixinValues.init();
         CommandManager.init();
+        AccountManager.init();
 
         SaveManager.register(Config.class, "config");
         SaveManager.register(ModuleManager.class, "modules");
         SaveManager.register(FriendManager.class, "friends");
         SaveManager.register(MacroManager.class, "macros");
-
-        try {
-            Field authenticationServiceField = BaseMinecraftSessionService.class.getDeclaredField("authenticationService");
-            authenticationServiceField.setAccessible(true);
-            userAuthentication = (YggdrasilUserAuthentication) ((YggdrasilAuthenticationService) authenticationServiceField.get(mc.getSessionService())).createUserAuthentication(Agent.MINECRAFT);
-
-            sessionField = MinecraftClient.class.getDeclaredField("session");
-            sessionField.setAccessible(true);
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            e.printStackTrace();
-        }
+        SaveManager.register(AccountManager.class, "accounts");
 
         SaveManager.load(Config.class);
         SaveManager.load(ModuleManager.class);
         SaveManager.load(FriendManager.class);
         SaveManager.load(MacroManager.class);
+        SaveManager.load(AccountManager.class);
 
         KeyBindingRegistry.INSTANCE.register(openClickGui);
         eventBus.subscribe(this);
@@ -116,6 +100,7 @@ public class MeteorClient implements ClientModInitializer, Listenable {
         SaveManager.save(ModuleManager.class);
         SaveManager.save(FriendManager.class);
         SaveManager.save(MacroManager.class);
+        SaveManager.save(AccountManager.class);
     }
 
     @EventHandler
@@ -130,20 +115,6 @@ public class MeteorClient implements ClientModInitializer, Listenable {
             ClickGUI clickGUI = new ClickGUI();
             clickGUI.parent = mc.currentScreen;
             mc.openScreen(clickGUI);
-        }
-    }
-
-    public boolean logIn(String username, String password) {
-        if (userAuthentication.isLoggedIn()) userAuthentication.logOut();
-        userAuthentication.setUsername(username);
-        userAuthentication.setPassword(password);
-        try {
-            userAuthentication.logIn();
-            GameProfile profile = userAuthentication.getSelectedProfile();
-            sessionField.set(mc, new Session(profile.getName(), profile.getId().toString(), userAuthentication.getAuthenticatedToken(), userAuthentication.getUserType().getName()));
-            return true;
-        } catch (AuthenticationException | IllegalAccessException e) {
-            return false;
         }
     }
 }

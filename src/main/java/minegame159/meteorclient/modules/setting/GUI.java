@@ -31,6 +31,8 @@ public class GUI extends Module {
 
     public static Color text = new Color();
     public static int textC;
+    public static Color textLoggedIn = new Color();
+    public static int textLoggedInC;
 
     public static HoverAnimation hoverAnimation;
     public static double hoverAnimationSpeedMultiplier;
@@ -53,6 +55,7 @@ public class GUI extends Module {
     private static Setting<Color> minusS;
 
     private static Setting<Color> textS;
+    private static Setting<Color> textLoggedInS;
 
     private static Setting<HoverAnimation> hoverAnimationS;
     private static Setting<Double> hoverAnimationSpeedMultiplierS;
@@ -154,6 +157,19 @@ public class GUI extends Module {
         );
         text.set(textS.get());
         textC = text.getPacked();
+
+        textLoggedInS = addSetting(new ColorSetting.Builder()
+                .name("text-logged-in")
+                .description("Text logged in color.")
+                .defaultValue(new Color(45, 225, 45))
+                .onChanged(color1 -> {
+                    textLoggedIn.set(color1);
+                    textLoggedInC = color1.getPacked();
+                })
+                .build()
+        );
+        textLoggedIn.set(textLoggedInS.get());
+        textLoggedInC = textLoggedIn.getPacked();
 
         hoverAnimationS = addSetting(new EnumSetting.Builder<HoverAnimation>()
                 .name("hover-animation")
