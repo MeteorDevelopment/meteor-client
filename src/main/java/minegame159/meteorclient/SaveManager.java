@@ -4,6 +4,8 @@ import me.zero.alpine.listener.Listenable;
 
 import java.io.*;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -56,7 +58,13 @@ public class SaveManager {
             }
 
             MeteorClient.eventBus.subscribe((Listenable) instance.get(null));
-        } catch (NoSuchFieldException | IllegalAccessException | InstantiationException | IOException e) {
+            try {
+                Method onLoad = instance.get(null).getClass().getDeclaredMethod("onLoad");
+                onLoad.setAccessible(true);
+                onLoad.invoke(instance.get(null));
+            } catch (NoSuchMethodException ignored) {
+            }
+        } catch (NoSuchFieldException | IllegalAccessException | InstantiationException | IOException | InvocationTargetException e) {
             e.printStackTrace();
         }
     }

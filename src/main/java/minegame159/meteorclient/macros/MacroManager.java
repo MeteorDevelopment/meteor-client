@@ -31,4 +31,8 @@ public class MacroManager implements Listenable {
             SaveManager.save(getClass());
         }
     }
+
+    private void onLoad() {
+        for (Macro macro : macros) MeteorClient.eventBus.subscribe(macro);
+    }
 }
