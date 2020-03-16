@@ -28,6 +28,13 @@ public class Speed extends Module {
             .build()
     );
 
+    private Setting<Boolean> inWater = addSetting(new BoolSetting.Builder()
+            .name("in-water")
+            .description("Use speed when in water.")
+            .defaultValue(false)
+            .build()
+    );
+
     private Setting<Boolean> whenSneaking = addSetting(new BoolSetting.Builder()
             .name("when-sneaking")
             .description("Use speed when sneaking.")
@@ -41,9 +48,10 @@ public class Speed extends Module {
 
     @EventHandler
     private Listener<PlayerMoveEvent> onPlayerMove = new Listener<>(event -> {
-        if (event.type != MovementType.SELF || mc.player.isTouchingWater() || mc.player.isFallFlying() || mc.player.isClimbing()) return;
+        if (event.type != MovementType.SELF || mc.player.isFallFlying() || mc.player.isClimbing()) return;
         if (!whenSneaking.get() && mc.player.isSneaking()) return;
         if (onlyOnGround.get() && !mc.player.onGround) return;
+        if (!inWater.get() && mc.player.isTouchingWater()) return;
 
         Vec3d forward = Vec3d.fromPolar(0, mc.player.yaw);
         Vec3d right = Vec3d.fromPolar(0, mc.player.yaw + 90);
