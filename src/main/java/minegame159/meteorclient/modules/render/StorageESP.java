@@ -10,7 +10,10 @@ import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.RenderUtils;
+import net.minecraft.block.ChestBlock;
 import net.minecraft.block.entity.*;
+import net.minecraft.block.enums.ChestType;
+import net.minecraft.util.math.Direction;
 
 public class StorageESP extends Module {
     public enum Mode {
@@ -78,11 +81,16 @@ public class StorageESP extends Module {
                 int y = blockEntity.getPos().getY();
                 int z = blockEntity.getPos().getZ();
 
-                if (mode.get() == Mode.Lines) RenderUtils.blockEdges(x, y, z, lineColor);
-                else if (mode.get() == Mode.Sides) RenderUtils.blockSides(x, y, z, sideColor);
+                Direction excludeDir = null;
+                if (blockEntity instanceof ChestBlockEntity && blockEntity.getCachedState().get(ChestBlock.CHEST_TYPE) != ChestType.SINGLE) {
+                    excludeDir = ChestBlock.getFacing(blockEntity.getCachedState());
+                }
+
+                if (mode.get() == Mode.Lines) RenderUtils.blockEdges(x, y, z, lineColor, excludeDir);
+                else if (mode.get() == Mode.Sides) RenderUtils.blockSides(x, y, z, sideColor, excludeDir);
                 else {
-                    RenderUtils.blockEdges(x, y, z, lineColor);
-                    RenderUtils.blockSides(x, y, z, sideColor);
+                    RenderUtils.blockEdges(x, y, z, lineColor, excludeDir);
+                    RenderUtils.blockSides(x, y, z, sideColor, excludeDir);
                 }
             }
         }
