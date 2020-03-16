@@ -10,17 +10,16 @@ import minegame159.meteorclient.utils.Vector2;
 public class WHorizontalSeparatorBigger extends WWidget {
     public WHorizontalSeparatorBigger() {
         boundingBox = new HackBoundingBox(this::calculateCustomSize);
-        boundingBox.calculateAutoSizePost = true;
     }
 
     @Override
     public Vector2 calculateCustomSize() {
-        return new Vector2(6 + parent.boundingBox.innerWidth + 6, 1);
+        return new Vector2(0, 1);
     }
 
     @Override
     public void onRender(double delta) {
-        RenderUtils.quad(boundingBox.getInnerX(), boundingBox.getInnerY(), boundingBox.innerWidth, boundingBox.innerHeight, GUI.outline);
+        RenderUtils.quad(parent.parent.boundingBox.x, boundingBox.y, parent.parent.boundingBox.getWidth(), boundingBox.innerHeight, GUI.outline);
     }
 
     private static class HackBoundingBox extends BoundingBox {

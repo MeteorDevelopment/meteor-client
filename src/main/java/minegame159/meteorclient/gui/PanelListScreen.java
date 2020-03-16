@@ -35,8 +35,11 @@ public class PanelListScreen extends WidgetScreen {
 
     @Override
     public void clear() {
-        super.clear();
-        super.add(panel);
+        list.widgets.clear();
+
+        // Title
+        list.add(new WLabel(title.asString(), true)).boundingBox.alignment.x = Alignment.X.Center;
+        list.add(new WHorizontalSeparatorBigger());
     }
 
     @Override
