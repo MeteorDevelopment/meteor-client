@@ -1,5 +1,6 @@
 package minegame159.meteorclient.gui.widgets;
 
+import minegame159.meteorclient.MixinValues;
 import minegame159.meteorclient.modules.setting.GUI;
 import minegame159.meteorclient.utils.RenderUtils;
 import minegame159.meteorclient.utils.Utils;
@@ -36,6 +37,9 @@ public class WTextBox extends WWidget {
 
     @Override
     public boolean onMousePressed(int button) {
+        if (!focused && mouseOver) MixinValues.setPostKeyEvents(true);
+        else if (focused && !mouseOver) MixinValues.setPostKeyEvents(false);
+
         focused = mouseOver;
         return false;
     }

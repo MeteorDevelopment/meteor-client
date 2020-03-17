@@ -1,6 +1,7 @@
 package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.MeteorClient;
+import minegame159.meteorclient.MixinValues;
 import minegame159.meteorclient.events.CharTypedEvent;
 import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.events.KeyEvent;
@@ -28,7 +29,7 @@ public abstract class KeyboardMixin {
                 return;
             }
 
-            if (!client.isPaused() && (client.currentScreen == null || client.currentScreen instanceof WidgetScreen)) {
+            if (!client.isPaused() && (client.currentScreen == null || (client.currentScreen instanceof WidgetScreen && MixinValues.postKeyEvents()))) {
                 KeyEvent event = EventStore.keyEvent(key, i == 1);
                 MeteorClient.eventBus.post(event);
 
