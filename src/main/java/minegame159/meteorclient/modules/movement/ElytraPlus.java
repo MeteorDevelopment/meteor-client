@@ -29,13 +29,6 @@ public class ElytraPlus extends Module {
             .build()
     );
 
-    private Setting<Boolean> dontGoUpAndDownWhenMovingHorizontally = addSetting(new BoolSetting.Builder()
-            .name("dont-go-up-and-down-when-moving-horizontally")
-            .description("Doesn't go up or don't when moving horizontally.")
-            .defaultValue(false)
-            .build()
-    );
-
     private Setting<Double> horizontalSpeed = addSetting(new DoubleSetting.Builder()
             .name("horizontal-speed")
             .description("How fast will u go forward and backward.")
