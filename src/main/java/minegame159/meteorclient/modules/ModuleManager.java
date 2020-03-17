@@ -163,6 +163,7 @@ public class ModuleManager implements Listenable {
         addModule(new ESP());
         addModule(new Freecam());
         addModule(new Tracers());
+        addModule(new Nametags());
     }
 
     private void initMisc() {

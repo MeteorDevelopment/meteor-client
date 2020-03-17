@@ -29,7 +29,8 @@
     "TitleScreenMixin",
     "EntityMixin",
     "PlayerMoveC2SPacketMixin",
-    "Vec3dMixin"
+    "Vec3dMixin",
+    "EntityRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1
