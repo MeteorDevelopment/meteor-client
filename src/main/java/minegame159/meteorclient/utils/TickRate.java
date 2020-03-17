@@ -4,8 +4,11 @@ import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listenable;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.MeteorClient;
+import minegame159.meteorclient.events.GameJoinedEvent;
 import minegame159.meteorclient.events.packets.ReceivePacketEvent;
 import net.minecraft.network.packet.s2c.play.WorldTimeUpdateS2CPacket;
+
+import java.util.Arrays;
 
 /**
  * Copied from <a href="https://github.com/S-B99/kamiblue/blob/feature/master/src/main/java/me/zeroeightsix/kami/util/LagCompensator.java">KAMI Blue</a>
@@ -16,6 +19,7 @@ public class TickRate implements Listenable {
     private final float[] tickRates = new float[20];
     private int nextIndex = 0;
     private long timeLastTimeUpdate = -1;
+    private long timeGameJoined;
 
     private TickRate() {
         MeteorClient.eventBus.subscribe(this);
@@ -33,7 +37,17 @@ public class TickRate implements Listenable {
         }
     });
 
+    @EventHandler
+    private Listener<GameJoinedEvent> onGameJoined = new Listener<>(event -> {
+        Arrays.fill(tickRates, 0);
+        nextIndex = 0;
+        timeLastTimeUpdate = -1;
+        timeGameJoined = System.currentTimeMillis();
+    });
+
     public float getTickRate() {
+        if (System.currentTimeMillis() - timeGameJoined < 4000) return 20;
+
         float numTicks = 0.0f;
         float sumTickRates = 0.0f;
         for (float tickRate : tickRates) {
@@ -46,6 +60,7 @@ public class TickRate implements Listenable {
     }
 
     public float getTimeSinceLastTick() {
+        if (System.currentTimeMillis() - timeGameJoined < 4000) return 0;
         return (System.currentTimeMillis() - timeLastTimeUpdate) / 1000f;
     }
 }
