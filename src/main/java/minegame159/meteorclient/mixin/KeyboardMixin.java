@@ -6,9 +6,11 @@ import minegame159.meteorclient.events.CharTypedEvent;
 import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.events.KeyEvent;
 import minegame159.meteorclient.gui.WidgetScreen;
+import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.Keyboard;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.options.KeyBinding;
 import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -24,6 +26,10 @@ public abstract class KeyboardMixin {
     @Inject(method = "onKey", at = @At("HEAD"), cancellable = true)
     public void onKey(long window, int key, int scancode, int i, int j, CallbackInfo info) {
         if (key != GLFW.GLFW_KEY_UNKNOWN) {
+            KeyBinding shulkerPeek = MeteorClient.INSTANCE.shulkerPeek;
+            if (shulkerPeek.matchesKey(key, scancode) && (i == GLFW.GLFW_PRESS || i == GLFW.GLFW_REPEAT)) ((IKeyBinding) shulkerPeek).setPressed(true);
+            else ((IKeyBinding) shulkerPeek).setPressed(false);
+
             if (!Utils.canUpdate() && i == 1) {
                 MeteorClient.INSTANCE.onKeyInMainMenu(key);
                 return;

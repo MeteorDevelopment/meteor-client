@@ -44,7 +44,6 @@ public class InventoryViewer extends Module {
     );
 
     private static final Identifier TEXTURE = new Identifier("meteor-client", "container_3x9.png");
-    private static final DrawableHelper draw = new DrawableHelper() {};
 
     private int width = 176;
     private int height = 67;

@@ -47,11 +47,16 @@ public class MeteorClient implements ClientModInitializer, Listenable {
     public static File directory = new File(FabricLoader.getInstance().getGameDirectory(), "meteor-client");
 
     private MinecraftClient mc;
-    private FabricKeyBinding openClickGui = FabricKeyBinding.Builder.create(new Identifier("meteor-client", "open-click-gui"), InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_RIGHT_SHIFT, "key.categories.misc").build();
+    private FabricKeyBinding openClickGui = FabricKeyBinding.Builder.create(new Identifier("meteor-client", "open-click-gui"), InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_RIGHT_SHIFT, "Meteor Client").build();
+    public FabricKeyBinding shulkerPeek = FabricKeyBinding.Builder.create(new Identifier("meteor-client", "shulker-peek"), InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_LEFT_ALT, "Meteor Client").build();
 
     @Override
     public void onInitializeClient() {
         if (INSTANCE == null) {
+            KeyBindingRegistry.INSTANCE.addCategory("Meteor Client");
+            KeyBindingRegistry.INSTANCE.register(openClickGui);
+            KeyBindingRegistry.INSTANCE.register(shulkerPeek);
+
             INSTANCE = this;
             return;
         }
@@ -90,7 +95,6 @@ public class MeteorClient implements ClientModInitializer, Listenable {
         SaveManager.load(MacroManager.class);
         SaveManager.load(AccountManager.class);
 
-        KeyBindingRegistry.INSTANCE.register(openClickGui);
         eventBus.subscribe(this);
         Runtime.getRuntime().addShutdownHook(new Thread(this::stop));
     }
