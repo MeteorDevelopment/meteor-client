@@ -13,8 +13,7 @@ import net.minecraft.block.entity.ChestBlockEntity;
 import net.minecraft.block.entity.ShulkerBoxBlockEntity;
 import net.minecraft.util.math.ChunkPos;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class StashRecorder extends Module {
     private Setting<Integer> minimumStorageCount = addSetting(new IntSetting.Builder()
@@ -47,6 +46,12 @@ public class StashRecorder extends Module {
 
     @Override
     public WWidget getCustomWidget() {
+        // Sort
+        List<Map.Entry<ChunkPos, Integer>> entryList = new ArrayList<>(chunkStorageCounts.entrySet());
+        entryList.sort(Comparator.comparingInt(value -> -value.getValue()));
+        chunkStorageCounts = new LinkedHashMap<>(entryList.size());
+        for (Map.Entry<ChunkPos, Integer> entry : entryList) chunkStorageCounts.put(entry.getKey(), entry.getValue());
+
         WVerticalList list = new WVerticalList(4);
 
         // Reset
