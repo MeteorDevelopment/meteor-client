@@ -30,7 +30,8 @@
     "EntityMixin",
     "PlayerMoveC2SPacketMixin",
     "Vec3dMixin",
-    "EntityRendererMixin"
+    "EntityRendererMixin",
+    "GenericContainerScreenMixin"
   ],
   "injectors": {
     "defaultRequire": 1
