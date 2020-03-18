@@ -2,6 +2,8 @@ package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.MixinValues;
+import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.misc.ShulkerTooltip;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.block.ShulkerBoxBlock;
@@ -26,6 +28,13 @@ import java.util.stream.Collectors;
 
 @Mixin(ShulkerBoxBlock.class)
 public class ShulkerBoxBlockMixin {
+    private ShulkerTooltip shulkerTooltip;
+
+    private ShulkerTooltip getShulkerTooltip() {
+        if (shulkerTooltip == null) shulkerTooltip = ModuleManager.INSTANCE.get(ShulkerTooltip.class);
+        return shulkerTooltip;
+    }
+
     /**
      * @author MineGame159
      * @reason bc i want
@@ -59,7 +68,7 @@ public class ShulkerBoxBlockMixin {
                     totalItemStacks = itemCounts.size();
 
                     List<Pair<Text, Integer>> items = new ArrayList<>(5);
-                    for (int i = 0; i < 5; i++) {
+                    for (int i = 0; i < getShulkerTooltip().lines(); i++) {
                         if (itemCounts.size() == 0) break;
 
                         Text bestItem = null;
