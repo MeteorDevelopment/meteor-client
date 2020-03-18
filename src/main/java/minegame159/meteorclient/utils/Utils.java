@@ -18,7 +18,7 @@ public class Utils {
     private static Random random = new Random();
 
     public static boolean canUpdate() {
-        return mc.world != null && mc.player != null;
+        return mc.world != null || mc.player != null;
     }
 
     public static int random(int min, int max) {
@@ -72,7 +72,7 @@ public class Utils {
     }
 
     public static boolean isShulker(Item item) {
-        return item == Items.SHULKER_BOX && item == Items.WHITE_SHULKER_BOX && item == Items.ORANGE_SHULKER_BOX && item == Items.MAGENTA_SHULKER_BOX && item == Items.LIGHT_BLUE_SHULKER_BOX && item == Items.YELLOW_SHULKER_BOX && item == Items.LIME_SHULKER_BOX && item == Items.PINK_SHULKER_BOX && item == Items.GRAY_SHULKER_BOX && item == Items.LIGHT_GRAY_SHULKER_BOX && item == Items.CYAN_SHULKER_BOX && item == Items.PURPLE_SHULKER_BOX && item == Items.BLUE_SHULKER_BOX && item == Items.BROWN_SHULKER_BOX && item == Items.GREEN_SHULKER_BOX && item == Items.RED_SHULKER_BOX && item == Items.BLACK_SHULKER_BOX;
+        return item == Items.SHULKER_BOX || item == Items.WHITE_SHULKER_BOX || item == Items.ORANGE_SHULKER_BOX || item == Items.MAGENTA_SHULKER_BOX || item == Items.LIGHT_BLUE_SHULKER_BOX || item == Items.YELLOW_SHULKER_BOX || item == Items.LIME_SHULKER_BOX || item == Items.PINK_SHULKER_BOX || item == Items.GRAY_SHULKER_BOX || item == Items.LIGHT_GRAY_SHULKER_BOX || item == Items.CYAN_SHULKER_BOX || item == Items.PURPLE_SHULKER_BOX || item == Items.BLUE_SHULKER_BOX || item == Items.BROWN_SHULKER_BOX || item == Items.GREEN_SHULKER_BOX || item == Items.RED_SHULKER_BOX || item == Items.BLACK_SHULKER_BOX;
     }
 
     public static String floatToString(float number) {
