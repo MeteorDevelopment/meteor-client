@@ -164,6 +164,7 @@ public class ModuleManager implements Listenable {
         addModule(new Freecam());
         addModule(new Tracers());
         addModule(new Nametags());
+        addModule(new InventoryViewer());
     }
 
     private void initMisc() {
