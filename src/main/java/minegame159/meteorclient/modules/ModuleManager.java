@@ -174,6 +174,7 @@ public class ModuleManager implements Listenable {
         addModule(new AutoNametag());
         addModule(new AutoBreeder());
         addModule(new MiddleClickFriend());
+        addModule(new StashRecorder());
     }
 
     private void initSetting() {

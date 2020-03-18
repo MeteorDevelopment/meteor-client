@@ -33,20 +33,7 @@ public class EditMacroScreen extends PanelListScreen implements Listenable {
         // Messages
         add(new WLabel("Messages:"));
         WGrid grid = add(new WGrid(4, 4, 2));
-        for (int i = 0; i < macro.messages.size(); i++) {
-            int ii = i;
-
-            WTextBox command = new WTextBox(macro.messages.get(ii), 32);
-            command.action = textBox -> macro.messages.set(ii, textBox.text.trim());
-            WMinus remove = new WMinus();
-            remove.action = () -> {
-                macro.removeMessage(ii);
-                grid.removeRow(ii);
-                layout();
-            };
-
-            grid.addRow(command, remove);
-        }
+        fillGridMacroMessages(grid);
 
         WTextBox newCommand = new WTextBox("", 32);
         WPlus add = new WPlus();
@@ -100,6 +87,24 @@ public class EditMacroScreen extends PanelListScreen implements Listenable {
 
         layout();
         MeteorClient.eventBus.subscribe(this);
+    }
+
+    private void fillGridMacroMessages(WGrid grid) {
+        for (int i = 0; i < macro.messages.size(); i++) {
+            int ii = i;
+
+            WTextBox command = new WTextBox(macro.messages.get(ii), 32);
+            command.action = textBox -> macro.messages.set(ii, textBox.text.trim());
+            WMinus remove = new WMinus();
+            remove.action = () -> {
+                macro.removeMessage(ii);
+                grid.clear();
+                fillGridMacroMessages(grid);
+                layout();
+            };
+
+            grid.addRow(command, remove);
+        }
     }
 
     private String getKeyLabelText() {

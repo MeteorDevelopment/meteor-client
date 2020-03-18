@@ -13,6 +13,7 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.chunk.WorldChunk;
 
 public class EventStore {
     private static PlaySoundPacketEvent playSoundPacketEvent = new PlaySoundPacketEvent();
@@ -43,6 +44,7 @@ public class EventStore {
     private static ReceivePacketEvent receivePacketEvent = new ReceivePacketEvent();
     private static PlayerMoveEvent playerMoveEvent = new PlayerMoveEvent();
     private static AccountListChangedEvent accountListChangedEvent = new AccountListChangedEvent();
+    private static ChunkDataEvent chunkDataEvent = new ChunkDataEvent();
 
     public static PlaySoundPacketEvent playSoundPacketEvent(PlaySoundS2CPacket packet) {
         playSoundPacketEvent.packet = packet;
@@ -191,5 +193,10 @@ public class EventStore {
 
     public static AccountListChangedEvent accountListChangedEvent() {
         return accountListChangedEvent;
+    }
+
+    public static ChunkDataEvent chunkDataEvent(WorldChunk chunk) {
+        chunkDataEvent.chunk = chunk;
+        return chunkDataEvent;
     }
 }

@@ -74,9 +74,16 @@ public class ModuleScreen extends PanelListScreen implements Listenable {
 
             grid.addRow(name, s, reset);
         }
-        if (module.settings.size() > 0 && !module.setting) add(new WHorizontalSeparator());
+
+        WWidget customWidget = module.getCustomWidget();
+        if (customWidget != null) {
+            if (module.settings.size() > 0) add(new WHorizontalSeparator());
+            add(customWidget);
+        }
 
         if (!module.setting) {
+            if (customWidget != null || module.settings.size() > 0) add(new WHorizontalSeparator());
+
             // Bind
             WHorizontalList bind = add(new WHorizontalList(4));
             bindLabel = bind.add(new WLabel(getBindLabelText()));
