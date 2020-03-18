@@ -2,13 +2,13 @@ package minegame159.meteorclient.mixin;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import minegame159.meteorclient.MeteorClient;
+import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.screen.ingame.ContainerScreen;
 import net.minecraft.container.Slot;
 import net.minecraft.inventory.Inventories;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.DefaultedList;
 import net.minecraft.util.Identifier;
@@ -27,7 +27,7 @@ public class ContainerScreenMixin {
 
     @Inject(method = "render", at = @At("TAIL"))
     private void onRender(int mouseX, int mouseY, float delta, CallbackInfo info) {
-        if (focusedSlot != null && !focusedSlot.getStack().isEmpty() && focusedSlot.getStack().getItem() == Items.SHULKER_BOX && MeteorClient.INSTANCE.shulkerPeek.isPressed()) {
+        if (focusedSlot != null && !focusedSlot.getStack().isEmpty() && Utils.isShulker(focusedSlot.getStack().getItem()) && MeteorClient.INSTANCE.shulkerPeek.isPressed()) {
             CompoundTag compoundTag = focusedSlot.getStack().getSubTag("BlockEntityTag");
             if (compoundTag != null) {
                 if (compoundTag.contains("Items", 9)) {
@@ -61,7 +61,7 @@ public class ContainerScreenMixin {
 
     @Inject(method = "drawMouseoverTooltip", at = @At("HEAD"), cancellable = true)
     private void onDrawMouseoverTooltip(int mouseX, int mouseY, CallbackInfo info) {
-        if (focusedSlot != null && !focusedSlot.getStack().isEmpty() && focusedSlot.getStack().getItem() == Items.SHULKER_BOX && MeteorClient.INSTANCE.shulkerPeek.isPressed()) {
+        if (focusedSlot != null && !focusedSlot.getStack().isEmpty() && Utils.isShulker(focusedSlot.getStack().getItem()) && MeteorClient.INSTANCE.shulkerPeek.isPressed()) {
             info.cancel();
         }
     }
