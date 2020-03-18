@@ -1,6 +1,7 @@
 package minegame159.meteorclient.modules;
 
 import me.zero.alpine.listener.Listenable;
+import minegame159.meteorclient.Config;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.gui.WidgetScreen;
@@ -24,7 +25,7 @@ public abstract class Module implements Listenable {
     public final String name;
     public final String title;
     public final String description;
-    public final int color;
+    private final int color;
     public final List<Setting> settings = new ArrayList<>();
     public final boolean setting;
     public final boolean serialize;
@@ -89,6 +90,12 @@ public abstract class Module implements Listenable {
 
         Screen customScreen = getCustomScreen();
         mc.openScreen(customScreen != null ? customScreen : new ModuleScreen(this));
+    }
+
+    public int getColor() {
+        Color categoryColor = Config.INSTANCE.getCategoryColor(category);
+        if (categoryColor == null || categoryColor.isZero()) return color;
+        return categoryColor.getPacked();
     }
 
     public Setting getSetting(String name) {

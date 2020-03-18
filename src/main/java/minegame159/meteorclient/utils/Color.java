@@ -39,6 +39,13 @@ public class Color {
         this.a = color.a;
     }
 
+    public Color(java.awt.Color color) {
+        this.r = color.getRed();
+        this.g = color.getGreen();
+        this.b = color.getBlue();
+        this.a = color.getAlpha();
+    }
+
     public void set(Color value) {
         r = value.r;
         g = value.g;
@@ -60,6 +67,10 @@ public class Color {
 
         if (a < 0) a = 0;
         else if (a > 255) a = 255;
+    }
+
+    public boolean isZero() {
+        return r == 0 && g == 0 && b == 0 && a == 0;
     }
 
     public int getPacked() {

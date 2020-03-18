@@ -58,11 +58,11 @@ public class ActiveModules extends Module {
             String infoString = module.getInfoString();
             if (infoString == null) {
                 int x = event.screenWidth - Utils.getTextWidth(module.title) - 2;
-                Utils.drawTextWithShadow(module.title, x, y, module.color);
+                Utils.drawTextWithShadow(module.title, x, y, module.getColor());
                 y += Utils.getTextHeight() + 1;
             } else {
                 int x = event.screenWidth - Utils.getTextWidth(module.title + " " + infoString) - 2;
-                Utils.drawTextWithShadow(module.title, x, y, module.color);
+                Utils.drawTextWithShadow(module.title, x, y, module.getColor());
                 Utils.drawTextWithShadow(module.getInfoString(), x + Utils.getTextWidth(module.title + " "), y, infoColor);
                 y += Utils.getTextHeight() + 1;
             }

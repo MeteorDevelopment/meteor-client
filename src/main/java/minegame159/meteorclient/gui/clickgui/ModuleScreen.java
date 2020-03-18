@@ -53,7 +53,12 @@ public class ModuleScreen extends PanelListScreen implements Listenable {
             else if (setting.get() instanceof Color) {
                 s = new WColorEdit((Color) setting.get());
                 ((WColorEdit) s).action = wColorEdit -> setting.set(wColorEdit.color);
-            } else s = new WLabel("Setting type not supported.");
+            }
+            else if (setting.get() instanceof String) {
+                s = new WTextBox((String) setting.get(), 32);
+                ((WTextBox) s).action = textBox -> setting.set(textBox.text);
+            }
+            else s = new WLabel("Setting type not supported.");
             s.tooltip = setting.description;
 
             WButton reset = new WButton("Reset");
@@ -64,6 +69,7 @@ public class ModuleScreen extends PanelListScreen implements Listenable {
                 else if (s instanceof WDoubleTextBox) ((WDoubleTextBox) s).setValue((Double) setting.get());
                 else if (s instanceof WEnumButton) ((WEnumButton) s).setValue((Enum<?>) setting.get());
                 else if (s instanceof WColorEdit) ((WColorEdit) s).set((Color) setting.get());
+                else if (s instanceof WTextBox) ((WTextBox) s).text = (String) setting.get();
             };
 
             grid.addRow(name, s, reset);
