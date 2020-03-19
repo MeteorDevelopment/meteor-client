@@ -4,6 +4,7 @@ import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.movement.NoPush;
+import minegame159.meteorclient.modules.movement.SafeWalk;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.MovementType;
@@ -12,8 +13,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 @Mixin(Entity.class)
 public abstract class EntityMixin {
@@ -49,5 +50,10 @@ public abstract class EntityMixin {
         if ((Object) this != MinecraftClient.getInstance().player) return;
 
         MeteorClient.eventBus.post(EventStore.playerMoveEvent(type, movement));
+    }
+
+    @Redirect(method = "adjustMovementForSneaking", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;isSneaking()Z"))
+    private boolean isSafeWalkSneaking(Entity entity) {
+        return entity.isSneaking() || ModuleManager.INSTANCE.get(SafeWalk.class).isActive();
     }
 }

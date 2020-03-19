@@ -26,7 +26,9 @@ public class ModuleManagerSerializer implements JsonSerializer<ModuleManager>, J
 
         for (JsonElement e : json.getAsJsonArray()) {
             JsonObject o = e.getAsJsonObject();
-            ModuleSerializer.deserialize(ModuleManager.INSTANCE.get(o.get("name").getAsString()), o, context);
+            Module module = ModuleManager.INSTANCE.get(o.get("name").getAsString());
+            if (module == null) continue;
+            ModuleSerializer.deserialize(module, o, context);
         }
 
         return ModuleManager.INSTANCE;
