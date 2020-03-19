@@ -1,5 +1,6 @@
 package minegame159.meteorclient.settings;
 
+import minegame159.meteorclient.gui.widgets.WWidget;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
@@ -16,6 +17,7 @@ public abstract class Setting<T> {
 
     private final Consumer<T> onChanged;
     public final Consumer<Setting<T>> onModuleActivated;
+    public WWidget widget;
 
     public Setting(String name, String description, T defaultValue, Consumer<T> onChanged, Consumer<Setting<T>> onModuleActivated) {
         this.name = name;
@@ -34,12 +36,16 @@ public abstract class Setting<T> {
     public void set(T value) {
         if (!isValueValid(value)) return;
         this.value = value;
+        resetWidget();
         if (onChanged != null) onChanged.accept(value);
     }
 
     public void reset() {
         value = defaultValue;
-        if (onChanged != null) onChanged.accept(value);
+        if (onChanged != null) {
+            onChanged.accept(value);
+        }
+        resetWidget();
     }
 
     public boolean parse(String str) {
@@ -56,6 +62,8 @@ public abstract class Setting<T> {
     }
 
     protected abstract T parseImpl(String str);
+
+    protected abstract void resetWidget();
 
     protected abstract boolean isValueValid(T value);
 

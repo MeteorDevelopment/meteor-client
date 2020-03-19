@@ -10,7 +10,6 @@ import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.utils.Color;
 import org.lwjgl.glfw.GLFW;
 
 public class ModuleScreen extends PanelListScreen implements Listenable {
@@ -33,44 +32,11 @@ public class ModuleScreen extends PanelListScreen implements Listenable {
             WLabel name = new WLabel(setting.title + ":");
             name.tooltip = setting.description;
 
-            WWidget s;
-            if (setting.get() instanceof Boolean) {
-                s = new WCheckbox((boolean) setting.get());
-                ((WCheckbox) s).setAction(wCheckbox -> setting.set(wCheckbox.checked));
-            }
-            else if (setting.get() instanceof Integer) {
-                s = new WIntTextBox((int) setting.get(), 9);
-                ((WIntTextBox) s).action = wIntTextBox -> setting.set(wIntTextBox.value);
-            }
-            else if (setting.get() instanceof Double) {
-                s = new WDoubleTextBox((double) setting.get(), 9);
-                ((WDoubleTextBox) s).action = wDoubleTextBox -> setting.set(wDoubleTextBox.value);
-            }
-            else if (setting.get() instanceof Enum) {
-                s = new WEnumButton<>((Enum<?>) setting.get());
-                ((WEnumButton) s).action = o -> setting.set(((WEnumButton) o).value);
-            }
-            else if (setting.get() instanceof Color) {
-                s = new WColorEdit((Color) setting.get());
-                ((WColorEdit) s).action = wColorEdit -> setting.set(wColorEdit.color);
-            }
-            else if (setting.get() instanceof String) {
-                s = new WTextBox((String) setting.get(), 32);
-                ((WTextBox) s).action = textBox -> setting.set(textBox.text);
-            }
-            else s = new WLabel("Setting type not supported.");
+            WWidget s = setting.widget;
             s.tooltip = setting.description;
 
             WButton reset = new WButton("Reset");
-            reset.action = () -> {
-                setting.reset();
-                if (s instanceof WCheckbox) ((WCheckbox) s).checked = (boolean) setting.get();
-                else if (s instanceof WIntTextBox) ((WIntTextBox) s).setValue((Integer) setting.get());
-                else if (s instanceof WDoubleTextBox) ((WDoubleTextBox) s).setValue((Double) setting.get());
-                else if (s instanceof WEnumButton) ((WEnumButton) s).setValue((Enum<?>) setting.get());
-                else if (s instanceof WColorEdit) ((WColorEdit) s).set((Color) setting.get());
-                else if (s instanceof WTextBox) ((WTextBox) s).text = (String) setting.get();
-            };
+            reset.action = setting::reset;
 
             grid.addRow(name, s, reset);
         }

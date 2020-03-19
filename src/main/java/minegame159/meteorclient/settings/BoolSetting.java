@@ -1,10 +1,15 @@
 package minegame159.meteorclient.settings;
 
+import minegame159.meteorclient.gui.widgets.WCheckbox;
+
 import java.util.function.Consumer;
 
 public class BoolSetting extends Setting<Boolean> {
     private BoolSetting(String name, String description, Boolean defaultValue, Consumer<Boolean> onChanged, Consumer<Setting<Boolean>> onModuleActivated) {
         super(name, description, defaultValue, onChanged, onModuleActivated);
+
+        widget = new WCheckbox(get());
+        ((WCheckbox) widget).setAction(wCheckbox -> set(wCheckbox.checked));
     }
 
     @Override
@@ -12,6 +17,11 @@ public class BoolSetting extends Setting<Boolean> {
         if (str.equalsIgnoreCase("true") || str.equalsIgnoreCase("1")) return true;
         else if (str.equalsIgnoreCase("false") || str.equalsIgnoreCase("0")) return false;
         return null;
+    }
+
+    @Override
+    protected void resetWidget() {
+        ((WCheckbox) widget).checked = get();
     }
 
     @Override

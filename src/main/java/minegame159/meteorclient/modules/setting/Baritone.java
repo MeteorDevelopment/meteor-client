@@ -68,6 +68,7 @@ public class Baritone extends Module {
         addSetting(new BoolSetting.Builder()
                 .name("allow-water-bucket-fall")
                 .description("Allow Baritone to fall arbitrary distances and place a water bucket beneath it. Reliability: questionable.")
+                .defaultValue(s.allowWaterBucketFall.value)
                 .onChanged(aBoolean -> s.allowWaterBucketFall.value = aBoolean)
                 .onModuleActivated(booleanSetting -> booleanSetting.set(s.allowWaterBucketFall.value))
                 .build()

@@ -1,5 +1,7 @@
 package minegame159.meteorclient.settings;
 
+import minegame159.meteorclient.gui.widgets.WDoubleTextBox;
+
 import java.util.function.Consumer;
 
 public class DoubleSetting extends Setting<Double> {
@@ -9,6 +11,9 @@ public class DoubleSetting extends Setting<Double> {
         super(name, description, defaultValue, onChanged, onModuleActivated);
         this.min = min;
         this.max = max;
+
+        widget = new WDoubleTextBox(get(), 9);
+        ((WDoubleTextBox) widget).action = wDoubleTextBox -> set(wDoubleTextBox.value);
     }
 
     @Override
@@ -18,6 +23,11 @@ public class DoubleSetting extends Setting<Double> {
         } catch (NumberFormatException ignored) {
             return null;
         }
+    }
+
+    @Override
+    protected void resetWidget() {
+        ((WDoubleTextBox) widget).setValue(get());
     }
 
     @Override

@@ -1,12 +1,14 @@
 package minegame159.meteorclient.settings;
 
+import minegame159.meteorclient.gui.widgets.WEnumButton;
+
 import java.lang.reflect.InvocationTargetException;
 import java.util.function.Consumer;
 
 public class EnumSetting<T extends Enum<?>> extends Setting<T> {
     private T[] values;
 
-    private EnumSetting(String name, String description, T defaultValue, Consumer<T> onChanged, Consumer<Setting<T>> onModuleActivated) {
+    public EnumSetting(String name, String description, T defaultValue, Consumer<T> onChanged, Consumer<Setting<T>> onModuleActivated) {
         super(name, description, defaultValue, onChanged, onModuleActivated);
 
         try {
@@ -14,6 +16,9 @@ public class EnumSetting<T extends Enum<?>> extends Setting<T> {
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             e.printStackTrace();
         }
+
+        widget = new WEnumButton<>(get());
+        ((WEnumButton<T>) widget).action = twEnumButton -> set(twEnumButton.value);
     }
 
     @Override
@@ -23,6 +28,11 @@ public class EnumSetting<T extends Enum<?>> extends Setting<T> {
         }
 
         return null;
+    }
+
+    @Override
+    protected void resetWidget() {
+        ((WEnumButton<T>) widget).setValue(get());
     }
 
     @Override
@@ -43,10 +53,10 @@ public class EnumSetting<T extends Enum<?>> extends Setting<T> {
     }
 
     public static class Builder<T extends Enum<?>> {
-        private String name = "undefined", description = "";
-        private T defaultValue;
-        private Consumer<T> onChanged;
-        private Consumer<Setting<T>> onModuleActivated;
+        protected String name = "undefined", description = "";
+        protected T defaultValue;
+        protected Consumer<T> onChanged;
+        protected Consumer<Setting<T>> onModuleActivated;
 
         public Builder<T> name(String name) {
             this.name = name;

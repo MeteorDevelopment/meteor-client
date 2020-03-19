@@ -1,5 +1,6 @@
 package minegame159.meteorclient.settings;
 
+import minegame159.meteorclient.gui.widgets.WColorEdit;
 import minegame159.meteorclient.utils.Color;
 
 import java.util.function.Consumer;
@@ -7,6 +8,9 @@ import java.util.function.Consumer;
 public class ColorSetting extends Setting<Color> {
     public ColorSetting(String name, String description, Color defaultValue, Consumer<Color> onChanged, Consumer<Setting<Color>> onModuleActivated) {
         super(name, description, defaultValue, onChanged, onModuleActivated);
+
+        widget = new WColorEdit(get());
+        ((WColorEdit) widget).action = wColorEdit -> set(wColorEdit.color);
     }
 
     @Override
@@ -17,6 +21,11 @@ public class ColorSetting extends Setting<Color> {
         } catch (IndexOutOfBoundsException | NumberFormatException ignored) {
             return null;
         }
+    }
+
+    @Override
+    protected void resetWidget() {
+        ((WColorEdit) widget).set(get());
     }
 
     @Override

@@ -32,7 +32,8 @@
     "Vec3dMixin",
     "EntityRendererMixin",
     "GenericContainerScreenMixin",
-    "ContainerScreenMixin"
+    "ContainerScreenMixin",
+    "BrewingStandScreenMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -1,15 +1,25 @@
 package minegame159.meteorclient.settings;
 
+import minegame159.meteorclient.gui.widgets.WTextBox;
+
 import java.util.function.Consumer;
 
 public class StringSetting extends Setting<String> {
     public StringSetting(String name, String description, String defaultValue, Consumer<String> onChanged, Consumer<Setting<String>> onModuleActivated) {
         super(name, description, defaultValue, onChanged, onModuleActivated);
+
+        widget = new WTextBox(get(), 32);
+        ((WTextBox) widget).action = textBox -> set(textBox.text.trim());
     }
 
     @Override
     protected String parseImpl(String str) {
         return str.trim();
+    }
+
+    @Override
+    protected void resetWidget() {
+        ((WTextBox) widget).text = get();
     }
 
     @Override

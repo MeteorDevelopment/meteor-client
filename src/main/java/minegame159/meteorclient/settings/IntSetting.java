@@ -1,5 +1,7 @@
 package minegame159.meteorclient.settings;
 
+import minegame159.meteorclient.gui.widgets.WIntTextBox;
+
 import java.util.function.Consumer;
 
 public class IntSetting extends Setting<Integer> {
@@ -9,6 +11,9 @@ public class IntSetting extends Setting<Integer> {
         super(name, description, defaultValue, onChanged, onModuleActivated);
         this.min = min;
         this.max = max;
+
+        widget = new WIntTextBox(get(), 9);
+        ((WIntTextBox) widget).action = wIntTextBox -> set(wIntTextBox.value);
     }
 
     @Override
@@ -18,6 +23,11 @@ public class IntSetting extends Setting<Integer> {
         } catch (NumberFormatException ignored) {
             return null;
         }
+    }
+
+    @Override
+    protected void resetWidget() {
+        ((WIntTextBox) widget).setValue(get());
     }
 
     @Override
