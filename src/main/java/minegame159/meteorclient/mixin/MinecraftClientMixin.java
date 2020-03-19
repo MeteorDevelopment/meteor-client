@@ -64,12 +64,12 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
 
     @Override
     public void leftClick() {
-        doItemUse();
+        doAttack();
     }
 
     @Override
     public void rightClick() {
-        doAttack();
+        doItemUse();
     }
 
     @Override
