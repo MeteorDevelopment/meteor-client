@@ -20,6 +20,7 @@ public abstract class GenericContainerScreenMixin extends ContainerScreen<Generi
     protected void init() {
         super.init();
 
+        // Steal
         addButton(new ButtonWidget(x + containerWidth - 50 - 7, y + 3, 50, 12, "Steal", button -> {
             for (int i = 0; i < container.getRows() * 9; i++) {
                 MinecraftClient.getInstance().interactionManager.method_2906(container.syncId, i, 0, SlotActionType.QUICK_MOVE, playerInventory.player);
@@ -34,6 +35,13 @@ public abstract class GenericContainerScreenMixin extends ContainerScreen<Generi
             }
 
             if (empty) MinecraftClient.getInstance().player.closeContainer();
+        }));
+
+        // Dump
+        addButton(new ButtonWidget(x + containerWidth - 50 - 7, y + this.containerHeight - 96 - 1, 50, 12, "Dump", button -> {
+            for (int i = container.getRows() * 9; i < container.getRows() * 9 + 1 + 3 * 9; i++) {
+                MinecraftClient.getInstance().interactionManager.method_2906(container.syncId, i, 0, SlotActionType.QUICK_MOVE, playerInventory.player);
+            }
         }));
     }
 }
