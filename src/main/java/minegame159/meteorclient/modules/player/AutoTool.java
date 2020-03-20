@@ -12,7 +12,6 @@ import net.minecraft.block.BlockState;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.MiningToolItem;
 
 public class AutoTool extends Module {
     public enum Prefer {
@@ -48,7 +47,7 @@ public class AutoTool extends Module {
 
         for (int i = 0; i < 9; i++) {
             ItemStack itemStack = mc.player.inventory.getInvStack(i);
-            if (!(itemStack.getItem() instanceof MiningToolItem) && !itemStack.getItem().isEffectiveOn(blockState)) continue;
+            if (!itemStack.getItem().isEffectiveOn(blockState)) continue;
             int score = 0;
 
             score += Math.round(itemStack.getMiningSpeed(blockState));
