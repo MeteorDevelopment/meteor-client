@@ -16,6 +16,7 @@ public class BoolSetting extends Setting<Boolean> {
     protected Boolean parseImpl(String str) {
         if (str.equalsIgnoreCase("true") || str.equalsIgnoreCase("1")) return true;
         else if (str.equalsIgnoreCase("false") || str.equalsIgnoreCase("0")) return false;
+        else if (str.equalsIgnoreCase("toggle")) return !get();
         return null;
     }
 
@@ -31,7 +32,7 @@ public class BoolSetting extends Setting<Boolean> {
 
     @Override
     protected String generateUsage() {
-        return "#bluetrue #grayor #bluefalse";
+        return "#bluetrue#gray, #bluefalse #grayor #bluetoggle";
     }
 
     public static class Builder {
