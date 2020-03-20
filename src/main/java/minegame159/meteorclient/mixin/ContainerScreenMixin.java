@@ -6,6 +6,7 @@ import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.screen.ingame.ContainerScreen;
+import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.container.Slot;
 import net.minecraft.inventory.Inventories;
 import net.minecraft.item.ItemStack;
@@ -39,6 +40,7 @@ public class ContainerScreenMixin {
 
                     mc = MinecraftClient.getInstance();
                     drawBackground(mouseX + 6, mouseY + 6);
+                    DiffuseLighting.enableForItems();
 
                     int row = 0;
                     int i = 0;

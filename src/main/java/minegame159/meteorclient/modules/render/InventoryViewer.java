@@ -11,6 +11,7 @@ import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
 import net.minecraft.client.gui.DrawableHelper;
+import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 
@@ -58,6 +59,7 @@ public class InventoryViewer extends Module {
         int y = getY(event.screenHeight);
 
         drawBackground(x, y);
+        DiffuseLighting.enableForItems();
 
         for (int row = 0; row < 3; row++) {
             for (int i = 0; i < 9; i++) {

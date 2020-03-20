@@ -19,7 +19,7 @@ public class ActiveModules extends Module {
     private int infoColor = Color.fromRGBA(175, 175, 175, 255);
 
     public ActiveModules() {
-        super(Category.Render, "active-modules", "Displays active modules.", false);
+        super(Category.Render, "active-modules", "Displays active modules.", false, false);
     }
 
     @Override
