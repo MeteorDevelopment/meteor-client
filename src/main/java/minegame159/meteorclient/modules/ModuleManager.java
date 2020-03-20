@@ -178,6 +178,7 @@ public class ModuleManager implements Listenable {
         addModule(new MiddleClickFriend());
         addModule(new StashRecorder());
         addModule(new AutoBrewer());
+        addModule(new AutoSmelter());
     }
 
     private void initSetting() {

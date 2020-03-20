@@ -33,7 +33,9 @@
     "EntityRendererMixin",
     "GenericContainerScreenMixin",
     "ContainerScreenMixin",
-    "BrewingStandScreenMixin"
+    "BrewingStandScreenMixin",
+    "AbstractFurnaceScreenMixin",
+    "AbstractFurnaceContainerMixin"
   ],
   "injectors": {
     "defaultRequire": 1
