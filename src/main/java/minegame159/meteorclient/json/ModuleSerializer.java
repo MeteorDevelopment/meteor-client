@@ -3,8 +3,6 @@ package minegame159.meteorclient.json;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.*;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.modules.setting.Baritone;
 import minegame159.meteorclient.settings.Setting;
 
 import java.lang.reflect.Type;
@@ -38,7 +36,9 @@ public class ModuleSerializer implements JsonSerializer<Module> {
 
         for (JsonElement e : json.get("settings").getAsJsonArray()) {
             JsonObject o = e.getAsJsonObject();
-            SettingSerializer.deserialize(module.getSetting(o.get("name").getAsString()), o, context);
+            Setting<?> setting = module.getSetting(o.get("name").getAsString());
+            if (setting == null) continue;
+            SettingSerializer.deserialize(setting, o, context);
         }
     }
 }
