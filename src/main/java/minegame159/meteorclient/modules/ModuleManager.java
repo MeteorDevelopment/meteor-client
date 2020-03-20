@@ -131,6 +131,7 @@ public class ModuleManager implements Listenable {
         addModule(new AntiFire());
         addModule(new AutoMend());
         addModule(new AntiHunger());
+        addModule(new AutoTool());
     }
 
     private void initMovement() {

@@ -35,7 +35,8 @@
     "ContainerScreenMixin",
     "BrewingStandScreenMixin",
     "AbstractFurnaceScreenMixin",
-    "AbstractFurnaceContainerMixin"
+    "AbstractFurnaceContainerMixin",
+    "ClientPlayerInteractionManagerMixin"
   ],
   "injectors": {
     "defaultRequire": 1
