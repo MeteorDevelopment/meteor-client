@@ -13,7 +13,7 @@ public class ModuleManagerSerializer implements JsonSerializer<ModuleManager>, J
 
         for (Module module : src.getAll()) {
             if (module.serialize) {
-                a.add(context.serialize(module, Module.class));
+                a.add(ModuleSerializer.serialize(module, context));
             }
         }
 

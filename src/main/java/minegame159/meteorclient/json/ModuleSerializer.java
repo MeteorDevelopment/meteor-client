@@ -8,19 +8,18 @@ import minegame159.meteorclient.settings.Setting;
 import java.lang.reflect.Type;
 import java.util.List;
 
-public class ModuleSerializer implements JsonSerializer<Module> {
-    @Override
-    public JsonElement serialize(Module src, Type typeOfSrc, JsonSerializationContext context) {
+public class ModuleSerializer {
+    public static JsonElement serialize(Module module, JsonSerializationContext context) {
         JsonObject o = new JsonObject();
 
-        o.addProperty("name", src.name);
-        if (!src.setting) {
-            o.addProperty("active", src.isActive());
-            o.addProperty("visible", src.isVisible());
-            o.addProperty("key", src.getKey());
+        o.addProperty("name", module.name);
+        if (!module.setting) {
+            o.addProperty("active", module.isActive());
+            o.addProperty("visible", module.isVisible());
+            o.addProperty("key", module.getKey());
         }
 
-        o.add("settings", context.serialize(src.settings, new TypeToken<List<Setting>>() {}.getType()));
+        o.add("settings", context.serialize(module.settings, new TypeToken<List<Setting>>() {}.getType()));
 
         return o;
     }

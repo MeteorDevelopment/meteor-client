@@ -16,16 +16,24 @@ public class SaveManager {
         files.put(klass, new File(MeteorClient.directory, file + ".json"));
     }
 
-    public static void save(Class<?> klass) {
-        File file = files.get(klass);
-        if (file == null) throw new IllegalArgumentException(klass + " was registered.");
+    public static void save(Object obj) {
+        File file = files.get(obj.getClass());
+        if (file == null) throw new IllegalArgumentException(obj.getClass() + " was registered.");
         file.getParentFile().mkdirs();
 
         try {
             Writer writer = new FileWriter(file);
-            MeteorClient.gson.toJson(klass.getField("INSTANCE").get(null), writer);
+            MeteorClient.gson.toJson(obj, writer);
             writer.close();
-        } catch (IOException | NoSuchFieldException | IllegalAccessException e) {
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void save(Class<?> klass) {
+        try {
+            save(klass.getField("INSTANCE").get(null));
+        } catch (IllegalAccessException | NoSuchFieldException e) {
             e.printStackTrace();
         }
     }

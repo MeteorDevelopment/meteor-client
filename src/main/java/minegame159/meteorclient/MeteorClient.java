@@ -16,13 +16,11 @@ import minegame159.meteorclient.altsfriends.FriendManager;
 import minegame159.meteorclient.commands.CommandManager;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.gui.clickgui.ClickGUI;
-import minegame159.meteorclient.json.GameProfileSerializer;
-import minegame159.meteorclient.json.ModuleManagerSerializer;
-import minegame159.meteorclient.json.ModuleSerializer;
-import minegame159.meteorclient.json.SettingSerializer;
+import minegame159.meteorclient.json.*;
 import minegame159.meteorclient.macros.MacroManager;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.misc.StashRecorder;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.utils.EntityUtils;
 import minegame159.meteorclient.utils.Utils;
@@ -70,12 +68,12 @@ public class MeteorClient implements ClientModInitializer, Listenable {
         gson = new GsonBuilder()
                 .excludeFieldsWithModifiers(Modifier.TRANSIENT, Modifier.STATIC)
                 .registerTypeAdapter(ModuleManager.class, new ModuleManagerSerializer())
-                .registerTypeAdapter(Module.class, new ModuleSerializer())
                 .registerTypeAdapter(Setting.class, new SettingSerializer())
                 .registerTypeAdapter(GameProfile.class, new GameProfileSerializer())
                 .registerTypeAdapter(PropertyMap.class, new PropertyMap.Serializer())
                 .registerTypeAdapter(UUID.class, new UUIDTypeAdapter())
                 .registerTypeAdapter(ProfileSearchResultsResponse.class, new ProfileSearchResultsResponse.Serializer())
+                .registerTypeAdapter(StashRecorder.class, new StashRecorderSerializer())
                 .setPrettyPrinting()
                 .create();
 
@@ -88,6 +86,7 @@ public class MeteorClient implements ClientModInitializer, Listenable {
         SaveManager.register(FriendManager.class, "friends");
         SaveManager.register(MacroManager.class, "macros");
         SaveManager.register(AccountManager.class, "accounts");
+        SaveManager.register(StashRecorder.class, "stashes");
 
         SaveManager.load(Config.class);
         SaveManager.load(ModuleManager.class);
