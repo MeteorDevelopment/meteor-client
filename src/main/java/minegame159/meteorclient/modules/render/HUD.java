@@ -12,6 +12,7 @@ import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.TickRate;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.passive.SheepEntity;
@@ -200,8 +201,9 @@ public class HUD extends Module {
             y += Utils.getTextHeight() + 2;
         }
 
-        if (ping.get()) {
-            drawInfo("Ping: ", mc.getNetworkHandler().getPlayerListEntry(mc.player.getUuid()).getLatency() + "", y);
+        PlayerListEntry playerListEntry = mc.getNetworkHandler().getPlayerListEntry(mc.player.getUuid());
+        if (ping.get() && playerListEntry != null) {
+            drawInfo("Ping: ", playerListEntry.getLatency() + "", y);
             y += Utils.getTextHeight() + 2;
         }
 
