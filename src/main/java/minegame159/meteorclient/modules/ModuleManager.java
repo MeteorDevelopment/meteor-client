@@ -164,10 +164,8 @@ public class ModuleManager implements Listenable {
     }
 
     private void initRender() {
-        addModule(new ActiveModules());
+        addModule(new HUD());
         addModule(new FullBright());
-        addModule(new Info());
-        addModule(new Position());
         addModule(new StorageESP());
         addModule(new XRay());
         addModule(new AntiFog());
