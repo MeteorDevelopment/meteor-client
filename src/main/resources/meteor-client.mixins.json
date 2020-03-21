@@ -36,7 +36,8 @@
     "BrewingStandScreenMixin",
     "AbstractFurnaceScreenMixin",
     "AbstractFurnaceContainerMixin",
-    "ClientPlayerInteractionManagerMixin"
+    "ClientPlayerInteractionManagerMixin",
+    "MiningToolItemMixin"
   ],
   "injectors": {
     "defaultRequire": 1
