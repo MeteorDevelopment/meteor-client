@@ -7,7 +7,6 @@ import minegame159.meteorclient.modules.setting.GUI;
 import minegame159.meteorclient.utils.RenderUtils;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
 
 public class WModule extends WWidget {
     private Module module;
@@ -35,7 +34,7 @@ public class WModule extends WWidget {
     public boolean onMousePressed(int button) {
         if (mouseOver && button == 0) {
             if (module.setting) module.openScreen();
-            else module.toggle();
+            else module.toggle(MinecraftClient.getInstance().world != null);
             return true;
         } else if (mouseOver && button == 1) {
             module.openScreen();

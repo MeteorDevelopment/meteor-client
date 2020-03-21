@@ -28,7 +28,7 @@ public class ModuleSerializer implements JsonSerializer<Module> {
     public static void deserialize(Module module, JsonObject json, JsonDeserializationContext context) {
         if (!module.setting) {
             boolean active = json.get("active").getAsBoolean();
-            if (module.isActive() != active) module.toggle();
+            if (module.isActive() != active) module.toggle(false);
 
             module.setVisible(json.get("visible").getAsBoolean());
             module.setKey(json.get("key").getAsInt(), false);

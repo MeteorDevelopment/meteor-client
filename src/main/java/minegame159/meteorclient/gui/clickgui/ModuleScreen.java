@@ -71,7 +71,7 @@ public class ModuleScreen extends PanelListScreen implements Listenable {
             // Active
             WHorizontalList active = add(new WHorizontalList(4));
             active.add(new WLabel("Active:"));
-            active.add(new WCheckbox(module.isActive())).setAction(wCheckbox -> module.toggle());
+            active.add(new WCheckbox(module.isActive())).setAction(wCheckbox -> module.toggle(mc.world != null));
         }
 
         layout();

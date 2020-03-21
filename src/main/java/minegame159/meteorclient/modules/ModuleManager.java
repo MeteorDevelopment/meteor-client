@@ -6,6 +6,8 @@ import me.zero.alpine.listener.Listenable;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.EventStore;
+import minegame159.meteorclient.events.GameDisconnectedEvent;
+import minegame159.meteorclient.events.GameJoinedEvent;
 import minegame159.meteorclient.events.KeyEvent;
 import minegame159.meteorclient.modules.combat.*;
 import minegame159.meteorclient.modules.misc.*;
@@ -114,6 +116,16 @@ public class ModuleManager implements Listenable {
         modules.add(module);
         getGroup(module.category).add(module);
     }
+
+    @EventHandler
+    private Listener<GameJoinedEvent> onGameJoined = new Listener<>(event -> {
+        for (Module module : active) module.onActivate();
+    });
+
+    @EventHandler
+    private Listener<GameDisconnectedEvent> onGameDisconnected = new Listener<>(event -> {
+        for (Module module : active) module.onDeactivate();
+    });
 
     private void initCombat() {
         addModule(new Criticals());

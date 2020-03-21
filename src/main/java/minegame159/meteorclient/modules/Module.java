@@ -62,7 +62,7 @@ public abstract class Module implements Listenable {
     public void onActivate() {}
     public void onDeactivate() {}
 
-    public void toggle() {
+    public void toggle(boolean onActivateDeactivate) {
         if (setting) return;
 
         if (!active) {
@@ -74,14 +74,17 @@ public abstract class Module implements Listenable {
                 if (setting.onModuleActivated != null) setting.onModuleActivated.accept(setting);
             }
 
-            onActivate();
+            if (onActivateDeactivate) onActivate();
         }
         else {
             active = false;
             ModuleManager.INSTANCE.removeActive(this);
             MeteorClient.eventBus.unsubscribe(this);
-            onDeactivate();
+            if (onActivateDeactivate) onDeactivate();
         }
+    }
+    public void toggle() {
+        toggle(true);
     }
 
     public void openScreen() {
