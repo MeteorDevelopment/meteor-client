@@ -19,6 +19,7 @@ public class SaveManager {
     public static void save(Class<?> klass) {
         File file = files.get(klass);
         if (file == null) throw new IllegalArgumentException(klass + " was registered.");
+        file.getParentFile().mkdirs();
 
         try {
             Writer writer = new FileWriter(file);
