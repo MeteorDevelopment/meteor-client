@@ -131,6 +131,7 @@ public class ESP extends Module {
     private Color crystalsSideColor = new Color();
     private Color vehiclesLineColor = new Color();
     private Color vehiclesSideColor = new Color();
+    private int count;
 
     public ESP() {
         super(Category.Render, "esp", "See entities through walls.");
@@ -200,10 +201,14 @@ public class ESP extends Module {
                 break;
             }
         }
+
+        count++;
     }
 
     @EventHandler
     private Listener<RenderEvent> onRender = new Listener<>(event -> {
+        count = 0;
+
         for (Entity entity : mc.world.getEntities()) {
             if (players.get() && EntityUtils.isPlayer(entity) && entity != mc.player) render(entity, playersLineColor, playersSideColor);
             else if (animals.get() && EntityUtils.isAnimal(entity)) render(entity, animalsLineColor, animalsSideColor);
@@ -213,4 +218,9 @@ public class ESP extends Module {
             else if (vehicles.get() && EntityUtils.isVehicle(entity)) render(entity, vehiclesLineColor, vehiclesSideColor);
         }
     });
+
+    @Override
+    public String getInfoString() {
+        return Integer.toString(count);
+    }
 }

@@ -52,6 +52,7 @@ public class StorageESP extends Module {
     private Color lineColor = new Color(0, 0, 0, 0);
     private Color sideColor = new Color(0, 0, 0, 0);
     private boolean render;
+    private int count;
 
     public StorageESP() {
         super(Category.Render, "storage-esp", "Shows storage blocks.");
@@ -74,6 +75,8 @@ public class StorageESP extends Module {
 
     @EventHandler
     private Listener<RenderEvent> onRender = new Listener<>(event -> {
+        count = 0;
+
         for (BlockEntity blockEntity : mc.world.blockEntities) {
             getTileEntityColor(blockEntity);
             if (render) {
@@ -92,7 +95,14 @@ public class StorageESP extends Module {
                     RenderUtils.blockEdges(x, y, z, lineColor, excludeDir);
                     RenderUtils.blockSides(x, y, z, sideColor, excludeDir);
                 }
+
+                count++;
             }
         }
     });
+
+    @Override
+    public String getInfoString() {
+        return Integer.toString(count);
+    }
 }

@@ -77,6 +77,7 @@ public class Tracers extends Module {
     );
 
     private Vec3d vec1;
+    private int count;
 
     public Tracers() {
         super(Category.Render, "tracers", "Displays lines to entities.");
@@ -86,15 +87,21 @@ public class Tracers extends Module {
         Vec3d vec2 = entity.getPos().add(0, entity.getEyeHeight(entity.getPose()), 0);
         double y = (entity.getBoundingBox().y2 - entity.getBoundingBox().y1) / 2.0;
         RenderUtils.line(vec1.x - (mc.cameraEntity.x - event.offsetX), vec1.y - (mc.cameraEntity.y - event.offsetY), vec1.z - (mc.cameraEntity.z - event.offsetZ), vec2.x, vec2.y - y, vec2.z, color);
+
+        count++;
     }
 
     private void render(BlockEntity blockEntity, RenderEvent event) {
         BlockPos pos = blockEntity.getPos();
         RenderUtils.line(vec1.x - (mc.cameraEntity.x - event.offsetX), vec1.y - (mc.cameraEntity.y - event.offsetY), vec1.z - (mc.cameraEntity.z - event.offsetZ), pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5f, storageColor.get());
+
+        count++;
     }
 
     @EventHandler
     private Listener<RenderEvent> onRender = new Listener<>(event -> {
+        count = 0;
+
         vec1 = new Vec3d(0, 0, 1)
                 .rotateX(-(float) Math.toRadians(mc.cameraEntity.pitch))
                 .rotateY(-(float) Math.toRadians(mc.cameraEntity.yaw))
@@ -114,4 +121,9 @@ public class Tracers extends Module {
             }
         }
     });
+
+    @Override
+    public String getInfoString() {
+        return Integer.toString(count);
+    }
 }
