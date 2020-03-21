@@ -28,9 +28,23 @@ public class StorageESP extends Module {
             .build()
     );
 
-    private Setting<Color> classic = addSetting(new ColorSetting.Builder()
-            .name("classic")
-            .description("Color of chests, shulkers and barrels.")
+    private Setting<Color> chest = addSetting(new ColorSetting.Builder()
+            .name("chest")
+            .description("Color of chests.")
+            .defaultValue(new Color(255, 160, 0, 255))
+            .build()
+    );
+
+    private Setting<Color> barrel = addSetting(new ColorSetting.Builder()
+            .name("barrel")
+            .description("Color of barrels.")
+            .defaultValue(new Color(255, 160, 0, 255))
+            .build()
+    );
+
+    private Setting<Color> shulker = addSetting(new ColorSetting.Builder()
+            .name("chest")
+            .description("Color of shulkers.")
             .defaultValue(new Color(255, 160, 0, 255))
             .build()
     );
@@ -61,7 +75,9 @@ public class StorageESP extends Module {
     private void getTileEntityColor(BlockEntity blockEntity) {
         render = true;
 
-        if (blockEntity instanceof ChestBlockEntity || blockEntity instanceof ShulkerBoxBlockEntity || blockEntity instanceof BarrelBlockEntity) lineColor.set(classic.get());
+        if (blockEntity instanceof ChestBlockEntity) lineColor.set(chest.get());
+        else if (blockEntity instanceof BarrelBlockEntity) lineColor.set(barrel.get());
+        else if (blockEntity instanceof ShulkerBoxBlockEntity) lineColor.set(shulker.get());
         else if (blockEntity instanceof EnderChestBlockEntity) lineColor.set(enderChest.get());
         else if (blockEntity instanceof FurnaceBlockEntity || blockEntity instanceof DispenserBlockEntity || blockEntity instanceof HopperBlockEntity) lineColor.set(other.get());
         else render = false;
