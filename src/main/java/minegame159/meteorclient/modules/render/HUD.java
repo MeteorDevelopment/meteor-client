@@ -36,6 +36,13 @@ public class HUD extends Module {
             .build()
     );
 
+    private Setting<Boolean> ping = addSetting(new BoolSetting.Builder()
+            .name("ping")
+            .description("Display ping.")
+            .defaultValue(true)
+            .build()
+    );
+
     private Setting<Boolean> tps = addSetting(new BoolSetting.Builder()
             .name("tps")
             .description("Display tps.")
@@ -190,6 +197,11 @@ public class HUD extends Module {
 
         if (fps.get()) {
             drawInfo("FPS: ", MinecraftClient.getCurrentFps() + "", y);
+            y += Utils.getTextHeight() + 2;
+        }
+
+        if (ping.get()) {
+            drawInfo("Ping: ", mc.getNetworkHandler().getPlayerListEntry(mc.player.getUuid()).getLatency() + "", y);
             y += Utils.getTextHeight() + 2;
         }
 
