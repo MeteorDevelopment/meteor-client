@@ -53,16 +53,15 @@ public abstract class EntityRendererMixin<T extends Entity> {
         GlStateManager.scalef(-scale, -scale, scale);
         GlStateManager.disableLighting();
         GlStateManager.depthMask(false);
-        GlStateManager.disableDepthTest();
-
         GlStateManager.enableBlend();
         GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        GlStateManager.disableTexture();
+
         int health = (int) ((PlayerEntity) entity).getHealth();
         String healthText = health + "";
         double halfWidthName = getFontRenderer().getStringWidth(text) / 2.0;
         double halfWidthHealth = getFontRenderer().getStringWidth(healthText) / 2.0;
         double halfWidth = halfWidthName + 4 + halfWidthHealth - 2.5;
-        GlStateManager.disableTexture();
 
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder bb = tessellator.getBuffer();
