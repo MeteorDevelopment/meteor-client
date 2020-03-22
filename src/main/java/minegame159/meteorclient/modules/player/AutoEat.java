@@ -41,8 +41,20 @@ public class AutoEat extends Module {
         super(Category.Player, "auto-eat", "Automatically eats food.");
     }
 
+    @Override
+    public void onDeactivate() {
+        if (isEating) {
+            ((IKeyBinding) mc.options.keyUse).setPressed(false);
+            isEating = false;
+            mc.player.inventory.selectedSlot = preSelectedSlot;
+            BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume");
+        }
+    }
+
     @EventHandler
     private Listener<TickEvent> onTick = new Listener<>(event -> {
+        if (mc.player.abilities.creativeMode) return;
+
         if (isEating) {
             ((IKeyBinding) mc.options.keyUse).setPressed(true);
 
