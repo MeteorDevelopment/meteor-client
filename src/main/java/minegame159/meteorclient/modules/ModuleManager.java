@@ -133,6 +133,7 @@ public class ModuleManager implements Listenable {
         addModule(new AutoLog());
         addModule(new KillAura());
         addModule(new CrystalAura());
+        addModule(new Surround());
     }
 
     private void initPlayer() {
