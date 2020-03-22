@@ -30,7 +30,7 @@ public class AutoLog extends Module {
 
     @EventHandler
     private Listener<TookDamageEvent> onTookDamage = new Listener<>(event -> {
-        if (!shouldLog && event.entity.getUuid().equals(mc.player.getUuid()) && event.entity.getHealth() <= health.get()) {
+        if (!shouldLog && mc.player != null && event.entity.getUuid().equals(mc.player.getUuid()) && event.entity.getHealth() <= health.get()) {
             shouldLog = true;
             lastLog = System.currentTimeMillis();
         }
