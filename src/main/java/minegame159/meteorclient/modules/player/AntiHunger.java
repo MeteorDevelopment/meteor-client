@@ -15,7 +15,7 @@ public class AntiHunger extends Module {
 
     @EventHandler
     private Listener<SendPacketEvent> onSendPacket = new Listener<>(event -> {
-        if (mc.player.fallDistance <= 0.0 && !mc.interactionManager.isBreakingBlock() && event.packet instanceof PlayerMoveC2SPacket) {
+        if (event.packet instanceof PlayerMoveC2SPacket && mc.player.fallDistance <= 0.0 && !mc.interactionManager.isBreakingBlock()) {
             ((IPlayerMoveC2SPacket) event.packet).setOnGround(false);
         }
     });

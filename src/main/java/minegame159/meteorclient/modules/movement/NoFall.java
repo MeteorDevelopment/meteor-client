@@ -15,7 +15,7 @@ public class NoFall extends Module {
 
     @EventHandler
     private Listener<SendPacketEvent> onSendPacket = new Listener<>(event -> {
-        if (mc.player.fallDistance > 0.0 && event.packet instanceof PlayerMoveC2SPacket) {
+        if (event.packet instanceof PlayerMoveC2SPacket && mc.player.fallDistance > 0.0) {
             ((IPlayerMoveC2SPacket) event.packet).setOnGround(true);
         }
     });
