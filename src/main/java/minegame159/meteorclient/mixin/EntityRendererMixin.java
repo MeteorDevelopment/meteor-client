@@ -56,6 +56,7 @@ public abstract class EntityRendererMixin<T extends Entity> {
         GlStateManager.enableBlend();
         GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
         GlStateManager.disableTexture();
+        GlStateManager.disableDepthTest();
 
         int health = (int) ((PlayerEntity) entity).getHealth();
         String healthText = health + "";
@@ -98,14 +99,17 @@ public abstract class EntityRendererMixin<T extends Entity> {
         tessellator.draw();
 
         GlStateManager.enableTexture();
-        GlStateManager.depthMask(true);
-
-        getFontRenderer().draw(text, (float) (-halfWidth), (float) verticalOffset, -1);
 
         int healthColor;
         if (health <= 6) healthColor = Color.fromRGBA(225, 45, 45, 255);
         else if (health <= 12) healthColor = Color.fromRGBA(225, 105, 25, 255);
         else healthColor = Color.fromRGBA(45, 225, 45, 255);
+
+        getFontRenderer().draw(text, (float) (-halfWidth), (float) verticalOffset, -1);
+        getFontRenderer().draw(healthText, (float) (-halfWidth + halfWidthName * 2 + 4), (float) verticalOffset, healthColor);
+        GlStateManager.depthMask(true);
+        GlStateManager.enableDepthTest();
+        getFontRenderer().draw(text, (float) (-halfWidth), (float) verticalOffset, -1);
         getFontRenderer().draw(healthText, (float) (-halfWidth + halfWidthName * 2 + 4), (float) verticalOffset, healthColor);
 
         GlStateManager.enableDepthTest();
