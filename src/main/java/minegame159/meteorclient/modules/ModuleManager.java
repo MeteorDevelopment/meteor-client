@@ -163,6 +163,7 @@ public class ModuleManager implements Listenable {
         addModule(new Speed());
         addModule(new SafeWalk());
         addModule(new Parkour());
+        addModule(new Scaffold());
     }
 
     private void initRender() {

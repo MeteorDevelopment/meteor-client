@@ -58,7 +58,7 @@ public class AutoEat extends Module {
         if (isEating) {
             ((IKeyBinding) mc.options.keyUse).setPressed(true);
 
-            if (mc.player.getHungerManager().getFoodLevel() != preFoodLevel) {
+            if (mc.player.getHungerManager().getFoodLevel() > preFoodLevel) {
                 ((IKeyBinding) mc.options.keyUse).setPressed(false);
                 isEating = false;
                 mc.player.inventory.selectedSlot = preSelectedSlot;
