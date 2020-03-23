@@ -27,11 +27,11 @@ public class AccountsScreen extends PanelListScreen implements Listenable {
         if (AccountManager.INSTANCE.getAll().size() > 0) {
             WGrid grid = add(new WGrid(4, 4, 4));
             for (Account account : AccountManager.INSTANCE.getAll()) {
-                WLabel name = new WLabel(account.username);
+                WLabel name = new WLabel(account.getName());
 
                 WLabel loggedIn = new WLabel("- logged in");
                 loggedIn.color = GUI.textLoggedIn;
-                if (mc.getSession().getUsername().equalsIgnoreCase(account.username)) loggedInL = loggedIn;
+                if (mc.getSession().getUsername().equalsIgnoreCase(account.getName())) loggedInL = loggedIn;
                 else loggedIn.visible = false;
 
                 WButton logIn = new WButton("Log In");
@@ -40,6 +40,8 @@ public class AccountsScreen extends PanelListScreen implements Listenable {
                         if (loggedInL != null) loggedInL.visible = false;
                         loggedIn.visible = true;
                         loggedInL = loggedIn;
+                        name.text = account.getName();
+                        layout();
                     }
                 };
 
