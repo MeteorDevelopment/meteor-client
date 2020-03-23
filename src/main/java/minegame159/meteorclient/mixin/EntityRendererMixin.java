@@ -1,6 +1,7 @@
 package minegame159.meteorclient.mixin;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import minegame159.meteorclient.altsfriends.FriendManager;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.render.Nametags;
 import minegame159.meteorclient.utils.Color;
@@ -12,6 +13,7 @@ import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.DyeColor;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -100,16 +102,18 @@ public abstract class EntityRendererMixin<T extends Entity> {
 
         GlStateManager.enableTexture();
 
+        int nameColor = FriendManager.INSTANCE.contains((PlayerEntity) entity) ? DyeColor.CYAN.getSignColor() : -1;
+
         int healthColor;
         if (health <= 6) healthColor = Color.fromRGBA(225, 45, 45, 255);
         else if (health <= 12) healthColor = Color.fromRGBA(225, 105, 25, 255);
         else healthColor = Color.fromRGBA(45, 225, 45, 255);
 
-        getFontRenderer().draw(text, (float) (-halfWidth), (float) verticalOffset, -1);
+        getFontRenderer().draw(text, (float) (-halfWidth), (float) verticalOffset, nameColor);
         getFontRenderer().draw(healthText, (float) (-halfWidth + halfWidthName * 2 + 4), (float) verticalOffset, healthColor);
         GlStateManager.depthMask(true);
         GlStateManager.enableDepthTest();
-        getFontRenderer().draw(text, (float) (-halfWidth), (float) verticalOffset, -1);
+        getFontRenderer().draw(text, (float) (-halfWidth), (float) verticalOffset, nameColor);
         getFontRenderer().draw(healthText, (float) (-halfWidth + halfWidthName * 2 + 4), (float) verticalOffset, healthColor);
 
         GlStateManager.enableDepthTest();
