@@ -96,7 +96,7 @@ public class AutoEat extends Module {
             }
         }
 
-        if (slot != 1 && 20 - mc.player.getHungerManager().getFoodLevel() >= bestHunger) {
+        if (slot != -1 && 20 - mc.player.getHungerManager().getFoodLevel() >= bestHunger) {
             preSelectedSlot = mc.player.inventory.selectedSlot;
             mc.player.inventory.selectedSlot = slot;
             isEating = true;
