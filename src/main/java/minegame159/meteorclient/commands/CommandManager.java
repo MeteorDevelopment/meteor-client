@@ -19,6 +19,7 @@ public class CommandManager {
         addCommand(new Reset());
         addCommand(new Panic());
         addCommand(new ResetAll());
+        addCommand(new Baritone());
     }
 
     public static Command get(String name) {
