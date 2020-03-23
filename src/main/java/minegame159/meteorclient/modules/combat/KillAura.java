@@ -34,7 +34,7 @@ public class KillAura extends Module {
 
     public Setting<Boolean> friends = addSetting(new BoolSetting.Builder()
             .name("friends")
-            .description("Attack friends, useful only if attack friends is on.")
+            .description("Attack friends, useful only if attack players is on.")
             .defaultValue(false)
             .build()
     );
@@ -86,7 +86,7 @@ public class KillAura extends Module {
     private boolean canAttackEntity(Entity entity) {
         if (entity.getUuid().equals(mc.player.getUuid())) return false;
         if (EntityUtils.isPlayer(entity) && players.get()) {
-            if (!friends.get()) return true;
+            if (friends.get()) return true;
             return !FriendManager.INSTANCE.contains((PlayerEntity) entity);
         }
         if (EntityUtils.isAnimal(entity) && animals.get()) return true;
