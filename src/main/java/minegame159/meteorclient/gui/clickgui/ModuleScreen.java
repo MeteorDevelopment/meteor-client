@@ -24,21 +24,14 @@ public class ModuleScreen extends PanelListScreen implements Listenable {
 
         // Description
         add(new WLabel(module.description));
-        add(new WHorizontalSeparator());
+        if (module.settingGroups.size() <= 1) add(new WHorizontalSeparator());
 
         // Settings
-        WGrid grid = add(new WGrid(4, 4, 3));
-        for (Setting setting : module.settings) {
-            WLabel name = new WLabel(setting.title + ":");
-            name.tooltip = setting.description;
+        for (String group : module.settingGroups.keySet()) {
+            if (module.settingGroups.size() > 1) add(new WHorizontalSeparator(group));
 
-            WWidget s = setting.widget;
-            s.tooltip = setting.description;
-
-            WButton reset = new WButton("Reset");
-            reset.action = setting::reset;
-
-            grid.addRow(name, s, reset);
+            WGrid grid = add(new WGrid(4, 4, 3));
+            for (Setting<?> setting : module.settingGroups.get(group)) generateSettingToGrid(grid, setting);
         }
 
         WWidget customWidget = module.getCustomWidget();
@@ -86,6 +79,19 @@ public class ModuleScreen extends PanelListScreen implements Listenable {
             layout();
         }
     });
+
+    private void generateSettingToGrid(WGrid grid, Setting<?> setting) {
+        WLabel name = new WLabel(setting.title + ":");
+        name.tooltip = setting.description;
+
+        WWidget s = setting.widget;
+        s.tooltip = setting.description;
+
+        WButton reset = new WButton("Reset");
+        reset.action = setting::reset;
+
+        grid.addRow(name, s, reset);
+    }
 
     private String getBindLabelText() {
         return "Bind: " + (module.getKey() == -1 ? "none" : GLFW.glfwGetKeyName(module.getKey(), 0));

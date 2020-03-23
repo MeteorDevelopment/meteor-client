@@ -25,6 +25,7 @@ public class ESP extends Module {
     private Setting<Mode> mode = addSetting(new EnumSetting.Builder<Mode>()
             .name("mode")
             .description("Rendering mode.")
+            .group("General")
             .defaultValue(Mode.Both)
             .build()
     );
@@ -32,6 +33,7 @@ public class ESP extends Module {
     private Setting<Boolean> players = addSetting(new BoolSetting.Builder()
             .name("players")
             .description("See players.")
+            .group("Players")
             .defaultValue(true)
             .build()
     );
@@ -39,6 +41,7 @@ public class ESP extends Module {
     private Setting<Color> playersColor = addSetting(new ColorSetting.Builder()
             .name("players-color")
             .description("Players color.")
+            .group("Players")
             .defaultValue(new Color(255, 255, 255, 255))
             .onChanged(color1 -> recalculateColor())
             .build()
@@ -47,6 +50,7 @@ public class ESP extends Module {
     private Setting<Boolean> animals = addSetting(new BoolSetting.Builder()
             .name("animals")
             .description("See animals.")
+            .group("Animals")
             .defaultValue(true)
             .build()
     );
@@ -54,6 +58,7 @@ public class ESP extends Module {
     private Setting<Color> animalsColor = addSetting(new ColorSetting.Builder()
             .name("animals-color")
             .description("Animals color.")
+            .group("Animals")
             .defaultValue(new Color(145, 255, 145, 255))
             .onChanged(color1 -> recalculateColor())
             .build()
@@ -62,6 +67,7 @@ public class ESP extends Module {
     private Setting<Boolean> mobs = addSetting(new BoolSetting.Builder()
             .name("mobs")
             .description("See mobs.")
+            .group("Mobs")
             .defaultValue(true)
             .build()
     );
@@ -69,6 +75,7 @@ public class ESP extends Module {
     private Setting<Color> mobsColor = addSetting(new ColorSetting.Builder()
             .name("mobs-color")
             .description("Mobs color.")
+            .group("Mobs")
             .defaultValue(new Color(255, 145, 145, 255))
             .onChanged(color1 -> recalculateColor())
             .build()
@@ -77,6 +84,7 @@ public class ESP extends Module {
     private Setting<Boolean> items = addSetting(new BoolSetting.Builder()
             .name("items")
             .description("See items.")
+            .group("Items")
             .defaultValue(true)
             .build()
     );
@@ -84,6 +92,7 @@ public class ESP extends Module {
     private Setting<Color> itemsColor = addSetting(new ColorSetting.Builder()
             .name("items-color")
             .description("Items color.")
+            .group("Items")
             .defaultValue(new Color(145, 145, 145, 255))
             .onChanged(color1 -> recalculateColor())
             .build()
@@ -92,6 +101,7 @@ public class ESP extends Module {
     private Setting<Boolean> crystals = addSetting(new BoolSetting.Builder()
             .name("crystals")
             .description("See crystals.")
+            .group("Crystals")
             .defaultValue(true)
             .build()
     );
@@ -99,6 +109,7 @@ public class ESP extends Module {
     private Setting<Color> crystalsColor = addSetting(new ColorSetting.Builder()
             .name("crystals-color")
             .description("Crystals color.")
+            .group("Crystals")
             .defaultValue(new Color(160, 40, 235, 255))
             .onChanged(color1 -> recalculateColor())
             .build()
@@ -107,6 +118,7 @@ public class ESP extends Module {
     private Setting<Boolean> vehicles = addSetting(new BoolSetting.Builder()
             .name("vehicles")
             .description("See vehicles.")
+            .group("Vehicles")
             .defaultValue(true)
             .build()
     );
@@ -114,6 +126,7 @@ public class ESP extends Module {
     private Setting<Color> vehiclesColor = addSetting(new ColorSetting.Builder()
             .name("vehicles-color")
             .description("Vehicles color.")
+            .group("Vehicles")
             .defaultValue(new Color(100, 100, 100, 255))
             .onChanged(color1 -> recalculateColor())
             .build()

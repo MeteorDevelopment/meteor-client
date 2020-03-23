@@ -9,7 +9,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public abstract class Setting<T> {
-    public final String name, title, description;
+    public final String name, title, description, group;
     private String usage;
 
     private final T defaultValue;
@@ -19,10 +19,11 @@ public abstract class Setting<T> {
     public final Consumer<Setting<T>> onModuleActivated;
     public WWidget widget;
 
-    public Setting(String name, String description, T defaultValue, Consumer<T> onChanged, Consumer<Setting<T>> onModuleActivated) {
+    public Setting(String name, String description, String group, T defaultValue, Consumer<T> onChanged, Consumer<Setting<T>> onModuleActivated) {
         this.name = name;
         this.title = Arrays.stream(name.split("-")).map(StringUtils::capitalize).collect(Collectors.joining(" "));;
         this.description = description;
+        this.group = group;
         this.defaultValue = defaultValue;
         this.value = defaultValue;
         this.onChanged = onChanged;

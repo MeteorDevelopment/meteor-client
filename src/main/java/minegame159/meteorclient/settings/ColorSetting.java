@@ -6,8 +6,8 @@ import minegame159.meteorclient.utils.Color;
 import java.util.function.Consumer;
 
 public class ColorSetting extends Setting<Color> {
-    public ColorSetting(String name, String description, Color defaultValue, Consumer<Color> onChanged, Consumer<Setting<Color>> onModuleActivated) {
-        super(name, description, defaultValue, onChanged, onModuleActivated);
+    public ColorSetting(String name, String description, String group, Color defaultValue, Consumer<Color> onChanged, Consumer<Setting<Color>> onModuleActivated) {
+        super(name, description, group, defaultValue, onChanged, onModuleActivated);
 
         widget = new WColorEdit(get());
         ((WColorEdit) widget).action = wColorEdit -> set(wColorEdit.color);
@@ -41,6 +41,7 @@ public class ColorSetting extends Setting<Color> {
 
     public static class Builder {
         private String name = "undefined", description = "";
+        private String group;
         private Color defaultValue;
         private Consumer<Color> onChanged;
         private Consumer<Setting<Color>> onModuleActivated;
@@ -52,6 +53,11 @@ public class ColorSetting extends Setting<Color> {
 
         public Builder description(String description) {
             this.description = description;
+            return this;
+        }
+
+        public Builder group(String group) {
+            this.group = group;
             return this;
         }
 
@@ -71,7 +77,7 @@ public class ColorSetting extends Setting<Color> {
         }
 
         public ColorSetting build() {
-            return new ColorSetting(name, description, defaultValue, onChanged, onModuleActivated);
+            return new ColorSetting(name, description, group, defaultValue, onChanged, onModuleActivated);
         }
     }
 }

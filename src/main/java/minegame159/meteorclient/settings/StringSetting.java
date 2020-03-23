@@ -5,8 +5,8 @@ import minegame159.meteorclient.gui.widgets.WTextBox;
 import java.util.function.Consumer;
 
 public class StringSetting extends Setting<String> {
-    public StringSetting(String name, String description, String defaultValue, Consumer<String> onChanged, Consumer<Setting<String>> onModuleActivated) {
-        super(name, description, defaultValue, onChanged, onModuleActivated);
+    public StringSetting(String name, String description, String group, String defaultValue, Consumer<String> onChanged, Consumer<Setting<String>> onModuleActivated) {
+        super(name, description, group, defaultValue, onChanged, onModuleActivated);
 
         widget = new WTextBox(get(), 200);
         ((WTextBox) widget).action = textBox -> set(textBox.text.trim());
@@ -35,6 +35,7 @@ public class StringSetting extends Setting<String> {
     public static class Builder {
         private String name = "undefined", description = "";
         private String defaultValue;
+        private String group;
         private Consumer<String> onChanged;
         private Consumer<Setting<String>> onModuleActivated;
 
@@ -45,6 +46,11 @@ public class StringSetting extends Setting<String> {
 
         public Builder description(String description) {
             this.description = description;
+            return this;
+        }
+
+        public Builder group(String group) {
+            this.group = group;
             return this;
         }
 
@@ -64,7 +70,7 @@ public class StringSetting extends Setting<String> {
         }
 
         public StringSetting build() {
-            return new StringSetting(name, description, defaultValue, onChanged, onModuleActivated);
+            return new StringSetting(name, description, group, defaultValue, onChanged, onModuleActivated);
         }
     }
 }

@@ -5,8 +5,8 @@ import minegame159.meteorclient.gui.widgets.WCheckbox;
 import java.util.function.Consumer;
 
 public class BoolSetting extends Setting<Boolean> {
-    private BoolSetting(String name, String description, Boolean defaultValue, Consumer<Boolean> onChanged, Consumer<Setting<Boolean>> onModuleActivated) {
-        super(name, description, defaultValue, onChanged, onModuleActivated);
+    private BoolSetting(String name, String description, String group, Boolean defaultValue, Consumer<Boolean> onChanged, Consumer<Setting<Boolean>> onModuleActivated) {
+        super(name, description, group, defaultValue, onChanged, onModuleActivated);
 
         widget = new WCheckbox(get());
         ((WCheckbox) widget).setAction(wCheckbox -> set(wCheckbox.checked));
@@ -37,6 +37,7 @@ public class BoolSetting extends Setting<Boolean> {
 
     public static class Builder {
         private String name = "undefined", description = "";
+        private String group;
         private Boolean defaultValue;
         private Consumer<Boolean> onChanged;
         private Consumer<Setting<Boolean>> onModuleActivated;
@@ -48,6 +49,11 @@ public class BoolSetting extends Setting<Boolean> {
 
         public Builder description(String description) {
             this.description = description;
+            return this;
+        }
+
+        public Builder group(String group) {
+            this.group = group;
             return this;
         }
 
@@ -67,7 +73,7 @@ public class BoolSetting extends Setting<Boolean> {
         }
 
         public BoolSetting build() {
-            return new BoolSetting(name, description, defaultValue, onChanged, onModuleActivated);
+            return new BoolSetting(name, description, group, defaultValue, onChanged, onModuleActivated);
         }
     }
 }

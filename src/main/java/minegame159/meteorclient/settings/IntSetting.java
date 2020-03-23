@@ -7,8 +7,8 @@ import java.util.function.Consumer;
 public class IntSetting extends Setting<Integer> {
     private final Integer min, max;
 
-    private IntSetting(String name, String description, Integer defaultValue, Consumer<Integer> onChanged, Consumer<Setting<Integer>> onModuleActivated, Integer min, Integer max) {
-        super(name, description, defaultValue, onChanged, onModuleActivated);
+    private IntSetting(String name, String description, String group, Integer defaultValue, Consumer<Integer> onChanged, Consumer<Setting<Integer>> onModuleActivated, Integer min, Integer max) {
+        super(name, description, group, defaultValue, onChanged, onModuleActivated);
         this.min = min;
         this.max = max;
 
@@ -52,6 +52,7 @@ public class IntSetting extends Setting<Integer> {
 
     public static class Builder {
         private String name = "undefined", description = "";
+        private String group;
         private Integer defaultValue;
         private Consumer<Integer> onChanged;
         private Consumer<Setting<Integer>> onModuleActivated;
@@ -64,6 +65,11 @@ public class IntSetting extends Setting<Integer> {
 
         public Builder description(String description) {
             this.description = description;
+            return this;
+        }
+
+        public Builder group(String group) {
+            this.group = group;
             return this;
         }
 
@@ -93,7 +99,7 @@ public class IntSetting extends Setting<Integer> {
         }
 
         public IntSetting build() {
-            return new IntSetting(name, description, defaultValue, onChanged, onModuleActivated, min, max);
+            return new IntSetting(name, description, group, defaultValue, onChanged, onModuleActivated, min, max);
         }
     }
 }

@@ -14,9 +14,8 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public abstract class Module implements Listenable {
@@ -27,7 +26,8 @@ public abstract class Module implements Listenable {
     public final String title;
     public final String description;
     private final int color;
-    public final List<Setting> settings = new ArrayList<>();
+    public final Map<String, List<Setting<?>>> settingGroups = new LinkedHashMap<>(1);
+    public final List<Setting<?>> settings = new ArrayList<>(1);
     public final boolean setting;
     public final boolean serialize;
     private int key = -1;
@@ -102,8 +102,8 @@ public abstract class Module implements Listenable {
         return categoryColor.getPacked();
     }
 
-    public Setting getSetting(String name) {
-        for (Setting setting : settings) {
+    public Setting<?> getSetting(String name) {
+        for (Setting<?> setting : settings) {
             if (name.equalsIgnoreCase(setting.name)) return setting;
         }
 
@@ -112,6 +112,8 @@ public abstract class Module implements Listenable {
 
     public <T> Setting<T> addSetting(Setting<T> setting) {
         settings.add(setting);
+        List<Setting<?>> group = settingGroups.computeIfAbsent(setting.group == null ? "Other" : setting.group, s -> new ArrayList<>(1));
+        group.add(setting);
         return setting;
     }
 

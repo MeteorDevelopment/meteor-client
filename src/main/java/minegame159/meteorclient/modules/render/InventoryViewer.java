@@ -19,6 +19,7 @@ public class InventoryViewer extends Module {
     private Setting<Alignment.X> xAlignment = addSetting(new EnumSetting.Builder<Alignment.X>()
             .name("x-alignment")
             .description("X alignment.")
+            .group("X")
             .defaultValue(Alignment.X.Left)
             .build()
     );
@@ -26,6 +27,7 @@ public class InventoryViewer extends Module {
     private Setting<Integer> xOffset = addSetting(new IntSetting.Builder()
             .name("x-offset")
             .description("X offset.")
+            .group("X")
             .defaultValue(3)
             .build()
     );
@@ -33,6 +35,7 @@ public class InventoryViewer extends Module {
     private Setting<Alignment.Y> yAlignment = addSetting(new EnumSetting.Builder<Alignment.Y>()
             .name("y-alignment")
             .description("Y alignment.")
+            .group("Y")
             .defaultValue(Alignment.Y.Bottom)
             .build()
     );
@@ -40,6 +43,7 @@ public class InventoryViewer extends Module {
     private Setting<Integer> yOffset = addSetting(new IntSetting.Builder()
             .name("y-offset")
             .description("Y offset.")
+            .group("Y")
             .defaultValue(3)
             .build()
     );

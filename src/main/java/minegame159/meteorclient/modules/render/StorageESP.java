@@ -24,6 +24,7 @@ public class StorageESP extends Module {
     private Setting<Mode> mode = addSetting(new EnumSetting.Builder<Mode>()
             .name("mode")
             .description("Rendering mode.")
+            .group("General")
             .defaultValue(Mode.Both)
             .build()
     );
@@ -31,6 +32,7 @@ public class StorageESP extends Module {
     private Setting<Color> chest = addSetting(new ColorSetting.Builder()
             .name("chest")
             .description("Color of chests.")
+            .group("Classic")
             .defaultValue(new Color(255, 160, 0, 255))
             .build()
     );
@@ -38,6 +40,7 @@ public class StorageESP extends Module {
     private Setting<Color> barrel = addSetting(new ColorSetting.Builder()
             .name("barrel")
             .description("Color of barrels.")
+            .group("Classic")
             .defaultValue(new Color(255, 160, 0, 255))
             .build()
     );
@@ -45,6 +48,7 @@ public class StorageESP extends Module {
     private Setting<Color> shulker = addSetting(new ColorSetting.Builder()
             .name("chest")
             .description("Color of shulkers.")
+            .group("Classic")
             .defaultValue(new Color(255, 160, 0, 255))
             .build()
     );

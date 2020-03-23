@@ -25,6 +25,7 @@ public class ConfigM extends Module {
             addSetting(new ColorSetting.Builder()
                     .name(category.toString().toLowerCase() + "-color")
                     .description(category.toString() + " color.")
+                    .group("Category Colors")
                     .defaultValue(new Color(0, 0, 0, 0))
                     .onChanged(color1 -> Config.INSTANCE.setCategoryColor(category, color1))
                     .onModuleActivated(colorSetting -> {

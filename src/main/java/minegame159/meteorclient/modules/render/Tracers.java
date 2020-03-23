@@ -23,6 +23,7 @@ public class Tracers extends Module {
     private Setting<Boolean> players = addSetting(new BoolSetting.Builder()
             .name("players")
             .description("See players.")
+            .group("Players")
             .defaultValue(true)
             .build()
     );
@@ -30,6 +31,7 @@ public class Tracers extends Module {
     private Setting<Color> playersColor = addSetting(new ColorSetting.Builder()
             .name("players-color")
             .description("Players color.")
+            .group("Players")
             .defaultValue(new Color(255, 255, 255, 255))
             .build()
     );
@@ -37,6 +39,7 @@ public class Tracers extends Module {
     private Setting<Boolean> animals = addSetting(new BoolSetting.Builder()
             .name("animals")
             .description("See animals.")
+            .group("Animals")
             .defaultValue(true)
             .build()
     );
@@ -44,6 +47,7 @@ public class Tracers extends Module {
     private Setting<Color> animalsColor = addSetting(new ColorSetting.Builder()
             .name("animals-color")
             .description("Animals color.")
+            .group("Animals")
             .defaultValue(new Color(145, 255, 145, 255))
             .build()
     );
@@ -51,6 +55,7 @@ public class Tracers extends Module {
     private Setting<Boolean> mobs = addSetting(new BoolSetting.Builder()
             .name("mobs")
             .description("See mobs.")
+            .group("Mobs")
             .defaultValue(true)
             .build()
     );
@@ -58,6 +63,7 @@ public class Tracers extends Module {
     private Setting<Color> mobsColor = addSetting(new ColorSetting.Builder()
             .name("mobs-color")
             .description("Mobs color.")
+            .group("Mobs")
             .defaultValue(new Color(255, 145, 145, 255))
             .build()
     );
@@ -65,6 +71,7 @@ public class Tracers extends Module {
     private Setting<Boolean> storage = addSetting(new BoolSetting.Builder()
             .name("storage")
             .description("See chests, barrels and shulkers.")
+            .group("Storage")
             .defaultValue(false)
             .build()
     );
@@ -72,6 +79,7 @@ public class Tracers extends Module {
     private Setting<Color> storageColor = addSetting(new ColorSetting.Builder()
             .name("storage-color")
             .description("Storage color.")
+            .group("Storage")
             .defaultValue(new Color(255, 160, 0, 255))
             .build()
     );

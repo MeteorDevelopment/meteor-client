@@ -37,6 +37,7 @@ public class HUD extends Module {
     private Setting<Boolean> fps = addSetting(new BoolSetting.Builder()
             .name("fps")
             .description("Display fps.")
+            .group("Top Left")
             .defaultValue(true)
             .build()
     );
@@ -44,6 +45,7 @@ public class HUD extends Module {
     private Setting<Boolean> ping = addSetting(new BoolSetting.Builder()
             .name("ping")
             .description("Display ping.")
+            .group("Top Left")
             .defaultValue(true)
             .build()
     );
@@ -51,6 +53,7 @@ public class HUD extends Module {
     private Setting<Boolean> tps = addSetting(new BoolSetting.Builder()
             .name("tps")
             .description("Display tps.")
+            .group("Top Left")
             .defaultValue(true)
             .build()
     );
@@ -58,6 +61,7 @@ public class HUD extends Module {
     private Setting<Boolean> speed = addSetting(new BoolSetting.Builder()
             .name("speed")
             .description("Display speed in blocks per second.")
+            .group("Top Left")
             .defaultValue(true)
             .build()
     );
@@ -65,6 +69,7 @@ public class HUD extends Module {
     private Setting<Boolean> entities = addSetting(new BoolSetting.Builder()
             .name("entities")
             .description("Display number of entities.")
+            .group("Top Left")
             .defaultValue(true)
             .onChanged(aBoolean -> updateEntities = true)
             .build()
@@ -73,6 +78,7 @@ public class HUD extends Module {
     private Setting<Boolean> entityCustomNames = addSetting(new BoolSetting.Builder()
             .name("entity-custom-names")
             .description("Use custom names.")
+            .group("Top Left")
             .defaultValue(true)
             .onChanged(aBoolean -> updateEntities = true)
             .build()
@@ -81,6 +87,7 @@ public class HUD extends Module {
     private Setting<Boolean> separateSheepsByColor = addSetting(new BoolSetting.Builder()
             .name("separate-sheeps-by-color")
             .description("Separates sheeps by color in entity list.")
+            .group("Top Left")
             .defaultValue(false)
             .onChanged(aBoolean -> updateEntities = true)
             .build()
@@ -89,6 +96,7 @@ public class HUD extends Module {
     private Setting<Boolean> activeModules = addSetting(new BoolSetting.Builder()
             .name("active-modules")
             .description("Display active modules.")
+            .group("Top Right")
             .defaultValue(true)
             .build()
     );
@@ -96,6 +104,7 @@ public class HUD extends Module {
     public Setting<Boolean> potionTimers = addSetting(new BoolSetting.Builder()
             .name("potion-timers")
             .description("Display potion timers and hide minecraft default potion icons.")
+            .group("Bottom Right")
             .defaultValue(true)
             .build()
     );
@@ -103,6 +112,7 @@ public class HUD extends Module {
     private Setting<Boolean> position = addSetting(new BoolSetting.Builder()
             .name("position")
             .description("Display your position.")
+            .group("Bottom Right")
             .defaultValue(true)
             .build()
     );
@@ -110,6 +120,7 @@ public class HUD extends Module {
     private Setting<Boolean> rotation = addSetting(new BoolSetting.Builder()
             .name("rotation")
             .description("Display your rotation.")
+            .group("Bottom Right")
             .defaultValue(true)
             .build()
     );
