@@ -17,6 +17,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.passive.SheepEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.math.Direction;
 import net.minecraft.world.dimension.DimensionType;
 import org.apache.commons.lang3.StringUtils;
 
@@ -92,6 +93,13 @@ public class HUD extends Module {
     private Setting<Boolean> position = addSetting(new BoolSetting.Builder()
             .name("position")
             .description("Display your position.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private Setting<Boolean> rotation = addSetting(new BoolSetting.Builder()
+            .name("rotation")
+            .description("Display your rotation.")
             .defaultValue(true)
             .build()
     );
@@ -237,12 +245,18 @@ public class HUD extends Module {
         }
     }
 
+    private void drawInfo(String text1, String text2, int x, int y, int text1Color) {
+        Utils.drawTextWithShadow(text1, x, y, text1Color);
+        Utils.drawTextWithShadow(text2, x + Utils.getTextWidth(text1), y, gray);
+    }
     private void drawInfo(String text1, String text2, int y, int text1Color) {
-        Utils.drawTextWithShadow(text1, 2, y, text1Color);
-        Utils.drawTextWithShadow(text2, 2 + Utils.getTextWidth(text1), y, gray);
+        drawInfo(text1, text2, 2, y, text1Color);
     }
     private void drawInfo(String text1, String text2, int y) {
         drawInfo(text1, text2, y, white);
+    }
+    private void drawInfoRight(String text1, String text2, int y) {
+        drawInfo(text1, text2, mc.window.getScaledWidth() - Utils.getTextWidth(text1) - Utils.getTextWidth(text2) - 2, y, white);
     }
 
     private void drawEntityCount(EntityInfo entityInfo, int y) {
@@ -288,17 +302,33 @@ public class HUD extends Module {
     private void renderBottomRight(Render2DEvent event) {
         int y = event.screenHeight - Utils.getTextHeight() - 2;
 
+        if (rotation.get()) {
+            Direction direction = mc.player.getHorizontalFacing();
+            String axis = "invalid";
+            switch (direction) {
+                case NORTH: axis = "-Z"; break;
+                case SOUTH: axis = "+Z"; break;
+                case WEST:  axis = "-X"; break;
+                case EAST:  axis = "+X"; break;
+            }
+            drawInfoRight(String.format("%s %s ", StringUtils.capitalize(direction.getName()), axis), String.format("(%.1f, %.1f)", mc.player.yaw, mc.player.pitch), y);
+            y -= Utils.getTextHeight() + 2;
+        }
+
         if (position.get()) {
             if (mc.player.dimension == DimensionType.OVERWORLD) {
                 drawPosition(event.screenWidth, "Nether Pos: ", y, mc.player.x / 8.0, mc.player.y / 8.0, mc.player.z / 8.0);
                 y -= Utils.getTextHeight() + 2;
                 drawPosition(event.screenWidth, "Pos: ", y, mc.player.x, mc.player.y, mc.player.z);
+                y -= Utils.getTextHeight() + 2;
             } else if (mc.player.dimension == DimensionType.THE_NETHER) {
                 drawPosition(event.screenWidth, "Overworld Pos: ", y, mc.player.x * 8.0, mc.player.y * 8.0, mc.player.z * 8.0);
                 y -= Utils.getTextHeight() + 2;
                 drawPosition(event.screenWidth, "Pos: ", y, mc.player.x, mc.player.y, mc.player.z);
+                y -= Utils.getTextHeight() + 2;
             } else if (mc.player.dimension == DimensionType.THE_END) {
                 drawPosition(event.screenWidth, "Pos: ", y, mc.player.x, mc.player.y, mc.player.z);
+                y -= Utils.getTextHeight() + 2;
             }
         }
     }
