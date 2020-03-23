@@ -87,13 +87,13 @@ public class WWidget {
         return false;
     }
 
-    public boolean charTyped(char c) {
+    public boolean charTyped(char c, int key) {
         for (WWidget widget : widgets) {
-            if (widget.charTyped(c)) return true;
+            if (widget.charTyped(c, key)) return true;
         }
-        return onCharTyped(c);
+        return onCharTyped(c, key);
     }
-    public boolean onCharTyped(char c) {
+    public boolean onCharTyped(char c, int key) {
         return false;
     }
 

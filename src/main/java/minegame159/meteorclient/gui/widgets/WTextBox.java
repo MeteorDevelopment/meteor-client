@@ -21,10 +21,9 @@ public class WTextBox extends WWidget {
     public Consumer<WTextBox> action;
 
     private double width;
-    public boolean focused;
+    private boolean focused;
     private boolean cursorVisible;
     private int blinkTimer = 0;
-    private boolean backspacePressed;
 
     public WTextBox(String text, double width) {
         boundingBox.setMargin(3);
@@ -41,10 +40,7 @@ public class WTextBox extends WWidget {
     @Override
     public boolean onMousePressed(int button) {
         if (!focused && mouseOver) MixinValues.setPostKeyEvents(true);
-        else if (focused && !mouseOver) {
-            MixinValues.setPostKeyEvents(false);
-            backspacePressed = false;
-        }
+        else if (focused && !mouseOver) MixinValues.setPostKeyEvents(false);
 
         focused = mouseOver;
 
@@ -58,11 +54,6 @@ public class WTextBox extends WWidget {
 
     @Override
     public boolean onKeyPressed(int key, int modifiers) {
-        if (key == GLFW.GLFW_KEY_BACKSPACE && focused) {
-            backspacePressed = true;
-            return true;
-        }
-
         if (key == GLFW.GLFW_KEY_V && modifiers == GLFW.GLFW_MOD_CONTROL && focused) {
             text += MinecraftClient.getInstance().keyboard.getClipboard();
             return true;
@@ -72,18 +63,14 @@ public class WTextBox extends WWidget {
     }
 
     @Override
-    public boolean onKeyReleased(int key) {
-        if (key == GLFW.GLFW_KEY_BACKSPACE && focused) {
-            backspacePressed = false;
-            return true;
-        }
-
-        return false;
-    }
-
-    @Override
-    public boolean onCharTyped(char c) {
+    public boolean onCharTyped(char c, int key) {
         if (focused) {
+            if (key == GLFW.GLFW_KEY_BACKSPACE && text.length() > 0) {
+                text = text.substring(0, text.length() - 1);
+                if (action != null) action.accept(this);
+                return true;
+            }
+
             if (filter == null) {
                 text += c;
                 if (action != null) action.accept(this);
@@ -97,6 +84,12 @@ public class WTextBox extends WWidget {
         return false;
     }
 
+    public void setFocused(boolean focused) {
+        if (!this.focused && focused) MixinValues.setPostKeyEvents(true);
+        else if (this.focused && !focused) MixinValues.setPostKeyEvents(false);
+        this.focused = focused;
+    }
+
     @Override
     public void onTick() {
         blinkTimer++;
@@ -104,11 +97,6 @@ public class WTextBox extends WWidget {
         if (blinkTimer >= 10) {
             blinkTimer = 0;
             cursorVisible = !cursorVisible;
-        }
-
-        if (backspacePressed && text.length() > 0) {
-            text = text.substring(0, text.length() - 1);
-            if (action != null) action.accept(this);
         }
     }
 

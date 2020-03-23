@@ -27,7 +27,9 @@ public class EditMacroScreen extends PanelListScreen implements Listenable {
         // Name
         WHorizontalList name = add(new WHorizontalList(4));
         name.add(new WLabel("Name:"));
-        name.add(new WTextBox(newMacro ? "" : macro.name, 200)).action = textBox -> macro.name = textBox.text.trim();
+        WTextBox nameT = name.add(new WTextBox(newMacro ? "" : macro.name, 200));
+        nameT.setFocused(true);
+        nameT.action = textBox -> macro.name = textBox.text.trim();
         add(new WHorizontalSeparator());
 
         // Messages

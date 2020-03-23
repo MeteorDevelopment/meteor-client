@@ -14,6 +14,7 @@ public class AddAccountScreen extends PanelListScreen {
 
         WLabel emailL = new WLabel("Email:");
         WTextBox emailT = new WTextBox("", 200);
+        emailT.setFocused(true);
         grid.addRow(emailL, emailT);
 
         WLabel passwordL = new WLabel("Password:");

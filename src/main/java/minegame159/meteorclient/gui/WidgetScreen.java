@@ -77,7 +77,7 @@ public class WidgetScreen extends Screen {
 
     @Override
     public boolean charTyped(char chr, int keyCode) {
-        return root.charTyped(chr);
+        return root.charTyped(chr, keyCode);
     }
 
     public void layout() {

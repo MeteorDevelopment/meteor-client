@@ -21,6 +21,7 @@ public class PotionSettingScreen extends PanelListScreen {
         // Filter
         filter = new WTextBox("", 200);
         filter.boundingBox.fullWidth = true;
+        filter.setFocused(true);
         filter.action = textBox -> {
             clear();
             initWidgets();

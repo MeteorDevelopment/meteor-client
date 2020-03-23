@@ -32,7 +32,7 @@ public class FriendsScreen extends PanelListScreen implements Listenable {
 
         // Add
         WTextBox username = new WTextBox("", 200);
-        username.focused = true;
+        username.setFocused(true);
         WPlus add = new WPlus();
         add.action = () -> FriendManager.INSTANCE.add(username.text);
         grid.addRow(username, add);
