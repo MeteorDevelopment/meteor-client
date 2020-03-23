@@ -70,9 +70,8 @@ public class WidgetScreen extends Screen {
         return root.keyPressed(keyCode, modifiers) || super.keyPressed(keyCode, scanCode, modifiers);
     }
 
-    @Override
-    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
-        return root.keyReleased(keyCode) || super.keyReleased(keyCode, scanCode, modifiers);
+    public void keyRepeated(int key) {
+        root.keyRepeated(key);
     }
 
     @Override

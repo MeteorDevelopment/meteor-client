@@ -54,6 +54,12 @@ public class WTextBox extends WWidget {
 
     @Override
     public boolean onKeyPressed(int key, int modifiers) {
+        if (focused && key == GLFW.GLFW_KEY_BACKSPACE && text.length() > 0) {
+            text = text.substring(0, text.length() - 1);
+            if (action != null) action.accept(this);
+            return true;
+        }
+
         if (key == GLFW.GLFW_KEY_V && modifiers == GLFW.GLFW_MOD_CONTROL && focused) {
             text += MinecraftClient.getInstance().keyboard.getClipboard();
             return true;
@@ -63,14 +69,19 @@ public class WTextBox extends WWidget {
     }
 
     @Override
+    public boolean onKeyRepeated(int key) {
+        if (focused && key == GLFW.GLFW_KEY_BACKSPACE && text.length() > 0) {
+            text = text.substring(0, text.length() - 1);
+            if (action != null) action.accept(this);
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
     public boolean onCharTyped(char c, int key) {
         if (focused) {
-            if (key == GLFW.GLFW_KEY_BACKSPACE && text.length() > 0) {
-                text = text.substring(0, text.length() - 1);
-                if (action != null) action.accept(this);
-                return true;
-            }
-
             if (filter == null) {
                 text += c;
                 if (action != null) action.accept(this);

@@ -30,6 +30,8 @@ public abstract class KeyboardMixin {
             if (shulkerPeek.matchesKey(key, scancode) && (i == GLFW.GLFW_PRESS || i == GLFW.GLFW_REPEAT)) ((IKeyBinding) shulkerPeek).setPressed(true);
             else ((IKeyBinding) shulkerPeek).setPressed(false);
 
+            if (client.currentScreen instanceof WidgetScreen && i == GLFW.GLFW_REPEAT) ((WidgetScreen) client.currentScreen).keyRepeated(key);
+
             if (!Utils.canUpdate() && i == 1) {
                 MeteorClient.INSTANCE.onKeyInMainMenu(key);
                 return;

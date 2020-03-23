@@ -77,13 +77,13 @@ public class WWidget {
         return false;
     }
 
-    public boolean keyReleased(int key) {
+    public boolean keyRepeated(int key) {
         for (WWidget widget : widgets) {
-            if (widget.keyReleased(key)) return true;
+            if (widget.keyRepeated(key)) return true;
         }
-        return onKeyReleased(key);
+        return onKeyRepeated(key);
     }
-    public boolean onKeyReleased(int key) {
+    public boolean onKeyRepeated(int key) {
         return false;
     }
 

@@ -9,12 +9,12 @@ public class StringSetting extends Setting<String> {
         super(name, description, group, defaultValue, onChanged, onModuleActivated);
 
         widget = new WTextBox(get(), 200);
-        ((WTextBox) widget).action = textBox -> set(textBox.text.trim());
+        ((WTextBox) widget).action = textBox -> set(textBox.text);
     }
 
     @Override
     protected String parseImpl(String str) {
-        return str.trim();
+        return str;
     }
 
     @Override
