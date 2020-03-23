@@ -15,6 +15,9 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
+import net.minecraft.entity.effect.StatusEffect;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffectUtil;
 import net.minecraft.entity.passive.SheepEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.Direction;
@@ -86,6 +89,13 @@ public class HUD extends Module {
     private Setting<Boolean> activeModules = addSetting(new BoolSetting.Builder()
             .name("active-modules")
             .description("Display active modules.")
+            .defaultValue(true)
+            .build()
+    );
+
+    public Setting<Boolean> potionTimers = addSetting(new BoolSetting.Builder()
+            .name("potion-timers")
+            .description("Display potion timers and hide minecraft default potion icons.")
             .defaultValue(true)
             .build()
     );
@@ -255,8 +265,11 @@ public class HUD extends Module {
     private void drawInfo(String text1, String text2, int y) {
         drawInfo(text1, text2, y, white);
     }
+    private void drawInfoRight(String text1, String text2, int y, int text1Color) {
+        drawInfo(text1, text2, mc.window.getScaledWidth() - Utils.getTextWidth(text1) - Utils.getTextWidth(text2) - 2, y, text1Color);
+    }
     private void drawInfoRight(String text1, String text2, int y) {
-        drawInfo(text1, text2, mc.window.getScaledWidth() - Utils.getTextWidth(text1) - Utils.getTextWidth(text2) - 2, y, white);
+        drawInfoRight(text1, text2, y, white);
     }
 
     private void drawEntityCount(EntityInfo entityInfo, int y) {
@@ -328,6 +341,15 @@ public class HUD extends Module {
                 y -= Utils.getTextHeight() + 2;
             } else if (mc.player.dimension == DimensionType.THE_END) {
                 drawPosition(event.screenWidth, "Pos: ", y, mc.player.x, mc.player.y, mc.player.z);
+                y -= Utils.getTextHeight() + 2;
+            }
+        }
+
+        if (potionTimers.get()) {
+            for (StatusEffectInstance statusEffectInstance : mc.player.getStatusEffects()) {
+                StatusEffect statusEffect = statusEffectInstance.getEffectType();
+
+                drawInfoRight(statusEffect.method_5560().asString(), " " + (statusEffectInstance.getAmplifier() + 1) + " (" + StatusEffectUtil.durationToString(statusEffectInstance, 1) + ")", y, statusEffect.getColor());
                 y -= Utils.getTextHeight() + 2;
             }
         }
