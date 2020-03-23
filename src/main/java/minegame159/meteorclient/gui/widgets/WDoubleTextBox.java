@@ -9,8 +9,8 @@ public class WDoubleTextBox extends WTextBox {
     public double value;
     public Consumer<WDoubleTextBox> action;
 
-    public WDoubleTextBox(double value, int maxCharCount) {
-        super(Utils.doubleToString(value), maxCharCount);
+    public WDoubleTextBox(double value, double width) {
+        super(Utils.doubleToString(value), width);
         filter = TextBoxFilters.floating;
 
         this.value = value;

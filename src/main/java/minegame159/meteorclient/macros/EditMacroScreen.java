@@ -27,7 +27,7 @@ public class EditMacroScreen extends PanelListScreen implements Listenable {
         // Name
         WHorizontalList name = add(new WHorizontalList(4));
         name.add(new WLabel("Name:"));
-        name.add(new WTextBox(newMacro ? "" : macro.name, 16)).action = textBox -> macro.name = textBox.text.trim();
+        name.add(new WTextBox(newMacro ? "" : macro.name, 200)).action = textBox -> macro.name = textBox.text.trim();
         add(new WHorizontalSeparator());
 
         // Messages
@@ -35,13 +35,13 @@ public class EditMacroScreen extends PanelListScreen implements Listenable {
         WGrid grid = add(new WGrid(4, 4, 2));
         fillGridMacroMessages(grid);
 
-        WTextBox newCommand = new WTextBox("", 32);
+        WTextBox newCommand = new WTextBox("", 200);
         WPlus add = new WPlus();
         add.action = () -> {
             grid.removeLastRow();
             macro.messages.add(newCommand.text.trim());
 
-            WTextBox command = new WTextBox(newCommand.text.trim(), 32);
+            WTextBox command = new WTextBox(newCommand.text.trim(), 200);
             command.action = textBox -> macro.messages.set(macro.messages.size() - 1, textBox.text.trim());
             WMinus remove = new WMinus();
             remove.action = () -> {
@@ -93,7 +93,7 @@ public class EditMacroScreen extends PanelListScreen implements Listenable {
         for (int i = 0; i < macro.messages.size(); i++) {
             int ii = i;
 
-            WTextBox command = new WTextBox(macro.messages.get(ii), 32);
+            WTextBox command = new WTextBox(macro.messages.get(ii), 200);
             command.action = textBox -> macro.messages.set(ii, textBox.text.trim());
             WMinus remove = new WMinus();
             remove.action = () -> {

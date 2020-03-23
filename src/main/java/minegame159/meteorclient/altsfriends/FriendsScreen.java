@@ -31,7 +31,7 @@ public class FriendsScreen extends PanelListScreen implements Listenable {
         add(new WHorizontalSeparator());
 
         // Add
-        WTextBox username = new WTextBox("", 16);
+        WTextBox username = new WTextBox("", 200);
         username.focused = true;
         WPlus add = new WPlus();
         add.action = () -> FriendManager.INSTANCE.add(username.text);

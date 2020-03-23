@@ -12,7 +12,7 @@ public class DoubleSetting extends Setting<Double> {
         this.min = min;
         this.max = max;
 
-        widget = new WDoubleTextBox(get(), 9);
+        widget = new WDoubleTextBox(get(), 70);
         ((WDoubleTextBox) widget).action = wDoubleTextBox -> set(wDoubleTextBox.value);
     }
 

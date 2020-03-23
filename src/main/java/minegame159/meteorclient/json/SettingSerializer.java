@@ -12,7 +12,8 @@ public class SettingSerializer implements JsonSerializer<Setting<?>> {
         Int,
         Double,
         Enum,
-        Color
+        Color,
+        String
     }
 
     @Override
@@ -25,6 +26,7 @@ public class SettingSerializer implements JsonSerializer<Setting<?>> {
         else if (src instanceof DoubleSetting) type = SettingType.Double;
         else if (src instanceof EnumSetting) type = SettingType.Enum;
         else if (src instanceof ColorSetting) type = SettingType.Color;
+        else if (src instanceof StringSetting) type = SettingType.String;
 
         o.addProperty("name", src.name);
         o.add("type", context.serialize(type));

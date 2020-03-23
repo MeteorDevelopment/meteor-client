@@ -17,13 +17,13 @@ public class WColorEdit extends WHorizontalList {
         this.color = color;
 
         quad = add(new WQuad(color));
-        r = add(new WIntTextBox(color.r, 3));
+        r = add(new WIntTextBox(color.r, 20));
         r.action = wIntTextBox -> changed();
-        g = add(new WIntTextBox(color.g, 3));
+        g = add(new WIntTextBox(color.g, 20));
         g.action = wIntTextBox -> changed();
-        b = add(new WIntTextBox(color.b, 3));
+        b = add(new WIntTextBox(color.b, 20));
         b.action = wIntTextBox -> changed();
-        a = add(new WIntTextBox(color.a, 3));
+        a = add(new WIntTextBox(color.a, 20));
         a.action = wIntTextBox -> changed();
     }
 

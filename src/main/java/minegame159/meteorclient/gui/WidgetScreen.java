@@ -67,7 +67,12 @@ public class WidgetScreen extends Screen {
             renderDebug = !renderDebug;
             return true;
         }
-        return root.keyPressed(keyCode) || super.keyPressed(keyCode, scanCode, modifiers);
+        return root.keyPressed(keyCode, modifiers) || super.keyPressed(keyCode, scanCode, modifiers);
+    }
+
+    @Override
+    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
+        return root.keyReleased(keyCode) || super.keyReleased(keyCode, scanCode, modifiers);
     }
 
     @Override

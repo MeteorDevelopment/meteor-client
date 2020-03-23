@@ -19,7 +19,7 @@ public class PotionSettingScreen extends PanelListScreen {
         this.setting = setting;
 
         // Filter
-        filter = new WTextBox("", 32);
+        filter = new WTextBox("", 200);
         filter.boundingBox.fullWidth = true;
         filter.action = textBox -> {
             clear();

@@ -8,8 +8,8 @@ public class WIntTextBox extends WTextBox {
     public int value;
     public Consumer<WIntTextBox> action;
 
-    public WIntTextBox(int value, int maxCharCount) {
-        super(Integer.toString(value), maxCharCount);
+    public WIntTextBox(int value, double width) {
+        super(Integer.toString(value), width);
         filter = TextBoxFilters.integer;
 
         this.value = value;

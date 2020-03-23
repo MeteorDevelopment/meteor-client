@@ -67,13 +67,23 @@ public class WWidget {
         return false;
     }
 
-    public boolean keyPressed(int key) {
+    public boolean keyPressed(int key, int modifiers) {
         for (WWidget widget : widgets) {
-            if (widget.keyPressed(key)) return true;
+            if (widget.keyPressed(key, modifiers)) return true;
         }
-        return onKeyPressed(key);
+        return onKeyPressed(key, modifiers);
     }
-    public boolean onKeyPressed(int key) {
+    public boolean onKeyPressed(int key, int modifiers) {
+        return false;
+    }
+
+    public boolean keyReleased(int key) {
+        for (WWidget widget : widgets) {
+            if (widget.keyReleased(key)) return true;
+        }
+        return onKeyReleased(key);
+    }
+    public boolean onKeyReleased(int key) {
         return false;
     }
 

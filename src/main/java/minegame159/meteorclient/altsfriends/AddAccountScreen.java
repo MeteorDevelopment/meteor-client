@@ -13,11 +13,11 @@ public class AddAccountScreen extends PanelListScreen {
         WGrid grid = add(new WGrid(4, 4, 2));
 
         WLabel emailL = new WLabel("Email:");
-        WTextBox emailT = new WTextBox("", 32);
+        WTextBox emailT = new WTextBox("", 200);
         grid.addRow(emailL, emailT);
 
         WLabel passwordL = new WLabel("Password:");
-        WTextBox passwordT = new WTextBox("", 32);
+        WTextBox passwordT = new WTextBox("", 200);
         grid.addRow(passwordL, passwordT);
 
         WButton add = add(new WButton("Add"));

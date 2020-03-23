@@ -12,7 +12,7 @@ public class IntSetting extends Setting<Integer> {
         this.min = min;
         this.max = max;
 
-        widget = new WIntTextBox(get(), 9);
+        widget = new WIntTextBox(get(), 70);
         ((WIntTextBox) widget).action = wIntTextBox -> set(wIntTextBox.value);
     }
 
