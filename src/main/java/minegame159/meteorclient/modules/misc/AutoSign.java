@@ -13,6 +13,8 @@ import net.minecraft.network.packet.c2s.play.UpdateSignC2SPacket;
 import net.minecraft.text.LiteralText;
 
 public class AutoSign extends Module {
+    public static AutoSign INSTANCE;
+
     private String[] text;
 
     public AutoSign() {

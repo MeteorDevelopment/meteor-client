@@ -42,7 +42,6 @@ public abstract class InGameHudMixin {
 
     @Inject(method = "renderStatusEffectOverlay", at = @At("HEAD"), cancellable = true)
     private void onRenderStatusEffectOverlay(CallbackInfo info) {
-        HUD hud = ModuleManager.INSTANCE.get(HUD.class);
-        if (hud.isActive() && hud.potionTimers.get()) info.cancel();
+        if (HUD.INSTANCE.isActive() && HUD.INSTANCE.potionTimers.get()) info.cancel();
     }
 }

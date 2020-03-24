@@ -8,6 +8,8 @@ import net.minecraft.container.AbstractFurnaceContainer;
 import net.minecraft.container.SlotActionType;
 
 public class AutoSmelter extends Module {
+    public static AutoSmelter INSTANCE;
+
     private int step;
     private boolean first;
     private int timer;

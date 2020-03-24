@@ -16,6 +16,8 @@ import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.math.Vec3d;
 
 public class Freecam extends Module {
+    public static Freecam INSTANCE;
+
     private Setting<Double> speed = addSetting(new DoubleSetting.Builder()
             .name("speed")
             .description("Speed")

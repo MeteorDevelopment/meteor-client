@@ -14,6 +14,8 @@ import minegame159.meteorclient.utils.Utils;
 import net.minecraft.item.FishingRodItem;
 
 public class AutoFish extends Module {
+    public static AutoFish INSTANCE;
+
     private Setting<Boolean> autoCast = addSetting(new BoolSetting.Builder()
             .name("auto-cast")
             .description("Automatically casts when activated.")

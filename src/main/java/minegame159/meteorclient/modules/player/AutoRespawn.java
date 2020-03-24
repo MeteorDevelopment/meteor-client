@@ -8,6 +8,8 @@ import minegame159.meteorclient.modules.Module;
 import net.minecraft.client.gui.screen.DeathScreen;
 
 public class AutoRespawn extends Module {
+    public static AutoRespawn INSTANCE;
+
     public AutoRespawn() {
         super(Category.Player, "auto-respawn", "Automatically respawns.");
     }

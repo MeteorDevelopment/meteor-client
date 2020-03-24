@@ -6,6 +6,8 @@ import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
 
 public class Nametags extends Module {
+    public static Nametags INSTANCE;
+
     private Setting<Double> scale = addSetting(new DoubleSetting.Builder()
             .name("scale")
             .description("Scale.")

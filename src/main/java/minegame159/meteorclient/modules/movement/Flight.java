@@ -10,6 +10,8 @@ import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
 
 public class Flight extends Module {
+    public static Flight INSTANCE;
+
     public enum Mode {
         Vanilla
     }

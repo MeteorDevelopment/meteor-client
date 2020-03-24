@@ -16,6 +16,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.util.math.Box;
 
 public class ESP extends Module {
+    public static ESP INSTANCE;
+
     public enum Mode {
         Lines,
         Sides,

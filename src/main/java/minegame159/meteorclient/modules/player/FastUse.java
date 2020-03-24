@@ -8,6 +8,8 @@ import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 
 public class FastUse extends Module {
+    public static FastUse INSTANCE;
+
     public FastUse() {
         super(Category.Player, "fast-use", "Fast item use.");
     }

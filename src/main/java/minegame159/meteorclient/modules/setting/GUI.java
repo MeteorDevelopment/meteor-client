@@ -9,6 +9,8 @@ import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.utils.Color;
 
 public class GUI extends Module {
+    public static GUI INSTANCE;
+
     public enum HoverAnimation {
         FromLeft,
         FromRight,

@@ -19,6 +19,8 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.network.ServerInfo;
 
 public class AutoReconnect extends Module {
+    public static AutoReconnect INSTANCE;
+
     private Setting<Double> time = addSetting(new DoubleSetting.Builder()
             .name("time")
             .description("Time to wait before connecting.")

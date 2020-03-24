@@ -9,6 +9,8 @@ import minegame159.meteorclient.modules.Module;
 import net.minecraft.entity.player.PlayerEntity;
 
 public class MiddleClickFriend extends Module {
+    public static MiddleClickFriend INSTANCE;
+
     public MiddleClickFriend() {
         super(Category.Misc, "middle-click-friend", "Adds/removes player as friend.");
     }

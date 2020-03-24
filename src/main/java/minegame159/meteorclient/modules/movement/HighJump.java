@@ -6,6 +6,8 @@ import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
 
 public class HighJump extends Module {
+    public static HighJump INSTANCE;
+
     private Setting<Double> multiplier = addSetting(new DoubleSetting.Builder()
             .name("multiplier")
             .description("Jump height multiplier.")

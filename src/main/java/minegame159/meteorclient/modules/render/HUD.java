@@ -30,6 +30,8 @@ import java.util.List;
 import java.util.Objects;
 
 public class HUD extends Module {
+    public static HUD INSTANCE;
+
     private static int white = Color.fromRGBA(255, 255, 255, 255);
     private static int gray = Color.fromRGBA(185, 185, 185, 255);
     private static int red = Color.fromRGBA(225, 45, 45, 255);

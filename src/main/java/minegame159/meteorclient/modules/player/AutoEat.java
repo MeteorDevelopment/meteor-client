@@ -13,6 +13,8 @@ import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 
 public class AutoEat extends Module {
+    public static AutoEat INSTANCE;
+
     private Setting<Boolean> egaps = addSetting(new BoolSetting.Builder()
             .name("egaps")
             .description("Eat enchanted golden apples.")

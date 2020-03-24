@@ -16,6 +16,8 @@ import net.minecraft.util.Hand;
 import java.util.Comparator;
 
 public class CrystalAura extends Module {
+    public static CrystalAura INSTANCE;
+
     public Setting<Double> range = addSetting(new DoubleSetting.Builder()
             .name("range")
             .description("Attack range.")

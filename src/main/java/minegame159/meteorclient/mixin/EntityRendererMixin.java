@@ -2,7 +2,6 @@ package minegame159.meteorclient.mixin;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import minegame159.meteorclient.altsfriends.FriendManager;
-import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.render.Nametags;
 import minegame159.meteorclient.utils.Color;
 import net.minecraft.client.font.TextRenderer;
@@ -27,22 +26,15 @@ public abstract class EntityRendererMixin<T extends Entity> {
 
     @Shadow public abstract TextRenderer getFontRenderer();
 
-    private Nametags nametags;
-
-    private Nametags getNametags() {
-        if (nametags == null) nametags = ModuleManager.INSTANCE.get(Nametags.class);
-        return nametags;
-    }
-
     @Inject(method = "renderLabel(Lnet/minecraft/entity/Entity;Ljava/lang/String;DDDI)V", at = @At("HEAD"), cancellable = true)
     private void onRenderLabel(T entity, String text, double x, double y, double z, int maxDistance, CallbackInfo info) {
         if (!(entity instanceof PlayerEntity)) return;
-        if (getNametags().isActive()) info.cancel();
+        if (Nametags.INSTANCE.isActive()) info.cancel();
         else return;
 
         double dist = Math.sqrt(entity.squaredDistanceTo(renderManager.camera.getPos()));
         float scale = 0.025f;
-        if (dist > 10) scale *= dist / 10 * getNametags().getScale();
+        if (dist > 10) scale *= dist / 10 * Nametags.INSTANCE.getScale();
 
         float yOffset = entity.getHeight() + 0.5F;
         int verticalOffset = "deadmau5".equals(text) ? -10 : 0;

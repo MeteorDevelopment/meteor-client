@@ -16,6 +16,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 
 public class InventoryViewer extends Module {
+    public static InventoryViewer INSTANCE;
+
     private Setting<Alignment.X> xAlignment = addSetting(new EnumSetting.Builder<Alignment.X>()
             .name("x-alignment")
             .description("X alignment.")

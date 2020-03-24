@@ -14,6 +14,8 @@ import net.minecraft.item.NameTagItem;
 import net.minecraft.util.Hand;
 
 public class AutoNametag extends Module {
+    public static AutoNametag INSTANCE;
+
     private Setting<Double> distance = addSetting(new DoubleSetting.Builder()
             .name("distance")
             .description("Maximum distance.")

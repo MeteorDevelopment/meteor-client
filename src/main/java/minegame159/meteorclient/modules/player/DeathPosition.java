@@ -11,6 +11,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class DeathPosition extends Module {
+    public static DeathPosition INSTANCE;
+
     private SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
 
     public DeathPosition() {

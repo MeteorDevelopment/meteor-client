@@ -15,6 +15,8 @@ import net.minecraft.item.ShearsItem;
 import net.minecraft.util.Hand;
 
 public class AutoShearer extends Module {
+    public static AutoShearer INSTANCE;
+
     private Setting<Double> distance = addSetting(new DoubleSetting.Builder()
             .name("distance")
             .description("Maximum distance.")

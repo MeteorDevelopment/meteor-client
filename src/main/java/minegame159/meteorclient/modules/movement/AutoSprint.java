@@ -10,6 +10,8 @@ import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
 
 public class AutoSprint extends Module {
+    public static AutoSprint INSTANCE;
+
     public enum Mode {
         Always,
         Legit

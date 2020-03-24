@@ -1,8 +1,5 @@
 package minegame159.meteorclient.modules.render;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.BlockShouldRenderSideEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
@@ -10,6 +7,8 @@ import net.minecraft.block.Block;
 import net.minecraft.util.registry.Registry;
 
 public class XRay extends Module {
+    public static XRay INSTANCE;
+
     private boolean fullBrightWasActive = false;
 
     public XRay() {
@@ -33,13 +32,7 @@ public class XRay extends Module {
         mc.worldRenderer.reload();
     }
 
-    @EventHandler
-    private Listener<BlockShouldRenderSideEvent> onBlockShouldRenderSide = new Listener<>(event -> {
-        event.shouldRenderSide = isVisible(event.state.getBlock());
-        event.cancel();
-    });
-
-    private boolean isVisible(Block block) {
+    public boolean isVisible(Block block) {
         String id = Registry.BLOCK.getId(block).toString();
         return id.endsWith("_ore");
     }

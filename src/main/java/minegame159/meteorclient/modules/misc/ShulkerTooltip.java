@@ -8,6 +8,8 @@ import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
 
 public class ShulkerTooltip extends Module {
+    public static ShulkerTooltip INSTANCE;
+
     private Setting<Integer> lines = addSetting(new IntSetting.Builder()
             .name("lines")
             .description("Number of lines.")

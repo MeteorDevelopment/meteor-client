@@ -16,15 +16,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin extends Entity {
-    private HighJump highJump;
-
     public LivingEntityMixin(EntityType<?> type, World world) {
         super(type, world);
-    }
-
-    private HighJump getHighJump() {
-        if (highJump == null) highJump = ModuleManager.INSTANCE.get(HighJump.class);
-        return highJump;
     }
 
     @Inject(method = "damage", at = @At("TAIL"))
@@ -34,8 +27,8 @@ public abstract class LivingEntityMixin extends Entity {
 
     @Inject(method = "getJumpVelocity", at = @At("HEAD"), cancellable = true)
     private void onGetJumpVelocity(CallbackInfoReturnable<Float> info) {
-        if (getHighJump().isActive()) {
-            info.setReturnValue(0.42f * highJump.getMultiplier());
+        if (HighJump.INSTANCE.isActive()) {
+            info.setReturnValue(0.42f * HighJump.INSTANCE.getMultiplier());
         }
     }
 }

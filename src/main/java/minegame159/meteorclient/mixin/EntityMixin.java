@@ -10,7 +10,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.MovementType;
 import net.minecraft.util.math.Vec3d;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -18,20 +17,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(Entity.class)
 public abstract class EntityMixin {
-    @Shadow public float yaw;
-    @Shadow protected Vec3d movementMultiplier;
-    private NoPush noPush;
-
-    private NoPush getNoPush() {
-        if (noPush == null) noPush = ModuleManager.INSTANCE.get(NoPush.class);
-        return noPush;
-    }
-
     @Inject(method = "setVelocityClient", at = @At("HEAD"), cancellable = true)
     private void onSetVelocityClient(double x, double y, double z, CallbackInfo info) {
         if ((Object) this != MinecraftClient.getInstance().player) return;
 
-        if (getNoPush().isActive()) {
+        if (NoPush.INSTANCE.isActive()) {
             info.cancel();
         }
     }
@@ -40,7 +30,7 @@ public abstract class EntityMixin {
     private void onAddVelocity(double deltaX, double deltaY, double deltaZ, CallbackInfo info) {
         if ((Object) this != MinecraftClient.getInstance().player) return;
 
-        if (getNoPush().isActive()) {
+        if (NoPush.INSTANCE.isActive()) {
             info.cancel();
         }
     }

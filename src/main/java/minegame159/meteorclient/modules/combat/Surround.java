@@ -14,6 +14,8 @@ import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 
 public class Surround extends Module {
+    public static Surround INSTANCE;
+
     private Setting<Boolean> onlyOnGround = addSetting(new BoolSetting.Builder()
             .name("only-on-ground")
             .description("Works only when you standing on ground.")

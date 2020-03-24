@@ -7,6 +7,8 @@ import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 
 public class AntiFire extends Module {
+    public static AntiFire INSTANCE;
+
     public AntiFire() {
         super(Category.Player, "anti-fire", "Removes fire.");
     }

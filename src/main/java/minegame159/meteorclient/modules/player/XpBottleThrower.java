@@ -9,6 +9,8 @@ import net.minecraft.item.Items;
 import net.minecraft.util.Hand;
 
 public class XpBottleThrower extends Module {
+    public static XpBottleThrower INSTANCE;
+
     public XpBottleThrower() {
         super(Category.Player, "xp-bottle-thrower", "Automatically throws xp bottles in your hotbar.");
     }

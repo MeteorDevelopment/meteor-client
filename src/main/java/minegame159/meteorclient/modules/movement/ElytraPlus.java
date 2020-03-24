@@ -14,6 +14,8 @@ import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.util.math.Vec3d;
 
 public class ElytraPlus extends Module {
+    public static ElytraPlus INSTANCE;
+
     private Setting<Boolean> autoTakeOff = addSetting(new BoolSetting.Builder()
             .name("auto-take-off")
             .description("Automatically takes off when u hold jump without needing to double jump.")

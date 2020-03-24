@@ -10,6 +10,8 @@ import minegame159.meteorclient.settings.Setting;
 import net.minecraft.util.math.Vec3d;
 
 public class FastLadder extends Module {
+    public static FastLadder INSTANCE;
+
     private Setting<Double> speed = addSetting(new DoubleSetting.Builder()
             .name("speed")
             .description("Speed.")

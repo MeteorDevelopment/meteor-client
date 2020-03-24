@@ -11,6 +11,8 @@ import net.minecraft.util.shape.VoxelShape;
 import java.util.stream.Stream;
 
 public class Parkour extends Module {
+    public static Parkour INSTANCE;
+
     public Parkour() {
         super(Category.Movement, "parkour", "Automatically jumps at the edges of blocks.");
     }

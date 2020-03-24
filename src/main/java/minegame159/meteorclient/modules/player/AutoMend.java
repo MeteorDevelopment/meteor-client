@@ -13,6 +13,8 @@ import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.ItemStack;
 
 public class AutoMend extends Module {
+    public static AutoMend INSTANCE;
+
     public AutoMend() {
         super(Category.Player, "auto-mend", "Automatically replaces items in offhand with mending when fully repaired.");
     }

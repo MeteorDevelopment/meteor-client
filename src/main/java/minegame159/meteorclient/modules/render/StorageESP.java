@@ -16,11 +16,14 @@ import net.minecraft.block.enums.ChestType;
 import net.minecraft.util.math.Direction;
 
 public class StorageESP extends Module {
+    public static StorageESP INSTANCE;
+
     public enum Mode {
         Lines,
         Sides,
         Both
     }
+
     private Setting<Mode> mode = addSetting(new EnumSetting.Builder<Mode>()
             .name("mode")
             .description("Rendering mode.")

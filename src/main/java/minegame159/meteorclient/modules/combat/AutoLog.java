@@ -12,6 +12,8 @@ import net.minecraft.network.packet.s2c.play.DisconnectS2CPacket;
 import net.minecraft.text.LiteralText;
 
 public class AutoLog extends Module {
+    public static AutoLog INSTANCE;
+
     private Setting<Integer> health = addSetting(new IntSetting.Builder()
             .name("health")
             .description("Disconnects when health is lower or equal to this value.")

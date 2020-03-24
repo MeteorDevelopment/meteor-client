@@ -6,6 +6,8 @@ import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 
 public class Friends extends Module {
+    public static Friends INSTANCE;
+
     public Friends() {
         super(Category.Setting, "friends", "Friend list.", true, true, false);
     }

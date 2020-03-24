@@ -9,6 +9,8 @@ import minegame159.meteorclient.modules.Module;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 
 public class AntiHunger extends Module {
+    public static AntiHunger INSTANCE;
+
     public AntiHunger() {
         super(Category.Player, "anti-hunger", "Lose ur food slower. WARNING: It will u when u disable it.");
     }

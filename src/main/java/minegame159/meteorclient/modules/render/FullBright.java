@@ -6,6 +6,8 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.options.Option;
 
 public class FullBright extends Module {
+    public static FullBright INSTANCE;
+
     public FullBright() {
         super(Category.Render, "full-bright", "No more darkness.");
     }

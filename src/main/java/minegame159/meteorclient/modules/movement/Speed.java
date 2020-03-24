@@ -13,6 +13,8 @@ import net.minecraft.entity.MovementType;
 import net.minecraft.util.math.Vec3d;
 
 public class Speed extends Module {
+    public static Speed INSTANCE;
+
     private Setting<Double> speed = addSetting(new DoubleSetting.Builder()
             .name("speed")
             .description("Multiplier, 1 equals default sprinting speed.")

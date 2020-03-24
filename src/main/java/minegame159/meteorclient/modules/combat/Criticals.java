@@ -10,6 +10,8 @@ import minegame159.meteorclient.settings.Setting;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 
 public class Criticals extends Module {
+    public static Criticals INSTANCE;
+
     private Setting<Boolean> onlyOnGround = addSetting(new BoolSetting.Builder()
             .name("only-on-ground")
             .description("Do criticals only on ground.")

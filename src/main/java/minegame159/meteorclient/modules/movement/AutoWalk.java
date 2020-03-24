@@ -12,6 +12,8 @@ import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.utils.GoalDirection;
 
 public class AutoWalk extends Module {
+    public static AutoWalk INSTANCE;
+
     public enum Mode {
         Simple,
         Smart

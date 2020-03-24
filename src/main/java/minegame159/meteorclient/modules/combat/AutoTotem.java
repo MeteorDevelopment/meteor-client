@@ -12,6 +12,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 
 public class AutoTotem extends Module {
+    public static AutoTotem INSTANCE;
+
     private int totemCount;
     private String totemCountString = "0";
 

@@ -4,7 +4,6 @@ import minegame159.meteorclient.events.packets.PlaySoundPacketEvent;
 import minegame159.meteorclient.events.packets.ReceivePacketEvent;
 import minegame159.meteorclient.events.packets.SendPacketEvent;
 import minegame159.meteorclient.modules.Module;
-import net.minecraft.block.BlockState;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -21,19 +20,15 @@ public class EventStore {
     private static PlaySoundPacketEvent playSoundPacketEvent = new PlaySoundPacketEvent();
     private static SendPacketEvent sendPacketEvent = new SendPacketEvent();
     private static ActiveModulesChangedEvent activeModulesChangedEvent = new ActiveModulesChangedEvent();
-    private static BlockShouldRenderSideEvent blockShouldRenderSideEvent = new BlockShouldRenderSideEvent();
-    private static ChamsEvent chamsEvent = new ChamsEvent();
     private static CharTypedEvent charTypedEvent = new CharTypedEvent();
     private static EntityAddedEvent entityAddedEvent = new EntityAddedEvent();
     private static EntityRemovedEvent entityRemovedEvent = new EntityRemovedEvent();
-    private static HurtCamEvent hurtCamEvent = new HurtCamEvent();
     private static KeyEvent keyEvent = new KeyEvent();
     private static ModuleBindChangedEvent moduleBindChangedEvent = new ModuleBindChangedEvent();
     private static ModuleVisibilityChangedEvent moduleVisibilityChangedEvent = new ModuleVisibilityChangedEvent();
     private static OpenScreenEvent openScreenEvent = new OpenScreenEvent();
     private static Render2DEvent render2DEvent = new Render2DEvent();
     private static RenderEvent renderEvent = new RenderEvent();
-    private static RenderFogEvent renderFogEvent = new RenderFogEvent();
     private static TickEvent tickEvent = new TickEvent();
     private static TookDamageEvent tookDamageEvent = new TookDamageEvent();
     private static ChangeChatLengthEvent changeChatLengthEvent = new ChangeChatLengthEvent();
@@ -65,20 +60,6 @@ public class EventStore {
         return activeModulesChangedEvent;
     }
 
-    public static BlockShouldRenderSideEvent blockShouldRenderSideEvent(BlockState state) {
-        blockShouldRenderSideEvent.setCancelled(false);
-        blockShouldRenderSideEvent.state = state;
-        blockShouldRenderSideEvent.shouldRenderSide = true;
-        return blockShouldRenderSideEvent;
-    }
-
-    public static ChamsEvent chamsEvent(LivingEntity entity, boolean enabled) {
-        chamsEvent.setCancelled(false);
-        chamsEvent.entity = entity;
-        chamsEvent.enabled = enabled;
-        return chamsEvent;
-    }
-
     public static CharTypedEvent charTypedEvent(char c) {
         charTypedEvent.setCancelled(false);
         charTypedEvent.c = c;
@@ -93,11 +74,6 @@ public class EventStore {
     public static EntityRemovedEvent entityRemovedEvent(Entity entity) {
         entityRemovedEvent.entity = entity;
         return entityRemovedEvent;
-    }
-
-    public static HurtCamEvent hurtCamEvent() {
-        hurtCamEvent.setCancelled(false);
-        return hurtCamEvent;
     }
 
     public static KeyEvent keyEvent(int key, boolean push) {
@@ -136,11 +112,6 @@ public class EventStore {
         renderEvent.offsetY = offsetY;
         renderEvent.offsetZ = offsetZ;
         return renderEvent;
-    }
-
-    public static RenderFogEvent renderFogEvent() {
-        renderFogEvent.setCancelled(false);
-        return renderFogEvent;
     }
 
     public static TickEvent tickEvent() {

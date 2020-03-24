@@ -18,6 +18,8 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Hand;
 
 public class KillAura extends Module {
+    public static KillAura INSTANCE;
+
     public enum Priority {
         LowestDistance,
         HighestDistance,

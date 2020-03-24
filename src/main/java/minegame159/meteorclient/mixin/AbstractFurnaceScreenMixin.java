@@ -1,6 +1,5 @@
 package minegame159.meteorclient.mixin;
 
-import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.misc.AutoSmelter;
 import net.minecraft.client.gui.screen.ingame.AbstractFurnaceScreen;
 import net.minecraft.client.gui.screen.ingame.ContainerScreen;
@@ -20,15 +19,13 @@ public abstract class AbstractFurnaceScreenMixin<T extends AbstractFurnaceContai
 
     @Inject(method = "tick", at = @At("TAIL"))
     private void onTick(CallbackInfo info) {
-        AutoSmelter autoSmelter = ModuleManager.INSTANCE.get(AutoSmelter.class);
-        if (autoSmelter.isActive()) autoSmelter.tick(container);
+        if (AutoSmelter.INSTANCE.isActive()) AutoSmelter.INSTANCE.tick(container);
     }
 
     @Override
     public void onClose() {
         super.onClose();
 
-        AutoSmelter autoSmelter = ModuleManager.INSTANCE.get(AutoSmelter.class);
-        if (autoSmelter.isActive()) autoSmelter.onFurnaceClose();
+        if (AutoSmelter.INSTANCE.isActive()) AutoSmelter.INSTANCE.onFurnaceClose();
     }
 }

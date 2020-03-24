@@ -9,6 +9,8 @@ import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
 
 public class AutoJump extends Module {
+    public static AutoJump INSTANCE;
+
     public enum JumpIf {
         Sprinting,
         Walking,

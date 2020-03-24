@@ -16,6 +16,8 @@ import net.minecraft.potion.PotionUtil;
 import net.minecraft.potion.Potions;
 
 public class AutoBrewer extends Module {
+    public static AutoBrewer INSTANCE;
+
     public enum Modifier {
         None,
         Splash,

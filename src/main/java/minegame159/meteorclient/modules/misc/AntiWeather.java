@@ -7,6 +7,8 @@ import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 
 public class AntiWeather extends Module {
+    public static AntiWeather INSTANCE;
+
     public AntiWeather() {
         super(Category.Misc, "anti-weather", "Disables weather.");
     }

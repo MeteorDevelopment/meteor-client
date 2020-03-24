@@ -8,6 +8,8 @@ import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
 
 public class LongerChat extends Module {
+    public static LongerChat INSTANCE;
+
     public Setting<Integer> lines = addSetting(new IntSetting.Builder()
             .name("lines")
             .description("Chat lines.")

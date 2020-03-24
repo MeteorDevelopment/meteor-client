@@ -9,6 +9,8 @@ import minegame159.meteorclient.modules.Module;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 
 public class NoFall extends Module {
+    public static NoFall INSTANCE;
+
     public NoFall() {
         super(Category.Movement, "no-fall", "Protects you from fall damage.");
     }

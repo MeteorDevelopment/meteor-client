@@ -115,6 +115,11 @@ public class ModuleManager implements Listenable {
     private void addModule(Module module) {
         modules.add(module);
         getGroup(module.category).add(module);
+        try {
+            module.getClass().getDeclaredField("INSTANCE").set(null, module);
+        } catch (IllegalAccessException | NoSuchFieldException e) {
+            e.printStackTrace();
+        }
     }
 
     @EventHandler
@@ -188,7 +193,6 @@ public class ModuleManager implements Listenable {
         addModule(new ShulkerTooltip());
         addModule(new AutoShearer());
         addModule(new AutoNametag());
-        addModule(new AutoBreeder());
         addModule(new MiddleClickFriend());
         addModule(new StashRecorder());
         addModule(new AutoBrewer());

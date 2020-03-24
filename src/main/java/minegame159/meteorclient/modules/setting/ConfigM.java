@@ -9,6 +9,8 @@ import minegame159.meteorclient.settings.StringSetting;
 import minegame159.meteorclient.utils.Color;
 
 public class ConfigM extends Module {
+    public static ConfigM INSTANCE;
+
     public ConfigM() {
         super(Category.Setting, "config", "Config.", true, false, false);
 

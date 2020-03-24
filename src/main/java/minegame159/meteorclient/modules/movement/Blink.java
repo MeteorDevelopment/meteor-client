@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Blink extends Module {
+    public static Blink INSTANCE;
+
     public Blink() {
         super(Category.Movement, "blink", "Suspends all motion updates while enabled.");
     }

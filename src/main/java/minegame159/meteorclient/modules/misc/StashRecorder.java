@@ -23,6 +23,8 @@ import net.minecraft.util.math.ChunkPos;
 import java.util.*;
 
 public class StashRecorder extends Module {
+    public static StashRecorder INSTANCE;
+
     private Setting<Integer> minimumStorageCount = addSetting(new IntSetting.Builder()
             .name("minimum-storage-cont")
             .description("Minimum chest/shulker count required to record that chunk.")

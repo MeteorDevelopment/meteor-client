@@ -18,6 +18,8 @@ import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.*;
 
 public class AutoTool extends Module {
+    public static AutoTool INSTANCE;
+
     public enum Prefer {
         None,
         Fortune,
