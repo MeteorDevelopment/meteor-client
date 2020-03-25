@@ -197,6 +197,8 @@ public class ModuleManager implements Listenable {
         addModule(new StashRecorder());
         addModule(new AutoBrewer());
         addModule(new AutoSmelter());
+        addModule(new Annoy());
+        addModule(new Spam());
     }
 
     private void initSetting() {
