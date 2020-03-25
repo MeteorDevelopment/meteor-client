@@ -32,13 +32,13 @@ public abstract class KeyboardMixin {
 
             if (client.currentScreen instanceof WidgetScreen && i == GLFW.GLFW_REPEAT) ((WidgetScreen) client.currentScreen).keyRepeated(key);
 
-            if (!Utils.canUpdate() && i == 1) {
+            if (!Utils.canUpdate() && i == GLFW.GLFW_PRESS) {
                 MeteorClient.INSTANCE.onKeyInMainMenu(key);
                 return;
             }
 
             if (!client.isPaused() && (client.currentScreen == null || (client.currentScreen instanceof WidgetScreen && MixinValues.postKeyEvents()))) {
-                KeyEvent event = EventStore.keyEvent(key, i == 1);
+                KeyEvent event = EventStore.keyEvent(key, i == GLFW.GLFW_PRESS);
                 MeteorClient.eventBus.post(event);
 
                 if (event.isCancelled()) info.cancel();

@@ -17,6 +17,7 @@ public class ConfigM extends Module {
         addSetting(new StringSetting.Builder()
                 .name("prefix")
                 .description("Prefix.")
+                .group("General")
                 .defaultValue(".")
                 .onChanged(s -> Config.INSTANCE.prefix = s)
                 .onModuleActivated(stringSetting -> stringSetting.set(Config.INSTANCE.prefix))

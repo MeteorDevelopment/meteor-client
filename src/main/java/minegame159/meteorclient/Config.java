@@ -12,6 +12,7 @@ public class Config implements Listenable {
     public static Config INSTANCE;
 
     public String prefix = ".";
+    public AutoCraft autoCraft = new AutoCraft();
 
     public Map<Category, Vector2> guiPositions = new HashMap<>();
     private Map<Category, Color> categoryColors = new HashMap<>();
@@ -22,5 +23,10 @@ public class Config implements Listenable {
 
     public Color getCategoryColor(Category category) {
         return categoryColors.get(category);
+    }
+
+    public static class AutoCraft {
+        public boolean craftByOne = true;
+        public boolean stopWhenNoIngredients = true;
     }
 }

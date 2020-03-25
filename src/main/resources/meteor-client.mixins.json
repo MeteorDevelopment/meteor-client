@@ -37,7 +37,8 @@
     "AbstractFurnaceScreenMixin",
     "AbstractFurnaceContainerMixin",
     "ClientPlayerInteractionManagerMixin",
-    "MiningToolItemMixin"
+    "MiningToolItemMixin",
+    "CraftingTableScreenMixin"
   ],
   "injectors": {
     "defaultRequire": 1
