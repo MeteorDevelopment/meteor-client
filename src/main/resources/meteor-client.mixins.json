@@ -38,7 +38,8 @@
     "AbstractFurnaceContainerMixin",
     "ClientPlayerInteractionManagerMixin",
     "MiningToolItemMixin",
-    "CraftingTableScreenMixin"
+    "CraftingTableScreenMixin",
+    "PlayerEntityMixin"
   ],
   "injectors": {
     "defaultRequire": 1

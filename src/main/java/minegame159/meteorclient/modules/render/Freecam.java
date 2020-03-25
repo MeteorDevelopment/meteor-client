@@ -4,6 +4,7 @@ import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.events.packets.SendPacketEvent;
+import minegame159.meteorclient.mixininterface.IPlayerEntity;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.DoubleSetting;
@@ -40,10 +41,12 @@ public class Freecam extends Module {
         camera.copyPositionAndRotation(mc.player);
         camera.horizontalCollision = false;
         camera.verticalCollision = false;
+        ((IPlayerEntity) camera).setInventory(mc.player.inventory);
 
         dummy = new OtherClientPlayerEntity(mc.world, mc.player.getGameProfile());
         dummy.copyPositionAndRotation(mc.player);
         dummy.setBoundingBox(dummy.getBoundingBox().expand(0.1));
+        ((IPlayerEntity) dummy).setInventory(mc.player.inventory);
 
         mc.world.addEntity(camera.getEntityId(), camera);
         mc.world.addEntity(dummy.getEntityId(), dummy);
