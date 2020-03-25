@@ -1,5 +1,6 @@
 package minegame159.meteorclient.modules.render;
 
+import com.mojang.blaze3d.platform.GlStateManager;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.*;
@@ -20,6 +21,7 @@ import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffectUtil;
 import net.minecraft.entity.passive.SheepEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.dimension.DimensionType;
 import org.apache.commons.lang3.StringUtils;
@@ -127,6 +129,13 @@ public class HUD extends Module {
             .build()
     );
 
+    private Setting<Boolean> armor = addSetting(new BoolSetting.Builder()
+            .name("armor")
+            .description("Diplays your armor above hotbar.")
+            .defaultValue(true)
+            .build()
+    );
+
     private HashMap<String, EntityInfo> entityCounts = new HashMap<>();
     private int maxLetterCount = 0;
     private boolean updateEntities;
@@ -221,6 +230,25 @@ public class HUD extends Module {
         renderTopLeft(event);
         renderTopRight(event);
         renderBottomRight(event);
+
+        if (armor.get()) {
+            int x = event.screenWidth / 2 + 12;
+            int y = event.screenHeight - 38;
+
+            if (!mc.player.abilities.creativeMode) y -= 18;
+
+            for (int i = mc.player.inventory.armor.size() - 1; i >= 0; i--) {
+                ItemStack itemStack = mc.player.inventory.armor.get(i);
+
+                mc.getItemRenderer().renderGuiItem(itemStack, x, y);
+                mc.getItemRenderer().renderGuiItemOverlay(mc.textRenderer, itemStack, x, y);
+
+                x += 20;
+            }
+
+            GlStateManager.disableLighting();
+        }
+
     });
 
     private void renderTopLeft(Render2DEvent event) {
