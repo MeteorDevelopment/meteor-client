@@ -6,16 +6,23 @@ import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
+import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.utils.Utils;
+import net.minecraft.block.entity.BedBlockEntity;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.container.SlotActionType;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.decoration.EnderCrystalEntity;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.dimension.DimensionType;
 
 public class AutoArmor extends Module {
     public enum Protection {
@@ -52,6 +59,21 @@ public class AutoArmor extends Module {
             .build()
     );
 
+    private Setting<Boolean> switchToBlastProtWhenNearCrystalOrBed = addSetting(new BoolSetting.Builder()
+            .name("switch-to-blast-prot-when-near-crystal-or-bed")
+            .description("Switches to blast protection when near crystals or beds when not in overworld.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private Setting<Double> crystalAndBedDetectionDistance = addSetting(new DoubleSetting.Builder()
+            .name("crystal-and-bed-detection-distance")
+            .description("Crystal and bed detection distance")
+            .defaultValue(5)
+            .min(0)
+            .build()
+    );
+
     private BestItem helmet = new BestItem();
     private BestItem chestplate = new BestItem();
     private BestItem leggings = new BestItem();
@@ -64,6 +86,34 @@ public class AutoArmor extends Module {
     @EventHandler
     private Listener<TickEvent> onTick = new Listener<>(event -> {
         if (mc.currentScreen != null) return;
+
+        Protection prePrioritizeProt = prioritizeProtection.get();
+        if (switchToBlastProtWhenNearCrystalOrBed.get()) {
+            // Check crystals
+            for (Entity entity : mc.world.getEntities()) {
+                if (entity instanceof EnderCrystalEntity && entity.distanceTo(mc.player) <= crystalAndBedDetectionDistance.get()) {
+                    prioritizeProtection.set(Protection.BlastProtection);
+                    break;
+                }
+            }
+
+            // Check beds if not in overworld
+            if (mc.world.dimension.getType() != DimensionType.OVERWORLD) {
+                for (BlockEntity blockEntity : mc.world.blockEntities) {
+                    if (blockEntity instanceof BedBlockEntity) {
+                        float f = (float) (mc.player.x - blockEntity.getPos().getX());
+                        float g = (float) (mc.player.y - blockEntity.getPos().getY());
+                        float h = (float) (mc.player.z - blockEntity.getPos().getZ());
+                        float distance = MathHelper.sqrt(f * f + g * g + h * h);
+
+                        if (distance <= crystalAndBedDetectionDistance.get()) {
+                            prioritizeProtection.set(Protection.BlastProtection);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
 
         // Reset best items
         helmet.reset();
@@ -98,6 +148,8 @@ public class AutoArmor extends Module {
         chestplate.apply(6);
         leggings.apply(7);
         boots.apply(8);
+
+        if (switchToBlastProtWhenNearCrystalOrBed.get()) prioritizeProtection.set(prePrioritizeProt);
     });
 
     private int getHelmetScore(ItemStack itemStack) {
