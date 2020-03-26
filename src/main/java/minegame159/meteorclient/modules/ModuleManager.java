@@ -152,6 +152,7 @@ public class ModuleManager implements Listenable {
         addModule(new AutoTool());
         addModule(new AutoEat());
         addModule(new XpBottleThrower());
+        addModule(new AutoArmor());
     }
 
     private void initMovement() {
