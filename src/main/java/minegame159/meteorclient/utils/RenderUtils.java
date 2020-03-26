@@ -5,6 +5,7 @@ import net.minecraft.client.gl.GlBlendState;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormats;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import org.lwjgl.opengl.GL11;
 
@@ -54,6 +55,9 @@ public class RenderUtils {
      public static void blockEdges(int x, int y, int z, Color color, Direction excludeDir) {
         boxEdges(x, y, z, x + 1, y + 1, z + 1, color, excludeDir);
      }
+     public static void blockEdges(BlockPos blockPos, Color color) {
+         blockEdges(blockPos.getX(), blockPos.getY(), blockPos.getZ(), color, null);
+     }
 
      public static void beginQuads() {
          quadBuf.begin(GL11.GL_QUADS, VertexFormats.POSITION_COLOR);
@@ -91,5 +95,8 @@ public class RenderUtils {
 
      public static void blockSides(int x, int y, int z, Color color, Direction excludeDir) {
         boxSides(x, y, z, x + 1, y + 1, z + 1, color, excludeDir);
+     }
+     public static void blockSides(BlockPos blockPos, Color color) {
+         blockSides(blockPos.getX(), blockPos.getY(), blockPos.getZ(), color, null);
      }
 }

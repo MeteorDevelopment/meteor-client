@@ -184,6 +184,7 @@ public class ModuleManager implements Listenable {
         addModule(new Tracers());
         addModule(new Nametags());
         addModule(new InventoryViewer());
+        addModule(new HoleESP());
     }
 
     private void initMisc() {

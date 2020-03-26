@@ -1,8 +1,7 @@
 package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.Config;
-import minegame159.meteorclient.gui.AutoCraftScreen;
-import minegame159.meteorclient.utils.TickRate;
+import minegame159.meteorclient.gui.screens.AutoCraftScreen;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.ContainerScreen;
