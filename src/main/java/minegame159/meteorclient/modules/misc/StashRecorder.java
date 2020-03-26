@@ -5,7 +5,7 @@ import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.SaveManager;
 import minegame159.meteorclient.events.ChunkDataEvent;
-import minegame159.meteorclient.gui.StashRecorderChunkScreen;
+import minegame159.meteorclient.gui.screens.StashRecorderChunkScreen;
 import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;

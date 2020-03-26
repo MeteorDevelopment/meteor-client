@@ -25,6 +25,8 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.dimension.DimensionType;
 
 public class AutoArmor extends Module {
+    public static AutoArmor INSTANCE;
+
     public enum Protection {
         Protection("Protection", Enchantments.PROTECTION),
         BlastProtection("Blast Protection", Enchantments.BLAST_PROTECTION),

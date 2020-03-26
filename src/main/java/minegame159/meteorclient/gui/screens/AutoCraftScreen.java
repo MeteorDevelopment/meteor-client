@@ -1,6 +1,7 @@
-package minegame159.meteorclient.gui;
+package minegame159.meteorclient.gui.screens;
 
 import minegame159.meteorclient.Config;
+import minegame159.meteorclient.gui.PanelListScreen;
 import minegame159.meteorclient.gui.widgets.WCheckbox;
 import minegame159.meteorclient.gui.widgets.WGrid;
 import minegame159.meteorclient.gui.widgets.WLabel;

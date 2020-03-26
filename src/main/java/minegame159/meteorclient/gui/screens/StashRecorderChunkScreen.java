@@ -1,5 +1,6 @@
-package minegame159.meteorclient.gui;
+package minegame159.meteorclient.gui.screens;
 
+import minegame159.meteorclient.gui.PanelListScreen;
 import minegame159.meteorclient.gui.widgets.WGrid;
 import minegame159.meteorclient.gui.widgets.WHorizontalList;
 import minegame159.meteorclient.gui.widgets.WHorizontalSeparator;
