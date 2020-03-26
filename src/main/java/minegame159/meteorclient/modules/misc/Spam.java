@@ -10,6 +10,8 @@ import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.StringSetting;
 
 public class Spam extends Module {
+    public static Spam INSTANCE;
+
     private Setting<String> message = addSetting(new StringSetting.Builder()
             .name("message")
             .description("Message to spam.")

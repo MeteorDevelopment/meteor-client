@@ -118,7 +118,7 @@ public class ModuleManager implements Listenable {
         try {
             module.getClass().getDeclaredField("INSTANCE").set(null, module);
         } catch (IllegalAccessException | NoSuchFieldException e) {
-            e.printStackTrace();
+            System.err.println("Meteor Client: My dumbass forgot to add public static INSTANCE field to module '" + module.getClass().getName() + "'.");
         }
     }
 
