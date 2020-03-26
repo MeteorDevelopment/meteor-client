@@ -22,6 +22,7 @@ import net.minecraft.entity.effect.StatusEffectUtil;
 import net.minecraft.entity.passive.SheepEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.dimension.DimensionType;
 import org.apache.commons.lang3.StringUtils;
@@ -66,6 +67,13 @@ public class HUD extends Module {
             .name("speed")
             .description("Display speed in blocks per second.")
             .group("Top Left")
+            .defaultValue(true)
+            .build()
+    );
+
+    private Setting<Boolean> biome = addSetting(new BoolSetting.Builder()
+            .name("biome")
+            .description("Displays biome you are in.")
             .defaultValue(true)
             .build()
     );
@@ -142,6 +150,8 @@ public class HUD extends Module {
     private int updateEntitiesTimer = 2;
 
     private List<Module> modules = new ArrayList<>();
+
+    private BlockPos.Mutable playerBlockPos = new BlockPos.Mutable();
 
     public HUD() {
         super(Category.Render, "HUD", "Displays various info to the screen.");
@@ -283,6 +293,12 @@ public class HUD extends Module {
             double length = Math.sqrt(tX * tX + tZ * tZ);
 
             drawInfo("Speed: ", String.format("%.1f", length * 20), y);
+            y += Utils.getTextHeight() + 2;
+        }
+
+        if (biome.get()) {
+            playerBlockPos.set(mc.player);
+            drawInfo("Biome: ", mc.world.getBiome(playerBlockPos).getName().asString(), y);
             y += Utils.getTextHeight() + 2;
         }
 
