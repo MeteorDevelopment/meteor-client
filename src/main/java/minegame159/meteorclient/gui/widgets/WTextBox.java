@@ -46,6 +46,7 @@ public class WTextBox extends WWidget {
 
         if (focused && button == 1) {
             text = "";
+            if (action != null) action.accept(this);
             return true;
         }
 

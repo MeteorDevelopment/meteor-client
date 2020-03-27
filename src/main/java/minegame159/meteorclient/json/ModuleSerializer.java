@@ -1,11 +1,13 @@
 package minegame159.meteorclient.json;
 
 import com.google.common.reflect.TypeToken;
-import com.google.gson.*;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonSerializationContext;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.Setting;
 
-import java.lang.reflect.Type;
 import java.util.List;
 
 public class ModuleSerializer {

@@ -4,6 +4,8 @@ import minegame159.meteorclient.gui.BoundingBox;
 import minegame159.meteorclient.gui.WidgetLayout;
 import minegame159.meteorclient.modules.setting.GUI;
 import minegame159.meteorclient.utils.*;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.ingame.MinecartCommandBlockScreen;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -160,14 +162,20 @@ public class WWidget {
     public void render(double delta) {
         if (!visible) return;
         onRender(delta);
-        for (WWidget widget : widgets) widget.render(delta);
+        for (WWidget widget : widgets) {
+            if (widget.boundingBox.y > MinecraftClient.getInstance().window.getScaledHeight()) break;
+            widget.render(delta);
+        }
     }
     public void onRender(double delta) {}
 
     public void renderPost(double delta, double mouseX, double mouseY) {
         if (!visible) return;
         onRenderPost(delta);
-        for (WWidget widget : widgets) widget.renderPost(delta, mouseX, mouseY);
+        for (WWidget widget : widgets) {
+            if (widget.boundingBox.y > MinecraftClient.getInstance().window.getScaledHeight()) break;
+            widget.renderPost(delta, mouseX, mouseY);
+        }
     }
     public void onRenderPost(double delta) {
     }

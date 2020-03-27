@@ -16,10 +16,7 @@ import minegame159.meteorclient.altsfriends.FriendManager;
 import minegame159.meteorclient.commands.CommandManager;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.gui.clickgui.ClickGUI;
-import minegame159.meteorclient.json.GameProfileSerializer;
-import minegame159.meteorclient.json.ModuleManagerSerializer;
-import minegame159.meteorclient.json.SettingSerializer;
-import minegame159.meteorclient.json.StashRecorderSerializer;
+import minegame159.meteorclient.json.*;
 import minegame159.meteorclient.macros.MacroManager;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.misc.StashRecorder;
@@ -30,6 +27,7 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.keybinding.FabricKeyBinding;
 import net.fabricmc.fabric.api.client.keybinding.KeyBindingRegistry;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.block.Block;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.util.Identifier;
@@ -43,6 +41,7 @@ public class MeteorClient implements ClientModInitializer, Listenable {
     public static MeteorClient INSTANCE;
     public static EventBus eventBus = new EventManager();
     public static Gson gson;
+    public static boolean isDisconnecting;
 
     public static File directory = new File(FabricLoader.getInstance().getGameDirectory(), "meteor-client");
 
@@ -76,6 +75,7 @@ public class MeteorClient implements ClientModInitializer, Listenable {
                 .registerTypeAdapter(UUID.class, new UUIDTypeAdapter())
                 .registerTypeAdapter(ProfileSearchResultsResponse.class, new ProfileSearchResultsResponse.Serializer())
                 .registerTypeAdapter(StashRecorder.class, new StashRecorderSerializer())
+                .registerTypeAdapter(Block.class, new BlockSerializer())
                 .setPrettyPrinting()
                 .create();
 

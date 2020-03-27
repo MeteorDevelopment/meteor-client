@@ -38,14 +38,12 @@ public abstract class Setting<T> {
         if (!isValueValid(value)) return;
         this.value = value;
         resetWidget();
-        if (onChanged != null) onChanged.accept(value);
+        changed();
     }
 
     public void reset() {
         value = defaultValue;
-        if (onChanged != null) {
-            onChanged.accept(value);
-        }
+        changed();
         resetWidget();
     }
 
@@ -55,11 +53,15 @@ public abstract class Setting<T> {
         if (newValue != null) {
             if (isValueValid(newValue)) {
                 value = newValue;
-                if (onChanged != null) onChanged.accept(value);
+                changed();
             }
         }
 
         return newValue != null;
+    }
+
+    public void changed() {
+        if (onChanged != null) onChanged.accept(value);
     }
 
     protected abstract T parseImpl(String str);

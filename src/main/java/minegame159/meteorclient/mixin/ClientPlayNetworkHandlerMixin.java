@@ -26,6 +26,7 @@ public abstract class ClientPlayNetworkHandlerMixin {
 
     @Inject(at = @At("TAIL"), method = "onGameJoin")
     private void onGameJoin(GameJoinS2CPacket packet, CallbackInfo info) {
+        MeteorClient.isDisconnecting = false;
         MeteorClient.eventBus.post(EventStore.gameJoinedEvent());
     }
 
