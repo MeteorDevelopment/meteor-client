@@ -32,19 +32,8 @@ public class Surround extends Module {
         if (onlyOnGround.get() && !mc.player.onGround) return;
 
         int slot = -1;
-
-        for (int i = 0; i < 9; i++) {
-            Item item = mc.player.inventory.getInvStack(i).getItem();
-
-            if (!(item instanceof BlockItem)) continue;
-
-            if (item == Items.OBSIDIAN) {
-                slot = i;
-                break;
-            }
-
-            if (((BlockItem) item).getBlock().getDefaultState().isSimpleFullBlock(mc.world, null)) slot = i;
-        }
+        if (mc.player.getMainHandStack().getItem() == Items.OBSIDIAN) slot = mc.player.inventory.selectedSlot;
+        else slot = findSlot();
 
         if (slot != -1) {
             int preSelectedSlot = mc.player.inventory.selectedSlot;
@@ -52,11 +41,44 @@ public class Surround extends Module {
             BlockState blockState = ((BlockItem) mc.player.inventory.getMainHandStack().getItem()).getBlock().getDefaultState();
 
             Utils.place(blockState, mc.player.getBlockPos().add(1, 0, 0));
+            if (mc.player.getMainHandStack().getItem() != Items.OBSIDIAN) slot = findSlot();
+            if (slot == -1) {
+                mc.player.inventory.selectedSlot = preSelectedSlot;
+                return;
+            }
             Utils.place(blockState, mc.player.getBlockPos().add(-1, 0, 0));
+            if (mc.player.getMainHandStack().getItem() != Items.OBSIDIAN) slot = findSlot();
+            if (slot == -1) {
+                mc.player.inventory.selectedSlot = preSelectedSlot;
+                return;
+            }
             Utils.place(blockState, mc.player.getBlockPos().add(0, 0, 1));
+            if (mc.player.getMainHandStack().getItem() != Items.OBSIDIAN) slot = findSlot();
+            if (slot == -1) {
+                mc.player.inventory.selectedSlot = preSelectedSlot;
+                return;
+            }
             Utils.place(blockState, mc.player.getBlockPos().add(0, 0, -1));
 
             mc.player.inventory.selectedSlot = preSelectedSlot;
         }
     });
+
+    private int findSlot() {
+        int slot = -1;
+
+        for (int i = 0; i < 9; i++) {
+            Item item = mc.player.inventory.getInvStack(i).getItem();
+
+            if (!(item instanceof BlockItem)) continue;
+
+            if (item == Items.OBSIDIAN) {
+                return i;
+            }
+
+            if (((BlockItem) item).getBlock().getDefaultState().isSimpleFullBlock(mc.world, null)) slot = i;
+        }
+
+        return slot;
+    }
 }
