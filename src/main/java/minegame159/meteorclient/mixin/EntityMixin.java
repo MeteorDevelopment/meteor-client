@@ -21,7 +21,7 @@ public abstract class EntityMixin {
     private void onSetVelocityClient(double x, double y, double z, CallbackInfo info) {
         if ((Object) this != MinecraftClient.getInstance().player) return;
 
-        if (NoPush.INSTANCE.isActive()) {
+        if (ModuleManager.INSTANCE.isActive(NoPush.class)) {
             info.cancel();
         }
     }
@@ -30,7 +30,7 @@ public abstract class EntityMixin {
     private void onAddVelocity(double deltaX, double deltaY, double deltaZ, CallbackInfo info) {
         if ((Object) this != MinecraftClient.getInstance().player) return;
 
-        if (NoPush.INSTANCE.isActive()) {
+        if (ModuleManager.INSTANCE.isActive(NoPush.class)) {
             info.cancel();
         }
     }
@@ -39,11 +39,11 @@ public abstract class EntityMixin {
     private void onMove(MovementType type, Vec3d movement, CallbackInfo info) {
         if ((Object) this != MinecraftClient.getInstance().player) return;
 
-        MeteorClient.eventBus.post(EventStore.playerMoveEvent(type, movement));
+        MeteorClient.EVENT_BUS.post(EventStore.playerMoveEvent(type, movement));
     }
 
     @Redirect(method = "adjustMovementForSneaking", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;isSneaking()Z"))
     private boolean isSafeWalkSneaking(Entity entity) {
-        return entity.isSneaking() || ModuleManager.INSTANCE.get(SafeWalk.class).isActive();
+        return entity.isSneaking() || ModuleManager.INSTANCE.isActive(SafeWalk.class);
     }
 }

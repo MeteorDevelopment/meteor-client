@@ -15,6 +15,6 @@ public class Reset extends Command {
         Module module = Utils.tryToGetModule(args);
         if (module == null) return;
 
-        for (Setting setting : module.settings) setting.reset();
+        for (Setting<?> setting : module.settings) setting.reset();
     }
 }

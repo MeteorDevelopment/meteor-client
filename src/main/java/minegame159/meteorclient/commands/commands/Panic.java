@@ -1,8 +1,8 @@
 package minegame159.meteorclient.commands.commands;
 
 import minegame159.meteorclient.commands.Command;
-import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.ToggleModule;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +14,7 @@ public class Panic extends Command {
 
     @Override
     public void run(String[] args) {
-        List<Module> active = new ArrayList<>(ModuleManager.INSTANCE.getActive());
-        for (Module module : active) module.toggle();
+        List<ToggleModule> active = new ArrayList<>(ModuleManager.INSTANCE.getActive());
+        for (ToggleModule module : active) module.toggle();
     }
 }

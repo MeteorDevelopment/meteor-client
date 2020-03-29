@@ -1,6 +1,7 @@
 package minegame159.meteorclient.settings;
 
 import minegame159.meteorclient.gui.widgets.WDoubleTextBox;
+import net.minecraft.nbt.CompoundTag;
 
 import java.util.function.Consumer;
 
@@ -48,6 +49,20 @@ public class DoubleSetting extends Setting<Double> {
         else usage += max;
 
         return usage;
+    }
+
+    @Override
+    public CompoundTag toTag() {
+        CompoundTag tag = saveGeneral();
+        tag.putDouble("value", get());
+        return tag;
+    }
+
+    @Override
+    public Double fromTag(CompoundTag tag) {
+        set(tag.getDouble("value"));
+
+        return get();
     }
 
     public static class Builder {

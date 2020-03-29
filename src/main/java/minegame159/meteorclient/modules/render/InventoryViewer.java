@@ -6,7 +6,7 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.Render2DEvent;
 import minegame159.meteorclient.gui.Alignment;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -15,9 +15,7 @@ import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 
-public class InventoryViewer extends Module {
-    public static InventoryViewer INSTANCE;
-
+public class InventoryViewer extends ToggleModule {
     private Setting<Alignment.X> xAlignment = addSetting(new EnumSetting.Builder<Alignment.X>()
             .name("x-alignment")
             .description("X alignment.")

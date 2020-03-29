@@ -4,6 +4,7 @@ import minegame159.meteorclient.gui.Alignment;
 import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.gui.widgets.WLabel;
 import minegame159.meteorclient.gui.widgets.WVerticalList;
+import minegame159.meteorclient.modules.ModuleManager;
 
 public class ClickGUI extends WidgetScreen {
     public ClickGUI() {
@@ -20,5 +21,11 @@ public class ClickGUI extends WidgetScreen {
         helpList.add(new WLabel("Right click - open module settings", true));
 
         layout();
+    }
+
+    @Override
+    public void onClose() {
+        ModuleManager.INSTANCE.save();
+        super.onClose();
     }
 }

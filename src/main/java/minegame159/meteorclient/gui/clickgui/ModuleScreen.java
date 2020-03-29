@@ -9,6 +9,7 @@ import minegame159.meteorclient.gui.PanelListScreen;
 import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.Setting;
 import org.lwjgl.glfw.GLFW;
 
@@ -34,13 +35,13 @@ public class ModuleScreen extends PanelListScreen implements Listenable {
             for (Setting<?> setting : module.settingGroups.get(group)) generateSettingToGrid(grid, setting);
         }
 
-        WWidget customWidget = module.getCustomWidget();
+        WWidget customWidget = module.getWidget();
         if (customWidget != null) {
             if (module.settings.size() > 0) add(new WHorizontalSeparator());
             add(customWidget);
         }
 
-        if (!module.setting) {
+        if (module instanceof ToggleModule) {
             if (customWidget != null || module.settings.size() > 0) add(new WHorizontalSeparator());
 
             // Bind
@@ -64,11 +65,13 @@ public class ModuleScreen extends PanelListScreen implements Listenable {
             // Active
             WHorizontalList active = add(new WHorizontalList(4));
             active.add(new WLabel("Active:"));
-            active.add(new WCheckbox(module.isActive())).setAction(wCheckbox -> module.toggle(mc.world != null));
+            active.add(new WCheckbox(((ToggleModule) module).isActive())).setAction(wCheckbox -> {
+                if (((ToggleModule) module).isActive() != wCheckbox.checked) ((ToggleModule) module).toggle(mc.world != null);
+            });
         }
 
         layout();
-        MeteorClient.eventBus.subscribe(this);
+        MeteorClient.EVENT_BUS.subscribe(this);
     }
 
     @EventHandler
@@ -99,7 +102,7 @@ public class ModuleScreen extends PanelListScreen implements Listenable {
 
     @Override
     public void onClose() {
-        MeteorClient.eventBus.unsubscribe(this);
+        MeteorClient.EVENT_BUS.unsubscribe(this);
         super.onClose();
     }
 }

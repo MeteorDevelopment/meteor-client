@@ -1,6 +1,7 @@
 package minegame159.meteorclient.settings;
 
 import minegame159.meteorclient.gui.widgets.WTextBox;
+import net.minecraft.nbt.CompoundTag;
 
 import java.util.function.Consumer;
 
@@ -30,6 +31,20 @@ public class StringSetting extends Setting<String> {
     @Override
     protected String generateUsage() {
         return "#blue<text>";
+    }
+
+    @Override
+    public CompoundTag toTag() {
+        CompoundTag tag = saveGeneral();
+        tag.putString("value", get());
+        return tag;
+    }
+
+    @Override
+    public String fromTag(CompoundTag tag) {
+        set(tag.getString("value"));
+
+        return get();
     }
 
     public static class Builder {

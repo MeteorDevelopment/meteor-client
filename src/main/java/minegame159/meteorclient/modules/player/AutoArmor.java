@@ -4,7 +4,7 @@ import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.EnumSetting;
@@ -24,9 +24,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.dimension.DimensionType;
 
-public class AutoArmor extends Module {
-    public static AutoArmor INSTANCE;
-
+public class AutoArmor extends ToggleModule {
     public enum Protection {
         Protection("Protection", Enchantments.PROTECTION),
         BlastProtection("Blast Protection", Enchantments.BLAST_PROTECTION),

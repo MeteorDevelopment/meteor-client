@@ -5,15 +5,13 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.events.TookDamageEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
 import net.minecraft.network.packet.s2c.play.DisconnectS2CPacket;
 import net.minecraft.text.LiteralText;
 
-public class AutoLog extends Module {
-    public static AutoLog INSTANCE;
-
+public class AutoLog extends ToggleModule {
     private Setting<Integer> health = addSetting(new IntSetting.Builder()
             .name("health")
             .description("Disconnects when health is lower or equal to this value.")

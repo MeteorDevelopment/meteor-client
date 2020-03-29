@@ -14,7 +14,7 @@ public class MouseMixin {
     @Inject(method = "onMouseButton", at = @At("TAIL"))
     private void onMouseButton(long window, int button, int action, int mods, CallbackInfo info) {
         if (button == GLFW.GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW.GLFW_PRESS) {
-            MeteorClient.eventBus.post(EventStore.middleMouseButtonEvent());
+            MeteorClient.EVENT_BUS.post(EventStore.middleMouseButtonEvent());
         }
     }
 }

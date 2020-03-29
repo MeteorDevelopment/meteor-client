@@ -1,6 +1,8 @@
 package minegame159.meteorclient.settings;
 
 import minegame159.meteorclient.gui.widgets.WWidget;
+import minegame159.meteorclient.utils.ISerializable;
+import net.minecraft.nbt.CompoundTag;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
@@ -8,7 +10,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public abstract class Setting<T> {
+public abstract class Setting<T> implements ISerializable<T> {
     public final String name, title, description, group;
     private String usage;
 
@@ -76,6 +78,12 @@ public abstract class Setting<T> {
     }
 
     protected abstract String generateUsage();
+
+    protected CompoundTag saveGeneral() {
+        CompoundTag tag = new CompoundTag();
+        tag.putString("name", name);
+        return tag;
+    }
 
     @Override
     public String toString() {

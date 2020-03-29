@@ -3,13 +3,11 @@ package minegame159.meteorclient.modules.misc;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
 
-public class ShulkerTooltip extends Module {
-    public static ShulkerTooltip INSTANCE;
-
+public class ShulkerTooltip extends ToggleModule {
     private Setting<Integer> lines = addSetting(new IntSetting.Builder()
             .name("lines")
             .description("Number of lines.")
@@ -24,12 +22,12 @@ public class ShulkerTooltip extends Module {
 
     @Override
     public void onActivate() {
-        MeteorClient.eventBus.post(EventStore.betterShulkerTooltipEvent(true));
+        MeteorClient.EVENT_BUS.post(EventStore.betterShulkerTooltipEvent(true));
     }
 
     @Override
     public void onDeactivate() {
-        MeteorClient.eventBus.post(EventStore.betterShulkerTooltipEvent(false));
+        MeteorClient.EVENT_BUS.post(EventStore.betterShulkerTooltipEvent(false));
     }
 
     public int lines() {

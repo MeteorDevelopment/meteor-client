@@ -20,7 +20,7 @@ public class ClientPlayerInteractionManagerMixin {
     @Inject(method = "attackEntity", at = @At("HEAD"), cancellable = true)
     private void onAttackEntity(PlayerEntity player, Entity target, CallbackInfo info) {
         AttackEntityEvent event = EventStore.attackEntityEvent(target);
-        MeteorClient.eventBus.post(event);
+        MeteorClient.EVENT_BUS.post(event);
 
         if (event.isCancelled()) info.cancel();
     }
@@ -28,7 +28,7 @@ public class ClientPlayerInteractionManagerMixin {
     @Inject(method = "method_2902", at = @At("HEAD"), cancellable = true)
     private void onAttackBlock(BlockPos blockPos, Direction direction, CallbackInfoReturnable<Boolean> info) {
         StartBreakingBlockEvent event = EventStore.startBreakingBlockEvent(blockPos, direction);
-        MeteorClient.eventBus.post(event);
+        MeteorClient.EVENT_BUS.post(event);
 
         if (event.isCancelled()) info.cancel();
     }

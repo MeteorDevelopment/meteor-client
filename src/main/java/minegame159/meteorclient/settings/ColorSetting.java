@@ -2,6 +2,7 @@ package minegame159.meteorclient.settings;
 
 import minegame159.meteorclient.gui.widgets.WColorEdit;
 import minegame159.meteorclient.utils.Color;
+import net.minecraft.nbt.CompoundTag;
 
 import java.util.function.Consumer;
 
@@ -37,6 +38,21 @@ public class ColorSetting extends Setting<Color> {
     @Override
     protected String generateUsage() {
         return "#blue0-255 0-255 0-255 0-255";
+    }
+
+    @Override
+    public CompoundTag toTag() {
+        CompoundTag tag = saveGeneral();
+        tag.put("value", get().toTag());
+        return tag;
+    }
+
+    @Override
+    public Color fromTag(CompoundTag tag) {
+        get().fromTag(tag.getCompound("value"));
+
+        changed();
+        return get();
     }
 
     public static class Builder {

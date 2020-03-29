@@ -6,7 +6,7 @@ import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.events.packets.SendPacketEvent;
 import minegame159.meteorclient.mixininterface.IPlayerEntity;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
 import net.minecraft.client.network.OtherClientPlayerEntity;
@@ -16,9 +16,7 @@ import net.minecraft.network.packet.c2s.play.PlayerInputC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.math.Vec3d;
 
-public class Freecam extends Module {
-    public static Freecam INSTANCE;
-
+public class Freecam extends ToggleModule {
     private Setting<Double> speed = addSetting(new DoubleSetting.Builder()
             .name("speed")
             .description("Speed")

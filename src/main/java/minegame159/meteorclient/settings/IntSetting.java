@@ -1,6 +1,7 @@
 package minegame159.meteorclient.settings;
 
 import minegame159.meteorclient.gui.widgets.WIntTextBox;
+import net.minecraft.nbt.CompoundTag;
 
 import java.util.function.Consumer;
 
@@ -48,6 +49,20 @@ public class IntSetting extends Setting<Integer> {
         else usage += max;
 
         return usage;
+    }
+
+    @Override
+    public CompoundTag toTag() {
+        CompoundTag tag = saveGeneral();
+        tag.putInt("value", get());
+        return tag;
+    }
+
+    @Override
+    public Integer fromTag(CompoundTag tag) {
+        set(tag.getInt("value"));
+
+        return get();
     }
 
     public static class Builder {

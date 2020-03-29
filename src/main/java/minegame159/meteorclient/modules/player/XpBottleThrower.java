@@ -4,13 +4,11 @@ import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.ToggleModule;
 import net.minecraft.item.Items;
 import net.minecraft.util.Hand;
 
-public class XpBottleThrower extends Module {
-    public static XpBottleThrower INSTANCE;
-
+public class XpBottleThrower extends ToggleModule {
     public XpBottleThrower() {
         super(Category.Player, "xp-bottle-thrower", "Automatically throws xp bottles in your hotbar.");
     }

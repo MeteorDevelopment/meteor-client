@@ -4,7 +4,7 @@ import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.RenderEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.ColorSetting;
 import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -15,9 +15,7 @@ import net.minecraft.block.entity.*;
 import net.minecraft.block.enums.ChestType;
 import net.minecraft.util.math.Direction;
 
-public class StorageESP extends Module {
-    public static StorageESP INSTANCE;
-
+public class StorageESP extends ToggleModule {
     public enum Mode {
         Lines,
         Sides,

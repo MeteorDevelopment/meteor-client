@@ -5,7 +5,6 @@ import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listenable;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.SaveManager;
 import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.events.KeyEvent;
 import minegame159.meteorclient.gui.Alignment;
@@ -81,14 +80,14 @@ public class EditMacroScreen extends PanelListScreen implements Listenable {
                     onClose();
                 }
             } else {
-                SaveManager.save(MacroManager.class);
-                MeteorClient.eventBus.post(EventStore.macroListChangedEvent());
+                MacroManager.INSTANCE.save();
+                MeteorClient.EVENT_BUS.post(EventStore.macroListChangedEvent());
                 onClose();
             }
         };
 
         layout();
-        MeteorClient.eventBus.subscribe(this);
+        MeteorClient.EVENT_BUS.subscribe(this);
     }
 
     private void fillGridMacroMessages(WGrid grid) {
@@ -126,7 +125,7 @@ public class EditMacroScreen extends PanelListScreen implements Listenable {
 
     @Override
     public void onClose() {
-        MeteorClient.eventBus.unsubscribe(this);
+        MeteorClient.EVENT_BUS.unsubscribe(this);
         super.onClose();
     }
 }

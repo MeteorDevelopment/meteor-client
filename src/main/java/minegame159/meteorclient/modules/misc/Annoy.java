@@ -1,11 +1,9 @@
 package minegame159.meteorclient.modules.misc;
 
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.ToggleModule;
 
-public class Annoy extends Module {
-    public static Annoy INSTANCE;
-
+public class Annoy extends ToggleModule {
     public Annoy() {
         super(Category.Misc, "annoy", "Makes your messages wEiRd.");
     }

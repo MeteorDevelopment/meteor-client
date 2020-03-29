@@ -82,7 +82,7 @@ public abstract class CraftingTableScreenMixin extends ContainerScreen<CraftingT
             } else {
                 if (getStack(craftingI).isEmpty()) {
                     if (findIngredients(craftingI)) {
-                        if (Config.INSTANCE.autoCraft.stopWhenNoIngredients) {
+                        if (Config.INSTANCE.autoCraft.isStopWhenNoIngredients()) {
                             stopCrafting("Stopped because you have ran out of ingredients.");
                         }
                     }
@@ -119,7 +119,7 @@ public abstract class CraftingTableScreenMixin extends ContainerScreen<CraftingT
     private void moveIngredients(int from, int to) {
         mc.interactionManager.method_2906(container.syncId, from, 0, SlotActionType.PICKUP, mc.player);
 
-        if (Config.INSTANCE.autoCraft.craftByOne) {
+        if (Config.INSTANCE.autoCraft.isCraftByOne()) {
             mc.interactionManager.method_2906(container.syncId, to, 1, SlotActionType.PICKUP, mc.player);
             mc.interactionManager.method_2906(container.syncId, from, 0, SlotActionType.PICKUP, mc.player);
         } else {

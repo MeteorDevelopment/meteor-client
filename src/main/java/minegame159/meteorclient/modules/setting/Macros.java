@@ -6,14 +6,13 @@ import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 
 public class Macros extends Module {
-    public static Macros INSTANCE;
-
     public Macros() {
-        super(Category.Setting, "macros", "Macro list.", true, true, false);
+        super(Category.Setting, "macros", "Macro list.");
+        serialize = false;
     }
 
     @Override
-    public WidgetScreen getCustomScreen() {
+    public WidgetScreen getScreen() {
         return new MacrosScreen();
     }
 }

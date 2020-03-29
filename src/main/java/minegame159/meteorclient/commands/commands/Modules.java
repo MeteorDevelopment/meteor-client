@@ -22,8 +22,8 @@ public class Modules extends Command {
             List<Module> group = ModuleManager.INSTANCE.getGroup(category);
             Utils.sendMessage("  #pink%s #gray(%d)#pink:", category.toString(), group.size());
 
-            for (Module module : group) {
-                Utils.sendMessage("    #yellow%s%s #gray- #yellow%s", Config.INSTANCE.prefix, module.name, module.description);
+            for (Module oldModule : group) {
+                Utils.sendMessage("    #yellow%s%s #gray- #yellow%s", Config.INSTANCE.getPrefix(), oldModule.name, oldModule.description);
             }
         }
     }

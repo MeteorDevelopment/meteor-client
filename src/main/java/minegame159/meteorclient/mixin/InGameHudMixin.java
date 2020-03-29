@@ -32,7 +32,7 @@ public abstract class InGameHudMixin {
         GlStateManager.lineWidth(1);
         GL11.glEnable(GL11.GL_LINE_SMOOTH);
 
-        MeteorClient.eventBus.post(EventStore.render2DEvent(scaledWidth, scaledHeight, tickDelta));
+        MeteorClient.EVENT_BUS.post(EventStore.render2DEvent(scaledWidth, scaledHeight, tickDelta));
 
         GL11.glDisable(GL11.GL_LINE_SMOOTH);
         GlStateManager.lineWidth(1);
@@ -42,6 +42,6 @@ public abstract class InGameHudMixin {
 
     @Inject(method = "renderStatusEffectOverlay", at = @At("HEAD"), cancellable = true)
     private void onRenderStatusEffectOverlay(CallbackInfo info) {
-        if (HUD.INSTANCE.isActive() && HUD.INSTANCE.potionTimers.get()) info.cancel();
+        if (ModuleManager.INSTANCE.isActive(HUD.class) && ModuleManager.INSTANCE.get(HUD.class).potionTimers.get()) info.cancel();
     }
 }

@@ -1,13 +1,11 @@
 package minegame159.meteorclient.modules.render;
 
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.ToggleModule;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.options.Option;
 
-public class FullBright extends Module {
-    public static FullBright INSTANCE;
-
+public class FullBright extends ToggleModule {
     public FullBright() {
         super(Category.Render, "full-bright", "No more darkness.");
     }

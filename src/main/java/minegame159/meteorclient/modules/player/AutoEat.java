@@ -6,15 +6,13 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 
-public class AutoEat extends Module {
-    public static AutoEat INSTANCE;
-
+public class AutoEat extends ToggleModule {
     private Setting<Boolean> egaps = addSetting(new BoolSetting.Builder()
             .name("egaps")
             .description("Eat enchanted golden apples.")

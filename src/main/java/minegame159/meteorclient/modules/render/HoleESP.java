@@ -5,7 +5,7 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.RenderEvent;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.ColorSetting;
 import minegame159.meteorclient.settings.IntSetting;
@@ -20,9 +20,7 @@ import net.minecraft.util.math.BlockPos;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HoleESP extends Module {
-    public static HoleESP INSTANCE;
-
+public class HoleESP extends ToggleModule {
     private Setting<Integer> horizontalRadius = addSetting(new IntSetting.Builder()
             .name("horizontal-radius")
             .description("Horizontal radius in which to search for holes.")

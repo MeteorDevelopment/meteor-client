@@ -15,7 +15,7 @@ public class MacrosScreen extends PanelListScreen implements Listenable {
 
         initWidgets();
 
-        MeteorClient.eventBus.subscribe(this);
+        MeteorClient.EVENT_BUS.subscribe(this);
     }
 
     private void initWidgets() {
@@ -50,7 +50,7 @@ public class MacrosScreen extends PanelListScreen implements Listenable {
 
     @Override
     public void onClose() {
-        MeteorClient.eventBus.unsubscribe(this);
+        MeteorClient.EVENT_BUS.unsubscribe(this);
         super.onClose();
     }
 }

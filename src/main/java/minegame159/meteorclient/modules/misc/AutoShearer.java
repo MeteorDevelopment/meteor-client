@@ -4,7 +4,7 @@ import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -14,9 +14,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.ShearsItem;
 import net.minecraft.util.Hand;
 
-public class AutoShearer extends Module {
-    public static AutoShearer INSTANCE;
-
+public class AutoShearer extends ToggleModule {
     private Setting<Double> distance = addSetting(new DoubleSetting.Builder()
             .name("distance")
             .description("Maximum distance.")

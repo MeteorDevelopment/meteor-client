@@ -3,6 +3,7 @@ package minegame159.meteorclient.mixin;
 import com.mojang.blaze3d.platform.GlStateManager;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.EventStore;
+import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.render.NoHurtCam;
 import minegame159.meteorclient.utils.RenderUtils;
 import minegame159.meteorclient.utils.Utils;
@@ -44,7 +45,7 @@ public abstract class GameRendererMixin {
         RenderUtils.beginLines();
         RenderUtils.beginQuads();
 
-        MeteorClient.eventBus.post(EventStore.renderEvent(tickDelta, px, py, pz));
+        MeteorClient.EVENT_BUS.post(EventStore.renderEvent(tickDelta, px, py, pz));
 
         RenderUtils.endQuads();
         RenderUtils.endLines();
@@ -60,6 +61,6 @@ public abstract class GameRendererMixin {
 
     @Inject(method = "bobViewWhenHurt", at = @At("HEAD"), cancellable = true)
     private void onBobViewWhenHurt(float tickDelta, CallbackInfo info) {
-        if (NoHurtCam.INSTANCE.isActive()) info.cancel();
+        if (ModuleManager.INSTANCE.isActive(NoHurtCam.class)) info.cancel();
     }
 }

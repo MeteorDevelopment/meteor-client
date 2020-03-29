@@ -22,13 +22,13 @@ public abstract class LivingEntityMixin extends Entity {
 
     @Inject(method = "damage", at = @At("TAIL"))
     private void onDamage(DamageSource source, float amount, CallbackInfoReturnable<Boolean> info) {
-        MeteorClient.eventBus.post(EventStore.tookDamageEvent((LivingEntity) (Object) this));
+        MeteorClient.EVENT_BUS.post(EventStore.tookDamageEvent((LivingEntity) (Object) this));
     }
 
     @Inject(method = "getJumpVelocity", at = @At("HEAD"), cancellable = true)
     private void onGetJumpVelocity(CallbackInfoReturnable<Float> info) {
-        if (HighJump.INSTANCE.isActive()) {
-            info.setReturnValue(0.42f * HighJump.INSTANCE.getMultiplier());
+        if (ModuleManager.INSTANCE.isActive(HighJump.class)) {
+            info.setReturnValue(0.42f * ModuleManager.INSTANCE.get(HighJump.class).getMultiplier());
         }
     }
 }

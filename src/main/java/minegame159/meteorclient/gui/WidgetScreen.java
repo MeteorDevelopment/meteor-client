@@ -25,7 +25,7 @@ public class WidgetScreen extends Screen {
         super(new LiteralText(title));
         mc = MinecraftClient.getInstance();
 
-        parent = mc.currentScreen instanceof WidgetScreen ? mc.currentScreen : null;
+        parent = mc.currentScreen;
         prePostKeyEvents = MixinValues.postKeyEvents;
 
         WWidget trueRoot = new WWidget();

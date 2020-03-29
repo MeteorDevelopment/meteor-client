@@ -1,6 +1,7 @@
 package minegame159.meteorclient.settings;
 
 import minegame159.meteorclient.gui.widgets.WEnumButton;
+import net.minecraft.nbt.CompoundTag;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.function.Consumer;
@@ -50,6 +51,20 @@ public class EnumSetting<T extends Enum<?>> extends Setting<T> {
         }
 
         return usage;
+    }
+
+    @Override
+    public CompoundTag toTag() {
+        CompoundTag tag = saveGeneral();
+        tag.putString("value", get().toString());
+        return tag;
+    }
+
+    @Override
+    public T fromTag(CompoundTag tag) {
+        parse(tag.getString("value"));
+
+        return get();
     }
 
     public static class Builder<T extends Enum<?>> {

@@ -2,6 +2,7 @@ package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.MixinValues;
+import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.misc.ShulkerTooltip;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -59,7 +60,7 @@ public class ShulkerBoxBlockMixin {
                     totalItemStacks = itemCounts.size();
 
                     List<Pair<Text, Integer>> items = new ArrayList<>(5);
-                    for (int i = 0; i < ShulkerTooltip.INSTANCE.lines(); i++) {
+                    for (int i = 0; i < ModuleManager.INSTANCE.get(ShulkerTooltip.class).lines(); i++) {
                         if (itemCounts.size() == 0) break;
 
                         Text bestItem = null;

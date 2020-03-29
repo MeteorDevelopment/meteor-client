@@ -4,6 +4,7 @@ import minegame159.meteorclient.events.packets.PlaySoundPacketEvent;
 import minegame159.meteorclient.events.packets.ReceivePacketEvent;
 import minegame159.meteorclient.events.packets.SendPacketEvent;
 import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.ToggleModule;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -88,7 +89,7 @@ public class EventStore {
         return moduleBindChangedEvent;
     }
 
-    public static ModuleVisibilityChangedEvent moduleVisibilityChangedEvent(Module module) {
+    public static ModuleVisibilityChangedEvent moduleVisibilityChangedEvent(ToggleModule module) {
         moduleVisibilityChangedEvent.module = module;
         return moduleVisibilityChangedEvent;
     }

@@ -1,8 +1,11 @@
 package minegame159.meteorclient.utils;
 
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.math.Vec3d;
+
 import java.util.Objects;
 
-public class Vector2 {
+public class Vector2 implements ISerializable<Vector2> {
     public static final Vector2 ZERO = new Vector2(0, 0);
 
     public double x, y;
@@ -23,6 +26,24 @@ public class Vector2 {
     public void set(double x, double y) {
         this.x = x;
         this.y = y;
+    }
+
+    @Override
+    public CompoundTag toTag() {
+        CompoundTag tag = new CompoundTag();
+
+        tag.putDouble("x", x);
+        tag.putDouble("y", y);
+
+        return tag;
+    }
+
+    @Override
+    public Vector2 fromTag(CompoundTag tag) {
+        x = tag.getDouble("x");
+        y = tag.getDouble("y");
+
+        return this;
     }
 
     @Override

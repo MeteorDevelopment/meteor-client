@@ -5,7 +5,7 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.StartBreakingBlockEvent;
 import minegame159.meteorclient.mixininterface.IMiningToolItem;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -17,9 +17,7 @@ import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.*;
 
-public class AutoTool extends Module {
-    public static AutoTool INSTANCE;
-
+public class AutoTool extends ToggleModule {
     public enum Prefer {
         None,
         Fortune,

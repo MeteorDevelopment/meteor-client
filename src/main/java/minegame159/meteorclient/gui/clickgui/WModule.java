@@ -3,10 +3,10 @@ package minegame159.meteorclient.gui.clickgui;
 import minegame159.meteorclient.gui.widgets.WLabel;
 import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.modules.setting.GUI;
 import minegame159.meteorclient.utils.RenderUtils;
 import minegame159.meteorclient.utils.Utils;
-import net.minecraft.client.MinecraftClient;
 
 public class WModule extends WWidget {
     private Module module;
@@ -19,7 +19,7 @@ public class WModule extends WWidget {
         tooltip = module.description;
 
         this.module = module;
-        if (module.isActive()) {
+        if (module instanceof ToggleModule && ((ToggleModule) module).isActive()) {
             animationProgress = 1;
             animationMultiplier = 1;
         } else {
@@ -33,8 +33,7 @@ public class WModule extends WWidget {
     @Override
     public boolean onMousePressed(int button) {
         if (mouseOver && button == 0) {
-            if (module.setting) module.openScreen();
-            else module.toggle(MinecraftClient.getInstance().world != null);
+            module.doAction();
             return true;
         } else if (mouseOver && button == 1) {
             module.openScreen();
@@ -48,7 +47,7 @@ public class WModule extends WWidget {
     public void onRender(double delta) {
         if (mouseOver) animationMultiplier = 1;
         else animationMultiplier = -1;
-        if (module.isActive()) animationMultiplier = 1;
+        if (module instanceof ToggleModule && ((ToggleModule) module).isActive()) animationMultiplier = 1;
 
         animationProgress += delta / 10 * GUI.hoverAnimationSpeedMultiplier * animationMultiplier;
         animationProgress = Utils.clamp(animationProgress, 0, 1);

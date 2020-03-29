@@ -1,6 +1,10 @@
 package minegame159.meteorclient.utils;
 
-public class Color {
+import net.minecraft.nbt.CompoundTag;
+
+public class Color implements ISerializable<Color> {
+    private static byte[] bytes = new byte[4];
+
     public int r, g, b, a;
 
     public Color() {
@@ -75,6 +79,29 @@ public class Color {
 
     public int getPacked() {
         return fromRGBA(r, g, b, a);
+    }
+
+    @Override
+    public CompoundTag toTag() {
+        CompoundTag tag = new CompoundTag();
+
+        tag.putInt("r", r);
+        tag.putInt("g", g);
+        tag.putInt("b", b);
+        tag.putInt("a", a);
+
+        return tag;
+    }
+
+    @Override
+    public Color fromTag(CompoundTag tag) {
+        r = tag.getInt("r");
+        g = tag.getInt("g");
+        b = tag.getInt("b");
+        a = tag.getInt("a");
+
+        validate();
+        return this;
     }
 
     @Override

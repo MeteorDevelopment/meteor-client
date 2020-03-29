@@ -1,49 +1,35 @@
 package minegame159.meteorclient;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.properties.PropertyMap;
-import com.mojang.authlib.yggdrasil.response.ProfileSearchResultsResponse;
-import com.mojang.util.UUIDTypeAdapter;
 import me.zero.alpine.bus.EventBus;
 import me.zero.alpine.bus.EventManager;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listenable;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.altsfriends.AccountManager;
-import minegame159.meteorclient.altsfriends.FriendManager;
+import minegame159.meteorclient.accountsfriends.AccountManager;
+import minegame159.meteorclient.accountsfriends.FriendManager;
 import minegame159.meteorclient.commands.CommandManager;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.gui.clickgui.ClickGUI;
-import minegame159.meteorclient.json.*;
 import minegame159.meteorclient.macros.MacroManager;
 import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.modules.misc.StashRecorder;
-import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.utils.EntityUtils;
 import minegame159.meteorclient.utils.Utils;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.keybinding.FabricKeyBinding;
 import net.fabricmc.fabric.api.client.keybinding.KeyBindingRegistry;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.block.Block;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.util.Identifier;
 import org.lwjgl.glfw.GLFW;
 
 import java.io.File;
-import java.lang.reflect.Modifier;
-import java.util.UUID;
 
 public class MeteorClient implements ClientModInitializer, Listenable {
     public static MeteorClient INSTANCE;
-    public static EventBus eventBus = new EventManager();
-    public static Gson gson;
-    public static boolean isDisconnecting;
-
-    public static File directory = new File(FabricLoader.getInstance().getGameDirectory(), "meteor-client");
+    public static final EventBus EVENT_BUS = new EventManager();
+    public static boolean IS_DISCONNECTING;
+    public static final File FOLDER = new File(FabricLoader.getInstance().getGameDirectory(), "meteor-client");
 
     private MinecraftClient mc;
     private FabricKeyBinding openClickGui = FabricKeyBinding.Builder.create(new Identifier("meteor-client", "open-click-gui"), InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_RIGHT_SHIFT, "Meteor Client").build();
@@ -66,46 +52,26 @@ public class MeteorClient implements ClientModInitializer, Listenable {
         Utils.mc = mc;
         EntityUtils.mc = mc;
 
-        gson = new GsonBuilder()
-                .excludeFieldsWithModifiers(Modifier.TRANSIENT, Modifier.STATIC)
-                .registerTypeAdapter(ModuleManager.class, new ModuleManagerSerializer())
-                .registerTypeAdapter(Setting.class, new SettingSerializer())
-                .registerTypeAdapter(GameProfile.class, new GameProfileSerializer())
-                .registerTypeAdapter(PropertyMap.class, new PropertyMap.Serializer())
-                .registerTypeAdapter(UUID.class, new UUIDTypeAdapter())
-                .registerTypeAdapter(ProfileSearchResultsResponse.class, new ProfileSearchResultsResponse.Serializer())
-                .registerTypeAdapter(StashRecorder.class, new StashRecorderSerializer())
-                .registerTypeAdapter(Block.class, new BlockSerializer())
-                .setPrettyPrinting()
-                .create();
-
         MixinValues.init();
         CommandManager.init();
         AccountManager.init();
 
-        SaveManager.register(Config.class, "config");
-        SaveManager.register(ModuleManager.class, "modules");
-        SaveManager.register(FriendManager.class, "friends");
-        SaveManager.register(MacroManager.class, "macros");
-        SaveManager.register(AccountManager.class, "accounts");
-        SaveManager.register(StashRecorder.class, "stashes");
+        Config.INSTANCE.load();
+        ModuleManager.INSTANCE.load();
+        FriendManager.INSTANCE.load();
+        MacroManager.INSTANCE.load();
+        AccountManager.INSTANCE.load();
 
-        SaveManager.load(Config.class);
-        SaveManager.load(ModuleManager.class);
-        SaveManager.load(FriendManager.class);
-        SaveManager.load(MacroManager.class);
-        SaveManager.load(AccountManager.class);
-
-        eventBus.subscribe(this);
+        EVENT_BUS.subscribe(this);
         Runtime.getRuntime().addShutdownHook(new Thread(this::stop));
     }
 
     private void stop() {
-        SaveManager.save(Config.class);
-        SaveManager.save(ModuleManager.class);
-        SaveManager.save(FriendManager.class);
-        SaveManager.save(MacroManager.class);
-        SaveManager.save(AccountManager.class);
+        Config.INSTANCE.save();
+        ModuleManager.INSTANCE.save();
+        FriendManager.INSTANCE.save();
+        MacroManager.INSTANCE.save();
+        AccountManager.INSTANCE.save();
     }
 
     @EventHandler

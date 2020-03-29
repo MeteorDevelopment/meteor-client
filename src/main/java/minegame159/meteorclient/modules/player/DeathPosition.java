@@ -4,15 +4,13 @@ import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.TookDamageEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.utils.Utils;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class DeathPosition extends Module {
-    public static DeathPosition INSTANCE;
-
+public class DeathPosition extends ToggleModule {
     private SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
 
     public DeathPosition() {

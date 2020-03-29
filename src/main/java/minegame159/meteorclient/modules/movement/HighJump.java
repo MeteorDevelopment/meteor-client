@@ -1,13 +1,11 @@
 package minegame159.meteorclient.modules.movement;
 
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
 
-public class HighJump extends Module {
-    public static HighJump INSTANCE;
-
+public class HighJump extends ToggleModule {
     private Setting<Double> multiplier = addSetting(new DoubleSetting.Builder()
             .name("multiplier")
             .description("Jump height multiplier.")

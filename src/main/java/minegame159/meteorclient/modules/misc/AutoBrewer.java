@@ -1,7 +1,7 @@
 package minegame159.meteorclient.modules.misc;
 
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.PotionSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -15,9 +15,7 @@ import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionUtil;
 import net.minecraft.potion.Potions;
 
-public class AutoBrewer extends Module {
-    public static AutoBrewer INSTANCE;
-
+public class AutoBrewer extends ToggleModule {
     public enum Modifier {
         None,
         Splash,

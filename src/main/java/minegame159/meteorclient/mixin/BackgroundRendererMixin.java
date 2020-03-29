@@ -1,5 +1,6 @@
 package minegame159.meteorclient.mixin;
 
+import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.render.AntiFog;
 import minegame159.meteorclient.modules.render.XRay;
 import net.minecraft.client.render.BackgroundRenderer;
@@ -13,6 +14,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class BackgroundRendererMixin {
     @Inject(method = "applyFog", at = @At("HEAD"), cancellable = true)
     private void onApplyFog(Camera camera, int i, CallbackInfo info) {
-        if (AntiFog.INSTANCE.isActive() || XRay.INSTANCE.isActive()) info.cancel();
+        if (ModuleManager.INSTANCE.isActive(AntiFog.class) || ModuleManager.INSTANCE.isActive(XRay.class)) info.cancel();
     }
 }

@@ -6,16 +6,14 @@ import minegame159.meteorclient.events.KeyEvent;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.events.packets.PlaySoundPacketEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.item.FishingRodItem;
 
-public class AutoFish extends Module {
-    public static AutoFish INSTANCE;
-
+public class AutoFish extends ToggleModule {
     private Setting<Boolean> autoCast = addSetting(new BoolSetting.Builder()
             .name("auto-cast")
             .description("Automatically casts when activated.")

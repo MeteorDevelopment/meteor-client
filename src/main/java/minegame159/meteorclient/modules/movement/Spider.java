@@ -4,14 +4,12 @@ import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
 import net.minecraft.util.math.Vec3d;
 
-public class Spider extends Module {
-    public static Spider INSTANCE;
-
+public class Spider extends ToggleModule {
     private Setting<Double> speed = addSetting(new DoubleSetting.Builder()
             .name("speed")
             .description("Speed.")

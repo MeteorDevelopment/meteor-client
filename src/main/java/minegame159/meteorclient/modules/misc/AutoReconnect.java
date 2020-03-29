@@ -8,7 +8,7 @@ import minegame159.meteorclient.events.OpenScreenEvent;
 import minegame159.meteorclient.mixininterface.IAbstractButtonWidget;
 import minegame159.meteorclient.mixininterface.IDisconnectedScreen;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
 import net.minecraft.client.gui.screen.ConnectScreen;
@@ -18,9 +18,7 @@ import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.network.ServerInfo;
 
-public class AutoReconnect extends Module {
-    public static AutoReconnect INSTANCE;
-
+public class AutoReconnect extends ToggleModule {
     private Setting<Double> time = addSetting(new DoubleSetting.Builder()
             .name("time")
             .description("Time to wait before connecting.")
@@ -33,7 +31,7 @@ public class AutoReconnect extends Module {
 
     public AutoReconnect() {
         super(Category.Misc, "auto-reconnect", "Automatically reconnects when kicked from server.");
-        MeteorClient.eventBus.subscribe(new Listener<GameJoinedEvent>(event -> {
+        MeteorClient.EVENT_BUS.subscribe(new Listener<GameJoinedEvent>(event -> {
             lastServerInfo = mc.isInSingleplayer() ? null : mc.getCurrentServerEntry();
         }));
     }

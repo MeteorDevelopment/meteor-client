@@ -1,11 +1,9 @@
 package minegame159.meteorclient.modules.render;
 
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.ToggleModule;
 
-public class NoHurtCam extends Module {
-    public static NoHurtCam INSTANCE;
-
+public class NoHurtCam extends ToggleModule {
     public NoHurtCam() {
         super(Category.Render, "no-hurt-cam", "Disables hurt camera effect.");
     }

@@ -5,8 +5,8 @@ import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.*;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.utils.Color;
@@ -32,9 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
-public class HUD extends Module {
-    public static HUD INSTANCE;
-
+public class HUD extends ToggleModule {
     private static int white = Color.fromRGBA(255, 255, 255, 255);
     private static int gray = Color.fromRGBA(185, 185, 185, 255);
     private static int red = Color.fromRGBA(225, 45, 45, 255);
@@ -149,7 +147,7 @@ public class HUD extends Module {
     private boolean updateEntities;
     private int updateEntitiesTimer = 2;
 
-    private List<Module> modules = new ArrayList<>();
+    private List<ToggleModule> modules = new ArrayList<>();
 
     private BlockPos.Mutable playerBlockPos = new BlockPos.Mutable();
 
@@ -339,15 +337,15 @@ public class HUD extends Module {
         int y = 2;
 
         if (activeModules.get()) {
-            for (Module module : modules) {
+            for (ToggleModule module : modules) {
                 String infoString = module.getInfoString();
                 if (infoString == null) {
                     int x = event.screenWidth - Utils.getTextWidth(module.title) - 2;
-                    Utils.drawTextWithShadow(module.title, x, y, module.getColor());
+                    Utils.drawTextWithShadow(module.title, x, y, module.color);
                     y += Utils.getTextHeight() + 1;
                 } else {
                     int x = event.screenWidth - Utils.getTextWidth(module.title + " " + infoString) - 2;
-                    Utils.drawTextWithShadow(module.title, x, y, module.getColor());
+                    Utils.drawTextWithShadow(module.title, x, y, module.color);
                     Utils.drawTextWithShadow(module.getInfoString(), x + Utils.getTextWidth(module.title + " "), y, gray);
                     y += Utils.getTextHeight() + 1;
                 }
@@ -358,8 +356,8 @@ public class HUD extends Module {
     private void recalculateActiveModules() {
         modules.clear();
 
-        for (Module module : ModuleManager.INSTANCE.getActive()) {
-            if (module.isVisible()) modules.add(module);
+        for (ToggleModule oldModule : ModuleManager.INSTANCE.getActive()) {
+            if (oldModule.isVisible()) modules.add(oldModule);
         }
 
         modules.sort((o1, o2) -> {

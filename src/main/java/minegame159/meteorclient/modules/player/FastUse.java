@@ -5,11 +5,9 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.mixininterface.IMinecraftClient;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.ToggleModule;
 
-public class FastUse extends Module {
-    public static FastUse INSTANCE;
-
+public class FastUse extends ToggleModule {
     public FastUse() {
         super(Category.Player, "fast-use", "Fast item use.");
     }

@@ -2,8 +2,8 @@ package minegame159.meteorclient.modules.render;
 
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BlockListSetting;
 import minegame159.meteorclient.settings.Setting;
 import net.minecraft.block.Block;
@@ -11,9 +11,7 @@ import net.minecraft.block.Block;
 import java.util.ArrayList;
 import java.util.List;
 
-public class XRay extends Module {
-    public static XRay INSTANCE;
-
+public class XRay extends ToggleModule {
     private Setting<List<Block>> blocks = addSetting(new BlockListSetting.Builder()
             .name("blocks")
             .description("Blocks.")
@@ -44,7 +42,7 @@ public class XRay extends Module {
         FullBright fullBright = ModuleManager.INSTANCE.get(FullBright.class);
         if (!fullBrightWasActive && fullBright.isActive()) fullBright.toggle();
 
-        if (!MeteorClient.isDisconnecting) mc.worldRenderer.reload();
+        if (!MeteorClient.IS_DISCONNECTING) mc.worldRenderer.reload();
     }
 
     public boolean isVisible(Block block) {

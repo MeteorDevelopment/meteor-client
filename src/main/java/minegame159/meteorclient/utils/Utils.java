@@ -19,8 +19,11 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShapes;
+import org.apache.commons.lang3.StringUtils;
 
+import java.util.Arrays;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 public class Utils {
     public static MinecraftClient mc;
@@ -30,6 +33,10 @@ public class Utils {
     private static Vec3d eyesPos = new Vec3d(0, 0, 0);
     private static Vec3d vec1 = new Vec3d(0, 0, 0);
     private static Vec3d vec2 = new Vec3d(0, 0, 0);
+
+    public static String nameToTitle(String name) {
+        return Arrays.stream(name.split("-")).map(StringUtils::capitalize).collect(Collectors.joining(" "));
+    }
 
     public static boolean place(BlockState blockState, BlockPos blockPos) {
         // Calculate eyes pos
@@ -132,12 +139,12 @@ public class Utils {
             Utils.sendMessage("#redYou must specify module name.");
             return null;
         }
-        Module module = ModuleManager.INSTANCE.get(args[0]);
-        if (module == null) {
+        Module oldModule = ModuleManager.INSTANCE.get(args[0]);
+        if (oldModule == null) {
             Utils.sendMessage("#redModule with name #blue'%s' #reddoesn't exist.", args[0]);
             return null;
         }
-        return module;
+        return oldModule;
     }
 
     public static boolean isShulker(Item item) {

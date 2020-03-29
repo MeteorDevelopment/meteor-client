@@ -6,15 +6,13 @@ import minegame159.meteorclient.events.OpenScreenEvent;
 import minegame159.meteorclient.events.packets.SendPacketEvent;
 import minegame159.meteorclient.mixininterface.ISignEditScreen;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.ToggleModule;
 import net.minecraft.block.entity.SignBlockEntity;
 import net.minecraft.client.gui.screen.ingame.SignEditScreen;
 import net.minecraft.network.packet.c2s.play.UpdateSignC2SPacket;
 import net.minecraft.text.LiteralText;
 
-public class AutoSign extends Module {
-    public static AutoSign INSTANCE;
-
+public class AutoSign extends ToggleModule {
     private String[] text;
 
     public AutoSign() {

@@ -2,6 +2,7 @@ package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.CommandDispatcher;
 import minegame159.meteorclient.Config;
+import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.misc.Annoy;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -19,9 +20,9 @@ public abstract class ClientPlayerEntityMixin {
 
     @Inject(at = @At("HEAD"), method = "sendChatMessage", cancellable = true)
     private void onSendChatMessage(String msg, CallbackInfo info) {
-        if (!msg.startsWith(Config.INSTANCE.prefix)) {
-            if (Annoy.INSTANCE.isActive()) {
-                networkHandler.sendPacket(new ChatMessageC2SPacket(Annoy.INSTANCE.doAnnoy(msg)));
+        if (!msg.startsWith(Config.INSTANCE.getPrefix())) {
+            if (ModuleManager.INSTANCE.isActive(Annoy.class)) {
+                networkHandler.sendPacket(new ChatMessageC2SPacket(ModuleManager.INSTANCE.get(Annoy.class).doAnnoy(msg)));
                 info.cancel();
             }
 
@@ -29,6 +30,6 @@ public abstract class ClientPlayerEntityMixin {
         }
 
         info.cancel();
-        CommandDispatcher.run(msg.substring(Config.INSTANCE.prefix.length()));
+        CommandDispatcher.run(msg.substring(Config.INSTANCE.getPrefix().length()));
     }
 }

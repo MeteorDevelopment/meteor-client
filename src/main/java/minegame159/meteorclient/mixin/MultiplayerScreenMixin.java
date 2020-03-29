@@ -1,6 +1,6 @@
 package minegame159.meteorclient.mixin;
 
-import minegame159.meteorclient.altsfriends.AccountsScreen;
+import minegame159.meteorclient.accountsfriends.AccountsScreen;
 import minegame159.meteorclient.utils.Color;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;

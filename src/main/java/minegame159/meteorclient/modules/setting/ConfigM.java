@@ -9,18 +9,17 @@ import minegame159.meteorclient.settings.StringSetting;
 import minegame159.meteorclient.utils.Color;
 
 public class ConfigM extends Module {
-    public static ConfigM INSTANCE;
-
     public ConfigM() {
-        super(Category.Setting, "config", "Config.", true, false, false);
+        super(Category.Setting, "config", "Config.");
+        serialize = false;
 
         addSetting(new StringSetting.Builder()
                 .name("prefix")
                 .description("Prefix.")
                 .group("General")
                 .defaultValue(".")
-                .onChanged(s -> Config.INSTANCE.prefix = s)
-                .onModuleActivated(stringSetting -> stringSetting.set(Config.INSTANCE.prefix))
+                .onChanged(Config.INSTANCE::setPrefix)
+                .onModuleActivated(stringSetting -> stringSetting.set(Config.INSTANCE.getPrefix()))
                 .build()
         );
 

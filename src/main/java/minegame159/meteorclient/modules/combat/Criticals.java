@@ -4,14 +4,12 @@ import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.AttackEntityEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 
-public class Criticals extends Module {
-    public static Criticals INSTANCE;
-
+public class Criticals extends ToggleModule {
     private Setting<Boolean> onlyOnGround = addSetting(new BoolSetting.Builder()
             .name("only-on-ground")
             .description("Do criticals only on ground.")

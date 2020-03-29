@@ -1,4 +1,4 @@
-package minegame159.meteorclient.altsfriends;
+package minegame159.meteorclient.accountsfriends;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listenable;
@@ -15,11 +15,10 @@ public class AccountsScreen extends PanelListScreen implements Listenable {
 
     public AccountsScreen() {
         super("Accounts");
-        parent = mc.currentScreen;
 
         initWidgets();
 
-        MeteorClient.eventBus.subscribe(this);
+        MeteorClient.EVENT_BUS.subscribe(this);
     }
 
     private void initWidgets() {
@@ -69,7 +68,7 @@ public class AccountsScreen extends PanelListScreen implements Listenable {
 
     @Override
     public void onClose() {
-        MeteorClient.eventBus.unsubscribe(this);
+        MeteorClient.EVENT_BUS.unsubscribe(this);
         super.onClose();
     }
 }

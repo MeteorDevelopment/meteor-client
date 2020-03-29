@@ -4,15 +4,21 @@ import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listenable;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.KeyEvent;
+import minegame159.meteorclient.utils.ISerializable;
+import minegame159.meteorclient.utils.NbtUtils;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class Macro implements Listenable {
+public class Macro implements Listenable, ISerializable<Macro> {
     public String name;
-    public List<String> messages = new ArrayList<>();
+    public List<String> messages = new ArrayList<>(1);
     public int key = -1;
 
     public void addMessage(String command) {
@@ -32,6 +38,31 @@ public class Macro implements Listenable {
             event.cancel();
         }
     });
+
+    @Override
+    public CompoundTag toTag() {
+        CompoundTag tag = new CompoundTag();
+
+        // General
+        tag.putString("name", name);
+        tag.putInt("key", key);
+
+        // Messages
+        ListTag messagesTag = new ListTag();
+        for (String message : messages) messagesTag.add(new StringTag(message));
+        tag.put("messages", messagesTag);
+
+        return tag;
+    }
+
+    @Override
+    public Macro fromTag(CompoundTag tag) {
+        name = tag.getString("name");
+        key = tag.getInt("key");
+        messages = NbtUtils.listFromTag(tag.getList("messages", 8), Tag::asString);
+
+        return this;
+    }
 
     @Override
     public boolean equals(Object o) {

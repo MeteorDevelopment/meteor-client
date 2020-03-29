@@ -10,8 +10,8 @@ public class MixinValues {
     public static int postKeyEvents = 0;
 
     public static void init() {
-        MeteorClient.eventBus.subscribe(new Listener<ChangeChatLengthEvent>(event -> chatLength = event.length));
-        MeteorClient.eventBus.subscribe(new Listener<BetterShulkerTooltipEvent>(event -> betterShulkerTooltip = event.enabled));
+        MeteorClient.EVENT_BUS.subscribe(new Listener<ChangeChatLengthEvent>(event -> chatLength = event.length));
+        MeteorClient.EVENT_BUS.subscribe(new Listener<BetterShulkerTooltipEvent>(event -> betterShulkerTooltip = event.enabled));
     }
 
     public static int getChatLength() {

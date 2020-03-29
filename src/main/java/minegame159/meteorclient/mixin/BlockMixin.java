@@ -1,5 +1,6 @@
 package minegame159.meteorclient.mixin;
 
+import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.render.XRay;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -15,15 +16,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class BlockMixin {
     @Inject(method = "getAmbientOcclusionLightLevel", at = @At("HEAD"), cancellable = true)
     private void onGetAmbientOcclusionLightLevel(BlockState state, BlockView view, BlockPos pos, CallbackInfoReturnable<Float> info) {
-        if (XRay.INSTANCE.isActive()) {
+        if (ModuleManager.INSTANCE.isActive(XRay.class)) {
             info.setReturnValue(1f);
         }
     }
 
     @Inject(at = @At("HEAD"), method = "shouldDrawSide", cancellable = true)
     private static void onShouldDrawSide(BlockState state, BlockView view, BlockPos pos, Direction facing, CallbackInfoReturnable<Boolean> info) {
-        if (XRay.INSTANCE.isActive()) {
-            info.setReturnValue(XRay.INSTANCE.isVisible(state.getBlock()));
+        if (ModuleManager.INSTANCE.isActive(XRay.class)) {
+            info.setReturnValue(ModuleManager.INSTANCE.get(XRay.class).isVisible(state.getBlock()));
         }
     }
 }

@@ -15,62 +15,82 @@ import minegame159.meteorclient.modules.movement.*;
 import minegame159.meteorclient.modules.player.*;
 import minegame159.meteorclient.modules.render.*;
 import minegame159.meteorclient.modules.setting.*;
+import minegame159.meteorclient.utils.Savable;
 import minegame159.meteorclient.utils.Utils;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import org.lwjgl.glfw.GLFW;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.File;
+import java.util.*;
 
-public class ModuleManager implements Listenable {
-    public static ModuleManager INSTANCE;
+public class ModuleManager extends Savable<ModuleManager> implements Listenable {
     public static final Category[] CATEGORIES = { Category.Combat, Category.Player, Category.Movement, Category.Render, Category.Misc, Category.Setting };
+    public static final ModuleManager INSTANCE = new ModuleManager();
 
-    private List<Module> modules = new ArrayList<>();
+    private Map<Class<? extends Module>, Module> modules = new HashMap<>();
     private Map<Category, List<Module>> groups = new HashMap<>();
-    private List<Module> active = new ArrayList<>();
+
+    private List<ToggleModule> active = new ArrayList<>();
     private Module moduleToBind;
 
-    public ModuleManager() {
+    private ModuleManager() {
+        super(new File(MeteorClient.FOLDER, "modules.nbt"));
+
         initCombat();
         initPlayer();
         initMovement();
         initRender();
         initMisc();
         initSetting();
-    }
 
-    public List<Module> getGroup(Category category) {
-        return groups.computeIfAbsent(category, category1 -> new ArrayList<>());
-    }
-
-    public List<Module> getAll() {
-        return modules;
-    }
-
-    public List<Module> getActive() {
-        return active;
+        MeteorClient.EVENT_BUS.subscribe(this);
     }
 
     public <T extends Module> T get(Class<T> klass) {
-        for (Module module : modules) {
-            if (module.getClass() == klass) return (T) module;
-        }
-
-        return null;
+        return (T) modules.get(klass);
     }
 
     public Module get(String name) {
-        for (Module module : modules) {
+        for (Module module : modules.values()) {
             if (module.name.equalsIgnoreCase(name)) return module;
         }
 
         return null;
     }
 
+    public boolean isActive(Class<? extends ToggleModule> klass) {
+        return get(klass).isActive();
+    }
+
+    public List<Module> getGroup(Category category) {
+        return groups.computeIfAbsent(category, category1 -> new ArrayList<>());
+    }
+
+    public Collection<Module> getAll() {
+        return modules.values();
+    }
+
+    public List<ToggleModule> getActive() {
+        return active;
+    }
+
     public void setModuleToBind(Module moduleToBind) {
         this.moduleToBind = moduleToBind;
+    }
+
+    void addActive(ToggleModule module) {
+        if (!active.contains(module)) {
+            active.add(module);
+            MeteorClient.EVENT_BUS.post(EventStore.activeModulesChangedEvent());
+        }
+    }
+
+    void removeActive(ToggleModule module) {
+        if (active.remove(module)) {
+            MeteorClient.EVENT_BUS.post(EventStore.activeModulesChangedEvent());
+        }
     }
 
     @EventHandler
@@ -79,11 +99,6 @@ public class ModuleManager implements Listenable {
 
         // Check if binding module
         if (moduleToBind != null) {
-            if (moduleToBind.setting) {
-                moduleToBind = null;
-                return;
-            }
-
             moduleToBind.setKey(event.key);
             Utils.sendMessage("#yellowModule #blue'%s' #yellowbound to #blue%s#yellow.", moduleToBind.title, GLFW.glfwGetKeyName(event.key, 0));
             moduleToBind = null;
@@ -92,45 +107,56 @@ public class ModuleManager implements Listenable {
         }
 
         // Find module bound to that key
-        for (Module module : modules) {
-            if (module.setting) continue;
-
+        for (Module module : modules.values()) {
             if (module.getKey() == event.key) {
-                module.toggle();
+                module.doAction();
                 event.cancel();
             }
         }
     }, EventPriority.HIGHEST + 1);
 
-    void addActive(Module module) {
-        active.add(module);
-        MeteorClient.eventBus.post(EventStore.activeModulesChangedEvent());
-    }
-
-    void removeActive(Module module) {
-        active.remove(module);
-        MeteorClient.eventBus.post(EventStore.activeModulesChangedEvent());
-    }
-
-    private void addModule(Module module) {
-        modules.add(module);
-        getGroup(module.category).add(module);
-        try {
-            module.getClass().getDeclaredField("INSTANCE").set(null, module);
-        } catch (IllegalAccessException | NoSuchFieldException e) {
-            System.err.println("Meteor Client: My dumbass forgot to add public static INSTANCE field to module '" + module.getClass().getName() + "'.");
-        }
-    }
-
     @EventHandler
     private Listener<GameJoinedEvent> onGameJoined = new Listener<>(event -> {
-        for (Module module : active) module.onActivate();
+        for (ToggleModule module : active) module.onActivate();
     });
 
     @EventHandler
     private Listener<GameDisconnectedEvent> onGameDisconnected = new Listener<>(event -> {
-        for (Module module : active) module.onDeactivate();
+        for (ToggleModule module : active) module.onDeactivate();
     });
+
+    @Override
+    public CompoundTag toTag() {
+        CompoundTag tag = new CompoundTag();
+
+        ListTag modulesTag = new ListTag();
+        for (Module module : getAll()) {
+            CompoundTag moduleTag = module.toTag();
+            if (moduleTag != null) modulesTag.add(moduleTag);
+        }
+        tag.put("modules", modulesTag);
+
+        return tag;
+    }
+
+    @Override
+    public ModuleManager fromTag(CompoundTag tag) {
+        ListTag modulesTag = tag.getList("modules", 10);
+        for (Tag moduleTagI : modulesTag) {
+            CompoundTag moduleTag = (CompoundTag) moduleTagI;
+            Module module = get(moduleTag.getString("name"));
+            if (module != null) module.fromTag(moduleTag);
+        }
+
+        return this;
+    }
+
+    // INIT MODULES
+
+    private void addModule(Module module) {
+        modules.put(module.getClass(), module);
+        getGroup(module.category).add(module);
+    }
 
     private void initCombat() {
         addModule(new Criticals());

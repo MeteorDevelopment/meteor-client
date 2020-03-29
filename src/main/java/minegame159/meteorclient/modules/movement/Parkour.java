@@ -4,15 +4,13 @@ import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.ToggleModule;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.shape.VoxelShape;
 
 import java.util.stream.Stream;
 
-public class Parkour extends Module {
-    public static Parkour INSTANCE;
-
+public class Parkour extends ToggleModule {
     public Parkour() {
         super(Category.Movement, "parkour", "Automatically jumps at the edges of blocks.");
     }

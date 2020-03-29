@@ -1,11 +1,9 @@
 package minegame159.meteorclient.modules.movement;
 
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.ToggleModule;
 
-public class NoPush extends Module {
-    public static NoPush INSTANCE;
-
+public class NoPush extends ToggleModule {
     public NoPush() {
         super(Category.Movement, "no-push", "Prevents u from getting pushed by mobs, taking damage, etc.");
     }

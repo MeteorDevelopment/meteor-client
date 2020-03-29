@@ -39,7 +39,7 @@ public abstract class KeyboardMixin {
 
             if (!client.isPaused() && (client.currentScreen == null || (client.currentScreen instanceof WidgetScreen && MixinValues.postKeyEvents()))) {
                 KeyEvent event = EventStore.keyEvent(key, i == GLFW.GLFW_PRESS);
-                MeteorClient.eventBus.post(event);
+                MeteorClient.EVENT_BUS.post(event);
 
                 if (event.isCancelled()) info.cancel();
             }
@@ -50,7 +50,7 @@ public abstract class KeyboardMixin {
     private void onChar(long window, int i, int j, CallbackInfo info) {
         if (Utils.canUpdate() && !client.isPaused() && (client.currentScreen == null || client.currentScreen instanceof WidgetScreen)) {
             CharTypedEvent event = EventStore.charTypedEvent((char) i);
-            MeteorClient.eventBus.post(event);
+            MeteorClient.EVENT_BUS.post(event);
 
             if (event.isCancelled()) info.cancel();
         }

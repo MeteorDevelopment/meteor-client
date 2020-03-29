@@ -1,20 +1,18 @@
 package minegame159.meteorclient.mixin;
 
 import com.mojang.blaze3d.platform.GlStateManager;
-import minegame159.meteorclient.altsfriends.FriendManager;
+import minegame159.meteorclient.accountsfriends.FriendManager;
+import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.render.Nametags;
 import minegame159.meteorclient.utils.Color;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.render.entity.EntityRenderer;
-import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.DyeColor;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -32,12 +30,12 @@ public abstract class EntityRendererMixin<T extends Entity> {
     @Inject(method = "renderLabel(Lnet/minecraft/entity/Entity;Ljava/lang/String;DDDI)V", at = @At("HEAD"), cancellable = true)
     private void onRenderLabel(T entity, String text, double x, double y, double z, int maxDistance, CallbackInfo info) {
         if (!(entity instanceof PlayerEntity)) return;
-        if (Nametags.INSTANCE.isActive()) info.cancel();
+        if (ModuleManager.INSTANCE.isActive(Nametags.class)) info.cancel();
         else return;
 
         double dist = Math.sqrt(entity.squaredDistanceTo(renderManager.camera.getPos()));
         float scale = 0.025f;
-        if (dist > 10) scale *= dist / 10 * Nametags.INSTANCE.getScale();
+        if (dist > 10) scale *= dist / 10 * ModuleManager.INSTANCE.get(Nametags.class).getScale();
 
         float yOffset = entity.getHeight() + 0.5F;
         int verticalOffset = "deadmau5".equals(text) ? -10 : 0;

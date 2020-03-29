@@ -16,7 +16,7 @@ public class Settings extends Command {
         if (module == null) return;
 
         Utils.sendMessage("#pink%s:", module.title);
-        for (Setting setting : module.settings) {
+        for (Setting<?> setting : module.settings) {
             Utils.sendMessage("  #yellowUsage of #blue'%s' #gray(%s) #yellowis #gray%s#yellow.", setting.name, setting.get().toString(), setting.getUsage());
         }
     }

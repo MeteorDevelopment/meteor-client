@@ -6,7 +6,7 @@ import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -15,9 +15,7 @@ import net.minecraft.util.Hand;
 
 import java.util.Comparator;
 
-public class CrystalAura extends Module {
-    public static CrystalAura INSTANCE;
-
+public class CrystalAura extends ToggleModule {
     public Setting<Double> range = addSetting(new DoubleSetting.Builder()
             .name("range")
             .description("Attack range.")

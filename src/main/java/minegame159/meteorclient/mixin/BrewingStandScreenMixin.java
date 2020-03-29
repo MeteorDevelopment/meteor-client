@@ -1,5 +1,6 @@
 package minegame159.meteorclient.mixin;
 
+import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.misc.AutoBrewer;
 import net.minecraft.client.gui.screen.ingame.BrewingStandScreen;
 import net.minecraft.client.gui.screen.ingame.ContainerScreen;
@@ -18,12 +19,12 @@ public abstract class BrewingStandScreenMixin extends ContainerScreen<BrewingSta
     public void tick() {
         super.tick();
 
-        if (AutoBrewer.INSTANCE.isActive()) AutoBrewer.INSTANCE.tick(container);
+        if (ModuleManager.INSTANCE.isActive(AutoBrewer.class)) ModuleManager.INSTANCE.get(AutoBrewer.class).tick(container);
     }
 
     @Override
     public void onClose() {
-        if (AutoBrewer.INSTANCE.isActive()) AutoBrewer.INSTANCE.onBrewingStandClose();
+        if (ModuleManager.INSTANCE.isActive(AutoBrewer.class)) ModuleManager.INSTANCE.get(AutoBrewer.class).onBrewingStandClose();
 
         super.onClose();
     }

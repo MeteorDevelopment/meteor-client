@@ -1,6 +1,7 @@
 package minegame159.meteorclient.settings;
 
 import minegame159.meteorclient.gui.widgets.WCheckbox;
+import net.minecraft.nbt.CompoundTag;
 
 import java.util.function.Consumer;
 
@@ -33,6 +34,20 @@ public class BoolSetting extends Setting<Boolean> {
     @Override
     protected String generateUsage() {
         return "#bluetrue#gray, #bluefalse #grayor #bluetoggle";
+    }
+
+    @Override
+    public CompoundTag toTag() {
+        CompoundTag tag = saveGeneral();
+        tag.putBoolean("value", get());
+        return tag;
+    }
+
+    @Override
+    public Boolean fromTag(CompoundTag tag) {
+        set(tag.getBoolean("value"));
+
+        return get();
     }
 
     public static class Builder {

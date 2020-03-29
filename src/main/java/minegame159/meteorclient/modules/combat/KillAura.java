@@ -3,10 +3,10 @@ package minegame159.meteorclient.modules.combat;
 import com.google.common.collect.Streams;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.altsfriends.FriendManager;
+import minegame159.meteorclient.accountsfriends.FriendManager;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.EnumSetting;
@@ -17,9 +17,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Hand;
 
-public class KillAura extends Module {
-    public static KillAura INSTANCE;
-
+public class KillAura extends ToggleModule {
     public enum Priority {
         LowestDistance,
         HighestDistance,

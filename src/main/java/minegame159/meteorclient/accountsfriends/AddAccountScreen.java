@@ -1,4 +1,4 @@
-package minegame159.meteorclient.altsfriends;
+package minegame159.meteorclient.accountsfriends;
 
 import minegame159.meteorclient.gui.PanelListScreen;
 import minegame159.meteorclient.gui.widgets.WButton;

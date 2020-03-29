@@ -22,7 +22,7 @@ public class TickRate implements Listenable {
     private long timeGameJoined;
 
     private TickRate() {
-        MeteorClient.eventBus.subscribe(this);
+        MeteorClient.EVENT_BUS.subscribe(this);
     }
 
     @EventHandler

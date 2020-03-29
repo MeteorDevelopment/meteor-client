@@ -13,11 +13,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class ClientWorldMixin {
     @Inject(method = "addEntity", at = @At("TAIL"))
     private void onAddEntity(int id, Entity entity, CallbackInfo info) {
-        MeteorClient.eventBus.post(EventStore.entityAddedEvent(entity));
+        MeteorClient.EVENT_BUS.post(EventStore.entityAddedEvent(entity));
     }
 
     @Inject(method = "finishRemovingEntity", at = @At("TAIL"))
     private void onFinishRemovingEntity(Entity entity, CallbackInfo info) {
-        MeteorClient.eventBus.post(EventStore.entityRemovedEvent(entity));
+        MeteorClient.EVENT_BUS.post(EventStore.entityRemovedEvent(entity));
     }
 }

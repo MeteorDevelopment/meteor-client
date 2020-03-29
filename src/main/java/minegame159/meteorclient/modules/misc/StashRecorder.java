@@ -3,12 +3,12 @@ package minegame159.meteorclient.modules.misc;
 import com.mojang.blaze3d.platform.GlStateManager;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.SaveManager;
+import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.ChunkDataEvent;
 import minegame159.meteorclient.gui.screens.StashRecorderChunkScreen;
 import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
 import net.minecraft.block.entity.*;
@@ -17,13 +17,17 @@ import net.minecraft.client.toast.ToastManager;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.ChunkPos;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
-public class StashRecorder extends Module {
-    public static StashRecorder INSTANCE;
+public class StashRecorder extends ToggleModule {
+    private static final File FILE = new File(MeteorClient.FOLDER, "stashes.csv");
 
     private Setting<Integer> minimumStorageCount = addSetting(new IntSetting.Builder()
             .name("minimum-storage-cont")
@@ -36,7 +40,7 @@ public class StashRecorder extends Module {
     public List<Chunk> chunks = new ArrayList<>();
 
     public StashRecorder() {
-        super(Category.Misc, "stash-recorder", "Searches loaded chunks for storage blocks. Saves to <your minecraft folder>/meteor-client/stashes.json");
+        super(Category.Misc, "stash-recorder", "Searches loaded chunks for storage blocks. Saves to <your minecraft folder>/meteor-client/stashes.csv");
     }
 
     @EventHandler
@@ -80,7 +84,7 @@ public class StashRecorder extends Module {
     });
 
     @Override
-    public WWidget getCustomWidget() {
+    public WWidget getWidget() {
         // Sort
         chunks.sort(Comparator.comparingInt(value -> -value.getTotal()));
 
@@ -99,7 +103,7 @@ public class StashRecorder extends Module {
             list.layout();
         };
 
-        saveToFile.action = () -> SaveManager.save(this);
+        saveToFile.action = this::save;
 
         // Chunks
         fillGrid(grid);
@@ -130,7 +134,23 @@ public class StashRecorder extends Module {
         }
     }
 
+    private void save() {
+        try {
+            FILE.getParentFile().mkdirs();
+            Writer writer = new FileWriter(FILE);
+
+            writer.write("X,Z,Chests,Shulkers,EnderChests,Furnaces,DispensersDroppers,Hopper");
+            for (Chunk chunk : chunks) chunk.write(writer);
+
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static class Chunk {
+        private static final StringBuilder sb = new StringBuilder();
+
         public transient ChunkPos chunkPos;
         public int x, z;
         public int chests, barrels, shulkers, enderChests, furnaces, dispensersDroppers, hoppers;
@@ -144,6 +164,13 @@ public class StashRecorder extends Module {
 
         public int getTotal() {
             return chests + barrels + shulkers + enderChests + furnaces + dispensersDroppers + hoppers;
+        }
+
+        public void write(Writer writer) throws IOException {
+            sb.setLength(0);
+            sb.append(x).append(z);
+            sb.append(chests).append(barrels).append(shulkers).append(enderChests).append(furnaces).append(dispensersDroppers).append(hoppers);
+            writer.write(sb.toString());
         }
 
         @Override

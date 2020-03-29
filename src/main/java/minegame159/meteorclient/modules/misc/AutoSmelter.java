@@ -2,14 +2,12 @@ package minegame159.meteorclient.modules.misc;
 
 import minegame159.meteorclient.mixininterface.IAbstractFurnaceContainer;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.container.AbstractFurnaceContainer;
 import net.minecraft.container.SlotActionType;
 
-public class AutoSmelter extends Module {
-    public static AutoSmelter INSTANCE;
-
+public class AutoSmelter extends ToggleModule {
     private int step;
     private boolean first;
     private int timer;

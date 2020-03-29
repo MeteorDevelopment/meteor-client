@@ -4,7 +4,7 @@ import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.RenderEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.ColorSetting;
 import minegame159.meteorclient.settings.EnumSetting;
@@ -15,9 +15,7 @@ import minegame159.meteorclient.utils.RenderUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.Box;
 
-public class ESP extends Module {
-    public static ESP INSTANCE;
-
+public class ESP extends ToggleModule {
     public enum Mode {
         Lines,
         Sides,

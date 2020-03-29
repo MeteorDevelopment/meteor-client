@@ -4,7 +4,7 @@ import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -13,9 +13,7 @@ import net.minecraft.item.ElytraItem;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.util.math.Vec3d;
 
-public class ElytraPlus extends Module {
-    public static ElytraPlus INSTANCE;
-
+public class ElytraPlus extends ToggleModule {
     private Setting<Boolean> autoTakeOff = addSetting(new BoolSetting.Builder()
             .name("auto-take-off")
             .description("Automatically takes off when u hold jump without needing to double jump.")

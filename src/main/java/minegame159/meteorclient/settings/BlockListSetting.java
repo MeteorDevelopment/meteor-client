@@ -4,6 +4,10 @@ import minegame159.meteorclient.gui.screens.BlockListSettingScreen;
 import minegame159.meteorclient.gui.widgets.WButton;
 import net.minecraft.block.Block;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
@@ -48,6 +52,30 @@ public class BlockListSetting extends Setting<List<Block>> {
     @Override
     protected String generateUsage() {
         return "#blueblock id #gray(dirt, minecraft:stone, etc)";
+    }
+
+    @Override
+    public CompoundTag toTag() {
+        CompoundTag tag = saveGeneral();
+
+        ListTag valueTag = new ListTag();
+        for (Block block : get()) {
+            valueTag.add(new StringTag(Registry.BLOCK.getId(block).toString()));
+        }
+        tag.put("value", valueTag);
+
+        return tag;
+    }
+
+    @Override
+    public List<Block> fromTag(CompoundTag tag) {
+        ListTag valueTag = tag.getList("value", 8);
+        for (Tag tagI : valueTag) {
+            get().add(Registry.BLOCK.get(new Identifier(tagI.asString())));
+        }
+
+        changed();
+        return get();
     }
 
     public static class Builder {

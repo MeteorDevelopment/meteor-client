@@ -48,7 +48,7 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
     private void onTick(CallbackInfo info) {
         if (Utils.canUpdate()) {
             world.getProfiler().swap("meteor-client_update");
-            MeteorClient.eventBus.post(EventStore.tickEvent());
+            MeteorClient.EVENT_BUS.post(EventStore.tickEvent());
         }
     }
 
@@ -57,7 +57,7 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
         if (screen instanceof WidgetScreen) screen.mouseMoved(mouse.getX() * window.getScaleFactor(), mouse.getY() * window.getScaleFactor());
 
         OpenScreenEvent event = EventStore.openScreenEvent(screen);
-        MeteorClient.eventBus.post(event);
+        MeteorClient.EVENT_BUS.post(event);
 
         if (event.isCancelled()) info.cancel();
     }
