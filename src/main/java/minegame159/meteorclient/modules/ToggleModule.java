@@ -7,7 +7,7 @@ import net.minecraft.nbt.CompoundTag;
 
 public abstract class ToggleModule extends Module {
     private boolean active;
-    private boolean visible;
+    private boolean visible = true;
 
     public ToggleModule(Category category, String name, String description) {
         super(category, name, description);

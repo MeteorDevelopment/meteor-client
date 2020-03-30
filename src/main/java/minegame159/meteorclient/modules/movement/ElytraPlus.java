@@ -2,7 +2,8 @@ package minegame159.meteorclient.modules.movement;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.TickEvent;
+import minegame159.meteorclient.events.PlayerMoveEvent;
+import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BoolSetting;
@@ -17,14 +18,14 @@ public class ElytraPlus extends ToggleModule {
     private Setting<Boolean> autoTakeOff = addSetting(new BoolSetting.Builder()
             .name("auto-take-off")
             .description("Automatically takes off when u hold jump without needing to double jump.")
-            .defaultValue(true)
+            .defaultValue(false)
             .build()
     );
 
     private Setting<Double> fallMultiplier = addSetting(new DoubleSetting.Builder()
             .name("fall-multiplier")
             .description("Controls how fast will u go down naturally.")
-            .defaultValue(0)
+            .defaultValue(0.01)
             .min(0)
             .build()
     );
@@ -70,14 +71,14 @@ public class ElytraPlus extends ToggleModule {
     }
 
     @EventHandler
-    private Listener<TickEvent> onTick = new Listener<>(event -> {
+    private Listener<PlayerMoveEvent> onPlayerMove = new Listener<>(event -> {
         if (!(mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() instanceof ElytraItem)) return;
 
         handleAutoTakeOff();
 
         if (mc.player.isFallFlying()) {
             velX = 0;
-            velY = mc.player.getVelocity().y;
+            velY = event.movement.y;
             velZ = 0;
             forward = Vec3d.fromPolar(0, mc.player.yaw).multiply(0.1);
             right = Vec3d.fromPolar(0, mc.player.yaw + 90).multiply(0.1);
@@ -92,25 +93,38 @@ public class ElytraPlus extends ToggleModule {
             handleHorizontalSpeed();
             handleVerticalSpeed();
 
-            mc.player.setVelocity(velX, velY, velZ);
+            ((IVec3d) event.movement).set(velX, velY, velZ);
         }
     });
 
     private void handleHorizontalSpeed() {
+        boolean a = false;
+        boolean b = false;
+
         if (mc.options.keyForward.isPressed()) {
             velX += forward.x * horizontalSpeed.get() * 10;
             velZ += forward.z * horizontalSpeed.get() * 10;
+            a = true;
         } else if (mc.options.keyBack.isPressed()) {
             velX -= forward.x * horizontalSpeed.get() * 10;
             velZ -= forward.z * horizontalSpeed.get() * 10;
+            a = true;
         }
 
         if (mc.options.keyRight.isPressed()) {
             velX += right.x * horizontalSpeed.get() * 10;
             velZ += right.z * horizontalSpeed.get() * 10;
+            b = true;
         } else if (mc.options.keyLeft.isPressed()) {
             velX -= right.x * horizontalSpeed.get() * 10;
             velZ -= right.z * horizontalSpeed.get() * 10;
+            b = true;
+        }
+
+        if (a && b) {
+            double diagonal = 1 / Math.sqrt(2);
+            velX *= diagonal;
+            velZ *= diagonal;
         }
     }
 
