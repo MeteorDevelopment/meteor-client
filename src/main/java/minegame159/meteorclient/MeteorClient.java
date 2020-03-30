@@ -56,14 +56,18 @@ public class MeteorClient implements ClientModInitializer, Listenable {
         CommandManager.init();
         AccountManager.init();
 
+        load();
+
+        EVENT_BUS.subscribe(this);
+        Runtime.getRuntime().addShutdownHook(new Thread(this::stop));
+    }
+
+    public void load() {
         Config.INSTANCE.load();
         ModuleManager.INSTANCE.load();
         FriendManager.INSTANCE.load();
         MacroManager.INSTANCE.load();
         AccountManager.INSTANCE.load();
-
-        EVENT_BUS.subscribe(this);
-        Runtime.getRuntime().addShutdownHook(new Thread(this::stop));
     }
 
     private void stop() {

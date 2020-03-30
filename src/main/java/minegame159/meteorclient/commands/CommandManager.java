@@ -20,6 +20,8 @@ public class CommandManager {
         addCommand(new Panic());
         addCommand(new ResetAll());
         addCommand(new Baritone());
+        addCommand(new Reload());
+        addCommand(new Dismount());
     }
 
     public static Command get(String name) {
