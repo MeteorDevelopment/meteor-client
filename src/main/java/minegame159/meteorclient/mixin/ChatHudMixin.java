@@ -1,6 +1,7 @@
 package minegame159.meteorclient.mixin;
 
-import minegame159.meteorclient.MixinValues;
+import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.misc.LongerChat;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.hud.ChatHud;
 import net.minecraft.client.gui.hud.ChatHudLine;
@@ -58,14 +59,14 @@ public abstract class ChatHudMixin {
             }
         }
 
-        while(this.visibleMessages.size() > MixinValues.getChatLength()) {
+        while(this.visibleMessages.size() > ModuleManager.INSTANCE.get(LongerChat.class).getMaxLineCount()) {
             this.visibleMessages.remove(this.visibleMessages.size() - 1);
         }
 
         if (!bl) {
             this.messages.add(0, new ChatHudLine(timestamp, message, messageId));
 
-            while(this.messages.size() > MixinValues.getChatLength()) {
+            while(this.messages.size() > ModuleManager.INSTANCE.get(LongerChat.class).getMaxLineCount()) {
                 this.messages.remove(this.messages.size() - 1);
             }
         }

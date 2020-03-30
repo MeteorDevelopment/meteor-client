@@ -52,7 +52,6 @@ public class MeteorClient implements ClientModInitializer, Listenable {
         Utils.mc = mc;
         EntityUtils.mc = mc;
 
-        MixinValues.init();
         CommandManager.init();
         AccountManager.init();
 

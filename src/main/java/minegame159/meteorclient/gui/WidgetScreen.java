@@ -1,7 +1,6 @@
 package minegame159.meteorclient.gui;
 
 import com.mojang.blaze3d.platform.GlStateManager;
-import minegame159.meteorclient.MixinValues;
 import minegame159.meteorclient.gui.widgets.WDebugRenderer;
 import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.utils.RenderUtils;
@@ -26,7 +25,7 @@ public class WidgetScreen extends Screen {
         mc = MinecraftClient.getInstance();
 
         parent = mc.currentScreen;
-        prePostKeyEvents = MixinValues.postKeyEvents;
+        prePostKeyEvents = GuiThings.postKeyEvents;
 
         WWidget trueRoot = new WWidget();
         trueRoot.layout = new TrueRootLayout();
@@ -129,7 +128,7 @@ public class WidgetScreen extends Screen {
 
     @Override
     public void onClose() {
-        MixinValues.postKeyEvents = prePostKeyEvents;
+        GuiThings.postKeyEvents = prePostKeyEvents;
         minecraft.openScreen(parent);
     }
 

@@ -1,7 +1,6 @@
 package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.MixinValues;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.misc.ShulkerTooltip;
 import minegame159.meteorclient.utils.Utils;
@@ -48,7 +47,7 @@ public class ShulkerBoxBlockMixin {
                 int totalItemStacks = 0;
                 int displaysItemStacks = 0;
 
-                if (MixinValues.isBetterShulkerTooltip()) {
+                if (ModuleManager.INSTANCE.get(ShulkerTooltip.class).isActive()) {
                     Map<Text, Integer> itemCounts = new HashMap<>();
                     for (ItemStack itemStack : itemStacks) {
                         if (!itemStack.isEmpty()) {

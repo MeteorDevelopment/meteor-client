@@ -32,9 +32,7 @@ public class EventStore {
     private static RenderEvent renderEvent = new RenderEvent();
     private static TickEvent tickEvent = new TickEvent();
     private static TookDamageEvent tookDamageEvent = new TookDamageEvent();
-    private static ChangeChatLengthEvent changeChatLengthEvent = new ChangeChatLengthEvent();
     private static GameJoinedEvent gameJoinedEvent = new GameJoinedEvent();
-    private static BetterShulkerTooltipEvent betterShulkerTooltipEvent = new BetterShulkerTooltipEvent();
     private static GameDisconnectedEvent gameDisconnectedEvent = new GameDisconnectedEvent();
     private static MiddleMouseButtonEvent middleMouseButtonEvent = new MiddleMouseButtonEvent();
     private static FriendListChangedEvent friendListChangedEvent = new FriendListChangedEvent();
@@ -124,18 +122,8 @@ public class EventStore {
         return tookDamageEvent;
     }
 
-    public static ChangeChatLengthEvent changeChatLengthEvent(int length) {
-        changeChatLengthEvent.length = length;
-        return changeChatLengthEvent;
-    }
-
     public static GameJoinedEvent gameJoinedEvent() {
         return gameJoinedEvent;
-    }
-
-    public static BetterShulkerTooltipEvent betterShulkerTooltipEvent(boolean enabled) {
-        betterShulkerTooltipEvent.enabled = enabled;
-        return betterShulkerTooltipEvent;
     }
 
     public static GameDisconnectedEvent gameDisconnectedEvent(Text disconnectReason) {

@@ -1,7 +1,5 @@
 package minegame159.meteorclient.modules.misc;
 
-import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.IntSetting;
@@ -18,16 +16,6 @@ public class ShulkerTooltip extends ToggleModule {
 
     public ShulkerTooltip() {
         super(Category.Misc, "shulker-tooltip", "Better shulker item tooltip.");
-    }
-
-    @Override
-    public void onActivate() {
-        MeteorClient.EVENT_BUS.post(EventStore.betterShulkerTooltipEvent(true));
-    }
-
-    @Override
-    public void onDeactivate() {
-        MeteorClient.EVENT_BUS.post(EventStore.betterShulkerTooltipEvent(false));
     }
 
     public int lines() {
