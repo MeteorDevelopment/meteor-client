@@ -1,0 +1,57 @@
+package minegame159.meteorclient.utils;
+
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.container.SlotActionType;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+
+import java.util.function.Predicate;
+
+public class InvUtils {
+    public static final int OFFHAND_SLOT = 45;
+    private static final MinecraftClient mc = MinecraftClient.getInstance();
+
+    private static FindItemResult findItemResult = new FindItemResult();
+
+    public static void clickSlot(int slot, int button, SlotActionType action) {
+        mc.interactionManager.method_2906(mc.player.container.syncId, slot, button, action, mc.player);
+    }
+
+    public static FindItemResult findItemWithCount(Item item) {
+        findItemResult.slot = -1;
+        findItemResult.count = 0;
+
+        for (int i = 0; i < 4 * 9; i++) {
+            ItemStack itemStack = mc.player.inventory.getInvStack(i);
+
+            if (itemStack.getItem() == item) {
+                if (!findItemResult.found()) findItemResult.slot = i;
+                findItemResult.count += itemStack.getCount();
+            }
+        }
+
+        return findItemResult;
+    }
+
+    public static int findItemInHotbar(Item item, Predicate<ItemStack> isGood) {
+        for (int i = 0; i < 9; i++) {
+            ItemStack itemStack = mc.player.inventory.getInvStack(i);
+            if (itemStack.getItem() == item && isGood.test(itemStack)) return i;
+        }
+
+        return -1;
+    }
+
+    public static int invIndexToSlotId(int invIndex) {
+        if (invIndex < 9) return 44 - (8 - invIndex);
+        return invIndex;
+    }
+
+    public static class FindItemResult {
+        public int slot, count;
+
+        public boolean found() {
+            return slot != -1;
+        }
+    }
+}

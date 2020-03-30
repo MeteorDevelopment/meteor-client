@@ -8,9 +8,10 @@ import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.utils.InvUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.SheepEntity;
-import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.item.ShearsItem;
 import net.minecraft.util.Hand;
 
@@ -54,13 +55,11 @@ public class AutoShearer extends ToggleModule {
 
             boolean foundShears = !findNewShears;
             if (findNewShears) {
-                for (int i = 0; i < 9; i++) {
-                    ItemStack itemStack = mc.player.inventory.getInvStack(i);
-                    if (itemStack.getItem() instanceof ShearsItem && (!preserveBrokenShears.get() || (preserveBrokenShears.get() && itemStack.getDamage() < itemStack.getMaxDamage() - 1))) {
-                        mc.player.inventory.selectedSlot = i;
-                        foundShears = true;
-                        break;
-                    }
+                int slot = InvUtils.findItemInHotbar(Items.SHEARS, itemStack -> (!preserveBrokenShears.get() || (preserveBrokenShears.get() && itemStack.getDamage() < itemStack.getMaxDamage() - 1)));
+
+                if (slot != 1) {
+                    mc.player.inventory.selectedSlot = slot;
+                    foundShears = true;
                 }
             }
 

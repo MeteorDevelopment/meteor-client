@@ -28,7 +28,6 @@ import java.util.stream.Collectors;
 
 public class Utils {
     public static MinecraftClient mc;
-    public static int offhandSlotId = 45;
 
     private static Random random = new Random();
     private static Vec3d eyesPos = new Vec3d(0, 0, 0);
@@ -196,11 +195,6 @@ public class Utils {
     public static String doubleToString(double number) {
         if (number % 1 == 0) return Integer.toString((int) number);
         return Double.toString(number);
-    }
-
-    public static int invIndexToSlotId(int invIndex) {
-        if (invIndex < 9) return 44 - (8 - invIndex);
-        return invIndex;
     }
 
     public static int clamp(int value, int min, int max) {

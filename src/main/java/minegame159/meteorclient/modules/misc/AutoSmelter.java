@@ -3,6 +3,7 @@ package minegame159.meteorclient.modules.misc;
 import minegame159.meteorclient.mixininterface.IAbstractFurnaceContainer;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.utils.InvUtils;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.container.AbstractFurnaceContainer;
 import net.minecraft.container.SlotActionType;
@@ -87,8 +88,8 @@ public class AutoSmelter extends ToggleModule {
             return true;
         }
 
-        mc.interactionManager.method_2906(c.syncId, slot, 0, SlotActionType.PICKUP, mc.player);
-        mc.interactionManager.method_2906(c.syncId, 0, 0, SlotActionType.PICKUP, mc.player);
+        InvUtils.clickSlot(slot, 0, SlotActionType.PICKUP);
+        InvUtils.clickSlot(0, 0, SlotActionType.PICKUP);
 
         return false;
     }
@@ -96,7 +97,7 @@ public class AutoSmelter extends ToggleModule {
     private boolean checkFuel(AbstractFurnaceContainer c) {
         if (c.getFuelProgress() <= 1 && !((IAbstractFurnaceContainer) c).isFuelI(c.slots.get(1).getStack())) {
             if (!c.slots.get(1).getStack().isEmpty()) {
-                mc.interactionManager.method_2906(c.syncId, 1, 0, SlotActionType.QUICK_MOVE, mc.player);
+                InvUtils.clickSlot(1, 0, SlotActionType.QUICK_MOVE);
 
                 if (!c.slots.get(1).getStack().isEmpty()) {
                     Utils.sendMessage("#blueAuto Brewer:#white Deactivated because your inventory is full.");
@@ -119,15 +120,15 @@ public class AutoSmelter extends ToggleModule {
                 return true;
             }
 
-            mc.interactionManager.method_2906(c.syncId, slot, 0, SlotActionType.PICKUP, mc.player);
-            mc.interactionManager.method_2906(c.syncId, 1, 0, SlotActionType.PICKUP, mc.player);
+            InvUtils.clickSlot(slot, 0, SlotActionType.PICKUP);
+            InvUtils.clickSlot(1, 0, SlotActionType.PICKUP);
         }
 
         return false;
     }
 
     private boolean takeResults(AbstractFurnaceContainer c) {
-        mc.interactionManager.method_2906(c.syncId, 2, 0, SlotActionType.QUICK_MOVE, mc.player);
+        InvUtils.clickSlot(2, 0, SlotActionType.QUICK_MOVE);
 
         if (!c.slots.get(2).getStack().isEmpty()) {
             Utils.sendMessage("#blueAuto Brewer:#white Deactivated because your inventory is full.");
