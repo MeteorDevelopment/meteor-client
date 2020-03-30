@@ -5,10 +5,10 @@ import minegame159.meteorclient.gui.widgets.WGrid;
 import minegame159.meteorclient.gui.widgets.WHorizontalList;
 import minegame159.meteorclient.gui.widgets.WHorizontalSeparator;
 import minegame159.meteorclient.gui.widgets.WLabel;
-import minegame159.meteorclient.modules.misc.StashRecorder;
+import minegame159.meteorclient.modules.misc.StashFinder;
 
 public class StashRecorderChunkScreen extends PanelListScreen {
-    public StashRecorderChunkScreen(StashRecorder.Chunk chunk) {
+    public StashRecorderChunkScreen(StashFinder.Chunk chunk) {
         super("Chunk at " + chunk.x + ", " + chunk.z);
 
         WHorizontalList total = add(new WHorizontalList(4));

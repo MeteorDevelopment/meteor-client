@@ -26,7 +26,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
-public class StashRecorder extends ToggleModule {
+public class StashFinder extends ToggleModule {
     private static final File FILE = new File(MeteorClient.FOLDER, "stashes.csv");
 
     private Setting<Integer> minimumStorageCount = addSetting(new IntSetting.Builder()
@@ -39,8 +39,8 @@ public class StashRecorder extends ToggleModule {
 
     public List<Chunk> chunks = new ArrayList<>();
 
-    public StashRecorder() {
-        super(Category.Misc, "stash-recorder", "Searches loaded chunks for storage blocks. Saves to <your minecraft folder>/meteor-client/stashes.csv");
+    public StashFinder() {
+        super(Category.Misc, "stash-finder", "Searches loaded chunks for storage blocks. Saves to <your minecraft folder>/meteor-client/stashes.csv");
     }
 
     @EventHandler
