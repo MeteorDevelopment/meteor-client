@@ -147,8 +147,8 @@ public class WWidget {
         move(this, x, y);
     }
     private void move(WWidget w, double x, double y) {
-        w.boundingBox.x = x;
-        w.boundingBox.y = y;
+        w.boundingBox.x += x;
+        w.boundingBox.y += y;
         for (WWidget widget : w.widgets) widget.move(x, y);
     }
 

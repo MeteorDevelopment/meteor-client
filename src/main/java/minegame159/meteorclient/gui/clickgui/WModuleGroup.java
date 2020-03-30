@@ -1,5 +1,6 @@
 package minegame159.meteorclient.gui.clickgui;
 
+import minegame159.meteorclient.Config;
 import minegame159.meteorclient.gui.Alignment;
 import minegame159.meteorclient.gui.widgets.WLabel;
 import minegame159.meteorclient.gui.widgets.WPanel;
@@ -7,6 +8,7 @@ import minegame159.meteorclient.gui.widgets.WVerticalList;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.utils.Vector2;
 import net.minecraft.client.MinecraftClient;
 
 import java.util.List;
@@ -21,6 +23,12 @@ public class WModuleGroup extends WPanel {
         boundingBox.setMargin(6);
 
         this.category = category;
+
+        onDragged = panel -> {
+            Vector2 pos = Config.INSTANCE.getGuiPositionNotNull(category);
+            pos.x = panel.boundingBox.x;
+            pos.y = panel.boundingBox.y;
+        };
 
         WVerticalList rootList = add(new WVerticalList(0));
 

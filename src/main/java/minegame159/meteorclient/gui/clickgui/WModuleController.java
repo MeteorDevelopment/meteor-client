@@ -9,9 +9,6 @@ import minegame159.meteorclient.utils.Box;
 import minegame159.meteorclient.utils.Vector2;
 
 public class WModuleController extends WWidget {
-    private WModuleGroup grabbing;
-    private double lastMouseX, lastMouseY;
-
     public WModuleController() {
         layout = new ModuleControllerLayout();
         boundingBox.setMargin(16);
@@ -19,50 +16,6 @@ public class WModuleController extends WWidget {
         for (Category category : ModuleManager.CATEGORIES) {
             add(new WModuleGroup(category));
         }
-    }
-
-    @Override
-    public boolean onMousePressed(int button) {
-        if (grabbing == null) {
-            for (WWidget widget : widgets) {
-                if (widget.mouseOver) {
-                    grabbing = (WModuleGroup) widget;
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    @Override
-    public boolean onMouseReleased(int button) {
-        if (grabbing != null) {
-            grabbing = null;
-            return true;
-        }
-
-        return false;
-    }
-
-    @Override
-    public void onMouseMove(double mouseX, double mouseY) {
-        if (grabbing != null) {
-            move(grabbing, mouseX - lastMouseX, mouseY - lastMouseY);
-            Vector2 pos = Config.INSTANCE.getGuiPositionNotNull(grabbing.category);
-            pos.x = grabbing.boundingBox.x;
-            pos.y = grabbing.boundingBox.y;
-        }
-
-        lastMouseX = mouseX;
-        lastMouseY = mouseY;
-    }
-
-    private void move(WWidget widget, double deltaX, double deltaY) {
-        widget.boundingBox.x += deltaX;
-        widget.boundingBox.y += deltaY;
-
-        for (WWidget w : widget.widgets) move(w, deltaX, deltaY);
     }
 
     private static class ModuleControllerLayout extends WidgetLayout {
