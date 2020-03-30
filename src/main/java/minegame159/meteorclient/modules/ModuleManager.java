@@ -20,7 +20,6 @@ import minegame159.meteorclient.utils.Utils;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
-import org.lwjgl.glfw.GLFW;
 
 import java.io.File;
 import java.util.*;
@@ -100,7 +99,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         // Check if binding module
         if (moduleToBind != null) {
             moduleToBind.setKey(event.key);
-            Utils.sendMessage("#yellowModule #blue'%s' #yellowbound to #blue%s#yellow.", moduleToBind.title, GLFW.glfwGetKeyName(event.key, 0));
+            Utils.sendMessage("#yellowModule #blue'%s' #yellowbound to #blue%s#yellow.", moduleToBind.title, Utils.getKeyName(event.key));
             moduleToBind = null;
             event.cancel();
             return;

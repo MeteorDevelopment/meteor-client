@@ -20,6 +20,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShapes;
 import org.apache.commons.lang3.StringUtils;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.Arrays;
 import java.util.Random;
@@ -36,6 +37,42 @@ public class Utils {
 
     public static String nameToTitle(String name) {
         return Arrays.stream(name.split("-")).map(StringUtils::capitalize).collect(Collectors.joining(" "));
+    }
+
+    public static String getKeyName(int key) {
+        switch (key) {
+            case GLFW.GLFW_KEY_UNKNOWN: return "Unknown";
+            case GLFW.GLFW_KEY_ESCAPE: return "Esc";
+            case GLFW.GLFW_KEY_PRINT_SCREEN: return "Print Screen";
+            case GLFW.GLFW_KEY_PAUSE: return "Pause";
+            case GLFW.GLFW_KEY_INSERT: return "Insert";
+            case GLFW.GLFW_KEY_DELETE: return "Delete";
+            case GLFW.GLFW_KEY_HOME: return "Home";
+            case GLFW.GLFW_KEY_PAGE_UP: return "Page Up";
+            case GLFW.GLFW_KEY_PAGE_DOWN: return "Page Down";
+            case GLFW.GLFW_KEY_END: return "End";
+            case GLFW.GLFW_KEY_TAB: return "Tab";
+            case GLFW.GLFW_KEY_LEFT_CONTROL: return "Left Control";
+            case GLFW.GLFW_KEY_RIGHT_CONTROL: return "Right Control";
+            case GLFW.GLFW_KEY_LEFT_ALT: return "Left Alt";
+            case GLFW.GLFW_KEY_RIGHT_ALT: return "Right Alt";
+            case GLFW.GLFW_KEY_LEFT_SHIFT: return "Left Shift";
+            case GLFW.GLFW_KEY_RIGHT_SHIFT: return "Right Shift";
+            case GLFW.GLFW_KEY_UP: return "Arrow Up";
+            case GLFW.GLFW_KEY_DOWN: return "Arrow Down";
+            case GLFW.GLFW_KEY_LEFT: return "Arrow Left";
+            case GLFW.GLFW_KEY_RIGHT: return "Arrow Right";
+            case GLFW.GLFW_KEY_APOSTROPHE: return "Apostrophe";
+            case GLFW.GLFW_KEY_BACKSPACE: return "Backspace";
+            case GLFW.GLFW_KEY_CAPS_LOCK: return "Caps Lock";
+            case GLFW.GLFW_KEY_MENU: return "Menu";
+            case GLFW.GLFW_KEY_LEFT_SUPER: return "Left Super";
+            case GLFW.GLFW_KEY_RIGHT_SUPER: return "Right Super";
+            case GLFW.GLFW_KEY_ENTER: return "Enter";
+            case GLFW.GLFW_KEY_NUM_LOCK: return "Num Lock";
+            case GLFW.GLFW_KEY_SPACE: return "Space";
+            default: return GLFW.glfwGetKeyName(key, 0);
+        }
     }
 
     public static boolean place(BlockState blockState, BlockPos blockPos) {
