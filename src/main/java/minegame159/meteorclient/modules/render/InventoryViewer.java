@@ -7,6 +7,7 @@ import minegame159.meteorclient.events.Render2DEvent;
 import minegame159.meteorclient.gui.Alignment;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -16,6 +17,13 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 
 public class InventoryViewer extends ToggleModule {
+    private Setting<Boolean> drawBackground = addSetting(new BoolSetting.Builder()
+            .name("draw-background")
+            .description("Draws inventory background.")
+            .defaultValue(true)
+            .build()
+    );
+
     private Setting<Alignment.X> xAlignment = addSetting(new EnumSetting.Builder<Alignment.X>()
             .name("x-alignment")
             .description("X alignment.")
@@ -62,7 +70,7 @@ public class InventoryViewer extends ToggleModule {
         int x = getX(event.screenWidth);
         int y = getY(event.screenHeight);
 
-        drawBackground(x, y);
+        if (drawBackground.get()) drawBackground(x, y);
         DiffuseLighting.enableForItems();
 
         for (int row = 0; row < 3; row++) {
