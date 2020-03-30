@@ -12,7 +12,7 @@ public abstract class Savable<T> implements ISerializable<T> {
         this.file = file;
     }
 
-    public void save() {
+    public void save(File file) {
         try {
             System.out.println("Meteor-Client: Saving to " + file);
             file.getParentFile().mkdirs();
@@ -21,8 +21,11 @@ public abstract class Savable<T> implements ISerializable<T> {
             e.printStackTrace();
         }
     }
+    public void save() {
+        save(file);
+    }
 
-    public void load() {
+    public void load(File file) {
         try {
             if (file.exists()) {
                 System.out.println("Meteor-Client: Loading from " + file);
@@ -31,5 +34,12 @@ public abstract class Savable<T> implements ISerializable<T> {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+    public void load() {
+        load(file);
+    }
+
+    public File getFile() {
+        return file;
     }
 }

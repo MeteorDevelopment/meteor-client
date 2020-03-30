@@ -6,5 +6,6 @@ public enum Category {
     Movement,
     Render,
     Misc,
-    Setting
+    Setting,
+    Profiles
 }

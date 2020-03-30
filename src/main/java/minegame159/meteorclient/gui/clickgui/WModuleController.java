@@ -16,6 +16,8 @@ public class WModuleController extends WWidget {
         for (Category category : ModuleManager.CATEGORIES) {
             add(new WModuleGroup(category));
         }
+
+        add(new WProfiles());
     }
 
     private static class ModuleControllerLayout extends WidgetLayout {
@@ -33,7 +35,9 @@ public class WModuleController extends WWidget {
 
         @Override
         public Box layoutWidget(WWidget widget, WWidget child) {
-            Vector2 pos = Config.INSTANCE.getGuiPosition(((WModuleGroup) child).category);
+            Vector2 pos = null;
+            if (child instanceof WModuleGroup) pos = Config.INSTANCE.getGuiPosition(((WModuleGroup) child).category);
+            else if (child instanceof WProfiles) pos = Config.INSTANCE.getGuiPosition(Category.Profiles);
 
             if (pos != null) {
                 box.x = pos.x;

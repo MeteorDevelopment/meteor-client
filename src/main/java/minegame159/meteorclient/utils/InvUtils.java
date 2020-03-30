@@ -33,6 +33,15 @@ public class InvUtils {
         return findItemResult;
     }
 
+    public static int findItem(Item item, Predicate<ItemStack> isGood) {
+        for (int i = 0; i < 4 * 9; i++) {
+            ItemStack itemStack = mc.player.inventory.getInvStack(i);
+            if (itemStack.getItem() == item && isGood.test(itemStack)) return i;
+        }
+
+        return -1;
+    }
+
     public static int findItemInHotbar(Item item, Predicate<ItemStack> isGood) {
         for (int i = 0; i < 9; i++) {
             ItemStack itemStack = mc.player.inventory.getInvStack(i);

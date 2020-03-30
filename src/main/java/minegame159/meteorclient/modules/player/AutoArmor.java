@@ -9,7 +9,7 @@ import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.InvUtils;
 import net.minecraft.block.entity.BedBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.container.SlotActionType;
@@ -312,10 +312,10 @@ public class AutoArmor extends ToggleModule {
         void move(int from, int to) {
             boolean wasEmpty = mc.player.inventory.getInvStack(39 - (to - 5)).isEmpty();
 
-            mc.interactionManager.method_2906(0, Utils.invIndexToSlotId(from), 0, SlotActionType.PICKUP, mc.player);
-            mc.interactionManager.method_2906(0, to, 0, SlotActionType.PICKUP, mc.player);
+            InvUtils.clickSlot(InvUtils.invIndexToSlotId(from), 0, SlotActionType.PICKUP);
+            InvUtils.clickSlot(to, 0, SlotActionType.PICKUP);
 
-            if (!wasEmpty) mc.interactionManager.method_2906(0, Utils.invIndexToSlotId(from), 0, SlotActionType.PICKUP, mc.player);
+            if (!wasEmpty) InvUtils.clickSlot(InvUtils.invIndexToSlotId(from), 0, SlotActionType.PICKUP);
         }
 
         void reset() {

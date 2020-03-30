@@ -45,8 +45,8 @@ public abstract class Setting<T> implements ISerializable<T> {
 
     public void reset() {
         value = defaultValue;
-        changed();
         resetWidget();
+        changed();
     }
 
     public boolean parse(String str) {
@@ -55,6 +55,7 @@ public abstract class Setting<T> implements ISerializable<T> {
         if (newValue != null) {
             if (isValueValid(newValue)) {
                 value = newValue;
+                resetWidget();
                 changed();
             }
         }
