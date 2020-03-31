@@ -10,7 +10,7 @@ import minegame159.meteorclient.utils.Color;
 
 public class ConfigM extends Module {
     public ConfigM() {
-        super(Category.Setting, "config", "Config.");
+        super(Category.Setting, "config", "Config. For custom font replace <your minecraft folder>/meteor-client default font with your one, name doesnt matter.");
         serialize = false;
 
         addSetting(new StringSetting.Builder()
