@@ -1,5 +1,6 @@
 package minegame159.meteorclient.utils;
 
+import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.mixininterface.IMinecraftClient;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Module;
@@ -138,17 +139,17 @@ public class Utils {
     }
 
     public static int getTextWidth(String text) {
-        return mc.textRenderer.getStringWidth(text);
+        return MeteorClient.TEXT_RENDERER.getStringWidth(text);
     }
     public static int getTextHeight() {
-        return mc.textRenderer.fontHeight;
+        return MeteorClient.TEXT_RENDERER.getHeight() + 2;
     }
 
     public static void drawText(String text, float x, float y, int color) {
-        mc.textRenderer.draw(text, x, y, color);
+        MeteorClient.TEXT_RENDERER.drawString(text, x, y + 1, color);
     }
     public static void drawTextWithShadow(String text, float x, float y, int color) {
-        mc.textRenderer.drawWithShadow(text, x, y, color);
+        MeteorClient.TEXT_RENDERER.drawStringWithShadow(text, x, y + 1, color);
     }
 
     public static void sendMessage(String msg, Object... args) {

@@ -1,7 +1,6 @@
 package minegame159.meteorclient.utils;
 
 import com.mojang.blaze3d.platform.GlStateManager;
-import net.minecraft.client.gl.GlBlendState;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormats;
@@ -16,8 +15,12 @@ public class RenderUtils {
      private static Tessellator quadTesselator = new Tessellator(1000);
      private static BufferBuilder quadBuf = quadTesselator.getBuffer();
 
-     public static void beginLines() {
+     public static void beginLines(double oX, double oY, double oZ) {
          lineBuf.begin(GL11.GL_LINES, VertexFormats.POSITION_COLOR);
+         lineBuf.setOffset(oX, oY, oZ);
+     }
+     public static void beginLines() {
+         beginLines(0, 0, 0);
      }
      public static void endLines() {
          lineTesselator.draw();
@@ -59,8 +62,12 @@ public class RenderUtils {
          blockEdges(blockPos.getX(), blockPos.getY(), blockPos.getZ(), color, null);
      }
 
-     public static void beginQuads() {
+     public static void beginQuads(double oX, double oY, double oZ) {
          quadBuf.begin(GL11.GL_QUADS, VertexFormats.POSITION_COLOR);
+         quadBuf.setOffset(oX, oY, oZ);
+     }
+     public static void beginQuads() {
+         beginQuads(0, 0, 0);
      }
      public static void endQuads() {
          GlStateManager.disableCull();

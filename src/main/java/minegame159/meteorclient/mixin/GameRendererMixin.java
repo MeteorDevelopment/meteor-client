@@ -40,10 +40,9 @@ public abstract class GameRendererMixin {
         double px = camera.getPos().x;
         double py = camera.getPos().y;
         double pz = camera.getPos().z;
-        GlStateManager.translated(-px, -py, -pz);
         GlStateManager.color4f(1, 1, 1, 1);
-        RenderUtils.beginLines();
-        RenderUtils.beginQuads();
+        RenderUtils.beginLines(-px, -py, -pz);
+        RenderUtils.beginQuads(-px, -py, -pz);
 
         MeteorClient.EVENT_BUS.post(EventStore.renderEvent(tickDelta, px, py, pz));
 

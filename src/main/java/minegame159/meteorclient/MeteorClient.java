@@ -9,6 +9,7 @@ import minegame159.meteorclient.accountsfriends.AccountManager;
 import minegame159.meteorclient.accountsfriends.FriendManager;
 import minegame159.meteorclient.commands.CommandManager;
 import minegame159.meteorclient.events.TickEvent;
+import minegame159.meteorclient.font.CFontRenderer;
 import minegame159.meteorclient.gui.clickgui.ClickGUI;
 import minegame159.meteorclient.macros.MacroManager;
 import minegame159.meteorclient.modules.ModuleManager;
@@ -23,11 +24,13 @@ import net.minecraft.client.util.InputUtil;
 import net.minecraft.util.Identifier;
 import org.lwjgl.glfw.GLFW;
 
-import java.io.File;
+import java.awt.*;
+import java.io.*;
 
 public class MeteorClient implements ClientModInitializer, Listenable {
     public static MeteorClient INSTANCE;
     public static final EventBus EVENT_BUS = new EventManager();
+    public static CFontRenderer TEXT_RENDERER;
     public static boolean IS_DISCONNECTING;
     public static final File FOLDER = new File(FabricLoader.getInstance().getGameDirectory(), "meteor-client");
 
@@ -51,6 +54,8 @@ public class MeteorClient implements ClientModInitializer, Listenable {
         mc = MinecraftClient.getInstance();
         Utils.mc = mc;
         EntityUtils.mc = mc;
+
+        loadFont();
 
         CommandManager.init();
         AccountManager.init();
@@ -83,6 +88,43 @@ public class MeteorClient implements ClientModInitializer, Listenable {
             mc.openScreen(new ClickGUI());
         }
     });
+
+    private void loadFont() {
+        File[] files = FOLDER.listFiles();
+        File fontFile = null;
+        if (files != null) {
+            for (File file : files) {
+                if (file.getName().endsWith(".ttf")) {
+                    fontFile = file;
+                    break;
+                }
+            }
+        }
+
+        if (fontFile == null) {
+            try {
+                fontFile = new File(FOLDER, "Comfortaa.ttf");
+
+                InputStream in = MeteorClient.class.getResourceAsStream("/assets/meteor-client/Comfortaa.ttf");
+                OutputStream out = new FileOutputStream(fontFile);
+
+                byte[] bytes = new byte[255];
+                int read;
+                while ((read = in.read(bytes)) > 0) out.write(bytes, 0, read);
+
+                in.close();
+                out.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        try {
+            TEXT_RENDERER = new CFontRenderer(Font.createFont(Font.TRUETYPE_FONT, fontFile).deriveFont(18f), true, true);
+        } catch (FontFormatException | IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     public void onKeyInMainMenu(int key) {
         if (key == openClickGui.getBoundKey().getKeyCode()) {
