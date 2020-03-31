@@ -5,6 +5,7 @@ import minegame159.meteorclient.accountsfriends.FriendManager;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.render.Nametags;
 import minegame159.meteorclient.utils.Color;
+import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.Tessellator;
@@ -102,12 +103,12 @@ public abstract class EntityRendererMixin<T extends Entity> {
         else if (health <= 12) healthColor = Color.fromRGBA(225, 105, 25, 255);
         else healthColor = Color.fromRGBA(45, 225, 45, 255);
 
-        getFontRenderer().draw(text, (float) (-halfWidth), (float) verticalOffset, nameColor);
-        getFontRenderer().draw(healthText, (float) (-halfWidth + halfWidthName * 2 + 4), (float) verticalOffset, healthColor);
+        Utils.drawText(text, (float) (-halfWidth), (float) verticalOffset, nameColor);
+        Utils.drawText(healthText, (float) (-halfWidth + halfWidthName * 2 + 4), (float) verticalOffset, healthColor);
         GlStateManager.depthMask(true);
         GlStateManager.enableDepthTest();
-        getFontRenderer().draw(text, (float) (-halfWidth), (float) verticalOffset, nameColor);
-        getFontRenderer().draw(healthText, (float) (-halfWidth + halfWidthName * 2 + 4), (float) verticalOffset, healthColor);
+        Utils.drawText(text, (float) (-halfWidth), (float) verticalOffset, nameColor);
+        Utils.drawText(healthText, (float) (-halfWidth + halfWidthName * 2 + 4), (float) verticalOffset, healthColor);
 
         GlStateManager.enableDepthTest();
         GlStateManager.enableLighting();
