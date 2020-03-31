@@ -72,6 +72,15 @@ public class HUD extends ToggleModule {
     private Setting<Boolean> biome = addSetting(new BoolSetting.Builder()
             .name("biome")
             .description("Displays biome you are in.")
+            .group("Top Left")
+            .defaultValue(true)
+            .build()
+    );
+
+    private Setting<Boolean> time = addSetting(new BoolSetting.Builder()
+            .name("time")
+            .description("Displays ingame time in ticks.")
+            .group("Top Left")
             .defaultValue(true)
             .build()
     );
@@ -297,6 +306,11 @@ public class HUD extends ToggleModule {
         if (biome.get()) {
             playerBlockPos.set(mc.player);
             drawInfo("Biome: ", mc.world.getBiome(playerBlockPos).getName().asString(), y);
+            y += Utils.getTextHeight() + 2;
+        }
+
+        if (time.get()) {
+            drawInfo("Time: ", mc.world.getTimeOfDay() % 24000 + "", y);
             y += Utils.getTextHeight() + 2;
         }
 
