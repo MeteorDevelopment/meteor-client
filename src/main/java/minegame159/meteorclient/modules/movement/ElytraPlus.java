@@ -3,14 +3,19 @@ package minegame159.meteorclient.modules.movement;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.PlayerMoveEvent;
+import minegame159.meteorclient.events.TickEvent;
+import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.utils.InvUtils;
+import minegame159.meteorclient.utils.Utils;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.ElytraItem;
+import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.util.math.Vec3d;
 
@@ -53,12 +58,44 @@ public class ElytraPlus extends ToggleModule {
             .build()
     );
 
+    private Setting<Boolean> dontGoIntoUnloadedChunks = addSetting(new BoolSetting.Builder()
+            .name("dont-go-into-unloaded-chunks")
+            .description("Dont go into unloaded chunks.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private Setting<Boolean> autopilot = addSetting(new BoolSetting.Builder()
+            .name("autopilot")
+            .description("Automatically flies forward maintaining minimum height.")
+            .group("Autopilot")
+            .defaultValue(false)
+            .onChanged(aBoolean -> {
+                if (isActive() && !aBoolean) ((IKeyBinding) mc.options.keyForward).setPressed(false);
+            })
+            .build()
+    );
+
+    private Setting<Double> autopilotMinimumHeight = addSetting(new DoubleSetting.Builder()
+            .name("minimum-height")
+            .description("Autopilot minimum height.")
+            .group("Autopilot")
+            .defaultValue(160)
+            .min(0)
+            .build()
+    );
+
     private boolean lastJumpPressed;
     private boolean incrementJumpTimer;
     private int jumpTimer;
 
     private double velX, velY, velZ;
     private Vec3d forward, right;
+
+    private boolean decrementFireworkTimer;
+    private int fireworkTimer;
+
+    private boolean lastForwardPressed;
 
     public ElytraPlus() {
         super(Category.Movement, "Elytra+", "Makes elytra better,");
@@ -68,6 +105,11 @@ public class ElytraPlus extends ToggleModule {
     public void onActivate() {
         lastJumpPressed = false;
         jumpTimer = 0;
+    }
+
+    @Override
+    public void onDeactivate() {
+        if (autopilot.get()) ((IKeyBinding) mc.options.keyForward).setPressed(false);
     }
 
     @EventHandler
@@ -90,12 +132,62 @@ public class ElytraPlus extends ToggleModule {
             }
 
             handleFallMultiplier();
+            handleAutopilot();
+
             handleHorizontalSpeed();
             handleVerticalSpeed();
 
-            ((IVec3d) event.movement).set(velX, velY, velZ);
+            int chunkX = (int) ((mc.player.x + velX) / 16);
+            int chunkZ = (int) ((mc.player.z + velZ) / 16);
+            if (dontGoIntoUnloadedChunks.get()) {
+                if (mc.world.getChunkManager().isChunkLoaded(chunkX, chunkZ)) {
+                    ((IVec3d) event.movement).set(velX, velY, velZ);
+                } else {
+                    ((IVec3d) event.movement).set(0, velY, 0);
+                }
+            } else ((IVec3d) event.movement).set(velX, velY, velZ);
+        } else {
+            if (lastForwardPressed) {
+                ((IKeyBinding) mc.options.keyForward).setPressed(false);
+                lastForwardPressed = false;
+            }
         }
     });
+
+    @EventHandler
+    private Listener<TickEvent> onTick = new Listener<>(event -> {
+        if (decrementFireworkTimer) {
+            if (fireworkTimer <= 0) decrementFireworkTimer = false;
+
+            fireworkTimer--;
+        }
+    });
+
+    private void handleAutopilot() {
+        if (autopilot.get()) {
+            ((IKeyBinding) mc.options.keyForward).setPressed(true);
+
+            if (mc.player.y < autopilotMinimumHeight.get() && !decrementFireworkTimer) {
+                int slot = InvUtils.findItemInHotbar(Items.FIREWORK_ROCKET, itemStack -> true);
+                if (slot != -1) {
+                    mc.player.inventory.selectedSlot = slot;
+                    Utils.rightClick();
+
+                    decrementFireworkTimer = true;
+                    fireworkTimer = 20;
+                } else {
+                    Utils.sendMessage("#blueElytra+ Autopilot:#white Disabled autopilot because you don't have any fireworks left in your hotbar.");
+                    autopilot.set(false);
+                }
+            }
+
+            if (fireworkTimer > 0) {
+                velY = 2;
+            }
+
+            lastForwardPressed = true;
+        }
+    }
 
     private void handleHorizontalSpeed() {
         boolean a = false;

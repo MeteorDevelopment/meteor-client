@@ -3,6 +3,7 @@ package minegame159.meteorclient.modules.render;
 import com.mojang.blaze3d.platform.GlStateManager;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
+import minegame159.meteorclient.events.EntityAddedEvent;
 import minegame159.meteorclient.events.EntityDestroyEvent;
 import minegame159.meteorclient.events.RenderEvent;
 import minegame159.meteorclient.modules.Category;
@@ -52,6 +53,24 @@ public class LogoutSpot extends ToggleModule {
     });
 
     @EventHandler
+    private Listener<EntityAddedEvent> onEntityAdded = new Listener<>(event -> {
+        if (event.entity instanceof PlayerEntity) {
+            int toRemove = -1;
+
+            for (int i = 0; i < players.size(); i++) {
+                if (players.get(i).uuid.equals(event.entity.getUuidAsString())) {
+                    toRemove = i;
+                    break;
+                }
+            }
+
+            if (toRemove != -1) {
+                players.remove(toRemove);
+            }
+        }
+    });
+
+    @EventHandler
     private Listener<RenderEvent> onRender = new Listener<>(event -> {
         for (Entry player : players) player.render(event);
 
@@ -61,11 +80,16 @@ public class LogoutSpot extends ToggleModule {
         GlStateManager.enableBlend();
     });
 
+    @Override
+    public String getInfoString() {
+        return Integer.toString(players.size());
+    }
+
     private class Entry {
         public final double x, y, z;
         public final double width, height;
 
-        public final String name;
+        public final String uuid, name;
         public final int health, maxHealth;
 
         public Entry(LivingEntity entity) {
@@ -76,6 +100,7 @@ public class LogoutSpot extends ToggleModule {
             width = entity.getBoundingBox().getXLength();
             height = entity.getBoundingBox().getZLength();
 
+            uuid = entity.getUuidAsString();
             name = entity.getDisplayName().asString();
             health = (int) entity.getHealth();
             maxHealth = (int) entity.getMaximumHealth();
