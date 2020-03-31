@@ -106,4 +106,15 @@ public class RenderUtils {
      public static void blockSides(BlockPos blockPos, Color color) {
          blockSides(blockPos.getX(), blockPos.getY(), blockPos.getZ(), color, null);
      }
+
+     public static void boxWithLines(double x, double y, double z, double width, double height, Color sideColor, Color lineColor) {
+         RenderUtils.quad(x, y, z, x, y, z + height, x + width, y, z + height, x + width, y, z, sideColor);
+         RenderUtils.line(x, y, z, x, y, z + height, lineColor);
+         RenderUtils.line(x, y, z + height, x + width, y, z + height, lineColor);
+         RenderUtils.line(x + width, y, z + height, x + width, y, z, lineColor);
+         RenderUtils.line(x, y, z, x + width, y, z, lineColor);
+     }
+    public static void boxWithLines(double x, double y, double z, Color sideColor, Color lineColor) {
+        boxWithLines(x, y, z, 1, 1, sideColor, lineColor);
+    }
 }

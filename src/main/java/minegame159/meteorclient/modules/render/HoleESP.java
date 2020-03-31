@@ -131,11 +131,7 @@ public class HoleESP extends ToggleModule {
                 RenderUtils.blockSides(x, y - 1, z, hole.colorSides, null);
                 RenderUtils.blockEdges(x, y - 1, z, hole.colorLines, null);
             } else {
-                RenderUtils.quad(x, y, z, x, y, z + 1, x + 1, y, z + 1, x + 1, y, z, hole.colorSides);
-                RenderUtils.line(x, y, z, x, y, z + 1, hole.colorLines);
-                RenderUtils.line(x, y, z + 1, x + 1, y, z + 1, hole.colorLines);
-                RenderUtils.line(x + 1, y, z + 1, x + 1, y, z, hole.colorLines);
-                RenderUtils.line(x, y, z, x + 1, y, z, hole.colorLines);
+                RenderUtils.boxWithLines(x, y, z, hole.colorSides, hole.colorLines);
             }
         }
     });

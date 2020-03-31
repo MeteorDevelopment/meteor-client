@@ -43,6 +43,7 @@ public class EventStore {
     private static ChunkDataEvent chunkDataEvent = new ChunkDataEvent();
     private static AttackEntityEvent attackEntityEvent = new AttackEntityEvent();
     private static StartBreakingBlockEvent startBreakingBlockEvent = new StartBreakingBlockEvent();
+    private static EntityDestroyEvent entityDestroyEvent = new EntityDestroyEvent();
 
     public static PlaySoundPacketEvent playSoundPacketEvent(PlaySoundS2CPacket packet) {
         playSoundPacketEvent.packet = packet;
@@ -175,5 +176,10 @@ public class EventStore {
         startBreakingBlockEvent.blockPos = blockPos;
         startBreakingBlockEvent.direction = direction;
         return startBreakingBlockEvent;
+    }
+
+    public static EntityDestroyEvent entityDestroyEvent(Entity entity) {
+        entityDestroyEvent.entity = entity;
+        return entityDestroyEvent;
     }
 }
