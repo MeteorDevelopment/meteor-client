@@ -25,6 +25,15 @@ public class ColorSetting extends Setting<Color> {
     }
 
     @Override
+    public void reset(boolean callbacks) {
+        value = new Color(defaultValue);
+        if (callbacks) {
+            resetWidget();
+            changed();
+        }
+    }
+
+    @Override
     protected void resetWidget() {
         ((WColorEdit) widget).set(get());
     }

@@ -66,7 +66,7 @@ public class GUI extends Module {
         backgroundS = addSetting(new ColorSetting.Builder()
                 .name("background")
                 .description("Background color.")
-                .defaultValue(new Color(50, 50, 50, 225))
+                .defaultValue(new Color(20, 20, 20, 200))
                 .onChanged(color1 -> background.set(color1))
                 .build()
         );
@@ -74,7 +74,7 @@ public class GUI extends Module {
         backgroundModuleActiveS = addSetting(new ColorSetting.Builder()
                 .name("background-moule-active")
                 .description("Active module background color.")
-                .defaultValue(new Color(50, 50, 50, 180))
+                .defaultValue(new Color(50, 50, 50, 200))
                 .onChanged(color1 -> backgroundModuleActive.set(color1))
                 .build()
         );
@@ -82,7 +82,7 @@ public class GUI extends Module {
         backgroundHighlightedS = addSetting(new ColorSetting.Builder()
                 .name("background-highlighted")
                 .description("Background highlighted color.")
-                .defaultValue(new Color(90, 90, 90, 225))
+                .defaultValue(new Color(40, 40, 40, 200))
                 .onChanged(color1 -> backgroundHighlighted.set(color1))
                 .build()
         );
@@ -90,7 +90,7 @@ public class GUI extends Module {
         backgroundTextBoxS = addSetting(new ColorSetting.Builder()
                 .name("background-text-box")
                 .description("Background text box color.")
-                .defaultValue(new Color(60, 60, 60, 200))
+                .defaultValue(new Color(40, 40, 40, 200))
                 .onChanged(color1 -> backgroundTextBox.set(color1))
                 .build()
         );
@@ -107,7 +107,7 @@ public class GUI extends Module {
         separatorS = addSetting(new ColorSetting.Builder()
                 .name("separator")
                 .description("Separator color.")
-                .defaultValue(new Color(75, 75, 75, 225))
+                .defaultValue(new Color(10, 10, 10, 225))
                 .onChanged(color1 -> {
                     separator.set(color1);
                     separatorC = color1.getPacked();
@@ -128,7 +128,7 @@ public class GUI extends Module {
         outlineHighlightedS = addSetting(new ColorSetting.Builder()
                 .name("outline-highlighted")
                 .description("Outline highlighted color.")
-                .defaultValue(new Color(50, 50, 50, 225))
+                .defaultValue(new Color(50, 50, 50, 200))
                 .onChanged(color1 -> outlineHighlighted.set(color1))
                 .build()
         );

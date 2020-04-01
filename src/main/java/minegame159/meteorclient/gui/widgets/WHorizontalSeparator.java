@@ -42,6 +42,6 @@ public class WHorizontalSeparator extends WWidget {
     @Override
     public void onRenderPost(double delta) {
         double offset = boundingBox.innerWidth / 2.0 - Utils.getTextWidth(text) / 2.0;
-        Utils.drawTextWithShadow(text, (float) (boundingBox.getInnerX() + offset), (float) boundingBox.getInnerY(), GUI.separatorC);
+        Utils.drawText(text, (float) (boundingBox.getInnerX() + offset), (float) boundingBox.getInnerY(), GUI.separatorC);
     }
 }

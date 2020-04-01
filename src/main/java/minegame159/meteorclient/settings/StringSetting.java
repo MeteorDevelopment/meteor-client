@@ -19,6 +19,15 @@ public class StringSetting extends Setting<String> {
     }
 
     @Override
+    public void reset(boolean callbacks) {
+        value = new String(defaultValue);
+        if (callbacks) {
+            resetWidget();
+            changed();
+        }
+    }
+
+    @Override
     protected void resetWidget() {
         ((WTextBox) widget).text = get();
     }

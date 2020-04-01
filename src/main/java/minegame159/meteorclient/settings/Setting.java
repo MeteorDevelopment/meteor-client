@@ -14,8 +14,8 @@ public abstract class Setting<T> implements ISerializable<T> {
     public final String name, title, description, group;
     private String usage;
 
-    private final T defaultValue;
-    private T value;
+    protected final T defaultValue;
+    protected T value;
 
     private final Consumer<T> onChanged;
     public final Consumer<Setting<T>> onModuleActivated;
@@ -23,11 +23,11 @@ public abstract class Setting<T> implements ISerializable<T> {
 
     public Setting(String name, String description, String group, T defaultValue, Consumer<T> onChanged, Consumer<Setting<T>> onModuleActivated) {
         this.name = name;
-        this.title = Arrays.stream(name.split("-")).map(StringUtils::capitalize).collect(Collectors.joining(" "));;
+        this.title = Arrays.stream(name.split("-")).map(StringUtils::capitalize).collect(Collectors.joining(" "));
         this.description = description;
         this.group = group;
         this.defaultValue = defaultValue;
-        this.value = defaultValue;
+        reset(false);
         this.onChanged = onChanged;
         this.onModuleActivated = onModuleActivated;
     }
@@ -43,10 +43,15 @@ public abstract class Setting<T> implements ISerializable<T> {
         changed();
     }
 
-    public void reset() {
+    public void reset(boolean callbacks) {
         value = defaultValue;
-        resetWidget();
-        changed();
+        if (callbacks) {
+            resetWidget();
+            changed();
+        }
+    }
+    public void reset() {
+        reset(true);
     }
 
     public boolean parse(String str) {

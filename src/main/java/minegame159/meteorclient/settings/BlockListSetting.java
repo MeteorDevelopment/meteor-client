@@ -40,6 +40,15 @@ public class BlockListSetting extends Setting<List<Block>> {
     }
 
     @Override
+    public void reset(boolean callbacks) {
+        value = new ArrayList<>(defaultValue);
+        if (callbacks) {
+            resetWidget();
+            changed();
+        }
+    }
+
+    @Override
     protected void resetWidget() {
 
     }

@@ -44,8 +44,10 @@ public class WColorEdit extends WHorizontalList {
     }
 
     public void set(Color color) {
-        this.color = color;
+        color.validate();
+        this.color.set(color);
         set();
+        quad.color.set(color);
     }
 
     public void set() {
