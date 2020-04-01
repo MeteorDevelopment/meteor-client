@@ -40,8 +40,8 @@ public abstract class ToggleModule extends Module {
     }
 
     @Override
-    public void doAction() {
-        toggle();
+    public void doAction(boolean onActivateDeactivate) {
+        toggle(onActivateDeactivate);
     }
 
     public String getInfoString() {

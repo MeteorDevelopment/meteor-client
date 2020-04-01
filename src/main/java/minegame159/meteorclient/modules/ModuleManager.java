@@ -44,6 +44,10 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         initMisc();
         initSetting();
 
+        for (List<Module> modules : groups.values()) {
+            modules.sort(Comparator.comparing(o -> o.title));
+        }
+
         MeteorClient.EVENT_BUS.subscribe(this);
     }
 

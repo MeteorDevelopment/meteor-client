@@ -4,20 +4,15 @@ import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.ColorSetting;
 import minegame159.meteorclient.settings.DoubleSetting;
-import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.utils.Color;
 
 public class GUI extends Module {
-    public enum HoverAnimation {
-        FromLeft,
-        FromRight,
-        FromCenter
-    }
-
     public static Color background = new Color();
+    public static Color backgroundModuleActive = new Color();
     public static Color backgroundHighlighted = new Color();
     public static Color backgroundTextBox = new Color();
+    public static Color accent = new Color();
 
     public static Color separator = new Color();
     public static int separatorC;
@@ -31,10 +26,11 @@ public class GUI extends Module {
 
     public static Color text = new Color();
     public static int textC;
+    public static Color windowHeaderText = new Color();
+    public static int windowHeaderTextC;
     public static Color textLoggedIn = new Color();
     public static int textLoggedInC;
 
-    public static HoverAnimation hoverAnimation;
     public static double hoverAnimationSpeedMultiplier;
 
     public static double scrollMultiplier;
@@ -42,8 +38,10 @@ public class GUI extends Module {
 
 
     private static Setting<Color> backgroundS;
+    private static Setting<Color> backgroundModuleActiveS;
     private static Setting<Color> backgroundHighlightedS;
     private static Setting<Color> backgroundTextBoxS;
+    private static Setting<Color> accentS;
 
     private static Setting<Color> separatorS;
 
@@ -55,9 +53,9 @@ public class GUI extends Module {
     private static Setting<Color> minusS;
 
     private static Setting<Color> textS;
+    private static Setting<Color> windowHeaderTextS;
     private static Setting<Color> textLoggedInS;
 
-    private static Setting<HoverAnimation> hoverAnimationS;
     private static Setting<Double> hoverAnimationSpeedMultiplierS;
 
     private static Setting<Double> scrollMultiplierS;
@@ -73,6 +71,14 @@ public class GUI extends Module {
                 .build()
         );
         background.set(backgroundS.get());
+        backgroundModuleActiveS = addSetting(new ColorSetting.Builder()
+                .name("background-moule-active")
+                .description("Active module background color.")
+                .defaultValue(new Color(50, 50, 50, 180))
+                .onChanged(color1 -> backgroundModuleActive.set(color1))
+                .build()
+        );
+        backgroundModuleActive.set(backgroundModuleActiveS.get());
         backgroundHighlightedS = addSetting(new ColorSetting.Builder()
                 .name("background-highlighted")
                 .description("Background highlighted color.")
@@ -89,6 +95,14 @@ public class GUI extends Module {
                 .build()
         );
         backgroundTextBox.set(backgroundTextBoxS.get());
+        accentS = addSetting(new ColorSetting.Builder()
+                .name("accent")
+                .description("Accent color.")
+                .defaultValue(new Color(0, 255, 180))
+                .onChanged(color1 -> accent.set(color1))
+                .build()
+        );
+        accent.set(accentS.get());
 
         separatorS = addSetting(new ColorSetting.Builder()
                 .name("separator")
@@ -158,6 +172,16 @@ public class GUI extends Module {
         text.set(textS.get());
         textC = text.getPacked();
 
+        windowHeaderTextS = addSetting(new ColorSetting.Builder()
+                .name("window-header-text")
+                .description("Window header text color.")
+                .defaultValue(new Color(255, 255, 255))
+                .onChanged(color1 -> windowHeaderText.set(color1))
+                .build()
+        );
+        windowHeaderText.set(windowHeaderTextS.get());
+        windowHeaderTextC = windowHeaderText.getPacked();
+
         textLoggedInS = addSetting(new ColorSetting.Builder()
                 .name("text-logged-in")
                 .description("Text logged in color.")
@@ -170,15 +194,6 @@ public class GUI extends Module {
         );
         textLoggedIn.set(textLoggedInS.get());
         textLoggedInC = textLoggedIn.getPacked();
-
-        hoverAnimationS = addSetting(new EnumSetting.Builder<HoverAnimation>()
-                .name("hover-animation")
-                .description("Module hover animation.")
-                .defaultValue(HoverAnimation.FromLeft)
-                .onChanged(hoverAnimation1 -> hoverAnimation = hoverAnimation1)
-                .build()
-        );
-        hoverAnimation = hoverAnimationS.get();
 
         hoverAnimationSpeedMultiplierS = addSetting(new DoubleSetting.Builder()
                 .name("hover-animation-speed-multiplier")

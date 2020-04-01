@@ -1,12 +1,11 @@
 package minegame159.meteorclient.gui.screens;
 
 import minegame159.meteorclient.Config;
-import minegame159.meteorclient.gui.PanelListScreen;
 import minegame159.meteorclient.gui.widgets.WCheckbox;
 import minegame159.meteorclient.gui.widgets.WGrid;
 import minegame159.meteorclient.gui.widgets.WLabel;
 
-public class AutoCraftScreen extends PanelListScreen {
+public class AutoCraftScreen extends WindowScreen {
     public AutoCraftScreen() {
         super("Auto Craft");
 

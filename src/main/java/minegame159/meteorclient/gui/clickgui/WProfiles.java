@@ -5,13 +5,12 @@ import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.utils.ProfileUtils;
 import minegame159.meteorclient.utils.Vector2;
-import net.minecraft.client.MinecraftClient;
 
 import java.util.List;
 
-public class WProfiles extends WPanel {
+public class WProfiles extends WWindow {
     public WProfiles() {
-        boundingBox.setMargin(6);
+        super("Profiles", 4, 4);
 
         onDragged = panel -> {
             Vector2 pos = Config.INSTANCE.getGuiPositionNotNull(Category.Profiles);
@@ -23,13 +22,7 @@ public class WProfiles extends WPanel {
     }
 
     private void initWidgets() {
-        WVerticalList list = add(new WVerticalList(4));
-        list.maxHeight = MinecraftClient.getInstance().window.getScaledHeight() - 32;
-
-        list.add(new WLabel("Profiles", true));
-        list.add(new WHorizontalSeparatorBigger());
-
-        WGrid grid = list.add(new WGrid(4, 4, 4));
+        WGrid grid = add(new WGrid(4, 4, 4));
 
         // Profiles
         List<String> profiles = ProfileUtils.getProfiles();
@@ -54,8 +47,8 @@ public class WProfiles extends WPanel {
         }
 
         // New profile
-        if (profiles.size() > 0) list.add(new WHorizontalSeparator());
-        WHorizontalList hList = list.add(new WHorizontalList(4));
+        if (profiles.size() > 0) add(new WHorizontalSeparator());
+        WHorizontalList hList = add(new WHorizontalList(4));
         WTextBox name = hList.add(new WTextBox("", 70));
         WPlus save = hList.add(new WPlus());
         save.action = () -> {

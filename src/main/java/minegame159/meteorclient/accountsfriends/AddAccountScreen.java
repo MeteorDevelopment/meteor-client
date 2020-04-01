@@ -1,12 +1,12 @@
 package minegame159.meteorclient.accountsfriends;
 
-import minegame159.meteorclient.gui.PanelListScreen;
+import minegame159.meteorclient.gui.screens.WindowScreen;
 import minegame159.meteorclient.gui.widgets.WButton;
 import minegame159.meteorclient.gui.widgets.WGrid;
 import minegame159.meteorclient.gui.widgets.WLabel;
 import minegame159.meteorclient.gui.widgets.WTextBox;
 
-public class AddAccountScreen extends PanelListScreen {
+public class AddAccountScreen extends WindowScreen {
     public AddAccountScreen() {
         super("Add Account");
 

@@ -5,7 +5,7 @@ import me.zero.alpine.listener.Listenable;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.ModuleBindChangedEvent;
-import minegame159.meteorclient.gui.PanelListScreen;
+import minegame159.meteorclient.gui.screens.WindowScreen;
 import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
@@ -13,7 +13,7 @@ import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.Setting;
 import org.lwjgl.glfw.GLFW;
 
-public class ModuleScreen extends PanelListScreen implements Listenable {
+public class ModuleScreen extends WindowScreen implements Listenable {
     private Module module;
 
     private WLabel bindLabel;

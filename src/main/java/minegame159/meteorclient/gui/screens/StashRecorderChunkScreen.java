@@ -1,13 +1,12 @@
 package minegame159.meteorclient.gui.screens;
 
-import minegame159.meteorclient.gui.PanelListScreen;
 import minegame159.meteorclient.gui.widgets.WGrid;
 import minegame159.meteorclient.gui.widgets.WHorizontalList;
 import minegame159.meteorclient.gui.widgets.WHorizontalSeparator;
 import minegame159.meteorclient.gui.widgets.WLabel;
 import minegame159.meteorclient.modules.misc.StashFinder;
 
-public class StashRecorderChunkScreen extends PanelListScreen {
+public class StashRecorderChunkScreen extends WindowScreen {
     public StashRecorderChunkScreen(StashFinder.Chunk chunk) {
         super("Chunk at " + chunk.x + ", " + chunk.z);
 

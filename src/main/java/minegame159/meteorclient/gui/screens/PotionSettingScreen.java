@@ -1,6 +1,5 @@
 package minegame159.meteorclient.gui.screens;
 
-import minegame159.meteorclient.gui.PanelListScreen;
 import minegame159.meteorclient.gui.widgets.WButton;
 import minegame159.meteorclient.gui.widgets.WGrid;
 import minegame159.meteorclient.gui.widgets.WItemWithLabel;
@@ -9,7 +8,7 @@ import minegame159.meteorclient.settings.PotionSetting;
 import minegame159.meteorclient.utils.MyPotion;
 import org.apache.commons.lang3.StringUtils;
 
-public class PotionSettingScreen extends PanelListScreen {
+public class PotionSettingScreen extends WindowScreen {
     private PotionSetting setting;
     private WTextBox filter;
 

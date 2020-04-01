@@ -70,8 +70,11 @@ public abstract class Module implements Listenable, ISerializable<Module> {
         mc.openScreen(getScreen());
     }
 
-    public void doAction() {
+    public void doAction(boolean onActivateDeactivate) {
         openScreen();
+    }
+    public void doAction() {
+        doAction(true);
     }
 
     @Override

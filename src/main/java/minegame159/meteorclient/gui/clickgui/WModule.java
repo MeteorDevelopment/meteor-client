@@ -16,6 +16,8 @@ public class WModule extends WWidget {
 
     public WModule(Module module) {
         boundingBox.autoSize = true;
+        boundingBox.fullWidth = true;
+        boundingBox.setMargin(4);
         tooltip = module.description;
 
         this.module = module;
@@ -32,11 +34,10 @@ public class WModule extends WWidget {
 
     @Override
     public boolean onMousePressed(int button) {
-        if (mouseOver && button == 0) {
-            module.doAction();
-            return true;
-        } else if (mouseOver && button == 1) {
-            module.openScreen();
+        if (mouseOver) {
+            if (button == 0) module.doAction(false);
+            else if (button == 1) module.openScreen();
+
             return true;
         }
 
@@ -45,33 +46,17 @@ public class WModule extends WWidget {
 
     @Override
     public void onRender(double delta) {
-        if (mouseOver) animationMultiplier = 1;
-        else animationMultiplier = -1;
-        if (module instanceof ToggleModule && ((ToggleModule) module).isActive()) animationMultiplier = 1;
+        if (module instanceof ToggleModule) {
+            if (((ToggleModule) module).isActive()) animationMultiplier = 1;
+            else animationMultiplier = -1;
+        }
 
         animationProgress += delta / 10 * GUI.hoverAnimationSpeedMultiplier * animationMultiplier;
         animationProgress = Utils.clamp(animationProgress, 0, 1);
 
         if (animationProgress > 0) {
-            if (animationProgress == 1) RenderUtils.quad(boundingBox.x, boundingBox.y, boundingBox.getWidth(), boundingBox.getHeight(), GUI.backgroundHighlighted);
-            else {
-                switch (GUI.hoverAnimation) {
-                    case FromLeft:
-                        RenderUtils.quad(boundingBox.x, boundingBox.y, boundingBox.getWidth() * animationProgress, boundingBox.getHeight(), GUI.backgroundHighlighted);
-                        break;
-                    case FromCenter:
-                        RenderUtils.quad(boundingBox.x + boundingBox.getWidth() / 2 - boundingBox.getWidth() / 2 * animationProgress, boundingBox.y, boundingBox.getWidth() * animationProgress, boundingBox.getHeight(), GUI.backgroundHighlighted);
-                        break;
-                    case FromRight:
-                        RenderUtils.quad(boundingBox.x + boundingBox.getWidth(), boundingBox.y, -boundingBox.getWidth() * animationProgress, boundingBox.getHeight(), GUI.backgroundHighlighted);
-                        break;
-                }
-            }
+            RenderUtils.quad(boundingBox.x, boundingBox.y, boundingBox.getWidth() * animationProgress, boundingBox.getHeight(), GUI.backgroundModuleActive);
+            RenderUtils.quad(boundingBox.x, boundingBox.y + boundingBox.getHeight() * (1 - animationProgress), 1, boundingBox.getHeight() * animationProgress, GUI.accent);
         }
-
-        RenderUtils.line(boundingBox.x, boundingBox.y, boundingBox.x + boundingBox.getWidth(), boundingBox.y, GUI.outline);
-        RenderUtils.line(boundingBox.x, boundingBox.y + boundingBox.getHeight(), boundingBox.x + boundingBox.getWidth(), boundingBox.y + boundingBox.getHeight(), GUI.outline);
-        RenderUtils.line(boundingBox.x, boundingBox.y, boundingBox.x, boundingBox.y + boundingBox.getHeight(), GUI.outline);
-        RenderUtils.line(boundingBox.x + boundingBox.getWidth(), boundingBox.y, boundingBox.x + boundingBox.getWidth(), boundingBox.y + boundingBox.getHeight(), GUI.outline);
     }
 }

@@ -1,7 +1,6 @@
 package minegame159.meteorclient.gui.screens;
 
 import minegame159.meteorclient.gui.Alignment;
-import minegame159.meteorclient.gui.PanelListScreen;
 import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.settings.Setting;
 import net.minecraft.block.Block;
@@ -11,7 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 
-public class BlockListSettingScreen extends PanelListScreen {
+public class BlockListSettingScreen extends WindowScreen {
     private Setting<List<Block>> setting;
     private WTextBox filter;
 

@@ -10,7 +10,7 @@ public class ClickGUI extends WidgetScreen {
     public ClickGUI() {
         super("ClickGUI");
 
-        // Module controller
+        // Module Controller
         add(new WModuleController());
 
         // Help text

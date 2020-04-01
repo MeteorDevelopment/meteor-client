@@ -26,7 +26,7 @@ public class WLabel extends WWidget {
 
     @Override
     public void onRenderPost(double delta) {
-        if (shadow) Utils.drawTextWithShadow(text, (int) (boundingBox.getInnerX() + 0.5), (int) (boundingBox.getInnerY() + 0.5), GUI.textC);
+        if (shadow) Utils.drawTextWithShadow(text, (int) (boundingBox.getInnerX() + 0.5), (int) (boundingBox.getInnerY() + 0.5), color.getPacked());
         else Utils.drawText(text, (int) (boundingBox.getInnerX() + 0.5), (int) (boundingBox.getInnerY() + 0.5), color.getPacked());
     }
 }
