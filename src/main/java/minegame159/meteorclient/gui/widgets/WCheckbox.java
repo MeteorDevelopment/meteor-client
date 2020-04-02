@@ -10,6 +10,7 @@ import java.util.function.Consumer;
 public class WCheckbox extends WWidget {
     public boolean checked;
 
+    public double size = 6;
     private Consumer<WCheckbox> action;
 
     public WCheckbox(boolean checked) {
@@ -31,7 +32,7 @@ public class WCheckbox extends WWidget {
 
     @Override
     public Vector2 calculateCustomSize() {
-        return new Vector2(6, 6);
+        return new Vector2(size, size);
     }
 
     @Override

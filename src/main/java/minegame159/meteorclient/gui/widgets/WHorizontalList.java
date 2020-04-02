@@ -66,6 +66,8 @@ public class WHorizontalList extends WWidget {
             box.width = child.boundingBox.getWidth();
             box.height = widget.boundingBox.innerHeight;
 
+            if (i == widget.widgets.size() - 1) box.width = widget.boundingBox.getInnerX() + widget.boundingBox.innerWidth - box.x;
+
             lastChildWidth = child.boundingBox.getWidth();
             i++;
             return box;

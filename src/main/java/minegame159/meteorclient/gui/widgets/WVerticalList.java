@@ -46,7 +46,7 @@ public class WVerticalList extends WWidget {
         for (WWidget w : widget.widgets) move(w, deltaY);
     }
 
-    private void beginRender(boolean resetQuads) {
+    protected void beginRender(boolean resetQuads) {
         if (scrollingActive) {
             if (resetQuads) {
                 RenderUtils.endLines();
@@ -60,7 +60,7 @@ public class WVerticalList extends WWidget {
         }
     }
 
-    private void endRender(boolean resetQuads) {
+    protected void endRender(boolean resetQuads) {
         if (scrollingActive) {
             if (resetQuads) {
                 RenderUtils.endLines();

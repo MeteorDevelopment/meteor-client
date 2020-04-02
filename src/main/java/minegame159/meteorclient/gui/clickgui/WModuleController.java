@@ -3,10 +3,12 @@ package minegame159.meteorclient.gui.clickgui;
 import minegame159.meteorclient.Config;
 import minegame159.meteorclient.gui.WidgetLayout;
 import minegame159.meteorclient.gui.widgets.WWidget;
+import minegame159.meteorclient.gui.widgets.WWindow;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.utils.Box;
 import minegame159.meteorclient.utils.Vector2;
+import net.minecraft.client.MinecraftClient;
 
 public class WModuleController extends WWidget {
     public WModuleController() {
@@ -35,17 +37,26 @@ public class WModuleController extends WWidget {
 
         @Override
         public Box layoutWidget(WWidget widget, WWidget child) {
-            Vector2 pos = null;
-            if (child instanceof WModuleGroup) pos = Config.INSTANCE.getGuiPosition(((WModuleGroup) child).category);
-            else if (child instanceof WProfiles) pos = Config.INSTANCE.getGuiPosition(Category.Profiles);
+            Config.WindowConfig winConfig = Config.INSTANCE.getWindowConfig(((WWindow) child).getType(), false);
+            boolean automatic = false;
 
-            if (pos != null) {
-                box.x = pos.x;
-                box.y = pos.y;
-            } else box.x += 10 + box.width;
+            if (winConfig.getX() != -1 || winConfig.getY() != -1) {
+                box.x = winConfig.getX();
+                box.y = winConfig.getY();
+            } else {
+                box.x += 10 + box.width;
+                automatic = true;
+            }
 
             box.width = child.boundingBox.getWidth();
             box.height = child.boundingBox.getHeight();
+
+            if (automatic) {
+                if (box.x + box.width > MinecraftClient.getInstance().window.getScaledWidth()) {
+                    box.x = 10;
+                    box.y += 10 + box.height + 10;
+                }
+            }
 
             return box;
         }

@@ -15,7 +15,7 @@ public class Config extends Savable<Config> {
     private String prefix = ".";
     public AutoCraft autoCraft = new AutoCraft();
 
-    private Map<Category, Vector2> guiPositions = new HashMap<>();
+    private Map<WindowType, WindowConfig> windowConfigs = new HashMap<>();
     private Map<Category, Color> categoryColors = new HashMap<>();
 
     private Config() {
@@ -31,17 +31,8 @@ public class Config extends Savable<Config> {
         return prefix;
     }
 
-    public void setGuiPosition(Category category, Vector2 pos) {
-        guiPositions.put(category, pos);
-        save();
-    }
-
-    public Vector2 getGuiPositionNotNull(Category category) {
-        return guiPositions.computeIfAbsent(category, category1 -> new Vector2());
-    }
-
-    public Vector2 getGuiPosition(Category category) {
-        return guiPositions.get(category);
+    public WindowConfig getWindowConfig(WindowType type, boolean defaultExpanded) {
+        return windowConfigs.computeIfAbsent(type, type1 -> new WindowConfig(defaultExpanded));
     }
 
     public void setCategoryColor(Category category, Color color) {
@@ -60,7 +51,7 @@ public class Config extends Savable<Config> {
         tag.putString("version", version);
         tag.putString("prefix", prefix);
         tag.put("autoCraft", autoCraft.toTag());
-        tag.put("guiPositions", NbtUtils.mapToTag(guiPositions));
+        tag.put("windowConfigs", NbtUtils.mapToTag(windowConfigs));
         tag.put("categoryColors", NbtUtils.mapToTag(categoryColors));
 
         return tag;
@@ -71,7 +62,7 @@ public class Config extends Savable<Config> {
         version = tag.getString("version");
         prefix = tag.getString("prefix");
         autoCraft.fromTag(tag.getCompound("autoCraft"));
-        guiPositions = NbtUtils.mapFromTag(tag.getCompound("guiPositions"), Category::valueOf, tag1 -> new Vector2().fromTag((CompoundTag) tag1));
+        windowConfigs = NbtUtils.mapFromTag(tag.getCompound("windowConfigs"), WindowType::valueOf, tag1 -> new WindowConfig(false).fromTag((CompoundTag) tag1));
         categoryColors = NbtUtils.mapFromTag(tag.getCompound("categoryColors"), Category::valueOf, tag1 -> new Color().fromTag((CompoundTag) tag1));
 
         return this;
@@ -118,5 +109,64 @@ public class Config extends Savable<Config> {
 
             return this;
         }
+    }
+
+    public class WindowConfig implements ISerializable<WindowConfig> {
+        private Vector2 pos = new Vector2(-1, -1);
+        private boolean expanded;
+
+        private WindowConfig(boolean expanded) {
+            this.expanded = expanded;
+        }
+
+        public double getX() {
+            return pos.x;
+        }
+
+        public double getY() {
+            return pos.y;
+        }
+
+        public void setPos(double x, double y) {
+            this.pos.set(x, y);
+            save();
+        }
+
+        public boolean isExpanded() {
+            return expanded;
+        }
+
+        public void setExpanded(boolean expanded) {
+            this.expanded = expanded;
+            save();
+        }
+
+        @Override
+        public CompoundTag toTag() {
+            CompoundTag tag = new CompoundTag();
+
+            tag.put("pos", pos.toTag());
+            tag.putBoolean("expanded", expanded);
+
+            return tag;
+        }
+
+        @Override
+        public WindowConfig fromTag(CompoundTag tag) {
+            pos.fromTag(tag.getCompound("pos"));
+            expanded = tag.getBoolean("expanded");
+
+            return this;
+        }
+    }
+
+    public enum WindowType {
+        Combat,
+        Player,
+        Movement,
+        Render,
+        Misc,
+        Setting,
+        Profiles
     }
 }

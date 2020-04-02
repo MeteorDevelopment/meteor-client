@@ -9,23 +9,23 @@ public class WindowScreen extends WidgetScreen {
 
     private final double horizontalMargin, spacing;
 
-    public WindowScreen(String title, double horizontalMargin, double spacing) {
+    public WindowScreen(String title, double horizontalMargin, double spacing, boolean expanded) {
         super(title);
 
         this.horizontalMargin = horizontalMargin;
         this.spacing = spacing;
 
-        window = super.add(new WWindow(title, horizontalMargin, spacing));
+        window = super.add(new WWindow(title, null, horizontalMargin, spacing, expanded));
     }
 
     public WindowScreen(String title) {
-        this(title, 4, 4);
+        this(title, 4, 4, true);
     }
 
     @Override
     public void clear() {
         super.clear();
-        window = super.add(new WWindow(title.asString(), horizontalMargin, spacing));
+        window = super.add(new WWindow(title.asString(), null, horizontalMargin, spacing, window.isExpanded()));
     }
 
     @Override

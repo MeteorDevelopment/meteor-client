@@ -17,7 +17,7 @@ public class WWidget {
 
     public boolean mouseOver;
 
-    private int tooltipTimer = 0;
+    protected int tooltipTimer = 0;
 
     public WWidget parent;
     public List<WWidget> widgets = new ArrayList<>(2);

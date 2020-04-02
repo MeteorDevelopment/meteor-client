@@ -2,20 +2,17 @@ package minegame159.meteorclient.gui.clickgui;
 
 import minegame159.meteorclient.Config;
 import minegame159.meteorclient.gui.widgets.*;
-import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.utils.ProfileUtils;
-import minegame159.meteorclient.utils.Vector2;
 
 import java.util.List;
 
 public class WProfiles extends WWindow {
     public WProfiles() {
-        super("Profiles", 4, 4);
+        super("Profiles", Config.WindowType.Profiles, 4, 4, false);
 
         onDragged = panel -> {
-            Vector2 pos = Config.INSTANCE.getGuiPositionNotNull(Category.Profiles);
-            pos.x = panel.boundingBox.x;
-            pos.y = panel.boundingBox.y;
+            Config.WindowConfig winConfig = Config.INSTANCE.getWindowConfig(getType(), false);
+            winConfig.setPos(panel.boundingBox.x, panel.boundingBox.y);
         };
 
         initWidgets();

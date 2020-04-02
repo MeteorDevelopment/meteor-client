@@ -5,20 +5,18 @@ import minegame159.meteorclient.gui.widgets.WWindow;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.utils.Vector2;
 
 public class WModuleGroup extends WWindow {
     public final Category category;
 
     public WModuleGroup(Category category) {
-        super(category.toString(), 0, 0);
+        super(category.toString(), Config.WindowType.valueOf(category.toString()), 0, 0, false);
 
         this.category = category;
 
         onDragged = panel -> {
-            Vector2 pos = Config.INSTANCE.getGuiPositionNotNull(category);
-            pos.x = panel.boundingBox.x;
-            pos.y = panel.boundingBox.y;
+            Config.WindowConfig winConfig = Config.INSTANCE.getWindowConfig(getType(), false);
+            winConfig.setPos(panel.boundingBox.x, panel.boundingBox.y);
         };
 
         for (Module module : ModuleManager.INSTANCE.getGroup(category)) {
