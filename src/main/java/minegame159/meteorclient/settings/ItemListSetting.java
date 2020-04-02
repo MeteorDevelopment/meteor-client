@@ -1,9 +1,9 @@
 package minegame159.meteorclient.settings;
 
-import minegame159.meteorclient.gui.screens.BlockListSettingScreen;
+import minegame159.meteorclient.gui.screens.ItemListSettingScreen;
 import minegame159.meteorclient.gui.widgets.WButton;
-import net.minecraft.block.Block;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.item.Item;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -15,28 +15,28 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class BlockListSetting extends Setting<List<Block>> {
-    public BlockListSetting(String name, String description, String group, List<Block> defaultValue, Consumer<List<Block>> onChanged, Consumer<Setting<List<Block>>> onModuleActivated) {
+public class ItemListSetting extends Setting<List<Item>> {
+    public ItemListSetting(String name, String description, String group, List<Item> defaultValue, Consumer<List<Item>> onChanged, Consumer<Setting<List<Item>>> onModuleActivated) {
         super(name, description, group, defaultValue, onChanged, onModuleActivated);
 
         widget = new WButton("Select");
-        ((WButton) widget).action = () -> MinecraftClient.getInstance().openScreen(new BlockListSettingScreen(this));
+        ((WButton) widget).action = () -> MinecraftClient.getInstance().openScreen(new ItemListSettingScreen(this));
     }
 
     @Override
-    protected List<Block> parseImpl(String str) {
+    protected List<Item> parseImpl(String str) {
         String[] values = str.split(",");
-        List<Block> blocks = new ArrayList<>(1);
+        List<Item> items = new ArrayList<>(1);
 
         for (String value : values) {
             String val = value.trim();
             Identifier id;
             if (val.contains(":")) id = new Identifier(val);
             else id = new Identifier("minecraft", val);
-            blocks.add(Registry.BLOCK.get(id));
+            items.add(Registry.ITEM.get(id));
         }
 
-        return blocks;
+        return items;
     }
 
     @Override
@@ -54,13 +54,13 @@ public class BlockListSetting extends Setting<List<Block>> {
     }
 
     @Override
-    protected boolean isValueValid(List<Block> value) {
+    protected boolean isValueValid(List<Item> value) {
         return true;
     }
 
     @Override
     protected String generateUsage() {
-        return "#blueblock id #gray(dirt, minecraft:stone, etc)";
+        return "#blueitem id #gray(dirt, minecraft:stone, etc)";
     }
 
     @Override
@@ -68,8 +68,8 @@ public class BlockListSetting extends Setting<List<Block>> {
         CompoundTag tag = saveGeneral();
 
         ListTag valueTag = new ListTag();
-        for (Block block : get()) {
-            valueTag.add(new StringTag(Registry.BLOCK.getId(block).toString()));
+        for (Item item : get()) {
+            valueTag.add(new StringTag(Registry.ITEM.getId(item).toString()));
         }
         tag.put("value", valueTag);
 
@@ -77,12 +77,12 @@ public class BlockListSetting extends Setting<List<Block>> {
     }
 
     @Override
-    public List<Block> fromTag(CompoundTag tag) {
+    public List<Item> fromTag(CompoundTag tag) {
         get().clear();
 
         ListTag valueTag = tag.getList("value", 8);
         for (Tag tagI : valueTag) {
-            get().add(Registry.BLOCK.get(new Identifier(tagI.asString())));
+            get().add(Registry.ITEM.get(new Identifier(tagI.asString())));
         }
 
         changed();
@@ -92,9 +92,9 @@ public class BlockListSetting extends Setting<List<Block>> {
     public static class Builder {
         private String name = "undefined", description = "";
         private String group;
-        private List<Block> defaultValue;
-        private Consumer<List<Block>> onChanged;
-        private Consumer<Setting<List<Block>>> onModuleActivated;
+        private List<Item> defaultValue;
+        private Consumer<List<Item>> onChanged;
+        private Consumer<Setting<List<Item>>> onModuleActivated;
 
         public Builder name(String name) {
             this.name = name;
@@ -111,23 +111,23 @@ public class BlockListSetting extends Setting<List<Block>> {
             return this;
         }
 
-        public Builder defaultValue(List<Block> defaultValue) {
+        public Builder defaultValue(List<Item> defaultValue) {
             this.defaultValue = defaultValue;
             return this;
         }
 
-        public Builder onChanged(Consumer<List<Block>> onChanged) {
+        public Builder onChanged(Consumer<List<Item>> onChanged) {
             this.onChanged = onChanged;
             return this;
         }
 
-        public Builder onModuleActivated(Consumer<Setting<List<Block>>> onModuleActivated) {
+        public Builder onModuleActivated(Consumer<Setting<List<Item>>> onModuleActivated) {
             this.onModuleActivated = onModuleActivated;
             return this;
         }
 
-        public BlockListSetting build() {
-            return new BlockListSetting(name, description, group, defaultValue, onChanged, onModuleActivated);
+        public ItemListSetting build() {
+            return new ItemListSetting(name, description, group, defaultValue, onChanged, onModuleActivated);
         }
     }
 }

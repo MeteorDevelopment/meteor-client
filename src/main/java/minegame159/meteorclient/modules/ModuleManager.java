@@ -209,6 +209,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new AutoEat());
         addModule(new XpBottleThrower());
         addModule(new AutoArmor());
+        addModule(new AutoDrop());
     }
 
     private void initMovement() {
