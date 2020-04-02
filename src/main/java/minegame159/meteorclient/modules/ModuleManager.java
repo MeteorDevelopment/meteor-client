@@ -195,6 +195,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new KillAura());
         addModule(new CrystalAura());
         addModule(new Surround());
+        addModule(new Trigger());
     }
 
     private void initPlayer() {
