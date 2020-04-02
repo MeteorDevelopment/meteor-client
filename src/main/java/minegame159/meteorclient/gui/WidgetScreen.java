@@ -37,7 +37,7 @@ public class WidgetScreen extends Screen {
     }
 
     public void clear() {
-        root.widgets.clear();
+        root.clear();
     }
 
     @Override

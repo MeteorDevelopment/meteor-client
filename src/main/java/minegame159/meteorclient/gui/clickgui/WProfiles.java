@@ -35,7 +35,7 @@ public class WProfiles extends WWindow {
             WMinus delete = new WMinus();
             delete.action = () -> {
                 ProfileUtils.delete(profile);
-                widgets.clear();
+                clear();
                 initWidgets();
                 layout();
             };
@@ -47,10 +47,11 @@ public class WProfiles extends WWindow {
         if (profiles.size() > 0) add(new WHorizontalSeparator());
         WHorizontalList hList = add(new WHorizontalList(4));
         WTextBox name = hList.add(new WTextBox("", 70));
+        name.boundingBox.fullWidth = true;
         WPlus save = hList.add(new WPlus());
         save.action = () -> {
             if (ProfileUtils.save(name.text)) {
-                widgets.clear();
+                clear();
                 initWidgets();
                 layout();
             }

@@ -96,6 +96,10 @@ public class WTextBox extends WWidget {
         return false;
     }
 
+    public boolean isFocused() {
+        return focused;
+    }
+
     public void setFocused(boolean focused) {
         if (!this.focused && focused) GuiThings.setPostKeyEvents(true);
         else if (this.focused && !focused) GuiThings.setPostKeyEvents(false);

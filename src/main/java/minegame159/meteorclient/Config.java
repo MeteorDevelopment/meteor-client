@@ -167,6 +167,7 @@ public class Config extends Savable<Config> {
         Render,
         Misc,
         Setting,
-        Profiles
+        Profiles,
+        Search
     }
 }

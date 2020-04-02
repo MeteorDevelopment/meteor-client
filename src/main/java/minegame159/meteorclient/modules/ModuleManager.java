@@ -15,11 +15,13 @@ import minegame159.meteorclient.modules.movement.*;
 import minegame159.meteorclient.modules.player.*;
 import minegame159.meteorclient.modules.render.*;
 import minegame159.meteorclient.modules.setting.*;
+import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.utils.Savable;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.util.*;
@@ -81,6 +83,31 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
 
     public void setModuleToBind(Module moduleToBind) {
         this.moduleToBind = moduleToBind;
+    }
+
+    public List<Module> searchTitles(String text) {
+        List<Module> modules = new ArrayList<>();
+
+        for (Module module : this.modules.values()) {
+            if (StringUtils.containsIgnoreCase(module.title, text)) modules.add(module);
+        }
+
+        return modules;
+    }
+
+    public List<Module> searchSettingTitles(String text) {
+        List<Module> modules = new ArrayList<>();
+
+        for (Module module : this.modules.values()) {
+            for (Setting<?> setting : module.settings) {
+                if (StringUtils.containsIgnoreCase(setting.title, text)) {
+                    modules.add(module);
+                    break;
+                }
+            }
+        }
+
+        return modules;
     }
 
     void addActive(ToggleModule module) {

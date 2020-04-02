@@ -20,7 +20,6 @@ public class WWindow extends WVerticalList {
 
     public WWindow(String title, Config.WindowType type, double horizontalMargin, double spacing, boolean expanded) {
         super(spacing);
-        maxHeight = MinecraftClient.getInstance().window.getScaledHeight() - 32;
         boundingBox.alignment.set(Alignment.X.Center, Alignment.Y.Center);
 
         if (type != null) this.expanded = Config.INSTANCE.getWindowConfig(type, expanded).isExpanded();
@@ -31,6 +30,7 @@ public class WWindow extends WVerticalList {
         header = super.add(new Header(title, this));
 
         list = super.add(new WVerticalList(spacing));
+        list.maxHeight = MinecraftClient.getInstance().window.getScaledHeight() - 64;
         list.boundingBox.setMargin(horizontalMargin, 0);
         list.boundingBox.marginBottom = 4;
     }
@@ -38,6 +38,11 @@ public class WWindow extends WVerticalList {
     @Override
     public <T extends WWidget> T add(T widget) {
         return list.add(widget);
+    }
+
+    @Override
+    public void clear() {
+        list.clear();
     }
 
     public boolean isExpanded() {
@@ -103,7 +108,7 @@ public class WWindow extends WVerticalList {
     @Override
     public boolean charTyped(char c, int key) {
         for (WWidget widget : widgets) {
-            if ((!expanded || widget == header) && widget.charTyped(c, key)) return true;
+            if ((expanded || widget == header) && widget.charTyped(c, key)) return true;
         }
         return onCharTyped(c, key);
     }
@@ -141,7 +146,7 @@ public class WWindow extends WVerticalList {
 
     @Override
     public void onWindowResized(int width, int height) {
-        list.maxHeight = height - 32;
+        list.maxHeight = height - 64;
         list.calculateSize();
         list.calculatePosition();
     }

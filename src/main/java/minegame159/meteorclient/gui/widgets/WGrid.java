@@ -47,9 +47,10 @@ public class WGrid extends WWidget {
         removeRow(rows.size() - 1);
     }
 
+    @Override
     public void clear() {
+        super.clear();
         rows.clear();
-        widgets.clear();
     }
 
     @Override

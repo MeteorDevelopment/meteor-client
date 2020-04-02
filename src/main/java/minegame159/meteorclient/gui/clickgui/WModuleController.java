@@ -20,6 +20,7 @@ public class WModuleController extends WWidget {
         }
 
         add(new WProfiles());
+        add(new WSearch());
     }
 
     private static class ModuleControllerLayout extends WidgetLayout {

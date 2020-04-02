@@ -29,6 +29,10 @@ public class WWidget {
         return widget;
     }
 
+    public void clear() {
+        widgets.clear();
+    }
+
     public void mouseMove(double mouseX, double mouseY) {
         boolean lastMoveOver = mouseOver;
         mouseOver = boundingBox.isOver(mouseX, mouseY);
