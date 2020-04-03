@@ -9,6 +9,7 @@ import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.utils.Pool;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MovementType;
@@ -116,7 +117,8 @@ public class EventStore {
         return render2DEvent;
     }
 
-    public static RenderEvent renderEvent(float tickDelta, double offsetX, double offsetY, double offsetZ) {
+    public static RenderEvent renderEvent(MatrixStack matrixStack, float tickDelta, double offsetX, double offsetY, double offsetZ) {
+        renderEvent.matrixStack = matrixStack;
         renderEvent.tickDelta = tickDelta;
         renderEvent.offsetX = offsetX;
         renderEvent.offsetY = offsetY;
