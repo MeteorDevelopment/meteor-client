@@ -12,8 +12,11 @@ import net.minecraft.client.MinecraftClient;
 public class WModule extends WWidget {
     private Module module;
 
-    private double animationProgress;
-    private double animationMultiplier;
+    private double animationProgress1;
+    private double animationMultiplier1;
+
+    private double animationProgress2;
+    private double animationMultiplier2;
 
     public WModule(Module module) {
         boundingBox.autoSize = true;
@@ -23,11 +26,17 @@ public class WModule extends WWidget {
 
         this.module = module;
         if (module instanceof ToggleModule && ((ToggleModule) module).isActive()) {
-            animationProgress = 1;
-            animationMultiplier = 1;
+            animationProgress1 = 1;
+            animationMultiplier1 = 1;
+
+            animationProgress2 = 1;
+            animationMultiplier2 = 1;
         } else {
-            animationProgress = 0;
-            animationMultiplier = -1;
+            animationProgress1 = 0;
+            animationMultiplier1 = -1;
+
+            animationProgress2 = 0;
+            animationMultiplier2 = -1;
         }
 
         add(new WLabel(module.title));
@@ -48,16 +57,32 @@ public class WModule extends WWidget {
     @Override
     public void onRender(double delta) {
         if (module instanceof ToggleModule) {
-            if (((ToggleModule) module).isActive()) animationMultiplier = 1;
-            else animationMultiplier = -1;
+            if (((ToggleModule) module).isActive()) {
+                animationMultiplier1 = 1;
+                animationMultiplier2 = 1;
+            }
+            else {
+                animationMultiplier1 = -1;
+                animationMultiplier2 = -1;
+            }
         }
 
-        animationProgress += delta / 10 * GUI.hoverAnimationSpeedMultiplier * animationMultiplier;
-        animationProgress = Utils.clamp(animationProgress, 0, 1);
+        if (mouseOver) animationMultiplier1 = 1;
+        else {
+            if (module instanceof ToggleModule) {
+                if (!((ToggleModule) module).isActive()) animationMultiplier1 = -1;
+            } else animationMultiplier1 = -1;
+        }
 
-        if (animationProgress > 0) {
-            RenderUtils.quad(boundingBox.x, boundingBox.y, boundingBox.getWidth() * animationProgress, boundingBox.getHeight(), GUI.backgroundModuleActive);
-            RenderUtils.quad(boundingBox.x, boundingBox.y + boundingBox.getHeight() * (1 - animationProgress), 1, boundingBox.getHeight() * animationProgress, GUI.accent);
+        animationProgress1 += delta / 10 * GUI.hoverAnimationSpeedMultiplier * animationMultiplier1;
+        animationProgress1 = Utils.clamp(animationProgress1, 0, 1);
+
+        animationProgress2 += delta / 10 * GUI.hoverAnimationSpeedMultiplier * animationMultiplier2;
+        animationProgress2 = Utils.clamp(animationProgress2, 0, 1);
+
+        if (animationProgress1 > 0  || animationProgress2 > 0) {
+            RenderUtils.quad(boundingBox.x, boundingBox.y, boundingBox.getWidth() * animationProgress1, boundingBox.getHeight(), GUI.backgroundModuleActive);
+            RenderUtils.quad(boundingBox.x, boundingBox.y + boundingBox.getHeight() * (1 - animationProgress2), 1, boundingBox.getHeight() * animationProgress2, GUI.accent);
         }
     }
 }
