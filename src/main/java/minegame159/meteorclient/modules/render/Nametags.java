@@ -91,8 +91,8 @@ public class Nametags extends ToggleModule {
 
         double percHealth = (double) health / maxHealth;
         int healthColor;
-        if (health <= 0.333) healthColor = Color.fromRGBA(225, 45, 45, 255);
-        else if (health <= 0.666) healthColor = Color.fromRGBA(225, 105, 25, 255);
+        if (percHealth <= 0.333) healthColor = Color.fromRGBA(225, 45, 45, 255);
+        else if (percHealth <= 0.666) healthColor = Color.fromRGBA(225, 105, 25, 255);
         else healthColor = Color.fromRGBA(45, 225, 45, 255);
 
         Utils.drawText(name, (float) (-halfWidth), (float) verticalOffset, nameColor);
