@@ -11,7 +11,7 @@ import java.util.Map;
 public class Config extends Savable<Config> {
     public static final Config INSTANCE = new Config();
 
-    private String version = "0.1.6";
+    private String version = "0.1.7";
     private String prefix = ".";
     public AutoCraft autoCraft = new AutoCraft();
 
