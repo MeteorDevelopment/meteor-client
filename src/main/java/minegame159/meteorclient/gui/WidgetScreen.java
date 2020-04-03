@@ -1,6 +1,6 @@
 package minegame159.meteorclient.gui;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.gui.widgets.WDebugRenderer;
 import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.utils.RenderUtils;
@@ -80,7 +80,7 @@ public class WidgetScreen extends Screen {
 
     public void layout() {
         root.layout();
-        root.mouseMove(MinecraftClient.getInstance().mouse.getX() / MinecraftClient.getInstance().window.getScaleFactor(), MinecraftClient.getInstance().mouse.getY() / MinecraftClient.getInstance().window.getScaleFactor());
+        root.mouseMove(MinecraftClient.getInstance().mouse.getX() / MinecraftClient.getInstance().getWindow().getScaleFactor(), MinecraftClient.getInstance().mouse.getY() / MinecraftClient.getInstance().getWindow().getScaleFactor());
     }
 
     @Override
@@ -92,26 +92,26 @@ public class WidgetScreen extends Screen {
     public void render(int mouseX, int mouseY, float delta) {
         if (!Utils.canUpdate()) renderBackground();
 
-        GlStateManager.disableTexture();
-        GlStateManager.enableBlend();
-        GlStateManager.disableCull();
+        RenderSystem.disableTexture();
+        RenderSystem.enableBlend();
+        RenderSystem.disableCull();
 
-        GlStateManager.pushMatrix();
+        RenderSystem.pushMatrix();
         GL11.glLineWidth(1);
         RenderUtils.beginLines();
         RenderUtils.beginQuads();
         root.render(delta);
         RenderUtils.endQuads();
         RenderUtils.endLines();
-        GlStateManager.enableTexture();
+        RenderSystem.enableTexture();
         root.renderPost(delta, mouseX, mouseY);
         root.renderTooltip(mouseX, mouseY);
-        GlStateManager.popMatrix();
+        RenderSystem.popMatrix();
 
         if (renderDebug) WDebugRenderer.render(root, true);
 
-        GlStateManager.disableBlend();
-        GlStateManager.enableCull();
+        RenderSystem.disableBlend();
+        RenderSystem.enableCull();
     }
 
     @Override
@@ -135,7 +135,7 @@ public class WidgetScreen extends Screen {
     private static class WRoot extends WWidget {
         @Override
         public Vector2 calculateCustomSize() {
-            return new Vector2(MinecraftClient.getInstance().window.getScaledWidth(), MinecraftClient.getInstance().window.getScaledHeight());
+            return new Vector2(MinecraftClient.getInstance().getWindow().getScaledWidth(), MinecraftClient.getInstance().getWindow().getScaledHeight());
         }
     }
 
@@ -144,8 +144,8 @@ public class WidgetScreen extends Screen {
         public void reset(WWidget widget) {
             box.x = widget.boundingBox.getInnerX();
             box.y = widget.boundingBox.getInnerY();
-            box.width = MinecraftClient.getInstance().window.getScaledWidth();
-            box.height = MinecraftClient.getInstance().window.getScaledHeight();
+            box.width = MinecraftClient.getInstance().getWindow().getScaledWidth();
+            box.height = MinecraftClient.getInstance().getWindow().getScaledHeight();
         }
     }
 }

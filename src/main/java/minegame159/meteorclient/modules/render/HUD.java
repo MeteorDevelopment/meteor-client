@@ -1,9 +1,9 @@
 package minegame159.meteorclient.modules.render;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.*;
+import minegame159.meteorclient.mixininterface.IMinecraftClient;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
@@ -14,6 +14,7 @@ import minegame159.meteorclient.utils.TickRate;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.PlayerListEntry;
+import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.effect.StatusEffect;
@@ -263,7 +264,7 @@ public class HUD extends ToggleModule {
                 x += 20;
             }
 
-            GlStateManager.disableLighting();
+            DiffuseLighting.disable();
         }
 
     });
@@ -273,7 +274,7 @@ public class HUD extends ToggleModule {
         int y = 2;
 
         if (fps.get()) {
-            drawInfo("FPS: ", MinecraftClient.getCurrentFps() + "", y);
+            drawInfo("FPS: ", ((IMinecraftClient) MinecraftClient.getInstance()).getFps() + "", y);
             y += Utils.getTextHeight() + 2;
         }
 
@@ -295,8 +296,8 @@ public class HUD extends ToggleModule {
         }
 
         if (speed.get()) {
-            double tX = Math.abs(mc.player.x - mc.player.prevX);
-            double tZ = Math.abs(mc.player.z - mc.player.prevZ);
+            double tX = Math.abs(mc.player.getX() - mc.player.prevX);
+            double tZ = Math.abs(mc.player.getZ() - mc.player.prevZ);
             double length = Math.sqrt(tX * tX + tZ * tZ);
 
             drawInfo("Speed: ", String.format("%.1f", length * 20), y);
@@ -335,7 +336,7 @@ public class HUD extends ToggleModule {
         drawInfo(text1, text2, y, white);
     }
     private void drawInfoRight(String text1, String text2, int y, int text1Color) {
-        drawInfo(text1, text2, mc.window.getScaledWidth() - Utils.getTextWidth(text1) - Utils.getTextWidth(text2) - 2, y, text1Color);
+        drawInfo(text1, text2, mc.getWindow().getScaledWidth() - Utils.getTextWidth(text1) - Utils.getTextWidth(text2) - 2, y, text1Color);
     }
     private void drawInfoRight(String text1, String text2, int y) {
         drawInfoRight(text1, text2, y, white);
@@ -399,17 +400,17 @@ public class HUD extends ToggleModule {
 
         if (position.get()) {
             if (mc.player.dimension == DimensionType.OVERWORLD) {
-                drawPosition(event.screenWidth, "Nether Pos: ", y, mc.player.x / 8.0, mc.player.y / 8.0, mc.player.z / 8.0);
+                drawPosition(event.screenWidth, "Nether Pos: ", y, mc.player.getX() / 8.0, mc.player.getY() / 8.0, mc.player.getZ() / 8.0);
                 y -= Utils.getTextHeight() + 2;
-                drawPosition(event.screenWidth, "Pos: ", y, mc.player.x, mc.player.y, mc.player.z);
+                drawPosition(event.screenWidth, "Pos: ", y, mc.player.getX(), mc.player.getY(), mc.player.getZ());
                 y -= Utils.getTextHeight() + 2;
             } else if (mc.player.dimension == DimensionType.THE_NETHER) {
-                drawPosition(event.screenWidth, "Overworld Pos: ", y, mc.player.x * 8.0, mc.player.y * 8.0, mc.player.z * 8.0);
+                drawPosition(event.screenWidth, "Overworld Pos: ", y, mc.player.getX() * 8.0, mc.player.getY() * 8.0, mc.player.getZ() * 8.0);
                 y -= Utils.getTextHeight() + 2;
-                drawPosition(event.screenWidth, "Pos: ", y, mc.player.x, mc.player.y, mc.player.z);
+                drawPosition(event.screenWidth, "Pos: ", y, mc.player.getX(), mc.player.getY(), mc.player.getZ());
                 y -= Utils.getTextHeight() + 2;
             } else if (mc.player.dimension == DimensionType.THE_END) {
-                drawPosition(event.screenWidth, "Pos: ", y, mc.player.x, mc.player.y, mc.player.z);
+                drawPosition(event.screenWidth, "Pos: ", y, mc.player.getX(), mc.player.getY(), mc.player.getZ());
                 y -= Utils.getTextHeight() + 2;
             }
         }
@@ -418,7 +419,7 @@ public class HUD extends ToggleModule {
             for (StatusEffectInstance statusEffectInstance : mc.player.getStatusEffects()) {
                 StatusEffect statusEffect = statusEffectInstance.getEffectType();
 
-                drawInfoRight(statusEffect.method_5560().asString(), " " + (statusEffectInstance.getAmplifier() + 1) + " (" + StatusEffectUtil.durationToString(statusEffectInstance, 1) + ")", y, statusEffect.getColor());
+                drawInfoRight(statusEffect.getName().asString(), " " + (statusEffectInstance.getAmplifier() + 1) + " (" + StatusEffectUtil.durationToString(statusEffectInstance, 1) + ")", y, statusEffect.getColor());
                 y -= Utils.getTextHeight() + 2;
             }
         }

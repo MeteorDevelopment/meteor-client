@@ -1,6 +1,7 @@
 package minegame159.meteorclient.modules.render;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.accountsfriends.FriendManager;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
@@ -10,7 +11,11 @@ import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.Tessellator;
+import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.VertexFormats;
+import net.minecraft.client.util.math.Matrix4f;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.util.math.Vector3f;
 import net.minecraft.util.DyeColor;
 
 public class Nametags extends ToggleModule {
@@ -26,29 +31,28 @@ public class Nametags extends ToggleModule {
         super(Category.Render, "nametags", "Displays nametags above players.");
     }
 
-    public void render(double dist, float entityHeight, double x, double y, double z, float cameraYaw, float cameraPitch, String name, int health, int maxHealth) {
+    public void render(MatrixStack matrixStack, double dist, float entityHeight, double x, double y, double z, float cameraYaw, float cameraPitch, String name, int health, int maxHealth) {
         float scale = 0.025f;
         if (dist > 10) scale *= dist / 10 * this.scale.get();
 
         float yOffset = entityHeight + 0.5F;
         int verticalOffset = "deadmau5".equals(name) ? -10 : 0;
 
-        GlStateManager.pushMatrix();
-        GlStateManager.translatef((float) x, (float) y + yOffset, (float) z);
-        GlStateManager.normal3f(0.0F, 1.0F, 0.0F);
-        GlStateManager.rotatef(-cameraYaw, 0.0F, 1.0F, 0.0F);
-        GlStateManager.rotatef(cameraPitch, 1.0F, 0.0F, 0.0F);
-        GlStateManager.scalef(-scale, -scale, scale);
-        GlStateManager.disableLighting();
-        GlStateManager.depthMask(false);
-        GlStateManager.enableBlend();
-        GlStateManager.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-        GlStateManager.disableTexture();
-        GlStateManager.disableDepthTest();
+        matrixStack.push();
+        matrixStack.translate(0, yOffset, 0);
+        matrixStack.multiply(mc.getEntityRenderManager().getRotation());
+        matrixStack.scale(-scale, -scale, scale);
+        Matrix4f matrix4f = matrixStack.peek().getModel();
+        RenderSystem.disableLighting();
+        RenderSystem.depthMask(false);
+        RenderSystem.enableBlend();
+        RenderSystem.blendFuncSeparate(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SrcFactor.ONE, GlStateManager.DstFactor.ZERO);
+        RenderSystem.disableTexture();
+        RenderSystem.disableDepthTest();
 
         String healthText = health + "";
-        double halfWidthName = Utils.getTextWidth(name) / 2.0;
-        double halfWidthHealth = Utils.getTextWidth(healthText) / 2.0;
+        double halfWidthName = mc.textRenderer.getStringWidth(name) / 2.0;
+        double halfWidthHealth = mc.textRenderer.getStringWidth(healthText) / 2.0;
         double halfWidth = halfWidthName + 4 + halfWidthHealth - 2.5;
 
         Tessellator tessellator = Tessellator.getInstance();
@@ -59,33 +63,33 @@ public class Nametags extends ToggleModule {
         double by1 = verticalOffset - 1;
         double by2 = verticalOffset + 9;
         // Background
-        bb.vertex(bx1, by1, 0.0).color(0f, 0f, 0f, 0.5f).next();
-        bb.vertex(bx1, by2, 0.0).color(0f, 0f, 0f, 0.5f).next();
-        bb.vertex(bx2, by2, 0.0).color(0f, 0f, 0f, 0.5f).next();
-        bb.vertex(bx2, by1, 0.0).color(0f, 0f, 0f, 0.5f).next();
+        bb.vertex(matrix4f, (float) bx1, (float) by1, 0.0f).color(0f, 0f, 0f, 0.5f).next();
+        bb.vertex(matrix4f, (float) bx1, (float) by2, 0.0f).color(0f, 0f, 0f, 0.5f).next();
+        bb.vertex(matrix4f, (float) bx2, (float) by2, 0.0f).color(0f, 0f, 0f, 0.5f).next();
+        bb.vertex(matrix4f, (float) bx2, (float) by1, 0.0f).color(0f, 0f, 0f, 0.5f).next();
         // Left Edge
-        bb.vertex(bx1 - 1, by1, 0.0).color(0f, 0f, 0f, 1f).next();
-        bb.vertex(bx1 - 1, by2, 0.0).color(0f, 0f, 0f, 1f).next();
-        bb.vertex(bx1, by2, 0.0).color(0f, 0f, 0f, 1f).next();
-        bb.vertex(bx1, by1, 0.0).color(0f, 0f, 0f, 1f).next();
+        bb.vertex(matrix4f, (float) bx1 - 1, (float) by1, 0.0f).color(0f, 0f, 0f, 1f).next();
+        bb.vertex(matrix4f, (float) bx1 - 1, (float) by2, 0.0f).color(0f, 0f, 0f, 1f).next();
+        bb.vertex(matrix4f, (float) bx1, (float) by2, 0.0f).color(0f, 0f, 0f, 1f).next();
+        bb.vertex(matrix4f, (float) bx1, (float) by1, 0.0f).color(0f, 0f, 0f, 1f).next();
         // Right Edge
-        bb.vertex(bx2, by1, 0.0).color(0f, 0f, 0f, 1f).next();
-        bb.vertex(bx2, by2, 0.0).color(0f, 0f, 0f, 1f).next();
-        bb.vertex(bx2 + 1, by2, 0.0).color(0f, 0f, 0f, 1f).next();
-        bb.vertex(bx2 + 1, by1, 0.0).color(0f, 0f, 0f, 1f).next();
+        bb.vertex(matrix4f, (float) bx2, (float) by1, 0.0f).color(0f, 0f, 0f, 1f).next();
+        bb.vertex(matrix4f, (float) bx2, (float) by2, 0.0f).color(0f, 0f, 0f, 1f).next();
+        bb.vertex(matrix4f, (float) bx2 + 1, (float) by2, 0.0f).color(0f, 0f, 0f, 1f).next();
+        bb.vertex(matrix4f, (float) bx2 + 1, (float) by1, 0.0f).color(0f, 0f, 0f, 1f).next();
         // Top Edge
-        bb.vertex(bx1 - 1, by1 - 1, 0.0).color(0f, 0f, 0f, 1f).next();
-        bb.vertex(bx1 - 1, by1, 0.0).color(0f, 0f, 0f, 1f).next();
-        bb.vertex(bx2 + 1, by1, 0.0).color(0f, 0f, 0f, 1f).next();
-        bb.vertex(bx2 + 1, by1 - 1, 0.0).color(0f, 0f, 0f, 1f).next();
+        bb.vertex(matrix4f, (float) bx1 - 1, (float) by1 - 1, 0.0f).color(0f, 0f, 0f, 1f).next();
+        bb.vertex(matrix4f, (float) bx1 - 1, (float) by1, 0.0f).color(0f, 0f, 0f, 1f).next();
+        bb.vertex(matrix4f, (float) bx2 + 1, (float) by1, 0.0f).color(0f, 0f, 0f, 1f).next();
+        bb.vertex(matrix4f, (float) bx2 + 1, (float) by1 - 1, 0.0f).color(0f, 0f, 0f, 1f).next();
         // Bottom Edge
-        bb.vertex(bx1 - 1, by2, 0.0).color(0f, 0f, 0f, 1f).next();
-        bb.vertex(bx1 - 1, by2 + 1, 0.0).color(0f, 0f, 0f, 1f).next();
-        bb.vertex(bx2 + 1, by2 + 1, 0.0).color(0f, 0f, 0f, 1f).next();
-        bb.vertex(bx2 + 1, by2, 0.0).color(0f, 0f, 0f, 1f).next();
+        bb.vertex(matrix4f, (float) bx1 - 1, (float) by2, 0.0f).color(0f, 0f, 0f, 1f).next();
+        bb.vertex(matrix4f, (float) bx1 - 1, (float) by2 + 1, 0.0f).color(0f, 0f, 0f, 1f).next();
+        bb.vertex(matrix4f, (float) bx2 + 1, (float) by2 + 1, 0.0f).color(0f, 0f, 0f, 1f).next();
+        bb.vertex(matrix4f, (float) bx2 + 1, (float) by2, 0.0f).color(0f, 0f, 0f, 1f).next();
         tessellator.draw();
 
-        GlStateManager.enableTexture();
+        RenderSystem.enableTexture();
 
         int nameColor = FriendManager.INSTANCE.contains(name) ? DyeColor.CYAN.getSignColor() : -1;
 
@@ -95,17 +99,19 @@ public class Nametags extends ToggleModule {
         else if (health <= 0.666) healthColor = Color.fromRGBA(225, 105, 25, 255);
         else healthColor = Color.fromRGBA(45, 225, 45, 255);
 
-        Utils.drawText(name, (float) (-halfWidth), (float) verticalOffset, nameColor);
-        Utils.drawText(healthText, (float) (-halfWidth + halfWidthName * 2 + 4), (float) verticalOffset, healthColor);
-        GlStateManager.depthMask(true);
-        GlStateManager.enableDepthTest();
-        Utils.drawText(name, (float) (-halfWidth), (float) verticalOffset, nameColor);
-        Utils.drawText(healthText, (float) (-halfWidth + halfWidthName * 2 + 4), (float) verticalOffset, healthColor);
+        VertexConsumerProvider.Immediate immediate = VertexConsumerProvider.immediate(Tessellator.getInstance().getBuffer());
+        mc.textRenderer.draw(name, (float) (-halfWidth), (float) verticalOffset, nameColor, false, matrix4f, immediate, false, 0, 15728880);
+        mc.textRenderer.draw(healthText, (float) (-halfWidth + halfWidthName * 2 + 4), (float) verticalOffset, healthColor, false, matrix4f, immediate, false, 0, 15728880);
+        RenderSystem.depthMask(true);
+        RenderSystem.enableDepthTest();
+        mc.textRenderer.draw(name, (float) (-halfWidth), (float) verticalOffset, nameColor, false, matrix4f, immediate, false, 0, 15728880);
+        mc.textRenderer.draw(healthText, (float) (-halfWidth + halfWidthName * 2 + 4), (float) verticalOffset, healthColor, false, matrix4f, immediate, false, 0, 15728880);
+        immediate.draw();
 
-        GlStateManager.enableDepthTest();
-        GlStateManager.enableLighting();
-        GlStateManager.disableBlend();
-        GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        GlStateManager.popMatrix();
+        RenderSystem.enableDepthTest();
+        RenderSystem.enableLighting();
+        RenderSystem.disableBlend();
+        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+        matrixStack.pop();
     }
 }

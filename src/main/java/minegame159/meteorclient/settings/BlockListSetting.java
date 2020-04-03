@@ -69,7 +69,7 @@ public class BlockListSetting extends Setting<List<Block>> {
 
         ListTag valueTag = new ListTag();
         for (Block block : get()) {
-            valueTag.add(new StringTag(Registry.BLOCK.getId(block).toString()));
+            valueTag.add(StringTag.of(Registry.BLOCK.getId(block).toString()));
         }
         tag.put("value", valueTag);
 

@@ -32,7 +32,7 @@ public class WVerticalList extends WWidget {
 
             for (WWidget widget : widgets) {
                 move(widget, -deltaScroll);
-                widget.mouseMove(MinecraftClient.getInstance().mouse.getX() / MinecraftClient.getInstance().window.getScaleFactor(), MinecraftClient.getInstance().mouse.getY() / MinecraftClient.getInstance().window.getScaleFactor());
+                widget.mouseMove(MinecraftClient.getInstance().mouse.getX() / MinecraftClient.getInstance().getWindow().getScaleFactor(), MinecraftClient.getInstance().mouse.getY() / MinecraftClient.getInstance().getWindow().getScaleFactor());
             }
             return true;
         }
@@ -55,8 +55,8 @@ public class WVerticalList extends WWidget {
                 RenderUtils.beginQuads();
             }
             GL11.glEnable(GL11.GL_SCISSOR_TEST);
-            double scaleFactor = MinecraftClient.getInstance().window.getScaleFactor();
-            GL11.glScissor((int) (boundingBox.getInnerX() * scaleFactor), (int) ((MinecraftClient.getInstance().window.getScaledHeight() - boundingBox.getInnerY() - boundingBox.innerHeight) * scaleFactor), (int) (boundingBox.innerWidth * scaleFactor), (int) (boundingBox.innerHeight * scaleFactor));
+            double scaleFactor = MinecraftClient.getInstance().getWindow().getScaleFactor();
+            GL11.glScissor((int) (boundingBox.getInnerX() * scaleFactor), (int) ((MinecraftClient.getInstance().getWindow().getScaledHeight() - boundingBox.getInnerY() - boundingBox.innerHeight) * scaleFactor), (int) (boundingBox.innerWidth * scaleFactor), (int) (boundingBox.innerHeight * scaleFactor));
         }
     }
 

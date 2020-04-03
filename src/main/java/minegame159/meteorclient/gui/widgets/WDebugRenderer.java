@@ -1,6 +1,6 @@
 package minegame159.meteorclient.gui.widgets;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.RenderUtils;
 import org.lwjgl.opengl.GL11;
@@ -9,7 +9,7 @@ public class WDebugRenderer {
     private static final Color color = new Color(25, 25, 255);
 
     public static void render(WWidget widget, boolean beginEndLines) {
-        GlStateManager.disableTexture();
+        RenderSystem.disableTexture();
         GL11.glLineWidth(1);
         if (beginEndLines) RenderUtils.beginLines();
         line(widget.boundingBox.x, widget.boundingBox.y, widget.boundingBox.x + widget.boundingBox.getWidth(), widget.boundingBox.y);

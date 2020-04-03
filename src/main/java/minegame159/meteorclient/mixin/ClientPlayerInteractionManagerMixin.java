@@ -25,7 +25,7 @@ public class ClientPlayerInteractionManagerMixin {
         if (event.isCancelled()) info.cancel();
     }
 
-    @Inject(method = "method_2902", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "attackBlock", at = @At("HEAD"), cancellable = true)
     private void onAttackBlock(BlockPos blockPos, Direction direction, CallbackInfoReturnable<Boolean> info) {
         StartBreakingBlockEvent event = EventStore.startBreakingBlockEvent(blockPos, direction);
         MeteorClient.EVENT_BUS.post(event);

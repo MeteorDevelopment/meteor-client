@@ -2,6 +2,7 @@ package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.Config;
 import minegame159.meteorclient.gui.screens.AutoCraftScreen;
+import minegame159.meteorclient.utils.InvUtils;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.ContainerScreen;
@@ -70,7 +71,7 @@ public abstract class CraftingTableScreenMixin extends ContainerScreen<CraftingT
             //if (timer < 2) return;
 
             if (craftingI == 0) {
-                mc.interactionManager.method_2906(container.syncId, 0, 0, SlotActionType.QUICK_MOVE, mc.player);
+                InvUtils.clickSlot(0, 0, SlotActionType.QUICK_MOVE);
 
                 if (!getStack(0).isEmpty()) {
                     stopCrafting("Stopped because your inventory is full.");
@@ -117,13 +118,13 @@ public abstract class CraftingTableScreenMixin extends ContainerScreen<CraftingT
     }
 
     private void moveIngredients(int from, int to) {
-        mc.interactionManager.method_2906(container.syncId, from, 0, SlotActionType.PICKUP, mc.player);
+        InvUtils.clickSlot(from, 0, SlotActionType.PICKUP);
 
         if (Config.INSTANCE.autoCraft.isCraftByOne()) {
-            mc.interactionManager.method_2906(container.syncId, to, 1, SlotActionType.PICKUP, mc.player);
-            mc.interactionManager.method_2906(container.syncId, from, 0, SlotActionType.PICKUP, mc.player);
+            InvUtils.clickSlot(to, 1, SlotActionType.PICKUP);
+            InvUtils.clickSlot(from, 0, SlotActionType.PICKUP);
         } else {
-            mc.interactionManager.method_2906(container.syncId, to, 0, SlotActionType.PICKUP, mc.player);
+            InvUtils.clickSlot(to, 0, SlotActionType.PICKUP);
         }
     }
 

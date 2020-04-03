@@ -137,8 +137,8 @@ public class WTextBox extends WWidget {
 
         if (overflowWidth > 0) {
             GL11.glEnable(GL11.GL_SCISSOR_TEST);
-            double scaleFactor = MinecraftClient.getInstance().window.getScaleFactor();
-            GL11.glScissor((int) (boundingBox.getInnerX() * scaleFactor), (int) ((MinecraftClient.getInstance().window.getScaledHeight() - boundingBox.getInnerY() - boundingBox.innerHeight) * scaleFactor), (int) (boundingBox.innerWidth * scaleFactor), (int) (boundingBox.innerHeight * scaleFactor));
+            double scaleFactor = MinecraftClient.getInstance().getWindow().getScaleFactor();
+            GL11.glScissor((int) (boundingBox.getInnerX() * scaleFactor), (int) ((MinecraftClient.getInstance().getWindow().getScaledHeight() - boundingBox.getInnerY() - boundingBox.innerHeight) * scaleFactor), (int) (boundingBox.innerWidth * scaleFactor), (int) (boundingBox.innerHeight * scaleFactor));
         }
         Utils.drawText(text, (float) (boundingBox.getInnerX() - overflowWidth), (float) boundingBox.getInnerY() + 1, GUI.textC);
         if (overflowWidth > 0) {

@@ -69,7 +69,7 @@ public class ItemListSetting extends Setting<List<Item>> {
 
         ListTag valueTag = new ListTag();
         for (Item item : get()) {
-            valueTag.add(new StringTag(Registry.ITEM.getId(item).toString()));
+            valueTag.add(StringTag.of(Registry.ITEM.getId(item).toString()));
         }
         tag.put("value", valueTag);
 

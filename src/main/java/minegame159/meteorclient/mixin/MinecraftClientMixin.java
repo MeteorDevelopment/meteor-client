@@ -8,6 +8,7 @@ import minegame159.meteorclient.mixininterface.IMinecraftClient;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.Mouse;
+import net.minecraft.client.RunArgs;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.Session;
 import net.minecraft.client.util.Window;
@@ -20,6 +21,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.net.Proxy;
+import java.util.concurrent.CompletableFuture;
 
 @Mixin(MinecraftClient.class)
 public abstract class MinecraftClientMixin implements IMinecraftClient {
@@ -33,14 +35,18 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
 
     @Shadow public Mouse mouse;
 
-    @Shadow public Window window;
+    @Shadow private Window window;
 
     @Shadow @Final private Proxy netProxy;
 
     @Shadow private Session session;
 
-    @Inject(method = "init", at = @At("TAIL"))
-    private void onInit(CallbackInfo info) {
+    @Shadow public abstract CompletableFuture<Void> reloadResources();
+
+    @Shadow private static int currentFps;
+
+    @Inject(method = "<init>", at = @At("TAIL"))
+    private void onInit(RunArgs args, CallbackInfo info) {
         MeteorClient.INSTANCE.onInitializeClient();
     }
 
@@ -85,5 +91,10 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
     @Override
     public void setSession(Session session) {
         this.session = session;
+    }
+
+    @Override
+    public int getFps() {
+        return currentFps;
     }
 }

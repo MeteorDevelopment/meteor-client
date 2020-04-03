@@ -137,8 +137,8 @@ public class ElytraPlus extends ToggleModule {
             handleHorizontalSpeed();
             handleVerticalSpeed();
 
-            int chunkX = (int) ((mc.player.x + velX) / 16);
-            int chunkZ = (int) ((mc.player.z + velZ) / 16);
+            int chunkX = (int) ((mc.player.getX() + velX) / 16);
+            int chunkZ = (int) ((mc.player.getZ() + velZ) / 16);
             if (dontGoIntoUnloadedChunks.get()) {
                 if (mc.world.getChunkManager().isChunkLoaded(chunkX, chunkZ)) {
                     ((IVec3d) event.movement).set(velX, velY, velZ);
@@ -167,7 +167,7 @@ public class ElytraPlus extends ToggleModule {
         if (autopilot.get()) {
             ((IKeyBinding) mc.options.keyForward).setPressed(true);
 
-            if (mc.player.y < autopilotMinimumHeight.get() && !decrementFireworkTimer) {
+            if (mc.player.getY() < autopilotMinimumHeight.get() && !decrementFireworkTimer) {
                 int slot = InvUtils.findItemInHotbar(Items.FIREWORK_ROCKET, itemStack -> true);
                 if (slot != -1) {
                     mc.player.inventory.selectedSlot = slot;

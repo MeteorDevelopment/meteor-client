@@ -1,6 +1,7 @@
 package minegame159.meteorclient.mixin;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.modules.ModuleManager;
@@ -27,17 +28,17 @@ public abstract class InGameHudMixin {
     private void onRender(float tickDelta, CallbackInfo info) {
         client.getProfiler().swap("meteor-client_render");
 
-        GlStateManager.enableBlend();
-        GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-        GlStateManager.lineWidth(1);
+        RenderSystem.enableBlend();
+        RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA);
+        RenderSystem.lineWidth(1);
         GL11.glEnable(GL11.GL_LINE_SMOOTH);
 
         MeteorClient.EVENT_BUS.post(EventStore.render2DEvent(scaledWidth, scaledHeight, tickDelta));
 
         GL11.glDisable(GL11.GL_LINE_SMOOTH);
-        GlStateManager.lineWidth(1);
-        GlStateManager.disableBlend();
-        GlStateManager.disableBlend();
+        RenderSystem.lineWidth(1);
+        RenderSystem.disableBlend();
+        RenderSystem.disableBlend();
     }
 
     @Inject(method = "renderStatusEffectOverlay", at = @At("HEAD"), cancellable = true)

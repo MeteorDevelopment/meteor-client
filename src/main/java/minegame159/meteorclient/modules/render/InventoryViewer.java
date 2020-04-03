@@ -1,6 +1,6 @@
 package minegame159.meteorclient.modules.render;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.Render2DEvent;
@@ -71,7 +71,7 @@ public class InventoryViewer extends ToggleModule {
         int y = getY(event.screenHeight);
 
         if (drawBackground.get()) drawBackground(x, y);
-        DiffuseLighting.enableForItems();
+        DiffuseLighting.enable();
 
         for (int row = 0; row < 3; row++) {
             for (int i = 0; i < 9; i++) {
@@ -79,7 +79,7 @@ public class InventoryViewer extends ToggleModule {
             }
         }
 
-        GlStateManager.disableLighting();
+        DiffuseLighting.disable();
     });
 
     private void drawItem(ItemStack itemStack, int x, int y) {
@@ -88,7 +88,7 @@ public class InventoryViewer extends ToggleModule {
     }
 
     private void drawBackground(int x, int y) {
-        GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         mc.getTextureManager().bindTexture(TEXTURE);
         DrawableHelper.blit(x, y, 0, 0, 0, width,height, height, width);
     }

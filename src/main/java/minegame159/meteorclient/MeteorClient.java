@@ -120,6 +120,26 @@ public class MeteorClient implements ClientModInitializer, Listenable {
             }
         }
 
+        /*FontStorage fontStorage = new FontStorage(mc.getTextureManager(), new Identifier("meteor-client", "font"));
+        List<Font> fonts = new ArrayList<>(1);
+
+        try {
+            InputStream in = new FileInputStream(fontFile);
+            ByteBuffer buffer = TextureUtil.readResource(in);
+            buffer.flip();
+
+            STBTTFontinfo fontInfo = STBTTFontinfo.malloc();
+            STBTruetype.stbtt_InitFont(fontInfo, buffer);
+
+            in.close();
+
+            fonts.add(new TrueTypeFont(buffer, fontInfo, 12, 0, 0, 0, ""));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        fontStorage.setFonts(fonts);
+        TEXT_RENDERER = new TextRenderer(mc.getTextureManager(), fontStorage);*/
         try {
             TEXT_RENDERER = new CFontRenderer(Font.createFont(Font.TRUETYPE_FONT, fontFile).deriveFont(18f), true, true);
         } catch (FontFormatException | IOException e) {

@@ -84,9 +84,9 @@ public class HoleESP extends ToggleModule {
         for (Hole hole : holes) holePool.free(hole);
         holes.clear();
 
-        for (int x = (int) mc.player.x - horizontalRadius.get(); x <= (int) mc.player.x + horizontalRadius.get(); x++) {
-            for (int y = (int) mc.player.y - verticalRadius.get(); y <= (int) mc.player.y + verticalRadius.get(); y++) {
-                for (int z = (int) mc.player.z - horizontalRadius.get(); z <= (int) mc.player.z + horizontalRadius.get(); z++) {
+        for (int x = (int) mc.player.getX() - horizontalRadius.get(); x <= (int) mc.player.getX() + horizontalRadius.get(); x++) {
+            for (int y = (int) mc.player.getY() - verticalRadius.get(); y <= (int) mc.player.getY() + verticalRadius.get(); y++) {
+                for (int z = (int) mc.player.getZ() - horizontalRadius.get(); z <= (int) mc.player.getZ() + horizontalRadius.get(); z++) {
                     blockPos.set(x, y, z);
 
                     Block bottom = mc.world.getBlockState(add(0, -1, 0)).getBlock();

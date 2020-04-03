@@ -14,7 +14,7 @@ public class InvUtils {
     private static FindItemResult findItemResult = new FindItemResult();
 
     public static void clickSlot(int slot, int button, SlotActionType action) {
-        mc.interactionManager.method_2906(mc.player.container.syncId, slot, button, action, mc.player);
+        mc.interactionManager.clickSlot(mc.player.container.syncId, slot, button, action, mc.player);
     }
 
     public static FindItemResult findItemWithCount(Item item) {

@@ -34,11 +34,11 @@ public abstract class ChatHudMixin {
 
     @Shadow private int scrolledLines;
 
-    @Shadow private boolean field_2067;
-
     @Shadow public abstract void scroll(double amount);
 
     @Shadow @Final private List<ChatHudLine> messages;
+
+    @Shadow private boolean hasUnreadNewMessages;
 
     @Inject(at = @At("HEAD"), method = "addMessage(Lnet/minecraft/text/Text;IIZ)V", cancellable = true)
     private void onAddMessage(Text message, int messageId, int timestamp, boolean bl, CallbackInfo info) {
@@ -54,7 +54,7 @@ public abstract class ChatHudMixin {
         for(Iterator var8 = list.iterator(); var8.hasNext(); this.visibleMessages.add(0, new ChatHudLine(timestamp, text, messageId))) {
             text = (Text)var8.next();
             if (bl2 && this.scrolledLines > 0) {
-                this.field_2067 = true;
+                this.hasUnreadNewMessages = true;
                 this.scroll(1.0D);
             }
         }

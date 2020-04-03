@@ -5,7 +5,6 @@ import minegame159.meteorclient.gui.WidgetLayout;
 import minegame159.meteorclient.modules.setting.GUI;
 import minegame159.meteorclient.utils.*;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.ingame.MinecartCommandBlockScreen;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -167,7 +166,7 @@ public class WWidget {
         if (!visible) return;
         onRender(delta);
         for (WWidget widget : widgets) {
-            if (widget.boundingBox.y > MinecraftClient.getInstance().window.getScaledHeight()) break;
+            if (widget.boundingBox.y > MinecraftClient.getInstance().getWindow().getScaledHeight()) break;
             widget.render(delta);
         }
     }
@@ -177,7 +176,7 @@ public class WWidget {
         if (!visible) return;
         onRenderPost(delta);
         for (WWidget widget : widgets) {
-            if (widget.boundingBox.y > MinecraftClient.getInstance().window.getScaledHeight()) break;
+            if (widget.boundingBox.y > MinecraftClient.getInstance().getWindow().getScaledHeight()) break;
             widget.renderPost(delta, mouseX, mouseY);
         }
     }

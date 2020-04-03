@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(BackgroundRenderer.class)
 public class BackgroundRendererMixin {
     @Inject(method = "applyFog", at = @At("HEAD"), cancellable = true)
-    private void onApplyFog(Camera camera, int i, CallbackInfo info) {
+    private static void onApplyFog(Camera camera, BackgroundRenderer.FogType fogType, float viewDistance, boolean thickFog, CallbackInfo info) {
         if (ModuleManager.INSTANCE.isActive(AntiFog.class) || ModuleManager.INSTANCE.isActive(XRay.class)) info.cancel();
     }
 }

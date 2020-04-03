@@ -65,7 +65,7 @@ public class FriendManager extends Savable<FriendManager> {
         CompoundTag tag = new CompoundTag();
 
         ListTag friendsTag = new ListTag();
-        for (String friend : friends) friendsTag.add(new StringTag(friend));
+        for (String friend : friends) friendsTag.add(StringTag.of(friend));
         tag.put("friends", friendsTag);
 
         return tag;

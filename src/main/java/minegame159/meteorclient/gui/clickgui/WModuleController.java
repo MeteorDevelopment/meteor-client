@@ -53,7 +53,7 @@ public class WModuleController extends WWidget {
             box.height = child.boundingBox.getHeight();
 
             if (automatic) {
-                if (box.x + box.width > MinecraftClient.getInstance().window.getScaledWidth()) {
+                if (box.x + box.width > MinecraftClient.getInstance().getWindow().getScaledWidth()) {
                     box.x = 10;
                     box.y += 10 + box.height + 10;
                 }

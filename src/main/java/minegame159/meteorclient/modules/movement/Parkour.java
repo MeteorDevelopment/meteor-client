@@ -24,7 +24,7 @@ public class Parkour extends ToggleModule {
         Box box = mc.player.getBoundingBox();
         Box adjustedBox = box.offset(0, -0.5, 0).expand(-0.001, 0, -0.001);
 
-        Stream<VoxelShape> blockCollisions = mc.world.method_20812(mc.player, adjustedBox);
+        Stream<VoxelShape> blockCollisions = mc.world.getBlockCollisions(mc.player, adjustedBox);
 
         if(blockCollisions.findAny().isPresent()) return;
 

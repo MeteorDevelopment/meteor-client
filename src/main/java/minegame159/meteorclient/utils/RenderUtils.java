@@ -1,6 +1,6 @@
 package minegame159.meteorclient.utils;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormats;
@@ -11,13 +11,17 @@ import org.lwjgl.opengl.GL11;
 public class RenderUtils {
      private static Tessellator lineTesselator = new Tessellator(1000);
      private static BufferBuilder lineBuf = lineTesselator.getBuffer();
+     private static double lineOX, lineOY, lineOZ;
 
      private static Tessellator quadTesselator = new Tessellator(1000);
      private static BufferBuilder quadBuf = quadTesselator.getBuffer();
+     private static double quadOX, quadOY, quadOZ;
 
      public static void beginLines(double oX, double oY, double oZ) {
          lineBuf.begin(GL11.GL_LINES, VertexFormats.POSITION_COLOR);
-         lineBuf.setOffset(oX, oY, oZ);
+         lineOX = oX;
+         lineOY = oY;
+         lineOZ = oZ;
      }
      public static void beginLines() {
          beginLines(0, 0, 0);
@@ -27,8 +31,8 @@ public class RenderUtils {
      }
 
      public static void line(double x1, double y1, double z1, double x2, double y2, double z2, Color color) {
-         lineBuf.vertex(x1, y1, z1).color(color.r, color.g, color.b, color.a).next();
-         lineBuf.vertex(x2, y2, z2).color(color.r, color.g, color.b, color.a).next();
+         lineBuf.vertex(x1 + lineOX, y1 + lineOY, z1 + lineOZ).color(color.r, color.g, color.b, color.a).next();
+         lineBuf.vertex(x2 + lineOX, y2 + lineOY, z2 + lineOZ).color(color.r, color.g, color.b, color.a).next();
      }
      public static void line(double x1, double y1, double x2, double y2, Color color) {
          line(x1, y1, 0, x2, y2, 0, color);
@@ -64,21 +68,23 @@ public class RenderUtils {
 
      public static void beginQuads(double oX, double oY, double oZ) {
          quadBuf.begin(GL11.GL_QUADS, VertexFormats.POSITION_COLOR);
-         quadBuf.setOffset(oX, oY, oZ);
+         quadOX = oX;
+         quadOY = oY;
+         quadOZ = oZ;
      }
      public static void beginQuads() {
          beginQuads(0, 0, 0);
      }
      public static void endQuads() {
-         GlStateManager.disableCull();
+         RenderSystem.disableCull();
          quadTesselator.draw();
      }
 
      public static void quad(double x1, double y1, double z1, double x2, double y2, double z2, double x3, double y3, double z3, double x4, double y4, double z4, Color color) {
-         quadBuf.vertex(x1, y1, z1).color(color.r, color.g, color.b, color.a).next();
-         quadBuf.vertex(x2, y2, z2).color(color.r, color.g, color.b, color.a).next();
-         quadBuf.vertex(x3, y3, z3).color(color.r, color.g, color.b, color.a).next();
-         quadBuf.vertex(x4, y4, z4).color(color.r, color.g, color.b, color.a).next();
+         quadBuf.vertex(x1 + quadOX, y1 + quadOY, z1 + quadOZ).color(color.r, color.g, color.b, color.a).next();
+         quadBuf.vertex(x2 + quadOX, y2 + quadOY, z2 + quadOZ).color(color.r, color.g, color.b, color.a).next();
+         quadBuf.vertex(x3 + quadOX, y3 + quadOY, z3 + quadOZ).color(color.r, color.g, color.b, color.a).next();
+         quadBuf.vertex(x4 + quadOX, y4 + quadOY, z4 + quadOZ).color(color.r, color.g, color.b, color.a).next();
      }
 
      public static void quad(double x, double y, double width, double height, Color color) {

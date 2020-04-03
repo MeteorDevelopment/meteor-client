@@ -30,7 +30,7 @@ public class WWindow extends WVerticalList {
         header = super.add(new Header(title, this));
 
         list = super.add(new WVerticalList(spacing));
-        list.maxHeight = MinecraftClient.getInstance().window.getScaledHeight() - 64;
+        list.maxHeight = MinecraftClient.getInstance().getWindow().getScaledHeight() - 64;
         list.boundingBox.setMargin(horizontalMargin, 0);
         list.boundingBox.marginBottom = 4;
     }
@@ -119,7 +119,7 @@ public class WWindow extends WVerticalList {
         else {
             if (!visible) return;
             for (WWidget widget : widgets) {
-                if (widget.boundingBox.y > MinecraftClient.getInstance().window.getScaledHeight()) break;
+                if (widget.boundingBox.y > MinecraftClient.getInstance().getWindow().getScaledHeight()) break;
                 if (!expanded) if (widget != header) continue;
                 widget.render(delta);
             }
@@ -132,7 +132,7 @@ public class WWindow extends WVerticalList {
         else {
             if (!visible) return;
             for (WWidget widget : widgets) {
-                if (widget.boundingBox.y > MinecraftClient.getInstance().window.getScaledHeight()) break;
+                if (widget.boundingBox.y > MinecraftClient.getInstance().getWindow().getScaledHeight()) break;
                 if (!expanded) if (widget != header) continue;
                 widget.renderPost(delta, mouseX, mouseY);
             }

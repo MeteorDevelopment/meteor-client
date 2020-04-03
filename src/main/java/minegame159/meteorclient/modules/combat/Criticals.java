@@ -25,9 +25,9 @@ public class Criticals extends ToggleModule {
     private Listener<AttackEntityEvent> onAttackEntity = new Listener<>(event -> {
         if (!shouldDoCriticals()) return;
 
-        double x = mc.player.x;
-        double y = mc.player.y;
-        double z = mc.player.z;
+        double x = mc.player.getX();
+        double y = mc.player.getY();
+        double z = mc.player.getZ();
 
         mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(x, y + 0.0625, z, true));
         mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(x, y, z, false));

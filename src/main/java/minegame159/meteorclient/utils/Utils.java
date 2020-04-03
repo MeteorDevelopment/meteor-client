@@ -7,6 +7,7 @@ import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.util.math.Matrix4f;
 import net.minecraft.entity.EntityContext;
 import net.minecraft.item.*;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
@@ -76,7 +77,7 @@ public class Utils {
 
     public static boolean place(BlockState blockState, BlockPos blockPos) {
         // Calculate eyes pos
-        ((IVec3d) eyesPos).set(mc.player.x, mc.player.y + mc.player.getEyeHeight(mc.player.getPose()), mc.player.z);
+        ((IVec3d) eyesPos).set(mc.player.getX(), mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()), mc.player.getZ());
 
         // Check if current block is replaceable
         if (!mc.world.getBlockState(blockPos).getMaterial().isReplaceable()) return false;
@@ -116,13 +117,13 @@ public class Utils {
     }
 
     public static float getNeededYaw(Vec3d vec) {
-        return mc.player.yaw + MathHelper.wrapDegrees((float) Math.toDegrees(Math.atan2(vec.z - mc.player.z, vec.x - mc.player.x)) - 90f - mc.player.yaw);
+        return mc.player.yaw + MathHelper.wrapDegrees((float) Math.toDegrees(Math.atan2(vec.z - mc.player.getZ(), vec.x - mc.player.getX())) - 90f - mc.player.yaw);
     }
 
     public static float getNeededPitch(Vec3d vec) {
-        double diffX = vec.x - mc.player.x;
-        double diffY = vec.y - (mc.player.y + mc.player.getEyeHeight(mc.player.getPose()));
-        double diffZ = vec.z - mc.player.z;
+        double diffX = vec.x - mc.player.getX();
+        double diffY = vec.y - (mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()));
+        double diffZ = vec.z - mc.player.getZ();
 
         double diffXZ = Math.sqrt(diffX * diffX + diffZ * diffZ);
 
@@ -147,8 +148,15 @@ public class Utils {
     public static void drawText(String text, float x, float y, int color) {
         MeteorClient.TEXT_RENDERER.drawString(text, x, y + 1, color);
     }
+    public static void drawText(Matrix4f matrix4f, String text, float x, float y, int color) {
+        MeteorClient.TEXT_RENDERER.drawString(matrix4f, text, x, y + 1, color);
+    }
+
     public static void drawTextWithShadow(String text, float x, float y, int color) {
         MeteorClient.TEXT_RENDERER.drawStringWithShadow(text, x, y + 1, color);
+    }
+    public static void drawTextWithShadow(Matrix4f matrix4f, String text, float x, float y, int color) {
+        MeteorClient.TEXT_RENDERER.drawStringWithShadow(matrix4f, text, x, y + 1, color);
     }
 
     public static void sendMessage(String msg, Object... args) {

@@ -1,5 +1,6 @@
 package minegame159.meteorclient.mixin;
 
+import minegame159.meteorclient.utils.InvUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.ContainerScreen;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
@@ -23,7 +24,7 @@ public abstract class GenericContainerScreenMixin extends ContainerScreen<Generi
         // Steal
         addButton(new ButtonWidget(x + containerWidth - 50 - 7, y + 3, 50, 12, "Steal", button -> {
             for (int i = 0; i < container.getRows() * 9; i++) {
-                MinecraftClient.getInstance().interactionManager.method_2906(container.syncId, i, 0, SlotActionType.QUICK_MOVE, playerInventory.player);
+                InvUtils.clickSlot(i, 0, SlotActionType.QUICK_MOVE);
             }
 
             boolean empty = true;
@@ -40,7 +41,7 @@ public abstract class GenericContainerScreenMixin extends ContainerScreen<Generi
         // Dump
         addButton(new ButtonWidget(x + containerWidth - 50 - 7, y + this.containerHeight - 96 - 1, 50, 12, "Dump", button -> {
             for (int i = container.getRows() * 9; i < container.getRows() * 9 + 1 + 3 * 9; i++) {
-                MinecraftClient.getInstance().interactionManager.method_2906(container.syncId, i, 0, SlotActionType.QUICK_MOVE, playerInventory.player);
+                InvUtils.clickSlot(i, 0, SlotActionType.QUICK_MOVE);
             }
         }));
     }

@@ -1,8 +1,10 @@
 package minegame159.meteorclient.font;
 
+import net.minecraft.client.texture.AbstractTexture;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.NativeImageBackedTexture;
-import net.minecraft.client.texture.Texture;
+import net.minecraft.client.util.math.Matrix4f;
+import net.minecraft.client.util.math.Vector4f;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 
@@ -21,7 +23,9 @@ public class CFont {
     protected boolean fractionalMetrics;
     protected int fontHeight = -1;
     protected int charOffset = 0;
-    protected Texture tex;
+    protected AbstractTexture tex;
+
+    private Vector4f pos = new Vector4f();
 
     public CFont(Font font, boolean antiAlias, boolean fractionalMetrics) {
         this.font = font;
@@ -30,7 +34,7 @@ public class CFont {
         tex = setupTexture(font, antiAlias, fractionalMetrics, this.charData);
     }
 
-    protected Texture setupTexture(Font font, boolean antiAlias, boolean fractionalMetrics, CharData[] chars) {
+    protected AbstractTexture setupTexture(Font font, boolean antiAlias, boolean fractionalMetrics, CharData[] chars) {
         BufferedImage img = generateFontImage(font, antiAlias, fractionalMetrics, chars);
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -88,31 +92,34 @@ public class CFont {
         return bufferedImage;
     }
 
-    public void drawChar(CharData[] chars, char c, float x, float y) throws ArrayIndexOutOfBoundsException {
+    public void drawChar(Matrix4f matrix4f, CharData[] chars, char c, float x, float y) throws ArrayIndexOutOfBoundsException {
         try {
-            drawQuad(x, y, chars[c].width, chars[c].height, chars[c].storedX, chars[c].storedY, chars[c].width, chars[c].height);
+            drawQuad(matrix4f, x, y, chars[c].width, chars[c].height, chars[c].storedX, chars[c].storedY, chars[c].width, chars[c].height);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    protected void drawQuad(float x, float y, float width, float height, float srcX, float srcY, float srcWidth, float srcHeight) {
+    protected void drawQuad(Matrix4f matrix4f, float x, float y, float width, float height, float srcX, float srcY, float srcWidth, float srcHeight) {
         float renderSRCX = srcX / imgSize;
         float renderSRCY = srcY / imgSize;
         float renderSRCWidth = srcWidth / imgSize;
         float renderSRCHeight = srcHeight / imgSize;
-        GL11.glTexCoord2f(renderSRCX + renderSRCWidth, renderSRCY);
-        GL11.glVertex2d(x + width, y);
-        GL11.glTexCoord2f(renderSRCX, renderSRCY);
-        GL11.glVertex2d(x, y);
-        GL11.glTexCoord2f(renderSRCX, renderSRCY + renderSRCHeight);
-        GL11.glVertex2d(x, y + height);
-        GL11.glTexCoord2f(renderSRCX, renderSRCY + renderSRCHeight);
-        GL11.glVertex2d(x, y + height);
-        GL11.glTexCoord2f(renderSRCX + renderSRCWidth, renderSRCY + renderSRCHeight);
-        GL11.glVertex2d(x + width, y + height);
-        GL11.glTexCoord2f(renderSRCX + renderSRCWidth, renderSRCY);
-        GL11.glVertex2d(x + width, y);
+
+        drawVertex(matrix4f, x + width, y, renderSRCX + renderSRCWidth, renderSRCY);
+        drawVertex(matrix4f, x, y, renderSRCX, renderSRCY);
+        drawVertex(matrix4f, x, y + height, renderSRCX, renderSRCY + renderSRCHeight);
+        drawVertex(matrix4f, x, y + height, renderSRCX, renderSRCY + renderSRCHeight);
+        drawVertex(matrix4f, x + width, y + height, renderSRCX + renderSRCWidth, renderSRCY + renderSRCHeight);
+        drawVertex(matrix4f, x + width, y, renderSRCX + renderSRCWidth, renderSRCY);
+    }
+
+    private void drawVertex(Matrix4f matrix4f, float x, float y, float srcX, float srcY) {
+        pos.set(x, y, 0, 1);
+        pos.transform(matrix4f);
+
+        GL11.glTexCoord2f(srcX, srcY);
+        GL11.glVertex2d(pos.getX(), pos.getY());
     }
 
     public int getStringHeight(String text) {

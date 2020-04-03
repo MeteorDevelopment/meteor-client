@@ -2,7 +2,7 @@ package minegame159.meteorclient.modules.misc;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.MeteorClient;
@@ -76,7 +76,7 @@ public class StashFinder extends ToggleModule {
                     else timer += currentTime - lastTime;
 
                     manager.getGame().getTextureManager().bindTexture(new Identifier("textures/gui/toasts.png"));
-                    GlStateManager.color4f(1.0F, 1.0F, 1.0F, 255.0F);
+                    RenderSystem.color4f(1.0F, 1.0F, 1.0F, 255.0F);
                     manager.blit(0, 0, 0, 32, 160, 32);
 
                     manager.getGame().textRenderer.draw("StashRecorder found stash.", 12.0F, 12.0F, -11534256);

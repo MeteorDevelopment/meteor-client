@@ -94,14 +94,14 @@ public class Tracers extends ToggleModule {
     private void render(Entity entity, Color color, RenderEvent event) {
         Vec3d vec2 = entity.getPos().add(0, entity.getEyeHeight(entity.getPose()), 0);
         double y = (entity.getBoundingBox().y2 - entity.getBoundingBox().y1) / 2.0;
-        RenderUtils.line(vec1.x - (mc.cameraEntity.x - event.offsetX), vec1.y - (mc.cameraEntity.y - event.offsetY), vec1.z - (mc.cameraEntity.z - event.offsetZ), vec2.x, vec2.y - y, vec2.z, color);
+        RenderUtils.line(vec1.x - (mc.cameraEntity.getX() - event.offsetX), vec1.y - (mc.cameraEntity.getY() - event.offsetY), vec1.z - (mc.cameraEntity.getZ() - event.offsetZ), vec2.x, vec2.y - y, vec2.z, color);
 
         count++;
     }
 
     private void render(BlockEntity blockEntity, RenderEvent event) {
         BlockPos pos = blockEntity.getPos();
-        RenderUtils.line(vec1.x - (mc.cameraEntity.x - event.offsetX), vec1.y - (mc.cameraEntity.y - event.offsetY), vec1.z - (mc.cameraEntity.z - event.offsetZ), pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5f, storageColor.get());
+        RenderUtils.line(vec1.x - (mc.cameraEntity.getX() - event.offsetX), vec1.y - (mc.cameraEntity.getY() - event.offsetY), vec1.z - (mc.cameraEntity.getZ() - event.offsetZ), pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5f, storageColor.get());
 
         count++;
     }

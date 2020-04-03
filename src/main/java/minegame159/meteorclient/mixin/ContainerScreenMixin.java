@@ -1,6 +1,6 @@
 package minegame159.meteorclient.mixin;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
@@ -35,12 +35,12 @@ public class ContainerScreenMixin {
                     DefaultedList<ItemStack> itemStacks = DefaultedList.ofSize(27, ItemStack.EMPTY);
                     Inventories.fromTag(compoundTag, itemStacks);
 
-                    GlStateManager.disableLighting();
-                    GlStateManager.disableDepthTest();
+                    RenderSystem.disableLighting();
+                    RenderSystem.disableDepthTest();
 
                     mc = MinecraftClient.getInstance();
                     drawBackground(mouseX + 6, mouseY + 6);
-                    DiffuseLighting.enableForItems();
+                    DiffuseLighting.enable();
 
                     int row = 0;
                     int i = 0;
@@ -54,8 +54,8 @@ public class ContainerScreenMixin {
                         }
                     }
 
-                    GlStateManager.enableLighting();
-                    GlStateManager.enableDepthTest();
+                    DiffuseLighting.disable();
+                    RenderSystem.enableDepthTest();
                 }
             }
         }
@@ -74,7 +74,7 @@ public class ContainerScreenMixin {
     }
 
     private void drawBackground(int x, int y) {
-        GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         mc.getTextureManager().bindTexture(TEXTURE);
         int width = 176;
         int height = 67;

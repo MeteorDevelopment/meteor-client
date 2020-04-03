@@ -111,9 +111,9 @@ public class AutoArmor extends ToggleModule {
             if (mc.world.dimension.getType() != DimensionType.OVERWORLD) {
                 for (BlockEntity blockEntity : mc.world.blockEntities) {
                     if (blockEntity instanceof BedBlockEntity) {
-                        float f = (float) (mc.player.x - blockEntity.getPos().getX());
-                        float g = (float) (mc.player.y - blockEntity.getPos().getY());
-                        float h = (float) (mc.player.z - blockEntity.getPos().getZ());
+                        float f = (float) (mc.player.getX() - blockEntity.getPos().getX());
+                        float g = (float) (mc.player.getY() - blockEntity.getPos().getY());
+                        float h = (float) (mc.player.getZ() - blockEntity.getPos().getZ());
                         float distance = MathHelper.sqrt(f * f + g * g + h * h);
 
                         if (distance <= crystalAndBedDetectionDistance.get()) {

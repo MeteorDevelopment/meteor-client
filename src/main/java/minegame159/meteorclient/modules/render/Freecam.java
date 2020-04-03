@@ -88,8 +88,6 @@ public class Freecam extends ToggleModule {
         if (mc.options.keyJump.isPressed()) vel = vel.add(0, speed, 0);
         if (mc.options.keySneak.isPressed()) vel = vel.subtract(0, speed, 0);
 
-        camera.x += vel.x;
-        camera.y += vel.y;
-        camera.z += vel.z;
+        camera.setPos(camera.getX() + vel.x, camera.getY() + vel.y, camera.getZ() + vel.z);
     });
 }

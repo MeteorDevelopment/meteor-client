@@ -1,7 +1,9 @@
 package minegame159.meteorclient.font;
 
-import com.mojang.blaze3d.platform.GlStateManager;
-import net.minecraft.client.texture.Texture;
+import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.texture.AbstractTexture;
+import net.minecraft.client.util.math.Matrix4f;
+import net.minecraft.client.util.math.Rotation3;
 import org.lwjgl.opengl.GL11;
 
 import java.awt.*;
@@ -23,23 +25,20 @@ public class CFontRenderer extends CFont {
     }
 
     public float drawStringWithShadow(String text, double x, double y, int color) {
-        float shadowWidth = drawString(text, x + 1D, y + 1D, color, true);
-        return Math.max(shadowWidth, drawString(text, x, y, color, false));
+        return drawStringWithShadow(Rotation3.identity().getMatrix(), text, x, y, color);
+    }
+    public float drawStringWithShadow(Matrix4f matrix4f, String text, double x, double y, int color) {
+        float shadowWidth = drawString(matrix4f, text, x + 1D, y + 1D, color, true);
+        return Math.max(shadowWidth, drawString(matrix4f, text, x, y, color, false));
     }
 
-    public float drawString(String text, float x, float y, int color) {
-        return drawString(text, x, y, color, false);
+    public float drawString(String text, double x, double y, int color) {
+        return drawString(Rotation3.identity().getMatrix(), text, x, y, color);
     }
-
-    public float drawCenteredStringWithShadow(String text, float x, float y, int color) {
-        return drawStringWithShadow(text, x - getStringWidth(text) / 2f, y, color);
+    public float drawString(Matrix4f matrix4f, String text, double x, double y, int color) {
+        return drawString(matrix4f, text, x, y, color, false);
     }
-
-    public float drawCenteredString(String text, float x, float y, int color) {
-        return drawString(text, x - getStringWidth(text) / 2f, y, color);
-    }
-
-    public float drawString(String text, double x, double y, int color, boolean shadow) {
+    public float drawString(Matrix4f matrix4f, String text, double x, double y, int color, boolean shadow) {
         x -= 1;
         y -= 2;
         if (text == null) {
@@ -67,13 +66,13 @@ public class CFontRenderer extends CFont {
         x *= 2.0D;
         y *= 2.0D;
         if (render) {
-            GL11.glPushMatrix();
-            GlStateManager.scaled(0.5D, 0.5D, 0.5D);
-            GlStateManager.enableBlend();
-            GlStateManager.blendFunc(770, 771);
-            GlStateManager.color4f((color >> 16 & 0xFF) / 255.0F, (color >> 8 & 0xFF) / 255.0F, (color & 0xFF) / 255.0F, alpha);
+            RenderSystem.pushMatrix();
+            RenderSystem.scaled(0.5, 0.5, 0.5);
+            RenderSystem.enableBlend();
+            RenderSystem.blendFunc(770, 771);
+            RenderSystem.color4f((color >> 16 & 0xFF) / 255.0F, (color >> 8 & 0xFF) / 255.0F, (color & 0xFF) / 255.0F, alpha);
             int size = text.length();
-            GlStateManager.enableTexture();
+            RenderSystem.enableTexture();
             tex.bindTexture();
             for (int i = 0; i < size; i++) {
                 char character = text.charAt(i);
@@ -96,7 +95,7 @@ public class CFontRenderer extends CFont {
                         if ((colorIndex < 0) || (colorIndex > 15)) colorIndex = 15;
                         if (shadow) colorIndex += 16;
                         int colorcode = this.colorCode[colorIndex];
-                        GlStateManager.color4f((colorcode >> 16 & 0xFF) / 255.0F, (colorcode >> 8 & 0xFF) / 255.0F, (colorcode & 0xFF) / 255.0F, alpha);
+                        RenderSystem.color4f((colorcode >> 16 & 0xFF) / 255.0F, (colorcode >> 8 & 0xFF) / 255.0F, (colorcode & 0xFF) / 255.0F, alpha);
                     } else if (colorIndex == 16) randomCase = true;
                     else if (colorIndex == 17) {
                         bold = true;
@@ -132,7 +131,7 @@ public class CFontRenderer extends CFont {
                         randomCase = false;
                         underline = false;
                         strikethrough = false;
-                        GlStateManager.color4f((color >> 16 & 0xFF) / 255.0F, (color >> 8 & 0xFF) / 255.0F, (color & 0xFF) / 255.0F, alpha);
+                        RenderSystem.color4f((color >> 16 & 0xFF) / 255.0F, (color >> 8 & 0xFF) / 255.0F, (color & 0xFF) / 255.0F, alpha);
                         tex.bindTexture();
                         // GL11.glBindTexture(GL11.GL_TEXTURE_2D,
                         // tex.getGlTextureId());
@@ -141,7 +140,7 @@ public class CFontRenderer extends CFont {
                     i++;
                 } else if ((character < currentData.length) && (character >= 0)) {
                     GL11.glBegin(4);
-                    drawChar(currentData, character, (float) x, (float) y);
+                    drawChar(matrix4f, currentData, character, (float) x, (float) y);
                     GL11.glEnd();
                     if (strikethrough)
                         drawLine(x, y + currentData[character].height / 2f, x + currentData[character].width - 8.0D, y + currentData[character].height / 2, 1.0F);
@@ -211,9 +210,9 @@ public class CFontRenderer extends CFont {
         setupBoldItalicIDs();
     }
 
-    protected Texture texBold;
-    protected Texture texItalic;
-    protected Texture texItalicBold;
+    protected AbstractTexture texBold;
+    protected AbstractTexture texItalic;
+    protected AbstractTexture texItalicBold;
 
     private void setupBoldItalicIDs() {
         texBold = setupTexture(this.font.deriveFont(1), this.antiAlias, this.fractionalMetrics, this.boldChars);

@@ -1,6 +1,6 @@
 package minegame159.meteorclient.modules.render;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.EntityAddedEvent;
@@ -13,6 +13,7 @@ import minegame159.meteorclient.settings.ColorSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.RenderUtils;
+import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -74,10 +75,10 @@ public class LogoutSpot extends ToggleModule {
     private Listener<RenderEvent> onRender = new Listener<>(event -> {
         for (Entry player : players) player.render(event);
 
-        GlStateManager.disableDepthTest();
-        GlStateManager.disableTexture();
-        GlStateManager.disableLighting();
-        GlStateManager.enableBlend();
+        RenderSystem.disableDepthTest();
+        RenderSystem.disableTexture();
+        DiffuseLighting.disable();
+        RenderSystem.enableBlend();
     });
 
     @Override
@@ -93,9 +94,9 @@ public class LogoutSpot extends ToggleModule {
         public final int health, maxHealth;
 
         public Entry(LivingEntity entity) {
-            x = entity.x;
-            y = entity.y;
-            z = entity.z;
+            x = entity.getX();
+            y = entity.getY();
+            z = entity.getZ();
 
             width = entity.getBoundingBox().getXLength();
             height = entity.getBoundingBox().getZLength();
@@ -114,7 +115,7 @@ public class LogoutSpot extends ToggleModule {
             dist = Math.sqrt(a.getSquaredDistanceToCamera(x, y, z));
 
             RenderUtils.boxWithLines(x, y, z, width, height, sideColor, lineColor.get());
-            ModuleManager.INSTANCE.get(Nametags.class).render(dist, 0.5f, x + 0.5 - event.offsetX, y - event.offsetY, z + 0.5 - event.offsetZ, a.cameraYaw, a.cameraPitch, name, health, maxHealth);
+            ModuleManager.INSTANCE.get(Nametags.class).render(event.matrixStack, dist, 0.5f, x + 0.5 - event.offsetX, y - event.offsetY, z + 0.5 - event.offsetZ, a.camera.getYaw(), a.camera.getPitch(), name, health, maxHealth);
         }
     }
 }
