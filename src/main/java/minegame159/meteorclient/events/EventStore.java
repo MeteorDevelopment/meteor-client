@@ -9,6 +9,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MovementType;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.network.Packet;
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
 import net.minecraft.text.Text;
@@ -44,6 +45,7 @@ public class EventStore {
     private static AttackEntityEvent attackEntityEvent = new AttackEntityEvent();
     private static StartBreakingBlockEvent startBreakingBlockEvent = new StartBreakingBlockEvent();
     private static EntityDestroyEvent entityDestroyEvent = new EntityDestroyEvent();
+    private static DamageEvent damageEvent = new DamageEvent();
 
     public static PlaySoundPacketEvent playSoundPacketEvent(PlaySoundS2CPacket packet) {
         playSoundPacketEvent.packet = packet;
@@ -118,8 +120,9 @@ public class EventStore {
         return tickEvent;
     }
 
-    public static TookDamageEvent tookDamageEvent(LivingEntity entity) {
+    public static TookDamageEvent tookDamageEvent(LivingEntity entity, DamageSource source) {
         tookDamageEvent.entity = entity;
+        tookDamageEvent.source = source;
         return tookDamageEvent;
     }
 
@@ -181,5 +184,11 @@ public class EventStore {
     public static EntityDestroyEvent entityDestroyEvent(Entity entity) {
         entityDestroyEvent.entity = entity;
         return entityDestroyEvent;
+    }
+
+    public static DamageEvent damageEvent(LivingEntity entity, DamageSource source) {
+        damageEvent.entity = entity;
+        damageEvent.source = source;
+        return damageEvent;
     }
 }

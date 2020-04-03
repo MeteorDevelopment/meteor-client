@@ -2,6 +2,7 @@ package minegame159.meteorclient.modules.player;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
+import minegame159.meteorclient.events.DamageEvent;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
@@ -18,9 +19,12 @@ import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.damage.EntityDamageSource;
+import net.minecraft.entity.damage.NetherBedDamageSource;
 import net.minecraft.entity.decoration.EnderCrystalEntity;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.dimension.DimensionType;
 
@@ -79,6 +83,8 @@ public class AutoArmor extends ToggleModule {
     private BestItem leggings = new BestItem();
     private BestItem boots = new BestItem();
 
+    private boolean manageChestplate;
+
     public AutoArmor() {
         super(Category.Player, "auto-armor", "Automatically equips the best armor.");
     }
@@ -87,6 +93,10 @@ public class AutoArmor extends ToggleModule {
     private Listener<TickEvent> onTick = new Listener<>(event -> {
         if (mc.currentScreen != null) return;
 
+        doTick();
+    });
+
+    private void doTick() {
         Protection prePrioritizeProt = prioritizeProtection.get();
         if (switchToBlastProtWhenNearCrystalOrBed.get()) {
             // Check crystals
@@ -121,6 +131,15 @@ public class AutoArmor extends ToggleModule {
         leggings.reset();
         boots.reset();
 
+        // Check for elytra
+        checkElytra();
+
+        // Manage chestplate
+        if (manageChestplate) {
+            manageChestplate = false;
+            chestplate.manage = true;
+        }
+
         // Get best items
         for (int i = 0; i < mc.player.inventory.main.size(); i++) {
             ItemStack itemStack = mc.player.inventory.getInvStack(i);
@@ -150,9 +169,28 @@ public class AutoArmor extends ToggleModule {
         boots.apply(8);
 
         if (switchToBlastProtWhenNearCrystalOrBed.get()) prioritizeProtection.set(prePrioritizeProt);
+    }
+
+    @EventHandler
+    private Listener<DamageEvent> onDamage = new Listener<>(event -> {
+        if (event.entity.getEntityId() != mc.player.getEntityId()) return;
+
+        ItemStack itemStack = mc.player.inventory.getInvStack(39 - (6 - 5));
+        if (itemStack.getItem() != Items.ELYTRA) return;
+
+        if (event.source instanceof EntityDamageSource || event.source instanceof NetherBedDamageSource) {
+            manageChestplate = true;
+            doTick();
+        }
     });
 
+    private void checkElytra() {
+        ItemStack itemStack = mc.player.inventory.getInvStack(39 - (6 - 5));
+        chestplate.manage = itemStack.getItem() != Items.ELYTRA;
+    }
+
     private int getHelmetScore(ItemStack itemStack) {
+        if (!(itemStack.getItem() instanceof ArmorItem)) return -1;
         if (((ArmorItem) itemStack.getItem()).getSlotType() != EquipmentSlot.HEAD) return -1;
         int score = getBaseScore(itemStack);
 
@@ -163,16 +201,19 @@ public class AutoArmor extends ToggleModule {
     }
 
     private int getChestplateScore(ItemStack itemStack) {
+        if (!(itemStack.getItem() instanceof ArmorItem)) return -1;
         if (((ArmorItem) itemStack.getItem()).getSlotType() != EquipmentSlot.CHEST) return -1;
         return getBaseScore(itemStack);
     }
 
     private int getLeggingsScore(ItemStack itemStack) {
+        if (!(itemStack.getItem() instanceof ArmorItem)) return -1;
         if (((ArmorItem) itemStack.getItem()).getSlotType() != EquipmentSlot.LEGS) return -1;
         return getBaseScore(itemStack);
     }
 
     private int getBootsScore(ItemStack itemStack) {
+        if (!(itemStack.getItem() instanceof ArmorItem)) return -1;
         if (((ArmorItem) itemStack.getItem()).getSlotType() != EquipmentSlot.FEET) return -1;
         int score = getBaseScore(itemStack);
 
@@ -199,6 +240,8 @@ public class AutoArmor extends ToggleModule {
     }
 
     private class BestItem {
+        boolean manage = true;
+
         int bestProtScore = -1;
         int bestProtSlot = -1;
 
@@ -248,6 +291,8 @@ public class AutoArmor extends ToggleModule {
         }
 
         void apply(int armorSlot) {
+            if (!manage) return;
+
             ItemStack itemStack = mc.player.inventory.getInvStack(39 - (armorSlot - 5));
             int score = -1;
             if (!itemStack.isEmpty()) {

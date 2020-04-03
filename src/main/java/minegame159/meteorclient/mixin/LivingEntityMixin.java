@@ -20,9 +20,14 @@ public abstract class LivingEntityMixin extends Entity {
         super(type, world);
     }
 
+    @Inject(method = "damage", at = @At("HEAD"))
+    private void onDamageHead(DamageSource source, float amount, CallbackInfoReturnable<Boolean> info) {
+        MeteorClient.EVENT_BUS.post(EventStore.damageEvent((LivingEntity) (Object) this, source));
+    }
+
     @Inject(method = "damage", at = @At("TAIL"))
-    private void onDamage(DamageSource source, float amount, CallbackInfoReturnable<Boolean> info) {
-        MeteorClient.EVENT_BUS.post(EventStore.tookDamageEvent((LivingEntity) (Object) this));
+    private void onDamageTail(DamageSource source, float amount, CallbackInfoReturnable<Boolean> info) {
+        MeteorClient.EVENT_BUS.post(EventStore.tookDamageEvent((LivingEntity) (Object) this, source));
     }
 
     @Inject(method = "getJumpVelocity", at = @At("HEAD"), cancellable = true)
