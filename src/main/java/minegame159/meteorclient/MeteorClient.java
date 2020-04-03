@@ -90,7 +90,7 @@ public class MeteorClient implements ClientModInitializer, Listenable {
     });
 
     private void loadFont() {
-        File[] files = FOLDER.listFiles();
+        File[] files = FOLDER.exists() ? FOLDER.listFiles() : new File[0];
         File fontFile = null;
         if (files != null) {
             for (File file : files) {
@@ -104,6 +104,7 @@ public class MeteorClient implements ClientModInitializer, Listenable {
         if (fontFile == null) {
             try {
                 fontFile = new File(FOLDER, "Comfortaa.ttf");
+                fontFile.mkdirs();
 
                 InputStream in = MeteorClient.class.getResourceAsStream("/assets/meteor-client/Comfortaa.ttf");
                 OutputStream out = new FileOutputStream(fontFile);
