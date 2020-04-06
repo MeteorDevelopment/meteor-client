@@ -1,5 +1,7 @@
 package minegame159.meteorclient.modules.misc;
 
+import baritone.api.BaritoneAPI;
+import baritone.api.pathing.goals.GoalXZ;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mojang.blaze3d.platform.GlStateManager;
@@ -100,7 +102,7 @@ public class StashFinder extends ToggleModule {
         WButton saveToFileCsv = topBar.add(new WButton("Save to file csv"));
         WButton saveToFileJson = topBar.add(new WButton("Save to file json"));
 
-        WGrid grid = list.add(new WGrid(8, 4, 4));
+        WGrid grid = list.add(new WGrid(8, 4, 5));
 
         reset.action = () -> {
             chunks.clear();
@@ -122,6 +124,9 @@ public class StashFinder extends ToggleModule {
             WButton open = new WButton("Open");
             open.action = () -> mc.openScreen(new StashRecorderChunkScreen(chunk));
 
+            WButton gotoBtn = new WButton("Goto");
+            gotoBtn.action = () -> BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalXZ(chunk.x, chunk.z));
+
             WMinus remove = new WMinus();
             remove.action = () -> {
                 if (chunks.remove(chunk)) {
@@ -135,6 +140,7 @@ public class StashFinder extends ToggleModule {
                     new WLabel("Pos: " + chunk.x + ", " + chunk.z),
                     new WLabel("Total: " + chunk.getTotal()),
                     open,
+                    gotoBtn,
                     remove
             );
         }
