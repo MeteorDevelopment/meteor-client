@@ -229,6 +229,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new Speed());
         addModule(new SafeWalk());
         addModule(new Parkour());
+        addModule(new Step());
     }
 
     private void initRender() {
