@@ -16,8 +16,16 @@ import net.minecraft.item.FishingRodItem;
 public class AutoFish extends ToggleModule {
     private Setting<Boolean> autoCast = addSetting(new BoolSetting.Builder()
             .name("auto-cast")
-            .description("Automatically casts when activated.")
+            .description("Automatically casts when not fishing.")
             .defaultValue(true)
+            .build()
+    );
+
+    private Setting<Integer> ticksAutoCast = addSetting(new IntSetting.Builder()
+            .name("ticks-auto-cast")
+            .description("Ticks to wait before auto casting.")
+            .defaultValue(10)
+            .min(0)
             .build()
     );
 
@@ -41,6 +49,9 @@ public class AutoFish extends ToggleModule {
     private int ticksToRightClick;
     private int ticksData;
 
+    private int autoCastTimer;
+    private boolean autoCastEnabled;
+
     public AutoFish() {
         super(Category.Player, "auto-fish", "Automatically fishes.");
     }
@@ -48,7 +59,7 @@ public class AutoFish extends ToggleModule {
     @Override
     public void onActivate() {
         ticksEnabled = false;
-        if (autoCast.get() && mc.player.getMainHandStack().getItem() instanceof FishingRodItem) Utils.rightClick();
+        autoCastEnabled = false;
     }
 
     @EventHandler
@@ -62,6 +73,23 @@ public class AutoFish extends ToggleModule {
 
     @EventHandler
     private Listener<TickEvent> onTick = new Listener<>(event -> {
+        // Auto cast
+        if (autoCast.get() && !ticksEnabled && !autoCastEnabled && mc.player.fishHook == null && mc.player.getMainHandStack().getItem() instanceof FishingRodItem) {
+            autoCastTimer = 0;
+            autoCastEnabled = true;
+        }
+
+        // Check for auto cast timer
+        if (autoCastEnabled) {
+            autoCastTimer++;
+
+            if (autoCastTimer > ticksAutoCast.get()) {
+                autoCastEnabled = false;
+                Utils.rightClick();
+            }
+        }
+
+        // Handle logic
         if (ticksEnabled && ticksToRightClick <= 0) {
             if (ticksData == 0) {
                 Utils.rightClick();
