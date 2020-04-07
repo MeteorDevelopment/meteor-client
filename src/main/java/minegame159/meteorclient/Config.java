@@ -63,7 +63,6 @@ public class Config extends Savable<Config> {
 
     @Override
     public Config fromTag(CompoundTag tag) {
-        version = tag.getString("version");
         prefix = tag.getString("prefix");
         autoCraft.fromTag(tag.getCompound("autoCraft"));
         windowConfigs = NbtUtils.mapFromTag(tag.getCompound("windowConfigs"), WindowType::valueOf, tag1 -> new WindowConfig(false).fromTag((CompoundTag) tag1));
