@@ -28,7 +28,7 @@ import java.util.*;
 
 public class ModuleManager extends Savable<ModuleManager> implements Listenable {
     public static final Category[] CATEGORIES = { Category.Combat, Category.Player, Category.Movement, Category.Render, Category.Misc, Category.Setting };
-    public static final ModuleManager INSTANCE = new ModuleManager();
+    public static ModuleManager INSTANCE;
 
     private Map<Class<? extends Module>, Module> modules = new HashMap<>();
     private Map<Category, List<Module>> groups = new HashMap<>();
@@ -36,7 +36,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
     private List<ToggleModule> active = new ArrayList<>();
     private Module moduleToBind;
 
-    private ModuleManager() {
+    public ModuleManager() {
         super(new File(MeteorClient.FOLDER, "modules.nbt"));
 
         initCombat();
@@ -230,6 +230,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new SafeWalk());
         addModule(new Parkour());
         addModule(new Step());
+        addModule(new Jesus());
     }
 
     private void initRender() {

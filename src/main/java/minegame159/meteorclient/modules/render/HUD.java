@@ -281,7 +281,7 @@ public class HUD extends ToggleModule {
         int y = 2;
 
         if (waterMark.get()) {
-            drawInfo("Meteor Client", Config.INSTANCE.version, y);
+            drawInfo("Meteor Client ", Config.INSTANCE.getVersion(), y);
             y += Utils.getTextHeight() + 2;
         }
 
