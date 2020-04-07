@@ -92,7 +92,7 @@ public class Jesus extends ToggleModule {
         boolean foundSolid = false;
 
         ArrayList<Box> blockCollisions = mc.world
-                .method_20812(mc.player, mc.player.getBoundingBox().offset(0, -0.5, 0))
+                .getBlockCollisions(mc.player, mc.player.getBoundingBox().offset(0, -0.5, 0))
                 .map(VoxelShape::getBoundingBox)
                 .collect(Collectors.toCollection(ArrayList::new));
 
