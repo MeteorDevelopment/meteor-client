@@ -39,7 +39,8 @@
     "ClientPlayerInteractionManagerMixin",
     "MiningToolItemMixin",
     "CraftingTableScreenMixin",
-    "PlayerEntityMixin"
+    "PlayerEntityMixin",
+    "FluidBlockMixin"
   ],
   "injectors": {
     "defaultRequire": 1

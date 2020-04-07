@@ -57,6 +57,7 @@ public class MeteorClient implements ClientModInitializer, Listenable {
 
         loadFont();
 
+        ModuleManager.INSTANCE = new ModuleManager();
         CommandManager.init();
         AccountManager.init();
 
@@ -104,7 +105,7 @@ public class MeteorClient implements ClientModInitializer, Listenable {
         if (fontFile == null) {
             try {
                 fontFile = new File(FOLDER, "Comfortaa.ttf");
-                fontFile.mkdirs();
+                fontFile.getParentFile().mkdirs();
 
                 InputStream in = MeteorClient.class.getResourceAsStream("/assets/meteor-client/Comfortaa.ttf");
                 OutputStream out = new FileOutputStream(fontFile);

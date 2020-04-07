@@ -2,6 +2,7 @@ package minegame159.meteorclient.modules.render;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
+import minegame159.meteorclient.Config;
 import minegame159.meteorclient.events.*;
 import minegame159.meteorclient.mixininterface.IMinecraftClient;
 import minegame159.meteorclient.modules.Category;
@@ -37,6 +38,13 @@ public class HUD extends ToggleModule {
     private static int white = Color.fromRGBA(255, 255, 255, 255);
     private static int gray = Color.fromRGBA(185, 185, 185, 255);
     private static int red = Color.fromRGBA(225, 45, 45, 255);
+
+    private Setting<Boolean> waterMark = addSetting(new BoolSetting.Builder()
+            .name("water-mark")
+            .description("Water mark.")
+            .defaultValue(true)
+            .build()
+    );
 
     private Setting<Boolean> fps = addSetting(new BoolSetting.Builder()
             .name("fps")
@@ -272,6 +280,11 @@ public class HUD extends ToggleModule {
     private void renderTopLeft(Render2DEvent event) {
         if (mc.options.debugEnabled) return;
         int y = 2;
+
+        if (waterMark.get()) {
+            drawInfo("Meteor Client ", Config.INSTANCE.getVersion(), y);
+            y += Utils.getTextHeight() + 2;
+        }
 
         if (fps.get()) {
             drawInfo("FPS: ", ((IMinecraftClient) MinecraftClient.getInstance()).getFps() + "", y);
