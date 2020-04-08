@@ -141,6 +141,8 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
             if (module.getKey() == event.key) {
                 module.doAction();
                 event.cancel();
+
+                save();
             }
         }
     }, EventPriority.HIGHEST + 1);
