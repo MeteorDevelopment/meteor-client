@@ -2,6 +2,7 @@ package minegame159.meteorclient.modules.misc;
 
 import baritone.api.BaritoneAPI;
 import baritone.api.pathing.goals.GoalXZ;
+import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mojang.blaze3d.platform.GlStateManager;
@@ -21,10 +22,7 @@ import net.minecraft.client.toast.ToastManager;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.ChunkPos;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Writer;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -49,6 +47,11 @@ public class StashFinder extends ToggleModule {
         super(Category.Misc, "stash-finder", "Searches loaded chunks for storage blocks. Saves to <your minecraft folder>/meteor-client/stashes");
     }
 
+    @Override
+    public void onActivate() {
+        load();
+    }
+
     @EventHandler
     private Listener<ChunkDataEvent> onChunkData = new Listener<>(event -> {
         Chunk chunk = new Chunk(event.chunk.getPos());
@@ -67,6 +70,9 @@ public class StashFinder extends ToggleModule {
             int i = chunks.indexOf(chunk);
             if (i < 0) chunks.add(chunk);
             else chunks.set(i, chunk);
+
+            saveJson();
+            saveCsv();
 
             mc.getToastManager().add(new Toast() {
                 private long timer;
@@ -99,8 +105,6 @@ public class StashFinder extends ToggleModule {
         // Reset
         WHorizontalList topBar = list.add(new WHorizontalList(4));
         WButton reset = topBar.add(new WButton("Reset"));
-        WButton saveToFileCsv = topBar.add(new WButton("Save to file csv"));
-        WButton saveToFileJson = topBar.add(new WButton("Save to file json"));
 
         WGrid grid = list.add(new WGrid(8, 4, 5));
 
@@ -109,9 +113,6 @@ public class StashFinder extends ToggleModule {
             grid.clear();
             list.layout();
         };
-
-        saveToFileCsv.action = this::saveCsv;
-        saveToFileJson.action = this::saveJson;
 
         // Chunks
         fillGrid(grid);
@@ -146,12 +147,58 @@ public class StashFinder extends ToggleModule {
         }
     }
 
+    private void load() {
+        boolean loaded = false;
+
+        // Try to load json
+        if (FILE_JSON.exists()) {
+            try {
+                FileReader reader = new FileReader(FILE_JSON);
+                chunks = GSON.fromJson(reader, new TypeToken<List<Chunk>>() {}.getType());
+                reader.close();
+
+                for (Chunk chunk : chunks) chunk.calculatePos();
+
+                loaded = true;
+            } catch (Exception ignored) {
+                if (chunks == null) chunks = new ArrayList<>();
+            }
+        }
+
+        // Try to load csv
+        if (!loaded && FILE_CSV.exists()) {
+            try {
+                BufferedReader reader = new BufferedReader(new FileReader(FILE_CSV));
+                reader.readLine();
+
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    String[] values = line.split(" ");
+                    Chunk chunk = new Chunk(new ChunkPos(Integer.parseInt(values[0]), Integer.parseInt(values[1])));
+
+                    chunk.chests = Integer.parseInt(values[2]);
+                    chunk.shulkers = Integer.parseInt(values[3]);
+                    chunk.enderChests = Integer.parseInt(values[4]);
+                    chunk.furnaces = Integer.parseInt(values[5]);
+                    chunk.dispensersDroppers = Integer.parseInt(values[6]);
+                    chunk.hoppers = Integer.parseInt(values[7]);
+
+                    chunks.add(chunk);
+                }
+
+                reader.close();
+            } catch (Exception ignored) {
+                if (chunks == null) chunks = new ArrayList<>();
+            }
+        }
+    }
+
     private void saveCsv() {
         try {
             FILE_CSV.getParentFile().mkdirs();
             Writer writer = new FileWriter(FILE_CSV);
 
-            writer.write("X,Z,Chests,Shulkers,EnderChests,Furnaces,DispensersDroppers,Hopper");
+            writer.write("X,Z,Chests,Shulkers,EnderChests,Furnaces,DispensersDroppers,Hopper\n");
             for (Chunk chunk : chunks) chunk.write(writer);
 
             writer.close();
@@ -173,13 +220,17 @@ public class StashFinder extends ToggleModule {
     public static class Chunk {
         private static final StringBuilder sb = new StringBuilder();
 
-        public transient ChunkPos chunkPos;
-        public int x, z;
+        public ChunkPos chunkPos;
+        public transient int x, z;
         public int chests, barrels, shulkers, enderChests, furnaces, dispensersDroppers, hoppers;
 
         public Chunk(ChunkPos chunkPos) {
             this.chunkPos = chunkPos;
 
+            calculatePos();
+        }
+
+        public void calculatePos() {
             x = chunkPos.x * 16 + 8;
             z = chunkPos.z * 16 + 8;
         }
@@ -190,8 +241,8 @@ public class StashFinder extends ToggleModule {
 
         public void write(Writer writer) throws IOException {
             sb.setLength(0);
-            sb.append(x).append(z);
-            sb.append(chests).append(barrels).append(shulkers).append(enderChests).append(furnaces).append(dispensersDroppers).append(hoppers);
+            sb.append(x).append(',').append(z).append(',');
+            sb.append(chests).append(',').append(barrels).append(',').append(shulkers).append(',').append(enderChests).append(',').append(furnaces).append(',').append(dispensersDroppers).append(',').append(hoppers).append('\n');
             writer.write(sb.toString());
         }
 
