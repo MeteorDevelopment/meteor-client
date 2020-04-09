@@ -11,7 +11,9 @@ import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.utils.Utils;
+import net.minecraft.entity.projectile.FishingBobberEntity;
 import net.minecraft.item.FishingRodItem;
+import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
 
 public class AutoFish extends ToggleModule {
     private Setting<Boolean> autoCast = addSetting(new BoolSetting.Builder()
@@ -64,12 +66,19 @@ public class AutoFish extends ToggleModule {
 
     @EventHandler
     private Listener<PlaySoundPacketEvent> onPlaySoundPacket = new Listener<>(event -> {
-        if (event.packet.getSound().getId().getPath().equals("entity.fishing_bobber.splash")) {
+        PlaySoundS2CPacket p = event.packet;
+        FishingBobberEntity b = mc.player.fishHook;
+
+        if (p.getSound().getId().getPath().equals("entity.fishing_bobber.splash") && isIdk(p.getX(), b.x) && isIdk(p.getY(), b.y) && isIdk(p.getZ(), b.z)) {
             ticksEnabled = true;
             ticksToRightClick = ticksCatch.get();
             ticksData = 0;
         }
     });
+
+    private boolean isIdk(double a1, double a2) {
+        return a1 >= a2 - 0.25 && a1 <= a2 + 0.25;
+    }
 
     @EventHandler
     private Listener<TickEvent> onTick = new Listener<>(event -> {
