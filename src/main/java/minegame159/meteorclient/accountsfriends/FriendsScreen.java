@@ -13,7 +13,11 @@ public class FriendsScreen extends WindowScreen implements Listenable {
         super("Friends");
 
         initWidgets();
+    }
 
+    @Override
+    protected void init() {
+        super.init();
         MeteorClient.EVENT_BUS.subscribe(this);
     }
 

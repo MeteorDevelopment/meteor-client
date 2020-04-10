@@ -16,8 +16,8 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class ItemListSetting extends Setting<List<Item>> {
-    public ItemListSetting(String name, String description, String group, List<Item> defaultValue, Consumer<List<Item>> onChanged, Consumer<Setting<List<Item>>> onModuleActivated) {
-        super(name, description, group, defaultValue, onChanged, onModuleActivated);
+    public ItemListSetting(String name, String description, String group, List<Item> defaultValue, Consumer<List<Item>> onChanged, Consumer<Setting<List<Item>>> onModuleActivated, boolean visible) {
+        super(name, description, group, defaultValue, onChanged, onModuleActivated, visible);
 
         widget = new WButton("Select");
         ((WButton) widget).action = () -> MinecraftClient.getInstance().openScreen(new ItemListSettingScreen(this));
@@ -95,6 +95,7 @@ public class ItemListSetting extends Setting<List<Item>> {
         private List<Item> defaultValue;
         private Consumer<List<Item>> onChanged;
         private Consumer<Setting<List<Item>>> onModuleActivated;
+        private boolean visible = true;
 
         public Builder name(String name) {
             this.name = name;
@@ -126,8 +127,13 @@ public class ItemListSetting extends Setting<List<Item>> {
             return this;
         }
 
+        public Builder visible(boolean visible) {
+            this.visible = visible;
+            return this;
+        }
+
         public ItemListSetting build() {
-            return new ItemListSetting(name, description, group, defaultValue, onChanged, onModuleActivated);
+            return new ItemListSetting(name, description, group, defaultValue, onChanged, onModuleActivated, visible);
         }
     }
 }

@@ -87,6 +87,11 @@ public class EditMacroScreen extends WindowScreen implements Listenable {
         };
 
         layout();
+    }
+
+    @Override
+    protected void init() {
+        super.init();
         MeteorClient.EVENT_BUS.subscribe(this);
     }
 

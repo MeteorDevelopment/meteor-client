@@ -7,8 +7,8 @@ import net.minecraft.nbt.CompoundTag;
 import java.util.function.Consumer;
 
 public class ColorSetting extends Setting<Color> {
-    public ColorSetting(String name, String description, String group, Color defaultValue, Consumer<Color> onChanged, Consumer<Setting<Color>> onModuleActivated) {
-        super(name, description, group, defaultValue, onChanged, onModuleActivated);
+    public ColorSetting(String name, String description, String group, Color defaultValue, Consumer<Color> onChanged, Consumer<Setting<Color>> onModuleActivated, boolean visible) {
+        super(name, description, group, defaultValue, onChanged, onModuleActivated, visible);
 
         widget = new WColorEdit(get());
         ((WColorEdit) widget).action = wColorEdit -> set(wColorEdit.color);
@@ -70,6 +70,7 @@ public class ColorSetting extends Setting<Color> {
         private Color defaultValue;
         private Consumer<Color> onChanged;
         private Consumer<Setting<Color>> onModuleActivated;
+        private boolean visible = true;
 
         public Builder name(String name) {
             this.name = name;
@@ -101,8 +102,13 @@ public class ColorSetting extends Setting<Color> {
             return this;
         }
 
+        public Builder visible(boolean visible) {
+            this.visible = visible;
+            return this;
+        }
+
         public ColorSetting build() {
-            return new ColorSetting(name, description, group, defaultValue, onChanged, onModuleActivated);
+            return new ColorSetting(name, description, group, defaultValue, onChanged, onModuleActivated, visible);
         }
     }
 }

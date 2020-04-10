@@ -6,8 +6,8 @@ import net.minecraft.nbt.CompoundTag;
 import java.util.function.Consumer;
 
 public class StringSetting extends Setting<String> {
-    public StringSetting(String name, String description, String group, String defaultValue, Consumer<String> onChanged, Consumer<Setting<String>> onModuleActivated) {
-        super(name, description, group, defaultValue, onChanged, onModuleActivated);
+    public StringSetting(String name, String description, String group, String defaultValue, Consumer<String> onChanged, Consumer<Setting<String>> onModuleActivated, boolean visible) {
+        super(name, description, group, defaultValue, onChanged, onModuleActivated, visible);
 
         widget = new WTextBox(get(), 200);
         ((WTextBox) widget).action = textBox -> set(textBox.text);
@@ -62,6 +62,7 @@ public class StringSetting extends Setting<String> {
         private String group;
         private Consumer<String> onChanged;
         private Consumer<Setting<String>> onModuleActivated;
+        private boolean visible = true;
 
         public Builder name(String name) {
             this.name = name;
@@ -93,8 +94,13 @@ public class StringSetting extends Setting<String> {
             return this;
         }
 
+        public Builder visible(boolean visible) {
+            this.visible = visible;
+            return this;
+        }
+
         public StringSetting build() {
-            return new StringSetting(name, description, group, defaultValue, onChanged, onModuleActivated);
+            return new StringSetting(name, description, group, defaultValue, onChanged, onModuleActivated, visible);
         }
     }
 }

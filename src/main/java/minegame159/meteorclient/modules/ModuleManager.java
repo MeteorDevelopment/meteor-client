@@ -141,6 +141,8 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
             if (module.getKey() == event.key) {
                 module.doAction();
                 event.cancel();
+
+                save();
             }
         }
     }, EventPriority.HIGHEST + 1);
@@ -212,6 +214,8 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new AutoArmor());
         addModule(new AutoDrop());
         addModule(new AutoRightClick());
+        addModule(new Yaw());
+        addModule(new Pitch());
     }
 
     private void initMovement() {
@@ -231,6 +235,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new Parkour());
         addModule(new Step());
         addModule(new Jesus());
+        addModule(new AirJump());
     }
 
     private void initRender() {

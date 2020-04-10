@@ -21,8 +21,10 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShapes;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.lwjgl.glfw.GLFW;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -34,6 +36,24 @@ public class Utils {
     private static Vec3d eyesPos = new Vec3d(0, 0, 0);
     private static Vec3d vec1 = new Vec3d(0, 0, 0);
     private static Vec3d vec2 = new Vec3d(0, 0, 0);
+
+    public static String getWorldName() {
+        if (mc.isInSingleplayer()) {
+            // Singleplaer
+            File folder = mc.getServer().getWorld(mc.world.dimension.getType()).getSaveHandler().getWorldDir();
+            if (folder.toPath().relativize(mc.runDirectory.toPath()).getNameCount() != 2) {
+                folder = folder.getParentFile();
+            }
+            return folder.getName();
+        }
+
+        // Multiplayer
+        String name = mc.isConnectedToRealms() ? "realms" : mc.getCurrentServerEntry().address;
+        if (SystemUtils.IS_OS_WINDOWS) {
+            name = name.replace(":", "_");
+        }
+        return name;
+    }
 
     public static String nameToTitle(String name) {
         return Arrays.stream(name.split("-")).map(StringUtils::capitalize).collect(Collectors.joining(" "));

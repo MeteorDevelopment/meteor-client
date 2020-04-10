@@ -21,6 +21,13 @@ public class Surround extends ToggleModule {
             .build()
     );
 
+    private Setting<Boolean> onlyObsidian = addSetting(new BoolSetting.Builder()
+            .name("only-obsidian")
+            .description("Only uses obsidian.")
+            .defaultValue(true)
+            .build()
+    );
+
     public Surround() {
         super(Category.Combat, "surround", "Surrounds you with obsidian (or other blocks) to take less damage.");
     }
@@ -74,7 +81,9 @@ public class Surround extends ToggleModule {
                 return i;
             }
 
-            if (((BlockItem) item).getBlock().getDefaultState().isSimpleFullBlock(mc.world, null)) slot = i;
+            if (!onlyObsidian.get()) {
+                if (((BlockItem) item).getBlock().getDefaultState().isSimpleFullBlock(mc.world, null)) slot = i;
+            }
         }
 
         return slot;

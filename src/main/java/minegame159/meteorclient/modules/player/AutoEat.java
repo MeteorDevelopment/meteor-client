@@ -11,6 +11,7 @@ import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
+import net.minecraft.util.Hand;
 
 public class AutoEat extends ToggleModule {
     private Setting<Boolean> egaps = addSetting(new BoolSetting.Builder()
@@ -56,11 +57,16 @@ public class AutoEat extends ToggleModule {
         if (mc.player.abilities.creativeMode) return;
 
         if (isEating) {
-            ((IKeyBinding) mc.options.keyUse).setPressed(true);
+            if (mc.overlay == null && (mc.currentScreen == null || mc.currentScreen.passEvents)) {
+                ((IKeyBinding) mc.options.keyUse).setPressed(true);
+            } else {
+                mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
+            }
 
             if (mc.player.getHungerManager().getFoodLevel() > preFoodLevel) {
-                ((IKeyBinding) mc.options.keyUse).setPressed(false);
                 isEating = false;
+                mc.interactionManager.stopUsingItem(mc.player);
+                ((IKeyBinding) mc.options.keyUse).setPressed(false);
                 mc.player.inventory.selectedSlot = preSelectedSlot;
                 BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume");
             }

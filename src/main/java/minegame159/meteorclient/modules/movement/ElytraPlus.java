@@ -65,6 +65,7 @@ public class ElytraPlus extends ToggleModule {
             .build()
     );
 
+    private Setting<Double> autopilotMinimumHeight;
     private Setting<Boolean> autopilot = addSetting(new BoolSetting.Builder()
             .name("autopilot")
             .description("Automatically flies forward maintaining minimum height.")
@@ -72,16 +73,8 @@ public class ElytraPlus extends ToggleModule {
             .defaultValue(false)
             .onChanged(aBoolean -> {
                 if (isActive() && !aBoolean) ((IKeyBinding) mc.options.keyForward).setPressed(false);
+                autopilotMinimumHeight.setVisible(aBoolean);
             })
-            .build()
-    );
-
-    private Setting<Double> autopilotMinimumHeight = addSetting(new DoubleSetting.Builder()
-            .name("minimum-height")
-            .description("Autopilot minimum height.")
-            .group("Autopilot")
-            .defaultValue(160)
-            .min(0)
             .build()
     );
 
@@ -99,6 +92,16 @@ public class ElytraPlus extends ToggleModule {
 
     public ElytraPlus() {
         super(Category.Movement, "Elytra+", "Makes elytra better,");
+
+        autopilotMinimumHeight = addSetting(new DoubleSetting.Builder()
+                .name("minimum-height")
+                .description("Autopilot minimum height.")
+                .group("Autopilot")
+                .defaultValue(160)
+                .min(0)
+                .visible(false)
+                .build()
+        );
     }
 
     @Override

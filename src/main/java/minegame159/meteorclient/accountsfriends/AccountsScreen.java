@@ -17,7 +17,11 @@ public class AccountsScreen extends WindowScreen implements Listenable {
         super("Accounts");
 
         initWidgets();
+    }
 
+    @Override
+    protected void init() {
+        super.init();
         MeteorClient.EVENT_BUS.subscribe(this);
     }
 
