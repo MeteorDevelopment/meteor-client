@@ -101,20 +101,35 @@ public class StorageESP extends ToggleModule {
         for (BlockEntity blockEntity : mc.world.blockEntities) {
             getTileEntityColor(blockEntity);
             if (render) {
-                int x = blockEntity.getPos().getX();
-                int y = blockEntity.getPos().getY();
-                int z = blockEntity.getPos().getZ();
+                double x1 = blockEntity.getPos().getX();
+                double y1 = blockEntity.getPos().getY();
+                double z1 = blockEntity.getPos().getZ();
+
+                double x2 = blockEntity.getPos().getX() + 1;
+                double y2 = blockEntity.getPos().getY() + 1;
+                double z2 = blockEntity.getPos().getZ() + 1;
 
                 Direction excludeDir = null;
                 if (blockEntity instanceof ChestBlockEntity && blockEntity.getCachedState().get(ChestBlock.CHEST_TYPE) != ChestType.SINGLE) {
                     excludeDir = ChestBlock.getFacing(blockEntity.getCachedState());
                 }
 
-                if (mode.get() == Mode.Lines) RenderUtils.blockEdges(x, y, z, lineColor, excludeDir);
-                else if (mode.get() == Mode.Sides) RenderUtils.blockSides(x, y, z, sideColor, excludeDir);
+                if (blockEntity instanceof ChestBlockEntity) {
+                    double a = 1.0 / 16.0;
+
+                    if (excludeDir != Direction.WEST) x1 += a;
+                    if (excludeDir != Direction.NORTH) z1 += a;
+
+                    if (excludeDir != Direction.EAST) x2 -= a;
+                    y2 -= a * 2;
+                    if (excludeDir != Direction.SOUTH) z2 -= a;
+                }
+
+                if (mode.get() == Mode.Lines) RenderUtils.boxEdges(x1, y1, z1, x2, y2, z2, lineColor, excludeDir);
+                else if (mode.get() == Mode.Sides) RenderUtils.boxSides(x1, y1, z1, x2, y2, z2, sideColor, excludeDir);
                 else {
-                    RenderUtils.blockEdges(x, y, z, lineColor, excludeDir);
-                    RenderUtils.blockSides(x, y, z, sideColor, excludeDir);
+                    RenderUtils.boxEdges(x1, y1, z1, x2, y2, z2, lineColor, excludeDir);
+                    RenderUtils.boxSides(x1, y1, z1, x2, y2, z2, sideColor, excludeDir);
                 }
 
                 count++;
