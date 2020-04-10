@@ -16,6 +16,7 @@ import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.utils.Utils;
 import net.minecraft.block.entity.*;
 import net.minecraft.client.toast.Toast;
 import net.minecraft.client.toast.ToastManager;
@@ -29,8 +30,6 @@ import java.util.List;
 import java.util.Objects;
 
 public class StashFinder extends ToggleModule {
-    private static final File FILE_CSV = new File(MeteorClient.FOLDER, "stashes.csv");
-    private static final File FILE_JSON = new File(MeteorClient.FOLDER, "stashes.json");
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
     private Setting<Integer> minimumStorageCount = addSetting(new IntSetting.Builder()
@@ -44,7 +43,7 @@ public class StashFinder extends ToggleModule {
     public List<Chunk> chunks = new ArrayList<>();
 
     public StashFinder() {
-        super(Category.Misc, "stash-finder", "Searches loaded chunks for storage blocks. Saves to <your minecraft folder>/meteor-client/stashes");
+        super(Category.Misc, "stash-finder", "Searches loaded chunks for storage blocks. Saves to <your minecraft folder>/meteor-client");
     }
 
     @Override
@@ -134,6 +133,9 @@ public class StashFinder extends ToggleModule {
                     grid.clear();
                     fillGrid(grid);
                     grid.layout();
+
+                    saveJson();
+                    saveCsv();
                 }
             };
 
@@ -151,9 +153,10 @@ public class StashFinder extends ToggleModule {
         boolean loaded = false;
 
         // Try to load json
-        if (FILE_JSON.exists()) {
+        File file = getJsonFile();
+        if (file.exists()) {
             try {
-                FileReader reader = new FileReader(FILE_JSON);
+                FileReader reader = new FileReader(file);
                 chunks = GSON.fromJson(reader, new TypeToken<List<Chunk>>() {}.getType());
                 reader.close();
 
@@ -166,9 +169,10 @@ public class StashFinder extends ToggleModule {
         }
 
         // Try to load csv
-        if (!loaded && FILE_CSV.exists()) {
+        file = getCsvFile();
+        if (!loaded && file.exists()) {
             try {
-                BufferedReader reader = new BufferedReader(new FileReader(FILE_CSV));
+                BufferedReader reader = new BufferedReader(new FileReader(file));
                 reader.readLine();
 
                 String line;
@@ -195,8 +199,9 @@ public class StashFinder extends ToggleModule {
 
     private void saveCsv() {
         try {
-            FILE_CSV.getParentFile().mkdirs();
-            Writer writer = new FileWriter(FILE_CSV);
+            File file = getCsvFile();
+            file.getParentFile().mkdirs();
+            Writer writer = new FileWriter(file);
 
             writer.write("X,Z,Chests,Shulkers,EnderChests,Furnaces,DispensersDroppers,Hopper\n");
             for (Chunk chunk : chunks) chunk.write(writer);
@@ -209,12 +214,22 @@ public class StashFinder extends ToggleModule {
 
     private void saveJson() {
         try {
-            Writer writer = new FileWriter(FILE_JSON);
+            File file = getJsonFile();
+            file.getParentFile().mkdirs();
+            Writer writer = new FileWriter(file);
             GSON.toJson(chunks, writer);
             writer.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private File getJsonFile() {
+        return new File(new File(new File(MeteorClient.FOLDER, "stashes"), Utils.getWorldName()), "stashes.json");
+    }
+
+    private File getCsvFile() {
+        return new File(new File(new File(MeteorClient.FOLDER, "stashes"), Utils.getWorldName()), "stashes.csv");
     }
 
     public static class Chunk {
