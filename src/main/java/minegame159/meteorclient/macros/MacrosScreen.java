@@ -14,7 +14,11 @@ public class MacrosScreen extends WindowScreen implements Listenable {
         super("Macros");
 
         initWidgets();
+    }
 
+    @Override
+    protected void init() {
+        super.init();
         MeteorClient.EVENT_BUS.subscribe(this);
     }
 

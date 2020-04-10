@@ -16,8 +16,8 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class BlockListSetting extends Setting<List<Block>> {
-    public BlockListSetting(String name, String description, String group, List<Block> defaultValue, Consumer<List<Block>> onChanged, Consumer<Setting<List<Block>>> onModuleActivated) {
-        super(name, description, group, defaultValue, onChanged, onModuleActivated);
+    public BlockListSetting(String name, String description, String group, List<Block> defaultValue, Consumer<List<Block>> onChanged, Consumer<Setting<List<Block>>> onModuleActivated, boolean visible) {
+        super(name, description, group, defaultValue, onChanged, onModuleActivated, visible);
 
         widget = new WButton("Select");
         ((WButton) widget).action = () -> MinecraftClient.getInstance().openScreen(new BlockListSettingScreen(this));
@@ -95,6 +95,7 @@ public class BlockListSetting extends Setting<List<Block>> {
         private List<Block> defaultValue;
         private Consumer<List<Block>> onChanged;
         private Consumer<Setting<List<Block>>> onModuleActivated;
+        private boolean visible = true;
 
         public Builder name(String name) {
             this.name = name;
@@ -126,8 +127,13 @@ public class BlockListSetting extends Setting<List<Block>> {
             return this;
         }
 
+        public Builder visible(boolean visible) {
+            this.visible = visible;
+            return this;
+        }
+
         public BlockListSetting build() {
-            return new BlockListSetting(name, description, group, defaultValue, onChanged, onModuleActivated);
+            return new BlockListSetting(name, description, group, defaultValue, onChanged, onModuleActivated, visible);
         }
     }
 }

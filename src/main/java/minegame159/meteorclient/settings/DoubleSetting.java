@@ -8,8 +8,8 @@ import java.util.function.Consumer;
 public class DoubleSetting extends Setting<Double> {
     private final Double min, max;
 
-    private DoubleSetting(String name, String description, String group, Double defaultValue, Consumer<Double> onChanged, Consumer<Setting<Double>> onModuleActivated, Double min, Double max) {
-        super(name, description, group, defaultValue, onChanged, onModuleActivated);
+    private DoubleSetting(String name, String description, String group, Double defaultValue, Consumer<Double> onChanged, Consumer<Setting<Double>> onModuleActivated, Double min, Double max, boolean visible) {
+        super(name, description, group, defaultValue, onChanged, onModuleActivated, visible);
         this.min = min;
         this.max = max;
 
@@ -72,6 +72,7 @@ public class DoubleSetting extends Setting<Double> {
         private Consumer<Double> onChanged;
         private Consumer<Setting<Double>> onModuleActivated;
         private Double min, max;
+        private boolean visible = true;
 
         public Builder name(String name) {
             this.name = name;
@@ -113,8 +114,13 @@ public class DoubleSetting extends Setting<Double> {
             return this;
         }
 
+        public Builder visible(boolean visible) {
+            this.visible = visible;
+            return this;
+        }
+
         public DoubleSetting build() {
-            return new DoubleSetting(name, description, group, defaultValue, onChanged, onModuleActivated, min, max);
+            return new DoubleSetting(name, description, group, defaultValue, onChanged, onModuleActivated, min, max, visible);
         }
     }
 }

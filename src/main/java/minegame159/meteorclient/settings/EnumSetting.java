@@ -9,8 +9,8 @@ import java.util.function.Consumer;
 public class EnumSetting<T extends Enum<?>> extends Setting<T> {
     private T[] values;
 
-    public EnumSetting(String name, String description, String group, T defaultValue, Consumer<T> onChanged, Consumer<Setting<T>> onModuleActivated) {
-        super(name, description, group, defaultValue, onChanged, onModuleActivated);
+    public EnumSetting(String name, String description, String group, T defaultValue, Consumer<T> onChanged, Consumer<Setting<T>> onModuleActivated, boolean visible) {
+        super(name, description, group, defaultValue, onChanged, onModuleActivated, visible);
 
         try {
             values = (T[]) defaultValue.getClass().getMethod("values").invoke(null);
@@ -73,6 +73,7 @@ public class EnumSetting<T extends Enum<?>> extends Setting<T> {
         protected T defaultValue;
         protected Consumer<T> onChanged;
         protected Consumer<Setting<T>> onModuleActivated;
+        protected boolean visible = true;
 
         public Builder<T> name(String name) {
             this.name = name;
@@ -99,13 +100,18 @@ public class EnumSetting<T extends Enum<?>> extends Setting<T> {
             return this;
         }
 
-        public Builder onModuleActivated(Consumer<Setting<T>> onModuleActivated) {
+        public Builder<T> onModuleActivated(Consumer<Setting<T>> onModuleActivated) {
             this.onModuleActivated = onModuleActivated;
             return this;
         }
 
+        public Builder<T> visible(boolean visible) {
+            this.visible = visible;
+            return this;
+        }
+
         public EnumSetting<T> build() {
-            return new EnumSetting<>(name, description, group, defaultValue, onChanged, onModuleActivated);
+            return new EnumSetting<>(name, description, group, defaultValue, onChanged, onModuleActivated, visible);
         }
     }
 }

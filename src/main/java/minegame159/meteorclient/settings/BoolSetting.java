@@ -6,8 +6,8 @@ import net.minecraft.nbt.CompoundTag;
 import java.util.function.Consumer;
 
 public class BoolSetting extends Setting<Boolean> {
-    private BoolSetting(String name, String description, String group, Boolean defaultValue, Consumer<Boolean> onChanged, Consumer<Setting<Boolean>> onModuleActivated) {
-        super(name, description, group, defaultValue, onChanged, onModuleActivated);
+    private BoolSetting(String name, String description, String group, Boolean defaultValue, Consumer<Boolean> onChanged, Consumer<Setting<Boolean>> onModuleActivated, boolean visible) {
+        super(name, description, group, defaultValue, onChanged, onModuleActivated, visible);
 
         widget = new WCheckbox(get());
         ((WCheckbox) widget).setAction(wCheckbox -> set(wCheckbox.checked));
@@ -56,6 +56,7 @@ public class BoolSetting extends Setting<Boolean> {
         private Boolean defaultValue;
         private Consumer<Boolean> onChanged;
         private Consumer<Setting<Boolean>> onModuleActivated;
+        private boolean visible = true;
 
         public Builder name(String name) {
             this.name = name;
@@ -87,8 +88,13 @@ public class BoolSetting extends Setting<Boolean> {
             return this;
         }
 
+        public Builder visible(boolean visible) {
+            this.visible = visible;
+            return this;
+        }
+
         public BoolSetting build() {
-            return new BoolSetting(name, description, group, defaultValue, onChanged, onModuleActivated);
+            return new BoolSetting(name, description, group, defaultValue, onChanged, onModuleActivated, visible);
         }
     }
 }

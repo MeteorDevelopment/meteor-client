@@ -23,6 +23,10 @@ public class ModuleScreen extends WindowScreen implements Listenable {
         super(module.title);
         this.module = module;
 
+        initWidgets();
+    }
+
+    private void initWidgets() {
         // Description
         add(new WLabel(module.description));
         if (module.settingGroups.size() <= 1) add(new WHorizontalSeparator());
@@ -32,7 +36,9 @@ public class ModuleScreen extends WindowScreen implements Listenable {
             if (module.settingGroups.size() > 1) add(new WHorizontalSeparator(group));
 
             WGrid grid = add(new WGrid(4, 4, 3));
-            for (Setting<?> setting : module.settingGroups.get(group)) generateSettingToGrid(grid, setting);
+            for (Setting<?> setting : module.settingGroups.get(group)) {
+                if (setting.isVisible()) generateSettingToGrid(grid, setting);
+            }
         }
 
         WWidget customWidget = module.getWidget();
@@ -71,7 +77,19 @@ public class ModuleScreen extends WindowScreen implements Listenable {
         }
 
         layout();
+    }
+
+    @Override
+    protected void init() {
+        super.init();
         MeteorClient.EVENT_BUS.subscribe(this);
+
+        for (Setting<?> setting : module.settings) {
+            setting.setVisibleListener(() -> {
+                clear();
+                initWidgets();
+            });
+        }
     }
 
     @EventHandler
@@ -103,6 +121,10 @@ public class ModuleScreen extends WindowScreen implements Listenable {
     @Override
     public void onClose() {
         MeteorClient.EVENT_BUS.unsubscribe(this);
+        for (Setting<?> setting : module.settings) {
+            setting.setVisibleListener(null);
+        }
+
         super.onClose();
     }
 }
