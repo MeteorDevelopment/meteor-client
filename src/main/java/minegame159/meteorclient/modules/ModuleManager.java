@@ -236,6 +236,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new Step());
         addModule(new Jesus());
         addModule(new AirJump());
+        addModule(new AntiLevitation());
     }
 
     private void initRender() {

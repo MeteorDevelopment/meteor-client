@@ -5,6 +5,7 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.ItemListSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.utils.InvUtils;
@@ -22,6 +23,13 @@ public class AutoDrop extends ToggleModule {
             .build()
     );
 
+    private Setting<Boolean> excludeHotbar = addSetting(new BoolSetting.Builder()
+            .name("exclude-hotbar")
+            .description("Doesn't drop items from hotbar.")
+            .defaultValue(false)
+            .build()
+    );
+
     public AutoDrop() {
         super(Category.Player, "auto-drop", "Automatically drops selected items.");
     }
@@ -30,7 +38,7 @@ public class AutoDrop extends ToggleModule {
     private Listener<TickEvent> onTick = new Listener<>(event -> {
         if (mc.currentScreen != null) return;
 
-        for (int i = 0; i < mc.player.inventory.getInvSize(); i++) {
+        for (int i = excludeHotbar.get() ? 9 : 0; i < mc.player.inventory.getInvSize(); i++) {
             if (items.get().contains(mc.player.inventory.getInvStack(i).getItem())) {
                 InvUtils.clickSlot(InvUtils.invIndexToSlotId(i), 1, SlotActionType.THROW);
             }
