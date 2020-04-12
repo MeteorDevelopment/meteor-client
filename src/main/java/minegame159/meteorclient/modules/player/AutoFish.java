@@ -8,6 +8,7 @@ import minegame159.meteorclient.events.packets.PlaySoundPacketEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BoolSetting;
+import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.utils.Utils;
@@ -47,12 +48,22 @@ public class AutoFish extends ToggleModule {
             .build()
     );
 
+    private Setting<Double> splashDetectionRange = addSetting(new DoubleSetting.Builder()
+            .name("splash-detection-range")
+            .description("Detection range of splash sound. Lowe values will not work when TPS is low.")
+            .defaultValue(1)
+            .min(0)
+            .build()
+    );
+
     private boolean ticksEnabled;
     private int ticksToRightClick;
     private int ticksData;
 
     private int autoCastTimer;
     private boolean autoCastEnabled;
+
+    private int autoCastCheckTimer;
 
     public AutoFish() {
         super(Category.Player, "auto-fish", "Automatically fishes.");
@@ -62,6 +73,7 @@ public class AutoFish extends ToggleModule {
     public void onActivate() {
         ticksEnabled = false;
         autoCastEnabled = false;
+        autoCastCheckTimer = 0;
     }
 
     @EventHandler
@@ -77,15 +89,21 @@ public class AutoFish extends ToggleModule {
     });
 
     private boolean isIdk(double a1, double a2) {
-        return a1 >= a2 - 0.25 && a1 <= a2 + 0.25;
+        return a1 >= a2 - splashDetectionRange.get() && a1 <= a2 + splashDetectionRange.get();
     }
 
     @EventHandler
     private Listener<TickEvent> onTick = new Listener<>(event -> {
         // Auto cast
-        if (autoCast.get() && !ticksEnabled && !autoCastEnabled && mc.player.fishHook == null && mc.player.getMainHandStack().getItem() instanceof FishingRodItem) {
-            autoCastTimer = 0;
-            autoCastEnabled = true;
+        if (autoCastCheckTimer <= 0) {
+            autoCastCheckTimer = 20;
+
+            if (autoCast.get() && !ticksEnabled && !autoCastEnabled && mc.player.fishHook == null && mc.player.getMainHandStack().getItem() instanceof FishingRodItem) {
+                autoCastTimer = 0;
+                autoCastEnabled = true;
+            }
+        } else {
+            autoCastCheckTimer--;
         }
 
         // Check for auto cast timer
