@@ -253,6 +253,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new HoleESP());
         addModule(new LogoutSpot());
         addModule(new Trajectories());
+        addModule(new NoBubbles());
     }
 
     private void initMisc() {
@@ -269,6 +270,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new AutoSmelter());
         addModule(new Annoy());
         addModule(new Spam());
+        addModule(new UnfocusedCPU());
     }
 
     private void initSetting() {

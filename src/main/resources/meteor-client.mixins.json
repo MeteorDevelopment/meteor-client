@@ -40,7 +40,8 @@
     "MiningToolItemMixin",
     "CraftingTableScreenMixin",
     "PlayerEntityMixin",
-    "FluidBlockMixin"
+    "FluidBlockMixin",
+    "ParticleManagerMixin"
   ],
   "injectors": {
     "defaultRequire": 1
