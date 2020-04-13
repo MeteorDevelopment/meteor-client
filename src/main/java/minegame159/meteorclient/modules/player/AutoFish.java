@@ -51,7 +51,7 @@ public class AutoFish extends ToggleModule {
     private Setting<Double> splashDetectionRange = addSetting(new DoubleSetting.Builder()
             .name("splash-detection-range")
             .description("Detection range of splash sound. Lowe values will not work when TPS is low.")
-            .defaultValue(1)
+            .defaultValue(3)
             .min(0)
             .build()
     );
@@ -81,22 +81,20 @@ public class AutoFish extends ToggleModule {
         PlaySoundS2CPacket p = event.packet;
         FishingBobberEntity b = mc.player.fishHook;
 
-        if (p.getSound().getId().getPath().equals("entity.fishing_bobber.splash") && isIdk(p.getX(), b.x) && isIdk(p.getY(), b.y) && isIdk(p.getZ(), b.z)) {
-            ticksEnabled = true;
-            ticksToRightClick = ticksCatch.get();
-            ticksData = 0;
+        if (p.getSound().getId().getPath().equals("entity.fishing_bobber.splash")) {
+            if (Utils.distance(b.x, b.y, b.z, p.getX(), p.getY(), p.getZ()) <= splashDetectionRange.get()) {
+                ticksEnabled = true;
+                ticksToRightClick = ticksCatch.get();
+                ticksData = 0;
+            }
         }
     });
-
-    private boolean isIdk(double a1, double a2) {
-        return a1 >= a2 - splashDetectionRange.get() && a1 <= a2 + splashDetectionRange.get();
-    }
 
     @EventHandler
     private Listener<TickEvent> onTick = new Listener<>(event -> {
         // Auto cast
         if (autoCastCheckTimer <= 0) {
-            autoCastCheckTimer = 20;
+            autoCastCheckTimer = 30;
 
             if (autoCast.get() && !ticksEnabled && !autoCastEnabled && mc.player.fishHook == null && mc.player.getMainHandStack().getItem() instanceof FishingRodItem) {
                 autoCastTimer = 0;
