@@ -41,7 +41,8 @@
     "CraftingTableScreenMixin",
     "PlayerEntityMixin",
     "FluidBlockMixin",
-    "ParticleManagerMixin"
+    "ParticleManagerMixin",
+    "LightmapTextureManagerMixin"
   ],
   "injectors": {
     "defaultRequire": 1
