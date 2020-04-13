@@ -216,6 +216,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new AutoRightClick());
         addModule(new Yaw());
         addModule(new Pitch());
+        addModule(new Portals());
     }
 
     private void initMovement() {
