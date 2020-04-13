@@ -42,7 +42,8 @@
     "PlayerEntityMixin",
     "FluidBlockMixin",
     "ParticleManagerMixin",
-    "LightmapTextureManagerMixin"
+    "LightmapTextureManagerMixin",
+    "LivingEntityRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

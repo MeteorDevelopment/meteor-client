@@ -256,6 +256,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new LogoutSpot());
         addModule(new Trajectories());
         addModule(new NoBubbles());
+        addModule(new Chams());
     }
 
     private void initMisc() {
