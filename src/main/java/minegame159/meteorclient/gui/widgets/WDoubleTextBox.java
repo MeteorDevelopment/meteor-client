@@ -18,6 +18,11 @@ public class WDoubleTextBox extends WTextBox {
         super.action = this::textChanged;
     }
 
+    @Override
+    protected void callAction() {
+        if (text.length() > 1 || (text.length() == 1 && text.charAt(0) != '-')) super.callAction();
+    }
+
     private void textChanged(WTextBox textBox) {
         double lastValue = value;
         if (text.isEmpty()) value = 0;

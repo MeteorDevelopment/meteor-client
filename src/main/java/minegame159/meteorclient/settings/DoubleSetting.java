@@ -14,7 +14,9 @@ public class DoubleSetting extends Setting<Double> {
         this.max = max;
 
         widget = new WDoubleTextBox(get(), 70);
-        ((WDoubleTextBox) widget).action = wDoubleTextBox -> set(wDoubleTextBox.value);
+        ((WDoubleTextBox) widget).action = wDoubleTextBox -> {
+            if (!set(wDoubleTextBox.value)) wDoubleTextBox.setValue(get());
+        };
     }
 
     @Override

@@ -46,7 +46,7 @@ public class WTextBox extends WWidget {
 
         if (focused && button == 1) {
             text = "";
-            if (action != null) action.accept(this);
+            callAction();
             return true;
         }
 
@@ -57,7 +57,7 @@ public class WTextBox extends WWidget {
     public boolean onKeyPressed(int key, int modifiers) {
         if (focused && key == GLFW.GLFW_KEY_BACKSPACE && text.length() > 0) {
             text = text.substring(0, text.length() - 1);
-            if (action != null) action.accept(this);
+            callAction();
             return true;
         }
 
@@ -73,7 +73,7 @@ public class WTextBox extends WWidget {
     public boolean onKeyRepeated(int key) {
         if (focused && key == GLFW.GLFW_KEY_BACKSPACE && text.length() > 0) {
             text = text.substring(0, text.length() - 1);
-            if (action != null) action.accept(this);
+            callAction();
             return true;
         }
 
@@ -85,15 +85,19 @@ public class WTextBox extends WWidget {
         if (focused) {
             if (filter == null) {
                 text += c;
-                if (action != null) action.accept(this);
+                callAction();
             } else if (filter.accept(this, c)) {
                 text += c;
-                if (action != null) action.accept(this);
+                callAction();
             }
             return true;
         }
 
         return false;
+    }
+
+    protected void callAction() {
+        if (action != null) action.accept(this);
     }
 
     public boolean isFocused() {

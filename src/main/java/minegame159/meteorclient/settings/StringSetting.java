@@ -10,7 +10,9 @@ public class StringSetting extends Setting<String> {
         super(name, description, group, defaultValue, onChanged, onModuleActivated, visible);
 
         widget = new WTextBox(get(), 200);
-        ((WTextBox) widget).action = textBox -> set(textBox.text);
+        ((WTextBox) widget).action = textBox -> {
+            if (!set(textBox.text)) textBox.text = get();
+        };
     }
 
     @Override

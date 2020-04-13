@@ -53,11 +53,12 @@ public abstract class Setting<T> implements ISerializable<T> {
         return value;
     }
 
-    public void set(T value) {
-        if (!isValueValid(value)) return;
+    public boolean set(T value) {
+        if (!isValueValid(value)) return false;
         this.value = value;
         resetWidget();
         changed();
+        return true;
     }
 
     public void reset(boolean callbacks) {
