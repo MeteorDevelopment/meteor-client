@@ -146,11 +146,11 @@ public class KillAura extends ToggleModule {
     private boolean canSeeEntity(Entity entity) {
         if (ignoreWalls.get()) return true;
 
-        ((IVec3d) vec3d1).set(mc.player.x, mc.player.y + mc.player.getStandingEyeHeight(), mc.player.z);
-        ((IVec3d) vec3d2).set(entity.x, entity.y, entity.z);
+        ((IVec3d) vec3d1).set(mc.player.getX(), mc.player.getY() + mc.player.getStandingEyeHeight(), mc.player.getZ());
+        ((IVec3d) vec3d2).set(entity.getX(), entity.getY(), entity.getZ());
         boolean canSeeFeet =  mc.world.rayTrace(new RayTraceContext(vec3d1, vec3d2, RayTraceContext.ShapeType.COLLIDER, RayTraceContext.FluidHandling.NONE, mc.player)).getType() == HitResult.Type.MISS;
 
-        ((IVec3d) vec3d2).set(entity.x, entity.y + entity.getStandingEyeHeight(), entity.z);
+        ((IVec3d) vec3d2).set(entity.getX(), entity.getY() + entity.getStandingEyeHeight(), entity.getZ());
         boolean canSeeEyes =  mc.world.rayTrace(new RayTraceContext(vec3d1, vec3d2, RayTraceContext.ShapeType.COLLIDER, RayTraceContext.FluidHandling.NONE, mc.player)).getType() == HitResult.Type.MISS;
 
         return canSeeFeet || canSeeEyes;
@@ -196,7 +196,7 @@ public class KillAura extends ToggleModule {
                 .min(this::sort)
                 .ifPresent(entity -> {
                     if (rotate.get()) {
-                        ((IVec3d) vec3d1).set(entity.x, entity.y + entity.getHeight() / 2, entity.z);
+                        ((IVec3d) vec3d1).set(entity.getX(), entity.getY() + entity.getHeight() / 2, entity.getZ());
                         mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, vec3d1);
                     }
                     mc.interactionManager.attackEntity(mc.player, entity);

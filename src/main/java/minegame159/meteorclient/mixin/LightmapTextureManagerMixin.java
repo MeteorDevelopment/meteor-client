@@ -19,7 +19,7 @@ public class LightmapTextureManagerMixin {
     }
 
     @Redirect(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/GameRenderer;getNightVisionStrength(Lnet/minecraft/entity/LivingEntity;F)F"))
-    private float updateGetNightVisionStrengthProxy(GameRenderer gameRenderer, LivingEntity entity, float delta) {
-        return ModuleManager.INSTANCE.isActive(FullBright.class) ? 1 : gameRenderer.getNightVisionStrength(entity, delta);
+    private float updateGetNightVisionStrengthProxy(LivingEntity entity, float delta) {
+        return ModuleManager.INSTANCE.isActive(FullBright.class) ? 1 : GameRenderer.getNightVisionStrength(entity, delta);
     }
 }

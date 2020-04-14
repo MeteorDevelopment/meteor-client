@@ -98,7 +98,7 @@ public class AutoFish extends ToggleModule {
         FishingBobberEntity b = mc.player.fishHook;
 
         if (p.getSound().getId().getPath().equals("entity.fishing_bobber.splash")) {
-            if (!splashRangeDetection.get() || Utils.distance(b.x, b.y, b.z, p.getX(), p.getY(), p.getZ()) <= splashDetectionRange.get()) {
+            if (!splashRangeDetection.get() || Utils.distance(b.getX(), b.getY(), b.getZ(), p.getX(), p.getY(), p.getZ()) <= splashDetectionRange.get()) {
                 ticksEnabled = true;
                 ticksToRightClick = ticksCatch.get();
                 ticksData = 0;
