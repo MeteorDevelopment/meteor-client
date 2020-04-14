@@ -47,6 +47,14 @@ public class HoleESP extends ToggleModule {
             .build()
     );
 
+    private Setting<Integer> holeHeight = addSetting(new IntSetting.Builder()
+            .name("hole-height")
+            .description("Minimum hole height required to be rendered.")
+            .defaultValue(3)
+            .min(1)
+            .build()
+    );
+
     private Setting<Color> allBedrock = addSetting(new ColorSetting.Builder()
             .name("all-bedrock")
             .description("All blocks are bedrock.")
@@ -89,6 +97,8 @@ public class HoleESP extends ToggleModule {
                 for (int z = (int) mc.player.getZ() - horizontalRadius.get(); z <= (int) mc.player.getZ() + horizontalRadius.get(); z++) {
                     blockPos.set(x, y, z);
 
+                    if (!checkHeight()) continue;
+
                     Block bottom = mc.world.getBlockState(add(0, -1, 0)).getBlock();
                     if (bottom != Blocks.BEDROCK && bottom != Blocks.OBSIDIAN) continue;
                     Block forward = mc.world.getBlockState(add(0, 1, 1)).getBlock();
@@ -119,6 +129,17 @@ public class HoleESP extends ToggleModule {
             }
         }
     });
+
+    private boolean checkHeight() {
+        if (mc.world.getBlockState(blockPos).getBlock() != Blocks.AIR) return false;
+
+        for (int i = 0; i < holeHeight.get() - 1; i++) {
+            if (mc.world.getBlockState(add(0, 1, 0)).getBlock() != Blocks.AIR) return false;
+        }
+
+        add(0, -holeHeight.get() + 1, 0);
+        return true;
+    }
 
     @EventHandler
     private Listener<RenderEvent> onRender = new Listener<>(event -> {

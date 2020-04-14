@@ -4,6 +4,9 @@ import minegame159.meteorclient.CommandDispatcher;
 import minegame159.meteorclient.Config;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.misc.Annoy;
+import minegame159.meteorclient.modules.player.Portals;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.network.packet.c2s.play.ChatMessageC2SPacket;
@@ -12,6 +15,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ClientPlayerEntity.class)
@@ -31,5 +35,10 @@ public abstract class ClientPlayerEntityMixin {
 
         info.cancel();
         CommandDispatcher.run(msg.substring(Config.INSTANCE.getPrefix().length()));
+    }
+
+    @Redirect(method = "updateNausea", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/MinecraftClient;openScreen(Lnet/minecraft/client/gui/screen/Screen;)V"))
+    private void updateNauseaOpenScreenProxy(MinecraftClient mc, Screen screen) {
+        if (!ModuleManager.INSTANCE.isActive(Portals.class)) mc.openScreen(screen);
     }
 }

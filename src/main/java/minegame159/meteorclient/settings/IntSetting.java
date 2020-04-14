@@ -14,7 +14,9 @@ public class IntSetting extends Setting<Integer> {
         this.max = max;
 
         widget = new WIntTextBox(get(), 70);
-        ((WIntTextBox) widget).action = wIntTextBox -> set(wIntTextBox.value);
+        ((WIntTextBox) widget).action = wIntTextBox -> {
+            if (!set(wIntTextBox.value)) wIntTextBox.setValue(get());
+        };
     }
 
     @Override

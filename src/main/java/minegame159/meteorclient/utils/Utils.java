@@ -37,6 +37,13 @@ public class Utils {
     private static Vec3d vec1 = new Vec3d(0, 0, 0);
     private static Vec3d vec2 = new Vec3d(0, 0, 0);
 
+    public static double distance(double x1, double y1, double z1, double x2, double y2, double z2) {
+        double dX = x2 - x1;
+        double dY = y2 - y1;
+        double dZ = z2 - z1;
+        return Math.sqrt(dX * dX + dY * dY + dZ * dZ);
+    }
+
     public static String getWorldName() {
         if (mc.isInSingleplayer()) {
             // Singleplaer

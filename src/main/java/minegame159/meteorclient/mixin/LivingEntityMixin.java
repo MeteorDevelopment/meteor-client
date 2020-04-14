@@ -3,15 +3,19 @@ package minegame159.meteorclient.mixin;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.movement.AntiLevitation;
 import minegame159.meteorclient.modules.movement.HighJump;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.effect.StatusEffect;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(LivingEntity.class)
@@ -35,5 +39,19 @@ public abstract class LivingEntityMixin extends Entity {
         if (ModuleManager.INSTANCE.isActive(HighJump.class)) {
             info.setReturnValue(0.42f * ModuleManager.INSTANCE.get(HighJump.class).getMultiplier());
         }
+    }
+
+    @Redirect(method = "travel", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;hasStatusEffect(Lnet/minecraft/entity/effect/StatusEffect;)Z"))
+    private boolean travelHasStatusEffectProxy(LivingEntity self, StatusEffect statusEffect) {
+        if (statusEffect == StatusEffects.LEVITATION && ModuleManager.INSTANCE.isActive(AntiLevitation.class)) return false;
+        return self.hasStatusEffect(statusEffect);
+    }
+
+    @Redirect(method = "travel", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;hasNoGravity()Z"))
+    private boolean travelHasNoGravityProxy(LivingEntity self) {
+        if (self.hasStatusEffect(StatusEffects.LEVITATION) && ModuleManager.INSTANCE.isActive(AntiLevitation.class)) {
+            return !ModuleManager.INSTANCE.get(AntiLevitation.class).isApplyGravity();
+        }
+        return self.hasNoGravity();
     }
 }

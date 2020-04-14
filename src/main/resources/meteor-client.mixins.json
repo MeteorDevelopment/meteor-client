@@ -40,7 +40,10 @@
     "MiningToolItemMixin",
     "CraftingTableScreenMixin",
     "PlayerEntityMixin",
-    "FluidBlockMixin"
+    "FluidBlockMixin",
+    "ParticleManagerMixin",
+    "LightmapTextureManagerMixin",
+    "LivingEntityRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

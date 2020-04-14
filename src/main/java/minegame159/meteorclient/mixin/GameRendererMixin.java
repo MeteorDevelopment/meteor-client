@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.misc.UnfocusedCPU;
 import minegame159.meteorclient.modules.render.NoHurtCam;
 import minegame159.meteorclient.utils.RenderUtils;
 import minegame159.meteorclient.utils.Utils;
@@ -24,6 +25,11 @@ public abstract class GameRendererMixin {
     @Shadow @Final private MinecraftClient client;
 
     @Shadow @Final private Camera camera;
+
+    @Inject(method = "render", at = @At("HEAD"), cancellable = true)
+    private void onRender(float tickDelta, long startTime, boolean tick, CallbackInfo info) {
+        if (ModuleManager.INSTANCE.isActive(UnfocusedCPU.class) && !client.isWindowFocused()) info.cancel();
+    }
 
     @Inject(method = "renderWorld", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiler/Profiler;swap(Ljava/lang/String;)V", args = { "ldc=hand" }))
     public void onRenderWorld(float tickDelta, long limitTime, MatrixStack matrix, CallbackInfo info) {

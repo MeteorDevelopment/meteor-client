@@ -11,7 +11,10 @@ public class ColorSetting extends Setting<Color> {
         super(name, description, group, defaultValue, onChanged, onModuleActivated, visible);
 
         widget = new WColorEdit(get());
-        ((WColorEdit) widget).action = wColorEdit -> set(wColorEdit.color);
+        ((WColorEdit) widget).action = wColorEdit -> {
+            set(wColorEdit.color);
+            wColorEdit.set(get());
+        };
     }
 
     @Override

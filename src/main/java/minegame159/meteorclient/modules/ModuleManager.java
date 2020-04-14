@@ -216,6 +216,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new AutoRightClick());
         addModule(new Yaw());
         addModule(new Pitch());
+        addModule(new Portals());
     }
 
     private void initMovement() {
@@ -236,6 +237,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new Step());
         addModule(new Jesus());
         addModule(new AirJump());
+        addModule(new AntiLevitation());
     }
 
     private void initRender() {
@@ -253,6 +255,9 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new HoleESP());
         addModule(new LogoutSpot());
         addModule(new Trajectories());
+        addModule(new NoBubbles());
+        addModule(new Chams());
+        addModule(new NoClip());
     }
 
     private void initMisc() {
@@ -269,6 +274,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new AutoSmelter());
         addModule(new Annoy());
         addModule(new Spam());
+        addModule(new UnfocusedCPU());
     }
 
     private void initSetting() {
