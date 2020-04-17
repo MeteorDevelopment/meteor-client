@@ -275,6 +275,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new Annoy());
         addModule(new Spam());
         addModule(new UnfocusedCPU());
+        addModule(new ItemByteSize());
     }
 
     private void initSetting() {

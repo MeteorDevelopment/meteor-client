@@ -43,7 +43,8 @@
     "FluidBlockMixin",
     "ParticleManagerMixin",
     "LightmapTextureManagerMixin",
-    "LivingEntityRendererMixin"
+    "LivingEntityRendererMixin",
+    "ItemStackMixin"
   ],
   "injectors": {
     "defaultRequire": 1
