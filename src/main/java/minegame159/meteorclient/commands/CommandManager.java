@@ -22,6 +22,7 @@ public class CommandManager {
         addCommand(new Baritone());
         addCommand(new Reload());
         addCommand(new Dismount());
+        addCommand(new Book());
     }
 
     public static Command get(String name) {
