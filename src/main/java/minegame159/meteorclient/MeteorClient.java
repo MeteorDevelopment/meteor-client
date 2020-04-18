@@ -10,11 +10,9 @@ import minegame159.meteorclient.accountsfriends.FriendManager;
 import minegame159.meteorclient.commands.CommandManager;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.font.CFontRenderer;
+import minegame159.meteorclient.gui.clickgui.ClickGUI;
 import minegame159.meteorclient.macros.MacroManager;
 import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.newgui.WidgetScreen;
-import minegame159.meteorclient.newgui.widgets.WLabel;
-import minegame159.meteorclient.newgui.widgets.WTable;
 import minegame159.meteorclient.utils.EntityUtils;
 import minegame159.meteorclient.utils.Utils;
 import net.fabricmc.api.ClientModInitializer;
@@ -86,27 +84,7 @@ public class MeteorClient implements ClientModInitializer, Listenable {
     }
 
     private void openClickGui() {
-        //mc.openScreen(new ClickGUI());
-
-        WidgetScreen screen = new WidgetScreen("Test");
-        WTable table = (WTable) screen.root.add(new WTable()).centerXY().getWidget();
-        table.pad(6);
-        table.defaultCell.spaceVertical(4);
-
-        table.add(new WLabel("Test", true)).fillX().centerXY();
-        table.row();
-        table.add(new WLabel("Sample text."));
-        table.add(new WLabel("Another text in the same row."));
-        table.row();
-        table.add(new WLabel("SADNIbaskjdlanh D")).fillX().right();
-        table.row();
-
-        WTable table2 = (WTable) table.add(new WTable()).fillX().expandX().getWidget();
-        table2.add(new WLabel("A")).fillX().centerX();
-        table2.add(new WLabel("B")).fillX().centerX();
-        table2.add(new WLabel("C")).fillX().centerX();
-
-        mc.openScreen(screen);
+        mc.openScreen(new ClickGUI());
     }
 
     @EventHandler
