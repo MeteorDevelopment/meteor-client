@@ -22,11 +22,15 @@ import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Direction;
+import net.minecraft.world.RayTraceContext;
 
 public class SmartSurround extends ToggleModule {
 
     private MinecraftClient mc = MinecraftClient.getInstance();
+
+    private int oldSlot;
 
     private int slot = -1;
 
@@ -73,7 +77,7 @@ public class SmartSurround extends ToggleModule {
     private Listener<TickEvent> onTick = new Listener<>(event -> {
         if(slot == -1){
             return;
-        }else{
+        }else {
             if ((rPosX >= 2) && (rPosZ == 0)) {
                 placeObi(rPosX - 1, 0, crystal);
             } else if ((rPosX > 1) && (rPosZ > 1)) {
@@ -95,7 +99,13 @@ public class SmartSurround extends ToggleModule {
                 placeObi(rPosX, rPosZ - 1, crystal);
                 placeObi(rPosX + 1, rPosZ, crystal);
             }
-            slot = -1;
+            if (mc.world.rayTrace(
+                    new RayTraceContext(mc.player.getPos(), crystal.getPos(),
+                            RayTraceContext.ShapeType.COLLIDER, RayTraceContext.FluidHandling.NONE, mc.player)).getType()
+                    != HitResult.Type.MISS) {
+                slot = -1;
+                mc.player.inventory.selectedSlot = oldSlot;
+            }
         }
     });
 
@@ -108,6 +118,7 @@ public class SmartSurround extends ToggleModule {
     }
 
     private int findObiInHotbar(){
+        oldSlot = mc.player.inventory.selectedSlot;
         int newSlot = -1;
         for (int i = 0; i < 9; i++) {
             Item item = mc.player.inventory.getInvStack(i).getItem();
