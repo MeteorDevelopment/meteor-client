@@ -28,11 +28,11 @@ public class SmartSurround extends ToggleModule {
 
     private MinecraftClient mc = MinecraftClient.getInstance();
 
-    private Integer slot = -1;
+    private int slot = -1;
 
-    private Integer rPosX;
+    private int rPosX;
 
-    private Integer rPosZ;
+    private int rPosZ;
 
     private Entity crystal;
 
@@ -107,8 +107,8 @@ public class SmartSurround extends ToggleModule {
         mc.player.swingHand(Hand.MAIN_HAND);
     }
 
-    private Integer findObiInHotbar(){
-        Integer newSlot = -1;
+    private int findObiInHotbar(){
+        int newSlot = -1;
         for (int i = 0; i < 9; i++) {
             Item item = mc.player.inventory.getInvStack(i).getItem();
             if (item == Items.OBSIDIAN) {

@@ -14,41 +14,41 @@ public class DamageCalcUtils {
     public static MinecraftClient mc = MinecraftClient.getInstance();
 
 
-    public static Double crystalDamage(Entity player, Entity crystal){
-        Boolean feetExposed = mc.world.rayTrace(
+    public static double crystalDamage(Entity player, Entity crystal){
+        boolean feetExposed = mc.world.rayTrace(
                 new RayTraceContext(player.getPos(), crystal.getPos(),
                         RayTraceContext.ShapeType.COLLIDER, RayTraceContext.FluidHandling.NONE, player)).getType()
                 == HitResult.Type.MISS;
-        Boolean headExposed = mc.world.rayTrace(
+        boolean headExposed = mc.world.rayTrace(
                 new RayTraceContext(player.getPos().add(0, 1, 0), crystal.getPos(),
                         RayTraceContext.ShapeType.COLLIDER, RayTraceContext.FluidHandling.NONE, player)).getType()
                 == HitResult.Type.MISS;
-        Double exposure = 0D;
+        double exposure = 0D;
         if(feetExposed && headExposed){
             exposure = 1D;
         }else if(feetExposed ^ headExposed){
             exposure = 0.5D;
         }
-        Double impact = (1D - mc.player.distanceTo(crystal) / 12D)*exposure;
+        double impact = (1D - mc.player.distanceTo(crystal) / 12D)*exposure;
         return (impact*impact+impact)*42+1;
     }
 
-    public static Double bedDamage(Entity player, BlockEntity bed){
-        Boolean feetExposed = mc.world.rayTrace(
+    public static double bedDamage(Entity player, BlockEntity bed){
+        boolean feetExposed = mc.world.rayTrace(
                 new RayTraceContext(player.getPos(), toVec3D(bed),
                         RayTraceContext.ShapeType.COLLIDER, RayTraceContext.FluidHandling.NONE, player)).getType()
                 == HitResult.Type.MISS;
-        Boolean headExposed = mc.world.rayTrace(
+        boolean headExposed = mc.world.rayTrace(
                 new RayTraceContext(player.getPos().add(0, 1, 0), toVec3D(bed),
                         RayTraceContext.ShapeType.COLLIDER, RayTraceContext.FluidHandling.NONE, player)).getType()
                 == HitResult.Type.MISS;
-        Double exposure = 0D;
+        double exposure = 0D;
         if(feetExposed && headExposed){
             exposure = 1D;
         }else if(feetExposed ^ headExposed){
             exposure = 0.5D;
         }
-        Double impact = (1D - distanceBetween(player, bed) / 12D)*exposure;
+        double impact = (1D - distanceBetween(player, bed) / 12D)*exposure;
         return (impact*impact+impact)*42+1;
     }
 
@@ -56,7 +56,7 @@ public class DamageCalcUtils {
         return new Vec3d(bed.getPos().getX(), bed.getPos().getY(), bed.getPos().getZ());
     }
 
-    private static Double distanceBetween(Entity player, BlockEntity bed){
+    private static double distanceBetween(Entity player, BlockEntity bed){
         return (Math.abs(player.getPos().getX() - bed.getPos().getX()) + Math.abs(player.getPos().getY() - bed.getPos().getY()) + Math.abs(player.getPos().getZ() - bed.getPos().getZ()));
     }
 
