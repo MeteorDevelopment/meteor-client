@@ -1,9 +1,8 @@
 package minegame159.meteorclient.gui.widgets;
 
+import minegame159.meteorclient.gui.GuiRenderer;
 import minegame159.meteorclient.utils.Color;
-import minegame159.meteorclient.utils.RenderUtils;
 import minegame159.meteorclient.utils.Utils;
-import minegame159.meteorclient.utils.Vector2;
 
 public class WQuad extends WWidget {
     public Color color;
@@ -13,12 +12,13 @@ public class WQuad extends WWidget {
     }
 
     @Override
-    public Vector2 calculateCustomSize() {
-        return new Vector2(Utils.getTextHeight() + 6, Utils.getTextHeight() + 6);
+    protected void onCalculateSize() {
+        width = 4 + Utils.getTextHeight() + 4;
+        height = 4 + Utils.getTextHeight() + 4;
     }
 
     @Override
-    public void onRender(double delta) {
-        RenderUtils.quad(boundingBox.x, boundingBox.y, boundingBox.getWidth(), boundingBox.getHeight(), color);
+    protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
+        renderer.renderQuad(x, y, width, height, color);
     }
 }

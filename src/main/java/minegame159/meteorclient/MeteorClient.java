@@ -10,9 +10,9 @@ import minegame159.meteorclient.accountsfriends.FriendManager;
 import minegame159.meteorclient.commands.CommandManager;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.font.CFontRenderer;
-import minegame159.meteorclient.gui.clickgui.ClickGUI;
 import minegame159.meteorclient.macros.MacroManager;
 import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.gui.screens.ClickGUI;
 import minegame159.meteorclient.utils.EntityUtils;
 import minegame159.meteorclient.utils.Utils;
 import net.fabricmc.api.ClientModInitializer;
@@ -56,6 +56,7 @@ public class MeteorClient implements ClientModInitializer, Listenable {
         EntityUtils.mc = mc;
 
         loadFont();
+        Config.INSTANCE = new Config();
 
         ModuleManager.INSTANCE = new ModuleManager();
         CommandManager.init();

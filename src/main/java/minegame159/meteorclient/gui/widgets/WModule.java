@@ -1,16 +1,16 @@
-package minegame159.meteorclient.gui.clickgui;
+package minegame159.meteorclient.gui.widgets;
 
-import minegame159.meteorclient.gui.widgets.WLabel;
-import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.modules.setting.GUI;
-import minegame159.meteorclient.utils.RenderUtils;
+import minegame159.meteorclient.gui.GuiConfig;
+import minegame159.meteorclient.gui.GuiRenderer;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 
 public class WModule extends WWidget {
     private Module module;
+    private double titleWidth;
 
     private double animationProgress1;
     private double animationMultiplier1;
@@ -19,12 +19,10 @@ public class WModule extends WWidget {
     private double animationMultiplier2;
 
     public WModule(Module module) {
-        boundingBox.autoSize = true;
-        boundingBox.fullWidth = true;
-        boundingBox.setMargin(4);
-        tooltip = module.description;
-
         this.module = module;
+        this.titleWidth = Utils.getTextWidth(module.title);
+        this.tooltip = module.description;
+
         if (module instanceof ToggleModule && ((ToggleModule) module).isActive()) {
             animationProgress1 = 1;
             animationMultiplier1 = 1;
@@ -38,12 +36,16 @@ public class WModule extends WWidget {
             animationProgress2 = 0;
             animationMultiplier2 = -1;
         }
-
-        add(new WLabel(module.title));
     }
 
     @Override
-    public boolean onMousePressed(int button) {
+    protected void onCalculateSize() {
+        width = 4 + titleWidth + 4;
+        height = 4 + Utils.getTextHeight() + 4;
+    }
+
+    @Override
+    protected boolean onMouseClicked(int button) {
         if (mouseOver) {
             if (button == 0) module.doAction(MinecraftClient.getInstance().world != null);
             else if (button == 1) module.openScreen();
@@ -55,7 +57,7 @@ public class WModule extends WWidget {
     }
 
     @Override
-    public void onRender(double delta) {
+    protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
         if (module instanceof ToggleModule) {
             if (((ToggleModule) module).isActive()) {
                 animationMultiplier1 = 1;
@@ -81,8 +83,10 @@ public class WModule extends WWidget {
         animationProgress2 = Utils.clamp(animationProgress2, 0, 1);
 
         if (animationProgress1 > 0  || animationProgress2 > 0) {
-            RenderUtils.quad(boundingBox.x, boundingBox.y, boundingBox.getWidth() * animationProgress1, boundingBox.getHeight(), GUI.backgroundModuleActive);
-            RenderUtils.quad(boundingBox.x, boundingBox.y + boundingBox.getHeight() * (1 - animationProgress2), 1, boundingBox.getHeight() * animationProgress2, GUI.accent);
+            renderer.renderQuad(x, y, width * animationProgress1, height, GuiConfig.INSTANCE.moduleBackground);
+            renderer.renderQuad(x, y + height * (1 - animationProgress2), 1, height * animationProgress2, GuiConfig.INSTANCE.accent);
         }
+
+        renderer.renderText(module.title, x + width / 2 - titleWidth / 2, y + 4.5, GuiConfig.INSTANCE.text, false);
     }
 }

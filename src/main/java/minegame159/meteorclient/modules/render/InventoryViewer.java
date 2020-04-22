@@ -4,13 +4,14 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.Render2DEvent;
-import minegame159.meteorclient.gui.Alignment;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.utils.AlignmentX;
+import minegame159.meteorclient.utils.AlignmentY;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.item.ItemStack;
@@ -24,11 +25,11 @@ public class InventoryViewer extends ToggleModule {
             .build()
     );
 
-    private Setting<Alignment.X> xAlignment = addSetting(new EnumSetting.Builder<Alignment.X>()
+    private Setting<AlignmentX> xAlignment = addSetting(new EnumSetting.Builder<AlignmentX>()
             .name("x-alignment")
             .description("X alignment.")
             .group("X")
-            .defaultValue(Alignment.X.Left)
+            .defaultValue(AlignmentX.Left)
             .build()
     );
 
@@ -40,11 +41,11 @@ public class InventoryViewer extends ToggleModule {
             .build()
     );
 
-    private Setting<Alignment.Y> yAlignment = addSetting(new EnumSetting.Builder<Alignment.Y>()
+    private Setting<AlignmentY> yAlignment = addSetting(new EnumSetting.Builder<AlignmentY>()
             .name("y-alignment")
             .description("Y alignment.")
             .group("Y")
-            .defaultValue(Alignment.Y.Bottom)
+            .defaultValue(AlignmentY.Bottom)
             .build()
     );
 

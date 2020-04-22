@@ -1,20 +1,20 @@
-package minegame159.meteorclient.accountsfriends;
+package minegame159.meteorclient.gui.screens;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listenable;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.MeteorClient;
+import minegame159.meteorclient.accountsfriends.Account;
+import minegame159.meteorclient.accountsfriends.AccountManager;
 import minegame159.meteorclient.events.AccountListChangedEvent;
-import minegame159.meteorclient.gui.Alignment;
-import minegame159.meteorclient.gui.screens.WindowScreen;
+import minegame159.meteorclient.gui.GuiConfig;
 import minegame159.meteorclient.gui.widgets.*;
-import minegame159.meteorclient.modules.setting.GUI;
 
 public class AccountsScreen extends WindowScreen implements Listenable {
     private WLabel loggedInL;
 
     public AccountsScreen() {
-        super("Accounts");
+        super("Accounts", true);
 
         initWidgets();
     }
@@ -28,40 +28,40 @@ public class AccountsScreen extends WindowScreen implements Listenable {
     private void initWidgets() {
         // Accounts
         if (AccountManager.INSTANCE.getAll().size() > 0) {
-            WGrid grid = add(new WGrid(4, 4, 4));
-            for (Account account : AccountManager.INSTANCE.getAll()) {
-                WLabel name = new WLabel(account.getName());
+            WTable table = add(new WTable()).getWidget();
+            row();
 
-                WLabel loggedIn = new WLabel("- logged in");
-                loggedIn.color = GUI.textLoggedIn;
+            for (Account account : AccountManager.INSTANCE.getAll()) {
+                WLabel name = table.add(new WLabel(account.getName())).getWidget();
+
+                WLabel loggedIn = table.add(new WLabel("- logged in")).getWidget();
+                loggedIn.color = GuiConfig.INSTANCE.loggedInText;
                 if (mc.getSession().getUsername().equalsIgnoreCase(account.getName())) loggedInL = loggedIn;
                 else loggedIn.visible = false;
 
-                WButton logIn = new WButton("Log In");
-                logIn.action = () -> {
+                WButton logIn = table.add(new WButton("Log In")).getWidget();
+                logIn.action = button -> {
                     if (account.logIn()) {
                         if (loggedInL != null) loggedInL.visible = false;
                         loggedIn.visible = true;
                         loggedInL = loggedIn;
-                        name.text = account.getName();
-                        layout();
+                        name.setText(account.getName());
                     }
                 };
 
-                WMinus remove = new WMinus();
-                remove.action = () -> AccountManager.INSTANCE.remove(account);
+                WMinus remove = table.add(new WMinus()).getWidget();
+                remove.action = minus -> AccountManager.INSTANCE.remove(account);
 
-                grid.addRow(name, loggedIn, logIn, remove);
+                table.row();
             }
-            add(new WHorizontalSeparator());
+
+            add(new WHorizontalSeparator()).fillX().expandX();
+            row();
         }
 
         // Add
-        WPlus add = add(new WPlus());
-        add.boundingBox.alignment.x = Alignment.X.Right;
-        add.action = () -> mc.openScreen(new AddAccountScreen());
-
-        layout();
+        WPlus add = add(new WPlus()).fillX().right().getWidget();
+        add.action = plus -> mc.openScreen(new AddAccountScreen());
     }
 
     @EventHandler
