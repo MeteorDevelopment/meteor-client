@@ -1,188 +1,186 @@
 package minegame159.meteorclient.gui.widgets;
 
-import minegame159.meteorclient.Config;
-import minegame159.meteorclient.gui.Alignment;
-import minegame159.meteorclient.modules.setting.GUI;
-import minegame159.meteorclient.utils.RenderUtils;
+import minegame159.meteorclient.gui.GuiConfig;
+import minegame159.meteorclient.gui.GuiRenderer;
+import minegame159.meteorclient.gui.listeners.WindowDragListener;
 import net.minecraft.client.MinecraftClient;
 
-public class WWindow extends WVerticalList {
-    public interface OnMovedAction {
-        public void onMoved(WWindow window);
-    }
+public class WWindow extends WTable {
+    public WindowDragListener onDragged;
+    public final GuiConfig.WindowType type;
 
-    public OnMovedAction onDragged;
+    private String title;
+    private WTable table;
 
     private boolean expanded;
-    private Config.WindowType type;
     private Header header;
-    private WVerticalList list;
 
-    public WWindow(String title, Config.WindowType type, double horizontalMargin, double spacing, boolean expanded) {
-        super(spacing);
-        boundingBox.alignment.set(Alignment.X.Center, Alignment.Y.Center);
+    private double padding, spacing;
 
-        if (type != null) this.expanded = Config.INSTANCE.getWindowConfig(type, expanded).isExpanded();
-        else this.expanded = expanded;
+    private boolean wasMoved;
+    private double mX, mY;
 
+    public WWindow(String title, boolean expanded, double padding, double spacing, GuiConfig.WindowType type) {
+        this.title = title;
+        this.expanded = expanded;
+        this.padding = padding;
+        this.spacing = spacing;
         this.type = type;
 
-        header = super.add(new Header(title, this));
+        defaultCell.space(0);
+        initWidgets();
 
-        list = super.add(new WVerticalList(spacing));
-        list.maxHeight = MinecraftClient.getInstance().window.getScaledHeight() - 64;
-        list.boundingBox.setMargin(horizontalMargin, 0);
-        list.boundingBox.marginBottom = 4;
+        if (type != null) {
+            setExpanded(GuiConfig.INSTANCE.getWindowConfig(type, expanded).isExpanded());
+        }
+    }
+
+    public WWindow(String title, boolean expanded, GuiConfig.WindowType type) {
+        this(title, expanded, 6, 4, type);
+    }
+
+    public WWindow(String title, boolean expanded) {
+        this(title, expanded, null);
     }
 
     @Override
-    public <T extends WWidget> T add(T widget) {
-        return list.add(widget);
+    public <T extends WWidget> Cell<T> add(T widget) {
+        return table.add(widget);
+    }
+
+    @Override
+    public void row() {
+        table.row();
     }
 
     @Override
     public void clear() {
-        list.clear();
+        table.clear();
     }
 
-    public boolean isExpanded() {
-        return expanded;
+    private void initWidgets() {
+        header = super.add(new Header()).fillX().expandX().getWidget();
+        super.row();
+
+        table = super.add(new WTable()).fillX().expandX().getWidget();
+        table.pad(padding);
+        table.defaultCell.space(spacing);
     }
 
-    public Config.WindowType getType() {
-        return type;
+    public void setExpanded(boolean expanded) {
+        this.expanded = expanded;
+        header.checkbox.checked = expanded;
     }
 
     @Override
-    public boolean mousePressed(int button) {
-        for (WWidget widget : widgets) {
-            if ((expanded || widget == header) && widget.mousePressed(button)) return true;
+    public boolean mouseClicked(int button) {
+        for (Cell<?> cell : cells) {
+            if ((expanded || cell.getWidget() instanceof Header) && cell.getWidget().mouseClicked(button)) return true;
         }
-        return onMousePressed(button);
+        return onMouseClicked(button);
     }
 
     @Override
     public boolean mouseReleased(int button) {
-        for (WWidget widget : widgets) {
-            if ((expanded || widget == header) && widget.mouseReleased(button)) return true;
+        for (Cell<?> cell : cells) {
+            if ((expanded || cell.getWidget() instanceof Header) && cell.getWidget().mouseReleased(button)) return true;
         }
         return onMouseReleased(button);
     }
 
     @Override
+    public void mouseMoved(double x, double y) {
+        for (Cell<?> cell : cells) {
+            if (expanded || cell.getWidget() instanceof Header) cell.getWidget().mouseMoved(x, y);
+        }
+        boolean preMouseOver = mouseOver;
+        mouseOver = isOver(x, y);
+        if (preMouseOver && mouseOver) mouseOverTimer = 0;
+        onMouseMoved(x, y);
+    }
+
+    @Override
     public boolean mouseScrolled(double amount) {
-        for (WWidget widget : widgets) {
-            if ((expanded || widget == header) && widget.mouseScrolled(amount)) return true;
+        for (Cell<?> cell : cells) {
+            if ((expanded || cell.getWidget() instanceof Header) && cell.getWidget().mouseScrolled(amount)) return true;
         }
         return onMouseScrolled(amount);
     }
 
     @Override
-    public void mouseMove(double mouseX, double mouseY) {
-        boolean lastMoveOver = mouseOver;
-        mouseOver = boundingBox.isOver(mouseX, mouseY);
-        if (!lastMoveOver && mouseOver) tooltipTimer = 0;
-
-        onMouseMove(mouseX, mouseY);
-        for (WWidget widget : widgets) {
-            if (expanded || widget == header) widget.mouseMove(mouseX, mouseY);
+    public boolean keyPressed(int key, int mods) {
+        for (Cell<?> cell : cells) {
+            if ((expanded || cell.getWidget() instanceof Header) && cell.getWidget().keyPressed(key, mods)) return true;
         }
+        return onKeyPressed(key, mods);
     }
 
     @Override
-    public boolean keyPressed(int key, int modifiers) {
-        for (WWidget widget : widgets) {
-            if ((expanded || widget == header) && widget.keyPressed(key, modifiers)) return true;
+    public boolean keyRepeated(int key, int mods) {
+        for (Cell<?> cell : cells) {
+            if ((expanded || cell.getWidget() instanceof Header) && cell.getWidget().keyRepeated(key, mods)) return true;
         }
-        return onKeyPressed(key, modifiers);
-    }
-
-    @Override
-    public boolean keyRepeated(int key) {
-        for (WWidget widget : widgets) {
-            if ((expanded || widget == header) && widget.keyRepeated(key)) return true;
-        }
-        return onKeyRepeated(key);
+        return onKeyRepeated(key, mods);
     }
 
     @Override
     public boolean charTyped(char c, int key) {
-        for (WWidget widget : widgets) {
-            if ((expanded || widget == header) && widget.charTyped(c, key)) return true;
+        for (Cell<?> cell : cells) {
+            if ((expanded || cell.getWidget() instanceof Header) && cell.getWidget().charTyped(c, key)) return true;
         }
         return onCharTyped(c, key);
     }
 
     @Override
-    public void render(double delta) {
-        if (expanded) super.render(delta);
-        else {
-            if (!visible) return;
-            for (WWidget widget : widgets) {
-                if (widget.boundingBox.y > MinecraftClient.getInstance().window.getScaledHeight()) break;
-                if (!expanded) if (widget != header) continue;
-                widget.render(delta);
-            }
+    protected void onCalculateSize() {
+        maxHeight = MinecraftClient.getInstance().window.getScaledHeight() - 32;
+        super.onCalculateSize();
+    }
+
+    @Override
+    protected void onCalculateWidgetPositions() {
+        super.onCalculateWidgetPositions();
+
+        if (wasMoved) {
+            move(mX - x, mY - y, true);
         }
     }
 
     @Override
-    public void renderPost(double delta, double mouseX, double mouseY) {
-        if (expanded) super.renderPost(delta, mouseX, mouseY);
+    protected void onRenderWidget(WWidget widget, GuiRenderer renderer, double mouseX, double mouseY, double delta) {
+        if (expanded) widget.render(renderer, mouseX, mouseY, delta);
         else {
-            if (!visible) return;
-            for (WWidget widget : widgets) {
-                if (widget.boundingBox.y > MinecraftClient.getInstance().window.getScaledHeight()) break;
-                if (!expanded) if (widget != header) continue;
-                widget.renderPost(delta, mouseX, mouseY);
-            }
+            if (widget instanceof Header) widget.render(renderer, mouseX, mouseY, delta);
         }
     }
 
     @Override
-    public void onRender(double delta) {
-        RenderUtils.quad(boundingBox.x, boundingBox.y, boundingBox.getWidth(), boundingBox.getHeight(), GUI.background);
+    protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
+        if (expanded) renderer.renderQuad(x, y, width, height, GuiConfig.INSTANCE.background);
     }
 
-    @Override
-    public void onWindowResized(int width, int height) {
-        list.maxHeight = height - 64;
-        list.calculateSize();
-        list.calculatePosition();
-    }
+    private class Header extends WTable {
+        WLabel label;
+        WCheckbox checkbox;
 
-    private static class Header extends WWidget {
-        private WWindow window;
-        private boolean dragging;
-        private double lastMouseX, lastMouseY;
+        boolean dragging;
+        double lastMouseX, lastMouseY;
 
-        public Header(String text, WWindow window) {
-            boundingBox.autoSize = true;
-            boundingBox.fullWidth = true;
-            boundingBox.setMargin(4);
+        Header() {
+            pad(4);
 
-            this.window = window;
+            label = add(new WLabel(title, true)).fillX().centerX().padRight(4).getWidget();
 
-            WHorizontalList hList = add(new WHorizontalList(4));
-            hList.boundingBox.fullWidth = true;
-            hList.boundingBox.alignment.set(Alignment.X.Center, Alignment.Y.Center);
-
-            WLabel title = hList.add(new WLabel(text, true));
-            title.color = GUI.windowHeaderText;
-
-            WCheckbox checkbox = hList.add(new WCheckbox(window.expanded));
-            checkbox.boundingBox.alignment.set(Alignment.X.Right, Alignment.Y.Center);
-            checkbox.boundingBox.setMargin(1);
-            checkbox.size = 8;
-            checkbox.setAction(wCheckbox -> {
-                window.expanded = wCheckbox.checked;
-                if (window.type != null) Config.INSTANCE.getWindowConfig(window.type, false).setExpanded(wCheckbox.checked);
-            });
+            checkbox = add(new WCheckbox(expanded)).getWidget();
+            checkbox.action = checkbox -> {
+                expanded = checkbox.checked;
+                if (type != null) GuiConfig.INSTANCE.getWindowConfig(type, false).setExpanded(checkbox.checked);
+            };
         }
 
         @Override
-        public boolean onMousePressed(int button) {
-            if (mouseOver && button == 0) {
+        protected boolean onMouseClicked(int button) {
+            if (mouseOver) {
                 dragging = true;
                 return true;
             }
@@ -191,8 +189,8 @@ public class WWindow extends WVerticalList {
         }
 
         @Override
-        public boolean onMouseReleased(int button) {
-            if (dragging && button == 0) {
+        protected boolean onMouseReleased(int button) {
+            if (mouseOver) {
                 dragging = false;
                 return true;
             }
@@ -201,19 +199,28 @@ public class WWindow extends WVerticalList {
         }
 
         @Override
-        public void onMouseMove(double mouseX, double mouseY) {
+        protected void onMouseMoved(double x, double y) {
             if (dragging) {
-                window.move(mouseX - lastMouseX, mouseY - lastMouseY);
-                if (window.onDragged != null) window.onDragged.onMoved(window);
+                WWindow.this.move(x - lastMouseX, y - lastMouseY, false);
+                mX = WWindow.this.x;
+                mY = WWindow.this.y;
+                wasMoved = true;
+
+                if (onDragged != null) onDragged.onWindowDrag(WWindow.this);
             }
 
-            lastMouseX = mouseX;
-            lastMouseY = mouseY;
+            lastMouseX = x;
+            lastMouseY = y;
         }
 
         @Override
-        public void onRender(double delta) {
-            RenderUtils.quad(boundingBox.x, boundingBox.y, boundingBox.getWidth(), boundingBox.getHeight(), GUI.accent);
+        protected void onCalculateWidgetPositions() {
+            super.onCalculateWidgetPositions();
+        }
+
+        @Override
+        protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
+            renderer.renderQuad(x, y, width, height, GuiConfig.INSTANCE.accent);
         }
     }
 }

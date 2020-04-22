@@ -4,7 +4,7 @@ import minegame159.meteorclient.utils.Color;
 
 import java.util.function.Consumer;
 
-public class WColorEdit extends WHorizontalList {
+public class WColorEdit extends WTable {
     public Color color;
     public Consumer<WColorEdit> action;
 
@@ -12,18 +12,16 @@ public class WColorEdit extends WHorizontalList {
     private WIntTextBox r, g, b, a;
 
     public WColorEdit(Color color) {
-        super(4);
-
         this.color = color;
 
-        quad = add(new WQuad(color));
-        r = add(new WIntTextBox(color.r, 20));
+        quad = add(new WQuad(color)).getWidget();
+        r = add(new WIntTextBox(color.r, 20)).getWidget();
         r.action = wIntTextBox -> changed();
-        g = add(new WIntTextBox(color.g, 20));
+        g = add(new WIntTextBox(color.g, 20)).getWidget();
         g.action = wIntTextBox -> changed();
-        b = add(new WIntTextBox(color.b, 20));
+        b = add(new WIntTextBox(color.b, 20)).getWidget();
         b.action = wIntTextBox -> changed();
-        a = add(new WIntTextBox(color.a, 20));
+        a = add(new WIntTextBox(color.a, 20)).getWidget();
         a.action = wIntTextBox -> changed();
     }
 

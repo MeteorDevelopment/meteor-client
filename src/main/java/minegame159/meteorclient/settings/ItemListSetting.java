@@ -20,7 +20,7 @@ public class ItemListSetting extends Setting<List<Item>> {
         super(name, description, group, defaultValue, onChanged, onModuleActivated, visible);
 
         widget = new WButton("Select");
-        ((WButton) widget).action = () -> MinecraftClient.getInstance().openScreen(new ItemListSettingScreen(this));
+        ((WButton) widget).action = button -> MinecraftClient.getInstance().openScreen(new ItemListSettingScreen(this));
     }
 
     @Override

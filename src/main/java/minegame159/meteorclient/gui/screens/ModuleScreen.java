@@ -1,15 +1,14 @@
-package minegame159.meteorclient.gui.clickgui;
+package minegame159.meteorclient.gui.screens;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listenable;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.ModuleBindChangedEvent;
-import minegame159.meteorclient.gui.screens.WindowScreen;
-import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.settings.Setting;
 import org.lwjgl.glfw.GLFW;
 
@@ -20,7 +19,7 @@ public class ModuleScreen extends WindowScreen implements Listenable {
     private boolean canResetBind = true;
 
     public ModuleScreen(Module module) {
-        super(module.title);
+        super(module.title, true);
         this.module = module;
 
         initWidgets();
@@ -29,54 +28,72 @@ public class ModuleScreen extends WindowScreen implements Listenable {
     private void initWidgets() {
         // Description
         add(new WLabel(module.description));
-        if (module.settingGroups.size() <= 1) add(new WHorizontalSeparator());
+        row();
+        if (module.settingGroups.size() <= 1) {
+            add(new WHorizontalSeparator()).fillX().expandX();
+            row();
+        }
 
         // Settings
         for (String group : module.settingGroups.keySet()) {
-            if (module.settingGroups.size() > 1) add(new WHorizontalSeparator(group));
-
-            WGrid grid = add(new WGrid(4, 4, 3));
-            for (Setting<?> setting : module.settingGroups.get(group)) {
-                if (setting.isVisible()) generateSettingToGrid(grid, setting);
+            if (module.settingGroups.size() > 1) {
+                add(new WHorizontalSeparator(group)).fillX().expandX();
+                row();
             }
+
+            WTable table = add(new WTable()).fillX().expandX().getWidget();
+            for (Setting<?> setting : module.settingGroups.get(group)) {
+                if (setting.isVisible()) {
+                    generateSettingToGrid(table, setting);
+                }
+            }
+
+            row();
         }
 
         WWidget customWidget = module.getWidget();
         if (customWidget != null) {
-            if (module.settings.size() > 0) add(new WHorizontalSeparator());
+            if (module.settings.size() > 0) {
+                add(new WHorizontalSeparator()).fillX().expandX();
+                row();
+            }
+
             add(customWidget);
+            row();
         }
 
         if (module instanceof ToggleModule) {
-            if (customWidget != null || module.settings.size() > 0) add(new WHorizontalSeparator());
+            if (customWidget != null || module.settings.size() > 0) {
+                add(new WHorizontalSeparator()).fillX().expandX();
+                row();
+            }
 
             // Bind
-            WHorizontalList bind = add(new WHorizontalList(4));
-            bindLabel = bind.add(new WLabel(getBindLabelText()));
-            bind.add(new WButton("Set bind")).action = () -> {
+            WTable bindList = add(new WTable()).fillX().expandX().getWidget();
+            bindLabel = bindList.add(new WLabel(getBindLabelText())).getWidget();
+            bindList.add(new WButton("Set bind")).getWidget().action = button -> {
                 ModuleManager.INSTANCE.setModuleToBind(module);
                 canResetBind = false;
-                bindLabel.text = "Bind: press any key";
-                layout();
+                bindLabel.setText("Bind: press any key");
             };
-            bind.add(new WButton("Reset bind")).action = () -> {
+            bindList.add(new WButton("Reset bind")).getWidget().action = button -> {
                 if (canResetBind) {
                     module.setKey(-1);
-                    bindLabel.text = getBindLabelText();
-                    layout();
+                    bindLabel.setText(getBindLabelText());
                 }
             };
-            add(new WHorizontalSeparator());
+            row();
+
+            add(new WHorizontalSeparator()).fillX().expandX();
+            row();
 
             // Active
-            WHorizontalList active = add(new WHorizontalList(4));
-            active.add(new WLabel("Active:"));
-            active.add(new WCheckbox(((ToggleModule) module).isActive())).setAction(wCheckbox -> {
-                if (((ToggleModule) module).isActive() != wCheckbox.checked) ((ToggleModule) module).toggle(mc.world != null);
-            });
+            WTable activeList = add(new WTable()).fillX().expandX().getWidget();
+            activeList.add(new WLabel("Active:"));
+            activeList.add(new WCheckbox(((ToggleModule) module).isActive())).getWidget().action = checkbox -> {
+                if (((ToggleModule) module).isActive() != checkbox.checked) ((ToggleModule) module).toggle(mc.world != null);
+            };
         }
-
-        layout();
     }
 
     @Override
@@ -96,22 +113,21 @@ public class ModuleScreen extends WindowScreen implements Listenable {
     private Listener<ModuleBindChangedEvent> onModuleBindChanged = new Listener<>(event -> {
         if (event.module == module) {
             canResetBind = true;
-            bindLabel.text = getBindLabelText();
-            layout();
+            bindLabel.setText(getBindLabelText());
         }
     });
 
-    private void generateSettingToGrid(WGrid grid, Setting<?> setting) {
-        WLabel name = new WLabel(setting.title + ":");
+    private void generateSettingToGrid(WTable table, Setting<?> setting) {
+        WLabel name = table.add(new WLabel(setting.title + ":")).getWidget();
         name.tooltip = setting.description;
 
-        WWidget s = setting.widget;
+        WWidget s = table.add(setting.widget).getWidget();
         s.tooltip = setting.description;
 
-        WButton reset = new WButton("Reset");
-        reset.action = setting::reset;
+        WButton reset = table.add(new WButton("Reset")).getWidget();
+        reset.action = button -> setting.reset();
 
-        grid.addRow(name, s, reset);
+        table.row();
     }
 
     private String getBindLabelText() {

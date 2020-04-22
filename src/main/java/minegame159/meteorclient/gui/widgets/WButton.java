@@ -1,30 +1,39 @@
 package minegame159.meteorclient.gui.widgets;
 
-import minegame159.meteorclient.gui.Alignment;
-import minegame159.meteorclient.modules.setting.GUI;
-import minegame159.meteorclient.utils.Color;
+import minegame159.meteorclient.gui.GuiConfig;
+import minegame159.meteorclient.gui.GuiRenderer;
+import minegame159.meteorclient.gui.listeners.ButtonClickListener;
+import minegame159.meteorclient.utils.Utils;
 
 public class WButton extends WWidget {
-    public interface Action {
-        public void clicked();
-    }
+    public ButtonClickListener action;
 
-    public Action action;
+    private String text;
+    private double textWidth;
 
-    protected WLabel label;
+    private boolean pressed;
 
     public WButton(String text) {
-        boundingBox.setMargin(3);
-        boundingBox.autoSize = true;
+        setText(text);
+    }
 
-        label = add(new WLabel(text));
-        label.boundingBox.alignment.x = Alignment.X.Center;
+    public void setText(String text) {
+        this.text = text != null ? text : "";
+        this.textWidth = Utils.getTextWidth(this.text);
+
+        invalidate();
     }
 
     @Override
-    public boolean onMousePressed(int button) {
-        if (mouseOver && button == 0) {
-            if (action != null) action.clicked();
+    protected void onCalculateSize() {
+        width = 3 + Utils.getTextWidth(text) + 3;
+        height = 3 + Utils.getTextHeight() + 3;
+    }
+
+    @Override
+    protected boolean onMouseClicked(int button) {
+        if (mouseOver) {
+            pressed = true;
             return true;
         }
 
@@ -32,13 +41,19 @@ public class WButton extends WWidget {
     }
 
     @Override
-    public void onRender(double delta) {
-        Color background = GUI.background;
-        Color outline = GUI.outline;
+    protected boolean onMouseReleased(int button) {
         if (mouseOver) {
-            background = GUI.backgroundHighlighted;
-            outline = GUI.outlineHighlighted;
+            pressed = false;
+            if (action != null) action.onButtonClick(this);
+            return true;
         }
-        renderBackground(background, outline);
+
+        return false;
+    }
+
+    @Override
+    protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
+        renderer.renderBackground(this, mouseOver, pressed);
+        renderer.renderText(text, x + width / 2 - textWidth / 2, y + 3.5, GuiConfig.INSTANCE.text, false);
     }
 }

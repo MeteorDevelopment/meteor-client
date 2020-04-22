@@ -1,9 +1,9 @@
 package minegame159.meteorclient.modules.setting;
 
-import minegame159.meteorclient.gui.WidgetScreen;
-import minegame159.meteorclient.macros.MacrosScreen;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.gui.WidgetScreen;
+import minegame159.meteorclient.gui.screens.MacrosScreen;
 
 public class Macros extends Module {
     public Macros() {
