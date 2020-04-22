@@ -1,13 +1,13 @@
 package minegame159.meteorclient.gui.widgets;
 
 import minegame159.meteorclient.gui.TextBoxFilters;
+import minegame159.meteorclient.gui.listeners.DoubleTextBoxChangeListener;
 import minegame159.meteorclient.utils.Utils;
 
-import java.util.function.Consumer;
-
 public class WDoubleTextBox extends WTextBox {
+    public DoubleTextBoxChangeListener action;
+
     public double value;
-    public Consumer<WDoubleTextBox> action;
 
     public WDoubleTextBox(double value, double width) {
         super(Utils.doubleToString(value), width);
@@ -27,9 +27,16 @@ public class WDoubleTextBox extends WTextBox {
         double lastValue = value;
         if (text.isEmpty()) value = 0;
         else if (text.length() == 1 && text.charAt(0) == '-') value = 0;
-        else value = Double.parseDouble(text);
+        else {
+            try {
+                value = Double.parseDouble(text);
+            } catch (NumberFormatException ignored) {
+                value = 0;
+                text = Utils.doubleToString(value);
+            }
+        }
 
-        if (action != null && value != lastValue) action.accept(this);
+        if (action != null && value != lastValue) action.onDoubleTextBoxChange(this);
     }
 
     public void setValue(double value) {

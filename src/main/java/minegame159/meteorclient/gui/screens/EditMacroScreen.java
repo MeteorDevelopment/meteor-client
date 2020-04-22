@@ -1,4 +1,4 @@
-package minegame159.meteorclient.macros;
+package minegame159.meteorclient.gui.screens;
 
 import me.zero.alpine.event.EventPriority;
 import me.zero.alpine.listener.EventHandler;
@@ -7,8 +7,8 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.events.KeyEvent;
-import minegame159.meteorclient.gui.Alignment;
-import minegame159.meteorclient.gui.screens.WindowScreen;
+import minegame159.meteorclient.macros.Macro;
+import minegame159.meteorclient.macros.MacroManager;
 import minegame159.meteorclient.gui.widgets.*;
 import org.lwjgl.glfw.GLFW;
 
@@ -18,62 +18,50 @@ public class EditMacroScreen extends WindowScreen implements Listenable {
     private boolean waitingForKey;
 
     public EditMacroScreen(Macro m) {
-        super("Edit Macro");
-
-        boolean newMacro = m == null;
+        super("Edit Macro", true);
         this.macro = m == null ? new Macro() : m;
 
+        initWidgets(m);
+    }
+
+    private void initWidgets(Macro m) {
+        boolean newMacro = m == null;
+
         // Name
-        WHorizontalList name = add(new WHorizontalList(4));
-        name.add(new WLabel("Name:"));
-        WTextBox nameT = name.add(new WTextBox(newMacro ? "" : macro.name, 200));
+        add(new WLabel("Name:"));
+        WTextBox nameT = add(new WTextBox(newMacro ? "" : macro.name, 200)).fillX().expandX().getWidget();
         nameT.setFocused(true);
         nameT.action = textBox -> macro.name = textBox.text.trim();
-        add(new WHorizontalSeparator());
+        row();
 
         // Messages
-        add(new WLabel("Messages:"));
-        WGrid grid = add(new WGrid(4, 4, 2));
-        fillGridMacroMessages(grid);
+        add(new WLabel("Messages:")).padTop(2).top();
+        WTable table = add(new WTable()).getWidget();
+        fillGridMacroMessages(table);
+        row();
 
-        WTextBox newCommand = new WTextBox("", 200);
-        WPlus add = new WPlus();
-        add.action = () -> {
-            grid.removeLastRow();
+        WTextBox newCommand = table.add(new WTextBox("", 200)).fillX().expandX().getWidget();
+        WPlus add = table.add(new WPlus()).getWidget();
+        add.action = plus -> {
             macro.messages.add(newCommand.text.trim());
-
-            WTextBox command = new WTextBox(newCommand.text.trim(), 200);
-            command.action = textBox -> macro.messages.set(macro.messages.size() - 1, textBox.text.trim());
-            WMinus remove = new WMinus();
-            remove.action = () -> {
-                macro.removeMessage(macro.messages.size() - 1);
-                grid.removeRow(macro.messages.size() - 1);
-                layout();
-            };
-
-            grid.addRow(command, remove);
-            newCommand.text = "";
-            grid.addRow(newCommand, add);
-            layout();
+            clear();
+            initWidgets(macro);
         };
-
-        grid.addRow(newCommand, add);
-        add(new WHorizontalSeparator());
 
         // Key
-        WHorizontalList keyList = add(new WHorizontalList(4));
-        keyLabel = keyList.add(new WLabel(getKeyLabelText()));
-        keyList.add(new WButton("Set key")).action = () -> {
+        keyLabel = add(new WLabel(getKeyLabelText())).getWidget();
+        add(new WButton("Set key")).getWidget().action = button -> {
             waitingForKey = true;
-            keyLabel.text = getKeyLabelText();
-            layout();
+            keyLabel.setText(getKeyLabelText());
         };
+        row();
+
         add(new WHorizontalSeparator());
+        row();
 
         // Apply / Add
-        WButton applyAdd = add(new WButton(newMacro ? "Add" : "Apply"));
-        applyAdd.boundingBox.alignment.x = Alignment.X.Center;
-        applyAdd.action = () -> {
+        WButton applyAdd = add(new WButton(newMacro ? "Add" : "Apply")).fillX().expandX().getWidget();
+        applyAdd.action = button -> {
             if (newMacro) {
                 if (macro.name != null && !macro.name.isEmpty() && macro.messages.size() > 0 && macro.key != -1) {
                     MacroManager.INSTANCE.add(macro);
@@ -85,8 +73,6 @@ public class EditMacroScreen extends WindowScreen implements Listenable {
                 onClose();
             }
         };
-
-        layout();
     }
 
     @Override
@@ -95,21 +81,21 @@ public class EditMacroScreen extends WindowScreen implements Listenable {
         MeteorClient.EVENT_BUS.subscribe(this);
     }
 
-    private void fillGridMacroMessages(WGrid grid) {
+    private void fillGridMacroMessages(WTable table) {
         for (int i = 0; i < macro.messages.size(); i++) {
             int ii = i;
 
-            WTextBox command = new WTextBox(macro.messages.get(ii), 200);
+            WTextBox command = table.add(new WTextBox(macro.messages.get(ii), 200)).getWidget();
             command.action = textBox -> macro.messages.set(ii, textBox.text.trim());
+
             WMinus remove = new WMinus();
-            remove.action = () -> {
+            remove.action = minus -> {
                 macro.removeMessage(ii);
-                grid.clear();
-                fillGridMacroMessages(grid);
-                layout();
+                table.clear();
+                fillGridMacroMessages(table);
             };
 
-            grid.addRow(command, remove);
+            table.row();
         }
     }
 
@@ -123,8 +109,7 @@ public class EditMacroScreen extends WindowScreen implements Listenable {
         if (waitingForKey) {
             waitingForKey = false;
             macro.key = event.key;
-            keyLabel.text = getKeyLabelText();
-            layout();
+            keyLabel.setText(getKeyLabelText());
         }
     }, EventPriority.HIGHEST);
 

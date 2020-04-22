@@ -124,7 +124,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
     }
 
     @EventHandler
-    private Listener<KeyEvent> onKey = new Listener<>(event -> {
+    public Listener<KeyEvent> onKey = new Listener<>(event -> {
         if (!event.push) return;
 
         // Check if binding module

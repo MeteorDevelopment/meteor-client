@@ -1,6 +1,5 @@
 package minegame159.meteorclient.gui.screens;
 
-import minegame159.meteorclient.gui.Alignment;
 import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.settings.Setting;
 import net.minecraft.block.Block;
@@ -15,13 +14,12 @@ public class BlockListSettingScreen extends WindowScreen {
     private WTextBox filter;
 
     public BlockListSettingScreen(Setting<List<Block>> setting) {
-        super("Select blocks");
+        super("Select blocks", true);
 
         this.setting = setting;
 
         // Filter
-        filter = new WTextBox("", 200);
-        filter.boundingBox.fullWidth = true;
+        filter = new WTextBox("", 0);
         filter.setFocused(true);
         filter.action = textBox -> {
             clear();
@@ -32,13 +30,11 @@ public class BlockListSettingScreen extends WindowScreen {
     }
 
     private void initWidgets() {
-        WHorizontalList hList = add(new WHorizontalList(4, Alignment.X.Center, Alignment.Y.Top));
+        add(filter).fillX().expandX();
+        row();
 
         // All blocks
-        WVerticalList list = hList.add(new WVerticalList(4));
-        list.add(filter);
-
-        WGrid grid1 = list.add(new WGrid(4, 4, 2));
+        WTable table1 = add(new WTable()).top().getWidget();
         Registry.BLOCK.forEach(block -> {
             if (block == Blocks.AIR || setting.get().contains(block)) return;
 
@@ -46,9 +42,10 @@ public class BlockListSettingScreen extends WindowScreen {
             if (!filter.text.isEmpty()) {
                 if (!StringUtils.containsIgnoreCase(item.getLabelText(), filter.text)) return;
             }
+            table1.add(item);
 
-            WPlus plus = new WPlus();
-            plus.action = () -> {
+            WPlus plus = table1.add(new WPlus()).getWidget();
+            plus.action = plus1 -> {
                 if (!setting.get().contains(block)) {
                     setting.get().add(block);
                     setting.changed();
@@ -57,16 +54,18 @@ public class BlockListSettingScreen extends WindowScreen {
                 }
             };
 
-            grid1.addRow(item, plus);
+            table1.row();
         });
 
-        // Selected blocks
-        WGrid grid2 = hList.add(new WGrid(4, 4, 2));
-        for (Block block : setting.get()) {
-            WItemWithLabel item = new WItemWithLabel(block.asItem().getStackForRender());
+        if (table1.getCells().size() > 0) add(new WVerticalSeparator()).expandY();
 
-            WMinus minus = new WMinus();
-            minus.action = () -> {
+        // Selected blocks
+        WTable table2 = add(new WTable()).top().getWidget();
+        for (Block block : setting.get()) {
+            table2.add(new WItemWithLabel(block.asItem().getStackForRender()));
+
+            WMinus minus = table2.add(new WMinus()).getWidget();
+            minus.action = minus1 -> {
                 if (setting.get().remove(block)) {
                     setting.changed();
                     clear();
@@ -74,9 +73,7 @@ public class BlockListSettingScreen extends WindowScreen {
                 }
             };
 
-            grid2.addRow(item, minus);
+            table2.row();
         }
-
-        layout();
     }
 }

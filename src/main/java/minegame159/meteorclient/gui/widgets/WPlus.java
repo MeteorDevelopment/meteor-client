@@ -1,26 +1,25 @@
 package minegame159.meteorclient.gui.widgets;
 
-import minegame159.meteorclient.modules.setting.GUI;
+import minegame159.meteorclient.gui.GuiConfig;
+import minegame159.meteorclient.gui.GuiRenderer;
+import minegame159.meteorclient.gui.listeners.PlusClickListener;
 import minegame159.meteorclient.utils.Color;
-import minegame159.meteorclient.utils.RenderUtils;
-import minegame159.meteorclient.utils.Vector2;
 
 public class WPlus extends WWidget {
-    public WButton.Action action;
+    public PlusClickListener action;
 
-    public WPlus() {
-        boundingBox.setMargin(3);
+    private boolean pressed;
+
+    @Override
+    protected void onCalculateSize() {
+        width = 4 + 6 + 4;
+        height = 4 + 6 + 4;
     }
 
     @Override
-    public Vector2 calculateCustomSize() {
-        return new Vector2(6, 6);
-    }
-
-    @Override
-    public boolean onMousePressed(int button) {
+    protected boolean onMouseClicked(int button) {
         if (mouseOver) {
-            if (action != null) action.clicked();
+            pressed = true;
             return true;
         }
 
@@ -28,16 +27,24 @@ public class WPlus extends WWidget {
     }
 
     @Override
-    public void onRender(double delta) {
-        Color background = GUI.background;
-        Color outline = GUI.outline;
+    protected boolean onMouseReleased(int button) {
         if (mouseOver) {
-            background = GUI.backgroundHighlighted;
-            outline = GUI.outlineHighlighted;
+            pressed = false;
+            if (action != null) action.onPlusClick(this);
+            return true;
         }
-        renderBackground(background, outline);
 
-        RenderUtils.quad(boundingBox.getInnerX(), boundingBox.getInnerY() + 2, 6, 2, GUI.plus);
-        RenderUtils.quad(boundingBox.getInnerX() + 2, boundingBox.getInnerY(), 2, 6, GUI.plus);
+        return false;
+    }
+
+    @Override
+    protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
+        renderer.renderBackground(this, mouseOver, pressed);
+
+        Color color = GuiConfig.INSTANCE.plus;
+        if (pressed) color = GuiConfig.INSTANCE.plusPressed;
+
+        renderer.renderQuad(x + 4, y + 4 + 2, 6, 2, color);
+        renderer.renderQuad(x + 4 + 2, y + 4, 2, 6, color);
     }
 }

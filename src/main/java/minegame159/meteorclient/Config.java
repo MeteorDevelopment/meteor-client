@@ -1,6 +1,7 @@
 package minegame159.meteorclient;
 
 import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.gui.GuiConfig;
 import minegame159.meteorclient.utils.*;
 import net.minecraft.nbt.CompoundTag;
 
@@ -9,16 +10,17 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Config extends Savable<Config> {
-    public static final Config INSTANCE = new Config();
+    public static Config INSTANCE;
 
     private String version = "0.2.0";
     private String prefix = ".";
     public AutoCraft autoCraft = new AutoCraft();
+    public GuiConfig guiConfig = new GuiConfig();
 
     private Map<WindowType, WindowConfig> windowConfigs = new HashMap<>();
     private Map<Category, Color> categoryColors = new HashMap<>();
 
-    private Config() {
+    public Config() {
         super(new File(MeteorClient.FOLDER, "config.nbt"));
     }
 
@@ -57,6 +59,7 @@ public class Config extends Savable<Config> {
         tag.put("autoCraft", autoCraft.toTag());
         tag.put("windowConfigs", NbtUtils.mapToTag(windowConfigs));
         tag.put("categoryColors", NbtUtils.mapToTag(categoryColors));
+        tag.put("guiConfig", guiConfig.toTag());
 
         return tag;
     }
@@ -67,6 +70,7 @@ public class Config extends Savable<Config> {
         autoCraft.fromTag(tag.getCompound("autoCraft"));
         windowConfigs = NbtUtils.mapFromTag(tag.getCompound("windowConfigs"), WindowType::valueOf, tag1 -> new WindowConfig(false).fromTag((CompoundTag) tag1));
         categoryColors = NbtUtils.mapFromTag(tag.getCompound("categoryColors"), Category::valueOf, tag1 -> new Color().fromTag((CompoundTag) tag1));
+        guiConfig.fromTag(tag.getCompound("guiConfig"));
 
         return this;
     }

@@ -20,7 +20,7 @@ public class BlockListSetting extends Setting<List<Block>> {
         super(name, description, group, defaultValue, onChanged, onModuleActivated, visible);
 
         widget = new WButton("Select");
-        ((WButton) widget).action = () -> MinecraftClient.getInstance().openScreen(new BlockListSettingScreen(this));
+        ((WButton) widget).action = button -> MinecraftClient.getInstance().openScreen(new BlockListSettingScreen(this));
     }
 
     @Override
