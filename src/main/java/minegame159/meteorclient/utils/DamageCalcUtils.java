@@ -34,8 +34,10 @@ public class DamageCalcUtils {
         double exposure = 0D;
         if(feetExposed && headExposed){
             exposure = 1D;
-        }else if(feetExposed ^ headExposed){
-            exposure = 0.5D;
+        }else if(headExposed){
+            exposure = 0.2D;
+        }else if(feetExposed){
+            exposure = 0.8D;
         }
         double impact = (1D - mc.player.distanceTo(crystal) / 12D)*exposure;
         return (impact*impact+impact)*42+1;
