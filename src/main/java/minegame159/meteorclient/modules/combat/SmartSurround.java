@@ -17,6 +17,7 @@ import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
@@ -28,7 +29,7 @@ import net.minecraft.world.RayTraceContext;
 
 public class SmartSurround extends ToggleModule {
 
-    private MinecraftClient mc = MinecraftClient.getInstance();
+    private final MinecraftClient mc = MinecraftClient.getInstance();
 
     private int oldSlot;
 
@@ -40,13 +41,13 @@ public class SmartSurround extends ToggleModule {
 
     private Entity crystal;
 
-    private Setting<Boolean> onlyObsidian = addSetting(new BoolSetting.Builder()
+    private final Setting<Boolean> onlyObsidian = addSetting(new BoolSetting.Builder()
             .name("only-obsidian")
             .description("Only uses Obsidian")
             .defaultValue(false)
             .build());
 
-    private Setting<Double> minDamage = addSetting(new DoubleSetting.Builder()
+    private final Setting<Double> minDamage = addSetting(new DoubleSetting.Builder()
             .name("min-damage")
             .description("The minimum damage before this activates.")
             .defaultValue(5.5)
@@ -57,16 +58,27 @@ public class SmartSurround extends ToggleModule {
     }
 
     @EventHandler
-    private Listener<EntityAddedEvent> onSpawn = new Listener<>(event -> {
+    private final Listener<EntityAddedEvent> onSpawn = new Listener<>(event -> {
         crystal = event.entity;
         if(event.entity.getType() == EntityType.END_CRYSTAL){
-            if(DamageCalcUtils.crystalDamage(mc.player, event.entity) > minDamage.get()){
+            if(DamageCalcUtils.resistanceReduction(DamageCalcUtils.blastProtReduction(mc.player, DamageCalcUtils.armourCalc(mc.player, DamageCalcUtils.getDamageMultiplied(DamageCalcUtils.crystalDamage(mc.player, event.entity))))) > minDamage.get()){
                 slot = findObiInHotbar();
-                if(slot == -1){
-                    Utils.sendMessage("#redNo Obi in hotbar. Disabling!");
+                if(slot == -1 && onlyObsidian.get()){
+                    Utils.sendMessage("#redNo Obsidian in hotbar. Disabling!");
                     return;
                 }
-                mc.player.inventory.selectedSlot = slot;
+                for (int i = 0; i < 9; i++) {
+                    Item item = mc.player.inventory.getInvStack(i).getItem();
+                    if (item instanceof BlockItem) {
+                        slot = i;
+                        mc.player.inventory.selectedSlot = slot;
+                        break;
+                    }
+                }
+                if(slot == -1){
+                    Utils.sendMessage("#redNo blocks in hotbar. Disabling!");
+                    return;
+                }
                 rPosX = mc.player.getBlockPos().getX() - event.entity.getBlockPos().getX();
                 rPosZ = mc.player.getBlockPos().getZ() - event.entity.getBlockPos().getZ();
             }
@@ -74,10 +86,8 @@ public class SmartSurround extends ToggleModule {
     });
 
     @EventHandler
-    private Listener<TickEvent> onTick = new Listener<>(event -> {
-        if(slot == -1){
-            return;
-        }else {
+    private final  Listener<TickEvent> onTick = new Listener<>(event -> {
+        if(slot != -1){
             if ((rPosX >= 2) && (rPosZ == 0)) {
                 placeObi(rPosX - 1, 0, crystal);
             } else if ((rPosX > 1) && (rPosZ > 1)) {
