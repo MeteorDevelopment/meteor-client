@@ -29,7 +29,7 @@ import net.minecraft.world.RayTraceContext;
 
 public class SmartSurround extends ToggleModule {
 
-    private MinecraftClient mc = MinecraftClient.getInstance();
+    private final MinecraftClient mc = MinecraftClient.getInstance();
 
     private int oldSlot;
 
@@ -41,13 +41,13 @@ public class SmartSurround extends ToggleModule {
 
     private Entity crystal;
 
-    private Setting<Boolean> onlyObsidian = addSetting(new BoolSetting.Builder()
+    private final Setting<Boolean> onlyObsidian = addSetting(new BoolSetting.Builder()
             .name("only-obsidian")
             .description("Only uses Obsidian")
             .defaultValue(false)
             .build());
 
-    private Setting<Double> minDamage = addSetting(new DoubleSetting.Builder()
+    private final Setting<Double> minDamage = addSetting(new DoubleSetting.Builder()
             .name("min-damage")
             .description("The minimum damage before this activates.")
             .defaultValue(5.5)
@@ -58,7 +58,7 @@ public class SmartSurround extends ToggleModule {
     }
 
     @EventHandler
-    private Listener<EntityAddedEvent> onSpawn = new Listener<>(event -> {
+    private final Listener<EntityAddedEvent> onSpawn = new Listener<>(event -> {
         crystal = event.entity;
         if(event.entity.getType() == EntityType.END_CRYSTAL){
             if(DamageCalcUtils.resistanceReduction(DamageCalcUtils.blastProtReduction(mc.player, DamageCalcUtils.armourCalc(mc.player, DamageCalcUtils.getDamageMultiplied(DamageCalcUtils.crystalDamage(mc.player, event.entity))))) > minDamage.get()){
@@ -86,10 +86,8 @@ public class SmartSurround extends ToggleModule {
     });
 
     @EventHandler
-    private Listener<TickEvent> onTick = new Listener<>(event -> {
-        if(slot == -1){
-            return;
-        }else {
+    private final  Listener<TickEvent> onTick = new Listener<>(event -> {
+        if(slot != -1){
             if ((rPosX >= 2) && (rPosZ == 0)) {
                 placeObi(rPosX - 1, 0, crystal);
             } else if ((rPosX > 1) && (rPosZ > 1)) {

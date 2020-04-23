@@ -7,6 +7,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.*;
 import net.minecraft.util.hit.HitResult;
@@ -14,6 +15,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RayTraceContext;
 
 import java.util.Iterator;
+import java.util.Objects;
 
 public class DamageCalcUtils {
 
@@ -68,20 +70,20 @@ public class DamageCalcUtils {
         Item chestplate = playerArmour.next().getItem();
         Item helmet = playerArmour.next().getItem();
         if(boots instanceof ArmorItem){
-            defencePoints = defencePoints + getDefencePoints((ArmorItem) boots);
-            toughness = toughness + getArmourToughness((ArmorItem) boots);
+            defencePoints += getDefencePoints((ArmorItem) boots);
+            toughness += getArmourToughness((ArmorItem) boots);
         }
         if(leggings instanceof ArmorItem){
-            defencePoints = defencePoints + getDefencePoints((ArmorItem) leggings);
-            toughness = toughness + getArmourToughness((ArmorItem) leggings);
+            defencePoints += getDefencePoints((ArmorItem) leggings);
+            toughness += getArmourToughness((ArmorItem) leggings);
         }
         if(chestplate instanceof ArmorItem){
-            defencePoints = defencePoints + getDefencePoints((ArmorItem) chestplate);
+            defencePoints += getDefencePoints((ArmorItem) chestplate);
             toughness = toughness + getArmourToughness((ArmorItem) chestplate);
         }
         if(helmet instanceof ArmorItem){
-            defencePoints = defencePoints + getDefencePoints((ArmorItem) helmet);
-            toughness = toughness + getArmourToughness((ArmorItem) helmet);
+            defencePoints += getDefencePoints((ArmorItem) helmet);
+            toughness += getArmourToughness((ArmorItem) helmet);
         }
         damage = damage*(1 - ((Math.min(20, Math.max((defencePoints/5), defencePoints - (damage/(2+(toughness/4))))))/25));
         return damage;
@@ -105,15 +107,14 @@ public class DamageCalcUtils {
         if(protLevel > 20){
             protLevel = 20;
         }
-        damage = damage * (1-(protLevel/25));
+        damage = damage * (1-(protLevel/25f));
         return damage;
     }
 
     public static double resistanceReduction(double damage){
         int level = 0;
-        if(mc.player.getStatusEffects().equals(StatusEffects.RESISTANCE)){
-            level = mc.player.getStatusEffect(StatusEffects.RESISTANCE).getAmplifier();
-
+        if(mc.player.getActiveStatusEffects().containsKey(StatusEffects.RESISTANCE)){
+            level = Objects.requireNonNull(mc.player.getStatusEffect(StatusEffects.RESISTANCE)).getAmplifier() + 1;
         }
         damage = damage * (1 - (0.2 * level));
         return damage;
