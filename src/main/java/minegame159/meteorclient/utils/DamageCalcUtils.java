@@ -65,7 +65,6 @@ public class DamageCalcUtils {
         double defencePoints = 0;
         double toughness = 0;
         Iterator<ItemStack> playerArmour = player.getArmorItems().iterator();
-        Iterator<ItemStack> playerArmourEnchants = player.getArmorItems().iterator();
         Item boots = playerArmour.next().getItem();
         Item leggings = playerArmour.next().getItem();
         Item chestplate = playerArmour.next().getItem();
@@ -122,6 +121,11 @@ public class DamageCalcUtils {
         }
         damage = damage*(1 - ((Math.min(20, Math.max((defencePoints/5), defencePoints - (damage/(2+(toughness/4))))))/25));
         return damage;
+    }
+
+    public static double getDamageMultiplied(double damage){
+        int diff = mc.world.getDifficulty().getId();
+        return damage * (diff == 0 ? 0 : (diff == 1 ? 0.5f : (diff == 2 ? 1 : 1.5f)));
     }
 
     public static double blastProtReduction(Entity player, double damage){
