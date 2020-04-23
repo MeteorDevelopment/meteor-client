@@ -69,7 +69,7 @@ public class WWindow extends WTable {
 
     public void setExpanded(boolean expanded) {
         this.expanded = expanded;
-        header.checkbox.checked = expanded;
+        header.triangle.checked = expanded;
     }
 
     @Override
@@ -161,7 +161,7 @@ public class WWindow extends WTable {
 
     private class Header extends WTable {
         WLabel label;
-        WCheckbox checkbox;
+        WTriangle triangle;
 
         boolean dragging;
         double lastMouseX, lastMouseY;
@@ -171,10 +171,10 @@ public class WWindow extends WTable {
 
             label = add(new WLabel(title, true)).fillX().centerX().padRight(4).getWidget();
 
-            checkbox = add(new WCheckbox(expanded)).getWidget();
-            checkbox.action = checkbox -> {
-                expanded = checkbox.checked;
-                if (type != null) GuiConfig.INSTANCE.getWindowConfig(type, false).setExpanded(checkbox.checked);
+            triangle = add(new WTriangle()).getWidget();
+            triangle.action = triangle1 -> {
+                expanded = triangle1.checked;
+                if (type != null) GuiConfig.INSTANCE.getWindowConfig(type, false).setExpanded(triangle1.checked);
             };
         }
 
