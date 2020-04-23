@@ -8,9 +8,7 @@ import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
+import net.minecraft.item.*;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RayTraceContext;
@@ -63,64 +61,38 @@ public class DamageCalcUtils {
 
     public static double armourCalc(Entity player ,double damage){
         double defencePoints = 0;
-        double toughness = 0;
+        float toughness = 0;
         Iterator<ItemStack> playerArmour = player.getArmorItems().iterator();
         Item boots = playerArmour.next().getItem();
         Item leggings = playerArmour.next().getItem();
         Item chestplate = playerArmour.next().getItem();
         Item helmet = playerArmour.next().getItem();
-        if( boots == Items.DIAMOND_BOOTS){
-            defencePoints += 3;
-            toughness += 2;
-        }else if(boots == Items.IRON_BOOTS){
-            defencePoints += 2;
-        }else if(boots == Items.LEATHER_BOOTS){
-            defencePoints += 1;
-        }else if(boots == Items.GOLDEN_BOOTS){
-            defencePoints += 1;
-        }else if(boots == Items.CHAINMAIL_BOOTS){
-            defencePoints += 1;
+        if(boots instanceof ArmorItem){
+            defencePoints = defencePoints + getDefencePoints((ArmorItem) boots);
+            toughness = toughness + getArmourToughness((ArmorItem) boots);
         }
-        if( leggings == Items.DIAMOND_LEGGINGS){
-            defencePoints += 6;
-            toughness += 2;
-        }else if(leggings == Items.IRON_LEGGINGS){
-            defencePoints += 5;
-        }else if(leggings == Items.LEATHER_BOOTS){
-            defencePoints += 2;
-        }else if(leggings == Items.GOLDEN_BOOTS){
-            defencePoints += 3;
-        }else if(leggings == Items.CHAINMAIL_BOOTS){
-            defencePoints += 4;
+        if(leggings instanceof ArmorItem){
+            defencePoints = defencePoints + getDefencePoints((ArmorItem) leggings);
+            toughness = toughness + getArmourToughness((ArmorItem) leggings);
         }
-        if( chestplate == Items.DIAMOND_CHESTPLATE){
-            defencePoints += 8;
-            toughness += 2;
-        }else if(chestplate == Items.IRON_CHESTPLATE){
-            defencePoints += 6;
-        }else if(chestplate == Items.LEATHER_CHESTPLATE){
-            defencePoints += 3;
-        }else if(chestplate == Items.GOLDEN_CHESTPLATE){
-            defencePoints += 5;
-        }else if(chestplate == Items.CHAINMAIL_CHESTPLATE){
-            defencePoints += 5;
+        if(chestplate instanceof ArmorItem){
+            defencePoints = defencePoints + getDefencePoints((ArmorItem) chestplate);
+            toughness = toughness + getArmourToughness((ArmorItem) chestplate);
         }
-        if( helmet == Items.DIAMOND_HELMET){
-            defencePoints += 3;
-            toughness += 2;
-        }else if(helmet == Items.IRON_HELMET){
-            defencePoints += 2;
-        }else if(helmet == Items.LEATHER_HELMET){
-            defencePoints += 1;
-        }else if(helmet == Items.GOLDEN_HELMET){
-            defencePoints += 2;
-        }else if(helmet == Items.CHAINMAIL_HELMET){
-            defencePoints += 2;
-        }else if(helmet == Items.TURTLE_HELMET){
-            defencePoints += 2;
+        if(helmet instanceof ArmorItem){
+            defencePoints = defencePoints + getDefencePoints((ArmorItem) helmet);
+            toughness = toughness + getArmourToughness((ArmorItem) helmet);
         }
         damage = damage*(1 - ((Math.min(20, Math.max((defencePoints/5), defencePoints - (damage/(2+(toughness/4))))))/25));
         return damage;
+    }
+
+    public static int getDefencePoints(ArmorItem item){
+        return item.getProtection();
+    }
+
+    public static float getArmourToughness(ArmorItem item){
+        return item.getMaterial().getToughness();
     }
 
     public static double getDamageMultiplied(double damage){
