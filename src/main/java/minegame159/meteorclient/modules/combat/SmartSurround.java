@@ -17,6 +17,7 @@ import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
@@ -60,13 +61,24 @@ public class SmartSurround extends ToggleModule {
     private Listener<EntityAddedEvent> onSpawn = new Listener<>(event -> {
         crystal = event.entity;
         if(event.entity.getType() == EntityType.END_CRYSTAL){
-            if(DamageCalcUtils.crystalDamage(mc.player, event.entity) > minDamage.get()){
+            if(DamageCalcUtils.resistanceReduction(DamageCalcUtils.blastProtReduction(mc.player, DamageCalcUtils.armourCalc(mc.player, DamageCalcUtils.crystalDamage(mc.player, event.entity)))) > minDamage.get()){
                 slot = findObiInHotbar();
-                if(slot == -1){
-                    Utils.sendMessage("#redNo Obi in hotbar. Disabling!");
+                if(slot == -1 && onlyObsidian.get()){
+                    Utils.sendMessage("#redNo Obsidian in hotbar. Disabling!");
                     return;
                 }
-                mc.player.inventory.selectedSlot = slot;
+                for (int i = 0; i < 9; i++) {
+                    Item item = mc.player.inventory.getInvStack(i).getItem();
+                    if (item instanceof BlockItem) {
+                        slot = i;
+                        mc.player.inventory.selectedSlot = slot;
+                        break;
+                    }
+                }
+                if(slot == -1){
+                    Utils.sendMessage("#redNo blocks in hotbar. Disabling!");
+                    return;
+                }
                 rPosX = mc.player.getBlockPos().getX() - event.entity.getBlockPos().getX();
                 rPosZ = mc.player.getBlockPos().getZ() - event.entity.getBlockPos().getZ();
             }
