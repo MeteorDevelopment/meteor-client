@@ -30,6 +30,7 @@ public class GuiRenderer {
 
     private Pool<QuadOperation> quadOperationPool = new Pool<>(QuadOperation::new);
     private Pool<LineOperation> lineOperationPool = new Pool<>(LineOperation::new);
+    private Pool<TriangleOperation> triangleOperationPool = new Pool<>(TriangleOperation::new);
     private Pool<ItemOperation> itemOperationPool = new Pool<>(ItemOperation::new);
     private Pool<TextOperation> textOperationPool = new Pool<>(TextOperation::new);
     private Pool<ScissorOperation> scissorOperationPool = new Pool<>(ScissorOperation::new);
@@ -70,6 +71,16 @@ public class GuiRenderer {
         operation.height = height;
         operation.color = color;
         operations.add(operation);
+    }
+
+    public void renderTriangle(double x, double y, double size, double angle, Color color) {
+        TriangleOperation o = triangleOperationPool.get();
+        o.x = x;
+        o.y = y;
+        o.size = size;
+        o.angle = angle;
+        o.color = color;
+        operations.add(o);
     }
 
     public void renderItem(double x, double y, ItemStack itemStack) {
@@ -238,6 +249,40 @@ public class GuiRenderer {
         @Override
         void free() {
             quadOperationPool.free(this);
+        }
+    }
+
+    private class TriangleOperation extends Operation {
+        double x, y;
+        double size;
+        double angle;
+        Color color;
+
+        @Override
+        void render() {
+            double cos = Math.cos(Math.toRadians(angle));
+            double sin = Math.sin(Math.toRadians(angle));
+
+            double oX = this.x + size / 2;
+            double oY = this.y + size / 4;
+
+            double x = ((this.x - oX) * cos) - ((this.y - oY) * sin) + oX;
+            double y = ((this.y - oY) * cos) + ((this.x - oX) * sin) + oY;
+            quadBuf.vertex(x, y, 0).color(color.r, color.g, color.b, color.a).next();
+
+            x = ((this.x + size - oX) * cos) - ((this.y - oY) * sin) + oX;
+            y = ((this.y - oY) * cos) + ((this.x + size - oX) * sin) + oY;
+            quadBuf.vertex(x, y, 0).color(color.r, color.g, color.b, color.a).next();
+
+            x = ((this.x + size / 2 - oX) * cos) - ((this.y + size / 2 - oY) * sin) + oX;
+            y = ((this.y + size / 2 - oY) * cos) + ((this.x + size / 2 - oX) * sin) + oY;
+            quadBuf.vertex(x, y, 0).color(color.r, color.g, color.b, color.a).next();
+            quadBuf.vertex(x, y, 0).color(color.r, color.g, color.b, color.a).next();
+        }
+
+        @Override
+        void free() {
+            triangleOperationPool.free(this);
         }
     }
 
