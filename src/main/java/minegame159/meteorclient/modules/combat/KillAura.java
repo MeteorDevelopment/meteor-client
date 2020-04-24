@@ -119,6 +119,7 @@ public class KillAura extends ToggleModule {
                 .group("Delay")
                 .defaultValue(0)
                 .min(0)
+                .sliderMax(60)
                 .visible(false)
                 .build()
         );

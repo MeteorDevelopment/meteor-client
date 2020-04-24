@@ -42,13 +42,18 @@ public class WTriangle extends WWidget {
         return false;
     }
 
+    public void setChecked(boolean checked) {
+        this.checked = checked;
+        angle = checked ? -90 : 0;
+    }
+
     @Override
     protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
         Color color = GuiConfig.INSTANCE.background;
         if (pressed) color = GuiConfig.INSTANCE.backgroundPressed;
         else if (mouseOver) color = GuiConfig.INSTANCE.backgroundHovered;
 
-        angle += delta * 45 * (checked ? -1 : 1);
+        angle += delta * 40 * (checked ? -1 : 1);
         angle = Utils.clamp(angle, -90, 0);
 
         renderer.renderTriangle(x, y + height / 4, width, angle, color);

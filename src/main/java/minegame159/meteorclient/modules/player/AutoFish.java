@@ -31,6 +31,7 @@ public class AutoFish extends ToggleModule {
             .group("General")
             .defaultValue(10)
             .min(0)
+            .sliderMax(60)
             .build()
     );
 
@@ -40,6 +41,7 @@ public class AutoFish extends ToggleModule {
             .group("General")
             .defaultValue(6)
             .min(0)
+            .sliderMax(60)
             .build()
     );
 
@@ -49,6 +51,7 @@ public class AutoFish extends ToggleModule {
             .group("General")
             .defaultValue(14)
             .min(0)
+            .sliderMax(60)
             .build()
     );
 
