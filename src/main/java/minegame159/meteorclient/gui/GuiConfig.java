@@ -40,6 +40,10 @@ public class GuiConfig implements ISerializable<GuiConfig> {
 
     public Color moduleBackground = new Color(50, 50, 50);
 
+    public Color reset = new Color(50, 50, 50);
+    public Color resetHovered = new Color(60, 60, 60);
+    public Color resetPressed = new Color(70, 70, 70);
+
     private Map<WindowType, WindowConfig> windowConfigs = new HashMap<>();
 
     public GuiConfig() {
@@ -81,6 +85,10 @@ public class GuiConfig implements ISerializable<GuiConfig> {
 
         tag.put("moduleBackground", moduleBackground.toTag());
 
+        tag.put("reset", reset.toTag());
+        tag.put("resetHovered", resetHovered.toTag());
+        tag.put("resetPressed", resetPressed.toTag());
+
         tag.put("windowConfigs", NbtUtils.mapToTag(windowConfigs));
 
         return tag;
@@ -112,6 +120,10 @@ public class GuiConfig implements ISerializable<GuiConfig> {
         read(tag, "minusPressed", minusPressed);
 
         read(tag, "accent", accent);
+
+        read(tag, "reset", reset);
+        read(tag, "resetHovered", resetHovered);
+        read(tag, "resetPressed", resetPressed);
 
         read(tag, "moduleBackground", moduleBackground);
 

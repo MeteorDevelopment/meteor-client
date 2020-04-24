@@ -5,6 +5,7 @@ import minegame159.meteorclient.gui.widgets.Cell;
 import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.Pool;
+import minegame159.meteorclient.utils.TextureRegion;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.BufferBuilder;
@@ -12,6 +13,7 @@ import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.Identifier;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
@@ -21,6 +23,13 @@ import java.util.Objects;
 public class GuiRenderer {
     private static final Color DEBUG_COLOR_WIDGET = new Color(25, 25, 225);
     private static final Color DEBUG_COLOR_CELL = new Color(25, 225, 25);
+
+    private static Identifier TEXTURE = new Identifier("meteor-client", "gui.png");
+    private static int TEXTURE_WIDTH = 33;
+    private static int TEXTURE_HEIGHT = 32;
+
+    public static TextureRegion TEX_QUAD = new TextureRegion(TEXTURE_WIDTH, TEXTURE_HEIGHT, 0, 0, 1, 1, null, null, null);
+    public static TextureRegion TEX_RESET = new TextureRegion(TEXTURE_WIDTH, TEXTURE_HEIGHT, 1, 0, 32, 32, GuiConfig.INSTANCE.reset, GuiConfig.INSTANCE.resetHovered, GuiConfig.INSTANCE.resetPressed);
 
     private static Tessellator lineTesselator = new Tessellator(1000);
     private static BufferBuilder lineBuf = lineTesselator.getBuffer();
@@ -39,6 +48,7 @@ public class GuiRenderer {
     private List<Operation> operations = new ArrayList<>();
     private List<Operation> postOperations = new ArrayList<>();
     private List<TextOperation> textOperations = new ArrayList<>();
+    private TextOperation tooltip;
 
     private boolean preScissorTest = false;
     private boolean preTextScissorTest = false;
@@ -50,7 +60,7 @@ public class GuiRenderer {
         lineBuf.begin(GL11.GL_LINES, VertexFormats.POSITION_COLOR);
 
         // Quads
-        quadBuf.begin(GL11.GL_QUADS, VertexFormats.POSITION_COLOR);
+        quadBuf.begin(GL11.GL_QUADS, VertexFormats.POSITION_TEXTURE_COLOR);
     }
 
     public void renderLine(double x1, double y1, double x2, double y2, Color color) {
@@ -63,14 +73,18 @@ public class GuiRenderer {
         operations.add(operation);
     }
 
+    public void renderQuad(double x, double y, double width, double height, TextureRegion tex, Color color) {
+        QuadOperation o = quadOperationPool.get();
+        o.x = x;
+        o.y = y;
+        o.width = width;
+        o.height = height;
+        o.tex = tex;
+        o.color = color;
+        operations.add(o);
+    }
     public void renderQuad(double x, double y, double width, double height, Color color) {
-        QuadOperation operation = quadOperationPool.get();
-        operation.x = x;
-        operation.y = y;
-        operation.width = width;
-        operation.height = height;
-        operation.color = color;
-        operations.add(operation);
+        renderQuad(x, y, width, height, null, color);
     }
 
     public void renderTriangle(double x, double y, double size, double angle, Color color) {
@@ -84,11 +98,22 @@ public class GuiRenderer {
     }
 
     public void renderItem(double x, double y, ItemStack itemStack) {
-        ItemOperation operation = itemOperationPool.get();
-        operation.x = x;
-        operation.y = y;
-        operation.itemStack = itemStack;
-        postOperations.add(operation);
+        ItemOperation o = itemOperationPool.get();
+        o.x = x;
+        o.y = y;
+        o.itemStack = itemStack;
+        postOperations.add(o);
+    }
+
+    private void endBuffers() {
+        GlStateManager.enableBlend();
+        GlStateManager.disableLighting();
+        GlStateManager.enableTexture();
+        MinecraftClient.getInstance().getTextureManager().bindTexture(TEXTURE);
+        quadTesselator.draw();
+
+        GlStateManager.disableTexture();
+        lineTesselator.draw();
     }
 
     public void end() {
@@ -102,14 +127,12 @@ public class GuiRenderer {
         preTextScissorTest = false;
 
         // Render quads and lines
-        GlStateManager.disableTexture();
         for (Operation operation : operations) {
             operation.render();
             operation.free();
         }
         operations.clear();
-        quadTesselator.draw();
-        lineTesselator.draw();
+        endBuffers();
 
         // Render post operations
         for (Operation operation : postOperations) {
@@ -127,6 +150,13 @@ public class GuiRenderer {
             textOperation.free();
         }
         textOperations.clear();
+
+        // Render tooltip
+        if (tooltip != null) {
+            tooltip.render();
+            tooltip.free();
+            tooltip = null;
+        }
 
         GlStateManager.popMatrix();
 
@@ -154,24 +184,34 @@ public class GuiRenderer {
     }
 
     public void renderText(String text, double x, double y, Color color, boolean shadow) {
-        TextOperation textOperation = textOperationPool.get();
-        textOperation.text = text;
-        textOperation.x = x;
-        textOperation.y = y;
-        textOperation.color = color;
-        textOperation.shadow = shadow;
-        textOperations.add(textOperation);
+        TextOperation o = textOperationPool.get();
+        o.text = text;
+        o.x = x;
+        o.y = y;
+        o.color = color;
+        o.shadow = shadow;
+        textOperations.add(o);
+    }
+
+    public void renderTooltip(String text, double x, double y, Color color) {
+        TextOperation o = textOperationPool.get();
+        o.text = text;
+        o.x = x;
+        o.y = y;
+        o.color = color;
+        o.shadow = true;
+        tooltip = o;
     }
 
     public void startTextScissor(WWidget widget, double padTop, double padRight, double padBottom, double padLeft) {
-        TextScissorOperation operation = textScissorOperationPool.get();
+        TextScissorOperation o = textScissorOperationPool.get();
         double scaleFactor = MinecraftClient.getInstance().window.getScaleFactor();
-        operation.x = (widget.x + padLeft) * scaleFactor;
-        operation.y = (MinecraftClient.getInstance().window.getScaledHeight() - widget.y - widget.height + padTop) * scaleFactor;
-        operation.width = (widget.width - padLeft - padRight) * scaleFactor;
-        operation.height = (widget.height - padTop - padBottom) * scaleFactor;
-        operation.start = true;
-        textOperations.add(operation);
+        o.x = (widget.x + padLeft) * scaleFactor;
+        o.y = (MinecraftClient.getInstance().window.getScaledHeight() - widget.y - widget.height + padTop) * scaleFactor;
+        o.width = (widget.width - padLeft - padRight) * scaleFactor;
+        o.height = (widget.height - padTop - padBottom) * scaleFactor;
+        o.start = true;
+        textOperations.add(o);
     }
 
     public void endTextScissor() {
@@ -236,14 +276,18 @@ public class GuiRenderer {
     private class QuadOperation extends Operation {
         double x, y;
         double width, height;
+        TextureRegion tex;
         Color color;
 
         @Override
         void render() {
-            quadBuf.vertex(x, y, 0).color(color.r, color.g, color.b, color.a).next();
-            quadBuf.vertex(x + width, y, 0).color(color.r, color.g, color.b, color.a).next();
-            quadBuf.vertex(x + width, y + height, 0).color(color.r, color.g, color.b, color.a).next();
-            quadBuf.vertex(x, y + height, 0).color(color.r, color.g, color.b, color.a).next();
+            TextureRegion tex = this.tex;
+            if (tex == null) tex = TEX_QUAD;
+            
+            quadBuf.vertex(x, y, 0).texture(tex.x, tex.y).color(color.r, color.g, color.b, color.a).next();
+            quadBuf.vertex(x + width, y, 0).texture(tex.x + tex.width, tex.y).color(color.r, color.g, color.b, color.a).next();
+            quadBuf.vertex(x + width, y + height, 0).texture(tex.x + tex.width, tex.y + tex.height).color(color.r, color.g, color.b, color.a).next();
+            quadBuf.vertex(x, y + height, 0).texture(tex.x, tex.y + tex.height).color(color.r, color.g, color.b, color.a).next();
         }
 
         @Override
@@ -268,16 +312,16 @@ public class GuiRenderer {
 
             double x = ((this.x - oX) * cos) - ((this.y - oY) * sin) + oX;
             double y = ((this.y - oY) * cos) + ((this.x - oX) * sin) + oY;
-            quadBuf.vertex(x, y, 0).color(color.r, color.g, color.b, color.a).next();
+            quadBuf.vertex(x, y, 0).texture(TEX_QUAD.x, TEX_QUAD.y).color(color.r, color.g, color.b, color.a).next();
 
             x = ((this.x + size - oX) * cos) - ((this.y - oY) * sin) + oX;
             y = ((this.y - oY) * cos) + ((this.x + size - oX) * sin) + oY;
-            quadBuf.vertex(x, y, 0).color(color.r, color.g, color.b, color.a).next();
+            quadBuf.vertex(x, y, 0).texture(TEX_QUAD.x + TEX_QUAD.width, TEX_QUAD.y).color(color.r, color.g, color.b, color.a).next();
 
             x = ((this.x + size / 2 - oX) * cos) - ((this.y + size / 2 - oY) * sin) + oX;
             y = ((this.y + size / 2 - oY) * cos) + ((this.x + size / 2 - oX) * sin) + oY;
-            quadBuf.vertex(x, y, 0).color(color.r, color.g, color.b, color.a).next();
-            quadBuf.vertex(x, y, 0).color(color.r, color.g, color.b, color.a).next();
+            quadBuf.vertex(x, y, 0).texture(TEX_QUAD.x + TEX_QUAD.width, TEX_QUAD.y + TEX_QUAD.height).color(color.r, color.g, color.b, color.a).next();
+            quadBuf.vertex(x, y, 0).texture(TEX_QUAD.x, TEX_QUAD.y + TEX_QUAD.height).color(color.r, color.g, color.b, color.a).next();
         }
 
         @Override
@@ -314,8 +358,7 @@ public class GuiRenderer {
         @Override
         void render() {
             if (resetQuadLine) {
-                quadTesselator.draw();
-                lineTesselator.draw();
+                endBuffers();
                 begin();
             }
 

@@ -5,6 +5,7 @@ import me.zero.alpine.listener.Listenable;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.ModuleBindChangedEvent;
+import minegame159.meteorclient.gui.GuiRenderer;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
@@ -35,19 +36,20 @@ public class ModuleScreen extends WindowScreen implements Listenable {
         }
 
         // Settings
-        for (String group : module.settingGroups.keySet()) {
-            if (module.settingGroups.size() > 1) {
-                add(new WHorizontalSeparator(group)).fillX().expandX();
-                row();
-            }
-
+        if (module.settingGroups.size() > 0) {
             WTable table = add(new WTable()).fillX().expandX().getWidget();
-            for (Setting<?> setting : module.settingGroups.get(group)) {
-                if (setting.isVisible()) {
-                    generateSettingToGrid(table, setting);
+            for (String group : module.settingGroups.keySet()) {
+                if (module.settingGroups.size() > 1) {
+                    table.add(new WHorizontalSeparator(group)).fillX().expandX();
+                    table.row();
+                }
+
+                for (Setting<?> setting : module.settingGroups.get(group)) {
+                    if (setting.isVisible()) {
+                        generateSettingToGrid(table, setting);
+                    }
                 }
             }
-
             row();
         }
 
@@ -124,7 +126,8 @@ public class ModuleScreen extends WindowScreen implements Listenable {
         WWidget s = table.add(setting.widget).getWidget();
         s.tooltip = setting.description;
 
-        WButton reset = table.add(new WButton("Reset")).getWidget();
+        WButton reset = table.add(new WButton(GuiRenderer.TEX_RESET)).getWidget();
+        reset.tooltip = "Reset";
         reset.action = button -> setting.reset();
 
         table.row();
