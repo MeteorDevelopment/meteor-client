@@ -3,7 +3,9 @@ package minegame159.meteorclient.gui.widgets;
 import minegame159.meteorclient.gui.GuiConfig;
 import minegame159.meteorclient.gui.GuiRenderer;
 import minegame159.meteorclient.gui.listeners.WindowDragListener;
+import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
+import org.lwjgl.glfw.GLFW;
 
 public class WWindow extends WTable {
     public WindowDragListener onDragged;
@@ -69,7 +71,7 @@ public class WWindow extends WTable {
 
     public void setExpanded(boolean expanded) {
         this.expanded = expanded;
-        header.triangle.checked = expanded;
+        header.triangle.setChecked(!expanded);
     }
 
     @Override
@@ -134,6 +136,8 @@ public class WWindow extends WTable {
     @Override
     protected void onCalculateSize() {
         maxHeight = MinecraftClient.getInstance().window.getScaledHeight() - 32;
+        animationProgress = expanded ? 1 : 0;
+
         super.onCalculateSize();
     }
 
@@ -147,8 +151,16 @@ public class WWindow extends WTable {
     }
 
     @Override
+    public void render(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
+        animationProgress += delta / 4 * (expanded ? 1 : -1);
+        animationProgress = Utils.clamp(animationProgress, header.height / height, 1);
+
+        super.render(renderer, mouseX, mouseY, delta);
+    }
+
+    @Override
     protected void onRenderWidget(WWidget widget, GuiRenderer renderer, double mouseX, double mouseY, double delta) {
-        if (expanded) widget.render(renderer, mouseX, mouseY, delta);
+        if (expanded || animationProgress > header.height / height) widget.render(renderer, mouseX, mouseY, delta);
         else {
             if (widget instanceof Header) widget.render(renderer, mouseX, mouseY, delta);
         }
@@ -156,7 +168,7 @@ public class WWindow extends WTable {
 
     @Override
     protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
-        if (expanded) renderer.renderQuad(x, y, width, height, GuiConfig.INSTANCE.background);
+        if (expanded || animationProgress > 0) renderer.renderQuad(x, y, width, height, GuiConfig.INSTANCE.background);
     }
 
     private class Header extends WTable {
@@ -173,14 +185,14 @@ public class WWindow extends WTable {
 
             triangle = add(new WTriangle()).getWidget();
             triangle.action = triangle1 -> {
-                expanded = triangle1.checked;
-                if (type != null) GuiConfig.INSTANCE.getWindowConfig(type, false).setExpanded(triangle1.checked);
+                expanded = !triangle1.checked;
+                if (type != null) GuiConfig.INSTANCE.getWindowConfig(type, false).setExpanded(!triangle1.checked);
             };
         }
 
         @Override
         protected boolean onMouseClicked(int button) {
-            if (mouseOver) {
+            if (mouseOver && button == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
                 dragging = true;
                 return true;
             }
@@ -192,6 +204,12 @@ public class WWindow extends WTable {
         protected boolean onMouseReleased(int button) {
             if (mouseOver) {
                 dragging = false;
+
+                if (button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) {
+                    triangle.mouseOver = true;
+                    triangle.onMouseReleased(button);
+                }
+
                 return true;
             }
 

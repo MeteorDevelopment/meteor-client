@@ -1,21 +1,24 @@
 package minegame159.meteorclient.settings;
 
-import minegame159.meteorclient.gui.widgets.WIntTextBox;
+import minegame159.meteorclient.gui.widgets.WIntEdit;
 import net.minecraft.nbt.CompoundTag;
 
 import java.util.function.Consumer;
 
 public class IntSetting extends Setting<Integer> {
     private final Integer min, max;
+    private final Integer sliderMin, sliderMax;
 
-    private IntSetting(String name, String description, String group, Integer defaultValue, Consumer<Integer> onChanged, Consumer<Setting<Integer>> onModuleActivated, Integer min, Integer max, boolean visible) {
+    private IntSetting(String name, String description, String group, Integer defaultValue, Consumer<Integer> onChanged, Consumer<Setting<Integer>> onModuleActivated, Integer min, Integer max, Integer sliderMin, Integer sliderMax, boolean visible) {
         super(name, description, group, defaultValue, onChanged, onModuleActivated, visible);
         this.min = min;
         this.max = max;
+        this.sliderMin = sliderMin;
+        this.sliderMax = sliderMax;
 
-        widget = new WIntTextBox(get(), 70);
-        ((WIntTextBox) widget).action = wIntTextBox -> {
-            if (!set(wIntTextBox.value)) wIntTextBox.setValue(get());
+        widget = new WIntEdit(sliderMin != null ? sliderMin : 0, sliderMax != null ? sliderMax : 10, get());
+        ((WIntEdit) widget).action = intEdit -> {
+            if (!set(intEdit.get())) intEdit.set(get());
         };
     }
 
@@ -30,7 +33,7 @@ public class IntSetting extends Setting<Integer> {
 
     @Override
     protected void resetWidget() {
-        ((WIntTextBox) widget).setValue(get());
+        ((WIntEdit) widget).set(get());
     }
 
     @Override
@@ -74,6 +77,7 @@ public class IntSetting extends Setting<Integer> {
         private Consumer<Integer> onChanged;
         private Consumer<Setting<Integer>> onModuleActivated;
         private Integer min, max;
+        private Integer sliderMin, sliderMax;
         private boolean visible = true;
 
         public Builder name(String name) {
@@ -116,13 +120,23 @@ public class IntSetting extends Setting<Integer> {
             return this;
         }
 
+        public Builder sliderMin(int min) {
+            sliderMin = min;
+            return this;
+        }
+
+        public Builder sliderMax(int max) {
+            sliderMax = max;
+            return this;
+        }
+
         public Builder visible(boolean visible) {
             this.visible = visible;
             return this;
         }
 
         public IntSetting build() {
-            return new IntSetting(name, description, group, defaultValue, onChanged, onModuleActivated, min, max, visible);
+            return new IntSetting(name, description, group, defaultValue, onChanged, onModuleActivated, min, max, sliderMin, sliderMax, visible);
         }
     }
 }

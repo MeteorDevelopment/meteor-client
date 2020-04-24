@@ -14,6 +14,7 @@ public class WTable extends WWidget {
     public final Cell<?> defaultCell = new Cell<>().centerY().space(4);
 
     public double maxHeight;
+    public double animationProgress = 1;
 
     private List<List<Cell<?>>> rows = new ArrayList<>(1);
     private int rowI;
@@ -284,12 +285,12 @@ public class WTable extends WWidget {
 
     @Override
     public void render(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
-        if (fullHeight != -1) {
-            renderer.startScissor(this, 0, 0, 0, 0);
-            renderer.startTextScissor(this, 0, 0, 0, 0);
+        if (fullHeight != -1 || (animationProgress != 0 && animationProgress != 1)) {
+            renderer.startScissor(this, (height - padTop) * (1 - animationProgress), 0, 0, 0);
+            renderer.startTextScissor(this, (height - padTop) * (1 - animationProgress), 0, 0, 0);
         }
         super.render(renderer, mouseX, mouseY, delta);
-        if (fullHeight != -1) {
+        if (fullHeight != -1 || (animationProgress != 0 && animationProgress != 1)) {
             renderer.endTextScissor();
             renderer.endScissor();
         }
