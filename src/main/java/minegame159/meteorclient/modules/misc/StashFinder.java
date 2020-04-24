@@ -101,13 +101,14 @@ public class StashFinder extends ToggleModule {
 
         WTable list = new WTable();
 
-        // Reset
-        WButton reset = list.add(new WButton("Reset")).getWidget();
+        // Clear
+        WButton clear = list.add(new WButton("Clear")).getWidget();
         list.row();
 
-        WTable table = list.add(new WTable()).getWidget();
+        WTable table = new WTable();
+        if (chunks.size() > 0) list.add(table);
 
-        reset.action = button -> {
+        clear.action = button -> {
             chunks.clear();
             table.clear();
         };

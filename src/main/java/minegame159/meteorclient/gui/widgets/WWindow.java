@@ -71,7 +71,7 @@ public class WWindow extends WTable {
 
     public void setExpanded(boolean expanded) {
         this.expanded = expanded;
-        header.triangle.checked = !expanded;
+        header.triangle.setChecked(!expanded);
     }
 
     @Override
@@ -160,7 +160,7 @@ public class WWindow extends WTable {
 
     @Override
     protected void onRenderWidget(WWidget widget, GuiRenderer renderer, double mouseX, double mouseY, double delta) {
-        if (expanded || animationProgress > 0) widget.render(renderer, mouseX, mouseY, delta);
+        if (expanded || animationProgress > header.height / height) widget.render(renderer, mouseX, mouseY, delta);
         else {
             if (widget instanceof Header) widget.render(renderer, mouseX, mouseY, delta);
         }
@@ -186,7 +186,7 @@ public class WWindow extends WTable {
             triangle = add(new WTriangle()).getWidget();
             triangle.action = triangle1 -> {
                 expanded = !triangle1.checked;
-                if (type != null) GuiConfig.INSTANCE.getWindowConfig(type, false).setExpanded(triangle1.checked);
+                if (type != null) GuiConfig.INSTANCE.getWindowConfig(type, false).setExpanded(!triangle1.checked);
             };
         }
 
