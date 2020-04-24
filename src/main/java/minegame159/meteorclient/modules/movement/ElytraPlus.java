@@ -99,6 +99,7 @@ public class ElytraPlus extends ToggleModule {
                 .group("Autopilot")
                 .defaultValue(160)
                 .min(0)
+                .sliderMax(260)
                 .visible(false)
                 .build()
         );

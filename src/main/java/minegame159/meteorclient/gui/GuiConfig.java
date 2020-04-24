@@ -44,6 +44,13 @@ public class GuiConfig implements ISerializable<GuiConfig> {
     public Color resetHovered = new Color(60, 60, 60);
     public Color resetPressed = new Color(70, 70, 70);
 
+    public Color sliderLeft = new Color(0, 150, 80);
+    public Color sliderRight = new Color(50, 50, 50);
+
+    public Color sliderHandle = new Color(0, 255, 180);
+    public Color sliderHandleHovered = new Color(0, 240, 165);
+    public Color sliderHandlePressed = new Color(0, 225, 150);
+
     private Map<WindowType, WindowConfig> windowConfigs = new HashMap<>();
 
     public GuiConfig() {
@@ -89,6 +96,13 @@ public class GuiConfig implements ISerializable<GuiConfig> {
         tag.put("resetHovered", resetHovered.toTag());
         tag.put("resetPressed", resetPressed.toTag());
 
+        tag.put("sliderLeft", sliderLeft.toTag());
+        tag.put("sliderRight", sliderRight.toTag());
+
+        tag.put("sliderHandle", sliderHandle.toTag());
+        tag.put("sliderHandleHovered", sliderHandleHovered.toTag());
+        tag.put("sliderHandlePressed", sliderHandlePressed.toTag());
+
         tag.put("windowConfigs", NbtUtils.mapToTag(windowConfigs));
 
         return tag;
@@ -126,6 +140,13 @@ public class GuiConfig implements ISerializable<GuiConfig> {
         read(tag, "resetPressed", resetPressed);
 
         read(tag, "moduleBackground", moduleBackground);
+
+        read(tag, "sliderLeft", sliderLeft);
+        read(tag, "sliderRight", sliderRight);
+
+        read(tag, "sliderHandle", sliderHandle);
+        read(tag, "sliderHandleHovered", sliderHandleHovered);
+        read(tag, "sliderHandlePressed", sliderHandlePressed);
 
         windowConfigs = NbtUtils.mapFromTag(tag.getCompound("windowConfigs"), WindowType::valueOf, tag1 -> new WindowConfig(false).fromTag((CompoundTag) tag1));
 

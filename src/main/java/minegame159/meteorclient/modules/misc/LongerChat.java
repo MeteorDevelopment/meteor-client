@@ -11,6 +11,7 @@ public class LongerChat extends ToggleModule {
             .description("Chat lines.")
             .defaultValue(1000)
             .min(1)
+            .sliderMax(1000)
             .build()
     );
 

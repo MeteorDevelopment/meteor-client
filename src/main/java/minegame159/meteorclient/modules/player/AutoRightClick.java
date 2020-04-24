@@ -16,6 +16,7 @@ public class AutoRightClick extends ToggleModule {
             .description("Delay between clicks in ticks.")
             .defaultValue(2)
             .min(0)
+            .sliderMax(60)
             .build()
     );
 
