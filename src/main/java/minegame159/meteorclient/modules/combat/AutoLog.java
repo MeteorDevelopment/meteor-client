@@ -18,6 +18,7 @@ public class AutoLog extends ToggleModule {
             .defaultValue(6)
             .min(0)
             .max(20)
+            .sliderMax(20)
             .build()
     );
 
