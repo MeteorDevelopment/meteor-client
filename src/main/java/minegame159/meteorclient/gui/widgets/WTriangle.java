@@ -48,7 +48,7 @@ public class WTriangle extends WWidget {
         if (pressed) color = GuiConfig.INSTANCE.backgroundPressed;
         else if (mouseOver) color = GuiConfig.INSTANCE.backgroundHovered;
 
-        angle += delta * 45 * (checked ? -1 : 1);
+        angle += delta * 40 * (checked ? -1 : 1);
         angle = Utils.clamp(angle, -90, 0);
 
         renderer.renderTriangle(x, y + height / 4, width, angle, color);
