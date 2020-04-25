@@ -25,12 +25,13 @@ public class GuiRenderer {
     private static final Color DEBUG_COLOR_CELL = new Color(25, 225, 25);
 
     private static Identifier TEXTURE = new Identifier("meteor-client", "gui.png");
-    private static int TEXTURE_WIDTH = 65;
+    private static int TEXTURE_WIDTH = 97;
     private static int TEXTURE_HEIGHT = 32;
 
     public static TextureRegion TEX_QUAD = new TextureRegion(TEXTURE_WIDTH, TEXTURE_HEIGHT, 0, 0, 1, 1, null, null, null);
     public static TextureRegion TEX_RESET = new TextureRegion(TEXTURE_WIDTH, TEXTURE_HEIGHT, 1, 0, 32, 32, GuiConfig.INSTANCE.reset, GuiConfig.INSTANCE.resetHovered, GuiConfig.INSTANCE.resetPressed);
     public static TextureRegion TEX_SLIDER_HANDLE = new TextureRegion(TEXTURE_WIDTH, TEXTURE_HEIGHT, 33, 0, 32, 32, GuiConfig.INSTANCE.sliderHandle, GuiConfig.INSTANCE.sliderHandleHovered, GuiConfig.INSTANCE.sliderHandlePressed);
+    public static TextureRegion TEX_EDIT = new TextureRegion(TEXTURE_WIDTH, TEXTURE_HEIGHT, 65, 0, 32, 32, GuiConfig.INSTANCE.edit, GuiConfig.INSTANCE.editHovered, GuiConfig.INSTANCE.editPressed);
 
     private static Tessellator lineTesselator = new Tessellator(1000);
     private static BufferBuilder lineBuf = lineTesselator.getBuffer();
@@ -74,18 +75,27 @@ public class GuiRenderer {
         operations.add(operation);
     }
 
-    public void renderQuad(double x, double y, double width, double height, TextureRegion tex, Color color) {
+    public void renderQuad(double x, double y, double width, double height, TextureRegion tex, Color color1, Color color2, Color color3, Color color4) {
         QuadOperation o = quadOperationPool.get();
         o.x = x;
         o.y = y;
         o.width = width;
         o.height = height;
         o.tex = tex;
-        o.color = color;
+        o.color1 = color1;
+        o.color2 = color2;
+        o.color3 = color3;
+        o.color4 = color4;
         operations.add(o);
     }
+    public void renderQuad(double x, double y, double width, double height, TextureRegion tex, Color color) {
+        renderQuad(x, y, width, height, tex, color, color, color, color);
+    }
+    public void renderQuad(double x, double y, double width, double height, Color colorLeft, Color colorRight) {
+        renderQuad(x, y, width, height, null, colorLeft, colorRight, colorRight, colorLeft);
+    }
     public void renderQuad(double x, double y, double width, double height, Color color) {
-        renderQuad(x, y, width, height, null, color);
+        renderQuad(x, y, width, height, null, color, color, color, color);
     }
 
     public void renderTriangle(double x, double y, double size, double angle, Color color) {
@@ -278,17 +288,17 @@ public class GuiRenderer {
         double x, y;
         double width, height;
         TextureRegion tex;
-        Color color;
+        Color color1, color2, color3, color4;
 
         @Override
         void render() {
             TextureRegion tex = this.tex;
             if (tex == null) tex = TEX_QUAD;
             
-            quadBuf.vertex(x, y, 0).texture(tex.x, tex.y).color(color.r, color.g, color.b, color.a).next();
-            quadBuf.vertex(x + width, y, 0).texture(tex.x + tex.width, tex.y).color(color.r, color.g, color.b, color.a).next();
-            quadBuf.vertex(x + width, y + height, 0).texture(tex.x + tex.width, tex.y + tex.height).color(color.r, color.g, color.b, color.a).next();
-            quadBuf.vertex(x, y + height, 0).texture(tex.x, tex.y + tex.height).color(color.r, color.g, color.b, color.a).next();
+            quadBuf.vertex(x, y, 0).texture(tex.x, tex.y).color(color1.r, color1.g, color1.b, color1.a).next();
+            quadBuf.vertex(x + width, y, 0).texture(tex.x + tex.width, tex.y).color(color2.r, color2.g, color2.b, color2.a).next();
+            quadBuf.vertex(x + width, y + height, 0).texture(tex.x + tex.width, tex.y + tex.height).color(color3.r, color3.g, color3.b, color3.a).next();
+            quadBuf.vertex(x, y + height, 0).texture(tex.x, tex.y + tex.height).color(color4.r, color4.g, color4.b, color4.a).next();
         }
 
         @Override

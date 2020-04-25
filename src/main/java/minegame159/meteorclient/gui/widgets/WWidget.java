@@ -127,6 +127,12 @@ public abstract class WWidget {
     }
     protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {}
 
+    public void afterRender() {
+        onAfterRender();
+        for (Cell<?> cell : cells) cell.getWidget().afterRender();
+    }
+    protected void onAfterRender() {}
+
     public WWidget getRoot() {
         return parent != null ? parent.getRoot() : this;
     }
