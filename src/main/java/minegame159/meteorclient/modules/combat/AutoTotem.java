@@ -53,15 +53,20 @@ public class AutoTotem extends ToggleModule {
         int preTotemCount = totemCount;
         InvUtils.FindItemResult result = InvUtils.findItemWithCount(Items.TOTEM_OF_UNDYING);
 
-        if (result.found() && !(mc.player.getOffHandStack().getItem() == Items.TOTEM_OF_UNDYING) && !smart.get() && !antiOneTap.get()) {
-            InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
+        if (result.found() && !(mc.player.getOffHandStack().getItem() == Items.TOTEM_OF_UNDYING) && !smart.get()) {
+            if(!antiOneTap.get()) {
+                InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
+            }
             InvUtils.clickSlot(InvUtils.OFFHAND_SLOT, 0, SlotActionType.PICKUP);
             InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
-        }else if(result.found() && !(mc.player.getOffHandStack().getItem() == Items.TOTEM_OF_UNDYING) && smart.get() && (mc.player.getHealth() + mc.player.getAbsorptionAmount() < 10 || (mc.player.getHealth() + mc.player.getAbsorptionAmount()) - getHealthReduction() < 10)){
-            InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
+        }else if(result.found() && !(mc.player.getOffHandStack().getItem() == Items.TOTEM_OF_UNDYING) && smart.get() &&
+                (mc.player.getHealth() + mc.player.getAbsorptionAmount() < 10 || (mc.player.getHealth() + mc.player.getAbsorptionAmount()) - getHealthReduction() < 10)){
+            if(!antiOneTap.get()) {
+                InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
+            }
             InvUtils.clickSlot(InvUtils.OFFHAND_SLOT, 0, SlotActionType.PICKUP);
             InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
-        }else if(result.found() && antiOneTap.get()){
+        }else if(result.found() && antiOneTap.get() && mc.player.inventory.getCursorStack().isEmpty()){
             InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
         }
 
