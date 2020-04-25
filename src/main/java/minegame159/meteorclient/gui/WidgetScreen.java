@@ -89,6 +89,8 @@ public class WidgetScreen extends Screen {
         root.render(GUI_RENDERER, mouseX, mouseY, delta);
         if (renderDebug) GUI_RENDERER.renderDebug(root);
         GUI_RENDERER.end();
+
+        root.afterRender();
     }
 
     @Override

@@ -126,7 +126,7 @@ public class ModuleScreen extends WindowScreen implements Listenable {
         WWidget s = table.add(setting.widget).getWidget();
         s.tooltip = setting.description;
 
-        WButton reset = table.add(new WButton(GuiRenderer.TEX_RESET)).getWidget();
+        WButton reset = table.add(new WButton(GuiRenderer.TEX_RESET)).fillX().right().getWidget();
         reset.tooltip = "Reset";
         reset.action = button -> setting.reset();
 

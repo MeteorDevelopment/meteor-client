@@ -51,6 +51,12 @@ public class GuiConfig implements ISerializable<GuiConfig> {
     public Color sliderHandleHovered = new Color(0, 240, 165);
     public Color sliderHandlePressed = new Color(0, 225, 150);
 
+    public Color colorEditHueHandle = new Color(70, 70, 70);
+
+    public Color edit = new Color(50, 50, 50);
+    public Color editHovered = new Color(60, 60, 60);
+    public Color editPressed = new Color(70, 70, 70);
+
     private Map<WindowType, WindowConfig> windowConfigs = new HashMap<>();
 
     public GuiConfig() {
@@ -103,6 +109,12 @@ public class GuiConfig implements ISerializable<GuiConfig> {
         tag.put("sliderHandleHovered", sliderHandleHovered.toTag());
         tag.put("sliderHandlePressed", sliderHandlePressed.toTag());
 
+        tag.put("colorEditHueHandle", colorEditHueHandle.toTag());
+
+        tag.put("edit", edit.toTag());
+        tag.put("editHovered", editHovered.toTag());
+        tag.put("editPressed", editPressed.toTag());
+
         tag.put("windowConfigs", NbtUtils.mapToTag(windowConfigs));
 
         return tag;
@@ -147,6 +159,12 @@ public class GuiConfig implements ISerializable<GuiConfig> {
         read(tag, "sliderHandle", sliderHandle);
         read(tag, "sliderHandleHovered", sliderHandleHovered);
         read(tag, "sliderHandlePressed", sliderHandlePressed);
+
+        read(tag, "colorEditHueHandle", colorEditHueHandle);
+
+        read(tag, "edit", edit);
+        read(tag, "editHovered", editHovered);
+        read(tag, "editPressed", editPressed);
 
         windowConfigs = NbtUtils.mapFromTag(tag.getCompound("windowConfigs"), WindowType::valueOf, tag1 -> new WindowConfig(false).fromTag((CompoundTag) tag1));
 
