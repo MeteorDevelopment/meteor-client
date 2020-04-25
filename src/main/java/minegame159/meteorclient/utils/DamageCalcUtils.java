@@ -5,10 +5,12 @@ package minegame159.meteorclient.utils;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Vec3d;
@@ -91,6 +93,33 @@ public class DamageCalcUtils {
         return damage;
     }
 
+    public static double getSwordDamage(PlayerEntity entity){
+        float damage = 0;
+        if(entity.getActiveItem().getItem() == Items.DIAMOND_SWORD) {
+            damage += 7;
+        }else if(entity.getActiveItem().getItem() == Items.GOLDEN_SWORD){
+            damage += 4;
+        }else if(entity.getActiveItem().getItem() == Items.IRON_SWORD){
+            damage += 6;
+        }else if(entity.getActiveItem().getItem() == Items.STONE_SWORD){
+            damage += 5;
+        }else if(entity.getActiveItem().getItem() == Items.WOODEN_SWORD){
+            damage += 4;
+        }
+        damage *= 1.5;
+        if(entity.getActiveItem().getEnchantments() != null){
+            if(EnchantmentHelper.getEnchantments(entity.getActiveItem()).containsKey(Enchantments.SHARPNESS)){
+                int level = EnchantmentHelper.getLevel(Enchantments.SHARPNESS, entity.getActiveItem());
+                damage += 0.5 * (level + 1);
+            }
+        }
+        if(entity.getActiveStatusEffects().containsKey(StatusEffects.STRENGTH)){
+            int strength =  Objects.requireNonNull(entity.getStatusEffect(StatusEffects.STRENGTH)).getAmplifier() + 1;
+            damage += 3 * strength;
+        }
+        return damage;
+    }
+
     public static int getDefencePoints(ArmorItem item){
         return item.getProtection();
     }
@@ -104,18 +133,27 @@ public class DamageCalcUtils {
         return damage * (diff == 0 ? 0 : (diff == 1 ? 0.5f : (diff == 2 ? 1 : 1.5f)));
     }
 
+    public static double normalProtReduction(Entity player, double damage){
+        int protLevel = EnchantmentHelper.getProtectionAmount(player.getArmorItems(), DamageSource.GENERIC);
+        if(protLevel > 20){
+            protLevel = 20;
+        }
+        damage *= (1 - (protLevel/25d));
+        return damage;
+    }
+
     public static double blastProtReduction(Entity player, double damage){
         int protLevel = EnchantmentHelper.getProtectionAmount(player.getArmorItems(), DamageSource.FIREWORKS);
         if(protLevel > 20){
             protLevel = 20;
         }
-        damage = damage * (1-(protLevel/25f));
+        damage *= (1 - (protLevel/25d));
         return damage;
     }
 
-    public static double resistanceReduction(double damage){
+    public static double resistanceReduction(PlayerEntity player, double damage){
         int level = 0;
-        if(mc.player.getActiveStatusEffects().containsKey(StatusEffects.RESISTANCE)){
+        if(player.getActiveStatusEffects().containsKey(StatusEffects.RESISTANCE)){
             level = Objects.requireNonNull(mc.player.getStatusEffect(StatusEffects.RESISTANCE)).getAmplifier() + 1;
         }
         damage = damage * (1 - (0.2 * level));
