@@ -1,5 +1,7 @@
 package minegame159.meteorclient.modules.combat;
 
+//Created by squidoodly 25/04/2020
+
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.RightClickEvent;
