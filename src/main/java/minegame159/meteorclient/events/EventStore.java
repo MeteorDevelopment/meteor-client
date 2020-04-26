@@ -46,6 +46,7 @@ public class EventStore {
     private static StartBreakingBlockEvent startBreakingBlockEvent = new StartBreakingBlockEvent();
     private static EntityDestroyEvent entityDestroyEvent = new EntityDestroyEvent();
     private static DamageEvent damageEvent = new DamageEvent();
+    private static RightClickEvent rightClickEvent = new RightClickEvent();
 
     public static PlaySoundPacketEvent playSoundPacketEvent(PlaySoundS2CPacket packet) {
         playSoundPacketEvent.packet = packet;
@@ -191,4 +192,6 @@ public class EventStore {
         damageEvent.source = source;
         return damageEvent;
     }
+
+    public static RightClickEvent rightClickEvent(){return rightClickEvent;}
 }
