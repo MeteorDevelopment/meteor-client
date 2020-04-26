@@ -9,6 +9,7 @@ import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BoolSetting;
+import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.utils.DamageCalcUtils;
 import minegame159.meteorclient.utils.InvUtils;
@@ -46,6 +47,15 @@ public class AutoTotem extends ToggleModule {
             .defaultValue(false)
             .build());
 
+    public final Setting<Integer> health = addSetting(new IntSetting.Builder()
+            .name("health")
+            .description("The health smart totem activates")
+            .defaultValue(10)
+            .min(0)
+            .sliderMax(20)
+            .build()
+    );
+
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
         if (mc.currentScreen instanceof ContainerScreen<?>) return;
@@ -60,7 +70,7 @@ public class AutoTotem extends ToggleModule {
             InvUtils.clickSlot(InvUtils.OFFHAND_SLOT, 0, SlotActionType.PICKUP);
             InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
         }else if(result.found() && !(mc.player.getOffHandStack().getItem() == Items.TOTEM_OF_UNDYING) && smart.get() &&
-                (mc.player.getHealth() + mc.player.getAbsorptionAmount() < 10 || (mc.player.getHealth() + mc.player.getAbsorptionAmount()) - getHealthReduction() < 10)){
+                ((mc.player.getHealth() + mc.player.getAbsorptionAmount()) < health.get() || ((mc.player.getHealth() + mc.player.getAbsorptionAmount()) - getHealthReduction()) < health.get())){
             if(!antiOneTap.get()) {
                 InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
             }
