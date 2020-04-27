@@ -117,10 +117,12 @@ public class GuiRenderer {
     }
 
     private void endBuffers() {
-        GlStateManager.enableBlend();
-        GlStateManager.disableLighting();
         GlStateManager.enableTexture();
         MinecraftClient.getInstance().getTextureManager().bindTexture(TEXTURE);
+        GlStateManager.enableBlend();
+        GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+        GlStateManager.disableLighting();
+        GL11.glShadeModel(GL11.GL_SMOOTH);
         quadTesselator.draw();
 
         GlStateManager.disableTexture();
