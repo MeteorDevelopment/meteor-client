@@ -306,7 +306,11 @@ public class ColorSettingScreen extends WindowScreen {
 
             renderer.renderQuad(x, y, width, height, null, WHITE, hueQuad.color, BLACK, BLACK);
 
-            renderer.renderQuad(x + handleX - 1, y + handleY - 1, 2, 2, GuiConfig.INSTANCE.colorEditHueHandle);
+            Color color = GuiConfig.INSTANCE.colorEditHandle;
+            if (dragging) color = GuiConfig.INSTANCE.colorEditHandlePressed;
+            else if (mouseX >= x + handleX - 1 && mouseX <= x + handleX + 1 && mouseY >= y + handleY - 1 && mouseY <= y + handleY + 1) color = GuiConfig.INSTANCE.colorEditHandleHovered;
+
+            renderer.renderQuad(x + handleX - 1, y + handleY - 1, 2, 2, color);
         }
     }
 
@@ -498,7 +502,11 @@ public class ColorSettingScreen extends WindowScreen {
                 sectionX += sectionWidth;
             }
 
-            renderer.renderQuad(x + handleX - 1, y, 2, height, GuiConfig.INSTANCE.colorEditHueHandle);
+            Color color = GuiConfig.INSTANCE.colorEditHandle;
+            if (dragging) color = GuiConfig.INSTANCE.colorEditHandlePressed;
+            else if (mouseX >= x + handleX - 1 && mouseX <= x + handleX + 1 && mouseY >= y && mouseY <= y + height) color = GuiConfig.INSTANCE.colorEditHandleHovered;
+
+            renderer.renderQuad(x + handleX - 1, y, 2, height, color);
         }
     }
 }

@@ -1,17 +1,16 @@
-package minegame159.meteorclient.modules.setting;
+package minegame159.meteorclient.gui.screens.topbar;
 
 import minegame159.meteorclient.Config;
+import minegame159.meteorclient.gui.TopBarType;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.settings.ColorSetting;
 import minegame159.meteorclient.settings.StringSetting;
 import minegame159.meteorclient.utils.Color;
 
-public class ConfigM extends Module {
-    public ConfigM() {
-        super(Category.Setting, "config", "Config. For custom font replace <your minecraft folder>/meteor-client default font with your one, name doesnt matter.");
-        serialize = false;
+public class TopBarConfig extends TopBarScreen {
+    public TopBarConfig() {
+        super(TopBarType.Config);
 
         addSetting(new StringSetting.Builder()
                 .name("prefix")
@@ -38,5 +37,7 @@ public class ConfigM extends Module {
                     .build()
             );
         }
+
+        createSettingsWindow();
     }
 }

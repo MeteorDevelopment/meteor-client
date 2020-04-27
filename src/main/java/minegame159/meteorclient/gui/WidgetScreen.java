@@ -14,7 +14,7 @@ public class WidgetScreen extends Screen {
     public final String title;
     protected final MinecraftClient mc;
 
-    private Screen parent;
+    public Screen parent;
     public final WWidget root;
     private int prePostKeyEvents;
     private boolean renderDebug = false;

@@ -1,6 +1,6 @@
 package minegame159.meteorclient.gui.widgets;
 
-import minegame159.meteorclient.modules.setting.GUI;
+import minegame159.meteorclient.gui.GuiConfig;
 import minegame159.meteorclient.gui.GuiRenderer;
 import net.minecraft.client.MinecraftClient;
 
@@ -120,7 +120,7 @@ public abstract class WWidget {
             if (cell.x > MinecraftClient.getInstance().window.getScaledWidth() || cell.y > MinecraftClient.getInstance().window.getScaledHeight()) break;
             onRenderWidget(cell.getWidget(), renderer, mouseX, mouseY, delta);
         }
-        if (mouseOver && mouseOverTimer >= 1 && tooltip != null) renderer.renderTooltip(tooltip, mouseX + 8, mouseY + 8, GUI.text);
+        if (mouseOver && mouseOverTimer >= 1 && tooltip != null) renderer.renderTooltip(tooltip, mouseX + 8, mouseY + 8, GuiConfig.INSTANCE.text);
     }
     protected void onRenderWidget(WWidget widget, GuiRenderer renderer, double mouseX, double mouseY, double delta) {
         widget.render(renderer, mouseX, mouseY, delta);

@@ -2,7 +2,6 @@ package minegame159.meteorclient.gui.widgets;
 
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ToggleModule;
-import minegame159.meteorclient.modules.setting.GUI;
 import minegame159.meteorclient.gui.GuiConfig;
 import minegame159.meteorclient.gui.GuiRenderer;
 import minegame159.meteorclient.utils.Utils;
@@ -76,10 +75,10 @@ public class WModule extends WWidget {
             } else animationMultiplier1 = -1;
         }
 
-        animationProgress1 += delta / 10 * GUI.hoverAnimationSpeedMultiplier * animationMultiplier1;
+        animationProgress1 += delta / 10 * animationMultiplier1;
         animationProgress1 = Utils.clamp(animationProgress1, 0, 1);
 
-        animationProgress2 += delta / 10 * GUI.hoverAnimationSpeedMultiplier * animationMultiplier2;
+        animationProgress2 += delta / 10 * animationMultiplier2;
         animationProgress2 = Utils.clamp(animationProgress2, 0, 1);
 
         if (animationProgress1 > 0  || animationProgress2 > 0) {
