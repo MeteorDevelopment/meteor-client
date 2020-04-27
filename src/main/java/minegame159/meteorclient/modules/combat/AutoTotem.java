@@ -30,6 +30,8 @@ public class AutoTotem extends ToggleModule {
 
     private final MinecraftClient mc = MinecraftClient.getInstance();
 
+    private boolean locked = false;
+
     public AutoTotem() {
         super(Category.Combat, "auto-totem", "Automatically equips totems.");
     }
@@ -64,6 +66,7 @@ public class AutoTotem extends ToggleModule {
         InvUtils.FindItemResult result = InvUtils.findItemWithCount(Items.TOTEM_OF_UNDYING);
 
         if (result.found() && !(mc.player.getOffHandStack().getItem() == Items.TOTEM_OF_UNDYING) && !smart.get()) {
+            locked = true;
             if(!antiOneTap.get()) {
                 InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
             }
@@ -71,6 +74,7 @@ public class AutoTotem extends ToggleModule {
             InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
         }else if(result.found() && !(mc.player.getOffHandStack().getItem() == Items.TOTEM_OF_UNDYING) && smart.get() &&
                 ((mc.player.getHealth() + mc.player.getAbsorptionAmount()) < health.get() || ((mc.player.getHealth() + mc.player.getAbsorptionAmount()) - getHealthReduction()) < health.get())){
+            locked = true;
             if(!antiOneTap.get()) {
                 InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
             }
@@ -78,6 +82,10 @@ public class AutoTotem extends ToggleModule {
             InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
         }else if(result.found() && antiOneTap.get() && mc.player.inventory.getCursorStack().isEmpty()){
             InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
+        }
+        if(smart.get() && ((mc.player.getHealth() + mc.player.getAbsorptionAmount()) > health.get()
+                && (((mc.player.getHealth() + mc.player.getAbsorptionAmount()) - getHealthReduction()) > health.get()))){
+            locked = false;
         }
 
         if (result.count != preTotemCount) totemCountString = Integer.toString(result.count);
@@ -108,6 +116,10 @@ public class AutoTotem extends ToggleModule {
 
     public void setSmart(boolean b){
         smart.set(b);
+    }
+
+    public boolean getLocked(){
+        return locked;
     }
 
     public void setAntiOneTap(boolean b){
