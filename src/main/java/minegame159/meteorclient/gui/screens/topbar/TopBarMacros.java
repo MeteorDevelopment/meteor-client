@@ -1,19 +1,30 @@
-package minegame159.meteorclient.gui.screens;
+package minegame159.meteorclient.gui.screens.topbar;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listenable;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.MacroListChangedEvent;
+import minegame159.meteorclient.gui.TopBarType;
+import minegame159.meteorclient.gui.screens.EditMacroScreen;
+import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.macros.Macro;
 import minegame159.meteorclient.macros.MacroManager;
-import minegame159.meteorclient.gui.widgets.*;
 
-public class MacrosScreen extends WindowScreen implements Listenable {
-    public MacrosScreen() {
-        super("Macros", true);
+public class TopBarMacros extends TopBarScreen implements Listenable {
+    private WWindow window;
+
+    public TopBarMacros() {
+        super(TopBarType.Macros);
+
+        window = add(new WWindow(title, true)).centerXY().getWidget();
 
         initWidgets();
+    }
+
+    @Override
+    public void clear() {
+        window.clear();
     }
 
     @Override
@@ -25,8 +36,8 @@ public class MacrosScreen extends WindowScreen implements Listenable {
     private void initWidgets() {
         // Macros
         if (MacroManager.INSTANCE.getAll().size() > 0) {
-            WTable table = add(new WTable()).getWidget();
-            row();
+            WTable table = window.add(new WTable()).getWidget();
+            window.row();
 
             for (Macro macro : MacroManager.INSTANCE.getAll()) {
                 table.add(new WLabel(macro.name));
@@ -40,12 +51,12 @@ public class MacrosScreen extends WindowScreen implements Listenable {
                 table.row();
             }
 
-            add(new WHorizontalSeparator());
-            row();
+            window.add(new WHorizontalSeparator());
+            window.row();
         }
 
         // Add
-        WPlus add = add(new WPlus()).fillX().right().getWidget();
+        WPlus add = window.add(new WPlus()).fillX().right().getWidget();
         add.action = plus -> mc.openScreen(new EditMacroScreen(null));
     }
 

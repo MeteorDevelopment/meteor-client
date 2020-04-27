@@ -43,6 +43,7 @@ public class WMinus extends WWidget {
 
         Color color = GuiConfig.INSTANCE.minus;
         if (pressed) color = GuiConfig.INSTANCE.minusPressed;
+        else if (mouseOver) color = GuiConfig.INSTANCE.minusHovered;
 
         renderer.renderQuad(x + 4, y + 4 + 2, 6, 2, color);
     }

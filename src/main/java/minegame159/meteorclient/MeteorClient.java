@@ -10,7 +10,7 @@ import minegame159.meteorclient.accountsfriends.FriendManager;
 import minegame159.meteorclient.commands.CommandManager;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.font.CFontRenderer;
-import minegame159.meteorclient.gui.screens.ClickGUI;
+import minegame159.meteorclient.gui.screens.topbar.TopBarModules;
 import minegame159.meteorclient.macros.MacroManager;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.utils.EntityUtils;
@@ -85,7 +85,7 @@ public class MeteorClient implements ClientModInitializer, Listenable {
     }
 
     private void openClickGui() {
-        mc.openScreen(new ClickGUI());
+        mc.openScreen(new TopBarModules());
     }
 
     @EventHandler

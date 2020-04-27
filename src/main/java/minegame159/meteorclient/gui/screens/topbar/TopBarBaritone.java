@@ -1,19 +1,17 @@
-package minegame159.meteorclient.modules.setting;
+package minegame159.meteorclient.gui.screens.topbar;
 
 import baritone.api.BaritoneAPI;
 import baritone.api.Settings;
-import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.gui.TopBarType;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.ColorSetting;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.utils.Color;
 
-public class Baritone extends Module {
-    public Baritone() {
-        super(Category.Setting, "baritone", "Some most of the most useful Baritone settings.");
-        serialize = false;
+public class TopBarBaritone extends TopBarScreen {
+    public TopBarBaritone() {
+        super(TopBarType.Baritone);
 
         Settings s = BaritoneAPI.getSettings();
 
@@ -536,5 +534,7 @@ public class Baritone extends Module {
                 .onModuleActivated(booleanSetting -> booleanSetting.set(s.sprintInWater.value))
                 .build()
         );
+
+        createSettingsWindow();
     }
 }

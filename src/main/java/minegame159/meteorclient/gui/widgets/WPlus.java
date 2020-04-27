@@ -43,6 +43,7 @@ public class WPlus extends WWidget {
 
         Color color = GuiConfig.INSTANCE.plus;
         if (pressed) color = GuiConfig.INSTANCE.plusPressed;
+        else if (mouseOver) color = GuiConfig.INSTANCE.plusHovered;
 
         renderer.renderQuad(x + 4, y + 4 + 2, 6, 2, color);
         renderer.renderQuad(x + 4 + 2, y + 4, 2, 6, color);

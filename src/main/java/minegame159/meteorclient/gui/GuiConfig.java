@@ -31,10 +31,12 @@ public class GuiConfig implements ISerializable<GuiConfig> {
     public Color separator = new Color(10, 10, 10, 225);
 
     public Color plus = new Color(45, 225, 45);
-    public Color plusPressed = new Color(70, 225, 70);
+    public Color plusHovered = new Color(60, 225, 60);
+    public Color plusPressed = new Color(75, 225, 75);
 
     public Color minus = new Color(225, 45, 45);
-    public Color minusPressed = new Color(225, 70, 70);
+    public Color minusHovered = new Color(225, 60, 60);
+    public Color minusPressed = new Color(225, 75, 75);
 
     public Color accent = new Color(0, 255, 180);
 
@@ -51,7 +53,9 @@ public class GuiConfig implements ISerializable<GuiConfig> {
     public Color sliderHandleHovered = new Color(0, 240, 165);
     public Color sliderHandlePressed = new Color(0, 225, 150);
 
-    public Color colorEditHueHandle = new Color(70, 70, 70);
+    public Color colorEditHandle = new Color(70, 70, 70);
+    public Color colorEditHandleHovered = new Color(80, 80, 80);
+    public Color colorEditHandlePressed = new Color(90, 90, 90);
 
     public Color edit = new Color(50, 50, 50);
     public Color editHovered = new Color(60, 60, 60);
@@ -89,9 +93,11 @@ public class GuiConfig implements ISerializable<GuiConfig> {
         tag.put("separator", separator.toTag());
 
         tag.put("plus", plus.toTag());
+        tag.put("plusHovered", plusHovered.toTag());
         tag.put("plusPressed", plusPressed.toTag());
 
         tag.put("minus", minus.toTag());
+        tag.put("minusHovered", minusHovered.toTag());
         tag.put("minusPressed", minusPressed.toTag());
 
         tag.put("accent", accent.toTag());
@@ -109,7 +115,9 @@ public class GuiConfig implements ISerializable<GuiConfig> {
         tag.put("sliderHandleHovered", sliderHandleHovered.toTag());
         tag.put("sliderHandlePressed", sliderHandlePressed.toTag());
 
-        tag.put("colorEditHueHandle", colorEditHueHandle.toTag());
+        tag.put("colorEditHandle", colorEditHandle.toTag());
+        tag.put("colorEditHandleHovered", colorEditHandleHovered.toTag());
+        tag.put("colorEditHandlePressed", colorEditHandlePressed.toTag());
 
         tag.put("edit", edit.toTag());
         tag.put("editHovered", editHovered.toTag());
@@ -140,9 +148,11 @@ public class GuiConfig implements ISerializable<GuiConfig> {
         read(tag, "separator", separator);
 
         read(tag, "plus", plus);
+        read(tag, "plusHovered", plusHovered);
         read(tag, "plusPressed", plusPressed);
 
         read(tag, "minus", minus);
+        read(tag, "minusHovered", minusHovered);
         read(tag, "minusPressed", minusPressed);
 
         read(tag, "accent", accent);
@@ -160,7 +170,9 @@ public class GuiConfig implements ISerializable<GuiConfig> {
         read(tag, "sliderHandleHovered", sliderHandleHovered);
         read(tag, "sliderHandlePressed", sliderHandlePressed);
 
-        read(tag, "colorEditHueHandle", colorEditHueHandle);
+        read(tag, "colorEditHandle", colorEditHandle);
+        read(tag, "colorEditHandleHovered", colorEditHandleHovered);
+        read(tag, "colorEditHandlePressed", colorEditHandlePressed);
 
         read(tag, "edit", edit);
         read(tag, "editHovered", editHovered);
@@ -204,7 +216,6 @@ public class GuiConfig implements ISerializable<GuiConfig> {
 
         public void setPos(double x, double y) {
             this.pos.set(x, y);
-            Config.INSTANCE.save();
         }
 
         public boolean isExpanded() {

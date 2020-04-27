@@ -119,7 +119,7 @@ public class ModuleScreen extends WindowScreen implements Listenable {
         }
     });
 
-    private void generateSettingToGrid(WTable table, Setting<?> setting) {
+    public static void generateSettingToGrid(WTable table, Setting<?> setting) {
         WLabel name = table.add(new WLabel(setting.title + ":")).getWidget();
         name.tooltip = setting.description;
 

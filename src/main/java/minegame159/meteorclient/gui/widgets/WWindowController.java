@@ -24,7 +24,7 @@ public class WWindowController extends WWidget {
     @Override
     protected void onCalculateWidgetPositions() {
         double cellX = x;
-        double cellY = y + 10;
+        double cellY = y + 16;
 
         for (Cell<?> cell : cells) {
             GuiConfig.WindowConfig winConfig = GuiConfig.INSTANCE.getWindowConfig(((WWindow) cell.getWidget()).type, false);
@@ -34,7 +34,7 @@ public class WWindowController extends WWidget {
                 cellX = winConfig.getX();
                 cellY = winConfig.getY();
             } else {
-                cellX += 10;
+                cellX += 16;
                 automatic = true;
             }
 
