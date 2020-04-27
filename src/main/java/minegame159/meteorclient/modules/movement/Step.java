@@ -17,12 +17,24 @@ public class Step extends ToggleModule {
             .build()
     );
 
+    private float prevStepHeight;
+
     public Step() {
         super(Category.Movement, "step", "Allows you to step up full blocks.");
+    }
+
+    @Override
+    public void onActivate() {
+        prevStepHeight = mc.player.stepHeight;
     }
 
     @EventHandler
     private Listener<TickEvent> onTick = new Listener<>(event -> {
         mc.player.stepHeight = height.get().floatValue();
     });
+
+    @Override
+    public void onDeactivate() {
+        mc.player.stepHeight = prevStepHeight;
+    }
 }
