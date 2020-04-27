@@ -7,6 +7,7 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.RightClickEvent;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.EnumSetting;
@@ -63,7 +64,8 @@ public class OffhandExtra extends ToggleModule {
 
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
-        if((mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING) && Asimov.get() && !(mc.currentScreen instanceof ContainerScreen<?>)){
+        if(ModuleManager.INSTANCE.get(AutoTotem.class).getLocked()) return;
+        if(Asimov.get() && !(mc.currentScreen instanceof ContainerScreen<?>)){
             Item item = getItem();
             InvUtils.FindItemResult result = InvUtils.findItemWithCount(item);
             if (mc.player.getOffHandStack().isEmpty()) {
@@ -79,19 +81,20 @@ public class OffhandExtra extends ToggleModule {
 
     @EventHandler
     private final Listener<RightClickEvent> onRightClick = new Listener<>(event -> {
-       if((mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING || (mc.player.getHealth() + mc.player.getAbsorptionAmount() > health.get())
+        if(ModuleManager.INSTANCE.get(AutoTotem.class).getLocked()) return;
+        if((mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING || (mc.player.getHealth() + mc.player.getAbsorptionAmount() > health.get())
                && (mc.player.getOffHandStack().getItem() != getItem()) && !(mc.currentScreen instanceof ContainerScreen<?>))){
-           Item item = getItem();
-           InvUtils.FindItemResult result = InvUtils.findItemWithCount(item);
-           if (mc.player.getOffHandStack().isEmpty()) {
-               InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
-               InvUtils.clickSlot(InvUtils.OFFHAND_SLOT, 0, SlotActionType.PICKUP);
-           }else if (mc.player.getOffHandStack().getItem() != item && replace.get()){
-               InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
-               InvUtils.clickSlot(InvUtils.OFFHAND_SLOT, 0, SlotActionType.PICKUP);
-               InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
-           }
-       }
+            Item item = getItem();
+            InvUtils.FindItemResult result = InvUtils.findItemWithCount(item);
+            if (mc.player.getOffHandStack().isEmpty()) {
+                InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
+                InvUtils.clickSlot(InvUtils.OFFHAND_SLOT, 0, SlotActionType.PICKUP);
+            }else if (mc.player.getOffHandStack().getItem() != item && replace.get()){
+                InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
+                InvUtils.clickSlot(InvUtils.OFFHAND_SLOT, 0, SlotActionType.PICKUP);
+                InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
+            }
+        }
     });
 
     private Item getItem(){
