@@ -20,6 +20,7 @@ import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.util.Hand;
 
 import java.util.Iterator;
 
@@ -42,20 +43,46 @@ public class AutoExp extends ToggleModule {
             .build()
     );
 
-    private boolean wasActive = false;
+    private final Setting<Boolean> disableAuras = addSetting(new BoolSetting.Builder()
+            .name("disable-auras")
+            .description("disable all auras")
+            .defaultValue(false)
+            .build()
+    );
+
+    private boolean wasArmourActive = false;
+
+    private boolean wasKillActive = false;
+
+    private boolean wasCrystalActive = false;
 
     @Override
     public void onActivate(){
         if(ModuleManager.INSTANCE.get(AutoArmor.class).isActive()) {
-            wasActive = true;
+            wasArmourActive = true;
             ModuleManager.INSTANCE.get(AutoArmor.class).toggle();
+        }
+        if(disableAuras.get()){
+            if(ModuleManager.INSTANCE.get(KillAura.class).isActive()){
+                wasKillActive = true;
+                ModuleManager.INSTANCE.get(KillAura.class).toggle();
+            }
+            if(ModuleManager.INSTANCE.get(CrystalAura.class).isActive()){
+                wasCrystalActive = true;
+            }
         }
     }
 
     @Override
     public void onDeactivate() {
-        if(wasActive) {
+        if(wasArmourActive) {
             ModuleManager.INSTANCE.get(AutoArmor.class).toggle();
+        }
+        if(wasKillActive){
+            ModuleManager.INSTANCE.get(KillAura.class).toggle();
+        }
+        if(wasCrystalActive){
+            ModuleManager.INSTANCE.get(CrystalAura.class).toggle();
         }
     }
 
@@ -168,6 +195,7 @@ public class AutoExp extends ToggleModule {
             InvUtils.clickSlot(5, 0, SlotActionType.PICKUP);
             InvUtils.clickSlot(searchCraftingSlots(), 0, SlotActionType.PICKUP);
         }
+        mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
     });
 
     private int findBrokenArmour(Item item){
