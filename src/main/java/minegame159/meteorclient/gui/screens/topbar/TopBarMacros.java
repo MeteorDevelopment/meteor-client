@@ -41,7 +41,7 @@ public class TopBarMacros extends TopBarScreen implements Listenable {
             window.row();
 
             for (Macro macro : MacroManager.INSTANCE.getAll()) {
-                table.add(new WLabel(macro.name + " (" + Utils.getKeyName(macro.key)));
+                table.add(new WLabel(macro.name + " (" + Utils.getKeyName(macro.key) + ")"));
 
                 WButton edit = table.add(new WButton("Edit")).getWidget();
                 edit.action = button -> mc.openScreen(new EditMacroScreen(macro));

@@ -87,7 +87,7 @@ public class Nametags extends ToggleModule {
 
         GlStateManager.enableTexture();
 
-        int nameColor = FriendManager.INSTANCE.contains(name) ? DyeColor.CYAN.getSignColor() : -1;
+        int nameColor = FriendManager.INSTANCE.getColor(name).getPacked();
 
         double percHealth = (double) health / maxHealth;
         int healthColor;
