@@ -1,62 +1,59 @@
 package minegame159.meteorclient.gui.widgets;
 
-import minegame159.meteorclient.gui.Alignment;
+import minegame159.meteorclient.gui.GuiConfig;
+import minegame159.meteorclient.gui.GuiRenderer;
+import minegame159.meteorclient.gui.listeners.EnumButtonClickListener;
 import minegame159.meteorclient.utils.Utils;
-import minegame159.meteorclient.utils.Vector2;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.function.Consumer;
+import java.lang.reflect.Method;
 
-public class WEnumButton<T extends Enum<?>> extends WButton {
+public class WEnumButton<T extends Enum<?>> extends WWidget {
+    public EnumButtonClickListener<T> action;
+
     public T value;
-    public Consumer<WEnumButton<T>> action;
+    private String valueStr;
 
     private T[] values;
-    private double width;
+    private double uWidth, vWidth;
     private int valueI;
 
+    private boolean pressed;
+
     public WEnumButton(T value) {
-        super(value.toString());
-        boundingBox.autoSize = false;
-
-        label.boundingBox.alignment.x = Alignment.X.Center;
-
         this.value = value;
+        this.valueStr = value.toString();
+        this.vWidth = Utils.getTextWidth(value.toString());
 
         try {
-            values = (T[]) value.getClass().getMethod("values").invoke(null);
+            Method method = value.getClass().getMethod("values");
+            boolean isAccessible = method.isAccessible();
+            method.setAccessible(true);
+            values = (T[]) method.invoke(null);
+            method.setAccessible(isAccessible);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
         }
 
+        for (T v : values) {
+            uWidth = Math.max(uWidth, Utils.getTextWidth(v.toString()));
+        }
+
+        findValueI();
+    }
+
+    private void findValueI() {
         for (int i = 0; i < values.length; i++) {
             T v = values[i];
 
-            width = Math.max(width, Utils.getTextWidth(v.toString()));
             if (v == value) valueI = i;
         }
     }
 
     @Override
-    public Vector2 calculateCustomSize() {
-        return new Vector2(width, Utils.getTextHeight());
-    }
-
-    @Override
-    public boolean onMousePressed(int button) {
-        if (mouseOver) {
-            if (button == 0) {
-                valueI++;
-                updateValue();
-                return true;
-            } else if (button == 1) {
-                valueI--;
-                updateValue();
-                return true;
-            }
-        }
-
-        return false;
+    protected void onCalculateSize() {
+        width = 3 + uWidth + 3;
+        height = 3 + Utils.getTextHeight() + 3;
     }
 
     private void updateValue() {
@@ -64,19 +61,61 @@ public class WEnumButton<T extends Enum<?>> extends WButton {
         else if (valueI >= values.length) valueI = 0;
 
         value = values[valueI];
-        label.text = value.toString();
+        valueStr = value.toString();
+        vWidth = Utils.getTextWidth(value.toString());
 
-        calculateSize();
-        calculatePosition();
+        if (action != null) action.onEnumButtonClick(this);
 
-        if (action != null) action.accept(this);
+        invalidate();
     }
 
     public void setValue(T value) {
         this.value = value;
-        label.text = value.toString();
+        valueStr = value.toString();
+        vWidth = Utils.getTextWidth(value.toString());
 
-        calculateSize();
-        calculatePosition();
+        findValueI();
+        invalidate();
+    }
+
+    @Override
+    protected boolean onMouseClicked(int button) {
+        if (mouseOver) {
+            pressed = true;
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
+    protected boolean onMouseReleased(int button) {
+        if (mouseOver) {
+            pressed = false;
+
+            if (button == 0) {
+                valueI++;
+                updateValue();
+                callAction();
+            } else if (button == 1) {
+                valueI--;
+                updateValue();
+                callAction();
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    private void callAction() {
+        if (action != null) action.onEnumButtonClick(this);
+    }
+
+    @Override
+    protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
+        renderer.renderBackground(this, mouseOver, pressed);
+        renderer.renderText(valueStr, x + 3 + uWidth / 2 - vWidth / 2, y + 3.5, GuiConfig.INSTANCE.text, false);
     }
 }

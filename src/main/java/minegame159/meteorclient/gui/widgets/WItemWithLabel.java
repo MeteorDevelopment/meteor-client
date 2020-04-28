@@ -8,17 +8,15 @@ import net.minecraft.potion.PotionUtil;
 
 import java.util.List;
 
-public class WItemWithLabel extends WHorizontalList {
+public class WItemWithLabel extends WTable {
     private ItemStack itemStack;
     private WItem item;
     private WLabel label;
 
     public WItemWithLabel(ItemStack itemStack) {
-        super(4);
-
         this.itemStack = itemStack;
-        item = add(new WItem(itemStack));
-        label = add(new WLabel(itemStack.getName().asString() + getStringToAppend()));
+        this.item = add(new WItem(itemStack)).getWidget();
+        this.label = add(new WLabel(itemStack.getName().asString() + getStringToAppend())).getWidget();
     }
 
     private String getStringToAppend() {
@@ -38,10 +36,10 @@ public class WItemWithLabel extends WHorizontalList {
     public void set(ItemStack itemStack) {
         this.itemStack = itemStack;
         item.itemStack = itemStack;
-        label.text = itemStack.getName().asString() + getStringToAppend();
+        label.setText(itemStack.getName().asString() + getStringToAppend());
     }
 
     public String getLabelText() {
-        return label.text;
+        return label.getText();
     }
 }

@@ -119,6 +119,7 @@ public class KillAura extends ToggleModule {
                 .group("Delay")
                 .defaultValue(0)
                 .min(0)
+                .sliderMax(60)
                 .visible(false)
                 .build()
         );
@@ -137,7 +138,7 @@ public class KillAura extends ToggleModule {
         if (entity.getUuid().equals(mc.player.getUuid())) return false;
         if (EntityUtils.isPlayer(entity) && players.get()) {
             if (friends.get()) return true;
-            return !FriendManager.INSTANCE.contains((PlayerEntity) entity);
+            return FriendManager.INSTANCE.attack((PlayerEntity) entity);
         }
         if (EntityUtils.isAnimal(entity) && animals.get()) return true;
         return EntityUtils.isMob(entity) && mobs.get();

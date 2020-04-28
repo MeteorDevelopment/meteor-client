@@ -1,29 +1,45 @@
 package minegame159.meteorclient.gui.screens;
 
-import minegame159.meteorclient.gui.widgets.WGrid;
-import minegame159.meteorclient.gui.widgets.WHorizontalList;
+import minegame159.meteorclient.modules.misc.StashFinder;
 import minegame159.meteorclient.gui.widgets.WHorizontalSeparator;
 import minegame159.meteorclient.gui.widgets.WLabel;
-import minegame159.meteorclient.modules.misc.StashFinder;
 
 public class StashRecorderChunkScreen extends WindowScreen {
     public StashRecorderChunkScreen(StashFinder.Chunk chunk) {
-        super("Chunk at " + chunk.x + ", " + chunk.z);
+        super("Chunk at " + chunk.x + ", " + chunk.z, true);
 
-        WHorizontalList total = add(new WHorizontalList(4));
-        total.add(new WLabel("Total:"));
-        total.add(new WLabel(chunk.getTotal() + ""));
-        add(new WHorizontalSeparator());
+        add(new WLabel("Total:"));
+        add(new WLabel(chunk.getTotal() + ""));
+        row();
 
-        WGrid grid = add(new WGrid(4, 4, 2));
-        grid.addRow(new WLabel("Chests:"), new WLabel(chunk.chests + ""));
-        grid.addRow(new WLabel("Barrels:"), new WLabel(chunk.barrels + ""));
-        grid.addRow(new WLabel("Shulkers:"), new WLabel(chunk.shulkers + ""));
-        grid.addRow(new WLabel("Ender Chests:"), new WLabel(chunk.enderChests + ""));
-        grid.addRow(new WLabel("Furnaces:"), new WLabel(chunk.furnaces + ""));
-        grid.addRow(new WLabel("Dispensers and droppers:"), new WLabel(chunk.dispensersDroppers + ""));
-        grid.addRow(new WLabel("Hoppers:"), new WLabel(chunk.hoppers + ""));
+        add(new WHorizontalSeparator()).fillX().expandX();
+        row();
 
-        layout();
+        add(new WLabel("Chests:"));
+        add(new WLabel(chunk.chests + ""));
+        row();
+
+        add(new WLabel("Barrels:"));
+        add(new WLabel(chunk.barrels + ""));
+        row();
+
+        add(new WLabel("Shulkers:"));
+        add(new WLabel(chunk.shulkers + ""));
+        row();
+
+        add(new WLabel("Ender Chests:"));
+        add(new WLabel(chunk.enderChests + ""));
+        row();
+
+        add(new WLabel("Furnaces:"));
+        add(new WLabel(chunk.furnaces + ""));
+        row();
+
+        add(new WLabel("Dispensers and droppers:"));
+        add(new WLabel(chunk.dispensersDroppers + ""));
+        row();
+
+        add(new WLabel("Hoppers:"));
+        add(new WLabel(chunk.hoppers + ""));
     }
 }

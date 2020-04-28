@@ -2,6 +2,8 @@ package minegame159.meteorclient.modules.render;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
+import minegame159.meteorclient.accountsfriends.Friend;
+import minegame159.meteorclient.accountsfriends.FriendManager;
 import minegame159.meteorclient.events.RenderEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
@@ -16,6 +18,7 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.ChestBlockEntity;
 import net.minecraft.block.entity.ShulkerBoxBlockEntity;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
@@ -116,7 +119,13 @@ public class Tracers extends ToggleModule {
                 .add(mc.cameraEntity.getPos());
 
         for (Entity entity : mc.world.getEntities()) {
-            if (players.get() && EntityUtils.isPlayer(entity) && entity != mc.player) render(entity, playersColor.get(), event);
+            if (players.get() && EntityUtils.isPlayer(entity) && entity != mc.player) {
+                Color color = playersColor.get();
+                Friend friend = FriendManager.INSTANCE.get(((PlayerEntity) entity).getGameProfile().getName());
+                if (friend != null) color = friend.color;
+
+                if (friend == null || friend.showInTracers) render(entity, color, event);
+            }
             else if (animals.get() && EntityUtils.isAnimal(entity)) render(entity, animalsColor.get(), event);
             else if (mobs.get() && EntityUtils.isMob(entity)) render(entity, mobsColor.get(), event);
         }

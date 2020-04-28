@@ -14,7 +14,6 @@ import minegame159.meteorclient.modules.misc.*;
 import minegame159.meteorclient.modules.movement.*;
 import minegame159.meteorclient.modules.player.*;
 import minegame159.meteorclient.modules.render.*;
-import minegame159.meteorclient.modules.setting.*;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.utils.Savable;
 import minegame159.meteorclient.utils.Utils;
@@ -27,7 +26,7 @@ import java.io.File;
 import java.util.*;
 
 public class ModuleManager extends Savable<ModuleManager> implements Listenable {
-    public static final Category[] CATEGORIES = { Category.Combat, Category.Player, Category.Movement, Category.Render, Category.Misc, Category.Setting };
+    public static final Category[] CATEGORIES = { Category.Combat, Category.Player, Category.Movement, Category.Render, Category.Misc };
     public static ModuleManager INSTANCE;
 
     private Map<Class<? extends Module>, Module> modules = new HashMap<>();
@@ -44,7 +43,6 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         initMovement();
         initRender();
         initMisc();
-        initSetting();
 
         for (List<Module> modules : groups.values()) {
             modules.sort(Comparator.comparing(o -> o.title));
@@ -124,7 +122,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
     }
 
     @EventHandler
-    private Listener<KeyEvent> onKey = new Listener<>(event -> {
+    public Listener<KeyEvent> onKey = new Listener<>(event -> {
         if (!event.push) return;
 
         // Check if binding module
@@ -196,8 +194,11 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new AutoLog());
         addModule(new KillAura());
         addModule(new CrystalAura());
+        addModule(new OffhandExtra());
+        addModule(new SmartSurround());
         addModule(new Surround());
         addModule(new Trigger());
+        addModule(new AutoExp());
     }
 
     private void initPlayer() {
@@ -274,13 +275,6 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new Annoy());
         addModule(new Spam());
         addModule(new UnfocusedCPU());
-    }
-
-    private void initSetting() {
-        addModule(new ConfigM());
-        addModule(new GUI());
-        addModule(new Friends());
-        addModule(new Macros());
-        addModule(new Baritone());
+        addModule(new ItemByteSize());
     }
 }

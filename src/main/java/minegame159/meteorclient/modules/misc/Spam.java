@@ -22,6 +22,7 @@ public class Spam extends ToggleModule {
             .description("How much ticks to wait between messages. 20 ticks = 1 second.")
             .defaultValue(0)
             .min(0)
+            .sliderMax(60)
             .build()
     );
 
