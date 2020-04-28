@@ -4,9 +4,12 @@ import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listenable;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.MeteorClient;
+import minegame159.meteorclient.accountsfriends.Friend;
 import minegame159.meteorclient.accountsfriends.FriendManager;
 import minegame159.meteorclient.events.FriendListChangedEvent;
+import minegame159.meteorclient.gui.GuiRenderer;
 import minegame159.meteorclient.gui.TopBarType;
+import minegame159.meteorclient.gui.screens.EditFriendScreen;
 import minegame159.meteorclient.gui.widgets.*;
 
 public class TopBarFriends extends TopBarScreen implements Listenable {
@@ -33,8 +36,10 @@ public class TopBarFriends extends TopBarScreen implements Listenable {
 
     private void initWidgets() {
         // Friends
-        for (String friend : FriendManager.INSTANCE.getAll()) {
-            window.add(new WLabel(friend));
+        for (Friend friend : FriendManager.INSTANCE.getAll()) {
+            window.add(new WLabel(friend.name));
+
+            window.add(new WButton(GuiRenderer.TEX_EDIT)).getWidget().action = button -> mc.openScreen(new EditFriendScreen(friend));
 
             WMinus remove = window.add(new WMinus()).getWidget();
             remove.action = minus -> FriendManager.INSTANCE.remove(friend);
@@ -48,7 +53,7 @@ public class TopBarFriends extends TopBarScreen implements Listenable {
         username.setFocused(true);
 
         WPlus add = addList.add(new WPlus()).getWidget();
-        add.action = plus -> FriendManager.INSTANCE.add(username.text);
+        add.action = plus -> FriendManager.INSTANCE.add(new Friend(username.text.trim()));
     }
 
     @EventHandler
@@ -60,6 +65,7 @@ public class TopBarFriends extends TopBarScreen implements Listenable {
     @Override
     public void onClose() {
         MeteorClient.EVENT_BUS.unsubscribe(this);
+        FriendManager.INSTANCE.save();
         super.onClose();
     }
 }
