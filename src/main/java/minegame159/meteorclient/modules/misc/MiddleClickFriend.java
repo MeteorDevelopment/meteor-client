@@ -2,6 +2,7 @@ package minegame159.meteorclient.modules.misc;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
+import minegame159.meteorclient.accountsfriends.Friend;
 import minegame159.meteorclient.accountsfriends.FriendManager;
 import minegame159.meteorclient.events.MiddleMouseButtonEvent;
 import minegame159.meteorclient.modules.Category;
@@ -15,6 +16,6 @@ public class MiddleClickFriend extends ToggleModule {
 
     @EventHandler
     private Listener<MiddleMouseButtonEvent> onMiddleMouseButton = new Listener<>(event -> {
-        if (mc.targetedEntity instanceof PlayerEntity) FriendManager.INSTANCE.addOrRemove(((PlayerEntity) mc.targetedEntity));
+        if (mc.targetedEntity instanceof PlayerEntity) FriendManager.INSTANCE.addOrRemove(new Friend((PlayerEntity) mc.targetedEntity));
     });
 }
