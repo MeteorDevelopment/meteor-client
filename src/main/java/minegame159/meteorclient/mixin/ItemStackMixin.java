@@ -17,7 +17,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.List;
 
@@ -28,7 +27,7 @@ public abstract class ItemStackMixin {
     @Shadow private int count;
 
     @Inject(method = "getTooltip", at = @At("TAIL"), locals = LocalCapture.CAPTURE_FAILSOFT)
-    private void onGetTooltip(@Nullable PlayerEntity player, TooltipContext context, CallbackInfoReturnable<List<Text>> info, List<Text> list) {
+    private void onGetTooltip(PlayerEntity player, TooltipContext context, CallbackInfoReturnable<List<Text>> info, List<Text> list) {
         if (player != null && ModuleManager.INSTANCE.isActive(ItemByteSize.class)) {
             try {
                 toTag(new CompoundTag()).write(ByteCountDataOutput.INSTANCE);
