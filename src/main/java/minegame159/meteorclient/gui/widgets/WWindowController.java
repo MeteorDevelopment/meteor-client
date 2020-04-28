@@ -42,7 +42,7 @@ public class WWindowController extends WWidget {
             cell.height = ((WWindow) cell.getWidget()).height;
 
             if (automatic) {
-                if (cellX + cell.width > MinecraftClient.getInstance().window.getScaledWidth()) {
+                if (cellX + cell.width > MinecraftClient.getInstance().getWindow().getScaledWidth()) {
                     cellX = x;
                     cellY += 10 + cell.height + 10;
                 }

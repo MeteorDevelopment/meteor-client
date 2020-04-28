@@ -1,6 +1,7 @@
 package minegame159.meteorclient.gui;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.gui.widgets.Cell;
 import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.utils.Color;
@@ -117,23 +118,23 @@ public class GuiRenderer {
     }
 
     private void endBuffers() {
-        GlStateManager.enableTexture();
+        RenderSystem.enableTexture();
         MinecraftClient.getInstance().getTextureManager().bindTexture(TEXTURE);
-        GlStateManager.enableBlend();
-        GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-        GlStateManager.disableLighting();
+        RenderSystem.enableBlend();
+        RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA);
+        RenderSystem.disableLighting();
         GL11.glShadeModel(GL11.GL_SMOOTH);
         quadTesselator.draw();
 
-        GlStateManager.disableTexture();
+        RenderSystem.disableTexture();
         lineTesselator.draw();
     }
 
     public void end() {
-        GlStateManager.enableBlend();
-        GlStateManager.disableCull();
+        RenderSystem.enableBlend();
+        RenderSystem.disableCull();
 
-        GlStateManager.pushMatrix();
+        RenderSystem.pushMatrix();
         GL11.glLineWidth(1);
 
         preScissorTest = false;
@@ -155,7 +156,7 @@ public class GuiRenderer {
         postOperations.clear();
 
         // Render text
-        GlStateManager.enableTexture();
+        RenderSystem.enableTexture();
         for (textOperationI = 0; textOperationI < textOperations.size(); textOperationI++) {
             TextOperation textOperation = textOperations.get(textOperationI);
 
@@ -171,10 +172,10 @@ public class GuiRenderer {
             tooltip = null;
         }
 
-        GlStateManager.popMatrix();
+        RenderSystem.popMatrix();
 
-        GlStateManager.enableCull();
-        GlStateManager.disableBlend();
+        RenderSystem.enableCull();
+        RenderSystem.disableBlend();
     }
 
     public void renderBackground(WWidget widget, boolean hovered, boolean pressed) {
@@ -218,9 +219,9 @@ public class GuiRenderer {
 
     public void startTextScissor(WWidget widget, double padTop, double padRight, double padBottom, double padLeft) {
         TextScissorOperation o = textScissorOperationPool.get();
-        double scaleFactor = MinecraftClient.getInstance().window.getScaleFactor();
+        double scaleFactor = MinecraftClient.getInstance().getWindow().getScaleFactor();
         o.x = (widget.x + padLeft) * scaleFactor;
-        o.y = (MinecraftClient.getInstance().window.getScaledHeight() - widget.y - widget.height + padTop) * scaleFactor;
+        o.y = (MinecraftClient.getInstance().getWindow().getScaledHeight() - widget.y - widget.height + padTop) * scaleFactor;
         o.width = (widget.width - padLeft - padRight) * scaleFactor;
         o.height = (widget.height - padTop - padBottom) * scaleFactor;
         o.start = true;
@@ -237,9 +238,9 @@ public class GuiRenderer {
         ScissorOperation o1 = scissorOperationPool.get();
         ScissorOperation o2 = scissorOperationPool.get();
 
-        double scaleFactor = MinecraftClient.getInstance().window.getScaleFactor();
+        double scaleFactor = MinecraftClient.getInstance().getWindow().getScaleFactor();
         o1.x = o2.x = (widget.x + padLeft) * scaleFactor;
-        o1.y = o2.y = (MinecraftClient.getInstance().window.getScaledHeight() - widget.y - widget.height + padTop) * scaleFactor;
+        o1.y = o2.y = (MinecraftClient.getInstance().getWindow().getScaledHeight() - widget.y - widget.height + padTop) * scaleFactor;
         o1.width = o2.width = (widget.width - padLeft - padRight) * scaleFactor;
         o1.height = o2.height = (widget.height - padTop - padBottom) * scaleFactor;
         o1.start = o2.start = true;
@@ -297,10 +298,10 @@ public class GuiRenderer {
             TextureRegion tex = this.tex;
             if (tex == null) tex = TEX_QUAD;
             
-            quadBuf.vertex(x, y, 0).texture(tex.x, tex.y).color(color1.r, color1.g, color1.b, color1.a).next();
-            quadBuf.vertex(x + width, y, 0).texture(tex.x + tex.width, tex.y).color(color2.r, color2.g, color2.b, color2.a).next();
-            quadBuf.vertex(x + width, y + height, 0).texture(tex.x + tex.width, tex.y + tex.height).color(color3.r, color3.g, color3.b, color3.a).next();
-            quadBuf.vertex(x, y + height, 0).texture(tex.x, tex.y + tex.height).color(color4.r, color4.g, color4.b, color4.a).next();
+            quadBuf.vertex(x, y, 0).texture((float) tex.x, (float) tex.y).color(color1.r, color1.g, color1.b, color1.a).next();
+            quadBuf.vertex(x + width, y, 0).texture((float) (tex.x + tex.width), (float) tex.y).color(color2.r, color2.g, color2.b, color2.a).next();
+            quadBuf.vertex(x + width, y + height, 0).texture((float) (tex.x + tex.width), (float) (tex.y + tex.height)).color(color3.r, color3.g, color3.b, color3.a).next();
+            quadBuf.vertex(x, y + height, 0).texture((float) tex.x, (float) (tex.y + tex.height)).color(color4.r, color4.g, color4.b, color4.a).next();
         }
 
         @Override
@@ -325,16 +326,16 @@ public class GuiRenderer {
 
             double x = ((this.x - oX) * cos) - ((this.y - oY) * sin) + oX;
             double y = ((this.y - oY) * cos) + ((this.x - oX) * sin) + oY;
-            quadBuf.vertex(x, y, 0).texture(TEX_QUAD.x, TEX_QUAD.y).color(color.r, color.g, color.b, color.a).next();
+            quadBuf.vertex(x, y, 0).texture((float) TEX_QUAD.x, (float) TEX_QUAD.y).color(color.r, color.g, color.b, color.a).next();
 
             x = ((this.x + size - oX) * cos) - ((this.y - oY) * sin) + oX;
             y = ((this.y - oY) * cos) + ((this.x + size - oX) * sin) + oY;
-            quadBuf.vertex(x, y, 0).texture(TEX_QUAD.x + TEX_QUAD.width, TEX_QUAD.y).color(color.r, color.g, color.b, color.a).next();
+            quadBuf.vertex(x, y, 0).texture((float) (TEX_QUAD.x + TEX_QUAD.width), (float) TEX_QUAD.y).color(color.r, color.g, color.b, color.a).next();
 
             x = ((this.x + size / 2 - oX) * cos) - ((this.y + size / 2 - oY) * sin) + oX;
             y = ((this.y + size / 2 - oY) * cos) + ((this.x + size / 2 - oX) * sin) + oY;
-            quadBuf.vertex(x, y, 0).texture(TEX_QUAD.x + TEX_QUAD.width, TEX_QUAD.y + TEX_QUAD.height).color(color.r, color.g, color.b, color.a).next();
-            quadBuf.vertex(x, y, 0).texture(TEX_QUAD.x, TEX_QUAD.y + TEX_QUAD.height).color(color.r, color.g, color.b, color.a).next();
+            quadBuf.vertex(x, y, 0).texture((float) (TEX_QUAD.x + TEX_QUAD.width), (float) (TEX_QUAD.y + TEX_QUAD.height)).color(color.r, color.g, color.b, color.a).next();
+            quadBuf.vertex(x, y, 0).texture((float) TEX_QUAD.x, (float) (TEX_QUAD.y + TEX_QUAD.height)).color(color.r, color.g, color.b, color.a).next();
         }
 
         @Override
@@ -399,9 +400,9 @@ public class GuiRenderer {
 
         @Override
         void render() {
-            GlStateManager.enableTexture();
-            DiffuseLighting.enableForItems();
-            GlStateManager.enableDepthTest();
+            RenderSystem.enableTexture();
+            DiffuseLighting.enable();
+            RenderSystem.enableDepthTest();
             MinecraftClient.getInstance().getItemRenderer().renderGuiItem(itemStack, (int) x, (int) y);
         }
 

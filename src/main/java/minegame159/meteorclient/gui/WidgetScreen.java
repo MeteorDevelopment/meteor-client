@@ -111,8 +111,8 @@ public class WidgetScreen extends Screen {
     private class WRoot extends WWidget {
         @Override
         protected void onCalculateSize() {
-            width = mc.window.getScaledWidth();
-            height = mc.window.getScaledHeight();
+            width = mc.getWindow().getScaledWidth();
+            height = mc.getWindow().getScaledHeight();
         }
     }
 }
