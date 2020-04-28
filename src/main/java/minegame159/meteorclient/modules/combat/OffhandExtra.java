@@ -14,6 +14,7 @@ import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.utils.InvUtils;
+import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.ContainerScreen;
 import net.minecraft.container.SlotActionType;
@@ -68,6 +69,11 @@ public class OffhandExtra extends ToggleModule {
         if(Asimov.get() && !(mc.currentScreen instanceof ContainerScreen<?>)){
             Item item = getItem();
             InvUtils.FindItemResult result = InvUtils.findItemWithCount(item);
+            if(result.slot == -1) {
+                Utils.sendMessage("#redNone of the chosen item found. Disabling!");
+                this.toggle();
+                return;
+            }
             if (mc.player.getOffHandStack().isEmpty()) {
                 InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
                 InvUtils.clickSlot(InvUtils.OFFHAND_SLOT, 0, SlotActionType.PICKUP);
@@ -86,6 +92,11 @@ public class OffhandExtra extends ToggleModule {
                && (mc.player.getOffHandStack().getItem() != getItem()) && !(mc.currentScreen instanceof ContainerScreen<?>))){
             Item item = getItem();
             InvUtils.FindItemResult result = InvUtils.findItemWithCount(item);
+            if(result.slot == -1) {
+                Utils.sendMessage("#redNone of the chosen item found. Disabling!");
+                this.toggle();
+                return;
+            }
             if (mc.player.getOffHandStack().isEmpty()) {
                 InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
                 InvUtils.clickSlot(InvUtils.OFFHAND_SLOT, 0, SlotActionType.PICKUP);
