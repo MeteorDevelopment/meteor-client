@@ -10,6 +10,7 @@ import minegame159.meteorclient.gui.screens.EditMacroScreen;
 import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.macros.Macro;
 import minegame159.meteorclient.macros.MacroManager;
+import minegame159.meteorclient.utils.Utils;
 
 public class TopBarMacros extends TopBarScreen implements Listenable {
     private WWindow window;
@@ -40,7 +41,7 @@ public class TopBarMacros extends TopBarScreen implements Listenable {
             window.row();
 
             for (Macro macro : MacroManager.INSTANCE.getAll()) {
-                table.add(new WLabel(macro.name));
+                table.add(new WLabel(macro.name + " (" + Utils.getKeyName(macro.key)));
 
                 WButton edit = table.add(new WButton("Edit")).getWidget();
                 edit.action = button -> mc.openScreen(new EditMacroScreen(macro));
