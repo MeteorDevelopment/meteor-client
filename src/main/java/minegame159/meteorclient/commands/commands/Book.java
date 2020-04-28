@@ -132,7 +132,7 @@ public class Book extends Command {
                     end = joinedPages.length();
                     brejk = true;
                 }
-                pages.add(new StringTag(joinedPages.substring(start, end)));
+                pages.add(StringTag.of(joinedPages.substring(start, end)));
                 start = end + 1;
                 page++;
                 if (brejk) break;

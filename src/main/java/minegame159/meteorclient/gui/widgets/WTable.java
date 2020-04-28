@@ -235,7 +235,7 @@ public class WTable extends WWidget {
 
     private void moveWidgets(double deltaX, double deltaY) {
         for (Cell<?> cell : getCells()) move(cell.getWidget(), deltaX, deltaY);
-        mouseMoved(MinecraftClient.getInstance().mouse.getX() / MinecraftClient.getInstance().window.getScaleFactor(), MinecraftClient.getInstance().mouse.getY() / MinecraftClient.getInstance().window.getScaleFactor());
+        mouseMoved(MinecraftClient.getInstance().mouse.getX() / MinecraftClient.getInstance().getWindow().getScaleFactor(), MinecraftClient.getInstance().mouse.getY() / MinecraftClient.getInstance().getWindow().getScaleFactor());
     }
 
     private void calculateInfo() {

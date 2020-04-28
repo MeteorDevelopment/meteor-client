@@ -53,7 +53,7 @@ public abstract class WWidget {
 
     public void move(double deltaX, double deltaY, boolean callMouseMoved) {
         move(this, deltaX, deltaY);
-        if (callMouseMoved) mouseMoved(MinecraftClient.getInstance().mouse.getX() / MinecraftClient.getInstance().window.getScaleFactor(), MinecraftClient.getInstance().mouse.getY() / MinecraftClient.getInstance().window.getScaleFactor());
+        if (callMouseMoved) mouseMoved(MinecraftClient.getInstance().mouse.getX() / MinecraftClient.getInstance().getWindow().getScaleFactor(), MinecraftClient.getInstance().mouse.getY() / MinecraftClient.getInstance().getWindow().getScaleFactor());
     }
     protected void move(WWidget widget, double deltaX, double deltaY) {
         widget.x += deltaX;
@@ -73,7 +73,7 @@ public abstract class WWidget {
         // Calculate widget positions from bottom to top
         calculateWidgetPositions();
 
-        mouseMoved(MinecraftClient.getInstance().mouse.getX() / MinecraftClient.getInstance().window.getScaleFactor(), MinecraftClient.getInstance().mouse.getY() / MinecraftClient.getInstance().window.getScaleFactor());
+        mouseMoved(MinecraftClient.getInstance().mouse.getX() / MinecraftClient.getInstance().getWindow().getScaleFactor(), MinecraftClient.getInstance().mouse.getY() / MinecraftClient.getInstance().getWindow().getScaleFactor());
         setNeedsLayout(this, false);
     }
     private void setNeedsLayout(WWidget widget, boolean needsLayout) {
@@ -117,7 +117,7 @@ public abstract class WWidget {
         if (mouseOver) mouseOverTimer += delta / 10;
         onRender(renderer, mouseX, mouseY, delta);
         for (Cell<?> cell : cells) {
-            if (cell.x > MinecraftClient.getInstance().window.getScaledWidth() || cell.y > MinecraftClient.getInstance().window.getScaledHeight()) break;
+            if (cell.x > MinecraftClient.getInstance().getWindow().getScaledWidth() || cell.y > MinecraftClient.getInstance().getWindow().getScaledHeight()) break;
             onRenderWidget(cell.getWidget(), renderer, mouseX, mouseY, delta);
         }
         if (mouseOver && mouseOverTimer >= 1 && tooltip != null) renderer.renderTooltip(tooltip, mouseX + 8, mouseY + 8, GuiConfig.INSTANCE.text);

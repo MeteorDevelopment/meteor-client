@@ -135,7 +135,7 @@ public class WWindow extends WTable {
 
     @Override
     protected void onCalculateSize() {
-        maxHeight = MinecraftClient.getInstance().window.getScaledHeight() - 32;
+        maxHeight = MinecraftClient.getInstance().getWindow().getScaledHeight() - 32;
         animationProgress = expanded ? 1 : 0;
 
         super.onCalculateSize();
