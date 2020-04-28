@@ -91,8 +91,7 @@ public class AutoExp extends ToggleModule {
 
         //for boots
         slot = findBrokenArmour(Items.DIAMOND_BOOTS);
-        boolean empty = false;
-        empty = boots.isEmpty();
+        boolean empty = boots.isEmpty();
         if(!boots.isDamaged() && (slot != -1)){
             InvUtils.clickSlot(8, 0, SlotActionType.PICKUP);
             InvUtils.clickSlot(InvUtils.invIndexToSlotId(slot), 0, SlotActionType.PICKUP);
