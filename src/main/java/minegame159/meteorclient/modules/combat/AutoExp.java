@@ -101,18 +101,18 @@ public class AutoExp extends ToggleModule {
             return;
         }
         int slot = findExpInHotbar();
-        if(slot == -1){
+        if (slot == -1) {
             Utils.sendMessage("#redNo Exp in hotbar. Disabling!");
             this.toggle();
-        }else if(mc.player.inventory.getInvStack(slot).getCount() < replenishCount.get()){
-            for(int i = 9; i < 36; i++){
-                if(mc.player.inventory.getInvStack(i).getItem() == Items.EXPERIENCE_BOTTLE){
+        } else if (mc.player.inventory.getInvStack(slot).getCount() < replenishCount.get() && replenish.get()) {
+            for (int i = 9; i < 36; i++) {
+                if (mc.player.inventory.getInvStack(i).getItem() == Items.EXPERIENCE_BOTTLE) {
                     InvUtils.clickSlot(InvUtils.invIndexToSlotId(i), 0, SlotActionType.PICKUP);
                     InvUtils.clickSlot(InvUtils.invIndexToSlotId(slot), 0, SlotActionType.PICKUP);
                     InvUtils.clickSlot(InvUtils.invIndexToSlotId(i), 0, SlotActionType.PICKUP);
                 }
             }
-        }else{
+        } else {
             mc.player.inventory.selectedSlot = slot;
         }
 
