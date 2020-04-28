@@ -40,4 +40,10 @@ public class TopBarConfig extends TopBarScreen {
 
         createSettingsWindow();
     }
+
+    @Override
+    public void onClose() {
+        Config.INSTANCE.save();
+        super.onClose();
+    }
 }
