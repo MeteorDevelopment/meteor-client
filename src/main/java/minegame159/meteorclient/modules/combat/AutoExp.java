@@ -38,7 +38,7 @@ public class AutoExp extends ToggleModule {
             .description("The number of items before the stack gets replenished")
             .defaultValue(32)
             .min(1)
-            .max(63)
+            .sliderMax(63)
             .build()
     );
 
@@ -57,10 +57,6 @@ public class AutoExp extends ToggleModule {
         if(wasActive) {
             ModuleManager.INSTANCE.get(AutoArmor.class).toggle();
         }
-        InvUtils.clickSlot(1, 0, SlotActionType.QUICK_MOVE);
-        InvUtils.clickSlot(2, 0, SlotActionType.QUICK_MOVE);
-        InvUtils.clickSlot(3, 0, SlotActionType.QUICK_MOVE);
-        InvUtils.clickSlot(4, 0, SlotActionType.QUICK_MOVE);
     }
 
     @EventHandler
@@ -80,14 +76,17 @@ public class AutoExp extends ToggleModule {
         int slot = findExpInHotbar();
         if(slot == -1){
             Utils.sendMessage("#redNo Exp in hotbar. Disabling!");
+            this.toggle();
         }else if(mc.player.inventory.getInvStack(slot).getCount() < replenishCount.get()){
             for(int i = 9; i < 36; i++){
                 if(mc.player.inventory.getInvStack(i).getItem() == Items.EXPERIENCE_BOTTLE){
-                    InvUtils.clickSlot(i, 0, SlotActionType.PICKUP_ALL);
-                    InvUtils.clickSlot(slot, 0, SlotActionType.PICKUP_ALL);
-                    InvUtils.clickSlot(i, 0, SlotActionType.PICKUP_ALL);
+                    InvUtils.clickSlot(InvUtils.invIndexToSlotId(i), 0, SlotActionType.PICKUP);
+                    InvUtils.clickSlot(InvUtils.invIndexToSlotId(slot), 0, SlotActionType.PICKUP);
+                    InvUtils.clickSlot(InvUtils.invIndexToSlotId(i), 0, SlotActionType.PICKUP);
                 }
             }
+        }else{
+            mc.player.inventory.selectedSlot = slot;
         }
 
         //for boots
@@ -96,13 +95,13 @@ public class AutoExp extends ToggleModule {
         empty = boots.isEmpty();
         if(!boots.isDamaged() && (slot != -1)){
             InvUtils.clickSlot(8, 0, SlotActionType.PICKUP);
-            InvUtils.clickSlot(slot, 0, SlotActionType.PICKUP);
+            InvUtils.clickSlot(InvUtils.invIndexToSlotId(slot), 0, SlotActionType.PICKUP);
             if(!empty) {
                 InvUtils.clickSlot(8, 0, SlotActionType.PICKUP);
             }
         }else if(!boots.isDamaged() && (slot == -1) && (mc.player.inventory.getEmptySlot() != -1)){
             InvUtils.clickSlot(8, 0, SlotActionType.PICKUP);
-            InvUtils.clickSlot(mc.player.inventory.getEmptySlot(), 0, SlotActionType.PICKUP);
+            InvUtils.clickSlot(InvUtils.invIndexToSlotId(mc.player.inventory.getEmptySlot()), 0, SlotActionType.PICKUP);
             if(!empty) {
                 InvUtils.clickSlot(8, 0, SlotActionType.PICKUP);
             }
@@ -116,13 +115,13 @@ public class AutoExp extends ToggleModule {
         empty = leggings.isEmpty();
         if(!leggings.isDamaged() && (slot != -1)){
             InvUtils.clickSlot(7, 0, SlotActionType.PICKUP);
-            InvUtils.clickSlot(slot, 0, SlotActionType.PICKUP);
+            InvUtils.clickSlot(InvUtils.invIndexToSlotId(slot), 0, SlotActionType.PICKUP);
             if(!empty) {
                 InvUtils.clickSlot(7, 0, SlotActionType.PICKUP);
             }
         }else if(!leggings.isDamaged() && (slot == -1) && (mc.player.inventory.getEmptySlot() != -1)){
             InvUtils.clickSlot(7, 0, SlotActionType.PICKUP);
-            InvUtils.clickSlot(mc.player.inventory.getEmptySlot(), 0, SlotActionType.PICKUP);
+            InvUtils.clickSlot(InvUtils.invIndexToSlotId(mc.player.inventory.getEmptySlot()), 0, SlotActionType.PICKUP);
             if(!empty) {
                 InvUtils.clickSlot(7, 0, SlotActionType.PICKUP);
             }
@@ -136,13 +135,13 @@ public class AutoExp extends ToggleModule {
         empty = chestplate.isEmpty();
         if(!chestplate.isDamaged() && (slot != -1)){
             InvUtils.clickSlot(6, 0, SlotActionType.PICKUP);
-            InvUtils.clickSlot(slot, 0, SlotActionType.PICKUP);
+            InvUtils.clickSlot(InvUtils.invIndexToSlotId(slot), 0, SlotActionType.PICKUP);
             if(!empty) {
                 InvUtils.clickSlot(6, 0, SlotActionType.PICKUP);
             }
         }else if(!chestplate.isDamaged() && (slot == -1) && (mc.player.inventory.getEmptySlot() != -1)){
             InvUtils.clickSlot(6, 0, SlotActionType.PICKUP);
-            InvUtils.clickSlot(mc.player.inventory.getEmptySlot(), 0, SlotActionType.PICKUP);
+            InvUtils.clickSlot(InvUtils.invIndexToSlotId(mc.player.inventory.getEmptySlot()), 0, SlotActionType.PICKUP);
             if(!empty) {
                 InvUtils.clickSlot(6, 0, SlotActionType.PICKUP);
             }
@@ -156,13 +155,13 @@ public class AutoExp extends ToggleModule {
         empty = helmet.isEmpty();
         if(!helmet.isDamaged() && (slot != -1)){
             InvUtils.clickSlot(5, 0, SlotActionType.PICKUP);
-            InvUtils.clickSlot(slot, 0, SlotActionType.PICKUP);
+            InvUtils.clickSlot(InvUtils.invIndexToSlotId(slot), 0, SlotActionType.PICKUP);
             if(!empty) {
                 InvUtils.clickSlot(5, 0, SlotActionType.PICKUP);
             }
         }else if(!helmet.isDamaged() && (slot == -1) && (mc.player.inventory.getEmptySlot() != -1)){
             InvUtils.clickSlot(5, 0, SlotActionType.PICKUP);
-            InvUtils.clickSlot(mc.player.inventory.getEmptySlot(), 0, SlotActionType.PICKUP);
+            InvUtils.clickSlot(InvUtils.invIndexToSlotId(mc.player.inventory.getEmptySlot()), 0, SlotActionType.PICKUP);
             if(!empty) {
                 InvUtils.clickSlot(5, 0, SlotActionType.PICKUP);
             }
