@@ -13,7 +13,7 @@ public class PotionSetting extends EnumSetting<MyPotion> {
         super(name, description, group, defaultValue, onChanged, onModuleActivated, visible);
 
         widget = new WItemWithLabel(get().potion);
-        widget.add(new WButton("Select")).action = () -> MinecraftClient.getInstance().openScreen(new PotionSettingScreen(this));
+        widget.add(new WButton("Select")).getWidget().action = button -> MinecraftClient.getInstance().openScreen(new PotionSettingScreen(this));
     }
 
     @Override

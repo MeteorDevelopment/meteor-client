@@ -1,12 +1,13 @@
 package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.gui.GuiThings;
 import minegame159.meteorclient.events.CharTypedEvent;
 import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.events.KeyEvent;
-import minegame159.meteorclient.gui.WidgetScreen;
+import minegame159.meteorclient.gui.GuiThings;
 import minegame159.meteorclient.mixininterface.IKeyBinding;
+import minegame159.meteorclient.gui.WidgetScreen;
+import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.Keyboard;
 import net.minecraft.client.MinecraftClient;
@@ -30,10 +31,11 @@ public abstract class KeyboardMixin {
             if (shulkerPeek.matchesKey(key, scancode) && (i == GLFW.GLFW_PRESS || i == GLFW.GLFW_REPEAT)) ((IKeyBinding) shulkerPeek).setPressed(true);
             else ((IKeyBinding) shulkerPeek).setPressed(false);
 
-            if (client.currentScreen instanceof WidgetScreen && i == GLFW.GLFW_REPEAT) ((WidgetScreen) client.currentScreen).keyRepeated(key);
+            if (client.currentScreen instanceof WidgetScreen && i == GLFW.GLFW_REPEAT) ((WidgetScreen) client.currentScreen).keyRepeated(key, j);
 
             if (!Utils.canUpdate() && i == GLFW.GLFW_PRESS) {
                 MeteorClient.INSTANCE.onKeyInMainMenu(key);
+                if (client.currentScreen instanceof WidgetScreen && GuiThings.postKeyEvents()) ModuleManager.INSTANCE.onKey.invoke(EventStore.keyEvent(key, true));
                 return;
             }
 

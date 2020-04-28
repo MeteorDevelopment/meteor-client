@@ -1,38 +1,35 @@
 package minegame159.meteorclient.gui;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import minegame159.meteorclient.gui.widgets.WDebugRenderer;
+import minegame159.meteorclient.gui.widgets.Cell;
 import minegame159.meteorclient.gui.widgets.WWidget;
-import minegame159.meteorclient.utils.RenderUtils;
 import minegame159.meteorclient.utils.Utils;
-import minegame159.meteorclient.utils.Vector2;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.LiteralText;
 import org.lwjgl.glfw.GLFW;
-import org.lwjgl.opengl.GL11;
 
 public class WidgetScreen extends Screen {
-    public Screen parent;
-    private WRoot root = new WRoot();
-    private boolean renderDebug = false;
-    private int prePostKeyEvents;
+    private static final GuiRenderer GUI_RENDERER = new GuiRenderer();
 
-    protected MinecraftClient mc;
+    public final String title;
+    protected final MinecraftClient mc;
+
+    public Screen parent;
+    public final WWidget root;
+    private int prePostKeyEvents;
+    private boolean renderDebug = false;
 
     public WidgetScreen(String title) {
         super(new LiteralText(title));
-        mc = MinecraftClient.getInstance();
 
-        parent = mc.currentScreen;
-        prePostKeyEvents = GuiThings.postKeyEvents;
-
-        WWidget trueRoot = new WWidget();
-        trueRoot.layout = new TrueRootLayout();
-        trueRoot.add(root);
+        this.title = title;
+        this.mc = MinecraftClient.getInstance();
+        this.parent = mc.currentScreen;
+        this.root = new WRoot();
+        this.prePostKeyEvents = GuiThings.postKeyEvents;
     }
 
-    public <T extends WWidget> T add(T widget) {
+    public <T extends WWidget> Cell<T> add(T widget) {
         return root.add(widget);
     }
 
@@ -42,12 +39,12 @@ public class WidgetScreen extends Screen {
 
     @Override
     public void mouseMoved(double mouseX, double mouseY) {
-        root.mouseMove(mouseX, mouseY);
+        root.mouseMoved(mouseX, mouseY);
     }
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        return root.mousePressed(button);
+        return root.mouseClicked(button);
     }
 
     @Override
@@ -66,21 +63,17 @@ public class WidgetScreen extends Screen {
             renderDebug = !renderDebug;
             return true;
         }
+
         return root.keyPressed(keyCode, modifiers) || super.keyPressed(keyCode, scanCode, modifiers);
     }
 
-    public void keyRepeated(int key) {
-        root.keyRepeated(key);
+    public void keyRepeated(int key, int mods) {
+        root.keyRepeated(key, mods);
     }
 
     @Override
     public boolean charTyped(char chr, int keyCode) {
         return root.charTyped(chr, keyCode);
-    }
-
-    public void layout() {
-        root.layout();
-        root.mouseMove(MinecraftClient.getInstance().mouse.getX() / MinecraftClient.getInstance().getWindow().getScaleFactor(), MinecraftClient.getInstance().mouse.getY() / MinecraftClient.getInstance().getWindow().getScaleFactor());
     }
 
     @Override
@@ -92,33 +85,22 @@ public class WidgetScreen extends Screen {
     public void render(int mouseX, int mouseY, float delta) {
         if (!Utils.canUpdate()) renderBackground();
 
-        RenderSystem.disableTexture();
-        RenderSystem.enableBlend();
-        RenderSystem.disableCull();
-
-        RenderSystem.pushMatrix();
-        GL11.glLineWidth(1);
-        RenderUtils.beginLines();
-        RenderUtils.beginQuads();
-        root.render(delta);
-        RenderUtils.endQuads();
-        RenderUtils.endLines();
-        RenderSystem.enableTexture();
-        root.renderPost(delta, mouseX, mouseY);
-        root.renderTooltip(mouseX, mouseY);
-        RenderSystem.popMatrix();
-
-        if (renderDebug) WDebugRenderer.render(root, true);
-
-        RenderSystem.disableBlend();
-        RenderSystem.enableCull();
+        GUI_RENDERER.begin();
+        root.render(GUI_RENDERER, mouseX, mouseY, delta);
+        if (renderDebug) GUI_RENDERER.renderDebug(root);
+        GUI_RENDERER.end();
     }
 
     @Override
     public void resize(MinecraftClient client, int width, int height) {
         super.resize(client, width, height);
-        layout();
-        root.windowResized(width, height);
+        root.invalidate();
+    }
+
+    @Override
+    public void onClose() {
+        GuiThings.postKeyEvents = prePostKeyEvents;
+        mc.openScreen(parent);
     }
 
     @Override
@@ -126,26 +108,11 @@ public class WidgetScreen extends Screen {
         return false;
     }
 
-    @Override
-    public void onClose() {
-        GuiThings.postKeyEvents = prePostKeyEvents;
-        minecraft.openScreen(parent);
-    }
-
-    private static class WRoot extends WWidget {
+    private class WRoot extends WWidget {
         @Override
-        public Vector2 calculateCustomSize() {
-            return new Vector2(MinecraftClient.getInstance().getWindow().getScaledWidth(), MinecraftClient.getInstance().getWindow().getScaledHeight());
-        }
-    }
-
-    private static class TrueRootLayout extends WWidget.DefaultLayout {
-        @Override
-        public void reset(WWidget widget) {
-            box.x = widget.boundingBox.getInnerX();
-            box.y = widget.boundingBox.getInnerY();
-            box.width = MinecraftClient.getInstance().getWindow().getScaledWidth();
-            box.height = MinecraftClient.getInstance().getWindow().getScaledHeight();
+        protected void onCalculateSize() {
+            width = mc.window.getScaledWidth();
+            height = mc.window.getScaledHeight();
         }
     }
 }

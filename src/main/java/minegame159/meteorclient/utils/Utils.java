@@ -25,6 +25,8 @@ import org.apache.commons.lang3.SystemUtils;
 import org.lwjgl.glfw.GLFW;
 
 import java.io.File;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -36,6 +38,15 @@ public class Utils {
     private static Vec3d eyesPos = new Vec3d(0, 0, 0);
     private static Vec3d vec1 = new Vec3d(0, 0, 0);
     private static Vec3d vec2 = new Vec3d(0, 0, 0);
+    private static DecimalFormat df;
+
+    static {
+        df = new DecimalFormat("0");
+        df.setMaximumFractionDigits(340);
+        DecimalFormatSymbols dfs = new DecimalFormatSymbols();
+        dfs.setDecimalSeparator('.');
+        df.setDecimalFormatSymbols(dfs);
+    }
 
     public static double distance(double x1, double y1, double z1, double x2, double y2, double z2) {
         double dX = x2 - x1;
@@ -187,6 +198,8 @@ public class Utils {
     }
 
     public static void sendMessage(String msg, Object... args) {
+        if (mc.player == null) return;
+
         msg = String.format(msg, args);
         msg = msg.replaceAll("#yellow", Formatting.YELLOW.toString());
         msg = msg.replaceAll("#white", Formatting.WHITE.toString());
@@ -233,7 +246,7 @@ public class Utils {
 
     public static String doubleToString(double number) {
         if (number % 1 == 0) return Integer.toString((int) number);
-        return Double.toString(number);
+        return df.format(number);
     }
 
     public static int clamp(int value, int min, int max) {

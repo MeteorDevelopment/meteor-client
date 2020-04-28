@@ -14,7 +14,6 @@ public abstract class Savable<T> implements ISerializable<T> {
 
     public void save(File file) {
         try {
-            System.out.println("Meteor-Client: Saving to " + file);
             file.getParentFile().mkdirs();
             NbtIo.write(toTag(), file);
         } catch (IOException e) {
@@ -28,7 +27,6 @@ public abstract class Savable<T> implements ISerializable<T> {
     public void load(File file) {
         try {
             if (file.exists()) {
-                System.out.println("Meteor-Client: Loading from " + file);
                 fromTag(NbtIo.read(file));
             }
         } catch (IOException e) {

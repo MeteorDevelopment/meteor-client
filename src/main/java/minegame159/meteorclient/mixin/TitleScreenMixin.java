@@ -11,13 +11,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(TitleScreen.class)
 public class TitleScreenMixin extends Screen {
-    private int text1Color = Color.fromRGBA(255, 255, 255, 255);
-    private int text2Color = Color.fromRGBA(175, 175, 175, 255);
+    private int text1Color;
+    private int text2Color;
 
-    private String text1 = "Meteor Client by ";
+    private String text1;
     private int text1Length;
 
-    private String text2 = "MineGame159";
+    private String text2;
     private int text2Length;
 
     public TitleScreenMixin(Text title) {
@@ -26,6 +26,12 @@ public class TitleScreenMixin extends Screen {
 
     @Inject(method = "init", at = @At("TAIL"))
     private void onInit(CallbackInfo info) {
+        text1Color = Color.fromRGBA(255, 255, 255, 255);
+        text2Color = Color.fromRGBA(175, 175, 175, 255);
+
+        text1 = "Meteor Client by ";
+        text2 = "MineGame159";
+
         text1Length = font.getStringWidth(text1);
         text2Length = font.getStringWidth(text2);
     }

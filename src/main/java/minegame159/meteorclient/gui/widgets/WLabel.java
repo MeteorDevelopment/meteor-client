@@ -1,32 +1,44 @@
 package minegame159.meteorclient.gui.widgets;
 
-import minegame159.meteorclient.modules.setting.GUI;
+import minegame159.meteorclient.gui.GuiConfig;
+import minegame159.meteorclient.gui.GuiRenderer;
 import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.Utils;
-import minegame159.meteorclient.utils.Vector2;
 
 public class WLabel extends WWidget {
-    public String text;
+    public Color color;
+
+    private String text;
     public boolean shadow;
-    public Color color = GUI.text;
 
     public WLabel(String text, boolean shadow) {
         this.text = text;
         this.shadow = shadow;
+
+        color = GuiConfig.INSTANCE.text;
     }
 
     public WLabel(String text) {
         this(text, false);
     }
 
-    @Override
-    public Vector2 calculateCustomSize() {
-        return new Vector2(Utils.getTextWidth(text), Utils.getTextHeight());
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
+        invalidate();
     }
 
     @Override
-    public void onRenderPost(double delta) {
-        if (shadow) Utils.drawTextWithShadow(text, (int) (boundingBox.getInnerX() + 0.5), (int) (boundingBox.getInnerY() + 0.5), color.getPacked());
-        else Utils.drawText(text, (int) (boundingBox.getInnerX() + 0.5), (int) (boundingBox.getInnerY() + 0.5), color.getPacked());
+    protected void onCalculateSize() {
+        width = Utils.getTextWidth(text);
+        height = Utils.getTextHeight() + 2;
+    }
+
+    @Override
+    protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
+        renderer.renderText(text, x, y + 1, color, shadow);
     }
 }

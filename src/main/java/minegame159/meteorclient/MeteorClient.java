@@ -10,7 +10,7 @@ import minegame159.meteorclient.accountsfriends.FriendManager;
 import minegame159.meteorclient.commands.CommandManager;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.font.CFontRenderer;
-import minegame159.meteorclient.gui.clickgui.ClickGUI;
+import minegame159.meteorclient.gui.screens.topbar.TopBarModules;
 import minegame159.meteorclient.macros.MacroManager;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.utils.EntityUtils;
@@ -56,6 +56,7 @@ public class MeteorClient implements ClientModInitializer, Listenable {
         EntityUtils.mc = mc;
 
         loadFont();
+        Config.INSTANCE = new Config();
 
         ModuleManager.INSTANCE = new ModuleManager();
         CommandManager.init();
@@ -83,10 +84,14 @@ public class MeteorClient implements ClientModInitializer, Listenable {
         AccountManager.INSTANCE.save();
     }
 
+    private void openClickGui() {
+        mc.openScreen(new TopBarModules());
+    }
+
     @EventHandler
     private Listener<TickEvent> onTick = new Listener<>(event -> {
         if (openClickGui.isPressed() && mc.currentScreen == null) {
-            mc.openScreen(new ClickGUI());
+            openClickGui();
         }
     });
 
@@ -150,9 +155,7 @@ public class MeteorClient implements ClientModInitializer, Listenable {
 
     public void onKeyInMainMenu(int key) {
         if (key == openClickGui.getBoundKey().getKeyCode()) {
-            ClickGUI clickGUI = new ClickGUI();
-            clickGUI.parent = mc.currentScreen;
-            mc.openScreen(clickGUI);
+            openClickGui();
         }
     }
 }

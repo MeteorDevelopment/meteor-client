@@ -1,52 +1,51 @@
 package minegame159.meteorclient.gui.widgets;
 
 import minegame159.meteorclient.gui.GuiThings;
-import minegame159.meteorclient.modules.setting.GUI;
-import minegame159.meteorclient.utils.RenderUtils;
+import minegame159.meteorclient.gui.GuiConfig;
+import minegame159.meteorclient.gui.GuiRenderer;
+import minegame159.meteorclient.gui.listeners.TextBoxChangeListener;
 import minegame159.meteorclient.utils.Utils;
-import minegame159.meteorclient.utils.Vector2;
 import net.minecraft.client.MinecraftClient;
 import org.lwjgl.glfw.GLFW;
-import org.lwjgl.opengl.GL11;
-
-import java.util.function.Consumer;
 
 public class WTextBox extends WWidget {
     public interface Filter {
         public boolean accept(WTextBox textBox, char c);
     }
 
-    public String text;
+    public TextBoxChangeListener action;
     public Filter filter;
-    public Consumer<WTextBox> action;
 
-    private double width;
+    public String text;
+
+    private double uWidth;
     private boolean focused;
+
+    private int cursorTimer;
     private boolean cursorVisible;
-    private int blinkTimer = 0;
 
-    public WTextBox(String text, double width) {
-        boundingBox.setMargin(3);
-
+    public WTextBox(String text, double uWidth) {
         this.text = text != null ? text : "";
-        this.width = width;
+        this.uWidth = uWidth;
     }
 
     @Override
-    public Vector2 calculateCustomSize() {
-        return new Vector2(width, Utils.getTextHeight());
+    protected void onCalculateSize() {
+        width = 3 + uWidth + 3;
+        height = 3 + Utils.getTextHeight() + 3;
     }
 
     @Override
-    public boolean onMousePressed(int button) {
+    protected boolean onMouseClicked(int button) {
         if (!focused && mouseOver) GuiThings.setPostKeyEvents(true);
         else if (focused && !mouseOver) GuiThings.setPostKeyEvents(false);
 
         focused = mouseOver;
 
         if (focused && button == 1) {
+            String preText = text;
             text = "";
-            callAction();
+            if (!preText.equals(text)) callAction();
             return true;
         }
 
@@ -54,15 +53,16 @@ public class WTextBox extends WWidget {
     }
 
     @Override
-    public boolean onKeyPressed(int key, int modifiers) {
+    protected boolean onKeyPressed(int key, int mods) {
         if (focused && key == GLFW.GLFW_KEY_BACKSPACE && text.length() > 0) {
             text = text.substring(0, text.length() - 1);
             callAction();
             return true;
         }
 
-        if (key == GLFW.GLFW_KEY_V && modifiers == GLFW.GLFW_MOD_CONTROL && focused) {
+        if (key == GLFW.GLFW_KEY_V && mods == GLFW.GLFW_MOD_CONTROL && focused) {
             text += MinecraftClient.getInstance().keyboard.getClipboard();
+            callAction();
             return true;
         }
 
@@ -70,7 +70,7 @@ public class WTextBox extends WWidget {
     }
 
     @Override
-    public boolean onKeyRepeated(int key) {
+    protected boolean onKeyRepeated(int key, int mods) {
         if (focused && key == GLFW.GLFW_KEY_BACKSPACE && text.length() > 0) {
             text = text.substring(0, text.length() - 1);
             callAction();
@@ -81,7 +81,7 @@ public class WTextBox extends WWidget {
     }
 
     @Override
-    public boolean onCharTyped(char c, int key) {
+    protected boolean onCharTyped(char c, int key) {
         if (focused) {
             if (filter == null) {
                 text += c;
@@ -97,7 +97,7 @@ public class WTextBox extends WWidget {
     }
 
     protected void callAction() {
-        if (action != null) action.accept(this);
+        if (action != null) action.onTextBoxChange(this);
     }
 
     public boolean isFocused() {
@@ -111,42 +111,32 @@ public class WTextBox extends WWidget {
     }
 
     @Override
-    public void onTick() {
-        blinkTimer++;
-
-        if (blinkTimer >= 10) {
-            blinkTimer = 0;
+    protected void onTick() {
+        if (cursorTimer >= 10) {
             cursorVisible = !cursorVisible;
+            cursorTimer = 0;
+        } else {
+            cursorTimer++;
         }
     }
 
     @Override
-    public void onRender(double delta) {
-        renderBackground(GUI.backgroundTextBox, GUI.outline);
+    protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
+        renderer.renderBackground(this, false, false);
 
-        if (focused && cursorVisible) {
-            double textWidth = Utils.getTextWidth(text);
+        double textWidth = Utils.getTextWidth(text);
 
-            double overflowWidth = textWidth - width;
-            if (overflowWidth < 0) overflowWidth = 0;
-
-            RenderUtils.quad(boundingBox.getInnerX() + textWidth - overflowWidth, boundingBox.getInnerY(), 1, Utils.getTextHeight(), GUI.text);
-        }
-    }
-
-    @Override
-    public void onRenderPost(double delta) {
-        double overflowWidth = Utils.getTextWidth(text) - width;
+        double overflowWidth = textWidth - width + 3 + 3;
         if (overflowWidth < 0) overflowWidth = 0;
 
-        if (overflowWidth > 0) {
-            GL11.glEnable(GL11.GL_SCISSOR_TEST);
-            double scaleFactor = MinecraftClient.getInstance().getWindow().getScaleFactor();
-            GL11.glScissor((int) (boundingBox.getInnerX() * scaleFactor), (int) ((MinecraftClient.getInstance().getWindow().getScaledHeight() - boundingBox.getInnerY() - boundingBox.innerHeight) * scaleFactor), (int) (boundingBox.innerWidth * scaleFactor), (int) (boundingBox.innerHeight * scaleFactor));
+        if (text.length() > 0) {
+            if (overflowWidth > 0) renderer.startTextScissor(this, 0, 3, 0, 3);
+            renderer.renderText(text, x + 3 - overflowWidth, y + 3.5, GuiConfig.INSTANCE.text, false);
+            if (overflowWidth > 0) renderer.endTextScissor();
         }
-        Utils.drawText(text, (float) (boundingBox.getInnerX() - overflowWidth), (float) boundingBox.getInnerY() + 1, GUI.textC);
-        if (overflowWidth > 0) {
-            GL11.glDisable(GL11.GL_SCISSOR_TEST);
+
+        if (focused && cursorVisible) {
+            renderer.renderQuad(x + 3 + textWidth - overflowWidth, y + 3, 1, Utils.getTextHeight(), GuiConfig.INSTANCE.text);
         }
     }
 }

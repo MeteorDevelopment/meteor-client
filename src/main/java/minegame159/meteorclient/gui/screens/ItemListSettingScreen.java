@@ -1,6 +1,5 @@
 package minegame159.meteorclient.gui.screens;
 
-import minegame159.meteorclient.gui.Alignment;
 import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.settings.Setting;
 import net.minecraft.item.Item;
@@ -15,13 +14,12 @@ public class ItemListSettingScreen extends WindowScreen {
     private WTextBox filter;
 
     public ItemListSettingScreen(Setting<List<Item>> setting) {
-        super("Select items");
+        super("Select items", true);
 
         this.setting = setting;
 
         // Filter
-        filter = new WTextBox("", 200);
-        filter.boundingBox.fullWidth = true;
+        filter = new WTextBox("", 0);
         filter.setFocused(true);
         filter.action = textBox -> {
             clear();
@@ -32,13 +30,11 @@ public class ItemListSettingScreen extends WindowScreen {
     }
 
     private void initWidgets() {
-        WHorizontalList hList = add(new WHorizontalList(4, Alignment.X.Center, Alignment.Y.Top));
+        add(filter).fillX().expandX();
+        row();
 
         // All items
-        WVerticalList list = hList.add(new WVerticalList(4));
-        list.add(filter);
-
-        WGrid grid1 = list.add(new WGrid(4, 4, 2));
+        WTable table1 = add(new WTable()).top().getWidget();
         Registry.ITEM.forEach(item -> {
             if (item == Items.AIR || setting.get().contains(item)) return;
 
@@ -46,9 +42,10 @@ public class ItemListSettingScreen extends WindowScreen {
             if (!filter.text.isEmpty()) {
                 if (!StringUtils.containsIgnoreCase(wItem.getLabelText(), filter.text)) return;
             }
+            table1.add(wItem);
 
-            WPlus plus = new WPlus();
-            plus.action = () -> {
+            WPlus plus = table1.add(new WPlus()).getWidget();
+            plus.action = plus1 -> {
                 if (!setting.get().contains(item)) {
                     setting.get().add(item);
                     setting.changed();
@@ -57,16 +54,18 @@ public class ItemListSettingScreen extends WindowScreen {
                 }
             };
 
-            grid1.addRow(wItem, plus);
+            table1.row();
         });
 
-        // Selected blocks
-        WGrid grid2 = hList.add(new WGrid(4, 4, 2));
-        for (Item item : setting.get()) {
-            WItemWithLabel wItem = new WItemWithLabel(item.getStackForRender());
+        if (table1.getCells().size() > 0) add(new WVerticalSeparator()).expandY();
 
-            WMinus minus = new WMinus();
-            minus.action = () -> {
+        // Selected blocks
+        WTable table2 = add(new WTable()).top().getWidget();
+        for (Item item : setting.get()) {
+            table2.add(new WItemWithLabel(item.getStackForRender()));
+
+            WMinus minus = table2.add(new WMinus()).getWidget();
+            minus.action = minus1 -> {
                 if (setting.get().remove(item)) {
                     setting.changed();
                     clear();
@@ -74,9 +73,7 @@ public class ItemListSettingScreen extends WindowScreen {
                 }
             };
 
-            grid2.addRow(wItem, minus);
+            table2.row();
         }
-
-        layout();
     }
 }

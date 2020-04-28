@@ -10,10 +10,10 @@ import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.ChunkDataEvent;
-import minegame159.meteorclient.gui.screens.StashRecorderChunkScreen;
-import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.gui.screens.StashRecorderChunkScreen;
+import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.utils.Utils;
@@ -99,53 +99,49 @@ public class StashFinder extends ToggleModule {
         // Sort
         chunks.sort(Comparator.comparingInt(value -> -value.getTotal()));
 
-        WVerticalList list = new WVerticalList(4);
+        WTable list = new WTable();
 
-        // Reset
-        WHorizontalList topBar = list.add(new WHorizontalList(4));
-        WButton reset = topBar.add(new WButton("Reset"));
+        // Clear
+        WButton clear = list.add(new WButton("Clear")).getWidget();
+        list.row();
 
-        WGrid grid = list.add(new WGrid(8, 4, 5));
+        WTable table = new WTable();
+        if (chunks.size() > 0) list.add(table);
 
-        reset.action = () -> {
+        clear.action = button -> {
             chunks.clear();
-            grid.clear();
-            list.layout();
+            table.clear();
         };
 
         // Chunks
-        fillGrid(grid);
+        fillTable(table);
 
         return list;
     }
 
-    private void fillGrid(WGrid grid) {
+    private void fillTable(WTable table) {
         for (Chunk chunk : chunks) {
-            WButton open = new WButton("Open");
-            open.action = () -> mc.openScreen(new StashRecorderChunkScreen(chunk));
+            table.add(new WLabel("Pos: " + chunk.x + ", " + chunk.z));
+            table.add(new WLabel("Total: " + chunk.getTotal()));
 
-            WButton gotoBtn = new WButton("Goto");
-            gotoBtn.action = () -> BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalXZ(chunk.x, chunk.z));
+            WButton open = table.add(new WButton("Open")).getWidget();
+            open.action = button -> mc.openScreen(new StashRecorderChunkScreen(chunk));
 
-            WMinus remove = new WMinus();
-            remove.action = () -> {
+            WButton gotoBtn = table.add(new WButton("Goto")).getWidget();
+            gotoBtn.action = button -> BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalXZ(chunk.x, chunk.z));
+
+            WMinus remove = table.add(new WMinus()).getWidget();
+            remove.action = minus -> {
                 if (chunks.remove(chunk)) {
-                    grid.clear();
-                    fillGrid(grid);
-                    grid.layout();
+                    table.clear();
+                    fillTable(table);
 
                     saveJson();
                     saveCsv();
                 }
             };
 
-            grid.addRow(
-                    new WLabel("Pos: " + chunk.x + ", " + chunk.z),
-                    new WLabel("Total: " + chunk.getTotal()),
-                    open,
-                    gotoBtn,
-                    remove
-            );
+            table.row();
         }
     }
 

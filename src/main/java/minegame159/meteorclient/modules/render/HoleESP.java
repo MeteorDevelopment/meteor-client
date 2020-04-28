@@ -27,6 +27,7 @@ public class HoleESP extends ToggleModule {
             .group("General")
             .defaultValue(10)
             .min(0)
+            .sliderMax(32)
             .build()
     );
 
@@ -36,6 +37,7 @@ public class HoleESP extends ToggleModule {
             .group("General")
             .defaultValue(10)
             .min(0)
+            .sliderMax(32)
             .build()
     );
 
