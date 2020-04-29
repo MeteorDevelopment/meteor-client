@@ -9,8 +9,8 @@ public class DoubleSetting extends Setting<Double> {
     private final Double min, max;
     private final Double sliderMin, sliderMax;
 
-    private DoubleSetting(String name, String description, String group, Double defaultValue, Consumer<Double> onChanged, Consumer<Setting<Double>> onModuleActivated, Double min, Double max, Double sliderMin, Double sliderMax, boolean visible) {
-        super(name, description, group, defaultValue, onChanged, onModuleActivated, visible);
+    private DoubleSetting(String name, String description, Double defaultValue, Consumer<Double> onChanged, Consumer<Setting<Double>> onModuleActivated, Double min, Double max, Double sliderMin, Double sliderMax) {
+        super(name, description, defaultValue, onChanged, onModuleActivated);
         this.min = min;
         this.max = max;
         this.sliderMin = sliderMin;
@@ -72,13 +72,11 @@ public class DoubleSetting extends Setting<Double> {
 
     public static class Builder {
         private String name = "undefined", description = "";
-        private String group;
         private Double defaultValue;
         private Consumer<Double> onChanged;
         private Consumer<Setting<Double>> onModuleActivated;
         private Double min, max;
         private Double sliderMin, sliderMax;
-        private boolean visible = true;
 
         public Builder name(String name) {
             this.name = name;
@@ -87,11 +85,6 @@ public class DoubleSetting extends Setting<Double> {
 
         public Builder description(String description) {
             this.description = description;
-            return this;
-        }
-
-        public Builder group(String group) {
-            this.group = group;
             return this;
         }
 
@@ -130,13 +123,8 @@ public class DoubleSetting extends Setting<Double> {
             return this;
         }
 
-        public Builder visible(boolean visible) {
-            this.visible = visible;
-            return this;
-        }
-
         public DoubleSetting build() {
-            return new DoubleSetting(name, description, group, defaultValue, onChanged, onModuleActivated, min, max, sliderMin, sliderMax, visible);
+            return new DoubleSetting(name, description, defaultValue, onChanged, onModuleActivated, min, max, sliderMin, sliderMax);
         }
     }
 }

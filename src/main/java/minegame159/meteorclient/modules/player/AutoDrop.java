@@ -8,6 +8,7 @@ import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.ItemListSetting;
 import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.InvUtils;
 import net.minecraft.container.SlotActionType;
 import net.minecraft.item.Item;
@@ -16,14 +17,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AutoDrop extends ToggleModule {
-    private Setting<List<Item>> items = addSetting(new ItemListSetting.Builder()
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    
+    private Setting<List<Item>> items = sgGeneral.add(new ItemListSetting.Builder()
             .name("items")
             .description("Items to drop.")
             .defaultValue(new ArrayList<>(0))
             .build()
     );
 
-    private Setting<Boolean> excludeHotbar = addSetting(new BoolSetting.Builder()
+    private Setting<Boolean> excludeHotbar = sgGeneral.add(new BoolSetting.Builder()
             .name("exclude-hotbar")
             .description("Doesn't drop items from hotbar.")
             .defaultValue(false)

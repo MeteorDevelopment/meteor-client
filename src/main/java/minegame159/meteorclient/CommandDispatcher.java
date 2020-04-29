@@ -30,7 +30,7 @@ public class CommandDispatcher {
             module.doAction();
         } else {
             // Set or get module setting
-            Setting<?> setting = module.getSetting(args[0]);
+            Setting<?> setting = module.settings.get(args[0]);
             if (setting == null) {
                 Utils.sendMessage("#redModule #blue'%s' #reddoesn't have setting with name #blue'%s'#red.", module.title, args[0]);
                 return;

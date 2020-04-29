@@ -8,10 +8,13 @@ import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.Utils;
 
 public class AutoRightClick extends ToggleModule {
-    private Setting<Integer> delay = addSetting(new IntSetting.Builder()
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    
+    private Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
             .name("delay")
             .description("Delay between clicks in ticks.")
             .defaultValue(2)
@@ -20,7 +23,7 @@ public class AutoRightClick extends ToggleModule {
             .build()
     );
 
-    private Setting<Boolean> onlyWhenHoldingUse = addSetting(new BoolSetting.Builder()
+    private Setting<Boolean> onlyWhenHoldingUse = sgGeneral.add(new BoolSetting.Builder()
             .name("only-when-holding-use")
             .description("Only when holding right click.")
             .defaultValue(false)

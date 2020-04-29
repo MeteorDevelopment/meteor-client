@@ -16,6 +16,7 @@ import minegame159.meteorclient.gui.screens.StashRecorderChunkScreen;
 import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.block.entity.*;
 import net.minecraft.client.toast.Toast;
@@ -32,7 +33,9 @@ import java.util.Objects;
 public class StashFinder extends ToggleModule {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-    private Setting<Integer> minimumStorageCount = addSetting(new IntSetting.Builder()
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+
+    private Setting<Integer> minimumStorageCount = sgGeneral.add(new IntSetting.Builder()
             .name("minimum-storage-cont")
             .description("Minimum storage block count required to record that chunk.")
             .defaultValue(4)
