@@ -7,10 +7,13 @@ import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.SettingGroup;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 
 public class Criticals extends ToggleModule {
-    private Setting<Boolean> onlyOnGround = addSetting(new BoolSetting.Builder()
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    
+    private Setting<Boolean> onlyOnGround = sgGeneral.add(new BoolSetting.Builder()
             .name("only-on-ground")
             .description("Do criticals only on ground.")
             .defaultValue(false)

@@ -7,6 +7,7 @@ import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.SettingGroup;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -14,7 +15,9 @@ import net.minecraft.item.NameTagItem;
 import net.minecraft.util.Hand;
 
 public class AutoNametag extends ToggleModule {
-    private Setting<Double> distance = addSetting(new DoubleSetting.Builder()
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    
+    private Setting<Double> distance = sgGeneral.add(new DoubleSetting.Builder()
             .name("distance")
             .description("Maximum distance.")
             .min(0.0)

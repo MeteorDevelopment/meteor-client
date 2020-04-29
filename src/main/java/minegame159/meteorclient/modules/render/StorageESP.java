@@ -8,6 +8,7 @@ import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.ColorSetting;
 import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.RenderUtils;
 import net.minecraft.block.ChestBlock;
@@ -22,46 +23,44 @@ public class StorageESP extends ToggleModule {
         Both
     }
 
-    private Setting<Mode> mode = addSetting(new EnumSetting.Builder<Mode>()
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+
+    private Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("mode")
             .description("Rendering mode.")
-            .group("General")
             .defaultValue(Mode.Both)
             .build()
     );
 
-    private Setting<Color> chest = addSetting(new ColorSetting.Builder()
+    private Setting<Color> chest = sgGeneral.add(new ColorSetting.Builder()
             .name("chest")
             .description("Color of chests.")
-            .group("Classic")
             .defaultValue(new Color(255, 160, 0, 255))
             .build()
     );
 
-    private Setting<Color> barrel = addSetting(new ColorSetting.Builder()
+    private Setting<Color> barrel = sgGeneral.add(new ColorSetting.Builder()
             .name("barrel")
             .description("Color of barrels.")
-            .group("Classic")
             .defaultValue(new Color(255, 160, 0, 255))
             .build()
     );
 
-    private Setting<Color> shulker = addSetting(new ColorSetting.Builder()
+    private Setting<Color> shulker = sgGeneral.add(new ColorSetting.Builder()
             .name("chest")
             .description("Color of shulkers.")
-            .group("Classic")
             .defaultValue(new Color(255, 160, 0, 255))
             .build()
     );
 
-    private Setting<Color> enderChest = addSetting(new ColorSetting.Builder()
+    private Setting<Color> enderChest = sgGeneral.add(new ColorSetting.Builder()
             .name("ender-chest")
             .description("Color of ender chests.")
             .defaultValue(new Color(120, 0, 255, 255))
             .build()
     );
 
-    private Setting<Color> other = addSetting(new ColorSetting.Builder()
+    private Setting<Color> other = sgGeneral.add(new ColorSetting.Builder()
             .name("other")
             .description("Color of furnaces, dispenders, droppers and hoppers.")
             .defaultValue(new Color(140, 140, 140, 255))

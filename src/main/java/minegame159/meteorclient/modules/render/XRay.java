@@ -6,13 +6,16 @@ import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BlockListSetting;
 import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.SettingGroup;
 import net.minecraft.block.Block;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class XRay extends ToggleModule {
-    private Setting<List<Block>> blocks = addSetting(new BlockListSetting.Builder()
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    
+    private Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
             .name("blocks")
             .description("Blocks.")
             .defaultValue(new ArrayList<>(0))

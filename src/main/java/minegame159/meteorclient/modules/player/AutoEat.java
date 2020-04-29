@@ -9,26 +9,29 @@ import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.SettingGroup;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.util.Hand;
 
 public class AutoEat extends ToggleModule {
-    private Setting<Boolean> egaps = addSetting(new BoolSetting.Builder()
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    
+    private Setting<Boolean> egaps = sgGeneral.add(new BoolSetting.Builder()
             .name("egaps")
             .description("Eat enchanted golden apples.")
             .defaultValue(false)
             .build()
     );
 
-    private Setting<Boolean> gaps = addSetting(new BoolSetting.Builder()
+    private Setting<Boolean> gaps = sgGeneral.add(new BoolSetting.Builder()
             .name("gaps")
             .description("Eat golden apples.")
             .defaultValue(false)
             .build()
     );
 
-    private Setting<Boolean> chorus = addSetting(new BoolSetting.Builder()
+    private Setting<Boolean> chorus = sgGeneral.add(new BoolSetting.Builder()
             .name("chorus")
             .description("Eat chorus fruit.")
             .defaultValue(false)

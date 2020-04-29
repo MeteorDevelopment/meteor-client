@@ -2,11 +2,7 @@ package minegame159.meteorclient.gui.screens;
 
 import minegame159.meteorclient.accountsfriends.Friend;
 import minegame159.meteorclient.gui.widgets.WButton;
-import minegame159.meteorclient.gui.widgets.WHorizontalSeparator;
-import minegame159.meteorclient.gui.widgets.WTable;
-import minegame159.meteorclient.settings.BoolSetting;
-import minegame159.meteorclient.settings.ColorSetting;
-import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.*;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -23,7 +19,10 @@ public class EditFriendScreen extends WindowScreen {
         super(friend.name, true);
         this.friend = friend;
 
-        addSetting(new BoolSetting.Builder()
+        Settings s = new Settings();
+        SettingGroup sg = s.getDefaultGroup();
+        
+        sg.add(new BoolSetting.Builder()
                 .name("trusted")
                 .description("Do you trust this person?")
                 .defaultValue(friend.trusted)
@@ -31,7 +30,7 @@ public class EditFriendScreen extends WindowScreen {
                 .build()
         );
 
-        addSetting(new ColorSetting.Builder()
+        sg.add(new ColorSetting.Builder()
                 .name("color")
                 .description("Color.")
                 .defaultValue(friend.color)
@@ -39,7 +38,7 @@ public class EditFriendScreen extends WindowScreen {
                 .build()
         );
 
-        addSetting(new BoolSetting.Builder()
+        sg.add(new BoolSetting.Builder()
                 .name("attack")
                 .description("Should modules attack this person?")
                 .defaultValue(friend.attack)
@@ -47,7 +46,7 @@ public class EditFriendScreen extends WindowScreen {
                 .build()
         );
 
-        addSetting(new BoolSetting.Builder()
+        sg.add(new BoolSetting.Builder()
                 .name("show-in-tracers")
                 .description("Show in tracers.")
                 .defaultValue(friend.showInTracers)
@@ -55,34 +54,9 @@ public class EditFriendScreen extends WindowScreen {
                 .build()
         );
 
-        createSettingsWindow();
+        add(s.createTable()).fillX().expandX();
         row();
+        
         add(new WButton("Back")).fillX().expandX().getWidget().action = button1 -> onClose();
-    }
-
-    private  <T> Setting<T> addSetting(Setting<T> setting) {
-        settings.add(setting);
-        List<Setting<?>> group = settingGroups.computeIfAbsent(setting.group == null ? "Other" : setting.group, s -> new ArrayList<>(1));
-        group.add(setting);
-        return setting;
-    }
-
-    private void createSettingsWindow() {
-        // Settings
-        if (settingGroups.size() > 0) {
-            WTable table = add(new WTable()).fillX().expandX().getWidget();
-            for (String group : settingGroups.keySet()) {
-                if (settingGroups.size() > 1) {
-                    table.add(new WHorizontalSeparator(group)).fillX().expandX();
-                    table.row();
-                }
-
-                for (Setting<?> setting : settingGroups.get(group)) {
-                    if (setting.isVisible()) {
-                        ModuleScreen.generateSettingToGrid(table, setting);
-                    }
-                }
-            }
-        }
     }
 }

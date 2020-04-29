@@ -5,10 +5,7 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.RenderEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
-import minegame159.meteorclient.settings.BoolSetting;
-import minegame159.meteorclient.settings.ColorSetting;
-import minegame159.meteorclient.settings.EnumSetting;
-import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.EntityUtils;
 import minegame159.meteorclient.utils.RenderUtils;
@@ -22,111 +19,106 @@ public class ESP extends ToggleModule {
         Both
     }
 
-    private Setting<Mode> mode = addSetting(new EnumSetting.Builder<Mode>()
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgPlayers = settings.createGroup("Players");
+    private final SettingGroup sgAnimals = settings.createGroup("Animals");
+    private final SettingGroup sgMobs = settings.createGroup("Mobs");
+    private final SettingGroup sgItems = settings.createGroup("Items");
+    private final SettingGroup sgCrystals = settings.createGroup("Crystals");
+    private final SettingGroup sgVehicles = settings.createGroup("Vehicles");
+
+    private Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("mode")
             .description("Rendering mode.")
-            .group("General")
             .defaultValue(Mode.Both)
             .build()
     );
 
-    private Setting<Boolean> players = addSetting(new BoolSetting.Builder()
+    private Setting<Boolean> players = sgPlayers.add(new BoolSetting.Builder()
             .name("players")
             .description("See players.")
-            .group("Players")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<Color> playersColor = addSetting(new ColorSetting.Builder()
+    private Setting<Color> playersColor = sgPlayers.add(new ColorSetting.Builder()
             .name("players-color")
             .description("Players color.")
-            .group("Players")
             .defaultValue(new Color(255, 255, 255, 255))
             .onChanged(color1 -> recalculateColor())
             .build()
     );
 
-    private Setting<Boolean> animals = addSetting(new BoolSetting.Builder()
+    private Setting<Boolean> animals = sgAnimals.add(new BoolSetting.Builder()
             .name("animals")
             .description("See animals.")
-            .group("Animals")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<Color> animalsColor = addSetting(new ColorSetting.Builder()
+    private Setting<Color> animalsColor = sgAnimals.add(new ColorSetting.Builder()
             .name("animals-color")
             .description("Animals color.")
-            .group("Animals")
             .defaultValue(new Color(145, 255, 145, 255))
             .onChanged(color1 -> recalculateColor())
             .build()
     );
 
-    private Setting<Boolean> mobs = addSetting(new BoolSetting.Builder()
+    private Setting<Boolean> mobs = sgMobs.add(new BoolSetting.Builder()
             .name("mobs")
             .description("See mobs.")
-            .group("Mobs")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<Color> mobsColor = addSetting(new ColorSetting.Builder()
+    private Setting<Color> mobsColor = sgMobs.add(new ColorSetting.Builder()
             .name("mobs-color")
             .description("Mobs color.")
-            .group("Mobs")
             .defaultValue(new Color(255, 145, 145, 255))
             .onChanged(color1 -> recalculateColor())
             .build()
     );
 
-    private Setting<Boolean> items = addSetting(new BoolSetting.Builder()
+    private Setting<Boolean> items = sgItems.add(new BoolSetting.Builder()
             .name("items")
             .description("See items.")
-            .group("Items")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<Color> itemsColor = addSetting(new ColorSetting.Builder()
+    private Setting<Color> itemsColor = sgItems.add(new ColorSetting.Builder()
             .name("items-color")
             .description("Items color.")
-            .group("Items")
             .defaultValue(new Color(145, 145, 145, 255))
             .onChanged(color1 -> recalculateColor())
             .build()
     );
 
-    private Setting<Boolean> crystals = addSetting(new BoolSetting.Builder()
+    private Setting<Boolean> crystals = sgCrystals.add(new BoolSetting.Builder()
             .name("crystals")
             .description("See crystals.")
-            .group("Crystals")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<Color> crystalsColor = addSetting(new ColorSetting.Builder()
+    private Setting<Color> crystalsColor = sgCrystals.add(new ColorSetting.Builder()
             .name("crystals-color")
             .description("Crystals color.")
-            .group("Crystals")
             .defaultValue(new Color(160, 40, 235, 255))
             .onChanged(color1 -> recalculateColor())
             .build()
     );
 
-    private Setting<Boolean> vehicles = addSetting(new BoolSetting.Builder()
+    private Setting<Boolean> vehicles = sgVehicles.add(new BoolSetting.Builder()
             .name("vehicles")
             .description("See vehicles.")
-            .group("Vehicles")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<Color> vehiclesColor = addSetting(new ColorSetting.Builder()
+    private Setting<Color> vehiclesColor = sgVehicles.add(new ColorSetting.Builder()
             .name("vehicles-color")
             .description("Vehicles color.")
-            .group("Vehicles")
             .defaultValue(new Color(100, 100, 100, 255))
             .onChanged(color1 -> recalculateColor())
             .build()
