@@ -8,20 +8,23 @@ import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.SettingGroup;
 
 public class Flight extends ToggleModule {
     public enum Mode {
         Vanilla
     }
 
-    private Setting<Mode> mode = addSetting(new EnumSetting.Builder<Mode>()
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+
+    private Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("mode")
             .description("Mode.")
             .defaultValue(Mode.Vanilla)
             .build()
     );
 
-    private Setting<Double> speed = addSetting(new DoubleSetting.Builder()
+    private Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
             .name("speed")
             .description("Speed.")
             .defaultValue(0.1)

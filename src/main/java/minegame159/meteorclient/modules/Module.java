@@ -7,6 +7,7 @@ import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.gui.screens.ModuleScreen;
 import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.Settings;
 import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.ISerializable;
 import minegame159.meteorclient.utils.NbtUtils;
@@ -27,8 +28,7 @@ public abstract class Module implements Listenable, ISerializable<Module> {
     public final String description;
     public final int color;
 
-    public final Map<String, List<Setting<?>>> settingGroups = new LinkedHashMap<>(1);
-    public final List<Setting<?>> settings = new ArrayList<>(1);
+    public final Settings settings = new Settings();
 
     public boolean serialize = true;
 
@@ -41,21 +41,6 @@ public abstract class Module implements Listenable, ISerializable<Module> {
         this.title = Utils.nameToTitle(name);
         this.description = description;
         this.color = Color.fromRGBA(Utils.random(180, 255), Utils.random(180, 255), Utils.random(180, 255), 255);
-    }
-
-    public Setting<?> getSetting(String name) {
-        for (Setting<?> setting : settings) {
-            if (name.equalsIgnoreCase(setting.name)) return setting;
-        }
-
-        return null;
-    }
-
-    public <T> Setting<T> addSetting(Setting<T> setting) {
-        settings.add(setting);
-        List<Setting<?>> group = settingGroups.computeIfAbsent(setting.group == null ? "Other" : setting.group, s -> new ArrayList<>(1));
-        group.add(setting);
-        return setting;
     }
 
     public WidgetScreen getScreen() {
@@ -98,7 +83,7 @@ public abstract class Module implements Listenable, ISerializable<Module> {
         ListTag settingsTag = tag.getList("settings", 10);
         for (Tag settingTagI : settingsTag) {
             CompoundTag settingTag = (CompoundTag) settingTagI;
-            Setting<?> setting = getSetting(settingTag.getString("name"));
+            Setting<?> setting = settings.get(settingTag.getString("name"));
             if (setting != null) setting.fromTag(settingTag);
         }
 

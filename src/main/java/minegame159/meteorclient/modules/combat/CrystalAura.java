@@ -10,13 +10,16 @@ import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.SettingGroup;
 import net.minecraft.entity.decoration.EnderCrystalEntity;
 import net.minecraft.util.Hand;
 
 import java.util.Comparator;
 
 public class CrystalAura extends ToggleModule {
-    public Setting<Double> range = addSetting(new DoubleSetting.Builder()
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    
+    public Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()
             .name("range")
             .description("Attack range.")
             .defaultValue(5.5)
@@ -24,7 +27,7 @@ public class CrystalAura extends ToggleModule {
             .build()
     );
 
-    public Setting<Boolean> ignoreWalls = addSetting(new BoolSetting.Builder()
+    public Setting<Boolean> ignoreWalls = sgGeneral.add(new BoolSetting.Builder()
             .name("ignore-walls")
             .description("Attack through walls.")
             .defaultValue(true)
