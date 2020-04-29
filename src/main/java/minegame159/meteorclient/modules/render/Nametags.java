@@ -6,6 +6,7 @@ import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.render.BufferBuilder;
@@ -14,7 +15,9 @@ import net.minecraft.client.render.VertexFormats;
 import net.minecraft.util.DyeColor;
 
 public class Nametags extends ToggleModule {
-    private Setting<Double> scale = addSetting(new DoubleSetting.Builder()
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    
+    private Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
             .name("scale")
             .description("Scale.")
             .defaultValue(1)

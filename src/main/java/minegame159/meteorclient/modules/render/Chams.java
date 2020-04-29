@@ -4,25 +4,28 @@ import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.EntityUtils;
 import net.minecraft.entity.LivingEntity;
 
 public class Chams extends ToggleModule {
-    private Setting<Boolean> players = addSetting(new BoolSetting.Builder()
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    
+    private Setting<Boolean> players = sgGeneral.add(new BoolSetting.Builder()
             .name("players")
             .description("Render players.")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<Boolean> animals = addSetting(new BoolSetting.Builder()
+    private Setting<Boolean> animals = sgGeneral.add(new BoolSetting.Builder()
             .name("animals")
             .description("Render animals")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<Boolean> mobs = addSetting(new BoolSetting.Builder()
+    private Setting<Boolean> mobs = sgGeneral.add(new BoolSetting.Builder()
             .name("mobs")
             .description("Render mobs.")
             .defaultValue(true)

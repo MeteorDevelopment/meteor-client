@@ -11,6 +11,7 @@ import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.InvUtils;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.entity.EquipmentSlot;
@@ -20,14 +21,19 @@ import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.util.math.Vec3d;
 
 public class ElytraPlus extends ToggleModule {
-    private Setting<Boolean> autoTakeOff = addSetting(new BoolSetting.Builder()
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgAutopilot = settings.createGroup("Autopilot", "autopilot", "Automatically flies forward maintaining minimum height.", false, settingGroup -> {
+        if (isActive() && !settingGroup.isEnabled()) ((IKeyBinding) mc.options.keyForward).setPressed(false);
+    });
+    
+    private Setting<Boolean> autoTakeOff = sgGeneral.add(new BoolSetting.Builder()
             .name("auto-take-off")
             .description("Automatically takes off when u hold jump without needing to double jump.")
             .defaultValue(false)
             .build()
     );
 
-    private Setting<Double> fallMultiplier = addSetting(new DoubleSetting.Builder()
+    private Setting<Double> fallMultiplier = sgGeneral.add(new DoubleSetting.Builder()
             .name("fall-multiplier")
             .description("Controls how fast will u go down naturally.")
             .defaultValue(0.01)
@@ -35,7 +41,7 @@ public class ElytraPlus extends ToggleModule {
             .build()
     );
 
-    private Setting<Double> horizontalSpeed = addSetting(new DoubleSetting.Builder()
+    private Setting<Double> horizontalSpeed = sgGeneral.add(new DoubleSetting.Builder()
             .name("horizontal-speed")
             .description("How fast will u go forward and backward.")
             .defaultValue(1)
@@ -43,7 +49,7 @@ public class ElytraPlus extends ToggleModule {
             .build()
     );
 
-    private Setting<Double> verticalSpeed = addSetting(new DoubleSetting.Builder()
+    private Setting<Double> verticalSpeed = sgGeneral.add(new DoubleSetting.Builder()
             .name("vertical-speed")
             .description("How fast will u go up and down.")
             .defaultValue(1)
@@ -51,30 +57,26 @@ public class ElytraPlus extends ToggleModule {
             .build()
     );
 
-    private Setting<Boolean> stopInWater = addSetting(new BoolSetting.Builder()
+    private Setting<Boolean> stopInWater = sgGeneral.add(new BoolSetting.Builder()
             .name("stop-in-water")
             .description("Stops flying in water.")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<Boolean> dontGoIntoUnloadedChunks = addSetting(new BoolSetting.Builder()
+    private Setting<Boolean> dontGoIntoUnloadedChunks = sgGeneral.add(new BoolSetting.Builder()
             .name("dont-go-into-unloaded-chunks")
             .description("Dont go into unloaded chunks.")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<Double> autopilotMinimumHeight;
-    private Setting<Boolean> autopilot = addSetting(new BoolSetting.Builder()
-            .name("autopilot")
-            .description("Automatically flies forward maintaining minimum height.")
-            .group("Autopilot")
-            .defaultValue(false)
-            .onChanged(aBoolean -> {
-                if (isActive() && !aBoolean) ((IKeyBinding) mc.options.keyForward).setPressed(false);
-                autopilotMinimumHeight.setVisible(aBoolean);
-            })
+    private Setting<Double> autopilotMinimumHeight = sgAutopilot.add(new DoubleSetting.Builder()
+            .name("minimum-height")
+            .description("Autopilot minimum height.")
+            .defaultValue(160)
+            .min(0)
+            .sliderMax(260)
             .build()
     );
 
@@ -92,17 +94,6 @@ public class ElytraPlus extends ToggleModule {
 
     public ElytraPlus() {
         super(Category.Movement, "Elytra+", "Makes elytra better,");
-
-        autopilotMinimumHeight = addSetting(new DoubleSetting.Builder()
-                .name("minimum-height")
-                .description("Autopilot minimum height.")
-                .group("Autopilot")
-                .defaultValue(160)
-                .min(0)
-                .sliderMax(260)
-                .visible(false)
-                .build()
-        );
     }
 
     @Override
@@ -113,7 +104,7 @@ public class ElytraPlus extends ToggleModule {
 
     @Override
     public void onDeactivate() {
-        if (autopilot.get()) ((IKeyBinding) mc.options.keyForward).setPressed(false);
+        if (sgAutopilot.isEnabled()) ((IKeyBinding) mc.options.keyForward).setPressed(false);
     }
 
     @EventHandler
@@ -168,7 +159,7 @@ public class ElytraPlus extends ToggleModule {
     });
 
     private void handleAutopilot() {
-        if (autopilot.get()) {
+        if (sgAutopilot.isEnabled()) {
             ((IKeyBinding) mc.options.keyForward).setPressed(true);
 
             if (mc.player.y < autopilotMinimumHeight.get() && !decrementFireworkTimer) {
@@ -181,7 +172,7 @@ public class ElytraPlus extends ToggleModule {
                     fireworkTimer = 20;
                 } else {
                     Utils.sendMessage("#blueElytra+ Autopilot:#white Disabled autopilot because you don't have any fireworks left in your hotbar.");
-                    autopilot.set(false);
+                    sgAutopilot.setEnabled(false);
                 }
             }
 

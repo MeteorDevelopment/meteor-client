@@ -11,6 +11,7 @@ import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.ColorSetting;
 import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.RenderUtils;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
@@ -21,9 +22,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class LogoutSpot extends ToggleModule {
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    
     private Color sideColor = new Color();
 
-    private Setting<Color> lineColor = addSetting(new ColorSetting.Builder()
+    private Setting<Color> lineColor = sgGeneral.add(new ColorSetting.Builder()
             .name("color")
             .description("Color.")
             .defaultValue(new Color(255, 0, 255))

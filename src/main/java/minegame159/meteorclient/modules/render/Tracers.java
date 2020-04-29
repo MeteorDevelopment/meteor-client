@@ -10,6 +10,7 @@ import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.ColorSetting;
 import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.EntityUtils;
 import minegame159.meteorclient.utils.RenderUtils;
@@ -23,66 +24,63 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
 public class Tracers extends ToggleModule {
-    private Setting<Boolean> players = addSetting(new BoolSetting.Builder()
+    private final SettingGroup sgPlayers = settings.createGroup("Players");
+    private final SettingGroup sgAnimals = settings.createGroup("Animals");
+    private final SettingGroup sgMobs = settings.createGroup("Mobs");
+    private final SettingGroup sgStorage = settings.createGroup("Storage");
+    
+    private Setting<Boolean> players = sgPlayers.add(new BoolSetting.Builder()
             .name("players")
             .description("See players.")
-            .group("Players")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<Color> playersColor = addSetting(new ColorSetting.Builder()
+    private Setting<Color> playersColor = sgPlayers.add(new ColorSetting.Builder()
             .name("players-color")
             .description("Players color.")
-            .group("Players")
             .defaultValue(new Color(255, 255, 255, 255))
             .build()
     );
 
-    private Setting<Boolean> animals = addSetting(new BoolSetting.Builder()
+    private Setting<Boolean> animals = sgAnimals.add(new BoolSetting.Builder()
             .name("animals")
             .description("See animals.")
-            .group("Animals")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<Color> animalsColor = addSetting(new ColorSetting.Builder()
+    private Setting<Color> animalsColor = sgAnimals.add(new ColorSetting.Builder()
             .name("animals-color")
             .description("Animals color.")
-            .group("Animals")
             .defaultValue(new Color(145, 255, 145, 255))
             .build()
     );
 
-    private Setting<Boolean> mobs = addSetting(new BoolSetting.Builder()
+    private Setting<Boolean> mobs = sgMobs.add(new BoolSetting.Builder()
             .name("mobs")
             .description("See mobs.")
-            .group("Mobs")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<Color> mobsColor = addSetting(new ColorSetting.Builder()
+    private Setting<Color> mobsColor = sgMobs.add(new ColorSetting.Builder()
             .name("mobs-color")
             .description("Mobs color.")
-            .group("Mobs")
             .defaultValue(new Color(255, 145, 145, 255))
             .build()
     );
 
-    private Setting<Boolean> storage = addSetting(new BoolSetting.Builder()
+    private Setting<Boolean> storage = sgStorage.add(new BoolSetting.Builder()
             .name("storage")
             .description("See chests, barrels and shulkers.")
-            .group("Storage")
             .defaultValue(false)
             .build()
     );
 
-    private Setting<Color> storageColor = addSetting(new ColorSetting.Builder()
+    private Setting<Color> storageColor = sgStorage.add(new ColorSetting.Builder()
             .name("storage-color")
             .description("Storage color.")
-            .group("Storage")
             .defaultValue(new Color(255, 160, 0, 255))
             .build()
     );

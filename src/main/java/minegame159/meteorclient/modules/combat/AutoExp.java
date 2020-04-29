@@ -12,6 +12,7 @@ import minegame159.meteorclient.modules.player.AutoArmor;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.InvUtils;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.container.SlotActionType;
@@ -25,16 +26,16 @@ import net.minecraft.util.Hand;
 import java.util.Iterator;
 
 public class AutoExp extends ToggleModule {
-    public AutoExp(){super(Category.Combat, "auto-exp", "Throws exp to mend your armour (only works with diamond)");}
-
-    private final Setting<Boolean> replenish = addSetting(new BoolSetting.Builder()
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    
+    private final Setting<Boolean> replenish = sgGeneral.add(new BoolSetting.Builder()
             .name("replenish")
             .description("Replenishes your hotbar with Exp Bottles")
             .defaultValue(true)
             .build()
     );
 
-    private final Setting<Integer> replenishCount = addSetting(new IntSetting.Builder()
+    private final Setting<Integer> replenishCount = sgGeneral.add(new IntSetting.Builder()
             .name("items-left")
             .description("The number of items before the stack gets replenished")
             .defaultValue(32)
@@ -43,12 +44,16 @@ public class AutoExp extends ToggleModule {
             .build()
     );
 
-    private final Setting<Boolean> disableAuras = addSetting(new BoolSetting.Builder()
+    private final Setting<Boolean> disableAuras = sgGeneral.add(new BoolSetting.Builder()
             .name("disable-auras")
             .description("disable all auras")
             .defaultValue(false)
             .build()
     );
+    
+    public AutoExp() {
+        super(Category.Combat, "auto-exp", "Throws exp to mend your armour (only works with diamond)");
+    }
 
     private boolean wasArmourActive = false;
 

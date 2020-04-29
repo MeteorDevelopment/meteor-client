@@ -10,13 +10,16 @@ import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.SettingGroup;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.packet.s2c.play.DisconnectS2CPacket;
 import net.minecraft.text.LiteralText;
 
 public class AutoLog extends ToggleModule {
-    private Setting<Integer> health = addSetting(new IntSetting.Builder()
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    
+    private Setting<Integer> health = sgGeneral.add(new IntSetting.Builder()
             .name("health")
             .description("Disconnects when health is lower or equal to this value.")
             .defaultValue(6)
@@ -26,7 +29,7 @@ public class AutoLog extends ToggleModule {
             .build()
     );
 
-    private Setting<Boolean> onlyTrusted = addSetting(new BoolSetting.Builder()
+    private Setting<Boolean> onlyTrusted = sgGeneral.add(new BoolSetting.Builder()
             .name("only-trusted")
             .description("Disconnects when non-trusted player appears in your render distance.")
             .defaultValue(false)

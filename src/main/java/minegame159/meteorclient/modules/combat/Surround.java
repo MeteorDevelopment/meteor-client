@@ -7,6 +7,7 @@ import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.BlockItem;
@@ -14,14 +15,16 @@ import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 
 public class Surround extends ToggleModule {
-    private Setting<Boolean> onlyOnGround = addSetting(new BoolSetting.Builder()
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    
+    private Setting<Boolean> onlyOnGround = sgGeneral.add(new BoolSetting.Builder()
             .name("only-on-ground")
             .description("Works only when you standing on ground.")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<Boolean> onlyObsidian = addSetting(new BoolSetting.Builder()
+    private Setting<Boolean> onlyObsidian = sgGeneral.add(new BoolSetting.Builder()
             .name("only-obsidian")
             .description("Only uses obsidian.")
             .defaultValue(true)
