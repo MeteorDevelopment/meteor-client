@@ -27,83 +27,76 @@ public class KillAura extends ToggleModule {
         HighestHealth
     }
 
-    public Setting<Double> range = addSetting(new DoubleSetting.Builder()
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgToAttack = settings.createGroup("To Attack");
+    private final SettingGroup sgDelay = settings.createGroup("Delay", "smart-delay", "Smart delay.", true);
+    private final SettingGroup sgDelayDisabled = sgDelay.getDisabledGroup();
+
+    public Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()
             .name("range")
             .description("Attack range.")
-            .group("General")
             .defaultValue(5.5)
             .min(0.0)
             .build()
     );
 
-    public Setting<Boolean> ignoreWalls = addSetting(new BoolSetting.Builder()
+    public Setting<Boolean> ignoreWalls = sgGeneral.add(new BoolSetting.Builder()
             .name("ignore-walls")
             .description("Attack through walls.")
-            .group("General")
             .defaultValue(true)
             .build()
     );
 
-    public Setting<Priority> priority = addSetting(new EnumSetting.Builder<Priority>()
+    public Setting<Priority> priority = sgGeneral.add(new EnumSetting.Builder<Priority>()
             .name("priority")
             .description("What entities to target.")
-            .group("General")
             .defaultValue(Priority.LowestHealth)
             .build()
     );
 
-    private Setting<Boolean> rotate = addSetting(new BoolSetting.Builder()
+    private Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
             .name("rotate")
             .description("Rotates you towards the target.")
-            .group("General")
             .defaultValue(false)
             .build()
     );
 
-    public Setting<Boolean> players = addSetting(new BoolSetting.Builder()
+    public Setting<Boolean> players = sgGeneral.add(new BoolSetting.Builder()
             .name("players")
             .description("Attack players.")
-            .group("To Attack")
             .defaultValue(true)
             .build()
     );
 
-    public Setting<Boolean> friends = addSetting(new BoolSetting.Builder()
+    public Setting<Boolean> friends = sgToAttack.add(new BoolSetting.Builder()
             .name("friends")
             .description("Attack friends, useful only if attack players is on.")
-            .group("To Attack")
             .defaultValue(false)
             .build()
     );
 
-    public Setting<Boolean> animals = addSetting(new BoolSetting.Builder()
+    public Setting<Boolean> animals = sgToAttack.add(new BoolSetting.Builder()
             .name("animals")
             .description("Attack animals.")
-            .group("To Attack")
             .defaultValue(true)
             .build()
     );
 
-    public Setting<Boolean> mobs = addSetting(new BoolSetting.Builder()
+    public Setting<Boolean> mobs = sgToAttack.add(new BoolSetting.Builder()
             .name("mobs")
             .description("Attack mobs.")
-            .group("To Attack")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<Integer> hitDelay;
-    private Setting<Boolean> smartDelay = addSetting(new BoolSetting.Builder()
-            .name("smart-delay")
-            .description("Smart delay.")
-            .group("Delay")
-            .onChanged(aBoolean -> {
-                hitDelay.setVisible(!aBoolean);
-                hitDelayTimer = 0;
-            })
-            .defaultValue(true)
-            .build()
-    );
+    private Setting<Integer> hitDelay = sgDelayDisabled.add(new IntSetting.Builder()
+            .name("hit-delay")
+                .description("Hit delay in ticks. 20 ticks = 1 second.")
+                .defaultValue(0)
+                .min(0)
+                .sliderMax(60)
+                .build()
+        );
 
     private int hitDelayTimer;
 
@@ -112,17 +105,6 @@ public class KillAura extends ToggleModule {
 
     public KillAura() {
         super(Category.Combat, "kill-aura", "Automatically attacks entities.");
-
-        hitDelay = addSetting(new IntSetting.Builder()
-                .name("hit-delay")
-                .description("Hit delay in ticks. 20 ticks = 1 second.")
-                .group("Delay")
-                .defaultValue(0)
-                .min(0)
-                .sliderMax(60)
-                .visible(false)
-                .build()
-        );
     }
 
     @Override
@@ -176,7 +158,7 @@ public class KillAura extends ToggleModule {
     private Listener<TickEvent> onTick = new Listener<>(event -> {
         if (mc.player.getHealth() <= 0) return;
 
-        if (smartDelay.get()) {
+        if (sgDelay.isEnabled()) {
             // Smart delay
             if (mc.player.getAttackCooldownProgress(0.5f) < 1) return;
         } else {

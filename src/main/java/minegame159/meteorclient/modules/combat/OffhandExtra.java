@@ -9,13 +9,9 @@ import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
-import minegame159.meteorclient.settings.BoolSetting;
-import minegame159.meteorclient.settings.EnumSetting;
-import minegame159.meteorclient.settings.IntSetting;
-import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.InvUtils;
 import minegame159.meteorclient.utils.Utils;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.ContainerScreen;
 import net.minecraft.container.SlotActionType;
 import net.minecraft.item.Item;
@@ -28,33 +24,31 @@ public class OffhandExtra extends ToggleModule {
         Exp_Bottle,
         End_Crystal,
     }
+    
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final MinecraftClient mc = MinecraftClient.getInstance();
-
-    public OffhandExtra(){ super(Category.Combat, "offhand-extra", "Allows you to use items in your offhand. Requires AutoTotem to be on smart mode."); }
-
-    private final Setting<Mode> mode = addSetting(new EnumSetting.Builder<Mode>()
+    private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("Mode")
             .description("Changes which item goes in your offhand")
             .defaultValue(Mode.Enchanted_Golden_Apple)
             .build()
     );
 
-    private final Setting<Boolean> replace = addSetting(new BoolSetting.Builder()
+    private final Setting<Boolean> replace = sgGeneral.add(new BoolSetting.Builder()
             .name("replace")
             .description("Replace your offhand or wait for it to be empty")
             .defaultValue(true)
             .build()
     );
 
-    private final Setting<Boolean> Asimov = addSetting(new BoolSetting.Builder()
+    private final Setting<Boolean> Asimov = sgGeneral.add(new BoolSetting.Builder()
             .name("Asimov")
             .description("Always holds the item in your offhand")
             .defaultValue(false)
             .build()
     );
 
-    private final Setting<Integer> health = addSetting(new IntSetting.Builder()
+    private final Setting<Integer> health = sgGeneral.add(new IntSetting.Builder()
             .name("health")
             .description("The health this stops working.")
             .defaultValue(10)
@@ -62,6 +56,10 @@ public class OffhandExtra extends ToggleModule {
             .sliderMax(20)
             .build()
     );
+
+    public OffhandExtra() {
+        super(Category.Combat, "offhand-extra", "Allows you to use items in your offhand. Requires AutoTotem to be on smart mode.");
+    }
 
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {

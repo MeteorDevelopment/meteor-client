@@ -3,7 +3,6 @@ package minegame159.meteorclient.settings;
 import minegame159.meteorclient.gui.GuiRenderer;
 import minegame159.meteorclient.gui.screens.ColorSettingScreen;
 import minegame159.meteorclient.gui.widgets.WButton;
-import minegame159.meteorclient.gui.widgets.WColorEdit;
 import minegame159.meteorclient.gui.widgets.WQuad;
 import minegame159.meteorclient.gui.widgets.WTable;
 import minegame159.meteorclient.utils.Color;
@@ -15,8 +14,8 @@ import java.util.function.Consumer;
 public class ColorSetting extends Setting<Color> {
     private WQuad quad;
 
-    public ColorSetting(String name, String description, String group, Color defaultValue, Consumer<Color> onChanged, Consumer<Setting<Color>> onModuleActivated, boolean visible) {
-        super(name, description, group, defaultValue, onChanged, onModuleActivated, visible);
+    public ColorSetting(String name, String description, Color defaultValue, Consumer<Color> onChanged, Consumer<Setting<Color>> onModuleActivated) {
+        super(name, description, defaultValue, onChanged, onModuleActivated);
 
         widget = new WTable();
         quad = widget.add(new WQuad(get())).getWidget();
@@ -51,7 +50,7 @@ public class ColorSetting extends Setting<Color> {
     }
 
     @Override
-    protected void resetWidget() {
+    public void resetWidget() {
         quad.color.set(get());
     }
 
@@ -83,11 +82,9 @@ public class ColorSetting extends Setting<Color> {
 
     public static class Builder {
         private String name = "undefined", description = "";
-        private String group;
         private Color defaultValue;
         private Consumer<Color> onChanged;
         private Consumer<Setting<Color>> onModuleActivated;
-        private boolean visible = true;
 
         public Builder name(String name) {
             this.name = name;
@@ -96,11 +93,6 @@ public class ColorSetting extends Setting<Color> {
 
         public Builder description(String description) {
             this.description = description;
-            return this;
-        }
-
-        public Builder group(String group) {
-            this.group = group;
             return this;
         }
 
@@ -119,13 +111,8 @@ public class ColorSetting extends Setting<Color> {
             return this;
         }
 
-        public Builder visible(boolean visible) {
-            this.visible = visible;
-            return this;
-        }
-
         public ColorSetting build() {
-            return new ColorSetting(name, description, group, defaultValue, onChanged, onModuleActivated, visible);
+            return new ColorSetting(name, description, defaultValue, onChanged, onModuleActivated);
         }
     }
 }

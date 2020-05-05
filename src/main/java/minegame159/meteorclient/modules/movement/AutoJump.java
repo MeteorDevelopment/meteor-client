@@ -7,6 +7,7 @@ import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.SettingGroup;
 
 public class AutoJump extends ToggleModule {
     public enum JumpIf {
@@ -15,7 +16,9 @@ public class AutoJump extends ToggleModule {
         Always
     }
 
-    private Setting<JumpIf> jumpIf = addSetting(new EnumSetting.Builder<JumpIf>()
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+
+    private Setting<JumpIf> jumpIf = sgGeneral.add(new EnumSetting.Builder<JumpIf>()
             .name("jump-if")
             .description("Jump if.")
             .defaultValue(JumpIf.Always)

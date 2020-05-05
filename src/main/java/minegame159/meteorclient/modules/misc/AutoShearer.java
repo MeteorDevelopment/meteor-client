@@ -8,6 +8,7 @@ import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.InvUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.SheepEntity;
@@ -16,7 +17,9 @@ import net.minecraft.item.ShearsItem;
 import net.minecraft.util.Hand;
 
 public class AutoShearer extends ToggleModule {
-    private Setting<Double> distance = addSetting(new DoubleSetting.Builder()
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    
+    private Setting<Double> distance = sgGeneral.add(new DoubleSetting.Builder()
             .name("distance")
             .description("Maximum distance.")
             .min(0.0)
@@ -24,7 +27,7 @@ public class AutoShearer extends ToggleModule {
             .build()
     );
 
-    private Setting<Boolean> preserveBrokenShears = addSetting(new BoolSetting.Builder()
+    private Setting<Boolean> preserveBrokenShears = sgGeneral.add(new BoolSetting.Builder()
             .name("preserve-broken-shears")
             .description("Will not break shears.")
             .defaultValue(false)

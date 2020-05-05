@@ -11,7 +11,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public abstract class Setting<T> implements ISerializable<T> {
-    public final String name, title, description, group;
+    public final String name, title, description;
     private String usage;
 
     protected final T defaultValue;
@@ -21,32 +21,14 @@ public abstract class Setting<T> implements ISerializable<T> {
     public final Consumer<Setting<T>> onModuleActivated;
     public WWidget widget;
 
-    private boolean visible;
-    private SettingVisibleListener visibleListener;
-
-    public Setting(String name, String description, String group, T defaultValue, Consumer<T> onChanged, Consumer<Setting<T>> onModuleActivated, boolean visible) {
+    public Setting(String name, String description, T defaultValue, Consumer<T> onChanged, Consumer<Setting<T>> onModuleActivated) {
         this.name = name;
         this.title = Arrays.stream(name.split("-")).map(StringUtils::capitalize).collect(Collectors.joining(" "));
         this.description = description;
-        this.group = group;
         this.defaultValue = defaultValue;
         reset(false);
         this.onChanged = onChanged;
         this.onModuleActivated = onModuleActivated;
-        this.visible = visible;
-    }
-
-    public void setVisible(boolean visible) {
-        this.visible = visible;
-        if (visibleListener != null) visibleListener.visibilityChanged();
-    }
-
-    public boolean isVisible() {
-        return visible;
-    }
-
-    public void setVisibleListener(SettingVisibleListener visibleListener) {
-        this.visibleListener = visibleListener;
     }
 
     public T get() {
@@ -90,9 +72,13 @@ public abstract class Setting<T> implements ISerializable<T> {
         if (onChanged != null) onChanged.accept(value);
     }
 
+    public void onActivated() {
+        if (onModuleActivated != null) onModuleActivated.accept(this);
+    }
+
     protected abstract T parseImpl(String str);
 
-    protected abstract void resetWidget();
+    public abstract void resetWidget();
 
     protected abstract boolean isValueValid(T value);
 

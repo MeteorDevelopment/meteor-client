@@ -4,9 +4,12 @@ import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.SettingGroup;
 
 public class LongerChat extends ToggleModule {
-    public Setting<Integer> lines = addSetting(new IntSetting.Builder()
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    
+    public Setting<Integer> lines = sgGeneral.add(new IntSetting.Builder()
             .name("lines")
             .description("Chat lines.")
             .defaultValue(1000)

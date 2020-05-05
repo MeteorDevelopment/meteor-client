@@ -9,11 +9,14 @@ import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.SettingGroup;
 import net.minecraft.entity.MovementType;
 import net.minecraft.util.math.Vec3d;
 
 public class Speed extends ToggleModule {
-    private Setting<Double> speed = addSetting(new DoubleSetting.Builder()
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    
+    private Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
             .name("speed")
             .description("Multiplier, 1 equals default sprinting speed.")
             .defaultValue(1)
@@ -21,21 +24,21 @@ public class Speed extends ToggleModule {
             .build()
     );
 
-    private Setting<Boolean> onlyOnGround = addSetting(new BoolSetting.Builder()
+    private Setting<Boolean> onlyOnGround = sgGeneral.add(new BoolSetting.Builder()
             .name("only-on-ground")
             .description("Use speed only when on ground.")
             .defaultValue(false)
             .build()
     );
 
-    private Setting<Boolean> inWater = addSetting(new BoolSetting.Builder()
+    private Setting<Boolean> inWater = sgGeneral.add(new BoolSetting.Builder()
             .name("in-water")
             .description("Use speed when in water.")
             .defaultValue(false)
             .build()
     );
 
-    private Setting<Boolean> whenSneaking = addSetting(new BoolSetting.Builder()
+    private Setting<Boolean> whenSneaking = sgGeneral.add(new BoolSetting.Builder()
             .name("when-sneaking")
             .description("Use speed when sneaking.")
             .defaultValue(false)

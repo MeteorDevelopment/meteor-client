@@ -6,8 +6,8 @@ import net.minecraft.nbt.CompoundTag;
 import java.util.function.Consumer;
 
 public class StringSetting extends Setting<String> {
-    public StringSetting(String name, String description, String group, String defaultValue, Consumer<String> onChanged, Consumer<Setting<String>> onModuleActivated, boolean visible) {
-        super(name, description, group, defaultValue, onChanged, onModuleActivated, visible);
+    public StringSetting(String name, String description, String defaultValue, Consumer<String> onChanged, Consumer<Setting<String>> onModuleActivated) {
+        super(name, description, defaultValue, onChanged, onModuleActivated);
 
         widget = new WTextBox(get(), 200);
         ((WTextBox) widget).action = textBox -> {
@@ -30,7 +30,7 @@ public class StringSetting extends Setting<String> {
     }
 
     @Override
-    protected void resetWidget() {
+    public void resetWidget() {
         ((WTextBox) widget).text = get();
     }
 
@@ -61,10 +61,8 @@ public class StringSetting extends Setting<String> {
     public static class Builder {
         private String name = "undefined", description = "";
         private String defaultValue;
-        private String group;
         private Consumer<String> onChanged;
         private Consumer<Setting<String>> onModuleActivated;
-        private boolean visible = true;
 
         public Builder name(String name) {
             this.name = name;
@@ -73,11 +71,6 @@ public class StringSetting extends Setting<String> {
 
         public Builder description(String description) {
             this.description = description;
-            return this;
-        }
-
-        public Builder group(String group) {
-            this.group = group;
             return this;
         }
 
@@ -96,13 +89,8 @@ public class StringSetting extends Setting<String> {
             return this;
         }
 
-        public Builder visible(boolean visible) {
-            this.visible = visible;
-            return this;
-        }
-
         public StringSetting build() {
-            return new StringSetting(name, description, group, defaultValue, onChanged, onModuleActivated, visible);
+            return new StringSetting(name, description, defaultValue, onChanged, onModuleActivated);
         }
     }
 }

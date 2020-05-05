@@ -7,11 +7,14 @@ import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.SettingGroup;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.Hand;
 
 public class Trigger extends ToggleModule {
-    private Setting<Boolean> onlyWhenHoldingAttack = addSetting(new BoolSetting.Builder()
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    
+    private Setting<Boolean> onlyWhenHoldingAttack = sgGeneral.add(new BoolSetting.Builder()
             .name("only-when-holding-attack")
             .description("Attacks only when you are holding left click.")
             .defaultValue(false)

@@ -11,6 +11,7 @@ import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.DamageCalcUtils;
 import minegame159.meteorclient.utils.InvUtils;
 import net.minecraft.client.MinecraftClient;
@@ -25,6 +26,30 @@ import net.minecraft.item.SwordItem;
 import java.util.Iterator;
 
 public class AutoTotem extends ToggleModule {
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+
+    public final Setting<Boolean> smart = sgGeneral.add(new BoolSetting.Builder()
+            .name("smart")
+            .description("Only switches to totem when in danger of dying")
+            .defaultValue(false)
+            .build());
+
+
+    public final Setting<Boolean> antiOneTap = sgGeneral.add(new BoolSetting.Builder()
+            .name("anti-one-tap")
+            .description("Tries to stop you dying with totems")
+            .defaultValue(false)
+            .build());
+
+    public final Setting<Integer> health = sgGeneral.add(new IntSetting.Builder()
+            .name("health")
+            .description("The health smart totem activates")
+            .defaultValue(10)
+            .min(0)
+            .sliderMax(20)
+            .build()
+    );
+    
     private int totemCount;
     private String totemCountString = "0";
 
@@ -35,28 +60,6 @@ public class AutoTotem extends ToggleModule {
     public AutoTotem() {
         super(Category.Combat, "auto-totem", "Automatically equips totems.");
     }
-
-    public final Setting<Boolean> smart = addSetting(new BoolSetting.Builder()
-            .name("smart")
-            .description("Only switches to totem when in danger of dying")
-            .defaultValue(false)
-            .build());
-
-
-    public final Setting<Boolean> antiOneTap = addSetting(new BoolSetting.Builder()
-            .name("anti-one-tap")
-            .description("Tries to stop you dying with totems")
-            .defaultValue(false)
-            .build());
-
-    public final Setting<Integer> health = addSetting(new IntSetting.Builder()
-            .name("health")
-            .description("The health smart totem activates")
-            .defaultValue(10)
-            .min(0)
-            .sliderMax(20)
-            .build()
-    );
 
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {

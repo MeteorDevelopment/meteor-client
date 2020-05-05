@@ -10,6 +10,7 @@ import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.TickRate;
 import minegame159.meteorclient.utils.Utils;
@@ -39,123 +40,115 @@ public class HUD extends ToggleModule {
     private static int gray = Color.fromRGBA(185, 185, 185, 255);
     private static int red = Color.fromRGBA(225, 45, 45, 255);
 
-    private Setting<Boolean> waterMark = addSetting(new BoolSetting.Builder()
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgTopLeft = settings.createGroup("Top Left");
+    private final SettingGroup sgTopRight = settings.createGroup("Top Right");
+    private final SettingGroup sgBottomRight = settings.createGroup("Bottom Right");
+
+    private Setting<Boolean> armor = sgGeneral.add(new BoolSetting.Builder()
+            .name("armor")
+            .description("Diplays your armor above hotbar.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private Setting<Boolean> waterMark = sgTopLeft.add(new BoolSetting.Builder()
             .name("water-mark")
             .description("Water mark.")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<Boolean> fps = addSetting(new BoolSetting.Builder()
+    private Setting<Boolean> fps = sgTopLeft.add(new BoolSetting.Builder()
             .name("fps")
             .description("Display fps.")
-            .group("Top Left")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<Boolean> ping = addSetting(new BoolSetting.Builder()
+    private Setting<Boolean> ping = sgTopLeft.add(new BoolSetting.Builder()
             .name("ping")
             .description("Display ping.")
-            .group("Top Left")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<Boolean> tps = addSetting(new BoolSetting.Builder()
+    private Setting<Boolean> tps = sgTopLeft.add(new BoolSetting.Builder()
             .name("tps")
             .description("Display tps.")
-            .group("Top Left")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<Boolean> speed = addSetting(new BoolSetting.Builder()
+    private Setting<Boolean> speed = sgTopLeft.add(new BoolSetting.Builder()
             .name("speed")
             .description("Display speed in blocks per second.")
-            .group("Top Left")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<Boolean> biome = addSetting(new BoolSetting.Builder()
+    private Setting<Boolean> biome = sgTopLeft.add(new BoolSetting.Builder()
             .name("biome")
             .description("Displays biome you are in.")
-            .group("Top Left")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<Boolean> time = addSetting(new BoolSetting.Builder()
+    private Setting<Boolean> time = sgTopLeft.add(new BoolSetting.Builder()
             .name("time")
             .description("Displays ingame time in ticks.")
-            .group("Top Left")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<Boolean> entities = addSetting(new BoolSetting.Builder()
+    private Setting<Boolean> entities = sgTopLeft.add(new BoolSetting.Builder()
             .name("entities")
             .description("Display number of entities.")
-            .group("Top Left")
             .defaultValue(true)
             .onChanged(aBoolean -> updateEntities = true)
             .build()
     );
 
-    private Setting<Boolean> entityCustomNames = addSetting(new BoolSetting.Builder()
+    private Setting<Boolean> entityCustomNames = sgTopLeft.add(new BoolSetting.Builder()
             .name("entity-custom-names")
             .description("Use custom names.")
-            .group("Top Left")
             .defaultValue(true)
             .onChanged(aBoolean -> updateEntities = true)
             .build()
     );
 
-    private Setting<Boolean> separateSheepsByColor = addSetting(new BoolSetting.Builder()
+    private Setting<Boolean> separateSheepsByColor = sgTopLeft.add(new BoolSetting.Builder()
             .name("separate-sheeps-by-color")
             .description("Separates sheeps by color in entity list.")
-            .group("Top Left")
             .defaultValue(false)
             .onChanged(aBoolean -> updateEntities = true)
             .build()
     );
 
-    private Setting<Boolean> activeModules = addSetting(new BoolSetting.Builder()
+    private Setting<Boolean> activeModules = sgTopRight.add(new BoolSetting.Builder()
             .name("active-modules")
             .description("Display active modules.")
-            .group("Top Right")
             .defaultValue(true)
             .build()
     );
 
-    public Setting<Boolean> potionTimers = addSetting(new BoolSetting.Builder()
+    public Setting<Boolean> potionTimers = sgBottomRight.add(new BoolSetting.Builder()
             .name("potion-timers")
             .description("Display potion timers and hide minecraft default potion icons.")
-            .group("Bottom Right")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<Boolean> position = addSetting(new BoolSetting.Builder()
+    private Setting<Boolean> position = sgBottomRight.add(new BoolSetting.Builder()
             .name("position")
             .description("Display your position.")
-            .group("Bottom Right")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<Boolean> rotation = addSetting(new BoolSetting.Builder()
+    private Setting<Boolean> rotation = sgBottomRight.add(new BoolSetting.Builder()
             .name("rotation")
             .description("Display your rotation.")
-            .group("Bottom Right")
-            .defaultValue(true)
-            .build()
-    );
-
-    private Setting<Boolean> armor = addSetting(new BoolSetting.Builder()
-            .name("armor")
-            .description("Diplays your armor above hotbar.")
             .defaultValue(true)
             .build()
     );

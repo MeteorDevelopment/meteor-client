@@ -5,7 +5,7 @@ import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.PotionSetting;
 import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.utils.InvUtils;
+import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.MyPotion;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.container.BrewingStandContainer;
@@ -23,14 +23,16 @@ public class AutoBrewer extends ToggleModule {
         Lingering
     }
 
-    private Setting<MyPotion> potion = addSetting(new PotionSetting.Builder()
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+
+    private Setting<MyPotion> potion = sgGeneral.add(new PotionSetting.Builder()
             .name("potion")
             .description("Potion to brew.")
             .defaultValue(MyPotion.Strength)
             .build()
     );
 
-    private Setting<Modifier> modifier = addSetting(new EnumSetting.Builder<Modifier>()
+    private Setting<Modifier> modifier = sgGeneral.add(new EnumSetting.Builder<Modifier>()
             .name("modifier")
             .description("Modifier.")
             .defaultValue(Modifier.None).build()

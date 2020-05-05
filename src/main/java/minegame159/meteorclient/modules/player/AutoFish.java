@@ -7,61 +7,55 @@ import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.events.packets.PlaySoundPacketEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
-import minegame159.meteorclient.settings.BoolSetting;
-import minegame159.meteorclient.settings.DoubleSetting;
-import minegame159.meteorclient.settings.IntSetting;
-import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.entity.projectile.FishingBobberEntity;
 import net.minecraft.item.FishingRodItem;
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
 
 public class AutoFish extends ToggleModule {
-    private Setting<Boolean> autoCast = addSetting(new BoolSetting.Builder()
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgSplashRangeDetection = settings.createGroup("Splash Sound Range Detection", "Allows you to use multiple accounts next to each other.", "splash-range-detection", false);
+
+    private Setting<Boolean> autoCast = sgGeneral.add(new BoolSetting.Builder()
             .name("auto-cast")
             .description("Automatically casts when not fishing.")
-            .group("General")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<Integer> ticksAutoCast = addSetting(new IntSetting.Builder()
+    private Setting<Integer> ticksAutoCast = sgGeneral.add(new IntSetting.Builder()
             .name("ticks-auto-cast")
             .description("Ticks to wait before auto casting.")
-            .group("General")
             .defaultValue(10)
             .min(0)
             .sliderMax(60)
             .build()
     );
 
-    private Setting<Integer> ticksCatch = addSetting(new IntSetting.Builder()
+    private Setting<Integer> ticksCatch = sgGeneral.add(new IntSetting.Builder()
             .name("ticks-catch")
             .description("Ticks to wait before catching the fish")
-            .group("General")
             .defaultValue(6)
             .min(0)
             .sliderMax(60)
             .build()
     );
 
-    private Setting<Integer> ticksThrow = addSetting(new IntSetting.Builder()
+    private Setting<Integer> ticksThrow = sgGeneral.add(new IntSetting.Builder()
             .name("ticks-throw")
             .description("Ticks to wait before throwing the bobber.")
-            .group("General")
             .defaultValue(14)
             .min(0)
             .sliderMax(60)
             .build()
     );
 
-    private Setting<Double> splashDetectionRange;
-    private Setting<Boolean> splashRangeDetection = addSetting(new BoolSetting.Builder()
-            .name("splash-range-detection")
-            .description("Allows you to use multiple accoutns next to each other.")
-            .group("Splash Sound Range Detection")
-            .defaultValue(false)
-            .onChanged(aBoolean -> splashDetectionRange.setVisible(aBoolean))
+    private Setting<Double> splashDetectionRange = sgSplashRangeDetection.add(new DoubleSetting.Builder()
+            .name("splash-detection-range")
+            .description("Detection range of splash sound. Low values will not work when TPS is low.")
+            .defaultValue(10)
+            .min(0)
             .build()
     );
 
@@ -76,16 +70,6 @@ public class AutoFish extends ToggleModule {
 
     public AutoFish() {
         super(Category.Player, "auto-fish", "Automatically fishes.");
-
-        splashDetectionRange = addSetting(new DoubleSetting.Builder()
-                .name("splash-detection-range")
-                .description("Detection range of splash sound. Low values will not work when TPS is low.")
-                .group("Splash Sound Range Detection")
-                .defaultValue(10)
-                .min(0)
-                .visible(false)
-                .build()
-        );
     }
 
     @Override
@@ -101,7 +85,7 @@ public class AutoFish extends ToggleModule {
         FishingBobberEntity b = mc.player.fishHook;
 
         if (p.getSound().getId().getPath().equals("entity.fishing_bobber.splash")) {
-            if (!splashRangeDetection.get() || Utils.distance(b.getX(), b.getY(), b.getZ(), p.getX(), p.getY(), p.getZ()) <= splashDetectionRange.get()) {
+            if (!sgSplashRangeDetection.isEnabled() || Utils.distance(b.getX(), b.getY(), b.getZ(), p.getX(), p.getY(), p.getZ()) <= splashDetectionRange.get()) {
                 ticksEnabled = true;
                 ticksToRightClick = ticksCatch.get();
                 ticksData = 0;
