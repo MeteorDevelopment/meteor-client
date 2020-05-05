@@ -49,7 +49,7 @@ public class BlockListSetting extends Setting<List<Block>> {
     }
 
     @Override
-    protected void resetWidget() {
+    public void resetWidget() {
 
     }
 

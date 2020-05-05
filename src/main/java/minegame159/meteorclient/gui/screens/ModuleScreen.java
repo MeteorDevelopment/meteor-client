@@ -30,7 +30,7 @@ public class ModuleScreen extends WindowScreen implements Listenable {
         row();
 
         if (module.settings.sizeGroups() > 0) {
-            add(module.settings.createTable()).fillX().expandX().getWidget();
+            add(module.settings.createTable(false)).fillX().expandX().getWidget();
         } else {
             add(new WHorizontalSeparator()).fillX().expandX();
             row();
