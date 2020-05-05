@@ -50,7 +50,7 @@ public class ColorSetting extends Setting<Color> {
     }
 
     @Override
-    protected void resetWidget() {
+    public void resetWidget() {
         quad.color.set(get());
     }
 

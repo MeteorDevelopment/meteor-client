@@ -72,9 +72,13 @@ public abstract class Setting<T> implements ISerializable<T> {
         if (onChanged != null) onChanged.accept(value);
     }
 
+    public void onActivated() {
+        if (onModuleActivated != null) onModuleActivated.accept(this);
+    }
+
     protected abstract T parseImpl(String str);
 
-    protected abstract void resetWidget();
+    public abstract void resetWidget();
 
     protected abstract boolean isValueValid(T value);
 

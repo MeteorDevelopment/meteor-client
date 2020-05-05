@@ -32,7 +32,7 @@ public class EnumSetting<T extends Enum<?>> extends Setting<T> {
     }
 
     @Override
-    protected void resetWidget() {
+    public void resetWidget() {
         ((WEnumButton<T>) widget).setValue(get());
     }
 
