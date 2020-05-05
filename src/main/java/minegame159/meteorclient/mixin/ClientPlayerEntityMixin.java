@@ -37,8 +37,9 @@ public abstract class ClientPlayerEntityMixin {
         CommandDispatcher.run(msg.substring(Config.INSTANCE.getPrefix().length()));
     }
 
-    @Redirect(method = "updateNausea", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/MinecraftClient;openScreen(Lnet/minecraft/client/gui/screen/Screen;)V"))
-    private void updateNauseaOpenScreenProxy(MinecraftClient mc, Screen screen) {
-        if (!ModuleManager.INSTANCE.isActive(Portals.class)) mc.openScreen(screen);
+    @Redirect(method = "updateNausea", at = @At(value = "FIELD", target = "Lnet/minecraft/client/MinecraftClient;currentScreen:Lnet/minecraft/client/gui/screen/Screen;"))
+    private Screen updateNauseaGetCurrentScreenProxy(MinecraftClient client) {
+        if (ModuleManager.INSTANCE.isActive(Portals.class)) return null;
+        return client.currentScreen;
     }
 }
