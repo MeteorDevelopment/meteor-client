@@ -44,14 +44,22 @@ public class Settings implements Iterable<Setting<?>> {
         return createGroup(name, null, null, false, null);
     }
 
-    public WTable createTable() {
+    public WTable createTable(boolean activate) {
         table = new WTable();
+
+        for (Setting<?> setting : this) {
+            if (activate) setting.onActivated();
+            setting.resetWidget();
+        }
 
         for (SettingGroup group : groups) {
             group.fillTable(table);
         }
 
         return table;
+    }
+    public WTable createTable() {
+        return createTable(true);
     }
 
     void refreshTable() {

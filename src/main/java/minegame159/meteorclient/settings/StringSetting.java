@@ -30,7 +30,7 @@ public class StringSetting extends Setting<String> {
     }
 
     @Override
-    protected void resetWidget() {
+    public void resetWidget() {
         ((WTextBox) widget).text = get();
     }
 

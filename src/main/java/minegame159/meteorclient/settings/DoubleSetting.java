@@ -32,7 +32,7 @@ public class DoubleSetting extends Setting<Double> {
     }
 
     @Override
-    protected void resetWidget() {
+    public void resetWidget() {
         ((WDoubleEdit) widget).set(get());
     }
 

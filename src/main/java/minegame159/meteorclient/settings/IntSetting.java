@@ -32,7 +32,7 @@ public class IntSetting extends Setting<Integer> {
     }
 
     @Override
-    protected void resetWidget() {
+    public void resetWidget() {
         ((WIntEdit) widget).set(get());
     }
 
