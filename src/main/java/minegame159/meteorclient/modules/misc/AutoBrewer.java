@@ -6,6 +6,7 @@ import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.PotionSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.utils.InvUtils;
 import minegame159.meteorclient.utils.MyPotion;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.container.BrewingStandContainer;
