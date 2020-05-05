@@ -2,9 +2,12 @@ package minegame159.meteorclient.gui.screens.topbar;
 
 import minegame159.meteorclient.Config;
 import minegame159.meteorclient.gui.TopBarType;
+import minegame159.meteorclient.gui.widgets.WWindow;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.settings.ColorSetting;
+import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.settings.Settings;
 import minegame159.meteorclient.settings.StringSetting;
 import minegame159.meteorclient.utils.Color;
 
@@ -12,10 +15,14 @@ public class TopBarConfig extends TopBarScreen {
     public TopBarConfig() {
         super(TopBarType.Config);
 
-        addSetting(new StringSetting.Builder()
+        Settings s = new Settings();
+
+        SettingGroup sgGeneral = s.getDefaultGroup();
+        SettingGroup sgCategoryColors = s.createGroup("Category Colors");
+
+        sgGeneral.add(new StringSetting.Builder()
                 .name("prefix")
                 .description("Prefix.")
-                .group("General")
                 .defaultValue(".")
                 .onChanged(Config.INSTANCE::setPrefix)
                 .onModuleActivated(stringSetting -> stringSetting.set(Config.INSTANCE.getPrefix()))
@@ -23,10 +30,9 @@ public class TopBarConfig extends TopBarScreen {
         );
 
         for (Category category : ModuleManager.CATEGORIES) {
-            addSetting(new ColorSetting.Builder()
+            sgCategoryColors.add(new ColorSetting.Builder()
                     .name(category.toString().toLowerCase() + "-color")
                     .description(category.toString() + " color.")
-                    .group("Category Colors")
                     .defaultValue(new Color(0, 0, 0, 0))
                     .onChanged(color1 -> Config.INSTANCE.setCategoryColor(category, color1))
                     .onModuleActivated(colorSetting -> {
@@ -38,7 +44,8 @@ public class TopBarConfig extends TopBarScreen {
             );
         }
 
-        createSettingsWindow();
+        WWindow window = add(new WWindow(title, true)).centerXY().getWidget();
+        window.add(s.createTable()).fillX().expandX();
     }
 
     @Override

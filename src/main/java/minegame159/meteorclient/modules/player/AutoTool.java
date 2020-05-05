@@ -9,6 +9,7 @@ import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.SettingGroup;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -24,21 +25,23 @@ public class AutoTool extends ToggleModule {
         SilkTouch
     }
 
-    private Setting<Prefer> prefer = addSetting(new EnumSetting.Builder<Prefer>()
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+
+    private Setting<Prefer> prefer = sgGeneral.add(new EnumSetting.Builder<Prefer>()
             .name("prefer")
             .description("Prefer silk touch, fortune or none.")
             .defaultValue(Prefer.Fortune)
             .build()
     );
 
-    private Setting<Boolean> preferMending = addSetting(new BoolSetting.Builder()
+    private Setting<Boolean> preferMending = sgGeneral.add(new BoolSetting.Builder()
             .name("prefer-mending")
             .description("Prefers mending.")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<Boolean> enderChestOnlyWithSilkTouch = addSetting(new BoolSetting.Builder()
+    private Setting<Boolean> enderChestOnlyWithSilkTouch = sgGeneral.add(new BoolSetting.Builder()
             .name("ender-chest-only-with-silk-touch")
             .description("Mine ender chest only wiht silk touch.")
             .defaultValue(true)

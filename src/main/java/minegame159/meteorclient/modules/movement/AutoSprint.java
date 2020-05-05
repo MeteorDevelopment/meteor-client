@@ -8,6 +8,7 @@ import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.SettingGroup;
 
 public class AutoSprint extends ToggleModule {
     public enum Mode {
@@ -15,7 +16,9 @@ public class AutoSprint extends ToggleModule {
         Legit
     }
 
-    private Setting<Mode> mode = addSetting(new EnumSetting.Builder<Mode>()
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+
+    private Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("mode")
             .description("Mode.")
             .defaultValue(Mode.Always)

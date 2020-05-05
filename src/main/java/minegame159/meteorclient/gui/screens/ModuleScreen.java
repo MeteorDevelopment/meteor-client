@@ -5,12 +5,10 @@ import me.zero.alpine.listener.Listenable;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.ModuleBindChangedEvent;
-import minegame159.meteorclient.gui.GuiRenderer;
+import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
-import minegame159.meteorclient.gui.widgets.*;
-import minegame159.meteorclient.settings.Setting;
 import org.lwjgl.glfw.GLFW;
 
 public class ModuleScreen extends WindowScreen implements Listenable {
@@ -30,32 +28,17 @@ public class ModuleScreen extends WindowScreen implements Listenable {
         // Description
         add(new WLabel(module.description));
         row();
-        if (module.settingGroups.size() <= 1) {
+
+        if (module.settings.sizeGroups() > 0) {
+            add(module.settings.createTable(false)).fillX().expandX().getWidget();
+        } else {
             add(new WHorizontalSeparator()).fillX().expandX();
-            row();
-        }
-
-        // Settings
-        if (module.settingGroups.size() > 0) {
-            WTable table = add(new WTable()).fillX().expandX().getWidget();
-            for (String group : module.settingGroups.keySet()) {
-                if (module.settingGroups.size() > 1) {
-                    table.add(new WHorizontalSeparator(group)).fillX().expandX();
-                    table.row();
-                }
-
-                for (Setting<?> setting : module.settingGroups.get(group)) {
-                    if (setting.isVisible()) {
-                        generateSettingToGrid(table, setting);
-                    }
-                }
-            }
             row();
         }
 
         WWidget customWidget = module.getWidget();
         if (customWidget != null) {
-            if (module.settings.size() > 0) {
+            if (module.settings.sizeGroups() > 0) {
                 add(new WHorizontalSeparator()).fillX().expandX();
                 row();
             }
@@ -65,7 +48,7 @@ public class ModuleScreen extends WindowScreen implements Listenable {
         }
 
         if (module instanceof ToggleModule) {
-            if (customWidget != null || module.settings.size() > 0) {
+            if (customWidget != null || module.settings.sizeGroups() > 0) {
                 add(new WHorizontalSeparator()).fillX().expandX();
                 row();
             }
@@ -102,13 +85,6 @@ public class ModuleScreen extends WindowScreen implements Listenable {
     protected void init() {
         super.init();
         MeteorClient.EVENT_BUS.subscribe(this);
-
-        for (Setting<?> setting : module.settings) {
-            setting.setVisibleListener(() -> {
-                clear();
-                initWidgets();
-            });
-        }
     }
 
     @EventHandler
@@ -119,20 +95,6 @@ public class ModuleScreen extends WindowScreen implements Listenable {
         }
     });
 
-    public static void generateSettingToGrid(WTable table, Setting<?> setting) {
-        WLabel name = table.add(new WLabel(setting.title + ":")).getWidget();
-        name.tooltip = setting.description;
-
-        WWidget s = table.add(setting.widget).getWidget();
-        s.tooltip = setting.description;
-
-        WButton reset = table.add(new WButton(GuiRenderer.TEX_RESET)).fillX().right().getWidget();
-        reset.tooltip = "Reset";
-        reset.action = button -> setting.reset();
-
-        table.row();
-    }
-
     private String getBindLabelText() {
         return "Bind: " + (module.getKey() == -1 ? "none" : GLFW.glfwGetKeyName(module.getKey(), 0));
     }
@@ -140,10 +102,6 @@ public class ModuleScreen extends WindowScreen implements Listenable {
     @Override
     public void onClose() {
         MeteorClient.EVENT_BUS.unsubscribe(this);
-        for (Setting<?> setting : module.settings) {
-            setting.setVisibleListener(null);
-        }
-
         super.onClose();
     }
 }

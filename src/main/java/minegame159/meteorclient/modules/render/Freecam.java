@@ -9,6 +9,7 @@ import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.SettingGroup;
 import net.minecraft.client.network.OtherClientPlayerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
@@ -17,7 +18,9 @@ import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.math.Vec3d;
 
 public class Freecam extends ToggleModule {
-    private Setting<Double> speed = addSetting(new DoubleSetting.Builder()
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    
+    private Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
             .name("speed")
             .description("Speed")
             .defaultValue(1.0)

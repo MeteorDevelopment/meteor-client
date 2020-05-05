@@ -6,10 +6,7 @@ import minegame159.meteorclient.events.DamageEvent;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
-import minegame159.meteorclient.settings.BoolSetting;
-import minegame159.meteorclient.settings.DoubleSetting;
-import minegame159.meteorclient.settings.EnumSetting;
-import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.InvUtils;
 import net.minecraft.block.entity.BedBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
@@ -49,28 +46,30 @@ public class AutoArmor extends ToggleModule {
         }
     }
 
-    private Setting<Protection> prioritizeProtection = addSetting(new EnumSetting.Builder<Protection>()
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+
+    private Setting<Protection> prioritizeProtection = sgGeneral.add(new EnumSetting.Builder<Protection>()
             .name("prioritize")
             .description("Which protection to prioritize.")
             .defaultValue(Protection.Protection)
             .build()
     );
 
-    private Setting<Boolean> considerFrostWalker = addSetting(new BoolSetting.Builder()
+    private Setting<Boolean> considerFrostWalker = sgGeneral.add(new BoolSetting.Builder()
             .name("consider-frost-walker")
             .description("Consider frost walker.")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<Boolean> switchToBlastProtWhenNearCrystalOrBed = addSetting(new BoolSetting.Builder()
+    private Setting<Boolean> switchToBlastProtWhenNearCrystalOrBed = sgGeneral.add(new BoolSetting.Builder()
             .name("switch-to-blast-prot-when-near-crystal-or-bed")
             .description("Switches to blast protection when near crystals or beds when not in overworld.")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<Double> crystalAndBedDetectionDistance = addSetting(new DoubleSetting.Builder()
+    private Setting<Double> crystalAndBedDetectionDistance = sgGeneral.add(new DoubleSetting.Builder()
             .name("crystal-and-bed-detection-distance")
             .description("Crystal and bed detection distance")
             .defaultValue(5)

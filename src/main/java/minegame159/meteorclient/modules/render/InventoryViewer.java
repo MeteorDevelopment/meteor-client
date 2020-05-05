@@ -6,10 +6,7 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.Render2DEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
-import minegame159.meteorclient.settings.BoolSetting;
-import minegame159.meteorclient.settings.EnumSetting;
-import minegame159.meteorclient.settings.IntSetting;
-import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.AlignmentX;
 import minegame159.meteorclient.utils.AlignmentY;
 import net.minecraft.client.gui.DrawableHelper;
@@ -18,41 +15,41 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 
 public class InventoryViewer extends ToggleModule {
-    private Setting<Boolean> drawBackground = addSetting(new BoolSetting.Builder()
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgX = settings.createGroup("X");
+    private final SettingGroup sgY = settings.createGroup("Y");
+    
+    private Setting<Boolean> drawBackground = sgGeneral.add(new BoolSetting.Builder()
             .name("draw-background")
             .description("Draws inventory background.")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<AlignmentX> xAlignment = addSetting(new EnumSetting.Builder<AlignmentX>()
+    private Setting<AlignmentX> xAlignment = sgX.add(new EnumSetting.Builder<AlignmentX>()
             .name("x-alignment")
             .description("X alignment.")
-            .group("X")
             .defaultValue(AlignmentX.Left)
             .build()
     );
 
-    private Setting<Integer> xOffset = addSetting(new IntSetting.Builder()
+    private Setting<Integer> xOffset = sgX.add(new IntSetting.Builder()
             .name("x-offset")
             .description("X offset.")
-            .group("X")
             .defaultValue(3)
             .build()
     );
 
-    private Setting<AlignmentY> yAlignment = addSetting(new EnumSetting.Builder<AlignmentY>()
+    private Setting<AlignmentY> yAlignment = sgY.add(new EnumSetting.Builder<AlignmentY>()
             .name("y-alignment")
             .description("Y alignment.")
-            .group("Y")
             .defaultValue(AlignmentY.Bottom)
             .build()
     );
 
-    private Setting<Integer> yOffset = addSetting(new IntSetting.Builder()
+    private Setting<Integer> yOffset = sgY.add(new IntSetting.Builder()
             .name("y-offset")
             .description("Y offset.")
-            .group("Y")
             .defaultValue(3)
             .build()
     );

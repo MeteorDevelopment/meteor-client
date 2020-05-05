@@ -7,6 +7,7 @@ import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.InvUtils;
 import net.minecraft.client.gui.screen.ingame.ContainerScreen;
 import net.minecraft.container.SlotActionType;
@@ -16,7 +17,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.SwordItem;
 
 public class AutoMend extends ToggleModule {
-    private Setting<Boolean> swords = addSetting(new BoolSetting.Builder()
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    
+    private Setting<Boolean> swords = sgGeneral.add(new BoolSetting.Builder()
             .name("swords")
             .description("Move swords.")
             .defaultValue(true)

@@ -9,8 +9,8 @@ public class IntSetting extends Setting<Integer> {
     private final Integer min, max;
     private final Integer sliderMin, sliderMax;
 
-    private IntSetting(String name, String description, String group, Integer defaultValue, Consumer<Integer> onChanged, Consumer<Setting<Integer>> onModuleActivated, Integer min, Integer max, Integer sliderMin, Integer sliderMax, boolean visible) {
-        super(name, description, group, defaultValue, onChanged, onModuleActivated, visible);
+    private IntSetting(String name, String description, Integer defaultValue, Consumer<Integer> onChanged, Consumer<Setting<Integer>> onModuleActivated, Integer min, Integer max, Integer sliderMin, Integer sliderMax) {
+        super(name, description, defaultValue, onChanged, onModuleActivated);
         this.min = min;
         this.max = max;
         this.sliderMin = sliderMin;
@@ -32,7 +32,7 @@ public class IntSetting extends Setting<Integer> {
     }
 
     @Override
-    protected void resetWidget() {
+    public void resetWidget() {
         ((WIntEdit) widget).set(get());
     }
 
@@ -72,13 +72,11 @@ public class IntSetting extends Setting<Integer> {
 
     public static class Builder {
         private String name = "undefined", description = "";
-        private String group;
         private Integer defaultValue;
         private Consumer<Integer> onChanged;
         private Consumer<Setting<Integer>> onModuleActivated;
         private Integer min, max;
         private Integer sliderMin, sliderMax;
-        private boolean visible = true;
 
         public Builder name(String name) {
             this.name = name;
@@ -87,11 +85,6 @@ public class IntSetting extends Setting<Integer> {
 
         public Builder description(String description) {
             this.description = description;
-            return this;
-        }
-
-        public Builder group(String group) {
-            this.group = group;
             return this;
         }
 
@@ -130,13 +123,8 @@ public class IntSetting extends Setting<Integer> {
             return this;
         }
 
-        public Builder visible(boolean visible) {
-            this.visible = visible;
-            return this;
-        }
-
         public IntSetting build() {
-            return new IntSetting(name, description, group, defaultValue, onChanged, onModuleActivated, min, max, sliderMin, sliderMax, visible);
+            return new IntSetting(name, description, defaultValue, onChanged, onModuleActivated, min, max, sliderMin, sliderMax);
         }
     }
 }

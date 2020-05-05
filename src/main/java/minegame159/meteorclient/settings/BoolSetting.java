@@ -6,8 +6,8 @@ import net.minecraft.nbt.CompoundTag;
 import java.util.function.Consumer;
 
 public class BoolSetting extends Setting<Boolean> {
-    private BoolSetting(String name, String description, String group, Boolean defaultValue, Consumer<Boolean> onChanged, Consumer<Setting<Boolean>> onModuleActivated, boolean visible) {
-        super(name, description, group, defaultValue, onChanged, onModuleActivated, visible);
+    private BoolSetting(String name, String description, Boolean defaultValue, Consumer<Boolean> onChanged, Consumer<Setting<Boolean>> onModuleActivated) {
+        super(name, description, defaultValue, onChanged, onModuleActivated);
 
         widget = new WCheckbox(get());
         ((WCheckbox) widget).action = checkbox -> set(checkbox.checked);
@@ -22,7 +22,7 @@ public class BoolSetting extends Setting<Boolean> {
     }
 
     @Override
-    protected void resetWidget() {
+    public void resetWidget() {
         ((WCheckbox) widget).checked = get();
     }
 
@@ -52,11 +52,9 @@ public class BoolSetting extends Setting<Boolean> {
 
     public static class Builder {
         private String name = "undefined", description = "";
-        private String group;
         private Boolean defaultValue;
         private Consumer<Boolean> onChanged;
         private Consumer<Setting<Boolean>> onModuleActivated;
-        private boolean visible = true;
 
         public Builder name(String name) {
             this.name = name;
@@ -65,11 +63,6 @@ public class BoolSetting extends Setting<Boolean> {
 
         public Builder description(String description) {
             this.description = description;
-            return this;
-        }
-
-        public Builder group(String group) {
-            this.group = group;
             return this;
         }
 
@@ -88,13 +81,8 @@ public class BoolSetting extends Setting<Boolean> {
             return this;
         }
 
-        public Builder visible(boolean visible) {
-            this.visible = visible;
-            return this;
-        }
-
         public BoolSetting build() {
-            return new BoolSetting(name, description, group, defaultValue, onChanged, onModuleActivated, visible);
+            return new BoolSetting(name, description, defaultValue, onChanged, onModuleActivated);
         }
     }
 }

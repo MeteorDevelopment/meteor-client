@@ -6,10 +6,7 @@ import minegame159.meteorclient.events.RenderEvent;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
-import minegame159.meteorclient.settings.BoolSetting;
-import minegame159.meteorclient.settings.ColorSetting;
-import minegame159.meteorclient.settings.IntSetting;
-import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.Pool;
 import minegame159.meteorclient.utils.RenderUtils;
@@ -21,35 +18,35 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class HoleESP extends ToggleModule {
-    private Setting<Integer> horizontalRadius = addSetting(new IntSetting.Builder()
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgColors = settings.createGroup("Colors");
+    
+    private Setting<Integer> horizontalRadius = sgGeneral.add(new IntSetting.Builder()
             .name("horizontal-radius")
             .description("Horizontal radius in which to search for holes.")
-            .group("General")
             .defaultValue(10)
             .min(0)
             .sliderMax(32)
             .build()
     );
 
-    private Setting<Integer> verticalRadius = addSetting(new IntSetting.Builder()
+    private Setting<Integer> verticalRadius = sgGeneral.add(new IntSetting.Builder()
             .name("vertical-radius")
             .description("Vertical radius in which to search for holes.")
-            .group("General")
             .defaultValue(10)
             .min(0)
             .sliderMax(32)
             .build()
     );
 
-    private Setting<Boolean> renderBox = addSetting(new BoolSetting.Builder()
+    private Setting<Boolean> renderBox = sgGeneral.add(new BoolSetting.Builder()
             .name("render-box")
             .description("Renders box instead of a quad.")
-            .group("General")
             .defaultValue(false)
             .build()
     );
 
-    private Setting<Integer> holeHeight = addSetting(new IntSetting.Builder()
+    private Setting<Integer> holeHeight = sgGeneral.add(new IntSetting.Builder()
             .name("hole-height")
             .description("Minimum hole height required to be rendered.")
             .defaultValue(3)
@@ -57,26 +54,23 @@ public class HoleESP extends ToggleModule {
             .build()
     );
 
-    private Setting<Color> allBedrock = addSetting(new ColorSetting.Builder()
+    private Setting<Color> allBedrock = sgColors.add(new ColorSetting.Builder()
             .name("all-bedrock")
             .description("All blocks are bedrock.")
-            .group("Colors")
             .defaultValue(new Color(25, 225, 25))
             .build()
     );
 
-    private Setting<Color> someObsidian = addSetting(new ColorSetting.Builder()
+    private Setting<Color> someObsidian = sgColors.add(new ColorSetting.Builder()
             .name("some-obsidian")
             .description("Some blocks are obsidian.")
-            .group("Colors")
             .defaultValue(new Color(225, 145, 25))
             .build()
     );
 
-    private Setting<Color> allObsidian = addSetting(new ColorSetting.Builder()
+    private Setting<Color> allObsidian = sgColors.add(new ColorSetting.Builder()
             .name("all-obsidian")
             .description("All blocks are obsidian.")
-            .group("Colors")
             .defaultValue(new Color(225, 25, 25))
             .build()
     );

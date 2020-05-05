@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 public class NbtUtils {
-    public static <T extends ISerializable<?>> ListTag listToTag(List<T> list) {
+    public static <T extends ISerializable<?>> ListTag listToTag(Iterable<T> list) {
         ListTag tag = new ListTag();
         for (T item : list) tag.add(item.toTag());
         return tag;

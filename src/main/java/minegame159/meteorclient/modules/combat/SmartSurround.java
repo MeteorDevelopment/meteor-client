@@ -12,9 +12,9 @@ import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.DamageCalcUtils;
 import minegame159.meteorclient.utils.Utils;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.BlockItem;
@@ -28,8 +28,19 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.RayTraceContext;
 
 public class SmartSurround extends ToggleModule {
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final MinecraftClient mc = MinecraftClient.getInstance();
+    private final Setting<Boolean> onlyObsidian = sgGeneral.add(new BoolSetting.Builder()
+            .name("only-obsidian")
+            .description("Only uses Obsidian")
+            .defaultValue(false)
+            .build());
+
+    private final Setting<Double> minDamage = sgGeneral.add(new DoubleSetting.Builder()
+            .name("min-damage")
+            .description("The minimum damage before this activates.")
+            .defaultValue(5.5)
+            .build());
 
     private int oldSlot;
 
@@ -40,18 +51,6 @@ public class SmartSurround extends ToggleModule {
     private int rPosZ;
 
     private Entity crystal;
-
-    private final Setting<Boolean> onlyObsidian = addSetting(new BoolSetting.Builder()
-            .name("only-obsidian")
-            .description("Only uses Obsidian")
-            .defaultValue(false)
-            .build());
-
-    private final Setting<Double> minDamage = addSetting(new DoubleSetting.Builder()
-            .name("min-damage")
-            .description("The minimum damage before this activates.")
-            .defaultValue(5.5)
-            .build());
 
     public SmartSurround(){
         super(Category.Combat, "smart-surround", "Tries to save you from crystals automatically.");
