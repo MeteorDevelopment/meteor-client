@@ -22,7 +22,7 @@ public class BoolSetting extends Setting<Boolean> {
     }
 
     @Override
-    protected void resetWidget() {
+    public void resetWidget() {
         ((WCheckbox) widget).checked = get();
     }
 

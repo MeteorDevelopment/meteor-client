@@ -17,7 +17,7 @@ public class PotionSetting extends EnumSetting<MyPotion> {
     }
 
     @Override
-    protected void resetWidget() {
+    public void resetWidget() {
         ((WItemWithLabel) widget).set(get().potion);
         widget.layout();
     }

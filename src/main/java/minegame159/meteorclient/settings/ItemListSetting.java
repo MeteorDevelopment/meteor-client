@@ -49,7 +49,7 @@ public class ItemListSetting extends Setting<List<Item>> {
     }
 
     @Override
-    protected void resetWidget() {
+    public void resetWidget() {
 
     }
 
