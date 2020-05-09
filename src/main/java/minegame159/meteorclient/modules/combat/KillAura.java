@@ -96,7 +96,14 @@ public class KillAura extends ToggleModule {
                 .min(0)
                 .sliderMax(60)
                 .build()
-        );
+    );
+
+    private Setting<Boolean> salt = sgDelayDisabled.add(sgDelay.add(new BoolSetting.Builder()
+            .name("anti-anti-cheat")
+            .description("Adds a random delay to hits to try and bypass anti-cheats")
+            .defaultValue(false)
+            .build())
+    );
 
     private Setting<Boolean> salt = sgDelayDisabled.add(sgDelay.add(new BoolSetting.Builder()
             .name("anti-anti-cheat")
@@ -185,6 +192,7 @@ public class KillAura extends ToggleModule {
                 .filter(entity -> entity.getHealth() > 0)
                 .min(this::sort)
                 .ifPresent(entity -> {
+                    if (salt.get() && Math.random() < 0.9) return;
                     if (rotate.get()) {
                         ((IVec3d) vec3d1).set(entity.x, entity.y + entity.getHeight() / 2, entity.z);
                         mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, vec3d1);
