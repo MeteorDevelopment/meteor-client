@@ -8,7 +8,6 @@ import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
@@ -24,13 +23,13 @@ public class DamageCalcUtils {
     public static MinecraftClient mc = MinecraftClient.getInstance();
 
     //Always Calculate damage, then armour, then enchantments, then potion effect
-    public static double crystalDamage(Entity player, Entity crystal){
+    public static double crystalDamage(Entity player, Vec3d crystal){
         boolean feetExposed = mc.world.rayTrace(
-                new RayTraceContext(player.getPos(), crystal.getPos(),
+                new RayTraceContext(player.getPos(), crystal,
                         RayTraceContext.ShapeType.COLLIDER, RayTraceContext.FluidHandling.NONE, player)).getType()
                 == HitResult.Type.MISS;
         boolean headExposed = mc.world.rayTrace(
-                new RayTraceContext(player.getPos().add(0, 1, 0), crystal.getPos(),
+                new RayTraceContext(player.getPos().add(0, 1, 0), crystal,
                         RayTraceContext.ShapeType.COLLIDER, RayTraceContext.FluidHandling.NONE, player)).getType()
                 == HitResult.Type.MISS;
         double exposure = 0D;
@@ -41,7 +40,7 @@ public class DamageCalcUtils {
         }else if(feetExposed){
             exposure = 0.8D;
         }
-        double impact = (1D - mc.player.distanceTo(crystal) / 12D)*exposure;
+        double impact = (1D - mc.player.squaredDistanceTo(crystal) / 12D)*exposure;
         return (impact*impact+impact)*42+1;
     }
 

@@ -102,7 +102,7 @@ public class AutoTotem extends ToggleModule {
         for(int i = 0; entities.hasNext(); i++){
             Entity entity = entities.next();
             if(entity instanceof EnderCrystalEntity){
-                damageTaken = DamageCalcUtils.resistanceReduction(mc.player, DamageCalcUtils.blastProtReduction(mc.player, DamageCalcUtils.armourCalc(mc.player, DamageCalcUtils.getDamageMultiplied(DamageCalcUtils.crystalDamage(mc.player, entity)))));
+                damageTaken = DamageCalcUtils.resistanceReduction(mc.player, DamageCalcUtils.blastProtReduction(mc.player, DamageCalcUtils.armourCalc(mc.player, DamageCalcUtils.getDamageMultiplied(DamageCalcUtils.crystalDamage(mc.player, entity.getPos())))));
             }else if(entity instanceof PlayerEntity){
                 if(!FriendManager.INSTANCE.isTrusted((PlayerEntity) entity) && mc.player.getPos().distanceTo(entity.getPos()) < 5){
                     if(((PlayerEntity) entity).getActiveItem().getItem() instanceof SwordItem){
