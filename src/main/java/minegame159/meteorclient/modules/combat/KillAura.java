@@ -93,6 +93,7 @@ public class KillAura extends ToggleModule {
     );
 
     private Setting<Integer> hitDelay;
+
     private Setting<Boolean> smartDelay = addSetting(new BoolSetting.Builder()
             .name("smart-delay")
             .description("Smart delay.")
@@ -102,6 +103,13 @@ public class KillAura extends ToggleModule {
                 hitDelayTimer = 0;
             })
             .defaultValue(true)
+            .build()
+    );
+
+    private Setting<Boolean> salt = addSetting(new BoolSetting.Builder()
+            .name("anti-anti-cheat")
+            .description("Adds a random delay to hits to try and bypass anti-cheats")
+            .defaultValue(false)
             .build()
     );
 
@@ -178,10 +186,16 @@ public class KillAura extends ToggleModule {
 
         if (smartDelay.get()) {
             // Smart delay
-            if (mc.player.getAttackCooldownProgress(0.5f) < 1) return;
+            float delay = mc.player.getAttackCooldownProgress(0.5f);
+            if(salt.get()){
+                delay -= Math.random() * 0.3;
+            }
+            if (delay < 1) return;
         } else {
             // Manual delay
-            if (hitDelayTimer < hitDelay.get()) {
+            int delay = hitDelay.get();
+            if(salt.get())delay += Math.random() * 3;
+            if (hitDelayTimer < delay) {
                 hitDelayTimer++;
                 return;
             }
