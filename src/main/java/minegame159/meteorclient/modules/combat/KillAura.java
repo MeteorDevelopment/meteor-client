@@ -96,6 +96,13 @@ public class KillAura extends ToggleModule {
                 .min(0)
                 .sliderMax(60)
                 .build()
+                                                            
+    private Setting<Boolean> salt = sgDelayDisabled.add(sgDelay.add(new BoolSetting.Builder()
+            .name("anti-anti-cheat")
+            .description("Adds a random delay to hits to try and bypass anti-cheats")
+            .defaultValue(false)
+            .build())
+    );
 
     private int hitDelayTimer;
 
