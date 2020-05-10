@@ -31,8 +31,9 @@ public class KillAura extends ToggleModule {
     private final SettingGroup sgToAttack = settings.createGroup("To Attack");
     private final SettingGroup sgDelay = settings.createGroup("Delay", "smart-delay", "Smart delay.", true);
     private final SettingGroup sgDelayDisabled = sgDelay.getDisabledGroup();
+    private final SettingGroup sgRandomDelay = settings.createGroup("Random Delay", "random-delay-enabled", "Adds a random delay to hits to try and bypass anti-cheats.", false);
 
-    public Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()
+    public final Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()
             .name("range")
             .description("Attack range.")
             .defaultValue(5.5)
@@ -40,74 +41,78 @@ public class KillAura extends ToggleModule {
             .build()
     );
 
-    public Setting<Boolean> ignoreWalls = sgGeneral.add(new BoolSetting.Builder()
+    public final Setting<Boolean> ignoreWalls = sgGeneral.add(new BoolSetting.Builder()
             .name("ignore-walls")
             .description("Attack through walls.")
             .defaultValue(true)
             .build()
     );
 
-    public Setting<Priority> priority = sgGeneral.add(new EnumSetting.Builder<Priority>()
+    public final Setting<Priority> priority = sgGeneral.add(new EnumSetting.Builder<Priority>()
             .name("priority")
             .description("What entities to target.")
             .defaultValue(Priority.LowestHealth)
             .build()
     );
 
-    private Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
             .name("rotate")
             .description("Rotates you towards the target.")
             .defaultValue(false)
             .build()
     );
 
-    public Setting<Boolean> players = sgGeneral.add(new BoolSetting.Builder()
+    public final Setting<Boolean> players = sgGeneral.add(new BoolSetting.Builder()
             .name("players")
             .description("Attack players.")
             .defaultValue(true)
             .build()
     );
 
-    public Setting<Boolean> friends = sgToAttack.add(new BoolSetting.Builder()
+    public final Setting<Boolean> friends = sgToAttack.add(new BoolSetting.Builder()
             .name("friends")
             .description("Attack friends, useful only if attack players is on.")
             .defaultValue(false)
             .build()
     );
 
-    public Setting<Boolean> animals = sgToAttack.add(new BoolSetting.Builder()
+    public final Setting<Boolean> animals = sgToAttack.add(new BoolSetting.Builder()
             .name("animals")
             .description("Attack animals.")
             .defaultValue(true)
             .build()
     );
 
-    public Setting<Boolean> mobs = sgToAttack.add(new BoolSetting.Builder()
+    public final Setting<Boolean> mobs = sgToAttack.add(new BoolSetting.Builder()
             .name("mobs")
             .description("Attack mobs.")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<Integer> hitDelay = sgDelayDisabled.add(new IntSetting.Builder()
+    private final Setting<Integer> hitDelay = sgDelayDisabled.add(new IntSetting.Builder()
             .name("hit-delay")
                 .description("Hit delay in ticks. 20 ticks = 1 second.")
                 .defaultValue(0)
                 .min(0)
                 .sliderMax(60)
                 .build()
+    );
                                                             
-    private Setting<Boolean> salt = sgDelayDisabled.add(sgDelay.add(new BoolSetting.Builder()
-            .name("anti-anti-cheat")
-            .description("Adds a random delay to hits to try and bypass anti-cheats")
-            .defaultValue(false)
-            .build())
+    private final Setting<Integer> randomDelayMax = sgRandomDelay.add(new IntSetting.Builder()
+            .name("random-delay-max")
+            .description("Maximum random value for random delay.")
+            .defaultValue(4)
+            .min(0)
+            .sliderMax(20)
+            .build()
     );
 
     private int hitDelayTimer;
+    private int randomHitDelayTimer;
 
-    private Vec3d vec3d1 = new Vec3d(0, 0, 0);
-    private Vec3d vec3d2 = new Vec3d(0, 0, 0);
+    private final Vec3d vec3d1 = new Vec3d(0, 0, 0);
+    private final Vec3d vec3d2 = new Vec3d(0, 0, 0);
 
     public KillAura() {
         super(Category.Combat, "kill-aura", "Automatically attacks entities.");
@@ -116,6 +121,7 @@ public class KillAura extends ToggleModule {
     @Override
     public void onActivate() {
         hitDelayTimer = 0;
+        randomHitDelayTimer = 0;
     }
 
     private boolean isInRange(Entity entity) {
@@ -176,6 +182,14 @@ public class KillAura extends ToggleModule {
             else hitDelayTimer = 0;
         }
 
+        // Random hit delay
+        if (sgRandomDelay.isEnabled()) {
+            if (randomHitDelayTimer > 0) {
+                randomHitDelayTimer--;
+                return;
+            }
+        }
+
         Streams.stream(mc.world.getEntities())
                 .filter(this::isInRange)
                 .filter(this::canAttackEntity)
@@ -184,13 +198,18 @@ public class KillAura extends ToggleModule {
                 .filter(entity -> entity.getHealth() > 0)
                 .min(this::sort)
                 .ifPresent(entity -> {
-                    if (salt.get() && Math.random() < 0.9) return;
+                    // Rotate
                     if (rotate.get()) {
                         ((IVec3d) vec3d1).set(entity.x, entity.y + entity.getHeight() / 2, entity.z);
                         mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, vec3d1);
                     }
+
+                    // Attack
                     mc.interactionManager.attackEntity(mc.player, entity);
                     mc.player.swingHand(Hand.MAIN_HAND);
+
+                    // Set next random delay length
+                    if (sgRandomDelay.isEnabled()) randomHitDelayTimer = (int) Math.round(Math.random() * randomDelayMax.get());
                 });
     });
 }
