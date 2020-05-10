@@ -38,7 +38,7 @@ public class BlockListSettingScreen extends WindowScreen {
         Registry.BLOCK.forEach(block -> {
             if (block == Blocks.AIR || setting.get().contains(block)) return;
 
-            WItemWithLabel item = new WItemWithLabel(block.asItem().getStackForRender());
+            WItemWithLabel item = new WItemWithLabel(block.asItem().getStackForRender(), block.getName().asString());
             if (!filter.text.isEmpty()) {
                 if (!StringUtils.containsIgnoreCase(item.getLabelText(), filter.text)) return;
             }
@@ -62,7 +62,7 @@ public class BlockListSettingScreen extends WindowScreen {
         // Selected blocks
         WTable table2 = add(new WTable()).top().getWidget();
         for (Block block : setting.get()) {
-            table2.add(new WItemWithLabel(block.asItem().getStackForRender()));
+            table2.add(new WItemWithLabel(block.asItem().getStackForRender(), block.getName().asString()));
 
             WMinus minus = table2.add(new WMinus()).getWidget();
             minus.action = minus1 -> {
