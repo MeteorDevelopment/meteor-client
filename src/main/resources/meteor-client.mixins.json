@@ -44,7 +44,8 @@
     "ParticleManagerMixin",
     "LightmapTextureManagerMixin",
     "LivingEntityRendererMixin",
-    "ItemStackMixin"
+    "ItemStackMixin",
+    "ChunkDeltaUpdateS2CPacketMixin"
   ],
   "injectors": {
     "defaultRequire": 1

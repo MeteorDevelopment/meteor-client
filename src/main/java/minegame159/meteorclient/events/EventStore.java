@@ -5,6 +5,7 @@ import minegame159.meteorclient.events.packets.ReceivePacketEvent;
 import minegame159.meteorclient.events.packets.SendPacketEvent;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.utils.Pool;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -41,7 +42,7 @@ public class EventStore {
     private static ReceivePacketEvent receivePacketEvent = new ReceivePacketEvent();
     private static PlayerMoveEvent playerMoveEvent = new PlayerMoveEvent();
     private static AccountListChangedEvent accountListChangedEvent = new AccountListChangedEvent();
-    private static ChunkDataEvent chunkDataEvent = new ChunkDataEvent();
+    private static Pool<ChunkDataEvent> chunkDataEventPool = new Pool<>(ChunkDataEvent::new);
     private static AttackEntityEvent attackEntityEvent = new AttackEntityEvent();
     private static StartBreakingBlockEvent startBreakingBlockEvent = new StartBreakingBlockEvent();
     private static EntityDestroyEvent entityDestroyEvent = new EntityDestroyEvent();
@@ -165,8 +166,13 @@ public class EventStore {
     }
 
     public static ChunkDataEvent chunkDataEvent(WorldChunk chunk) {
-        chunkDataEvent.chunk = chunk;
-        return chunkDataEvent;
+        ChunkDataEvent event = chunkDataEventPool.get();
+        event.chunk = chunk;
+        return event;
+    }
+
+    public static void returnChunkDataEvent(ChunkDataEvent event) {
+        chunkDataEventPool.free(event);
     }
 
     public static AttackEntityEvent attackEntityEvent(Entity entity) {
