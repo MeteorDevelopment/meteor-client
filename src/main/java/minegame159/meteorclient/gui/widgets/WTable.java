@@ -91,7 +91,7 @@ public class WTable extends WWidget {
     protected boolean onMouseScrolled(double amount) {
         if (fullHeight != -1 && mouseOver) {
             double preVerticalScroll = verticalScroll;
-            verticalScroll += amount * 12;
+            verticalScroll += amount * 16;
 
             if (verticalScroll > 0) verticalScroll = 0;
             else if (verticalScroll < -(fullHeight - height)) verticalScroll = -(fullHeight - height);

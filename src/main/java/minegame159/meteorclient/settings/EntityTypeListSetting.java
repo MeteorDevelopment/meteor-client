@@ -1,9 +1,9 @@
 package minegame159.meteorclient.settings;
 
-import minegame159.meteorclient.gui.screens.BlockListSettingScreen;
+import minegame159.meteorclient.gui.screens.EntityTypeListSettingScreen;
 import minegame159.meteorclient.gui.widgets.WButton;
-import net.minecraft.block.Block;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.entity.EntityType;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -15,28 +15,28 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class BlockListSetting extends Setting<List<Block>> {
-    public BlockListSetting(String name, String description, List<Block> defaultValue, Consumer<List<Block>> onChanged, Consumer<Setting<List<Block>>> onModuleActivated) {
+public class EntityTypeListSetting extends Setting<List<EntityType<?>>> {
+    public EntityTypeListSetting(String name, String description, List<EntityType<?>> defaultValue, Consumer<List<EntityType<?>>> onChanged, Consumer<Setting<List<EntityType<?>>>> onModuleActivated) {
         super(name, description, defaultValue, onChanged, onModuleActivated);
-
+        
         widget = new WButton("Select");
-        ((WButton) widget).action = button -> MinecraftClient.getInstance().openScreen(new BlockListSettingScreen(this));
+        ((WButton) widget).action = button -> MinecraftClient.getInstance().openScreen(new EntityTypeListSettingScreen(this));
     }
 
     @Override
-    protected List<Block> parseImpl(String str) {
+    protected List<EntityType<?>> parseImpl(String str) {
         String[] values = str.split(",");
-        List<Block> blocks = new ArrayList<>(1);
+        List<EntityType<?>> entities = new ArrayList<>(1);
 
         for (String value : values) {
             String val = value.trim();
             Identifier id;
             if (val.contains(":")) id = new Identifier(val);
             else id = new Identifier("minecraft", val);
-            blocks.add(Registry.BLOCK.get(id));
+            entities.add(Registry.ENTITY_TYPE.get(id));
         }
 
-        return blocks;
+        return entities;
     }
 
     @Override
@@ -45,13 +45,13 @@ public class BlockListSetting extends Setting<List<Block>> {
     }
 
     @Override
-    protected boolean isValueValid(List<Block> value) {
+    protected boolean isValueValid(List<EntityType<?>> value) {
         return true;
     }
 
     @Override
     protected String generateUsage() {
-        return "#blueblock id #gray(dirt, minecraft:stone, etc)";
+        return "#blueblock id #gray(pig, minecraft:zombie, etc)";
     }
 
     @Override
@@ -59,8 +59,8 @@ public class BlockListSetting extends Setting<List<Block>> {
         CompoundTag tag = saveGeneral();
 
         ListTag valueTag = new ListTag();
-        for (Block block : get()) {
-            valueTag.add(new StringTag(Registry.BLOCK.getId(block).toString()));
+        for (EntityType<?> entityType : get()) {
+            valueTag.add(new StringTag(Registry.ENTITY_TYPE.getId(entityType).toString()));
         }
         tag.put("value", valueTag);
 
@@ -68,12 +68,12 @@ public class BlockListSetting extends Setting<List<Block>> {
     }
 
     @Override
-    public List<Block> fromTag(CompoundTag tag) {
+    public List<EntityType<?>> fromTag(CompoundTag tag) {
         get().clear();
 
         ListTag valueTag = tag.getList("value", 8);
         for (Tag tagI : valueTag) {
-            get().add(Registry.BLOCK.get(new Identifier(tagI.asString())));
+            get().add(Registry.ENTITY_TYPE.get(new Identifier(tagI.asString())));
         }
 
         changed();
@@ -82,9 +82,9 @@ public class BlockListSetting extends Setting<List<Block>> {
 
     public static class Builder {
         private String name = "undefined", description = "";
-        private List<Block> defaultValue;
-        private Consumer<List<Block>> onChanged;
-        private Consumer<Setting<List<Block>>> onModuleActivated;
+        private List<EntityType<?>> defaultValue;
+        private Consumer<List<EntityType<?>>> onChanged;
+        private Consumer<Setting<List<EntityType<?>>>> onModuleActivated;
 
         public Builder name(String name) {
             this.name = name;
@@ -96,23 +96,23 @@ public class BlockListSetting extends Setting<List<Block>> {
             return this;
         }
 
-        public Builder defaultValue(List<Block> defaultValue) {
+        public Builder defaultValue(List<EntityType<?>> defaultValue) {
             this.defaultValue = defaultValue;
             return this;
         }
 
-        public Builder onChanged(Consumer<List<Block>> onChanged) {
+        public Builder onChanged(Consumer<List<EntityType<?>>> onChanged) {
             this.onChanged = onChanged;
             return this;
         }
 
-        public Builder onModuleActivated(Consumer<Setting<List<Block>>> onModuleActivated) {
+        public Builder onModuleActivated(Consumer<Setting<List<EntityType<?>>>> onModuleActivated) {
             this.onModuleActivated = onModuleActivated;
             return this;
         }
 
-        public BlockListSetting build() {
-            return new BlockListSetting(name, description, defaultValue, onChanged, onModuleActivated);
+        public EntityTypeListSetting build() {
+            return new EntityTypeListSetting(name, description, defaultValue, onChanged, onModuleActivated);
         }
     }
 }
