@@ -21,7 +21,7 @@ public class AddAccountScreen extends WindowScreen {
 
         WButton add = add(new WButton("Add")).fillX().expandX().getWidget();
         add.action = button -> {
-            if (!email.text.isEmpty() && !password.text.isEmpty() && password.text.contains("@")) {
+            if (!email.text.isEmpty() && !password.text.isEmpty() && email.text.contains("@")) {
                 AccountManager.INSTANCE.add(new Account(email.text, password.text));
                 onClose();
             }
