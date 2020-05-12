@@ -22,6 +22,7 @@ import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.Heightmap;
 import net.minecraft.world.chunk.Chunk;
 
@@ -42,8 +43,10 @@ public class Search extends ToggleModule {
             .defaultValue(new ArrayList<>(0))
             .onChanged(blocks1 -> {
                 if (Utils.canUpdate()) {
-                    for (MyChunk chunk : chunks.values()) chunk.dispose();
-                    chunks.clear();
+                    synchronized (chunks) {
+                        for (MyChunk chunk : chunks.values()) chunk.dispose();
+                        chunks.clear();
+                    }
 
                     searchViewDistance();
                 }
@@ -136,10 +139,10 @@ public class Search extends ToggleModule {
     private Listener<ReceivePacketEvent> onReceivePacket = new Listener<>(event -> {
         if (!(event.packet instanceof BlockUpdateS2CPacket)) return;
 
-        service.execute(() -> {
-            BlockPos blockPos = ((BlockUpdateS2CPacket) event.packet).getPos();
-            BlockState bs = ((BlockUpdateS2CPacket) event.packet).getState();
+        BlockPos blockPos = ((BlockUpdateS2CPacket) event.packet).getPos();
+        BlockState bs = ((BlockUpdateS2CPacket) event.packet).getState();
 
+        service.execute(() -> {
             int chunkX = blockPos.getX() >> 4;
             int chunkZ = blockPos.getZ() >> 4;
             long key = ChunkPos.toLong(chunkX, chunkZ);
@@ -214,7 +217,13 @@ public class Search extends ToggleModule {
                 if (fullBlock.get()) {
                     RenderUtils.blockEdges(blockPos, color.get());
                 } else {
-                    Box box = mc.world.getBlockState(blockPos).getOutlineShape(mc.world, blockPos).getBoundingBox();
+                    VoxelShape shape = mc.world.getBlockState(blockPos).getOutlineShape(mc.world, blockPos);
+                    if (shape.isEmpty()) {
+                        RenderUtils.blockEdges(blockPos, color.get());
+                        continue;
+                    }
+
+                    Box box = shape.getBoundingBox();
                     RenderUtils.boxEdges(blockPos.getX() + box.x1, blockPos.getY() + box.y1, blockPos.getZ() + box.z1, blockPos.getX() + box.x2, blockPos.getY() + box.y2, blockPos.getZ() + box.z2, color.get());
                 }
             }
