@@ -45,7 +45,8 @@
     "LightmapTextureManagerMixin",
     "LivingEntityRendererMixin",
     "ItemStackMixin",
-    "ChunkDeltaUpdateS2CPacketMixin"
+    "ChunkDeltaUpdateS2CPacketMixin",
+    "ChatHudLineMixin"
   ],
   "injectors": {
     "defaultRequire": 1
