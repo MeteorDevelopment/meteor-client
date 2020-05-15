@@ -1,7 +1,7 @@
 package minegame159.meteorclient.gui.widgets;
 
 import minegame159.meteorclient.gui.GuiConfig;
-import minegame159.meteorclient.gui.GuiRenderer;
+import minegame159.meteorclient.gui.renderer.GuiRenderer;
 import net.minecraft.client.MinecraftClient;
 
 import java.util.ArrayList;

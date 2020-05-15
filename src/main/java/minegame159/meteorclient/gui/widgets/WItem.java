@@ -1,6 +1,6 @@
 package minegame159.meteorclient.gui.widgets;
 
-import minegame159.meteorclient.gui.GuiRenderer;
+import minegame159.meteorclient.gui.renderer.GuiRenderer;
 import net.minecraft.item.ItemStack;
 
 public class WItem extends WWidget {
