@@ -46,7 +46,8 @@
     "LivingEntityRendererMixin",
     "ItemStackMixin",
     "ChunkDeltaUpdateS2CPacketMixin",
-    "ChatHudLineMixin"
+    "ChatHudLineMixin",
+    "BufferBuilderMixin"
   ],
   "injectors": {
     "defaultRequire": 1

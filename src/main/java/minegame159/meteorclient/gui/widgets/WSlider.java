@@ -1,8 +1,8 @@
 package minegame159.meteorclient.gui.widgets;
 
 import minegame159.meteorclient.gui.GuiConfig;
-import minegame159.meteorclient.gui.GuiRenderer;
 import minegame159.meteorclient.gui.listeners.SliderMoveListener;
+import minegame159.meteorclient.gui.renderer.GuiRenderer;
 import minegame159.meteorclient.utils.Utils;
 
 public class WSlider extends WWidget {
