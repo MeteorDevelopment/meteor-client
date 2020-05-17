@@ -52,29 +52,31 @@ public abstract class ChatHudMixin {
 
         // Anti Spam
         if (ModuleManager.INSTANCE.isActive(AntiSpam.class)) {
-            ChatHudLine lastMsg = visibleMessages.get(0);
+            ChatHudLine lastMsg = visibleMessages.size() > 0 ? visibleMessages.get(0) : null;
 
-            if (lastMsg.getText().asFormattedString().equals(message.asFormattedString())) {
-                String string = lastMsg.getText().asFormattedString();
-                string += Formatting.GRAY + " (2)";
+            if (lastMsg != null) {
+                if (lastMsg.getText().asFormattedString().equals(message.asFormattedString())) {
+                    String string = lastMsg.getText().asFormattedString();
+                    string += Formatting.GRAY + " (2)";
 
-                ((IChatHudLine) lastMsg).setText(new LiteralText(string));
-                return;
-            } else {
-                String string = lastMsg.getText().asFormattedString();
-                Matcher matcher = Pattern.compile(".*(\\([0-9]+\\)$)").matcher(string);
+                    ((IChatHudLine) lastMsg).setText(new LiteralText(string));
+                    return;
+                } else {
+                    String string = lastMsg.getText().asFormattedString();
+                    Matcher matcher = Pattern.compile(".*(\\([0-9]+\\)$)").matcher(string);
 
-                if (matcher.matches()) {
-                    String group = matcher.group(1);
-                    int number = Integer.parseInt(group.substring(1, group.length() - 1));
+                    if (matcher.matches()) {
+                        String group = matcher.group(1);
+                        int number = Integer.parseInt(group.substring(1, group.length() - 1));
 
-                    int i = string.lastIndexOf(group);
-                    string = string.substring(0, i - Formatting.GRAY.toString().length() - 1);
+                        int i = string.lastIndexOf(group);
+                        string = string.substring(0, i - Formatting.GRAY.toString().length() - 1);
 
-                    if (string.equals(message.asFormattedString())) {
-                        string += Formatting.GRAY + " (" + (number + 1) + ")";
-                        ((IChatHudLine) lastMsg).setText(new LiteralText(string));
-                        return;
+                        if (string.equals(message.asFormattedString())) {
+                            string += Formatting.GRAY + " (" + (number + 1) + ")";
+                            ((IChatHudLine) lastMsg).setText(new LiteralText(string));
+                            return;
+                        }
                     }
                 }
             }
