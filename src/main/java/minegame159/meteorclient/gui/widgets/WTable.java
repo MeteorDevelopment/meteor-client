@@ -16,7 +16,7 @@ public class WTable extends WWidget {
     public double maxHeight;
     public double animationProgress = 1;
 
-    private final List<List<Cell<?>>> rows = new ArrayList<>(1);
+    final List<List<Cell<?>>> rows = new ArrayList<>(1);
     private int rowI;
 
     private double padTop, padRight, padBottom, padLeft;
@@ -32,6 +32,7 @@ public class WTable extends WWidget {
 
     private double fullHeight = -1;
     private double verticalScroll;
+    public boolean enabledScroll = true;
 
     @Override
     public <T extends WWidget> Cell<T> add(T widget) {
@@ -171,7 +172,7 @@ public class WTable extends WWidget {
         height = maxY - this.y + padBottom;
 
         // Check if vertical scrolling needs to be enabled
-        if (maxHeight != 0 && height > maxHeight) {
+        if (enabledScroll && maxHeight != 0 && height > maxHeight) {
             fullHeight = height;
             height = maxHeight;
 

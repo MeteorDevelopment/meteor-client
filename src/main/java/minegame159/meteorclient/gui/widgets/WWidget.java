@@ -95,7 +95,7 @@ public abstract class WWidget {
         }
     }
 
-    private void calculateSize() {
+    protected void calculateSize() {
         for (Cell cell : cells) cell.getWidget().calculateSize();
         onCalculateSize();
     }
