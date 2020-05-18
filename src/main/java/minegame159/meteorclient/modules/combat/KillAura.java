@@ -9,15 +9,18 @@ import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.EntityUtils;
 import net.minecraft.command.arguments.EntityAnchorArgumentType;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RayTraceContext;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class KillAura extends ToggleModule {
     public enum Priority {
@@ -28,7 +31,6 @@ public class KillAura extends ToggleModule {
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgToAttack = settings.createGroup("To Attack");
     private final SettingGroup sgDelay = settings.createGroup("Delay", "smart-delay", "Smart delay.", true);
     private final SettingGroup sgDelayDisabled = sgDelay.getDisabledGroup();
     private final SettingGroup sgRandomDelay = settings.createGroup("Random Delay", "random-delay-enabled", "Adds a random delay to hits to try and bypass anti-cheats.", false);
@@ -38,6 +40,20 @@ public class KillAura extends ToggleModule {
             .description("Attack range.")
             .defaultValue(5.5)
             .min(0.0)
+            .build()
+    );
+
+    public final Setting<List<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
+            .name("entities")
+            .description("Entities to attack.")
+            .defaultValue(new ArrayList<>(0))
+            .build()
+    );
+
+    public final Setting<Boolean> friends = sgGeneral.add(new BoolSetting.Builder()
+            .name("friends")
+            .description("Attack friends, useful only if attack players is on.")
+            .defaultValue(false)
             .build()
     );
 
@@ -59,34 +75,6 @@ public class KillAura extends ToggleModule {
             .name("rotate")
             .description("Rotates you towards the target.")
             .defaultValue(false)
-            .build()
-    );
-
-    public final Setting<Boolean> players = sgGeneral.add(new BoolSetting.Builder()
-            .name("players")
-            .description("Attack players.")
-            .defaultValue(true)
-            .build()
-    );
-
-    public final Setting<Boolean> friends = sgToAttack.add(new BoolSetting.Builder()
-            .name("friends")
-            .description("Attack friends, useful only if attack players is on.")
-            .defaultValue(false)
-            .build()
-    );
-
-    public final Setting<Boolean> animals = sgToAttack.add(new BoolSetting.Builder()
-            .name("animals")
-            .description("Attack animals.")
-            .defaultValue(true)
-            .build()
-    );
-
-    public final Setting<Boolean> mobs = sgToAttack.add(new BoolSetting.Builder()
-            .name("mobs")
-            .description("Attack mobs.")
-            .defaultValue(true)
             .build()
     );
 
@@ -129,13 +117,14 @@ public class KillAura extends ToggleModule {
     }
 
     private boolean canAttackEntity(Entity entity) {
-        if (entity.getUuid().equals(mc.player.getUuid())) return false;
-        if (EntityUtils.isPlayer(entity) && players.get()) {
+        if (entity == mc.player || !entities.get().contains(entity.getType())) return false;
+
+        if (entity instanceof PlayerEntity) {
             if (friends.get()) return true;
             return FriendManager.INSTANCE.attack((PlayerEntity) entity);
         }
-        if (EntityUtils.isAnimal(entity) && animals.get()) return true;
-        return EntityUtils.isMob(entity) && mobs.get();
+
+        return true;
     }
 
     private boolean canSeeEntity(Entity entity) {

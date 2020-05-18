@@ -39,6 +39,8 @@ public abstract class GameRendererMixin {
         GlStateManager.disableTexture();
         GlStateManager.disableDepthTest();
         GlStateManager.enableBlend();
+        GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+        GlStateManager.disableAlphaTest();
         GlStateManager.lineWidth(1);
         GL11.glEnable(GL11.GL_LINE_SMOOTH);
 

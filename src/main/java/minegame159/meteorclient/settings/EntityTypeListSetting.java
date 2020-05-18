@@ -18,9 +18,20 @@ import java.util.function.Consumer;
 public class EntityTypeListSetting extends Setting<List<EntityType<?>>> {
     public EntityTypeListSetting(String name, String description, List<EntityType<?>> defaultValue, Consumer<List<EntityType<?>>> onChanged, Consumer<Setting<List<EntityType<?>>>> onModuleActivated) {
         super(name, description, defaultValue, onChanged, onModuleActivated);
+
+        value = new ArrayList<>(defaultValue);
         
         widget = new WButton("Select");
         ((WButton) widget).action = button -> MinecraftClient.getInstance().openScreen(new EntityTypeListSettingScreen(this));
+    }
+
+    @Override
+    public void reset(boolean callbacks) {
+        value = new ArrayList<>(defaultValue);
+        if (callbacks) {
+            resetWidget();
+            changed();
+        }
     }
 
     @Override
