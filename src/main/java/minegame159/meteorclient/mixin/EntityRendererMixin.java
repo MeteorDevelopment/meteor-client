@@ -23,6 +23,8 @@ public abstract class EntityRendererMixin<T extends Entity> {
         if (ModuleManager.INSTANCE.isActive(Nametags.class)) info.cancel();
         else return;
 
-        ModuleManager.INSTANCE.get(Nametags.class).render(Math.sqrt(renderManager.getSquaredDistanceToCamera(entity.x, entity.y, entity.z)), entity.getHeight(), x, y, z, renderManager.cameraYaw, renderManager.cameraPitch, entity.getDisplayName().asFormattedString(), (int) ((PlayerEntity) entity).getHealth(), (int) ((PlayerEntity) entity).getMaximumHealth());
+        float absorption = ((PlayerEntity) entity).getAbsorptionAmount();
+
+        ModuleManager.INSTANCE.get(Nametags.class).render(Math.sqrt(renderManager.getSquaredDistanceToCamera(entity.x, entity.y, entity.z)), entity.getHeight(), x, y, z, renderManager.cameraYaw, renderManager.cameraPitch, entity.getDisplayName().asFormattedString(), (int) (((PlayerEntity) entity).getHealth() + absorption), (int) (((PlayerEntity) entity).getMaximumHealth() + absorption));
     }
 }
