@@ -1,9 +1,11 @@
 package minegame159.meteorclient.gui.widgets;
 
+import minegame159.meteorclient.Config;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.gui.GuiConfig;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.util.Window;
 
 public class WWindowController extends WWidget {
     public WWindowController() {
@@ -41,12 +43,27 @@ public class WWindowController extends WWidget {
             cell.width = ((WWindow) cell.getWidget()).width;
             cell.height = ((WWindow) cell.getWidget()).height;
 
+            Window window = MinecraftClient.getInstance().window;
             if (automatic) {
-                if (cellX + cell.width > MinecraftClient.getInstance().window.getScaledWidth()) {
+                if (cellX + cell.width > window.getScaledWidth()) {
                     cellX = x;
-                    cellY += 10 + cell.height + 10;
+                    cellY += 10 + 40 + 10;
                 }
             }
+
+            if (cellX + cell.width > window.getScaledWidth()) {
+                cellX = window.getScaledWidth() / 2.0 - cell.width / 2.0;
+                if (cellX < 0) cellX = 0;
+            }
+            if (cellY + cell.height > window.getScaledHeight()) {
+                cellY = window.getScaledHeight() / 2.0 - cell.height / 2.0;
+                if (cellY < 0) cellY = 0;
+            }
+
+            if (cellX != winConfig.getX() || cellY != winConfig.getY()) {
+                winConfig.setPos(cellX, cellY);
+            }
+            Config.INSTANCE.save();
 
             cell.x = cellX;
             cell.y = cellY;
