@@ -2,12 +2,15 @@ package minegame159.meteorclient.gui.screens;
 
 import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.utils.Utils;
 import net.minecraft.entity.EntityType;
+import net.minecraft.util.Pair;
 import net.minecraft.util.registry.Registry;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class EntityTypeListSettingScreen extends WindowScreen {
     private final Setting<List<EntityType<?>>> setting;
@@ -91,32 +94,43 @@ public class EntityTypeListSettingScreen extends WindowScreen {
         miscC.action = checkbox -> tableChecked(miscE, checkbox.checked);
         row();
 
-        Registry.ENTITY_TYPE.forEach(entityType -> {
-            if (filter.text.isEmpty() || StringUtils.containsIgnoreCase(entityType.getName().asFormattedString(), filter.text)) {
-                switch (entityType.getCategory()) {
-                    case CREATURE:
-                        animalsE.add(entityType);
-                        addEntityType(animals, animalsC, entityType);
-                        break;
-                    case WATER_CREATURE:
-                        waterAnimalsE.add(entityType);
-                        addEntityType(waterAnimals, waterAnimalsC, entityType);
-                        break;
-                    case MONSTER:
-                        monstersE.add(entityType);
-                        addEntityType(monsters, monstersC, entityType);
-                        break;
-                    case AMBIENT:
-                        ambientE.add(entityType);
-                        addEntityType(ambient, ambientC, entityType);
-                        break;
-                    case MISC:
-                        miscE.add(entityType);
-                        addEntityType(misc, miscC, entityType);
-                        break;
-                }
+        Consumer<EntityType<?>> entityTypeForEach = entityType -> {
+            switch (entityType.getCategory()) {
+                case CREATURE:
+                    animalsE.add(entityType);
+                    addEntityType(animals, animalsC, entityType);
+                    break;
+                case WATER_CREATURE:
+                    waterAnimalsE.add(entityType);
+                    addEntityType(waterAnimals, waterAnimalsC, entityType);
+                    break;
+                case MONSTER:
+                    monstersE.add(entityType);
+                    addEntityType(monsters, monstersC, entityType);
+                    break;
+                case AMBIENT:
+                    ambientE.add(entityType);
+                    addEntityType(ambient, ambientC, entityType);
+                    break;
+                case MISC:
+                    miscE.add(entityType);
+                    addEntityType(misc, miscC, entityType);
+                    break;
             }
-        });
+        };
+
+        // Sort all entities
+        if (filter.text.isEmpty()) {
+            Registry.ENTITY_TYPE.forEach(entityTypeForEach);
+        } else {
+            List<Pair<EntityType<?>, Integer>> entities = new ArrayList<>();
+            Registry.ENTITY_TYPE.forEach(entity -> {
+                int words = Utils.search(entity.getName().asFormattedString(), filter.text);
+                if (words > 0) entities.add(new Pair<>(entity, words));
+            });
+            entities.sort(Comparator.comparingInt(value -> -value.getRight()));
+            for (Pair<EntityType<?>, Integer> pair : entities) entityTypeForEach.accept(pair.getLeft());
+        }
 
         if (animals.table.getCells().size() > 0) add(animals).fillX().expandX();
         if (waterAnimals.table.getCells().size() > 0) add(waterAnimals).fillX().expandX();
