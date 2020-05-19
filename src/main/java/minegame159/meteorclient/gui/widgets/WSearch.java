@@ -1,9 +1,10 @@
 package minegame159.meteorclient.gui.widgets;
 
+import minegame159.meteorclient.gui.GuiConfig;
 import minegame159.meteorclient.gui.GuiThings;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.gui.GuiConfig;
+import net.minecraft.util.Pair;
 
 import java.util.List;
 
@@ -35,13 +36,13 @@ public class WSearch extends WWindow {
 
         if (!filter.text.isEmpty()) {
             // Titles
-            List<Module> modules = ModuleManager.INSTANCE.searchTitles(filter.text);
+            List<Pair<Module, Integer>> modules = ModuleManager.INSTANCE.searchTitles(filter.text);
             if (modules.size() > 0) {
                 add(new WHorizontalSeparator("Modules")).fillX().expandX();
                 row();
             }
-            for (Module module : modules) {
-                add(new WModule(module));
+            for (Pair<Module, Integer> pair : modules) {
+                add(new WModule(pair.getLeft()));
                 row();
             }
 
@@ -49,8 +50,8 @@ public class WSearch extends WWindow {
             modules = ModuleManager.INSTANCE.searchSettingTitles(filter.text);
             add(new WHorizontalSeparator("Settings")).fillX().expandX();
             row();
-            for (Module module : modules) {
-                add(new WModule(module));
+            for (Pair<Module, Integer> pair : modules) {
+                add(new WModule(pair.getLeft()));
                 row();
             }
         }

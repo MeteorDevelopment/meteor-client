@@ -33,11 +33,11 @@ import java.util.stream.Collectors;
 public class Utils {
     public static MinecraftClient mc;
 
-    private static Random random = new Random();
-    private static Vec3d eyesPos = new Vec3d(0, 0, 0);
-    private static Vec3d vec1 = new Vec3d(0, 0, 0);
-    private static Vec3d vec2 = new Vec3d(0, 0, 0);
-    private static DecimalFormat df;
+    private static final Random random = new Random();
+    private static final Vec3d eyesPos = new Vec3d(0, 0, 0);
+    private static final Vec3d vec1 = new Vec3d(0, 0, 0);
+    private static final Vec3d vec2 = new Vec3d(0, 0, 0);
+    private static final DecimalFormat df;
 
     static {
         df = new DecimalFormat("0");
@@ -45,6 +45,17 @@ public class Utils {
         DecimalFormatSymbols dfs = new DecimalFormatSymbols();
         dfs.setDecimalSeparator('.');
         df.setDecimalFormatSymbols(dfs);
+    }
+
+    public static int search(String text, String filter) {
+        int wordsFound = 0;
+        String[] words = filter.split(" ");
+
+        for (String word : words) {
+            if (StringUtils.containsIgnoreCase(text, word)) wordsFound++;
+        }
+
+        return wordsFound;
     }
 
     public static double distance(double x1, double y1, double z1, double x2, double y2, double z2) {

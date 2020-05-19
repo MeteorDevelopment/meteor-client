@@ -20,7 +20,7 @@ import minegame159.meteorclient.utils.Utils;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
-import org.apache.commons.lang3.StringUtils;
+import net.minecraft.util.Pair;
 
 import java.io.File;
 import java.util.*;
@@ -29,10 +29,10 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
     public static final Category[] CATEGORIES = { Category.Combat, Category.Player, Category.Movement, Category.Render, Category.Misc };
     public static ModuleManager INSTANCE;
 
-    private Map<Class<? extends Module>, Module> modules = new HashMap<>();
-    private Map<Category, List<Module>> groups = new HashMap<>();
+    private final Map<Class<? extends Module>, Module> modules = new HashMap<>();
+    private final Map<Category, List<Module>> groups = new HashMap<>();
 
-    private List<ToggleModule> active = new ArrayList<>();
+    private final List<ToggleModule> active = new ArrayList<>();
     private Module moduleToBind;
 
     public ModuleManager() {
@@ -83,28 +83,32 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         this.moduleToBind = moduleToBind;
     }
 
-    public List<Module> searchTitles(String text) {
-        List<Module> modules = new ArrayList<>();
+    public List<Pair<Module, Integer>> searchTitles(String text) {
+        List<Pair<Module, Integer>> modules = new ArrayList<>();
 
         for (Module module : this.modules.values()) {
-            if (StringUtils.containsIgnoreCase(module.title, text)) modules.add(module);
+            int words = Utils.search(module.title, text);
+            if (words > 0) modules.add(new Pair<>(module, words));
         }
 
+        modules.sort(Comparator.comparingInt(value -> -value.getRight()));
         return modules;
     }
 
-    public List<Module> searchSettingTitles(String text) {
-        List<Module> modules = new ArrayList<>();
+    public List<Pair<Module, Integer>> searchSettingTitles(String text) {
+        List<Pair<Module, Integer>> modules = new ArrayList<>();
 
         for (Module module : this.modules.values()) {
             for (Setting<?> setting : module.settings) {
-                if (StringUtils.containsIgnoreCase(setting.title, text)) {
-                    modules.add(module);
+                int words = Utils.search(setting.title, text);
+                if (words > 0) {
+                    modules.add(new Pair<>(module, words));
                     break;
                 }
             }
         }
 
+        modules.sort(Comparator.comparingInt(value -> -value.getRight()));
         return modules;
     }
 
@@ -146,12 +150,12 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
     }, EventPriority.HIGHEST + 1);
 
     @EventHandler
-    private Listener<GameJoinedEvent> onGameJoined = new Listener<>(event -> {
+    private final Listener<GameJoinedEvent> onGameJoined = new Listener<>(event -> {
         for (ToggleModule module : active) module.onActivate();
     });
 
     @EventHandler
-    private Listener<GameDisconnectedEvent> onGameDisconnected = new Listener<>(event -> {
+    private final Listener<GameDisconnectedEvent> onGameDisconnected = new Listener<>(event -> {
         for (ToggleModule module : active) module.onDeactivate();
     });
 
