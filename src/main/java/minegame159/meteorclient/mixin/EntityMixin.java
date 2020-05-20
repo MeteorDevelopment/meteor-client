@@ -5,6 +5,7 @@ import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.movement.NoPush;
 import minegame159.meteorclient.modules.movement.SafeWalk;
+import minegame159.meteorclient.modules.movement.Scaffold;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.MovementType;
@@ -44,6 +45,7 @@ public abstract class EntityMixin {
 
     @Redirect(method = "adjustMovementForSneaking", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;isSneaking()Z"))
     private boolean isSafeWalkSneaking(Entity entity) {
-        return entity.isSneaking() || ModuleManager.INSTANCE.isActive(SafeWalk.class);
+        Scaffold scaffold = ModuleManager.INSTANCE.get(Scaffold.class);
+        return entity.isSneaking() || ModuleManager.INSTANCE.isActive(SafeWalk.class) || (scaffold.isActive() && scaffold.hasSafeWalk());
     }
 }
