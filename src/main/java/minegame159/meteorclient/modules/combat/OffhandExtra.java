@@ -68,8 +68,6 @@ public class OffhandExtra extends ToggleModule {
             Item item = getItem();
             InvUtils.FindItemResult result = InvUtils.findItemWithCount(item);
             if(result.slot == -1) {
-                Utils.sendMessage("#redNone of the chosen item found. Disabling!");
-                this.toggle();
                 return;
             }
             if (mc.player.getOffHandStack().isEmpty()) {
