@@ -90,7 +90,7 @@ public class WEnumButton<T extends Enum<?>> extends WWidget {
 
     @Override
     protected boolean onMouseReleased(int button) {
-        if (mouseOver) {
+        if (pressed) {
             pressed = false;
 
             if (button == 0) {

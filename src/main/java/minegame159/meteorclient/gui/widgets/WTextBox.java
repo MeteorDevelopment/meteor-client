@@ -1,7 +1,7 @@
 package minegame159.meteorclient.gui.widgets;
 
-import minegame159.meteorclient.gui.GuiThings;
 import minegame159.meteorclient.gui.GuiConfig;
+import minegame159.meteorclient.gui.GuiThings;
 import minegame159.meteorclient.gui.listeners.TextBoxChangeListener;
 import minegame159.meteorclient.gui.renderer.GuiRenderer;
 import minegame159.meteorclient.utils.Utils;
@@ -18,7 +18,7 @@ public class WTextBox extends WWidget {
 
     public String text;
 
-    private double uWidth;
+    private final double uWidth;
     private boolean focused;
 
     private int cursorTimer;
