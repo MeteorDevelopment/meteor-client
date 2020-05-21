@@ -28,7 +28,7 @@ public class WPlus extends WWidget {
 
     @Override
     protected boolean onMouseReleased(int button) {
-        if (mouseOver) {
+        if (pressed) {
             pressed = false;
             if (action != null) action.onPlusClick(this);
             return true;

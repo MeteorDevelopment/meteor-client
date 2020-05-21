@@ -36,7 +36,7 @@ public class WCheckbox extends WWidget {
 
     @Override
     protected boolean onMouseReleased(int button) {
-        if (mouseOver) {
+        if (pressed) {
             pressed = false;
             checked = !checked;
             if (action != null) action.onCheckboxClick(this);

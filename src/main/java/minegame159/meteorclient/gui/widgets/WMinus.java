@@ -28,7 +28,7 @@ public class WMinus extends WWidget {
 
     @Override
     protected boolean onMouseReleased(int button) {
-        if (mouseOver) {
+        if (pressed) {
             pressed = false;
             if (action != null) action.onMinusClick(this);
             return true;
