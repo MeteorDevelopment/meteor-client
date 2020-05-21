@@ -47,7 +47,8 @@
     "ItemStackMixin",
     "ChunkDeltaUpdateS2CPacketMixin",
     "ChatHudLineMixin",
-    "BufferBuilderMixin"
+    "BufferBuilderMixin",
+    "LookBehaviorMixin"
   ],
   "injectors": {
     "defaultRequire": 1
