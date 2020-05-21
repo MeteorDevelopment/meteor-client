@@ -35,6 +35,13 @@ public class AutoReplenish extends ToggleModule {
             .build()
     );
 
+    private Setting<Boolean> offhand = sgGeneral.add(new BoolSetting.Builder()
+            .name("offhand")
+            .description("Whether to re-fill your offhand")
+            .defaultValue(true)
+            .build()
+    );
+
     private List<Item> items = new ArrayList<>();
 
     public AutoReplenish(){
@@ -44,20 +51,34 @@ public class AutoReplenish extends ToggleModule {
     @EventHandler
     private Listener<TickEvent> OnTick = new Listener<>(event -> {
         for(int i = 0; i < 9; i++){
-            if(mc.player.inventory.getInvStack(i) == null || mc.currentScreen instanceof ContainerScreen
-                    || !mc.player.inventory.getInvStack(i).isStackable()) return;
+            if(mc.player.inventory.getInvStack(i).getItem() == Items.AIR || mc.currentScreen instanceof ContainerScreen
+                    || !mc.player.inventory.getInvStack(i).isStackable()) continue;
             if(mc.player.inventory.getInvStack(i).getCount() < amount.get()){
                 int slot = findItems(mc.player.inventory.getInvStack(i).getItem());
                 if(slot == -1 && !items.contains(mc.player.inventory.getInvStack(i).getItem())){
                     Utils.sendMessage("#redYou are out of #blue" + mc.player.inventory.getInvStack(i).getItem().toString() + "#red. Cannot refill.");
                     items.add(mc.player.inventory.getInvStack(i).getItem());
-                    return;
+                    continue;
                 }
-                if(slot == -1) return;
+                if(slot == -1) continue;
                 InvUtils.clickSlot(InvUtils.invIndexToSlotId(slot), 0, SlotActionType.PICKUP);
                 InvUtils.clickSlot(InvUtils.invIndexToSlotId(i), 0, SlotActionType.PICKUP);
                 InvUtils.clickSlot(InvUtils.invIndexToSlotId(slot), 0, SlotActionType.PICKUP);
             }
+        }
+        if(mc.player.getOffHandStack().getItem() == Items.AIR || mc.currentScreen instanceof ContainerScreen
+                || !mc.player.getOffHandStack().isStackable() || !offhand.get()) return;
+        if(mc.player.getOffHandStack().getCount() < amount.get()){
+            int slot = findItems(mc.player.getOffHandStack().getItem());
+            if(slot == -1 && !items.contains(mc.player.getOffHandStack().getItem())){
+                Utils.sendMessage("#redYou are out of #blue" + mc.player.getOffHandStack().getItem().toString() + "#red. Cannot refill.");
+                items.add(mc.player.getOffHandStack().getItem());
+                return;
+            }
+            if(slot == -1) return;
+            InvUtils.clickSlot(InvUtils.invIndexToSlotId(InvUtils.invIndexToSlotId(slot)), 0, SlotActionType.PICKUP);
+            InvUtils.clickSlot(InvUtils.invIndexToSlotId(InvUtils.OFFHAND_SLOT), 0, SlotActionType.PICKUP);
+            InvUtils.clickSlot(InvUtils.invIndexToSlotId(InvUtils.invIndexToSlotId(slot)), 0, SlotActionType.PICKUP);
         }
     });
 
@@ -73,6 +94,7 @@ public class AutoReplenish extends ToggleModule {
         for(int i = 9; i < 45; i++){
             if(mc.player.inventory.getInvStack(i).getItem() == item){
                 slot = i;
+                return slot;
             }
         }
         return slot;

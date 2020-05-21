@@ -40,7 +40,7 @@ public class DamageCalcUtils {
         }else if(feetExposed){
             exposure = 0.8D;
         }
-        double impact = (1D - mc.player.squaredDistanceTo(crystal) / 12D)*exposure;
+        double impact = (1D - Math.sqrt(mc.player.squaredDistanceTo(crystal)) / 12D)*exposure;
         return (impact*impact+impact)*42+1;
     }
 
@@ -153,7 +153,7 @@ public class DamageCalcUtils {
     public static double resistanceReduction(PlayerEntity player, double damage){
         int level = 0;
         if(player.getActiveStatusEffects().containsKey(StatusEffects.RESISTANCE)){
-            level = Objects.requireNonNull(mc.player.getStatusEffect(StatusEffects.RESISTANCE)).getAmplifier() + 1;
+            level = Objects.requireNonNull(player.getStatusEffect(StatusEffects.RESISTANCE)).getAmplifier() + 1;
         }
         damage = damage * (1 - (0.2 * level));
         return damage;
