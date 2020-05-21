@@ -24,7 +24,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Tracers extends ToggleModule {
+    public enum Target {
+        Head,
+        Body,
+        Feet
+    }
+
+    public enum Mode {
+        Simple,
+        Stem
+    }
+
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgAppearance = settings.createGroup("Appearance");
     private final SettingGroup sgColors = settings.createGroup("Colors");
 
     // General
@@ -40,6 +52,22 @@ public class Tracers extends ToggleModule {
             .name("storage")
             .description("Display storage blocks.")
             .defaultValue(false)
+            .build()
+    );
+
+    // Appearance
+
+    private final Setting<Target> target = sgAppearance.add(new EnumSetting.Builder<Target>()
+            .name("target")
+            .description("Which body part to target.")
+            .defaultValue(Target.Body)
+            .build()
+    );
+
+    private final Setting<Mode> mode = sgAppearance.add(new EnumSetting.Builder<Mode>()
+            .name("mode")
+            .description("Rendering mode.")
+            .defaultValue(Mode.Simple)
             .build()
     );
 
@@ -102,9 +130,18 @@ public class Tracers extends ToggleModule {
     }
 
     private void render(Entity entity, Color color, RenderEvent event) {
-        Vec3d vec2 = entity.getPos().add(0, entity.getEyeHeight(entity.getPose()), 0);
-        double y = (entity.getBoundingBox().y2 - entity.getBoundingBox().y1) / 2.0;
-        RenderUtils.line(vec1.x - (mc.cameraEntity.x - event.offsetX), vec1.y - (mc.cameraEntity.y - event.offsetY), vec1.z - (mc.cameraEntity.z - event.offsetZ), vec2.x, vec2.y - y, vec2.z, color);
+        double x = entity.x;
+        double y = entity.y;
+        double z = entity.z;
+
+        double height = entity.getBoundingBox().y2 - entity.getBoundingBox().y1;
+
+        if (target.get() == Target.Head) y += height;
+        else if (target.get() == Target.Body) y += height / 2;
+
+        RenderUtils.line(vec1.x - (mc.cameraEntity.x - event.offsetX), vec1.y - (mc.cameraEntity.y - event.offsetY), vec1.z - (mc.cameraEntity.z - event.offsetZ), x, y, z, color);
+
+        if (mode.get() == Mode.Stem) RenderUtils.line(x, entity.y, z, x, entity.y + height, z, color);
 
         count++;
     }
