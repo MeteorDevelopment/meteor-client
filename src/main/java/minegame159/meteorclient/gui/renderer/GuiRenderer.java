@@ -1,6 +1,7 @@
 package minegame159.meteorclient.gui.renderer;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.gui.GuiConfig;
 import minegame159.meteorclient.gui.widgets.Cell;
 import minegame159.meteorclient.gui.widgets.WWidget;
@@ -62,32 +63,32 @@ public class GuiRenderer {
 
     public void begin() {
         MinecraftClient mc = MinecraftClient.getInstance();
-        scissor = currentScissor = scissorPool.get().set(null, 0, 0, mc.window.getScaledWidth(), mc.window.getScaledHeight(), false, false);
+        scissor = currentScissor = scissorPool.get().set(null, 0, 0, mc.getWindow().getScaledWidth(), mc.getWindow().getScaledHeight(), false, false);
     }
 
     void endBuffers() {
         if (((IBufferBuilder) quadBuf).isBuilding()) {
-            GlStateManager.enableBlend();
-            GlStateManager.disableCull();
+            RenderSystem.enableBlend();
+            RenderSystem.disableCull();
 
-            GlStateManager.pushMatrix();
+            RenderSystem.pushMatrix();
             GL11.glLineWidth(1);
 
-            GlStateManager.enableTexture();
+            RenderSystem.enableTexture();
             MinecraftClient.getInstance().getTextureManager().bindTexture(TEXTURE);
-            GlStateManager.enableBlend();
-            GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-            GlStateManager.disableLighting();
+            RenderSystem.enableBlend();
+            RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA);
+            RenderSystem.disableLighting();
             GL11.glShadeModel(GL11.GL_SMOOTH);
             quadTesselator.draw();
 
-            GlStateManager.disableTexture();
+            RenderSystem.disableTexture();
             lineTesselator.draw();
 
-            GlStateManager.popMatrix();
+            RenderSystem.popMatrix();
 
-            GlStateManager.enableCull();
-            GlStateManager.disableBlend();
+            RenderSystem.enableCull();
+            RenderSystem.disableBlend();
         }
     }
 
@@ -116,7 +117,7 @@ public class GuiRenderer {
 
     public void beginScissor(WWidget widget, double padTop, double padRight, double padBottom, double padLeft, boolean textOnly) {
         double x = widget.x + padLeft;
-        double y = MinecraftClient.getInstance().window.getScaledHeight() - widget.y - widget.height + padTop;
+        double y = MinecraftClient.getInstance().getWindow().getScaledHeight() - widget.y - widget.height + padTop;
         double width = widget.width - padLeft - padRight;
         double height = widget.height - padTop - padBottom;
 

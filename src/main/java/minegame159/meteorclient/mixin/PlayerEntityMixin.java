@@ -3,6 +3,7 @@ package minegame159.meteorclient.mixin;
 import minegame159.meteorclient.mixininterface.IPlayerEntity;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.movement.SafeWalk;
+import minegame159.meteorclient.modules.movement.Scaffold;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import org.spongepowered.asm.mixin.Mixin;
@@ -17,8 +18,9 @@ public class PlayerEntityMixin implements IPlayerEntity {
 
     @Inject(method = "clipAtLedge", at = @At("HEAD"), cancellable = true)
     protected void clipAtLedge(CallbackInfoReturnable<Boolean> info) {
-        if (ModuleManager.INSTANCE.isActive(SafeWalk.class)) {
-            info.setReturnValue(((PlayerEntity) (Object) this).isSneaking() || ModuleManager.INSTANCE.isActive(SafeWalk.class));
+        Scaffold scaffold = ModuleManager.INSTANCE.get(Scaffold.class);
+        if (ModuleManager.INSTANCE.isActive(SafeWalk.class) || (scaffold.isActive() && scaffold.hasSafeWalk())) {
+            info.setReturnValue(true);
         }
     }
 

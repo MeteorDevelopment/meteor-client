@@ -28,10 +28,10 @@ public class QuadOperation extends Operation {
         TextureRegion tex = this.tex;
         if (tex == null) tex = GuiRenderer.TEX_QUAD;
 
-        renderer.quadBuf.vertex(x, y, 0).texture(tex.x, tex.y).color(color1.r, color1.g, color1.b, color1.a).next();
-        renderer.quadBuf.vertex(x + width, y, 0).texture(tex.x + tex.width, tex.y).color(color2.r, color2.g, color2.b, color2.a).next();
-        renderer.quadBuf.vertex(x + width, y + height, 0).texture(tex.x + tex.width, tex.y + tex.height).color(color3.r, color3.g, color3.b, color3.a).next();
-        renderer.quadBuf.vertex(x, y + height, 0).texture(tex.x, tex.y + tex.height).color(color4.r, color4.g, color4.b, color4.a).next();
+        renderer.quadBuf.vertex(x, y, 0).texture((float) tex.x, (float) tex.y).color(color1.r, color1.g, color1.b, color1.a).next();
+        renderer.quadBuf.vertex(x + width, y, 0).texture((float) (tex.x + tex.width), (float) tex.y).color(color2.r, color2.g, color2.b, color2.a).next();
+        renderer.quadBuf.vertex(x + width, y + height, 0).texture((float) (tex.x + tex.width), (float) (tex.y + tex.height)).color(color3.r, color3.g, color3.b, color3.a).next();
+        renderer.quadBuf.vertex(x, y + height, 0).texture((float) tex.x, (float) (tex.y + tex.height)).color(color4.r, color4.g, color4.b, color4.a).next();
     }
 
     @Override

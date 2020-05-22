@@ -98,7 +98,7 @@ public class WCollapsableTable extends WTable {
 
     @Override
     protected void onCalculateSize() {
-        maxHeight = MinecraftClient.getInstance().window.getScaledHeight() - 32;
+        maxHeight = MinecraftClient.getInstance().getWindow().getScaledHeight() - 32;
 
         super.onCalculateSize();
 

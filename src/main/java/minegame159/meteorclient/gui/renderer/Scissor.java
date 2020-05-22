@@ -46,7 +46,7 @@ public class Scissor {
     public void render(GuiRenderer renderer) {
         // Begin
         if (active) {
-            double scaleFactor = MinecraftClient.getInstance().window.getScaleFactor();
+            double scaleFactor = MinecraftClient.getInstance().getWindow().getScaleFactor();
 
             GL11.glEnable(GL11.GL_SCISSOR_TEST);
             GL11.glScissor((int) (x * scaleFactor), (int) (y * scaleFactor), (int) (width * scaleFactor), (int) (height * scaleFactor));

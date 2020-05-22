@@ -130,9 +130,9 @@ public class Tracers extends ToggleModule {
     }
 
     private void render(Entity entity, Color color, RenderEvent event) {
-        double x = entity.x;
-        double y = entity.y;
-        double z = entity.z;
+        double x = entity.getX();
+        double y = entity.getY();
+        double z = entity.getZ();
 
         double height = entity.getBoundingBox().y2 - entity.getBoundingBox().y1;
 
@@ -141,7 +141,7 @@ public class Tracers extends ToggleModule {
 
         RenderUtils.line(vec1.x - (mc.cameraEntity.getX() - event.offsetX), vec1.y - (mc.cameraEntity.getY() - event.offsetY), vec1.z - (mc.cameraEntity.getZ() - event.offsetZ), x, y, z, color);
 
-        if (mode.get() == Mode.Stem) RenderUtils.line(x, entity.y, z, x, entity.y + height, z, color);
+        if (mode.get() == Mode.Stem) RenderUtils.line(x, entity.getY(), z, x, entity.getY() + height, z, color);
 
         count++;
     }
