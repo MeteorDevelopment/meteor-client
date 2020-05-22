@@ -399,7 +399,16 @@ public class HUD extends ToggleModule {
                 case WEST:  axis = "-X"; break;
                 case EAST:  axis = "+X"; break;
             }
-            drawInfoRight(String.format("%s %s ", StringUtils.capitalize(direction.getName()), axis), String.format("(%.1f, %.1f)", mc.player.yaw, mc.player.pitch), y);
+
+            float yaw = mc.player.yaw % 360;
+            if (yaw < 0) yaw += 360;
+            if (yaw > 180) yaw -= 360;
+
+            float pitch = mc.player.pitch % 360;
+            if (pitch < 0) pitch += 360;
+            if (pitch > 180) pitch -= 360;
+
+            drawInfoRight(String.format("%s %s ", StringUtils.capitalize(direction.getName()), axis), String.format("(%.1f, %.1f)", yaw, pitch), y);
             y -= Utils.getTextHeight() + 2;
         }
 
