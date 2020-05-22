@@ -1,6 +1,6 @@
 package minegame159.meteorclient.settings;
 
-import minegame159.meteorclient.gui.GuiRenderer;
+import minegame159.meteorclient.gui.renderer.GuiRenderer;
 import minegame159.meteorclient.gui.screens.ColorSettingScreen;
 import minegame159.meteorclient.gui.widgets.WButton;
 import minegame159.meteorclient.gui.widgets.WQuad;

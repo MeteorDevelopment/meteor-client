@@ -2,16 +2,18 @@ package minegame159.meteorclient.gui.screens;
 
 import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.utils.Utils;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
+import net.minecraft.util.Pair;
 import net.minecraft.util.registry.Registry;
-import org.apache.commons.lang3.StringUtils;
 
-import java.util.List;
+import java.util.*;
+import java.util.function.Consumer;
 
 public class BlockListSettingScreen extends WindowScreen {
-    private Setting<List<Block>> setting;
-    private WTextBox filter;
+    private final Setting<List<Block>> setting;
+    private final WTextBox filter;
 
     public BlockListSettingScreen(Setting<List<Block>> setting) {
         super("Select blocks", true);
@@ -35,14 +37,10 @@ public class BlockListSettingScreen extends WindowScreen {
 
         // All blocks
         WTable table1 = add(new WTable()).top().getWidget();
-        Registry.BLOCK.forEach(block -> {
+        Consumer<Block> blockForEach = block -> {
             if (block == Blocks.AIR || setting.get().contains(block)) return;
 
-            WItemWithLabel item = new WItemWithLabel(block.asItem().getStackForRender());
-            if (!filter.text.isEmpty()) {
-                if (!StringUtils.containsIgnoreCase(item.getLabelText(), filter.text)) return;
-            }
-            table1.add(item);
+            table1.add(new WItemWithLabel(block.asItem().getStackForRender(), block.getName().asString()));
 
             WPlus plus = table1.add(new WPlus()).getWidget();
             plus.action = plus1 -> {
@@ -55,14 +53,27 @@ public class BlockListSettingScreen extends WindowScreen {
             };
 
             table1.row();
-        });
+        };
+
+        // Sort all blocks
+        if (filter.text.isEmpty()) {
+            Registry.BLOCK.forEach(blockForEach);
+        } else {
+            List<Pair<Block, Integer>> blocks = new ArrayList<>();
+            Registry.BLOCK.forEach(block -> {
+                int words = Utils.search(block.getName().asFormattedString(), filter.text);
+                if (words > 0) blocks.add(new Pair<>(block, words));
+            });
+            blocks.sort(Comparator.comparingInt(value -> -value.getRight()));
+            for (Pair<Block, Integer> pair : blocks) blockForEach.accept(pair.getLeft());
+        }
 
         if (table1.getCells().size() > 0) add(new WVerticalSeparator()).expandY();
 
         // Selected blocks
         WTable table2 = add(new WTable()).top().getWidget();
         for (Block block : setting.get()) {
-            table2.add(new WItemWithLabel(block.asItem().getStackForRender()));
+            table2.add(new WItemWithLabel(block.asItem().getStackForRender(), block.getName().asString()));
 
             WMinus minus = table2.add(new WMinus()).getWidget();
             minus.action = minus1 -> {

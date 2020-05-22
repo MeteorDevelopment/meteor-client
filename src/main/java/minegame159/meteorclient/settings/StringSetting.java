@@ -9,6 +9,8 @@ public class StringSetting extends Setting<String> {
     public StringSetting(String name, String description, String defaultValue, Consumer<String> onChanged, Consumer<Setting<String>> onModuleActivated) {
         super(name, description, defaultValue, onChanged, onModuleActivated);
 
+        value = defaultValue;
+
         widget = new WTextBox(get(), 200);
         ((WTextBox) widget).action = textBox -> {
             if (!set(textBox.text)) textBox.text = get();

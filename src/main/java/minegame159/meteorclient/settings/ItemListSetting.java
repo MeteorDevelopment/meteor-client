@@ -19,6 +19,8 @@ public class ItemListSetting extends Setting<List<Item>> {
     public ItemListSetting(String name, String description, List<Item> defaultValue, Consumer<List<Item>> onChanged, Consumer<Setting<List<Item>>> onModuleActivated) {
         super(name, description, defaultValue, onChanged, onModuleActivated);
 
+        value = new ArrayList<>(defaultValue);
+
         widget = new WButton("Select");
         ((WButton) widget).action = button -> MinecraftClient.getInstance().openScreen(new ItemListSettingScreen(this));
     }

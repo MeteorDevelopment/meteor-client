@@ -7,81 +7,118 @@ import minegame159.meteorclient.accountsfriends.FriendManager;
 import minegame159.meteorclient.events.RenderEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
-import minegame159.meteorclient.settings.BoolSetting;
-import minegame159.meteorclient.settings.ColorSetting;
-import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Color;
-import minegame159.meteorclient.utils.EntityUtils;
 import minegame159.meteorclient.utils.RenderUtils;
 import net.minecraft.block.entity.BarrelBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.ChestBlockEntity;
 import net.minecraft.block.entity.ShulkerBoxBlockEntity;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Tracers extends ToggleModule {
-    private final SettingGroup sgPlayers = settings.createGroup("Players");
-    private final SettingGroup sgAnimals = settings.createGroup("Animals");
-    private final SettingGroup sgMobs = settings.createGroup("Mobs");
-    private final SettingGroup sgStorage = settings.createGroup("Storage");
-    
-    private Setting<Boolean> players = sgPlayers.add(new BoolSetting.Builder()
-            .name("players")
-            .description("See players.")
-            .defaultValue(true)
+    public enum Target {
+        Head,
+        Body,
+        Feet
+    }
+
+    public enum Mode {
+        Simple,
+        Stem
+    }
+
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgAppearance = settings.createGroup("Appearance");
+    private final SettingGroup sgColors = settings.createGroup("Colors");
+
+    // General
+
+    private final Setting<List<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
+            .name("entites")
+            .description("Select specific entities.")
+            .defaultValue(new ArrayList<>(0))
             .build()
     );
 
-    private Setting<Color> playersColor = sgPlayers.add(new ColorSetting.Builder()
-            .name("players-color")
+    private final Setting<Boolean> storage = sgGeneral.add(new BoolSetting.Builder()
+            .name("storage")
+            .description("Display storage blocks.")
+            .defaultValue(false)
+            .build()
+    );
+
+    // Appearance
+
+    private final Setting<Target> target = sgAppearance.add(new EnumSetting.Builder<Target>()
+            .name("target")
+            .description("Which body part to target.")
+            .defaultValue(Target.Body)
+            .build()
+    );
+
+    private final Setting<Mode> mode = sgAppearance.add(new EnumSetting.Builder<Mode>()
+            .name("mode")
+            .description("Rendering mode.")
+            .defaultValue(Mode.Simple)
+            .build()
+    );
+
+    // Colors
+
+    private final Setting<Color> playersColor = sgColors.add(new ColorSetting.Builder()
+            .name("players-colors")
             .description("Players color.")
-            .defaultValue(new Color(255, 255, 255, 255))
+            .defaultValue(new Color(205, 205, 205))
             .build()
     );
 
-    private Setting<Boolean> animals = sgAnimals.add(new BoolSetting.Builder()
-            .name("animals")
-            .description("See animals.")
-            .defaultValue(true)
-            .build()
-    );
-
-    private Setting<Color> animalsColor = sgAnimals.add(new ColorSetting.Builder()
+    private final Setting<Color> animalsColor = sgColors.add(new ColorSetting.Builder()
             .name("animals-color")
             .description("Animals color.")
             .defaultValue(new Color(145, 255, 145, 255))
             .build()
     );
 
-    private Setting<Boolean> mobs = sgMobs.add(new BoolSetting.Builder()
-            .name("mobs")
-            .description("See mobs.")
-            .defaultValue(true)
+    private final Setting<Color> waterAnimalsColor = sgColors.add(new ColorSetting.Builder()
+            .name("water-animals-color")
+            .description("Water animals color.")
+            .defaultValue(new Color(145, 145, 255, 255))
             .build()
     );
 
-    private Setting<Color> mobsColor = sgMobs.add(new ColorSetting.Builder()
-            .name("mobs-color")
-            .description("Mobs color.")
+    private final Setting<Color> monstersColor = sgColors.add(new ColorSetting.Builder()
+            .name("monsters-color")
+            .description("Monsters color.")
             .defaultValue(new Color(255, 145, 145, 255))
             .build()
     );
 
-    private Setting<Boolean> storage = sgStorage.add(new BoolSetting.Builder()
-            .name("storage")
-            .description("See chests, barrels and shulkers.")
-            .defaultValue(false)
+    private final Setting<Color> ambientColor = sgColors.add(new ColorSetting.Builder()
+            .name("ambient-color")
+            .description("Ambient color.")
+            .defaultValue(new Color(75, 75, 75, 255))
             .build()
     );
 
-    private Setting<Color> storageColor = sgStorage.add(new ColorSetting.Builder()
+    private final Setting<Color> miscColor = sgColors.add(new ColorSetting.Builder()
+            .name("misc-color")
+            .description("Misc color.")
+            .defaultValue(new Color(145, 145, 145, 255))
+            .build()
+    );
+
+    private final Setting<Color> storageColor = sgColors.add(new ColorSetting.Builder()
             .name("storage-color")
             .description("Storage color.")
-            .defaultValue(new Color(255, 160, 0, 255))
+            .defaultValue(new Color(255, 160, 0))
             .build()
     );
 
@@ -93,9 +130,18 @@ public class Tracers extends ToggleModule {
     }
 
     private void render(Entity entity, Color color, RenderEvent event) {
-        Vec3d vec2 = entity.getPos().add(0, entity.getEyeHeight(entity.getPose()), 0);
-        double y = (entity.getBoundingBox().y2 - entity.getBoundingBox().y1) / 2.0;
-        RenderUtils.line(vec1.x - (mc.cameraEntity.getX() - event.offsetX), vec1.y - (mc.cameraEntity.getY() - event.offsetY), vec1.z - (mc.cameraEntity.getZ() - event.offsetZ), vec2.x, vec2.y - y, vec2.z, color);
+        double x = entity.x;
+        double y = entity.y;
+        double z = entity.z;
+
+        double height = entity.getBoundingBox().y2 - entity.getBoundingBox().y1;
+
+        if (target.get() == Target.Head) y += height;
+        else if (target.get() == Target.Body) y += height / 2;
+
+        RenderUtils.line(vec1.x - (mc.cameraEntity.getX() - event.offsetX), vec1.y - (mc.cameraEntity.getY() - event.offsetY), vec1.z - (mc.cameraEntity.getZ() - event.offsetZ), x, y, z, color);
+
+        if (mode.get() == Mode.Stem) RenderUtils.line(x, entity.y, z, x, entity.y + height, z, color);
 
         count++;
     }
@@ -108,7 +154,7 @@ public class Tracers extends ToggleModule {
     }
 
     @EventHandler
-    private Listener<RenderEvent> onRender = new Listener<>(event -> {
+    private final Listener<RenderEvent> onRender = new Listener<>(event -> {
         count = 0;
 
         vec1 = new Vec3d(0, 0, 1)
@@ -117,15 +163,23 @@ public class Tracers extends ToggleModule {
                 .add(mc.cameraEntity.getPos());
 
         for (Entity entity : mc.world.getEntities()) {
-            if (players.get() && EntityUtils.isPlayer(entity) && entity != mc.player) {
+            if (entity == mc.player || !entities.get().contains(entity.getType())) continue;
+
+            if (entity instanceof PlayerEntity) {
                 Color color = playersColor.get();
                 Friend friend = FriendManager.INSTANCE.get(((PlayerEntity) entity).getGameProfile().getName());
                 if (friend != null) color = friend.color;
 
                 if (friend == null || friend.showInTracers) render(entity, color, event);
+            } else {
+                switch (entity.getType().getCategory()) {
+                    case CREATURE:       render(entity, animalsColor.get(), event); break;
+                    case WATER_CREATURE: render(entity, waterAnimalsColor.get(), event); break;
+                    case MONSTER:        render(entity, monstersColor.get(), event); break;
+                    case AMBIENT:        render(entity, ambientColor.get(), event); break;
+                    case MISC:           render(entity, miscColor.get(), event); break;
+                }
             }
-            else if (animals.get() && EntityUtils.isAnimal(entity)) render(entity, animalsColor.get(), event);
-            else if (mobs.get() && EntityUtils.isMob(entity)) render(entity, mobsColor.get(), event);
         }
 
         if (storage.get()) {

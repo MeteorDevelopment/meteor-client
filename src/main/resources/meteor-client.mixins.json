@@ -43,7 +43,11 @@
     "FluidBlockMixin",
     "ParticleManagerMixin",
     "LightmapTextureManagerMixin",
-    "ItemStackMixin"
+    "ItemStackMixin",
+    "ChunkDeltaUpdateS2CPacketMixin",
+    "ChatHudLineMixin",
+    "BufferBuilderMixin",
+    "LookBehaviorMixin"
   ],
   "injectors": {
     "defaultRequire": 1

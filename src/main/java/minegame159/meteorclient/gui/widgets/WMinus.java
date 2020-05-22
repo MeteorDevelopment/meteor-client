@@ -1,8 +1,8 @@
 package minegame159.meteorclient.gui.widgets;
 
 import minegame159.meteorclient.gui.GuiConfig;
-import minegame159.meteorclient.gui.GuiRenderer;
 import minegame159.meteorclient.gui.listeners.MinusClickListener;
+import minegame159.meteorclient.gui.renderer.GuiRenderer;
 import minegame159.meteorclient.utils.Color;
 
 public class WMinus extends WWidget {
@@ -28,7 +28,7 @@ public class WMinus extends WWidget {
 
     @Override
     protected boolean onMouseReleased(int button) {
-        if (mouseOver) {
+        if (pressed) {
             pressed = false;
             if (action != null) action.onMinusClick(this);
             return true;

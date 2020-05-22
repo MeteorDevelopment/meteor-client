@@ -100,7 +100,7 @@ public class HoleESP extends ToggleModule {
                     Block forward = mc.world.getBlockState(add(0, 1, 1)).getBlock();
                     if (forward != Blocks.BEDROCK && forward != Blocks.OBSIDIAN) continue;
                     Block back = mc.world.getBlockState(add(0, 0, -2)).getBlock();
-                    if (back != Blocks.BEDROCK && forward != Blocks.OBSIDIAN) continue;
+                    if (back != Blocks.BEDROCK && back != Blocks.OBSIDIAN) continue;
                     Block right = mc.world.getBlockState(add(1, 0, 1)).getBlock();
                     if (right != Blocks.BEDROCK && right != Blocks.OBSIDIAN) continue;
                     Block left = mc.world.getBlockState(add(-2, 0, 0)).getBlock();

@@ -26,6 +26,9 @@ public abstract class EntityRendererMixin<T extends Entity> {
         if (ModuleManager.INSTANCE.isActive(Nametags.class)) info.cancel();
         else return;
 
-        ModuleManager.INSTANCE.get(Nametags.class).render(matrixStack, Math.sqrt(renderManager.getSquaredDistanceToCamera(entity.getX(), entity.getY(), entity.getZ())), entity.getHeight(), entity.getX() - renderManager.camera.getPos().x, entity.getY() - renderManager.camera.getPos().y, entity.getZ() - renderManager.camera.getPos().z, renderManager.camera.getYaw(), renderManager.camera.getPitch(), entity.getDisplayName().asFormattedString(), (int) ((LivingEntity) entity).getHealth(), (int) ((LivingEntity) entity).getMaximumHealth());
+        float absorption = ((PlayerEntity) entity).getAbsorptionAmount();
+
+        ModuleManager.INSTANCE.get(Nametags.class).render(Math.sqrt(renderManager.getSquaredDistanceToCamera(entity.getX(), entity.getY(), entity.getZ())), entity.getHeight(), x, y, z, renderManager.cameraYaw, renderManager.cameraPitch, entity.getDisplayName().asFormattedString(), (int) (((PlayerEntity) entity).getHealth() + absorption), (int) (((PlayerEntity) entity).getMaximumHealth() + absorption));
+        ModuleManager.INSTANCE.get(Nametags.class).render(matrixStack, Math.sqrt(renderManager.getSquaredDistanceToCamera(entity., entity., entity.)), entity.getHeight(), entity.getX() - renderManager.camera.getPos().x, entity.getY() - renderManager.camera.getPos().y, entity.getZ() - renderManager.camera.getPos().z, renderManager.camera.getYaw(), renderManager.camera.getPitch(), entity.getDisplayName().asFormattedString(), (int) ((LivingEntity) entity).getHealth(), (int) ((LivingEntity) entity).getMaximumHealth());
     }
 }

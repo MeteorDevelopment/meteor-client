@@ -1,8 +1,8 @@
 package minegame159.meteorclient.gui.widgets;
 
 import minegame159.meteorclient.gui.GuiConfig;
-import minegame159.meteorclient.gui.GuiRenderer;
 import minegame159.meteorclient.gui.listeners.CheckboxClickListener;
+import minegame159.meteorclient.gui.renderer.GuiRenderer;
 import minegame159.meteorclient.utils.Utils;
 
 public class WCheckbox extends WWidget {
@@ -36,7 +36,7 @@ public class WCheckbox extends WWidget {
 
     @Override
     protected boolean onMouseReleased(int button) {
-        if (mouseOver) {
+        if (pressed) {
             pressed = false;
             checked = !checked;
             if (action != null) action.onCheckboxClick(this);

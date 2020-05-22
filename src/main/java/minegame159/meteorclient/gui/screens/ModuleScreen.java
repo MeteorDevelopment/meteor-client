@@ -72,10 +72,21 @@ public class ModuleScreen extends WindowScreen implements Listenable {
             add(new WHorizontalSeparator()).fillX().expandX();
             row();
 
-            // Active
-            WTable activeList = add(new WTable()).fillX().expandX().getWidget();
-            activeList.add(new WLabel("Active:"));
-            activeList.add(new WCheckbox(((ToggleModule) module).isActive())).getWidget().action = checkbox -> {
+            // Bottom
+            WTable bottomTable = add(new WTable()).getWidget();
+
+            //   Visible
+            bottomTable.add(new WLabel("Visible: ")).getWidget().tooltip = "Visible in HUD.";
+            WCheckbox visibleCheckbox = bottomTable.add(new WCheckbox(((ToggleModule) module).isVisible())).getWidget();
+            visibleCheckbox.tooltip = "Visible in HUD.";
+            visibleCheckbox.action = checkbox -> {
+                if (((ToggleModule) module).isVisible() != checkbox.checked) ((ToggleModule) module).setVisible(checkbox.checked);
+            };
+            bottomTable.row();
+
+            //   Active
+            bottomTable.add(new WLabel("Active:"));
+            bottomTable.add(new WCheckbox(((ToggleModule) module).isActive())).getWidget().action = checkbox -> {
                 if (((ToggleModule) module).isActive() != checkbox.checked) ((ToggleModule) module).toggle(mc.world != null);
             };
         }

@@ -13,10 +13,14 @@ public class WItemWithLabel extends WTable {
     private WItem item;
     private WLabel label;
 
-    public WItemWithLabel(ItemStack itemStack) {
+    public WItemWithLabel(ItemStack itemStack, String name) {
         this.itemStack = itemStack;
         this.item = add(new WItem(itemStack)).getWidget();
-        this.label = add(new WLabel(itemStack.getName().asString() + getStringToAppend())).getWidget();
+        this.label = add(new WLabel(name + getStringToAppend())).getWidget();
+    }
+
+    public WItemWithLabel(ItemStack itemStack) {
+        this(itemStack, itemStack.getName().asString());
     }
 
     private String getStringToAppend() {

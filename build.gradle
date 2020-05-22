@@ -33,6 +33,9 @@ dependencies {
 	include "com.github.ZeroMemes:Alpine:1.9"
 	include "net.jodah:typetools:0.5.0"
 
+	modImplementation "com.github.Vatuu:discord-rpc:1.6.2"
+	include "com.github.Vatuu:discord-rpc:1.6.2"
+
 	modImplementation "com.gitlab.CDAGaming:fabritone:1.15.2-SNAPSHOT"
 	include "com.gitlab.CDAGaming:fabritone:1.15.2-SNAPSHOT"
 }

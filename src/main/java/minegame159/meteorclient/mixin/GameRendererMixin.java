@@ -1,5 +1,6 @@
 package minegame159.meteorclient.mixin;
 
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.EventStore;
@@ -41,6 +42,8 @@ public abstract class GameRendererMixin {
         RenderSystem.disableDepthTest();
         RenderSystem.enableBlend();
         RenderSystem.lineWidth(1);
+        RenderSystem.enableBlend();
+        RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA);
         GL11.glEnable(GL11.GL_LINE_SMOOTH);
 
         RenderSystem.pushMatrix();

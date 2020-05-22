@@ -1,8 +1,8 @@
 package minegame159.meteorclient.gui.widgets;
 
 import minegame159.meteorclient.gui.GuiConfig;
-import minegame159.meteorclient.gui.GuiRenderer;
 import minegame159.meteorclient.gui.listeners.WindowDragListener;
+import minegame159.meteorclient.gui.renderer.GuiRenderer;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import org.lwjgl.glfw.GLFW;
@@ -11,7 +11,7 @@ public class WWindow extends WTable {
     public WindowDragListener onDragged;
     public final GuiConfig.WindowType type;
 
-    private String title;
+    private final String title;
     private WTable table;
 
     private boolean expanded;

@@ -5,8 +5,8 @@ import minegame159.meteorclient.gui.listeners.IntEditChangeListener;
 public class WIntEdit extends WTable {
     public IntEditChangeListener action;
 
-    private WIntTextBox textBox;
-    private WSlider slider;
+    private final WIntTextBox textBox;
+    private final WSlider slider;
 
     public WIntEdit(int min, int max, int value) {
         textBox = add(new WIntTextBox(value, 50)).getWidget();

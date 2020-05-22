@@ -1,13 +1,14 @@
 package minegame159.meteorclient.gui.widgets;
 
 import minegame159.meteorclient.gui.GuiConfig;
-import minegame159.meteorclient.gui.GuiRenderer;
 import minegame159.meteorclient.gui.listeners.TriangleClickListener;
+import minegame159.meteorclient.gui.renderer.GuiRenderer;
 import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.Utils;
 
 public class WTriangle extends WWidget {
     public TriangleClickListener action;
+    public boolean accentColor;
 
     public boolean checked;
 
@@ -32,7 +33,7 @@ public class WTriangle extends WWidget {
 
     @Override
     protected boolean onMouseReleased(int button) {
-        if (mouseOver) {
+        if (pressed) {
             pressed = false;
             checked = !checked;
             if (action != null) action.onTriangleClick(this);
@@ -49,9 +50,9 @@ public class WTriangle extends WWidget {
 
     @Override
     protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
-        Color color = GuiConfig.INSTANCE.background;
-        if (pressed) color = GuiConfig.INSTANCE.backgroundPressed;
-        else if (mouseOver) color = GuiConfig.INSTANCE.backgroundHovered;
+        Color color = accentColor ? GuiConfig.INSTANCE.accent : GuiConfig.INSTANCE.background;
+        if (pressed) color = accentColor ? GuiConfig.INSTANCE.accent : GuiConfig.INSTANCE.backgroundPressed;
+        else if (mouseOver) color = accentColor ? GuiConfig.INSTANCE.accent : GuiConfig.INSTANCE.backgroundHovered;
 
         angle += delta * 40 * (checked ? -1 : 1);
         angle = Utils.clamp(angle, -90, 0);

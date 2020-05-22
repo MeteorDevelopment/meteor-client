@@ -1,8 +1,11 @@
 package minegame159.meteorclient.modules.movement;
 
+import baritone.api.BaritoneAPI;
+import baritone.behavior.LookBehavior;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.PlayerMoveEvent;
+import minegame159.meteorclient.mixininterface.ILookBehavior;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
@@ -56,8 +59,13 @@ public class Speed extends ToggleModule {
         if (onlyOnGround.get() && !mc.player.onGround) return;
         if (!inWater.get() && mc.player.isTouchingWater()) return;
 
-        Vec3d forward = Vec3d.fromPolar(0, mc.player.yaw);
-        Vec3d right = Vec3d.fromPolar(0, mc.player.yaw + 90);
+        float yaw = mc.player.yaw;
+        if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing()) {
+            yaw = ((ILookBehavior) BaritoneAPI.getProvider().getPrimaryBaritone().getLookBehavior()).getTarget().getYaw();
+        }
+
+        Vec3d forward = Vec3d.fromPolar(0, yaw);
+        Vec3d right = Vec3d.fromPolar(0, yaw + 90);
         double velX = 0;
         double velZ = 0;
 

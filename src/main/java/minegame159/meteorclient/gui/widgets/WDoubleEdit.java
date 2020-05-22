@@ -5,8 +5,8 @@ import minegame159.meteorclient.gui.listeners.DoubleEditChangeListener;
 public class WDoubleEdit extends WTable {
     public DoubleEditChangeListener action;
 
-    private WDoubleTextBox textBox;
-    private WSlider slider;
+    private final WDoubleTextBox textBox;
+    private final WSlider slider;
 
     public WDoubleEdit(double min, double max, double value) {
         textBox = add(new WDoubleTextBox(value, 50)).getWidget();

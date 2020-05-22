@@ -10,6 +10,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.math.Matrix4f;
 import net.minecraft.entity.EntityContext;
 import net.minecraft.item.*;
+import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.Formatting;
@@ -20,6 +21,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShapes;
+import net.minecraft.world.EmptyBlockView;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.lwjgl.glfw.GLFW;
@@ -34,11 +36,11 @@ import java.util.stream.Collectors;
 public class Utils {
     public static MinecraftClient mc;
 
-    private static Random random = new Random();
-    private static Vec3d eyesPos = new Vec3d(0, 0, 0);
-    private static Vec3d vec1 = new Vec3d(0, 0, 0);
-    private static Vec3d vec2 = new Vec3d(0, 0, 0);
-    private static DecimalFormat df;
+    private static final Random random = new Random();
+    private static final Vec3d eyesPos = new Vec3d(0, 0, 0);
+    private static final Vec3d vec1 = new Vec3d(0, 0, 0);
+    private static final Vec3d vec2 = new Vec3d(0, 0, 0);
+    private static final DecimalFormat df;
 
     static {
         df = new DecimalFormat("0");
@@ -46,6 +48,17 @@ public class Utils {
         DecimalFormatSymbols dfs = new DecimalFormatSymbols();
         dfs.setDecimalSeparator('.');
         df.setDecimalFormatSymbols(dfs);
+    }
+
+    public static int search(String text, String filter) {
+        int wordsFound = 0;
+        String[] words = filter.split(" ");
+
+        for (String word : words) {
+            if (StringUtils.containsIgnoreCase(text, word)) wordsFound++;
+        }
+
+        return wordsFound;
     }
 
     public static double distance(double x1, double y1, double z1, double x2, double y2, double z2) {
@@ -113,7 +126,7 @@ public class Utils {
         }
     }
 
-    public static boolean place(BlockState blockState, BlockPos blockPos) {
+    public static boolean place(BlockState blockState, BlockPos blockPos, boolean swingHand, boolean checkForEntities) {
         // Calculate eyes pos
         ((IVec3d) eyesPos).set(mc.player.getX(), mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()), mc.player.getZ());
 
@@ -130,28 +143,32 @@ public class Utils {
             if(eyesPos.squaredDistanceTo(vec1) >= eyesPos.squaredDistanceTo(vec2)) continue;
 
             // Check if neighbor can be right clicked
-            if (mc.world.getBlockState(blockPos).getOutlineShape(mc.world, blockPos) != VoxelShapes.empty()) continue;
+            if (mc.world.getBlockState(neighbor).getOutlineShape(mc.world, blockPos) == VoxelShapes.empty()) continue;
 
             // Calculate hit pos
-            ((IVec3d) vec1).set(neighbor.getX() + 0.5 + side2.getVector().getX() * 0.5, neighbor.getY() + 0.5 + side2.getVector().getY() * 0.5, neighbor.getZ() + 0.5 + side2.getVector().getZ() * 0.5);
+            ((IVec3d) vec1).set(neighbor.getX() + 0.5 + side2.getVector().getX() * 0.5, neighbor.getY() + 0.5 + side2.getVector().getY()     * 0.5, neighbor.getZ() + 0.5 + side2.getVector().getZ() * 0.5);
 
             // Check if hitVec is within range (4.25 blocks)
             if(eyesPos.squaredDistanceTo(vec1) > 18.0625) continue;
 
             // Check if intersects entities
-            if (!mc.world.canPlace(blockState, blockPos, EntityContext.absent())) continue;
+            if (checkForEntities && !mc.world.canPlace(blockState, blockPos, EntityContext.absent())) continue;
 
             // Place block
             PlayerMoveC2SPacket.LookOnly packet = new PlayerMoveC2SPacket.LookOnly(getNeededYaw(vec1), getNeededPitch(vec1), mc.player.onGround);
             mc.player.networkHandler.sendPacket(packet);
             mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(vec1, side2, neighbor, false));
             mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
-            mc.player.swingHand(Hand.MAIN_HAND);
+            if (swingHand) mc.player.swingHand(Hand.MAIN_HAND);
+            else mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
 
             return true;
         }
 
         return false;
+    }
+    public static boolean place(BlockState blockState, BlockPos blockPos) {
+        return place(blockState, blockPos, true, true);
     }
 
     public static float getNeededYaw(Vec3d vec) {

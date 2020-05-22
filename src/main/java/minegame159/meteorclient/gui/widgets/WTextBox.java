@@ -1,9 +1,9 @@
 package minegame159.meteorclient.gui.widgets;
 
-import minegame159.meteorclient.gui.GuiThings;
 import minegame159.meteorclient.gui.GuiConfig;
-import minegame159.meteorclient.gui.GuiRenderer;
+import minegame159.meteorclient.gui.GuiThings;
 import minegame159.meteorclient.gui.listeners.TextBoxChangeListener;
+import minegame159.meteorclient.gui.renderer.GuiRenderer;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import org.lwjgl.glfw.GLFW;
@@ -18,7 +18,7 @@ public class WTextBox extends WWidget {
 
     public String text;
 
-    private double uWidth;
+    private final double uWidth;
     private boolean focused;
 
     private int cursorTimer;
@@ -130,9 +130,9 @@ public class WTextBox extends WWidget {
         if (overflowWidth < 0) overflowWidth = 0;
 
         if (text.length() > 0) {
-            if (overflowWidth > 0) renderer.startTextScissor(this, 0, 3, 0, 3);
+            if (overflowWidth > 0) renderer.beginScissor(this, 0, 3, 0, 3, true);
             renderer.renderText(text, x + 3 - overflowWidth, y + 3.5, GuiConfig.INSTANCE.text, false);
-            if (overflowWidth > 0) renderer.endTextScissor();
+            if (overflowWidth > 0) renderer.endScissor();
         }
 
         if (focused && cursorVisible) {

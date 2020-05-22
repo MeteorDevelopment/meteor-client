@@ -8,8 +8,8 @@ public class WColorEdit extends WTable {
     public Color color;
     public Consumer<WColorEdit> action;
 
-    private WQuad quad;
-    private WIntTextBox r, g, b, a;
+    private final WQuad quad;
+    private final WIntTextBox r, g, b, a;
 
     public WColorEdit(Color color) {
         this.color = color;
