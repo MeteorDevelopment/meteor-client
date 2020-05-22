@@ -2,16 +2,18 @@ package minegame159.meteorclient.gui.screens;
 
 import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.utils.Utils;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
+import net.minecraft.util.Pair;
 import net.minecraft.util.registry.Registry;
-import org.apache.commons.lang3.StringUtils;
 
-import java.util.List;
+import java.util.*;
+import java.util.function.Consumer;
 
 public class ItemListSettingScreen extends WindowScreen {
-    private Setting<List<Item>> setting;
-    private WTextBox filter;
+    private final Setting<List<Item>> setting;
+    private final WTextBox filter;
 
     public ItemListSettingScreen(Setting<List<Item>> setting) {
         super("Select items", true);
@@ -35,14 +37,10 @@ public class ItemListSettingScreen extends WindowScreen {
 
         // All items
         WTable table1 = add(new WTable()).top().getWidget();
-        Registry.ITEM.forEach(item -> {
+        Consumer<Item> itemForEach = item -> {
             if (item == Items.AIR || setting.get().contains(item)) return;
 
-            WItemWithLabel wItem = new WItemWithLabel(item.getStackForRender());
-            if (!filter.text.isEmpty()) {
-                if (!StringUtils.containsIgnoreCase(wItem.getLabelText(), filter.text)) return;
-            }
-            table1.add(wItem);
+            table1.add(new WItemWithLabel(item.getStackForRender()));
 
             WPlus plus = table1.add(new WPlus()).getWidget();
             plus.action = plus1 -> {
@@ -55,7 +53,20 @@ public class ItemListSettingScreen extends WindowScreen {
             };
 
             table1.row();
-        });
+        };
+
+        // Sort all items
+        if (filter.text.isEmpty()) {
+            Registry.ITEM.forEach(itemForEach);
+        } else {
+            List<Pair<Item, Integer>> items = new ArrayList<>();
+            Registry.ITEM.forEach(item -> {
+                int words = Utils.search(item.getName().asFormattedString(), filter.text);
+                if (words > 0) items.add(new Pair<>(item, words));
+            });
+            items.sort(Comparator.comparingInt(value -> -value.getRight()));
+            for (Pair<Item, Integer> pair : items) itemForEach.accept(pair.getLeft());
+        }
 
         if (table1.getCells().size() > 0) add(new WVerticalSeparator()).expandY();
 

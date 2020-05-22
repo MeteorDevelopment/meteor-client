@@ -19,8 +19,19 @@ public class BlockListSetting extends Setting<List<Block>> {
     public BlockListSetting(String name, String description, List<Block> defaultValue, Consumer<List<Block>> onChanged, Consumer<Setting<List<Block>>> onModuleActivated) {
         super(name, description, defaultValue, onChanged, onModuleActivated);
 
+        value = new ArrayList<>(defaultValue);
+
         widget = new WButton("Select");
         ((WButton) widget).action = button -> MinecraftClient.getInstance().openScreen(new BlockListSettingScreen(this));
+    }
+
+    @Override
+    public void reset(boolean callbacks) {
+        value = new ArrayList<>(defaultValue);
+        if (callbacks) {
+            resetWidget();
+            changed();
+        }
     }
 
     @Override
@@ -37,15 +48,6 @@ public class BlockListSetting extends Setting<List<Block>> {
         }
 
         return blocks;
-    }
-
-    @Override
-    public void reset(boolean callbacks) {
-        value = new ArrayList<>(defaultValue);
-        if (callbacks) {
-            resetWidget();
-            changed();
-        }
     }
 
     @Override

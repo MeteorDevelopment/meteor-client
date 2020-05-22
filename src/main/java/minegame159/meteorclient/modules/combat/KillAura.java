@@ -9,15 +9,18 @@ import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.EntityUtils;
 import net.minecraft.command.arguments.EntityAnchorArgumentType;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RayTraceContext;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class KillAura extends ToggleModule {
     public enum Priority {
@@ -28,11 +31,11 @@ public class KillAura extends ToggleModule {
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgToAttack = settings.createGroup("To Attack");
     private final SettingGroup sgDelay = settings.createGroup("Delay", "smart-delay", "Smart delay.", true);
     private final SettingGroup sgDelayDisabled = sgDelay.getDisabledGroup();
+    private final SettingGroup sgRandomDelay = settings.createGroup("Random Delay", "random-delay-enabled", "Adds a random delay to hits to try and bypass anti-cheats.", false);
 
-    public Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()
+    public final Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()
             .name("range")
             .description("Attack range.")
             .defaultValue(5.5)
@@ -40,68 +43,64 @@ public class KillAura extends ToggleModule {
             .build()
     );
 
-    public Setting<Boolean> ignoreWalls = sgGeneral.add(new BoolSetting.Builder()
-            .name("ignore-walls")
-            .description("Attack through walls.")
-            .defaultValue(true)
+    public final Setting<List<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
+            .name("entities")
+            .description("Entities to attack.")
+            .defaultValue(new ArrayList<>(0))
             .build()
     );
 
-    public Setting<Priority> priority = sgGeneral.add(new EnumSetting.Builder<Priority>()
-            .name("priority")
-            .description("What entities to target.")
-            .defaultValue(Priority.LowestHealth)
-            .build()
-    );
-
-    private Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
-            .name("rotate")
-            .description("Rotates you towards the target.")
-            .defaultValue(false)
-            .build()
-    );
-
-    public Setting<Boolean> players = sgGeneral.add(new BoolSetting.Builder()
-            .name("players")
-            .description("Attack players.")
-            .defaultValue(true)
-            .build()
-    );
-
-    public Setting<Boolean> friends = sgToAttack.add(new BoolSetting.Builder()
+    public final Setting<Boolean> friends = sgGeneral.add(new BoolSetting.Builder()
             .name("friends")
             .description("Attack friends, useful only if attack players is on.")
             .defaultValue(false)
             .build()
     );
 
-    public Setting<Boolean> animals = sgToAttack.add(new BoolSetting.Builder()
-            .name("animals")
-            .description("Attack animals.")
+    public final Setting<Boolean> ignoreWalls = sgGeneral.add(new BoolSetting.Builder()
+            .name("ignore-walls")
+            .description("Attack through walls.")
             .defaultValue(true)
             .build()
     );
 
-    public Setting<Boolean> mobs = sgToAttack.add(new BoolSetting.Builder()
-            .name("mobs")
-            .description("Attack mobs.")
-            .defaultValue(true)
+    public final Setting<Priority> priority = sgGeneral.add(new EnumSetting.Builder<Priority>()
+            .name("priority")
+            .description("What entities to target.")
+            .defaultValue(Priority.LowestHealth)
             .build()
     );
 
-    private Setting<Integer> hitDelay = sgDelayDisabled.add(new IntSetting.Builder()
+    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
+            .name("rotate")
+            .description("Rotates you towards the target.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Integer> hitDelay = sgDelayDisabled.add(new IntSetting.Builder()
             .name("hit-delay")
                 .description("Hit delay in ticks. 20 ticks = 1 second.")
                 .defaultValue(0)
                 .min(0)
                 .sliderMax(60)
                 .build()
-        );
+    );
+                                                            
+    private final Setting<Integer> randomDelayMax = sgRandomDelay.add(new IntSetting.Builder()
+            .name("random-delay-max")
+            .description("Maximum random value for random delay.")
+            .defaultValue(4)
+            .min(0)
+            .sliderMax(20)
+            .build()
+    );
 
     private int hitDelayTimer;
+    private int randomHitDelayTimer;
 
-    private Vec3d vec3d1 = new Vec3d(0, 0, 0);
-    private Vec3d vec3d2 = new Vec3d(0, 0, 0);
+    private final Vec3d vec3d1 = new Vec3d(0, 0, 0);
+    private final Vec3d vec3d2 = new Vec3d(0, 0, 0);
 
     public KillAura() {
         super(Category.Combat, "kill-aura", "Automatically attacks entities.");
@@ -110,6 +109,7 @@ public class KillAura extends ToggleModule {
     @Override
     public void onActivate() {
         hitDelayTimer = 0;
+        randomHitDelayTimer = 0;
     }
 
     private boolean isInRange(Entity entity) {
@@ -117,13 +117,14 @@ public class KillAura extends ToggleModule {
     }
 
     private boolean canAttackEntity(Entity entity) {
-        if (entity.getUuid().equals(mc.player.getUuid())) return false;
-        if (EntityUtils.isPlayer(entity) && players.get()) {
+        if (entity == mc.player || !entities.get().contains(entity.getType())) return false;
+
+        if (entity instanceof PlayerEntity) {
             if (friends.get()) return true;
             return FriendManager.INSTANCE.attack((PlayerEntity) entity);
         }
-        if (EntityUtils.isAnimal(entity) && animals.get()) return true;
-        return EntityUtils.isMob(entity) && mobs.get();
+
+        return true;
     }
 
     private boolean canSeeEntity(Entity entity) {
@@ -170,6 +171,14 @@ public class KillAura extends ToggleModule {
             else hitDelayTimer = 0;
         }
 
+        // Random hit delay
+        if (sgRandomDelay.isEnabled()) {
+            if (randomHitDelayTimer > 0) {
+                randomHitDelayTimer--;
+                return;
+            }
+        }
+
         Streams.stream(mc.world.getEntities())
                 .filter(this::isInRange)
                 .filter(this::canAttackEntity)
@@ -178,12 +187,18 @@ public class KillAura extends ToggleModule {
                 .filter(entity -> entity.getHealth() > 0)
                 .min(this::sort)
                 .ifPresent(entity -> {
+                    // Rotate
                     if (rotate.get()) {
                         ((IVec3d) vec3d1).set(entity.getX(), entity.getY() + entity.getHeight() / 2, entity.getZ());
                         mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, vec3d1);
                     }
+
+                    // Attack
                     mc.interactionManager.attackEntity(mc.player, entity);
                     mc.player.swingHand(Hand.MAIN_HAND);
+
+                    // Set next random delay length
+                    if (sgRandomDelay.isEnabled()) randomHitDelayTimer = (int) Math.round(Math.random() * randomDelayMax.get());
                 });
     });
 }

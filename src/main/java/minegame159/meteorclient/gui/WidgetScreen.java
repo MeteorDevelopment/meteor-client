@@ -1,5 +1,6 @@
 package minegame159.meteorclient.gui;
 
+import minegame159.meteorclient.gui.renderer.GuiRenderer;
 import minegame159.meteorclient.gui.widgets.Cell;
 import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.utils.Utils;
@@ -9,8 +10,6 @@ import net.minecraft.text.LiteralText;
 import org.lwjgl.glfw.GLFW;
 
 public class WidgetScreen extends Screen {
-    private static final GuiRenderer GUI_RENDERER = new GuiRenderer();
-
     public final String title;
     protected final MinecraftClient mc;
 
@@ -85,10 +84,11 @@ public class WidgetScreen extends Screen {
     public void render(int mouseX, int mouseY, float delta) {
         if (!Utils.canUpdate()) renderBackground();
 
-        GUI_RENDERER.begin();
-        root.render(GUI_RENDERER, mouseX, mouseY, delta);
-        if (renderDebug) GUI_RENDERER.renderDebug(root);
-        GUI_RENDERER.end();
+        GuiRenderer.INSTANCE.begin();
+        root.render(GuiRenderer.INSTANCE, mouseX, mouseY, delta);
+        GuiRenderer.INSTANCE.end();
+
+        if (renderDebug) GuiRenderer.INSTANCE.renderDebug(root);
     }
 
     @Override

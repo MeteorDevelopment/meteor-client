@@ -7,8 +7,8 @@ import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.accountsfriends.Friend;
 import minegame159.meteorclient.accountsfriends.FriendManager;
 import minegame159.meteorclient.events.FriendListChangedEvent;
-import minegame159.meteorclient.gui.GuiRenderer;
 import minegame159.meteorclient.gui.TopBarType;
+import minegame159.meteorclient.gui.renderer.GuiRenderer;
 import minegame159.meteorclient.gui.screens.EditFriendScreen;
 import minegame159.meteorclient.gui.widgets.*;
 

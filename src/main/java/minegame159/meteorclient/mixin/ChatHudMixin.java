@@ -1,12 +1,16 @@
 package minegame159.meteorclient.mixin;
 
+import minegame159.meteorclient.mixininterface.IChatHudLine;
 import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.misc.AntiSpam;
 import minegame159.meteorclient.modules.misc.LongerChat;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.hud.ChatHud;
 import net.minecraft.client.gui.hud.ChatHudLine;
 import net.minecraft.client.util.Texts;
+import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.math.MathHelper;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -17,6 +21,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Mixin(ChatHud.class)
 public abstract class ChatHudMixin {
@@ -42,6 +48,41 @@ public abstract class ChatHudMixin {
 
     @Inject(at = @At("HEAD"), method = "addMessage(Lnet/minecraft/text/Text;IIZ)V", cancellable = true)
     private void onAddMessage(Text message, int messageId, int timestamp, boolean bl, CallbackInfo info) {
+        info.cancel();
+
+        // Anti Spam
+        if (ModuleManager.INSTANCE.isActive(AntiSpam.class)) {
+            ChatHudLine lastMsg = visibleMessages.size() > 0 ? visibleMessages.get(0) : null;
+
+            if (lastMsg != null) {
+                if (lastMsg.getText().asFormattedString().equals(message.asFormattedString())) {
+                    String string = lastMsg.getText().asFormattedString();
+                    string += Formatting.GRAY + " (2)";
+
+                    ((IChatHudLine) lastMsg).setText(new LiteralText(string));
+                    return;
+                } else {
+                    String string = lastMsg.getText().asFormattedString();
+                    Matcher matcher = Pattern.compile(".*(\\([0-9]+\\)$)").matcher(string);
+
+                    if (matcher.matches()) {
+                        String group = matcher.group(1);
+                        int number = Integer.parseInt(group.substring(1, group.length() - 1));
+
+                        int i = string.lastIndexOf(group);
+                        string = string.substring(0, i - Formatting.GRAY.toString().length() - 1);
+
+                        if (string.equals(message.asFormattedString())) {
+                            string += Formatting.GRAY + " (" + (number + 1) + ")";
+                            ((IChatHudLine) lastMsg).setText(new LiteralText(string));
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Normal things
         if (messageId != 0) {
             this.removeMessage(messageId);
         }
@@ -70,7 +111,5 @@ public abstract class ChatHudMixin {
                 this.messages.remove(this.messages.size() - 1);
             }
         }
-
-        info.cancel();
     }
 }
