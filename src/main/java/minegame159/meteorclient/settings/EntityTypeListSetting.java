@@ -71,7 +71,7 @@ public class EntityTypeListSetting extends Setting<List<EntityType<?>>> {
 
         ListTag valueTag = new ListTag();
         for (EntityType<?> entityType : get()) {
-            valueTag.add(new StringTag(Registry.ENTITY_TYPE.getId(entityType).toString()));
+            valueTag.add(StringTag.of(Registry.ENTITY_TYPE.getId(entityType).toString()));
         }
         tag.put("value", valueTag);
 
