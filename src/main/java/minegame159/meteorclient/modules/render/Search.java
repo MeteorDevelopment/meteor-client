@@ -42,7 +42,7 @@ public class Search extends ToggleModule {
             .description("Blocks to search for.")
             .defaultValue(new ArrayList<>(0))
             .onChanged(blocks1 -> {
-                if (Utils.canUpdate()) {
+                if (Utils.canUpdate() && isActive()) {
                     synchronized (chunks) {
                         for (MyChunk chunk : chunks.values()) chunk.dispose();
                         chunks.clear();
