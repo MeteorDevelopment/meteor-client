@@ -20,6 +20,7 @@ import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 
@@ -130,9 +131,7 @@ public class CrystalAura extends ToggleModule {
                     break;
                 }
             }
-            if (bestBlock.equals(mc.player.getBlockPos())) {
-                //Literally do nothing. You are worthless.
-            } else{
+            if (!bestBlock.equals(mc.player.getBlockPos())) {
                 PlayerInteractBlockC2SPacket placePacket;
                 if (mc.player.getMainHandStack().getItem() == Items.END_CRYSTAL) {
                     placePacket = new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, bestBlock, false));
@@ -165,8 +164,8 @@ public class CrystalAura extends ToggleModule {
             if(i == null) continue;
             if((mc.world.getBlockState(i).getBlock() == Blocks.BEDROCK
                     || mc.world.getBlockState(i).getBlock() == Blocks.OBSIDIAN)
-                    && mc.world.getBlockState(i.add(0, 1, 0)).getBlock() == Blocks.AIR
-                    && mc.world.getBlockState(i.add(0, 2, 0)).getBlock() == Blocks.AIR){
+                    && (mc.world.getBlockState(i.up()).getBlock() == Blocks.AIR && mc.world.getEntities(null, new Box(i.up().getX(), i.up().getY(), i.up().getZ(), i.up().getX() + 1.0D, i.up().getY() + 2.0D, i.up().getZ() + 1.0D)).isEmpty())
+                    && mc.world.getBlockState(i.up(2)).getBlock() == Blocks.AIR && mc.world.getEntities(null, new Box(i.up(2).getX(), i.up(2).getY(), i.up(2).getZ(), i.up(2).getX() + 1.0D, i.up(2).getY() + 2.0D, i.up(2).getZ() + 1.0D)).isEmpty()){
                 validBlocks.add(i);
             }
         }

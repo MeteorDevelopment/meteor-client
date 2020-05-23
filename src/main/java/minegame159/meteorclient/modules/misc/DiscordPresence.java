@@ -12,15 +12,26 @@ import net.arikia.dev.drpc.DiscordEventHandlers;
 import net.arikia.dev.drpc.DiscordRPC;
 import net.arikia.dev.drpc.DiscordRichPresence;
 
-import java.util.Objects;
-
 public class DiscordPresence extends ToggleModule {
     private static DiscordRichPresence presence = new DiscordRichPresence.Builder("https://discord.gg/BG2kMWb").build();
 
     public DiscordPresence(){super(Category.Misc, "discord-presence", "That stuff you see in discord");}
 
+    private int ticks = 0;
+
     @EventHandler
     private Listener<TickEvent> OnTick = new Listener<>(event -> {
+        ticks++;
+        if(ticks < 200){
+            DiscordPresence.presence.smallImageKey = "minegame";
+            DiscordPresence.presence.smallImageText = "MineGame159";
+        }else if(ticks < 400){
+            DiscordPresence.presence.smallImageKey = "squidoodly";
+            DiscordPresence.presence.smallImageText = "squidoodly";
+        }else{
+            ticks = 0;
+        }
+        DiscordRPC.discordUpdatePresence(presence);
         DiscordRPC.discordRunCallbacks();
     });
 
@@ -35,6 +46,8 @@ public class DiscordPresence extends ToggleModule {
         }else{
             DiscordPresence.presence.details = getName() + " || " + getServer();
         }
+        DiscordPresence.presence.largeImageKey = "meteor_client";
+        DiscordPresence.presence.largeImageText = "https://meteorclient.github.io/";
         DiscordRPC.discordUpdatePresence(presence);
     }
 

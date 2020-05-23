@@ -42,6 +42,13 @@ public class AutoReplenish extends ToggleModule {
             .build()
     );
 
+    private Setting<Boolean> alert = sgGeneral.add(new BoolSetting.Builder()
+            .name("alert")
+            .description("Send messages in chat when you run out of items")
+            .defaultValue(false)
+            .build()
+    );
+
     private List<Item> items = new ArrayList<>();
 
     public AutoReplenish(){
@@ -56,7 +63,9 @@ public class AutoReplenish extends ToggleModule {
             if(mc.player.inventory.getInvStack(i).getCount() < amount.get()){
                 int slot = findItems(mc.player.inventory.getInvStack(i).getItem());
                 if(slot == -1 && !items.contains(mc.player.inventory.getInvStack(i).getItem())){
-                    Utils.sendMessage("#redYou are out of #blue" + mc.player.inventory.getInvStack(i).getItem().toString() + "#red. Cannot refill.");
+                    if(alert.get()) {
+                        Utils.sendMessage("#redYou are out of #blue" + mc.player.inventory.getInvStack(i).getItem().toString() + "#red. Cannot refill.");
+                    }
                     items.add(mc.player.inventory.getInvStack(i).getItem());
                     continue;
                 }
@@ -71,7 +80,9 @@ public class AutoReplenish extends ToggleModule {
         if(mc.player.getOffHandStack().getCount() < amount.get()){
             int slot = findItems(mc.player.getOffHandStack().getItem());
             if(slot == -1 && !items.contains(mc.player.getOffHandStack().getItem())){
-                Utils.sendMessage("#redYou are out of #blue" + mc.player.getOffHandStack().getItem().toString() + "#red. Cannot refill.");
+                if(alert.get()) {
+                    Utils.sendMessage("#redYou are out of #blue" + mc.player.getOffHandStack().getItem().toString() + "#red. Cannot refill.");
+                }
                 items.add(mc.player.getOffHandStack().getItem());
                 return;
             }

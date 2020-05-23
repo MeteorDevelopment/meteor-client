@@ -23,7 +23,7 @@ public class CommandDispatcher {
 
         // Get module
         Module module = ModuleManager.INSTANCE.get(args[0]);
-        if (module == null) return;
+        if (module == null) {Utils.sendMessage("#redNot a valid command or module. Do #blue.commands #redfor a list of commands or #blue.modules #red for a lit of modules"); return;}
         args = subArray(args, 1);
 
         if (args.length <= 0) {
