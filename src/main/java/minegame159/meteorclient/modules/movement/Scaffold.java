@@ -6,6 +6,7 @@ import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BoolSetting;
+import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.Utils;
@@ -34,6 +35,16 @@ public class Scaffold extends ToggleModule {
             .build()
     );
 
+    private final Setting<Integer> radius = sg.add(new IntSetting.Builder()
+            .name("radius")
+            .description("Radius.")
+            .defaultValue(1)
+            .min(1)
+            .sliderMin(1)
+            .sliderMax(7)
+            .build()
+    );
+
     private final Setting<Boolean> swingHand = sg.add(new BoolSetting.Builder()
             .name("swing-hand")
             .description("Only client side.")
@@ -42,7 +53,8 @@ public class Scaffold extends ToggleModule {
     );
 
     private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
-    private BlockState slotBlockState;
+    private BlockState blockState, slotBlockState;
+    private int slot, prevSelectedSlot;
 
     public Scaffold() {
         super(Category.Movement, "scaffold", "Places blocks under you.");
@@ -51,15 +63,15 @@ public class Scaffold extends ToggleModule {
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
         if (fastTower.get() && mc.options.keyJump.isPressed() && findSlot(mc.world.getBlockState(setPos(0, -1, 0))) != -1) mc.player.jump();
-        BlockState blockState = mc.world.getBlockState(setPos(0, -1, 0));
+        blockState = mc.world.getBlockState(setPos(0, -1, 0));
         if (!blockState.getMaterial().isReplaceable()) return;
 
         // Search for block in hotbar
-        int slot = findSlot(blockState);
+        slot = findSlot(blockState);
         if (slot == -1) return;
 
         // Change slot
-        int prevSelectedSlot = mc.player.inventory.selectedSlot;
+        prevSelectedSlot = mc.player.inventory.selectedSlot;
         mc.player.inventory.selectedSlot = slot;
 
         // Check if has solid horizontal neighbour
@@ -74,32 +86,75 @@ public class Scaffold extends ToggleModule {
         // No neighbour so player is going diagonally
         if (!hasNeighbour) {
             // Place extra block
-            boolean placed = Utils.place(slotBlockState, setPos(1, -1, 0), swingHand.get(), true);
-            if (!placed) placed = Utils.place(slotBlockState, setPos(-1, -1, 0), swingHand.get(), true);
-            if (!placed) placed = Utils.place(slotBlockState, setPos(0, -1, 1), swingHand.get(), true);
-            if (!placed) placed = Utils.place(slotBlockState, setPos(0, -1, -1), swingHand.get(), true);
-            if (!placed) placed = Utils.place(slotBlockState, setPos(0, -1 - 1, 0), swingHand.get(), true);
+            boolean placed = Utils.place(slotBlockState, setPos(1, -1, 0), swingHand.get(), false, true);
+            if (!placed) placed = Utils.place(slotBlockState, setPos(-1, -1, 0), swingHand.get(), false, true);
+            if (!placed) placed = Utils.place(slotBlockState, setPos(0, -1, 1), swingHand.get(), false, true);
+            if (!placed) placed = Utils.place(slotBlockState, setPos(0, -1, -1), swingHand.get(), false, true);
+            if (!placed) placed = Utils.place(slotBlockState, setPos(0, -1 - 1, 0), swingHand.get(), false, true);
             if (!placed) {
                 System.err.println("[Meteor]: Scaffold: Failed to place extra block when going diagonally. This shouldn't happen.");
                 return;
             }
 
             // Search for extra block is needed
-            if (mc.player.inventory.getInvStack(slot).isEmpty()) {
-                slot = findSlot(blockState);
-                if (slot == -1) {
-                    mc.player.inventory.selectedSlot = prevSelectedSlot;
-                    return;
-                }
-            }
+            if (!findBlock()) return;
         }
 
         // Place block
-        Utils.place(slotBlockState, setPos(0, -1, 0), swingHand.get(), false);
+        Utils.place(slotBlockState, setPos(0, -1, 0), swingHand.get(), false, false);
+
+        // Place blocks around if radius is bigger than 1
+        for (int i = 1; i < radius.get(); i++) {
+            int count = 1 + (i - 1) * 2;
+            int countHalf = count / 2;
+
+            // Forward
+            for (int j = 0; j < count; j++) {
+                if (!findBlock()) return;
+                Utils.place(slotBlockState, setPos(j - countHalf, -1, i), swingHand.get(), false, false);
+            }
+            // Backward
+            for (int j = 0; j < count; j++) {
+                if (!findBlock()) return;
+                Utils.place(slotBlockState, setPos(j - countHalf, -1, -i), swingHand.get(), false, false);
+            }
+            // Right
+            for (int j = 0; j < count; j++) {
+                if (!findBlock()) return;
+                Utils.place(slotBlockState, setPos(i, -1, j - countHalf), swingHand.get(), false, false);
+            }
+            // Left
+            for (int j = 0; j < count; j++) {
+                if (!findBlock()) return;
+                Utils.place(slotBlockState, setPos(-i, -1, j - countHalf), swingHand.get(), false, false);
+            }
+
+            // Diagonals
+            if (!findBlock()) return;
+            Utils.place(slotBlockState, setPos(-i, -1, i), swingHand.get(), false, false);
+            if (!findBlock()) return;
+            Utils.place(slotBlockState, setPos(i, -1, i), swingHand.get(), false, false);
+            if (!findBlock()) return;
+            Utils.place(slotBlockState, setPos(-i, -1, -i), swingHand.get(), false, false);
+            if (!findBlock()) return;
+            Utils.place(slotBlockState, setPos(i, -1, -i), swingHand.get(), false, false);
+        }
 
         // Change back to previous slot
         mc.player.inventory.selectedSlot = prevSelectedSlot;
     });
+
+    private boolean findBlock() {
+        if (mc.player.inventory.getInvStack(slot).isEmpty()) {
+            slot = findSlot(blockState);
+            if (slot == -1) {
+                mc.player.inventory.selectedSlot = prevSelectedSlot;
+                return false;
+            }
+        }
+
+        return true;
+    }
 
     private boolean isSolid(BlockState state) {
         return state.getOutlineShape(mc.world, setPos(0, -1, 0)) != VoxelShapes.empty();
