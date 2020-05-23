@@ -7,7 +7,9 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.accountsfriends.FriendManager;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.movement.NoFall;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -104,14 +106,20 @@ public class AutoTotem extends ToggleModule {
         double damageTaken = 0;
         for(int i = 0; entities.hasNext(); i++){
             Entity entity = entities.next();
-            if(entity instanceof EnderCrystalEntity){
+            if(entity instanceof EnderCrystalEntity && damageTaken < DamageCalcUtils.resistanceReduction(mc.player, DamageCalcUtils.blastProtReduction(mc.player, DamageCalcUtils.armourCalc(mc.player, DamageCalcUtils.getDamageMultiplied(DamageCalcUtils.crystalDamage(mc.player, entity.getPos())))))){
                 damageTaken = DamageCalcUtils.resistanceReduction(mc.player, DamageCalcUtils.blastProtReduction(mc.player, DamageCalcUtils.armourCalc(mc.player, DamageCalcUtils.getDamageMultiplied(DamageCalcUtils.crystalDamage(mc.player, entity.getPos())))));
-            }else if(entity instanceof PlayerEntity){
+            }else if(entity instanceof PlayerEntity && damageTaken < DamageCalcUtils.resistanceReduction(mc.player, DamageCalcUtils.normalProtReduction(mc.player, DamageCalcUtils.armourCalc(mc.player, DamageCalcUtils.getSwordDamage((PlayerEntity) entity))))){
                 if(!FriendManager.INSTANCE.isTrusted((PlayerEntity) entity) && mc.player.getPos().distanceTo(entity.getPos()) < 5){
                     if(((PlayerEntity) entity).getActiveItem().getItem() instanceof SwordItem){
                         damageTaken = DamageCalcUtils.resistanceReduction(mc.player, DamageCalcUtils.normalProtReduction(mc.player, DamageCalcUtils.armourCalc(mc.player, DamageCalcUtils.getSwordDamage((PlayerEntity) entity))));
                     }
                 }
+            }
+        }
+        if(!ModuleManager.INSTANCE.get(NoFall.class).isActive() && mc.player.fallDistance > 3){
+            double damage =mc.player.fallDistance * 0.5;
+            if(damage > damageTaken){
+                damageTaken = damage;
             }
         }
         return damageTaken;
