@@ -13,7 +13,7 @@ public class WIntEdit extends WTable {
         slider = add(new WSlider(min, max, value, 75)).getWidget();
 
         textBox.action = textBox1 -> {
-            if (textBox1.value != slider.value) {
+            if (textBox1.value != Math.round(slider.value)) {
                 slider.value = textBox1.value;
                 if (action != null) action.onIntEditChange(this);
             }
@@ -33,6 +33,6 @@ public class WIntEdit extends WTable {
 
     public void set(int value) {
         textBox.setValue(value);
-        slider.value = value;
+        if (Math.round(slider.value) != value) slider.value = value;
     }
 }
