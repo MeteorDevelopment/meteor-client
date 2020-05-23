@@ -76,7 +76,9 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
     }
 
     public List<ToggleModule> getActive() {
-        return active;
+        synchronized (active) {
+            return active;
+        }
     }
 
     public void setModuleToBind(Module moduleToBind) {
@@ -113,15 +115,19 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
     }
 
     void addActive(ToggleModule module) {
-        if (!active.contains(module)) {
-            active.add(module);
-            MeteorClient.EVENT_BUS.post(EventStore.activeModulesChangedEvent());
+        synchronized (active) {
+            if (!active.contains(module)) {
+                active.add(module);
+                MeteorClient.EVENT_BUS.post(EventStore.activeModulesChangedEvent());
+            }
         }
     }
 
     void removeActive(ToggleModule module) {
-        if (active.remove(module)) {
-            MeteorClient.EVENT_BUS.post(EventStore.activeModulesChangedEvent());
+        synchronized (active) {
+            if (active.remove(module)) {
+                MeteorClient.EVENT_BUS.post(EventStore.activeModulesChangedEvent());
+            }
         }
     }
 
@@ -151,12 +157,16 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
 
     @EventHandler
     private final Listener<GameJoinedEvent> onGameJoined = new Listener<>(event -> {
-        for (ToggleModule module : active) module.onActivate();
+        synchronized (active) {
+            for (ToggleModule module : active) module.onActivate();
+        }
     });
 
     @EventHandler
     private final Listener<GameDisconnectedEvent> onGameDisconnected = new Listener<>(event -> {
-        for (ToggleModule module : active) module.onDeactivate();
+        synchronized (active) {
+            for (ToggleModule module : active) module.onDeactivate();
+        }
     });
 
     @Override
