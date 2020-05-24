@@ -10,7 +10,7 @@ import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 
 public class AntiHunger extends ToggleModule {
     public AntiHunger() {
-        super(Category.Player, "anti-hunger", "Lose ur food slower. WARNING: It will u when u disable it.");
+        super(Category.Player, "anti-hunger", "Lose your food slower. WARNING: It will kill you when you disable it.");
     }
 
     @EventHandler
