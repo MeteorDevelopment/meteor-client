@@ -206,7 +206,7 @@ public class WWindow extends WTable {
                 dragging = false;
 
                 if (button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) {
-                    triangle.mouseOver = true;
+                    triangle.pressed = true;
                     triangle.onMouseReleased(button);
                 }
 
