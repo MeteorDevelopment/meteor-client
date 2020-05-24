@@ -51,11 +51,11 @@ public class WWindowController extends WWidget {
                 }
             }
 
-            if (cellX + cell.width > window.getScaledWidth()) {
+            if (cellX > window.getScaledWidth()) {
                 cellX = window.getScaledWidth() / 2.0 - cell.width / 2.0;
                 if (cellX < 0) cellX = 0;
             }
-            if (cellY + cell.height > window.getScaledHeight()) {
+            if (cellY > window.getScaledHeight()) {
                 cellY = window.getScaledHeight() / 2.0 - cell.height / 2.0;
                 if (cellY < 0) cellY = 0;
             }
