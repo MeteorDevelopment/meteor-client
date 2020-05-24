@@ -22,7 +22,7 @@ public abstract class EntityRendererMixin<T extends Entity> {
 
     @Inject(method = "renderLabelIfPresent", at = @At("HEAD"), cancellable = true)
     private void onRenderLabel(T entity, String string, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, CallbackInfo info) {
-        if (!(entity instanceof LivingEntity)) return;
+        if (!(entity instanceof PlayerEntity)) return;
         if (ModuleManager.INSTANCE.isActive(Nametags.class)) info.cancel();
         else return;
 
