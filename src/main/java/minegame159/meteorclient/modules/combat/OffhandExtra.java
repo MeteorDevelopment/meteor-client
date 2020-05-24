@@ -67,7 +67,9 @@ public class OffhandExtra extends ToggleModule {
         if(Asimov.get() && !(mc.currentScreen instanceof ContainerScreen<?>)){
             Item item = getItem();
             InvUtils.FindItemResult result = InvUtils.findItemWithCount(item);
-            if(result.slot == -1) {
+            if(result.slot == -1 && mc.player.getOffHandStack().getItem() != getItem()) {
+                Utils.sendMessage("#redNone of the chosen item found. Disabling!");
+                this.toggle();
                 return;
             }
             if (mc.player.getOffHandStack().isEmpty()) {
@@ -88,7 +90,7 @@ public class OffhandExtra extends ToggleModule {
                && (mc.player.getOffHandStack().getItem() != getItem()) && !(mc.currentScreen instanceof ContainerScreen<?>))){
             Item item = getItem();
             InvUtils.FindItemResult result = InvUtils.findItemWithCount(item);
-            if(result.slot == -1) {
+            if(result.slot == -1 && mc.player.getOffHandStack().getItem() != getItem()) {
                 Utils.sendMessage("#redNone of the chosen item found. Disabling!");
                 this.toggle();
                 return;
