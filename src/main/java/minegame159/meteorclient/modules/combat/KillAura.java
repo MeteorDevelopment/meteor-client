@@ -78,6 +78,13 @@ public class KillAura extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> oneTickDelay = sgDelay.add(new BoolSetting.Builder()
+            .name("one-tick-delay")
+            .description("Adds one tick delay.")
+            .defaultValue(true)
+            .build()
+    );
+
     private final Setting<Integer> hitDelay = sgDelayDisabled.add(new IntSetting.Builder()
             .name("hit-delay")
                 .description("Hit delay in ticks. 20 ticks = 1 second.")
@@ -96,6 +103,7 @@ public class KillAura extends ToggleModule {
             .build()
     );
 
+    private boolean canAutoDelayAttack;
     private int hitDelayTimer;
     private int randomHitDelayTimer;
 
@@ -162,13 +170,23 @@ public class KillAura extends ToggleModule {
         if (sgDelay.isEnabled()) {
             // Smart delay
             if (mc.player.getAttackCooldownProgress(0.5f) < 1) return;
+
+            // One tick delay
+            if (oneTickDelay.get()) {
+                if (canAutoDelayAttack) {
+                    canAutoDelayAttack = false;
+                } else {
+                    canAutoDelayAttack = true;
+                    return;
+                }
+            }
         } else {
             // Manual delay
-            if (hitDelayTimer < hitDelay.get()) {
-                hitDelayTimer++;
+            if (hitDelayTimer <= 0) {
+                hitDelayTimer--;
                 return;
             }
-            else hitDelayTimer = 0;
+            else hitDelayTimer = hitDelay.get();
         }
 
         // Random hit delay
