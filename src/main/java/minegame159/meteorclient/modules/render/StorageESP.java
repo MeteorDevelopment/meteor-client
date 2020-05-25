@@ -125,7 +125,7 @@ public class StorageESP extends ToggleModule {
                     excludeDir = ChestBlock.getFacing(blockEntity.getCachedState());
                 }
 
-                if (blockEntity instanceof ChestBlockEntity) {
+                if (blockEntity instanceof ChestBlockEntity || blockEntity instanceof EnderChestBlockEntity) {
                     double a = 1.0 / 16.0;
 
                     if (excludeDir != Direction.WEST) x1 += a;
