@@ -12,10 +12,7 @@ import minegame159.meteorclient.events.packets.ReceivePacketEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.Color;
-import minegame159.meteorclient.utils.Pool;
-import minegame159.meteorclient.utils.RenderUtils;
-import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.*;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
@@ -28,9 +25,6 @@ import net.minecraft.world.chunk.Chunk;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 public class Search extends ToggleModule {
     private final SettingGroup sg = settings.getDefaultGroup();
@@ -68,8 +62,6 @@ public class Search extends ToggleModule {
             .build()
     );
 
-    private ExecutorService service;
-
     private final Pool<BlockPos.Mutable> blockPosPool = new Pool<>(BlockPos.Mutable::new);
     private final LongList toRemove = new LongArrayList();
 
@@ -81,20 +73,14 @@ public class Search extends ToggleModule {
 
     @Override
     public void onActivate() {
-        service = Executors.newSingleThreadExecutor();
+        MeteorTaskExecutor.start();
 
         searchViewDistance();
     }
 
     @Override
     public void onDeactivate() {
-        try {
-            service.shutdown();
-            service.awaitTermination(5, TimeUnit.SECONDS);
-            service = null;
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        MeteorTaskExecutor.stop();
 
         for (MyChunk chunk : chunks.values()) chunk.dispose();
         chunks.clear();
@@ -113,7 +99,7 @@ public class Search extends ToggleModule {
     private Listener<ChunkDataEvent> onChunkData = new Listener<>(event -> searchChunk(event.chunk, event));
 
     private void searchChunk(Chunk chunk, ChunkDataEvent event) {
-        service.execute(() -> {
+        MeteorTaskExecutor.execute(() -> {
             MyChunk myChunk = new MyChunk(chunk.getPos().x, chunk.getPos().z);
 
             for (int x = chunk.getPos().getStartX(); x <= chunk.getPos().getEndX(); x++) {
@@ -142,7 +128,7 @@ public class Search extends ToggleModule {
         BlockPos blockPos = ((BlockUpdateS2CPacket) event.packet).getPos();
         BlockState bs = ((BlockUpdateS2CPacket) event.packet).getState();
 
-        service.execute(() -> {
+        MeteorTaskExecutor.execute(() -> {
             int chunkX = blockPos.getX() >> 4;
             int chunkZ = blockPos.getZ() >> 4;
             long key = ChunkPos.toLong(chunkX, chunkZ);
