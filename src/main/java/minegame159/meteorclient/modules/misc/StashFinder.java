@@ -14,6 +14,7 @@ import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.gui.screens.StashRecorderChunkScreen;
 import minegame159.meteorclient.gui.widgets.*;
+import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
@@ -35,11 +36,18 @@ public class StashFinder extends ToggleModule {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private Setting<Integer> minimumStorageCount = sgGeneral.add(new IntSetting.Builder()
+    private final Setting<Integer> minimumStorageCount = sgGeneral.add(new IntSetting.Builder()
             .name("minimum-storage-cont")
             .description("Minimum storage block count required to record that chunk.")
             .defaultValue(4)
             .min(1)
+            .build()
+    );
+    
+    private final Setting<Boolean> sendNotifications = sgGeneral.add(new BoolSetting.Builder()
+            .name("send-notifications")
+            .description("Send minecraft notifications when new stashes are found.")
+            .defaultValue(true)
             .build()
     );
 
@@ -69,31 +77,35 @@ public class StashFinder extends ToggleModule {
         }
 
         if (chunk.getTotal() >= minimumStorageCount.get()) {
+            Chunk prevChunk = null;
             int i = chunks.indexOf(chunk);
+            
             if (i < 0) chunks.add(chunk);
-            else chunks.set(i, chunk);
+            else prevChunk = chunks.set(i, chunk);
 
             saveJson();
             saveCsv();
 
-            mc.getToastManager().add(new Toast() {
-                private long timer;
-                private long lastTime = -1;
+            if (sendNotifications.get() && (!chunk.equals(prevChunk) || !chunk.countsEqual(prevChunk))) {
+                mc.getToastManager().add(new Toast() {
+                    private long timer;
+                    private long lastTime = -1;
 
-                @Override
-                public Visibility draw(ToastManager manager, long currentTime) {
-                    if (lastTime == -1) lastTime = currentTime;
-                    else timer += currentTime - lastTime;
+                    @Override
+                    public Visibility draw(ToastManager manager, long currentTime) {
+                        if (lastTime == -1) lastTime = currentTime;
+                        else timer += currentTime - lastTime;
 
-                    manager.getGame().getTextureManager().bindTexture(new Identifier("textures/gui/toasts.png"));
-                    GlStateManager.color4f(1.0F, 1.0F, 1.0F, 255.0F);
-                    manager.blit(0, 0, 0, 32, 160, 32);
+                        manager.getGame().getTextureManager().bindTexture(new Identifier("textures/gui/toasts.png"));
+                        GlStateManager.color4f(1.0F, 1.0F, 1.0F, 255.0F);
+                        manager.blit(0, 0, 0, 32, 160, 32);
 
-                    manager.getGame().textRenderer.draw("StashRecorder found stash.", 12.0F, 12.0F, -11534256);
+                        manager.getGame().textRenderer.draw("StashRecorder found stash.", 12.0F, 12.0F, -11534256);
 
-                    return timer >= 32000 ? Visibility.HIDE : Visibility.SHOW;
-                }
-            });
+                        return timer >= 32000 ? Visibility.HIDE : Visibility.SHOW;
+                    }
+                });
+            }
         }
     });
 
@@ -258,6 +270,11 @@ public class StashFinder extends ToggleModule {
             sb.append(x).append(',').append(z).append(',');
             sb.append(chests).append(',').append(barrels).append(',').append(shulkers).append(',').append(enderChests).append(',').append(furnaces).append(',').append(dispensersDroppers).append(',').append(hoppers).append('\n');
             writer.write(sb.toString());
+        }
+        
+        public boolean countsEqual(Chunk c) {
+            if (c == null) return false;
+            return chests != c.chests || barrels != c.barrels || shulkers != c.shulkers || enderChests != c.enderChests || furnaces != c.furnaces || dispensersDroppers != c.dispensersDroppers || hoppers != c.hoppers;
         }
 
         @Override
