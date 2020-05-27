@@ -68,8 +68,8 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
         if (event.isCancelled()) info.cancel();
     }
 
-    @Redirect(method = "openScreen", at = @At(value = "HEAD", target = "Lnet/minecraft/entity/LivingEntity;getHealth()F"))
-    private float getHealthProxy(){
+    @Redirect(method = "openScreen", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;getHealth()F"))
+    private float getHealthProxy(ClientPlayerEntity entity){
         if(player.getHealth() < 0.0f && ModuleManager.INSTANCE.get(BypassDeathScreen.class).shouldBypass){
             return 2f;
         }else{
