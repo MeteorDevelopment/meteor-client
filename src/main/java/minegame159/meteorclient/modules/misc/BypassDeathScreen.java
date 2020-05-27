@@ -12,4 +12,10 @@ public class BypassDeathScreen extends ToggleModule {
     public BypassDeathScreen(){
         super(Category.Misc, "bypass-death-screen", "Let's you spy on people");
     }
+
+    @Override
+    public void onDeactivate() {
+        shouldBypass = false;
+        super.onDeactivate();
+    }
 }
