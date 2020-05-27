@@ -16,6 +16,7 @@ public class CommandManager {
         addCommand(new Modules());
         addCommand(new ResetBind());
         addCommand(new Settings());
+        addCommand(new Enchant());
         addCommand(new Reset());
         addCommand(new Panic());
         addCommand(new ResetAll());
