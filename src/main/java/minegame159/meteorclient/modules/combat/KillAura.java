@@ -78,6 +78,13 @@ public class KillAura extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> oneTickDelay = sgDelay.add(new BoolSetting.Builder()
+            .name("one-tick-delay")
+            .description("Adds one tick delay.")
+            .defaultValue(true)
+            .build()
+    );
+
     private final Setting<Integer> hitDelay = sgDelayDisabled.add(new IntSetting.Builder()
             .name("hit-delay")
                 .description("Hit delay in ticks. 20 ticks = 1 second.")
@@ -96,6 +103,7 @@ public class KillAura extends ToggleModule {
             .build()
     );
 
+    private boolean canAutoDelayAttack;
     private int hitDelayTimer;
     private int randomHitDelayTimer;
 
@@ -145,12 +153,20 @@ public class KillAura extends ToggleModule {
         return sort > 0 ? -1 : 1;
     }
 
-    private int sort(LivingEntity e1, LivingEntity e2) {
+    private int sort(Entity e1, Entity e2) {
         switch (priority.get()) {
             case LowestDistance:  return Double.compare(e1.distanceTo(mc.player), e2.distanceTo(mc.player));
             case HighestDistance: return invertSort(Double.compare(e1.distanceTo(mc.player), e2.distanceTo(mc.player)));
-            case LowestHealth:    return Float.compare(e1.getHealth(), e2.getHealth());
-            case HighestHealth:   return invertSort(Float.compare(e1.getHealth(), e2.getHealth()));
+            case LowestHealth: {
+                float a = e1 instanceof LivingEntity ? ((LivingEntity) e1).getHealth() : 0;
+                float b = e2 instanceof LivingEntity ? ((LivingEntity) e2).getHealth() : 0;
+                return Float.compare(a, b);
+            }
+            case HighestHealth: {
+                float a = e1 instanceof LivingEntity ? ((LivingEntity) e1).getHealth() : 0;
+                float b = e2 instanceof LivingEntity ? ((LivingEntity) e2).getHealth() : 0;
+                return invertSort(Float.compare(a, b));
+            }
             default:              return 0;
         }
     }
@@ -162,13 +178,23 @@ public class KillAura extends ToggleModule {
         if (sgDelay.isEnabled()) {
             // Smart delay
             if (mc.player.getAttackCooldownProgress(0.5f) < 1) return;
+
+            // One tick delay
+            if (oneTickDelay.get()) {
+                if (canAutoDelayAttack) {
+                    canAutoDelayAttack = false;
+                } else {
+                    canAutoDelayAttack = true;
+                    return;
+                }
+            }
         } else {
             // Manual delay
-            if (hitDelayTimer < hitDelay.get()) {
-                hitDelayTimer++;
+            if (hitDelayTimer <= 0) {
+                hitDelayTimer--;
                 return;
             }
-            else hitDelayTimer = 0;
+            else hitDelayTimer = hitDelay.get();
         }
 
         // Random hit delay
@@ -183,8 +209,6 @@ public class KillAura extends ToggleModule {
                 .filter(this::isInRange)
                 .filter(this::canAttackEntity)
                 .filter(this::canSeeEntity)
-                .map(entity -> (LivingEntity) entity)
-                .filter(entity -> entity.getHealth() > 0)
                 .min(this::sort)
                 .ifPresent(entity -> {
                     // Rotate

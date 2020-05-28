@@ -21,7 +21,6 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShapes;
-import net.minecraft.world.EmptyBlockView;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.lwjgl.glfw.GLFW;
@@ -126,7 +125,7 @@ public class Utils {
         }
     }
 
-    public static boolean place(BlockState blockState, BlockPos blockPos, boolean swingHand, boolean checkForEntities) {
+    public static boolean place(BlockState blockState, BlockPos blockPos, boolean swingHand, boolean checkFaceVisibility, boolean checkForEntities) {
         // Calculate eyes pos
         ((IVec3d) eyesPos).set(mc.player.getX(), mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()), mc.player.getZ());
 
@@ -138,9 +137,11 @@ public class Utils {
             Direction side2 = side.getOpposite();
 
             // Check if side is visible (facing away from player)
-            ((IVec3d) vec1).set(blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5);
-            ((IVec3d) vec2).set(neighbor.getX() + 0.5, neighbor.getY() + 0.5, neighbor.getZ() + 0.5);
-            if(eyesPos.squaredDistanceTo(vec1) >= eyesPos.squaredDistanceTo(vec2)) continue;
+            if (checkFaceVisibility) {
+                ((IVec3d) vec1).set(blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5);
+                ((IVec3d) vec2).set(neighbor.getX() + 0.5, neighbor.getY() + 0.5, neighbor.getZ() + 0.5);
+                if (eyesPos.squaredDistanceTo(vec1) >= eyesPos.squaredDistanceTo(vec2)) continue;
+            }
 
             // Check if neighbor can be right clicked
             if (mc.world.getBlockState(neighbor).getOutlineShape(mc.world, blockPos) == VoxelShapes.empty()) continue;
@@ -168,7 +169,7 @@ public class Utils {
         return false;
     }
     public static boolean place(BlockState blockState, BlockPos blockPos) {
-        return place(blockState, blockPos, true, true);
+        return place(blockState, blockPos, true, true, true);
     }
 
     public static float getNeededYaw(Vec3d vec) {

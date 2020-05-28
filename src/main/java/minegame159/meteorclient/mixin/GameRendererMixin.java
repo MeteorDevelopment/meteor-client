@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.EventStore;
+import minegame159.meteorclient.mixininterface.IGameRenderer;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.misc.UnfocusedCPU;
 import minegame159.meteorclient.modules.render.NoHurtCam;
@@ -22,7 +23,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(GameRenderer.class)
-public abstract class GameRendererMixin {
+public abstract class GameRendererMixin implements IGameRenderer {
     @Shadow @Final private MinecraftClient client;
 
     @Shadow @Final private Camera camera;
@@ -37,14 +38,6 @@ public abstract class GameRendererMixin {
         if (!Utils.canUpdate()) return;
 
         client.getProfiler().swap("meteor-client_render");
-        RenderSystem.disableLighting();
-        RenderSystem.disableTexture();
-        RenderSystem.disableDepthTest();
-        RenderSystem.enableBlend();
-        RenderSystem.lineWidth(1);
-        RenderSystem.enableBlend();
-        RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA);
-        GL11.glEnable(GL11.GL_LINE_SMOOTH);
 
         RenderSystem.pushMatrix();
         double px = camera.getPos().x;
@@ -56,6 +49,15 @@ public abstract class GameRendererMixin {
         RenderUtils.beginQuads(-px, -py, -pz);
 
         MeteorClient.EVENT_BUS.post(EventStore.renderEvent(matrix, tickDelta, px, py, pz));
+
+        RenderSystem.disableLighting();
+        RenderSystem.disableTexture();
+        RenderSystem.disableDepthTest();
+        RenderSystem.enableBlend();
+        RenderSystem.lineWidth(1);
+        RenderSystem.enableBlend();
+        RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA);
+        GL11.glEnable(GL11.GL_LINE_SMOOTH);
 
         RenderUtils.endQuads();
         RenderUtils.endLines();
@@ -72,5 +74,10 @@ public abstract class GameRendererMixin {
     @Inject(method = "bobViewWhenHurt", at = @At("HEAD"), cancellable = true)
     private void onBobViewWhenHurt(MatrixStack matrixStack, float f, CallbackInfo info) {
         if (ModuleManager.INSTANCE.isActive(NoHurtCam.class)) info.cancel();
+    }
+
+    @Override
+    public Camera getCamera() {
+        return camera;
     }
 }

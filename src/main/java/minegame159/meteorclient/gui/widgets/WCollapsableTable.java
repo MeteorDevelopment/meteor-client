@@ -138,8 +138,8 @@ public class WCollapsableTable extends WTable {
 
         @Override
         protected boolean onMouseReleased(int button) {
-            if (mouseOver && button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) {
-                triangle.mouseOver = true;
+            if (mouseOver) {
+                triangle.pressed = true;
                 triangle.onMouseReleased(button);
 
                 return true;

@@ -12,7 +12,7 @@ public class WTriangle extends WWidget {
 
     public boolean checked;
 
-    private boolean pressed;
+    boolean pressed;
     private double angle;
 
     @Override

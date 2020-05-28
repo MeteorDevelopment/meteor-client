@@ -5,16 +5,16 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.RenderEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
-import minegame159.meteorclient.settings.ColorSetting;
-import minegame159.meteorclient.settings.EnumSetting;
-import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.RenderUtils;
 import net.minecraft.block.ChestBlock;
 import net.minecraft.block.entity.*;
 import net.minecraft.block.enums.ChestType;
 import net.minecraft.util.math.Direction;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class StorageESP extends ToggleModule {
     public enum Mode {
@@ -25,50 +25,57 @@ public class StorageESP extends ToggleModule {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
+    private final Setting<List<BlockEntityType<?>>> storageBlocks = sgGeneral.add(new StorageBlockListSetting.Builder()
+            .name("storage-blocks")
+            .description("Select storage blocks to display.")
+            .defaultValue(Arrays.asList(StorageBlockListSetting.STORAGE_BLOCKS))
+            .build()
+    );
+
+    private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("mode")
             .description("Rendering mode.")
             .defaultValue(Mode.Both)
             .build()
     );
 
-    private Setting<Color> chest = sgGeneral.add(new ColorSetting.Builder()
+    private final Setting<Color> chest = sgGeneral.add(new ColorSetting.Builder()
             .name("chest")
             .description("Color of chests.")
             .defaultValue(new Color(255, 160, 0, 255))
             .build()
     );
 
-    private Setting<Color> barrel = sgGeneral.add(new ColorSetting.Builder()
+    private final Setting<Color> barrel = sgGeneral.add(new ColorSetting.Builder()
             .name("barrel")
             .description("Color of barrels.")
             .defaultValue(new Color(255, 160, 0, 255))
             .build()
     );
 
-    private Setting<Color> shulker = sgGeneral.add(new ColorSetting.Builder()
-            .name("chest")
+    private final Setting<Color> shulker = sgGeneral.add(new ColorSetting.Builder()
+            .name("shulker")
             .description("Color of shulkers.")
             .defaultValue(new Color(255, 160, 0, 255))
             .build()
     );
 
-    private Setting<Color> enderChest = sgGeneral.add(new ColorSetting.Builder()
+    private final Setting<Color> enderChest = sgGeneral.add(new ColorSetting.Builder()
             .name("ender-chest")
             .description("Color of ender chests.")
             .defaultValue(new Color(120, 0, 255, 255))
             .build()
     );
 
-    private Setting<Color> other = sgGeneral.add(new ColorSetting.Builder()
+    private final Setting<Color> other = sgGeneral.add(new ColorSetting.Builder()
             .name("other")
             .description("Color of furnaces, dispenders, droppers and hoppers.")
             .defaultValue(new Color(140, 140, 140, 255))
             .build()
     );
 
-    private Color lineColor = new Color(0, 0, 0, 0);
-    private Color sideColor = new Color(0, 0, 0, 0);
+    private final Color lineColor = new Color(0, 0, 0, 0);
+    private final Color sideColor = new Color(0, 0, 0, 0);
     private boolean render;
     private int count;
 
@@ -77,14 +84,18 @@ public class StorageESP extends ToggleModule {
     }
 
     private void getTileEntityColor(BlockEntity blockEntity) {
-        render = true;
+        render = false;
+
+        if (!storageBlocks.get().contains(blockEntity.getType())) return;
 
         if (blockEntity instanceof ChestBlockEntity) lineColor.set(chest.get());
         else if (blockEntity instanceof BarrelBlockEntity) lineColor.set(barrel.get());
         else if (blockEntity instanceof ShulkerBoxBlockEntity) lineColor.set(shulker.get());
         else if (blockEntity instanceof EnderChestBlockEntity) lineColor.set(enderChest.get());
         else if (blockEntity instanceof FurnaceBlockEntity || blockEntity instanceof DispenserBlockEntity || blockEntity instanceof HopperBlockEntity) lineColor.set(other.get());
-        else render = false;
+        else return;
+
+        render = true;
 
         if (mode.get() == Mode.Sides || mode.get() == Mode.Both) {
             sideColor.set(lineColor);
@@ -94,7 +105,7 @@ public class StorageESP extends ToggleModule {
     }
 
     @EventHandler
-    private Listener<RenderEvent> onRender = new Listener<>(event -> {
+    private final Listener<RenderEvent> onRender = new Listener<>(event -> {
         count = 0;
 
         for (BlockEntity blockEntity : mc.world.blockEntities) {
@@ -113,7 +124,7 @@ public class StorageESP extends ToggleModule {
                     excludeDir = ChestBlock.getFacing(blockEntity.getCachedState());
                 }
 
-                if (blockEntity instanceof ChestBlockEntity) {
+                if (blockEntity instanceof ChestBlockEntity || blockEntity instanceof EnderChestBlockEntity) {
                     double a = 1.0 / 16.0;
 
                     if (excludeDir != Direction.WEST) x1 += a;
