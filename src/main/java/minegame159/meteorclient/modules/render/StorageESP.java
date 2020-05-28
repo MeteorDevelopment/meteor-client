@@ -13,7 +13,6 @@ import net.minecraft.block.entity.*;
 import net.minecraft.block.enums.ChestType;
 import net.minecraft.util.math.Direction;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -55,7 +54,7 @@ public class StorageESP extends ToggleModule {
     );
 
     private final Setting<Color> shulker = sgGeneral.add(new ColorSetting.Builder()
-            .name("chest")
+            .name("shulker")
             .description("Color of shulkers.")
             .defaultValue(new Color(255, 160, 0, 255))
             .build()
