@@ -19,6 +19,7 @@ import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.Heightmap;
 import net.minecraft.world.chunk.Chunk;
@@ -27,11 +28,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Search extends ToggleModule {
-    private final SettingGroup sg = settings.getDefaultGroup();
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgTracers = settings.createGroup("Tracers", "tracers", "Draw lines to the blocks.", false);
 
     private final Long2ObjectArrayMap<MyChunk> chunks = new Long2ObjectArrayMap<>();
 
-    private final Setting<List<Block>> blocks = sg.add(new BlockListSetting.Builder()
+    // General
+
+    private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
             .name("blocks")
             .description("Blocks to search for.")
             .defaultValue(new ArrayList<>(0))
@@ -48,17 +52,26 @@ public class Search extends ToggleModule {
             .build()
     );
 
-    private final Setting<Color> color = sg.add(new ColorSetting.Builder()
+    private final Setting<Color> color = sgGeneral.add(new ColorSetting.Builder()
             .name("color")
             .description("Color.")
             .defaultValue(new Color(0, 255, 200))
             .build()
     );
 
-    private final Setting<Boolean> fullBlock = sg.add(new BoolSetting.Builder()
+    private final Setting<Boolean> fullBlock = sgGeneral.add(new BoolSetting.Builder()
             .name("full-block")
             .description("Outlines are rendered as full blocks.")
             .defaultValue(false)
+            .build()
+    );
+
+    // Tracers
+
+    private final Setting<Color> tracersColor = sgTracers.add(new ColorSetting.Builder()
+            .name("tracers-color")
+            .description("Tracers color.")
+            .defaultValue(new Color(225, 225, 225))
             .build()
     );
 
@@ -66,6 +79,7 @@ public class Search extends ToggleModule {
     private final LongList toRemove = new LongArrayList();
 
     private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
+    private Vec3d vec1 = new Vec3d(0, 0, 0);
 
     public Search() {
         super(Category.Render, "search", "Searches for specified blocks.");
@@ -146,13 +160,18 @@ public class Search extends ToggleModule {
 
     @EventHandler
     private Listener<RenderEvent> onRender = new Listener<>(event -> {
+        vec1 = new Vec3d(0, 0, 1)
+                .rotateX(-(float) Math.toRadians(mc.cameraEntity.pitch))
+                .rotateY(-(float) Math.toRadians(mc.cameraEntity.yaw))
+                .add(mc.cameraEntity.getPos());
+
         synchronized (chunks) {
             toRemove.clear();
             
             for (long key : chunks.keySet()) {
                 MyChunk chunk = chunks.get(key);
                 if (chunk.shouldBeDeleted()) toRemove.add(key);
-                else chunk.render();
+                else chunk.render(event);
             }
             
             for (long key : toRemove) {
@@ -198,7 +217,7 @@ public class Search extends ToggleModule {
             return x > mc.player.chunkX + viewDist || x < mc.player.chunkX - viewDist || z > mc.player.chunkZ + viewDist || z < mc.player.chunkZ - viewDist;
         }
 
-        public void render() {
+        public void render(RenderEvent event) {
             for (BlockPos.Mutable blockPos : blockPoss) {
                 if (fullBlock.get()) {
                     RenderUtils.blockEdges(blockPos, color.get());
@@ -211,6 +230,11 @@ public class Search extends ToggleModule {
 
                     Box box = shape.getBoundingBox();
                     RenderUtils.boxEdges(blockPos.getX() + box.x1, blockPos.getY() + box.y1, blockPos.getZ() + box.z1, blockPos.getX() + box.x2, blockPos.getY() + box.y2, blockPos.getZ() + box.z2, color.get());
+                }
+
+                // Tracers
+                if (sgTracers.isEnabled()) {
+                    RenderUtils.line(vec1.x - (mc.cameraEntity.x - event.offsetX), vec1.y - (mc.cameraEntity.y - event.offsetY), vec1.z - (mc.cameraEntity.z - event.offsetZ), blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5f, tracersColor.get());
                 }
             }
         }
