@@ -11,9 +11,8 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
-import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.RayTraceContext;
+import net.minecraft.world.explosion.Explosion;
 
 import java.util.Iterator;
 import java.util.Objects;
@@ -24,42 +23,14 @@ public class DamageCalcUtils {
 
     //Always Calculate damage, then armour, then enchantments, then potion effect
     public static double crystalDamage(Entity player, Vec3d crystal){
-        boolean feetExposed = mc.world.rayTrace(
-                new RayTraceContext(player.getPos(), crystal,
-                        RayTraceContext.ShapeType.COLLIDER, RayTraceContext.FluidHandling.NONE, player)).getType()
-                == HitResult.Type.MISS;
-        boolean headExposed = mc.world.rayTrace(
-                new RayTraceContext(player.getPos().add(0, 1, 0), crystal,
-                        RayTraceContext.ShapeType.COLLIDER, RayTraceContext.FluidHandling.NONE, player)).getType()
-                == HitResult.Type.MISS;
-        double exposure = 0D;
-        if(feetExposed && headExposed){
-            exposure = 1D;
-        }else if(headExposed){
-            exposure = 0.2D;
-        }else if(feetExposed){
-            exposure = 0.8D;
-        }
+        double exposure = Explosion.getExposure(crystal, player);
         double impact = (1D - Math.sqrt(mc.player.squaredDistanceTo(crystal)) / 12D)*exposure;
         return (impact*impact+impact)*42+1;
     }
 
     //Always Calculate damage, then armour, then enchantments, then potion effect
     public static double bedDamage(Entity player, BlockEntity bed){
-        boolean feetExposed = mc.world.rayTrace(
-                new RayTraceContext(player.getPos(), toVec3D(bed),
-                        RayTraceContext.ShapeType.COLLIDER, RayTraceContext.FluidHandling.NONE, player)).getType()
-                == HitResult.Type.MISS;
-        boolean headExposed = mc.world.rayTrace(
-                new RayTraceContext(player.getPos().add(0, 1, 0), toVec3D(bed),
-                        RayTraceContext.ShapeType.COLLIDER, RayTraceContext.FluidHandling.NONE, player)).getType()
-                == HitResult.Type.MISS;
-        double exposure = 0D;
-        if(feetExposed && headExposed){
-            exposure = 1D;
-        }else if(feetExposed ^ headExposed){
-            exposure = 0.5D;
-        }
+        double exposure = Explosion.getExposure(toVec3D(bed), player);
         double impact = (1D - distanceBetween(player, bed) / 12D)*exposure;
         return (impact*impact+impact)*42+1;
     }

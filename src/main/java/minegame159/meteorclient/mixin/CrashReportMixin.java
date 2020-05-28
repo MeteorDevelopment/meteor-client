@@ -1,0 +1,46 @@
+package minegame159.meteorclient.mixin;
+
+import minegame159.meteorclient.Config;
+import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.ToggleModule;
+import net.minecraft.util.crash.CrashReport;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import java.util.List;
+
+@Mixin(CrashReport.class)
+public class CrashReportMixin {
+    @Inject(method = "addStackTrace", at = @At("TAIL"))
+    private void onAsString(StringBuilder sb, CallbackInfo info) {
+        sb.append("\n\n");
+        sb.append("-- Meteor Client --\n");
+        sb.append("Version: ").append(Config.INSTANCE.getVersion()).append("\n");
+
+        for (Category category : ModuleManager.CATEGORIES) {
+            List<Module> modules = ModuleManager.INSTANCE.getGroup(category);
+            boolean active = false;
+            for (Module module : modules) {
+                if (module instanceof ToggleModule && ((ToggleModule) module).isActive()) {
+                    active = true;
+                    break;
+                }
+            }
+
+            if (active) {
+                sb.append("\n");
+                sb.append("[").append(category).append("]:").append("\n");
+
+                for (Module module : modules) {
+                    if (module instanceof ToggleModule && ((ToggleModule) module).isActive()) {
+                        sb.append(module.title).append(" (").append(module.name).append(")\n");
+                    }
+                }
+            }
+        }
+    }
+}
