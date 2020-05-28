@@ -70,7 +70,7 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
 
     @Redirect(method = "openScreen", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;getHealth()F"))
     private float getHealthProxy(ClientPlayerEntity entity){
-        if(player.getHealth() < 0.0f && ModuleManager.INSTANCE.get(BypassDeathScreen.class).shouldBypass){
+        if(player.getHealth() <= 0.0f && ModuleManager.INSTANCE.get(BypassDeathScreen.class).shouldBypass){
             return 2f;
         }else{
             return player.getHealth();
