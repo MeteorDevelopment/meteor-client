@@ -10,8 +10,11 @@ import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.utils.HttpUtils;
 import minegame159.meteorclient.utils.MeteorTaskExecutor;
 import minegame159.meteorclient.utils.UuidNameHistoryResponseItem;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.render.Camera;
-import net.minecraft.client.render.GameRenderer;
+import net.minecraft.client.render.Tessellator;
+import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.HorseBaseEntity;
 import net.minecraft.entity.passive.TameableEntity;
@@ -57,7 +60,24 @@ public class EntityOwner extends ToggleModule {
             if (ownerUuid == null) continue;
 
             String name = getOwnerName(ownerUuid);
-            GameRenderer.renderFloatingText(mc.textRenderer, name, (float) (entity.x - cameraPos.x), (float) (entity.y - cameraPos.y + entity.getHeight()), (float) (entity.z - cameraPos.z), -10, camera.getYaw(), camera.getPitch(), false);
+
+            event.matrixStack.push();
+            event.matrixStack.translate(entity.getX() - cameraPos.x, entity.getY() - cameraPos.y + entity.getHeight(), entity.getZ() - cameraPos.z);
+            event.matrixStack.multiply(mc.getEntityRenderManager().getRotation());
+            //event.matrixStack.translate(cameraPos.x, cameraPos.y, cameraPos.z);
+            event.matrixStack.scale(-0.025F, -0.025F, 0.025F);
+            //event.matrixStack.scale(-0.5f, -0.5f, -0.5f);
+            float g = MinecraftClient.getInstance().options.getTextBackgroundOpacity(0.25F);
+            int k = (int)(g * 255.0F) << 24;
+            TextRenderer textRenderer = mc.textRenderer;
+            float h = (float)(-textRenderer.getStringWidth(name) / 2);
+            VertexConsumerProvider.Immediate immediate = VertexConsumerProvider.immediate(Tessellator.getInstance().getBuffer());
+            textRenderer.draw(name, h, (float)-10, 553648127, false, event.matrixStack.peek().getModel(), immediate, false, k, 0);
+            textRenderer.draw(name, h, (float)-10, -1, false, event.matrixStack.peek().getModel(), immediate, false, k, 0);
+            immediate.draw();
+
+            event.matrixStack.pop();
+            //GameRenderer.renderFloatingText(mc.textRenderer, name, (float) (entity.x - cameraPos.x), (float) (entity.y - cameraPos.y + entity.getHeight()), (float) (entity.z - cameraPos.z), -10, camera.getYaw(), camera.getPitch(), false);
         }
     });
 

@@ -234,7 +234,7 @@ public class Search extends ToggleModule {
 
                 // Tracers
                 if (sgTracers.isEnabled()) {
-                    RenderUtils.line(vec1.x - (mc.cameraEntity.x - event.offsetX), vec1.y - (mc.cameraEntity.y - event.offsetY), vec1.z - (mc.cameraEntity.z - event.offsetZ), blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5f, tracersColor.get());
+                    RenderUtils.line(vec1.x - (mc.cameraEntity.getX() - event.offsetX), vec1.y - (mc.cameraEntity.getY() - event.offsetY), vec1.z - (mc.cameraEntity.getZ() - event.offsetZ), blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5f, tracersColor.get());
                 }
             }
         }
