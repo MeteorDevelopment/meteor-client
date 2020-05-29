@@ -17,27 +17,29 @@ import java.util.List;
 public class CrashReportMixin {
     @Inject(method = "addStackTrace", at = @At("TAIL"))
     private void onAsString(StringBuilder sb, CallbackInfo info) {
-        sb.append("\n\n");
-        sb.append("-- Meteor Client --\n");
-        sb.append("Version: ").append(Config.INSTANCE.getVersion()).append("\n");
+        if (ModuleManager.INSTANCE != null) {
+            sb.append("\n\n");
+            sb.append("-- Meteor Client --\n");
+            sb.append("Version: ").append(Config.INSTANCE.getVersion()).append("\n");
 
-        for (Category category : ModuleManager.CATEGORIES) {
-            List<Module> modules = ModuleManager.INSTANCE.getGroup(category);
-            boolean active = false;
-            for (Module module : modules) {
-                if (module instanceof ToggleModule && ((ToggleModule) module).isActive()) {
-                    active = true;
-                    break;
-                }
-            }
-
-            if (active) {
-                sb.append("\n");
-                sb.append("[").append(category).append("]:").append("\n");
-
+            for (Category category : ModuleManager.CATEGORIES) {
+                List<Module> modules = ModuleManager.INSTANCE.getGroup(category);
+                boolean active = false;
                 for (Module module : modules) {
                     if (module instanceof ToggleModule && ((ToggleModule) module).isActive()) {
-                        sb.append(module.title).append(" (").append(module.name).append(")\n");
+                        active = true;
+                        break;
+                    }
+                }
+
+                if (active) {
+                    sb.append("\n");
+                    sb.append("[").append(category).append("]:").append("\n");
+
+                    for (Module module : modules) {
+                        if (module instanceof ToggleModule && ((ToggleModule) module).isActive()) {
+                            sb.append(module.title).append(" (").append(module.name).append(")\n");
+                        }
                     }
                 }
             }
