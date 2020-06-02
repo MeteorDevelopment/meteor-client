@@ -6,7 +6,10 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.combat.CrystalAura;
+import minegame159.meteorclient.modules.combat.KillAura;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
@@ -38,6 +41,19 @@ public class AutoEat extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> disableAuras = sgGeneral.add(new BoolSetting.Builder()
+            .name("disable-auras")
+            .description("disable all auras")
+            .defaultValue(false)
+            .build()
+    );
+
+    private boolean wasArmourActive = false;
+
+    private boolean wasKillActive = false;
+
+    private boolean wasCrystalActive = false;
+
     private boolean isEating;
     private int preSelectedSlot, preFoodLevel;
 
@@ -61,6 +77,21 @@ public class AutoEat extends ToggleModule {
 
         if (isEating) {
             if (mc.overlay == null && (mc.currentScreen == null || mc.currentScreen.passEvents)) {
+                if(disableAuras.get()) {
+                    if (ModuleManager.INSTANCE.get(AutoArmor.class).isActive()) {
+                        wasArmourActive = true;
+                        ModuleManager.INSTANCE.get(AutoArmor.class).toggle();
+                    }
+                    if (disableAuras.get()) {
+                        if (ModuleManager.INSTANCE.get(KillAura.class).isActive()) {
+                            wasKillActive = true;
+                            ModuleManager.INSTANCE.get(KillAura.class).toggle();
+                        }
+                        if (ModuleManager.INSTANCE.get(CrystalAura.class).isActive()) {
+                            wasCrystalActive = true;
+                        }
+                    }
+                }
                 ((IKeyBinding) mc.options.keyUse).setPressed(true);
             } else {
                 mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
@@ -70,6 +101,18 @@ public class AutoEat extends ToggleModule {
                 isEating = false;
                 mc.interactionManager.stopUsingItem(mc.player);
                 ((IKeyBinding) mc.options.keyUse).setPressed(false);
+                if(wasArmourActive) {
+                    ModuleManager.INSTANCE.get(AutoArmor.class).toggle();
+                    wasArmourActive = false;
+                }
+                if(wasKillActive){
+                    ModuleManager.INSTANCE.get(KillAura.class).toggle();
+                    wasKillActive = false;
+                }
+                if(wasCrystalActive){
+                    ModuleManager.INSTANCE.get(CrystalAura.class).toggle();
+                    wasCrystalActive = false;
+                }
                 mc.player.inventory.selectedSlot = preSelectedSlot;
                 BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume");
             }
