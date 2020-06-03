@@ -48,12 +48,8 @@ public class AutoEat extends ToggleModule {
             .build()
     );
 
-    private boolean wasArmourActive = false;
-
     private boolean wasKillActive = false;
-
     private boolean wasCrystalActive = false;
-
     private boolean isEating;
     private int preSelectedSlot, preFoodLevel;
 
@@ -78,10 +74,6 @@ public class AutoEat extends ToggleModule {
         if (isEating) {
             if (mc.overlay == null && (mc.currentScreen == null || mc.currentScreen.passEvents)) {
                 if(disableAuras.get()) {
-                    if (ModuleManager.INSTANCE.get(AutoArmor.class).isActive()) {
-                        wasArmourActive = true;
-                        ModuleManager.INSTANCE.get(AutoArmor.class).toggle();
-                    }
                     if (disableAuras.get()) {
                         if (ModuleManager.INSTANCE.get(KillAura.class).isActive()) {
                             wasKillActive = true;
@@ -101,10 +93,6 @@ public class AutoEat extends ToggleModule {
                 isEating = false;
                 mc.interactionManager.stopUsingItem(mc.player);
                 ((IKeyBinding) mc.options.keyUse).setPressed(false);
-                if(wasArmourActive) {
-                    ModuleManager.INSTANCE.get(AutoArmor.class).toggle();
-                    wasArmourActive = false;
-                }
                 if(wasKillActive){
                     ModuleManager.INSTANCE.get(KillAura.class).toggle();
                     wasKillActive = false;
