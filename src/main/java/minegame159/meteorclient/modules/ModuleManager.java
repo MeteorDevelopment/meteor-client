@@ -222,6 +222,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new AutoRespawn());
         addModule(new AntiFire());
         addModule(new AutoMend());
+        addModule(new AutoGap());
         addModule(new AutoReplenish());
         addModule(new AntiHunger());
         addModule(new AutoTool());
