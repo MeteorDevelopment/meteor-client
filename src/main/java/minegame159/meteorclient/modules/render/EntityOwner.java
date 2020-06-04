@@ -3,18 +3,23 @@ package minegame159.meteorclient.modules.render;
 import com.google.common.reflect.TypeToken;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
+import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.RenderEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
-import minegame159.meteorclient.utils.HttpUtils;
-import minegame159.meteorclient.utils.MeteorTaskExecutor;
-import minegame159.meteorclient.utils.UuidNameHistoryResponseItem;
+import minegame159.meteorclient.rendering.Matrices;
+import minegame159.meteorclient.rendering.ShapeBuilder;
+import minegame159.meteorclient.settings.DoubleSetting;
+import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.utils.*;
 import net.minecraft.client.render.Camera;
+import net.minecraft.client.render.VertexFormats;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.HorseBaseEntity;
 import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.Vec3d;
+import org.lwjgl.opengl.GL11;
 
 import java.lang.reflect.Type;
 import java.util.HashMap;
@@ -23,7 +28,19 @@ import java.util.Map;
 import java.util.UUID;
 
 public class EntityOwner extends ToggleModule {
+    private static final Color BACKGROUND = new Color(0, 0, 0, 75);
+    private static final Color TEXT = new Color(255, 255, 255);
     private static final Type RESPONSE_TYPE = new TypeToken<List<UuidNameHistoryResponseItem>>() {}.getType();
+
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+
+    private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
+            .name("scale")
+            .description("Scale.")
+            .defaultValue(1)
+            .min(0)
+            .build()
+    );
 
     private final Map<UUID, String> uuidToName = new HashMap<>();
 
@@ -45,9 +62,6 @@ public class EntityOwner extends ToggleModule {
 
     @EventHandler
     private final Listener<RenderEvent> onRender = new Listener<>(event -> {
-        Camera camera = mc.gameRenderer.getCamera();
-        Vec3d cameraPos = camera.getPos();
-
         for (Entity entity : mc.world.getEntities()) {
             UUID ownerUuid = null;
             if (entity instanceof TameableEntity) ownerUuid = ((TameableEntity) entity).getOwnerUuid();
@@ -55,26 +69,36 @@ public class EntityOwner extends ToggleModule {
             if (ownerUuid == null) continue;
 
             String name = getOwnerName(ownerUuid);
-
-            /*event.matrixStack.push();
-            event.matrixStack.translate(entity.getX() - cameraPos.x, entity.getY() - cameraPos.y + entity.getHeight(), entity.getZ() - cameraPos.z);
-            event.matrixStack.multiply(mc.getEntityRenderManager().getRotation());
-            //event.matrixStack.translate(cameraPos.x, cameraPos.y, cameraPos.z);
-            event.matrixStack.scale(-0.025F, -0.025F, 0.025F);
-            //event.matrixStack.scale(-0.5f, -0.5f, -0.5f);
-            float g = MinecraftClient.getInstance().options.getTextBackgroundOpacity(0.25F);
-            int k = (int)(g * 255.0F) << 24;
-            TextRenderer textRenderer = mc.textRenderer;
-            float h = (float)(-textRenderer.getStringWidth(name) / 2);
-            VertexConsumerProvider.Immediate immediate = VertexConsumerProvider.immediate(Tessellator.getInstance().getBuffer());
-            textRenderer.draw(name, h, (float)-10, 553648127, false, event.matrixStack.peek().getModel(), immediate, false, k, 0);
-            textRenderer.draw(name, h, (float)-10, -1, false, event.matrixStack.peek().getModel(), immediate, false, k, 0);
-            immediate.draw();
-
-            event.matrixStack.pop();*/
-            //GameRenderer.renderFloatingText(mc.textRenderer, name, (float) (entity.x - cameraPos.x), (float) (entity.y - cameraPos.y + entity.getHeight()), (float) (entity.z - cameraPos.z), -10, camera.getYaw(), camera.getPitch(), false);
+            renderNametag(event, entity, name);
         }
     });
+
+    private void renderNametag(RenderEvent event, Entity entity, String name) {
+        Camera camera = mc.gameRenderer.getCamera();
+
+        // Compute scale
+        double scale = 0.025;
+        double dist = Utils.distanceToCamera(entity);
+        if (dist > 10) scale *= dist / 10 * this.scale.get();
+
+        // Setup the rotation
+        Matrices.push();
+        Matrices.translate(entity.x - event.offsetX, entity.y + entity.getHeight() + 0.25 - event.offsetY, entity.z - event.offsetZ);
+        Matrices.rotate(-camera.getYaw(), 0, 1, 0);
+        Matrices.rotate(camera.getPitch(), 1, 0, 0);
+        Matrices.scale(-scale, -scale, scale);
+
+        // Render background
+        double i = MeteorClient.FONT.getStringWidth(name) / 2.0;
+        ShapeBuilder.begin(null, GL11.GL_TRIANGLES, VertexFormats.POSITION_COLOR);
+        ShapeBuilder.quad(-i - 1, -1, 0, -i - 1, 8, 0, i + 1, 8, 0, i + 1, -1, 0, BACKGROUND);
+        ShapeBuilder.end();
+
+        // Render name text
+        MeteorClient.FONT.renderString(name, -i, 0, TEXT);
+
+        Matrices.pop();
+    }
 
     private String getOwnerName(UUID uuid) {
         // Get name if owner is online
