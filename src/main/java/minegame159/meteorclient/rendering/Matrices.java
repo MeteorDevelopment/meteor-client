@@ -1,8 +1,5 @@
 package minegame159.meteorclient.rendering;
 
-import minegame159.meteorclient.events.RenderEvent;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.Camera;
 import org.lwjgl.opengl.GL11;
 
 public class Matrices {
@@ -24,16 +21,6 @@ public class Matrices {
 
     public static void scale(double x, double y, double z) {
         GL11.glScaled(x, y, z);
-    }
-
-    public static void lookAtCamera(RenderEvent event, double x, double y, double z, double width, double height) {
-        Matrices.translate((-event.offsetX) + (x + width / 2), (-event.offsetY) + (y + height / 2), (-event.offsetZ) + (z));
-
-        Camera camera = MinecraftClient.getInstance().gameRenderer.getCamera();
-        Matrices.rotate(-camera.getYaw(), 0, 1, 0);
-        Matrices.rotate(camera.getPitch(), 1, 0, 0);
-
-        Matrices.translate((-x - width / 2) + (event.offsetX) + (x), (-y - height / 2) + (event.offsetY) + (y), (-z) + (event.offsetZ) + (z));
     }
 
     public static void pop() {
