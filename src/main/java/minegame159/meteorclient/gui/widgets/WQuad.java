@@ -1,8 +1,8 @@
 package minegame159.meteorclient.gui.widgets;
 
+import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.gui.renderer.GuiRenderer;
 import minegame159.meteorclient.utils.Color;
-import minegame159.meteorclient.utils.Utils;
 
 public class WQuad extends WWidget {
     public Color color;
@@ -13,8 +13,8 @@ public class WQuad extends WWidget {
 
     @Override
     protected void onCalculateSize() {
-        width = 4 + Utils.getTextHeight() + 4;
-        height = 4 + Utils.getTextHeight() + 4;
+        width = 4 + MeteorClient.FONT.getHeight() + 4;
+        height = 4 + MeteorClient.FONT.getHeight() + 4;
     }
 
     @Override

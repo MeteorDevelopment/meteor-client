@@ -1,10 +1,10 @@
 package minegame159.meteorclient.gui.widgets;
 
+import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.gui.GuiConfig;
 import minegame159.meteorclient.gui.GuiThings;
 import minegame159.meteorclient.gui.listeners.TextBoxChangeListener;
 import minegame159.meteorclient.gui.renderer.GuiRenderer;
-import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import org.lwjgl.glfw.GLFW;
 
@@ -32,7 +32,7 @@ public class WTextBox extends WWidget {
     @Override
     protected void onCalculateSize() {
         width = 3 + uWidth + 3;
-        height = 3 + Utils.getTextHeight() + 3;
+        height = 3 + MeteorClient.FONT.getHeight() + 3;
     }
 
     @Override
@@ -124,19 +124,19 @@ public class WTextBox extends WWidget {
     protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
         renderer.renderBackground(this, false, false);
 
-        double textWidth = Utils.getTextWidth(text);
+        double textWidth = MeteorClient.FONT.getStringWidth(text);
 
         double overflowWidth = textWidth - width + 3 + 3;
         if (overflowWidth < 0) overflowWidth = 0;
 
         if (text.length() > 0) {
             if (overflowWidth > 0) renderer.beginScissor(this, 0, 3, 0, 3, true);
-            renderer.renderText(text, x + 3 - overflowWidth, y + 3.5, GuiConfig.INSTANCE.text, false);
+            renderer.renderText(text, x + 3 - overflowWidth, y + 3, GuiConfig.INSTANCE.text, false);
             if (overflowWidth > 0) renderer.endScissor();
         }
 
         if (focused && cursorVisible) {
-            renderer.renderQuad(x + 3 + textWidth - overflowWidth, y + 3, 1, Utils.getTextHeight(), GuiConfig.INSTANCE.text);
+            renderer.renderQuad(x + 3 + textWidth - overflowWidth, y + 3, 1, MeteorClient.FONT.getHeight(), GuiConfig.INSTANCE.text);
         }
     }
 }

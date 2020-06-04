@@ -1,5 +1,6 @@
 package minegame159.meteorclient.gui.widgets;
 
+import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.gui.GuiConfig;
 import minegame159.meteorclient.gui.listeners.EnumButtonClickListener;
 import minegame159.meteorclient.gui.renderer.GuiRenderer;
@@ -23,7 +24,7 @@ public class WEnumButton<T extends Enum<?>> extends WWidget {
     public WEnumButton(T value) {
         this.value = value;
         this.valueStr = value.toString();
-        this.vWidth = Utils.getTextWidth(value.toString());
+        this.vWidth = MeteorClient.FONT.getStringWidth(value.toString());
 
         try {
             Method method = value.getClass().getMethod("values");
@@ -36,7 +37,7 @@ public class WEnumButton<T extends Enum<?>> extends WWidget {
         }
 
         for (T v : values) {
-            uWidth = Math.max(uWidth, Utils.getTextWidth(v.toString()));
+            uWidth = Math.max(uWidth, MeteorClient.FONT.getStringWidth(v.toString()));
         }
 
         findValueI();
@@ -53,7 +54,7 @@ public class WEnumButton<T extends Enum<?>> extends WWidget {
     @Override
     protected void onCalculateSize() {
         width = 3 + uWidth + 3;
-        height = 3 + Utils.getTextHeight() + 3;
+        height = 3 + MeteorClient.FONT.getHeight() + 3;
     }
 
     private void updateValue() {
@@ -62,7 +63,7 @@ public class WEnumButton<T extends Enum<?>> extends WWidget {
 
         value = values[valueI];
         valueStr = value.toString();
-        vWidth = Utils.getTextWidth(value.toString());
+        vWidth = MeteorClient.FONT.getStringWidth(value.toString());
 
         if (action != null) action.onEnumButtonClick(this);
 
@@ -72,7 +73,7 @@ public class WEnumButton<T extends Enum<?>> extends WWidget {
     public void setValue(T value) {
         this.value = value;
         valueStr = value.toString();
-        vWidth = Utils.getTextWidth(value.toString());
+        vWidth = MeteorClient.FONT.getStringWidth(value.toString());
 
         findValueI();
         invalidate();
