@@ -1,7 +1,9 @@
 package minegame159.meteorclient.rendering;
 
+import net.minecraft.client.util.math.Matrix4f;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.Quaternion;
+import org.lwjgl.opengl.GL11;
 
 public class Matrices {
     private static MatrixStack matrixStack;
@@ -28,5 +30,9 @@ public class Matrices {
 
     public static void pop() {
         matrixStack.pop();
+    }
+
+    public static Matrix4f getTop() {
+        return matrixStack.peek().getModel();
     }
 }
