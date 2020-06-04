@@ -59,6 +59,9 @@ public class MeshBuilder {
     }
 
     public void end(boolean texture) {
+        GL11.glPushMatrix();
+        RenderSystem.multMatrix(Matrices.getTop());
+
         RenderSystem.enableBlend();
         RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA);
         RenderSystem.disableDepthTest();
@@ -77,6 +80,8 @@ public class MeshBuilder {
         RenderSystem.enableDepthTest();
         RenderSystem.enableTexture();
         GL11.glDisable(GL11.GL_LINE_SMOOTH);
+
+        GL11.glPopMatrix();
     }
 
     public boolean isBuilding() {
