@@ -66,7 +66,7 @@ public class Nametags extends ToggleModule {
 
         // Setup the rotation
         Matrices.push();
-        Matrices.translate(entity.x - event.offsetX, entity.y + 2.5 - event.offsetY, entity.z - event.offsetZ);
+        Matrices.translate(entity.getX() - event.offsetX, entity.getY() + 2.5 - event.offsetY, entity.getZ() - event.offsetZ);
         Matrices.rotate(-camera.getYaw(), 0, 1, 0);
         Matrices.rotate(camera.getPitch(), 1, 0, 0);
         Matrices.scale(-scale, -scale, scale);

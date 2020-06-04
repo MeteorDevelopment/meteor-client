@@ -9,11 +9,7 @@ import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.utils.HttpUtils;
 import minegame159.meteorclient.utils.MeteorTaskExecutor;
 import minegame159.meteorclient.utils.UuidNameHistoryResponseItem;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.render.Camera;
-import net.minecraft.client.render.Tessellator;
-import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.HorseBaseEntity;
 import net.minecraft.entity.passive.TameableEntity;
@@ -60,7 +56,7 @@ public class EntityOwner extends ToggleModule {
 
             String name = getOwnerName(ownerUuid);
 
-            event.matrixStack.push();
+            /*event.matrixStack.push();
             event.matrixStack.translate(entity.getX() - cameraPos.x, entity.getY() - cameraPos.y + entity.getHeight(), entity.getZ() - cameraPos.z);
             event.matrixStack.multiply(mc.getEntityRenderManager().getRotation());
             //event.matrixStack.translate(cameraPos.x, cameraPos.y, cameraPos.z);
@@ -75,7 +71,7 @@ public class EntityOwner extends ToggleModule {
             textRenderer.draw(name, h, (float)-10, -1, false, event.matrixStack.peek().getModel(), immediate, false, k, 0);
             immediate.draw();
 
-            event.matrixStack.pop();
+            event.matrixStack.pop();*/
             //GameRenderer.renderFloatingText(mc.textRenderer, name, (float) (entity.x - cameraPos.x), (float) (entity.y - cameraPos.y + entity.getHeight()), (float) (entity.z - cameraPos.z), -10, camera.getYaw(), camera.getPitch(), false);
         }
     });

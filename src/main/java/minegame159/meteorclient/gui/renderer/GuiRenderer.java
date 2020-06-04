@@ -1,7 +1,6 @@
 package minegame159.meteorclient.gui.renderer;
 
 import minegame159.meteorclient.MeteorClient;
-import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.gui.GuiConfig;
 import minegame159.meteorclient.gui.widgets.Cell;
 import minegame159.meteorclient.gui.widgets.WWidget;
