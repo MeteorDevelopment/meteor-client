@@ -1,6 +1,7 @@
 package minegame159.meteorclient.rendering;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.events.RenderEvent;
 import minegame159.meteorclient.mixininterface.IBufferBuilder;
 import minegame159.meteorclient.utils.Color;
@@ -10,8 +11,6 @@ import net.minecraft.client.render.VertexFormat;
 import org.lwjgl.opengl.GL11;
 
 public class MeshBuilder {
-    private static final BufferRenderer RENDERER = new BufferRenderer();
-
     private final BufferBuilder buffer;
     private double offsetX, offsetY, offsetZ;
 
@@ -46,7 +45,7 @@ public class MeshBuilder {
     }
 
     public MeshBuilder texture(double x, double y) {
-        buffer.texture(x + offsetX, y + offsetY);
+        buffer.texture((float) (x + offsetX), (float) (y + offsetY));
         return this;
     }
 
@@ -60,23 +59,23 @@ public class MeshBuilder {
     }
 
     public void end(boolean texture) {
-        GlStateManager.enableBlend();
-        GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-        GlStateManager.disableDepthTest();
-        if (texture) GlStateManager.enableTexture();
-        else GlStateManager.disableTexture();
-        GlStateManager.disableLighting();
-        GlStateManager.disableCull();
+        RenderSystem.enableBlend();
+        RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA);
+        RenderSystem.disableDepthTest();
+        if (texture) RenderSystem.enableTexture();
+        else RenderSystem.disableTexture();
+        RenderSystem.disableLighting();
+        RenderSystem.disableCull();
         GL11.glEnable(GL11.GL_LINE_SMOOTH);
-        GlStateManager.lineWidth(1);
-        GlStateManager.color4f(1, 1, 1, 1);
+        RenderSystem.lineWidth(1);
+        RenderSystem.color4f(1, 1, 1, 1);
 
         buffer.end();
-        RENDERER.draw(buffer);
+        BufferRenderer.draw(buffer);
 
-        GlStateManager.disableBlend();
-        GlStateManager.enableDepthTest();
-        GlStateManager.enableTexture();
+        RenderSystem.disableBlend();
+        RenderSystem.enableDepthTest();
+        RenderSystem.enableTexture();
         GL11.glDisable(GL11.GL_LINE_SMOOTH);
     }
 
