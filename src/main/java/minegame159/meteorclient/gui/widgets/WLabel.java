@@ -1,5 +1,6 @@
 package minegame159.meteorclient.gui.widgets;
 
+import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.gui.GuiConfig;
 import minegame159.meteorclient.gui.renderer.GuiRenderer;
 import minegame159.meteorclient.utils.Color;
@@ -33,12 +34,12 @@ public class WLabel extends WWidget {
 
     @Override
     protected void onCalculateSize() {
-        width = Utils.getTextWidth(text);
-        height = Utils.getTextHeight() + 2;
+        width = MeteorClient.FONT.getStringWidth(text);
+        height = MeteorClient.FONT.getHeight();
     }
 
     @Override
     protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
-        renderer.renderText(text, x, y + 1, color, shadow);
+        renderer.renderText(text, x, y, color, shadow);
     }
 }

@@ -4,7 +4,6 @@ import com.google.common.reflect.TypeToken;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.RenderEvent;
-import minegame159.meteorclient.mixininterface.IGameRenderer;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.utils.HttpUtils;
@@ -50,7 +49,7 @@ public class EntityOwner extends ToggleModule {
 
     @EventHandler
     private final Listener<RenderEvent> onRender = new Listener<>(event -> {
-        Camera camera = ((IGameRenderer) mc.gameRenderer).getCamera();
+        Camera camera = mc.gameRenderer.getCamera();
         Vec3d cameraPos = camera.getPos();
 
         for (Entity entity : mc.world.getEntities()) {

@@ -17,7 +17,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 
-import java.util.*;
+import java.util.Objects;
 
 public abstract class Module implements Listenable, ISerializable<Module> {
     protected final MinecraftClient mc;
@@ -26,7 +26,7 @@ public abstract class Module implements Listenable, ISerializable<Module> {
     public final String name;
     public final String title;
     public final String description;
-    public final int color;
+    public final Color color;
 
     public final Settings settings = new Settings();
 
@@ -40,7 +40,7 @@ public abstract class Module implements Listenable, ISerializable<Module> {
         this.name = name;
         this.title = Utils.nameToTitle(name);
         this.description = description;
-        this.color = Color.fromRGBA(Utils.random(180, 255), Utils.random(180, 255), Utils.random(180, 255), 255);
+        this.color = new Color(Utils.random(180, 255), Utils.random(180, 255), Utils.random(180, 255), 255);
     }
 
     public WidgetScreen getScreen() {

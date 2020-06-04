@@ -1,10 +1,10 @@
 package minegame159.meteorclient.gui.widgets;
 
+import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.gui.GuiConfig;
 import minegame159.meteorclient.gui.listeners.ButtonClickListener;
 import minegame159.meteorclient.gui.renderer.GuiRenderer;
 import minegame159.meteorclient.utils.TextureRegion;
-import minegame159.meteorclient.utils.Utils;
 
 public class WButton extends WWidget {
     public ButtonClickListener action;
@@ -31,15 +31,15 @@ public class WButton extends WWidget {
 
     public void setText(String text) {
         this.text = text != null ? text : "";
-        this.textWidth = Utils.getTextWidth(this.text);
+        this.textWidth = MeteorClient.FONT.getStringWidth(this.text);
 
         invalidate();
     }
 
     @Override
     protected void onCalculateSize() {
-        width = 3 + (text != null ? Utils.getTextWidth(text) : Utils.getTextHeight()) + 3;
-        height = 3 + Utils.getTextHeight() + 3;
+        width = 3 + (text != null ? MeteorClient.FONT.getStringWidth(text) : MeteorClient.FONT.getHeight()) + 3;
+        height = 3 + MeteorClient.FONT.getHeight() + 3;
     }
 
     @Override

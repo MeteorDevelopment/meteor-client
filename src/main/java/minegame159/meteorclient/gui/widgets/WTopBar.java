@@ -1,11 +1,11 @@
 package minegame159.meteorclient.gui.widgets;
 
+import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.gui.GuiConfig;
 import minegame159.meteorclient.gui.TopBarType;
 import minegame159.meteorclient.gui.renderer.GuiRenderer;
 import minegame159.meteorclient.gui.screens.topbar.TopBarScreen;
 import minegame159.meteorclient.utils.Color;
-import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import org.lwjgl.glfw.GLFW;
@@ -30,8 +30,8 @@ public class WTopBar extends WTable {
 
         @Override
         protected void onCalculateSize() {
-            width = 3 + Utils.getTextWidth(type.toString()) + 3;
-            height = 3 + Utils.getTextHeight() + 3;
+            width = 2 + MeteorClient.FONT.getStringWidth(type.toString()) + 2;
+            height = 2 + MeteorClient.FONT.getHeight() + 2;
         }
 
         @Override
@@ -76,7 +76,7 @@ public class WTopBar extends WTable {
             if (screen instanceof TopBarScreen && ((TopBarScreen) screen).type == type) color = GuiConfig.INSTANCE.backgroundPressed;
 
             renderer.renderQuad(x, y, width, height, color);
-            renderer.renderText(type.toString(), x + 3, y + 3, GuiConfig.INSTANCE.text, false);
+            renderer.renderText(type.toString(), x + 2, y + 2, GuiConfig.INSTANCE.text, false);
         }
     }
 }

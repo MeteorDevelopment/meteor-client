@@ -6,10 +6,10 @@ import minegame159.meteorclient.events.RenderEvent;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.rendering.ShapeBuilder;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.Pool;
-import minegame159.meteorclient.utils.RenderUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.util.math.BlockPos;
@@ -21,7 +21,7 @@ public class HoleESP extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgColors = settings.createGroup("Colors");
     
-    private Setting<Integer> horizontalRadius = sgGeneral.add(new IntSetting.Builder()
+    private final Setting<Integer> horizontalRadius = sgGeneral.add(new IntSetting.Builder()
             .name("horizontal-radius")
             .description("Horizontal radius in which to search for holes.")
             .defaultValue(10)
@@ -30,7 +30,7 @@ public class HoleESP extends ToggleModule {
             .build()
     );
 
-    private Setting<Integer> verticalRadius = sgGeneral.add(new IntSetting.Builder()
+    private final Setting<Integer> verticalRadius = sgGeneral.add(new IntSetting.Builder()
             .name("vertical-radius")
             .description("Vertical radius in which to search for holes.")
             .defaultValue(10)
@@ -39,14 +39,14 @@ public class HoleESP extends ToggleModule {
             .build()
     );
 
-    private Setting<Boolean> renderBox = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> renderBox = sgGeneral.add(new BoolSetting.Builder()
             .name("render-box")
             .description("Renders box instead of a quad.")
             .defaultValue(false)
             .build()
     );
 
-    private Setting<Integer> holeHeight = sgGeneral.add(new IntSetting.Builder()
+    private final Setting<Integer> holeHeight = sgGeneral.add(new IntSetting.Builder()
             .name("hole-height")
             .description("Minimum hole height required to be rendered.")
             .defaultValue(3)
@@ -54,30 +54,30 @@ public class HoleESP extends ToggleModule {
             .build()
     );
 
-    private Setting<Color> allBedrock = sgColors.add(new ColorSetting.Builder()
+    private final Setting<Color> allBedrock = sgColors.add(new ColorSetting.Builder()
             .name("all-bedrock")
             .description("All blocks are bedrock.")
             .defaultValue(new Color(25, 225, 25))
             .build()
     );
 
-    private Setting<Color> someObsidian = sgColors.add(new ColorSetting.Builder()
+    private final Setting<Color> someObsidian = sgColors.add(new ColorSetting.Builder()
             .name("some-obsidian")
             .description("Some blocks are obsidian.")
             .defaultValue(new Color(225, 145, 25))
             .build()
     );
 
-    private Setting<Color> allObsidian = sgColors.add(new ColorSetting.Builder()
+    private final Setting<Color> allObsidian = sgColors.add(new ColorSetting.Builder()
             .name("all-obsidian")
             .description("All blocks are obsidian.")
             .defaultValue(new Color(225, 25, 25))
             .build()
     );
 
-    private Pool<Hole> holePool = new Pool<>(Hole::new);
-    private BlockPos.Mutable blockPos = new BlockPos.Mutable();
-    private List<Hole> holes = new ArrayList<>();
+    private final Pool<Hole> holePool = new Pool<>(Hole::new);
+    private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
+    private final List<Hole> holes = new ArrayList<>();
 
     public HoleESP() {
         super(Category.Render, "hole-esp", "Displays holes that u can be in so u dont take explosion damage.");
@@ -138,17 +138,17 @@ public class HoleESP extends ToggleModule {
     }
 
     @EventHandler
-    private Listener<RenderEvent> onRender = new Listener<>(event -> {
+    private final Listener<RenderEvent> onRender = new Listener<>(event -> {
         for (Hole hole : holes) {
             int x = hole.blockPos.getX();
             int y = hole.blockPos.getY();
             int z = hole.blockPos.getZ();
 
             if (renderBox.get()) {
-                RenderUtils.blockSides(x, y - 1, z, hole.colorSides, null);
-                RenderUtils.blockEdges(x, y - 1, z, hole.colorLines, null);
+                ShapeBuilder.blockSides(x, y - 1, z, hole.colorSides, null);
+                ShapeBuilder.blockEdges(x, y - 1, z, hole.colorLines, null);
             } else {
-                RenderUtils.boxWithLines(x, y, z, hole.colorSides, hole.colorLines);
+                ShapeBuilder.quadWithLines(x, y, z, hole.colorSides, hole.colorLines);
             }
         }
     });
