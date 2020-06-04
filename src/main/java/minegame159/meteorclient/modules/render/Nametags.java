@@ -20,6 +20,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import org.lwjgl.opengl.GL11;
 
 public class Nametags extends ToggleModule {
+    private static final Color BACKGROUND = new Color(0, 0, 0, 75);
     private static final Color TEXT = new Color(255, 255, 255);
     private static final Color GREEN = new Color(25, 225, 25);
     private static final Color ORANGE = new Color(225, 105, 25);
@@ -66,7 +67,7 @@ public class Nametags extends ToggleModule {
 
         // Setup the rotation
         Matrices.push();
-        Matrices.translate(entity.getX() - event.offsetX, entity.getY() + 2.5 - event.offsetY, entity.getZ() - event.offsetZ);
+        Matrices.translate(entity.getX() - event.offsetX, entity.getY() + entity.getHeight() + 0.5 - event.offsetY, entity.getZ() - event.offsetZ);
         Matrices.rotate(-camera.getYaw(), 0, 1, 0);
         Matrices.rotate(camera.getPitch(), 1, 0, 0);
         Matrices.scale(-scale, -scale, scale);
@@ -74,7 +75,7 @@ public class Nametags extends ToggleModule {
         // Render background
         double i = MeteorClient.FONT.getStringWidth(name) / 2.0 + MeteorClient.FONT.getStringWidth(healthText) / 2.0;
         ShapeBuilder.begin(null, GL11.GL_TRIANGLES, VertexFormats.POSITION_COLOR);
-        ShapeBuilder.quad(-i - 1, -1, 0, -i - 1, 8, 0, i + 1, 8, 0, i + 1, -1, 0, new Color(0, 0, 0, 75));
+        ShapeBuilder.quad(-i - 1, -1, 0, -i - 1, 8, 0, i + 1, 8, 0, i + 1, -1, 0, BACKGROUND);
         ShapeBuilder.end();
 
         // Get health color
