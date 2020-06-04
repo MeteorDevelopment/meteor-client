@@ -1,28 +1,33 @@
 package minegame159.meteorclient.modules.render;
 
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
-import minegame159.meteorclient.accountsfriends.FriendManager;
+import me.zero.alpine.listener.EventHandler;
+import me.zero.alpine.listener.Listener;
+import minegame159.meteorclient.MeteorClient;
+import minegame159.meteorclient.events.RenderEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.rendering.Matrices;
+import minegame159.meteorclient.rendering.ShapeBuilder;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.Utils;
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.Tessellator;
-import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.VertexFormats;
-import net.minecraft.client.util.math.Matrix4f;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.client.util.math.Vector3f;
-import net.minecraft.util.DyeColor;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.PlayerEntity;
+import org.lwjgl.opengl.GL11;
 
 public class Nametags extends ToggleModule {
+    private static final Color TEXT = new Color(255, 255, 255);
+    private static final Color GREEN = new Color(25, 225, 25);
+    private static final Color ORANGE = new Color(225, 105, 25);
+    private static final Color RED = new Color(225, 25, 25);
+
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     
-    private Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
+    private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
             .name("scale")
             .description("Scale.")
             .defaultValue(1)
@@ -34,87 +39,56 @@ public class Nametags extends ToggleModule {
         super(Category.Render, "nametags", "Displays nametags above players.");
     }
 
-    public void render(MatrixStack matrixStack, double dist, float entityHeight, double x, double y, double z, float cameraYaw, float cameraPitch, String name, int health, int maxHealth) {
-        float scale = 0.025f;
+    @EventHandler
+    private final Listener<RenderEvent> onRender = new Listener<>(event -> {
+        for (Entity entity : mc.world.getEntities()) {
+            if (!(entity instanceof PlayerEntity) || entity == mc.player) continue;
+
+            renderNametag(event, (PlayerEntity) entity);
+        }
+    });
+
+    private void renderNametag(RenderEvent event, PlayerEntity entity) {
+        Camera camera = mc.gameRenderer.getCamera();
+
+        // Compute scale
+        double scale = 0.025;
+        double dist = Utils.distanceToCamera(entity);
         if (dist > 10) scale *= dist / 10 * this.scale.get();
 
-        float yOffset = entityHeight + 0.5F;
-        int verticalOffset = "deadmau5".equals(name) ? -10 : 0;
+        // Compute health things
+        float absorption = entity.getAbsorptionAmount();
+        int health = Math.round(entity.getHealth() + absorption);
+        double healthPercentage = health / (entity.getMaximumHealth() + absorption);
 
-        matrixStack.push();
-        matrixStack.translate(0, yOffset, 0);
-        matrixStack.multiply(mc.getEntityRenderManager().getRotation());
-        matrixStack.scale(-scale, -scale, scale);
-        Matrix4f matrix4f = matrixStack.peek().getModel();
-        RenderSystem.disableLighting();
-        RenderSystem.depthMask(false);
-        RenderSystem.enableBlend();
-        RenderSystem.blendFuncSeparate(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SrcFactor.ONE, GlStateManager.DstFactor.ZERO);
-        RenderSystem.disableTexture();
-        RenderSystem.disableDepthTest();
+        String name = entity.getGameProfile().getName();
+        String healthText = " " + health;
 
-        String healthText = health + "";
-        double halfWidthName = mc.textRenderer.getStringWidth(name) / 2.0;
-        double halfWidthHealth = mc.textRenderer.getStringWidth(healthText) / 2.0;
-        double halfWidth = halfWidthName + 4 + halfWidthHealth - 2.5;
+        // Setup the rotation
+        Matrices.push();
+        Matrices.translate(entity.x - event.offsetX, entity.y + 2.5 - event.offsetY, entity.z - event.offsetZ);
+        Matrices.rotate(-camera.getYaw(), 0, 1, 0);
+        Matrices.rotate(camera.getPitch(), 1, 0, 0);
+        Matrices.scale(-scale, -scale, scale);
 
-        Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder bb = tessellator.getBuffer();
-        bb.begin(7, VertexFormats.POSITION_COLOR);
-        double bx1 = -halfWidth - 1;
-        double bx2 = halfWidth + 1;
-        double by1 = verticalOffset - 1;
-        double by2 = verticalOffset + 9;
-        // Background
-        bb.vertex(matrix4f, (float) bx1, (float) by1, 0.0f).color(0f, 0f, 0f, 0.5f).next();
-        bb.vertex(matrix4f, (float) bx1, (float) by2, 0.0f).color(0f, 0f, 0f, 0.5f).next();
-        bb.vertex(matrix4f, (float) bx2, (float) by2, 0.0f).color(0f, 0f, 0f, 0.5f).next();
-        bb.vertex(matrix4f, (float) bx2, (float) by1, 0.0f).color(0f, 0f, 0f, 0.5f).next();
-        // Left Edge
-        bb.vertex(matrix4f, (float) bx1 - 1, (float) by1, 0.0f).color(0f, 0f, 0f, 1f).next();
-        bb.vertex(matrix4f, (float) bx1 - 1, (float) by2, 0.0f).color(0f, 0f, 0f, 1f).next();
-        bb.vertex(matrix4f, (float) bx1, (float) by2, 0.0f).color(0f, 0f, 0f, 1f).next();
-        bb.vertex(matrix4f, (float) bx1, (float) by1, 0.0f).color(0f, 0f, 0f, 1f).next();
-        // Right Edge
-        bb.vertex(matrix4f, (float) bx2, (float) by1, 0.0f).color(0f, 0f, 0f, 1f).next();
-        bb.vertex(matrix4f, (float) bx2, (float) by2, 0.0f).color(0f, 0f, 0f, 1f).next();
-        bb.vertex(matrix4f, (float) bx2 + 1, (float) by2, 0.0f).color(0f, 0f, 0f, 1f).next();
-        bb.vertex(matrix4f, (float) bx2 + 1, (float) by1, 0.0f).color(0f, 0f, 0f, 1f).next();
-        // Top Edge
-        bb.vertex(matrix4f, (float) bx1 - 1, (float) by1 - 1, 0.0f).color(0f, 0f, 0f, 1f).next();
-        bb.vertex(matrix4f, (float) bx1 - 1, (float) by1, 0.0f).color(0f, 0f, 0f, 1f).next();
-        bb.vertex(matrix4f, (float) bx2 + 1, (float) by1, 0.0f).color(0f, 0f, 0f, 1f).next();
-        bb.vertex(matrix4f, (float) bx2 + 1, (float) by1 - 1, 0.0f).color(0f, 0f, 0f, 1f).next();
-        // Bottom Edge
-        bb.vertex(matrix4f, (float) bx1 - 1, (float) by2, 0.0f).color(0f, 0f, 0f, 1f).next();
-        bb.vertex(matrix4f, (float) bx1 - 1, (float) by2 + 1, 0.0f).color(0f, 0f, 0f, 1f).next();
-        bb.vertex(matrix4f, (float) bx2 + 1, (float) by2 + 1, 0.0f).color(0f, 0f, 0f, 1f).next();
-        bb.vertex(matrix4f, (float) bx2 + 1, (float) by2, 0.0f).color(0f, 0f, 0f, 1f).next();
-        tessellator.draw();
+        // Render background
+        double i = MeteorClient.FONT.getStringWidth(name) / 2.0 + MeteorClient.FONT.getStringWidth(healthText) / 2.0;
+        ShapeBuilder.begin(null, GL11.GL_TRIANGLES, VertexFormats.POSITION_COLOR);
+        ShapeBuilder.quad(-i - 1, -1, 0, -i - 1, 8, 0, i + 1, 8, 0, i + 1, -1, 0, new Color(0, 0, 0, 75));
+        ShapeBuilder.end();
 
-        RenderSystem.enableTexture();
+        // Get health color
+        Color healthColor;
+        if (healthPercentage <= 0.333) healthColor = RED;
+        else if (healthPercentage <= 0.666) healthColor = ORANGE;
+        else healthColor = GREEN;
 
-        int nameColor = FriendManager.INSTANCE.getColor(name).getPacked();
+        // Render name and health texts
+        MeteorClient.FONT.begin();
+        double hX = MeteorClient.FONT.renderString(name, -i, 0, TEXT);
+        MeteorClient.FONT.renderString(healthText, hX, 0, healthColor);
+        MeteorClient.FONT.end();
 
-        double percHealth = (double) health / maxHealth;
-        int healthColor;
-        if (percHealth <= 0.333) healthColor = Color.fromRGBA(225, 45, 45, 255);
-        else if (percHealth <= 0.666) healthColor = Color.fromRGBA(225, 105, 25, 255);
-        else healthColor = Color.fromRGBA(45, 225, 45, 255);
-
-        VertexConsumerProvider.Immediate immediate = VertexConsumerProvider.immediate(Tessellator.getInstance().getBuffer());
-        mc.textRenderer.draw(name, (float) (-halfWidth), (float) verticalOffset, nameColor, false, matrix4f, immediate, false, 0, 15728880);
-        mc.textRenderer.draw(healthText, (float) (-halfWidth + halfWidthName * 2 + 4), (float) verticalOffset, healthColor, false, matrix4f, immediate, false, 0, 15728880);
-        RenderSystem.depthMask(true);
-        RenderSystem.enableDepthTest();
-        mc.textRenderer.draw(name, (float) (-halfWidth), (float) verticalOffset, nameColor, false, matrix4f, immediate, false, 0, 15728880);
-        mc.textRenderer.draw(healthText, (float) (-halfWidth + halfWidthName * 2 + 4), (float) verticalOffset, healthColor, false, matrix4f, immediate, false, 0, 15728880);
-        immediate.draw();
-
-        RenderSystem.enableDepthTest();
-        RenderSystem.enableLighting();
-        RenderSystem.disableBlend();
-        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        matrixStack.pop();
+        Matrices.pop();
     }
 }

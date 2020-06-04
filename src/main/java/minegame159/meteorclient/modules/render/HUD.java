@@ -3,6 +3,7 @@ package minegame159.meteorclient.modules.render;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.Config;
+import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.*;
 import minegame159.meteorclient.mixininterface.IMinecraftClient;
 import minegame159.meteorclient.modules.Category;
@@ -13,7 +14,6 @@ import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.TickRate;
-import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.client.render.DiffuseLighting;
@@ -36,72 +36,72 @@ import java.util.List;
 import java.util.Objects;
 
 public class HUD extends ToggleModule {
-    private static int white = Color.fromRGBA(255, 255, 255, 255);
-    private static int gray = Color.fromRGBA(185, 185, 185, 255);
-    private static int red = Color.fromRGBA(225, 45, 45, 255);
+    private static final Color white = new Color(255, 255, 255);
+    private static final Color gray = new Color(185, 185, 185);
+    private static final Color red = new Color(225, 45, 45);
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgTopLeft = settings.createGroup("Top Left");
     private final SettingGroup sgTopRight = settings.createGroup("Top Right");
     private final SettingGroup sgBottomRight = settings.createGroup("Bottom Right");
 
-    private Setting<Boolean> armor = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> armor = sgGeneral.add(new BoolSetting.Builder()
             .name("armor")
             .description("Diplays your armor above hotbar.")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<Boolean> waterMark = sgTopLeft.add(new BoolSetting.Builder()
+    private final Setting<Boolean> waterMark = sgTopLeft.add(new BoolSetting.Builder()
             .name("water-mark")
             .description("Water mark.")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<Boolean> fps = sgTopLeft.add(new BoolSetting.Builder()
+    private final Setting<Boolean> fps = sgTopLeft.add(new BoolSetting.Builder()
             .name("fps")
             .description("Display fps.")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<Boolean> ping = sgTopLeft.add(new BoolSetting.Builder()
+    private final Setting<Boolean> ping = sgTopLeft.add(new BoolSetting.Builder()
             .name("ping")
             .description("Display ping.")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<Boolean> tps = sgTopLeft.add(new BoolSetting.Builder()
+    private final Setting<Boolean> tps = sgTopLeft.add(new BoolSetting.Builder()
             .name("tps")
             .description("Display tps.")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<Boolean> speed = sgTopLeft.add(new BoolSetting.Builder()
+    private final Setting<Boolean> speed = sgTopLeft.add(new BoolSetting.Builder()
             .name("speed")
             .description("Display speed in blocks per second.")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<Boolean> biome = sgTopLeft.add(new BoolSetting.Builder()
+    private final Setting<Boolean> biome = sgTopLeft.add(new BoolSetting.Builder()
             .name("biome")
             .description("Displays biome you are in.")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<Boolean> time = sgTopLeft.add(new BoolSetting.Builder()
+    private final Setting<Boolean> time = sgTopLeft.add(new BoolSetting.Builder()
             .name("time")
             .description("Displays ingame time in ticks.")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<Boolean> entities = sgTopLeft.add(new BoolSetting.Builder()
+    private final Setting<Boolean> entities = sgTopLeft.add(new BoolSetting.Builder()
             .name("entities")
             .description("Display number of entities.")
             .defaultValue(true)
@@ -109,7 +109,7 @@ public class HUD extends ToggleModule {
             .build()
     );
 
-    private Setting<Boolean> entityCustomNames = sgTopLeft.add(new BoolSetting.Builder()
+    private final Setting<Boolean> entityCustomNames = sgTopLeft.add(new BoolSetting.Builder()
             .name("entity-custom-names")
             .description("Use custom names.")
             .defaultValue(true)
@@ -117,7 +117,7 @@ public class HUD extends ToggleModule {
             .build()
     );
 
-    private Setting<Boolean> separateSheepsByColor = sgTopLeft.add(new BoolSetting.Builder()
+    private final Setting<Boolean> separateSheepsByColor = sgTopLeft.add(new BoolSetting.Builder()
             .name("separate-sheeps-by-color")
             .description("Separates sheeps by color in entity list.")
             .defaultValue(false)
@@ -125,42 +125,42 @@ public class HUD extends ToggleModule {
             .build()
     );
 
-    private Setting<Boolean> activeModules = sgTopRight.add(new BoolSetting.Builder()
+    private final Setting<Boolean> activeModules = sgTopRight.add(new BoolSetting.Builder()
             .name("active-modules")
             .description("Display active modules.")
             .defaultValue(true)
             .build()
     );
 
-    public Setting<Boolean> potionTimers = sgBottomRight.add(new BoolSetting.Builder()
+    public final Setting<Boolean> potionTimers = sgBottomRight.add(new BoolSetting.Builder()
             .name("potion-timers")
             .description("Display potion timers and hide minecraft default potion icons.")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<Boolean> position = sgBottomRight.add(new BoolSetting.Builder()
+    private final Setting<Boolean> position = sgBottomRight.add(new BoolSetting.Builder()
             .name("position")
             .description("Display your position.")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<Boolean> rotation = sgBottomRight.add(new BoolSetting.Builder()
+    private final Setting<Boolean> rotation = sgBottomRight.add(new BoolSetting.Builder()
             .name("rotation")
             .description("Display your rotation.")
             .defaultValue(true)
             .build()
     );
 
-    private HashMap<String, EntityInfo> entityCounts = new HashMap<>();
+    private final HashMap<String, EntityInfo> entityCounts = new HashMap<>();
     private int maxLetterCount = 0;
     private boolean updateEntities;
     private int updateEntitiesTimer = 2;
 
-    private List<ToggleModule> modules = new ArrayList<>();
+    private final List<ToggleModule> modules = new ArrayList<>();
 
-    private BlockPos.Mutable playerBlockPos = new BlockPos.Mutable();
+    private final BlockPos.Mutable playerBlockPos = new BlockPos.Mutable();
 
     public HUD() {
         super(Category.Render, "HUD", "Displays various info to the screen.");
@@ -174,15 +174,15 @@ public class HUD extends ToggleModule {
     }
 
     @EventHandler
-    private Listener<ActiveModulesChangedEvent> activeModulesChangedEventListener = new Listener<>(event -> recalculateActiveModules());
+    private final Listener<ActiveModulesChangedEvent> activeModulesChangedEventListener = new Listener<>(event -> recalculateActiveModules());
 
     @EventHandler
-    private Listener<ModuleVisibilityChangedEvent> onModuleVisibilityChanged = new Listener<>(event -> {
+    private final Listener<ModuleVisibilityChangedEvent> onModuleVisibilityChanged = new Listener<>(event -> {
         if (event.module.isActive()) recalculateActiveModules();
     });
 
     @EventHandler
-    private Listener<EntityAddedEvent> onEntityAdded = new Listener<>(event -> {
+    private final Listener<EntityAddedEvent> onEntityAdded = new Listener<>(event -> {
         if (entities.get()) {
             if (!isValidEntity(event.entity)) return;
             updateEntities = true;
@@ -190,7 +190,7 @@ public class HUD extends ToggleModule {
     });
 
     @EventHandler
-    private Listener<EntityRemovedEvent> onEntityRemoved = new Listener<>(event -> {
+    private final Listener<EntityRemovedEvent> onEntityRemoved = new Listener<>(event -> {
         if (entities.get()) {
             if (!isValidEntity(event.entity)) return;
             updateEntities = true;
@@ -222,7 +222,7 @@ public class HUD extends ToggleModule {
     }
 
     @EventHandler
-    private Listener<TickEvent> onTick = new Listener<>(event -> {
+    private final Listener<TickEvent> onTick = new Listener<>(event -> {
         updateEntitiesTimer--;
 
         if (entities.get()) {
@@ -245,10 +245,12 @@ public class HUD extends ToggleModule {
     });
 
     @EventHandler
-    private Listener<Render2DEvent> onRender2D = new Listener<>(event -> {
+    private final Listener<Render2DEvent> onRender2D = new Listener<>(event -> {
+        MeteorClient.FONT.begin();
         renderTopLeft(event);
         renderTopRight(event);
         renderBottomRight(event);
+        MeteorClient.FONT.end();
 
         if (armor.get()) {
             int x = event.screenWidth / 2 + 12;
@@ -276,29 +278,29 @@ public class HUD extends ToggleModule {
 
         if (waterMark.get()) {
             drawInfo("Meteor Client ", Config.INSTANCE.getVersion(), y);
-            y += Utils.getTextHeight() + 2;
+            y += MeteorClient.FONT.getHeight() + 2;
         }
 
         if (fps.get()) {
             drawInfo("FPS: ", ((IMinecraftClient) MinecraftClient.getInstance()).getFps() + "", y);
-            y += Utils.getTextHeight() + 2;
+            y += MeteorClient.FONT.getHeight() + 2;
         }
 
         PlayerListEntry playerListEntry = mc.getNetworkHandler().getPlayerListEntry(mc.player.getUuid());
         if (ping.get() && playerListEntry != null) {
             drawInfo("Ping: ", playerListEntry.getLatency() + "", y);
-            y += Utils.getTextHeight() + 2;
+            y += MeteorClient.FONT.getHeight() + 2;
         }
 
         if (tps.get()) {
             drawInfo("TPS: ", String.format("%.1f", TickRate.INSTANCE.getTickRate()), y);
-            y += Utils.getTextHeight() + 2;
+            y += MeteorClient.FONT.getHeight() + 2;
         }
 
         float timeSinceLastTick = TickRate.INSTANCE.getTimeSinceLastTick();
         if (timeSinceLastTick >= 1f) {
             drawInfo("Since last tick: ", String.format("%.1f", timeSinceLastTick), y, red);
-            y += Utils.getTextHeight() + 2;
+            y += MeteorClient.FONT.getHeight() + 2;
         }
 
         if (speed.get()) {
@@ -307,18 +309,18 @@ public class HUD extends ToggleModule {
             double length = Math.sqrt(tX * tX + tZ * tZ);
 
             drawInfo("Speed: ", String.format("%.1f", length * 20), y);
-            y += Utils.getTextHeight() + 2;
+            y += MeteorClient.FONT.getHeight() + 2;
         }
 
         if (biome.get()) {
             playerBlockPos.set(mc.player);
             drawInfo("Biome: ", mc.world.getBiome(playerBlockPos).getName().asString(), y);
-            y += Utils.getTextHeight() + 2;
+            y += MeteorClient.FONT.getHeight() + 2;
         }
 
         if (time.get()) {
             drawInfo("Time: ", mc.world.getTimeOfDay() % 24000 + "", y);
-            y += Utils.getTextHeight() + 2;
+            y += MeteorClient.FONT.getHeight() + 2;
         }
 
         if (entities.get()) {
@@ -326,31 +328,31 @@ public class HUD extends ToggleModule {
                 if (!renderInfo.render) continue;
 
                 drawEntityCount(renderInfo, y);
-                y += Utils.getTextHeight() + 2;
+                y += MeteorClient.FONT.getHeight() + 2;
             }
         }
     }
 
-    private void drawInfo(String text1, String text2, int x, int y, int text1Color) {
-        Utils.drawTextWithShadow(text1, x, y, text1Color);
-        Utils.drawTextWithShadow(text2, x + Utils.getTextWidth(text1), y, gray);
+    private void drawInfo(String text1, String text2, int x, int y, Color text1Color) {
+        MeteorClient.FONT.renderStringWithShadow(text1, x, y, text1Color);
+        MeteorClient.FONT.renderStringWithShadow(text2, x + MeteorClient.FONT.getStringWidth(text1), y, gray);
     }
-    private void drawInfo(String text1, String text2, int y, int text1Color) {
+    private void drawInfo(String text1, String text2, int y, Color text1Color) {
         drawInfo(text1, text2, 2, y, text1Color);
     }
     private void drawInfo(String text1, String text2, int y) {
         drawInfo(text1, text2, y, white);
     }
-    private void drawInfoRight(String text1, String text2, int y, int text1Color) {
-        drawInfo(text1, text2, mc.getWindow().getScaledWidth() - Utils.getTextWidth(text1) - Utils.getTextWidth(text2) - 2, y, text1Color);
+    private void drawInfoRight(String text1, String text2, int y, Color text1Color) {
+        drawInfo(text1, text2, mc.getWindow().getScaledWidth() - MeteorClient.FONT.getStringWidth(text1) - MeteorClient.FONT.getStringWidth(text2) - 2, y, text1Color);
     }
     private void drawInfoRight(String text1, String text2, int y) {
         drawInfoRight(text1, text2, y, white);
     }
 
     private void drawEntityCount(EntityInfo entityInfo, int y) {
-        Utils.drawTextWithShadow(entityInfo.countStr, 2, y, gray);
-        Utils.drawTextWithShadow(entityInfo.name, 2 + (maxLetterCount - entityInfo.countStr.length()) * 4 + 4 + Utils.getTextWidth(entityInfo.countStr), y, white);
+        MeteorClient.FONT.renderStringWithShadow(entityInfo.countStr, 2, y, gray);
+        MeteorClient.FONT.renderStringWithShadow(entityInfo.name, 2 + (maxLetterCount - entityInfo.countStr.length()) * 4 + 4 + MeteorClient.FONT.getStringWidth(entityInfo.countStr), y, white);
     }
 
     private void renderTopRight(Render2DEvent event) {
@@ -360,16 +362,16 @@ public class HUD extends ToggleModule {
         if (activeModules.get()) {
             for (ToggleModule module : modules) {
                 String infoString = module.getInfoString();
+                int x;
                 if (infoString == null) {
-                    int x = event.screenWidth - Utils.getTextWidth(module.title) - 2;
-                    Utils.drawTextWithShadow(module.title, x, y, module.color);
-                    y += Utils.getTextHeight() + 1;
+                    x = event.screenWidth - MeteorClient.FONT.getStringWidth(module.title) - 2;
+                    MeteorClient.FONT.renderStringWithShadow(module.title, x, y, module.color);
                 } else {
-                    int x = event.screenWidth - Utils.getTextWidth(module.title + " " + infoString) - 2;
-                    Utils.drawTextWithShadow(module.title, x, y, module.color);
-                    Utils.drawTextWithShadow(module.getInfoString(), x + Utils.getTextWidth(module.title + " "), y, gray);
-                    y += Utils.getTextHeight() + 1;
+                    x = event.screenWidth - MeteorClient.FONT.getStringWidth(module.title + " " + infoString) - 2;
+                    MeteorClient.FONT.renderStringWithShadow(module.title, x, y, module.color);
+                    MeteorClient.FONT.renderStringWithShadow(module.getInfoString(), x + MeteorClient.FONT.getStringWidth(module.title + " "), y, gray);
                 }
+                y += MeteorClient.FONT.getHeight() + 1;
             }
         }
     }
@@ -382,14 +384,14 @@ public class HUD extends ToggleModule {
         }
 
         modules.sort((o1, o2) -> {
-            int a = Integer.compare(o1.getInfoString() == null ? Utils.getTextWidth(o1.title) : Utils.getTextWidth(o1.title + " " + o1.getInfoString()), o2.getInfoString() == null ? Utils.getTextWidth(o2.title) : Utils.getTextWidth(o2.title + " " + o2.getInfoString()));
+            int a = Integer.compare(o1.getInfoString() == null ? MeteorClient.FONT.getStringWidth(o1.title) : MeteorClient.FONT.getStringWidth(o1.title + " " + o1.getInfoString()), o2.getInfoString() == null ? MeteorClient.FONT.getStringWidth(o2.title) : MeteorClient.FONT.getStringWidth(o2.title + " " + o2.getInfoString()));
             if (a == 0) return 0;
             return a < 0 ? 1 : -1;
         });
     }
 
     private void renderBottomRight(Render2DEvent event) {
-        int y = event.screenHeight - Utils.getTextHeight() - 2;
+        int y = event.screenHeight - MeteorClient.FONT.getHeight() - 2;
 
         if (rotation.get()) {
             Direction direction = mc.player.getHorizontalFacing();
@@ -410,23 +412,23 @@ public class HUD extends ToggleModule {
             if (pitch > 180) pitch -= 360;
 
             drawInfoRight(String.format("%s %s ", StringUtils.capitalize(direction.getName()), axis), String.format("(%.1f, %.1f)", yaw, pitch), y);
-            y -= Utils.getTextHeight() + 2;
+            y -= MeteorClient.FONT.getHeight() + 2;
         }
 
         if (position.get()) {
             if (mc.player.dimension == DimensionType.OVERWORLD) {
                 drawPosition(event.screenWidth, "Nether Pos: ", y, mc.player.getX() / 8.0, mc.player.getY() / 8.0, mc.player.getZ() / 8.0);
-                y -= Utils.getTextHeight() + 2;
+                y -= MeteorClient.FONT.getHeight() + 2;
                 drawPosition(event.screenWidth, "Pos: ", y, mc.player.getX(), mc.player.getY(), mc.player.getZ());
-                y -= Utils.getTextHeight() + 2;
+                y -= MeteorClient.FONT.getHeight() + 2;
             } else if (mc.player.dimension == DimensionType.THE_NETHER) {
                 drawPosition(event.screenWidth, "Overworld Pos: ", y, mc.player.getX() * 8.0, mc.player.getY() * 8.0, mc.player.getZ() * 8.0);
-                y -= Utils.getTextHeight() + 2;
+                y -= MeteorClient.FONT.getHeight() + 2;
                 drawPosition(event.screenWidth, "Pos: ", y, mc.player.getX(), mc.player.getY(), mc.player.getZ());
-                y -= Utils.getTextHeight() + 2;
+                y -= MeteorClient.FONT.getHeight() + 2;
             } else if (mc.player.dimension == DimensionType.THE_END) {
                 drawPosition(event.screenWidth, "Pos: ", y, mc.player.getX(), mc.player.getY(), mc.player.getZ());
-                y -= Utils.getTextHeight() + 2;
+                y -= MeteorClient.FONT.getHeight() + 2;
             }
         }
 
@@ -434,18 +436,18 @@ public class HUD extends ToggleModule {
             for (StatusEffectInstance statusEffectInstance : mc.player.getStatusEffects()) {
                 StatusEffect statusEffect = statusEffectInstance.getEffectType();
 
-                drawInfoRight(statusEffect.getName().asString(), " " + (statusEffectInstance.getAmplifier() + 1) + " (" + StatusEffectUtil.durationToString(statusEffectInstance, 1) + ")", y, statusEffect.getColor());
-                y -= Utils.getTextHeight() + 2;
+                drawInfoRight(statusEffect.getName().asString(), " " + (statusEffectInstance.getAmplifier() + 1) + " (" + StatusEffectUtil.durationToString(statusEffectInstance, 1) + ")", y, new Color(statusEffect.getColor()));
+                y -= MeteorClient.FONT.getHeight() + 2;
             }
         }
     }
 
     private void drawPosition(int screenWidth, String text, int yy, double x, double y, double z) {
         String msg1 = String.format("%.1f %.1f %.1f", x, y, z);
-        int x1 = screenWidth - Utils.getTextWidth(msg1) - 2;
-        int x2 = screenWidth - Utils.getTextWidth(msg1) - Utils.getTextWidth(text) - 2;
-        Utils.drawTextWithShadow(msg1, x1, yy, Color.fromRGBA(185, 185, 185, 255));
-        Utils.drawTextWithShadow(text, x2, yy, Color.fromRGBA(255, 255, 255, 255));
+        int x1 = screenWidth - MeteorClient.FONT.getStringWidth(msg1) - 2;
+        int x2 = screenWidth - MeteorClient.FONT.getStringWidth(msg1) - MeteorClient.FONT.getStringWidth(text) - 2;
+        MeteorClient.FONT.renderStringWithShadow(msg1, x1, yy, gray);
+        MeteorClient.FONT.renderStringWithShadow(text, x2, yy, white);
     }
 
     private static class EntityInfo {
@@ -466,7 +468,6 @@ public class HUD extends ToggleModule {
         }
 
         public void reset() {
-            int preCount = count;
             count = 0;
             render = false;
         }

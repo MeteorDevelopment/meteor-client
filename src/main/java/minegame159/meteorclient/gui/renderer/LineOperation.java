@@ -1,5 +1,6 @@
 package minegame159.meteorclient.gui.renderer;
 
+import minegame159.meteorclient.rendering.ShapeBuilder;
 import minegame159.meteorclient.utils.Color;
 
 public class LineOperation extends Operation {
@@ -19,8 +20,7 @@ public class LineOperation extends Operation {
 
     @Override
     public void render(GuiRenderer renderer) {
-        renderer.lineBuf.vertex(x1, y1, 0).color(color.r, color.g, color.b, color.a).next();
-        renderer.lineBuf.vertex(x2, y2, 0).color(color.r, color.g, color.b, color.a).next();
+        ShapeBuilder.line(x1, y1, x2, y2, color);
     }
 
     @Override

@@ -1,7 +1,7 @@
 package minegame159.meteorclient.gui.renderer;
 
+import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.utils.Color;
-import minegame159.meteorclient.utils.Utils;
 
 public class TextOperation extends Operation {
     private String text;
@@ -21,8 +21,8 @@ public class TextOperation extends Operation {
 
     @Override
     public void render(GuiRenderer renderer) {
-        if (shadow) Utils.drawTextWithShadow(text, (float) x, (float) y, color.getPacked());
-        else Utils.drawText(text, (float) x, (float) y, color.getPacked());
+        if (shadow) MeteorClient.FONT.renderStringWithShadow(text, (float) x, (float) y, color);
+        else MeteorClient.FONT.renderString(text, (float) x, (float) y, color);
     }
 
     @Override
