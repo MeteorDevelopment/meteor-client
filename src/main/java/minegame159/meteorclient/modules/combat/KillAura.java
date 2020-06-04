@@ -10,10 +10,13 @@ import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.*;
 import net.minecraft.command.arguments.EntityAnchorArgumentType;
+import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.SwordItem;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Vec3d;
@@ -78,6 +81,13 @@ public class KillAura extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> autoSword = sgGeneral.add(new BoolSetting.Builder()
+            .name("auto-sword")
+            .description("Automatically changes to the best sword in your hotbar")
+            .defaultValue(false)
+            .build()
+    );
+
     private final Setting<Boolean> oneTickDelay = sgDelay.add(new BoolSetting.Builder()
             .name("one-tick-delay")
             .description("Adds one tick delay.")
@@ -106,6 +116,7 @@ public class KillAura extends ToggleModule {
     private boolean canAutoDelayAttack;
     private int hitDelayTimer;
     private int randomHitDelayTimer;
+    private int prevSlot;
 
     private final Vec3d vec3d1 = new Vec3d(0, 0, 0);
     private final Vec3d vec3d2 = new Vec3d(0, 0, 0);
@@ -118,6 +129,16 @@ public class KillAura extends ToggleModule {
     public void onActivate() {
         hitDelayTimer = 0;
         randomHitDelayTimer = 0;
+
+        if(autoSword.get()){
+            prevSlot = mc.player.inventory.selectedSlot;
+            mc.player.inventory.selectedSlot = getBestSword();
+        }
+    }
+
+    @Override
+    public void onDeactivate() {
+        mc.player.inventory.selectedSlot = prevSlot;
     }
 
     private boolean isInRange(Entity entity) {
@@ -169,6 +190,33 @@ public class KillAura extends ToggleModule {
             }
             default:              return 0;
         }
+    }
+
+    private int getBestSword(){
+        int slot = mc.player.inventory.selectedSlot;
+        double damage = 0;
+        for(int i = 0; i < 9; i++){
+            if(mc.player.inventory.getInvStack(i).getItem() instanceof SwordItem){
+                double sharpDamage = 0;
+                if((EnchantmentHelper.getEnchantments(mc.player.inventory.getInvStack(i)).containsKey(Enchantments.SHARPNESS))){
+                    sharpDamage = EnchantmentHelper.getLevel(Enchantments.SHARPNESS, mc.player.inventory.getInvStack(i)) * 0.5 + 0.5;
+                }
+                double fireDamage = 0;
+                if((EnchantmentHelper.getEnchantments(mc.player.inventory.getInvStack(i)).containsKey(Enchantments.FIRE_ASPECT))){
+                    fireDamage = 1;
+                }
+                double currentDamage = ((SwordItem) mc.player.inventory.getInvStack(i).getItem()).getAttackDamage()
+                        + sharpDamage + fireDamage;
+                if(damage == 0) {
+                    slot = i;
+                }
+                if(currentDamage > damage){
+                    damage = currentDamage;
+                    slot = i;
+                }
+            }
+        }
+        return slot;
     }
 
     @EventHandler

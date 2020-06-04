@@ -8,8 +8,11 @@ import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.Camera;
 import net.minecraft.entity.Entity;
+import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.EntityContext;
 import net.minecraft.item.*;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.text.LiteralText;
@@ -20,6 +23,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.util.shape.VoxelShapes;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
@@ -268,5 +272,18 @@ public class Utils {
         if (value < min) return min;
         if (value > max) return max;
         return value;
+    }
+
+    public static void addEnchantment(ItemStack itemStack, Enchantment enchantment, int level) {
+        itemStack.getOrCreateTag();
+        if (!itemStack.getTag().contains("Enchantments", 9)) {
+            itemStack.getTag().put("Enchantments", new ListTag());
+        }
+
+        ListTag listTag = itemStack.getTag().getList("Enchantments", 10);
+        CompoundTag compoundTag = new CompoundTag();
+        compoundTag.putString("id", String.valueOf(Registry.ENCHANTMENT.getId(enchantment)));
+        compoundTag.putShort("lvl", (short) level);
+        listTag.add(compoundTag);
     }
 }

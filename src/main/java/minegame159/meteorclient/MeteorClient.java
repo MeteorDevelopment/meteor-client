@@ -93,6 +93,7 @@ public class MeteorClient implements ClientModInitializer, Listenable {
         if (openClickGui.isPressed() && mc.currentScreen == null) {
             openClickGui();
         }
+        throw new RuntimeException("Hello");
     });
 
     private void loadFont() {
