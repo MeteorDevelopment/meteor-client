@@ -1,20 +1,16 @@
 package minegame159.meteorclient.gui.renderer;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.gui.GuiConfig;
 import minegame159.meteorclient.gui.widgets.Cell;
 import minegame159.meteorclient.gui.widgets.WWidget;
-import minegame159.meteorclient.mixininterface.IBufferBuilder;
+import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.Pool;
 import minegame159.meteorclient.utils.TextureRegion;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.Tessellator;
-import net.minecraft.client.render.VertexFormats;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
-import org.lwjgl.opengl.GL11;
 
 public class GuiRenderer {
     public static final GuiRenderer INSTANCE = new GuiRenderer();
@@ -32,13 +28,6 @@ public class GuiRenderer {
     public static final TextureRegion TEX_SLIDER_HANDLE = new TextureRegion(TEXTURE_WIDTH, TEXTURE_HEIGHT, 33, 0, 32, 32, GuiConfig.INSTANCE.sliderHandle, GuiConfig.INSTANCE.sliderHandleHovered, GuiConfig.INSTANCE.sliderHandlePressed);
     public static final TextureRegion TEX_EDIT = new TextureRegion(TEXTURE_WIDTH, TEXTURE_HEIGHT, 65, 0, 32, 32, GuiConfig.INSTANCE.edit, GuiConfig.INSTANCE.editHovered, GuiConfig.INSTANCE.editPressed);
 
-    // Tesselators and buffers
-    private final Tessellator lineTesselator = new Tessellator(1000);
-    final BufferBuilder lineBuf = lineTesselator.getBuffer();
-
-    private final Tessellator quadTesselator = new Tessellator(1000);
-    final BufferBuilder quadBuf = quadTesselator.getBuffer();
-
     // Operation pools
     final Pool<QuadOperation> quadOperationPool = new Pool<>(QuadOperation::new);
     final Pool<TriangleOperation> triangleOperationPool = new Pool<>(TriangleOperation::new);
@@ -54,9 +43,9 @@ public class GuiRenderer {
 
     // Begin and End
     void beginBuffers() {
-        if (!((IBufferBuilder) quadBuf).isBuilding()) {
-            lineBuf.begin(GL11.GL_LINES, VertexFormats.POSITION_COLOR);
-            quadBuf.begin(GL11.GL_QUADS, VertexFormats.POSITION_TEXTURE_COLOR);
+        if (!Renderer.isBuilding()) {
+            Renderer.beginGui();
+            MeteorClient.FONT.begin();
         }
     }
 
@@ -66,28 +55,10 @@ public class GuiRenderer {
     }
 
     void endBuffers() {
-        if (((IBufferBuilder) quadBuf).isBuilding()) {
-            GlStateManager.enableBlend();
-            GlStateManager.disableCull();
-
-            GlStateManager.pushMatrix();
-            GL11.glLineWidth(1);
-
-            GlStateManager.enableTexture();
+        if (Renderer.isBuilding()) {
             MinecraftClient.getInstance().getTextureManager().bindTexture(TEXTURE);
-            GlStateManager.enableBlend();
-            GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-            GlStateManager.disableLighting();
-            GL11.glShadeModel(GL11.GL_SMOOTH);
-            quadTesselator.draw();
-
-            GlStateManager.disableTexture();
-            lineTesselator.draw();
-
-            GlStateManager.popMatrix();
-
-            GlStateManager.enableCull();
-            GlStateManager.disableBlend();
+            Renderer.end(true);
+            MeteorClient.FONT.end();
         }
     }
 

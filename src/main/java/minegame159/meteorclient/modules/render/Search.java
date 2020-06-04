@@ -11,8 +11,12 @@ import minegame159.meteorclient.events.RenderEvent;
 import minegame159.meteorclient.events.packets.ReceivePacketEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.rendering.ShapeBuilder;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.*;
+import minegame159.meteorclient.utils.Color;
+import minegame159.meteorclient.utils.MeteorTaskExecutor;
+import minegame159.meteorclient.utils.Pool;
+import minegame159.meteorclient.utils.Utils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
@@ -110,7 +114,7 @@ public class Search extends ToggleModule {
     }
 
     @EventHandler
-    private Listener<ChunkDataEvent> onChunkData = new Listener<>(event -> searchChunk(event.chunk, event));
+    private final Listener<ChunkDataEvent> onChunkData = new Listener<>(event -> searchChunk(event.chunk, event));
 
     private void searchChunk(Chunk chunk, ChunkDataEvent event) {
         MeteorTaskExecutor.execute(() -> {
@@ -136,7 +140,7 @@ public class Search extends ToggleModule {
     }
 
     @EventHandler
-    private Listener<ReceivePacketEvent> onReceivePacket = new Listener<>(event -> {
+    private final Listener<ReceivePacketEvent> onReceivePacket = new Listener<>(event -> {
         if (!(event.packet instanceof BlockUpdateS2CPacket)) return;
 
         BlockPos blockPos = ((BlockUpdateS2CPacket) event.packet).getPos();
@@ -159,7 +163,7 @@ public class Search extends ToggleModule {
     });
 
     @EventHandler
-    private Listener<RenderEvent> onRender = new Listener<>(event -> {
+    private final Listener<RenderEvent> onRender = new Listener<>(event -> {
         vec1 = new Vec3d(0, 0, 1)
                 .rotateX(-(float) Math.toRadians(mc.cameraEntity.pitch))
                 .rotateY(-(float) Math.toRadians(mc.cameraEntity.yaw))
@@ -220,21 +224,21 @@ public class Search extends ToggleModule {
         public void render(RenderEvent event) {
             for (BlockPos.Mutable blockPos : blockPoss) {
                 if (fullBlock.get()) {
-                    RenderUtils.blockEdges(blockPos, color.get());
+                    ShapeBuilder.blockEdges(blockPos, color.get());
                 } else {
                     VoxelShape shape = mc.world.getBlockState(blockPos).getOutlineShape(mc.world, blockPos);
                     if (shape.isEmpty()) {
-                        RenderUtils.blockEdges(blockPos, color.get());
+                        ShapeBuilder.blockEdges(blockPos, color.get());
                         continue;
                     }
 
                     Box box = shape.getBoundingBox();
-                    RenderUtils.boxEdges(blockPos.getX() + box.x1, blockPos.getY() + box.y1, blockPos.getZ() + box.z1, blockPos.getX() + box.x2, blockPos.getY() + box.y2, blockPos.getZ() + box.z2, color.get());
+                    ShapeBuilder.boxEdges(blockPos.getX() + box.x1, blockPos.getY() + box.y1, blockPos.getZ() + box.z1, blockPos.getX() + box.x2, blockPos.getY() + box.y2, blockPos.getZ() + box.z2, color.get());
                 }
 
                 // Tracers
                 if (sgTracers.isEnabled()) {
-                    RenderUtils.line(vec1.x - (mc.cameraEntity.x - event.offsetX), vec1.y - (mc.cameraEntity.y - event.offsetY), vec1.z - (mc.cameraEntity.z - event.offsetZ), blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5f, tracersColor.get());
+                    ShapeBuilder.line(vec1.x - (mc.cameraEntity.x - event.offsetX), vec1.y - (mc.cameraEntity.y - event.offsetY), vec1.z - (mc.cameraEntity.z - event.offsetZ), blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5f, tracersColor.get());
                 }
             }
         }

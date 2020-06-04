@@ -1,18 +1,17 @@
 package minegame159.meteorclient.mixin;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.EventStore;
-import minegame159.meteorclient.mixininterface.IGameRenderer;
+import minegame159.meteorclient.events.RenderEvent;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.misc.UnfocusedCPU;
 import minegame159.meteorclient.modules.render.NoHurtCam;
-import minegame159.meteorclient.utils.RenderUtils;
+import minegame159.meteorclient.rendering.Matrices;
+import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.GameRenderer;
-import org.lwjgl.opengl.GL11;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -21,7 +20,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(GameRenderer.class)
-public abstract class GameRendererMixin implements IGameRenderer {
+public abstract class GameRendererMixin {
     @Shadow @Final private MinecraftClient client;
 
     @Shadow @Final private Camera camera;
@@ -37,44 +36,17 @@ public abstract class GameRendererMixin implements IGameRenderer {
 
         client.getProfiler().swap("meteor-client_render");
 
-        GlStateManager.pushMatrix();
-        double px = camera.getPos().x;
-        double py = camera.getPos().y;
-        double pz = camera.getPos().z;
-        GlStateManager.color4f(1, 1, 1, 1);
-        RenderUtils.beginLines(-px, -py, -pz);
-        RenderUtils.beginQuads(-px, -py, -pz);
+        Matrices.begin();
 
-        MeteorClient.EVENT_BUS.post(EventStore.renderEvent(tickDelta, px, py, pz));
+        RenderEvent event = EventStore.renderEvent(tickDelta, camera.getPos().x, camera.getPos().y, camera.getPos().z);
 
-        GlStateManager.disableLighting();
-        GlStateManager.disableTexture();
-        GlStateManager.disableDepthTest();
-        GlStateManager.enableBlend();
-        GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-        GlStateManager.disableAlphaTest();
-        GlStateManager.lineWidth(1);
-        GL11.glEnable(GL11.GL_LINE_SMOOTH);
-
-        RenderUtils.endQuads();
-        RenderUtils.endLines();
-        GlStateManager.popMatrix();
-
-        GL11.glDisable(GL11.GL_LINE_SMOOTH);
-        GlStateManager.lineWidth(1);
-        GlStateManager.disableBlend();
-        GlStateManager.enableDepthTest();
-        GlStateManager.enableTexture();
-        GlStateManager.enableLighting();
+        Renderer.begin(event);
+        MeteorClient.EVENT_BUS.post(event);
+        Renderer.end();
     }
 
     @Inject(method = "bobViewWhenHurt", at = @At("HEAD"), cancellable = true)
     private void onBobViewWhenHurt(float tickDelta, CallbackInfo info) {
         if (ModuleManager.INSTANCE.isActive(NoHurtCam.class)) info.cancel();
-    }
-
-    @Override
-    public Camera getCamera() {
-        return camera;
     }
 }

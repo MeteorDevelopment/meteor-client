@@ -1,12 +1,13 @@
 package minegame159.meteorclient.utils;
 
-import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.mixininterface.IMinecraftClient;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.render.Camera;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityContext;
 import net.minecraft.item.*;
 import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
@@ -185,26 +186,20 @@ public class Utils {
         return mc.player.pitch + MathHelper.wrapDegrees((float) -Math.toDegrees(Math.atan2(diffY, diffXZ)) - mc.player.pitch);
     }
 
+    public static double distanceToCamera(double x, double y, double z) {
+        Camera camera = mc.gameRenderer.getCamera();
+        return Math.sqrt(camera.getPos().squaredDistanceTo(x, y, z));
+    }
+    public static double distanceToCamera(Entity entity) {
+        return distanceToCamera(entity.x, entity.y, entity.z);
+    }
+
     public static boolean canUpdate() {
         return mc.world != null || mc.player != null;
     }
 
     public static int random(int min, int max) {
         return random.nextInt(max - min) + min;
-    }
-
-    public static int getTextWidth(String text) {
-        return MeteorClient.TEXT_RENDERER.getStringWidth(text);
-    }
-    public static int getTextHeight() {
-        return MeteorClient.TEXT_RENDERER.getHeight() + 2;
-    }
-
-    public static void drawText(String text, float x, float y, int color) {
-        MeteorClient.TEXT_RENDERER.drawString(text, x, y + 1, color);
-    }
-    public static void drawTextWithShadow(String text, float x, float y, int color) {
-        MeteorClient.TEXT_RENDERER.drawStringWithShadow(text, x, y + 1, color);
     }
 
     public static void sendMessage(String msg, Object... args) {

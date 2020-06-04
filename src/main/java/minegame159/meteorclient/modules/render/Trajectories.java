@@ -6,12 +6,12 @@ import minegame159.meteorclient.events.RenderEvent;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.rendering.ShapeBuilder;
 import minegame159.meteorclient.settings.ColorSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.Pool;
-import minegame159.meteorclient.utils.RenderUtils;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.item.*;
 import net.minecraft.util.hit.HitResult;
@@ -24,15 +24,15 @@ import java.util.List;
 public class Trajectories extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     
-    private Setting<Color> color = sgGeneral.add(new ColorSetting.Builder()
+    private final Setting<Color> color = sgGeneral.add(new ColorSetting.Builder()
             .name("color")
             .description("Color.")
             .defaultValue(new Color(255, 150, 0))
             .build()
     );
 
-    private Pool<Vec3d> vec3ds = new Pool<>(() -> new Vec3d(0, 0, 0));
-    private List<Vec3d> path = new ArrayList<>();
+    private final Pool<Vec3d> vec3ds = new Pool<>(() -> new Vec3d(0, 0, 0));
+    private final List<Vec3d> path = new ArrayList<>();
 
     public Trajectories() {
         super(Category.Render, "trajectories", "Displays trajectory of holding items.");
@@ -46,7 +46,7 @@ public class Trajectories extends ToggleModule {
 
         Vec3d lastPoint = null;
         for (Vec3d point : path) {
-            if (lastPoint != null) RenderUtils.line(lastPoint.x, lastPoint.y, lastPoint.z, point.x, point.y, point.z, color.get());
+            if (lastPoint != null) ShapeBuilder.line(lastPoint.x, lastPoint.y, lastPoint.z, point.x, point.y, point.z, color.get());
             lastPoint = point;
         }
     });

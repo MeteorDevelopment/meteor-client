@@ -5,9 +5,9 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.RenderEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.rendering.ShapeBuilder;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Color;
-import minegame159.meteorclient.utils.RenderUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
@@ -104,18 +104,18 @@ public class ESP extends ToggleModule {
         switch (mode.get()) {
             case Lines: {
                 Box box = entity.getBoundingBox();
-                RenderUtils.boxEdges(box.x1, box.y1, box.z1, box.x2, box.y2, box.z2, lineColor);
+                ShapeBuilder.boxEdges(box.x1, box.y1, box.z1, box.x2, box.y2, box.z2, lineColor);
                 break;
             }
             case Sides: {
                 Box box = entity.getBoundingBox();
-                RenderUtils.boxSides(box.x1, box.y1, box.z1, box.x2, box.y2, box.z2, sideColor);
+                ShapeBuilder.boxSides(box.x1, box.y1, box.z1, box.x2, box.y2, box.z2, sideColor);
                 break;
             }
             case Both: {
                 Box box = entity.getBoundingBox();
-                RenderUtils.boxEdges(box.x1, box.y1, box.z1, box.x2, box.y2, box.z2, lineColor);
-                RenderUtils.boxSides(box.x1, box.y1, box.z1, box.x2, box.y2, box.z2, sideColor);
+                ShapeBuilder.boxEdges(box.x1, box.y1, box.z1, box.x2, box.y2, box.z2, lineColor);
+                ShapeBuilder.boxSides(box.x1, box.y1, box.z1, box.x2, box.y2, box.z2, sideColor);
                 break;
             }
         }

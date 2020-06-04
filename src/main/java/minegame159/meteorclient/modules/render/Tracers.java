@@ -7,9 +7,9 @@ import minegame159.meteorclient.accountsfriends.FriendManager;
 import minegame159.meteorclient.events.RenderEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.rendering.ShapeBuilder;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Color;
-import minegame159.meteorclient.utils.RenderUtils;
 import net.minecraft.block.entity.BarrelBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.ChestBlockEntity;
@@ -139,16 +139,16 @@ public class Tracers extends ToggleModule {
         if (target.get() == Target.Head) y += height;
         else if (target.get() == Target.Body) y += height / 2;
 
-        RenderUtils.line(vec1.x - (mc.cameraEntity.x - event.offsetX), vec1.y - (mc.cameraEntity.y - event.offsetY), vec1.z - (mc.cameraEntity.z - event.offsetZ), x, y, z, color);
+        ShapeBuilder.line(vec1.x - (mc.cameraEntity.x - event.offsetX), vec1.y - (mc.cameraEntity.y - event.offsetY), vec1.z - (mc.cameraEntity.z - event.offsetZ), x, y, z, color);
 
-        if (mode.get() == Mode.Stem) RenderUtils.line(x, entity.y, z, x, entity.y + height, z, color);
+        if (mode.get() == Mode.Stem) ShapeBuilder.line(x, entity.y, z, x, entity.y + height, z, color);
 
         count++;
     }
 
     private void render(BlockEntity blockEntity, RenderEvent event) {
         BlockPos pos = blockEntity.getPos();
-        RenderUtils.line(vec1.x - (mc.cameraEntity.x - event.offsetX), vec1.y - (mc.cameraEntity.y - event.offsetY), vec1.z - (mc.cameraEntity.z - event.offsetZ), pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5f, storageColor.get());
+        ShapeBuilder.line(vec1.x - (mc.cameraEntity.x - event.offsetX), vec1.y - (mc.cameraEntity.y - event.offsetY), vec1.z - (mc.cameraEntity.z - event.offsetZ), pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5f, storageColor.get());
 
         count++;
     }

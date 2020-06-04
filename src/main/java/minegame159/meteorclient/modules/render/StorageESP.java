@@ -5,9 +5,9 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.RenderEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.rendering.ShapeBuilder;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Color;
-import minegame159.meteorclient.utils.RenderUtils;
 import net.minecraft.block.ChestBlock;
 import net.minecraft.block.entity.*;
 import net.minecraft.block.enums.ChestType;
@@ -135,11 +135,11 @@ public class StorageESP extends ToggleModule {
                     if (excludeDir != Direction.SOUTH) z2 -= a;
                 }
 
-                if (mode.get() == Mode.Lines) RenderUtils.boxEdges(x1, y1, z1, x2, y2, z2, lineColor, excludeDir);
-                else if (mode.get() == Mode.Sides) RenderUtils.boxSides(x1, y1, z1, x2, y2, z2, sideColor, excludeDir);
+                if (mode.get() == Mode.Lines) ShapeBuilder.boxEdges(x1, y1, z1, x2, y2, z2, lineColor, excludeDir);
+                else if (mode.get() == Mode.Sides) ShapeBuilder.boxSides(x1, y1, z1, x2, y2, z2, sideColor, excludeDir);
                 else {
-                    RenderUtils.boxEdges(x1, y1, z1, x2, y2, z2, lineColor, excludeDir);
-                    RenderUtils.boxSides(x1, y1, z1, x2, y2, z2, sideColor, excludeDir);
+                    ShapeBuilder.boxEdges(x1, y1, z1, x2, y2, z2, lineColor, excludeDir);
+                    ShapeBuilder.boxSides(x1, y1, z1, x2, y2, z2, sideColor, excludeDir);
                 }
 
                 count++;
