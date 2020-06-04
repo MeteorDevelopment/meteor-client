@@ -19,7 +19,6 @@ import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.VertexFormats;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import org.lwjgl.opengl.GL11;
 
@@ -71,7 +70,7 @@ public class LogoutSpot extends ToggleModule {
 
     @EventHandler
     private final Listener<EntityDestroyEvent> onEntityDestroy = new Listener<>(event -> {
-        if (event.entity instanceof PlayerEntity) players.add(new Entry((LivingEntity) event.entity));
+        if (event.entity instanceof PlayerEntity) players.add(new Entry((PlayerEntity) event.entity));
     });
 
     @EventHandler
@@ -115,7 +114,7 @@ public class LogoutSpot extends ToggleModule {
         public final int health, maxHealth;
         public final String healthText;
 
-        public Entry(LivingEntity entity) {
+        public Entry(PlayerEntity entity) {
             x = entity.x;
             y = entity.y;
             z = entity.z;
@@ -124,7 +123,7 @@ public class LogoutSpot extends ToggleModule {
             height = entity.getBoundingBox().getZLength();
 
             uuid = entity.getUuidAsString();
-            name = entity.getDisplayName().asString();
+            name = entity.getGameProfile().getName();
             health = Math.round(entity.getHealth() + entity.getAbsorptionAmount());
             maxHealth = Math.round(entity.getMaximumHealth() + entity.getAbsorptionAmount());
 
