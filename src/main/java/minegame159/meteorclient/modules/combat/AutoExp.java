@@ -63,17 +63,19 @@ public class AutoExp extends ToggleModule {
 
     @Override
     public void onActivate(){
-        if(ModuleManager.INSTANCE.get(AutoArmor.class).isActive()) {
-            wasArmourActive = true;
-            ModuleManager.INSTANCE.get(AutoArmor.class).toggle();
-        }
-        if(disableAuras.get()){
-            if(ModuleManager.INSTANCE.get(KillAura.class).isActive()){
-                wasKillActive = true;
-                ModuleManager.INSTANCE.get(KillAura.class).toggle();
+        if(disableAuras.get()) {
+            if (ModuleManager.INSTANCE.get(AutoArmor.class).isActive()) {
+                wasArmourActive = true;
+                ModuleManager.INSTANCE.get(AutoArmor.class).toggle();
             }
-            if(ModuleManager.INSTANCE.get(CrystalAura.class).isActive()){
-                wasCrystalActive = true;
+            if (disableAuras.get()) {
+                if (ModuleManager.INSTANCE.get(KillAura.class).isActive()) {
+                    wasKillActive = true;
+                    ModuleManager.INSTANCE.get(KillAura.class).toggle();
+                }
+                if (ModuleManager.INSTANCE.get(CrystalAura.class).isActive()) {
+                    wasCrystalActive = true;
+                }
             }
         }
     }
@@ -82,12 +84,15 @@ public class AutoExp extends ToggleModule {
     public void onDeactivate() {
         if(wasArmourActive) {
             ModuleManager.INSTANCE.get(AutoArmor.class).toggle();
+            wasArmourActive = false;
         }
         if(wasKillActive){
             ModuleManager.INSTANCE.get(KillAura.class).toggle();
+            wasKillActive = false;
         }
         if(wasCrystalActive){
             ModuleManager.INSTANCE.get(CrystalAura.class).toggle();
+            wasCrystalActive = false;
         }
     }
 
