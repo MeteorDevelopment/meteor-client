@@ -29,9 +29,9 @@ public class DamageCalcUtils {
     }
 
     //Always Calculate damage, then armour, then enchantments, then potion effect
-    public static double bedDamage(Entity player, BlockEntity bed){
-        double exposure = Explosion.getExposure(toVec3D(bed), player);
-        double impact = (1D - distanceBetween(player, bed) / 12D)*exposure;
+    public static double bedDamage(Entity player, Vec3d bed){
+        double exposure = Explosion.getExposure(bed, player);
+        double impact = (1D - Math.sqrt(mc.player.squaredDistanceTo(bed)) / 12D)*exposure;
         return (impact*impact+impact)*42+1;
     }
 
