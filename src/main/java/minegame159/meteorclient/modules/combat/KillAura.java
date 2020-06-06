@@ -11,11 +11,12 @@ import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.*;
 import net.minecraft.command.arguments.EntityAnchorArgumentType;
 import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityGroup;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.AxeItem;
 import net.minecraft.item.SwordItem;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.HitResult;
@@ -33,9 +34,15 @@ public class KillAura extends ToggleModule {
         HighestHealth
     }
 
+    public enum Weapon{
+        Sword,
+        Axe
+    }
+
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgDelay = settings.createGroup("Delay", "smart-delay", "Smart delay.", true);
     private final SettingGroup sgDelayDisabled = sgDelay.getDisabledGroup();
+    private final SettingGroup sgAutoWeapon = settings.createGroup("AutoWeapon", "auto-weapon", "AutoWeapon.", false);
     private final SettingGroup sgRandomDelay = settings.createGroup("Random Delay", "random-delay-enabled", "Adds a random delay to hits to try and bypass anti-cheats.", false);
 
     public final Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()
@@ -81,10 +88,10 @@ public class KillAura extends ToggleModule {
             .build()
     );
 
-    private final Setting<Boolean> autoSword = sgGeneral.add(new BoolSetting.Builder()
-            .name("auto-sword")
-            .description("Automatically changes to the best sword in your hotbar")
-            .defaultValue(false)
+    private final Setting<Weapon> weapon = sgAutoWeapon.add(new EnumSetting.Builder<Weapon>()
+            .name("Weapon")
+            .description("Which weapon to use for AutoWeapon")
+            .defaultValue(Weapon.Sword)
             .build()
     );
 
@@ -130,15 +137,20 @@ public class KillAura extends ToggleModule {
         hitDelayTimer = 0;
         randomHitDelayTimer = 0;
 
-        if(autoSword.get()){
+        if(sgAutoWeapon.isEnabled() && weapon.get() == Weapon.Sword){
             prevSlot = mc.player.inventory.selectedSlot;
             mc.player.inventory.selectedSlot = getBestSword();
+        }else if(sgAutoWeapon.isEnabled() && weapon.get() == Weapon.Axe){
+            prevSlot = mc.player.inventory.selectedSlot;
+            mc.player.inventory.selectedSlot = getBestAxe();
         }
     }
 
     @Override
     public void onDeactivate() {
-        mc.player.inventory.selectedSlot = prevSlot;
+        if (sgAutoWeapon.isEnabled()){
+            mc.player.inventory.selectedSlot = prevSlot;
+        }
     }
 
     private boolean isInRange(Entity entity) {
@@ -197,19 +209,22 @@ public class KillAura extends ToggleModule {
         double damage = 0;
         for(int i = 0; i < 9; i++){
             if(mc.player.inventory.getInvStack(i).getItem() instanceof SwordItem){
-                double sharpDamage = 0;
-                if((EnchantmentHelper.getEnchantments(mc.player.inventory.getInvStack(i)).containsKey(Enchantments.SHARPNESS))){
-                    sharpDamage = EnchantmentHelper.getLevel(Enchantments.SHARPNESS, mc.player.inventory.getInvStack(i)) * 0.5 + 0.5;
-                }
-                double fireDamage = 0;
-                if((EnchantmentHelper.getEnchantments(mc.player.inventory.getInvStack(i)).containsKey(Enchantments.FIRE_ASPECT))){
-                    fireDamage = 1;
-                }
-                double currentDamage = ((SwordItem) mc.player.inventory.getInvStack(i).getItem()).getAttackDamage()
-                        + sharpDamage + fireDamage;
-                if(damage == 0) {
+                double currentDamage = ((SwordItem) mc.player.inventory.getInvStack(i).getItem()).getMaterial().getAttackDamage() + EnchantmentHelper.getAttackDamage(mc.player.inventory.getInvStack(i), EntityGroup.DEFAULT) + 2;
+                if(currentDamage > damage){
+                    damage = currentDamage;
                     slot = i;
                 }
+            }
+        }
+        return slot;
+    }
+
+    private int  getBestAxe(){
+        int slot = mc.player.inventory.selectedSlot;
+        double damage = 0;
+        for(int i = 0; i < 9; i++){
+            if(mc.player.inventory.getInvStack(i).getItem() instanceof AxeItem){
+                double currentDamage = ((AxeItem) mc.player.inventory.getInvStack(i).getItem()).getMaterial().getAttackDamage() + EnchantmentHelper.getAttackDamage(mc.player.inventory.getInvStack(i), EntityGroup.DEFAULT) + 2;
                 if(currentDamage > damage){
                     damage = currentDamage;
                     slot = i;
