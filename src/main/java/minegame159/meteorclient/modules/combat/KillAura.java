@@ -34,15 +34,9 @@ public class KillAura extends ToggleModule {
         HighestHealth
     }
 
-    public enum Weapon{
-        Sword,
-        Axe
-    }
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgDelay = settings.createGroup("Delay", "smart-delay", "Smart delay.", true);
     private final SettingGroup sgDelayDisabled = sgDelay.getDisabledGroup();
-    private final SettingGroup sgAutoWeapon = settings.createGroup("AutoWeapon", "auto-weapon", "AutoWeapon.", false);
     private final SettingGroup sgRandomDelay = settings.createGroup("Random Delay", "random-delay-enabled", "Adds a random delay to hits to try and bypass anti-cheats.", false);
 
     public final Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()
@@ -88,13 +82,6 @@ public class KillAura extends ToggleModule {
             .build()
     );
 
-    private final Setting<Weapon> weapon = sgAutoWeapon.add(new EnumSetting.Builder<Weapon>()
-            .name("Weapon")
-            .description("Which weapon to use for AutoWeapon")
-            .defaultValue(Weapon.Sword)
-            .build()
-    );
-
     private final Setting<Boolean> oneTickDelay = sgDelay.add(new BoolSetting.Builder()
             .name("one-tick-delay")
             .description("Adds one tick delay.")
@@ -123,7 +110,6 @@ public class KillAura extends ToggleModule {
     private boolean canAutoDelayAttack;
     private int hitDelayTimer;
     private int randomHitDelayTimer;
-    private int prevSlot;
 
     private final Vec3d vec3d1 = new Vec3d(0, 0, 0);
     private final Vec3d vec3d2 = new Vec3d(0, 0, 0);
@@ -136,21 +122,6 @@ public class KillAura extends ToggleModule {
     public void onActivate() {
         hitDelayTimer = 0;
         randomHitDelayTimer = 0;
-
-        if(sgAutoWeapon.isEnabled() && weapon.get() == Weapon.Sword){
-            prevSlot = mc.player.inventory.selectedSlot;
-            mc.player.inventory.selectedSlot = getBestSword();
-        }else if(sgAutoWeapon.isEnabled() && weapon.get() == Weapon.Axe){
-            prevSlot = mc.player.inventory.selectedSlot;
-            mc.player.inventory.selectedSlot = getBestAxe();
-        }
-    }
-
-    @Override
-    public void onDeactivate() {
-        if (sgAutoWeapon.isEnabled()){
-            mc.player.inventory.selectedSlot = prevSlot;
-        }
     }
 
     private boolean isInRange(Entity entity) {
@@ -202,36 +173,6 @@ public class KillAura extends ToggleModule {
             }
             default:              return 0;
         }
-    }
-
-    private int getBestSword(){
-        int slot = mc.player.inventory.selectedSlot;
-        double damage = 0;
-        for(int i = 0; i < 9; i++){
-            if(mc.player.inventory.getInvStack(i).getItem() instanceof SwordItem){
-                double currentDamage = ((SwordItem) mc.player.inventory.getInvStack(i).getItem()).getMaterial().getAttackDamage() + EnchantmentHelper.getAttackDamage(mc.player.inventory.getInvStack(i), EntityGroup.DEFAULT) + 2;
-                if(currentDamage > damage){
-                    damage = currentDamage;
-                    slot = i;
-                }
-            }
-        }
-        return slot;
-    }
-
-    private int  getBestAxe(){
-        int slot = mc.player.inventory.selectedSlot;
-        double damage = 0;
-        for(int i = 0; i < 9; i++){
-            if(mc.player.inventory.getInvStack(i).getItem() instanceof AxeItem){
-                double currentDamage = ((AxeItem) mc.player.inventory.getInvStack(i).getItem()).getMaterial().getAttackDamage() + EnchantmentHelper.getAttackDamage(mc.player.inventory.getInvStack(i), EntityGroup.DEFAULT) + 2;
-                if(currentDamage > damage){
-                    damage = currentDamage;
-                    slot = i;
-                }
-            }
-        }
-        return slot;
     }
 
     @EventHandler
