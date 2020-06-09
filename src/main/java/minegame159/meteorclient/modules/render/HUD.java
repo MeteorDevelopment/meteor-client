@@ -332,36 +332,36 @@ public class HUD extends ToggleModule {
         }
     }
 
-    private void drawInfo(String text1, String text2, int x, int y, Color text1Color) {
+    private void drawInfo(String text1, String text2, double x, double y, Color text1Color) {
         MeteorClient.FONT.renderStringWithShadow(text1, x, y, text1Color);
         MeteorClient.FONT.renderStringWithShadow(text2, x + MeteorClient.FONT.getStringWidth(text1), y, gray);
     }
-    private void drawInfo(String text1, String text2, int y, Color text1Color) {
+    private void drawInfo(String text1, String text2, double y, Color text1Color) {
         drawInfo(text1, text2, 2, y, text1Color);
     }
-    private void drawInfo(String text1, String text2, int y) {
+    private void drawInfo(String text1, String text2, double y) {
         drawInfo(text1, text2, y, white);
     }
-    private void drawInfoRight(String text1, String text2, int y, Color text1Color) {
+    private void drawInfoRight(String text1, String text2, double y, Color text1Color) {
         drawInfo(text1, text2, mc.window.getScaledWidth() - MeteorClient.FONT.getStringWidth(text1) - MeteorClient.FONT.getStringWidth(text2) - 2, y, text1Color);
     }
-    private void drawInfoRight(String text1, String text2, int y) {
+    private void drawInfoRight(String text1, String text2, double y) {
         drawInfoRight(text1, text2, y, white);
     }
 
-    private void drawEntityCount(EntityInfo entityInfo, int y) {
+    private void drawEntityCount(EntityInfo entityInfo, double y) {
         MeteorClient.FONT.renderStringWithShadow(entityInfo.countStr, 2, y, gray);
         MeteorClient.FONT.renderStringWithShadow(entityInfo.name, 2 + (maxLetterCount - entityInfo.countStr.length()) * 4 + 4 + MeteorClient.FONT.getStringWidth(entityInfo.countStr), y, white);
     }
 
     private void renderTopRight(Render2DEvent event) {
         if (mc.options.debugEnabled) return;
-        int y = 2;
+        double y = 2;
 
         if (activeModules.get()) {
             for (ToggleModule module : modules) {
                 String infoString = module.getInfoString();
-                int x;
+                double x;
                 if (infoString == null) {
                     x = event.screenWidth - MeteorClient.FONT.getStringWidth(module.title) - 2;
                     MeteorClient.FONT.renderStringWithShadow(module.title, x, y, module.color);
@@ -383,14 +383,14 @@ public class HUD extends ToggleModule {
         }
 
         modules.sort((o1, o2) -> {
-            int a = Integer.compare(o1.getInfoString() == null ? MeteorClient.FONT.getStringWidth(o1.title) : MeteorClient.FONT.getStringWidth(o1.title + " " + o1.getInfoString()), o2.getInfoString() == null ? MeteorClient.FONT.getStringWidth(o2.title) : MeteorClient.FONT.getStringWidth(o2.title + " " + o2.getInfoString()));
+            int a = Double.compare(o1.getInfoString() == null ? MeteorClient.FONT.getStringWidth(o1.title) : MeteorClient.FONT.getStringWidth(o1.title + " " + o1.getInfoString()), o2.getInfoString() == null ? MeteorClient.FONT.getStringWidth(o2.title) : MeteorClient.FONT.getStringWidth(o2.title + " " + o2.getInfoString()));
             if (a == 0) return 0;
             return a < 0 ? 1 : -1;
         });
     }
 
     private void renderBottomRight(Render2DEvent event) {
-        int y = event.screenHeight - MeteorClient.FONT.getHeight() - 2;
+        double y = event.screenHeight - MeteorClient.FONT.getHeight() - 2;
 
         if (rotation.get()) {
             Direction direction = mc.player.getHorizontalFacing();
@@ -435,16 +435,23 @@ public class HUD extends ToggleModule {
             for (StatusEffectInstance statusEffectInstance : mc.player.getStatusEffects()) {
                 StatusEffect statusEffect = statusEffectInstance.getEffectType();
 
-                drawInfoRight(statusEffect.method_5560().asString(), " " + (statusEffectInstance.getAmplifier() + 1) + " (" + StatusEffectUtil.durationToString(statusEffectInstance, 1) + ")", y, new Color(statusEffect.getColor()));
+                int c = statusEffect.getColor();
+                white.r = Color.toRGBAR(c);
+                white.g = Color.toRGBAG(c);
+                white.b = Color.toRGBAB(c);
+
+                drawInfoRight(statusEffect.method_5560().asString(), " " + (statusEffectInstance.getAmplifier() + 1) + " (" + StatusEffectUtil.durationToString(statusEffectInstance, 1) + ")", y, white);
                 y -= MeteorClient.FONT.getHeight() + 2;
+
+                white.r = white.g = white.b = 255;
             }
         }
     }
 
-    private void drawPosition(int screenWidth, String text, int yy, double x, double y, double z) {
+    private void drawPosition(int screenWidth, String text, double yy, double x, double y, double z) {
         String msg1 = String.format("%.1f %.1f %.1f", x, y, z);
-        int x1 = screenWidth - MeteorClient.FONT.getStringWidth(msg1) - 2;
-        int x2 = screenWidth - MeteorClient.FONT.getStringWidth(msg1) - MeteorClient.FONT.getStringWidth(text) - 2;
+        double x1 = screenWidth - MeteorClient.FONT.getStringWidth(msg1) - 2;
+        double x2 = screenWidth - MeteorClient.FONT.getStringWidth(msg1) - MeteorClient.FONT.getStringWidth(text) - 2;
         MeteorClient.FONT.renderStringWithShadow(msg1, x1, yy, gray);
         MeteorClient.FONT.renderStringWithShadow(text, x2, yy, white);
     }
