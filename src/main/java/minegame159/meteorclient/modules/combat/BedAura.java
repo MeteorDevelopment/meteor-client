@@ -51,14 +51,14 @@ public class BedAura extends ToggleModule {
 
     public Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("place-mode")
-            .description("The way crystals are placed")
+            .description("The way beds are placed")
             .defaultValue(Mode.safe)
             .build()
     );
 
     public Setting<Double> minDamage = sgPlace.add(new DoubleSetting.Builder()
             .name("min-damage")
-            .description("The minimum damage the crystal will place")
+            .description("The minimum damage the beds will place")
             .defaultValue(5.5)
             .build()
     );
@@ -71,7 +71,7 @@ public class BedAura extends ToggleModule {
     );
     public Setting<Boolean> breakMode = sgGeneral.add(new BoolSetting.Builder()
             .name("anti-suicide")
-            .description("The way the crystals are broken")
+            .description("The way the beds are broken")
             .defaultValue(true)
             .build()
     );
@@ -92,7 +92,7 @@ public class BedAura extends ToggleModule {
 
     public Setting<Boolean> place = sgGeneral.add(new BoolSetting.Builder()
             .name("place")
-            .description("Allow it to place cystals")
+            .description("Allow it to place beds")
             .defaultValue(true)
             .build()
     );
