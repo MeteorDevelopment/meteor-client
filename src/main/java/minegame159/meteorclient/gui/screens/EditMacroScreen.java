@@ -16,17 +16,17 @@ public class EditMacroScreen extends WindowScreen implements Listenable {
     private Macro macro;
     private WLabel keyLabel;
     private boolean waitingForKey;
+    private final boolean newMacro;
 
     public EditMacroScreen(Macro m) {
         super("Edit Macro", true);
         this.macro = m == null ? new Macro() : m;
 
+        newMacro = m == null;
         initWidgets(m);
     }
 
     private void initWidgets(Macro m) {
-        boolean newMacro = m == null;
-
         // Name
         add(new WLabel("Name:"));
         WTextBox nameT = add(new WTextBox(newMacro ? "" : macro.name, 200)).fillX().expandX().getWidget();
