@@ -4,7 +4,6 @@ import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.accountsfriends.FriendManager;
 import minegame159.meteorclient.events.TickEvent;
-import minegame159.meteorclient.events.TookDamageEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BoolSetting;
@@ -36,25 +35,13 @@ public class AutoLog extends ToggleModule {
             .build()
     );
 
-    private long lastLog = System.currentTimeMillis();
-    private boolean shouldLog = false;
-
     public AutoLog() {
         super(Category.Combat, "auto-log", "Automatically disconnects when low on health.");
     }
 
     @EventHandler
-    private Listener<TookDamageEvent> onTookDamage = new Listener<>(event -> {
-        if (!shouldLog && mc.player != null && event.entity.getUuid().equals(mc.player.getUuid()) && event.entity.getHealth() <= health.get()) {
-            shouldLog = true;
-            lastLog = System.currentTimeMillis();
-        }
-    });
-
-    @EventHandler
     private Listener<TickEvent> onTick = new Listener<>(event -> {
-        if (shouldLog && System.currentTimeMillis() - lastLog <= 1000) {
-            shouldLog = false;
+        if (mc.player.getHealth() <= health.get()) {
             mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(new LiteralText("Health was lower than " + health.get())));
         }
 
