@@ -121,7 +121,7 @@ public class CrystalAura extends ToggleModule {
                 if (i == null) continue;
                 Vec3d convert = new Vec3d(i.getX(), i.getY(), i.getZ()).add(0, 1, 0);
                 if (mc.player.getHealth() + mc.player.getAbsorptionAmount() - DamageCalcUtils.resistanceReduction(mc.player, DamageCalcUtils.blastProtReduction(mc.player, DamageCalcUtils.armourCalc(mc.player, DamageCalcUtils.crystalDamage(mc.player, convert))))
-                        < minHealth.get() && mode.get() != Mode.suicide) continue;
+                        < minHealth.get() || mode.get() != Mode.suicide) continue;
                 double damage = DamageCalcUtils.resistanceReduction(target, DamageCalcUtils.blastProtReduction(target, DamageCalcUtils.armourCalc(target, DamageCalcUtils.crystalDamage(target, convert))));
                 double selfDamage = DamageCalcUtils.resistanceReduction(mc.player, DamageCalcUtils.blastProtReduction(mc.player, DamageCalcUtils.armourCalc(mc.player, DamageCalcUtils.crystalDamage(mc.player, convert))));
                 convert = new Vec3d(bestBlock.getX(), bestBlock.getY(), bestBlock.getZ()).add(0, 1, 0);
@@ -176,7 +176,7 @@ public class CrystalAura extends ToggleModule {
         List<BlockPos> allBlocks = new ArrayList<>();
         for(int i = player.getX() - range; i < player.getX() + range; i++){
             for(int j = player.getZ() - range; j < player.getZ() + range; j++){
-                for(int k = player.getY() - 2; k < player.getY() + 2; k++){
+                for(int k = player.getY() - 3; k < player.getY() + 3; k++){
                     BlockPos x = new BlockPos(i, k, j);
                     allBlocks.add(x);
                 }
