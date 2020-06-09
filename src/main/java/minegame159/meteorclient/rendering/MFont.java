@@ -23,6 +23,8 @@ public class MFont {
     private final CharData[] charData = new CharData[256];
     private int fontHeight = -1;
 
+    public double scale = 1;
+
     public MFont(Font font, boolean antiAlias, boolean fractionalMetrics) {
         texture = setupTexture(font, antiAlias, fractionalMetrics, this.charData);
     }
@@ -122,7 +124,7 @@ public class MFont {
 
             if (c < charData.length) {
                 charData[c].render(mb, x, y, color);
-                x += charData[c].srcWidth - 8;
+                x += (charData[c].srcWidth - 8) * scale;
             }
         }
 
@@ -134,28 +136,28 @@ public class MFont {
         boolean wasBuilding = isBuilding();
         if (!isBuilding()) begin();
 
-        double shadowWidth = renderString(string, x + 1, y + 1, SHADOW_COLOR);
+        double shadowWidth = renderString(string, x + 1 * scale, y + 1 * scale, SHADOW_COLOR);
         double width = Math.max(shadowWidth, renderString(string, x, y, color));
 
         if (!wasBuilding) end();
         return width;
     }
 
-    public int getHeight() {
-        return (this.fontHeight - 8) / 2 + 2;
+    public double getHeight() {
+        return Math.round((this.fontHeight - 8.0) / 2 + 2) * scale;
     }
 
-    public int getStringWidth(String text) {
+    public double getStringWidth(String text) {
         int width = 0;
 
         for (char c : text.toCharArray()) {
             if (c < this.charData.length) width += this.charData[c].srcWidth - 8;
         }
 
-        return width / 2;
+        return Math.round(width / 2.0) * scale;
     }
 
-    public static class CharData {
+    public class CharData {
         public int srcX;
         public int srcY;
         public int srcWidth;
@@ -170,7 +172,7 @@ public class MFont {
             MeshBuilder preMb = ShapeBuilder.triangles;
             ShapeBuilder.triangles = mb;
 
-            ShapeBuilder.texQuad(x / 2, y / 2, (double) srcWidth / 2, (double) srcHeight / 2, texX, texY, texWidth, texHeight, color, color, color, color);
+            ShapeBuilder.texQuad(x / 2, y / 2, srcWidth / 2.0 * scale, srcHeight / 2.0 * scale, texX, texY, texWidth, texHeight, color, color, color, color);
 
             ShapeBuilder.triangles = preMb;
         }

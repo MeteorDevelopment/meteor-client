@@ -7,6 +7,7 @@ import minegame159.meteorclient.modules.ModuleManager;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.Camera;
+import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.EntityContext;
@@ -51,6 +52,30 @@ public class Utils {
         DecimalFormatSymbols dfs = new DecimalFormatSymbols();
         dfs.setDecimalSeparator('.');
         df.setDecimalFormatSymbols(dfs);
+    }
+
+    public static String getEnchantShortName(Enchantment enchantment) {
+        if (enchantment == Enchantments.FIRE_PROTECTION) return "F Prot";
+        if (enchantment == Enchantments.FEATHER_FALLING) return "Fea Fa";
+        if (enchantment == Enchantments.BLAST_PROTECTION) return "B Prot";
+        if (enchantment == Enchantments.PROJECTILE_PROTECTION) return "P Prot";
+        if (enchantment == Enchantments.AQUA_AFFINITY) return "Aqua A";
+        if (enchantment == Enchantments.THORNS) return "Thorns";
+        if (enchantment == Enchantments.DEPTH_STRIDER) return "Depth S";
+        if (enchantment == Enchantments.FROST_WALKER) return "Frost W";
+        if (enchantment == Enchantments.BINDING_CURSE) return "Curse B";
+        if (enchantment == Enchantments.SMITE) return "Smite";
+        if (enchantment == Enchantments.BANE_OF_ARTHROPODS) return "Bane A";
+        if (enchantment == Enchantments.FIRE_ASPECT) return "Fire A";
+        if (enchantment == Enchantments.SILK_TOUCH) return "Silk T";
+        if (enchantment == Enchantments.POWER) return "Power";
+        if (enchantment == Enchantments.PUNCH) return "Punch";
+        if (enchantment == Enchantments.FLAME) return "Flame";
+        if (enchantment == Enchantments.LUCK_OF_THE_SEA) return "Luck S";
+        if (enchantment == Enchantments.QUICK_CHARGE) return "Quick C";
+        if (enchantment == Enchantments.VANISHING_CURSE) return "Curse V";
+
+        return enchantment.getName(0).asString().substring(0, 4);
     }
 
     public static int search(String text, String filter) {
