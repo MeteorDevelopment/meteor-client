@@ -1,36 +1,40 @@
 package minegame159.meteorclient.modules.combat;
 
-//Updated by squidoodly 31/04/2020
+//Created by squidoodly 03/06/2020
 
-import com.google.common.collect.Streams;
-import me.zero.alpine.event.EventPriority;
 import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;;
+import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.accountsfriends.FriendManager;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.DamageCalcUtils;
+import minegame159.meteorclient.utils.Utils;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
-import net.minecraft.entity.decoration.EnderCrystalEntity;
-import net.minecraft.item.Items;
+import net.minecraft.item.BedItem;
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
+import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.dimension.DimensionType;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class CrystalAura extends ToggleModule {
+public class BedAura extends ToggleModule {
     public enum Mode{
         safe,
         suicide
+    }
+
+    public BedAura(){
+        super(Category.Combat, "bed-aura", "Automatically places and blows up beds in the nether");
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -47,14 +51,14 @@ public class CrystalAura extends ToggleModule {
 
     public Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("place-mode")
-            .description("The way crystals are placed")
+            .description("The way beds are placed")
             .defaultValue(Mode.safe)
             .build()
     );
 
     public Setting<Double> minDamage = sgPlace.add(new DoubleSetting.Builder()
             .name("min-damage")
-            .description("The minimum damage the crystal will place")
+            .description("The minimum damage the beds will place")
             .defaultValue(5.5)
             .build()
     );
@@ -67,7 +71,7 @@ public class CrystalAura extends ToggleModule {
     );
     public Setting<Boolean> breakMode = sgGeneral.add(new BoolSetting.Builder()
             .name("anti-suicide")
-            .description("The way the crystals are broken")
+            .description("The way the beds are broken")
             .defaultValue(true)
             .build()
     );
@@ -88,19 +92,20 @@ public class CrystalAura extends ToggleModule {
 
     public Setting<Boolean> place = sgGeneral.add(new BoolSetting.Builder()
             .name("place")
-            .description("Allow it to place cystals")
+            .description("Allow it to place beds")
             .defaultValue(true)
             .build()
     );
 
-    public CrystalAura() {
-        super(Category.Combat, "crystal-aura", "You know what it does");
-    }
-
     @EventHandler
     private Listener<TickEvent> onTick = new Listener<>(event -> {
+        if(mc.player.dimension == DimensionType.OVERWORLD) {
+            Utils.sendMessage("#redYou are in the overworld. Disabling!");
+            this.toggle();
+            return;
+        }
         if ((mc.player.getHealth() + mc.player.getAbsorptionAmount()) <= minHealth.get() && mode.get() != Mode.suicide) return;
-        if(place.get() && (mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL)) return;
+        if(place.get() && (!(mc.player.getMainHandStack().getItem() instanceof BedItem) && !(mc.player.getOffHandStack().getItem() instanceof BedItem))) return;
         if(place.get()) {
             ListIterator<BlockPos> validBlocks = Objects.requireNonNull(findValidBlocks()).listIterator();
             Iterator<AbstractClientPlayerEntity> validEntities = mc.world.getPlayers().stream().filter(entityPlayer -> !FriendManager.INSTANCE.isTrusted(entityPlayer)).filter(entityPlayer -> !entityPlayer.getDisplayName().equals(mc.player.getDisplayName())).collect(Collectors.toList()).iterator();
@@ -120,52 +125,74 @@ public class CrystalAura extends ToggleModule {
             for (BlockPos i = null; validBlocks.hasNext(); i = validBlocks.next()) {
                 if (i == null) continue;
                 Vec3d convert = new Vec3d(i.getX(), i.getY(), i.getZ()).add(0, 1, 0);
-                if (mc.player.getHealth() + mc.player.getAbsorptionAmount() - DamageCalcUtils.resistanceReduction(mc.player, DamageCalcUtils.blastProtReduction(mc.player, DamageCalcUtils.armourCalc(mc.player, DamageCalcUtils.crystalDamage(mc.player, convert))))
+                if (mc.player.getHealth() + mc.player.getAbsorptionAmount() - DamageCalcUtils.resistanceReduction(mc.player, DamageCalcUtils.blastProtReduction(mc.player, DamageCalcUtils.armourCalc(mc.player, DamageCalcUtils.bedDamage(mc.player, convert))))
                         < minHealth.get() || mode.get() != Mode.suicide) continue;
-                double damage = DamageCalcUtils.resistanceReduction(target, DamageCalcUtils.blastProtReduction(target, DamageCalcUtils.armourCalc(target, DamageCalcUtils.crystalDamage(target, convert))));
+                double damage = DamageCalcUtils.resistanceReduction(target, DamageCalcUtils.blastProtReduction(target, DamageCalcUtils.armourCalc(target, DamageCalcUtils.bedDamage(target, convert))));
                 double selfDamage = DamageCalcUtils.resistanceReduction(mc.player, DamageCalcUtils.blastProtReduction(mc.player, DamageCalcUtils.armourCalc(mc.player, DamageCalcUtils.crystalDamage(mc.player, convert))));
                 convert = new Vec3d(bestBlock.getX(), bestBlock.getY(), bestBlock.getZ()).add(0, 1, 0);
-                if (damage > DamageCalcUtils.resistanceReduction(target, DamageCalcUtils.blastProtReduction(target, DamageCalcUtils.armourCalc(target, DamageCalcUtils.crystalDamage(target, convert))))
+                if (damage > DamageCalcUtils.resistanceReduction(target, DamageCalcUtils.blastProtReduction(target, DamageCalcUtils.armourCalc(target, DamageCalcUtils.bedDamage(target, convert))))
                         && (selfDamage < maxDamage.get() || mode.get() == Mode.suicide) && damage > minDamage.get()) {
                     bestBlock = i;
                     break;
                 }
             }
             if (!bestBlock.equals(mc.player.getBlockPos())) {
+                double north = -1;
+                double east = -1;
+                double south = -1;
+                double west = -1;
+                if(mc.world.getBlockState(bestBlock.add(1, 0, 0)).getBlock() == Blocks.AIR){
+                    east = DamageCalcUtils.resistanceReduction(target, DamageCalcUtils.blastProtReduction(target, DamageCalcUtils.armourCalc(target, DamageCalcUtils.bedDamage(target, new Vec3d(bestBlock.add(1, 0, 0))))));
+                }
+                if(mc.world.getBlockState(bestBlock.add(-1, 0, 0)).getBlock() == Blocks.AIR){
+                    west = DamageCalcUtils.resistanceReduction(target, DamageCalcUtils.blastProtReduction(target, DamageCalcUtils.armourCalc(target, DamageCalcUtils.bedDamage(target, new Vec3d(bestBlock.add(-1, 0, 0))))));
+                }
+                if(mc.world.getBlockState(bestBlock.add(0, 0, 1)).getBlock() == Blocks.AIR){
+                    south = DamageCalcUtils.resistanceReduction(target, DamageCalcUtils.blastProtReduction(target, DamageCalcUtils.armourCalc(target, DamageCalcUtils.bedDamage(target, new Vec3d(bestBlock.add(0, 0, 1))))));
+                }
+                if(mc.world.getBlockState(bestBlock.add(0, 0, -1)).getBlock() == Blocks.AIR){
+                    north = DamageCalcUtils.resistanceReduction(target, DamageCalcUtils.blastProtReduction(target, DamageCalcUtils.armourCalc(target, DamageCalcUtils.bedDamage(target, new Vec3d(bestBlock.add(0, 0, -1))))));
+                }
                 PlayerInteractBlockC2SPacket placePacket;
-                if (mc.player.getMainHandStack().getItem() == Items.END_CRYSTAL) {
+                if (mc.player.getMainHandStack().getItem() instanceof BedItem) {
                     placePacket = new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, bestBlock, false));
                 } else {
                     placePacket = new PlayerInteractBlockC2SPacket(Hand.OFF_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, bestBlock, false));
                 }
-                mc.player.networkHandler.sendPacket(placePacket);
-                mc.player.swingHand(Hand.MAIN_HAND);
+                if((east > north) && (east > south) && (east > west)){
+                    mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(-90, 0, true));
+                    mc.player.networkHandler.sendPacket(placePacket);
+                    mc.player.swingHand(Hand.MAIN_HAND);
+                }else if((east < north) && (north > south) && (north > west)){
+                    mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(179, 0, true));
+                    mc.player.networkHandler.sendPacket(placePacket);
+                    mc.player.swingHand(Hand.MAIN_HAND);
+                }else if((south > north) && (east < south) && (south > west)){
+                    mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(1, 0, true));
+                    mc.player.networkHandler.sendPacket(placePacket);
+                    mc.player.swingHand(Hand.MAIN_HAND);
+                }else if((west > north) && (west > south) && (east < west)){
+                    mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(90, 0, true));
+                    mc.player.networkHandler.sendPacket(placePacket);
+                    mc.player.swingHand(Hand.MAIN_HAND);
+                }
             }
         }
-        Streams.stream(mc.world.getEntities())
-                .filter(entity -> entity instanceof EnderCrystalEntity)
-                .filter(entity -> entity.distanceTo(mc.player) <= range.get())
-                .filter(entity -> ignoreWalls.get() || mc.player.canSee(entity))
-                .filter(entity -> !breakMode.get() || (mc.player.getHealth() + mc.player.getAbsorptionAmount()
-                        - DamageCalcUtils.resistanceReduction(mc.player, DamageCalcUtils.blastProtReduction(mc.player, DamageCalcUtils.armourCalc(mc.player, DamageCalcUtils.getDamageMultiplied(DamageCalcUtils.crystalDamage(mc.player, entity.getPos())))))
-                        > minHealth.get() && DamageCalcUtils.resistanceReduction(mc.player, DamageCalcUtils.blastProtReduction(mc.player, DamageCalcUtils.armourCalc(mc.player, DamageCalcUtils.getDamageMultiplied(DamageCalcUtils.crystalDamage(mc.player, entity.getPos())))))
-                        < maxDamage.get()))
-                .min(Comparator.comparingDouble(o -> o.distanceTo(mc.player)))
-                .ifPresent(entity -> {
-                    mc.interactionManager.attackEntity(mc.player, entity);
-                    mc.player.swingHand(Hand.MAIN_HAND);
-                });
-    }, EventPriority.HIGH);
+    });
 
     private List<BlockPos> findValidBlocks(){
         Iterator<BlockPos> allBlocks = getRange(mc.player.getBlockPos(), range.get()).iterator();
         List<BlockPos> validBlocks = new ArrayList<>();
         for(BlockPos i = null; allBlocks.hasNext(); i = allBlocks.next()){
             if(i == null) continue;
-            if((mc.world.getBlockState(i).getBlock() == Blocks.BEDROCK
-                    || mc.world.getBlockState(i).getBlock() == Blocks.OBSIDIAN)
-                    && (mc.world.getBlockState(i.up()).getBlock() == Blocks.AIR && mc.world.getEntities(null, new Box(i.up().getX(), i.up().getY(), i.up().getZ(), i.up().getX() + 1.0D, i.up().getY() + 2.0D, i.up().getZ() + 1.0D)).isEmpty())
-                    && mc.world.getBlockState(i.up(2)).getBlock() == Blocks.AIR && mc.world.getEntities(null, new Box(i.up(2).getX(), i.up(2).getY(), i.up(2).getZ(), i.up(2).getX() + 1.0D, i.up(2).getY() + 2.0D, i.up(2).getZ() + 1.0D)).isEmpty()){
+            if(mc.world.getBlockState(i).getBlock() != Blocks.AIR
+                    && ((mc.world.getBlockState(i.up()).getBlock() == Blocks.AIR
+                    && mc.world.getEntities(null, new Box(i.up().getX(), i.up().getY(), i.up().getZ(), i.up().getX() + 1.0D, i.up().getY() + 1.0D, i.up().getZ() + 1.0D)).isEmpty())
+                    && (mc.world.getBlockState(i.add(1, 1, 0)).getBlock() == Blocks.AIR
+                    || mc.world.getBlockState(i.add(-1, 1, 0)).getBlock() == Blocks.AIR
+                    || mc.world.getBlockState(i.add(0, 1, 1)).getBlock() == Blocks.AIR
+                    || mc.world.getBlockState(i.add(0, 1, -1)).getBlock() == Blocks.AIR)))
+            {
                 validBlocks.add(i);
             }
         }

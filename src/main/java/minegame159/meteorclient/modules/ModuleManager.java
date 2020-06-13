@@ -204,6 +204,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
     private void initCombat() {
         addModule(new Criticals());
         addModule(new AutoTotem());
+        addModule(new BedAura());
         addModule(new AutoWeapon());
         addModule(new AutoLog());
         addModule(new KillAura());
