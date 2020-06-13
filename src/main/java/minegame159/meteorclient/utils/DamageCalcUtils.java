@@ -23,19 +23,21 @@ public class DamageCalcUtils {
 
     //Always Calculate damage, then armour, then enchantments, then potion effect
     public static double crystalDamage(Entity player, Vec3d crystal){
+        if(Math.sqrt(mc.player.squaredDistanceTo(crystal)) > 12) return 0;
         double exposure = Explosion.getExposure(crystal, player);
-        double impact = (1D - Math.sqrt(mc.player.squaredDistanceTo(crystal)) / 12D)*exposure;
+        double impact = (1D - (Math.sqrt(mc.player.squaredDistanceTo(crystal)) / 12D))*exposure;
         return (impact*impact+impact)*42+1;
     }
 
     //Always Calculate damage, then armour, then enchantments, then potion effect
-    public static double bedDamage(Entity player, BlockEntity bed){
-        double exposure = Explosion.getExposure(toVec3D(bed), player);
-        double impact = (1D - distanceBetween(player, bed) / 12D)*exposure;
-        return (impact*impact+impact)*42+1;
+    public static double bedDamage(Entity player, Vec3d bed){
+        if(Math.sqrt(mc.player.squaredDistanceTo(bed)) > 10) return 0;
+        double exposure = Explosion.getExposure(bed, player);
+        double impact = (1D - (Math.sqrt(mc.player.squaredDistanceTo(bed)) / 10D))*exposure;
+        return (impact*impact+impact)*35+1;
     }
 
-    public static double armourCalc(Entity player ,double damage){
+    public static double armourCalc(Entity player, double damage){
         double defencePoints = 0;
         float toughness = 0;
         Iterator<ItemStack> playerArmour = player.getArmorItems().iterator();
