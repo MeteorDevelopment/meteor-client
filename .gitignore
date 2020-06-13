@@ -3,4 +3,6 @@
 build
 out
 run
-obfuscation
+
+obfuscation/meteor-client-*
+obfuscation/obfuscation-map-*
