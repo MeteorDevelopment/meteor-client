@@ -247,7 +247,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new Spider());
         addModule(new AutoJump());
         addModule(new Flight());
-        addModule(new NoPush());
+        addModule(new Velocity());
         addModule(new ElytraPlus());
         addModule(new HighJump());
         addModule(new Speed());
