@@ -1,5 +1,7 @@
 package minegame159.meteorclient.modules.player;
 
+//Updated by squidoodly 15/06/2020
+
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.DamageEvent;
@@ -77,6 +79,13 @@ public class AutoArmor extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> antiBreak = sgGeneral.add(new BoolSetting.Builder()
+            .name("anti-break")
+            .description("Stops you from breaking your weapon.")
+            .defaultValue(false)
+            .build()
+    );
+
     private BestItem helmet = new BestItem();
     private BestItem chestplate = new BestItem();
     private BestItem leggings = new BestItem();
@@ -142,7 +151,7 @@ public class AutoArmor extends ToggleModule {
         // Get best items
         for (int i = 0; i < mc.player.inventory.main.size(); i++) {
             ItemStack itemStack = mc.player.inventory.getInvStack(i);
-            if (!(itemStack.getItem() instanceof ArmorItem)) continue;
+            if (!(itemStack.getItem() instanceof ArmorItem) || (antiBreak.get() && itemStack.getItem().getMaxDamage() <= 11)) continue;
 
             // Helmet
             int score = getHelmetScore(itemStack);
@@ -257,7 +266,7 @@ public class AutoArmor extends ToggleModule {
         int bestOtherSlot = -1;
 
         boolean add(ItemStack itemStack, int score, int slot) {
-            if (score == -1) return false;
+            if (score == -1 || (antiBreak.get() && itemStack.getItem().getMaxDamage() <= 11)) return false;
 
             if (EnchantmentHelper.getLevel(Enchantments.PROTECTION, itemStack) > 0) {
                 if (score > bestProtScore) {
