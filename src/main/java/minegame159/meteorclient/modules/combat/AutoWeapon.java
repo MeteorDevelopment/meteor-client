@@ -1,14 +1,13 @@
 package minegame159.meteorclient.modules.combat;
 
+//Updated by squidoodly 15/06/2020
+
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.AttackEntityEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
-import minegame159.meteorclient.settings.EnumSetting;
-import minegame159.meteorclient.settings.IntSetting;
-import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.settings.*;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EntityGroup;
 import net.minecraft.item.AxeItem;
@@ -40,11 +39,16 @@ public class AutoWeapon extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> antiBreak = sgGeneral.add(new BoolSetting.Builder()
+            .name("anti-break")
+            .description("Stops you from breaking your weapon.")
+            .defaultValue(false)
+            .build()
+    );
+
     @EventHandler
     private Listener<AttackEntityEvent> onAttack = new Listener<>(event -> {
-        if(weapon.get() == Weapon.Sword){
             mc.player.inventory.selectedSlot = getBestWeapon();
-        }
     });
 
     private int getBestWeapon(){
@@ -56,7 +60,7 @@ public class AutoWeapon extends ToggleModule {
         double currentDamageS;
         double currentDamageA;
         for(int i = 0; i < 9; i++){
-            if(mc.player.inventory.getInvStack(i).getItem() instanceof SwordItem){
+            if(mc.player.inventory.getInvStack(i).getItem() instanceof SwordItem && (!antiBreak.get() || mc.player.inventory.getInvStack(i).getItem().getMaxDamage() > 10)){
                 currentDamageS = ((SwordItem) mc.player.inventory.getInvStack(i).getItem()).getMaterial().getAttackDamage() + EnchantmentHelper.getAttackDamage(mc.player.inventory.getInvStack(i), EntityGroup.DEFAULT) + 2;
                 if(currentDamageS > damageS){
                     damageS = currentDamageS;
@@ -65,7 +69,7 @@ public class AutoWeapon extends ToggleModule {
             }
         }
         for(int i = 0; i < 9; i++){
-            if(mc.player.inventory.getInvStack(i).getItem() instanceof AxeItem){
+            if(mc.player.inventory.getInvStack(i).getItem() instanceof AxeItem  && (!antiBreak.get() || mc.player.inventory.getInvStack(i).getItem().getMaxDamage() > 10)){
                 currentDamageA = ((AxeItem) mc.player.inventory.getInvStack(i).getItem()).getMaterial().getAttackDamage() + EnchantmentHelper.getAttackDamage(mc.player.inventory.getInvStack(i), EntityGroup.DEFAULT) + 2;
                 if(currentDamageA > damageA){
                     damageA = currentDamageA;
