@@ -60,7 +60,8 @@ public class AutoWeapon extends ToggleModule {
         double currentDamageS;
         double currentDamageA;
         for(int i = 0; i < 9; i++){
-            if(mc.player.inventory.getInvStack(i).getItem() instanceof SwordItem && (!antiBreak.get() || mc.player.inventory.getInvStack(i).getItem().getMaxDamage() > 10)){
+            if(mc.player.inventory.getInvStack(i).getItem() instanceof SwordItem
+                    && (!antiBreak.get() || (mc.player.inventory.getInvStack(i).getMaxDamage() - mc.player.inventory.getInvStack(i).getDamage()) > 10)){
                 currentDamageS = ((SwordItem) mc.player.inventory.getInvStack(i).getItem()).getMaterial().getAttackDamage() + EnchantmentHelper.getAttackDamage(mc.player.inventory.getInvStack(i), EntityGroup.DEFAULT) + 2;
                 if(currentDamageS > damageS){
                     damageS = currentDamageS;
@@ -69,7 +70,8 @@ public class AutoWeapon extends ToggleModule {
             }
         }
         for(int i = 0; i < 9; i++){
-            if(mc.player.inventory.getInvStack(i).getItem() instanceof AxeItem  && (!antiBreak.get() || mc.player.inventory.getInvStack(i).getItem().getMaxDamage() > 10)){
+            if(mc.player.inventory.getInvStack(i).getItem() instanceof AxeItem
+                    && (!antiBreak.get() || (mc.player.inventory.getInvStack(i).getMaxDamage() - mc.player.inventory.getInvStack(i).getDamage()) > 10)){
                 currentDamageA = ((AxeItem) mc.player.inventory.getInvStack(i).getItem()).getMaterial().getAttackDamage() + EnchantmentHelper.getAttackDamage(mc.player.inventory.getInvStack(i), EntityGroup.DEFAULT) + 2;
                 if(currentDamageA > damageA){
                     damageA = currentDamageA;

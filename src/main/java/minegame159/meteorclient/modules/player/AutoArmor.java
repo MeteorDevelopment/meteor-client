@@ -151,7 +151,7 @@ public class AutoArmor extends ToggleModule {
         // Get best items
         for (int i = 0; i < mc.player.inventory.main.size(); i++) {
             ItemStack itemStack = mc.player.inventory.getInvStack(i);
-            if (!(itemStack.getItem() instanceof ArmorItem) || (antiBreak.get() && itemStack.getItem().getMaxDamage() <= 11)) continue;
+            if (!(itemStack.getItem() instanceof ArmorItem) || (antiBreak.get() && (itemStack.getMaxDamage() - itemStack.getDamage()) <= 11)) continue;
 
             // Helmet
             int score = getHelmetScore(itemStack);
@@ -201,6 +201,7 @@ public class AutoArmor extends ToggleModule {
         if (!(itemStack.getItem() instanceof ArmorItem)) return -1;
         if (((ArmorItem) itemStack.getItem()).getSlotType() != EquipmentSlot.HEAD) return -1;
         int score = getBaseScore(itemStack);
+        if(score == -1) return -1;
 
         score += EnchantmentHelper.getLevel(Enchantments.AQUA_AFFINITY, itemStack);
         score += EnchantmentHelper.getLevel(Enchantments.RESPIRATION, itemStack);
@@ -211,12 +212,14 @@ public class AutoArmor extends ToggleModule {
     private int getChestplateScore(ItemStack itemStack) {
         if (!(itemStack.getItem() instanceof ArmorItem)) return -1;
         if (((ArmorItem) itemStack.getItem()).getSlotType() != EquipmentSlot.CHEST) return -1;
+        if(getBaseScore(itemStack) == -1) return -1;
         return getBaseScore(itemStack);
     }
 
     private int getLeggingsScore(ItemStack itemStack) {
         if (!(itemStack.getItem() instanceof ArmorItem)) return -1;
         if (((ArmorItem) itemStack.getItem()).getSlotType() != EquipmentSlot.LEGS) return -1;
+        if(getBaseScore(itemStack) == -1) return -1;
         return getBaseScore(itemStack);
     }
 
@@ -224,6 +227,7 @@ public class AutoArmor extends ToggleModule {
         if (!(itemStack.getItem() instanceof ArmorItem)) return -1;
         if (((ArmorItem) itemStack.getItem()).getSlotType() != EquipmentSlot.FEET) return -1;
         int score = getBaseScore(itemStack);
+        if(score == -1) return -1;
 
         score += EnchantmentHelper.getLevel(Enchantments.DEPTH_STRIDER, itemStack);
         score += EnchantmentHelper.getLevel(Enchantments.FEATHER_FALLING, itemStack);
@@ -233,6 +237,7 @@ public class AutoArmor extends ToggleModule {
     }
 
     private int getBaseScore(ItemStack itemStack) {
+        if((antiBreak.get() && (itemStack.getMaxDamage() - itemStack.getDamage()) <= 11)) return -1;
         int score = 0;
 
         score += ((ArmorItem) itemStack.getItem()).getProtection();
@@ -266,7 +271,7 @@ public class AutoArmor extends ToggleModule {
         int bestOtherSlot = -1;
 
         boolean add(ItemStack itemStack, int score, int slot) {
-            if (score == -1 || (antiBreak.get() && itemStack.getItem().getMaxDamage() <= 11)) return false;
+            if (score == -1) return false;
 
             if (EnchantmentHelper.getLevel(Enchantments.PROTECTION, itemStack) > 0) {
                 if (score > bestProtScore) {
