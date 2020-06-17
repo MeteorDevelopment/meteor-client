@@ -1,7 +1,6 @@
 package minegame159.meteorclient.modules.movement;
 
 import baritone.api.BaritoneAPI;
-import baritone.behavior.LookBehavior;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.PlayerMoveEvent;
@@ -14,12 +13,13 @@ import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import net.minecraft.entity.MovementType;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.util.math.Vec3d;
 
 public class Speed extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     
-    private Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
+    private final Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
             .name("speed")
             .description("Multiplier, 1 equals default sprinting speed.")
             .defaultValue(1)
@@ -27,24 +27,31 @@ public class Speed extends ToggleModule {
             .build()
     );
 
-    private Setting<Boolean> onlyOnGround = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> onlyOnGround = sgGeneral.add(new BoolSetting.Builder()
             .name("only-on-ground")
             .description("Use speed only when on ground.")
             .defaultValue(false)
             .build()
     );
 
-    private Setting<Boolean> inWater = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> inWater = sgGeneral.add(new BoolSetting.Builder()
             .name("in-water")
             .description("Use speed when in water.")
             .defaultValue(false)
             .build()
     );
 
-    private Setting<Boolean> whenSneaking = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> whenSneaking = sgGeneral.add(new BoolSetting.Builder()
             .name("when-sneaking")
             .description("Use speed when sneaking.")
             .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> applySpeedPotions = sgGeneral.add(new BoolSetting.Builder()
+            .name("apply-speed-potions")
+            .description("Apply speed potion effect.")
+            .defaultValue(true)
             .build()
     );
 
@@ -99,6 +106,12 @@ public class Speed extends ToggleModule {
             double diagonal = 1 / Math.sqrt(2);
             velX *= diagonal;
             velZ *= diagonal;
+        }
+
+        if (applySpeedPotions.get() && mc.player.hasStatusEffect(StatusEffects.SPEED)) {
+            double value = (mc.player.getStatusEffect(StatusEffects.SPEED).getAmplifier() + 1) * 0.205;
+            velX += velX * value;
+            velZ += velZ * value;
         }
 
         ((IVec3d) event.movement).set(velX, event.movement.y, velZ);
