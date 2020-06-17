@@ -24,6 +24,9 @@ import net.minecraft.entity.effect.StatusEffectUtil;
 import net.minecraft.entity.passive.SheepEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.EntityHitResult;
+import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.dimension.DimensionType;
@@ -96,6 +99,13 @@ public class HUD extends ToggleModule {
     private final Setting<Boolean> time = sgTopLeft.add(new BoolSetting.Builder()
             .name("time")
             .description("Displays ingame time in ticks.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Boolean> lookingAt = sgTopLeft.add(new BoolSetting.Builder()
+            .name("looking-at")
+            .description("Displays block or entity you are looking at.")
             .defaultValue(true)
             .build()
     );
@@ -319,6 +329,15 @@ public class HUD extends ToggleModule {
 
         if (time.get()) {
             drawInfo("Time: ", mc.world.getTimeOfDay() % 24000 + "", y);
+            y += MeteorClient.FONT.getHeight() + 2;
+        }
+
+        if (lookingAt.get()) {
+            String text = "";
+            if (mc.crosshairTarget.getType() == HitResult.Type.BLOCK) text = mc.world.getBlockState(((BlockHitResult) mc.crosshairTarget).getBlockPos()).getBlock().getName().asString();
+            else if (mc.crosshairTarget.getType() == HitResult.Type.ENTITY) text = ((EntityHitResult) mc.crosshairTarget).getEntity().getDisplayName().asString();
+
+            drawInfo("Looking At: ", text, y);
             y += MeteorClient.FONT.getHeight() + 2;
         }
 
