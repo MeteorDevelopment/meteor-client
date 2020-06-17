@@ -393,7 +393,7 @@ public class HUD extends ToggleModule {
         double y = event.screenHeight - MeteorClient.FONT.getHeight() - 2;
 
         if (rotation.get()) {
-            Direction direction = mc.player.getHorizontalFacing();
+            Direction direction = mc.cameraEntity.getHorizontalFacing();
             String axis = "invalid";
             switch (direction) {
                 case NORTH: axis = "-Z"; break;
@@ -402,11 +402,11 @@ public class HUD extends ToggleModule {
                 case EAST:  axis = "+X"; break;
             }
 
-            float yaw = mc.player.yaw % 360;
+            float yaw = mc.cameraEntity.yaw % 360;
             if (yaw < 0) yaw += 360;
             if (yaw > 180) yaw -= 360;
 
-            float pitch = mc.player.pitch % 360;
+            float pitch = mc.cameraEntity.pitch % 360;
             if (pitch < 0) pitch += 360;
             if (pitch > 180) pitch -= 360;
 
@@ -416,17 +416,17 @@ public class HUD extends ToggleModule {
 
         if (position.get()) {
             if (mc.player.dimension == DimensionType.OVERWORLD) {
-                drawPosition(event.screenWidth, "Nether Pos: ", y, mc.player.x / 8.0, mc.player.y / 8.0, mc.player.z / 8.0);
+                drawPosition(event.screenWidth, "Nether Pos: ", y, mc.cameraEntity.x / 8.0, mc.cameraEntity.y / 8.0, mc.cameraEntity.z / 8.0);
                 y -= MeteorClient.FONT.getHeight() + 2;
-                drawPosition(event.screenWidth, "Pos: ", y, mc.player.x, mc.player.y, mc.player.z);
+                drawPosition(event.screenWidth, "Pos: ", y, mc.cameraEntity.x, mc.cameraEntity.y, mc.cameraEntity.z);
                 y -= MeteorClient.FONT.getHeight() + 2;
             } else if (mc.player.dimension == DimensionType.THE_NETHER) {
-                drawPosition(event.screenWidth, "Overworld Pos: ", y, mc.player.x * 8.0, mc.player.y * 8.0, mc.player.z * 8.0);
+                drawPosition(event.screenWidth, "Overworld Pos: ", y, mc.cameraEntity.x * 8.0, mc.cameraEntity.y * 8.0, mc.cameraEntity.z * 8.0);
                 y -= MeteorClient.FONT.getHeight() + 2;
-                drawPosition(event.screenWidth, "Pos: ", y, mc.player.x, mc.player.y, mc.player.z);
+                drawPosition(event.screenWidth, "Pos: ", y, mc.cameraEntity.x, mc.cameraEntity.y, mc.cameraEntity.z);
                 y -= MeteorClient.FONT.getHeight() + 2;
             } else if (mc.player.dimension == DimensionType.THE_END) {
-                drawPosition(event.screenWidth, "Pos: ", y, mc.player.x, mc.player.y, mc.player.z);
+                drawPosition(event.screenWidth, "Pos: ", y, mc.cameraEntity.x, mc.cameraEntity.y, mc.cameraEntity.z);
                 y -= MeteorClient.FONT.getHeight() + 2;
             }
         }
