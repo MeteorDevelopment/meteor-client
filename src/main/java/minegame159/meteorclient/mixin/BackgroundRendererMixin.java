@@ -2,7 +2,7 @@ package minegame159.meteorclient.mixin;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.modules.render.AntiFog;
+import minegame159.meteorclient.modules.render.NoRender;
 import minegame159.meteorclient.modules.render.XRay;
 import net.minecraft.client.render.BackgroundRenderer;
 import net.minecraft.client.render.Camera;
@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class BackgroundRendererMixin {
     @Inject(method = "applyFog", at = @At("TAIL"))
     private void onApplyFog(Camera camera, int i, CallbackInfo info) {
-        if (ModuleManager.INSTANCE.isActive(AntiFog.class) || ModuleManager.INSTANCE.isActive(XRay.class)) {
+        if (ModuleManager.INSTANCE.get(NoRender.class).noFog() || ModuleManager.INSTANCE.isActive(XRay.class)) {
             GlStateManager.disableFog();
         }
     }
