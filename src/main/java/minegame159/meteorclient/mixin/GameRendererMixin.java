@@ -5,7 +5,7 @@ import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.events.RenderEvent;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.misc.UnfocusedCPU;
-import minegame159.meteorclient.modules.render.NoHurtCam;
+import minegame159.meteorclient.modules.render.NoRender;
 import minegame159.meteorclient.rendering.Matrices;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.utils.Utils;
@@ -47,6 +47,16 @@ public abstract class GameRendererMixin {
 
     @Inject(method = "bobViewWhenHurt", at = @At("HEAD"), cancellable = true)
     private void onBobViewWhenHurt(float tickDelta, CallbackInfo info) {
-        if (ModuleManager.INSTANCE.isActive(NoHurtCam.class)) info.cancel();
+        if (ModuleManager.INSTANCE.get(NoRender.class).noHurtCam()) info.cancel();
+    }
+
+    @Inject(method = "renderWeather", at = @At("HEAD"), cancellable = true)
+    private void onRenderWeather(float f, CallbackInfo info) {
+        if (ModuleManager.INSTANCE.get(NoRender.class).noWeather()) info.cancel();
+    }
+
+    @Inject(method = "renderRain", at = @At("HEAD"), cancellable = true)
+    private void onRenderRain(CallbackInfo info) {
+        if (ModuleManager.INSTANCE.get(NoRender.class).noWeather()) info.cancel();
     }
 }

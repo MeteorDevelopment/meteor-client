@@ -50,7 +50,9 @@
     "BufferBuilderMixin",
     "LookBehaviorMixin",
     "CrashReportMixin",
-    "ExplosionMixin"
+    "ExplosionMixin",
+    "BossBarHudMixin",
+    "HeldItemRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1
