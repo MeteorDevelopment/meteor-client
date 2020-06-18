@@ -298,5 +298,6 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new UnfocusedCPU());
         addModule(new ItemByteSize());
         addModule(new AntiSpam());
+        addModule(new PacketCanceller());
     }
 }
