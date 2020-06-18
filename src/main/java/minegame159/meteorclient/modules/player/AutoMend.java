@@ -1,18 +1,24 @@
 package minegame159.meteorclient.modules.player;
 
+//Updated by squidoodly 18/06/2020
+
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.InvUtils;
+import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.gui.screen.ingame.ContainerScreen;
 import net.minecraft.container.SlotActionType;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
+import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.SwordItem;
 
@@ -26,8 +32,22 @@ public class AutoMend extends ToggleModule {
             .build()
     );
 
+    private Setting<Boolean> armourSlots = sgGeneral.add(new BoolSetting.Builder()
+            .name("use-armour-slots")
+            .description("Whether to use armour slots to mend items faster")
+            .defaultValue(true)
+            .build()
+    );
+
+    private Setting<Boolean> removeFinished = sgGeneral.add(new BoolSetting.Builder()
+            .name("remove-finished")
+            .description("If there are no items to replace but space in your inventory, the items will be moved out of active slots")
+            .defaultValue(true)
+            .build()
+    );
+
     public AutoMend() {
-        super(Category.Player, "auto-mend", "Automatically replaces items in offhand with mending when fully repaired.");
+        super(Category.Player, "auto-mend", "Automatically replaces equipped items and items in offhand with mending when fully repaired.");
     }
 
     private void replaceItem(boolean offhandEmpty) {
@@ -42,6 +62,38 @@ public class AutoMend extends ToggleModule {
 
             break;
         }
+        if(!mc.player.getOffHandStack().isDamaged() && removeFinished.get() && mc.player.inventory.getEmptySlot() != -1){
+            InvUtils.clickSlot(InvUtils.OFFHAND_SLOT, 0, SlotActionType.PICKUP);
+            InvUtils.clickSlot(InvUtils.invIndexToSlotId(mc.player.inventory.getEmptySlot()), 0, SlotActionType.PICKUP);
+        }
+    }
+
+    private boolean checkSlot(ItemStack itemStack, int slot){
+        boolean correct = false;
+        if(slot == 5 && ((ArmorItem) itemStack.getItem()).getSlotType() == EquipmentSlot.HEAD) correct = true;
+        else if(slot == 6 && ((ArmorItem) itemStack.getItem()).getSlotType() == EquipmentSlot.CHEST) correct = true;
+        else if(slot == 7 && ((ArmorItem) itemStack.getItem()).getSlotType() == EquipmentSlot.LEGS) correct = true;
+        else if(slot == 8 && ((ArmorItem) itemStack.getItem()).getSlotType() == EquipmentSlot.FEET) correct = true;
+        return correct;
+    }
+
+    private void replaceArmour(int slot, boolean empty){
+        for (int i = 0; i < mc.player.inventory.main.size(); i++) {
+            ItemStack itemStack = mc.player.inventory.getInvStack(i);
+            if(!(itemStack.getItem() instanceof ArmorItem)) continue;
+            if(!checkSlot(mc.player.inventory.getInvStack(i), slot)) continue;
+            if (EnchantmentHelper.getLevel(Enchantments.MENDING, itemStack) == 0 || !itemStack.isDamaged()) continue;
+
+            InvUtils.clickSlot(InvUtils.invIndexToSlotId(i), 0, SlotActionType.PICKUP);
+            InvUtils.clickSlot(slot, 0, SlotActionType.PICKUP);
+            if (!empty) InvUtils.clickSlot(InvUtils.invIndexToSlotId(i), 0, SlotActionType.PICKUP);
+
+            break;
+        }
+        if(!mc.player.inventory.getInvStack(39 - (slot - 5)).isDamaged() && removeFinished.get() && mc.player.inventory.getEmptySlot() != -1){
+            InvUtils.clickSlot(slot, 0, SlotActionType.PICKUP);
+            InvUtils.clickSlot(InvUtils.invIndexToSlotId(mc.player.inventory.getEmptySlot()), 0, SlotActionType.PICKUP);
+        }
     }
 
     @EventHandler
@@ -51,5 +103,17 @@ public class AutoMend extends ToggleModule {
         if (mc.player.getOffHandStack().isEmpty()) replaceItem(true);
         else if (!mc.player.getOffHandStack().isDamaged()) replaceItem(false);
         else if (EnchantmentHelper.getLevel(Enchantments.MENDING, mc.player.getOffHandStack()) == 0) replaceItem(false);
+
+        if(armourSlots.get()) {
+            if(ModuleManager.INSTANCE.get(AutoArmor.class).isActive()) {
+                Utils.sendMessage("#redCannot use armor slots while AutoArmor is active. #redPlease disable AutoArmour and try again. #redDisabling Use Armour Slots");
+                armourSlots.set(false);
+            }
+            for (int i = 5; i < 9; i++) {
+                if (mc.player.inventory.getInvStack(39 - (i - 5)).isEmpty()) replaceArmour(i, true);
+                else if (!mc.player.inventory.getInvStack(39 - (i - 5)).isDamaged()) replaceArmour(i, false);
+                else if (EnchantmentHelper.getLevel(Enchantments.MENDING, mc.player.inventory.getInvStack(39 - (i - 5))) == 0) replaceArmour(i, false);
+            }
+        }
     });
 }
