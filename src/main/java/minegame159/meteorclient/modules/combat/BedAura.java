@@ -1,6 +1,7 @@
 package minegame159.meteorclient.modules.combat;
 
 //Created by squidoodly 03/06/2020
+//Updated by squidoodly 19/06/2020
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
@@ -12,6 +13,8 @@ import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.DamageCalcUtils;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.entity.BedBlockEntity;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.item.BedItem;
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
@@ -56,6 +59,13 @@ public class BedAura extends ToggleModule {
             .build()
     );
 
+    private final Setting<Mode> clickMode = sgGeneral.add(new EnumSetting.Builder<Mode>()
+            .name("break-mode")
+            .description("The way the beds are broken")
+            .defaultValue(Mode.safe)
+            .build()
+    );
+
     private final Setting<Double> minDamage = sgPlace.add(new DoubleSetting.Builder()
             .name("min-damage")
             .description("The minimum damage the beds will place")
@@ -95,7 +105,7 @@ public class BedAura extends ToggleModule {
         if(place.get() && (!(mc.player.getMainHandStack().getItem() instanceof BedItem) && !(mc.player.getOffHandStack().getItem() instanceof BedItem))) return;
         if(place.get()) {
             ListIterator<BlockPos> validBlocks = Objects.requireNonNull(findValidBlocks()).listIterator();
-            Iterator<AbstractClientPlayerEntity> validEntities = mc.world.getPlayers().stream().filter(entityPlayer -> !FriendManager.INSTANCE.isTrusted(entityPlayer)).filter(entityPlayer -> !entityPlayer.getDisplayName().equals(mc.player.getDisplayName())).collect(Collectors.toList()).iterator();
+            Iterator<AbstractClientPlayerEntity> validEntities = mc.world.getPlayers().stream().filter(entityPlayer -> !FriendManager.INSTANCE.isTrusted(entityPlayer)).filter(entityPlayer -> !entityPlayer.getDisplayName().equals(mc.player.getDisplayName())).filter(entityPlayer -> Math.sqrt(mc.player.squaredDistanceTo(new Vec3d(entityPlayer.x, entityPlayer.y, entityPlayer.z))) <= 10).collect(Collectors.toList()).iterator();
             AbstractClientPlayerEntity target;
             if (validEntities.hasNext()) {
                 target = validEntities.next();
@@ -111,12 +121,12 @@ public class BedAura extends ToggleModule {
             BlockPos bestBlock = mc.player.getBlockPos();
             for (BlockPos i = null; validBlocks.hasNext(); i = validBlocks.next()) {
                 if (i == null) continue;
-                Vec3d convert = new Vec3d(i.getX(), i.getY(), i.getZ()).add(0, 1, 0);
+                Vec3d convert = new Vec3d(i.getX(), i.getY() + 1, i.getZ());
                 if (mc.player.getHealth() + mc.player.getAbsorptionAmount() - DamageCalcUtils.resistanceReduction(mc.player, DamageCalcUtils.blastProtReduction(mc.player, DamageCalcUtils.armourCalc(mc.player, DamageCalcUtils.bedDamage(mc.player, convert))))
-                        < minHealth.get() || mode.get() != Mode.suicide) continue;
+                        < minHealth.get() && mode.get() != Mode.suicide) continue;
                 double damage = DamageCalcUtils.resistanceReduction(target, DamageCalcUtils.blastProtReduction(target, DamageCalcUtils.armourCalc(target, DamageCalcUtils.bedDamage(target, convert))));
                 double selfDamage = DamageCalcUtils.resistanceReduction(mc.player, DamageCalcUtils.blastProtReduction(mc.player, DamageCalcUtils.armourCalc(mc.player, DamageCalcUtils.crystalDamage(mc.player, convert))));
-                convert = new Vec3d(bestBlock.getX(), bestBlock.getY(), bestBlock.getZ()).add(0, 1, 0);
+                convert = new Vec3d(bestBlock.getX(), bestBlock.getY() + 1, bestBlock.getZ());
                 if (damage > DamageCalcUtils.resistanceReduction(target, DamageCalcUtils.blastProtReduction(target, DamageCalcUtils.armourCalc(target, DamageCalcUtils.bedDamage(target, convert))))
                         && (selfDamage < maxDamage.get() || mode.get() == Mode.suicide) && damage > minDamage.get()) {
                     bestBlock = i;
@@ -128,17 +138,17 @@ public class BedAura extends ToggleModule {
                 double east = -1;
                 double south = -1;
                 double west = -1;
-                if(mc.world.getBlockState(bestBlock.add(1, 0, 0)).getBlock() == Blocks.AIR){
-                    east = DamageCalcUtils.resistanceReduction(target, DamageCalcUtils.blastProtReduction(target, DamageCalcUtils.armourCalc(target, DamageCalcUtils.bedDamage(target, new Vec3d(bestBlock.add(1, 0, 0))))));
+                if(mc.world.getBlockState(bestBlock.add(1, 1, 0)).getBlock() == Blocks.AIR){
+                    east = DamageCalcUtils.resistanceReduction(target, DamageCalcUtils.blastProtReduction(target, DamageCalcUtils.armourCalc(target, DamageCalcUtils.bedDamage(target, new Vec3d(bestBlock.add(1, 1, 0))))));
                 }
-                if(mc.world.getBlockState(bestBlock.add(-1, 0, 0)).getBlock() == Blocks.AIR){
-                    west = DamageCalcUtils.resistanceReduction(target, DamageCalcUtils.blastProtReduction(target, DamageCalcUtils.armourCalc(target, DamageCalcUtils.bedDamage(target, new Vec3d(bestBlock.add(-1, 0, 0))))));
+                if(mc.world.getBlockState(bestBlock.add(-1, 1, 0)).getBlock() == Blocks.AIR){
+                    west = DamageCalcUtils.resistanceReduction(target, DamageCalcUtils.blastProtReduction(target, DamageCalcUtils.armourCalc(target, DamageCalcUtils.bedDamage(target, new Vec3d(bestBlock.add(-1, 1, 0))))));
                 }
-                if(mc.world.getBlockState(bestBlock.add(0, 0, 1)).getBlock() == Blocks.AIR){
-                    south = DamageCalcUtils.resistanceReduction(target, DamageCalcUtils.blastProtReduction(target, DamageCalcUtils.armourCalc(target, DamageCalcUtils.bedDamage(target, new Vec3d(bestBlock.add(0, 0, 1))))));
+                if(mc.world.getBlockState(bestBlock.add(0, 1, 1)).getBlock() == Blocks.AIR){
+                    south = DamageCalcUtils.resistanceReduction(target, DamageCalcUtils.blastProtReduction(target, DamageCalcUtils.armourCalc(target, DamageCalcUtils.bedDamage(target, new Vec3d(bestBlock.add(0, 1, 1))))));
                 }
-                if(mc.world.getBlockState(bestBlock.add(0, 0, -1)).getBlock() == Blocks.AIR){
-                    north = DamageCalcUtils.resistanceReduction(target, DamageCalcUtils.blastProtReduction(target, DamageCalcUtils.armourCalc(target, DamageCalcUtils.bedDamage(target, new Vec3d(bestBlock.add(0, 0, -1))))));
+                if(mc.world.getBlockState(bestBlock.add(0, 1, -1)).getBlock() == Blocks.AIR){
+                    north = DamageCalcUtils.resistanceReduction(target, DamageCalcUtils.blastProtReduction(target, DamageCalcUtils.armourCalc(target, DamageCalcUtils.bedDamage(target, new Vec3d(bestBlock.add(0, 1, -1))))));
                 }
                 PlayerInteractBlockC2SPacket placePacket;
                 if (mc.player.getMainHandStack().getItem() instanceof BedItem) {
@@ -163,6 +173,15 @@ public class BedAura extends ToggleModule {
                     mc.player.networkHandler.sendPacket(placePacket);
                     mc.player.swingHand(Hand.MAIN_HAND);
                 }
+            }
+        }
+        for(BlockEntity entity : mc.world.blockEntities){
+            if(entity instanceof BedBlockEntity){
+                if(DamageCalcUtils.resistanceReduction(mc.player, DamageCalcUtils.blastProtReduction(mc.player, DamageCalcUtils.armourCalc(mc.player, DamageCalcUtils.bedDamage(mc.player, new Vec3d(entity.getPos().getX(), entity.getPos().getY(), entity.getPos().getZ()))))) < maxDamage.get()
+                    || (mc.player.getHealth() + mc.player.getAbsorptionAmount() - DamageCalcUtils.resistanceReduction(mc.player, DamageCalcUtils.blastProtReduction(mc.player, DamageCalcUtils.armourCalc(mc.player, DamageCalcUtils.bedDamage(mc.player, new Vec3d(entity.getPos().getX(), entity.getPos().getY(), entity.getPos().getZ())))))) < minHealth.get() || clickMode.get().equals(Mode.suicide)){
+                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(mc.player.x, mc.player.y, mc.player.z), Direction.UP, entity.getPos(), false));
+                }
+
             }
         }
     });
