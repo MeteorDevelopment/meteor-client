@@ -22,7 +22,7 @@ import net.minecraft.client.network.ServerInfo;
 public class AutoReconnect extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     
-    private Setting<Double> time = sgGeneral.add(new DoubleSetting.Builder()
+    private final Setting<Double> time = sgGeneral.add(new DoubleSetting.Builder()
             .name("time")
             .description("Time to wait before connecting.")
             .defaultValue(2.0)

@@ -50,28 +50,28 @@ public class AutoArmor extends ToggleModule {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private Setting<Protection> prioritizeProtection = sgGeneral.add(new EnumSetting.Builder<Protection>()
+    private final Setting<Protection> prioritizeProtection = sgGeneral.add(new EnumSetting.Builder<Protection>()
             .name("prioritize")
             .description("Which protection to prioritize.")
             .defaultValue(Protection.Protection)
             .build()
     );
 
-    private Setting<Boolean> considerFrostWalker = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> considerFrostWalker = sgGeneral.add(new BoolSetting.Builder()
             .name("consider-frost-walker")
             .description("Consider frost walker.")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<Boolean> switchToBlastProtWhenNearCrystalOrBed = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> switchToBlastProtWhenNearCrystalOrBed = sgGeneral.add(new BoolSetting.Builder()
             .name("switch-to-blast-prot-when-near-crystal-or-bed")
             .description("Switches to blast protection when near crystals or beds when not in overworld.")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<Double> crystalAndBedDetectionDistance = sgGeneral.add(new DoubleSetting.Builder()
+    private final Setting<Double> crystalAndBedDetectionDistance = sgGeneral.add(new DoubleSetting.Builder()
             .name("crystal-and-bed-detection-distance")
             .description("Crystal and bed detection distance")
             .defaultValue(5)
@@ -86,10 +86,10 @@ public class AutoArmor extends ToggleModule {
             .build()
     );
 
-    private BestItem helmet = new BestItem();
-    private BestItem chestplate = new BestItem();
-    private BestItem leggings = new BestItem();
-    private BestItem boots = new BestItem();
+    private final BestItem helmet = new BestItem();
+    private final BestItem chestplate = new BestItem();
+    private final BestItem leggings = new BestItem();
+    private final BestItem boots = new BestItem();
 
     private boolean manageChestplate;
 

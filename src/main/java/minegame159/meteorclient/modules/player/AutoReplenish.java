@@ -26,7 +26,7 @@ public class AutoReplenish extends ToggleModule {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private Setting<Integer> amount = sgGeneral.add(new IntSetting.Builder()
+    private final Setting<Integer> amount = sgGeneral.add(new IntSetting.Builder()
             .name("amount")
             .description("The amount this actives at")
             .defaultValue(32)
@@ -35,14 +35,14 @@ public class AutoReplenish extends ToggleModule {
             .build()
     );
 
-    private Setting<Boolean> offhand = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> offhand = sgGeneral.add(new BoolSetting.Builder()
             .name("offhand")
             .description("Whether to re-fill your offhand")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<Boolean> alert = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> alert = sgGeneral.add(new BoolSetting.Builder()
             .name("alert")
             .description("Send messages in chat when you run out of items")
             .defaultValue(false)

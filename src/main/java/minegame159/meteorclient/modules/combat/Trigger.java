@@ -14,7 +14,7 @@ import net.minecraft.util.Hand;
 public class Trigger extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     
-    private Setting<Boolean> onlyWhenHoldingAttack = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> onlyWhenHoldingAttack = sgGeneral.add(new BoolSetting.Builder()
             .name("only-when-holding-attack")
             .description("Attacks only when you are holding left click.")
             .defaultValue(false)

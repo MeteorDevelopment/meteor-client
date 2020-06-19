@@ -12,7 +12,7 @@ import minegame159.meteorclient.settings.SettingGroup;
 public class Yaw extends ToggleModule {
     private final SettingGroup sgAutoYaw = settings.createGroup("Auto Yaw", "auto", "Automatically uses the best angle.", true);
 
-    private Setting<Double> angle = sgAutoYaw.add(new DoubleSetting.Builder()
+    private final Setting<Double> angle = sgAutoYaw.add(new DoubleSetting.Builder()
             .name("angle")
             .description("Angle in degrees.")
             .defaultValue(0)

@@ -5,7 +5,7 @@ package minegame159.meteorclient.modules.combat;
 import com.google.common.collect.Streams;
 import me.zero.alpine.event.EventPriority;
 import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;;
+import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.accountsfriends.FriendManager;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.modules.Category;
@@ -36,7 +36,7 @@ public class CrystalAura extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgPlace = settings.createGroup("Place");
 
-    public Setting<Integer> range = sgGeneral.add(new IntSetting.Builder()
+    private final Setting<Integer> range = sgGeneral.add(new IntSetting.Builder()
             .name("range")
             .description("Attack range")
             .defaultValue(2)
@@ -45,48 +45,49 @@ public class CrystalAura extends ToggleModule {
             .build()
     );
 
-    public Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
+    private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("place-mode")
             .description("The way crystals are placed")
             .defaultValue(Mode.safe)
             .build()
     );
 
-    public Setting<Double> minDamage = sgPlace.add(new DoubleSetting.Builder()
+    private final Setting<Double> minDamage = sgPlace.add(new DoubleSetting.Builder()
             .name("min-damage")
             .description("The minimum damage the crystal will place")
             .defaultValue(5.5)
             .build()
     );
 
-    public Setting<Double> maxDamage = sgPlace.add(new DoubleSetting.Builder()
+    private final Setting<Double> maxDamage = sgPlace.add(new DoubleSetting.Builder()
             .name("max-damage")
             .description("The maximum self-damage allowed")
             .defaultValue(3)
             .build()
     );
-    public Setting<Boolean> breakMode = sgGeneral.add(new BoolSetting.Builder()
+
+    private final Setting<Boolean> breakMode = sgGeneral.add(new BoolSetting.Builder()
             .name("anti-suicide")
             .description("The way the crystals are broken")
             .defaultValue(true)
             .build()
     );
 
-    public Setting<Double> minHealth = sgPlace.add(new DoubleSetting.Builder()
+    private final Setting<Double> minHealth = sgPlace.add(new DoubleSetting.Builder()
             .name("min-health")
             .description("The minimum health you have to be for it to place")
             .defaultValue(15)
             .build()
     );
 
-    public Setting<Boolean> ignoreWalls = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> ignoreWalls = sgGeneral.add(new BoolSetting.Builder()
             .name("ignore-walls")
             .description("Attack through walls")
             .defaultValue(true)
             .build()
     );
 
-    public Setting<Boolean> place = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> place = sgGeneral.add(new BoolSetting.Builder()
             .name("place")
             .description("Allow it to place cystals")
             .defaultValue(true)
