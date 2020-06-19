@@ -19,7 +19,7 @@ import net.minecraft.util.math.Vec3d;
 public class Speed extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     
-    private Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
+    private final Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
             .name("speed")
             .description("Multiplier, 1 equals default sprinting speed.")
             .defaultValue(1)
@@ -27,21 +27,21 @@ public class Speed extends ToggleModule {
             .build()
     );
 
-    private Setting<Boolean> onlyOnGround = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> onlyOnGround = sgGeneral.add(new BoolSetting.Builder()
             .name("only-on-ground")
             .description("Use speed only when on ground.")
             .defaultValue(false)
             .build()
     );
 
-    private Setting<Boolean> inWater = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> inWater = sgGeneral.add(new BoolSetting.Builder()
             .name("in-water")
             .description("Use speed when in water.")
             .defaultValue(false)
             .build()
     );
 
-    private Setting<Boolean> whenSneaking = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> whenSneaking = sgGeneral.add(new BoolSetting.Builder()
             .name("when-sneaking")
             .description("Use speed when sneaking.")
             .defaultValue(false)

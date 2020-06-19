@@ -18,7 +18,7 @@ import net.minecraft.text.LiteralText;
 public class AutoLog extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     
-    private Setting<Integer> health = sgGeneral.add(new IntSetting.Builder()
+    private final Setting<Integer> health = sgGeneral.add(new IntSetting.Builder()
             .name("health")
             .description("Disconnects when health is lower or equal to this value.")
             .defaultValue(6)
@@ -28,7 +28,7 @@ public class AutoLog extends ToggleModule {
             .build()
     );
 
-    private Setting<Boolean> onlyTrusted = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> onlyTrusted = sgGeneral.add(new BoolSetting.Builder()
             .name("only-trusted")
             .description("Disconnects when non-trusted player appears in your render distance.")
             .defaultValue(false)

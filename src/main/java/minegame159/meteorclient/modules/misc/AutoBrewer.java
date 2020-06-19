@@ -25,14 +25,14 @@ public class AutoBrewer extends ToggleModule {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private Setting<MyPotion> potion = sgGeneral.add(new PotionSetting.Builder()
+    private final Setting<MyPotion> potion = sgGeneral.add(new PotionSetting.Builder()
             .name("potion")
             .description("Potion to brew.")
             .defaultValue(MyPotion.Strength)
             .build()
     );
 
-    private Setting<Modifier> modifier = sgGeneral.add(new EnumSetting.Builder<Modifier>()
+    private final Setting<Modifier> modifier = sgGeneral.add(new EnumSetting.Builder<Modifier>()
             .name("modifier")
             .description("Modifier.")
             .defaultValue(Modifier.None).build()

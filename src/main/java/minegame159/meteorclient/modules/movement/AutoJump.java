@@ -18,7 +18,7 @@ public class AutoJump extends ToggleModule {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private Setting<JumpIf> jumpIf = sgGeneral.add(new EnumSetting.Builder<JumpIf>()
+    private final Setting<JumpIf> jumpIf = sgGeneral.add(new EnumSetting.Builder<JumpIf>()
             .name("jump-if")
             .description("Jump if.")
             .defaultValue(JumpIf.Always)

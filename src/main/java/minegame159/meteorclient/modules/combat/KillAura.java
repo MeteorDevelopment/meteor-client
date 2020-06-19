@@ -39,7 +39,7 @@ public class KillAura extends ToggleModule {
     private final SettingGroup sgDelayDisabled = sgDelay.getDisabledGroup();
     private final SettingGroup sgRandomDelay = settings.createGroup("Random Delay", "random-delay-enabled", "Adds a random delay to hits to try and bypass anti-cheats.", false);
 
-    public final Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()
+    private final Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()
             .name("range")
             .description("Attack range.")
             .defaultValue(5.5)
@@ -47,28 +47,28 @@ public class KillAura extends ToggleModule {
             .build()
     );
 
-    public final Setting<List<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
+    private final Setting<List<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
             .name("entities")
             .description("Entities to attack.")
             .defaultValue(new ArrayList<>(0))
             .build()
     );
 
-    public final Setting<Boolean> friends = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> friends = sgGeneral.add(new BoolSetting.Builder()
             .name("friends")
             .description("Attack friends, useful only if attack players is on.")
             .defaultValue(false)
             .build()
     );
 
-    public final Setting<Boolean> ignoreWalls = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> ignoreWalls = sgGeneral.add(new BoolSetting.Builder()
             .name("ignore-walls")
             .description("Attack through walls.")
             .defaultValue(true)
             .build()
     );
 
-    public final Setting<Priority> priority = sgGeneral.add(new EnumSetting.Builder<Priority>()
+    private final Setting<Priority> priority = sgGeneral.add(new EnumSetting.Builder<Priority>()
             .name("priority")
             .description("What entities to target.")
             .defaultValue(Priority.LowestHealth)

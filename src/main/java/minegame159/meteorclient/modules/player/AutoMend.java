@@ -25,21 +25,21 @@ import net.minecraft.item.SwordItem;
 public class AutoMend extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     
-    private Setting<Boolean> swords = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> swords = sgGeneral.add(new BoolSetting.Builder()
             .name("swords")
             .description("Move swords.")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<Boolean> armourSlots = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> armourSlots = sgGeneral.add(new BoolSetting.Builder()
             .name("use-armour-slots")
             .description("Whether to use armour slots to mend items faster")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<Boolean> removeFinished = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> removeFinished = sgGeneral.add(new BoolSetting.Builder()
             .name("remove-finished")
             .description("If there are no items to replace but space in your inventory, the items will be moved out of active slots")
             .defaultValue(true)
