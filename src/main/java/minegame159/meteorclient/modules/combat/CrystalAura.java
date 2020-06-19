@@ -1,6 +1,7 @@
 package minegame159.meteorclient.modules.combat;
 
 //Updated by squidoodly 31/04/2020
+//Updated by squidoodly 19/06/2020
 
 import com.google.common.collect.Streams;
 import me.zero.alpine.event.EventPriority;
@@ -104,7 +105,7 @@ public class CrystalAura extends ToggleModule {
         if(place.get() && (mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL)) return;
         if(place.get()) {
             ListIterator<BlockPos> validBlocks = Objects.requireNonNull(findValidBlocks()).listIterator();
-            Iterator<AbstractClientPlayerEntity> validEntities = mc.world.getPlayers().stream().filter(entityPlayer -> !FriendManager.INSTANCE.isTrusted(entityPlayer)).filter(entityPlayer -> !entityPlayer.getDisplayName().equals(mc.player.getDisplayName())).collect(Collectors.toList()).iterator();
+            Iterator<AbstractClientPlayerEntity> validEntities = mc.world.getPlayers().stream().filter(entityPlayer -> !FriendManager.INSTANCE.isTrusted(entityPlayer)).filter(entityPlayer -> !entityPlayer.getDisplayName().equals(mc.player.getDisplayName())).filter(entityPlayer -> Math.sqrt(mc.player.squaredDistanceTo(new Vec3d(entityPlayer.x, entityPlayer.y, entityPlayer.z))) <= 10).collect(Collectors.toList()).iterator();
             AbstractClientPlayerEntity target;
             if (validEntities.hasNext()) {
                 target = validEntities.next();
@@ -122,7 +123,7 @@ public class CrystalAura extends ToggleModule {
                 if (i == null) continue;
                 Vec3d convert = new Vec3d(i.getX(), i.getY(), i.getZ()).add(0, 1, 0);
                 if (mc.player.getHealth() + mc.player.getAbsorptionAmount() - DamageCalcUtils.resistanceReduction(mc.player, DamageCalcUtils.blastProtReduction(mc.player, DamageCalcUtils.armourCalc(mc.player, DamageCalcUtils.crystalDamage(mc.player, convert))))
-                        < minHealth.get() || mode.get() != Mode.suicide) continue;
+                        < minHealth.get() && mode.get() != Mode.suicide) continue;
                 double damage = DamageCalcUtils.resistanceReduction(target, DamageCalcUtils.blastProtReduction(target, DamageCalcUtils.armourCalc(target, DamageCalcUtils.crystalDamage(target, convert))));
                 double selfDamage = DamageCalcUtils.resistanceReduction(mc.player, DamageCalcUtils.blastProtReduction(mc.player, DamageCalcUtils.armourCalc(mc.player, DamageCalcUtils.crystalDamage(mc.player, convert))));
                 convert = new Vec3d(bestBlock.getX(), bestBlock.getY(), bestBlock.getZ()).add(0, 1, 0);
