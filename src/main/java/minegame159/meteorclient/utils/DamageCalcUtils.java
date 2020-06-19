@@ -1,6 +1,7 @@
 package minegame159.meteorclient.utils;
 
 //Created by squidoodly 18/04/2020
+//Updated by squidoodly 19/06/2020
 
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
@@ -62,6 +63,7 @@ public class DamageCalcUtils {
             toughness += getArmourToughness((ArmorItem) helmet);
         }
         damage = damage*(1 - ((Math.min(20, Math.max((defencePoints/5), defencePoints - (damage/(2+(toughness/4))))))/25));
+        if(damage < 0) damage = 0;
         return damage;
     }
 
@@ -82,7 +84,7 @@ public class DamageCalcUtils {
         if(entity.getActiveItem().getEnchantments() != null){
             if(EnchantmentHelper.getEnchantments(entity.getActiveItem()).containsKey(Enchantments.SHARPNESS)){
                 int level = EnchantmentHelper.getLevel(Enchantments.SHARPNESS, entity.getActiveItem());
-                damage += 0.5 * (level + 1);
+                damage += (0.5 * level) + 0.5;
             }
         }
         if(entity.getActiveStatusEffects().containsKey(StatusEffects.STRENGTH)){
@@ -111,6 +113,7 @@ public class DamageCalcUtils {
             protLevel = 20;
         }
         damage *= (1 - (protLevel/25d));
+        if(damage < 0) damage = 0;
         return damage;
     }
 
@@ -120,6 +123,7 @@ public class DamageCalcUtils {
             protLevel = 20;
         }
         damage *= (1 - (protLevel/25d));
+        if(damage < 0) damage = 0;
         return damage;
     }
 
@@ -129,6 +133,7 @@ public class DamageCalcUtils {
             level = Objects.requireNonNull(player.getStatusEffect(StatusEffects.RESISTANCE)).getAmplifier() + 1;
         }
         damage = damage * (1 - (0.2 * level));
+        if(damage < 0) damage = 0;
         return damage;
     }
 
