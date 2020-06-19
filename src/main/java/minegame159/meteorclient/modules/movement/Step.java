@@ -12,7 +12,7 @@ import minegame159.meteorclient.settings.SettingGroup;
 public class Step extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     
-    private Setting<Double> height = sgGeneral.add(new DoubleSetting.Builder()
+    private final Setting<Double> height = sgGeneral.add(new DoubleSetting.Builder()
             .name("height")
             .description("Step height.")
             .defaultValue(1)

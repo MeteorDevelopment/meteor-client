@@ -36,21 +36,21 @@ public class AutoTool extends ToggleModule {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private Setting<Prefer> prefer = sgGeneral.add(new EnumSetting.Builder<Prefer>()
+    private final Setting<Prefer> prefer = sgGeneral.add(new EnumSetting.Builder<Prefer>()
             .name("prefer")
             .description("Prefer silk touch, fortune or none.")
             .defaultValue(Prefer.Fortune)
             .build()
     );
 
-    private Setting<Boolean> preferMending = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> preferMending = sgGeneral.add(new BoolSetting.Builder()
             .name("prefer-mending")
             .description("Prefers mending.")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<Boolean> enderChestOnlyWithSilkTouch = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> enderChestOnlyWithSilkTouch = sgGeneral.add(new BoolSetting.Builder()
             .name("ender-chest-only-with-silk-touch")
             .description("Mine ender chest only wiht silk touch.")
             .defaultValue(true)

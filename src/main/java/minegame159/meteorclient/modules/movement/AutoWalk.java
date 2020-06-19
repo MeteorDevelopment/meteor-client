@@ -20,7 +20,7 @@ public class AutoWalk extends ToggleModule {
     
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
+    private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("mode")
             .description("Walking mode.")
             .defaultValue(Mode.Smart)
