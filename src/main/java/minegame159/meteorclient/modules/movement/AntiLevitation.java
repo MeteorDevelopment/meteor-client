@@ -9,7 +9,7 @@ import minegame159.meteorclient.settings.SettingGroup;
 public class AntiLevitation extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     
-    private Setting<Boolean> applyGravity = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> applyGravity = sgGeneral.add(new BoolSetting.Builder()
             .name("apply-gravity")
             .description("Apply gravity.")
             .defaultValue(false)

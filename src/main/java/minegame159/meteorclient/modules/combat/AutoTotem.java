@@ -34,21 +34,21 @@ import net.minecraft.world.dimension.DimensionType;
 public class AutoTotem extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    public final Setting<Boolean> smart = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> smart = sgGeneral.add(new BoolSetting.Builder()
             .name("smart")
             .description("Only switches to totem when in danger of dying")
             .defaultValue(false)
             .build()
     );
 
-    public final Setting<Boolean> inventorySwitch = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> inventorySwitch = sgGeneral.add(new BoolSetting.Builder()
             .name("inventory")
             .description("Switches totems while you are in your inventory")
             .defaultValue(true)
             .build()
     );
 
-    public final Setting<Integer> health = sgGeneral.add(new IntSetting.Builder()
+    private final Setting<Integer> health = sgGeneral.add(new IntSetting.Builder()
             .name("health")
             .description("The health smart totem activates")
             .defaultValue(10)

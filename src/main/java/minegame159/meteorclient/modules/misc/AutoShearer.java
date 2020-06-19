@@ -19,7 +19,7 @@ import net.minecraft.util.Hand;
 public class AutoShearer extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     
-    private Setting<Double> distance = sgGeneral.add(new DoubleSetting.Builder()
+    private final Setting<Double> distance = sgGeneral.add(new DoubleSetting.Builder()
             .name("distance")
             .description("Maximum distance.")
             .min(0.0)
@@ -27,7 +27,7 @@ public class AutoShearer extends ToggleModule {
             .build()
     );
 
-    private Setting<Boolean> preserveBrokenShears = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> preserveBrokenShears = sgGeneral.add(new BoolSetting.Builder()
             .name("preserve-broken-shears")
             .description("Will not break shears.")
             .defaultValue(false)

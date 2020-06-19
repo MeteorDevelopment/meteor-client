@@ -20,21 +20,21 @@ import net.minecraft.util.Hand;
 public class AutoEat extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     
-    private Setting<Boolean> egaps = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> egaps = sgGeneral.add(new BoolSetting.Builder()
             .name("egaps")
             .description("Eat enchanted golden apples.")
             .defaultValue(false)
             .build()
     );
 
-    private Setting<Boolean> gaps = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> gaps = sgGeneral.add(new BoolSetting.Builder()
             .name("gaps")
             .description("Eat golden apples.")
             .defaultValue(false)
             .build()
     );
 
-    private Setting<Boolean> chorus = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> chorus = sgGeneral.add(new BoolSetting.Builder()
             .name("chorus")
             .description("Eat chorus fruit.")
             .defaultValue(false)
