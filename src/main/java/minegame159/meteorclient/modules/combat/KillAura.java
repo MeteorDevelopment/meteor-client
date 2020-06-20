@@ -194,7 +194,7 @@ public class KillAura extends ToggleModule {
             }
         } else {
             // Manual delay
-            if (hitDelayTimer <= 0) {
+            if (hitDelayTimer >= 0) {
                 hitDelayTimer--;
                 return;
             }
