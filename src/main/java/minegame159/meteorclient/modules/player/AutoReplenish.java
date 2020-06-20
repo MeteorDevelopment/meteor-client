@@ -15,6 +15,7 @@ import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.InvUtils;
 import minegame159.meteorclient.utils.Utils;
+import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.ContainerScreen;
 import net.minecraft.container.SlotActionType;
 import net.minecraft.item.Item;
@@ -51,104 +52,131 @@ public class AutoReplenish extends ToggleModule {
             .build()
     );
 
-    private Setting<Boolean> unstackable = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> unstackable = sgGeneral.add(new BoolSetting.Builder()
             .name("unstackable")
             .description("Replenishes unstackable items (only works for main hand and offhand)")
             .defaultValue(true)
             .build()
     );
 
-    private List<Item> items = new ArrayList<>();
+    private final Setting<Boolean> searchHotbar = sgGeneral.add(new BoolSetting.Builder()
+            .name("search-hotbar")
+            .description("Refills items if they are in your hotbar.")
+            .defaultValue(true)
+            .build()
+    );
 
-    private ItemStack item;
-    private ItemStack offHandItem;
+    private final List<Item> items = new ArrayList<>();
+
+    private Item lastMainHand, lastOffHand;
     private int lastSlot;
+
+    /*private ItemStack item;
+    private ItemStack offHandItem;
+    private int lastSlot;*/
 
     public AutoReplenish(){
         super(Category.Player, "auto-replenish", "Automatically fills your hotbar and offhand items");
     }
 
+    @Override
+    public void onActivate() {
+        lastSlot = mc.player.inventory.selectedSlot;
+    }
+
+    @Override
+    public void onDeactivate() {
+        lastMainHand = lastOffHand = null;
+    }
+
     @EventHandler
-    private Listener<TickEvent> OnTick = new Listener<>(event -> {
+    private final Listener<TickEvent> onTick = new Listener<>(event -> {
         if(mc.currentScreen instanceof ContainerScreen) return;
-        for(int i = 0; i < 9; i++){
-            if(mc.player.inventory.getInvStack(i).isEmpty() || (!mc.player.inventory.getInvStack(i).isStackable()
-                    && !unstackable.get())) continue;
-            if(mc.player.inventory.getInvStack(i).isStackable() && mc.player.inventory.getInvStack(i).getCount() < amount.get()) {
-                int slot = findItems(mc.player.inventory.getInvStack(i).getItem());
-                if(slot == -1 && !items.contains(mc.player.inventory.getInvStack(i).getItem())){
-                    if(alert.get()) {
-                        Utils.sendMessage("#redYou are out of #blue" + mc.player.inventory.getInvStack(i).getItem().toString() + "#red. Cannot refill.");
-                    }
-                    items.add(mc.player.inventory.getInvStack(i).getItem());
-                    continue;
-                }
-                if(slot == -1) continue;
-                InvUtils.clickSlot(InvUtils.invIndexToSlotId(slot), 0, SlotActionType.PICKUP);
-                InvUtils.clickSlot(InvUtils.invIndexToSlotId(i), 0, SlotActionType.PICKUP);
-                InvUtils.clickSlot(InvUtils.invIndexToSlotId(slot), 0, SlotActionType.PICKUP);
-            }
+
+        // Hotbar, stackable items
+        for (int i = 0; i < 9; i++) {
+            replenishStackableItems(mc.player.inventory.getInvStack(i), i);
         }
-        if(!(mc.player.getOffHandStack().isEmpty() || mc.currentScreen instanceof ContainerScreen
-                || (!mc.player.getOffHandStack().isStackable() && !unstackable.get()) || !offhand.get())) {
-            if (mc.player.getOffHandStack().isStackable() && mc.player.getOffHandStack().getCount() < amount.get()) {
-                int slot = findItems(mc.player.getOffHandStack().getItem());
-                if (slot == -1 && !items.contains(mc.player.getOffHandStack().getItem())) {
-                    if (alert.get()) {
-                        Utils.sendMessage("#redYou are out of #blue" + mc.player.getOffHandStack().getItem().toString() + "#red. Cannot refill.");
-                    }
-                    items.add(mc.player.getOffHandStack().getItem());
-                    return;
-                }
-                if (slot == -1) return;
-                InvUtils.clickSlot(InvUtils.invIndexToSlotId(InvUtils.invIndexToSlotId(slot)), 0, SlotActionType.PICKUP);
-                InvUtils.clickSlot(InvUtils.invIndexToSlotId(InvUtils.OFFHAND_SLOT), 0, SlotActionType.PICKUP);
-                InvUtils.clickSlot(InvUtils.invIndexToSlotId(InvUtils.invIndexToSlotId(slot)), 0, SlotActionType.PICKUP);
-            } else if (!offHandItem.isEmpty() && offHandItem.getItem() != Items.TOTEM_OF_UNDYING && mc.player.getOffHandStack() != offHandItem && offhand.get() && unstackable.get()) {
-                InvUtils.FindItemResult itemResult = InvUtils.findItemWithCount(offHandItem.getItem());
-                boolean empty = mc.player.getOffHandStack().isEmpty();
-                InvUtils.clickSlot(InvUtils.invIndexToSlotId(itemResult.slot), 0, SlotActionType.PICKUP);
-                InvUtils.clickSlot(InvUtils.invIndexToSlotId(mc.player.inventory.selectedSlot), 0, SlotActionType.PICKUP);
-                if (!empty) {
-                    InvUtils.clickSlot(InvUtils.invIndexToSlotId(itemResult.slot), 0, SlotActionType.PICKUP);
-                }
-            } else if (!mc.player.getOffHandStack().isStackable() && unstackable.get() && offhand.get() && !mc.player.getOffHandStack().isEmpty()) {
-                offHandItem = mc.player.getOffHandStack();
-            }
+
+        // OffHand, stackable items
+        if (offhand.get()) {
+            replenishStackableItems(mc.player.getOffHandStack(), InvUtils.OFFHAND_SLOT);
         }
-        if(!mc.player.getMainHandStack().isStackable() && unstackable.get() && (!mc.player.getMainHandStack().isEmpty()
-                && mc.player.getMainHandStack().getItem() != Items.AIR)
-                && lastSlot != mc.player.inventory.selectedSlot
-                && item.getItem() != mc.player.getMainHandStack().getItem()){
-            item = mc.player.getMainHandStack();
+
+        // MainHand, unstackable items
+        if (unstackable.get()) {
+            ItemStack mainHandItemStack = mc.player.getMainHandStack();
+            if (mainHandItemStack.getItem() != lastMainHand && mainHandItemStack.isEmpty() && (lastMainHand != null && lastMainHand != Items.AIR) && isUnstackable(lastMainHand) && mc.player.inventory.selectedSlot == lastSlot) {
+                int slot = findSlot(lastMainHand);
+                if (slot != -1) moveItems(slot, lastSlot, false);
+            }
+            lastMainHand = mc.player.getMainHandStack().getItem();
             lastSlot = mc.player.inventory.selectedSlot;
-        }
-        if(mc.player.getMainHandStack().getItem() != item.getItem() && lastSlot == mc.player.inventory.selectedSlot && unstackable.get()){
-            InvUtils.FindItemResult itemResult = InvUtils.findItemWithCount(item.getItem());
-            boolean empty = mc.player.getMainHandStack().isEmpty();
-            InvUtils.clickSlot(InvUtils.invIndexToSlotId(itemResult.slot), 0, SlotActionType.PICKUP);
-            InvUtils.clickSlot(InvUtils.invIndexToSlotId(mc.player.inventory.selectedSlot), 0, SlotActionType.PICKUP);
-            if(!empty){
-                InvUtils.clickSlot(InvUtils.invIndexToSlotId(itemResult.slot), 0, SlotActionType.PICKUP);
+
+            if (offhand.get()) {
+                // OffHand, unstackable items
+                ItemStack offHandItemStack = mc.player.getOffHandStack();
+                if (offHandItemStack.getItem() != lastOffHand && offHandItemStack.isEmpty() && (lastOffHand != null && lastOffHand != Items.AIR) && isUnstackable(lastOffHand)) {
+                    int slot = findSlot(lastOffHand);
+                    if (slot != -1) moveItems(slot, InvUtils.OFFHAND_SLOT, false);
+                }
+                lastOffHand = mc.player.getOffHandStack().getItem();
             }
         }
     });
 
     @EventHandler
-    private Listener<OpenScreenEvent> OnScreen = new Listener<>(event -> {
-        if(mc.currentScreen instanceof ContainerScreen){
+    private final Listener<OpenScreenEvent> onScreen = new Listener<>(event -> {
+        if(mc.currentScreen instanceof ContainerScreen && !(mc.currentScreen instanceof AbstractInventoryScreen)){
             items.clear();
         }
     });
 
-    private int findItems(Item item){
+    private void replenishStackableItems(ItemStack itemStack, int i) {
+        if(itemStack.isEmpty() || !itemStack.isStackable()) return;
+
+        if(itemStack.getCount() < amount.get()) {
+            int slot = findSlot(itemStack.getItem());
+            if(slot == -1) return;
+
+            moveItems(slot, i, true);
+        }
+    }
+
+    private void moveItems(int from, int to, boolean stackable) {
+        InvUtils.clickSlot(InvUtils.invIndexToSlotId(from), 0, SlotActionType.PICKUP);
+        InvUtils.clickSlot(InvUtils.invIndexToSlotId(to), 0, SlotActionType.PICKUP);
+        if (stackable) InvUtils.clickSlot(InvUtils.invIndexToSlotId(from), 0, SlotActionType.PICKUP);
+    }
+
+    private int findSlot(Item item) {
+        int slot = findItems(item);
+
+        if(slot == -1 && !items.contains(item)){
+            if(alert.get()) {
+                Utils.sendMessage("#redYou are out of #blue" + item.toString() + "#red. Cannot refill.");
+            }
+
+            items.add(item);
+        }
+
+        return slot;
+    }
+
+    private int findItems(Item item) {
         int slot = -1;
-        for(int i = 9; i < 45; i++){
-            if(mc.player.inventory.getInvStack(i).getItem() == item){
+
+        for (int i = searchHotbar.get() ? 0 : 9; i < mc.player.inventory.main.size(); i++) {
+            if (mc.player.inventory.main.get(i).getItem() == item && (!searchHotbar.get() || i != mc.player.inventory.selectedSlot)) {
                 slot = i;
                 return slot;
             }
         }
+
         return slot;
+    }
+
+    private boolean isUnstackable(Item item) {
+        return item.getMaxCount() <= 1;
     }
 }
