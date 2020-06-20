@@ -146,7 +146,7 @@ public class AutoTool extends ToggleModule {
         }
     });
 
-    private boolean isEffectiveOn(Item item, Block block) {
+    public boolean isEffectiveOn(Item item, Block block) {
         if (item instanceof SwordItem && block == Blocks.COBWEB) return true;
         if (item instanceof AxeItem && (block instanceof ChestBlock || block == Blocks.BARREL)) return true;
         if (item instanceof PickaxeItem && block == Blocks.ENDER_CHEST) return true;
