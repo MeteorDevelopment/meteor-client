@@ -17,14 +17,14 @@ public class Flight extends ToggleModule {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
+    private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("mode")
             .description("Mode.")
             .defaultValue(Mode.Vanilla)
             .build()
     );
 
-    private Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
+    private final Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
             .name("speed")
             .description("Speed.")
             .defaultValue(0.1)
@@ -57,13 +57,11 @@ public class Flight extends ToggleModule {
 
     @EventHandler
     private Listener<TickEvent> onTick = new Listener<>(event -> {
-        switch (mode.get()) {
-            case Vanilla:
-                mc.player.abilities.setFlySpeed(speed.get().floatValue());
-                mc.player.abilities.flying = true;
-                if (mc.player.abilities.creativeMode) return;
-                mc.player.abilities.allowFlying = true;
-                break;
+        if (mode.get() == Mode.Vanilla) {
+            mc.player.abilities.setFlySpeed(speed.get().floatValue());
+            mc.player.abilities.flying = true;
+            if (mc.player.abilities.creativeMode) return;
+            mc.player.abilities.allowFlying = true;
         }
     });
 }

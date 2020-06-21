@@ -9,7 +9,7 @@ import minegame159.meteorclient.settings.SettingGroup;
 public class HighJump extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     
-    private Setting<Double> multiplier = sgGeneral.add(new DoubleSetting.Builder()
+    private final Setting<Double> multiplier = sgGeneral.add(new DoubleSetting.Builder()
             .name("multiplier")
             .description("Jump height multiplier.")
             .defaultValue(1)

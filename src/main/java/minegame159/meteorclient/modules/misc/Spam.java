@@ -13,14 +13,14 @@ import minegame159.meteorclient.settings.StringSetting;
 public class Spam extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     
-    private Setting<String> message = sgGeneral.add(new StringSetting.Builder()
+    private final Setting<String> message = sgGeneral.add(new StringSetting.Builder()
             .name("message")
             .description("Message to spam.")
             .defaultValue("Meteor Client")
             .build()
     );
 
-    private Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
+    private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
             .name("delay")
             .description("How much ticks to wait between messages. 20 ticks = 1 second.")
             .defaultValue(0)

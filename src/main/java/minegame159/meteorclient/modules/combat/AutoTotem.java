@@ -1,6 +1,7 @@
 package minegame159.meteorclient.modules.combat;
 
 //Updated by squidoodly 24/04/2020
+//Updated by squidoodly 19/06/2020
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
@@ -16,34 +17,38 @@ import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.DamageCalcUtils;
 import minegame159.meteorclient.utils.InvUtils;
+import net.minecraft.block.entity.BedBlockEntity;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.ContainerScreen;
+import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.container.SlotActionType;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.decoration.EnderCrystalEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Items;
 import net.minecraft.item.SwordItem;
-
-import java.util.Iterator;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.dimension.DimensionType;
 
 public class AutoTotem extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    public final Setting<Boolean> smart = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> smart = sgGeneral.add(new BoolSetting.Builder()
             .name("smart")
             .description("Only switches to totem when in danger of dying")
             .defaultValue(false)
-            .build());
+            .build()
+    );
 
+    private final Setting<Boolean> inventorySwitch = sgGeneral.add(new BoolSetting.Builder()
+            .name("inventory")
+            .description("Switches totems while you are in your inventory")
+            .defaultValue(true)
+            .build()
+    );
 
-    public final Setting<Boolean> antiOneTap = sgGeneral.add(new BoolSetting.Builder()
-            .name("anti-one-tap")
-            .description("Tries to stop you dying with totems")
-            .defaultValue(false)
-            .build());
-
-    public final Setting<Integer> health = sgGeneral.add(new IntSetting.Builder()
+    private final Setting<Integer> health = sgGeneral.add(new IntSetting.Builder()
             .name("health")
             .description("The health smart totem activates")
             .defaultValue(10)
@@ -65,14 +70,14 @@ public class AutoTotem extends ToggleModule {
 
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
-        if (mc.currentScreen instanceof ContainerScreen<?>) return;
+        if (mc.currentScreen instanceof ContainerScreen<?>  && (!(mc.currentScreen instanceof InventoryScreen) || !inventorySwitch.get())) return;
 
         int preTotemCount = totemCount;
         InvUtils.FindItemResult result = InvUtils.findItemWithCount(Items.TOTEM_OF_UNDYING);
 
-        if (result.found() && !(mc.player.getOffHandStack().getItem() == Items.TOTEM_OF_UNDYING) && !smart.get()) {
+        if (result.found() && mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING && !smart.get()) {
             locked = true;
-            if(!antiOneTap.get()) {
+            if(mc.player.inventory.getCursorStack().getItem() != Items.TOTEM_OF_UNDYING) {
                 InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
             }
             InvUtils.clickSlot(InvUtils.OFFHAND_SLOT, 0, SlotActionType.PICKUP);
@@ -80,12 +85,10 @@ public class AutoTotem extends ToggleModule {
         }else if(result.found() && !(mc.player.getOffHandStack().getItem() == Items.TOTEM_OF_UNDYING) && smart.get() &&
                 ((mc.player.getHealth() + mc.player.getAbsorptionAmount()) < health.get() || ((mc.player.getHealth() + mc.player.getAbsorptionAmount()) - getHealthReduction()) < health.get())){
             locked = true;
-            if(!antiOneTap.get()) {
+            if(mc.player.inventory.getCursorStack().getItem() != Items.TOTEM_OF_UNDYING) {
                 InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
             }
             InvUtils.clickSlot(InvUtils.OFFHAND_SLOT, 0, SlotActionType.PICKUP);
-            InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
-        }else if(result.found() && antiOneTap.get() && mc.player.inventory.getCursorStack().isEmpty()){
             InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
         }
         if(smart.get() && ((mc.player.getHealth() + mc.player.getAbsorptionAmount()) > health.get()
@@ -102,10 +105,8 @@ public class AutoTotem extends ToggleModule {
     }
 
     private double getHealthReduction(){
-        Iterator<Entity> entities =  mc.world.getEntities().iterator();
         double damageTaken = 0;
-        for(int i = 0; entities.hasNext(); i++){
-            Entity entity = entities.next();
+        for(Entity entity : mc.world.getEntities()){
             if(entity instanceof EnderCrystalEntity && damageTaken < DamageCalcUtils.resistanceReduction(mc.player, DamageCalcUtils.blastProtReduction(mc.player, DamageCalcUtils.armourCalc(mc.player, DamageCalcUtils.getDamageMultiplied(DamageCalcUtils.crystalDamage(mc.player, entity.getPos())))))){
                 damageTaken = DamageCalcUtils.resistanceReduction(mc.player, DamageCalcUtils.blastProtReduction(mc.player, DamageCalcUtils.armourCalc(mc.player, DamageCalcUtils.getDamageMultiplied(DamageCalcUtils.crystalDamage(mc.player, entity.getPos())))));
             }else if(entity instanceof PlayerEntity && damageTaken < DamageCalcUtils.resistanceReduction(mc.player, DamageCalcUtils.normalProtReduction(mc.player, DamageCalcUtils.armourCalc(mc.player, DamageCalcUtils.getSwordDamage((PlayerEntity) entity))))){
@@ -122,21 +123,18 @@ public class AutoTotem extends ToggleModule {
                 damageTaken = damage;
             }
         }
+        if (mc.world.dimension.getType() != DimensionType.OVERWORLD) {
+            for (BlockEntity blockEntity : mc.world.blockEntities) {
+                if (blockEntity instanceof BedBlockEntity && damageTaken < DamageCalcUtils.resistanceReduction(mc.player, DamageCalcUtils.blastProtReduction(mc.player, DamageCalcUtils.armourCalc(mc.player, DamageCalcUtils.getDamageMultiplied(DamageCalcUtils.bedDamage(mc.player, new Vec3d(blockEntity.getPos().getX(), blockEntity.getPos().getY(), blockEntity.getPos().getZ()))))))) {
+                    damageTaken = DamageCalcUtils.resistanceReduction(mc.player, DamageCalcUtils.blastProtReduction(mc.player, DamageCalcUtils.armourCalc(mc.player, DamageCalcUtils.getDamageMultiplied(DamageCalcUtils.bedDamage(mc.player, new Vec3d(blockEntity.getPos().getX(), blockEntity.getPos().getY(), blockEntity.getPos().getZ()))))));
+                }
+            }
+        }
         return damageTaken;
-    }
-
-    public void setSmart(boolean b){
-        smart.set(b);
     }
 
     public boolean getLocked(){
         return locked;
     }
 
-    public void setAntiOneTap(boolean b){
-        if(antiOneTap.get()){
-            InvUtils.clickSlot(mc.player.inventory.getEmptySlot(), 0, SlotActionType.PICKUP);
-        }
-        antiOneTap.set(b);
-    }
 }

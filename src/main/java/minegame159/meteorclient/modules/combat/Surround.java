@@ -17,14 +17,14 @@ import net.minecraft.item.Items;
 public class Surround extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     
-    private Setting<Boolean> onlyOnGround = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> onlyOnGround = sgGeneral.add(new BoolSetting.Builder()
             .name("only-on-ground")
             .description("Works only when you standing on ground.")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<Boolean> onlyObsidian = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> onlyObsidian = sgGeneral.add(new BoolSetting.Builder()
             .name("only-obsidian")
             .description("Only uses obsidian.")
             .defaultValue(true)
@@ -39,7 +39,7 @@ public class Surround extends ToggleModule {
     private Listener<TickEvent> onTick = new Listener<>(event -> {
         if (onlyOnGround.get() && !mc.player.onGround) return;
 
-        int slot = -1;
+        int slot;
         if (mc.player.getMainHandStack().getItem() == Items.OBSIDIAN) slot = mc.player.inventory.selectedSlot;
         else slot = findSlot();
 

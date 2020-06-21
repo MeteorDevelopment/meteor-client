@@ -26,14 +26,14 @@ public class ElytraPlus extends ToggleModule {
         if (isActive() && !settingGroup.isEnabled()) ((IKeyBinding) mc.options.keyForward).setPressed(false);
     });
     
-    private Setting<Boolean> autoTakeOff = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> autoTakeOff = sgGeneral.add(new BoolSetting.Builder()
             .name("auto-take-off")
             .description("Automatically takes off when u hold jump without needing to double jump.")
             .defaultValue(false)
             .build()
     );
 
-    private Setting<Double> fallMultiplier = sgGeneral.add(new DoubleSetting.Builder()
+    private final Setting<Double> fallMultiplier = sgGeneral.add(new DoubleSetting.Builder()
             .name("fall-multiplier")
             .description("Controls how fast will u go down naturally.")
             .defaultValue(0.01)
@@ -41,7 +41,7 @@ public class ElytraPlus extends ToggleModule {
             .build()
     );
 
-    private Setting<Double> horizontalSpeed = sgGeneral.add(new DoubleSetting.Builder()
+    private final Setting<Double> horizontalSpeed = sgGeneral.add(new DoubleSetting.Builder()
             .name("horizontal-speed")
             .description("How fast will u go forward and backward.")
             .defaultValue(1)
@@ -49,7 +49,7 @@ public class ElytraPlus extends ToggleModule {
             .build()
     );
 
-    private Setting<Double> verticalSpeed = sgGeneral.add(new DoubleSetting.Builder()
+    private final Setting<Double> verticalSpeed = sgGeneral.add(new DoubleSetting.Builder()
             .name("vertical-speed")
             .description("How fast will u go up and down.")
             .defaultValue(1)
@@ -57,21 +57,21 @@ public class ElytraPlus extends ToggleModule {
             .build()
     );
 
-    private Setting<Boolean> stopInWater = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> stopInWater = sgGeneral.add(new BoolSetting.Builder()
             .name("stop-in-water")
             .description("Stops flying in water.")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<Boolean> dontGoIntoUnloadedChunks = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> dontGoIntoUnloadedChunks = sgGeneral.add(new BoolSetting.Builder()
             .name("dont-go-into-unloaded-chunks")
             .description("Dont go into unloaded chunks.")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<Double> autopilotMinimumHeight = sgAutopilot.add(new DoubleSetting.Builder()
+    private final Setting<Double> autopilotMinimumHeight = sgAutopilot.add(new DoubleSetting.Builder()
             .name("minimum-height")
             .description("Autopilot minimum height.")
             .defaultValue(160)
@@ -234,7 +234,7 @@ public class ElytraPlus extends ToggleModule {
         boolean jumpPressed = mc.options.keyJump.isPressed();
 
         if (autoTakeOff.get() && jumpPressed) {
-            if (!lastJumpPressed && jumpPressed&& !mc.player.isFallFlying()) {
+            if (!lastJumpPressed && !mc.player.isFallFlying()) {
                 jumpTimer = 0;
                 incrementJumpTimer = true;
             }

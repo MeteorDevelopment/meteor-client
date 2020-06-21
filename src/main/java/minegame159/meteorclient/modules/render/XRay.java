@@ -15,7 +15,7 @@ import java.util.List;
 public class XRay extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     
-    private Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
+    private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
             .name("blocks")
             .description("Blocks.")
             .defaultValue(new ArrayList<>(0))

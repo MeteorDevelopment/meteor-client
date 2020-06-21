@@ -13,7 +13,7 @@ import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 public class Criticals extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     
-    private Setting<Boolean> onlyOnGround = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> onlyOnGround = sgGeneral.add(new BoolSetting.Builder()
             .name("only-on-ground")
             .description("Do criticals only on ground.")
             .defaultValue(false)

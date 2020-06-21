@@ -148,7 +148,6 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         for (Module module : modules.values()) {
             if (module.getKey() == event.key) {
                 module.doAction();
-                event.cancel();
 
                 save();
             }
@@ -205,6 +204,8 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
     private void initCombat() {
         addModule(new Criticals());
         addModule(new AutoTotem());
+        addModule(new BedAura());
+        addModule(new AutoWeapon());
         addModule(new AutoLog());
         addModule(new KillAura());
         addModule(new CrystalAura());
@@ -222,6 +223,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new AutoRespawn());
         addModule(new AntiFire());
         addModule(new AutoMend());
+        addModule(new AutoGap());
         addModule(new AutoReplenish());
         addModule(new AntiHunger());
         addModule(new AutoTool());
@@ -245,7 +247,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new Spider());
         addModule(new AutoJump());
         addModule(new Flight());
-        addModule(new NoPush());
+        addModule(new Velocity());
         addModule(new ElytraPlus());
         addModule(new HighJump());
         addModule(new Speed());
@@ -263,8 +265,6 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new FullBright());
         addModule(new StorageESP());
         addModule(new XRay());
-        addModule(new AntiFog());
-        addModule(new NoHurtCam());
         addModule(new ESP());
         addModule(new Freecam());
         addModule(new Tracers());
@@ -277,6 +277,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new NoClip());
         addModule(new Search());
         addModule(new EntityOwner());
+        addModule(new NoRender());
     }
 
     private void initMisc() {
@@ -288,6 +289,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new AutoShearer());
         addModule(new AutoNametag());
         addModule(new DiscordPresence());
+        addModule(new EChestFarmer());
         addModule(new MiddleClickFriend());
         addModule(new StashFinder());
         addModule(new AutoBrewer());
@@ -297,5 +299,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new UnfocusedCPU());
         addModule(new ItemByteSize());
         addModule(new AntiSpam());
+        addModule(new PacketCanceller());
+        addModule(new EntityLogger());
     }
 }

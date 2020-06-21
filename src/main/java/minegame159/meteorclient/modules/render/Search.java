@@ -8,6 +8,7 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.ChunkDataEvent;
 import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.events.RenderEvent;
+import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.events.packets.ReceivePacketEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
@@ -27,6 +28,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.Heightmap;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.dimension.DimensionType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -85,6 +87,8 @@ public class Search extends ToggleModule {
     private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
     private Vec3d vec1 = new Vec3d(0, 0, 0);
 
+    private DimensionType lastDimension;
+
     public Search() {
         super(Category.Render, "search", "Searches for specified blocks.");
     }
@@ -92,6 +96,8 @@ public class Search extends ToggleModule {
     @Override
     public void onActivate() {
         MeteorTaskExecutor.start();
+
+        lastDimension = mc.player.dimension;
 
         searchViewDistance();
     }
@@ -160,6 +166,18 @@ public class Search extends ToggleModule {
                 }
             }
         });
+    });
+
+    @EventHandler
+    private final Listener<TickEvent> onTick = new Listener<>(event -> {
+        if (lastDimension != mc.player.dimension) {
+            synchronized (chunks) {
+                for (MyChunk chunk : chunks.values()) chunk.dispose();
+                chunks.clear();
+            }
+        }
+
+        lastDimension = mc.player.dimension;
     });
 
     @EventHandler

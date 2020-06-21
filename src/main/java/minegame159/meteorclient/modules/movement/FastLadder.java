@@ -13,7 +13,7 @@ import net.minecraft.util.math.Vec3d;
 public class FastLadder extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     
-    private Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
+    private final Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
             .name("speed")
             .description("Speed.")
             .defaultValue(0.2872)

@@ -6,7 +6,10 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.combat.CrystalAura;
+import minegame159.meteorclient.modules.combat.KillAura;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
@@ -17,27 +20,36 @@ import net.minecraft.util.Hand;
 public class AutoEat extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     
-    private Setting<Boolean> egaps = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> egaps = sgGeneral.add(new BoolSetting.Builder()
             .name("egaps")
             .description("Eat enchanted golden apples.")
             .defaultValue(false)
             .build()
     );
 
-    private Setting<Boolean> gaps = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> gaps = sgGeneral.add(new BoolSetting.Builder()
             .name("gaps")
             .description("Eat golden apples.")
             .defaultValue(false)
             .build()
     );
 
-    private Setting<Boolean> chorus = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> chorus = sgGeneral.add(new BoolSetting.Builder()
             .name("chorus")
             .description("Eat chorus fruit.")
             .defaultValue(false)
             .build()
     );
 
+    private final Setting<Boolean> disableAuras = sgGeneral.add(new BoolSetting.Builder()
+            .name("disable-auras")
+            .description("disable all auras")
+            .defaultValue(false)
+            .build()
+    );
+
+    private boolean wasKillActive = false;
+    private boolean wasCrystalActive = false;
     private boolean isEating;
     private int preSelectedSlot, preFoodLevel;
 
@@ -61,6 +73,17 @@ public class AutoEat extends ToggleModule {
 
         if (isEating) {
             if (mc.overlay == null && (mc.currentScreen == null || mc.currentScreen.passEvents)) {
+                if(disableAuras.get()) {
+                    if (disableAuras.get()) {
+                        if (ModuleManager.INSTANCE.get(KillAura.class).isActive()) {
+                            wasKillActive = true;
+                            ModuleManager.INSTANCE.get(KillAura.class).toggle();
+                        }
+                        if (ModuleManager.INSTANCE.get(CrystalAura.class).isActive()) {
+                            wasCrystalActive = true;
+                        }
+                    }
+                }
                 ((IKeyBinding) mc.options.keyUse).setPressed(true);
             } else {
                 mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
@@ -70,6 +93,14 @@ public class AutoEat extends ToggleModule {
                 isEating = false;
                 mc.interactionManager.stopUsingItem(mc.player);
                 ((IKeyBinding) mc.options.keyUse).setPressed(false);
+                if(wasKillActive){
+                    ModuleManager.INSTANCE.get(KillAura.class).toggle();
+                    wasKillActive = false;
+                }
+                if(wasCrystalActive){
+                    ModuleManager.INSTANCE.get(CrystalAura.class).toggle();
+                    wasCrystalActive = false;
+                }
                 mc.player.inventory.selectedSlot = preSelectedSlot;
                 BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume");
             }

@@ -25,6 +25,9 @@ import net.minecraft.entity.effect.StatusEffectUtil;
 import net.minecraft.entity.passive.SheepEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.EntityHitResult;
+import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.dimension.DimensionType;
@@ -97,6 +100,13 @@ public class HUD extends ToggleModule {
     private final Setting<Boolean> time = sgTopLeft.add(new BoolSetting.Builder()
             .name("time")
             .description("Displays ingame time in ticks.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Boolean> lookingAt = sgTopLeft.add(new BoolSetting.Builder()
+            .name("looking-at")
+            .description("Displays block or entity you are looking at.")
             .defaultValue(true)
             .build()
     );
@@ -323,6 +333,15 @@ public class HUD extends ToggleModule {
             y += MeteorClient.FONT.getHeight() + 2;
         }
 
+        if (lookingAt.get()) {
+            String text = "";
+            if (mc.crosshairTarget.getType() == HitResult.Type.BLOCK) text = mc.world.getBlockState(((BlockHitResult) mc.crosshairTarget).getBlockPos()).getBlock().getName().asString();
+            else if (mc.crosshairTarget.getType() == HitResult.Type.ENTITY) text = ((EntityHitResult) mc.crosshairTarget).getEntity().getDisplayName().asString();
+
+            drawInfo("Looking At: ", text, y);
+            y += MeteorClient.FONT.getHeight() + 2;
+        }
+
         if (entities.get()) {
             for (EntityInfo renderInfo : entityCounts.values()) {
                 if (!renderInfo.render) continue;
@@ -333,36 +352,36 @@ public class HUD extends ToggleModule {
         }
     }
 
-    private void drawInfo(String text1, String text2, int x, int y, Color text1Color) {
+    private void drawInfo(String text1, String text2, double x, double y, Color text1Color) {
         MeteorClient.FONT.renderStringWithShadow(text1, x, y, text1Color);
         MeteorClient.FONT.renderStringWithShadow(text2, x + MeteorClient.FONT.getStringWidth(text1), y, gray);
     }
-    private void drawInfo(String text1, String text2, int y, Color text1Color) {
+    private void drawInfo(String text1, String text2, double y, Color text1Color) {
         drawInfo(text1, text2, 2, y, text1Color);
     }
-    private void drawInfo(String text1, String text2, int y) {
+    private void drawInfo(String text1, String text2, double y) {
         drawInfo(text1, text2, y, white);
     }
-    private void drawInfoRight(String text1, String text2, int y, Color text1Color) {
+    private void drawInfoRight(String text1, String text2, double y, Color text1Color) {
         drawInfo(text1, text2, mc.getWindow().getScaledWidth() - MeteorClient.FONT.getStringWidth(text1) - MeteorClient.FONT.getStringWidth(text2) - 2, y, text1Color);
     }
-    private void drawInfoRight(String text1, String text2, int y) {
+    private void drawInfoRight(String text1, String text2, double y) {
         drawInfoRight(text1, text2, y, white);
     }
 
-    private void drawEntityCount(EntityInfo entityInfo, int y) {
+    private void drawEntityCount(EntityInfo entityInfo, double y) {
         MeteorClient.FONT.renderStringWithShadow(entityInfo.countStr, 2, y, gray);
         MeteorClient.FONT.renderStringWithShadow(entityInfo.name, 2 + (maxLetterCount - entityInfo.countStr.length()) * 4 + 4 + MeteorClient.FONT.getStringWidth(entityInfo.countStr), y, white);
     }
 
     private void renderTopRight(Render2DEvent event) {
         if (mc.options.debugEnabled) return;
-        int y = 2;
+        double y = 2;
 
         if (activeModules.get()) {
             for (ToggleModule module : modules) {
                 String infoString = module.getInfoString();
-                int x;
+                double x;
                 if (infoString == null) {
                     x = event.screenWidth - MeteorClient.FONT.getStringWidth(module.title) - 2;
                     MeteorClient.FONT.renderStringWithShadow(module.title, x, y, module.color);
@@ -384,17 +403,17 @@ public class HUD extends ToggleModule {
         }
 
         modules.sort((o1, o2) -> {
-            int a = Integer.compare(o1.getInfoString() == null ? MeteorClient.FONT.getStringWidth(o1.title) : MeteorClient.FONT.getStringWidth(o1.title + " " + o1.getInfoString()), o2.getInfoString() == null ? MeteorClient.FONT.getStringWidth(o2.title) : MeteorClient.FONT.getStringWidth(o2.title + " " + o2.getInfoString()));
+            int a = Double.compare(o1.getInfoString() == null ? MeteorClient.FONT.getStringWidth(o1.title) : MeteorClient.FONT.getStringWidth(o1.title + " " + o1.getInfoString()), o2.getInfoString() == null ? MeteorClient.FONT.getStringWidth(o2.title) : MeteorClient.FONT.getStringWidth(o2.title + " " + o2.getInfoString()));
             if (a == 0) return 0;
             return a < 0 ? 1 : -1;
         });
     }
 
     private void renderBottomRight(Render2DEvent event) {
-        int y = event.screenHeight - MeteorClient.FONT.getHeight() - 2;
+        double y = event.screenHeight - MeteorClient.FONT.getHeight() - 2;
 
         if (rotation.get()) {
-            Direction direction = mc.player.getHorizontalFacing();
+            Direction direction = mc.cameraEntity.getHorizontalFacing();
             String axis = "invalid";
             switch (direction) {
                 case NORTH: axis = "-Z"; break;
@@ -403,11 +422,11 @@ public class HUD extends ToggleModule {
                 case EAST:  axis = "+X"; break;
             }
 
-            float yaw = mc.player.yaw % 360;
+            float yaw = mc.cameraEntity.yaw % 360;
             if (yaw < 0) yaw += 360;
             if (yaw > 180) yaw -= 360;
 
-            float pitch = mc.player.pitch % 360;
+            float pitch = mc.cameraEntity.pitch % 360;
             if (pitch < 0) pitch += 360;
             if (pitch > 180) pitch -= 360;
 
@@ -417,17 +436,17 @@ public class HUD extends ToggleModule {
 
         if (position.get()) {
             if (mc.player.dimension == DimensionType.OVERWORLD) {
-                drawPosition(event.screenWidth, "Nether Pos: ", y, mc.player.getX() / 8.0, mc.player.getY() / 8.0, mc.player.getZ() / 8.0);
+                drawPosition(event.screenWidth, "Nether Pos: ", y, mc.cameraEntity.getX() / 8.0, mc.cameraEntity.getY() / 8.0, mc.cameraEntity.getZ() / 8.0);
                 y -= MeteorClient.FONT.getHeight() + 2;
-                drawPosition(event.screenWidth, "Pos: ", y, mc.player.getX(), mc.player.getY(), mc.player.getZ());
+                drawPosition(event.screenWidth, "Pos: ", y, mc.cameraEntity.getX(), mc.cameraEntity.getY(), mc.cameraEntity.getZ());
                 y -= MeteorClient.FONT.getHeight() + 2;
             } else if (mc.player.dimension == DimensionType.THE_NETHER) {
-                drawPosition(event.screenWidth, "Overworld Pos: ", y, mc.player.getX() * 8.0, mc.player.getY() * 8.0, mc.player.getZ() * 8.0);
+                drawPosition(event.screenWidth, "Overworld Pos: ", y, mc.cameraEntity.getX() * 8.0, mc.cameraEntity.getY() * 8.0, mc.cameraEntity.getZ() * 8.0);
                 y -= MeteorClient.FONT.getHeight() + 2;
-                drawPosition(event.screenWidth, "Pos: ", y, mc.player.getX(), mc.player.getY(), mc.player.getZ());
+                drawPosition(event.screenWidth, "Pos: ", y, mc.cameraEntity.getX(), mc.cameraEntity.getY(), mc.cameraEntity.getZ());
                 y -= MeteorClient.FONT.getHeight() + 2;
             } else if (mc.player.dimension == DimensionType.THE_END) {
-                drawPosition(event.screenWidth, "Pos: ", y, mc.player.getX(), mc.player.getY(), mc.player.getZ());
+                drawPosition(event.screenWidth, "Pos: ", y, mc.cameraEntity.getX(), mc.cameraEntity.getY(), mc.cameraEntity.getZ());
                 y -= MeteorClient.FONT.getHeight() + 2;
             }
         }
@@ -436,16 +455,23 @@ public class HUD extends ToggleModule {
             for (StatusEffectInstance statusEffectInstance : mc.player.getStatusEffects()) {
                 StatusEffect statusEffect = statusEffectInstance.getEffectType();
 
-                drawInfoRight(statusEffect.getName().asString(), " " + (statusEffectInstance.getAmplifier() + 1) + " (" + StatusEffectUtil.durationToString(statusEffectInstance, 1) + ")", y, new Color(statusEffect.getColor()));
+                int c = statusEffect.getColor();
+                white.r = Color.toRGBAR(c);
+                white.g = Color.toRGBAG(c);
+                white.b = Color.toRGBAB(c);
+
+                drawInfoRight(statusEffect.getName().asString(), " " + (statusEffectInstance.getAmplifier() + 1) + " (" + StatusEffectUtil.durationToString(statusEffectInstance, 1) + ")", y, white);
                 y -= MeteorClient.FONT.getHeight() + 2;
+
+                white.r = white.g = white.b = 255;
             }
         }
     }
 
-    private void drawPosition(int screenWidth, String text, int yy, double x, double y, double z) {
+    private void drawPosition(int screenWidth, String text, double yy, double x, double y, double z) {
         String msg1 = String.format("%.1f %.1f %.1f", x, y, z);
-        int x1 = screenWidth - MeteorClient.FONT.getStringWidth(msg1) - 2;
-        int x2 = screenWidth - MeteorClient.FONT.getStringWidth(msg1) - MeteorClient.FONT.getStringWidth(text) - 2;
+        double x1 = screenWidth - MeteorClient.FONT.getStringWidth(msg1) - 2;
+        double x2 = screenWidth - MeteorClient.FONT.getStringWidth(msg1) - MeteorClient.FONT.getStringWidth(text) - 2;
         MeteorClient.FONT.renderStringWithShadow(msg1, x1, yy, gray);
         MeteorClient.FONT.renderStringWithShadow(text, x2, yy, white);
     }
