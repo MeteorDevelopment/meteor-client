@@ -273,7 +273,6 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new HoleESP());
         addModule(new LogoutSpot());
         addModule(new Trajectories());
-        addModule(new NoBubbles());
         addModule(new NoClip());
         addModule(new Search());
         addModule(new EntityOwner());

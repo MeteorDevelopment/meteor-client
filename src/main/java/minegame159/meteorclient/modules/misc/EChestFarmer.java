@@ -69,7 +69,7 @@ public class EChestFarmer extends ToggleModule {
             if(slot <= 0) {
                 mc.player.inventory.selectedSlot = slot;
             }
-            mc.interactionManager.method_2902(mc.player.getBlockPos().add(x, 0, z), Direction.UP);
+            mc.interactionManager.updateBlockBreakingProgress(mc.player.getBlockPos().add(x, 0, z), Direction.UP);
         }
     });
 }

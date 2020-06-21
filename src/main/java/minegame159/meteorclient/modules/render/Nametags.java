@@ -4,6 +4,7 @@ import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.RenderEvent;
+import minegame159.meteorclient.mixininterface.IBakedQuad;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.rendering.Matrices;
@@ -165,8 +166,8 @@ public class Nametags extends ToggleModule {
 
                 if (itemStack.isDamaged()) isDamaged = true;
 
-                for (BakedQuad quad : mc.getItemRenderer().getModel(itemStack).getQuads(null, null, null)) {
-                    Sprite sprite = quad.getSprite();
+                for (BakedQuad quad : mc.getItemRenderer().getModels().getModel(itemStack).getQuads(null, null, null)) {
+                    Sprite sprite = ((IBakedQuad) quad).getSprite();
                     double w = sprite.getWidth();
                     double h = sprite.getHeight();
 

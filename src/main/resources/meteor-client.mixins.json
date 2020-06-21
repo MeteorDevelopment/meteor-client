@@ -51,7 +51,9 @@
     "CrashReportMixin",
     "ExplosionMixin",
     "BossBarHudMixin",
-    "HeldItemRendererMixin"
+    "InGameOverlayRendererMixin",
+    "BakedQuadMixin",
+    "WorldRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1
