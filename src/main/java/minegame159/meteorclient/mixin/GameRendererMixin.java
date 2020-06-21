@@ -12,6 +12,8 @@ import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.GameRenderer;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -58,5 +60,12 @@ public abstract class GameRendererMixin {
     @Inject(method = "renderRain", at = @At("HEAD"), cancellable = true)
     private void onRenderRain(CallbackInfo info) {
         if (ModuleManager.INSTANCE.get(NoRender.class).noWeather()) info.cancel();
+    }
+
+    @Inject(method = "showFloatingItem", at = @At("HEAD"), cancellable = true)
+    private void onShowFloatingItem(ItemStack floatingItem, CallbackInfo info) {
+        if (floatingItem.getItem() == Items.TOTEM_OF_UNDYING && ModuleManager.INSTANCE.get(NoRender.class).noTotem()) {
+            info.cancel();
+        }
     }
 }
