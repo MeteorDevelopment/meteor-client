@@ -300,5 +300,6 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new ItemByteSize());
         addModule(new AntiSpam());
         addModule(new PacketCanceller());
+        addModule(new EntityLogger());
     }
 }
