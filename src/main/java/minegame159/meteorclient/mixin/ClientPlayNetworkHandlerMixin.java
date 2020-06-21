@@ -3,18 +3,23 @@ package minegame159.meteorclient.mixin;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.events.packets.SendPacketEvent;
+import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.movement.Velocity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.network.Packet;
 import net.minecraft.network.packet.s2c.play.ChunkDataS2CPacket;
 import net.minecraft.network.packet.s2c.play.EntitiesDestroyS2CPacket;
 import net.minecraft.network.packet.s2c.play.GameJoinS2CPacket;
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.chunk.WorldChunk;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
@@ -49,5 +54,17 @@ public abstract class ClientPlayNetworkHandlerMixin {
     @Inject(method = "onEntitiesDestroy", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/world/ClientWorld;removeEntity(I)V"), locals = LocalCapture.CAPTURE_FAILSOFT)
     private void onEntityDestroy(EntitiesDestroyS2CPacket packet, CallbackInfo info, int i, int j) {
         MeteorClient.EVENT_BUS.post(EventStore.entityDestroyEvent(client.world.getEntityById(j)));
+    }
+
+    @Redirect(method = "onExplosion", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;setVelocity(Lnet/minecraft/util/math/Vec3d;)V"))
+    private void onExplosionVec3dAddProxy(ClientPlayerEntity player, Vec3d vec3d) {
+        if (player != client.player) player.setVelocity(vec3d);
+
+        double deltaX = vec3d.x - player.getVelocity().x;
+        double deltaY = vec3d.y - player.getVelocity().y;
+        double deltaZ = vec3d.z - player.getVelocity().z;
+
+        Velocity velocity = ModuleManager.INSTANCE.get(Velocity.class);
+        player.setVelocity(player.getVelocity().x + deltaX * velocity.getHorizontal(), player.getVelocity().y + deltaY * velocity.getVertical(), player.getVelocity().z + deltaZ * velocity.getHorizontal());
     }
 }

@@ -13,7 +13,7 @@ import net.arikia.dev.drpc.DiscordRPC;
 import net.arikia.dev.drpc.DiscordRichPresence;
 
 public class DiscordPresence extends ToggleModule {
-    private static DiscordRichPresence presence = new DiscordRichPresence.Builder("https://discord.gg/BG2kMWb").build();
+    private final static DiscordRichPresence presence = new DiscordRichPresence.Builder("https://discord.gg/BG2kMWb").build();
 
     public DiscordPresence(){super(Category.Misc, "discord-presence", "That stuff you see in discord");}
 

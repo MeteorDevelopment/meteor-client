@@ -17,14 +17,14 @@ public class AutoFish extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgSplashRangeDetection = settings.createGroup("Splash Sound Range Detection", "Allows you to use multiple accounts next to each other.", "splash-range-detection", false);
 
-    private Setting<Boolean> autoCast = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> autoCast = sgGeneral.add(new BoolSetting.Builder()
             .name("auto-cast")
             .description("Automatically casts when not fishing.")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<Integer> ticksAutoCast = sgGeneral.add(new IntSetting.Builder()
+    private final Setting<Integer> ticksAutoCast = sgGeneral.add(new IntSetting.Builder()
             .name("ticks-auto-cast")
             .description("Ticks to wait before auto casting.")
             .defaultValue(10)
@@ -33,7 +33,7 @@ public class AutoFish extends ToggleModule {
             .build()
     );
 
-    private Setting<Integer> ticksCatch = sgGeneral.add(new IntSetting.Builder()
+    private final Setting<Integer> ticksCatch = sgGeneral.add(new IntSetting.Builder()
             .name("ticks-catch")
             .description("Ticks to wait before catching the fish")
             .defaultValue(6)
@@ -42,7 +42,7 @@ public class AutoFish extends ToggleModule {
             .build()
     );
 
-    private Setting<Integer> ticksThrow = sgGeneral.add(new IntSetting.Builder()
+    private final Setting<Integer> ticksThrow = sgGeneral.add(new IntSetting.Builder()
             .name("ticks-throw")
             .description("Ticks to wait before throwing the bobber.")
             .defaultValue(14)
@@ -51,7 +51,7 @@ public class AutoFish extends ToggleModule {
             .build()
     );
 
-    private Setting<Double> splashDetectionRange = sgSplashRangeDetection.add(new DoubleSetting.Builder()
+    private final Setting<Double> splashDetectionRange = sgSplashRangeDetection.add(new DoubleSetting.Builder()
             .name("splash-detection-range")
             .description("Detection range of splash sound. Low values will not work when TPS is low.")
             .defaultValue(10)

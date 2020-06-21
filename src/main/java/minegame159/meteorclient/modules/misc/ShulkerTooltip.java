@@ -9,7 +9,7 @@ import minegame159.meteorclient.settings.SettingGroup;
 public class ShulkerTooltip extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     
-    private Setting<Integer> lines = sgGeneral.add(new IntSetting.Builder()
+    private final Setting<Integer> lines = sgGeneral.add(new IntSetting.Builder()
             .name("lines")
             .description("Number of lines.")
             .defaultValue(8)

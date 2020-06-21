@@ -6,8 +6,11 @@ import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.render.HUD;
+import minegame159.meteorclient.modules.render.NoRender;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.hud.InGameHud;
+import net.minecraft.entity.Entity;
+import net.minecraft.scoreboard.ScoreboardObjective;
 import org.lwjgl.opengl.GL11;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -44,5 +47,25 @@ public abstract class InGameHudMixin {
     @Inject(method = "renderStatusEffectOverlay", at = @At("HEAD"), cancellable = true)
     private void onRenderStatusEffectOverlay(CallbackInfo info) {
         if (ModuleManager.INSTANCE.isActive(HUD.class) && ModuleManager.INSTANCE.get(HUD.class).potionTimers.get()) info.cancel();
+    }
+
+    @Inject(method = "renderPortalOverlay", at = @At("HEAD"), cancellable = true)
+    private void onRenderPortalOverlay(float f, CallbackInfo info) {
+        if (ModuleManager.INSTANCE.get(NoRender.class).noPortalOverlay()) info.cancel();
+    }
+
+    @Inject(method = "renderPumpkinOverlay", at = @At("HEAD"), cancellable = true)
+    private void onRenderPumpkinOverlay(CallbackInfo info) {
+        if (ModuleManager.INSTANCE.get(NoRender.class).noPumpkinOverlay()) info.cancel();
+    }
+
+    @Inject(method = "renderVignetteOverlay", at = @At("HEAD"), cancellable = true)
+    private void onRenderVignetteOverlay(Entity entity, CallbackInfo info) {
+        if (ModuleManager.INSTANCE.get(NoRender.class).noVignette()) info.cancel();
+    }
+
+    @Inject(method = "renderScoreboardSidebar", at = @At("HEAD"), cancellable = true)
+    private void onRenderScoreboardSidebar(ScoreboardObjective scoreboardObjective, CallbackInfo info) {
+        if (ModuleManager.INSTANCE.get(NoRender.class).noScoreboard()) info.cancel();
     }
 }

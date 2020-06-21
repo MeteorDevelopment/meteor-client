@@ -1,5 +1,7 @@
 package minegame159.meteorclient.modules.player;
 
+//Updated by squidoodly 15/06/2020
+
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.DamageEvent;
@@ -48,28 +50,28 @@ public class AutoArmor extends ToggleModule {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private Setting<Protection> prioritizeProtection = sgGeneral.add(new EnumSetting.Builder<Protection>()
+    private final Setting<Protection> prioritizeProtection = sgGeneral.add(new EnumSetting.Builder<Protection>()
             .name("prioritize")
             .description("Which protection to prioritize.")
             .defaultValue(Protection.Protection)
             .build()
     );
 
-    private Setting<Boolean> considerFrostWalker = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> considerFrostWalker = sgGeneral.add(new BoolSetting.Builder()
             .name("consider-frost-walker")
             .description("Consider frost walker.")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<Boolean> switchToBlastProtWhenNearCrystalOrBed = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> switchToBlastProtWhenNearCrystalOrBed = sgGeneral.add(new BoolSetting.Builder()
             .name("switch-to-blast-prot-when-near-crystal-or-bed")
             .description("Switches to blast protection when near crystals or beds when not in overworld.")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<Double> crystalAndBedDetectionDistance = sgGeneral.add(new DoubleSetting.Builder()
+    private final Setting<Double> crystalAndBedDetectionDistance = sgGeneral.add(new DoubleSetting.Builder()
             .name("crystal-and-bed-detection-distance")
             .description("Crystal and bed detection distance")
             .defaultValue(5)
@@ -77,10 +79,17 @@ public class AutoArmor extends ToggleModule {
             .build()
     );
 
-    private BestItem helmet = new BestItem();
-    private BestItem chestplate = new BestItem();
-    private BestItem leggings = new BestItem();
-    private BestItem boots = new BestItem();
+    private final Setting<Boolean> antiBreak = sgGeneral.add(new BoolSetting.Builder()
+            .name("anti-break")
+            .description("Stops you from breaking your weapon.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final BestItem helmet = new BestItem();
+    private final BestItem chestplate = new BestItem();
+    private final BestItem leggings = new BestItem();
+    private final BestItem boots = new BestItem();
 
     private boolean manageChestplate;
 
@@ -142,7 +151,7 @@ public class AutoArmor extends ToggleModule {
         // Get best items
         for (int i = 0; i < mc.player.inventory.main.size(); i++) {
             ItemStack itemStack = mc.player.inventory.getInvStack(i);
-            if (!(itemStack.getItem() instanceof ArmorItem)) continue;
+            if (!(itemStack.getItem() instanceof ArmorItem) || (antiBreak.get() && (itemStack.getMaxDamage() - itemStack.getDamage()) <= 11)) continue;
 
             // Helmet
             int score = getHelmetScore(itemStack);
@@ -192,6 +201,7 @@ public class AutoArmor extends ToggleModule {
         if (!(itemStack.getItem() instanceof ArmorItem)) return -1;
         if (((ArmorItem) itemStack.getItem()).getSlotType() != EquipmentSlot.HEAD) return -1;
         int score = getBaseScore(itemStack);
+        if(score == -1) return -1;
 
         score += EnchantmentHelper.getLevel(Enchantments.AQUA_AFFINITY, itemStack);
         score += EnchantmentHelper.getLevel(Enchantments.RESPIRATION, itemStack);
@@ -202,12 +212,14 @@ public class AutoArmor extends ToggleModule {
     private int getChestplateScore(ItemStack itemStack) {
         if (!(itemStack.getItem() instanceof ArmorItem)) return -1;
         if (((ArmorItem) itemStack.getItem()).getSlotType() != EquipmentSlot.CHEST) return -1;
+        if(getBaseScore(itemStack) == -1) return -1;
         return getBaseScore(itemStack);
     }
 
     private int getLeggingsScore(ItemStack itemStack) {
         if (!(itemStack.getItem() instanceof ArmorItem)) return -1;
         if (((ArmorItem) itemStack.getItem()).getSlotType() != EquipmentSlot.LEGS) return -1;
+        if(getBaseScore(itemStack) == -1) return -1;
         return getBaseScore(itemStack);
     }
 
@@ -215,6 +227,7 @@ public class AutoArmor extends ToggleModule {
         if (!(itemStack.getItem() instanceof ArmorItem)) return -1;
         if (((ArmorItem) itemStack.getItem()).getSlotType() != EquipmentSlot.FEET) return -1;
         int score = getBaseScore(itemStack);
+        if(score == -1) return -1;
 
         score += EnchantmentHelper.getLevel(Enchantments.DEPTH_STRIDER, itemStack);
         score += EnchantmentHelper.getLevel(Enchantments.FEATHER_FALLING, itemStack);
@@ -224,6 +237,7 @@ public class AutoArmor extends ToggleModule {
     }
 
     private int getBaseScore(ItemStack itemStack) {
+        if((antiBreak.get() && (itemStack.getMaxDamage() - itemStack.getDamage()) <= 11)) return -1;
         int score = 0;
 
         score += ((ArmorItem) itemStack.getItem()).getProtection();

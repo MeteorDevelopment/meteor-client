@@ -19,14 +19,14 @@ import java.util.List;
 public class AutoDrop extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     
-    private Setting<List<Item>> items = sgGeneral.add(new ItemListSetting.Builder()
+    private final Setting<List<Item>> items = sgGeneral.add(new ItemListSetting.Builder()
             .name("items")
             .description("Items to drop.")
             .defaultValue(new ArrayList<>(0))
             .build()
     );
 
-    private Setting<Boolean> excludeHotbar = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> excludeHotbar = sgGeneral.add(new BoolSetting.Builder()
             .name("exclude-hotbar")
             .description("Doesn't drop items from hotbar.")
             .defaultValue(false)

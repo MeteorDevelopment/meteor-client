@@ -11,21 +11,21 @@ import net.minecraft.entity.LivingEntity;
 public class Chams extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     
-    private Setting<Boolean> players = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> players = sgGeneral.add(new BoolSetting.Builder()
             .name("players")
             .description("Render players.")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<Boolean> animals = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> animals = sgGeneral.add(new BoolSetting.Builder()
             .name("animals")
             .description("Render animals")
             .defaultValue(true)
             .build()
     );
 
-    private Setting<Boolean> mobs = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> mobs = sgGeneral.add(new BoolSetting.Builder()
             .name("mobs")
             .description("Render mobs.")
             .defaultValue(true)

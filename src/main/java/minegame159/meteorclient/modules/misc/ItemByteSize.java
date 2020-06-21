@@ -14,7 +14,7 @@ public class ItemByteSize extends ToggleModule {
 
     private final SettingGroup sgUseKbIfBigEnough = settings.createGroup("Use KB if big enough", "use-kb-if-big-enough", "Uses kilobytes instead of bytes if the item is larger than 1 kb.", true);
 
-    private Setting<Mode> mode = sgUseKbIfBigEnough.add(new EnumSetting.Builder<Mode>()
+    private final Setting<Mode> mode = sgUseKbIfBigEnough.add(new EnumSetting.Builder<Mode>()
             .name("mode")
             .description("Standard 1 kb = 1000 b, True 1 kb = 1024 b.")
             .defaultValue(Mode.True)

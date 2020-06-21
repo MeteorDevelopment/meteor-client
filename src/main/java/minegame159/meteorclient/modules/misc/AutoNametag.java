@@ -17,7 +17,7 @@ import net.minecraft.util.Hand;
 public class AutoNametag extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     
-    private Setting<Double> distance = sgGeneral.add(new DoubleSetting.Builder()
+    private final Setting<Double> distance = sgGeneral.add(new DoubleSetting.Builder()
             .name("distance")
             .description("Maximum distance.")
             .min(0.0)

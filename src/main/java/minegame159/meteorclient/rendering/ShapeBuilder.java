@@ -18,10 +18,13 @@ public class ShapeBuilder {
         Matrices.push();
     }
 
-    public static void end() {
-        triangles.end(false);
+    public static void end(boolean texture) {
+        triangles.end(texture);
         triangles = Renderer.TRIANGLES;
         Matrices.pop();
+    }
+    public static void end() {
+        end(false);
     }
 
     // Quad

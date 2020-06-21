@@ -12,7 +12,7 @@ import minegame159.meteorclient.settings.SettingGroup;
 public class Pitch extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     
-    private Setting<Double> angle = sgGeneral.add(new DoubleSetting.Builder()
+    private final Setting<Double> angle = sgGeneral.add(new DoubleSetting.Builder()
             .name("angle")
             .description("Angle in degrees.")
             .defaultValue(0)

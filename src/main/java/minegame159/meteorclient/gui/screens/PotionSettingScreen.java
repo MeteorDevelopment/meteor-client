@@ -18,18 +18,20 @@ public class PotionSettingScreen extends WindowScreen {
         this.setting = setting;
 
         // Filter
-        filter = add(new WTextBox("", 200)).fillX().expandX().getWidget();
+        filter = new WTextBox("", 200);
         filter.setFocused(true);
         filter.action = textBox -> {
             clear();
             initWidgets();
         };
-        row();
 
         initWidgets();
     }
 
     private void initWidgets() {
+        add(filter).fillX().expandX().getWidget();
+        row();
+
         // Potions
         WTable table = add(new WTable()).getWidget();
         for (MyPotion potion : MyPotion.values()) {

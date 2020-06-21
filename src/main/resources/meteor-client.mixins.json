@@ -48,7 +48,10 @@
     "ChatHudLineMixin",
     "BufferBuilderMixin",
     "LookBehaviorMixin",
-    "CrashReportMixin"
+    "CrashReportMixin",
+    "ExplosionMixin",
+    "BossBarHudMixin",
+    "HeldItemRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

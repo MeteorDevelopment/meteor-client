@@ -3,13 +3,14 @@ package minegame159.meteorclient.mixin;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.events.OpenScreenEvent;
-import minegame159.meteorclient.mixininterface.IMinecraftClient;
 import minegame159.meteorclient.gui.WidgetScreen;
+import minegame159.meteorclient.mixininterface.IMinecraftClient;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.Mouse;
 import net.minecraft.client.RunArgs;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.util.Session;
 import net.minecraft.client.util.Window;
 import net.minecraft.client.world.ClientWorld;
@@ -41,12 +42,8 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
 
     @Shadow private Session session;
 
-    @Shadow public abstract CompletableFuture<Void> reloadResources();
-
-    @Shadow private static int currentFps;
-
-    @Inject(method = "<init>", at = @At("TAIL"))
-    private void onInit(RunArgs args, CallbackInfo info) {
+    @Inject(method = "init", at = @At("TAIL"))
+    private void onInit(CallbackInfo info) {
         MeteorClient.INSTANCE.onInitializeClient();
     }
 
