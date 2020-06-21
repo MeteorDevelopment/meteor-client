@@ -18,6 +18,8 @@ public class ParticleManagerMixin {
             info.cancel();
         } else if (noRender.noExplosion() && (particle instanceof ExplosionSmokeParticle || particle instanceof ExplosionLargeParticle || particle instanceof ExplosionEmitterParticle)) {
             info.cancel();
+        } else if (noRender.noTotem() && particle instanceof TotemParticle) {
+            info.cancel();
         }
     }
 }

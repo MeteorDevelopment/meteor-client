@@ -93,6 +93,13 @@ public class NoRender extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> noTotem = sgGeneral.add(new BoolSetting.Builder()
+            .name("no-totem")
+            .description("No totem particles.")
+            .defaultValue(true)
+            .build()
+    );
+
     public NoRender() {
         super(Category.Render, "no-render", "Disables some things from rendering.");
     }
@@ -143,5 +150,9 @@ public class NoRender extends ToggleModule {
 
     public boolean noExplosion() {
         return isActive() && noExplosion.get();
+    }
+
+    public boolean noTotem() {
+        return isActive() && noTotem.get();
     }
 }
