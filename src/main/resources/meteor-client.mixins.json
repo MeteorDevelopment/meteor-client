@@ -53,7 +53,8 @@
     "ExplosionMixin",
     "BossBarHudMixin",
     "HeldItemRendererMixin",
-    "ArmorFeatureRendererMixin"
+    "ArmorFeatureRendererMixin",
+    "BlockStateMixin"
   ],
   "injectors": {
     "defaultRequire": 1

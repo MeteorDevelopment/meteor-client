@@ -13,6 +13,7 @@ import minegame159.meteorclient.gui.screens.topbar.TopBarModules;
 import minegame159.meteorclient.macros.MacroManager;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.rendering.MFont;
+import minegame159.meteorclient.utils.EChestMemory;
 import minegame159.meteorclient.utils.EntityUtils;
 import minegame159.meteorclient.utils.Utils;
 import net.fabricmc.api.ClientModInitializer;
@@ -61,6 +62,7 @@ public class MeteorClient implements ClientModInitializer, Listenable {
         ModuleManager.INSTANCE = new ModuleManager();
         CommandManager.init();
         AccountManager.init();
+        EChestMemory.init();
 
         load();
 
