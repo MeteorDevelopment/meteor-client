@@ -3,9 +3,11 @@ package minegame159.meteorclient.gui;
 import minegame159.meteorclient.gui.renderer.GuiRenderer;
 import minegame159.meteorclient.gui.widgets.Cell;
 import minegame159.meteorclient.gui.widgets.WWidget;
+import minegame159.meteorclient.rendering.Matrices;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.LiteralText;
 import org.lwjgl.glfw.GLFW;
 
@@ -84,6 +86,7 @@ public class WidgetScreen extends Screen {
     public void render(int mouseX, int mouseY, float delta) {
         if (!Utils.canUpdate()) renderBackground();
 
+        Matrices.begin(new MatrixStack());
         GuiRenderer.INSTANCE.begin();
         root.render(GuiRenderer.INSTANCE, mouseX, mouseY, delta);
         GuiRenderer.INSTANCE.end();
