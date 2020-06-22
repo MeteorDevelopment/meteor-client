@@ -18,39 +18,43 @@ public class Enchant extends Command {
     public void run(String[] args){
         if(args.length == 0){Utils.sendMessage("#redPlease include a level"); return;}
         if(mc.player.isCreative()){
-            Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.AQUA_AFFINITY, Integer.parseInt(args[0]));
-            Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.BANE_OF_ARTHROPODS, Integer.parseInt(args[0]));
-            Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.BLAST_PROTECTION, Integer.parseInt(args[0]));
-            Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.CHANNELING, Integer.parseInt(args[0]));
-            Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.DEPTH_STRIDER, Integer.parseInt(args[0]));
-            Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.EFFICIENCY, Integer.parseInt(args[0]));
-            Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.FEATHER_FALLING, Integer.parseInt(args[0]));
-            Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.FIRE_ASPECT, Integer.parseInt(args[0]));
-            Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.FIRE_PROTECTION, Integer.parseInt(args[0]));
-            Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.FLAME, Integer.parseInt(args[0]));
-            Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.FORTUNE, Integer.parseInt(args[0]));
-            Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.FROST_WALKER, Integer.parseInt(args[0]));
-            Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.IMPALING, Integer.parseInt(args[0]));
-            Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.INFINITY, Integer.parseInt(args[0]));
-            Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.LOOTING, Integer.parseInt(args[0]));
-            Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.LOYALTY, Integer.parseInt(args[0]));
-            Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.LUCK_OF_THE_SEA, Integer.parseInt(args[0]));
-            Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.LURE, Integer.parseInt(args[0]));
-            Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.MENDING, Integer.parseInt(args[0]));
-            Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.PIERCING, Integer.parseInt(args[0]));
-            Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.POWER, Integer.parseInt(args[0]));
-            Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.PROJECTILE_PROTECTION, Integer.parseInt(args[0]));
-            Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.PROTECTION, Integer.parseInt(args[0]));
-            Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.PUNCH, Integer.parseInt(args[0]));
-            Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.QUICK_CHARGE, Integer.parseInt(args[0]));
-            Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.RESPIRATION, Integer.parseInt(args[0]));
-            Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.SHARPNESS, Integer.parseInt(args[0]));
-            Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.SMITE, Integer.parseInt(args[0]));
-            Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.SWEEPING, Integer.parseInt(args[0]));
-            Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.SHARPNESS, Integer.parseInt(args[0]));
-            Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.THORNS, Integer.parseInt(args[0]));
-            Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.UNBREAKING, Integer.parseInt(args[0]));
-            Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.VANISHING_CURSE, Integer.parseInt(args[0]));
+            try {
+                Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.AQUA_AFFINITY, Integer.parseInt(args[0]));
+                Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.BANE_OF_ARTHROPODS, Integer.parseInt(args[0]));
+                Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.BLAST_PROTECTION, Integer.parseInt(args[0]));
+                Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.CHANNELING, Integer.parseInt(args[0]));
+                Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.DEPTH_STRIDER, Integer.parseInt(args[0]));
+                Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.EFFICIENCY, Integer.parseInt(args[0]));
+                Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.FEATHER_FALLING, Integer.parseInt(args[0]));
+                Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.FIRE_ASPECT, Integer.parseInt(args[0]));
+                Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.FIRE_PROTECTION, Integer.parseInt(args[0]));
+                Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.FLAME, Integer.parseInt(args[0]));
+                Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.FORTUNE, Integer.parseInt(args[0]));
+                Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.FROST_WALKER, Integer.parseInt(args[0]));
+                Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.IMPALING, Integer.parseInt(args[0]));
+                Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.INFINITY, Integer.parseInt(args[0]));
+                Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.LOOTING, Integer.parseInt(args[0]));
+                Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.LOYALTY, Integer.parseInt(args[0]));
+                Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.LUCK_OF_THE_SEA, Integer.parseInt(args[0]));
+                Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.LURE, Integer.parseInt(args[0]));
+                Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.MENDING, Integer.parseInt(args[0]));
+                Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.PIERCING, Integer.parseInt(args[0]));
+                Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.POWER, Integer.parseInt(args[0]));
+                Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.PROJECTILE_PROTECTION, Integer.parseInt(args[0]));
+                Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.PROTECTION, Integer.parseInt(args[0]));
+                Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.PUNCH, Integer.parseInt(args[0]));
+                Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.QUICK_CHARGE, Integer.parseInt(args[0]));
+                Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.RESPIRATION, Integer.parseInt(args[0]));
+                Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.SHARPNESS, Integer.parseInt(args[0]));
+                Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.SMITE, Integer.parseInt(args[0]));
+                Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.SWEEPING, Integer.parseInt(args[0]));
+                Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.SHARPNESS, Integer.parseInt(args[0]));
+                Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.THORNS, Integer.parseInt(args[0]));
+                Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.UNBREAKING, Integer.parseInt(args[0]));
+                Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.VANISHING_CURSE, Integer.parseInt(args[0]));
+            }catch(NumberFormatException e){
+                Utils.sendMessage("#redThat is not a valid number. Try again.");
+            }
         }else{
             Utils.sendMessage("#redYou must be in creative mode to use this");
         }
