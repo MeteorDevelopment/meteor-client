@@ -54,7 +54,9 @@
     "BossBarHudMixin",
     "HeldItemRendererMixin",
     "ArmorFeatureRendererMixin",
-    "BlockStateMixin"
+    "BlockStateMixin",
+    "BookEditScreenMixin",
+    "BookScreenMixin"
   ],
   "injectors": {
     "defaultRequire": 1
