@@ -63,6 +63,7 @@ public class MeshBuilder {
         GlStateManager.enableBlend();
         GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
         GlStateManager.disableDepthTest();
+        GlStateManager.disableAlphaTest();
         if (texture) GlStateManager.enableTexture();
         else GlStateManager.disableTexture();
         GlStateManager.disableLighting();
@@ -75,6 +76,7 @@ public class MeshBuilder {
         RENDERER.draw(buffer);
 
         GlStateManager.disableBlend();
+        GlStateManager.enableAlphaTest();
         GlStateManager.enableDepthTest();
         GlStateManager.enableTexture();
         GL11.glDisable(GL11.GL_LINE_SMOOTH);

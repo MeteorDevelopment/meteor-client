@@ -86,6 +86,15 @@ public class ESP extends ToggleModule {
             .build()
     );
 
+    private final Setting<Double> fadeDistance = sgGeneral.add(new DoubleSetting.Builder()
+            .name("fade-distance")
+            .description("At which distance the color will fade out.")
+            .defaultValue(6)
+            .min(0)
+            .sliderMax(12)
+            .build()
+    );
+
     private final Color sideColor = new Color();
     private int count;
 
@@ -101,24 +110,39 @@ public class ESP extends ToggleModule {
     private void render(Entity entity, Color lineColor) {
         setSideColor(lineColor);
 
-        switch (mode.get()) {
-            case Lines: {
-                Box box = entity.getBoundingBox();
-                ShapeBuilder.boxEdges(box.x1, box.y1, box.z1, box.x2, box.y2, box.z2, lineColor);
-                break;
-            }
-            case Sides: {
-                Box box = entity.getBoundingBox();
-                ShapeBuilder.boxSides(box.x1, box.y1, box.z1, box.x2, box.y2, box.z2, sideColor);
-                break;
-            }
-            case Both: {
-                Box box = entity.getBoundingBox();
-                ShapeBuilder.boxEdges(box.x1, box.y1, box.z1, box.x2, box.y2, box.z2, lineColor);
-                ShapeBuilder.boxSides(box.x1, box.y1, box.z1, box.x2, box.y2, box.z2, sideColor);
-                break;
+        double dist = mc.player.squaredDistanceTo(entity.x + entity.getWidth() / 2, entity.y + entity.getHeight() / 2, entity.z + entity.getWidth() / 2);
+        double a = 1;
+        if (dist <= fadeDistance.get() * fadeDistance.get()) a = dist / (fadeDistance.get() * fadeDistance.get());
+
+        int prevLineA = lineColor.a;
+        int prevSideA = sideColor.a;
+
+        lineColor.a *= a;
+        sideColor.a *= a;
+
+        if (a >= 0.075) {
+            switch (mode.get()) {
+                case Lines: {
+                    Box box = entity.getBoundingBox();
+                    ShapeBuilder.boxEdges(box.x1, box.y1, box.z1, box.x2, box.y2, box.z2, lineColor);
+                    break;
+                }
+                case Sides: {
+                    Box box = entity.getBoundingBox();
+                    ShapeBuilder.boxSides(box.x1, box.y1, box.z1, box.x2, box.y2, box.z2, sideColor);
+                    break;
+                }
+                case Both: {
+                    Box box = entity.getBoundingBox();
+                    ShapeBuilder.boxEdges(box.x1, box.y1, box.z1, box.x2, box.y2, box.z2, lineColor);
+                    ShapeBuilder.boxSides(box.x1, box.y1, box.z1, box.x2, box.y2, box.z2, sideColor);
+                    break;
+                }
             }
         }
+
+        lineColor.a = prevLineA;
+        sideColor.a = prevSideA;
 
         count++;
     }
