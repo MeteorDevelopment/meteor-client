@@ -167,8 +167,6 @@ public class Nametags extends ToggleModule {
 
                 for (BakedQuad quad : mc.getItemRenderer().getModel(itemStack).getQuads(null, null, null)) {
                     Sprite sprite = quad.getSprite();
-                    double w = sprite.getWidth();
-                    double h = sprite.getHeight();
 
                     if (itemStack.getItem() instanceof DyeableArmorItem) {
                         int c = ((DyeableArmorItem) itemStack.getItem()).getColor(itemStack);
@@ -182,7 +180,7 @@ public class Nametags extends ToggleModule {
                     itemX += (armorWidths[i] - 16) / 2;
                     double addY = (armorHeight - 16) / 2;
 
-                    ShapeBuilder.texQuad(itemX, -heightUp + addY, w, h, sprite.getMinU(), sprite.getMinV(), sprite.getMaxU() - sprite.getMinU(), sprite.getMaxV() - sprite.getMinV(), WHITE, WHITE, WHITE, WHITE);
+                    ShapeBuilder.texQuad(itemX, -heightUp + addY, 16, 16, sprite.getMinU(), sprite.getMinV(), sprite.getMaxU() - sprite.getMinU(), sprite.getMaxV() - sprite.getMinV(), WHITE, WHITE, WHITE, WHITE);
 
                     itemX = preItemX;
                     WHITE.r = WHITE.g = WHITE.b = 255;
