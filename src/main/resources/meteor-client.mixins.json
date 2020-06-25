@@ -56,7 +56,8 @@
     "ArmorFeatureRendererMixin",
     "BlockStateMixin",
     "BookEditScreenMixin",
-    "BookScreenMixin"
+    "BookScreenMixin",
+    "AbstractClientPlayerEntityMixin"
   ],
   "injectors": {
     "defaultRequire": 1
