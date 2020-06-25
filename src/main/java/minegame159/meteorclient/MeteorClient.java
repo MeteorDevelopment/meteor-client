@@ -99,6 +99,8 @@ public class MeteorClient implements ClientModInitializer, Listenable {
         if (openClickGui.isPressed() && mc.currentScreen == null) {
             openClickGui();
         }
+
+        mc.player.getActiveStatusEffects().values().removeIf(statusEffectInstance -> statusEffectInstance.getDuration() <= 0);
     });
 
     private void loadFont() {

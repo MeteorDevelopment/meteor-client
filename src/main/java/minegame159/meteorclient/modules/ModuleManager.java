@@ -236,6 +236,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new Pitch());
         addModule(new Portals());
         addModule(new Reach());
+        addModule(new PotionSpoof());
     }
 
     private void initMovement() {
