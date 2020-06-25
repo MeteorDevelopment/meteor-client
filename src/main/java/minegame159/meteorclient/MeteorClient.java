@@ -13,6 +13,7 @@ import minegame159.meteorclient.gui.screens.topbar.TopBarModules;
 import minegame159.meteorclient.macros.MacroManager;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.rendering.MFont;
+import minegame159.meteorclient.utils.Capes;
 import minegame159.meteorclient.utils.EChestMemory;
 import minegame159.meteorclient.utils.EntityUtils;
 import minegame159.meteorclient.utils.Utils;
@@ -63,6 +64,7 @@ public class MeteorClient implements ClientModInitializer, Listenable {
         CommandManager.init();
         AccountManager.init();
         EChestMemory.init();
+        Capes.init();
 
         load();
 
@@ -92,6 +94,8 @@ public class MeteorClient implements ClientModInitializer, Listenable {
 
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
+        Capes.tick();
+
         if (openClickGui.isPressed() && mc.currentScreen == null) {
             openClickGui();
         }
