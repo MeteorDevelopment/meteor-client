@@ -1,5 +1,7 @@
 package minegame159.meteorclient.utils;
 
+import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import minegame159.meteorclient.mixininterface.IMinecraftClient;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Module;
@@ -7,10 +9,11 @@ import minegame159.meteorclient.modules.ModuleManager;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.Camera;
+import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
-import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.EntityContext;
+import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.item.*;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -52,6 +55,14 @@ public class Utils {
         DecimalFormatSymbols dfs = new DecimalFormatSymbols();
         dfs.setDecimalSeparator('.');
         df.setDecimalFormatSymbols(dfs);
+    }
+
+    public static Object2IntMap<StatusEffect> createStatusEffectMap() {
+        Object2IntMap<StatusEffect> map = new Object2IntArrayMap<>(Registry.STATUS_EFFECT.getIds().size());
+
+        Registry.STATUS_EFFECT.forEach(potion -> map.put(potion, 0));
+
+        return map;
     }
 
     public static String getEnchantShortName(Enchantment enchantment) {

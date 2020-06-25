@@ -57,7 +57,8 @@
     "BlockStateMixin",
     "BookEditScreenMixin",
     "BookScreenMixin",
-    "AbstractClientPlayerEntityMixin"
+    "AbstractClientPlayerEntityMixin",
+    "StatusEffectInstanceMixin"
   ],
   "injectors": {
     "defaultRequire": 1
