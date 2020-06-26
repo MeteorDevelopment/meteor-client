@@ -279,6 +279,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new Search());
         addModule(new EntityOwner());
         addModule(new NoRender());
+        addModule(new Breadcrumbs());
     }
 
     private void initMisc() {
