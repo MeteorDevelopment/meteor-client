@@ -9,13 +9,14 @@ import minegame159.meteorclient.events.*;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
-import minegame159.meteorclient.settings.BoolSetting;
-import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.rendering.ShapeBuilder;
+import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Color;
+import minegame159.meteorclient.utils.EntityUtils;
 import minegame159.meteorclient.utils.TickRate;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.PlayerListEntry;
+import net.minecraft.client.render.VertexFormats;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.effect.StatusEffect;
@@ -31,6 +32,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.dimension.DimensionType;
 import org.apache.commons.lang3.StringUtils;
+import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -44,8 +46,11 @@ public class HUD extends ToggleModule {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgTopLeft = settings.createGroup("Top Left");
+    private final SettingGroup sgMinimap = settings.createGroup("Minimap", "minimap-enabled", "Minimap.", true);
     private final SettingGroup sgTopRight = settings.createGroup("Top Right");
     private final SettingGroup sgBottomRight = settings.createGroup("Bottom Right");
+
+    // General
 
     private final Setting<Boolean> armor = sgGeneral.add(new BoolSetting.Builder()
             .name("armor")
@@ -53,6 +58,8 @@ public class HUD extends ToggleModule {
             .defaultValue(true)
             .build()
     );
+
+    // Top Left
 
     private final Setting<Boolean> waterMark = sgTopLeft.add(new BoolSetting.Builder()
             .name("water-mark")
@@ -134,12 +141,55 @@ public class HUD extends ToggleModule {
             .build()
     );
 
+    // Minimap
+
+    private final Setting<Double> mmScale = sgMinimap.add(new DoubleSetting.Builder()
+            .name("minimap-scale")
+            .description("Scale.")
+            .defaultValue(1)
+            .min(0)
+            .sliderMax(2)
+            .build()
+    );
+
+    private final Setting<Color> mmBackground = sgMinimap.add(new ColorSetting.Builder()
+            .name("minimap-background")
+            .description("Minimap background color.")
+            .defaultValue(new Color(25, 25, 25, 175))
+            .build()
+    );
+
+    private final Setting<Color> mmPlayer = sgMinimap.add(new ColorSetting.Builder()
+            .name("minimap-player")
+            .description("Minimap player color.")
+            .defaultValue(new Color(225, 225, 225, 225))
+            .build()
+    );
+
+    private final Setting<Color> mmAnimal = sgMinimap.add(new ColorSetting.Builder()
+            .name("minimap-animal")
+            .description("Minimap animal color.")
+            .defaultValue(new Color(25, 225, 25, 225))
+            .build()
+    );
+
+    private final Setting<Color> mmMob = sgMinimap.add(new ColorSetting.Builder()
+            .name("minimap-mob")
+            .description("Minimap mob color.")
+            .defaultValue(new Color(225, 25, 25, 225))
+            .build()
+    );
+
+    // Top Right
+
     private final Setting<Boolean> activeModules = sgTopRight.add(new BoolSetting.Builder()
             .name("active-modules")
             .description("Display active modules.")
             .defaultValue(true)
             .build()
     );
+
+    // Bottom Right
 
     public final Setting<Boolean> potionTimers = sgBottomRight.add(new BoolSetting.Builder()
             .name("potion-timers")
@@ -281,9 +331,51 @@ public class HUD extends ToggleModule {
 
     });
 
+    private void renderMMQuad(double x, double y, double size, Color color) {
+        double s = mmScale.get();
+        ShapeBuilder.quad(2 + x * s, 2 + y * s, 0, 2 + (x + size) * s, 2 + y * s, 0, 2 + (x + size) * s, 2 + (y + size) * s, 0, 2 + x * s, 2 + (y + size) * s, 0, color);
+    }
+
+    private void renderMMTriangle(double x, double y, double size, double angle, Color color) {
+        double s = mmScale.get();
+        ShapeBuilder.triangle(2 + x * s, 2 + y * s, size * s, angle, color, false);
+    }
+
     private void renderTopLeft(Render2DEvent event) {
         if (mc.options.debugEnabled) return;
         int y = 2;
+
+        if (sgMinimap.isEnabled()) {
+            ShapeBuilder.begin(null, GL11.GL_TRIANGLES, VertexFormats.POSITION_COLOR);
+            renderMMQuad(0, 0, 100, mmBackground.get());
+
+            double radius = 32;
+            if (mc.options.viewDistance > 4) radius += 16;
+
+            double centerX = mc.player.x;
+            double centerZ = mc.player.z;
+
+            for (Entity entity : mc.world.getEntities()) {
+                double x = entity.x - centerX;
+                double z = entity.z - centerZ;
+                if (Math.abs(x) > radius || Math.abs(z) > radius) continue;
+
+                Color color;
+                if (EntityUtils.isPlayer(entity)) color = mmPlayer.get();
+                else if (EntityUtils.isAnimal(entity)) color = mmAnimal.get();
+                else if (EntityUtils.isMob(entity)) color = mmMob.get();
+                else continue;
+
+                double x2 = (x / radius) * 50 + 50;
+                double z2 = (z / radius) * 50 + 50;
+
+                if (entity.getEntityId() == mc.player.getEntityId()) renderMMTriangle(x2 - 2.5, z2 - 2.5, 5, mc.player.yaw, color);
+                else renderMMQuad(x2 - 1, z2 - 1, 2, color);
+            }
+
+            ShapeBuilder.end();
+            y += 100 * mmScale.get() + 2;
+        }
 
         if (waterMark.get()) {
             drawInfo("Meteor Client ", Config.INSTANCE.getVersion(), y);

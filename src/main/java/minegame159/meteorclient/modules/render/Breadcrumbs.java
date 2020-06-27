@@ -29,6 +29,7 @@ public class Breadcrumbs extends ToggleModule {
             .description("Maximum number of sections.")
             .defaultValue(1000)
             .min(0)
+            .sliderMax(5000)
             .build()
     );
 
