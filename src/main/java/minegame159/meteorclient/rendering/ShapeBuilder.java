@@ -52,7 +52,7 @@ public class ShapeBuilder {
     }
 
     // Triangle
-    public static void triangle(double x, double y, double size, double angle, Color color) {
+    public static void triangle(double x, double y, double size, double angle, Color color, boolean texture) {
         double cos = Math.cos(Math.toRadians(angle));
         double sin = Math.sin(Math.toRadians(angle));
 
@@ -61,15 +61,22 @@ public class ShapeBuilder {
 
         double _x = ((x - oX) * cos) - ((y - oY) * sin) + oX;
         double _y = ((y - oY) * cos) + ((x - oX) * sin) + oY;
-        triangles.pos(_x, _y, 0).texture(GuiRenderer.TEX_QUAD.x, GuiRenderer.TEX_QUAD.y).color(color).endVertex();
+        if (texture) triangles.pos(_x, _y, 0).texture(GuiRenderer.TEX_QUAD.x, GuiRenderer.TEX_QUAD.y).color(color).endVertex();
+        else triangles.pos(_x, _y, 0).color(color).endVertex();
 
         _x = ((x + size - oX) * cos) - ((y - oY) * sin) + oX;
         _y = ((y - oY) * cos) + ((x + size - oX) * sin) + oY;
-        triangles.pos(_x, _y, 0).texture(GuiRenderer.TEX_QUAD.x + GuiRenderer.TEX_QUAD.width, GuiRenderer.TEX_QUAD.y).color(color).endVertex();
+        if (texture) triangles.pos(_x, _y, 0).texture(GuiRenderer.TEX_QUAD.x + GuiRenderer.TEX_QUAD.width, GuiRenderer.TEX_QUAD.y).color(color).endVertex();
+        else triangles.pos(_x, _y, 0).color(color).endVertex();
 
-        _x = ((x + size / 2 - oX) * cos) - ((y + size / 2 - oY) * sin) + oX;
-        _y = ((y + size / 2 - oY) * cos) + ((x + size / 2 - oX) * sin) + oY;
-        triangles.pos(_x, _y, 0).texture(GuiRenderer.TEX_QUAD.x + GuiRenderer.TEX_QUAD.width, GuiRenderer.TEX_QUAD.y + GuiRenderer.TEX_QUAD.height).color(color).endVertex();
+        double v = y + size / (texture ? 2 : 0.9) - oY;
+        _x = ((x + size / 2 - oX) * cos) - (v * sin) + oX;
+        _y = (v * cos) + ((x + size / 2 - oX) * sin) + oY;
+        if (texture) triangles.pos(_x, _y, 0).texture(GuiRenderer.TEX_QUAD.x + GuiRenderer.TEX_QUAD.width, GuiRenderer.TEX_QUAD.y + GuiRenderer.TEX_QUAD.height).color(color).endVertex();
+        else triangles.pos(_x, _y, 0).color(color).endVertex();
+    }
+    public static void triangle(double x, double y, double size, double angle, Color color) {
+        triangle(x, y, size, angle, color, true);
     }
 
     // Line
