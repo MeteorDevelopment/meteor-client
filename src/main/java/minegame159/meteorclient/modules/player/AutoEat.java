@@ -57,8 +57,8 @@ public class AutoEat extends ToggleModule {
             .description("The hunger you eat at.")
             .defaultValue(17)
             .min(1)
-            .max(20)
-            .sliderMax(20)
+            .max(19)
+            .sliderMax(19)
             .build()
     );
 
@@ -98,7 +98,11 @@ public class AutoEat extends ToggleModule {
                 }
                 ((IKeyBinding) mc.options.keyUse).setPressed(true);
             } else {
-                mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
+                if(mc.player.getOffHandStack().isFood() && mc.player.inventory.selectedSlot == preSelectedSlot){
+                    mc.interactionManager.interactItem(mc.player, mc.world, Hand.OFF_HAND);
+                }else {
+                    mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
+                }
             }
 
             if (mc.player.getHungerManager().getFoodLevel() > preFoodLevel) {
