@@ -11,14 +11,18 @@ import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.modules.combat.CrystalAura;
 import minegame159.meteorclient.modules.combat.KillAura;
 import minegame159.meteorclient.settings.BoolSetting;
+import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.utils.InvUtils;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.util.Hand;
 
 public class AutoEat extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgManualHunger = settings.createGroup("HungerManagement", "manual-hunger-management", "Allows you to choose the hunger to eat at", true);
+    private final SettingGroup sgAutoHunger = sgManualHunger.getDisabledGroup();
     
     private final Setting<Boolean> egaps = sgGeneral.add(new BoolSetting.Builder()
             .name("egaps")
@@ -48,6 +52,16 @@ public class AutoEat extends ToggleModule {
             .build()
     );
 
+    private final Setting<Integer> minHunger = sgManualHunger.add(new IntSetting.Builder()
+            .name("hunger")
+            .description("The hunger you eat at.")
+            .defaultValue(17)
+            .min(1)
+            .max(20)
+            .sliderMax(20)
+            .build()
+    );
+
     private boolean wasKillActive = false;
     private boolean wasCrystalActive = false;
     private boolean isEating;
@@ -73,15 +87,13 @@ public class AutoEat extends ToggleModule {
 
         if (isEating) {
             if (mc.overlay == null && (mc.currentScreen == null || mc.currentScreen.passEvents)) {
-                if(disableAuras.get()) {
-                    if (disableAuras.get()) {
-                        if (ModuleManager.INSTANCE.get(KillAura.class).isActive()) {
-                            wasKillActive = true;
-                            ModuleManager.INSTANCE.get(KillAura.class).toggle();
-                        }
-                        if (ModuleManager.INSTANCE.get(CrystalAura.class).isActive()) {
-                            wasCrystalActive = true;
-                        }
+                if (disableAuras.get()) {
+                    if (ModuleManager.INSTANCE.get(KillAura.class).isActive()) {
+                        wasKillActive = true;
+                        ModuleManager.INSTANCE.get(KillAura.class).toggle();
+                    }
+                    if (ModuleManager.INSTANCE.get(CrystalAura.class).isActive()) {
+                        wasCrystalActive = true;
                     }
                 }
                 ((IKeyBinding) mc.options.keyUse).setPressed(true);
@@ -135,10 +147,17 @@ public class AutoEat extends ToggleModule {
                 slot = i;
             }
         }
+        if(mc.player.getOffHandStack().isFood() && mc.player.getOffHandStack().getItem().getFoodComponent().getHunger() > bestHunger){
+            bestHunger = mc.player.getOffHandStack().getItem().getFoodComponent().getHunger();
+            slot = InvUtils.OFFHAND_SLOT;
+        }
 
-        if (slot != -1 && 20 - mc.player.getHungerManager().getFoodLevel() >= bestHunger) {
+        if (slot != -1 && (20 - mc.player.getHungerManager().getFoodLevel() >= bestHunger && sgAutoHunger.isEnabled())
+                || (20 - mc.player.getHungerManager().getFoodLevel() >= minHunger.get() && sgManualHunger.isEnabled())) {
             preSelectedSlot = mc.player.inventory.selectedSlot;
-            mc.player.inventory.selectedSlot = slot;
+            if(slot != InvUtils.OFFHAND_SLOT) {
+                mc.player.inventory.selectedSlot = slot;
+            }
             isEating = true;
             preFoodLevel = mc.player.getHungerManager().getFoodLevel();
             BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("pause");
