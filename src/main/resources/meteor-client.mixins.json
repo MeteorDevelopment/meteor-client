@@ -58,7 +58,8 @@
     "BookEditScreenMixin",
     "BookScreenMixin",
     "AbstractClientPlayerEntityMixin",
-    "StatusEffectInstanceMixin"
+    "StatusEffectInstanceMixin",
+    "RenderTickCounterMixin"
   ],
   "injectors": {
     "defaultRequire": 1

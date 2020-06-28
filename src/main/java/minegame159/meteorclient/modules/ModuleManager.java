@@ -11,6 +11,7 @@ import minegame159.meteorclient.events.GameJoinedEvent;
 import minegame159.meteorclient.events.KeyEvent;
 import minegame159.meteorclient.modules.combat.*;
 import minegame159.meteorclient.modules.misc.*;
+import minegame159.meteorclient.modules.misc.Timer;
 import minegame159.meteorclient.modules.movement.*;
 import minegame159.meteorclient.modules.player.*;
 import minegame159.meteorclient.modules.render.*;
@@ -305,5 +306,6 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new PacketCanceller());
         addModule(new EntityLogger());
         addModule(new EChestPreview());
+        addModule(new Timer());
     }
 }
