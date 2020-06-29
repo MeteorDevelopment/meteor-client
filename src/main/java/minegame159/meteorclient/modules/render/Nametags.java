@@ -48,7 +48,7 @@ public class Nametags extends ToggleModule {
     );
 
     private final Setting<Boolean> displayArmorEnchants = sgGeneral.add(new BoolSetting.Builder()
-            .name("siplay-armor-enchants")
+            .name("display-armor-enchants")
             .description("Display armor enchantments.")
             .defaultValue(true)
             .build()
@@ -58,7 +58,7 @@ public class Nametags extends ToggleModule {
             .name("scale")
             .description("Scale.")
             .defaultValue(1)
-            .min(0)
+            .min(0.1)
             .build()
     );
 
@@ -66,9 +66,9 @@ public class Nametags extends ToggleModule {
             .name("enchant-text-scale")
             .description("Enchantment text scale.")
             .defaultValue(0.6)
-            .min(0)
+            .min(0.1)
             .max(1)
-            .sliderMin(0)
+            .sliderMin(0.1)
             .sliderMax(1)
             .build()
     );
@@ -91,7 +91,7 @@ public class Nametags extends ToggleModule {
 
         // Compute scale
         double dist = Utils.distanceToCamera(entity);
-        double scale = 0.025 * dist * this.scale.get() / 5 * (1 - dist / 75);
+        double scale = 0.04 * this.scale.get();
 
         // Compute health things
         float absorption = entity.getAbsorptionAmount();
