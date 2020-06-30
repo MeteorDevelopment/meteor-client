@@ -353,12 +353,12 @@ public class HUD extends ToggleModule {
             double radius = 32;
             if (mc.options.viewDistance > 4) radius += 16;
 
-            double centerX = mc.player.x;
-            double centerZ = mc.player.z;
+            double centerX = mc.player.getX();
+            double centerZ = mc.player.getZ();
 
             for (Entity entity : mc.world.getEntities()) {
-                double x = entity.x - centerX;
-                double z = entity.z - centerZ;
+                double x = entity.getX() - centerX;
+                double z = entity.getZ() - centerZ;
                 if (Math.abs(x) > radius || Math.abs(z) > radius) continue;
 
                 Color color;

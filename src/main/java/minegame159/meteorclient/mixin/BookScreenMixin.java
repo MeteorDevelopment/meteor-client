@@ -35,7 +35,7 @@ public class BookScreenMixin extends Screen {
     private void onInit(CallbackInfo info) {
         addButton(new ButtonWidget(4, 4, 70, 16, "Copy", button -> {
             ListTag listTag = new ListTag();
-            for (int i = 0; i < contents.getLineCount(); i++) listTag.add(new StringTag(contents.getLine(i).asString()));
+            for (int i = 0; i < contents.getPageCount(); i++) listTag.add(StringTag.of(contents.getPage(i).asString()));
 
             CompoundTag tag = new CompoundTag();
             tag.put("pages", listTag);
@@ -49,7 +49,7 @@ public class BookScreenMixin extends Screen {
                 e.printStackTrace();
             }
 
-            GLFW.glfwSetClipboardString(MinecraftClient.getInstance().window.getHandle(), Base64.getEncoder().encodeToString(bytes.array));
+            GLFW.glfwSetClipboardString(MinecraftClient.getInstance().getWindow().getHandle(), Base64.getEncoder().encodeToString(bytes.array));
         }));
     }
 }
