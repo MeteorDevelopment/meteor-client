@@ -163,7 +163,7 @@ public class Tracers extends ToggleModule {
                 .add(mc.cameraEntity.getPos());
 
         for (Entity entity : mc.world.getEntities()) {
-            if (entity == mc.player || !entities.get().contains(entity.getType())) continue;
+            if (entity == mc.cameraEntity || !entities.get().contains(entity.getType())) continue;
 
             if (entity instanceof PlayerEntity) {
                 Color color = playersColor.get();
