@@ -14,8 +14,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(BlockState.class)
 public class BlockStateMixin {
-    @Inject(method = "activate", at = @At("HEAD"))
-    private void onActivate(World world, PlayerEntity player, Hand hand, BlockHitResult hit, CallbackInfoReturnable<Boolean> info) {
+    @Inject(method = "onUse", at = @At("HEAD"))
+    private void onUse(World world, PlayerEntity player, Hand hand, BlockHitResult hit, CallbackInfoReturnable<Boolean> info) {
         MeteorClient.EVENT_BUS.post(EventStore.blockActivateEvent((BlockState) (Object) this));
     }
 }

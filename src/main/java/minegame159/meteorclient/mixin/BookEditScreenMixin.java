@@ -50,7 +50,7 @@ public abstract class BookEditScreenMixin extends Screen {
     private void onInit(CallbackInfo info) {
         addButton(new ButtonWidget(4, 4, 70, 16, "Copy", button -> {
             ListTag listTag = new ListTag();
-            pages.stream().map(StringTag::new).forEach(listTag::add);
+            pages.stream().map(StringTag::of).forEach(listTag::add);
 
             CompoundTag tag = new CompoundTag();
             tag.put("pages", listTag);
@@ -64,10 +64,10 @@ public abstract class BookEditScreenMixin extends Screen {
                 e.printStackTrace();
             }
 
-            GLFW.glfwSetClipboardString(MinecraftClient.getInstance().window.getHandle(), Base64.getEncoder().encodeToString(bytes.array));
+            GLFW.glfwSetClipboardString(MinecraftClient.getInstance().getWindow().getHandle(), Base64.getEncoder().encodeToString(bytes.array));
         }));
         addButton(new ButtonWidget(4, 4 + 16 + 4, 70, 16, "Paste", button -> {
-            byte[] bytes = Base64.getDecoder().decode(GLFW.glfwGetClipboardString(MinecraftClient.getInstance().window.getHandle()));
+            byte[] bytes = Base64.getDecoder().decode(GLFW.glfwGetClipboardString(MinecraftClient.getInstance().getWindow().getHandle()));
             DataInputStream in = new DataInputStream(new ByteArrayInputStream(bytes));
 
             try {

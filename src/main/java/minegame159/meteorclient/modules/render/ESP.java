@@ -110,7 +110,7 @@ public class ESP extends ToggleModule {
     private void render(RenderEvent event, Entity entity, Color lineColor) {
         setSideColor(lineColor);
 
-        double dist = mc.player.squaredDistanceTo(entity.x + entity.getWidth() / 2, entity.y + entity.getHeight() / 2, entity.z + entity.getWidth() / 2);
+        double dist = mc.player.squaredDistanceTo(entity.getX() + entity.getWidth() / 2, entity.getY() + entity.getHeight() / 2, entity.getZ() + entity.getWidth() / 2);
         double a = 1;
         if (dist <= fadeDistance.get() * fadeDistance.get()) a = dist / (fadeDistance.get() * fadeDistance.get());
 
@@ -121,9 +121,9 @@ public class ESP extends ToggleModule {
         sideColor.a *= a;
 
         if (a >= 0.075) {
-            double x = (entity.x - entity.prevX) * event.tickDelta;
-            double y = (entity.y - entity.prevY) * event.tickDelta;
-            double z = (entity.z - entity.prevZ) * event.tickDelta;
+            double x = (entity.getX() - entity.prevX) * event.tickDelta;
+            double y = (entity.getY() - entity.prevY) * event.tickDelta;
+            double z = (entity.getZ() - entity.prevZ) * event.tickDelta;
 
             switch (mode.get()) {
                 case Lines: {
