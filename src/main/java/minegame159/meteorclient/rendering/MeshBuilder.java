@@ -65,6 +65,7 @@ public class MeshBuilder {
         RenderSystem.enableBlend();
         RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA);
         RenderSystem.disableDepthTest();
+        RenderSystem.disableAlphaTest();
         if (texture) RenderSystem.enableTexture();
         else RenderSystem.disableTexture();
         RenderSystem.disableLighting();
@@ -77,6 +78,7 @@ public class MeshBuilder {
         BufferRenderer.draw(buffer);
 
         RenderSystem.disableBlend();
+        RenderSystem.enableAlphaTest();
         RenderSystem.enableDepthTest();
         RenderSystem.enableTexture();
         GL11.glDisable(GL11.GL_LINE_SMOOTH);

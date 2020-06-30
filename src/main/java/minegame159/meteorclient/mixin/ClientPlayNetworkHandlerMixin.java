@@ -9,10 +9,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.network.Packet;
-import net.minecraft.network.packet.s2c.play.ChunkDataS2CPacket;
-import net.minecraft.network.packet.s2c.play.EntitiesDestroyS2CPacket;
-import net.minecraft.network.packet.s2c.play.GameJoinS2CPacket;
-import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
+import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.chunk.WorldChunk;
 import org.spongepowered.asm.mixin.Mixin;
@@ -49,6 +46,11 @@ public abstract class ClientPlayNetworkHandlerMixin {
     private void onChunkData(ChunkDataS2CPacket packet, CallbackInfo info) {
         WorldChunk chunk = client.world.getChunk(packet.getX(), packet.getZ());
         MeteorClient.EVENT_BUS.post(EventStore.chunkDataEvent(chunk));
+    }
+
+    @Inject(method = "onContainerSlotUpdate", at = @At("TAIL"))
+    private void onContainerSlotUpdate(ContainerSlotUpdateS2CPacket packet, CallbackInfo info) {
+        MeteorClient.EVENT_BUS.post(EventStore.containerSlotUpdateEvent(packet));
     }
 
     @Inject(method = "onEntitiesDestroy", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/world/ClientWorld;removeEntity(I)V"), locals = LocalCapture.CAPTURE_FAILSOFT)

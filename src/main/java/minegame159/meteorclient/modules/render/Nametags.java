@@ -49,7 +49,7 @@ public class Nametags extends ToggleModule {
     );
 
     private final Setting<Boolean> displayArmorEnchants = sgGeneral.add(new BoolSetting.Builder()
-            .name("siplay-armor-enchants")
+            .name("display-armor-enchants")
             .description("Display armor enchantments.")
             .defaultValue(true)
             .build()
@@ -59,7 +59,7 @@ public class Nametags extends ToggleModule {
             .name("scale")
             .description("Scale.")
             .defaultValue(1)
-            .min(0)
+            .min(0.1)
             .build()
     );
 
@@ -67,9 +67,9 @@ public class Nametags extends ToggleModule {
             .name("enchant-text-scale")
             .description("Enchantment text scale.")
             .defaultValue(0.6)
-            .min(0)
+            .min(0.1)
             .max(1)
-            .sliderMin(0)
+            .sliderMin(0.1)
             .sliderMax(1)
             .build()
     );
@@ -92,7 +92,7 @@ public class Nametags extends ToggleModule {
 
         // Compute scale
         double dist = Utils.distanceToCamera(entity);
-        double scale = 0.025 * dist * this.scale.get() / 5 * (1 - dist / 75);
+        double scale = 0.04 * this.scale.get();
 
         // Compute health things
         float absorption = entity.getAbsorptionAmount();
@@ -104,7 +104,10 @@ public class Nametags extends ToggleModule {
 
         // Setup the rotation
         Matrices.push();
-        Matrices.translate(entity.getX() - event.offsetX, entity.getY() + entity.getHeight() + 0.5 - event.offsetY, entity.getZ() - event.offsetZ);
+        double x = entity.prevX + (entity.getX() - entity.prevX) * event.tickDelta;
+        double y = entity.prevY + (entity.getY() - entity.prevY) * event.tickDelta + entity.getHeight() + 0.5;
+        double z = entity.prevZ + (entity.getZ() - entity.prevZ) * event.tickDelta;
+        Matrices.translate(x - event.offsetX, y - event.offsetY, z - event.offsetZ);
         Matrices.rotate(-camera.getYaw(), 0, 1, 0);
         Matrices.rotate(camera.getPitch(), 1, 0, 0);
         Matrices.scale(-scale, -scale, scale);
@@ -168,8 +171,6 @@ public class Nametags extends ToggleModule {
 
                 for (BakedQuad quad : mc.getItemRenderer().getModels().getModel(itemStack).getQuads(null, null, null)) {
                     Sprite sprite = ((IBakedQuad) quad).getSprite();
-                    double w = sprite.getWidth();
-                    double h = sprite.getHeight();
 
                     if (itemStack.getItem() instanceof DyeableArmorItem) {
                         int c = ((DyeableArmorItem) itemStack.getItem()).getColor(itemStack);
@@ -183,7 +184,7 @@ public class Nametags extends ToggleModule {
                     itemX += (armorWidths[i] - 16) / 2;
                     double addY = (armorHeight - 16) / 2;
 
-                    ShapeBuilder.texQuad(itemX, -heightUp + addY, w, h, sprite.getMinU(), sprite.getMinV(), sprite.getMaxU() - sprite.getMinU(), sprite.getMaxV() - sprite.getMinV(), WHITE, WHITE, WHITE, WHITE);
+                    ShapeBuilder.texQuad(itemX, -heightUp + addY, 16, 16, sprite.getMinU(), sprite.getMinV(), sprite.getMaxU() - sprite.getMinU(), sprite.getMaxV() - sprite.getMinV(), WHITE, WHITE, WHITE, WHITE);
 
                     itemX = preItemX;
                     WHITE.r = WHITE.g = WHITE.b = 255;

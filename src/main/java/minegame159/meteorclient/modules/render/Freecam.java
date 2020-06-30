@@ -78,6 +78,9 @@ public class Freecam extends ToggleModule {
         camera.elytraYaw = mc.player.elytraYaw;
         camera.pitch = mc.player.pitch;
         camera.elytraPitch = mc.player.elytraPitch;
+        camera.setHealth(mc.player.getHealth());
+        camera.setAbsorptionAmount(mc.player.getAbsorptionAmount());
+        camera.getActiveStatusEffects().putAll(mc.player.getActiveStatusEffects());
 
         double speed = this.speed.get() / 2;
         Vec3d vel = camera.getVelocity();

@@ -44,6 +44,8 @@ public abstract class ChatHudMixin {
 
     @Shadow @Final private List<ChatHudLine> messages;
 
+    @Shadow public abstract void addMessage(Text message);
+
     @Shadow private boolean hasUnreadNewMessages;
 
     @Inject(at = @At("HEAD"), method = "addMessage(Lnet/minecraft/text/Text;IIZ)V", cancellable = true)
@@ -51,34 +53,16 @@ public abstract class ChatHudMixin {
         info.cancel();
 
         // Anti Spam
-        if (ModuleManager.INSTANCE.isActive(AntiSpam.class)) {
-            ChatHudLine lastMsg = visibleMessages.size() > 0 ? visibleMessages.get(0) : null;
-
-            if (lastMsg != null) {
-                if (lastMsg.getText().asFormattedString().equals(message.asFormattedString())) {
-                    String string = lastMsg.getText().asFormattedString();
-                    string += Formatting.GRAY + " (2)";
-
-                    ((IChatHudLine) lastMsg).setText(new LiteralText(string));
-                    return;
-                } else {
-                    String string = lastMsg.getText().asFormattedString();
-                    Matcher matcher = Pattern.compile(".*(\\([0-9]+\\)$)").matcher(string);
-
-                    if (matcher.matches()) {
-                        String group = matcher.group(1);
-                        int number = Integer.parseInt(group.substring(1, group.length() - 1));
-
-                        int i = string.lastIndexOf(group);
-                        string = string.substring(0, i - Formatting.GRAY.toString().length() - 1);
-
-                        if (string.equals(message.asFormattedString())) {
-                            string += Formatting.GRAY + " (" + (number + 1) + ")";
-                            ((IChatHudLine) lastMsg).setText(new LiteralText(string));
-                            return;
-                        }
-                    }
+        AntiSpam antiSpam = ModuleManager.INSTANCE.get(AntiSpam.class);
+        for (int i = 0; i < antiSpam.getDepth(); i++) {
+            if (checkMsg(message.asFormattedString(), timestamp, messageId, i)) {
+                if (antiSpam.isMoveToBottom() && i != 0) {
+                    ChatHudLine msg = visibleMessages.remove(i);
+                    visibleMessages.add(0, msg);
+                    messages.add(0, msg);
                 }
+
+                return;
             }
         }
 
@@ -110,6 +94,44 @@ public abstract class ChatHudMixin {
             while(this.messages.size() > ModuleManager.INSTANCE.get(LongerChat.class).getMaxLineCount()) {
                 this.messages.remove(this.messages.size() - 1);
             }
+        }
+    }
+
+    private boolean checkMsg(String newMsg, int newTimestamp, int newId, int msgI) {
+        ChatHudLine msg = visibleMessages.size() > msgI ? visibleMessages.get(msgI) : null;
+        if (msg == null) return false;
+        String msgString = msg.getText().asFormattedString();
+
+        if (msgString.equals(newMsg)) {
+            msgString += Formatting.GRAY + " (2)";
+
+            ((IChatHudLine) msg).setText(new LiteralText(msgString));
+            ((IChatHudLine) msg).setTimestamp(newTimestamp);
+            ((IChatHudLine) msg).setId(newId);
+
+            return true;
+        } else {
+            Matcher matcher = Pattern.compile(".*(\\([0-9]+\\)$)").matcher(msgString);
+
+            if (matcher.matches()) {
+                String group = matcher.group(1);
+                int number = Integer.parseInt(group.substring(1, group.length() - 1));
+
+                int i = msgString.lastIndexOf(group);
+                msgString = msgString.substring(0, i - Formatting.GRAY.toString().length() - 1);
+
+                if (msgString.equals(newMsg)) {
+                    msgString += Formatting.GRAY + " (" + (number + 1) + ")";
+
+                    ((IChatHudLine) msg).setText(new LiteralText(msgString));
+                    ((IChatHudLine) msg).setTimestamp(newTimestamp);
+                    ((IChatHudLine) msg).setId(newId);
+
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

@@ -1,17 +1,20 @@
 package minegame159.meteorclient.events;
 
+import minegame159.meteorclient.events.packets.ContainerSlotUpdateEvent;
 import minegame159.meteorclient.events.packets.PlaySoundPacketEvent;
 import minegame159.meteorclient.events.packets.ReceivePacketEvent;
 import minegame159.meteorclient.events.packets.SendPacketEvent;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.utils.Pool;
+import net.minecraft.block.BlockState;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MovementType;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.network.Packet;
+import net.minecraft.network.packet.s2c.play.ContainerSlotUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
@@ -48,6 +51,8 @@ public class EventStore {
     private static EntityDestroyEvent entityDestroyEvent = new EntityDestroyEvent();
     private static DamageEvent damageEvent = new DamageEvent();
     private static RightClickEvent rightClickEvent = new RightClickEvent();
+    private static ContainerSlotUpdateEvent containerSlotUpdateEvent = new ContainerSlotUpdateEvent();
+    private static BlockActivateEvent blockActivateEvent = new BlockActivateEvent();
 
     public static PlaySoundPacketEvent playSoundPacketEvent(PlaySoundS2CPacket packet) {
         playSoundPacketEvent.packet = packet;
@@ -200,4 +205,14 @@ public class EventStore {
     }
 
     public static RightClickEvent rightClickEvent(){return rightClickEvent;}
+
+    public static ContainerSlotUpdateEvent containerSlotUpdateEvent(ContainerSlotUpdateS2CPacket packet) {
+        containerSlotUpdateEvent.packet = packet;
+        return containerSlotUpdateEvent;
+    }
+
+    public static BlockActivateEvent blockActivateEvent(BlockState blockState) {
+        blockActivateEvent.blockState = blockState;
+        return blockActivateEvent;
+    }
 }

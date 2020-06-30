@@ -209,6 +209,7 @@ public class KillAura extends ToggleModule {
                 .filter(this::isInRange)
                 .filter(this::canAttackEntity)
                 .filter(this::canSeeEntity)
+                .filter(Entity::isAlive)
                 .min(this::sort)
                 .ifPresent(entity -> {
                     // Rotate
