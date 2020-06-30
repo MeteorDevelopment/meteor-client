@@ -130,9 +130,9 @@ public class Tracers extends ToggleModule {
     }
 
     private void render(Entity entity, Color color, RenderEvent event) {
-        double x = entity.x;
-        double y = entity.y;
-        double z = entity.z;
+        double x = entity.prevX + (entity.x - entity.prevX) * event.tickDelta;
+        double y = entity.prevY + (entity.y - entity.prevY) * event.tickDelta;
+        double z = entity.prevZ + (entity.z - entity.prevZ) * event.tickDelta;
 
         double height = entity.getBoundingBox().y2 - entity.getBoundingBox().y1;
 

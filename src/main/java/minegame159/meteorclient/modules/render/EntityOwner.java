@@ -83,7 +83,10 @@ public class EntityOwner extends ToggleModule {
 
         // Setup the rotation
         Matrices.push();
-        Matrices.translate(entity.x - event.offsetX, entity.y + entity.getHeight() + 0.25 - event.offsetY, entity.z - event.offsetZ);
+        double x = entity.prevX + (entity.x - entity.prevX) * event.tickDelta;
+        double y = entity.prevY + (entity.y - entity.prevY) * event.tickDelta + entity.getHeight() + 0.25;
+        double z = entity.prevZ + (entity.z - entity.prevZ) * event.tickDelta;
+        Matrices.translate(x - event.offsetX, y - event.offsetY, z - event.offsetZ);
         Matrices.rotate(-camera.getYaw(), 0, 1, 0);
         Matrices.rotate(camera.getPitch(), 1, 0, 0);
         Matrices.scale(-scale, -scale, scale);
