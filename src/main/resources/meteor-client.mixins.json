@@ -53,7 +53,14 @@
     "BossBarHudMixin",
     "InGameOverlayRendererMixin",
     "BakedQuadMixin",
-    "WorldRendererMixin"
+    "WorldRendererMixin",
+    "ArmorFeatureRendererMixin",
+    "BlockStateMixin",
+    "BookEditScreenMixin",
+    "BookScreenMixin",
+    "AbstractClientPlayerEntityMixin",
+    "StatusEffectInstanceMixin",
+    "RenderTickCounterMixin"
   ],
   "injectors": {
     "defaultRequire": 1

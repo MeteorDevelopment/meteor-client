@@ -74,6 +74,15 @@ public class StorageESP extends ToggleModule {
             .build()
     );
 
+    private final Setting<Double> fadeDistance = sgGeneral.add(new DoubleSetting.Builder()
+            .name("fade-distance")
+            .description("At which distance the color will fade out.")
+            .defaultValue(6)
+            .min(0)
+            .sliderMax(12)
+            .build()
+    );
+
     private final Color lineColor = new Color(0, 0, 0, 0);
     private final Color sideColor = new Color(0, 0, 0, 0);
     private boolean render;
@@ -135,12 +144,27 @@ public class StorageESP extends ToggleModule {
                     if (excludeDir != Direction.SOUTH) z2 -= a;
                 }
 
-                if (mode.get() == Mode.Lines) ShapeBuilder.boxEdges(x1, y1, z1, x2, y2, z2, lineColor, excludeDir);
-                else if (mode.get() == Mode.Sides) ShapeBuilder.boxSides(x1, y1, z1, x2, y2, z2, sideColor, excludeDir);
-                else {
-                    ShapeBuilder.boxEdges(x1, y1, z1, x2, y2, z2, lineColor, excludeDir);
-                    ShapeBuilder.boxSides(x1, y1, z1, x2, y2, z2, sideColor, excludeDir);
+                double dist = mc.player.squaredDistanceTo(blockEntity.getPos().getX() + 1, blockEntity.getPos().getY() + 1, blockEntity.getPos().getZ() + 1);
+                double a = 1;
+                if (dist <= fadeDistance.get() * fadeDistance.get()) a = dist / (fadeDistance.get() * fadeDistance.get());
+
+                int prevLineA = lineColor.a;
+                int prevSideA = sideColor.a;
+
+                lineColor.a *= a;
+                sideColor.a *= a;
+
+                if (a >= 0.075) {
+                    if (mode.get() == Mode.Lines) ShapeBuilder.boxEdges(x1, y1, z1, x2, y2, z2, lineColor, excludeDir);
+                    else if (mode.get() == Mode.Sides) ShapeBuilder.boxSides(x1, y1, z1, x2, y2, z2, sideColor, excludeDir);
+                    else {
+                        ShapeBuilder.boxEdges(x1, y1, z1, x2, y2, z2, lineColor, excludeDir);
+                        ShapeBuilder.boxSides(x1, y1, z1, x2, y2, z2, sideColor, excludeDir);
+                    }
                 }
+
+                lineColor.a = prevLineA;
+                sideColor.a = prevSideA;
 
                 count++;
             }

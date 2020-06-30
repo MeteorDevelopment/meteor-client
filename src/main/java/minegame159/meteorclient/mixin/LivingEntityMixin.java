@@ -5,6 +5,7 @@ import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.movement.AntiLevitation;
 import minegame159.meteorclient.modules.movement.HighJump;
+import minegame159.meteorclient.utils.Utils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -26,12 +27,12 @@ public abstract class LivingEntityMixin extends Entity {
 
     @Inject(method = "damage", at = @At("HEAD"))
     private void onDamageHead(DamageSource source, float amount, CallbackInfoReturnable<Boolean> info) {
-        MeteorClient.EVENT_BUS.post(EventStore.damageEvent((LivingEntity) (Object) this, source));
+        if (Utils.canUpdate()) MeteorClient.EVENT_BUS.post(EventStore.damageEvent((LivingEntity) (Object) this, source));
     }
 
     @Inject(method = "damage", at = @At("TAIL"))
     private void onDamageTail(DamageSource source, float amount, CallbackInfoReturnable<Boolean> info) {
-        MeteorClient.EVENT_BUS.post(EventStore.tookDamageEvent((LivingEntity) (Object) this, source));
+        if (Utils.canUpdate()) MeteorClient.EVENT_BUS.post(EventStore.tookDamageEvent((LivingEntity) (Object) this, source));
     }
 
     @Inject(method = "getJumpVelocity", at = @At("HEAD"), cancellable = true)

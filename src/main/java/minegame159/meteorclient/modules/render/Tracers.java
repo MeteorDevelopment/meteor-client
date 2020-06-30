@@ -130,9 +130,9 @@ public class Tracers extends ToggleModule {
     }
 
     private void render(Entity entity, Color color, RenderEvent event) {
-        double x = entity.getX();
-        double y = entity.getY();
-        double z = entity.getZ();
+        double x = entity.prevX + (entity.getX() - entity.prevX) * event.tickDelta;
+        double y = entity.prevY + (entity.getY() - entity.prevY) * event.tickDelta;
+        double z = entity.prevZ + (entity.getZ() - entity.prevZ) * event.tickDelta;
 
         double height = entity.getBoundingBox().y2 - entity.getBoundingBox().y1;
 
@@ -163,7 +163,7 @@ public class Tracers extends ToggleModule {
                 .add(mc.cameraEntity.getPos());
 
         for (Entity entity : mc.world.getEntities()) {
-            if (entity == mc.player || !entities.get().contains(entity.getType())) continue;
+            if (entity == mc.cameraEntity || !entities.get().contains(entity.getType())) continue;
 
             if (entity instanceof PlayerEntity) {
                 Color color = playersColor.get();

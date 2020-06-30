@@ -95,8 +95,15 @@ public class NoRender extends ToggleModule {
 
     private final Setting<Boolean> noTotem = sgGeneral.add(new BoolSetting.Builder()
             .name("no-totem")
-            .description("No totem particles.")
+            .description("Disables totem particles.")
             .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Boolean> noArmor = sgGeneral.add(new BoolSetting.Builder()
+            .name("no-armor")
+            .description("Disables player armor.")
+            .defaultValue(false)
             .build()
     );
 
@@ -154,5 +161,9 @@ public class NoRender extends ToggleModule {
 
     public boolean noTotem() {
         return isActive() && noTotem.get();
+    }
+
+    public boolean noArmor() {
+        return isActive() && noArmor.get();
     }
 }
