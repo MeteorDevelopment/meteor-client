@@ -21,7 +21,7 @@ import net.minecraft.util.math.Direction;
 
 public class EChestFarmer extends ToggleModule {
     public EChestFarmer(){
-        super(Category.Misc, "EChestFarmer", "Farms EChests for obby.");
+        super(Category.Misc, "EChest-farmer", "Farms EChests for obby.");
     }
 
     @EventHandler

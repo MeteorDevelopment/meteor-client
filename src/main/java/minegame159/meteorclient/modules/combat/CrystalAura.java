@@ -96,7 +96,7 @@ public class CrystalAura extends ToggleModule {
     );
 
     public CrystalAura() {
-        super(Category.Combat, "crystal-aura", "You know what it does");
+        super(Category.Combat, "crystal-aura", "Places and breaks end crystals automatically");
     }
 
     @EventHandler
