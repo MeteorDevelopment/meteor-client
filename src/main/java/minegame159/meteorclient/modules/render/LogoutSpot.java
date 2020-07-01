@@ -126,7 +126,7 @@ public class LogoutSpot extends ToggleModule {
             uuid = entity.getUuidAsString();
             name = entity.getGameProfile().getName();
             health = Math.round(entity.getHealth() + entity.getAbsorptionAmount());
-            maxHealth = Math.round(entity.getMaximumHealth() + entity.getAbsorptionAmount());
+            maxHealth = Math.round(entity.getMaxHealth() + entity.getAbsorptionAmount());
 
             healthText = " " + health;
         }

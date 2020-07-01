@@ -1,12 +1,12 @@
 package minegame159.meteorclient.modules.misc;
 
-import minegame159.meteorclient.mixininterface.IAbstractFurnaceContainer;
+import minegame159.meteorclient.mixininterface.IAbstractFurnaceScreenHandler;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.utils.InvUtils;
 import minegame159.meteorclient.utils.Utils;
-import net.minecraft.container.AbstractFurnaceContainer;
-import net.minecraft.container.SlotActionType;
+import net.minecraft.screen.AbstractFurnaceScreenHandler;
+import net.minecraft.screen.slot.SlotActionType;
 
 public class AutoSmelter extends ToggleModule {
     private int step;
@@ -29,7 +29,7 @@ public class AutoSmelter extends ToggleModule {
         waitingForItemsToSmelt = false;
     }
 
-    public void tick(AbstractFurnaceContainer c) {
+    public void tick(AbstractFurnaceScreenHandler c) {
         timer++;
 
         // When furnace is opened
@@ -70,13 +70,13 @@ public class AutoSmelter extends ToggleModule {
         }
     }
 
-    private boolean insertItems(AbstractFurnaceContainer c) {
+    private boolean insertItems(AbstractFurnaceScreenHandler c) {
         if (!c.slots.get(0).getStack().isEmpty()) return true;
 
         int slot = -1;
 
         for (int i = 3; i < c.slots.size(); i++) {
-            if (((IAbstractFurnaceContainer) c).isSmeltableI(c.slots.get(i).getStack())) {
+            if (((IAbstractFurnaceScreenHandler) c).isSmeltableI(c.slots.get(i).getStack())) {
                 slot = i;
                 break;
             }
@@ -94,8 +94,8 @@ public class AutoSmelter extends ToggleModule {
         return false;
     }
 
-    private boolean checkFuel(AbstractFurnaceContainer c) {
-        if (c.getFuelProgress() <= 1 && !((IAbstractFurnaceContainer) c).isFuelI(c.slots.get(1).getStack())) {
+    private boolean checkFuel(AbstractFurnaceScreenHandler c) {
+        if (c.getFuelProgress() <= 1 && !((IAbstractFurnaceScreenHandler) c).isFuelI(c.slots.get(1).getStack())) {
             if (!c.slots.get(1).getStack().isEmpty()) {
                 InvUtils.clickSlot(1, 0, SlotActionType.QUICK_MOVE);
 
@@ -108,7 +108,7 @@ public class AutoSmelter extends ToggleModule {
 
             int slot = -1;
             for (int i = 3; i < c.slots.size(); i++) {
-                if (((IAbstractFurnaceContainer) c).isFuelI(c.slots.get(i).getStack())) {
+                if (((IAbstractFurnaceScreenHandler) c).isFuelI(c.slots.get(i).getStack())) {
                     slot = i;
                     break;
                 }
@@ -127,7 +127,7 @@ public class AutoSmelter extends ToggleModule {
         return false;
     }
 
-    private boolean takeResults(AbstractFurnaceContainer c) {
+    private boolean takeResults(AbstractFurnaceScreenHandler c) {
         InvUtils.clickSlot(2, 0, SlotActionType.QUICK_MOVE);
 
         if (!c.slots.get(2).getStack().isEmpty()) {

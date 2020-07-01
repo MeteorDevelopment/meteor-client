@@ -14,8 +14,8 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MovementType;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.network.Packet;
-import net.minecraft.network.packet.s2c.play.ContainerSlotUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
+import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -206,7 +206,7 @@ public class EventStore {
 
     public static RightClickEvent rightClickEvent(){return rightClickEvent;}
 
-    public static ContainerSlotUpdateEvent containerSlotUpdateEvent(ContainerSlotUpdateS2CPacket packet) {
+    public static ContainerSlotUpdateEvent containerSlotUpdateEvent(ScreenHandlerSlotUpdateS2CPacket packet) {
         containerSlotUpdateEvent.packet = packet;
         return containerSlotUpdateEvent;
     }

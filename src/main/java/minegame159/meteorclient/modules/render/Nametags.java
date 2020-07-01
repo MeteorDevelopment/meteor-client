@@ -97,7 +97,7 @@ public class Nametags extends ToggleModule {
         // Compute health things
         float absorption = entity.getAbsorptionAmount();
         int health = Math.round(entity.getHealth() + absorption);
-        double healthPercentage = health / (entity.getMaximumHealth() + absorption);
+        double healthPercentage = health / (entity.getMaxHealth() + absorption);
 
         String name = entity.getGameProfile().getName();
         String healthText = " " + health;
@@ -120,7 +120,7 @@ public class Nametags extends ToggleModule {
             MeteorClient.FONT.scale = enchantTextScale.get();
             for (int i = 0; i < 4; i++) {
                 ItemStack itemStack = entity.inventory.armor.get(i);
-                Map<Enchantment, Integer> enchantments = EnchantmentHelper.getEnchantments(itemStack);
+                Map<Enchantment, Integer> enchantments = EnchantmentHelper.get(itemStack);
 
                 if (armorWidths[i] == 0) armorWidths[i] = 16;
                 if (!itemStack.isEmpty() && displayArmor.get()) hasArmor = true;
@@ -249,7 +249,7 @@ public class Nametags extends ToggleModule {
 
             for (int i = 0; i < 4; i++) {
                 ItemStack itemStack = entity.inventory.armor.get(i);
-                Map<Enchantment, Integer> enchantments = EnchantmentHelper.getEnchantments(itemStack);
+                Map<Enchantment, Integer> enchantments = EnchantmentHelper.get(itemStack);
 
                 double aW = armorWidths[i];
                 double enchantY = 0;

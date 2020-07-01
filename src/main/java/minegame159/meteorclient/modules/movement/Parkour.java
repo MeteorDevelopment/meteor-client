@@ -17,7 +17,7 @@ public class Parkour extends ToggleModule {
 
     @EventHandler
     private Listener<TickEvent> onTick = new Listener<>(event -> {
-        if(!mc.player.onGround || mc.options.keyJump.isPressed()) return;
+        if(!mc.player.isOnGround() || mc.options.keyJump.isPressed()) return;
 
         if(mc.player.isSneaking() || mc.options.keySneak.isPressed()) return;
 

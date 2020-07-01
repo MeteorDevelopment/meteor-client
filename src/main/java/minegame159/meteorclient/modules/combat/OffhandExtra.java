@@ -12,10 +12,10 @@ import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.InvUtils;
 import minegame159.meteorclient.utils.Utils;
-import net.minecraft.client.gui.screen.ingame.ContainerScreen;
-import net.minecraft.container.SlotActionType;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
+import net.minecraft.screen.slot.SlotActionType;
 
 public class OffhandExtra extends ToggleModule {
     public enum Mode{
@@ -64,7 +64,7 @@ public class OffhandExtra extends ToggleModule {
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
         if(ModuleManager.INSTANCE.get(AutoTotem.class).getLocked()) return;
-        if(Asimov.get() && !(mc.currentScreen instanceof ContainerScreen<?>)){
+        if(Asimov.get() && !(mc.currentScreen instanceof HandledScreen<?>)){
             Item item = getItem();
             InvUtils.FindItemResult result = InvUtils.findItemWithCount(item);
             if(result.slot == -1 && mc.player.getOffHandStack().getItem() != getItem()) {
@@ -87,7 +87,7 @@ public class OffhandExtra extends ToggleModule {
     private final Listener<RightClickEvent> onRightClick = new Listener<>(event -> {
         if(ModuleManager.INSTANCE.get(AutoTotem.class).getLocked()) return;
         if((mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING || (mc.player.getHealth() + mc.player.getAbsorptionAmount() > health.get())
-               && (mc.player.getOffHandStack().getItem() != getItem()) && !(mc.currentScreen instanceof ContainerScreen<?>))){
+               && (mc.player.getOffHandStack().getItem() != getItem()) && !(mc.currentScreen instanceof HandledScreen<?>))){
             Item item = getItem();
             InvUtils.FindItemResult result = InvUtils.findItemWithCount(item);
             if(result.slot == -1 && mc.player.getOffHandStack().getItem() != getItem()) {

@@ -40,7 +40,7 @@ public class BlockListSettingScreen extends WindowScreen {
         Consumer<Block> blockForEach = block -> {
             if (block == Blocks.AIR || setting.get().contains(block)) return;
 
-            table1.add(new WItemWithLabel(block.asItem().getStackForRender(), block.getName().asString()));
+            table1.add(new WItemWithLabel(block.asItem().getStackForRender(), block.getName().getString()));
 
             WPlus plus = table1.add(new WPlus()).getWidget();
             plus.action = plus1 -> {
@@ -61,7 +61,7 @@ public class BlockListSettingScreen extends WindowScreen {
         } else {
             List<Pair<Block, Integer>> blocks = new ArrayList<>();
             Registry.BLOCK.forEach(block -> {
-                int words = Utils.search(block.getName().asFormattedString(), filter.text);
+                int words = Utils.search(block.getName().getString(), filter.text);
                 if (words > 0) blocks.add(new Pair<>(block, words));
             });
             blocks.sort(Comparator.comparingInt(value -> -value.getRight()));
@@ -73,7 +73,7 @@ public class BlockListSettingScreen extends WindowScreen {
         // Selected blocks
         WTable table2 = add(new WTable()).top().getWidget();
         for (Block block : setting.get()) {
-            table2.add(new WItemWithLabel(block.asItem().getStackForRender(), block.getName().asString()));
+            table2.add(new WItemWithLabel(block.asItem().getStackForRender(), block.getName().getString()));
 
             WMinus minus = table2.add(new WMinus()).getWidget();
             minus.action = minus1 -> {

@@ -15,12 +15,12 @@ import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.InvUtils;
 import minegame159.meteorclient.utils.Utils;
-import net.minecraft.container.SlotActionType;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.Hand;
 
 import java.util.Iterator;
@@ -114,9 +114,9 @@ public class AutoExp extends ToggleModule {
         if (slot == -1) {
             Utils.sendMessage("#redNo Exp in hotbar. Disabling!");
             this.toggle();
-        } else if (mc.player.inventory.getInvStack(slot).getCount() < replenishCount.get() && replenish.get()) {
+        } else if (mc.player.inventory.getStack(slot).getCount() < replenishCount.get() && replenish.get()) {
             for (int i = 9; i < 36; i++) {
-                if (mc.player.inventory.getInvStack(i).getItem() == Items.EXPERIENCE_BOTTLE) {
+                if (mc.player.inventory.getStack(i).getItem() == Items.EXPERIENCE_BOTTLE) {
                     InvUtils.clickSlot(InvUtils.invIndexToSlotId(i), 0, SlotActionType.PICKUP);
                     InvUtils.clickSlot(InvUtils.invIndexToSlotId(slot), 0, SlotActionType.PICKUP);
                     InvUtils.clickSlot(InvUtils.invIndexToSlotId(i), 0, SlotActionType.PICKUP);
@@ -209,8 +209,8 @@ public class AutoExp extends ToggleModule {
     });
 
     private int findBrokenArmour(Item item){
-        for(int i = 0; i <mc.player.inventory.getInvSize(); i++){
-            ItemStack itemStack = mc.player.inventory.getInvStack(i);
+        for(int i = 0; i <mc.player.inventory.size(); i++){
+            ItemStack itemStack = mc.player.inventory.getStack(i);
             if(itemStack.isDamaged() && itemStack.getItem() == item && (EnchantmentHelper.getLevel(Enchantments.MENDING, itemStack) >= 1)){
                 return i;
             }
@@ -221,7 +221,7 @@ public class AutoExp extends ToggleModule {
     private int findExpInHotbar(){
         int slot = -1;
         for(int i = 0; i < 9; i++){
-            if (mc.player.inventory.getInvStack(i).getItem() == Items.EXPERIENCE_BOTTLE){
+            if (mc.player.inventory.getStack(i).getItem() == Items.EXPERIENCE_BOTTLE){
                 slot = i;
             }
         }

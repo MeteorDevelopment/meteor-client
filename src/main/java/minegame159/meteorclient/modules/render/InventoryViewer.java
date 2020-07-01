@@ -6,6 +6,7 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.Render2DEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.rendering.Matrices;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.AlignmentX;
 import minegame159.meteorclient.utils.AlignmentY;
@@ -74,7 +75,7 @@ public class InventoryViewer extends ToggleModule {
 
         for (int row = 0; row < 3; row++) {
             for (int i = 0; i < 9; i++) {
-                drawItem(mc.player.inventory.getInvStack(9 + row * 9 + i), x + 8 + i * 18, y + 7 + row * 18);
+                drawItem(mc.player.inventory.getStack(9 + row * 9 + i), x + 8 + i * 18, y + 7 + row * 18);
             }
         }
 
@@ -82,14 +83,14 @@ public class InventoryViewer extends ToggleModule {
     });
 
     private void drawItem(ItemStack itemStack, int x, int y) {
-        mc.getItemRenderer().renderGuiItem(mc.player, itemStack, x, y);
+        mc.getItemRenderer().renderGuiItemIcon(itemStack, x, y);
         mc.getItemRenderer().renderGuiItemOverlay(mc.textRenderer, itemStack, x, y, null);
     }
 
     private void drawBackground(int x, int y) {
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         mc.getTextureManager().bindTexture(bgTransparent.get() ? TEXTURE_TRANSPARENT : TEXTURE);
-        DrawableHelper.blit(x, y, 0, 0, 0, WIDTH, HEIGHT, HEIGHT, WIDTH);
+        DrawableHelper.drawTexture(Matrices.getMatrixStack(), x, y, 0, 0, 0, WIDTH, HEIGHT, HEIGHT, WIDTH);
     }
 
     private int getX(int screenWidth) {

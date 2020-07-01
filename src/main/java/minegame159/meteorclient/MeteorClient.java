@@ -11,6 +11,7 @@ import minegame159.meteorclient.commands.CommandManager;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.gui.screens.topbar.TopBarModules;
 import minegame159.meteorclient.macros.MacroManager;
+import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.rendering.MFont;
 import minegame159.meteorclient.utils.Capes;
@@ -18,12 +19,11 @@ import minegame159.meteorclient.utils.EChestMemory;
 import minegame159.meteorclient.utils.EntityUtils;
 import minegame159.meteorclient.utils.Utils;
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.keybinding.FabricKeyBinding;
-import net.fabricmc.fabric.api.client.keybinding.KeyBindingRegistry;
+import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.options.KeyBinding;
 import net.minecraft.client.util.InputUtil;
-import net.minecraft.util.Identifier;
 import org.lwjgl.glfw.GLFW;
 
 import java.awt.*;
@@ -37,15 +37,14 @@ public class MeteorClient implements ClientModInitializer, Listenable {
     public static final File FOLDER = new File(FabricLoader.getInstance().getGameDirectory(), "meteor-client");
 
     private MinecraftClient mc;
-    private FabricKeyBinding openClickGui = FabricKeyBinding.Builder.create(new Identifier("meteor-client", "open-click-gui"), InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_RIGHT_SHIFT, "Meteor Client").build();
-    public FabricKeyBinding shulkerPeek = FabricKeyBinding.Builder.create(new Identifier("meteor-client", "shulker-peek"), InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_LEFT_ALT, "Meteor Client").build();
+    private KeyBinding openClickGui = new KeyBinding("key.meteor-client.open-click-gui", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_RIGHT_SHIFT, "Meteor Client");
+    public KeyBinding shulkerPeek = new KeyBinding("key.meteor-client.shulker-peek", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_LEFT_ALT, "Meteor Client");
 
     @Override
     public void onInitializeClient() {
         if (INSTANCE == null) {
-            KeyBindingRegistry.INSTANCE.addCategory("Meteor Client");
-            KeyBindingRegistry.INSTANCE.register(openClickGui);
-            KeyBindingRegistry.INSTANCE.register(shulkerPeek);
+            KeyBindingHelper.registerKeyBinding(openClickGui);
+            KeyBindingHelper.registerKeyBinding(shulkerPeek);
 
             INSTANCE = this;
             return;
@@ -162,7 +161,7 @@ public class MeteorClient implements ClientModInitializer, Listenable {
     }
 
     public void onKeyInMainMenu(int key) {
-        if (key == openClickGui.getBoundKey().getKeyCode()) {
+        if (key == ((IKeyBinding) openClickGui).getBoundKey().getCode()) {
             openClickGui();
         }
     }

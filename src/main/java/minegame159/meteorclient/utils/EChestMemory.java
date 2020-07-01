@@ -9,7 +9,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.DefaultedList;
+import net.minecraft.util.collection.DefaultedList;
 
 public class EChestMemory {
     private static final MinecraftClient MC = MinecraftClient.getInstance();
@@ -33,10 +33,10 @@ public class EChestMemory {
         }
         if (echestOpenedState == 0) return;
 
-        Inventory inv = ((GenericContainerScreen) MC.currentScreen).getContainer().getInventory();
+        Inventory inv = ((GenericContainerScreen) MC.currentScreen).getScreenHandler().getInventory();
 
         for (int i = 0; i < 27; i++) {
-            ITEMS.set(i, inv.getInvStack(i));
+            ITEMS.set(i, inv.getStack(i));
         }
 
         echestOpenedState = 0;

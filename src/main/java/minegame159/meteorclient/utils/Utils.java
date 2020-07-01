@@ -3,16 +3,17 @@ package minegame159.meteorclient.utils;
 import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import minegame159.meteorclient.mixininterface.IMinecraftClient;
+import minegame159.meteorclient.mixininterface.IMinecraftServer;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.ShapeContext;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.Camera;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityContext;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.item.*;
 import net.minecraft.nbt.CompoundTag;
@@ -86,7 +87,7 @@ public class Utils {
         if (enchantment == Enchantments.QUICK_CHARGE) return "Quick C";
         if (enchantment == Enchantments.VANISHING_CURSE) return "Curse V";
 
-        return enchantment.getName(0).asString().substring(0, 4);
+        return enchantment.getName(0).getString().substring(0, 4);
     }
 
     public static int search(String text, String filter) {
@@ -110,7 +111,7 @@ public class Utils {
     public static String getWorldName() {
         if (mc.isInSingleplayer()) {
             // Singleplaer
-            File folder = mc.getServer().getWorld(mc.world.dimension.getType()).getSaveHandler().getWorldDir();
+            File folder = ((IMinecraftServer) mc.getServer()).getSession().getWorldDirectory(mc.world.getRegistryKey());
             if (folder.toPath().relativize(mc.runDirectory.toPath()).getNameCount() != 2) {
                 folder = folder.getParentFile();
             }
@@ -193,10 +194,10 @@ public class Utils {
             if(eyesPos.squaredDistanceTo(vec1) > 18.0625) continue;
 
             // Check if intersects entities
-            if (checkForEntities && !mc.world.canPlace(blockState, blockPos, EntityContext.absent())) continue;
+            if (checkForEntities && !mc.world.canPlace(blockState, blockPos, ShapeContext.absent())) continue;
 
             // Place block
-            PlayerMoveC2SPacket.LookOnly packet = new PlayerMoveC2SPacket.LookOnly(getNeededYaw(vec1), getNeededPitch(vec1), mc.player.onGround);
+            PlayerMoveC2SPacket.LookOnly packet = new PlayerMoveC2SPacket.LookOnly(getNeededYaw(vec1), getNeededPitch(vec1), mc.player.isOnGround());
             mc.player.networkHandler.sendPacket(packet);
             mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(vec1, side2, neighbor, false));
             mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
@@ -253,7 +254,7 @@ public class Utils {
         msg = msg.replaceAll("#pink", Formatting.LIGHT_PURPLE.toString());
         msg = msg.replaceAll("#gray", Formatting.GRAY.toString());
 
-        mc.player.sendMessage(new LiteralText(msg));
+        mc.player.sendMessage(new LiteralText(msg), false);
     }
 
     public static void leftClick() {

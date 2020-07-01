@@ -82,7 +82,7 @@ public class DamageCalcUtils {
         }
         damage *= 1.5;
         if(entity.getActiveItem().getEnchantments() != null){
-            if(EnchantmentHelper.getEnchantments(entity.getActiveItem()).containsKey(Enchantments.SHARPNESS)){
+            if(EnchantmentHelper.get(entity.getActiveItem()).containsKey(Enchantments.SHARPNESS)){
                 int level = EnchantmentHelper.getLevel(Enchantments.SHARPNESS, entity.getActiveItem());
                 damage += (0.5 * level) + 0.5;
             }
@@ -118,7 +118,7 @@ public class DamageCalcUtils {
     }
 
     public static double blastProtReduction(Entity player, double damage){
-        int protLevel = EnchantmentHelper.getProtectionAmount(player.getArmorItems(), DamageSource.FIREWORKS);
+        int protLevel = EnchantmentHelper.getProtectionAmount(player.getArmorItems(), DamageSource.GENERIC);
         if(protLevel > 20){
             protLevel = 20;
         }

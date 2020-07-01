@@ -32,13 +32,13 @@
     "Vec3dMixin",
     "EntityRendererMixin",
     "GenericContainerScreenMixin",
-    "ContainerScreenMixin",
+    "HandledScreenMixin",
     "BrewingStandScreenMixin",
     "AbstractFurnaceScreenMixin",
-    "AbstractFurnaceContainerMixin",
+    "AbstractFurnaceScreenHandlerMixin",
     "ClientPlayerInteractionManagerMixin",
     "MiningToolItemMixin",
-    "CraftingTableScreenMixin",
+    "CraftingScreenMixin",
     "PlayerEntityMixin",
     "FluidBlockMixin",
     "ParticleManagerMixin",
@@ -60,7 +60,9 @@
     "BookScreenMixin",
     "AbstractClientPlayerEntityMixin",
     "StatusEffectInstanceMixin",
-    "RenderTickCounterMixin"
+    "RenderTickCounterMixin",
+    "MinecraftServerMixin",
+    "DimensionTypeMixin"
   ],
   "injectors": {
     "defaultRequire": 1

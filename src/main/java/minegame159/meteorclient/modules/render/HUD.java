@@ -5,6 +5,7 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.Config;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.*;
+import minegame159.meteorclient.mixininterface.IDimensionType;
 import minegame159.meteorclient.mixininterface.IMinecraftClient;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
@@ -44,6 +45,9 @@ public class HUD extends ToggleModule {
     private static final Color white = new Color(255, 255, 255);
     private static final Color gray = new Color(185, 185, 185);
     private static final Color red = new Color(225, 45, 45);
+
+    private static final DimensionType THE_NETHER = ((IDimensionType) DimensionType.getOverworldDimensionType()).getNether();
+    private static final DimensionType THE_END = ((IDimensionType) DimensionType.getOverworldDimensionType()).getEnd();
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgTopLeft = settings.createGroup("Top Left");
@@ -260,7 +264,7 @@ public class HUD extends ToggleModule {
     private String getEntityName(Entity entity) {
         if (entity instanceof PlayerEntity) return "Player";
         if (entity instanceof ItemEntity) return "Item";
-        String name = entityCustomNames.get() ? entity.getDisplayName().asString() : entity.getType().getName().asString();
+        String name = entityCustomNames.get() ? entity.getDisplayName().getString() : entity.getType().getName().getString();
         if (separateSheepsByColor.get() && entity instanceof SheepEntity) return StringUtils.capitalize(((SheepEntity) entity).getColor().getName().replace('_', ' ')) + " - " + name;
         return name;
     }
@@ -321,7 +325,7 @@ public class HUD extends ToggleModule {
             for (int i = mc.player.inventory.armor.size() - 1; i >= 0; i--) {
                 ItemStack itemStack = mc.player.inventory.armor.get(i);
 
-                mc.getItemRenderer().renderGuiItem(itemStack, x, y);
+                mc.getItemRenderer().renderGuiItemIcon(itemStack, x, y);
                 mc.getItemRenderer().renderGuiItemOverlay(mc.textRenderer, itemStack, x, y);
 
                 x += 20;
@@ -415,8 +419,8 @@ public class HUD extends ToggleModule {
         }
 
         if (biome.get()) {
-            playerBlockPos.set(mc.player);
-            drawInfo("Biome: ", mc.world.getBiome(playerBlockPos).getName().asString(), y);
+            playerBlockPos.set(mc.player.getX(), mc.player.getY(), mc.player.getZ());
+            drawInfo("Biome: ", mc.world.getBiome(playerBlockPos).getName().getString(), y);
             y += MeteorClient.FONT.getHeight() + 2;
         }
 
@@ -427,8 +431,8 @@ public class HUD extends ToggleModule {
 
         if (lookingAt.get()) {
             String text = "";
-            if (mc.crosshairTarget.getType() == HitResult.Type.BLOCK) text = mc.world.getBlockState(((BlockHitResult) mc.crosshairTarget).getBlockPos()).getBlock().getName().asString();
-            else if (mc.crosshairTarget.getType() == HitResult.Type.ENTITY) text = ((EntityHitResult) mc.crosshairTarget).getEntity().getDisplayName().asString();
+            if (mc.crosshairTarget.getType() == HitResult.Type.BLOCK) text = mc.world.getBlockState(((BlockHitResult) mc.crosshairTarget).getBlockPos()).getBlock().getName().getString();
+            else if (mc.crosshairTarget.getType() == HitResult.Type.ENTITY) text = ((EntityHitResult) mc.crosshairTarget).getEntity().getDisplayName().getString();
 
             drawInfo("Looking At: ", text, y);
             y += MeteorClient.FONT.getHeight() + 2;
@@ -527,17 +531,17 @@ public class HUD extends ToggleModule {
         }
 
         if (position.get()) {
-            if (mc.player.dimension == DimensionType.OVERWORLD) {
+            if (mc.world.getDimension() == DimensionType.getOverworldDimensionType()) {
                 drawPosition(event.screenWidth, "Nether Pos: ", y, mc.cameraEntity.getX() / 8.0, mc.cameraEntity.getY() / 8.0, mc.cameraEntity.getZ() / 8.0);
                 y -= MeteorClient.FONT.getHeight() + 2;
                 drawPosition(event.screenWidth, "Pos: ", y, mc.cameraEntity.getX(), mc.cameraEntity.getY(), mc.cameraEntity.getZ());
                 y -= MeteorClient.FONT.getHeight() + 2;
-            } else if (mc.player.dimension == DimensionType.THE_NETHER) {
+            } else if (mc.world.getDimension() == THE_NETHER) {
                 drawPosition(event.screenWidth, "Overworld Pos: ", y, mc.cameraEntity.getX() * 8.0, mc.cameraEntity.getY() * 8.0, mc.cameraEntity.getZ() * 8.0);
                 y -= MeteorClient.FONT.getHeight() + 2;
                 drawPosition(event.screenWidth, "Pos: ", y, mc.cameraEntity.getX(), mc.cameraEntity.getY(), mc.cameraEntity.getZ());
                 y -= MeteorClient.FONT.getHeight() + 2;
-            } else if (mc.player.dimension == DimensionType.THE_END) {
+            } else if (mc.world.getDimension() == THE_END) {
                 drawPosition(event.screenWidth, "Pos: ", y, mc.cameraEntity.getX(), mc.cameraEntity.getY(), mc.cameraEntity.getZ());
                 y -= MeteorClient.FONT.getHeight() + 2;
             }
@@ -552,7 +556,7 @@ public class HUD extends ToggleModule {
                 white.g = Color.toRGBAG(c);
                 white.b = Color.toRGBAB(c);
 
-                drawInfoRight(statusEffect.getName().asString(), " " + (statusEffectInstance.getAmplifier() + 1) + " (" + StatusEffectUtil.durationToString(statusEffectInstance, 1) + ")", y, white);
+                drawInfoRight(statusEffect.getName().getString(), " " + (statusEffectInstance.getAmplifier() + 1) + " (" + StatusEffectUtil.durationToString(statusEffectInstance, 1) + ")", y, white);
                 y -= MeteorClient.FONT.getHeight() + 2;
 
                 white.r = white.g = white.b = 255;

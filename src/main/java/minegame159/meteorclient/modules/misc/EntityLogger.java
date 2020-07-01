@@ -31,7 +31,7 @@ public class EntityLogger extends ToggleModule {
     @EventHandler
     private final Listener<EntityAddedEvent> onEntityAdded = new Listener<>(event -> {
         if (entities.get().contains(event.entity.getType())) {
-            Utils.sendMessage(String.format("#blue[Meteor]: #white%s #grayspawned at #white%.0f#gray, #white%.0f#gray, #white%.0f#gray.", event.entity.getType().getName().asString(), event.entity.getX(), event.entity.getY(), event.entity.getZ()));
+            Utils.sendMessage(String.format("#blue[Meteor]: #white%s #grayspawned at #white%.0f#gray, #white%.0f#gray, #white%.0f#gray.", event.entity.getType().getName().getString(), event.entity.getX(), event.entity.getY(), event.entity.getZ()));
         }
     });
 }

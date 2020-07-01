@@ -22,6 +22,7 @@ import minegame159.meteorclient.utils.Utils;
 import net.minecraft.block.entity.*;
 import net.minecraft.client.toast.Toast;
 import net.minecraft.client.toast.ToastManager;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.ChunkPos;
 
@@ -92,15 +93,15 @@ public class StashFinder extends ToggleModule {
                     private long lastTime = -1;
 
                     @Override
-                    public Visibility draw(ToastManager manager, long currentTime) {
+                    public Visibility draw(MatrixStack matrices, ToastManager manager, long currentTime) {
                         if (lastTime == -1) lastTime = currentTime;
                         else timer += currentTime - lastTime;
 
                         manager.getGame().getTextureManager().bindTexture(new Identifier("textures/gui/toasts.png"));
                         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 255.0F);
-                        manager.blit(0, 0, 0, 32, 160, 32);
+                        manager.drawTexture(matrices, 0, 0, 0, 32, 160, 32);
 
-                        manager.getGame().textRenderer.draw("StashRecorder found stash.", 12.0F, 12.0F, -11534256);
+                        manager.getGame().textRenderer.draw(matrices, "StashRecorder found stash.", 12.0F, 12.0F, -11534256);
 
                         return timer >= 32000 ? Visibility.HIDE : Visibility.SHOW;
                     }

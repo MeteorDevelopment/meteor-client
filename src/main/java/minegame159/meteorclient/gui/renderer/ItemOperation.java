@@ -22,7 +22,7 @@ public class ItemOperation extends Operation {
         GlStateManager.enableTexture();
         DiffuseLighting.enable();
         GlStateManager.enableDepthTest();
-        MinecraftClient.getInstance().getItemRenderer().renderGuiItem(itemStack, (int) x, (int) y);
+        MinecraftClient.getInstance().getItemRenderer().renderGuiItemIcon(itemStack, (int) x, (int) y);
     }
 
     @Override

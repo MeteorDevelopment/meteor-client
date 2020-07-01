@@ -96,7 +96,7 @@ public class BedAura extends ToggleModule {
 
     @EventHandler
     private Listener<TickEvent> onTick = new Listener<>(event -> {
-        if(mc.player.dimension == DimensionType.OVERWORLD) {
+        if(mc.world.getDimension() == DimensionType.getOverworldDimensionType()) {
             Utils.sendMessage("#redYou are in the overworld. Disabling!");
             this.toggle();
             return;
@@ -139,16 +139,16 @@ public class BedAura extends ToggleModule {
                 double south = -1;
                 double west = -1;
                 if(mc.world.getBlockState(bestBlock.add(1, 1, 0)).getBlock() == Blocks.AIR){
-                    east = DamageCalcUtils.resistanceReduction(target, DamageCalcUtils.blastProtReduction(target, DamageCalcUtils.armourCalc(target, DamageCalcUtils.bedDamage(target, new Vec3d(bestBlock.add(1, 1, 0))))));
+                    east = DamageCalcUtils.resistanceReduction(target, DamageCalcUtils.blastProtReduction(target, DamageCalcUtils.armourCalc(target, DamageCalcUtils.bedDamage(target, new Vec3d(bestBlock.getX() + 1, bestBlock.getY() + 1, bestBlock.getZ())))));
                 }
                 if(mc.world.getBlockState(bestBlock.add(-1, 1, 0)).getBlock() == Blocks.AIR){
-                    west = DamageCalcUtils.resistanceReduction(target, DamageCalcUtils.blastProtReduction(target, DamageCalcUtils.armourCalc(target, DamageCalcUtils.bedDamage(target, new Vec3d(bestBlock.add(-1, 1, 0))))));
+                    west = DamageCalcUtils.resistanceReduction(target, DamageCalcUtils.blastProtReduction(target, DamageCalcUtils.armourCalc(target, DamageCalcUtils.bedDamage(target, new Vec3d(bestBlock.getX() - 1, bestBlock.getY() + 1, bestBlock.getZ())))));
                 }
                 if(mc.world.getBlockState(bestBlock.add(0, 1, 1)).getBlock() == Blocks.AIR){
-                    south = DamageCalcUtils.resistanceReduction(target, DamageCalcUtils.blastProtReduction(target, DamageCalcUtils.armourCalc(target, DamageCalcUtils.bedDamage(target, new Vec3d(bestBlock.add(0, 1, 1))))));
+                    south = DamageCalcUtils.resistanceReduction(target, DamageCalcUtils.blastProtReduction(target, DamageCalcUtils.armourCalc(target, DamageCalcUtils.bedDamage(target, new Vec3d(bestBlock.getX(), bestBlock.getY() + 1, bestBlock.getZ() + 1)))));
                 }
                 if(mc.world.getBlockState(bestBlock.add(0, 1, -1)).getBlock() == Blocks.AIR){
-                    north = DamageCalcUtils.resistanceReduction(target, DamageCalcUtils.blastProtReduction(target, DamageCalcUtils.armourCalc(target, DamageCalcUtils.bedDamage(target, new Vec3d(bestBlock.add(0, 1, -1))))));
+                    north = DamageCalcUtils.resistanceReduction(target, DamageCalcUtils.blastProtReduction(target, DamageCalcUtils.armourCalc(target, DamageCalcUtils.bedDamage(target, new Vec3d(bestBlock.getX(), bestBlock.getY() + 1, bestBlock.getZ() - 1)))));
                 }
                 PlayerInteractBlockC2SPacket placePacket;
                 if (mc.player.getMainHandStack().getItem() instanceof BedItem) {

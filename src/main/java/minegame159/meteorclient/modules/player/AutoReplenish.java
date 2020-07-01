@@ -16,11 +16,11 @@ import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.InvUtils;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
-import net.minecraft.client.gui.screen.ingame.ContainerScreen;
-import net.minecraft.container.SlotActionType;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.screen.slot.SlotActionType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -91,11 +91,11 @@ public class AutoReplenish extends ToggleModule {
 
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
-        if(mc.currentScreen instanceof ContainerScreen) return;
+        if(mc.currentScreen instanceof HandledScreen<?>) return;
 
         // Hotbar, stackable items
         for (int i = 0; i < 9; i++) {
-            replenishStackableItems(mc.player.inventory.getInvStack(i), i);
+            replenishStackableItems(mc.player.inventory.getStack(i), i);
         }
 
         // OffHand, stackable items
@@ -127,7 +127,7 @@ public class AutoReplenish extends ToggleModule {
 
     @EventHandler
     private final Listener<OpenScreenEvent> onScreen = new Listener<>(event -> {
-        if(mc.currentScreen instanceof ContainerScreen && !(mc.currentScreen instanceof AbstractInventoryScreen)){
+        if(mc.currentScreen instanceof HandledScreen<?> && !(mc.currentScreen instanceof AbstractInventoryScreen)){
             items.clear();
         }
     });

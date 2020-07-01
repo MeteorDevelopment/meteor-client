@@ -97,7 +97,7 @@ public class Search extends ToggleModule {
     public void onActivate() {
         MeteorTaskExecutor.start();
 
-        lastDimension = mc.player.dimension;
+        lastDimension = mc.world.getDimension();
 
         searchViewDistance();
     }
@@ -170,14 +170,14 @@ public class Search extends ToggleModule {
 
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
-        if (lastDimension != mc.player.dimension) {
+        if (lastDimension != mc.world.getDimension()) {
             synchronized (chunks) {
                 for (MyChunk chunk : chunks.values()) chunk.dispose();
                 chunks.clear();
             }
         }
 
-        lastDimension = mc.player.dimension;
+        lastDimension = mc.world.getDimension();
     });
 
     @EventHandler
@@ -251,7 +251,7 @@ public class Search extends ToggleModule {
                     }
 
                     Box box = shape.getBoundingBox();
-                    ShapeBuilder.boxEdges(blockPos.getX() + box.x1, blockPos.getY() + box.y1, blockPos.getZ() + box.z1, blockPos.getX() + box.x2, blockPos.getY() + box.y2, blockPos.getZ() + box.z2, color.get());
+                    ShapeBuilder.boxEdges(blockPos.getX() + box.minX, blockPos.getY() + box.minY, blockPos.getZ() + box.minZ, blockPos.getX() + box.maxX, blockPos.getY() + box.maxY, blockPos.getZ() + box.maxZ, color.get());
                 }
 
                 // Tracers

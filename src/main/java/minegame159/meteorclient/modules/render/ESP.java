@@ -128,18 +128,18 @@ public class ESP extends ToggleModule {
             switch (mode.get()) {
                 case Lines: {
                     Box box = entity.getBoundingBox();
-                    ShapeBuilder.boxEdges(x + box.x1, y + box.y1, z + box.z1, x + box.x2, y + box.y2, z + box.z2, lineColor);
+                    ShapeBuilder.boxEdges(x + box.minX, y + box.minY, z + box.minZ, x + box.maxX, y + box.maxY, z + box.maxZ, lineColor);
                     break;
                 }
                 case Sides: {
                     Box box = entity.getBoundingBox();
-                    ShapeBuilder.boxSides(x + box.x1, y + box.y1, z + box.z1, x + box.x2, y + box.y2, z + box.z2, sideColor);
+                    ShapeBuilder.boxSides(x + box.minX, y + box.minY, z + box.minZ, x + box.maxX, y + box.maxY, z + box.maxZ, sideColor);
                     break;
                 }
                 case Both: {
                     Box box = entity.getBoundingBox();
-                    ShapeBuilder.boxEdges(x + box.x1, y + box.y1, z + box.z1, x + box.x2, y + box.y2, z + box.z2, lineColor);
-                    ShapeBuilder.boxSides(x + box.x1, y + box.y1, z + box.z1, x + box.x2, y + box.y2, z + box.z2, sideColor);
+                    ShapeBuilder.boxEdges(x + box.minX, y + box.minY, z + box.minZ, x + box.maxX, y + box.maxY, z + box.maxZ, lineColor);
+                    ShapeBuilder.boxSides(x + box.minX, y + box.minY, z + box.minZ, x + box.maxX, y + box.maxY, z + box.maxZ, sideColor);
                     break;
                 }
             }
@@ -160,7 +160,7 @@ public class ESP extends ToggleModule {
 
             if (entity instanceof PlayerEntity) render(event, entity, playersColor.get());
             else {
-                switch (entity.getType().getCategory()) {
+                switch (entity.getType().getSpawnGroup()) {
                     case CREATURE:       render(event, entity, animalsColor.get()); break;
                     case WATER_CREATURE: render(event, entity, waterAnimalsColor.get()); break;
                     case MONSTER:        render(event, entity, monstersColor.get()); break;

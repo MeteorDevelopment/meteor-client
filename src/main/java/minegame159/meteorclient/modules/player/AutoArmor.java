@@ -12,18 +12,18 @@ import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.InvUtils;
 import net.minecraft.block.entity.BedBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.container.SlotActionType;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.damage.BadRespawnPointDamageSource;
 import net.minecraft.entity.damage.EntityDamageSource;
-import net.minecraft.entity.damage.NetherBedDamageSource;
-import net.minecraft.entity.decoration.EnderCrystalEntity;
+import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.dimension.DimensionType;
 
@@ -109,14 +109,14 @@ public class AutoArmor extends ToggleModule {
         if (switchToBlastProtWhenNearCrystalOrBed.get()) {
             // Check crystals
             for (Entity entity : mc.world.getEntities()) {
-                if (entity instanceof EnderCrystalEntity && entity.distanceTo(mc.player) <= crystalAndBedDetectionDistance.get()) {
+                if (entity instanceof EndCrystalEntity && entity.distanceTo(mc.player) <= crystalAndBedDetectionDistance.get()) {
                     prioritizeProtection.set(Protection.BlastProtection);
                     break;
                 }
             }
 
             // Check beds if not in overworld
-            if (mc.world.dimension.getType() != DimensionType.OVERWORLD) {
+            if (mc.world.getDimension() != DimensionType.getOverworldDimensionType()) {
                 for (BlockEntity blockEntity : mc.world.blockEntities) {
                     if (blockEntity instanceof BedBlockEntity) {
                         float f = (float) (mc.player.getX() - blockEntity.getPos().getX());
@@ -150,7 +150,7 @@ public class AutoArmor extends ToggleModule {
 
         // Get best items
         for (int i = 0; i < mc.player.inventory.main.size(); i++) {
-            ItemStack itemStack = mc.player.inventory.getInvStack(i);
+            ItemStack itemStack = mc.player.inventory.getStack(i);
             if (!(itemStack.getItem() instanceof ArmorItem) || (antiBreak.get() && (itemStack.getMaxDamage() - itemStack.getDamage()) <= 11)) continue;
 
             // Helmet
@@ -183,17 +183,17 @@ public class AutoArmor extends ToggleModule {
     private Listener<DamageEvent> onDamage = new Listener<>(event -> {
         if (event.entity.getEntityId() != mc.player.getEntityId()) return;
 
-        ItemStack itemStack = mc.player.inventory.getInvStack(39 - (6 - 5));
+        ItemStack itemStack = mc.player.inventory.getStack(39 - (6 - 5));
         if (itemStack.getItem() != Items.ELYTRA) return;
 
-        if (event.source instanceof EntityDamageSource || event.source instanceof NetherBedDamageSource) {
+        if (event.source instanceof EntityDamageSource || event.source instanceof BadRespawnPointDamageSource) {
             manageChestplate = true;
             doTick();
         }
     });
 
     private void checkElytra() {
-        ItemStack itemStack = mc.player.inventory.getInvStack(39 - (6 - 5));
+        ItemStack itemStack = mc.player.inventory.getStack(39 - (6 - 5));
         chestplate.manage = itemStack.getItem() != Items.ELYTRA;
     }
 
@@ -306,7 +306,7 @@ public class AutoArmor extends ToggleModule {
         void apply(int armorSlot) {
             if (!manage) return;
 
-            ItemStack itemStack = mc.player.inventory.getInvStack(39 - (armorSlot - 5));
+            ItemStack itemStack = mc.player.inventory.getStack(39 - (armorSlot - 5));
             int score = -1;
             if (!itemStack.isEmpty()) {
                 score = getHelmetScore(itemStack);
@@ -328,7 +328,7 @@ public class AutoArmor extends ToggleModule {
 
         boolean applyProt(int armorSlot) {
             if (bestProtSlot == -1) return false;
-            ItemStack itemStack = mc.player.inventory.getInvStack(39 - (armorSlot - 5));
+            ItemStack itemStack = mc.player.inventory.getStack(39 - (armorSlot - 5));
             if (EnchantmentHelper.getLevel(prioritizeProtection.get().enchantment, itemStack) > 0) return false;
 
             move(bestProtSlot, armorSlot);
@@ -337,7 +337,7 @@ public class AutoArmor extends ToggleModule {
 
         boolean applyBlastProt(int armorSlot) {
             if (bestBlastProtSlot == -1) return false;
-            ItemStack itemStack = mc.player.inventory.getInvStack(39 - (armorSlot - 5));
+            ItemStack itemStack = mc.player.inventory.getStack(39 - (armorSlot - 5));
             if (EnchantmentHelper.getLevel(prioritizeProtection.get().enchantment, itemStack) > 0) return false;
 
             move(bestBlastProtSlot, armorSlot);
@@ -346,7 +346,7 @@ public class AutoArmor extends ToggleModule {
 
         boolean applyFireProt(int armorSlot) {
             if (bestFireProtSlot == -1) return false;
-            ItemStack itemStack = mc.player.inventory.getInvStack(39 - (armorSlot - 5));
+            ItemStack itemStack = mc.player.inventory.getStack(39 - (armorSlot - 5));
             if (EnchantmentHelper.getLevel(prioritizeProtection.get().enchantment, itemStack) > 0) return false;
 
             move(bestFireProtSlot, armorSlot);
@@ -355,7 +355,7 @@ public class AutoArmor extends ToggleModule {
 
         boolean applyProjProt(int armorSlot) {
             if (bestProjProtSlot == -1) return false;
-            ItemStack itemStack = mc.player.inventory.getInvStack(39 - (armorSlot - 5));
+            ItemStack itemStack = mc.player.inventory.getStack(39 - (armorSlot - 5));
             if (EnchantmentHelper.getLevel(prioritizeProtection.get().enchantment, itemStack) > 0) return false;
 
             move(bestProjProtSlot, armorSlot);
@@ -368,7 +368,7 @@ public class AutoArmor extends ToggleModule {
         }
 
         void move(int from, int to) {
-            boolean wasEmpty = mc.player.inventory.getInvStack(39 - (to - 5)).isEmpty();
+            boolean wasEmpty = mc.player.inventory.getStack(39 - (to - 5)).isEmpty();
 
             InvUtils.clickSlot(InvUtils.invIndexToSlotId(from), 0, SlotActionType.PICKUP);
             InvUtils.clickSlot(to, 0, SlotActionType.PICKUP);

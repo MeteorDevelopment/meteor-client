@@ -10,8 +10,8 @@ import minegame159.meteorclient.settings.ItemListSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.InvUtils;
-import net.minecraft.container.SlotActionType;
 import net.minecraft.item.Item;
+import net.minecraft.screen.slot.SlotActionType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,8 +41,8 @@ public class AutoDrop extends ToggleModule {
     private Listener<TickEvent> onTick = new Listener<>(event -> {
         if (mc.currentScreen != null) return;
 
-        for (int i = excludeHotbar.get() ? 9 : 0; i < mc.player.inventory.getInvSize(); i++) {
-            if (items.get().contains(mc.player.inventory.getInvStack(i).getItem())) {
+        for (int i = excludeHotbar.get() ? 9 : 0; i < mc.player.inventory.size(); i++) {
+            if (items.get().contains(mc.player.inventory.getStack(i).getItem())) {
                 InvUtils.clickSlot(InvUtils.invIndexToSlotId(i), 1, SlotActionType.THROW);
             }
         }

@@ -48,8 +48,8 @@ public abstract class ClientPlayNetworkHandlerMixin {
         MeteorClient.EVENT_BUS.post(EventStore.chunkDataEvent(chunk));
     }
 
-    @Inject(method = "onContainerSlotUpdate", at = @At("TAIL"))
-    private void onContainerSlotUpdate(ContainerSlotUpdateS2CPacket packet, CallbackInfo info) {
+    @Inject(method = "onScreenHandlerSlotUpdate", at = @At("TAIL"))
+    private void onContainerSlotUpdate(ScreenHandlerSlotUpdateS2CPacket packet, CallbackInfo info) {
         MeteorClient.EVENT_BUS.post(EventStore.containerSlotUpdateEvent(packet));
     }
 
