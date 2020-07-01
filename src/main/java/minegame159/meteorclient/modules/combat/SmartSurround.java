@@ -67,7 +67,7 @@ public class SmartSurround extends ToggleModule {
                     return;
                 }
                 for (int i = 0; i < 9; i++) {
-                    Item item = mc.player.inventory.getInvStack(i).getItem();
+                    Item item = mc.player.inventory.getStack(i).getItem();
                     if (item instanceof BlockItem) {
                         slot = i;
                         mc.player.inventory.selectedSlot = slot;
@@ -130,7 +130,7 @@ public class SmartSurround extends ToggleModule {
         oldSlot = mc.player.inventory.selectedSlot;
         int newSlot = -1;
         for (int i = 0; i < 9; i++) {
-            Item item = mc.player.inventory.getInvStack(i).getItem();
+            Item item = mc.player.inventory.getStack(i).getItem();
             if (item == Items.OBSIDIAN) {
                 newSlot = i;
                 mc.player.inventory.selectedSlot = newSlot;

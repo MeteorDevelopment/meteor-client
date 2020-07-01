@@ -8,30 +8,33 @@ import minegame159.meteorclient.utils.EChestMemory;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
-import net.minecraft.client.gui.screen.ingame.ContainerScreen;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.render.DiffuseLighting;
-import net.minecraft.container.Slot;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.inventory.Inventories;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.util.DefaultedList;
+import net.minecraft.screen.slot.Slot;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.collection.DefaultedList;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(ContainerScreen.class)
-public class ContainerScreenMixin {
-    @Shadow protected Slot focusedSlot;
+import javax.annotation.Nullable;
+
+@Mixin(HandledScreen.class)
+public class HandledScreenMixin {
+    @Shadow @Nullable protected Slot focusedSlot;
 
     private static final Identifier TEXTURE = new Identifier("meteor-client", "container_3x9.png");
     private static MinecraftClient mc;
 
     @Inject(method = "render", at = @At("TAIL"))
-    private void onRender(int mouseX, int mouseY, float delta, CallbackInfo info) {
+    private void onRender(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo info) {
         if (focusedSlot != null && !focusedSlot.getStack().isEmpty()) {
             // Shulker Preview
             if (Utils.isShulker(focusedSlot.getStack().getItem()) && MeteorClient.INSTANCE.shulkerPeek.isPressed()) {
@@ -41,32 +44,32 @@ public class ContainerScreenMixin {
                         DefaultedList<ItemStack> itemStacks = DefaultedList.ofSize(27, ItemStack.EMPTY);
                         Inventories.fromTag(compoundTag, itemStacks);
 
-                        draw(itemStacks, mouseX, mouseY);
+                        draw(matrices, itemStacks, mouseX, mouseY);
                     }
                 }
             }
 
             // EChest preview
             if (focusedSlot.getStack().getItem() == Items.ENDER_CHEST && ModuleManager.INSTANCE.isActive(EChestPreview.class)) {
-                draw(EChestMemory.ITEMS, mouseX, mouseY);
+                draw(matrices, EChestMemory.ITEMS, mouseX, mouseY);
             }
         }
     }
 
     @Inject(method = "drawMouseoverTooltip", at = @At("HEAD"), cancellable = true)
-    private void onDrawMouseoverTooltip(int mouseX, int mouseY, CallbackInfo info) {
+    private void onDrawMouseoverTooltip(MatrixStack matrices, int x, int y, CallbackInfo info) {
         if (focusedSlot != null && !focusedSlot.getStack().isEmpty()) {
             if (Utils.isShulker(focusedSlot.getStack().getItem()) && MeteorClient.INSTANCE.shulkerPeek.isPressed()) info.cancel();
             else if (focusedSlot.getStack().getItem() == Items.ENDER_CHEST && ModuleManager.INSTANCE.isActive(EChestPreview.class)) info.cancel();
         }
     }
 
-    private void draw(DefaultedList<ItemStack> itemStacks, int mouseX, int mouseY) {
+    private void draw(MatrixStack matrices, DefaultedList<ItemStack> itemStacks, int mouseX, int mouseY) {
         RenderSystem.disableLighting();
         RenderSystem.disableDepthTest();
 
         mc = MinecraftClient.getInstance();
-        drawBackground(mouseX + 6, mouseY + 6);
+        drawBackground(matrices, mouseX + 6, mouseY + 6);
         DiffuseLighting.enable();
 
         int row = 0;
@@ -86,16 +89,16 @@ public class ContainerScreenMixin {
     }
 
     private void drawItem(ItemStack itemStack, int x, int y) {
-        mc.getItemRenderer().renderGuiItem(mc.player, itemStack, x, y);
+        mc.getItemRenderer().renderGuiItemIcon(itemStack, x, y);
         mc.getItemRenderer().renderGuiItemOverlay(mc.textRenderer, itemStack, x, y, null);
     }
 
-    private void drawBackground(int x, int y) {
+    private void drawBackground(MatrixStack matrices, int x, int y) {
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         mc.getTextureManager().bindTexture(TEXTURE);
         int width = 176;
         int height = 67;
-        DrawableHelper.blit(x, y, 0, 0, 0, width, height, height, width);
+        DrawableHelper.drawTexture(matrices, x, y, 0, 0, 0, width, height, height, width);
     }
 
 }

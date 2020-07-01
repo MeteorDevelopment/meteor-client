@@ -9,6 +9,7 @@ import minegame159.meteorclient.modules.render.HUD;
 import minegame159.meteorclient.modules.render.NoRender;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.hud.InGameHud;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.scoreboard.ScoreboardObjective;
 import org.lwjgl.opengl.GL11;
@@ -28,7 +29,7 @@ public abstract class InGameHudMixin {
     @Shadow @Final private MinecraftClient client;
 
     @Inject(at = @At("TAIL"), method = "render")
-    private void onRender(float tickDelta, CallbackInfo info) {
+    private void onRender(MatrixStack matrixStack, float tickDelta, CallbackInfo info) {
         client.getProfiler().swap("meteor-client_render");
 
         RenderSystem.enableBlend();
@@ -65,7 +66,7 @@ public abstract class InGameHudMixin {
     }
 
     @Inject(method = "renderScoreboardSidebar", at = @At("HEAD"), cancellable = true)
-    private void onRenderScoreboardSidebar(ScoreboardObjective scoreboardObjective, CallbackInfo info) {
+    private void onRenderScoreboardSidebar(MatrixStack matrixStack, ScoreboardObjective scoreboardObjective, CallbackInfo info) {
         if (ModuleManager.INSTANCE.get(NoRender.class).noScoreboard()) info.cancel();
     }
 }

@@ -18,7 +18,7 @@ public class XpBottleThrower extends ToggleModule {
         int slot = -1;
 
         for (int i = 0; i < 9; i++) {
-            if (mc.player.inventory.getInvStack(i).getItem() == Items.EXPERIENCE_BOTTLE) {
+            if (mc.player.inventory.getStack(i).getItem() == Items.EXPERIENCE_BOTTLE) {
                 slot = i;
                 break;
             }

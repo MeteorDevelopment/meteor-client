@@ -3,6 +3,7 @@ package minegame159.meteorclient.mixin;
 import minegame159.meteorclient.utils.Color;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.TitleScreen;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -44,17 +45,17 @@ public class TitleScreenMixin extends Screen {
         text3 = " & ";
         text4 = "squidoodly";
 
-        text1Length = font.getStringWidth(text1);
-        text2Length = font.getStringWidth(text2);
-        text3Length = font.getStringWidth(text3);
-        text4Length = font.getStringWidth(text4);
+        text1Length = textRenderer.getWidth(text1);
+        text2Length = textRenderer.getWidth(text2);
+        text3Length = textRenderer.getWidth(text3);
+        text4Length = textRenderer.getWidth(text4);
     }
 
     @Inject(method = "render", at = @At("TAIL"))
-    private void onRender(int mouseX, int mouseY, float delta, CallbackInfo info) {
-        drawString(font, text1, width - text4Length - text3Length - text2Length - text1Length - 3, 3, text1Color);
-        drawString(font, text2, width - text4Length - text3Length - text2Length - 3, 3, text2Color);
-        drawString(font, text3, width - text4Length - text3Length - 3, 3, text3Color);
-        drawString(font, text4, width - text4Length - 3, 3, text4Color);
+    private void onRender(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo info) {
+        textRenderer.draw(matrices, text1, width - text4Length - text3Length - text2Length - text1Length - 3, 3, text1Color);
+        textRenderer.draw(matrices, text2, width - text4Length - text3Length - text2Length - 3, 3, text2Color);
+        textRenderer.draw(matrices, text3, width - text4Length - text3Length - 3, 3, text3Color);
+        textRenderer.draw(matrices, text4, width - text4Length - 3, 3, text4Color);
     }
 }

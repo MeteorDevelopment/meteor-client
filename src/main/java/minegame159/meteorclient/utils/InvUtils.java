@@ -1,9 +1,9 @@
 package minegame159.meteorclient.utils;
 
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.container.SlotActionType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.screen.slot.SlotActionType;
 
 import java.util.function.Predicate;
 
@@ -14,7 +14,7 @@ public class InvUtils {
     private static FindItemResult findItemResult = new FindItemResult();
 
     public static void clickSlot(int slot, int button, SlotActionType action) {
-        mc.interactionManager.clickSlot(mc.player.container.syncId, slot, button, action, mc.player);
+        mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, slot, button, action, mc.player);
     }
 
     public static FindItemResult findItemWithCount(Item item) {
@@ -22,7 +22,7 @@ public class InvUtils {
         findItemResult.count = 0;
 
         for (int i = 0; i < 4 * 9; i++) {
-            ItemStack itemStack = mc.player.inventory.getInvStack(i);
+            ItemStack itemStack = mc.player.inventory.getStack(i);
 
             if (itemStack.getItem() == item) {
                 if (!findItemResult.found()) findItemResult.slot = i;
@@ -35,7 +35,7 @@ public class InvUtils {
 
     public static int findItem(Item item, Predicate<ItemStack> isGood) {
         for (int i = 0; i < 4 * 9; i++) {
-            ItemStack itemStack = mc.player.inventory.getInvStack(i);
+            ItemStack itemStack = mc.player.inventory.getStack(i);
             if (itemStack.getItem() == item && isGood.test(itemStack)) return i;
         }
 
@@ -44,7 +44,7 @@ public class InvUtils {
 
     public static int findItemInHotbar(Item item, Predicate<ItemStack> isGood) {
         for (int i = 0; i < 9; i++) {
-            ItemStack itemStack = mc.player.inventory.getInvStack(i);
+            ItemStack itemStack = mc.player.inventory.getStack(i);
             if (itemStack.getItem() == item && isGood.test(itemStack)) return i;
         }
 

@@ -134,7 +134,7 @@ public class Tracers extends ToggleModule {
         double y = entity.prevY + (entity.getY() - entity.prevY) * event.tickDelta;
         double z = entity.prevZ + (entity.getZ() - entity.prevZ) * event.tickDelta;
 
-        double height = entity.getBoundingBox().y2 - entity.getBoundingBox().y1;
+        double height = entity.getBoundingBox().maxY - entity.getBoundingBox().minY;
 
         if (target.get() == Target.Head) y += height;
         else if (target.get() == Target.Body) y += height / 2;
@@ -172,7 +172,7 @@ public class Tracers extends ToggleModule {
 
                 if (friend == null || friend.showInTracers) render(entity, color, event);
             } else {
-                switch (entity.getType().getCategory()) {
+                switch (entity.getType().getSpawnGroup()) {
                     case CREATURE:       render(entity, animalsColor.get(), event); break;
                     case WATER_CREATURE: render(entity, waterAnimalsColor.get(), event); break;
                     case MONSTER:        render(entity, monstersColor.get(), event); break;

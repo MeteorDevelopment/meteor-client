@@ -10,7 +10,6 @@ import minegame159.meteorclient.modules.ToggleModule;
 import net.minecraft.block.entity.SignBlockEntity;
 import net.minecraft.client.gui.screen.ingame.SignEditScreen;
 import net.minecraft.network.packet.c2s.play.UpdateSignC2SPacket;
-import net.minecraft.text.LiteralText;
 
 public class AutoSign extends ToggleModule {
     private String[] text;
@@ -37,7 +36,7 @@ public class AutoSign extends ToggleModule {
 
         SignBlockEntity sign = ((ISignEditScreen) event.screen).getSign();
 
-        mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(sign.getPos(), new LiteralText(text[0]), new LiteralText(text[1]), new LiteralText(text[2]), new LiteralText(text[3])));
+        mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(sign.getPos(), text[0], text[1], text[2], text[3]));
 
         event.cancel();
     });

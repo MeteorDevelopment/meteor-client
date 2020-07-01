@@ -83,8 +83,8 @@ public class WidgetScreen extends Screen {
     }
 
     @Override
-    public void render(int mouseX, int mouseY, float delta) {
-        if (!Utils.canUpdate()) renderBackground();
+    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+        if (!Utils.canUpdate()) renderBackground(matrices);
 
         Matrices.begin(new MatrixStack());
         GuiRenderer.INSTANCE.begin();

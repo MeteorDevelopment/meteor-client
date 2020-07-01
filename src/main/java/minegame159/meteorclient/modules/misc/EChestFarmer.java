@@ -10,6 +10,7 @@ import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.modules.player.AutoTool;
 import minegame159.meteorclient.utils.InvUtils;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
@@ -20,6 +21,8 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.Direction;
 
 public class EChestFarmer extends ToggleModule {
+    private static final BlockState ENDER_CHEST = Blocks.ENDER_CHEST.getDefaultState();
+
     public EChestFarmer(){
         super(Category.Misc, "EChestFarmer", "Farms EChests for obby.");
     }
@@ -30,8 +33,8 @@ public class EChestFarmer extends ToggleModule {
         int slot = -1;
         if(itemResult.count != 0 && itemResult.slot < 9) {
             for (int i = 0; i < 9; i++) {
-                if (ModuleManager.INSTANCE.get(AutoTool.class).isEffectiveOn(mc.player.inventory.getInvStack(i).getItem(), Blocks.ENDER_CHEST)
-                        && EnchantmentHelper.getLevel(Enchantments.SILK_TOUCH, mc.player.inventory.getInvStack(i)) == 0) {
+                if (ModuleManager.INSTANCE.get(AutoTool.class).isEffectiveOn(mc.player.inventory.getStack(i).getItem(), ENDER_CHEST)
+                        && EnchantmentHelper.getLevel(Enchantments.SILK_TOUCH, mc.player.inventory.getStack(i)) == 0) {
                     slot = i;
                 }
             }

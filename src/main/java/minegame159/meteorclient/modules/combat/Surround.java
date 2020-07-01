@@ -37,7 +37,7 @@ public class Surround extends ToggleModule {
 
     @EventHandler
     private Listener<TickEvent> onTick = new Listener<>(event -> {
-        if (onlyOnGround.get() && !mc.player.onGround) return;
+        if (onlyOnGround.get() && !mc.player.isOnGround()) return;
 
         int slot;
         if (mc.player.getMainHandStack().getItem() == Items.OBSIDIAN) slot = mc.player.inventory.selectedSlot;
@@ -76,7 +76,7 @@ public class Surround extends ToggleModule {
         int slot = -1;
 
         for (int i = 0; i < 9; i++) {
-            Item item = mc.player.inventory.getInvStack(i).getItem();
+            Item item = mc.player.inventory.getStack(i).getItem();
 
             if (!(item instanceof BlockItem)) continue;
 
@@ -85,7 +85,7 @@ public class Surround extends ToggleModule {
             }
 
             if (!onlyObsidian.get()) {
-                if (((BlockItem) item).getBlock().getDefaultState().isSimpleFullBlock(mc.world, null)) slot = i;
+                if (((BlockItem) item).getBlock().getDefaultState().isFullCube(mc.world, null)) slot = i;
             }
         }
 

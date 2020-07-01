@@ -145,7 +145,7 @@ public class Scaffold extends ToggleModule {
     });
 
     private boolean findBlock() {
-        if (mc.player.inventory.getInvStack(slot).isEmpty()) {
+        if (mc.player.inventory.getStack(slot).isEmpty()) {
             slot = findSlot(blockState);
             if (slot == -1) {
                 mc.player.inventory.selectedSlot = prevSelectedSlot;
@@ -161,7 +161,7 @@ public class Scaffold extends ToggleModule {
     }
 
     private BlockPos setPos(int x, int y, int z) {
-        blockPos.set(mc.player);
+        blockPos.set(mc.player.getX(), mc.player.getY(), mc.player.getZ());
         if (x != 0) blockPos.setX(blockPos.getX() + x);
         if (y != 0) blockPos.setY(blockPos.getY() + y);
         if (z != 0) blockPos.setZ(blockPos.getZ() + z);
@@ -171,7 +171,7 @@ public class Scaffold extends ToggleModule {
     private int findSlot(BlockState blockState) {
         int slot = -1;
         for (int i = 0; i < 9; i++) {
-            ItemStack stack = mc.player.inventory.getInvStack(i);
+            ItemStack stack = mc.player.inventory.getStack(i);
             if (stack.isEmpty() || !(stack.getItem() instanceof BlockItem)) continue;
 
             // Filter out non solid blocks

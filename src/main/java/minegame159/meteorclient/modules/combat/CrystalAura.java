@@ -15,7 +15,7 @@ import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.DamageCalcUtils;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
-import net.minecraft.entity.decoration.EnderCrystalEntity;
+import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
 import net.minecraft.util.Hand;
@@ -145,7 +145,7 @@ public class CrystalAura extends ToggleModule {
             }
         }
         Streams.stream(mc.world.getEntities())
-                .filter(entity -> entity instanceof EnderCrystalEntity)
+                .filter(entity -> entity instanceof EndCrystalEntity)
                 .filter(entity -> entity.distanceTo(mc.player) <= range.get())
                 .filter(entity -> ignoreWalls.get() || mc.player.canSee(entity))
                 .filter(entity -> !breakMode.get() || (mc.player.getHealth() + mc.player.getAbsorptionAmount()

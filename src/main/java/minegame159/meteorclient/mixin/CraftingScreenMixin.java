@@ -5,24 +5,26 @@ import minegame159.meteorclient.gui.screens.AutoCraftScreen;
 import minegame159.meteorclient.utils.InvUtils;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.ingame.ContainerScreen;
-import net.minecraft.client.gui.screen.ingame.CraftingTableScreen;
+import net.minecraft.client.gui.screen.ingame.CraftingScreen;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.client.gui.screen.recipebook.RecipeBookProvider;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.container.CraftingTableContainer;
-import net.minecraft.container.Slot;
-import net.minecraft.container.SlotActionType;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.screen.CraftingScreenHandler;
+import net.minecraft.screen.slot.Slot;
+import net.minecraft.screen.slot.SlotActionType;
+import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(CraftingTableScreen.class)
-public abstract class CraftingTableScreenMixin extends ContainerScreen<CraftingTableContainer> {
+@Mixin(CraftingScreen.class)
+public abstract class CraftingScreenMixin extends HandledScreen<CraftingScreenHandler> implements RecipeBookProvider {
     private MinecraftClient mc;
     private ButtonWidget autoCraftBtn;
 
@@ -31,7 +33,7 @@ public abstract class CraftingTableScreenMixin extends ContainerScreen<CraftingT
     private Item[] ingredients = new Item[9];
     private int timer;
 
-    public CraftingTableScreenMixin(CraftingTableContainer container, PlayerInventory playerInventory, Text name) {
+    public CraftingScreenMixin(CraftingScreenHandler container, PlayerInventory playerInventory, Text name) {
         super(container, playerInventory, name);
     }
 
@@ -42,8 +44,8 @@ public abstract class CraftingTableScreenMixin extends ContainerScreen<CraftingT
         autoCrafting = false;
         craftingI = 0;
 
-        autoCraftBtn = addButton(new ButtonWidget(x + 30 + 3 * 18 + 4, y + 16, 70, 13, "Auto craft", button -> onAutoCraft()));
-        addButton(new ButtonWidget(x + 30 + 3 * 18 + 4, y + 17 + 2 * 20, 70, 13, "Config", button -> MinecraftClient.getInstance().openScreen(new AutoCraftScreen())));
+        autoCraftBtn = addButton(new ButtonWidget(x + 30 + 3 * 18 + 4, y + 16, 70, 13, new LiteralText("Auto craft"), button -> onAutoCraft()));
+        addButton(new ButtonWidget(x + 30 + 3 * 18 + 4, y + 17 + 2 * 20, 70, 13, new LiteralText("Config"), button -> MinecraftClient.getInstance().openScreen(new AutoCraftScreen())));
     }
 
     private void onAutoCraft() {
@@ -54,7 +56,7 @@ public abstract class CraftingTableScreenMixin extends ContainerScreen<CraftingT
                 craftingI = 0;
                 for (int i = 1; i < 10; i++) ingredients[i - 1] = getStack(i).getItem();
 
-                autoCraftBtn.setMessage("Stop crafting");
+                autoCraftBtn.setMessage(new LiteralText("Stop crafting"));
             }
         } else {
             stopCrafting(null);
@@ -104,7 +106,7 @@ public abstract class CraftingTableScreenMixin extends ContainerScreen<CraftingT
 
         int ingredientSlot = -1;
 
-        for (int i = 10; i < container.slots.size(); i++) {
+        for (int i = 10; i < handler.slots.size(); i++) {
             if (getStack(i).getItem() == ingredients[slot - 1]) {
                 ingredientSlot = i;
                 break;
@@ -136,10 +138,10 @@ public abstract class CraftingTableScreenMixin extends ContainerScreen<CraftingT
     private void stopCrafting(String msg) {
         if (msg != null) Utils.sendMessage("#blueAutoCraft: #white" + msg);
         autoCrafting = false;
-        autoCraftBtn.setMessage("Auto craft");
+        autoCraftBtn.setMessage(new LiteralText("Auto craft"));
     }
 
     private ItemStack getStack(int slot) {
-        return container.getSlot(slot).getStack();
+        return handler.getSlot(slot).getStack();
     }
 }

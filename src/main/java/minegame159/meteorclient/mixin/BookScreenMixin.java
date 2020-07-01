@@ -9,6 +9,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.StringTag;
+import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.Mixin;
@@ -33,9 +34,9 @@ public class BookScreenMixin extends Screen {
 
     @Inject(method = "init", at = @At("TAIL"))
     private void onInit(CallbackInfo info) {
-        addButton(new ButtonWidget(4, 4, 70, 16, "Copy", button -> {
+        addButton(new ButtonWidget(4, 4, 70, 16, new LiteralText("Copy"), button -> {
             ListTag listTag = new ListTag();
-            for (int i = 0; i < contents.getPageCount(); i++) listTag.add(StringTag.of(contents.getPage(i).asString()));
+            for (int i = 0; i < contents.getPageCount(); i++) listTag.add(StringTag.of(contents.getPage(i).getString()));
 
             CompoundTag tag = new CompoundTag();
             tag.put("pages", listTag);

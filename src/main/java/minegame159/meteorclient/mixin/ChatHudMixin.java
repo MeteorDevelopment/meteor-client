@@ -7,8 +7,9 @@ import minegame159.meteorclient.modules.misc.LongerChat;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.hud.ChatHud;
 import net.minecraft.client.gui.hud.ChatHudLine;
-import net.minecraft.client.util.Texts;
+import net.minecraft.client.util.ChatMessages;
 import net.minecraft.text.LiteralText;
+import net.minecraft.text.StringRenderable;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.MathHelper;
@@ -48,14 +49,14 @@ public abstract class ChatHudMixin {
 
     @Shadow private boolean hasUnreadNewMessages;
 
-    @Inject(at = @At("HEAD"), method = "addMessage(Lnet/minecraft/text/Text;IIZ)V", cancellable = true)
-    private void onAddMessage(Text message, int messageId, int timestamp, boolean bl, CallbackInfo info) {
+    @Inject(at = @At("HEAD"), method = "addMessage(Lnet/minecraft/text/StringRenderable;IIZ)V", cancellable = true)
+    private void onAddMessage(StringRenderable stringRenderable, int messageId, int timestamp, boolean bl, CallbackInfo info) {
         info.cancel();
 
         // Anti Spam
         AntiSpam antiSpam = ModuleManager.INSTANCE.get(AntiSpam.class);
         for (int i = 0; i < antiSpam.getDepth(); i++) {
-            if (checkMsg(message.asFormattedString(), timestamp, messageId, i)) {
+            if (checkMsg(stringRenderable.getString(), timestamp, messageId, i)) {
                 if (antiSpam.isMoveToBottom() && i != 0) {
                     ChatHudLine msg = visibleMessages.remove(i);
                     visibleMessages.add(0, msg);
@@ -72,12 +73,12 @@ public abstract class ChatHudMixin {
         }
 
         int i = MathHelper.floor((double)this.getWidth() / this.getChatScale());
-        List<Text> list = Texts.wrapLines(message, i, this.client.textRenderer, false, false);
+        List<StringRenderable> list = ChatMessages.breakRenderedChatMessageLines(stringRenderable, i, this.client.textRenderer);
         boolean bl2 = this.isChatFocused();
 
-        Text text;
-        for(Iterator var8 = list.iterator(); var8.hasNext(); this.visibleMessages.add(0, new ChatHudLine(timestamp, text, messageId))) {
-            text = (Text)var8.next();
+        StringRenderable stringRenderable2;
+        for(Iterator var8 = list.iterator(); var8.hasNext(); this.visibleMessages.add(0, new ChatHudLine(timestamp, stringRenderable2, messageId))) {
+            stringRenderable2 = (StringRenderable)var8.next();
             if (bl2 && this.scrolledLines > 0) {
                 this.hasUnreadNewMessages = true;
                 this.scroll(1.0D);
@@ -89,7 +90,7 @@ public abstract class ChatHudMixin {
         }
 
         if (!bl) {
-            this.messages.add(0, new ChatHudLine(timestamp, message, messageId));
+            this.messages.add(0, new ChatHudLine(timestamp, stringRenderable, messageId));
 
             while(this.messages.size() > ModuleManager.INSTANCE.get(LongerChat.class).getMaxLineCount()) {
                 this.messages.remove(this.messages.size() - 1);
@@ -100,7 +101,7 @@ public abstract class ChatHudMixin {
     private boolean checkMsg(String newMsg, int newTimestamp, int newId, int msgI) {
         ChatHudLine msg = visibleMessages.size() > msgI ? visibleMessages.get(msgI) : null;
         if (msg == null) return false;
-        String msgString = msg.getText().asFormattedString();
+        String msgString = msg.getText().getString();
 
         if (msgString.equals(newMsg)) {
             msgString += Formatting.GRAY + " (2)";

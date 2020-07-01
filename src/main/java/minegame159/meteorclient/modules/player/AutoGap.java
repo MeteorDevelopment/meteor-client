@@ -86,9 +86,9 @@ public class AutoGap extends ToggleModule {
             int gappleSlot = -1;
             int egapSlot = -1;
             for(int i = 0; i < 9; i++){
-                if(mc.player.inventory.getInvStack(i).getItem() == Items.GOLDEN_APPLE && gappleSlot == -1){
+                if(mc.player.inventory.getStack(i).getItem() == Items.GOLDEN_APPLE && gappleSlot == -1){
                     gappleSlot = i;
-                }else if(mc.player.inventory.getInvStack(i).getItem() == Items.ENCHANTED_GOLDEN_APPLE && egapSlot == -1){
+                }else if(mc.player.inventory.getStack(i).getItem() == Items.ENCHANTED_GOLDEN_APPLE && egapSlot == -1){
                     egapSlot = i;
                 }
             }
