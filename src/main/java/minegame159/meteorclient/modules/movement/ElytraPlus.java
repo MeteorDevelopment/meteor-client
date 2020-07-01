@@ -28,14 +28,14 @@ public class ElytraPlus extends ToggleModule {
     
     private final Setting<Boolean> autoTakeOff = sgGeneral.add(new BoolSetting.Builder()
             .name("auto-take-off")
-            .description("Automatically takes off when u hold jump without needing to double jump.")
+            .description("Automatically takes off when you hold jump without needing to double jump.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Double> fallMultiplier = sgGeneral.add(new DoubleSetting.Builder()
             .name("fall-multiplier")
-            .description("Controls how fast will u go down naturally.")
+            .description("Controls how fast will you go down naturally.")
             .defaultValue(0.01)
             .min(0)
             .build()
@@ -43,7 +43,7 @@ public class ElytraPlus extends ToggleModule {
 
     private final Setting<Double> horizontalSpeed = sgGeneral.add(new DoubleSetting.Builder()
             .name("horizontal-speed")
-            .description("How fast will u go forward and backward.")
+            .description("How fast will you go forward and backward.")
             .defaultValue(1)
             .min(0)
             .build()

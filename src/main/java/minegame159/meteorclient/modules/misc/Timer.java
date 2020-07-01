@@ -15,7 +15,7 @@ public class Timer extends ToggleModule {
             .defaultValue(1)
             .min(0.1)
             .sliderMin(0.1)
-            .sliderMax(5)
+            .sliderMax(10)
             .build()
     );
 
