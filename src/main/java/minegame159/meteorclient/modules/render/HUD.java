@@ -6,6 +6,7 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.Config;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.*;
+import minegame159.meteorclient.gui.renderer.GuiRenderer;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
@@ -33,6 +34,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.dimension.DimensionType;
 import org.apache.commons.lang3.StringUtils;
 import org.lwjgl.opengl.GL11;
+import sun.net.www.MeteredStream;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,11 +42,17 @@ import java.util.List;
 import java.util.Objects;
 
 public class HUD extends ToggleModule {
+    public enum DurabilityType{
+        None,
+        Default,
+        Numbers,
+        Percentage
+    }
     private static final Color white = new Color(255, 255, 255);
     private static final Color gray = new Color(185, 185, 185);
     private static final Color red = new Color(225, 45, 45);
 
-    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgArmor = settings.createGroup("Armor", "armor-enabled", "Armor HUD", true);
     private final SettingGroup sgTopLeft = settings.createGroup("Top Left");
     private final SettingGroup sgMinimap = settings.createGroup("Minimap", "minimap-enabled", "Minimap.", true);
     private final SettingGroup sgTopRight = settings.createGroup("Top Right");
@@ -52,10 +60,10 @@ public class HUD extends ToggleModule {
 
     // General
 
-    private final Setting<Boolean> armor = sgGeneral.add(new BoolSetting.Builder()
-            .name("armor")
-            .description("Diplays your armor above hotbar.")
-            .defaultValue(true)
+    private final Setting<DurabilityType> armorDurability = sgArmor.add(new EnumSetting.Builder<DurabilityType>()
+            .name("armor-durability")
+            .description("Displays armor durability on top of hotbar")
+            .defaultValue(DurabilityType.Default)
             .build()
     );
 
@@ -318,19 +326,53 @@ public class HUD extends ToggleModule {
         renderBottomRight(event);
         MeteorClient.FONT.end();
 
-        if (armor.get()) {
+        if (sgArmor.isEnabled()) {
             int x = event.screenWidth / 2 + 12;
             int y = event.screenHeight - 38;
 
             if (!mc.player.abilities.creativeMode) y -= 18;
 
-            for (int i = mc.player.inventory.armor.size() - 1; i >= 0; i--) {
-                ItemStack itemStack = mc.player.inventory.armor.get(i);
+            if(armorDurability.get() == DurabilityType.Default) {
+                for (int i = mc.player.inventory.armor.size() - 1; i >= 0; i--) {
+                    ItemStack itemStack = mc.player.inventory.armor.get(i);
 
-                mc.getItemRenderer().renderGuiItem(itemStack, x, y);
-                mc.getItemRenderer().renderGuiItemOverlay(mc.textRenderer, itemStack, x, y);
+                    mc.getItemRenderer().renderGuiItem(itemStack, x, y);
+                    mc.getItemRenderer().renderGuiItemOverlay(mc.textRenderer, itemStack, x, y);
 
-                x += 20;
+                    x += 20;
+                }
+            }else if(armorDurability.get() == DurabilityType.Numbers){
+                for (int i = mc.player.inventory.armor.size() - 1; i >= 0; i--) {
+                    ItemStack itemStack = mc.player.inventory.armor.get(i);
+
+                    mc.getItemRenderer().renderGuiItem(itemStack, x, y);
+                    if(!itemStack.isEmpty()) {
+                        String message = Integer.toString(itemStack.getMaxDamage() - itemStack.getDamage());
+                        MeteorClient.FONT.renderStringWithShadow(message, x + ((15 - (MeteorClient.FONT.getStringWidth(message))) / 2) + 1, y - 5, white);
+                    }
+
+                    x += 20;
+                }
+            }else if(armorDurability.get() == DurabilityType.Percentage){
+                for (int i = mc.player.inventory.armor.size() - 1; i >= 0; i--) {
+                    ItemStack itemStack = mc.player.inventory.armor.get(i);
+
+                    mc.getItemRenderer().renderGuiItem(itemStack, x, y);
+                    if(!itemStack.isEmpty()) {
+                        String message = Integer.toString(Math.round(((itemStack.getMaxDamage() - itemStack.getDamage()) * 100) / itemStack.getMaxDamage()));
+                        MeteorClient.FONT.renderStringWithShadow(message, x + ((15 - (MeteorClient.FONT.getStringWidth(message))) / 2) + 1, y - 5, white);
+                    }
+
+                    x += 20;
+                }
+            }else if(armorDurability.get() == DurabilityType.None){
+                for (int i = mc.player.inventory.armor.size() - 1; i >= 0; i--) {
+                    ItemStack itemStack = mc.player.inventory.armor.get(i);
+
+                    mc.getItemRenderer().renderGuiItem(itemStack, x, y);
+
+                    x += 20;
+                }
             }
 
             GlStateManager.disableLighting();
