@@ -6,7 +6,6 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.Config;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.*;
-import minegame159.meteorclient.gui.renderer.GuiRenderer;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
@@ -15,9 +14,12 @@ import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.EntityUtils;
 import minegame159.meteorclient.utils.TickRate;
+import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.client.render.VertexFormats;
+import net.minecraft.client.toast.Toast;
+import net.minecraft.client.toast.ToastManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.effect.StatusEffect;
@@ -26,6 +28,7 @@ import net.minecraft.entity.effect.StatusEffectUtil;
 import net.minecraft.entity.passive.SheepEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
@@ -34,12 +37,8 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.dimension.DimensionType;
 import org.apache.commons.lang3.StringUtils;
 import org.lwjgl.opengl.GL11;
-import sun.net.www.MeteredStream;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class HUD extends ToggleModule {
     public enum DurabilityType{
@@ -58,12 +57,36 @@ public class HUD extends ToggleModule {
     private final SettingGroup sgTopRight = settings.createGroup("Top Right");
     private final SettingGroup sgBottomRight = settings.createGroup("Bottom Right");
 
-    // General
+    // Armor
 
     private final Setting<DurabilityType> armorDurability = sgArmor.add(new EnumSetting.Builder<DurabilityType>()
             .name("armor-durability")
             .description("Displays armor durability on top of hotbar")
             .defaultValue(DurabilityType.Default)
+            .build()
+    );
+
+    private final Setting<Boolean> armorWarning = sgArmor.add(new BoolSetting.Builder()
+            .name("durability-warner")
+            .description("Warns you if your armor is about to break.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Integer> warningDurability = sgArmor.add(new IntSetting.Builder()
+            .name("warn-durability")
+            .description("The durability you are warned at")
+            .defaultValue(30)
+            .min(1)
+            .max(360)
+            .sliderMax(100)
+            .build()
+    );
+
+    private final Setting<Boolean> notificationSettings = sgArmor.add(new BoolSetting.Builder()
+            .name("chat-notifications")
+            .description("Sends messages in chat rather than in the corner of the screen.")
+            .defaultValue(false)
             .build()
     );
 
@@ -231,6 +254,7 @@ public class HUD extends ToggleModule {
     private int maxLetterCount = 0;
     private boolean updateEntities;
     private int updateEntitiesTimer = 2;
+    private Map<Integer, ItemStack> itemStackMap = new HashMap<>();
 
     private final List<ToggleModule> modules = new ArrayList<>();
 
@@ -314,6 +338,21 @@ public class HUD extends ToggleModule {
                 updateEntities = false;
                 updateEntitiesTimer = 2;
                 calculateMaxLetterCount();
+            }
+        }
+        if(armorWarning.get()){
+            for (int i = mc.player.inventory.armor.size() - 1; i >= 0; i--){
+                ItemStack itemStack = mc.player.inventory.armor.get(i);
+                if(itemStack.isEmpty())continue;
+                if((itemStack.getMaxDamage() - itemStack.getDamage()) <= warningDurability.get()){
+                    if(!itemStackMap.containsKey(i)){
+                        itemStackMap.put(i, itemStack);
+                        sendNotification();
+                    }else if(itemStackMap.containsKey(i) && (itemStackMap.get(i).getMaxDamage() - itemStackMap.get(i).getDamage()) < (itemStack.getMaxDamage() - itemStack.getDamage())){
+                        itemStackMap.put(i, itemStack);
+                        sendNotification();
+                    }
+                }
             }
         }
     });
@@ -622,6 +661,31 @@ public class HUD extends ToggleModule {
         double x2 = screenWidth - MeteorClient.FONT.getStringWidth(msg1) - MeteorClient.FONT.getStringWidth(text) - 2;
         MeteorClient.FONT.renderStringWithShadow(msg1, x1, yy, gray);
         MeteorClient.FONT.renderStringWithShadow(text, x2, yy, white);
+    }
+
+    private void sendNotification(){
+        if(!notificationSettings.get()){
+            mc.getToastManager().add(new Toast() {
+                private long timer;
+                private long lastTime = -1;
+
+                @Override
+                public Visibility draw(ToastManager manager, long currentTime) {
+                    if (lastTime == -1) lastTime = currentTime;
+                    else timer += currentTime - lastTime;
+
+                    manager.getGame().getTextureManager().bindTexture(new Identifier("textures/gui/toasts.png"));
+                    GlStateManager.color4f(1.0F, 1.0F, 1.0F, 255.0F);
+                    manager.blit(0, 0, 0, 32, 160, 32);
+
+                    manager.getGame().textRenderer.draw("Armor Low.", 12.0F, 12.0F, -11534256);
+
+                    return timer >= 32000 ? Visibility.HIDE : Visibility.SHOW;
+                }
+            });
+        }else{
+            Utils.sendMessage("#redOne of your armor pieces is low.");
+        }
     }
 
     private static class EntityInfo {
