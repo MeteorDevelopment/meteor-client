@@ -1,16 +1,20 @@
 package minegame159.meteorclient.gui.renderer;
 
+import minegame159.meteorclient.Config;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.gui.GuiConfig;
 import minegame159.meteorclient.gui.widgets.Cell;
 import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.rendering.Renderer;
+import minegame159.meteorclient.rendering.ShapeBuilder;
 import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.Pool;
 import minegame159.meteorclient.utils.TextureRegion;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.render.VertexFormats;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
+import org.lwjgl.opengl.GL11;
 
 public class GuiRenderer {
     public static final GuiRenderer INSTANCE = new GuiRenderer();
@@ -68,6 +72,15 @@ public class GuiRenderer {
         scissor = null;
 
         if (tooltip != null) {
+            double x = ((TextOperation) tooltip).x - 2;
+            double y = ((TextOperation) tooltip).y - 2;
+            double w = MeteorClient.FONT.getStringWidth(((TextOperation) tooltip).text) + 4;
+            double h = MeteorClient.FONT.getHeight() + 4;
+
+            ShapeBuilder.begin(null, GL11.GL_TRIANGLES, VertexFormats.POSITION_COLOR);
+            ShapeBuilder.quad(x, y, 0, x + w, y, 0, x + w, y + h, 0, x, y + h, 0, Config.INSTANCE.guiConfig.background);
+            ShapeBuilder.end();
+
             tooltip.render(this);
             tooltip.free(this);
             tooltip = null;
