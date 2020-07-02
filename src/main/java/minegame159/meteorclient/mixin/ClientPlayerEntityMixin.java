@@ -2,6 +2,9 @@ package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.CommandDispatcher;
 import minegame159.meteorclient.Config;
+import minegame159.meteorclient.MeteorClient;
+import minegame159.meteorclient.events.EventStore;
+import minegame159.meteorclient.events.SendMessageEvent;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.misc.Annoy;
 import minegame159.meteorclient.modules.player.Portals;
@@ -24,12 +27,12 @@ public abstract class ClientPlayerEntityMixin {
 
     @Inject(at = @At("HEAD"), method = "sendChatMessage", cancellable = true)
     private void onSendChatMessage(String msg, CallbackInfo info) {
-        if (!msg.startsWith(Config.INSTANCE.getPrefix())) {
-            if (ModuleManager.INSTANCE.isActive(Annoy.class)) {
-                networkHandler.sendPacket(new ChatMessageC2SPacket(ModuleManager.INSTANCE.get(Annoy.class).doAnnoy(msg)));
-                info.cancel();
-            }
+        if (!msg.startsWith(Config.INSTANCE.getPrefix()) && !msg.startsWith("/")) {
+            SendMessageEvent event = EventStore.sendMessageEvent(msg);
+            MeteorClient.EVENT_BUS.post(event);
 
+            networkHandler.sendPacket(new ChatMessageC2SPacket(event.msg));
+            info.cancel();
             return;
         }
 
