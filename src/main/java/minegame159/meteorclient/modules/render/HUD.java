@@ -110,6 +110,13 @@ public class HUD extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> durability = sgTopLeft.add(new BoolSetting.Builder()
+            .name("durability")
+            .description("Durability of the time in your main hand.")
+            .defaultValue(true)
+            .build()
+    );
+
     private final Setting<Boolean> lookingAt = sgTopLeft.add(new BoolSetting.Builder()
             .name("looking-at")
             .description("Displays block or entity you are looking at.")
@@ -421,6 +428,14 @@ public class HUD extends ToggleModule {
 
         if (time.get()) {
             drawInfo("Time: ", mc.world.getTimeOfDay() % 24000 + "", y);
+            y += MeteorClient.FONT.getHeight() + 2;
+        }
+
+        if (durability.get()) {
+            Integer amount = null;
+            if (!mc.player.getMainHandStack().isEmpty() && mc.player.getMainHandStack().isDamageable()) amount = mc.player.getMainHandStack().getMaxDamage() - mc.player.getMainHandStack().getDamage();
+
+            drawInfo("Durability: ", amount == null ? "" : amount.toString(), y);
             y += MeteorClient.FONT.getHeight() + 2;
         }
 
