@@ -527,12 +527,12 @@ public class HUD extends ToggleModule {
 
         if (position.get()) {
             if (mc.player.dimension == DimensionType.OVERWORLD) {
-                drawPosition(event.screenWidth, "Nether Pos: ", y, mc.cameraEntity.x / 8.0, mc.cameraEntity.y / 8.0, mc.cameraEntity.z / 8.0);
+                drawPosition(event.screenWidth, "Nether Pos: ", y, mc.cameraEntity.x / 8.0, mc.cameraEntity.y, mc.cameraEntity.z / 8.0);
                 y -= MeteorClient.FONT.getHeight() + 2;
                 drawPosition(event.screenWidth, "Pos: ", y, mc.cameraEntity.x, mc.cameraEntity.y, mc.cameraEntity.z);
                 y -= MeteorClient.FONT.getHeight() + 2;
             } else if (mc.player.dimension == DimensionType.THE_NETHER) {
-                drawPosition(event.screenWidth, "Overworld Pos: ", y, mc.cameraEntity.x * 8.0, mc.cameraEntity.y * 8.0, mc.cameraEntity.z * 8.0);
+                drawPosition(event.screenWidth, "Overworld Pos: ", y, mc.cameraEntity.x * 8.0, mc.cameraEntity.y, mc.cameraEntity.z * 8.0);
                 y -= MeteorClient.FONT.getHeight() + 2;
                 drawPosition(event.screenWidth, "Pos: ", y, mc.cameraEntity.x, mc.cameraEntity.y, mc.cameraEntity.z);
                 y -= MeteorClient.FONT.getHeight() + 2;
