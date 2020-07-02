@@ -36,8 +36,10 @@ public abstract class ClientPlayerEntityMixin {
             return;
         }
 
-        info.cancel();
-        CommandDispatcher.run(msg.substring(Config.INSTANCE.getPrefix().length()));
+        if (msg.startsWith(Config.INSTANCE.getPrefix())) {
+            info.cancel();
+            CommandDispatcher.run(msg.substring(Config.INSTANCE.getPrefix().length()));
+        }
     }
 
     @Redirect(method = "updateNausea", at = @At(value = "FIELD", target = "Lnet/minecraft/client/MinecraftClient;currentScreen:Lnet/minecraft/client/gui/screen/Screen;"))
