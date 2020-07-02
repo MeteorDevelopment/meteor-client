@@ -66,6 +66,16 @@ public class HUD extends ToggleModule {
             .build()
     );
 
+    private final Setting<Double> scale = sgArmor.add(new DoubleSetting.Builder()
+            .name("scale")
+            .description("The scale of the numbers over the armor")
+            .min(0.5)
+            .max(1)
+            .sliderMax(1)
+            .defaultValue(0.8)
+            .build()
+    );
+
     private final Setting<Boolean> armorWarning = sgArmor.add(new BoolSetting.Builder()
             .name("durability-warner")
             .description("Warns you if your armor is about to break.")
@@ -387,7 +397,9 @@ public class HUD extends ToggleModule {
                     mc.getItemRenderer().renderGuiItem(itemStack, x, y);
                     if(!itemStack.isEmpty()) {
                         String message = Integer.toString(itemStack.getMaxDamage() - itemStack.getDamage());
+                        MeteorClient.FONT.scale = scale.get();
                         MeteorClient.FONT.renderStringWithShadow(message, x + ((15 - (MeteorClient.FONT.getStringWidth(message))) / 2) + 1, y - 5, white);
+                        MeteorClient.FONT.scale = 1;
                     }
 
                     x += 20;
@@ -399,7 +411,9 @@ public class HUD extends ToggleModule {
                     mc.getItemRenderer().renderGuiItem(itemStack, x, y);
                     if(!itemStack.isEmpty()) {
                         String message = Integer.toString(Math.round(((itemStack.getMaxDamage() - itemStack.getDamage()) * 100) / itemStack.getMaxDamage()));
+                        MeteorClient.FONT.scale = scale.get();
                         MeteorClient.FONT.renderStringWithShadow(message, x + ((15 - (MeteorClient.FONT.getStringWidth(message))) / 2) + 1, y - 5, white);
+                        MeteorClient.FONT.scale = 1;
                     }
 
                     x += 20;
