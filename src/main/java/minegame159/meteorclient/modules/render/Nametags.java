@@ -14,6 +14,7 @@ import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.Utils;
+import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.render.model.BakedQuad;
@@ -50,6 +51,13 @@ public class Nametags extends ToggleModule {
     private final Setting<Boolean> displayArmorEnchants = sgGeneral.add(new BoolSetting.Builder()
             .name("display-armor-enchants")
             .description("Display armor enchantments.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Boolean> displayPing = sgGeneral.add(new BoolSetting.Builder()
+            .name("ping")
+            .description("Shows players ping")
             .defaultValue(true)
             .build()
     );
@@ -93,6 +101,10 @@ public class Nametags extends ToggleModule {
         double dist = Utils.distanceToCamera(entity);
         double scale = 0.04 * this.scale.get();
 
+        // Get ping
+        PlayerListEntry playerListEntry = mc.getNetworkHandler().getPlayerListEntry(entity.getUuid());
+        int ping = playerListEntry.getLatency();
+
         // Compute health things
         float absorption = entity.getAbsorptionAmount();
         int health = Math.round(entity.getHealth() + absorption);
@@ -100,6 +112,7 @@ public class Nametags extends ToggleModule {
 
         String name = entity.getGameProfile().getName();
         String healthText = " " + health;
+        String pingText = "[" + ping + "]";
 
         // Setup the rotation
         Matrices.push();
@@ -139,7 +152,11 @@ public class Nametags extends ToggleModule {
         // Setup size
         double nameWidth = MeteorClient.FONT.getStringWidth(name);
         double healthWidth = MeteorClient.FONT.getStringWidth(healthText);
+        double pingWidth = MeteorClient.FONT.getStringWidth(pingText);
         double width = nameWidth + healthWidth;
+        if(displayPing.get()){
+            width += pingWidth;
+        }
         double armorWidth = 0;
         for (double v : armorWidths) armorWidth += v;
         width = Math.max(width, armorWidth);
@@ -206,7 +223,7 @@ public class Nametags extends ToggleModule {
                     double maxDamage = itemStack.getMaxDamage();
                     double percentage = Math.max(0.0F, (maxDamage - damage) / maxDamage);
 
-                    double j = Math.round(13.0F - damage * 13.0F / maxDamage);
+                    double j = Math.max(0.0F, Math.round(13.0F - damage * 13.0F / maxDamage));
                     int k = MathHelper.hsvToRgb((float) (percentage / 3.0), 1, 1);
 
                     double preItemX = itemX;
@@ -241,6 +258,7 @@ public class Nametags extends ToggleModule {
         MeteorClient.FONT.begin();
         double hX = MeteorClient.FONT.renderStringWithShadow(name, -widthHalf, 0, TEXT);
         MeteorClient.FONT.renderStringWithShadow(healthText, hX + (width - nameWidth - healthWidth), 0, healthColor);
+        MeteorClient.FONT.renderStringWithShadow(Integer.toString(ping), hX + 3, 0, WHITE);
         double itemX = -widthHalf;
 
         if (maxEnchantCount > 0) {
