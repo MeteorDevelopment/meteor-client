@@ -88,7 +88,7 @@ public class Nametags extends ToggleModule {
     private final Setting<Color> friendName = sgColors.add(new ColorSetting.Builder()
             .name("friend-name")
             .description("The color of friends")
-            .defaultValue(new Color(25, 25, 255))
+            .defaultValue(new Color(0, 255, 180))
             .build()
     );
 
