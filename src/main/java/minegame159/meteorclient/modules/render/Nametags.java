@@ -1,5 +1,7 @@
 package minegame159.meteorclient.modules.render;
 
+//Updated by squidoodly 03/07/2020
+
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.MeteorClient;
@@ -144,6 +146,9 @@ public class Nametags extends ToggleModule {
         // Compute scale
         double dist = Utils.distanceToCamera(entity);
         double scale = 0.04 * this.scale.get();
+        if(dist > 15){
+            scale *= dist/15;
+        }
 
         // Get ping
         PlayerListEntry playerListEntry = mc.getNetworkHandler().getPlayerListEntry(entity.getUuid());
@@ -263,11 +268,11 @@ public class Nametags extends ToggleModule {
                 for (int i = 0; i < 4; i++) {
                     ItemStack itemStack = entity.inventory.armor.get(i);
 
-                    double damage = itemStack.getDamage();
+                    double damage = Math.max(0, itemStack.getDamage());
                     double maxDamage = itemStack.getMaxDamage();
                     double percentage = Math.max(0.0F, (maxDamage - damage) / maxDamage);
 
-                    double j = Math.max(0.0F, Math.round(13.0F - damage * 13.0F / maxDamage));
+                    double j = Math.round(13.0F - damage * 13.0F / maxDamage);
                     int k = MathHelper.hsvToRgb((float) (percentage / 3.0), 1, 1);
 
                     double preItemX = itemX;
