@@ -43,12 +43,21 @@ public class BedAura extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgPlace = settings.createGroup("Place");
 
-    private final Setting<Integer> range = sgGeneral.add(new IntSetting.Builder()
-            .name("range")
-            .description("Attack range")
-            .defaultValue(2)
+    private final Setting<Integer> placeRange = sgGeneral.add(new IntSetting.Builder()
+            .name("place-range")
+            .description("The distance in a single direction the beds get placed.")
+            .defaultValue(3)
             .min(0)
-            .sliderMax(3)
+            .sliderMax(5)
+            .build()
+    );
+
+    private final Setting<Integer> breakRange = sgGeneral.add(new IntSetting.Builder()
+            .name("break-range")
+            .description("The distance in a single direction the beds get broken.")
+            .defaultValue(3)
+            .min(0)
+            .sliderMax(5)
             .build()
     );
 
@@ -176,7 +185,7 @@ public class BedAura extends ToggleModule {
             }
         }
         for(BlockEntity entity : mc.world.blockEntities){
-            if(entity instanceof BedBlockEntity){
+            if(entity instanceof BedBlockEntity && Math.sqrt(entity.getSquaredDistance(mc.player.x, mc.player.y, mc.player.z)) <= breakRange.get()){
                 if(DamageCalcUtils.resistanceReduction(mc.player, DamageCalcUtils.blastProtReduction(mc.player, DamageCalcUtils.armourCalc(mc.player, DamageCalcUtils.bedDamage(mc.player, new Vec3d(entity.getPos().getX(), entity.getPos().getY(), entity.getPos().getZ()))))) < maxDamage.get()
                     || (mc.player.getHealth() + mc.player.getAbsorptionAmount() - DamageCalcUtils.resistanceReduction(mc.player, DamageCalcUtils.blastProtReduction(mc.player, DamageCalcUtils.armourCalc(mc.player, DamageCalcUtils.bedDamage(mc.player, new Vec3d(entity.getPos().getX(), entity.getPos().getY(), entity.getPos().getZ())))))) < minHealth.get() || clickMode.get().equals(Mode.suicide)){
                     mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(mc.player.x, mc.player.y, mc.player.z), Direction.UP, entity.getPos(), false));
@@ -187,7 +196,7 @@ public class BedAura extends ToggleModule {
     });
 
     private List<BlockPos> findValidBlocks(){
-        Iterator<BlockPos> allBlocks = getRange(mc.player.getBlockPos(), range.get()).iterator();
+        Iterator<BlockPos> allBlocks = getRange(mc.player.getBlockPos(), placeRange.get()).iterator();
         List<BlockPos> validBlocks = new ArrayList<>();
         for(BlockPos i = null; allBlocks.hasNext(); i = allBlocks.next()){
             if(i == null) continue;

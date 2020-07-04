@@ -18,6 +18,7 @@ import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.entity.decoration.EnderCrystalEntity;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
+import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
@@ -37,12 +38,21 @@ public class CrystalAura extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgPlace = settings.createGroup("Place");
 
-    private final Setting<Integer> range = sgGeneral.add(new IntSetting.Builder()
-            .name("range")
-            .description("Attack range")
-            .defaultValue(2)
+    private final Setting<Integer> placeRange = sgGeneral.add(new IntSetting.Builder()
+            .name("place-range")
+            .description("The distance in a single direction the crystals get placed.")
+            .defaultValue(3)
             .min(0)
-            .sliderMax(3)
+            .sliderMax(5)
+            .build()
+    );
+
+    private final Setting<Integer> breakRange = sgGeneral.add(new IntSetting.Builder()
+            .name("break-range")
+            .description("The distance in a single direction the crystals get broken.")
+            .defaultValue(3)
+            .min(0)
+            .sliderMax(5)
             .build()
     );
 
@@ -146,7 +156,7 @@ public class CrystalAura extends ToggleModule {
         }
         Streams.stream(mc.world.getEntities())
                 .filter(entity -> entity instanceof EnderCrystalEntity)
-                .filter(entity -> entity.distanceTo(mc.player) <= range.get())
+                .filter(entity -> entity.distanceTo(mc.player) <= breakRange.get())
                 .filter(entity -> ignoreWalls.get() || mc.player.canSee(entity))
                 .filter(entity -> !breakMode.get() || (mc.player.getHealth() + mc.player.getAbsorptionAmount()
                         - DamageCalcUtils.resistanceReduction(mc.player, DamageCalcUtils.blastProtReduction(mc.player, DamageCalcUtils.armourCalc(mc.player, DamageCalcUtils.getDamageMultiplied(DamageCalcUtils.crystalDamage(mc.player, entity.getPos())))))
@@ -154,13 +164,21 @@ public class CrystalAura extends ToggleModule {
                         < maxDamage.get()))
                 .min(Comparator.comparingDouble(o -> o.distanceTo(mc.player)))
                 .ifPresent(entity -> {
+                    double deltaX = entity.x - mc.player.x;
+                    double deltaZ = entity.z - mc.player.z;
+                    double deltaY = entity.y - (mc.player.y + mc.player.getEyeHeight(mc.player.getPose()));
+                    double yawAngle = Math.toDegrees(Math.atan2(deltaZ, deltaX)) - 90;
+                    double idk = Math.sqrt(deltaX * deltaX + deltaZ * deltaZ);
+                    double pitchAngle = -Math.toDegrees(Math.atan2(deltaY, idk));
+                    PlayerMoveC2SPacket.LookOnly packet = new PlayerMoveC2SPacket.LookOnly(((float) yawAngle),(float) pitchAngle, mc.player.onGround);
+                    mc.player.networkHandler.sendPacket(packet);
                     mc.interactionManager.attackEntity(mc.player, entity);
                     mc.player.swingHand(Hand.MAIN_HAND);
                 });
     }, EventPriority.HIGH);
 
     private List<BlockPos> findValidBlocks(){
-        Iterator<BlockPos> allBlocks = getRange(mc.player.getBlockPos(), range.get()).iterator();
+        Iterator<BlockPos> allBlocks = getRange(mc.player.getBlockPos(), placeRange.get()).iterator();
         List<BlockPos> validBlocks = new ArrayList<>();
         for(BlockPos i = null; allBlocks.hasNext(); i = allBlocks.next()){
             if(i == null) continue;
