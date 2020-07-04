@@ -28,7 +28,6 @@ public class Freecam extends ToggleModule {
             .build()
     );
 
-    private Entity preCameraEntity;
     private OtherClientPlayerEntity camera;
     private OtherClientPlayerEntity dummy;
 
@@ -52,13 +51,12 @@ public class Freecam extends ToggleModule {
         mc.world.addEntity(camera.getEntityId(), camera);
         mc.world.addEntity(dummy.getEntityId(), dummy);
 
-        preCameraEntity = mc.cameraEntity;
         mc.cameraEntity = camera;
     }
 
     @Override
     public void onDeactivate() {
-        mc.cameraEntity = preCameraEntity;
+        mc.cameraEntity = mc.player;
 
         mc.world.removeEntity(camera.getEntityId());
         mc.world.removeEntity(dummy.getEntityId());
