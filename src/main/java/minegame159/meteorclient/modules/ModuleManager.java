@@ -262,6 +262,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new AirJump());
         addModule(new AntiLevitation());
         addModule(new Scaffold());
+        addModule(new BoatFly());
     }
 
     private void initRender() {
