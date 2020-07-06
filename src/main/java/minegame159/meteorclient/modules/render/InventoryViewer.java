@@ -62,7 +62,7 @@ public class InventoryViewer extends ToggleModule {
     private static final int HEIGHT = 67;
 
     public InventoryViewer() {
-        super(Category.Render, "inventory-viewer", "Displays ur inventory.");
+        super(Category.Render, "inventory-viewer", "Displays your inventory.");
     }
 
     @EventHandler

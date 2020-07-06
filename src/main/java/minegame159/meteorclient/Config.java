@@ -17,6 +17,8 @@ public class Config extends Savable<Config> {
     public AutoCraft autoCraft = new AutoCraft();
     public GuiConfig guiConfig = new GuiConfig();
 
+    public boolean chatCommandsInfo = true;
+
     private Map<WindowType, WindowConfig> windowConfigs = new HashMap<>();
     private Map<Category, Color> categoryColors = new HashMap<>();
 
@@ -60,6 +62,7 @@ public class Config extends Savable<Config> {
         tag.put("windowConfigs", NbtUtils.mapToTag(windowConfigs));
         tag.put("categoryColors", NbtUtils.mapToTag(categoryColors));
         tag.put("guiConfig", guiConfig.toTag());
+        tag.putBoolean("chatCommandsInfo", chatCommandsInfo);
 
         return tag;
     }
@@ -71,6 +74,7 @@ public class Config extends Savable<Config> {
         windowConfigs = NbtUtils.mapFromTag(tag.getCompound("windowConfigs"), WindowType::valueOf, tag1 -> new WindowConfig(false).fromTag((CompoundTag) tag1));
         categoryColors = NbtUtils.mapFromTag(tag.getCompound("categoryColors"), Category::valueOf, tag1 -> new Color().fromTag((CompoundTag) tag1));
         guiConfig.fromTag(tag.getCompound("guiConfig"));
+        chatCommandsInfo = !tag.contains("chatCommandsInfo") || tag.getBoolean("chatCommandsInfo");
 
         return this;
     }

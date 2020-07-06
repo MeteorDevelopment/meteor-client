@@ -25,28 +25,15 @@ public class Account implements ISerializable<Account> {
 
     public Account(String email, String password) {
         this.email = email;
-
-        try {
-            SecretKey key = new SecretKeySpec("Lps98faSD6ASD8fe".getBytes(StandardCharsets.UTF_8), "Blowfish");
-            Cipher cipher = Cipher.getInstance("Blowfish");
-            cipher.init(Cipher.ENCRYPT_MODE, key);
-            this.password = new String(Base64.getEncoder().encode(cipher.doFinal(password.getBytes(StandardCharsets.UTF_8))), StandardCharsets.UTF_8);
-        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
-            e.printStackTrace();
-        }
+        this.password = AESEncryption.encrypt(password, "Lps98faSD6ASD8fe");
     }
 
     public boolean logIn() {
         try {
             if (AccountManager.userAuthentication.isLoggedIn()) AccountManager.userAuthentication.logOut();
 
-            SecretKey key = new SecretKeySpec("Lps98faSD6ASD8fe".getBytes(StandardCharsets.UTF_8), "Blowfish");
-            Cipher cipher = Cipher.getInstance("Blowfish");
-            cipher.init(Cipher.DECRYPT_MODE, key);
-            String password = new String(cipher.doFinal(Base64.getDecoder().decode(this.password.getBytes(StandardCharsets.UTF_8))), StandardCharsets.UTF_8);
-
             AccountManager.userAuthentication.setUsername(email);
-            AccountManager.userAuthentication.setPassword(password);
+            AccountManager.userAuthentication.setPassword(AESEncryption.decrypt(this.password, "Lps98faSD6ASD8fe"));
 
             AccountManager.userAuthentication.logIn();
             GameProfile profile = AccountManager.userAuthentication.getSelectedProfile();
@@ -56,7 +43,7 @@ public class Account implements ISerializable<Account> {
             AccountManager.INSTANCE.save();
 
             return true;
-        } catch (AuthenticationException | NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
+        } catch (Exception e) {
             return false;
         }
     }

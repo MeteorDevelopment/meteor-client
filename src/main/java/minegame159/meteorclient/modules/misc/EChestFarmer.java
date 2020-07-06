@@ -24,7 +24,7 @@ public class EChestFarmer extends ToggleModule {
     private static final BlockState ENDER_CHEST = Blocks.ENDER_CHEST.getDefaultState();
 
     public EChestFarmer(){
-        super(Category.Misc, "EChestFarmer", "Farms EChests for obby.");
+        super(Category.Misc, "EChest-farmer", "Farms EChests for obby.");
     }
 
     @EventHandler

@@ -28,6 +28,7 @@ public class CommandDispatcher {
 
         if (args.length <= 0) {
             module.doAction();
+            if (Config.INSTANCE.chatCommandsInfo) Utils.sendMessage("#blue[Meteor]: #whiteToggled %s.", module.title);
         } else {
             // Set or get module setting
             Setting<?> setting = module.settings.get(args[0]);
@@ -45,6 +46,7 @@ public class CommandDispatcher {
                 if (!setting.parse(String.join(" ", args))) {
                     Utils.sendMessage("#redUsage of #blue'%s' #redis #gray%s#red.", setting.name, setting.getUsage());
                 }
+                if (Config.INSTANCE.chatCommandsInfo) Utils.sendMessage("#blue[Meteor]: #whiteSet '%s' to '%s'.", setting.title, setting.get().toString());
             }
         }
     }

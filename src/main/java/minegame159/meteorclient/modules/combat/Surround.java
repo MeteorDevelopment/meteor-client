@@ -31,17 +31,26 @@ public class Surround extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> turnOff = sgGeneral.add(new BoolSetting.Builder()
+            .name("turn-off")
+            .description("Turns off when placed.")
+            .defaultValue(false)
+            .build()
+    );
+
     public Surround() {
         super(Category.Combat, "surround", "Surrounds you with obsidian (or other blocks) to take less damage.");
     }
 
     @EventHandler
-    private Listener<TickEvent> onTick = new Listener<>(event -> {
+    private final Listener<TickEvent> onTick = new Listener<>(event -> {
         if (onlyOnGround.get() && !mc.player.isOnGround()) return;
 
         int slot;
         if (mc.player.getMainHandStack().getItem() == Items.OBSIDIAN) slot = mc.player.inventory.selectedSlot;
         else slot = findSlot();
+
+        boolean allPlaced = true;
 
         if (slot != -1) {
             int preSelectedSlot = mc.player.inventory.selectedSlot;
@@ -49,26 +58,38 @@ public class Surround extends ToggleModule {
             BlockState blockState = ((BlockItem) mc.player.inventory.getMainHandStack().getItem()).getBlock().getDefaultState();
 
             Utils.place(blockState, mc.player.getBlockPos().add(1, 0, 0));
+            if (mc.world.getBlockState(mc.player.getBlockPos().add(1, 0, 0)).getMaterial().isReplaceable()) allPlaced = false;
             if (mc.player.getMainHandStack().getItem() != Items.OBSIDIAN) slot = findSlot();
             if (slot == -1) {
                 mc.player.inventory.selectedSlot = preSelectedSlot;
+                if (turnOff.get() && allPlaced) toggle();
                 return;
             }
+
             Utils.place(blockState, mc.player.getBlockPos().add(-1, 0, 0));
+            if (mc.world.getBlockState(mc.player.getBlockPos().add(-1, 0, 0)).getMaterial().isReplaceable()) allPlaced = false;
             if (mc.player.getMainHandStack().getItem() != Items.OBSIDIAN) slot = findSlot();
             if (slot == -1) {
                 mc.player.inventory.selectedSlot = preSelectedSlot;
+                if (turnOff.get() && allPlaced) toggle();
                 return;
             }
+
             Utils.place(blockState, mc.player.getBlockPos().add(0, 0, 1));
+            if (mc.world.getBlockState(mc.player.getBlockPos().add(0, 0, 1)).getMaterial().isReplaceable()) allPlaced = false;
             if (mc.player.getMainHandStack().getItem() != Items.OBSIDIAN) slot = findSlot();
             if (slot == -1) {
                 mc.player.inventory.selectedSlot = preSelectedSlot;
+                if (turnOff.get() && allPlaced) toggle();
                 return;
             }
+
             Utils.place(blockState, mc.player.getBlockPos().add(0, 0, -1));
+            if (mc.world.getBlockState(mc.player.getBlockPos().add(0, 0, -1)).getMaterial().isReplaceable()) allPlaced = false;
 
             mc.player.inventory.selectedSlot = preSelectedSlot;
+
+            if (turnOff.get() && allPlaced) toggle();
         }
     });
 

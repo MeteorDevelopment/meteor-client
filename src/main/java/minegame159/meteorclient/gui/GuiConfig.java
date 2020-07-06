@@ -28,7 +28,7 @@ public class GuiConfig implements ISerializable<GuiConfig> {
     public Color checkbox = new Color(45, 225, 45);
     public Color checkboxPressed = new Color(70, 225, 70);
 
-    public Color separator = new Color(10, 10, 10, 225);
+    public Color separator = new Color(200, 200, 200, 225);
 
     public Color plus = new Color(45, 225, 45);
     public Color plusHovered = new Color(60, 225, 60);

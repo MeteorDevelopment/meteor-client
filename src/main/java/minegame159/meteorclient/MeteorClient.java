@@ -9,6 +9,7 @@ import minegame159.meteorclient.accountsfriends.AccountManager;
 import minegame159.meteorclient.accountsfriends.FriendManager;
 import minegame159.meteorclient.commands.CommandManager;
 import minegame159.meteorclient.events.TickEvent;
+import minegame159.meteorclient.gui.GuiThings;
 import minegame159.meteorclient.gui.screens.topbar.TopBarModules;
 import minegame159.meteorclient.macros.MacroManager;
 import minegame159.meteorclient.mixininterface.IKeyBinding;
@@ -95,7 +96,7 @@ public class MeteorClient implements ClientModInitializer, Listenable {
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
         Capes.tick();
 
-        if (openClickGui.isPressed() && mc.currentScreen == null) {
+        if (openClickGui.isPressed() && mc.currentScreen == null && GuiThings.postKeyEvents()) {
             openClickGui();
         }
 
