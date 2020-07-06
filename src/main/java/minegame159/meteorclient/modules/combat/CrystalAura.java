@@ -164,9 +164,9 @@ public class CrystalAura extends ToggleModule {
                         < maxDamage.get()))
                 .min(Comparator.comparingDouble(o -> o.distanceTo(mc.player)))
                 .ifPresent(entity -> {
-                    double deltaX = entity.x - mc.player.x;
-                    double deltaZ = entity.z - mc.player.z;
-                    double deltaY = entity.y - (mc.player.y + mc.player.getEyeHeight(mc.player.getPose()));
+                    double deltaX = entity.getX() - mc.player.getX();
+                    double deltaZ = entity.getZ() - mc.player.getZ();
+                    double deltaY = entity.getY() - (mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()));
                     double yawAngle = Math.toDegrees(Math.atan2(deltaZ, deltaX)) - 90;
                     double idk = Math.sqrt(deltaX * deltaX + deltaZ * deltaZ);
                     double pitchAngle = -Math.toDegrees(Math.atan2(deltaY, idk));
