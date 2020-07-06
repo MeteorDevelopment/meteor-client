@@ -21,9 +21,10 @@ public class Speed extends ToggleModule {
     
     private final Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
             .name("speed")
-            .description("Multiplier, 1 equals default sprinting speed.")
-            .defaultValue(1)
+            .description("How fast you want to go in blocks per second.")
+            .defaultValue(5.6)
             .min(0)
+            .sliderMax(50)
             .build()
     );
 
@@ -80,25 +81,25 @@ public class Speed extends ToggleModule {
 
         boolean a = false;
         if (mc.player.input.pressingForward) {
-            velX += forward.x * 0.28 * speed.get();
-            velZ += forward.z * 0.28 * speed.get();
+            velX += forward.x / 20 * speed.get();
+            velZ += forward.z / 20 * speed.get();
             a = true;
         }
         if (mc.player.input.pressingBack) {
-            velX -= forward.x * 0.28 * speed.get();
-            velZ -= forward.z * 0.28 * speed.get();
+            velX -= forward.x / 20 * speed.get();
+            velZ -= forward.z / 20 * speed.get();
             a = true;
         }
 
         boolean b = false;
         if (mc.player.input.pressingRight) {
-            velX += right.x * 0.28 * speed.get();
-            velZ += right.z * 0.28 * speed.get();
+            velX += right.x / 20 * speed.get();
+            velZ += right.z / 20 * speed.get();
             b = true;
         }
         if (mc.player.input.pressingLeft) {
-            velX -= right.x * 0.28 * speed.get();
-            velZ -= right.z * 0.28 * speed.get();
+            velX -= right.x / 20 * speed.get();
+            velZ -= right.z / 20 * speed.get();
             b = true;
         }
 

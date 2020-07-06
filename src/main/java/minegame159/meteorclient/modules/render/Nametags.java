@@ -1,20 +1,21 @@
 package minegame159.meteorclient.modules.render;
 
+//Updated by squidoodly 03/07/2020
+
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.MeteorClient;
+import minegame159.meteorclient.accountsfriends.FriendManager;
 import minegame159.meteorclient.events.RenderEvent;
 import minegame159.meteorclient.mixininterface.IBakedQuad;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.rendering.Matrices;
 import minegame159.meteorclient.rendering.ShapeBuilder;
-import minegame159.meteorclient.settings.BoolSetting;
-import minegame159.meteorclient.settings.DoubleSetting;
-import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.Utils;
+import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.render.model.BakedQuad;
@@ -33,13 +34,10 @@ import java.util.Map;
 
 public class Nametags extends ToggleModule {
     private static final Color BACKGROUND = new Color(0, 0, 0, 75);
-    private static final Color TEXT = new Color(255, 255, 255);
-    private static final Color GREEN = new Color(25, 225, 25);
-    private static final Color ORANGE = new Color(225, 105, 25);
-    private static final Color RED = new Color(225, 25, 25);
     private static final Color WHITE = new Color(255, 255, 255);
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgColors = settings.createGroup("Colors");
 
     private final Setting<Boolean> displayArmor = sgGeneral.add(new BoolSetting.Builder()
             .name("display-armor")
@@ -51,6 +49,13 @@ public class Nametags extends ToggleModule {
     private final Setting<Boolean> displayArmorEnchants = sgGeneral.add(new BoolSetting.Builder()
             .name("display-armor-enchants")
             .description("Display armor enchantments.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Boolean> displayPing = sgGeneral.add(new BoolSetting.Builder()
+            .name("ping")
+            .description("Shows players ping")
             .defaultValue(true)
             .build()
     );
@@ -74,6 +79,55 @@ public class Nametags extends ToggleModule {
             .build()
     );
 
+    private final Setting<Color> normalName = sgColors.add(new ColorSetting.Builder()
+            .name("normal-color")
+            .description("The color of non-friends")
+            .defaultValue(new Color(255, 255, 255))
+            .build()
+    );
+
+    private final Setting<Color> friendName = sgColors.add(new ColorSetting.Builder()
+            .name("friend-name")
+            .description("The color of friends")
+            .defaultValue(new Color(0, 255, 180))
+            .build()
+    );
+
+    private final Setting<Color> pingColor = sgColors.add(new ColorSetting.Builder()
+            .name("ping-color")
+            .description("The color of ping.")
+            .defaultValue(new Color(150, 150, 150))
+            .build()
+    );
+
+    private final Setting<Color> healthStage1 = sgColors.add(new ColorSetting.Builder()
+            .name("health-stage-1")
+            .description("The color of full health")
+            .defaultValue(new Color(25, 252, 25))
+            .build()
+    );
+
+    private final Setting<Color> healthStage2 = sgColors.add(new ColorSetting.Builder()
+            .name("health-stage-2")
+            .description("The color of 2/3 health")
+            .defaultValue(new Color(255, 105, 25))
+            .build()
+    );
+
+    private final Setting<Color> healthStage3 = sgColors.add(new ColorSetting.Builder()
+            .name("health-stage-3")
+            .description("The color of 1/3 health")
+            .defaultValue(new Color(255, 25, 25))
+            .build()
+    );
+
+    private final Setting<Color> enchantmentTextColor = sgColors.add(new ColorSetting.Builder()
+            .name("enchantment-text-color")
+            .description("The color of enchantment text.")
+            .defaultValue(new Color(255, 255, 255))
+            .build()
+    );
+
     public Nametags() {
         super(Category.Render, "nametags", "Displays nametags above players.");
     }
@@ -93,6 +147,13 @@ public class Nametags extends ToggleModule {
         // Compute scale
         double dist = Utils.distanceToCamera(entity);
         double scale = 0.04 * this.scale.get();
+        if(dist > 15){
+            scale *= dist/15;
+        }
+
+        // Get ping
+        PlayerListEntry playerListEntry = mc.getNetworkHandler().getPlayerListEntry(entity.getUuid());
+        int ping = playerListEntry.getLatency();
 
         // Compute health things
         float absorption = entity.getAbsorptionAmount();
@@ -101,6 +162,7 @@ public class Nametags extends ToggleModule {
 
         String name = entity.getGameProfile().getName();
         String healthText = " " + health;
+        String pingText = "[" + ping + "]";
 
         // Setup the rotation
         Matrices.push();
@@ -140,7 +202,11 @@ public class Nametags extends ToggleModule {
         // Setup size
         double nameWidth = MeteorClient.FONT.getStringWidth(name);
         double healthWidth = MeteorClient.FONT.getStringWidth(healthText);
+        double pingWidth = MeteorClient.FONT.getStringWidth(pingText);
         double width = nameWidth + healthWidth;
+        if(displayPing.get()){
+            width += pingWidth;
+        }
         double armorWidth = 0;
         for (double v : armorWidths) armorWidth += v;
         width = Math.max(width, armorWidth);
@@ -203,7 +269,7 @@ public class Nametags extends ToggleModule {
                 for (int i = 0; i < 4; i++) {
                     ItemStack itemStack = entity.inventory.armor.get(i);
 
-                    double damage = itemStack.getDamage();
+                    double damage = Math.max(0, itemStack.getDamage());
                     double maxDamage = itemStack.getMaxDamage();
                     double percentage = Math.max(0.0F, (maxDamage - damage) / maxDamage);
 
@@ -234,14 +300,20 @@ public class Nametags extends ToggleModule {
 
         // Get health color
         Color healthColor;
-        if (healthPercentage <= 0.333) healthColor = RED;
-        else if (healthPercentage <= 0.666) healthColor = ORANGE;
-        else healthColor = GREEN;
+        if (healthPercentage <= 0.333) healthColor = healthStage3.get();
+        else if (healthPercentage <= 0.666) healthColor = healthStage2.get();
+        else healthColor = healthStage1.get();
 
         // Render name, health enchant and texts
         MeteorClient.FONT.begin();
-        double hX = MeteorClient.FONT.renderStringWithShadow(name, -widthHalf, 0, TEXT);
+        double hX;
+        if(FriendManager.INSTANCE.attack(entity)){
+            hX = MeteorClient.FONT.renderStringWithShadow(name, -widthHalf, 0, normalName.get());
+        }else{
+            hX = MeteorClient.FONT.renderStringWithShadow(name, -widthHalf, 0, friendName.get());
+        }
         MeteorClient.FONT.renderStringWithShadow(healthText, hX + (width - nameWidth - healthWidth), 0, healthColor);
+        MeteorClient.FONT.renderStringWithShadow(pingText, hX + 3, 0, pingColor.get());
         double itemX = -widthHalf;
 
         if (maxEnchantCount > 0) {
@@ -257,7 +329,7 @@ public class Nametags extends ToggleModule {
 
                 for (Enchantment enchantment : enchantments.keySet()) {
                     String enchantName = Utils.getEnchantShortName(enchantment) + " " + enchantments.get(enchantment);
-                    MeteorClient.FONT.renderStringWithShadow(enchantName, itemX + ((aW - MeteorClient.FONT.getStringWidth(enchantName)) / 2), -heightUp + enchantY + addY, TEXT);
+                    MeteorClient.FONT.renderStringWithShadow(enchantName, itemX + ((aW - MeteorClient.FONT.getStringWidth(enchantName)) / 2), -heightUp + enchantY + addY, enchantmentTextColor.get());
 
                     enchantY += MeteorClient.FONT.getHeight();
                 }

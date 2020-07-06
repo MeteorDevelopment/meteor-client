@@ -5,6 +5,7 @@ import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.events.RenderEvent;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.misc.UnfocusedCPU;
+import minegame159.meteorclient.modules.player.LiquidInteract;
 import minegame159.meteorclient.modules.render.NoRender;
 import minegame159.meteorclient.rendering.Matrices;
 import minegame159.meteorclient.rendering.Renderer;
@@ -13,13 +14,16 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.util.hit.HitResult;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(GameRenderer.class)
@@ -46,6 +50,12 @@ public abstract class GameRendererMixin {
         Renderer.begin(event);
         MeteorClient.EVENT_BUS.post(event);
         Renderer.end();
+    }
+
+    @Redirect(method = "updateTargetedEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;rayTrace(DFZ)Lnet/minecraft/util/hit/HitResult;"))
+    private HitResult updateTargetedEntityEntityRayTraceProxy(Entity entity, double maxDistance, float tickDelta, boolean includeFluids) {
+        if (ModuleManager.INSTANCE.isActive(LiquidInteract.class)) return entity.rayTrace(maxDistance, tickDelta, true);
+        return entity.rayTrace(maxDistance, tickDelta, includeFluids);
     }
 
     @Inject(method = "bobViewWhenHurt", at = @At("HEAD"), cancellable = true)
