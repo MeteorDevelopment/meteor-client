@@ -160,6 +160,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         synchronized (active) {
             for (ToggleModule module : active) module.onActivate();
         }
+        INSTANCE.get(DiscordPresence.class).onActivate();
     });
 
     @EventHandler
