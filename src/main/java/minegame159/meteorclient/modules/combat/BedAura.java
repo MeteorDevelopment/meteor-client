@@ -185,7 +185,7 @@ public class BedAura extends ToggleModule {
             }
         }
         for(BlockEntity entity : mc.world.blockEntities){
-            if(entity instanceof BedBlockEntity && Math.sqrt(entity.getSquaredDistance(mc.player.getX(), mc.player.getY(), mc.player.getZ())) <= breakRange.get()){
+            if(entity instanceof BedBlockEntity && Utils.distance(entity.getPos().getX(), entity.getPos().getY(), entity.getPos().getZ(), mc.player.getX(), mc.player.getY(), mc.player.getZ()) <= breakRange.get()){
                 if(DamageCalcUtils.resistanceReduction(mc.player, DamageCalcUtils.blastProtReduction(mc.player, DamageCalcUtils.armourCalc(mc.player, DamageCalcUtils.bedDamage(mc.player, new Vec3d(entity.getPos().getX(), entity.getPos().getY(), entity.getPos().getZ()))))) < maxDamage.get()
                     || (mc.player.getHealth() + mc.player.getAbsorptionAmount() - DamageCalcUtils.resistanceReduction(mc.player, DamageCalcUtils.blastProtReduction(mc.player, DamageCalcUtils.armourCalc(mc.player, DamageCalcUtils.bedDamage(mc.player, new Vec3d(entity.getPos().getX(), entity.getPos().getY(), entity.getPos().getZ())))))) < minHealth.get() || clickMode.get().equals(Mode.suicide)){
                     mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(mc.player.getX(), mc.player.getY(), mc.player.getZ()), Direction.UP, entity.getPos(), false));

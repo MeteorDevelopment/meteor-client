@@ -365,12 +365,12 @@ public class Search extends ToggleModule {
                 fullCube = Block.isShapeFullCube(shape);
 
                 if (!shape.isEmpty()) {
-                    x1 = x + shape.getMinimum(Direction.Axis.X);
-                    y1 = y + shape.getMinimum(Direction.Axis.Y);
-                    z1 = z + shape.getMinimum(Direction.Axis.Z);
-                    x2 = x + shape.getMaximum(Direction.Axis.X);
-                    y2 = y + shape.getMaximum(Direction.Axis.Y);
-                    z2 = z + shape.getMaximum(Direction.Axis.Z);
+                    x1 = x + shape.getMin(Direction.Axis.X);
+                    y1 = y + shape.getMin(Direction.Axis.Y);
+                    z1 = z + shape.getMin(Direction.Axis.Z);
+                    x2 = x + shape.getMax(Direction.Axis.X);
+                    y2 = y + shape.getMax(Direction.Axis.Y);
+                    z2 = z + shape.getMax(Direction.Axis.Z);
                 }
             }
 

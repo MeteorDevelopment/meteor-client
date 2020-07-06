@@ -27,7 +27,7 @@ public class Criticals extends ToggleModule {
 
     private boolean shouldDoCriticals() {
         boolean a = !mc.player.isSubmergedInWater() && !mc.player.isInLava() && !mc.player.isClimbing();
-        if (onlyOnGround.get()) return a && mc.player.isOnGround();
+        if (!mc.player.isOnGround()) return false;
         return a;
     }
 }

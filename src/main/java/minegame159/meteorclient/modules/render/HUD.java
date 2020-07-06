@@ -6,7 +6,6 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.Config;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.*;
-import minegame159.meteorclient.mixininterface.IDimensionType;
 import minegame159.meteorclient.mixininterface.IMinecraftClient;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
@@ -23,6 +22,7 @@ import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.toast.Toast;
 import net.minecraft.client.toast.ToastManager;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.effect.StatusEffect;
@@ -37,7 +37,6 @@ import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.world.dimension.DimensionType;
 import org.apache.commons.lang3.StringUtils;
 import org.lwjgl.opengl.GL11;
 
@@ -53,9 +52,6 @@ public class HUD extends ToggleModule {
     private static final Color white = new Color(255, 255, 255);
     private static final Color gray = new Color(185, 185, 185);
     private static final Color red = new Color(225, 45, 45);
-
-    private static final DimensionType THE_NETHER = ((IDimensionType) DimensionType.getOverworldDimensionType()).getNether();
-    private static final DimensionType THE_END = ((IDimensionType) DimensionType.getOverworldDimensionType()).getEnd();
 
     private final SettingGroup sgArmor = settings.createGroup("Armor", "armor-enabled", "Armor HUD", true);
     private final SettingGroup sgTopLeft = settings.createGroup("Top Left");
@@ -400,7 +396,7 @@ public class HUD extends ToggleModule {
                 for (int i = mc.player.inventory.armor.size() - 1; i >= 0; i--) {
                     ItemStack itemStack = mc.player.inventory.armor.get(i);
 
-                    mc.getItemRenderer().renderGuiItem(itemStack, x, y);
+                    mc.getItemRenderer().renderGuiItemIcon(itemStack, x, y);
                     if(!itemStack.isEmpty()) {
                         String message = Integer.toString(itemStack.getMaxDamage() - itemStack.getDamage());
                         MeteorClient.FONT.scale = scale.get();
@@ -414,7 +410,7 @@ public class HUD extends ToggleModule {
                 for (int i = mc.player.inventory.armor.size() - 1; i >= 0; i--) {
                     ItemStack itemStack = mc.player.inventory.armor.get(i);
 
-                    mc.getItemRenderer().renderGuiItem(itemStack, x, y);
+                    mc.getItemRenderer().renderGuiItemIcon(itemStack, x, y);
                     if(!itemStack.isEmpty()) {
                         String message = Integer.toString(Math.round(((itemStack.getMaxDamage() - itemStack.getDamage()) * 100) / itemStack.getMaxDamage()));
                         MeteorClient.FONT.scale = scale.get();
@@ -428,7 +424,7 @@ public class HUD extends ToggleModule {
                 for (int i = mc.player.inventory.armor.size() - 1; i >= 0; i--) {
                     ItemStack itemStack = mc.player.inventory.armor.get(i);
 
-                    mc.getItemRenderer().renderGuiItem(itemStack, x, y);
+                    mc.getItemRenderer().renderGuiItemIcon(itemStack, x, y);
 
                     x += 20;
                 }
@@ -642,17 +638,17 @@ public class HUD extends ToggleModule {
         }
 
         if (position.get()) {
-            if (mc.world.getDimension() == DimensionType.getOverworldDimensionType()) {
+            if (mc.world.getDimensionRegistryKey().getValue().getPath().equals("overworld")) {
                 drawPosition(event.screenWidth, "Nether Pos: ", y, mc.cameraEntity.getX() / 8.0, mc.cameraEntity.getY(), mc.cameraEntity.getZ() / 8.0);
                 y -= MeteorClient.FONT.getHeight() + 2;
                 drawPosition(event.screenWidth, "Pos: ", y, mc.cameraEntity.getX(), mc.cameraEntity.getY(), mc.cameraEntity.getZ());
                 y -= MeteorClient.FONT.getHeight() + 2;
-            } else if (mc.world.getDimension() == THE_NETHER) {
+            } else if (mc.world.getDimensionRegistryKey().getValue().getPath().equals("the_nether")) {
                 drawPosition(event.screenWidth, "Overworld Pos: ", y, mc.cameraEntity.getX() * 8.0, mc.cameraEntity.getY(), mc.cameraEntity.getZ() * 8.0);
                 y -= MeteorClient.FONT.getHeight() + 2;
                 drawPosition(event.screenWidth, "Pos: ", y, mc.cameraEntity.getX(), mc.cameraEntity.getY(), mc.cameraEntity.getZ());
                 y -= MeteorClient.FONT.getHeight() + 2;
-            } else if (mc.world.getDimension() == THE_END) {
+            } else if (mc.world.getDimensionRegistryKey().getValue().getPath().equals("the_end")) {
                 drawPosition(event.screenWidth, "Pos: ", y, mc.cameraEntity.getX(), mc.cameraEntity.getY(), mc.cameraEntity.getZ());
                 y -= MeteorClient.FONT.getHeight() + 2;
             }
@@ -690,15 +686,15 @@ public class HUD extends ToggleModule {
                 private long lastTime = -1;
 
                 @Override
-                public Visibility draw(ToastManager manager, long currentTime) {
+                public Visibility draw(MatrixStack matrices, ToastManager manager, long currentTime) {
                     if (lastTime == -1) lastTime = currentTime;
                     else timer += currentTime - lastTime;
 
                     manager.getGame().getTextureManager().bindTexture(new Identifier("textures/gui/toasts.png"));
                     RenderSystem.color4f(1.0F, 1.0F, 1.0F, 255.0F);
-                    manager.blit(0, 0, 0, 32, 160, 32);
+                    manager.drawTexture(matrices, 0, 0, 0, 32, 160, 32);
 
-                    manager.getGame().textRenderer.draw("Armor Low.", 12.0F, 12.0F, -11534256);
+                    manager.getGame().textRenderer.draw(matrices, "Armor Low.", 12.0F, 12.0F, -11534256);
 
                     return timer >= 32000 ? Visibility.HIDE : Visibility.SHOW;
                 }
