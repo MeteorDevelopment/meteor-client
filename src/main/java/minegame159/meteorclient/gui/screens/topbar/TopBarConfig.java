@@ -5,10 +5,7 @@ import minegame159.meteorclient.gui.TopBarType;
 import minegame159.meteorclient.gui.widgets.WWindow;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.settings.ColorSetting;
-import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.settings.Settings;
-import minegame159.meteorclient.settings.StringSetting;
+import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Color;
 
 public class TopBarConfig extends TopBarScreen {
@@ -26,6 +23,15 @@ public class TopBarConfig extends TopBarScreen {
                 .defaultValue(".")
                 .onChanged(Config.INSTANCE::setPrefix)
                 .onModuleActivated(stringSetting -> stringSetting.set(Config.INSTANCE.getPrefix()))
+                .build()
+        );
+
+        sgGeneral.add(new BoolSetting.Builder()
+                .name("chat-commands-info")
+                .description("Send chat message when you use chat comamnds (eg toggling module, changing a setting, etc).")
+                .defaultValue(true)
+                .onChanged(aBoolean -> Config.INSTANCE.chatCommandsInfo = aBoolean)
+                .onModuleActivated(booleanSetting -> booleanSetting.set(Config.INSTANCE.chatCommandsInfo))
                 .build()
         );
 

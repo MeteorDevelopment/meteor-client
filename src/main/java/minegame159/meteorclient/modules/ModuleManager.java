@@ -239,6 +239,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new Portals());
         addModule(new Reach());
         addModule(new PotionSpoof());
+        addModule(new LiquidInteract());
     }
 
     private void initMovement() {
@@ -261,6 +262,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new AirJump());
         addModule(new AntiLevitation());
         addModule(new Scaffold());
+        addModule(new BoatFly());
     }
 
     private void initRender() {
@@ -306,5 +308,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new EntityLogger());
         addModule(new EChestPreview());
         addModule(new Timer());
+        addModule(new Suffix());
+        addModule(new UwUAura());
     }
 }

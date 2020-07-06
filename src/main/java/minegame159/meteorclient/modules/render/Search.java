@@ -22,8 +22,8 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.Heightmap;
@@ -81,8 +81,10 @@ public class Search extends ToggleModule {
             .build()
     );
 
-    private final Pool<BlockPos.Mutable> blockPosPool = new Pool<>(BlockPos.Mutable::new);
+    private final Pool<MyBlock> blockPool = new Pool<>(MyBlock::new);
+
     private final LongList toRemove = new LongArrayList();
+    private final LongList toUpdate = new LongArrayList();
 
     private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
     private Vec3d vec1 = new Vec3d(0, 0, 0);
@@ -138,7 +140,7 @@ public class Search extends ToggleModule {
             }
 
             synchronized (chunks) {
-                if (myChunk.blockPoss.size() > 0) chunks.put(chunk.getPos().toLong(), myChunk);
+                if (myChunk.blocks.size() > 0) chunks.put(chunk.getPos().toLong(), myChunk);
             }
 
             if (event != null) EventStore.returnChunkDataEvent(event);
@@ -177,6 +179,14 @@ public class Search extends ToggleModule {
             }
         }
 
+        synchronized (chunks) {
+            for (long key : toUpdate) {
+                MyChunk chunk = chunks.get(key);
+                if (chunk != null) chunk.update();
+            }
+            toUpdate.clear();
+        }
+
         lastDimension = mc.player.dimension;
     });
 
@@ -202,9 +212,14 @@ public class Search extends ToggleModule {
         }
     });
 
+    private void addToUpdate(int x, int z) {
+        long key = ChunkPos.toLong(x, z);
+        if (chunks.containsKey(key) && !toUpdate.contains(key)) toUpdate.add(key);
+    }
+
     private class MyChunk {
         private final int x, z;
-        private final List<BlockPos.Mutable> blockPoss = new ArrayList<>();
+        private final List<MyBlock> blocks = new ArrayList<>();
 
         public MyChunk(int x, int z) {
             this.x = x;
@@ -213,25 +228,41 @@ public class Search extends ToggleModule {
 
         public void add(BlockPos blockPos, boolean checkForDuplicates) {
             if (checkForDuplicates) {
-                for (BlockPos.Mutable bp : blockPoss) {
-                    if (bp.getX() == blockPos.getX() && bp.getY() == blockPos.getY() && bp.getZ() == blockPos.getZ()) return;
+                for (MyBlock block : blocks) {
+                    if (block.equals(blockPos)) return;
                 }
             }
 
-            BlockPos.Mutable pos = blockPosPool.get();
-            pos.set(blockPos);
-            blockPoss.add(pos);
+            MyBlock block = blockPool.get();
+            block.set(blockPos);
+            blocks.add(block);
+
+            addToUpdateChunk(blockPos);
         }
 
         public void remove(BlockPos blockPos) {
-            for (int i = 0; i < blockPoss.size(); i++) {
-                BlockPos.Mutable bp = blockPoss.get(i);
+            for (int i = 0; i < blocks.size(); i++) {
+                MyBlock block = blocks.get(i);
 
-                if (bp.getX() == blockPos.getX() && bp.getY() == blockPos.getY() && bp.getZ() == blockPos.getZ()) {
-                    blockPoss.remove(i);
+                if (block.equals(blockPos)) {
+                    blocks.remove(i);
                     return;
                 }
             }
+
+            addToUpdateChunk(blockPos);
+        }
+
+        private void addToUpdateChunk(BlockPos blockPos) {
+            addToUpdate(x, z);
+
+            double aX = Math.abs(blockPos.getX() + (blockPos.getX() < 0 ? 1 : 0)) % 16;
+            double aZ = Math.abs(blockPos.getZ() + (blockPos.getZ() < 0 ? 1 : 0)) % 16;
+
+            if (aX == 15) addToUpdate(x + (blockPos.getX() < 0 ? -1 : 1), z);
+            else if (aX == 0) addToUpdate(x - (blockPos.getX() < 0 ? -1 : 1), z);
+            if (aZ == 15) addToUpdate(x, z + (blockPos.getZ() < 0 ? -1 : 1));
+            else if (aZ == 0) addToUpdate(x, z - (blockPos.getZ() < 0 ? -1 : 1));
         }
 
         public boolean shouldBeDeleted() {
@@ -239,31 +270,173 @@ public class Search extends ToggleModule {
             return x > mc.player.chunkX + viewDist || x < mc.player.chunkX - viewDist || z > mc.player.chunkZ + viewDist || z < mc.player.chunkZ - viewDist;
         }
 
+        public void update() {
+            for (MyBlock block : blocks) block.updateNeighbours();
+        }
+
         public void render(RenderEvent event) {
-            for (BlockPos.Mutable blockPos : blockPoss) {
-                if (fullBlock.get()) {
-                    ShapeBuilder.blockEdges(blockPos, color.get());
-                } else {
-                    VoxelShape shape = mc.world.getBlockState(blockPos).getOutlineShape(mc.world, blockPos);
-                    if (shape.isEmpty()) {
-                        ShapeBuilder.blockEdges(blockPos, color.get());
-                        continue;
-                    }
-
-                    Box box = shape.getBoundingBox();
-                    ShapeBuilder.boxEdges(blockPos.getX() + box.x1, blockPos.getY() + box.y1, blockPos.getZ() + box.z1, blockPos.getX() + box.x2, blockPos.getY() + box.y2, blockPos.getZ() + box.z2, color.get());
-                }
-
-                // Tracers
-                if (sgTracers.isEnabled()) {
-                    ShapeBuilder.line(vec1.x - (mc.cameraEntity.getX() - event.offsetX), vec1.y - (mc.cameraEntity.getY() - event.offsetY), vec1.z - (mc.cameraEntity.getZ() - event.offsetZ), blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5f, tracersColor.get());
-                }
-            }
+            for (MyBlock block : blocks) block.render(event);
         }
 
         public void dispose() {
-            for (BlockPos.Mutable blockPos : blockPoss) blockPosPool.free(blockPos);
-            blockPoss.clear();
+            for (MyBlock block : blocks) blockPool.free(block);
+            blocks.clear();
+        }
+    }
+
+    private static final BlockPos.Mutable BLOCK_POS = new BlockPos.Mutable();
+
+    private class MyBlock {
+        private static final int FO = 1 << 1;
+        private static final int FO_RI = 1 << 2;
+        private static final int RI = 1 << 3;
+        private static final int BA_RI = 1 << 4;
+        private static final int BA = 1 << 5;
+        private static final int BA_LE = 1 << 6;
+        private static final int LE = 1 << 7;
+        private static final int FO_LE = 1 << 8;
+
+        private static final int TO = 1 << 9;
+        private static final int TO_FO = 1 << 10;
+        private static final int TO_BA = 1 << 11;
+        private static final int TO_RI = 1 << 12;
+        private static final int TO_LE = 1 << 13;
+        private static final int BO = 1 << 14;
+        private static final int BO_FO = 1 << 15;
+        private static final int BO_BA = 1 << 16;
+        private static final int BO_RI = 1 << 17;
+        private static final int BO_LE = 1 << 18;
+
+        private int x, y, z;
+        private BlockState state;
+        private int neighbours;
+
+        public void set(BlockPos blockPos) {
+            x = blockPos.getX();
+            y = blockPos.getY();
+            z = blockPos.getZ();
+
+            state = mc.world.getBlockState(blockPos);
+
+            updateNeighbours();
+        }
+
+        public void updateNeighbours() {
+            neighbours = 0;
+
+            if (isBlock(0, 0, 1)) neighbours |= FO;
+            if (isBlock(1, 0, 1)) neighbours |= FO_RI;
+            if (isBlock(1, 0, 0)) neighbours |= RI;
+            if (isBlock(1, 0, -1)) neighbours |= BA_RI;
+            if (isBlock(0, 0, -1)) neighbours |= BA;
+            if (isBlock(-1, 0, -1)) neighbours |= BA_LE;
+            if (isBlock(-1, 0, 0)) neighbours |= LE;
+            if (isBlock(-1, 0, 1)) neighbours |= FO_LE;
+
+            if (isBlock(0, 1, 0)) neighbours |= TO;
+            if (isBlock(0, 1, 1)) neighbours |= TO_FO;
+            if (isBlock(0, 1, -1)) neighbours |= TO_BA;
+            if (isBlock(1, 1, 0)) neighbours |= TO_RI;
+            if (isBlock(-1, 1, 0)) neighbours |= TO_LE;
+            if (isBlock(0, -1, 0)) neighbours |= BO;
+            if (isBlock(0, -1, 1)) neighbours |= BO_FO;
+            if (isBlock(0, -1, -1)) neighbours |= BO_BA;
+            if (isBlock(1, -1, 0)) neighbours |= BO_RI;
+            if (isBlock(-1, -1, 0)) neighbours |= BO_LE;
+        }
+
+        private boolean isBlock(double x, double y, double z) {
+            BLOCK_POS.set(this.x + x, this.y + y, this.z + z);
+            return mc.world.getBlockState(BLOCK_POS).getBlock() == state.getBlock();
+        }
+
+        public void render(RenderEvent event) {
+            double x1 = x;
+            double y1 = y;
+            double z1 = z;
+            double x2 = x + 1;
+            double y2 = y + 1;
+            double z2 = z + 1;
+
+            boolean fullCube = true;
+
+            if (!fullBlock.get()) {
+                VoxelShape shape = state.getOutlineShape(mc.world, blockPos);
+                fullCube = Block.isShapeFullCube(shape);
+
+                if (!shape.isEmpty()) {
+                    x1 = x + shape.getMinimum(Direction.Axis.X);
+                    y1 = y + shape.getMinimum(Direction.Axis.Y);
+                    z1 = z + shape.getMinimum(Direction.Axis.Z);
+                    x2 = x + shape.getMaximum(Direction.Axis.X);
+                    y2 = y + shape.getMaximum(Direction.Axis.Y);
+                    z2 = z + shape.getMaximum(Direction.Axis.Z);
+                }
+            }
+
+            if (fullCube) {
+                // Vertical, BA_LE
+                if (((neighbours & LE) != LE && (neighbours & BA) != BA) || ((neighbours & LE) == LE && (neighbours & BA) == BA && (neighbours & BA_LE) != BA_LE)) {
+                    ShapeBuilder.line(x1, y1, z1, x1, y2, z1, color.get());
+                }
+                // Vertical, FO_LE
+                if (((neighbours & LE) != LE && (neighbours & FO) != FO) || ((neighbours & LE) == LE && (neighbours & FO) == FO && (neighbours & FO_LE) != FO_LE)) {
+                    ShapeBuilder.line(x1, y1, z2, x1, y2, z2, color.get());
+                }
+                // Vertical, BA_RI
+                if (((neighbours & RI) != RI && (neighbours & BA) != BA) || ((neighbours & RI) == RI && (neighbours & BA) == BA && (neighbours & BA_RI) != BA_RI)) {
+                    ShapeBuilder.line(x2, y1, z1, x2, y2, z1, color.get());
+                }
+                // Vertical, FO_RI
+                if (((neighbours & RI) != RI && (neighbours & FO) != FO) || ((neighbours & RI) == RI && (neighbours & FO) == FO && (neighbours & FO_RI) != FO_RI)) {
+                    ShapeBuilder.line(x2, y1, z2, x2, y2, z2, color.get());
+                }
+
+                // Horizontal bottom, BA_LE - BA_RI
+                if (((neighbours & BA) != BA && (neighbours & BO) != BO) || ((neighbours & BA) != BA && (neighbours & BO_BA) == BO_BA)) {
+                    ShapeBuilder.line(x1, y1, z1, x2, y1, z1, color.get());
+                }
+                // Horizontal bottom, FO_LE - FO_RI
+                if (((neighbours & FO) != FO && (neighbours & BO) != BO) || ((neighbours & FO) != FO && (neighbours & BO_FO) == BO_FO)) {
+                    ShapeBuilder.line(x1, y1, z2, x2, y1, z2, color.get());
+                }
+                // Horizontal top, BA_LE - BA_RI
+                if (((neighbours & BA) != BA && (neighbours & TO) != TO) || ((neighbours & BA) != BA && (neighbours & TO_BA) == TO_BA)) {
+                    ShapeBuilder.line(x1, y2, z1, x2, y2, z1, color.get());
+                }
+                // Horizontal top, FO_LE - FO_RI
+                if (((neighbours & FO) != FO && (neighbours & TO) != TO) || ((neighbours & FO) != FO && (neighbours & TO_FO) == TO_FO)) {
+                    ShapeBuilder.line(x1, y2, z2, x2, y2, z2, color.get());
+                }
+
+                // Horizontal bottom, BA_LE - FO_LE
+                if (((neighbours & LE) != LE && (neighbours & BO) != BO) || ((neighbours & LE) != LE && (neighbours & BO_LE) == BO_LE)) {
+                    ShapeBuilder.line(x1, y1, z1, x1, y1, z2, color.get());
+                }
+                // Horizontal bottom, BA_RI - FO_RI
+                if (((neighbours & RI) != RI && (neighbours & BO) != BO) || ((neighbours & RI) != RI && (neighbours & BO_RI) == BO_RI)) {
+                    ShapeBuilder.line(x2, y1, z1, x2, y1, z2, color.get());
+                }
+                // Horizontal top, BA_LE - FO_LE
+                if (((neighbours & LE) != LE && (neighbours & TO) != TO) || ((neighbours & LE) != LE && (neighbours & TO_LE) == TO_LE)) {
+                    ShapeBuilder.line(x1, y2, z1, x1, y2, z2, color.get());
+                }
+                // Horizontal top, BA_RI - FO_RI
+                if (((neighbours & RI) != RI && (neighbours & TO) != TO) || ((neighbours & RI) != RI && (neighbours & TO_RI) == TO_RI)) {
+                    ShapeBuilder.line(x2, y2, z1, x2, y2, z2, color.get());
+                }
+            } else {
+                ShapeBuilder.boxEdges(x1, y1, z1, x2, y2, z2, color.get());
+            }
+
+            // Tracers
+            if (sgTracers.isEnabled()) {
+                ShapeBuilder.line(vec1.x - (mc.cameraEntity.getX() - event.offsetX), vec1.y - (mc.cameraEntity.getY() - event.offsetY), vec1.z - (mc.cameraEntity.getZ() - event.offsetZ), x + 0.5, y + 0.5, z + 0.5f, tracersColor.get());
+            }
+        }
+
+        public boolean equals(BlockPos blockPos) {
+            return x == blockPos.getX() && y == blockPos.getY() && z == blockPos.getZ();
         }
     }
 }

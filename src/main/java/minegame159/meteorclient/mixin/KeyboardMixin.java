@@ -26,7 +26,7 @@ public abstract class KeyboardMixin {
 
     @Inject(method = "onKey", at = @At("HEAD"), cancellable = true)
     public void onKey(long window, int key, int scancode, int i, int j, CallbackInfo info) {
-        if (key != GLFW.GLFW_KEY_UNKNOWN) {
+        if (key != GLFW.GLFW_KEY_UNKNOWN && GuiThings.postKeyEvents()) {
             KeyBinding shulkerPeek = MeteorClient.INSTANCE.shulkerPeek;
             if (shulkerPeek.matchesKey(key, scancode) && (i == GLFW.GLFW_PRESS || i == GLFW.GLFW_REPEAT)) ((IKeyBinding) shulkerPeek).setPressed(true);
             else ((IKeyBinding) shulkerPeek).setPressed(false);

@@ -47,7 +47,7 @@ public class DiscordPresence extends ToggleModule {
             DiscordPresence.presence.details = getName() + " || " + getServer();
         }
         DiscordPresence.presence.largeImageKey = "meteor_client";
-        DiscordPresence.presence.largeImageText = "https://meteorclient.github.io/";
+        DiscordPresence.presence.largeImageText = "https://meteorclient.com/";
         DiscordRPC.discordUpdatePresence(presence);
     }
 

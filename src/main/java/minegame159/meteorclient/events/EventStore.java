@@ -23,36 +23,37 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.chunk.WorldChunk;
 
 public class EventStore {
-    private static PlaySoundPacketEvent playSoundPacketEvent = new PlaySoundPacketEvent();
-    private static SendPacketEvent sendPacketEvent = new SendPacketEvent();
-    private static ActiveModulesChangedEvent activeModulesChangedEvent = new ActiveModulesChangedEvent();
-    private static CharTypedEvent charTypedEvent = new CharTypedEvent();
-    private static EntityAddedEvent entityAddedEvent = new EntityAddedEvent();
-    private static EntityRemovedEvent entityRemovedEvent = new EntityRemovedEvent();
-    private static KeyEvent keyEvent = new KeyEvent();
-    private static ModuleBindChangedEvent moduleBindChangedEvent = new ModuleBindChangedEvent();
-    private static ModuleVisibilityChangedEvent moduleVisibilityChangedEvent = new ModuleVisibilityChangedEvent();
-    private static OpenScreenEvent openScreenEvent = new OpenScreenEvent();
-    private static Render2DEvent render2DEvent = new Render2DEvent();
-    private static RenderEvent renderEvent = new RenderEvent();
-    private static TickEvent tickEvent = new TickEvent();
-    private static TookDamageEvent tookDamageEvent = new TookDamageEvent();
-    private static GameJoinedEvent gameJoinedEvent = new GameJoinedEvent();
-    private static GameDisconnectedEvent gameDisconnectedEvent = new GameDisconnectedEvent();
-    private static MiddleMouseButtonEvent middleMouseButtonEvent = new MiddleMouseButtonEvent();
-    private static FriendListChangedEvent friendListChangedEvent = new FriendListChangedEvent();
-    private static MacroListChangedEvent macroListChangedEvent = new MacroListChangedEvent();
-    private static ReceivePacketEvent receivePacketEvent = new ReceivePacketEvent();
-    private static PlayerMoveEvent playerMoveEvent = new PlayerMoveEvent();
-    private static AccountListChangedEvent accountListChangedEvent = new AccountListChangedEvent();
-    private static Pool<ChunkDataEvent> chunkDataEventPool = new Pool<>(ChunkDataEvent::new);
-    private static AttackEntityEvent attackEntityEvent = new AttackEntityEvent();
-    private static StartBreakingBlockEvent startBreakingBlockEvent = new StartBreakingBlockEvent();
-    private static EntityDestroyEvent entityDestroyEvent = new EntityDestroyEvent();
-    private static DamageEvent damageEvent = new DamageEvent();
-    private static RightClickEvent rightClickEvent = new RightClickEvent();
-    private static ContainerSlotUpdateEvent containerSlotUpdateEvent = new ContainerSlotUpdateEvent();
-    private static BlockActivateEvent blockActivateEvent = new BlockActivateEvent();
+    private static final PlaySoundPacketEvent playSoundPacketEvent = new PlaySoundPacketEvent();
+    private static final SendPacketEvent sendPacketEvent = new SendPacketEvent();
+    private static final ActiveModulesChangedEvent activeModulesChangedEvent = new ActiveModulesChangedEvent();
+    private static final CharTypedEvent charTypedEvent = new CharTypedEvent();
+    private static final EntityAddedEvent entityAddedEvent = new EntityAddedEvent();
+    private static final EntityRemovedEvent entityRemovedEvent = new EntityRemovedEvent();
+    private static final KeyEvent keyEvent = new KeyEvent();
+    private static final ModuleBindChangedEvent moduleBindChangedEvent = new ModuleBindChangedEvent();
+    private static final ModuleVisibilityChangedEvent moduleVisibilityChangedEvent = new ModuleVisibilityChangedEvent();
+    private static final OpenScreenEvent openScreenEvent = new OpenScreenEvent();
+    private static final Render2DEvent render2DEvent = new Render2DEvent();
+    private static final RenderEvent renderEvent = new RenderEvent();
+    private static final TickEvent tickEvent = new TickEvent();
+    private static final TookDamageEvent tookDamageEvent = new TookDamageEvent();
+    private static final GameJoinedEvent gameJoinedEvent = new GameJoinedEvent();
+    private static final GameDisconnectedEvent gameDisconnectedEvent = new GameDisconnectedEvent();
+    private static final MiddleMouseButtonEvent middleMouseButtonEvent = new MiddleMouseButtonEvent();
+    private static final FriendListChangedEvent friendListChangedEvent = new FriendListChangedEvent();
+    private static final MacroListChangedEvent macroListChangedEvent = new MacroListChangedEvent();
+    private static final ReceivePacketEvent receivePacketEvent = new ReceivePacketEvent();
+    private static final PlayerMoveEvent playerMoveEvent = new PlayerMoveEvent();
+    private static final AccountListChangedEvent accountListChangedEvent = new AccountListChangedEvent();
+    private static final Pool<ChunkDataEvent> chunkDataEventPool = new Pool<>(ChunkDataEvent::new);
+    private static final AttackEntityEvent attackEntityEvent = new AttackEntityEvent();
+    private static final StartBreakingBlockEvent startBreakingBlockEvent = new StartBreakingBlockEvent();
+    private static final EntityDestroyEvent entityDestroyEvent = new EntityDestroyEvent();
+    private static final DamageEvent damageEvent = new DamageEvent();
+    private static final RightClickEvent rightClickEvent = new RightClickEvent();
+    private static final ContainerSlotUpdateEvent containerSlotUpdateEvent = new ContainerSlotUpdateEvent();
+    private static final BlockActivateEvent blockActivateEvent = new BlockActivateEvent();
+    private static final SendMessageEvent sendMessageEvent = new SendMessageEvent();
 
     public static PlaySoundPacketEvent playSoundPacketEvent(PlaySoundS2CPacket packet) {
         playSoundPacketEvent.packet = packet;
@@ -214,5 +215,10 @@ public class EventStore {
     public static BlockActivateEvent blockActivateEvent(BlockState blockState) {
         blockActivateEvent.blockState = blockState;
         return blockActivateEvent;
+    }
+
+    public static SendMessageEvent sendMessageEvent(String msg) {
+        sendMessageEvent.msg = msg;
+        return sendMessageEvent;
     }
 }

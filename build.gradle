@@ -38,8 +38,8 @@ dependencies {
 	modImplementation "com.github.Vatuu:discord-rpc:1.6.2"
 	include "com.github.Vatuu:discord-rpc:1.6.2"
 
-	modImplementation "com.gitlab.CDAGaming:fabritone:1.15.2-SNAPSHOT"
-	include "com.gitlab.CDAGaming:fabritone:1.15.2-SNAPSHOT"
+	modImplementation "com.gitlab.CDAGaming:fabritone:fabritone~1.15.x-Fabric-SNAPSHOT"
+	include "com.gitlab.CDAGaming:fabritone:fabritone~1.15.x-Fabric-SNAPSHOT"
 }
 
 processResources {

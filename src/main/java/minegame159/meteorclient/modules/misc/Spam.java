@@ -16,14 +16,14 @@ public class Spam extends ToggleModule {
     private final Setting<String> message = sgGeneral.add(new StringSetting.Builder()
             .name("message")
             .description("Message to spam.")
-            .defaultValue("Meteor Client")
+            .defaultValue("Meteor on Crack!")
             .build()
     );
 
     private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
             .name("delay")
             .description("How much ticks to wait between messages. 20 ticks = 1 second.")
-            .defaultValue(0)
+            .defaultValue(60)
             .min(0)
             .sliderMax(60)
             .build()
