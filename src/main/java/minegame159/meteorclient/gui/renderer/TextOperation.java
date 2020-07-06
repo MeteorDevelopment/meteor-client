@@ -4,8 +4,8 @@ import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.utils.Color;
 
 public class TextOperation extends Operation {
-    private String text;
-    private double x, y;
+    protected String text;
+    protected double x, y;
     private Color color;
     private boolean shadow;
 

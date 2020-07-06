@@ -29,6 +29,8 @@
     ]
   },
 
+  "encryptStrings": true,
+
   "renamer": {
     "enabled": true,
     "excludeClasses": [

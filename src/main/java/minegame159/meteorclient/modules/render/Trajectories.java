@@ -35,7 +35,7 @@ public class Trajectories extends ToggleModule {
     private final List<Vec3d> path = new ArrayList<>();
 
     public Trajectories() {
-        super(Category.Render, "trajectories", "Displays trajectory of holding items.");
+        super(Category.Render, "trajectories", "Displays trajectory of held items.");
     }
 
     @EventHandler

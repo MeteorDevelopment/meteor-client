@@ -2,6 +2,7 @@ package minegame159.meteorclient.modules.render;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
+import minegame159.meteorclient.accountsfriends.FriendManager;
 import minegame159.meteorclient.events.RenderEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
@@ -45,9 +46,16 @@ public class ESP extends ToggleModule {
     // Colors
 
     private final Setting<Color> playersColor = sgColors.add(new ColorSetting.Builder()
-            .name("players-colors")
+            .name("players-color")
             .description("Players color.")
             .defaultValue(new Color(205, 205, 205))
+            .build()
+    );
+
+    private final Setting<Color> friendsColor = sgColors.add(new ColorSetting.Builder()
+            .name("friends-color")
+            .description("Players color.")
+            .defaultValue(new Color(0, 255, 180))
             .build()
     );
 
@@ -158,7 +166,13 @@ public class ESP extends ToggleModule {
         for (Entity entity : mc.world.getEntities()) {
             if (entity == mc.player || !entities.get().contains(entity.getType())) continue;
 
-            if (entity instanceof PlayerEntity) render(event, entity, playersColor.get());
+            if (entity instanceof PlayerEntity) {
+                if (FriendManager.INSTANCE.attack((PlayerEntity) entity)) {
+                    render(event, entity, playersColor.get());
+                }else{
+                    render(event, entity, friendsColor.get());
+                }
+            }
             else {
                 switch (entity.getType().getCategory()) {
                     case CREATURE:       render(event, entity, animalsColor.get()); break;
