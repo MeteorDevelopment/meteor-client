@@ -231,6 +231,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new AutoTool());
         addModule(new AutoEat());
         addModule(new XpBottleThrower());
+        addModule(new MiddleClickExtra());
         addModule(new AutoArmor());
         addModule(new AutoDrop());
         addModule(new AutoRightClick());
