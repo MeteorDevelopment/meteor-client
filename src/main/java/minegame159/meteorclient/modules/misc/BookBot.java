@@ -6,6 +6,7 @@ import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.TickEvent;
+import minegame159.meteorclient.mixininterface.IClientPlayerInteractionManager;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.*;
@@ -17,7 +18,6 @@ import net.minecraft.item.Items;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.network.packet.c2s.play.BookUpdateC2SPacket;
-import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
 import net.minecraft.util.Hand;
 
 import java.io.BufferedReader;
@@ -87,6 +87,8 @@ public class BookBot extends ToggleModule {
             .name("delay")
             .description("The delay between writing books(in ms)")
             .defaultValue(300)
+            .min(75)
+            .sliderMin(75)
             .sliderMax(600)
             .build()
     );
@@ -128,12 +130,6 @@ public class BookBot extends ToggleModule {
             toggle();
             return;
         }
-        if(ticksLeft <= 0){
-            ticksLeft = delay.get();
-        }else{
-            ticksLeft -= 50;
-            return;
-        }
         //If the player isn't holding a book
         if(mc.player.getMainHandStack().getItem() != Items.WRITABLE_BOOK){
             //Find one
@@ -141,7 +137,7 @@ public class BookBot extends ToggleModule {
             //If it's in their hotbar then just switch to it (no need to switch back later)
             if (itemResult.slot <= 8 && itemResult.slot != -1) {
                 mc.player.inventory.selectedSlot = itemResult.slot;
-                mc.getNetworkHandler().sendPacket(new UpdateSelectedSlotC2SPacket(itemResult.slot));
+                ((IClientPlayerInteractionManager) mc.interactionManager).syncSelectedSlot2();
             } else if (itemResult.slot > 8){ //Else if it's in their inventory then swap their current item with the writable book
                 InvUtils.clickSlot(InvUtils.invIndexToSlotId(itemResult.slot), 0, SlotActionType.PICKUP);
                 InvUtils.clickSlot(InvUtils.invIndexToSlotId(mc.player.inventory.selectedSlot), 0, SlotActionType.PICKUP);
@@ -150,6 +146,12 @@ public class BookBot extends ToggleModule {
                 //I'm always waiting. Watching. Get more books. I dare you. :))))
                 return;
             }
+        }
+        if(ticksLeft <= 0){
+            ticksLeft = delay.get();
+        }else{
+            ticksLeft -= 50;
+            return;
         }
         if(mode.get() == Mode.Random){
             //Generates a random stream of integers??
