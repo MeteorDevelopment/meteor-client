@@ -296,6 +296,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new ShulkerTooltip());
         addModule(new AutoShearer());
         addModule(new AutoNametag());
+        addModule(new BookBot());
         addModule(new DiscordPresence());
         addModule(new EChestFarmer());
         addModule(new MiddleClickFriend());

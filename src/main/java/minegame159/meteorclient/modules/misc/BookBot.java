@@ -82,16 +82,29 @@ public class BookBot extends ToggleModule {
             .max(999999999) //Don't ask why anyone would want to but they can.
             .build()
     );
+
+    private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
+            .name("delay")
+            .description("The delay between writing books(in ms)")
+            .defaultValue(300)
+            .min(50)
+            .max(2000)
+            .sliderMax(600)
+            .build()
+    );
     //Please don't ask my why they are global. I have no answer for you.
     private static final Random RANDOM = new Random();
     private ListTag pages = new ListTag();
     private String joinedPages;
     private int booksLeft;
+    private int ticksLeft = 0;
+    private boolean firstTime;
 
     @Override
     public void onActivate() { //WHY THE FUCK DOES OnActivate NOT CORRECT TO onActivate? Fucking retard.
         //We need to enter the loop somehow. ;)
         booksLeft = noOfBooks.get();
+        firstTime = true;
         super.onActivate(); //Almost forgot this. lol
     }
 
@@ -109,8 +122,14 @@ public class BookBot extends ToggleModule {
         //Make sure we aren't in the inventory.
         if(mc.currentScreen instanceof ContainerScreen) return;
         //If there are no books left to write we are done.
-        if(booksLeft == 0){
+        if(booksLeft <= 0){
             this.onDeactivate();
+            return;
+        }
+        if(ticksLeft <= 0){
+            ticksLeft = delay.get();
+        }else{
+            ticksLeft -= 50;
             return;
         }
         //If the player isn't holding a book
@@ -120,7 +139,7 @@ public class BookBot extends ToggleModule {
             //If it's in their hotbar then just switch to it (no need to switch back later)
             if(itemResult.slot <= 8 && itemResult.slot != -1){
                 mc.player.inventory.selectedSlot = itemResult.slot;
-            }else if(mc.player.inventory.selectedSlot > 8){ //Else if it's in their inventory then swap their current item with the writable book
+            }else if(itemResult.slot > 8){ //Else if it's in their inventory then swap their current item with the writable book
                 InvUtils.clickSlot(InvUtils.invIndexToSlotId(itemResult.slot), 0, SlotActionType.PICKUP);
                 InvUtils.clickSlot(InvUtils.invIndexToSlotId(mc.player.inventory.selectedSlot), 0, SlotActionType.PICKUP);
                 InvUtils.clickSlot(InvUtils.invIndexToSlotId(itemResult.slot), 0, SlotActionType.PICKUP);
@@ -133,19 +152,21 @@ public class BookBot extends ToggleModule {
             //Generates a random stream of integers??
             IntStream charGenerator = RANDOM.ints(0x80, 0x10ffff - 0x800).map(i -> i < 0xd800 ? i : i + 0x800);
             //Convert that stream into a string and tidies up.
-            joinedPages = charGenerator.mapToObj(i -> String.valueOf((char) i)).collect(Collectors.joining()).replaceFirst("\r\n", "\n");
+            joinedPages = charGenerator.limit(23000).mapToObj(i -> String.valueOf((char) i)).collect(Collectors.joining());
+            joinedPages = joinedPages.replaceAll("\r\n", "\n");
             //Pass that string into the book writing thing.
             writeBook(joinedPages);
         }else if(mode.get() == Mode.Ascii){
             //Generates a random stream of integers??
             IntStream charGenerator = RANDOM.ints(0x20, 0x7f);
             //Converts that stream into a string and tidies up.
-            joinedPages = charGenerator.mapToObj(i -> String.valueOf((char) i)).collect(Collectors.joining()).replaceFirst("\r\n", "\n");
+            joinedPages = charGenerator.limit(35000).mapToObj(i -> String.valueOf((char) i)).collect(Collectors.joining());
+            joinedPages = joinedPages.replaceAll("\r\n", "\n");
             //Pass that string to the book writing thing.
             writeBook(joinedPages);
         }else if(mode.get() == Mode.File){
             //If it is the first time writing a book
-            if(booksLeft == noOfBooks.get()) {
+            if(firstTime) {
                 //Fetch the file and initialise the IntList
                 File file = new File(MeteorClient.FOLDER, fileName.get());
                 IntList chars = new IntArrayList();
@@ -160,54 +181,50 @@ public class BookBot extends ToggleModule {
                     BufferedReader reader = new BufferedReader(new FileReader(file));
                     chars.clear();
 
-                    //Put all the characters into the IntList. (Cuz why read words as words? That would make too much sense.)
-                    int c;
-                    while ((c = reader.read()) != -1) chars.add(c);
-                    reader.close();
+                    // Read all the text into a string
+                    StringBuilder sb = new StringBuilder();
+                    String line;
+                    while ((line = reader.readLine()) != null) sb.append(line).append('\n');
+                    joinedPages = sb.toString();
 
-                    //Make the second list??? Idk, you coded this, you should know. Idk why I have to explain this shit to you. It just works. (I hope)
-                    int[] chars2 = new int[chars.size()];
-                    chars.getElements(0, chars2, 0, chars.size());
-
-                    //Turn the IntList into a string (Like they should have fucking been since the start because, ya know, they are FUCKING WORDS IN THE FILE YOU TWAT)
-                    joinedPages = IntStream.of(chars2).toString(); //At least it's easy to convert them or I think I would have cut my dick off.
-                    //Pass the string to the book writing thing.
+                    // Write it to the book
+                    firstTime = false;
                     writeBook(joinedPages);
                 } catch (IOException ignored) { //EZ ignore. > 1 blocked message
                     //If it fails then send a message
                     Utils.sendMessage("#redFailed to read the file.");
                     //When you try your best but you don't succeed.
                 }
-            }else if(booksLeft < noOfBooks.get()){ //If it's not the first time writing to a book
-                if(joinedPages.length() > 0) { //Make sure there is something to write.
-                    //We can just pass the main string as pages get removed as they are added to the ListTag and then the ListTag is used to make a whole book.
-                    //The same page shouldn't be written twice as the string is removed as soon as it is added.
-                    writeBook(joinedPages);
-                }else{
-                    onDeactivate();//Hope this is the right one.
-                }
+            }else if(!joinedPages.isEmpty()){ //If it's not the first time writing to a book
+                //Make sure there is something to write.
+                //We can just pass the main string as pages get removed as they are added to the ListTag and then the ListTag is used to make a whole book.
+                //The same page shouldn't be written twice as the string is removed as soon as it is added.
+                writeBook(joinedPages);
+            }else{
+                firstTime = true;
             }
         }
     });
     //Idk if it;s just cuz it's late and I'm starting to doubt myself but I'm like 90% sure I fucked this up. Please fix it so I can call myself a dev again.
     private void writeBook(String bitchNutz){ //BITCHNUTZ LMAO
         //Initialise all the shit I need.
-        int page = 0;
+        int page;
         int j;
         int line;
         int i;
+        pages.clear();
         //If the book isn't full
-        while(page < noOfPages.get()) {
+        for(page = 0; page < noOfPages.get(); page++) {
             j = 0;
-            line = 0;
             //If the page isn't full
-            while (line < 13) { //13 is the most number of lines I am comfortable fitting on a page
-                i = 1;
+            for(line = 0; line <= 13; line++) { //13 is the most number of lines I am comfortable fitting on a page
                 //Make sure we don't go too far.
-                if(mc.textRenderer.getStringWidth(bitchNutz.substring(0, bitchNutz.length() - 1)) >= 113) {
+                if(mc.textRenderer.getStringWidth(bitchNutz.substring(0, bitchNutz.length() - 1)) > 113) {
                     //Make the line as long as it's allowed
-                    while (mc.textRenderer.getStringWidth(bitchNutz.substring(0, i)) <= 113) { //113 is the widest a line can be in pixels
-                        i += 1;
+                    for (i = 1; mc.textRenderer.getStringWidth(bitchNutz.substring(0, i)) <= 113; i++) { //113 is the widest a line can be in pixels
+                        if(bitchNutz.substring(0, i).contains("\n")){
+                            break;
+                        }
                     }
                     //Make sure the line isn't too long just in case we overshot with the last one.
                     if (mc.textRenderer.getStringWidth(bitchNutz.substring(0, i)) > 113) {
@@ -217,8 +234,6 @@ public class BookBot extends ToggleModule {
                     j += i;
                     //Remove the last page from the string we are working on
                     bitchNutz = bitchNutz.substring(i, bitchNutz.length() - 1);
-                    //Add to the line count
-                    line += 1;
                 }else{ //If we go too far then just fucking end it.
                     //Go to the end of the thing and just exit the script.
                     j = bitchNutz.length() - 1;
@@ -227,16 +242,13 @@ public class BookBot extends ToggleModule {
                 }
             }
             //Add a page to the ListTag
+            if(j > joinedPages.length() - 1) j = joinedPages.length() - 1;
             pages.add(new StringTag(joinedPages.substring(0, j)));
-            //Make sure if we are at the end of the document then we just leave the thing and the book is counted and it's over.
-            if(bitchNutz.length() - 1 - j > 0) { //Just in case it's a perfect length? I don't really know why I added this but it's here and it's probably for a reason so it's staying.
-                //Remove a page from the main string.
-                joinedPages = bitchNutz.substring(j, bitchNutz.length() - 1);
+            if(j == (bitchNutz.length() - 1)){
+                joinedPages = "";
             }else{
-                break; //Make sure we don't keep writing pages if whatever happened above happens. Idk anymore
+                joinedPages = bitchNutz;
             }
-            //Add to the page counter. We can afford to do this no matter what cuz why not?
-            page += 1;
         }
         //Idk how to close the book properly.
         //.................................................HELP.......................................................
@@ -244,7 +256,12 @@ public class BookBot extends ToggleModule {
         //Plz make meteor the fucking author if you can. :kekw:
         mc.player.networkHandler.sendPacket(new BookUpdateC2SPacket(mc.player.getMainHandStack(), true, Hand.MAIN_HAND)); //Idk what signed means, so but I changed it because I hoped it would change the constructor it used cuz I'm smart. Unsurprisingly it didn't change the constructor but hopefully I did a good anyway?
         //To keep track of how many books we have left.
-        booksLeft -= 1;
+        if(mode.get() != Mode.File) {
+            booksLeft -= 1;
+        }else if(mode.get() == Mode.File && joinedPages.length() <=0){
+            booksLeft -= 1;
+            firstTime = true;
+        }
         //Book go Brrrrrrrrrr
     }
 } //IT TOOK ME 30 FUCKING MINUTES TO COMMENT THIS. I WANT TO DIE. SEND HELP. CODING METEOR IS BECOMING AN ADDICTION. PLEASE. CAN SOMEONE HEAR ME? ANYONE?
