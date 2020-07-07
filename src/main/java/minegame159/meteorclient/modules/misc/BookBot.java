@@ -250,13 +250,13 @@ public class BookBot extends ToggleModule {
                 }
             }
 
-            pages.add(new StringTag(pageSb.toString()));
+            pages.add(StringTag.of(pageSb.toString()));
             if (endOfStream) break;
         }
 
         mc.player.getMainHandStack().putSubTag("pages", pages);
-        mc.player.getMainHandStack().putSubTag("author", new StringTag("Meteor Client"));
-        mc.player.getMainHandStack().putSubTag("title", new StringTag(name.get()));
+        mc.player.getMainHandStack().putSubTag("author", StringTag.of("Meteor Client"));
+        mc.player.getMainHandStack().putSubTag("title", StringTag.of(name.get()));
         mc.player.networkHandler.sendPacket(new BookUpdateC2SPacket(mc.player.getMainHandStack(), true, Hand.MAIN_HAND));
         booksLeft--;
     }
