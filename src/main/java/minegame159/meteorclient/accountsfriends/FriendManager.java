@@ -58,9 +58,9 @@ public class FriendManager extends Savable<FriendManager> {
         return friend == null || friend.attack;
     }
 
-    public Color getColor(String name) {
-        Friend friend = get(name);
-        return friend == null ? WHITE : friend.color;
+    public Color getColor(PlayerEntity entity, Color defaultColor) {
+        Friend friend = get(entity.getGameProfile().getName());
+        return friend == null ? defaultColor : friend.color;
     }
 
     public void addOrRemove(Friend friend) {
