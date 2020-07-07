@@ -86,13 +86,6 @@ public class Nametags extends ToggleModule {
             .build()
     );
 
-    private final Setting<Color> friendName = sgColors.add(new ColorSetting.Builder()
-            .name("friend-name")
-            .description("The color of friends")
-            .defaultValue(new Color(0, 255, 180))
-            .build()
-    );
-
     private final Setting<Color> pingColor = sgColors.add(new ColorSetting.Builder()
             .name("ping-color")
             .description("The color of ping.")
@@ -306,12 +299,7 @@ public class Nametags extends ToggleModule {
 
         // Render name, health enchant and texts
         MeteorClient.FONT.begin();
-        double hX;
-        if(FriendManager.INSTANCE.attack(entity)){
-            hX = MeteorClient.FONT.renderStringWithShadow(name, -widthHalf, 0, normalName.get());
-        }else{
-            hX = MeteorClient.FONT.renderStringWithShadow(name, -widthHalf, 0, friendName.get());
-        }
+        double hX = MeteorClient.FONT.renderStringWithShadow(name, -widthHalf, 0, FriendManager.INSTANCE.getColor(entity, normalName.get()));
         MeteorClient.FONT.renderStringWithShadow(healthText, hX + (width - nameWidth - healthWidth), 0, healthColor);
         MeteorClient.FONT.renderStringWithShadow(pingText, hX + 3, 0, pingColor.get());
         double itemX = -widthHalf;
