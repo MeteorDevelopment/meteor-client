@@ -7,17 +7,19 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.mixininterface.IClientPlayerInteractionManager;
+import minegame159.meteorclient.mixininterface.ITextHandler;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.InvUtils;
 import minegame159.meteorclient.utils.Utils;
-import net.minecraft.client.gui.screen.ingame.ContainerScreen;
-import net.minecraft.container.SlotActionType;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.network.packet.c2s.play.BookUpdateC2SPacket;
+import net.minecraft.screen.slot.SlotActionType;
+import net.minecraft.text.Style;
 import net.minecraft.util.Hand;
 
 import java.io.BufferedReader;
@@ -124,7 +126,7 @@ public class BookBot extends ToggleModule {
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
         //Make sure we aren't in the inventory.
-        if(mc.currentScreen instanceof ContainerScreen) return;
+        if(mc.currentScreen instanceof HandledScreen<?>) return;
         //If there are no books left to write we are done.
         if(booksLeft <= 0){
             toggle();
@@ -227,7 +229,7 @@ public class BookBot extends ToggleModule {
                 boolean endOfStream2 = false;
 
                 while (true) {
-                    float charWidth = mc.textRenderer.getCharWidth((char) nextChar);
+                    float charWidth = ((ITextHandler) mc.textRenderer.getTextHandler()).getWidthRetriever().getWidth(nextChar, Style.EMPTY);
                     if (nextChar == '\n') {
                         if (!readChar()) endOfStream2 = true;
                         break;
