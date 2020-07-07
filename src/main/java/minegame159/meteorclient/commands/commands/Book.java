@@ -149,7 +149,7 @@ public class Book extends Command {
          */
         //Separate the pages
         for(int page = 1; page <= limit; page++){
-            pages.add(new StringTag());
+            pages.add(StringTag.of(""));
         }
 
         heldItem.getOrCreateTag().put("pages", pages);
