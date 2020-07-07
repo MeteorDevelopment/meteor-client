@@ -17,6 +17,7 @@ import net.minecraft.item.Items;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.network.packet.c2s.play.BookUpdateC2SPacket;
+import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
 import net.minecraft.util.Hand;
 
 import java.io.BufferedReader;
@@ -79,9 +80,6 @@ public class BookBot extends ToggleModule {
             .name("no-of-books")
             .description("The number of books to make(or until the file runs out)")
             .defaultValue(1)
-            .min(1)
-            .sliderMax(9999) //For when you are trying to type the fucking bible or some shit.
-            .max(999999999) //Don't ask why anyone would want to but they can.
             .build()
     );
 
@@ -89,11 +87,10 @@ public class BookBot extends ToggleModule {
             .name("delay")
             .description("The delay between writing books(in ms)")
             .defaultValue(300)
-            .min(50)
-            .max(2000)
             .sliderMax(600)
             .build()
     );
+
     //Please don't ask my why they are global. I have no answer for you.
     private static final Random RANDOM = new Random();
     private ListTag pages = new ListTag();
@@ -106,6 +103,7 @@ public class BookBot extends ToggleModule {
     private int nextChar;
     private final StringBuilder pageSb = new StringBuilder();
     private final StringBuilder lineSb = new StringBuilder();
+    private String fileString;
 
     @Override
     public void onActivate() { //WHY THE FUCK DOES OnActivate NOT CORRECT TO onActivate? Fucking retard.
@@ -141,13 +139,14 @@ public class BookBot extends ToggleModule {
             //Find one
             InvUtils.FindItemResult itemResult = InvUtils.findItemWithCount(Items.WRITABLE_BOOK);
             //If it's in their hotbar then just switch to it (no need to switch back later)
-            if(itemResult.slot <= 8 && itemResult.slot != -1){
+            if (itemResult.slot <= 8 && itemResult.slot != -1) {
                 mc.player.inventory.selectedSlot = itemResult.slot;
-            }else if(itemResult.slot > 8){ //Else if it's in their inventory then swap their current item with the writable book
+                mc.getNetworkHandler().sendPacket(new UpdateSelectedSlotC2SPacket(itemResult.slot));
+            } else if (itemResult.slot > 8){ //Else if it's in their inventory then swap their current item with the writable book
                 InvUtils.clickSlot(InvUtils.invIndexToSlotId(itemResult.slot), 0, SlotActionType.PICKUP);
                 InvUtils.clickSlot(InvUtils.invIndexToSlotId(mc.player.inventory.selectedSlot), 0, SlotActionType.PICKUP);
                 InvUtils.clickSlot(InvUtils.invIndexToSlotId(itemResult.slot), 0, SlotActionType.PICKUP);
-            }else{ //Otherwise we are out and we can just wait for more books.
+            } else { //Otherwise we are out and we can just wait for more books.
                 //I'm always waiting. Watching. Get more books. I dare you. :))))
                 return;
             }
@@ -188,7 +187,8 @@ public class BookBot extends ToggleModule {
                     // Write it to the book
                     reader.close();
                     firstTime = false;
-                    stream = sb.toString().chars().iterator();
+                    fileString = sb.toString();
+                    stream = fileString.chars().iterator();
                     firstChar = true;
                     writeBook();
                 } catch (IOException ignored) { //EZ ignore. > 1 blocked message
@@ -197,8 +197,12 @@ public class BookBot extends ToggleModule {
                     //When you try your best but you don't succeed.
                 }
             } else {
-                if (stream != null) writeBook();
-                else booksLeft = 0;
+                if (stream != null) {
+                    writeBook();
+                } else if (booksLeft > 0) {
+                    stream = fileString.chars().iterator();
+                    writeBook();
+                }
             }
         }
     });
@@ -248,8 +252,11 @@ public class BookBot extends ToggleModule {
             if (endOfStream) break;
         }
 
-        mc.player.getMainHandStack().getOrCreateTag().put("pages", pages);
+        mc.player.getMainHandStack().putSubTag("pages", pages);
+        mc.player.getMainHandStack().putSubTag("author", new StringTag("Meteor Client"));
+        mc.player.getMainHandStack().putSubTag("title", new StringTag(name.get()));
         mc.player.networkHandler.sendPacket(new BookUpdateC2SPacket(mc.player.getMainHandStack(), true, Hand.MAIN_HAND));
+        booksLeft--;
     }
 
     private boolean readChar() {
