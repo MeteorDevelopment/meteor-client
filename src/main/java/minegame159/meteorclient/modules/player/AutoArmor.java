@@ -81,7 +81,7 @@ public class AutoArmor extends ToggleModule {
 
     private final Setting<Boolean> antiBreak = sgGeneral.add(new BoolSetting.Builder()
             .name("anti-break")
-            .description("Stops you from breaking your weapon.")
+            .description("Stops you from breaking your armor.")
             .defaultValue(false)
             .build()
     );

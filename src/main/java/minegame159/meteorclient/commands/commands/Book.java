@@ -4,9 +4,11 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.commands.Command;
+import minegame159.meteorclient.utils.InvUtils;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.container.SlotActionType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.ListTag;
@@ -24,14 +26,15 @@ import java.util.stream.IntStream;
 
 public class Book extends Command {
     private static final int MAX_PAGES = 100;
-    private static final int CHARS_PER_PAGE = 210;
+    private static final int LINES_PER_PAGE = 210;
+    private static final int PIXELS_PER_LINE = 113;
 
     private static final Random RANDOM = new Random();
     private static final File FILE = new File(MeteorClient.FOLDER, "book.txt");
     private static final IntList CHARS = new IntArrayList();
 
     public Book() {
-        super("book", "Fills book with characters");
+        super("book", "Fills books with characters");
     }
 
     @Override
@@ -106,21 +109,26 @@ public class Book extends Command {
     private void fillBook(IntStream charGenerator, int limit) {
         ClientPlayerEntity player = MinecraftClient.getInstance().player;
 
-        ItemStack heldItem = player.getMainHandStack();
-        Hand hand = Hand.MAIN_HAND;
-        if (heldItem.getItem() != Items.WRITABLE_BOOK) {
-            heldItem = player.getOffHandStack();
-            hand = Hand.OFF_HAND;
-            if (heldItem.getItem() != Items.WRITABLE_BOOK) {
-                Utils.sendMessage("#redYou are not holding a book.");
-                return;
+        InvUtils.FindItemResult itemResult = InvUtils.findItemWithCount(Items.WRITABLE_BOOK);
+        if(itemResult.slot <= 8){
+            player.inventory.selectedSlot = itemResult.slot;
+        }else{
+            if(player.inventory.getEmptySlot() < 8){
+                InvUtils.clickSlot(InvUtils.invIndexToSlotId(itemResult.slot), 0, SlotActionType.PICKUP);
+                InvUtils.clickSlot(InvUtils.invIndexToSlotId(player.inventory.getEmptySlot()), 0, SlotActionType.PICKUP);
+            }else{
+                InvUtils.clickSlot(InvUtils.invIndexToSlotId(itemResult.slot), 0, SlotActionType.PICKUP);
+                InvUtils.clickSlot(InvUtils.invIndexToSlotId(player.inventory.selectedSlot), 0, SlotActionType.PICKUP);
+                InvUtils.clickSlot(InvUtils.invIndexToSlotId(itemResult.slot), 0, SlotActionType.PICKUP);
             }
         }
+        ItemStack heldItem = player.getMainHandStack();
 
-        String joinedPages = charGenerator.limit(MAX_PAGES * CHARS_PER_PAGE).mapToObj(i -> String.valueOf((char) i)).collect(Collectors.joining());
+        String joinedPages = charGenerator.mapToObj(i -> String.valueOf((char) i)).collect(Collectors.joining());
         joinedPages = joinedPages.replaceAll("\r\n", "\n");
 
         ListTag pages = new ListTag();
+        /*
         int start = 0;
         int end = 0;
         for (int page = 0; page < limit;) {
@@ -138,8 +146,13 @@ public class Book extends Command {
                 if (brejk) break;
             }
         }
+         */
+        //Separate the pages
+        for(int page = 1; page <= limit; page++){
+            pages.add(StringTag.of(""));
+        }
 
         heldItem.getOrCreateTag().put("pages", pages);
-        player.networkHandler.sendPacket(new BookUpdateC2SPacket(heldItem, false, hand));
+        player.networkHandler.sendPacket(new BookUpdateC2SPacket(heldItem, false, Hand.MAIN_HAND));
     }
 }
