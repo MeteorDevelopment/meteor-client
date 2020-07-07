@@ -8,12 +8,12 @@ import minegame159.meteorclient.utils.InvUtils;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.container.SlotActionType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.network.packet.c2s.play.BookUpdateC2SPacket;
+import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.Hand;
 
 import java.io.BufferedReader;

@@ -62,7 +62,8 @@
     "StatusEffectInstanceMixin",
     "RenderTickCounterMixin",
     "MinecraftServerMixin",
-    "DimensionTypeMixin"
+    "DimensionTypeMixin",
+    "TextHandlerMixin"
   ],
   "injectors": {
     "defaultRequire": 1
