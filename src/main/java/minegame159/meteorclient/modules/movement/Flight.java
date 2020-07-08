@@ -38,7 +38,7 @@ public class Flight extends ToggleModule {
 
     @Override
     public void onActivate() {
-        if (mode.get() == Mode.Vanilla) {
+        if (mode.get() == Mode.Vanilla && !mc.player.isSpectator()) {
             mc.player.abilities.flying = true;
             if (mc.player.abilities.creativeMode) return;
             mc.player.abilities.allowFlying = true;
@@ -47,7 +47,7 @@ public class Flight extends ToggleModule {
 
     @Override
     public void onDeactivate() {
-        if (mode.get() == Mode.Vanilla) {
+        if (mode.get() == Mode.Vanilla && !mc.player.isSpectator()) {
             mc.player.abilities.flying = false;
             mc.player.abilities.setFlySpeed(0.05f);
             if (mc.player.abilities.creativeMode) return;
@@ -57,7 +57,7 @@ public class Flight extends ToggleModule {
 
     @EventHandler
     private Listener<TickEvent> onTick = new Listener<>(event -> {
-        if (mode.get() == Mode.Vanilla) {
+        if (mode.get() == Mode.Vanilla && !mc.player.isSpectator()) {
             mc.player.abilities.setFlySpeed(speed.get().floatValue());
             mc.player.abilities.flying = true;
             if (mc.player.abilities.creativeMode) return;
