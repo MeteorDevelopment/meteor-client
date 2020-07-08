@@ -6,6 +6,7 @@ import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.ContainerScreen;
 import net.minecraft.client.gui.screen.ingame.CraftingTableScreen;
+import net.minecraft.client.gui.screen.recipebook.RecipeBookWidget;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.container.CraftingTableContainer;
 import net.minecraft.container.Slot;
@@ -15,15 +16,20 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.text.Text;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(CraftingTableScreen.class)
 public abstract class CraftingTableScreenMixin extends ContainerScreen<CraftingTableContainer> {
+    @Shadow @Final private RecipeBookWidget recipeBookGui;
+    @Shadow private boolean isNarrow;
     private MinecraftClient mc;
     private ButtonWidget autoCraftBtn;
+    private ButtonWidget configBtn;
 
     private boolean autoCrafting;
     private int craftingI;
@@ -42,7 +48,7 @@ public abstract class CraftingTableScreenMixin extends ContainerScreen<CraftingT
         craftingI = 0;
 
         autoCraftBtn = addButton(new ButtonWidget(x + 30 + 3 * 18 + 4, y + 16, 70, 13, "Auto craft", button -> onAutoCraft()));
-        addButton(new ButtonWidget(x + 30 + 3 * 18 + 4, y + 17 + 2 * 20, 70, 13, "Config", button -> MinecraftClient.getInstance().openScreen(new AutoCraftScreen())));
+        configBtn = addButton(new ButtonWidget(x + 30 + 3 * 18 + 4, y + 17 + 2 * 20, 70, 13, "Config", button -> MinecraftClient.getInstance().openScreen(new AutoCraftScreen())));
     }
 
     private void onAutoCraft() {
@@ -62,6 +68,10 @@ public abstract class CraftingTableScreenMixin extends ContainerScreen<CraftingT
 
     @Inject(method = "tick", at = @At("TAIL"))
     private void onTick(CallbackInfo info) {
+        int x = recipeBookGui.findLeftEdge(this.isNarrow, this.width, this.containerWidth) + 30 + 3 * 18 + 4;
+        autoCraftBtn.x = x;
+        configBtn.x = x;
+
         if (autoCrafting) {
             //if (TickRate.INSTANCE.getTimeSinceLastTick() > 0.5) return;
 
