@@ -522,7 +522,10 @@ public class HUD extends ToggleModule {
         }
 
         if (time.get()) {
-            drawInfo("Time: ", mc.world.getTimeOfDay() % 24000 + "", y);
+            int ticks = (int) (mc.world.getTimeOfDay() % 24000);
+            ticks += 6000;
+            if (ticks > 24000) ticks -= 24000;
+            drawInfo("Time: ", String.format("%02d:%02d", ticks / 1000, (int) (ticks % 1000 / 1000.0 * 60)), y);
             y += MeteorClient.FONT.getHeight() + 2;
         }
 
