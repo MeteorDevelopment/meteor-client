@@ -98,7 +98,7 @@ public class AutoMend extends ToggleModule {
 
     @EventHandler
     private Listener<TickEvent> onTick = new Listener<>(event -> {
-        if (mc.currentScreen instanceof ContainerScreen) return;
+        if (mc.currentScreen instanceof ContainerScreen<?>) return;
 
         if (mc.player.getOffHandStack().isEmpty()) replaceItem(true);
         else if (!mc.player.getOffHandStack().isDamaged()) replaceItem(false);
