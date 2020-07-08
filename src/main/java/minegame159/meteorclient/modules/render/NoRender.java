@@ -107,6 +107,13 @@ public class NoRender extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> noNausea = sgGeneral.add(new BoolSetting.Builder()
+            .name("no-nausea")
+            .description("Disables nausea effect.")
+            .defaultValue(true)
+            .build()
+    );
+
     public NoRender() {
         super(Category.Render, "no-render", "Disables some things from rendering.");
     }
@@ -165,5 +172,9 @@ public class NoRender extends ToggleModule {
 
     public boolean noArmor() {
         return isActive() && noArmor.get();
+    }
+
+    public boolean noNausea() {
+        return isActive() && noNausea.get();
     }
 }
