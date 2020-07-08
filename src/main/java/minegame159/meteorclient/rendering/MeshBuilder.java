@@ -71,6 +71,7 @@ public class MeshBuilder {
         GL11.glEnable(GL11.GL_LINE_SMOOTH);
         GlStateManager.lineWidth(1);
         GlStateManager.color4f(1, 1, 1, 1);
+        GlStateManager.shadeModel(GL11.GL_SMOOTH);
 
         buffer.end();
         RENDERER.draw(buffer);
