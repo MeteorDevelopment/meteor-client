@@ -149,6 +149,7 @@ public abstract class CraftingTableScreenMixin extends ContainerScreen<CraftingT
     }
 
     private ItemStack getStack(int slot) {
-        return container.getSlot(slot).getStack();
+        ItemStack itemStack = container.getSlot(slot).getStack();
+        return itemStack == null ? ItemStack.EMPTY : itemStack;
     }
 }
