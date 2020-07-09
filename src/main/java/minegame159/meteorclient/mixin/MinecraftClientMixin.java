@@ -5,6 +5,8 @@ import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.events.OpenScreenEvent;
 import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.mixininterface.IMinecraftClient;
+import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.player.AutoEat;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.Mouse;
@@ -13,11 +15,13 @@ import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.util.Session;
 import net.minecraft.client.util.Window;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.util.hit.HitResult;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.net.Proxy;
@@ -63,6 +67,12 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
         MeteorClient.EVENT_BUS.post(event);
 
         if (event.isCancelled()) info.cancel();
+    }
+
+    @Redirect(method = "doItemUse", at = @At(value = "FIELD", target = "Lnet/minecraft/client/MinecraftClient;crosshairTarget:Lnet/minecraft/util/hit/HitResult;", ordinal = 1))
+    private HitResult doItemUseMinecraftClientCrosshairTargetProxy(MinecraftClient client) {
+        if (ModuleManager.INSTANCE.get(AutoEat.class).rightClickThings()) return client.crosshairTarget;
+        return null;
     }
 
     @Override
