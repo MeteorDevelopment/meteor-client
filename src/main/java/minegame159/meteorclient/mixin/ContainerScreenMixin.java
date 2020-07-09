@@ -17,6 +17,7 @@ import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.DefaultedList;
 import net.minecraft.util.Identifier;
+import org.lwjgl.opengl.GL11;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -64,6 +65,7 @@ public class ContainerScreenMixin {
     private void draw(DefaultedList<ItemStack> itemStacks, int mouseX, int mouseY) {
         GlStateManager.disableLighting();
         GlStateManager.disableDepthTest();
+        GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
 
         mc = MinecraftClient.getInstance();
         drawBackground(mouseX + 6, mouseY + 6);
