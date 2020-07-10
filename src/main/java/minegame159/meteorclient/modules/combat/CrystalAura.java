@@ -17,7 +17,10 @@ import net.minecraft.block.Blocks;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.decoration.EnderCrystalEntity;
+import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.item.AxeItem;
 import net.minecraft.item.Items;
+import net.minecraft.item.SwordItem;
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.Hand;
@@ -106,6 +109,13 @@ public class CrystalAura extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> antiWeakness = sgGeneral.add(new BoolSetting.Builder()
+            .name("anti-weakness")
+            .description("Switches to tools when you have weakness")
+            .defaultValue(true)
+            .build()
+    );
+
     public CrystalAura() {
         super(Category.Combat, "crystal-aura", "Places and breaks end crystals automatically");
     }
@@ -166,6 +176,14 @@ public class CrystalAura extends ToggleModule {
                         < maxDamage.get()))
                 .min(Comparator.comparingDouble(o -> o.distanceTo(mc.player)))
                 .ifPresent(entity -> {
+                    int preSlot = mc.player.inventory.selectedSlot;
+                    if(mc.player.getActiveStatusEffects().containsKey(StatusEffects.WEAKNESS)){
+                        for(int i = 0; i < 9; i++){
+                            if(mc.player.inventory.getInvStack(i).getItem() instanceof SwordItem || mc.player.inventory.getInvStack(i).getItem() instanceof AxeItem){
+                                mc.player.inventory.selectedSlot = i;
+                            }
+                        }
+                    }
                     double deltaX = entity.x - mc.player.x;
                     double deltaZ = entity.z - mc.player.z;
                     double deltaY = entity.y - (mc.player.y + mc.player.getEyeHeight(mc.player.getPose()));
@@ -176,6 +194,7 @@ public class CrystalAura extends ToggleModule {
                     mc.player.networkHandler.sendPacket(packet);
                     mc.interactionManager.attackEntity(mc.player, entity);
                     mc.player.swingHand(Hand.MAIN_HAND);
+                    mc.player.inventory.selectedSlot = preSlot;
                 });
     }, EventPriority.HIGH);
 
