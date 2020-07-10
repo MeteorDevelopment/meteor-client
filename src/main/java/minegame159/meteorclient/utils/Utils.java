@@ -43,6 +43,8 @@ import java.util.stream.Collectors;
 public class Utils {
     public static MinecraftClient mc;
 
+    public static boolean blockRenderingBlockEntitiesInXray;
+
     private static final Random random = new Random();
     private static final Vec3d eyesPos = new Vec3d(0, 0, 0);
     private static final Vec3d vec1 = new Vec3d(0, 0, 0);
