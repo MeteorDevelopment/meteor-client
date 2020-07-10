@@ -15,6 +15,7 @@ import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.DamageCalcUtils;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.decoration.EnderCrystalEntity;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
@@ -38,7 +39,7 @@ public class CrystalAura extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgPlace = settings.createGroup("Place");
 
-    private final Setting<Integer> placeRange = sgGeneral.add(new IntSetting.Builder()
+    private final Setting<Double> placeRange = sgGeneral.add(new DoubleSetting.Builder()
             .name("place-range")
             .description("The distance in a single direction the crystals get placed.")
             .defaultValue(3)
@@ -47,7 +48,7 @@ public class CrystalAura extends ToggleModule {
             .build()
     );
 
-    private final Setting<Integer> breakRange = sgGeneral.add(new IntSetting.Builder()
+    private final Setting<Double> breakRange = sgGeneral.add(new DoubleSetting.Builder()
             .name("break-range")
             .description("The distance in a single direction the crystals get broken.")
             .defaultValue(3)
@@ -63,6 +64,13 @@ public class CrystalAura extends ToggleModule {
             .build()
     );
 
+    private final Setting<Mode> breakMode = sgGeneral.add(new EnumSetting.Builder<Mode>()
+            .name("break-mode")
+            .description("The way crystals are broken.")
+            .defaultValue(Mode.safe)
+            .build()
+    );
+
     private final Setting<Double> minDamage = sgPlace.add(new DoubleSetting.Builder()
             .name("min-damage")
             .description("The minimum damage the crystal will place")
@@ -74,13 +82,6 @@ public class CrystalAura extends ToggleModule {
             .name("max-damage")
             .description("The maximum self-damage allowed")
             .defaultValue(3)
-            .build()
-    );
-
-    private final Setting<Boolean> breakMode = sgGeneral.add(new BoolSetting.Builder()
-            .name("anti-suicide")
-            .description("The way the crystals are broken")
-            .defaultValue(true)
             .build()
     );
 
@@ -157,8 +158,9 @@ public class CrystalAura extends ToggleModule {
         Streams.stream(mc.world.getEntities())
                 .filter(entity -> entity instanceof EnderCrystalEntity)
                 .filter(entity -> entity.distanceTo(mc.player) <= breakRange.get())
+                .filter(Entity::isAlive)
                 .filter(entity -> ignoreWalls.get() || mc.player.canSee(entity))
-                .filter(entity -> !breakMode.get() || (mc.player.getHealth() + mc.player.getAbsorptionAmount()
+                .filter(entity -> !(breakMode.get() == Mode.safe) || (mc.player.getHealth() + mc.player.getAbsorptionAmount()
                         - DamageCalcUtils.resistanceReduction(mc.player, DamageCalcUtils.blastProtReduction(mc.player, DamageCalcUtils.armourCalc(mc.player, DamageCalcUtils.getDamageMultiplied(DamageCalcUtils.crystalDamage(mc.player, entity.getPos())))))
                         > minHealth.get() && DamageCalcUtils.resistanceReduction(mc.player, DamageCalcUtils.blastProtReduction(mc.player, DamageCalcUtils.armourCalc(mc.player, DamageCalcUtils.getDamageMultiplied(DamageCalcUtils.crystalDamage(mc.player, entity.getPos())))))
                         < maxDamage.get()))
@@ -192,10 +194,10 @@ public class CrystalAura extends ToggleModule {
         return validBlocks;
     }
 
-    private List<BlockPos> getRange(BlockPos player, int range){
+    private List<BlockPos> getRange(BlockPos player, double range){
         List<BlockPos> allBlocks = new ArrayList<>();
-        for(int i = player.getX() - range; i < player.getX() + range; i++){
-            for(int j = player.getZ() - range; j < player.getZ() + range; j++){
+        for(double i = player.getX() - range; i < player.getX() + range; i++){
+            for(double j = player.getZ() - range; j < player.getZ() + range; j++){
                 for(int k = player.getY() - 3; k < player.getY() + 3; k++){
                     BlockPos x = new BlockPos(i, k, j);
                     allBlocks.add(x);
