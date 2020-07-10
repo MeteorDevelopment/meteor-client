@@ -1,9 +1,11 @@
 package minegame159.meteorclient.mixin;
 
+import minegame159.meteorclient.commands.commands.Ignore;
 import minegame159.meteorclient.mixininterface.IChatHudLine;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.misc.AntiSpam;
 import minegame159.meteorclient.modules.misc.LongerChat;
+import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.hud.ChatHud;
 import net.minecraft.client.gui.hud.ChatHudLine;
@@ -63,6 +65,12 @@ public abstract class ChatHudMixin {
                 }
 
                 return;
+            }
+        }
+
+        for(String name: Ignore.ignoredPlayers){
+            if(!message.toString().contains("<" + name + ">")){
+                Utils.sendMessage(message.toString());
             }
         }
 
