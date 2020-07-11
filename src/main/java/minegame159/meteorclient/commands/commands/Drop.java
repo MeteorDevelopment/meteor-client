@@ -30,21 +30,21 @@ public class Drop extends Command {
                 mc.player.dropSelectedItem(true);
                 break;
             case "offhand":
-                InvUtils.clickSlot(InvUtils.OFFHAND_SLOT, 1, SlotActionType.THROW);
+                InvUtils.clickSlot(InvUtils.invIndexToSlotId(InvUtils.OFFHAND_SLOT), 1, SlotActionType.THROW);
                 break;
             case "hotbar":
                 for (int i = 0; i < 9; i++) {
-                    InvUtils.clickSlot(i, 1, SlotActionType.THROW);
+                    InvUtils.clickSlot(InvUtils.invIndexToSlotId(i), 1, SlotActionType.THROW);
                 }
                 break;
             case "inventory":
                 for (int i = 9; i < mc.player.inventory.main.size(); i++) {
-                    InvUtils.clickSlot(i, 1, SlotActionType.THROW);
+                    InvUtils.clickSlot(InvUtils.invIndexToSlotId(i), 1, SlotActionType.THROW);
                 }
                 break;
             case "all":
                 for (int i = 0; i < mc.player.inventory.main.size(); i++) {
-                    InvUtils.clickSlot(i, 1, SlotActionType.THROW);
+                    InvUtils.clickSlot(InvUtils.invIndexToSlotId(i), 1, SlotActionType.THROW);
                 }
                 break;
             default:
