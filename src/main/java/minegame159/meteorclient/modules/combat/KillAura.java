@@ -128,7 +128,7 @@ public class KillAura extends ToggleModule {
         if (entity == mc.player || entity == mc.cameraEntity || entity.getUuid().equals(mc.player.getUuid()) || !entities.get().contains(entity.getType())) return false;
 
         if (entity instanceof PlayerEntity) {
-            if (friends.get() || entity.getUuid() == mc.player.getUuid()) return true;
+            if (friends.get()) return true;
             return FriendManager.INSTANCE.attack((PlayerEntity) entity);
         }
 

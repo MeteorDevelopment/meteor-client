@@ -23,8 +23,8 @@ public class CommandManager {
         addCommand(new Baritone());
         addCommand(new Reload());
         addCommand(new Dismount());
-        addCommand(new Book());
         addCommand(new Say());
+        addCommand(new Ignore());
     }
 
     public static Command get(String name) {
