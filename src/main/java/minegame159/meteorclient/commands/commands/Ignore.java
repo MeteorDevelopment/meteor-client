@@ -40,7 +40,7 @@ public class Ignore extends Command {
                 BufferedReader reader = new BufferedReader(new FileReader(file));
 
                 String line;
-                while ((line = reader.readLine().split(" ")[0]) != null) Ignore.ignoredPlayers.add(line);
+                while ((line = reader.readLine()) != null) Ignore.ignoredPlayers.add(line.split(" ")[0]);
 
                 reader.close();
             } catch (IOException ignored) {

@@ -25,6 +25,7 @@ public class CommandManager {
         addCommand(new Dismount());
         addCommand(new Say());
         addCommand(new Ignore());
+        addCommand(new Drop());
     }
 
     public static Command get(String name) {
