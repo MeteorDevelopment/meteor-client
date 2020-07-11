@@ -8,6 +8,7 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.accountsfriends.AccountManager;
 import minegame159.meteorclient.accountsfriends.FriendManager;
 import minegame159.meteorclient.commands.CommandManager;
+import minegame159.meteorclient.commands.commands.Ignore;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.gui.GuiThings;
 import minegame159.meteorclient.gui.screens.topbar.TopBarModules;
@@ -29,6 +30,8 @@ import org.lwjgl.glfw.GLFW;
 
 import java.awt.*;
 import java.io.*;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class MeteorClient implements ClientModInitializer, Listenable {
     public static MeteorClient INSTANCE;
@@ -69,6 +72,28 @@ public class MeteorClient implements ClientModInitializer, Listenable {
 
         load();
 
+        File file = new File(MeteorClient.FOLDER, "ignored_players.txt");
+        if(file.exists()){
+            try {
+                BufferedReader reader = new BufferedReader(new FileReader(file));
+
+                String line;
+                while ((line = reader.readLine().split(" ")[0]) != null) Ignore.ignoredPlayers.add(line);
+
+                reader.close();
+            } catch (IOException ignored) {
+                Ignore.ignoredPlayers = new ArrayList<>();
+            }
+        }else{
+            try {
+                BufferedWriter writer = new BufferedWriter(new FileWriter(new File(MeteorClient.FOLDER, "ignored_players.txt")));
+                writer.write("Meteor on Crack!");
+                writer.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
         EVENT_BUS.subscribe(this);
         Runtime.getRuntime().addShutdownHook(new Thread(this::stop));
     }
@@ -87,6 +112,13 @@ public class MeteorClient implements ClientModInitializer, Listenable {
         FriendManager.INSTANCE.save();
         MacroManager.INSTANCE.save();
         AccountManager.INSTANCE.save();
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter(new File(MeteorClient.FOLDER, "ignored_players.txt")));
+            for(String name: Ignore.ignoredPlayers){writer.write(name); writer.write(" OwO\n");}
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void openClickGui() {
