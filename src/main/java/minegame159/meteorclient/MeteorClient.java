@@ -71,28 +71,7 @@ public class MeteorClient implements ClientModInitializer, Listenable {
         Capes.init();
 
         load();
-
-        File file = new File(MeteorClient.FOLDER, "ignored_players.txt");
-        if(file.exists()){
-            try {
-                BufferedReader reader = new BufferedReader(new FileReader(file));
-
-                String line;
-                while ((line = reader.readLine().split(" ")[0]) != null) Ignore.ignoredPlayers.add(line);
-
-                reader.close();
-            } catch (IOException ignored) {
-                Ignore.ignoredPlayers = new ArrayList<>();
-            }
-        }else{
-            try {
-                BufferedWriter writer = new BufferedWriter(new FileWriter(new File(MeteorClient.FOLDER, "ignored_players.txt")));
-                writer.write("Meteor on Crack!");
-                writer.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+        Ignore.load();
 
         EVENT_BUS.subscribe(this);
         Runtime.getRuntime().addShutdownHook(new Thread(this::stop));
@@ -112,13 +91,8 @@ public class MeteorClient implements ClientModInitializer, Listenable {
         FriendManager.INSTANCE.save();
         MacroManager.INSTANCE.save();
         AccountManager.INSTANCE.save();
-        try {
-            BufferedWriter writer = new BufferedWriter(new FileWriter(new File(MeteorClient.FOLDER, "ignored_players.txt")));
-            for(String name: Ignore.ignoredPlayers){writer.write(name); writer.write(" OwO\n");}
-            writer.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
+        Ignore.save();
     }
 
     private void openClickGui() {
