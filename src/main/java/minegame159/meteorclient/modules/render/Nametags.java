@@ -143,9 +143,14 @@ public class Nametags extends ToggleModule {
             scale *= dist/15;
         }
 
-        // Get ping
-        PlayerListEntry playerListEntry = mc.getNetworkHandler().getPlayerListEntry(entity.getUuid());
-        int ping = playerListEntry.getLatency();
+        int ping;
+        try {
+            // Get ping
+            PlayerListEntry playerListEntry = mc.getNetworkHandler().getPlayerListEntry(entity.getUuid());
+            ping = playerListEntry.getLatency();
+        }catch(NullPointerException ignored){
+            ping = 0;
+        }
 
         // Compute health things
         float absorption = entity.getAbsorptionAmount();
