@@ -1,9 +1,12 @@
 package minegame159.meteorclient.mixin;
 
+import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.render.BlockSelection;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.VisibleRegion;
 import net.minecraft.client.render.WorldRenderer;
+import net.minecraft.util.hit.HitResult;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -19,5 +22,10 @@ public class WorldRendererMixin {
     @Inject(method = "renderEntities", at = @At("TAIL"))
     private void onRenderEntitiesTail(Camera camera, VisibleRegion visibleRegion, float tickDelta, CallbackInfo info) {
         Utils.blockRenderingBlockEntitiesInXray = false;
+    }
+
+    @Inject(method = "drawHighlightedBlockOutline", at = @At("HEAD"), cancellable = true)
+    private void onDrawHighlightedBlockOutline(Camera camera, HitResult hit, int renderPass, CallbackInfo info) {
+        if (ModuleManager.INSTANCE.isActive(BlockSelection.class)) info.cancel();
     }
 }
