@@ -70,6 +70,7 @@ public class Freecam extends ToggleModule {
     @EventHandler
     private Listener<TickEvent> onTick = new Listener<>(event -> {
         camera.setVelocity(0, 0, 0);
+        if(mc.player == null) return;
 
         camera.yaw = mc.player.yaw;
         camera.headYaw = mc.player.headYaw;
