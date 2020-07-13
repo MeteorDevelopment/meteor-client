@@ -8,7 +8,9 @@ import net.minecraft.block.Blocks;
 import net.minecraft.util.Pair;
 import net.minecraft.util.registry.Registry;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.function.Consumer;
 
 public class BlockListSettingScreen extends WindowScreen {
@@ -46,9 +48,7 @@ public class BlockListSettingScreen extends WindowScreen {
             plus.action = plus1 -> {
                 if (!setting.get().contains(block)) {
                     setting.get().add(block);
-                    setting.changed();
-                    clear();
-                    initWidgets();
+                    reload();
                 }
             };
 
@@ -78,13 +78,22 @@ public class BlockListSettingScreen extends WindowScreen {
             WMinus minus = table2.add(new WMinus()).getWidget();
             minus.action = minus1 -> {
                 if (setting.get().remove(block)) {
-                    setting.changed();
-                    clear();
-                    initWidgets();
+                    reload();
                 }
             };
 
             table2.row();
         }
+    }
+
+    private void reload() {
+        double verticalScroll = window.verticalScroll;
+
+        setting.changed();
+        clear();
+        initWidgets();
+
+        window.getRoot().layout();
+        window.moveWidgets(0, verticalScroll);
     }
 }
