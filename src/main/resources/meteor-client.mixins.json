@@ -63,7 +63,8 @@
     "TerrainRenderContextMixin",
     "BlockEntityRenderDispatcherMixin",
     "WorldRendererMixin",
-    "BlockEntityTypeMixin"
+    "BlockEntityTypeMixin",
+    "EntityRenderDispatcherMixin"
   ],
   "injectors": {
     "defaultRequire": 1
