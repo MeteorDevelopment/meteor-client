@@ -64,7 +64,9 @@
     "BlockEntityRenderDispatcherMixin",
     "WorldRendererMixin",
     "BlockEntityTypeMixin",
-    "EntityRenderDispatcherMixin"
+    "EntityRenderDispatcherMixin",
+    "EnchantingTableBlockEntityRendererMixin",
+    "SignBlockEntityRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1
