@@ -121,6 +121,20 @@ public class NoRender extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> noEnchTableBook = sgGeneral.add(new BoolSetting.Builder()
+            .name("no-ench-table-book")
+            .description("Disables book above enchanting table.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> noSignText = sgGeneral.add(new BoolSetting.Builder()
+            .name("no-sign-text")
+            .description("Disables text on signs.")
+            .defaultValue(false)
+            .build()
+    );
+
     public NoRender() {
         super(Category.Render, "no-render", "Disables some things from rendering.");
     }
@@ -187,5 +201,13 @@ public class NoRender extends ToggleModule {
 
     public boolean noItems() {
         return isActive() && noItems.get();
+    }
+
+    public boolean noEnchTableBook() {
+        return isActive() && noEnchTableBook.get();
+    }
+
+    public boolean noSignText() {
+        return isActive() && noSignText.get();
     }
 }
