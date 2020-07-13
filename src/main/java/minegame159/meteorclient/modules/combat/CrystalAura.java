@@ -13,6 +13,7 @@ import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.DamageCalcUtils;
+import minegame159.meteorclient.utils.InvUtils;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.entity.Entity;
@@ -74,6 +75,13 @@ public class CrystalAura extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> autoSwitch = sgGeneral.add(new BoolSetting.Builder()
+            .name("auto-switch")
+            .description("Switches to crystals for you.")
+            .defaultValue(false)
+            .build()
+    );
+
     private final Setting<Double> minDamage = sgPlace.add(new DoubleSetting.Builder()
             .name("min-damage")
             .description("The minimum damage the crystal will place")
@@ -123,7 +131,7 @@ public class CrystalAura extends ToggleModule {
     @EventHandler
     private Listener<TickEvent> onTick = new Listener<>(event -> {
         if ((mc.player.getHealth() + mc.player.getAbsorptionAmount()) <= minHealth.get() && mode.get() != Mode.suicide) return;
-        if(place.get() && (mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL)) return;
+        if(place.get() && ((mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL) && !autoSwitch.get())) return;
         if(place.get()) {
             ListIterator<BlockPos> validBlocks = Objects.requireNonNull(findValidBlocks()).listIterator();
             Iterator<AbstractClientPlayerEntity> validEntities = mc.world.getPlayers().stream().filter(entityPlayer -> !FriendManager.INSTANCE.isTrusted(entityPlayer)).filter(entityPlayer -> !entityPlayer.getDisplayName().equals(mc.player.getDisplayName())).filter(entityPlayer -> Math.sqrt(mc.player.squaredDistanceTo(new Vec3d(entityPlayer.x, entityPlayer.y, entityPlayer.z))) <= 10).collect(Collectors.toList()).iterator();
@@ -152,6 +160,12 @@ public class CrystalAura extends ToggleModule {
                         && (selfDamage < maxDamage.get() || mode.get() == Mode.suicide) && damage > minDamage.get()) {
                     bestBlock = i;
                     break;
+                }
+            }
+            if(autoSwitch.get() && mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL){
+                int slot = InvUtils.findItemWithCount(Items.END_CRYSTAL).slot;
+                if(slot != -1 && slot < 9){
+                    mc.player.inventory.selectedSlot = slot;
                 }
             }
             if (!bestBlock.equals(mc.player.getBlockPos())) {
