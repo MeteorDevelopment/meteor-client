@@ -35,12 +35,12 @@ public class AutoMountBypassDupe extends ToggleModule {
     private AbstractDonkeyEntity entity;
     private boolean sneak = false;
 
-    private List<Integer> slotsToMove = new ArrayList<>();
-    private List<Integer> slotsToThrow = new ArrayList<>();
+    private final List<Integer> slotsToMove = new ArrayList<>();
+    private final List<Integer> slotsToThrow = new ArrayList<>();
 
-    private SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private Setting<Boolean> shulkersOnly = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> shulkersOnly = sgGeneral.add(new BoolSetting.Builder()
             .name("shulker-only")
             .description("Only moves shulker boxes into the inventory")
             .defaultValue(false)
@@ -85,7 +85,6 @@ public class AutoMountBypassDupe extends ToggleModule {
                 }else{
                     Utils.sendMessage("#redCannot find chest in hotbar. Disabling!");
                     this.toggle();
-                    return;
                 }
             }
         }else if(slots == 0){
