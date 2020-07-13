@@ -114,6 +114,13 @@ public class NoRender extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> noItems = sgGeneral.add(new BoolSetting.Builder()
+            .name("no-item")
+            .description("Disables item entities.")
+            .defaultValue(false)
+            .build()
+    );
+
     public NoRender() {
         super(Category.Render, "no-render", "Disables some things from rendering.");
     }
@@ -176,5 +183,9 @@ public class NoRender extends ToggleModule {
 
     public boolean noNausea() {
         return isActive() && noNausea.get();
+    }
+
+    public boolean noItems() {
+        return isActive() && noItems.get();
     }
 }
