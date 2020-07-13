@@ -54,23 +54,34 @@ public class AutoGap extends ToggleModule {
 
     @Override
     public void onDeactivate() {
-        ((IKeyBinding) mc.options.keyUse).setPressed(false);
+        if(wasThis) {
+            ((IKeyBinding) mc.options.keyUse).setPressed(false);
+            wasThis = false;
+        }
     }
 
     private int prevSlot;
     private boolean wasKillActive = false;
     private boolean wasCrystalActive = false;
+    private boolean wasThis = false;
+    private boolean wasAutoEatOn = false;
 
     @EventHandler
     private Listener<TickEvent> onTick = new Listener<>(event -> {
-        if(mc.options.keyUse.isPressed() && ModuleManager.INSTANCE.get(AutoEat.class).isActive() && preferAutoEat.get()){
+        if(mc.options.keyUse.isPressed() && !wasThis && ModuleManager.INSTANCE.get(AutoEat.class).isActive() && preferAutoEat.get()){
             return;
-        }else if(mc.options.keyUse.isPressed() && ModuleManager.INSTANCE.get(AutoEat.class).isActive() && !preferAutoEat.get()){
+        }else if(mc.options.keyUse.isPressed() && wasThis && ModuleManager.INSTANCE.get(AutoEat.class).isActive() && !preferAutoEat.get()){
             ModuleManager.INSTANCE.get(AutoEat.class).toggle();
+            wasAutoEatOn = true;
         }
         if(mc.player.getActiveStatusEffects().containsKey(StatusEffects.ABSORPTION) && mc.player.getActiveStatusEffects().containsKey(StatusEffects.REGENERATION)){
             if(mc.options.keyUse.isPressed()){
                 ((IKeyBinding) mc.options.keyUse).setPressed(false);
+                wasThis = false;
+                if(wasAutoEatOn){
+                    ModuleManager.INSTANCE.get(AutoEat.class).toggle();
+                    wasAutoEatOn = false;
+                }
                 if(wasKillActive){
                     ModuleManager.INSTANCE.get(KillAura.class).toggle();
                     wasKillActive = false;
@@ -112,6 +123,7 @@ public class AutoGap extends ToggleModule {
                 }
             }
             ((IKeyBinding) mc.options.keyUse).setPressed(true);
+            wasThis = true;
         }
     });
 }
