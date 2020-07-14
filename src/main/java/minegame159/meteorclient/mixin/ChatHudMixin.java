@@ -38,6 +38,13 @@ public abstract class ChatHudMixin {
             }
         }
 
+        // Ignore players
+        for (String name : Ignore.ignoredPlayers) {
+            if (message.toString().contains("<" + name + ">")) {
+                return;
+            }
+        }
+
         // Anti Spam
         AntiSpam antiSpam = ModuleManager.INSTANCE.get(AntiSpam.class);
         for (int i = 0; i < antiSpam.getDepth(); i++) {
@@ -52,6 +59,37 @@ public abstract class ChatHudMixin {
                 return;
             }
         }
+
+        // Normal things
+        if (messageId != 0) {
+            this.removeMessage(messageId);
+        }
+
+        int i = MathHelper.floor((double)this.getWidth() / this.getChatScale());
+        List<Text> list = Texts.wrapLines(message, i, this.client.textRenderer, false, false);
+        boolean bl2 = this.isChatFocused();
+
+        Text text;
+        for(Iterator var8 = list.iterator(); var8.hasNext(); this.visibleMessages.add(0, new ChatHudLine(timestamp, text, messageId))) {
+            text = (Text)var8.next();
+            if (bl2 && this.scrolledLines > 0) {
+                this.field_2067 = true;
+                this.scroll(1.0D);
+            }
+        }
+
+        while(this.visibleMessages.size() > ModuleManager.INSTANCE.get(LongerChat.class).getMaxLineCount()) {
+            this.visibleMessages.remove(this.visibleMessages.size() - 1);
+        }
+
+        if (!bl) {
+            this.messages.add(0, new ChatHudLine(timestamp, message, messageId));
+
+            while(this.messages.size() > ModuleManager.INSTANCE.get(LongerChat.class).getMaxLineCount()) {
+                this.messages.remove(this.messages.size() - 1);
+            }
+        }
+
     }
 
     private boolean checkMsg(String newMsg, int newTimestamp, int newId, int msgI) {
