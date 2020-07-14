@@ -4,16 +4,11 @@ import minegame159.meteorclient.commands.commands.Ignore;
 import minegame159.meteorclient.mixininterface.IChatHudLine;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.misc.AntiSpam;
-import minegame159.meteorclient.modules.misc.LongerChat;
-import minegame159.meteorclient.utils.Utils;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.hud.ChatHud;
 import net.minecraft.client.gui.hud.ChatHudLine;
-import net.minecraft.client.util.Texts;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import net.minecraft.util.math.MathHelper;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -21,36 +16,27 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Mixin(ChatHud.class)
 public abstract class ChatHudMixin {
-    @Shadow public abstract void removeMessage(int messageId);
-
-    @Shadow public abstract double getChatScale();
-
-    @Shadow @Final private MinecraftClient client;
-
-    @Shadow public abstract boolean isChatFocused();
-
     @Shadow @Final private List<ChatHudLine> visibleMessages;
 
     @Shadow public abstract int getWidth();
-
-    @Shadow private int scrolledLines;
-
-    @Shadow private boolean field_2067;
-
-    @Shadow public abstract void scroll(double amount);
 
     @Shadow @Final private List<ChatHudLine> messages;
 
     @Inject(at = @At("HEAD"), method = "addMessage(Lnet/minecraft/text/Text;IIZ)V", cancellable = true)
     private void onAddMessage(Text message, int messageId, int timestamp, boolean bl, CallbackInfo info) {
-        info.cancel();
+        // Ignore players
+        for (String name : Ignore.ignoredPlayers) {
+            if (message.toString().contains("<" + name + ">")) {
+                info.cancel();
+                return;
+            }
+        }
 
         // Ignore players
         for (String name : Ignore.ignoredPlayers) {
@@ -69,6 +55,7 @@ public abstract class ChatHudMixin {
                     messages.add(0, msg);
                 }
 
+                info.cancel();
                 return;
             }
         }
@@ -102,6 +89,7 @@ public abstract class ChatHudMixin {
                 this.messages.remove(this.messages.size() - 1);
             }
         }
+
     }
 
     private boolean checkMsg(String newMsg, int newTimestamp, int newId, int msgI) {
