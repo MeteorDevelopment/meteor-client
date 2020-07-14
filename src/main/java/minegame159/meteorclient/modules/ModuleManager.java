@@ -317,5 +317,6 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new Timer());
         addModule(new Suffix());
         addModule(new UwUAura());
+        addModule(new AutoMountBypassDupe());
     }
 }
