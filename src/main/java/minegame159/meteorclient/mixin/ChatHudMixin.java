@@ -48,7 +48,7 @@ public abstract class ChatHudMixin {
 
     @Shadow @Final private List<ChatHudLine> messages;
 
-    @Shadow public abstract void addMessage(Text message);
+    private boolean ignoreIgnoredPlayers;
 
     @Inject(at = @At("HEAD"), method = "addMessage(Lnet/minecraft/text/Text;IIZ)V", cancellable = true)
     private void onAddMessage(Text message, int messageId, int timestamp, boolean bl, CallbackInfo info) {
@@ -68,9 +68,13 @@ public abstract class ChatHudMixin {
             }
         }
 
-        for(String name: Ignore.ignoredPlayers){
-            if(!message.toString().contains("<" + name + ">")){
-                Utils.sendMessage(message.toString());
+        if (!ignoreIgnoredPlayers) {
+            for (String name : Ignore.ignoredPlayers) {
+                if (!message.toString().contains("<" + name + ">")) {
+                    ignoreIgnoredPlayers = true;
+                    Utils.sendMessage(message.toString());
+                    ignoreIgnoredPlayers = false;
+                }
             }
         }
 
