@@ -50,11 +50,10 @@ public abstract class ChatHudMixin {
 
     @Inject(at = @At("HEAD"), method = "addMessage(Lnet/minecraft/text/Text;IIZ)V", cancellable = true)
     private void onAddMessage(Text message, int messageId, int timestamp, boolean bl, CallbackInfo info) {
-        info.cancel();
-
         // Ignore players
         for (String name : Ignore.ignoredPlayers) {
             if (message.toString().contains("<" + name + ">")) {
+                info.cancel();
                 return;
             }
         }
@@ -69,37 +68,8 @@ public abstract class ChatHudMixin {
                     messages.add(0, msg);
                 }
 
+                info.cancel();
                 return;
-            }
-        }
-
-        // Normal things
-        if (messageId != 0) {
-            this.removeMessage(messageId);
-        }
-
-        int i = MathHelper.floor((double)this.getWidth() / this.getChatScale());
-        List<Text> list = Texts.wrapLines(message, i, this.client.textRenderer, false, false);
-        boolean bl2 = this.isChatFocused();
-
-        Text text;
-        for(Iterator var8 = list.iterator(); var8.hasNext(); this.visibleMessages.add(0, new ChatHudLine(timestamp, text, messageId))) {
-            text = (Text)var8.next();
-            if (bl2 && this.scrolledLines > 0) {
-                this.field_2067 = true;
-                this.scroll(1.0D);
-            }
-        }
-
-        while(this.visibleMessages.size() > ModuleManager.INSTANCE.get(LongerChat.class).getMaxLineCount()) {
-            this.visibleMessages.remove(this.visibleMessages.size() - 1);
-        }
-
-        if (!bl) {
-            this.messages.add(0, new ChatHudLine(timestamp, message, messageId));
-
-            while(this.messages.size() > ModuleManager.INSTANCE.get(LongerChat.class).getMaxLineCount()) {
-                this.messages.remove(this.messages.size() - 1);
             }
         }
     }
