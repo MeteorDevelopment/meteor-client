@@ -22,7 +22,7 @@ public class Velocity extends ToggleModule {
 
     private final Setting<Double> vertical = sg.add(new DoubleSetting.Builder()
             .name("vertical-multiplier")
-            .description("How much velocity to apply certically.")
+            .description("How much velocity to apply vertically.")
             .defaultValue(0)
             .min(0)
             .max(1)
