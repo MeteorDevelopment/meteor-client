@@ -16,7 +16,9 @@ public class MountBypass extends ToggleModule {
     }
 
     @EventHandler
-    private final Listener<SendPacketEvent> onSendPacket = new Listener<>(event -> {
+    private final Listener<SendPacketEvent> onSendPacket = new Listener<>(this::onSendPacket);
+
+    public void onSendPacket(SendPacketEvent event) {
         if (dontCancel) {
             dontCancel = false;
             return;
@@ -28,7 +30,7 @@ public class MountBypass extends ToggleModule {
         if (packet.getType() == PlayerInteractEntityC2SPacket.InteractionType.INTERACT_AT && packet.getEntity(mc.world) instanceof AbstractDonkeyEntity) {
             event.cancel();
         }
-    });
+    }
 
     public void dontCancel() {
         if (isActive()) dontCancel = true;
