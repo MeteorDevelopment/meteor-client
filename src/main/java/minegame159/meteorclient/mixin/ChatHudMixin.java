@@ -48,11 +48,16 @@ public abstract class ChatHudMixin {
 
     @Shadow @Final private List<ChatHudLine> messages;
 
-    private boolean ignoreIgnoredPlayers;
-
     @Inject(at = @At("HEAD"), method = "addMessage(Lnet/minecraft/text/Text;IIZ)V", cancellable = true)
     private void onAddMessage(Text message, int messageId, int timestamp, boolean bl, CallbackInfo info) {
         info.cancel();
+
+        // Ignore players
+        for (String name : Ignore.ignoredPlayers) {
+            if (message.toString().contains("<" + name + ">")) {
+                return;
+            }
+        }
 
         // Anti Spam
         AntiSpam antiSpam = ModuleManager.INSTANCE.get(AntiSpam.class);
@@ -65,16 +70,6 @@ public abstract class ChatHudMixin {
                 }
 
                 return;
-            }
-        }
-
-        if (!ignoreIgnoredPlayers) {
-            for (String name : Ignore.ignoredPlayers) {
-                if (!message.toString().contains("<" + name + ">")) {
-                    ignoreIgnoredPlayers = true;
-                    Utils.sendMessage(message.toString());
-                    ignoreIgnoredPlayers = false;
-                }
             }
         }
 
