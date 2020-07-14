@@ -1,7 +1,7 @@
 package minegame159.meteorclient.modules.player;
 
 //Created by squidoodly 8/05/2020
-//Updated by squidoodly 15/06/2020
+//Updated by squidoodly 14/07/2020
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
@@ -93,14 +93,58 @@ public class AutoReplenish extends ToggleModule {
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
         if(mc.currentScreen instanceof ContainerScreen) return;
 
-        // MainHand, stackable items
-        //for (int i = 0; i < 9; i++) {
-            replenishStackableItems(mc.player.getMainHandStack(), mc.player.inventory.selectedSlot);
-        //}
+        // Hotbar, stackable items
+        for (int i = 0; i < 9; i++) {
+            ItemStack stack = mc.player.inventory.getInvStack(i);
+            InvUtils.FindItemResult result = InvUtils.findItemWithCount(stack.getItem());
+            if(result.slot < i && i != mc.player.inventory.selectedSlot) continue;
+            if(isUnstackable(stack.getItem()) || stack.getItem() == Items.AIR) continue;
+            if (stack.getCount() < amount.get() && (stack.getMaxCount() > amount.get() || stack.getCount() < stack.getMaxCount())) {
+                int slot = -1;
+                if (searchHotbar.get()) {
+                    for (int j = 0; j < 9; j++) {
+                        if (mc.player.inventory.getInvStack(j).getItem() == stack.getItem() && mc.player.inventory.selectedSlot != j && i != j) {
+                            slot = j;
+                            break;
+                        }
+                    }
+                }
+                if (slot == -1) {
+                    for (int j = 9; j < 45; j++) {
+                        if (mc.player.inventory.getInvStack(j).getItem() == stack.getItem()) {
+                            slot = j;
+                            break;
+                        }
+                    }
+                }
+                if(slot != -1) {
+                    moveItems(slot, i, true);
+                }
+            }
+        }
 
         // OffHand, stackable items
         if (offhand.get()) {
-            replenishStackableItems(mc.player.getOffHandStack(), InvUtils.OFFHAND_SLOT);
+            ItemStack stack = mc.player.getOffHandStack();
+            if(stack.getItem() == Items.AIR) return;
+            if(stack.getCount() < amount.get() && (stack.getMaxCount() > amount.get() || stack.getCount() < stack.getMaxCount())) {
+                int slot = -1;
+                for (int i = 9; i < 45; i++) {
+                    if (mc.player.inventory.getInvStack(i).getItem() == stack.getItem()) {
+                        slot = i;
+                        break;
+                    }
+                }
+                if (searchHotbar.get() && slot == -1) {
+                    for (int j = 0; j < 9; j++) {
+                        if (mc.player.inventory.getInvStack(j).getItem() == stack.getItem()) {
+                            slot = j;
+                            break;
+                        }
+                    }
+                }
+                moveItems(slot, InvUtils.OFFHAND_SLOT, true);
+            }
         }
 
         // MainHand, unstackable items
@@ -132,17 +176,6 @@ public class AutoReplenish extends ToggleModule {
             lastMainHand = lastOffHand = null;
         }
     });
-
-    private void replenishStackableItems(ItemStack itemStack, int i) {
-        if(itemStack.isEmpty() || !itemStack.isStackable() || excludedItems.get().contains(itemStack.getItem())) return;
-
-        if(itemStack.getCount() < amount.get() && (itemStack.getMaxCount() > amount.get() || itemStack.getCount() < itemStack.getMaxCount())) {
-            int slot = findSlot(itemStack.getItem(), i);
-            if(slot == -1) return;
-
-            moveItems(slot, i, true);
-        }
-    }
 
     private void moveItems(int from, int to, boolean stackable) {
         InvUtils.clickSlot(InvUtils.invIndexToSlotId(from), 0, SlotActionType.PICKUP);
