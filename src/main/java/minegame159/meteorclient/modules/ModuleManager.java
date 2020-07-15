@@ -243,6 +243,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new PotionSpoof());
         addModule(new LiquidInteract());
         addModule(new MountBypass());
+        addModule(new PacketMine());
     }
 
     private void initMovement() {
