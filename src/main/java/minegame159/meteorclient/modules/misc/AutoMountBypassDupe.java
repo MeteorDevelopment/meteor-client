@@ -66,18 +66,6 @@ public class AutoMountBypassDupe extends ToggleModule {
     private boolean sneak = false;
     private int timer;
 
-
-    private final List<Integer> slotsToMove = new ArrayList<>();
-    private final List<Integer> slotsToThrow = new ArrayList<>();
-
-    private final SettingGroup sgGeneral = settings.getDefaultGroup();
-
-    private final Setting<Boolean> shulkersOnly = sgGeneral.add(new BoolSetting.Builder()
-            .name("shulker-only")
-            .description("Only moves shulker boxes into the inventory")
-            .defaultValue(false)
-            .build());
-
     public AutoMountBypassDupe() {
         super(Category.Misc, "auto-mount-bypass-dupe", "Does the mount bypass dupe for you. Disable with esc.");
     }
