@@ -24,6 +24,7 @@ import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RayTraceContext;
 
+import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,6 +53,13 @@ public class KillAura extends ToggleModule {
             .name("entities")
             .description("Entities to attack.")
             .defaultValue(new ArrayList<>(0))
+            .build()
+    );
+
+    private final Setting<Boolean> onlyOnGround = sgGeneral.add(new BoolSetting.Builder()
+            .name("only-on-ground")
+            .description("Only attacks players that are on the ground (useful to bypass anti-cheats)")
+            .defaultValue(false)
             .build()
     );
 
@@ -157,6 +165,13 @@ public class KillAura extends ToggleModule {
         return true;
     }
 
+    private boolean isPlayerOnGround(Entity entity){
+        if (!onlyOnGround.get()) return true;
+        else if (onlyOnGround.get() && entity instanceof PlayerEntity && entity.onGround) return true;
+        else if (onlyOnGround.get() && entity instanceof PlayerEntity && !entity.onGround) return false;
+        else return onlyOnGround.get() && !(entity instanceof PlayerEntity);
+    }
+
     private boolean canSeeEntity(Entity entity) {
         if (ignoreWalls.get()) return true;
 
@@ -210,6 +225,7 @@ public class KillAura extends ToggleModule {
                 .filter(this::canAttackEntity)
                 .filter(this::canSeeEntity)
                 .filter(Entity::isAlive)
+                .filter(this::isPlayerOnGround)
                 .min(this::sort)
                 .ifPresent(tempEntity -> {
                     entity = tempEntity;
