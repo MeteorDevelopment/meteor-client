@@ -30,8 +30,6 @@ import org.lwjgl.glfw.GLFW;
 
 import java.awt.*;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
 
 public class MeteorClient implements ClientModInitializer, Listenable {
     public static MeteorClient INSTANCE;

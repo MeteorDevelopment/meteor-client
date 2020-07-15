@@ -1,8 +1,12 @@
 package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.misc.Nuker;
 import minegame159.meteorclient.modules.render.NoRender;
+import net.minecraft.block.BlockState;
 import net.minecraft.client.particle.*;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -21,5 +25,15 @@ public class ParticleManagerMixin {
         } else if (noRender.noTotem() && particle instanceof TotemParticle) {
             info.cancel();
         }
+    }
+
+    @Inject(method = "addBlockBreakParticles", at = @At("HEAD"), cancellable = true)
+    private void onAddBlockBreakParticles(BlockPos blockPos, BlockState state, CallbackInfo info) {
+        if (ModuleManager.INSTANCE.get(Nuker.class).noParticles()) info.cancel();
+    }
+
+    @Inject(method = "addBlockBreakingParticles", at = @At("HEAD"), cancellable = true)
+    private void onAddBlockBreakingParticles(BlockPos blockPos, Direction direction, CallbackInfo info) {
+        if (ModuleManager.INSTANCE.get(Nuker.class).noParticles()) info.cancel();
     }
 }
