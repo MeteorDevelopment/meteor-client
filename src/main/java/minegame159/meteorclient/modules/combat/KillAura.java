@@ -232,7 +232,7 @@ public class KillAura extends ToggleModule {
                     if (entity instanceof PlayerEntity && instaKill.get()) {
                         double damage = EnchantmentHelper.getLevel(Enchantments.SHARPNESS, mc.player.getMainHandStack()) > 0 ?
                                 (EnchantmentHelper.getLevel(Enchantments.SHARPNESS, mc.player.getMainHandStack()) * 0.5) + 0.5 : 0;
-                        if ((((PlayerEntity) entity).getHealth() + ((PlayerEntity) entity).getAbsorptionAmount()) -  damage <= 0) {
+                        if ((((PlayerEntity) entity).getHealth() + ((PlayerEntity) entity).getAbsorptionAmount()) - damage <= 0) {
                             if (rotate.get()) {
                                 ((IVec3d) vec3d1).set(entity.x, entity.y + entity.getHeight() / 2, entity.z);
                                 mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, vec3d1);
@@ -243,7 +243,7 @@ public class KillAura extends ToggleModule {
                             didHit = true;
                         }
                     }
-                    if(pauseOnCombat.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing() && !wasPathing){
+                    if (pauseOnCombat.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing() && !wasPathing) {
                         BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("pause");
                         wasPathing = true;
                     }
@@ -280,18 +280,19 @@ public class KillAura extends ToggleModule {
                 return;
             }
         }
+        if(entity != null) {
+            // Rotate
+            if (rotate.get()) {
+                ((IVec3d) vec3d1).set(entity.x, entity.y + entity.getHeight() / 2, entity.z);
+                mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, vec3d1);
+            }
 
-        // Rotate
-        if (rotate.get()) {
-            ((IVec3d) vec3d1).set(entity.x, entity.y + entity.getHeight() / 2, entity.z);
-            mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, vec3d1);
+            // Attack
+            mc.interactionManager.attackEntity(mc.player, entity);
+            mc.player.swingHand(Hand.MAIN_HAND);
+
+            // Set next random delay length
+            if (sgRandomDelay.isEnabled()) randomHitDelayTimer = (int) Math.round(Math.random() * randomDelayMax.get());
         }
-
-        // Attack
-        mc.interactionManager.attackEntity(mc.player, entity);
-        mc.player.swingHand(Hand.MAIN_HAND);
-
-        // Set next random delay length
-        if (sgRandomDelay.isEnabled()) randomHitDelayTimer = (int) Math.round(Math.random() * randomDelayMax.get());
     });
 }
