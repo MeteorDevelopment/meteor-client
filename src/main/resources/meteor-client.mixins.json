@@ -60,7 +60,14 @@
     "BookScreenMixin",
     "AbstractClientPlayerEntityMixin",
     "StatusEffectInstanceMixin",
-    "RenderTickCounterMixin"
+    "RenderTickCounterMixin",
+    "TerrainRenderContextMixin",
+    "BlockEntityRenderDispatcherMixin",
+    "WorldRendererMixin",
+    "BlockEntityTypeMixin",
+    "EntityRenderDispatcherMixin",
+    "EnchantingTableBlockEntityRendererMixin",
+    "SignBlockEntityRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

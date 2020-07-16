@@ -16,37 +16,41 @@ public class Blink extends ToggleModule {
         super(Category.Movement, "blink", "Suspends all motion updates while enabled.");
     }
 
-    private List<PlayerMoveC2SPacket> packets = new ArrayList<>();
+    private final List<PlayerMoveC2SPacket> packets = new ArrayList<>();
     private int timer = 0;
 
     @Override
     public void onDeactivate() {
-        packets.forEach(p -> mc.player.networkHandler.sendPacket(p));
-        packets.clear();
-        timer = 0;
+        synchronized (packets) {
+            packets.forEach(p -> mc.player.networkHandler.sendPacket(p));
+            packets.clear();
+            timer = 0;
+        }
     }
 
     @EventHandler
-    private Listener<TickEvent> onTick = new Listener<>(event -> timer++);
+    private final Listener<TickEvent> onTick = new Listener<>(event -> timer++);
 
     @EventHandler
-    private Listener<SendPacketEvent> onSendPacket = new Listener<>(event -> {
+    private final Listener<SendPacketEvent> onSendPacket = new Listener<>(event -> {
         if (!(event.packet instanceof PlayerMoveC2SPacket)) return;
         event.cancel();
 
-        PlayerMoveC2SPacket p = (PlayerMoveC2SPacket) event.packet;
-        PlayerMoveC2SPacket prev = packets.size() == 0 ? null : packets.get(packets.size() - 1);
+        synchronized (packets) {
+            PlayerMoveC2SPacket p = (PlayerMoveC2SPacket) event.packet;
+            PlayerMoveC2SPacket prev = packets.size() == 0 ? null : packets.get(packets.size() - 1);
 
-        if (prev != null &&
-                p.isOnGround() == prev.isOnGround() &&
-                p.getYaw(-1) == prev.getYaw(-1) &&
-                p.getPitch(-1) == prev.getPitch(-1) &&
-                p.getX(-1) == prev.getX(-1) &&
-                p.getY(-1) == prev.getY(-1) &&
-                p.getZ(-1) == prev.getZ(-1)
-        ) return;
+            if (prev != null &&
+                    p.isOnGround() == prev.isOnGround() &&
+                    p.getYaw(-1) == prev.getYaw(-1) &&
+                    p.getPitch(-1) == prev.getPitch(-1) &&
+                    p.getX(-1) == prev.getX(-1) &&
+                    p.getY(-1) == prev.getY(-1) &&
+                    p.getZ(-1) == prev.getZ(-1)
+            ) return;
 
-        packets.add(p);
+            packets.add(p);
+        }
     });
 
     @Override

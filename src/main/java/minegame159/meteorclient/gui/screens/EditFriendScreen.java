@@ -3,6 +3,7 @@ package minegame159.meteorclient.gui.screens;
 import minegame159.meteorclient.accountsfriends.Friend;
 import minegame159.meteorclient.gui.widgets.WButton;
 import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.Color;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -25,32 +26,36 @@ public class EditFriendScreen extends WindowScreen {
         sg.add(new BoolSetting.Builder()
                 .name("trusted")
                 .description("Do you trust this person?")
-                .defaultValue(friend.trusted)
+                .defaultValue(true)
                 .onChanged(aBoolean -> friend.trusted = aBoolean)
+                .onModuleActivated(booleanSetting -> friend.trusted = booleanSetting.get())
                 .build()
         );
 
         sg.add(new ColorSetting.Builder()
                 .name("color")
                 .description("Color.")
-                .defaultValue(friend.color)
+                .defaultValue(new Color(0, 255, 180))
                 .onChanged(color -> friend.color = color)
+                .onModuleActivated(colorSetting -> friend.color = colorSetting.get())
                 .build()
         );
 
         sg.add(new BoolSetting.Builder()
                 .name("attack")
                 .description("Should modules attack this person?")
-                .defaultValue(friend.attack)
+                .defaultValue(false)
                 .onChanged(aBoolean -> friend.attack = aBoolean)
+                .onModuleActivated(booleanSetting -> friend.attack = booleanSetting.get())
                 .build()
         );
 
         sg.add(new BoolSetting.Builder()
                 .name("show-in-tracers")
                 .description("Show in tracers.")
-                .defaultValue(friend.showInTracers)
+                .defaultValue(true)
                 .onChanged(aBoolean -> friend.showInTracers = aBoolean)
+                .onModuleActivated(booleanSetting -> friend.showInTracers = booleanSetting.get())
                 .build()
         );
 

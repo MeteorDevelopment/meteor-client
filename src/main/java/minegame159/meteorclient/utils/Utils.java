@@ -38,16 +38,23 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Arrays;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public class Utils {
     public static MinecraftClient mc;
+
+    public static boolean blockRenderingBlockEntitiesInXray;
 
     private static final Random random = new Random();
     private static final Vec3d eyesPos = new Vec3d(0, 0, 0);
     private static final Vec3d vec1 = new Vec3d(0, 0, 0);
     private static final Vec3d vec2 = new Vec3d(0, 0, 0);
     private static final DecimalFormat df;
+    private static final BlockPos.Mutable blockPos = new BlockPos.Mutable();
+    private static final AtomicInteger x = new AtomicInteger();
+    private static final AtomicInteger y = new AtomicInteger();
+    private static final AtomicInteger z     = new AtomicInteger();
 
     static {
         df = new DecimalFormat("0");
@@ -98,6 +105,13 @@ public class Utils {
         }
 
         return wordsFound;
+    }
+
+    public static double squaredDistance(double x1, double y1, double z1, double x2, double y2, double z2) {
+        double dX = x2 - x1;
+        double dY = y2 - y1;
+        double dZ = z2 - z1;
+        return dX * dX + dY * dY + dZ * dZ;
     }
 
     public static double distance(double x1, double y1, double z1, double x2, double y2, double z2) {

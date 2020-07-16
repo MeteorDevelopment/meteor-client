@@ -435,9 +435,9 @@ public class HUD extends ToggleModule {
 
     });
 
-    private void renderMMQuad(double x, double y, double size, Color color) {
+    private void renderMMQuad(double x, double y, double width, double height, Color color) {
         double s = mmScale.get();
-        ShapeBuilder.quad(2 + x * s, 2 + y * s, 0, 2 + (x + size) * s, 2 + y * s, 0, 2 + (x + size) * s, 2 + (y + size) * s, 0, 2 + x * s, 2 + (y + size) * s, 0, color);
+        ShapeBuilder.quad(2 + x * s, 2 + y * s, 0, 2 + (x + width) * s, 2 + y * s, 0, 2 + (x + width) * s, 2 + (y + height) * s, 0, 2 + x * s, 2 + (y + height) * s, 0, color);
     }
 
     private void renderMMTriangle(double x, double y, double size, double angle, Color color) {
@@ -451,7 +451,11 @@ public class HUD extends ToggleModule {
 
         if (sgMinimap.isEnabled()) {
             ShapeBuilder.begin(null, GL11.GL_TRIANGLES, VertexFormats.POSITION_COLOR);
-            renderMMQuad(0, 0, 100, mmBackground.get());
+            renderMMQuad(0, 0, 100, 100, mmBackground.get());
+            renderMMQuad(0, 0, 100, 1, mmBackground.get());
+            renderMMQuad(0, 0, 1, 100, mmBackground.get());
+            renderMMQuad(100 - 1, 0, 1, 100, mmBackground.get());
+            renderMMQuad(0, 100 - 1, 100, 1, mmBackground.get());
 
             double radius = 32;
             if (mc.options.viewDistance > 4) radius += 16;
@@ -474,8 +478,16 @@ public class HUD extends ToggleModule {
                 double z2 = (z / radius) * 50 + 50;
 
                 if (entity.getEntityId() == mc.player.getEntityId()) renderMMTriangle(x2 - 2.5, z2 - 2.5, 5, mc.player.yaw, color);
-                else renderMMQuad(x2 - 1, z2 - 1, 2, color);
+                else renderMMQuad(x2 - 1, z2 - 1, 2, 2, color);
             }
+
+            double w = MeteorClient.FONT.getStringWidth("N");
+            MeteorClient.FONT.renderStringWithShadow("N", 2 + 50 - w / 2, 4, white);
+            w = MeteorClient.FONT.getStringWidth("S");
+            MeteorClient.FONT.renderStringWithShadow("S", 2 + 50 - w / 2, 2 + 100 - MeteorClient.FONT.getHeight() - 2, white);
+            MeteorClient.FONT.renderStringWithShadow("W", 4, 2 + 50 - MeteorClient.FONT.getHeight() / 2, white);
+            w = MeteorClient.FONT.getStringWidth("E");
+            MeteorClient.FONT.renderStringWithShadow("E", 2 + 100 - w - 2, 2 + 50 - MeteorClient.FONT.getHeight() / 2, white);
 
             ShapeBuilder.end();
             y += 100 * mmScale.get() + 2;
@@ -524,7 +536,10 @@ public class HUD extends ToggleModule {
         }
 
         if (time.get()) {
-            drawInfo("Time: ", mc.world.getTimeOfDay() % 24000 + "", y);
+            int ticks = (int) (mc.world.getTimeOfDay() % 24000);
+            ticks += 6000;
+            if (ticks > 24000) ticks -= 24000;
+            drawInfo("Time: ", String.format("%02d:%02d", ticks / 1000, (int) (ticks % 1000 / 1000.0 * 60)), y);
             y += MeteorClient.FONT.getHeight() + 2;
         }
 

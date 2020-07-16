@@ -242,6 +242,8 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new Reach());
         addModule(new PotionSpoof());
         addModule(new LiquidInteract());
+        addModule(new MountBypass());
+        addModule(new PacketMine());
     }
 
     private void initMovement() {
@@ -255,6 +257,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new Flight());
         addModule(new Velocity());
         addModule(new ElytraPlus());
+        addModule(new EntityControl());
         addModule(new HighJump());
         addModule(new Speed());
         addModule(new SafeWalk());
@@ -285,6 +288,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new EntityOwner());
         addModule(new NoRender());
         addModule(new Breadcrumbs());
+        addModule(new BlockSelection());
     }
 
     private void initMisc() {
@@ -313,5 +317,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new Timer());
         addModule(new Suffix());
         addModule(new UwUAura());
+        addModule(new AutoMountBypassDupe());
+        addModule(new Nuker());
     }
 }

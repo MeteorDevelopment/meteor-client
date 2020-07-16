@@ -107,6 +107,34 @@ public class NoRender extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> noNausea = sgGeneral.add(new BoolSetting.Builder()
+            .name("no-nausea")
+            .description("Disables nausea effect.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Boolean> noItems = sgGeneral.add(new BoolSetting.Builder()
+            .name("no-item")
+            .description("Disables item entities.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> noEnchTableBook = sgGeneral.add(new BoolSetting.Builder()
+            .name("no-ench-table-book")
+            .description("Disables book above enchanting table.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> noSignText = sgGeneral.add(new BoolSetting.Builder()
+            .name("no-sign-text")
+            .description("Disables text on signs.")
+            .defaultValue(false)
+            .build()
+    );
+
     public NoRender() {
         super(Category.Render, "no-render", "Disables some things from rendering.");
     }
@@ -165,5 +193,21 @@ public class NoRender extends ToggleModule {
 
     public boolean noArmor() {
         return isActive() && noArmor.get();
+    }
+
+    public boolean noNausea() {
+        return isActive() && noNausea.get();
+    }
+
+    public boolean noItems() {
+        return isActive() && noItems.get();
+    }
+
+    public boolean noEnchTableBook() {
+        return isActive() && noEnchTableBook.get();
+    }
+
+    public boolean noSignText() {
+        return isActive() && noSignText.get();
     }
 }

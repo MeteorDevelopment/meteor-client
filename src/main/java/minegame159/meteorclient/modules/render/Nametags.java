@@ -79,6 +79,13 @@ public class Nametags extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> yourself = sgGeneral.add(new BoolSetting.Builder()
+            .name("yourself")
+            .description("Displays nametag above your player in Freecam.")
+            .defaultValue(true)
+            .build()
+    );
+
     private final Setting<Color> normalName = sgColors.add(new ColorSetting.Builder()
             .name("normal-color")
             .description("The color of non-friends")
@@ -128,7 +135,8 @@ public class Nametags extends ToggleModule {
     @EventHandler
     private final Listener<RenderEvent> onRender = new Listener<>(event -> {
         for (Entity entity : mc.world.getEntities()) {
-            if (!(entity instanceof PlayerEntity) || entity == mc.player) continue;
+            if (!(entity instanceof PlayerEntity) || entity == mc.player || entity == mc.cameraEntity) continue;
+            if (yourself.get() && entity.getUuid().equals(mc.player.getUuid())) continue;
 
             renderNametag(event, (PlayerEntity) entity);
         }
@@ -144,9 +152,14 @@ public class Nametags extends ToggleModule {
             scale *= dist/15;
         }
 
-        // Get ping
-        PlayerListEntry playerListEntry = mc.getNetworkHandler().getPlayerListEntry(entity.getUuid());
-        int ping = playerListEntry.getLatency();
+        int ping;
+        try {
+            // Get ping
+            PlayerListEntry playerListEntry = mc.getNetworkHandler().getPlayerListEntry(entity.getUuid());
+            ping = playerListEntry.getLatency();
+        }catch(NullPointerException ignored){
+            ping = 0;
+        }
 
         // Compute health things
         float absorption = entity.getAbsorptionAmount();

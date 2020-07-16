@@ -6,7 +6,7 @@ import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.gui.widgets.WWindow;
 
 public class WindowScreen extends WidgetScreen {
-    private WWindow window;
+    protected WWindow window;
 
     public WindowScreen(String title, boolean expanded) {
         super(title);

@@ -50,6 +50,12 @@ public class AutoExp extends ToggleModule {
             .defaultValue(false)
             .build()
     );
+
+    private final Setting<Boolean> disableOnDamage = sgGeneral.add(new BoolSetting.Builder()
+            .name("disable-on-damage")
+            .description("Disables this when you take damage")
+            .defaultValue(true)
+            .build());
     
     public AutoExp() {
         super(Category.Combat, "auto-exp", "Throws exp to mend your armour (only works with diamond)");
@@ -78,6 +84,7 @@ public class AutoExp extends ToggleModule {
                 }
             }
         }
+        lastHealth = mc.player.getHealth() + mc.player.getAbsorptionAmount();
     }
 
     @Override
@@ -96,8 +103,15 @@ public class AutoExp extends ToggleModule {
         }
     }
 
+    private float lastHealth;
+
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
+        if(lastHealth > mc.player.getHealth() + mc.player.getAbsorptionAmount() && disableOnDamage.get()){
+            this.onDeactivate();
+        }else if(disableOnDamage.get()){
+            lastHealth = mc.player.getHealth() + mc.player.getAbsorptionAmount();
+        }
         Iterator<ItemStack> armour = mc.player.getArmorItems().iterator();
         ItemStack boots = armour.next();
         ItemStack leggings = armour.next();
