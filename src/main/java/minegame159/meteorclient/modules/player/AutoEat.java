@@ -66,6 +66,7 @@ public class AutoEat extends ToggleModule {
     private boolean wasCrystalActive = false;
     private boolean isEating;
     private int preSelectedSlot, preFoodLevel;
+    private int slot;
 
     public AutoEat() {
         super(Category.Player, "auto-eat", "Automatically eats food.");
@@ -82,29 +83,10 @@ public class AutoEat extends ToggleModule {
     }
 
     @EventHandler
-    private Listener<TickEvent> onTick = new Listener<>(event -> {
+    private final Listener<TickEvent> onTick = new Listener<>(event -> {
         if (mc.player.abilities.creativeMode) return;
 
         if (isEating) {
-            if (mc.overlay == null && (mc.currentScreen == null || mc.currentScreen.passEvents)) {
-                if (disableAuras.get()) {
-                    if (ModuleManager.INSTANCE.get(KillAura.class).isActive()) {
-                        wasKillActive = true;
-                        ModuleManager.INSTANCE.get(KillAura.class).toggle();
-                    }
-                    if (ModuleManager.INSTANCE.get(CrystalAura.class).isActive()) {
-                        wasCrystalActive = true;
-                    }
-                }
-                ((IKeyBinding) mc.options.keyUse).setPressed(true);
-            } else {
-                if(mc.player.getOffHandStack().isFood() && mc.player.inventory.selectedSlot == preSelectedSlot){
-                    mc.interactionManager.interactItem(mc.player, mc.world, Hand.OFF_HAND);
-                }else {
-                    mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
-                }
-            }
-
             if (mc.player.getHungerManager().getFoodLevel() > preFoodLevel) {
                 isEating = false;
                 mc.interactionManager.stopUsingItem(mc.player);
@@ -119,6 +101,31 @@ public class AutoEat extends ToggleModule {
                 }
                 mc.player.inventory.selectedSlot = preSelectedSlot;
                 BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume");
+
+                return;
+            }
+
+            if(slot != InvUtils.OFFHAND_SLOT) {
+                mc.player.inventory.selectedSlot = slot;
+            }
+
+            if (!mc.player.isUsingItem()) {
+                if (disableAuras.get()) {
+                    if (ModuleManager.INSTANCE.get(KillAura.class).isActive()) {
+                        wasKillActive = true;
+                        ModuleManager.INSTANCE.get(KillAura.class).toggle();
+                    }
+                    if (ModuleManager.INSTANCE.get(CrystalAura.class).isActive()) {
+                        wasCrystalActive = true;
+                    }
+                }
+
+                ((IKeyBinding) mc.options.keyUse).setPressed(true);
+                if (slot == InvUtils.OFFHAND_SLOT) {
+                    mc.interactionManager.interactItem(mc.player, mc.world, Hand.OFF_HAND);
+                } else {
+                    mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
+                }
             }
 
             return;
@@ -156,9 +163,9 @@ public class AutoEat extends ToggleModule {
             slot = InvUtils.OFFHAND_SLOT;
         }
 
-        if (slot != -1 && (20 - mc.player.getHungerManager().getFoodLevel() >= bestHunger && sgAutoHunger.isEnabled())
-                || (20 - mc.player.getHungerManager().getFoodLevel() >= minHunger.get() && sgManualHunger.isEnabled())) {
+        if (slot != -1 && (20 - mc.player.getHungerManager().getFoodLevel() >= bestHunger && sgAutoHunger.isEnabled()) || (20 - mc.player.getHungerManager().getFoodLevel() >= minHunger.get() && sgManualHunger.isEnabled())) {
             preSelectedSlot = mc.player.inventory.selectedSlot;
+            this.slot = slot;
             if(slot != InvUtils.OFFHAND_SLOT) {
                 mc.player.inventory.selectedSlot = slot;
             }
@@ -167,4 +174,8 @@ public class AutoEat extends ToggleModule {
             BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("pause");
         }
     });
+
+    public boolean rightClickThings() {
+        return !isActive() || !isEating;
+    }
 }

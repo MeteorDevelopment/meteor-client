@@ -1,5 +1,8 @@
 package minegame159.meteorclient.modules.combat;
 
+//Updated by squidoodly 14/07/2020
+
+import baritone.api.BaritoneAPI;
 import com.google.common.collect.Streams;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
@@ -10,6 +13,8 @@ import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.*;
 import net.minecraft.command.arguments.EntityAnchorArgumentType;
+import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -78,6 +83,20 @@ public class KillAura extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> instaKill = sgGeneral.add(new BoolSetting.Builder()
+            .name("insta-kill")
+            .description("If your sharpness is enough to kill then just swing")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Boolean> pauseOnCombat = sgGeneral.add(new BoolSetting.Builder()
+            .name("pause-on-combat")
+            .description("Pauses baritone when you get near a target")
+            .defaultValue(false)
+            .build()
+    );
+
     private final Setting<Boolean> oneTickDelay = sgDelay.add(new BoolSetting.Builder()
             .name("one-tick-delay")
             .description("Adds one tick delay.")
@@ -106,6 +125,9 @@ public class KillAura extends ToggleModule {
     private boolean canAutoDelayAttack;
     private int hitDelayTimer;
     private int randomHitDelayTimer;
+    private Entity entity;
+    private boolean didHit = false;
+    private boolean wasPathing = false;
 
     private final Vec3d vec3d1 = new Vec3d(0, 0, 0);
     private final Vec3d vec3d2 = new Vec3d(0, 0, 0);
@@ -125,10 +147,10 @@ public class KillAura extends ToggleModule {
     }
 
     private boolean canAttackEntity(Entity entity) {
-        if (entity == mc.player || !entities.get().contains(entity.getType())) return false;
+        if (entity == mc.player || entity == mc.cameraEntity || entity.getUuid().equals(mc.player.getUuid()) || !entities.get().contains(entity.getType())) return false;
 
         if (entity instanceof PlayerEntity) {
-            if (friends.get() || entity.getUuid() == mc.player.getUuid()) return true;
+            if (friends.get()) return true;
             return FriendManager.INSTANCE.attack((PlayerEntity) entity);
         }
 
@@ -175,6 +197,44 @@ public class KillAura extends ToggleModule {
     private Listener<TickEvent> onTick = new Listener<>(event -> {
         if (mc.player.getHealth() <= 0) return;
 
+        if(entity == null && wasPathing){
+            BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume");
+            wasPathing = false;
+        }
+
+        entity = null;
+        didHit = false;
+
+        Streams.stream(mc.world.getEntities())
+                .filter(this::isInRange)
+                .filter(this::canAttackEntity)
+                .filter(this::canSeeEntity)
+                .filter(Entity::isAlive)
+                .min(this::sort)
+                .ifPresent(tempEntity -> {
+                    entity = tempEntity;
+                    if (entity instanceof PlayerEntity && instaKill.get()) {
+                        double damage = EnchantmentHelper.getLevel(Enchantments.SHARPNESS, mc.player.getMainHandStack()) > 0 ?
+                                (EnchantmentHelper.getLevel(Enchantments.SHARPNESS, mc.player.getMainHandStack()) * 0.5) + 0.5 : 0;
+                        if ((((PlayerEntity) entity).getHealth() + ((PlayerEntity) entity).getAbsorptionAmount()) -  damage <= 0) {
+                            if (rotate.get()) {
+                                ((IVec3d) vec3d1).set(entity.x, entity.y + entity.getHeight() / 2, entity.z);
+                                mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, vec3d1);
+                            }
+
+                            mc.interactionManager.attackEntity(mc.player, entity);
+                            mc.player.swingHand(Hand.MAIN_HAND);
+                            didHit = true;
+                        }
+                    }
+                    if(pauseOnCombat.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing() && !wasPathing){
+                        BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("pause");
+                        wasPathing = true;
+                    }
+                });
+
+        if(didHit) return;
+
         if (sgDelay.isEnabled()) {
             // Smart delay
             if (mc.player.getAttackCooldownProgress(0.5f) < 1) return;
@@ -205,25 +265,17 @@ public class KillAura extends ToggleModule {
             }
         }
 
-        Streams.stream(mc.world.getEntities())
-                .filter(this::isInRange)
-                .filter(this::canAttackEntity)
-                .filter(this::canSeeEntity)
-                .filter(Entity::isAlive)
-                .min(this::sort)
-                .ifPresent(entity -> {
-                    // Rotate
-                    if (rotate.get()) {
-                        ((IVec3d) vec3d1).set(entity.getX(), entity.getY() + entity.getHeight() / 2, entity.getZ());
-                        mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, vec3d1);
-                    }
+        // Rotate
+        if (rotate.get()) {
+            ((IVec3d) vec3d1).set(entity.getX(), entity.getY() + entity.getHeight() / 2, entity.getZ());
+            mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, vec3d1);
+        }
 
-                    // Attack
-                    mc.interactionManager.attackEntity(mc.player, entity);
-                    mc.player.swingHand(Hand.MAIN_HAND);
+        // Attack
+        mc.interactionManager.attackEntity(mc.player, entity);
+        mc.player.swingHand(Hand.MAIN_HAND);
 
-                    // Set next random delay length
-                    if (sgRandomDelay.isEnabled()) randomHitDelayTimer = (int) Math.round(Math.random() * randomDelayMax.get());
-                });
+        // Set next random delay length
+        if (sgRandomDelay.isEnabled()) randomHitDelayTimer = (int) Math.round(Math.random() * randomDelayMax.get());
     });
 }

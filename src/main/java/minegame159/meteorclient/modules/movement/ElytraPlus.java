@@ -8,14 +8,13 @@ import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
-import minegame159.meteorclient.settings.BoolSetting;
-import minegame159.meteorclient.settings.DoubleSetting;
-import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.InvUtils;
 import minegame159.meteorclient.utils.Utils;
+import net.minecraft.container.SlotActionType;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.ElytraItem;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.util.math.Vec3d;
@@ -30,6 +29,23 @@ public class ElytraPlus extends ToggleModule {
             .name("auto-take-off")
             .description("Automatically takes off when you hold jump without needing to double jump.")
             .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> replace = sgGeneral.add(new BoolSetting.Builder()
+            .name("elytra-replace")
+            .description("Replaces your broken elytra with new ones")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Integer> replaceDurability = sgGeneral.add(new IntSetting.Builder()
+            .name("replace-durability")
+            .description("The durability to replace your elytra at")
+            .defaultValue(2)
+            .min(1)
+            .max(Items.ELYTRA.getMaxDamage() - 1)
+            .sliderMax(20)
             .build()
     );
 
@@ -155,6 +171,24 @@ public class ElytraPlus extends ToggleModule {
             if (fireworkTimer <= 0) decrementFireworkTimer = false;
 
             fireworkTimer--;
+        }
+        if(replace.get()){
+            if(mc.player.inventory.getArmorStack(2).getItem() == Items.ELYTRA){
+                if(mc.player.inventory.getArmorStack(2).getMaxDamage() - mc.player.inventory.getArmorStack(2).getDamage() <= replaceDurability.get()){
+                    int slot = -1;
+                    for (int i = 9; i < 45; i++) {
+                        ItemStack stack = mc.player.inventory.getInvStack(i);
+                        if (stack.getItem() == Items.ELYTRA && stack.getMaxDamage() - stack.getDamage() > replaceDurability.get()) {
+                            slot = i;
+                        }
+                    }
+                    if(slot != -1){
+                        InvUtils.clickSlot(slot, 0, SlotActionType.PICKUP);
+                        InvUtils.clickSlot(6, 0, SlotActionType.PICKUP);
+                        InvUtils.clickSlot(slot, 0, SlotActionType.PICKUP);
+                    }
+                }
+            }
         }
     });
 

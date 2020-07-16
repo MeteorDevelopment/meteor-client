@@ -10,14 +10,11 @@ import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.ChunkDataEvent;
-import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.gui.screens.StashRecorderChunkScreen;
 import minegame159.meteorclient.gui.widgets.*;
-import minegame159.meteorclient.settings.BoolSetting;
-import minegame159.meteorclient.settings.IntSetting;
-import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.block.entity.*;
 import net.minecraft.client.toast.Toast;
@@ -26,15 +23,19 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.ChunkPos;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class StashFinder extends ToggleModule {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+
+    private final Setting<List<BlockEntityType<?>>> storageBlocks = sgGeneral.add(new StorageBlockListSetting.Builder()
+            .name("storage-blocks")
+            .description("Select storage blocks to search for.")
+            .defaultValue(Arrays.asList(StorageBlockListSetting.STORAGE_BLOCKS))
+            .build()
+    );
 
     private final Setting<Integer> minimumStorageCount = sgGeneral.add(new IntSetting.Builder()
             .name("minimum-storage-cont")
@@ -63,15 +64,17 @@ public class StashFinder extends ToggleModule {
     }
 
     @EventHandler
-    private Listener<ChunkDataEvent> onChunkData = new Listener<>(event -> {
+    private final Listener<ChunkDataEvent> onChunkData = new Listener<>(event -> {
         Chunk chunk = new Chunk(event.chunk.getPos());
 
         for (BlockEntity blockEntity : event.chunk.getBlockEntities().values()) {
+            if (!storageBlocks.get().contains(blockEntity.getType())) continue;
+
             if (blockEntity instanceof ChestBlockEntity) chunk.chests++;
             else if (blockEntity instanceof BarrelBlockEntity) chunk.barrels++;
             else if (blockEntity instanceof ShulkerBoxBlockEntity) chunk.shulkers++;
             else if (blockEntity instanceof EnderChestBlockEntity) chunk.enderChests++;
-            else if (blockEntity instanceof FurnaceBlockEntity) chunk.furnaces++;
+            else if (blockEntity instanceof AbstractFurnaceBlockEntity) chunk.furnaces++;
             else if (blockEntity instanceof DispenserBlockEntity) chunk.dispensersDroppers++;
             else if (blockEntity instanceof HopperBlockEntity) chunk.hoppers++;
         }

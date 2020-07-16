@@ -12,6 +12,7 @@ import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.InvUtils;
 import net.minecraft.block.entity.BedBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.client.gui.screen.ingame.ContainerScreen;
 import net.minecraft.container.SlotActionType;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -99,7 +100,7 @@ public class AutoArmor extends ToggleModule {
 
     @EventHandler
     private Listener<TickEvent> onTick = new Listener<>(event -> {
-        if (mc.currentScreen != null) return;
+        if (mc.currentScreen instanceof ContainerScreen<?>) return;
 
         doTick();
     });

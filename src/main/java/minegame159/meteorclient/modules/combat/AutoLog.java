@@ -10,6 +10,7 @@ import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.utils.DamageCalcUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.packet.s2c.play.DisconnectS2CPacket;
@@ -35,6 +36,13 @@ public class AutoLog extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> instantDeath = sgGeneral.add(new BoolSetting.Builder()
+            .name("32k")
+            .description("Logs out out if someone near you can insta kill you")
+            .defaultValue(false)
+            .build()
+    );
+
     public AutoLog() {
         super(Category.Combat, "auto-log", "Automatically disconnects when low on health.");
     }
@@ -47,9 +55,16 @@ public class AutoLog extends ToggleModule {
 
         if (onlyTrusted.get()) {
             for (Entity entity : mc.world.getEntities()) {
-                if (entity instanceof PlayerEntity && entity != mc.player && !FriendManager.INSTANCE.isTrusted((PlayerEntity) entity)) {
-                    mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(new LiteralText("Non-trusted player appeared in your render distance")));
-                    break;
+                if (entity instanceof PlayerEntity) {
+                    if (entity != mc.player && !FriendManager.INSTANCE.isTrusted((PlayerEntity) entity)) {
+                        mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(new LiteralText("Non-trusted player appeared in your render distance")));
+                        break;
+                    }
+                    if(mc.player.distanceTo(entity) < 8 && instantDeath.get() && DamageCalcUtils.resistanceReduction(mc.player, DamageCalcUtils.normalProtReduction(mc.player, DamageCalcUtils.armourCalc(mc.player, DamageCalcUtils.getSwordDamage((PlayerEntity) entity))))
+                        > mc.player.getHealth() + mc.player.getAbsorptionAmount()){
+                        mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(new LiteralText("Anti-32k measures.")));
+                        break;
+                    }
                 }
             }
         }

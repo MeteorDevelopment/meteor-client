@@ -43,7 +43,7 @@ public class BedAura extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgPlace = settings.createGroup("Place");
 
-    private final Setting<Integer> placeRange = sgGeneral.add(new IntSetting.Builder()
+    private final Setting<Double> placeRange = sgGeneral.add(new DoubleSetting.Builder()
             .name("place-range")
             .description("The distance in a single direction the beds get placed.")
             .defaultValue(3)
@@ -52,7 +52,7 @@ public class BedAura extends ToggleModule {
             .build()
     );
 
-    private final Setting<Integer> breakRange = sgGeneral.add(new IntSetting.Builder()
+    private final Setting<Double> breakRange = sgGeneral.add(new DoubleSetting.Builder()
             .name("break-range")
             .description("The distance in a single direction the beds get broken.")
             .defaultValue(3)
@@ -214,10 +214,10 @@ public class BedAura extends ToggleModule {
         return validBlocks;
     }
 
-    private List<BlockPos> getRange(BlockPos player, int range){
+    private List<BlockPos> getRange(BlockPos player, double range){
         List<BlockPos> allBlocks = new ArrayList<>();
-        for(int i = player.getX() - range; i < player.getX() + range; i++){
-            for(int j = player.getZ() - range; j < player.getZ() + range; j++){
+        for(double i = player.getX() - range; i < player.getX() + range; i++){
+            for(double j = player.getZ() - range; j < player.getZ() + range; j++){
                 for(int k = player.getY() - 3; k < player.getY() + 3; k++){
                     BlockPos x = new BlockPos(i, k, j);
                     allBlocks.add(x);

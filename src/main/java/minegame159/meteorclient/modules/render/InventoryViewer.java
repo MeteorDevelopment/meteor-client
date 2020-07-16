@@ -37,6 +37,7 @@ public class InventoryViewer extends ToggleModule {
             .name("x-offset")
             .description("X offset.")
             .defaultValue(3)
+            .sliderMax(200)
             .build()
     );
 
@@ -51,6 +52,7 @@ public class InventoryViewer extends ToggleModule {
             .name("y-offset")
             .description("Y offset.")
             .defaultValue(3)
+            .sliderMax(200)
             .build()
     );
 
