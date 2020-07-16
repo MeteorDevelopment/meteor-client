@@ -102,7 +102,7 @@ public class AutoMountBypassDupe extends ToggleModule {
         if (entity == null) return;
 
         if (sneak) {
-            mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.STOP_SNEAKING));
+            mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
             sneak = false;
             return;
         }
@@ -137,7 +137,7 @@ public class AutoMountBypassDupe extends ToggleModule {
                 }
             } else {
                 mc.player.closeContainer();
-                mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.START_SNEAKING));
+                mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
                 sneak = true;
             }
         } else if (!(mc.currentScreen instanceof HorseScreen)) {
@@ -170,7 +170,7 @@ public class AutoMountBypassDupe extends ToggleModule {
             }
 
             if (!slotsToMove.isEmpty()) {
-                for (int i : slotsToMove) mc.interactionManager.method_2906(mc.player.container.syncId, i, 0, SlotActionType.QUICK_MOVE, mc.player);
+                for (int i : slotsToMove) mc.interactionManager.clickSlot(mc.player.container.syncId, i, 0, SlotActionType.QUICK_MOVE, mc.player);
                 slotsToMove.clear();
             }
         }

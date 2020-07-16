@@ -102,9 +102,9 @@ public class Nuker extends ToggleModule {
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
         // Calculate stuff
-        double pX = mc.player.x - 0.5;
-        double pY = mc.player.y;
-        double pZ = mc.player.z - 0.5;
+        double pX = mc.player.getX() - 0.5;
+        double pY = mc.player.getY();
+        double pZ = mc.player.getZ() - 0.5;
 
         int minX = (int) Math.floor(pX - range.get());
         int minY = (int) Math.floor(pY - range.get());
@@ -128,7 +128,7 @@ public class Nuker extends ToggleModule {
                     if (state.getOutlineShape(mc.world, blockPos) == VoxelShapes.empty()) continue;
 
                     // Flatten
-                    if (mode.get() == Mode.Flatten && y < mc.player.y) {
+                    if (mode.get() == Mode.Flatten && y < mc.player.getY()) {
                         skipThisYLevel = true;
                         break;
                     }
@@ -171,7 +171,7 @@ public class Nuker extends ToggleModule {
 
                 // Break block
                 lastBlockPos.set(pos);
-                mc.interactionManager.method_2902(pos, Direction.UP);
+                mc.interactionManager.updateBlockBreakingProgress(pos, Direction.UP);
                 mc.player.swingHand(Hand.MAIN_HAND);
 
                 breaking = true;

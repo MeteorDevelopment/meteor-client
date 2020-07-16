@@ -26,7 +26,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class ClientPlayerInteractionManagerMixin implements IClientPlayerInteractionManager {
     @Shadow protected abstract void syncSelectedSlot();
 
-    @Shadow private int field_3716;
+    @Shadow private int blockBreakingCooldown;
 
     @Inject(method = "attackEntity", at = @At("HEAD"), cancellable = true)
     private void onAttackEntity(PlayerEntity player, Entity target, CallbackInfo info) {
@@ -49,16 +49,16 @@ public abstract class ClientPlayerInteractionManagerMixin implements IClientPlay
         if (ModuleManager.INSTANCE.isActive(Reach.class)) info.setReturnValue(ModuleManager.INSTANCE.get(Reach.class).getReach());
     }
 
-    @Redirect(method = "method_2902", at = @At(value = "FIELD", target = "Lnet/minecraft/client/network/ClientPlayerInteractionManager;field_3716:I", opcode = Opcodes.PUTFIELD))
+    @Redirect(method = "updateBlockBreakingProgress", at = @At(value = "FIELD", target = "Lnet/minecraft/client/network/ClientPlayerInteractionManager;blockBreakingCooldown:I", opcode = Opcodes.PUTFIELD))
     private void onMethod_2902SetField_3716Proxy(ClientPlayerInteractionManager interactionManager, int value) {
         if (ModuleManager.INSTANCE.isActive(Nuker.class)) value = 0;
-        field_3716 = value;
+        blockBreakingCooldown = value;
     }
 
-    @Redirect(method = "attackBlock", at = @At(value = "FIELD", target = "Lnet/minecraft/client/network/ClientPlayerInteractionManager;field_3716:I", opcode = Opcodes.PUTFIELD))
+    @Redirect(method = "attackBlock", at = @At(value = "FIELD", target = "Lnet/minecraft/client/network/ClientPlayerInteractionManager;blockBreakingCooldown:I", opcode = Opcodes.PUTFIELD))
     private void onAttackBlockSetField_3719Proxy(ClientPlayerInteractionManager interactionManager, int value) {
         if (ModuleManager.INSTANCE.isActive(Nuker.class)) value = 0;
-        field_3716 = value;
+        blockBreakingCooldown = value;
     }
 
     @Override

@@ -218,7 +218,7 @@ public class KillAura extends ToggleModule {
                                 (EnchantmentHelper.getLevel(Enchantments.SHARPNESS, mc.player.getMainHandStack()) * 0.5) + 0.5 : 0;
                         if ((((PlayerEntity) entity).getHealth() + ((PlayerEntity) entity).getAbsorptionAmount()) -  damage <= 0) {
                             if (rotate.get()) {
-                                ((IVec3d) vec3d1).set(entity.x, entity.y + entity.getHeight() / 2, entity.z);
+                                ((IVec3d) vec3d1).set(entity.getX(), entity.getY() + entity.getHeight() / 2, entity.getZ());
                                 mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, vec3d1);
                             }
 
