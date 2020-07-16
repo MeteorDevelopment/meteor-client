@@ -69,7 +69,7 @@ public class PacketMine extends ToggleModule {
 
         public boolean sendPackets() {
             if (mc.world.getBlockState(blockPos).getBlock() == Blocks.AIR) return true;
-            if (Utils.distance(mc.player.x - 0.5, mc.player.y + mc.player.getEyeHeight(mc.player.getPose()), mc.player.z - 0.5, blockPos.getX() + direction.getOffsetX(), blockPos.getY() + direction.getOffsetY(), blockPos.getZ() + direction.getOffsetZ()) > mc.interactionManager.getReachDistance()) return true;
+            if (Utils.distance(mc.player.getX() - 0.5, mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()), mc.player.getZ() - 0.5, blockPos.getX() + direction.getOffsetX(), blockPos.getY() + direction.getOffsetY(), blockPos.getZ() + direction.getOffsetZ()) > mc.interactionManager.getReachDistance()) return true;
 
             mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
             mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
