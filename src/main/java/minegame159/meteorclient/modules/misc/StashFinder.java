@@ -44,6 +44,15 @@ public class StashFinder extends ToggleModule {
             .min(1)
             .build()
     );
+
+    private final Setting<Integer> minimumDistance = sgGeneral.add(new IntSetting.Builder()
+            .name("minimum-distance")
+            .description("Minimum distance in blocks from spawn required to record that chunk.")
+            .defaultValue(0)
+            .min(0)
+            .sliderMax(10000)
+            .build()
+    );
     
     private final Setting<Boolean> sendNotifications = sgGeneral.add(new BoolSetting.Builder()
             .name("send-notifications")
@@ -65,6 +74,11 @@ public class StashFinder extends ToggleModule {
 
     @EventHandler
     private final Listener<ChunkDataEvent> onChunkData = new Listener<>(event -> {
+        // Check distance
+        double chunkXAbs = Math.abs(event.chunk.getPos().x * 16);
+        double chunkZAbs = Math.abs(event.chunk.getPos().z * 16);
+        if (Math.sqrt(chunkXAbs * chunkXAbs + chunkZAbs * chunkZAbs) < minimumDistance.get()) return;
+
         Chunk chunk = new Chunk(event.chunk.getPos());
 
         for (BlockEntity blockEntity : event.chunk.getBlockEntities().values()) {
