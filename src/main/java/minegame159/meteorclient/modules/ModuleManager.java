@@ -204,6 +204,8 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
     }
 
     private void initCombat() {
+        addModule(new Auto32K());
+        addModule(new AntiFriendHit());
         addModule(new Criticals());
         addModule(new AutoTotem());
         addModule(new BedAura());
@@ -231,6 +233,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new AntiHunger());
         addModule(new AutoTool());
         addModule(new AutoEat());
+        addModule(new AutoMount());
         addModule(new XpBottleThrower());
         addModule(new MiddleClickExtra());
         addModule(new AutoArmor());
@@ -297,6 +300,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new AutoSign());
         addModule(new AntiWeather());
         addModule(new AutoReconnect());
+        addModule(new AutoMountBypassDupe());
         addModule(new ShulkerTooltip());
         addModule(new AutoShearer());
         addModule(new AutoNametag());
