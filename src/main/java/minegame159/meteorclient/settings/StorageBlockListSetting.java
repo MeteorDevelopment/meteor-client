@@ -65,7 +65,7 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
 
     @Override
     protected String generateUsage() {
-        return "#blueblock id #gray(chest, minecraft:ender_chest, etc)";
+        return "(highlight)storage block id(default)(chest, minecraft:ender_chest, etc)";
     }
 
     @Override

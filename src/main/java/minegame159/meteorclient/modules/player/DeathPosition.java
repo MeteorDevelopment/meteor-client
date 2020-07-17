@@ -7,7 +7,7 @@ import minegame159.meteorclient.gui.widgets.WLabel;
 import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
-import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.Chat;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -26,7 +26,7 @@ public class DeathPosition extends ToggleModule {
         if (event.entity.getUuid() != null && event.entity.getUuid().equals(mc.player.getUuid()) && event.entity.getHealth() <= 0) {
             label.setText(String.format("Latest death: %.1f, %.1f, %.1f", mc.player.x, mc.player.y, mc.player.z));
 
-            Utils.sendMessage("#yellowDied at #blue%.1f#yellow, #blue%.1f#yellow, #blue%.1f#yellow on #blue%s.", mc.player.x, mc.player.y, mc.player.z, dateFormat.format(new Date()));
+            Chat.info(this, "Died at (highlight)%.0f(default), (highlight)%.0f(default), (highlight)%.0f (default)on (highlight)%s(default).", mc.player.x, mc.player.y, mc.player.z, dateFormat.format(new Date()));
         }
     });
 

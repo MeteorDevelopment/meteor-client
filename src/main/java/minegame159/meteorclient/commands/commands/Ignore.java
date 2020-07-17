@@ -4,8 +4,7 @@ package minegame159.meteorclient.commands.commands;
 
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.commands.Command;
-import minegame159.meteorclient.utils.Utils;
-import net.minecraft.client.MinecraftClient;
+import minegame159.meteorclient.utils.Chat;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -19,16 +18,16 @@ public class Ignore extends Command {
     @Override
     public void run(String[] args) {
         if (args.length == 0) {
-            Utils.sendMessage("#blue[Meteor]: #whiteIgnoring #gray%d #white people:", ignoredPlayers.size());
+            Chat.info("Ignoring (highlight)%d (default)people:", ignoredPlayers.size());
             for (String player : ignoredPlayers) {
-                Utils.sendMessage("#blue[Meteor]: #gray- #white%s", player);
+                Chat.info("- (highlight)%s", player);
             }
         } else {
             if (ignoredPlayers.remove(args[0])) {
-                Utils.sendMessage("#blue[Meteor]: #whiteRemoved #gray%s #whitefrom list of ignored people.", args[0]);
+                Chat.info("Removed (highlight)%s (default)from list of ignored people.", args[0]);
             } else {
                 ignoredPlayers.add(args[0]);
-                Utils.sendMessage("#blue[Meteor]: #whiteAdded #gray%s #whiteto list of ignored people.", args[0]);
+                Chat.info("Added (highlight)%s (default) to list of ignored people.", args[0]);
             }
         }
     }

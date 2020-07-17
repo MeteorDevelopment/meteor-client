@@ -9,7 +9,7 @@ import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.EntityTypeListSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.Chat;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
 
@@ -44,7 +44,7 @@ public class EntityLogger extends ToggleModule {
             if (playerNames.get() && event.entity instanceof PlayerEntity) name = ((PlayerEntity) event.entity).getGameProfile().getName() + " (Player)";
             else name = event.entity.getType().getName().asString();
 
-            Utils.sendMessage(String.format("#blue[Meteor]: #white%s #grayspawned at #white%.0f#gray, #white%.0f#gray, #white%.0f#gray.", name, event.entity.x, event.entity.y, event.entity.z));
+            Chat.info(this, "(highlight)%s (default)spawned at (highlight)%.0f(default), (highlight)%.0f(default), (highlight)%.0f(default).", name, event.entity.x, event.entity.y, event.entity.z);
         }
     });
 }

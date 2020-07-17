@@ -62,7 +62,7 @@ public class SoundEventListSetting extends Setting<List<SoundEvent>> {
 
     @Override
     protected String generateUsage() {
-        return "#blueblock id #gray(block_anvil_hit, minecraft:entity_bat_hurt, etc)";
+        return "(highlight)sound id (default)(block_anvil_hit, minecraft:entity_bat_hurt, etc)";
     }
 
     @Override

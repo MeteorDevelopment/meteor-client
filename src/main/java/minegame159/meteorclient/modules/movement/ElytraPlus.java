@@ -9,6 +9,7 @@ import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.InvUtils;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.container.SlotActionType;
@@ -205,7 +206,7 @@ public class ElytraPlus extends ToggleModule {
                     decrementFireworkTimer = true;
                     fireworkTimer = 20;
                 } else {
-                    Utils.sendMessage("#blueElytra+ Autopilot:#white Disabled autopilot because you don't have any fireworks left in your hotbar.");
+                    Chat.warning(this, "Disabled autopilot because you don't have any fireworks left in your hotbar.");
                     sgAutopilot.setEnabled(false);
                 }
             }

@@ -15,8 +15,8 @@ import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.InvUtils;
-import minegame159.meteorclient.utils.Utils;
 import net.minecraft.block.ShulkerBoxBlock;
 import net.minecraft.client.gui.screen.ingame.HorseScreen;
 import net.minecraft.container.SlotActionType;
@@ -25,7 +25,6 @@ import net.minecraft.entity.passive.AbstractDonkeyEntity;
 import net.minecraft.entity.passive.LlamaEntity;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Items;
-import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.Hand;
@@ -115,7 +114,7 @@ public class AutoMountBypassDupe extends ToggleModule {
                 if (slot != -1 && slot < 9) {
                     mc.player.inventory.selectedSlot  = slot;
                  } else {
-                    Utils.sendMessage("#blue[Meteor]: #redCannot find chest in hotbar. Disabling!");
+                    Chat.warning(this, "Cannot find chest in your hotbar. Disabling!");
                     this.toggle();
                 }
             }

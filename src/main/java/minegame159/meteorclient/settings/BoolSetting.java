@@ -33,7 +33,7 @@ public class BoolSetting extends Setting<Boolean> {
 
     @Override
     protected String generateUsage() {
-        return "#bluetrue#gray, #bluefalse #grayor #bluetoggle";
+        return "(highlight)true(default), (highlight)false (default)or (highlight)toggle";
     }
 
     @Override

@@ -3,6 +3,7 @@ package minegame159.meteorclient.commands.commands;
 import minegame159.meteorclient.commands.Command;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.Utils;
 
 public class Settings extends Command {
@@ -15,9 +16,9 @@ public class Settings extends Command {
         Module module = Utils.tryToGetModule(args);
         if (module == null) return;
 
-        Utils.sendMessage("#pink%s:", module.title);
+        Chat.info("(highlight)%s(default):", module.title);
         for (Setting<?> setting : module.settings) {
-            Utils.sendMessage("  #yellowUsage of #blue'%s' #gray(%s) #yellowis #gray%s#yellow.", setting.name, setting.get().toString(), setting.getUsage());
+            Chat.info("  Usage of (highlight)%s (default)(%s) is (highlight)%s(default).", setting.name, setting.get().toString(), setting.getUsage());
         }
     }
 }

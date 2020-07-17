@@ -11,10 +11,10 @@ import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.rendering.ShapeBuilder;
 import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.EntityUtils;
 import minegame159.meteorclient.utils.TickRate;
-import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.client.render.VertexFormats;
@@ -693,7 +693,7 @@ public class HUD extends ToggleModule {
     }
 
     private void sendNotification(){
-        if(!notificationSettings.get()){
+        if (!notificationSettings.get()) {
             mc.getToastManager().add(new Toast() {
                 private long timer;
                 private long lastTime = -1;
@@ -712,8 +712,8 @@ public class HUD extends ToggleModule {
                     return timer >= 32000 ? Visibility.HIDE : Visibility.SHOW;
                 }
             });
-        }else{
-            Utils.sendMessage("#redOne of your armor pieces is low.");
+        } else {
+            Chat.warning(this, "One of your armor pieces ir low.");
         }
     }
 
