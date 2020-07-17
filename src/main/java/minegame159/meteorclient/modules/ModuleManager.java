@@ -324,5 +324,6 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new UwUAura());
         addModule(new AutoMountBypassDupe());
         addModule(new Nuker());
+        addModule(new SoundBlocker());
     }
 }
