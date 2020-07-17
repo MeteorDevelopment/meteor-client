@@ -39,6 +39,8 @@ public class EntityLogger extends ToggleModule {
 
     @EventHandler
     private final Listener<EntityAddedEvent> onEntityAdded = new Listener<>(event -> {
+        if (event.entity.getUuid().equals(mc.player.getUuid())) return;
+
         if (entities.get().contains(event.entity.getType())) {
             String name;
             if (playerNames.get() && event.entity instanceof PlayerEntity) name = ((PlayerEntity) event.entity).getGameProfile().getName() + " (Player)";
