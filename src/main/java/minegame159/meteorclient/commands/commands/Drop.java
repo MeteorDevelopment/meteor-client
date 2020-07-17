@@ -1,8 +1,8 @@
 package minegame159.meteorclient.commands.commands;
 
 import minegame159.meteorclient.commands.Command;
+import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.InvUtils;
-import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.container.SlotActionType;
 
@@ -16,7 +16,7 @@ public class Drop extends Command {
         MinecraftClient mc = MinecraftClient.getInstance();
 
         if (mc.player.isSpectator()) {
-            Utils.sendMessage("#blue[Meteor]: #redCan't drop thing while in spectator.");
+            Chat.error("Can't drop items while in spectator.");
             return;
         }
 
@@ -54,6 +54,6 @@ public class Drop extends Command {
     }
 
     private void sendErrorMessage() {
-        Utils.sendMessage("#blue[Meteor]: #redYou need to select a mode. #gray(hand, offhand, hotbar, inventory, all)");
+        Chat.error("You need to select a mode. (hand, offhand, hotbar, inventory, all)");
     }
 }

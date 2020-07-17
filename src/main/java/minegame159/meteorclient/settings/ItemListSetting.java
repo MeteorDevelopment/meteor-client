@@ -62,7 +62,7 @@ public class ItemListSetting extends Setting<List<Item>> {
 
     @Override
     protected String generateUsage() {
-        return "#blueitem id #gray(dirt, minecraft:stone, etc)";
+        return "(highlight)item id (default)(dirt, minecraft:stone, etc)";
     }
 
     @Override

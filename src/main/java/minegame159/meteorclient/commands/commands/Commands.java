@@ -3,7 +3,7 @@ package minegame159.meteorclient.commands.commands;
 import minegame159.meteorclient.Config;
 import minegame159.meteorclient.commands.Command;
 import minegame159.meteorclient.commands.CommandManager;
-import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.Chat;
 
 public class Commands extends Command {
     public Commands() {
@@ -12,9 +12,9 @@ public class Commands extends Command {
 
     @Override
     public void run(String[] args) {
-        Utils.sendMessage("#pinkAll #gray%d #yellowcommands:", CommandManager.getCount());
+        Chat.info("All (highlight)%d (default)commands:", CommandManager.getCount());
         CommandManager.forEach(command -> {
-            Utils.sendMessage("  #yellow%s%s #gray- #yellow%s", Config.INSTANCE.getPrefix(), command.name, command.description);
+            Chat.info("- (highlight)%s%s (default)- %s", Config.INSTANCE.getPrefix(), command.name, command.description);
         });
     }
 }

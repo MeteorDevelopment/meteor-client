@@ -60,9 +60,10 @@ public class EntityTypeListSetting extends Setting<List<EntityType<?>>> {
         return true;
     }
 
+    // TODO
     @Override
     protected String generateUsage() {
-        return "#blueblock id #gray(pig, minecraft:zombie, etc)";
+        return "(highlight)entity type (default)(pig, minecraft:zombie, etc)";
     }
 
     @Override

@@ -2,6 +2,7 @@ package minegame159.meteorclient.commands.commands;
 //Created by squidoodly 27/05/2020
 
 import minegame159.meteorclient.commands.Command;
+import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.enchantment.Enchantments;
@@ -12,12 +13,15 @@ public class Enchant extends Command {
         super("enchant", "Enchants the currently held item with almost every enchantment (must be in creative)");
     }
 
-    private MinecraftClient mc = MinecraftClient.getInstance();
+    private final MinecraftClient mc = MinecraftClient.getInstance();
 
     @Override
-    public void run(String[] args){
-        if(args.length == 0){Utils.sendMessage("#redPlease include a level"); return;}
-        if(mc.player.isCreative()){
+    public void run(String[] args) {
+        if (args.length == 0) {
+            Chat.error("Please include a level.");
+            return;
+        }
+        if (mc.player.isCreative()) {
             try {
                 Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.AQUA_AFFINITY, Integer.parseInt(args[0]));
                 Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.BANE_OF_ARTHROPODS, Integer.parseInt(args[0]));
@@ -52,11 +56,11 @@ public class Enchant extends Command {
                 Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.THORNS, Integer.parseInt(args[0]));
                 Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.UNBREAKING, Integer.parseInt(args[0]));
                 Utils.addEnchantment(mc.player.getMainHandStack(), Enchantments.VANISHING_CURSE, Integer.parseInt(args[0]));
-            }catch(NumberFormatException e){
-                Utils.sendMessage("#redThat is not a valid number. Try again.");
+            } catch (NumberFormatException e) {
+                Chat.error("That is not a valid number. Try again.");
             }
-        }else{
-            Utils.sendMessage("#redYou must be in creative mode to use this");
+        } else {
+            Chat.error("You must be in creative mode to use this.");
         }
     }
 }

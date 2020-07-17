@@ -10,12 +10,13 @@ import minegame159.meteorclient.events.GameDisconnectedEvent;
 import minegame159.meteorclient.events.GameJoinedEvent;
 import minegame159.meteorclient.events.KeyEvent;
 import minegame159.meteorclient.modules.combat.*;
-import minegame159.meteorclient.modules.misc.*;
 import minegame159.meteorclient.modules.misc.Timer;
+import minegame159.meteorclient.modules.misc.*;
 import minegame159.meteorclient.modules.movement.*;
 import minegame159.meteorclient.modules.player.*;
 import minegame159.meteorclient.modules.render.*;
 import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.Savable;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.nbt.CompoundTag;
@@ -139,7 +140,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         // Check if binding module
         if (moduleToBind != null) {
             moduleToBind.setKey(event.key);
-            Utils.sendMessage("#yellowModule #blue'%s' #yellowbound to #blue%s#yellow.", moduleToBind.title, Utils.getKeyName(event.key));
+            Chat.info("Module (highlight)%s (default)bound to (highlight)%s(default).", moduleToBind.title, Utils.getKeyName(event.key));
             moduleToBind = null;
             event.cancel();
             return;
