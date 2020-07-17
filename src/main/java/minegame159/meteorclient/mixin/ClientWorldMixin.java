@@ -11,8 +11,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ClientWorld.class)
 public class ClientWorldMixin {
-    @Inject(method = "addEntity", at = @At("TAIL"))
-    private void onAddEntity(int id, Entity entity, CallbackInfo info) {
+    @Inject(method = "addEntityPrivate", at = @At("TAIL"))
+    private void onAddEntityPrivate(int id, Entity entity, CallbackInfo info) {
         MeteorClient.EVENT_BUS.post(EventStore.entityAddedEvent(entity));
     }
 
