@@ -12,13 +12,15 @@ import minegame159.meteorclient.utils.InvUtils;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
+import net.minecraft.client.gui.screen.ingame.Generic3x3ContainerScreen;
 import net.minecraft.client.gui.screen.ingame.HopperScreen;
 import net.minecraft.container.SlotActionType;
+import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.AirBlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -73,92 +75,159 @@ public class Auto32K extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> autoMove = sgGeneral.add(new BoolSetting.Builder()
+            .name("auto-move")
+            .description("Moves the sword for you")
+            .defaultValue(true)
+            .build()
+    );
+
     private int x;
     private int z;
+    private int phase = 0;
+    private BlockPos bestBlock;
+
+    @Override
+    public void onDeactivate() {
+        phase = 0;
+    }
 
     @Override
     public void onActivate() {
-        if (mode.get() == Mode.Hopper) {
-            int shulkerSlot = InvUtils.findItemWithCount(Items.SHULKER_BOX).slot;
-            int hopperSlot = InvUtils.findItemWithCount(Items.HOPPER).slot;
-            if (isValidSlot(shulkerSlot) || isValidSlot(hopperSlot)) return;
-            List<BlockPos> sortedBlocks = findValidBlocksHopper();
-            sortedBlocks.sort(Comparator.comparingDouble(value -> mc.player.squaredDistanceTo(value.getX(), value.getY(), value.getZ())));
-            Iterator<BlockPos> sortedIterator = sortedBlocks.iterator();
-            BlockPos bestBlock = sortedIterator.next();
-
-            if (bestBlock != null) {
-                mc.player.inventory.selectedSlot = hopperSlot;
-                while(!Utils.place(Blocks.HOPPER.getDefaultState(), bestBlock)){
-                    bestBlock = sortedIterator.next();
-                }
-                mc.player.setSneaking(true);
-                mc.player.inventory.selectedSlot = shulkerSlot;
-                if (!Utils.place(Blocks.SHULKER_BOX.getDefaultState(), bestBlock.up())){ Utils.sendMessage("#redFailed to place."); return;}
-                mc.player.setSneaking(false);
-                mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(bestBlock.up()), mc.player.getHorizontalFacing(), bestBlock.up(), false));
-            }
-        }else if (mode.get() == Mode.Dispenser) {
-            int shulkerSlot = InvUtils.findItemWithCount(Items.SHULKER_BOX).slot;
-            int hopperSlot = InvUtils.findItemWithCount(Items.HOPPER).slot;
-            int dispenserSlot = InvUtils.findItemWithCount(Items.DISPENSER).slot;
-            int redstoneSlot = InvUtils.findItemWithCount(Items.REDSTONE_BLOCK).slot;
-            if (isValidSlot(shulkerSlot) || isValidSlot(hopperSlot) || isValidSlot(dispenserSlot) || isValidSlot(redstoneSlot))
-                return;
-            BlockPos bestBlock = findValidBlocksDispenser();
-            if (bestBlock != null) {
-                mc.player.inventory.selectedSlot = hopperSlot;
-                if (!Utils.place(Blocks.HOPPER.getDefaultState(), bestBlock.add(x, 0, z))) {
-                    Utils.sendMessage("#redFialed to place");
-                    return;
-                }
-                mc.player.inventory.selectedSlot = dispenserSlot;
-                if (x == -1) {
-                    //mc.player.yaw = -90f;
-                    mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(-90f, mc.player.pitch, mc.player.onGround));
-                } else if (x == 1) {
-                    //mc.player.yaw = 90f;
-                    mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(90f, mc.player.pitch, mc.player.onGround));
-                } else if (z == -1) {
-                    //mc.player.yaw = 1f;
-                    mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(1f, mc.player.pitch, mc.player.onGround));
-                } else if (z == 1) {
-                    //mc.player.yaw = 179f;
-                    mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(179f, mc.player.pitch, mc.player.onGround));
-                }
-                //mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(bestBlock), Direction.UP, bestBlock, false));
-                //mc.player.networkHandler.sendPacket(new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, bestBlock, false)));
-                mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(bestBlock.up()), mc.player.getHorizontalFacing().getOpposite(), bestBlock.up(), false));
-            }
-        }
+        bestBlock = findValidBlocksDispenser();
     }
 
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
-        if (mc.currentScreen instanceof HopperScreen){
-            if (fillHopper.get()) {
-                int slot = -1;
-                int count = 0;
-                Iterator<Block> blocks = throwawayItems.get().iterator();
-                for (Item item = blocks.next().asItem(); blocks.hasNext(); item = blocks.next().asItem()){
-                    for(int i = 5; i <=  40; i++){
-                        ItemStack stack = mc.player.inventory.getInvStack(i);
-                        if(stack.getItem() == item && stack.getCount() >= 4){
-                            slot = i;
-                            count = stack.getCount();
-                            break;
-                        }
+        if(phase <= 7) {
+            if (mode.get() == Mode.Hopper) {
+                int shulkerSlot = InvUtils.findItemWithCount(Items.SHULKER_BOX).slot;
+                int hopperSlot = InvUtils.findItemWithCount(Items.HOPPER).slot;
+                if (isValidSlot(shulkerSlot) || isValidSlot(hopperSlot)) return;
+                List<BlockPos> sortedBlocks = findValidBlocksHopper();
+                sortedBlocks.sort(Comparator.comparingDouble(value -> mc.player.squaredDistanceTo(value.getX(), value.getY(), value.getZ())));
+                Iterator<BlockPos> sortedIterator = sortedBlocks.iterator();
+                BlockPos bestBlock = sortedIterator.next();
+
+                if (bestBlock != null) {
+                    mc.player.inventory.selectedSlot = hopperSlot;
+                    while (!Utils.place(Blocks.HOPPER.getDefaultState(), bestBlock)) {
+                        if(sortedIterator.hasNext()) {
+                            bestBlock = sortedIterator.next().up();
+                        }else break;
                     }
-                    if(count >= 4) break;
+                    mc.player.setSneaking(true);
+                    mc.player.inventory.selectedSlot = shulkerSlot;
+                    if (!Utils.place(Blocks.SHULKER_BOX.getDefaultState(), bestBlock.up())) {
+                        Utils.sendMessage("#redFailed to place.");
+                        this.toggle();
+                        return;
+                    }
+                    mc.player.setSneaking(false);
+                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(bestBlock.up()), mc.player.getHorizontalFacing(), bestBlock.up(), false));
+                    phase = 8;
                 }
-                for (int i = 1; i < 5; i++) {
-                    if (mc.player.container.getSlot(i).getStack().getItem() instanceof AirBlockItem) {
-                        InvUtils.clickSlot(slot + 5, 0, SlotActionType.PICKUP);
-                        InvUtils.clickSlot(i, 1, SlotActionType.PICKUP);
-                        InvUtils.clickSlot(slot + 5, 0, SlotActionType.PICKUP);
+            } else if (mode.get() == Mode.Dispenser) {
+                int shulkerSlot = InvUtils.findItemWithCount(Items.SHULKER_BOX).slot;
+                int hopperSlot = InvUtils.findItemWithCount(Items.HOPPER).slot;
+                int dispenserSlot = InvUtils.findItemWithCount(Items.DISPENSER).slot;
+                int redstoneSlot = InvUtils.findItemWithCount(Items.REDSTONE_BLOCK).slot;
+                if ((isValidSlot(shulkerSlot) && mode.get() == Mode.Hopper) || isValidSlot(hopperSlot) || isValidSlot(dispenserSlot) || isValidSlot(redstoneSlot))
+                    return;
+                if (phase == 0) {
+                    bestBlock = findValidBlocksDispenser();
+                    mc.player.inventory.selectedSlot = hopperSlot;
+                    if (!Utils.place(Blocks.HOPPER.getDefaultState(), bestBlock.add(x, 0, z))) {
+                        Utils.sendMessage("#redFailed to place");
+                        this.toggle();
+                        return;
                     }
+                    phase += 1;
+                } else if (phase == 1) {
+                    mc.player.inventory.selectedSlot = dispenserSlot;
+                    if (x == -1) {
+                        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(-90f, mc.player.pitch, mc.player.onGround));
+                    } else if (x == 1) {
+                        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(90f, mc.player.pitch, mc.player.onGround));
+                    } else if (z == -1) {
+                        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(1f, mc.player.pitch, mc.player.onGround));
+                    } else if (z == 1) {
+                        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(179f, mc.player.pitch, mc.player.onGround));
+                    }
+                    phase += 1;
+                } else if (phase == 2) {
+                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(bestBlock), Direction.UP, bestBlock, false));
+                    phase += 1;
+                } else if (phase == 3) {
+                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(bestBlock.up()), mc.player.getHorizontalFacing().getOpposite(), bestBlock.up(), false));
+                    phase += 1;
+                }else if (phase == 4 && mc.currentScreen instanceof Generic3x3ContainerScreen) {
+                    mc.player.getSpeed();
+                    InvUtils.clickSlot(InvUtils.invIndexToSlotId(shulkerSlot), 0, SlotActionType.PICKUP);
+                    InvUtils.clickSlot(4, 0, SlotActionType.PICKUP);
+                    phase += 1;
+                }else if (phase == 5 && mc.currentScreen instanceof Generic3x3ContainerScreen) {
+                    mc.player.closeContainer();
+                    phase += 1;
+                }else if (phase == 6) {
+                    mc.player.inventory.selectedSlot = redstoneSlot;
+                    mc.player.setSneaking(true);
+                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(bestBlock.up()), mc.player.getHorizontalFacing().getOpposite(), bestBlock.up(2), false));
+                    mc.player.setSneaking(false);
+                    phase += 1;
+                }else if (phase == 7){
+                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(bestBlock.up()), mc.player.getHorizontalFacing().getOpposite(), bestBlock.add(x, 0, z), false));
+                    phase += 1;
                 }
             }
+        }else if(phase == 8) {
+            if (mc.currentScreen instanceof HopperScreen) {
+                if (fillHopper.get()) {
+                    int slot = -1;
+                    int count = 0;
+                    Iterator<Block> blocks = throwawayItems.get().iterator();
+                    for (Item item = blocks.next().asItem(); blocks.hasNext(); item = blocks.next().asItem()) {
+                        for (int i = 5; i <= 40; i++) {
+                            ItemStack stack = mc.player.inventory.getInvStack(i);
+                            if (stack.getItem() == item && stack.getCount() >= 4) {
+                                slot = i;
+                                count = stack.getCount();
+                                break;
+                            }
+                        }
+                        if (count >= 4) break;
+                    }
+                    for (int i = 1; i < 5; i++) {
+                        if (mc.player.container.getSlot(i).getStack().getItem() instanceof AirBlockItem) {
+                            InvUtils.clickSlot(InvUtils.invIndexToSlotId(slot) - 4, 0, SlotActionType.PICKUP);
+                            InvUtils.clickSlot(i, 1, SlotActionType.PICKUP);
+                            InvUtils.clickSlot(InvUtils.invIndexToSlotId(slot) - 4, 0, SlotActionType.PICKUP);
+                        }
+                    }
+                }
+                boolean manage = true;
+                int slot = -1;
+                for (int i = 32; i < 41; i++){
+                    if(EnchantmentHelper.getLevel(Enchantments.SHARPNESS, mc.player.container.getSlot(i).getStack()) > 5){
+                        manage = false;
+                        slot = i;
+                        break;
+                    }
+                }
+                if(autoMove.get() && manage){
+                    int slot2 = mc.player.inventory.getEmptySlot();
+                    if (slot2 < 9 && slot2 != -1 && EnchantmentHelper.getLevel(Enchantments.SHARPNESS, mc.player.container.getSlot(0).getStack()) > 5) {
+                        InvUtils.clickSlot(0, 0, SlotActionType.PICKUP);
+                        InvUtils.clickSlot(InvUtils.invIndexToSlotId(slot2), 0, SlotActionType.PICKUP);
+                    } else if (EnchantmentHelper.getLevel(Enchantments.SHARPNESS, mc.player.container.getSlot(0).getStack()) <= 5
+                            && mc.player.container.getSlot(0).getStack().getItem() != Items.AIR) {
+                        InvUtils.clickSlot(0, 0, SlotActionType.THROW);
+                    }
+                }
+                if(slot != -1) {
+                    mc.player.inventory.selectedSlot = slot - 32;
+                }
+            }else this.toggle();
         }
     });
 
