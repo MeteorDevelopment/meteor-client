@@ -14,6 +14,7 @@ public class Reach extends ToggleModule {
             .description("Reach.")
             .defaultValue(5)
             .min(0)
+            .sliderMax(6)
             .build()
     );
 
