@@ -30,6 +30,8 @@ public abstract class ClientPlayerInteractionManagerMixin implements IClientPlay
 
     @Shadow private int field_3716;
 
+    @Shadow private float currentBreakingProgress;
+
     @Inject(method = "attackEntity", at = @At("HEAD"), cancellable = true)
     private void onAttackEntity(PlayerEntity player, Entity target, CallbackInfo info) {
         AttackEntityEvent event = EventStore.attackEntityEvent(target);
@@ -67,5 +69,10 @@ public abstract class ClientPlayerInteractionManagerMixin implements IClientPlay
     @Override
     public void syncSelectedSlot2() {
         syncSelectedSlot();
+    }
+
+    @Override
+    public double getBreakingProgress() {
+        return currentBreakingProgress;
     }
 }

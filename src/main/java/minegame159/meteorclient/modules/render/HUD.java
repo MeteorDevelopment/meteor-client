@@ -6,6 +6,7 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.Config;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.*;
+import minegame159.meteorclient.mixininterface.IClientPlayerInteractionManager;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
@@ -154,6 +155,12 @@ public class HUD extends ToggleModule {
     private final Setting<Boolean> durability = sgTopLeft.add(new BoolSetting.Builder()
             .name("durability")
             .description("Durability of the time in your main hand.")
+            .defaultValue(true)
+            .build()
+    );
+    private final Setting<Boolean> breakingBlock = sgTopLeft.add(new BoolSetting.Builder()
+            .name("breaking-block")
+            .description("Displays the percentage how much you have broken the block.")
             .defaultValue(true)
             .build()
     );
@@ -546,6 +553,11 @@ public class HUD extends ToggleModule {
             if (!mc.player.getMainHandStack().isEmpty() && mc.player.getMainHandStack().isDamageable()) amount = mc.player.getMainHandStack().getMaxDamage() - mc.player.getMainHandStack().getDamage();
 
             drawInfo("Durability: ", amount == null ? "" : amount.toString(), y);
+            y += MeteorClient.FONT.getHeight() + 2;
+        }
+
+        if (breakingBlock.get()) {
+            drawInfo("Breaking block: ", String.format("%.0f%%", ((IClientPlayerInteractionManager) mc.interactionManager).getBreakingProgress() * 100), y);
             y += MeteorClient.FONT.getHeight() + 2;
         }
 
