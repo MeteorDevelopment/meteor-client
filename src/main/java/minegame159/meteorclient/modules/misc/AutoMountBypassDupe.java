@@ -4,7 +4,6 @@ package minegame159.meteorclient.modules.misc;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.KeyEvent;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.events.packets.SendPacketEvent;
 import minegame159.meteorclient.modules.Category;
@@ -25,6 +24,7 @@ import net.minecraft.entity.passive.AbstractDonkeyEntity;
 import net.minecraft.entity.passive.LlamaEntity;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Items;
+import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.Hand;
@@ -84,6 +84,12 @@ public class AutoMountBypassDupe extends ToggleModule {
 
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
+        if (GLFW.glfwGetKey(mc.window.getHandle(), GLFW.GLFW_KEY_ESCAPE) == GLFW.GLFW_PRESS) {
+            toggle();
+            mc.player.closeContainer();
+            return;
+        }
+
         if (timer <= 0) {
             timer = delay.get();
         } else {
@@ -101,6 +107,7 @@ public class AutoMountBypassDupe extends ToggleModule {
         if (entity == null) return;
 
         if (sneak) {
+            mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.STOP_SNEAKING));
             mc.player.setSneaking(false);
             sneak = false;
             return;
@@ -135,6 +142,8 @@ public class AutoMountBypassDupe extends ToggleModule {
                 }
             } else {
                 mc.player.closeContainer();
+                mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.START_SNEAKING));
+
                 mc.player.setSneaking(true);
                 sneak = true;
             }
@@ -171,14 +180,6 @@ public class AutoMountBypassDupe extends ToggleModule {
                 for (int i : slotsToMove) InvUtils.clickSlot(i, 0, SlotActionType.QUICK_MOVE);
                 slotsToMove.clear();
             }
-        }
-    });
-
-    @EventHandler
-    private final Listener<KeyEvent> onKey = new Listener<>(event -> {
-        if (event.key == GLFW.GLFW_KEY_ESCAPE && !event.push) {
-            toggle();
-            mc.player.closeContainer();
         }
     });
 
