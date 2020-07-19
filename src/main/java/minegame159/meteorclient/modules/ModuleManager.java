@@ -10,12 +10,13 @@ import minegame159.meteorclient.events.GameDisconnectedEvent;
 import minegame159.meteorclient.events.GameJoinedEvent;
 import minegame159.meteorclient.events.KeyEvent;
 import minegame159.meteorclient.modules.combat.*;
-import minegame159.meteorclient.modules.misc.*;
 import minegame159.meteorclient.modules.misc.Timer;
+import minegame159.meteorclient.modules.misc.*;
 import minegame159.meteorclient.modules.movement.*;
 import minegame159.meteorclient.modules.player.*;
 import minegame159.meteorclient.modules.render.*;
 import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.Savable;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.nbt.CompoundTag;
@@ -139,7 +140,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         // Check if binding module
         if (moduleToBind != null) {
             moduleToBind.setKey(event.key);
-            Utils.sendMessage("#yellowModule #blue'%s' #yellowbound to #blue%s#yellow.", moduleToBind.title, Utils.getKeyName(event.key));
+            Chat.info("Module (highlight)%s (default)bound to (highlight)%s(default).", moduleToBind.title, Utils.getKeyName(event.key));
             moduleToBind = null;
             event.cancel();
             return;
@@ -204,6 +205,8 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
     }
 
     private void initCombat() {
+        addModule(new Auto32K());
+        addModule(new AntiFriendHit());
         addModule(new Criticals());
         addModule(new AutoTotem());
         addModule(new BedAura());
@@ -231,6 +234,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new AntiHunger());
         addModule(new AutoTool());
         addModule(new AutoEat());
+        addModule(new AutoMount());
         addModule(new XpBottleThrower());
         addModule(new MiddleClickExtra());
         addModule(new AutoArmor());
@@ -242,6 +246,9 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new Reach());
         addModule(new PotionSpoof());
         addModule(new LiquidInteract());
+        addModule(new MountBypass());
+        addModule(new PacketMine());
+        addModule(new InvMove());
     }
 
     private void initMovement() {
@@ -255,6 +262,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new Flight());
         addModule(new Velocity());
         addModule(new ElytraPlus());
+        addModule(new EntityControl());
         addModule(new HighJump());
         addModule(new Speed());
         addModule(new SafeWalk());
@@ -285,6 +293,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new EntityOwner());
         addModule(new NoRender());
         addModule(new Breadcrumbs());
+        addModule(new BlockSelection());
     }
 
     private void initMisc() {
@@ -313,5 +322,9 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new Timer());
         addModule(new Suffix());
         addModule(new UwUAura());
+        addModule(new AutoMountBypassDupe());
+        addModule(new Nuker());
+        addModule(new SoundBlocker());
+        addModule(new AntiChunkBan());
     }
 }

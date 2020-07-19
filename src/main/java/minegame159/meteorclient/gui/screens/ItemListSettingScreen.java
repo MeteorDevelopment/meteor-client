@@ -46,9 +46,7 @@ public class ItemListSettingScreen extends WindowScreen {
             plus.action = plus1 -> {
                 if (!setting.get().contains(item)) {
                     setting.get().add(item);
-                    setting.changed();
-                    clear();
-                    initWidgets();
+                    reload();
                 }
             };
 
@@ -78,13 +76,22 @@ public class ItemListSettingScreen extends WindowScreen {
             WMinus minus = table2.add(new WMinus()).getWidget();
             minus.action = minus1 -> {
                 if (setting.get().remove(item)) {
-                    setting.changed();
-                    clear();
-                    initWidgets();
+                    reload();
                 }
             };
 
             table2.row();
         }
+    }
+
+    private void reload() {
+        double verticalScroll = window.verticalScroll;
+
+        setting.changed();
+        clear();
+        initWidgets();
+
+        window.getRoot().layout();
+        window.moveWidgets(0, verticalScroll);
     }
 }

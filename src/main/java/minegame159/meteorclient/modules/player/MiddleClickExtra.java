@@ -13,8 +13,8 @@ import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.InvUtils;
-import minegame159.meteorclient.utils.Utils;
 import net.minecraft.item.Items;
 import net.minecraft.util.Hand;
 
@@ -31,7 +31,7 @@ public class MiddleClickExtra extends ToggleModule {
         super(Category.Player, "middle-click-extra", "Lets you use items on middle click (works at the same time as Middle Click Friend).");
     }
 
-    private SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("mode")
@@ -52,7 +52,7 @@ public class MiddleClickExtra extends ToggleModule {
     private int preCount;
 
     @EventHandler
-    private Listener<MiddleMouseButtonEvent> onMiddleMouse = new Listener<>(event -> {
+    private final Listener<MiddleMouseButtonEvent> onMiddleMouse = new Listener<>(event -> {
         switch(mode.get()){
             case Pearl: {
                 InvUtils.FindItemResult result = InvUtils.findItemWithCount(Items.ENDER_PEARL);
@@ -61,8 +61,8 @@ public class MiddleClickExtra extends ToggleModule {
                     mc.player.inventory.selectedSlot = result.slot;
                     mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
                     mc.player.inventory.selectedSlot = preSlot;
-                }else if(notify.get()){
-                    Utils.sendMessage("#redUnable to find selected item.");
+                } else if (notify.get()) {
+                    sendErrorMsg();
                 }
                 break;
             }case Gap: {
@@ -72,8 +72,8 @@ public class MiddleClickExtra extends ToggleModule {
                     mc.player.inventory.selectedSlot = result.slot;
                     preCount = result.count;
                     wasUsing = true;
-                }else if(notify.get()){
-                    Utils.sendMessage("#redUnable to find selected item.");
+                } else if(notify.get()) {
+                    sendErrorMsg();
                 }
                 break;
             }case EGap:{
@@ -83,8 +83,8 @@ public class MiddleClickExtra extends ToggleModule {
                     mc.player.inventory.selectedSlot = result.slot;
                     preCount = result.count;
                     wasUsing = true;
-                }else if(notify.get()){
-                    Utils.sendMessage("#redUnable to find selected item.");
+                } else if(notify.get()) {
+                    sendErrorMsg();
                 }
                 break;
             }case Bow:{
@@ -94,8 +94,8 @@ public class MiddleClickExtra extends ToggleModule {
                     mc.player.inventory.selectedSlot = result.slot;
                     preCount = InvUtils.findItemWithCount(Items.ARROW).count;
                     wasUsing = !wasUsing;
-                }else if(notify.get()){
-                    Utils.sendMessage("#redUnable to find selected item.");
+                } else if(notify.get()) {
+                    sendErrorMsg();
                 }
                 break;
             }case Rod: {
@@ -104,16 +104,20 @@ public class MiddleClickExtra extends ToggleModule {
                     preSlot = mc.player.inventory.selectedSlot;
                     mc.player.inventory.selectedSlot = result.slot;
                     mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
-                }else if(notify.get()){
-                    Utils.sendMessage("#redUnable to find selected item.");
+                } else if (notify.get()) {
+                    sendErrorMsg();
                 }
                 break;
             }
         }
     });
 
+    private void sendErrorMsg() {
+        Chat.error(this, "Unable to find selected item.");
+    }
+
     @EventHandler
-    private Listener<TickEvent> onTick = new Listener<>(event -> {
+    private final Listener<TickEvent> onTick = new Listener<>(event -> {
         if(!wasUsing) return;
         if(preCount == mc.player.getMainHandStack().getCount()){
             ((IKeyBinding) mc.options.keyUse).setPressed(true);

@@ -48,7 +48,7 @@ public class XRay extends ToggleModule {
         if (!MeteorClient.IS_DISCONNECTING) mc.worldRenderer.reload();
     }
 
-    public boolean isVisible(Block block) {
-        return blocks.get().contains(block);
+    public boolean isBlocked(Block block) {
+        return isActive() && !blocks.get().contains(block);
     }
 }

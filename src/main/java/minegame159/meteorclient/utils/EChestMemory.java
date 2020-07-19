@@ -7,6 +7,7 @@ import minegame159.meteorclient.events.OpenScreenEvent;
 import net.minecraft.block.EnderChestBlock;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
+import net.minecraft.container.GenericContainer;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.collection.DefaultedList;
@@ -33,7 +34,10 @@ public class EChestMemory {
         }
         if (echestOpenedState == 0) return;
 
-        Inventory inv = ((GenericContainerScreen) MC.currentScreen).getScreenHandler().getInventory();
+        if (MC.currentScreen == null) return;
+        GenericContainer container = ((GenericContainerScreen) MC.currentScreen).getScreenHandler();
+        if (container == null) return;
+        Inventory inv = container.getInventory();
 
         for (int i = 0; i < 27; i++) {
             ITEMS.set(i, inv.getStack(i));

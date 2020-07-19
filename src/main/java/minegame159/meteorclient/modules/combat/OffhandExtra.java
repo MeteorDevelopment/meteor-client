@@ -10,8 +10,8 @@ import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.InvUtils;
-import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
@@ -63,19 +63,19 @@ public class OffhandExtra extends ToggleModule {
 
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
-        if(ModuleManager.INSTANCE.get(AutoTotem.class).getLocked()) return;
-        if(Asimov.get() && !(mc.currentScreen instanceof HandledScreen<?>)){
+        if (ModuleManager.INSTANCE.get(AutoTotem.class).getLocked()) return;
+        if (Asimov.get() && !(mc.currentScreen instanceof HandledScreen<?>)) {
             Item item = getItem();
             InvUtils.FindItemResult result = InvUtils.findItemWithCount(item);
-            if(result.slot == -1 && mc.player.getOffHandStack().getItem() != getItem()) {
-                Utils.sendMessage("#redNone of the chosen item found. Disabling!");
+            if (result.slot == -1 && mc.player.getOffHandStack().getItem() != getItem()) {
+                sendErrorMsg();
                 this.toggle();
                 return;
             }
             if (mc.player.getOffHandStack().isEmpty()) {
                 InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
                 InvUtils.clickSlot(InvUtils.OFFHAND_SLOT, 0, SlotActionType.PICKUP);
-            }else if (mc.player.getOffHandStack().getItem() != item && replace.get()){
+            } else if (mc.player.getOffHandStack().getItem() != item && replace.get()) {
                 InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
                 InvUtils.clickSlot(InvUtils.OFFHAND_SLOT, 0, SlotActionType.PICKUP);
                 InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
@@ -85,26 +85,30 @@ public class OffhandExtra extends ToggleModule {
 
     @EventHandler
     private final Listener<RightClickEvent> onRightClick = new Listener<>(event -> {
-        if(ModuleManager.INSTANCE.get(AutoTotem.class).getLocked()) return;
-        if((mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING || (mc.player.getHealth() + mc.player.getAbsorptionAmount() > health.get())
-               && (mc.player.getOffHandStack().getItem() != getItem()) && !(mc.currentScreen instanceof HandledScreen<?>))){
+        if (ModuleManager.INSTANCE.get(AutoTotem.class).getLocked()) return;
+        if ((mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING || (mc.player.getHealth() + mc.player.getAbsorptionAmount() > health.get())
+               && (mc.player.getOffHandStack().getItem() != getItem()) && !(mc.currentScreen instanceof HandledScreen<?>))) {
             Item item = getItem();
             InvUtils.FindItemResult result = InvUtils.findItemWithCount(item);
-            if(result.slot == -1 && mc.player.getOffHandStack().getItem() != getItem()) {
-                Utils.sendMessage("#redNone of the chosen item found. Disabling!");
+            if (result.slot == -1 && mc.player.getOffHandStack().getItem() != getItem()) {
+                sendErrorMsg();
                 this.toggle();
                 return;
             }
             if (mc.player.getOffHandStack().isEmpty()) {
                 InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
                 InvUtils.clickSlot(InvUtils.OFFHAND_SLOT, 0, SlotActionType.PICKUP);
-            }else if (mc.player.getOffHandStack().getItem() != item && replace.get()){
+            } else if (mc.player.getOffHandStack().getItem() != item && replace.get()) {
                 InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
                 InvUtils.clickSlot(InvUtils.OFFHAND_SLOT, 0, SlotActionType.PICKUP);
                 InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
             }
         }
     });
+
+    private void sendErrorMsg() {
+        Chat.warning(this, "None of the chosen item found. Disabling!");
+    }
 
     private Item getItem(){
         Item item = Items.TOTEM_OF_UNDYING;

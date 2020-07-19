@@ -9,70 +9,98 @@ import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.modules.player.AutoTool;
+import minegame159.meteorclient.settings.BoolSetting;
+import minegame159.meteorclient.settings.IntSetting;
+import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.InvUtils;
 import net.minecraft.block.BlockState;
+import minegame159.meteorclient.utils.Utils;
 import net.minecraft.block.Blocks;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.Items;
-import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
-import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 
 public class EChestFarmer extends ToggleModule {
     private static final BlockState ENDER_CHEST = Blocks.ENDER_CHEST.getDefaultState();
 
     public EChestFarmer(){
-        super(Category.Misc, "EChest-farmer", "Farms EChests for obby.");
+        super(Category.Misc, "EChest-farmer", "Places and mines EChests where you are looking.");
     }
 
+    private final SettingGroup sgGeneral  = settings.getDefaultGroup();
+
+    private final Setting<Integer> amount = sgGeneral.add(new IntSetting.Builder()
+            .name("target-amount")
+            .description("The amount of obsidian to farm.")
+            .defaultValue(64)
+            .min(8)
+            .sliderMax(64)
+            .max(512)
+            .build()
+    );
+
+    private final Setting<Integer> lowerAmount = sgGeneral.add(new IntSetting.Builder()
+            .name("lower-amount")
+            .description("The amount before this turns on again.")
+            .defaultValue(8)
+            .min(0)
+            .max(64)
+            .sliderMax(32)
+            .build()
+    );
+
+    private final Setting<Boolean> disableOnAmount = sgGeneral.add(new BoolSetting.Builder()
+            .name("disable-on-completion")
+            .description("Whether to disable once you reach target stacks")
+            .defaultValue(true)
+            .build()
+    );
+
+    private boolean stop = false;
+    private int numLeft = Math.floorDiv(amount.get() , 8);
+
     @EventHandler
-    private Listener<TickEvent> onTick = new Listener<>(event -> {
+    private final Listener<TickEvent> onTick = new Listener<>(event -> {
+        if (lowerAmount.get() < InvUtils.findItemWithCount(Items.OBSIDIAN).count) stop = false;
+        if (stop && !disableOnAmount.get()) {
+            stop = false;
+            numLeft = Math.floorDiv(amount.get(), 8);
+            return;
+        } else if (stop && disableOnAmount.get()) {
+            this.toggle();
+            return;
+        }
         InvUtils.FindItemResult itemResult = InvUtils.findItemWithCount(Items.ENDER_CHEST);
         int slot = -1;
-        if(itemResult.count != 0 && itemResult.slot < 9) {
+        if(itemResult.count != 0 && itemResult.slot < 9 && itemResult.slot != -1) {
             for (int i = 0; i < 9; i++) {
                 if (ModuleManager.INSTANCE.get(AutoTool.class).isEffectiveOn(mc.player.inventory.getStack(i).getItem(), ENDER_CHEST)
                         && EnchantmentHelper.getLevel(Enchantments.SILK_TOUCH, mc.player.inventory.getStack(i)) == 0) {
                     slot = i;
                 }
             }
-            if (slot != -1) {
-                int x = 0;
-                int z = 0;
-                if(mc.world.getBlockState(mc.player.getBlockPos().add(1, 0, 0)).getBlock().equals(Blocks.AIR)){
-                    x =1;
-                }else if(mc.world.getBlockState(mc.player.getBlockPos().add(-1, 0, 0)).getBlock().equals(Blocks.AIR)){
-                    x = -1;
-                }else if(mc.world.getBlockState(mc.player.getBlockPos().add(0, 0, 1)).getBlock().equals(Blocks.AIR)){
-                    z = 1;
-                }else if(mc.world.getBlockState(mc.player.getBlockPos().add(0, 0, -1)).getBlock().equals(Blocks.AIR)){
-                    z = -1;
-                }
-                if(x != 0 || z != 0) {
+            if (slot != -1 && itemResult.slot != -1 && itemResult.slot < 9) {
+                BlockPos pos = ((BlockHitResult) mc.crosshairTarget).getBlockPos();
+                if(mc.world.getBlockState(pos).getBlock() == Blocks.ENDER_CHEST){
+                    if (mc.player.inventory.selectedSlot != slot) {
+                        mc.player.inventory.selectedSlot = slot;
+                    }
+                    mc.interactionManager.updateBlockBreakingProgress(pos, Direction.UP);
+                    numLeft -= 1;
+                    if(numLeft == 0){
+                        stop = true;
+                    }
+                } else if (mc.world.getBlockState(pos.up()).getBlock() == Blocks.AIR) {
+                    if (mc.player.inventory.selectedSlot != itemResult.slot)
                     mc.player.inventory.selectedSlot = itemResult.slot;
-                    PlayerInteractBlockC2SPacket placePacket = new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, mc.player.getBlockPos().add(x, 0, z), false));
-                    mc.player.networkHandler.sendPacket(placePacket);
+                    Utils.place(Blocks.ENDER_CHEST.getDefaultState(), pos.up());
                 }
+
             }
-        }
-        int x = 0;
-        int z = 0;
-        if(mc.world.getBlockState(mc.player.getBlockPos().add(1, 0, 0)).getBlock().equals(Blocks.ENDER_CHEST)){
-            x =1;
-        }else if(mc.world.getBlockState(mc.player.getBlockPos().add(-1, 0, 0)).getBlock().equals(Blocks.ENDER_CHEST)){
-            x = -1;
-        }else if(mc.world.getBlockState(mc.player.getBlockPos().add(0, 0, 1)).getBlock().equals(Blocks.ENDER_CHEST)){
-            z = 1;
-        }else if(mc.world.getBlockState(mc.player.getBlockPos().add(0, 0, -1)).getBlock().equals(Blocks.ENDER_CHEST)){
-            z = -1;
-        }
-        if(x != 0 || z != 0) {
-            if(slot >= 0) {
-                mc.player.inventory.selectedSlot = slot;
-            }
-            mc.interactionManager.updateBlockBreakingProgress(mc.player.getBlockPos().add(x, 0, z), Direction.UP);
         }
     });
 }

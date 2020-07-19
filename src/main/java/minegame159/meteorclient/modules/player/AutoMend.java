@@ -11,8 +11,8 @@ import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.InvUtils;
-import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
@@ -97,7 +97,7 @@ public class AutoMend extends ToggleModule {
     }
 
     @EventHandler
-    private Listener<TickEvent> onTick = new Listener<>(event -> {
+    private final Listener<TickEvent> onTick = new Listener<>(event -> {
         if (mc.currentScreen instanceof HandledScreen<?>) return;
 
         if (mc.player.getOffHandStack().isEmpty()) replaceItem(true);
@@ -106,7 +106,7 @@ public class AutoMend extends ToggleModule {
 
         if(armourSlots.get()) {
             if(ModuleManager.INSTANCE.get(AutoArmor.class).isActive()) {
-                Utils.sendMessage("#redCannot use armor slots while AutoArmor is active. #redPlease disable AutoArmour and try again. #redDisabling Use Armour Slots");
+                Chat.warning(this, "Cannot use armor slots while AutoArmor is active. Please disable AutoArmor and try again. Disabling Use Armor Slots.");
                 armourSlots.set(false);
             }
             for (int i = 5; i < 9; i++) {

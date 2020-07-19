@@ -1,7 +1,7 @@
 {
-  "inputJar": "..\\build\\libs\\meteor-client-0.2.6.jar",
-  "outputJar": "meteor-client-0.2.6-1.16.1.jar",
-  "obfMap": "obfuscation-map-0.2.6-1.16.1.txt",
+  "inputJar": "..\\build\\libs\\meteor-client-0.2.7.jar",
+  "outputJar": "meteor-client-0.2.7-1.16.1.jar",
+  "obfMap": "obfuscation-map-0.2.7-1.16.1.txt",
 
   "groupNames": [
     "minegame159.meteorclient"

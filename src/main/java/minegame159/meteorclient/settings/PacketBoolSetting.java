@@ -49,7 +49,7 @@ public class PacketBoolSetting extends Setting<Object2BooleanMap<Class<? extends
     @Override
     protected String generateUsage() {
         //TODO: Look up nigger
-        return "#bluenot implemented";
+        return "(highlight)not implemented";
     }
 
     @Override

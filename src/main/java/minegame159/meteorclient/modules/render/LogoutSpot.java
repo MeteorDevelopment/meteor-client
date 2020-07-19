@@ -5,8 +5,8 @@ import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.EntityAddedEvent;
-import minegame159.meteorclient.events.EntityDestroyEvent;
 import minegame159.meteorclient.events.RenderEvent;
+import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.rendering.Matrices;
@@ -17,14 +17,18 @@ import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.Utils;
+import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.render.VertexFormats;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 public class LogoutSpot extends ToggleModule {
     private static final Color BACKGROUND = new Color(0, 0, 0, 75);
@@ -59,20 +63,36 @@ public class LogoutSpot extends ToggleModule {
 
     private final List<Entry> players = new ArrayList<>();
 
+    private final List<PlayerListEntry> lastPlayerList = new ArrayList<>();
+    private final List<PlayerEntity> lastPlayers = new ArrayList<>();
+
+    private int timer;
+
     public LogoutSpot() {
         super(Category.Render, "logout-spot", "Displays players logout position.");
         lineColor.changed();
     }
 
     @Override
-    public void onDeactivate() {
-        players.clear();
+    public void onActivate() {
+        lastPlayerList.addAll(mc.getNetworkHandler().getPlayerList());
+        updateLastPlayers();
+
+        timer = 10;
     }
 
-    @EventHandler
-    private final Listener<EntityDestroyEvent> onEntityDestroy = new Listener<>(event -> {
-        if (event.entity instanceof PlayerEntity) players.add(new Entry((PlayerEntity) event.entity));
-    });
+    @Override
+    public void onDeactivate() {
+        players.clear();
+        lastPlayerList.clear();
+    }
+
+    private void updateLastPlayers() {
+        lastPlayers.clear();
+        for (Entity entity : mc.world.getEntities()) {
+            if (entity instanceof PlayerEntity) lastPlayers.add((PlayerEntity) entity);
+        }
+    }
 
     @EventHandler
     private final Listener<EntityAddedEvent> onEntityAdded = new Listener<>(event -> {
@@ -93,6 +113,37 @@ public class LogoutSpot extends ToggleModule {
     });
 
     @EventHandler
+    private final Listener<TickEvent> onTick = new Listener<>(event -> {
+        if (mc.getNetworkHandler().getPlayerList().size() != lastPlayerList.size()) {
+            for (PlayerListEntry entry : lastPlayerList) {
+                if (mc.getNetworkHandler().getPlayerList().stream().anyMatch(playerListEntry -> playerListEntry.getProfile().equals(entry.getProfile()))) continue;
+
+                for (PlayerEntity player : lastPlayers) {
+                    if (player.getUuid().equals(entry.getProfile().getId())) {
+                        add(new Entry(player));
+                    }
+                }
+            }
+
+            lastPlayerList.clear();
+            lastPlayerList.addAll(mc.getNetworkHandler().getPlayerList());
+            updateLastPlayers();
+        }
+
+        if (timer <= 0) {
+            updateLastPlayers();
+            timer = 10;
+        } else {
+            timer--;
+        }
+    });
+
+    private void add(Entry entry) {
+        players.removeIf(player -> player.uuid.equals(entry.uuid));
+        players.add(entry);
+    }
+
+    @EventHandler
     private final Listener<RenderEvent> onRender = new Listener<>(event -> {
         for (Entry player : players) player.render(event);
 
@@ -111,7 +162,8 @@ public class LogoutSpot extends ToggleModule {
         public final double x, y, z;
         public final double width, height;
 
-        public final String uuid, name;
+        public final UUID uuid;
+        public final String name;
         public final int health, maxHealth;
         public final String healthText;
 
@@ -123,7 +175,7 @@ public class LogoutSpot extends ToggleModule {
             width = entity.getBoundingBox().getXLength();
             height = entity.getBoundingBox().getZLength();
 
-            uuid = entity.getUuidAsString();
+            uuid = entity.getUuid();
             name = entity.getGameProfile().getName();
             health = Math.round(entity.getHealth() + entity.getAbsorptionAmount());
             maxHealth = Math.round(entity.getMaxHealth() + entity.getAbsorptionAmount());

@@ -14,7 +14,7 @@ public class UwUAura extends ToggleModule {
 
     @EventHandler
     private final Listener<EntityAddedEvent> onEntityAdded = new Listener<>(event -> {
-        if (!(event.entity instanceof PlayerEntity)) return;
+        if (!(event.entity instanceof PlayerEntity) || event.entity.getUuid().equals(mc.player.getUuid())) return;
 
         mc.player.sendChatMessage("/msg " + ((PlayerEntity) event.entity).getGameProfile().getName() + " UwU");
     });

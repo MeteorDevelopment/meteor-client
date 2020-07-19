@@ -3,11 +3,12 @@ package minegame159.meteorclient.mixin;
 import minegame159.meteorclient.Config;
 import minegame159.meteorclient.gui.screens.AutoCraftScreen;
 import minegame159.meteorclient.utils.InvUtils;
-import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.Chat;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.CraftingScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.recipebook.RecipeBookProvider;
+import net.minecraft.client.gui.screen.recipebook.RecipeBookWidget;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Item;
@@ -18,15 +19,20 @@ import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(CraftingScreen.class)
 public abstract class CraftingScreenMixin extends HandledScreen<CraftingScreenHandler> implements RecipeBookProvider {
+    @Shadow @Final private RecipeBookWidget recipeBookGui;
+    @Shadow private boolean isNarrow;
     private MinecraftClient mc;
     private ButtonWidget autoCraftBtn;
+    private ButtonWidget configBtn;
 
     private boolean autoCrafting;
     private int craftingI;
@@ -45,12 +51,12 @@ public abstract class CraftingScreenMixin extends HandledScreen<CraftingScreenHa
         craftingI = 0;
 
         autoCraftBtn = addButton(new ButtonWidget(x + 30 + 3 * 18 + 4, y + 16, 70, 13, new LiteralText("Auto craft"), button -> onAutoCraft()));
-        addButton(new ButtonWidget(x + 30 + 3 * 18 + 4, y + 17 + 2 * 20, 70, 13, new LiteralText("Config"), button -> MinecraftClient.getInstance().openScreen(new AutoCraftScreen())));
+        configBtn = addButton(new ButtonWidget(x + 30 + 3 * 18 + 4, y + 17 + 2 * 20, 70, 13, new LiteralText("Config"), button -> MinecraftClient.getInstance().openScreen(new AutoCraftScreen())));
     }
 
     private void onAutoCraft() {
         if (!autoCrafting) {
-            if (getStack(0).isEmpty()) Utils.sendMessage("#blueAutoCraft: #whiteInvalid recipe.");
+            if (getStack(0).isEmpty()) Chat.error("Invalid recipe.");
             else {
                 autoCrafting = true;
                 craftingI = 0;
@@ -65,6 +71,10 @@ public abstract class CraftingScreenMixin extends HandledScreen<CraftingScreenHa
 
     @Inject(method = "tick", at = @At("TAIL"))
     private void onTick(CallbackInfo info) {
+        int x = recipeBookGui.findLeftEdge(this.isNarrow, this.width, this.containerWidth) + 30 + 3 * 18 + 4;
+        autoCraftBtn.x = x;
+        configBtn.x = x;
+
         if (autoCrafting) {
             //if (TickRate.INSTANCE.getTimeSinceLastTick() > 0.5) return;
 
@@ -136,12 +146,13 @@ public abstract class CraftingScreenMixin extends HandledScreen<CraftingScreenHa
     }
 
     private void stopCrafting(String msg) {
-        if (msg != null) Utils.sendMessage("#blueAutoCraft: #white" + msg);
+        if (msg != null) Chat.info(msg);
         autoCrafting = false;
         autoCraftBtn.setMessage(new LiteralText("Auto craft"));
     }
 
     private ItemStack getStack(int slot) {
-        return handler.getSlot(slot).getStack();
+        ItemStack itemStack = handler.getSlot(slot).getStack();
+        return itemStack == null ? ItemStack.EMPTY : itemStack;
     }
 }

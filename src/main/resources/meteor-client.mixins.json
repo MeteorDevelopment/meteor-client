@@ -64,6 +64,16 @@
     "MinecraftServerMixin",
     "DimensionTypeMixin",
     "TextHandlerMixin"
+    "RenderTickCounterMixin",
+    "TerrainRenderContextMixin",
+    "BlockEntityRenderDispatcherMixin",
+    "WorldRendererMixin",
+    "BlockEntityTypeMixin",
+    "EntityRenderDispatcherMixin",
+    "EnchantingTableBlockEntityRendererMixin",
+    "SignBlockEntityRendererMixin",
+    "SoundSystemMixin",
+    "PacketInflaterMixin"
   ],
   "injectors": {
     "defaultRequire": 1

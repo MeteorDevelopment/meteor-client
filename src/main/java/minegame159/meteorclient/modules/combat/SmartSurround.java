@@ -13,8 +13,8 @@ import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.DamageCalcUtils;
-import minegame159.meteorclient.utils.Utils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.BlockItem;
@@ -59,11 +59,11 @@ public class SmartSurround extends ToggleModule {
     @EventHandler
     private final Listener<EntityAddedEvent> onSpawn = new Listener<>(event -> {
         crystal = event.entity;
-        if(event.entity.getType() == EntityType.END_CRYSTAL){
-            if(DamageCalcUtils.resistanceReduction(mc.player, DamageCalcUtils.blastProtReduction(mc.player, DamageCalcUtils.armourCalc(mc.player, DamageCalcUtils.getDamageMultiplied(DamageCalcUtils.crystalDamage(mc.player, event.entity.getPos()))))) > minDamage.get()){
+        if (event.entity.getType() == EntityType.END_CRYSTAL) {
+            if (DamageCalcUtils.resistanceReduction(mc.player, DamageCalcUtils.blastProtReduction(mc.player, DamageCalcUtils.armourCalc(mc.player, DamageCalcUtils.getDamageMultiplied(DamageCalcUtils.crystalDamage(mc.player, event.entity.getPos()))))) > minDamage.get()) {
                 slot = findObiInHotbar();
-                if(slot == -1 && onlyObsidian.get()){
-                    Utils.sendMessage("#redNo Obsidian in hotbar. Disabling!");
+                if (slot == -1 && onlyObsidian.get()) {
+                    Chat.warning(this, "No Obsidian in hotbar. Disabling!");
                     return;
                 }
                 for (int i = 0; i < 9; i++) {
@@ -74,8 +74,8 @@ public class SmartSurround extends ToggleModule {
                         break;
                     }
                 }
-                if(slot == -1){
-                    Utils.sendMessage("#redNo blocks in hotbar. Disabling!");
+                if (slot == -1) {
+                    Chat.warning(this, "No blocks in hotbar. Disabling!");
                     return;
                 }
                 rPosX = mc.player.getBlockPos().getX() - event.entity.getBlockPos().getX();
@@ -118,7 +118,7 @@ public class SmartSurround extends ToggleModule {
         }
     });
 
-    private void placeObi(int x, int z, Entity crystal){
+    private void placeObi(int x, int z, Entity crystal) {
         //Place block packet
         PlayerInteractBlockC2SPacket placePacket = new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, crystal.getBlockPos().add(x, -1, z), false));
         mc.player.networkHandler.sendPacket(placePacket);
@@ -126,7 +126,7 @@ public class SmartSurround extends ToggleModule {
         mc.player.swingHand(Hand.MAIN_HAND);
     }
 
-    private int findObiInHotbar(){
+    private int findObiInHotbar() {
         oldSlot = mc.player.inventory.selectedSlot;
         int newSlot = -1;
         for (int i = 0; i < 9; i++) {
