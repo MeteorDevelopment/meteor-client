@@ -5,7 +5,7 @@ import minegame159.meteorclient.commands.CommandManager;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.Chat;
 
 import java.util.Arrays;
 
@@ -23,30 +23,33 @@ public class CommandDispatcher {
 
         // Get module
         Module module = ModuleManager.INSTANCE.get(args[0]);
-        if (module == null) {Utils.sendMessage("#redNot a valid command or module. Do #blue.commands #redfor a list of commands or #blue.modules #red for a lit of modules"); return;}
+        if (module == null) {
+            Chat.error("Not a valid command or module. Do (highlight).commands (default)or (highlight).modules (default)for a list of commands/modules.");
+            return;
+        }
         args = subArray(args, 1);
 
         if (args.length <= 0) {
             module.doAction();
-            if (Config.INSTANCE.chatCommandsInfo) Utils.sendMessage("#blue[Meteor]: #whiteToggled %s.", module.title);
+            if (Config.INSTANCE.chatCommandsInfo) Chat.info("Toggled (highlight)%s(default).", module.title);
         } else {
             // Set or get module setting
             Setting<?> setting = module.settings.get(args[0]);
             if (setting == null) {
-                Utils.sendMessage("#redModule #blue'%s' #reddoesn't have setting with name #blue'%s'#red.", module.title, args[0]);
+                Chat.error("Module (highlight)%s (default)doesn't have a setting with name (highlight)%s(default).", module.title, args[0]);
                 return;
             }
             args = subArray(args, 1);
 
             if (args.length <= 0) {
                 // Send setting's value if nothing is after it's name
-                Utils.sendMessage("#yellowValue of #blue'%s' #yellow is #blue'%s'#yellow.", setting.name, setting.get().toString());
+                Chat.info("Value of (highlight)%s (default)for module (highlight)%s (default)is (highlight)%s(default).", setting.title, module.title, setting.get().toString());
             } else {
                 // Parse setting's value and report usage if error
                 if (!setting.parse(String.join(" ", args))) {
-                    Utils.sendMessage("#redUsage of #blue'%s' #redis #gray%s#red.", setting.name, setting.getUsage());
+                    Chat.error("Usage of (highlight)%s (default)is (highlight)%s(default).", setting.name, setting.getUsage());
                 }
-                if (Config.INSTANCE.chatCommandsInfo) Utils.sendMessage("#blue[Meteor]: #whiteSet '%s' to '%s'.", setting.title, setting.get().toString());
+                if (Config.INSTANCE.chatCommandsInfo) Chat.info("Value of (highlight)%s (default)for module (highlight)%s (default)changed to (highlight)%s(default).", setting.title, module.title, setting.get().toString());
             }
         }
     }

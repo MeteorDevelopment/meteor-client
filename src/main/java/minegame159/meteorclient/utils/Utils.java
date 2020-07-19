@@ -279,12 +279,12 @@ public class Utils {
 
     public static Module tryToGetModule(String[] args) {
         if (args.length < 1) {
-            Utils.sendMessage("#redYou must specify module name.");
+            Chat.error("You must specify module name.");
             return null;
         }
         Module oldModule = ModuleManager.INSTANCE.get(args[0]);
         if (oldModule == null) {
-            Utils.sendMessage("#redModule with name #blue'%s' #reddoesn't exist.", args[0]);
+            Chat.error("Module with name (highlight)%s (default)doesn't exist.", args[0]);
             return null;
         }
         return oldModule;

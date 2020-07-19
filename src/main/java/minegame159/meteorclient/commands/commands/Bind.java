@@ -3,6 +3,7 @@ package minegame159.meteorclient.commands.commands;
 import minegame159.meteorclient.commands.Command;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.Utils;
 
 public class Bind extends Command {
@@ -15,7 +16,7 @@ public class Bind extends Command {
         Module module = Utils.tryToGetModule(args);
         if (module == null) return;
 
-        Utils.sendMessage("#yellowPress some key.");
+        Chat.info("Press some key.");
         ModuleManager.INSTANCE.setModuleToBind(module);
     }
 }

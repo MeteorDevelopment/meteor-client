@@ -4,7 +4,6 @@ package minegame159.meteorclient.modules.misc;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.KeyEvent;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.events.packets.SendPacketEvent;
 import minegame159.meteorclient.modules.Category;
@@ -15,8 +14,8 @@ import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.InvUtils;
-import minegame159.meteorclient.utils.Utils;
 import net.minecraft.block.ShulkerBoxBlock;
 import net.minecraft.client.gui.screen.ingame.HorseScreen;
 import net.minecraft.container.SlotActionType;
@@ -85,6 +84,12 @@ public class AutoMountBypassDupe extends ToggleModule {
 
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
+        if (GLFW.glfwGetKey(mc.window.getHandle(), GLFW.GLFW_KEY_ESCAPE) == GLFW.GLFW_PRESS) {
+            toggle();
+            mc.player.closeContainer();
+            return;
+        }
+
         if (timer <= 0) {
             timer = delay.get();
         } else {
@@ -95,7 +100,7 @@ public class AutoMountBypassDupe extends ToggleModule {
         int slots = getInvSize(mc.player.getVehicle());
 
         for (Entity e : mc.world.getEntities()) {
-            if (e.getPos().distanceTo(mc.player.getPos()) < 5 && e instanceof AbstractDonkeyEntity && ((AbstractDonkeyEntity) e).isTame()) {
+            if (e.distanceTo(mc.player) < 5 && e instanceof AbstractDonkeyEntity && ((AbstractDonkeyEntity) e).isTame()) {
                 entity = (AbstractDonkeyEntity) e;
             }
         }
@@ -103,6 +108,7 @@ public class AutoMountBypassDupe extends ToggleModule {
 
         if (sneak) {
             mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
+            mc.player.setSneaking(false);
             sneak = false;
             return;
         }
@@ -115,7 +121,7 @@ public class AutoMountBypassDupe extends ToggleModule {
                 if (slot != -1 && slot < 9) {
                     mc.player.inventory.selectedSlot  = slot;
                  } else {
-                    Utils.sendMessage("#blue[Meteor]: #redCannot find chest in hotbar. Disabling!");
+                    Chat.warning(this, "Cannot find chest in your hotbar. Disabling!");
                     this.toggle();
                 }
             }
@@ -123,8 +129,7 @@ public class AutoMountBypassDupe extends ToggleModule {
             if (isDupeTime()) {
                 if (!slotsToThrow.isEmpty()) {
                     if (faceDown.get()) {
-                        mc.player.pitch = 90;
-                        mc.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.LookOnly(mc.player.yaw, mc.player.pitch, mc.player.onGround));
+                        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(mc.player.yaw, 90, mc.player.onGround));
                     }
                     for (int i : slotsToThrow) {
                         InvUtils.clickSlot(i, 1, SlotActionType.THROW);
@@ -138,6 +143,8 @@ public class AutoMountBypassDupe extends ToggleModule {
             } else {
                 mc.player.closeContainer();
                 mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
+
+                mc.player.setSneaking(true);
                 sneak = true;
             }
         } else if (!(mc.currentScreen instanceof HorseScreen)) {
@@ -170,17 +177,9 @@ public class AutoMountBypassDupe extends ToggleModule {
             }
 
             if (!slotsToMove.isEmpty()) {
-                for (int i : slotsToMove) mc.interactionManager.clickSlot(mc.player.container.syncId, i, 0, SlotActionType.QUICK_MOVE, mc.player);
+                for (int i : slotsToMove) InvUtils.clickSlot(i, 0, SlotActionType.QUICK_MOVE);
                 slotsToMove.clear();
             }
-        }
-    });
-
-    @EventHandler
-    private final Listener<KeyEvent> onKey = new Listener<>(event -> {
-        if (event.key == GLFW.GLFW_KEY_ESCAPE && !event.push) {
-            toggle();
-            mc.player.closeContainer();
         }
     });
 
@@ -190,7 +189,7 @@ public class AutoMountBypassDupe extends ToggleModule {
         if (!((AbstractDonkeyEntity)e).hasChest()) return 0;
 
         if (e instanceof LlamaEntity) {
-            return 3 * ((LlamaEntity) e).method_6702();
+            return 3 * ((LlamaEntity) e).getStrength();
         }
 
         return 15;

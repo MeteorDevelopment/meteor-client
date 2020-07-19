@@ -67,7 +67,9 @@
     "BlockEntityTypeMixin",
     "EntityRenderDispatcherMixin",
     "EnchantingTableBlockEntityRendererMixin",
-    "SignBlockEntityRendererMixin"
+    "SignBlockEntityRendererMixin",
+    "SoundSystemMixin",
+    "PacketInflaterMixin"
   ],
   "injectors": {
     "defaultRequire": 1

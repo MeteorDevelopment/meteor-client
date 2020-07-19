@@ -62,7 +62,7 @@ public class ColorSetting extends Setting<Color> {
 
     @Override
     protected String generateUsage() {
-        return "#blue0-255 0-255 0-255 0-255";
+        return "(highlight)0-255 0-255 0-255 0-255";
     }
 
     @Override

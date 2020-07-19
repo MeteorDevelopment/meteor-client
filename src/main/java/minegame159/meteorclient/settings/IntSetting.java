@@ -43,12 +43,12 @@ public class IntSetting extends Setting<Integer> {
 
     @Override
     protected String generateUsage() {
-        String usage = "#blue";
+        String usage = "(highlight)";
 
         if (min == null) usage += "inf";
         else usage += min;
 
-        usage += " #gray- #blue";
+        usage += " (default)- (highlight)";
 
         if (max == null) usage += "inf";
         else usage += max;

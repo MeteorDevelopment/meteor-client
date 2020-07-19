@@ -1,13 +1,13 @@
 package minegame159.meteorclient.settings;
 
-import minegame159.meteorclient.gui.screens.ItemListSettingScreen;
+import minegame159.meteorclient.gui.screens.SoundEventListSettingScreen;
 import minegame159.meteorclient.gui.widgets.WButton;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.item.Item;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
@@ -15,30 +15,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class ItemListSetting extends Setting<List<Item>> {
-    public ItemListSetting(String name, String description, List<Item> defaultValue, Consumer<List<Item>> onChanged, Consumer<Setting<List<Item>>> onModuleActivated) {
+public class SoundEventListSetting extends Setting<List<SoundEvent>> {
+    public SoundEventListSetting(String name, String description, List<SoundEvent> defaultValue, Consumer<List<SoundEvent>> onChanged, Consumer<Setting<List<SoundEvent>>> onModuleActivated) {
         super(name, description, defaultValue, onChanged, onModuleActivated);
 
         value = new ArrayList<>(defaultValue);
 
         widget = new WButton("Select");
-        ((WButton) widget).action = button -> MinecraftClient.getInstance().openScreen(new ItemListSettingScreen(this));
-    }
-
-    @Override
-    protected List<Item> parseImpl(String str) {
-        String[] values = str.split(",");
-        List<Item> items = new ArrayList<>(1);
-
-        for (String value : values) {
-            String val = value.trim();
-            Identifier id;
-            if (val.contains(":")) id = new Identifier(val);
-            else id = new Identifier("minecraft", val);
-            items.add(Registry.ITEM.get(id));
-        }
-
-        return items;
+        ((WButton) widget).action = button -> MinecraftClient.getInstance().openScreen(new SoundEventListSettingScreen(this));
     }
 
     @Override
@@ -51,18 +35,34 @@ public class ItemListSetting extends Setting<List<Item>> {
     }
 
     @Override
+    protected List<SoundEvent> parseImpl(String str) {
+        String[] values = str.split(",");
+        List<SoundEvent> sounds = new ArrayList<>(1);
+
+        for (String value : values) {
+            String val = value.trim();
+            Identifier id;
+            if (val.contains(":")) id = new Identifier(val);
+            else id = new Identifier("minecraft", val);
+            sounds.add(Registry.SOUND_EVENT.get(id));
+        }
+
+        return sounds;
+    }
+
+    @Override
     public void resetWidget() {
 
     }
 
     @Override
-    protected boolean isValueValid(List<Item> value) {
+    protected boolean isValueValid(List<SoundEvent> value) {
         return true;
     }
 
     @Override
     protected String generateUsage() {
-        return "(highlight)item id (default)(dirt, minecraft:stone, etc)";
+        return "(highlight)sound id (default)(block_anvil_hit, minecraft:entity_bat_hurt, etc)";
     }
 
     @Override
@@ -70,8 +70,8 @@ public class ItemListSetting extends Setting<List<Item>> {
         CompoundTag tag = saveGeneral();
 
         ListTag valueTag = new ListTag();
-        for (Item item : get()) {
-            valueTag.add(StringTag.of(Registry.ITEM.getId(item).toString()));
+        for (SoundEvent sound : get()) {
+            valueTag.add(new StringTag(Registry.SOUND_EVENT.getId(sound).toString()));
         }
         tag.put("value", valueTag);
 
@@ -79,12 +79,12 @@ public class ItemListSetting extends Setting<List<Item>> {
     }
 
     @Override
-    public List<Item> fromTag(CompoundTag tag) {
+    public List<SoundEvent> fromTag(CompoundTag tag) {
         get().clear();
 
         ListTag valueTag = tag.getList("value", 8);
         for (Tag tagI : valueTag) {
-            get().add(Registry.ITEM.get(new Identifier(tagI.asString())));
+            get().add(Registry.SOUND_EVENT.get(new Identifier(tagI.asString())));
         }
 
         changed();
@@ -93,9 +93,9 @@ public class ItemListSetting extends Setting<List<Item>> {
 
     public static class Builder {
         private String name = "undefined", description = "";
-        private List<Item> defaultValue;
-        private Consumer<List<Item>> onChanged;
-        private Consumer<Setting<List<Item>>> onModuleActivated;
+        private List<SoundEvent> defaultValue;
+        private Consumer<List<SoundEvent>> onChanged;
+        private Consumer<Setting<List<SoundEvent>>> onModuleActivated;
 
         public Builder name(String name) {
             this.name = name;
@@ -107,23 +107,23 @@ public class ItemListSetting extends Setting<List<Item>> {
             return this;
         }
 
-        public Builder defaultValue(List<Item> defaultValue) {
+        public Builder defaultValue(List<SoundEvent> defaultValue) {
             this.defaultValue = defaultValue;
             return this;
         }
 
-        public Builder onChanged(Consumer<List<Item>> onChanged) {
+        public Builder onChanged(Consumer<List<SoundEvent>> onChanged) {
             this.onChanged = onChanged;
             return this;
         }
 
-        public Builder onModuleActivated(Consumer<Setting<List<Item>>> onModuleActivated) {
+        public Builder onModuleActivated(Consumer<Setting<List<SoundEvent>>> onModuleActivated) {
             this.onModuleActivated = onModuleActivated;
             return this;
         }
 
-        public ItemListSetting build() {
-            return new ItemListSetting(name, description, defaultValue, onChanged, onModuleActivated);
+        public SoundEventListSetting build() {
+            return new SoundEventListSetting(name, description, defaultValue, onChanged, onModuleActivated);
         }
     }
 }

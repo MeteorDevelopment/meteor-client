@@ -9,6 +9,7 @@ import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.utils.Pool;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.sound.SoundInstance;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MovementType;
@@ -54,6 +55,7 @@ public class EventStore {
     private static final ContainerSlotUpdateEvent containerSlotUpdateEvent = new ContainerSlotUpdateEvent();
     private static final BlockActivateEvent blockActivateEvent = new BlockActivateEvent();
     private static final SendMessageEvent sendMessageEvent = new SendMessageEvent();
+    private static final PlaySoundEvent playSoundEvent = new PlaySoundEvent();
 
     public static PlaySoundPacketEvent playSoundPacketEvent(PlaySoundS2CPacket packet) {
         playSoundPacketEvent.packet = packet;
@@ -220,5 +222,11 @@ public class EventStore {
     public static SendMessageEvent sendMessageEvent(String msg) {
         sendMessageEvent.msg = msg;
         return sendMessageEvent;
+    }
+
+    public static PlaySoundEvent playSoundEvent(SoundInstance sound) {
+        playSoundEvent.setCancelled(false);
+        playSoundEvent.sound = sound;
+        return playSoundEvent;
     }
 }

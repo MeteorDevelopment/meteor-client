@@ -62,7 +62,7 @@ public class BlockListSetting extends Setting<List<Block>> {
 
     @Override
     protected String generateUsage() {
-        return "#blueblock id #gray(dirt, minecraft:stone, etc)";
+        return "(highlight)block id (default)(dirt, minecraft:stone, etc)";
     }
 
     @Override

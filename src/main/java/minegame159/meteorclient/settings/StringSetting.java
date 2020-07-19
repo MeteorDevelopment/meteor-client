@@ -43,7 +43,7 @@ public class StringSetting extends Setting<String> {
 
     @Override
     protected String generateUsage() {
-        return "#blue<text>";
+        return "(highlight)<text>";
     }
 
     @Override
