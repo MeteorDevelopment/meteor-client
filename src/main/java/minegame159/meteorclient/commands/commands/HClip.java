@@ -23,7 +23,7 @@ public class HClip extends Command {
             ClientPlayerEntity player = MinecraftClient.getInstance().player;
 
             Vec3d forward = Vec3d.fromPolar(0, player.yaw).normalize();
-            player.updatePosition(player.x + forward.x * blocks, player.y, player.z + forward.z * blocks);
+            player.updatePosition(player.getX() + forward.x * blocks, player.getY(), player.getZ() + forward.z * blocks);
         } catch (NumberFormatException ignored) {
             sendErrorMsg();
         }
