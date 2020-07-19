@@ -3,7 +3,7 @@ package minegame159.meteorclient.mixin;
 import minegame159.meteorclient.Config;
 import minegame159.meteorclient.gui.screens.AutoCraftScreen;
 import minegame159.meteorclient.utils.InvUtils;
-import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.Chat;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.ContainerScreen;
 import net.minecraft.client.gui.screen.ingame.CraftingTableScreen;
@@ -54,7 +54,7 @@ public abstract class CraftingTableScreenMixin extends ContainerScreen<CraftingT
 
     private void onAutoCraft() {
         if (!autoCrafting) {
-            if (getStack(0).isEmpty()) Utils.sendMessage("#blueAutoCraft: #whiteInvalid recipe.");
+            if (getStack(0).isEmpty()) Chat.error("Invalid recipe.");
             else {
                 autoCrafting = true;
                 craftingI = 0;
@@ -144,7 +144,7 @@ public abstract class CraftingTableScreenMixin extends ContainerScreen<CraftingT
     }
 
     private void stopCrafting(String msg) {
-        if (msg != null) Utils.sendMessage("#blueAutoCraft: #white" + msg);
+        if (msg != null) Chat.info(msg);
         autoCrafting = false;
         autoCraftBtn.setMessage("Auto craft");
     }

@@ -10,8 +10,8 @@ import minegame159.meteorclient.mixininterface.IClientPlayerInteractionManager;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.InvUtils;
-import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.gui.screen.ingame.ContainerScreen;
 import net.minecraft.container.SlotActionType;
 import net.minecraft.item.Items;
@@ -172,7 +172,7 @@ public class BookBot extends ToggleModule {
 
                 //Check if the file exists.
                 if (!file.exists()) {
-                    Utils.sendMessage("#redThe file you specified doesn't exist in the meteor folder."); //You dumb bitch.
+                    Chat.error(this, "The file you specified doesn't exist in the meteor folder."); //You dumb bitch.
                     return;
                 }
 
@@ -195,7 +195,7 @@ public class BookBot extends ToggleModule {
                     writeBook();
                 } catch (IOException ignored) { //EZ ignore. > 1 blocked message
                     //If it fails then send a message
-                    Utils.sendMessage("#redFailed to read the file.");
+                    Chat.error(this, "Failed to read the file.");
                     //When you try your best but you don't succeed.
                 }
             } else {

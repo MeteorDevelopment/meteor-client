@@ -10,8 +10,8 @@ import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.InvUtils;
-import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.ContainerScreen;
 import net.minecraft.container.SlotActionType;
@@ -188,7 +188,7 @@ public class AutoReplenish extends ToggleModule {
 
         if(slot == -1 && !items.contains(item)){
             if(alert.get()) {
-                Utils.sendMessage("#redYou are out of #blue" + item.toString() + "#red. Cannot refill.");
+                Chat.warning(this, "You are out of (highlight)%s(default). Cannot refill.", item.toString());
             }
 
             items.add(item);
