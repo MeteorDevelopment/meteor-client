@@ -154,7 +154,7 @@ public class KillAura extends ToggleModule {
         return entity.distanceTo(mc.player) <= range.get();
     }
 
-    public boolean canAttackEntity(Entity entity) {
+    private boolean canAttackEntity(Entity entity) {
         if (entity == mc.player || entity == mc.cameraEntity || entity.getUuid().equals(mc.player.getUuid()) || !entities.get().contains(entity.getType())) return false;
 
         if (entity instanceof PlayerEntity) {
