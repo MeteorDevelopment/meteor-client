@@ -301,7 +301,6 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new AutoSign());
         addModule(new AntiWeather());
         addModule(new AutoReconnect());
-        addModule(new AutoMountBypassDupe());
         addModule(new ShulkerTooltip());
         addModule(new AutoShearer());
         addModule(new AutoNametag());
