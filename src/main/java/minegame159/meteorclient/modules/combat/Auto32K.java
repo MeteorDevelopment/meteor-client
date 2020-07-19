@@ -17,10 +17,7 @@ import net.minecraft.client.gui.screen.ingame.HopperScreen;
 import net.minecraft.container.SlotActionType;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
-import net.minecraft.item.AirBlockItem;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
+import net.minecraft.item.*;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -207,13 +204,18 @@ public class Auto32K extends ToggleModule {
                 }
                 boolean manage = true;
                 int slot = -1;
-                for (int i = 32; i < 41; i++){
-                    if(EnchantmentHelper.getLevel(Enchantments.SHARPNESS, mc.player.container.getSlot(i).getStack()) > 5){
+                int dropSlot = -1;
+                for (int i = 32; i < 41; i++) {
+                    if (EnchantmentHelper.getLevel(Enchantments.SHARPNESS, mc.player.container.getSlot(i).getStack()) > 5) {
                         manage = false;
                         slot = i;
                         break;
+                    }else if (mc.player.container.getSlot(i).getStack().getItem() instanceof SwordItem
+                            && EnchantmentHelper.getLevel(Enchantments.SHARPNESS, mc.player.container.getSlot(i).getStack()) <= 5) {
+                        dropSlot = i;
                     }
                 }
+                if (dropSlot != -1) InvUtils.clickSlot(InvUtils.invIndexToSlotId(dropSlot), 0, SlotActionType.THROW);
                 if(autoMove.get() && manage){
                     int slot2 = mc.player.inventory.getEmptySlot();
                     if (slot2 < 9 && slot2 != -1 && EnchantmentHelper.getLevel(Enchantments.SHARPNESS, mc.player.container.getSlot(0).getStack()) > 5) {
