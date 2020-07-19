@@ -31,7 +31,7 @@ public class WTable extends WWidget {
     private final DoubleList rowSpaceBottom = new DoubleArrayList(1);
 
     private double fullHeight = -1;
-    private double verticalScroll;
+    public double verticalScroll;
     public boolean enabledScroll = true;
 
     @Override
@@ -234,7 +234,7 @@ public class WTable extends WWidget {
         }
     }
 
-    private void moveWidgets(double deltaX, double deltaY) {
+    public void moveWidgets(double deltaX, double deltaY) {
         for (Cell<?> cell : getCells()) move(cell.getWidget(), deltaX, deltaY);
         mouseMoved(MinecraftClient.getInstance().mouse.getX() / MinecraftClient.getInstance().getWindow().getScaleFactor(), MinecraftClient.getInstance().mouse.getY() / MinecraftClient.getInstance().getWindow().getScaleFactor());
     }

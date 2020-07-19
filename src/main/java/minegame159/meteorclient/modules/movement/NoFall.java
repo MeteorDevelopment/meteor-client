@@ -14,7 +14,7 @@ public class NoFall extends ToggleModule {
     }
 
     @EventHandler
-    private Listener<SendPacketEvent> onSendPacket = new Listener<>(event -> {
+    private final Listener<SendPacketEvent> onSendPacket = new Listener<>(event -> {
         if (event.packet instanceof PlayerMoveC2SPacket) {
             ((IPlayerMoveC2SPacket) event.packet).setOnGround(true);
         }

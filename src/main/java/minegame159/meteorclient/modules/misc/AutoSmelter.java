@@ -3,6 +3,7 @@ package minegame159.meteorclient.modules.misc;
 import minegame159.meteorclient.mixininterface.IAbstractFurnaceScreenHandler;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.InvUtils;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.screen.AbstractFurnaceScreenHandler;
@@ -83,7 +84,7 @@ public class AutoSmelter extends ToggleModule {
         }
 
         if (slot == -1) {
-            Utils.sendMessage("#blueAuto Brewer:#white Deactivated because you don't have any items to smelt in your inventory.");
+            Chat.warning(this, "Disabled because you don't have any items to smelt in your inventory.");
             toggle();
             return true;
         }
@@ -100,7 +101,7 @@ public class AutoSmelter extends ToggleModule {
                 InvUtils.clickSlot(1, 0, SlotActionType.QUICK_MOVE);
 
                 if (!c.slots.get(1).getStack().isEmpty()) {
-                    Utils.sendMessage("#blueAuto Brewer:#white Deactivated because your inventory is full.");
+                    Chat.warning(this, "Disabled because your inventory is full.");
                     toggle();
                     return true;
                 }
@@ -115,7 +116,7 @@ public class AutoSmelter extends ToggleModule {
             }
 
             if (slot == -1) {
-                Utils.sendMessage("#blueAuto Brewer:#white Deactivated because you don't have any fuel in your inventory.");
+                Chat.warning(this, "Disabled because you don't have any fuel in your inventory.");
                 toggle();
                 return true;
             }
@@ -131,7 +132,7 @@ public class AutoSmelter extends ToggleModule {
         InvUtils.clickSlot(2, 0, SlotActionType.QUICK_MOVE);
 
         if (!c.slots.get(2).getStack().isEmpty()) {
-            Utils.sendMessage("#blueAuto Brewer:#white Deactivated because your inventory is full.");
+            Chat.warning(this, "Disabled because your inventory is full.");
             toggle();
             return true;
         }

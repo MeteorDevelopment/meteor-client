@@ -8,6 +8,8 @@ import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.rendering.ShapeBuilder;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Color;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.ChestBlock;
 import net.minecraft.block.entity.*;
 import net.minecraft.block.enums.ChestType;
@@ -129,8 +131,11 @@ public class StorageESP extends ToggleModule {
                 double z2 = blockEntity.getPos().getZ() + 1;
 
                 Direction excludeDir = null;
-                if (blockEntity instanceof ChestBlockEntity && blockEntity.getCachedState().get(ChestBlock.CHEST_TYPE) != ChestType.SINGLE) {
-                    excludeDir = ChestBlock.getFacing(blockEntity.getCachedState());
+                if (blockEntity instanceof ChestBlockEntity) {
+                    BlockState state = mc.world.getBlockState(blockEntity.getPos());
+                    if ((state.getBlock() == Blocks.CHEST || state.getBlock() == Blocks.TRAPPED_CHEST) && state.get(ChestBlock.CHEST_TYPE) != ChestType.SINGLE) {
+                        excludeDir = ChestBlock.getFacing(state);
+                    }
                 }
 
                 if (blockEntity instanceof ChestBlockEntity || blockEntity instanceof EnderChestBlockEntity) {

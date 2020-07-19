@@ -7,15 +7,16 @@ import minegame159.meteorclient.Config;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.*;
 import minegame159.meteorclient.mixininterface.IMinecraftClient;
+import minegame159.meteorclient.mixininterface.IClientPlayerInteractionManager;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.rendering.ShapeBuilder;
 import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.EntityUtils;
 import minegame159.meteorclient.utils.TickRate;
-import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.client.render.DiffuseLighting;
@@ -156,6 +157,12 @@ public class HUD extends ToggleModule {
     private final Setting<Boolean> durability = sgTopLeft.add(new BoolSetting.Builder()
             .name("durability")
             .description("Durability of the time in your main hand.")
+            .defaultValue(true)
+            .build()
+    );
+    private final Setting<Boolean> breakingBlock = sgTopLeft.add(new BoolSetting.Builder()
+            .name("breaking-block")
+            .description("Displays the percentage how much you have broken the block.")
             .defaultValue(true)
             .build()
     );
@@ -435,9 +442,9 @@ public class HUD extends ToggleModule {
 
     });
 
-    private void renderMMQuad(double x, double y, double size, Color color) {
+    private void renderMMQuad(double x, double y, double width, double height, Color color) {
         double s = mmScale.get();
-        ShapeBuilder.quad(2 + x * s, 2 + y * s, 0, 2 + (x + size) * s, 2 + y * s, 0, 2 + (x + size) * s, 2 + (y + size) * s, 0, 2 + x * s, 2 + (y + size) * s, 0, color);
+        ShapeBuilder.quad(2 + x * s, 2 + y * s, 0, 2 + (x + width) * s, 2 + y * s, 0, 2 + (x + width) * s, 2 + (y + height) * s, 0, 2 + x * s, 2 + (y + height) * s, 0, color);
     }
 
     private void renderMMTriangle(double x, double y, double size, double angle, Color color) {
@@ -451,7 +458,11 @@ public class HUD extends ToggleModule {
 
         if (sgMinimap.isEnabled()) {
             ShapeBuilder.begin(null, GL11.GL_TRIANGLES, VertexFormats.POSITION_COLOR);
-            renderMMQuad(0, 0, 100, mmBackground.get());
+            renderMMQuad(0, 0, 100, 100, mmBackground.get());
+            renderMMQuad(0, 0, 100, 1, mmBackground.get());
+            renderMMQuad(0, 0, 1, 100, mmBackground.get());
+            renderMMQuad(100 - 1, 0, 1, 100, mmBackground.get());
+            renderMMQuad(0, 100 - 1, 100, 1, mmBackground.get());
 
             double radius = 32;
             if (mc.options.viewDistance > 4) radius += 16;
@@ -474,8 +485,16 @@ public class HUD extends ToggleModule {
                 double z2 = (z / radius) * 50 + 50;
 
                 if (entity.getEntityId() == mc.player.getEntityId()) renderMMTriangle(x2 - 2.5, z2 - 2.5, 5, mc.player.yaw, color);
-                else renderMMQuad(x2 - 1, z2 - 1, 2, color);
+                else renderMMQuad(x2 - 1, z2 - 1, 2, 2, color);
             }
+
+            double w = MeteorClient.FONT.getStringWidth("N");
+            MeteorClient.FONT.renderStringWithShadow("N", 2 + 50 - w / 2, 4, white);
+            w = MeteorClient.FONT.getStringWidth("S");
+            MeteorClient.FONT.renderStringWithShadow("S", 2 + 50 - w / 2, 2 + 100 - MeteorClient.FONT.getHeight() - 2, white);
+            MeteorClient.FONT.renderStringWithShadow("W", 4, 2 + 50 - MeteorClient.FONT.getHeight() / 2, white);
+            w = MeteorClient.FONT.getStringWidth("E");
+            MeteorClient.FONT.renderStringWithShadow("E", 2 + 100 - w - 2, 2 + 50 - MeteorClient.FONT.getHeight() / 2, white);
 
             ShapeBuilder.end();
             y += 100 * mmScale.get() + 2;
@@ -524,7 +543,10 @@ public class HUD extends ToggleModule {
         }
 
         if (time.get()) {
-            drawInfo("Time: ", mc.world.getTimeOfDay() % 24000 + "", y);
+            int ticks = (int) (mc.world.getTimeOfDay() % 24000);
+            ticks += 6000;
+            if (ticks > 24000) ticks -= 24000;
+            drawInfo("Time: ", String.format("%02d:%02d", ticks / 1000, (int) (ticks % 1000 / 1000.0 * 60)), y);
             y += MeteorClient.FONT.getHeight() + 2;
         }
 
@@ -533,6 +555,11 @@ public class HUD extends ToggleModule {
             if (!mc.player.getMainHandStack().isEmpty() && mc.player.getMainHandStack().isDamageable()) amount = mc.player.getMainHandStack().getMaxDamage() - mc.player.getMainHandStack().getDamage();
 
             drawInfo("Durability: ", amount == null ? "" : amount.toString(), y);
+            y += MeteorClient.FONT.getHeight() + 2;
+        }
+
+        if (breakingBlock.get()) {
+            drawInfo("Breaking block: ", String.format("%.0f%%", ((IClientPlayerInteractionManager) mc.interactionManager).getBreakingProgress() * 100), y);
             y += MeteorClient.FONT.getHeight() + 2;
         }
 
@@ -680,7 +707,7 @@ public class HUD extends ToggleModule {
     }
 
     private void sendNotification(){
-        if(!notificationSettings.get()){
+        if (!notificationSettings.get()) {
             mc.getToastManager().add(new Toast() {
                 private long timer;
                 private long lastTime = -1;
@@ -699,8 +726,8 @@ public class HUD extends ToggleModule {
                     return timer >= 32000 ? Visibility.HIDE : Visibility.SHOW;
                 }
             });
-        }else{
-            Utils.sendMessage("#redOne of your armor pieces is low.");
+        } else {
+            Chat.warning(this, "One of your armor pieces ir low.");
         }
     }
 

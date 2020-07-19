@@ -8,6 +8,7 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.accountsfriends.AccountManager;
 import minegame159.meteorclient.accountsfriends.FriendManager;
 import minegame159.meteorclient.commands.CommandManager;
+import minegame159.meteorclient.commands.commands.Ignore;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.gui.GuiThings;
 import minegame159.meteorclient.gui.screens.topbar.TopBarModules;
@@ -67,6 +68,7 @@ public class MeteorClient implements ClientModInitializer, Listenable {
         Capes.init();
 
         load();
+        Ignore.load();
 
         EVENT_BUS.subscribe(this);
         Runtime.getRuntime().addShutdownHook(new Thread(this::stop));
@@ -86,6 +88,8 @@ public class MeteorClient implements ClientModInitializer, Listenable {
         FriendManager.INSTANCE.save();
         MacroManager.INSTANCE.save();
         AccountManager.INSTANCE.save();
+
+        Ignore.save();
     }
 
     private void openClickGui() {

@@ -2,6 +2,7 @@ package minegame159.meteorclient.modules.player;
 
 //Updated by squidoodly 15/06/2020
 
+import me.zero.alpine.event.EventPriority;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.StartBreakingBlockEvent;
@@ -73,7 +74,7 @@ public class AutoTool extends ToggleModule {
     }
 
     @EventHandler
-    private Listener<StartBreakingBlockEvent> onStartBreakingBlock = new Listener<>(event -> {
+    private final Listener<StartBreakingBlockEvent> onStartBreakingBlock = new Listener<>(event -> {
         BlockState blockState = mc.world.getBlockState(event.blockPos);
         if(mc.player.getMainHandStack().getItem() instanceof ToolItem && antiBreak.get()
                 && (mc.player.getMainHandStack().getItem().getMaxDamage() - mc.player.getMainHandStack().getDamage()) <= 11){
@@ -142,7 +143,7 @@ public class AutoTool extends ToggleModule {
         if (bestSlot != -1) {
             mc.player.inventory.selectedSlot = bestSlot;
         }
-    });
+    }, EventPriority.HIGH);
 
     public boolean isEffectiveOn(Item item, BlockState block) {
         Material material = block.getMaterial();

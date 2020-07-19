@@ -5,27 +5,40 @@ import minegame159.meteorclient.events.CharTypedEvent;
 import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.events.KeyEvent;
 import minegame159.meteorclient.gui.GuiThings;
-import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.gui.WidgetScreen;
+import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.player.InvMove;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.Keyboard;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.options.KeyBinding;
+import net.minecraft.client.util.InputUtil;
 import org.lwjgl.glfw.GLFW;
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(Keyboard.class)
 public abstract class KeyboardMixin {
     @Shadow @Final private MinecraftClient client;
 
+    @Shadow private boolean repeatEvents;
+    private int key, scancode, i, j;
+
     @Inject(method = "onKey", at = @At("HEAD"), cancellable = true)
     public void onKey(long window, int key, int scancode, int i, int j, CallbackInfo info) {
+        this.key = key;
+        this.scancode = scancode;
+        this.i = i;
+        this.j = j;
+
         if (key != GLFW.GLFW_KEY_UNKNOWN && GuiThings.postKeyEvents()) {
             KeyBinding shulkerPeek = MeteorClient.INSTANCE.shulkerPeek;
             if (shulkerPeek.matchesKey(key, scancode) && (i == GLFW.GLFW_PRESS || i == GLFW.GLFW_REPEAT)) ((IKeyBinding) shulkerPeek).setPressed(true);
@@ -37,6 +50,11 @@ public abstract class KeyboardMixin {
                 MeteorClient.INSTANCE.onKeyInMainMenu(key);
                 if (client.currentScreen instanceof WidgetScreen && GuiThings.postKeyEvents()) ModuleManager.INSTANCE.onKey.invoke(EventStore.keyEvent(key, true));
                 return;
+            }
+
+            if (ModuleManager.INSTANCE.isActive(InvMove.class)) {
+                InputUtil.KeyCode keyCode = InputUtil.getKeyCode(key, scancode);
+                KeyBinding.setKeyPressed(keyCode, i == GLFW.GLFW_PRESS);
             }
 
             if (!client.isPaused() && (client.currentScreen == null || (client.currentScreen instanceof WidgetScreen && GuiThings.postKeyEvents()))) {

@@ -18,6 +18,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.MathHelper;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -68,5 +69,11 @@ public abstract class GameRendererMixin {
         if (floatingItem.getItem() == Items.TOTEM_OF_UNDYING && ModuleManager.INSTANCE.get(NoRender.class).noTotem()) {
             info.cancel();
         }
+    }
+
+    @Redirect(method = "renderWorld", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/MathHelper;lerp(FFF)F"))
+    private float applyCameraTransformationsMathHelperLerpProxy(float delta, float first, float second) {
+        if (ModuleManager.INSTANCE.get(NoRender.class).noNausea()) return 0;
+        return MathHelper.lerp(delta, first, second);
     }
 }

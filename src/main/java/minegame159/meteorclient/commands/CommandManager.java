@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class CommandManager {
-    private static List<Command> commands = new ArrayList<>();
+    private static final List<Command> commands = new ArrayList<>();
 
     public static void init() {
         addCommand(new Bind());
@@ -23,8 +23,11 @@ public class CommandManager {
         addCommand(new Baritone());
         addCommand(new Reload());
         addCommand(new Dismount());
-        addCommand(new Book());
         addCommand(new Say());
+        addCommand(new Ignore());
+        addCommand(new Drop());
+        addCommand(new HClip());
+        addCommand(new VClip());
     }
 
     public static Command get(String name) {

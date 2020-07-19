@@ -46,8 +46,8 @@ public class EnumSetting<T extends Enum<?>> extends Setting<T> {
         String usage = "";
 
         for (int i = 0; i < values.length; i++) {
-            if (i > 0) usage += " #grayor ";
-            usage += "#blue" + values[i];
+            if (i > 0) usage += " (default)or ";
+            usage += "(highlight)" + values[i];
         }
 
         return usage;

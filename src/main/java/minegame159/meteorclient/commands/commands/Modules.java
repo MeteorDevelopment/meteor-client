@@ -5,7 +5,7 @@ import minegame159.meteorclient.commands.Command;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.Chat;
 
 import java.util.List;
 
@@ -16,14 +16,14 @@ public class Modules extends Command {
 
     @Override
     public void run(String[] args) {
-        Utils.sendMessage("#yellowAll #gray%d #yellowmodules:", ModuleManager.INSTANCE.getAll().size());
+        Chat.info("All (highlight)%d (default)modules:", ModuleManager.INSTANCE.getAll().size());
 
         for (Category category : ModuleManager.CATEGORIES) {
             List<Module> group = ModuleManager.INSTANCE.getGroup(category);
-            Utils.sendMessage("  #pink%s #gray(%d)#pink:", category.toString(), group.size());
+            Chat.info("- (highlight)%s (default)(%d):", category.toString(), group.size());
 
-            for (Module oldModule : group) {
-                Utils.sendMessage("    #yellow%s%s #gray- #yellow%s", Config.INSTANCE.getPrefix(), oldModule.name, oldModule.description);
+            for (Module module : group) {
+                Chat.info("  - (highlight)%s%s (default)- %s", Config.INSTANCE.getPrefix(), module.name, module.description);
             }
         }
     }

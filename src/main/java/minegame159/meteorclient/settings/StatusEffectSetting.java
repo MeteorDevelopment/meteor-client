@@ -49,7 +49,7 @@ public class StatusEffectSetting extends Setting<Object2IntMap<StatusEffect>> {
     @Override
     protected String generateUsage() {
         //TODO: Look up nigger
-        return "#bluenot implemented";
+        return "(highlight)not implemented";
     }
 
     @Override

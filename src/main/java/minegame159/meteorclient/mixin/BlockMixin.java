@@ -28,8 +28,8 @@ public abstract class BlockMixin extends AbstractBlock implements ItemConvertibl
 
     @Inject(at = @At("HEAD"), method = "shouldDrawSide", cancellable = true)
     private static void onShouldDrawSide(BlockState state, BlockView view, BlockPos pos, Direction facing, CallbackInfoReturnable<Boolean> info) {
-        if (ModuleManager.INSTANCE.isActive(XRay.class)) {
-            info.setReturnValue(ModuleManager.INSTANCE.get(XRay.class).isVisible(state.getBlock()));
+        if (ModuleManager.INSTANCE.get(XRay.class).isBlocked(state.getBlock())) {
+            info.setReturnValue(false);
         }
     }
 }

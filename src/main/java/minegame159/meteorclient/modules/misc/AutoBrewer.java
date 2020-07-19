@@ -7,8 +7,11 @@ import minegame159.meteorclient.settings.PotionSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.InvUtils;
+import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.MyPotion;
 import minegame159.meteorclient.utils.Utils;
+import net.minecraft.container.BrewingStandContainer;
+import net.minecraft.container.SlotActionType;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.potion.Potion;
@@ -114,7 +117,7 @@ public class AutoBrewer extends ToggleModule {
             }
 
             if (slot == -1) {
-                Utils.sendMessage("#blueAuto Brewer:#white Deactivated because you don't have any %s left in your inventory.", item.getName().getString());
+                Chat.warning(this, "Disabled because you don't have any %s left in your inventory.", item.getName().getString());
                 toggle();
                 return true;
             }
@@ -136,7 +139,7 @@ public class AutoBrewer extends ToggleModule {
         }
 
         if (slot == -1) {
-            Utils.sendMessage("#blueAuto Brewer:#white Deactivated because you don't have any %s left in your inventory.", ingredient.getName().getString());
+            Chat.warning(this, "Disabled because you don't have any %s left in your inventory.", ingredient.getName().getString());
             toggle();
             return true;
         }
@@ -158,7 +161,7 @@ public class AutoBrewer extends ToggleModule {
             }
 
             if (slot == -1) {
-                Utils.sendMessage("#blueAuto Brewer:#white Deactivated because you don't have any blaze powder (as fuel) left in your inventory.");
+                Chat.warning(this, "Disabled because you don't have any blaze powder (as fuel) left in your inventory.");
                 toggle();
                 return true;
             }
@@ -190,7 +193,7 @@ public class AutoBrewer extends ToggleModule {
             }
 
             if (slot == -1) {
-                Utils.sendMessage("#blueAuto Brewer:#white Deactivated because you don't have any water bottles left in your inventory.");
+                Chat.warning(this, "Disabled because you don't have any water bottles left in your inventory.");
                 toggle();
                 return true;
             }
@@ -207,7 +210,7 @@ public class AutoBrewer extends ToggleModule {
             InvUtils.clickSlot(i, 0, SlotActionType.QUICK_MOVE);
 
             if (!c.slots.get(i).getStack().isEmpty()) {
-                Utils.sendMessage("#blueAuto Brewer:#white Deactivated because your inventory is full.");
+                Chat.warning(this, "Disabled because your inventory is full.");
                 toggle();
                 return true;
             }

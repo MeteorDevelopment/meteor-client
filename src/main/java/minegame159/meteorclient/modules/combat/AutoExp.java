@@ -13,8 +13,10 @@ import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.InvUtils;
 import minegame159.meteorclient.utils.Utils;
+import net.minecraft.container.SlotActionType;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.Item;
@@ -50,7 +52,13 @@ public class AutoExp extends ToggleModule {
             .defaultValue(false)
             .build()
     );
-    
+
+    private final Setting<Boolean> disableOnDamage = sgGeneral.add(new BoolSetting.Builder()
+            .name("disable-on-damage")
+            .description("Disables this when you take damage")
+            .defaultValue(true)
+            .build());
+
     public AutoExp() {
         super(Category.Combat, "auto-exp", "Throws exp to mend your armour (only works with diamond)");
     }
@@ -78,6 +86,7 @@ public class AutoExp extends ToggleModule {
                 }
             }
         }
+        lastHealth = mc.player.getHealth() + mc.player.getAbsorptionAmount();
     }
 
     @Override
@@ -96,8 +105,15 @@ public class AutoExp extends ToggleModule {
         }
     }
 
+    private float lastHealth;
+
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
+        if(lastHealth > mc.player.getHealth() + mc.player.getAbsorptionAmount() && disableOnDamage.get()){
+            this.onDeactivate();
+        }else if(disableOnDamage.get()){
+            lastHealth = mc.player.getHealth() + mc.player.getAbsorptionAmount();
+        }
         Iterator<ItemStack> armour = mc.player.getArmorItems().iterator();
         ItemStack boots = armour.next();
         ItemStack leggings = armour.next();
@@ -107,12 +123,12 @@ public class AutoExp extends ToggleModule {
                 (findBrokenArmour(Items.DIAMOND_BOOTS) == -1) && (findBrokenArmour(Items.DIAMOND_LEGGINGS) == -1)
                 && (findBrokenArmour(Items.DIAMOND_CHESTPLATE) == -1) && (findBrokenArmour(Items.DIAMOND_HELMET) == -1)) {
             this.toggle();
-            Utils.sendMessage("#redNo broken armour with mending. Disabling!");
+            Chat.warning(this, "No broken armor with mending. Disabling!");
             return;
         }
         int slot = findExpInHotbar();
         if (slot == -1) {
-            Utils.sendMessage("#redNo Exp in hotbar. Disabling!");
+            Chat.warning(this, "No Exp in hotbar. Disabling!");
             this.toggle();
         } else if (mc.player.inventory.getStack(slot).getCount() < replenishCount.get() && replenish.get()) {
             for (int i = 9; i < 36; i++) {

@@ -10,8 +10,8 @@ import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.DamageCalcUtils;
-import minegame159.meteorclient.utils.Utils;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BedBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
@@ -43,7 +43,7 @@ public class BedAura extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgPlace = settings.createGroup("Place");
 
-    private final Setting<Integer> placeRange = sgGeneral.add(new IntSetting.Builder()
+    private final Setting<Double> placeRange = sgGeneral.add(new DoubleSetting.Builder()
             .name("place-range")
             .description("The distance in a single direction the beds get placed.")
             .defaultValue(3)
@@ -52,7 +52,7 @@ public class BedAura extends ToggleModule {
             .build()
     );
 
-    private final Setting<Integer> breakRange = sgGeneral.add(new IntSetting.Builder()
+    private final Setting<Double> breakRange = sgGeneral.add(new DoubleSetting.Builder()
             .name("break-range")
             .description("The distance in a single direction the beds get broken.")
             .defaultValue(3)
@@ -104,15 +104,15 @@ public class BedAura extends ToggleModule {
     );
 
     @EventHandler
-    private Listener<TickEvent> onTick = new Listener<>(event -> {
-        if(mc.world.getDimension() == DimensionType.getOverworldDimensionType()) {
-            Utils.sendMessage("#redYou are in the overworld. Disabling!");
+    private final Listener<TickEvent> onTick = new Listener<>(event -> {
+        if( mc.world.getDimension() == DimensionType.getOverworldDimensionType()) {
+            Chat.warning(this, "You are in the overworld. Disabling!");
             this.toggle();
             return;
         }
         if ((mc.player.getHealth() + mc.player.getAbsorptionAmount()) <= minHealth.get() && mode.get() != Mode.suicide) return;
-        if(place.get() && (!(mc.player.getMainHandStack().getItem() instanceof BedItem) && !(mc.player.getOffHandStack().getItem() instanceof BedItem))) return;
-        if(place.get()) {
+        if (place.get() && (!(mc.player.getMainHandStack().getItem() instanceof BedItem) && !(mc.player.getOffHandStack().getItem() instanceof BedItem))) return;
+        if (place.get()) {
             ListIterator<BlockPos> validBlocks = Objects.requireNonNull(findValidBlocks()).listIterator();
             Iterator<AbstractClientPlayerEntity> validEntities = mc.world.getPlayers().stream().filter(entityPlayer -> !FriendManager.INSTANCE.isTrusted(entityPlayer)).filter(entityPlayer -> !entityPlayer.getDisplayName().equals(mc.player.getDisplayName())).filter(entityPlayer -> Math.sqrt(mc.player.squaredDistanceTo(new Vec3d(entityPlayer.getX(), entityPlayer.getY(), entityPlayer.getZ()))) <= 10).collect(Collectors.toList()).iterator();
             AbstractClientPlayerEntity target;
@@ -214,10 +214,10 @@ public class BedAura extends ToggleModule {
         return validBlocks;
     }
 
-    private List<BlockPos> getRange(BlockPos player, int range){
+    private List<BlockPos> getRange(BlockPos player, double range){
         List<BlockPos> allBlocks = new ArrayList<>();
-        for(int i = player.getX() - range; i < player.getX() + range; i++){
-            for(int j = player.getZ() - range; j < player.getZ() + range; j++){
+        for(double i = player.getX() - range; i < player.getX() + range; i++){
+            for(double j = player.getZ() - range; j < player.getZ() + range; j++){
                 for(int k = player.getY() - 3; k < player.getY() + 3; k++){
                     BlockPos x = new BlockPos(i, k, j);
                     allBlocks.add(x);
