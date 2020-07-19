@@ -17,7 +17,8 @@ public class EntityControl extends ToggleModule {
     public void onDeactivate() {
         mc.world.getEntities().forEach(entity -> {
             if(entity instanceof HorseEntity){
-                ((HorseEntity) entity).setSaddled(false);
+                //TODO: I have no idea why mojang did this and i dont wanna figure it out so here it is commented
+                //((HorseEntity) entity).saddle(false);
             }
         });
     }
@@ -26,7 +27,7 @@ public class EntityControl extends ToggleModule {
     private Listener<TickEvent> onTick = new Listener<>(event -> {
         mc.world.getEntities().forEach(entity -> {
             if(entity instanceof HorseEntity){
-                ((HorseEntity) entity).setSaddled(true);
+                ((HorseEntity) entity).saddle(null);
             }
         });
         if(!mc.player.hasVehicle()) return;

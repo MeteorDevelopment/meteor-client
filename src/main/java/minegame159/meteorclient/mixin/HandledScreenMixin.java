@@ -10,11 +10,10 @@ import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.ContainerProvider;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.client.gui.screen.ingame.ScreenHandlerProvider;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.render.DiffuseLighting;
-import net.minecraft.container.Container;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.passive.AbstractDonkeyEntity;
 import net.minecraft.inventory.Inventories;
@@ -22,8 +21,10 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
-import net.minecraft.text.Text;
+import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
@@ -37,7 +38,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import javax.annotation.Nullable;
 
 @Mixin(HandledScreen.class)
-public class HandledScreenMixin {
+public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen implements ScreenHandlerProvider<T> {
     @Shadow @Nullable protected Slot focusedSlot;
 
     @Shadow protected int x;
@@ -45,7 +46,7 @@ public class HandledScreenMixin {
     private static final Identifier TEXTURE = new Identifier("meteor-client", "container_3x9.png");
     private static MinecraftClient mc;
 
-    public ContainerScreenMixin(Text title) {
+    public HandledScreenMixin(Text title) {
         super(title);
     }
 
@@ -57,10 +58,10 @@ public class HandledScreenMixin {
         if (mc.player.getVehicle() instanceof AbstractDonkeyEntity) {
             AbstractDonkeyEntity entity = (AbstractDonkeyEntity) mc.player.getVehicle();
 
-            addButton(new ButtonWidget(x + 82, y + 2, 39, 12, "Dupe", button -> {
+            addButton(new ButtonWidget(x + 82, y + 2, 39, 12, new LiteralText("Dupe"), button -> {
                 ModuleManager.INSTANCE.get(MountBypass.class).dontCancel();
 
-                mc.getNetworkHandler().sendPacket(new PlayerInteractEntityC2SPacket(entity, Hand.MAIN_HAND, entity.getPos().add(entity.getWidth() / 2, entity.getHeight() / 2, entity.getWidth() / 2)));
+                mc.getNetworkHandler().sendPacket(new PlayerInteractEntityC2SPacket(entity, Hand.MAIN_HAND, entity.getPos().add(entity.getWidth() / 2, entity.getHeight() / 2, entity.getWidth() / 2), mc.player.isSneaking()));
             }));
         }
     }

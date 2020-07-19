@@ -6,8 +6,8 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.DecoderException;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.misc.AntiChunkBan;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.PacketInflater;
-import net.minecraft.util.PacketByteBuf;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -40,8 +40,8 @@ public class PacketInflaterMixin {
                     throw new DecoderException("Badly compressed packet - size of " + i + " is below server threshold of " + this.compressionThreshold);
                 }
 
-                if (i > 51200000) {
-                    throw new DecoderException("Badly compressed packet - size of " + i + " is larger than protocol maximum of " + 51200000);
+                if (i > 2097152) {
+                    throw new DecoderException("Badly compressed packet - size of " + i + " is larger than protocol maximum of " + 2097152);
                 }
 
                 byte[] bs = new byte[packetByteBuf.readableBytes()];

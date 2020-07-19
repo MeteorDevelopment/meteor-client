@@ -2,8 +2,8 @@ package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.Config;
 import minegame159.meteorclient.gui.screens.AutoCraftScreen;
-import minegame159.meteorclient.utils.InvUtils;
 import minegame159.meteorclient.utils.Chat;
+import minegame159.meteorclient.utils.InvUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.CraftingScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
@@ -71,7 +71,7 @@ public abstract class CraftingScreenMixin extends HandledScreen<CraftingScreenHa
 
     @Inject(method = "tick", at = @At("TAIL"))
     private void onTick(CallbackInfo info) {
-        int x = recipeBookGui.findLeftEdge(this.isNarrow, this.width, this.containerWidth) + 30 + 3 * 18 + 4;
+        int x = recipeBookGui.findLeftEdge(this.isNarrow, this.width, this.width) + 30 + 3 * 18 + 4;
         autoCraftBtn.x = x;
         configBtn.x = x;
 

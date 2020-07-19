@@ -63,7 +63,7 @@
     "RenderTickCounterMixin",
     "MinecraftServerMixin",
     "DimensionTypeMixin",
-    "TextHandlerMixin"
+    "TextHandlerMixin",
     "RenderTickCounterMixin",
     "TerrainRenderContextMixin",
     "BlockEntityRenderDispatcherMixin",

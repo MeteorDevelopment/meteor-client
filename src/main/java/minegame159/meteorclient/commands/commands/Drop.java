@@ -4,7 +4,7 @@ import minegame159.meteorclient.commands.Command;
 import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.InvUtils;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.container.SlotActionType;
+import net.minecraft.screen.slot.SlotActionType;
 
 public class Drop extends Command {
     public Drop() {

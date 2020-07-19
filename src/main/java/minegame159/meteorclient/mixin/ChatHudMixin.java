@@ -6,10 +6,8 @@ import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.misc.AntiSpam;
 import net.minecraft.client.gui.hud.ChatHud;
 import net.minecraft.client.gui.hud.ChatHudLine;
-import net.minecraft.client.util.ChatMessages;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.StringRenderable;
-import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -34,7 +32,7 @@ public abstract class ChatHudMixin {
     private void onAddMessage(StringRenderable stringRenderable, int messageId, int timestamp, boolean bl, CallbackInfo info) {
         // Ignore players
         for (String name : Ignore.ignoredPlayers) {
-            if (message.toString().contains("<" + name + ">")) {
+            if (stringRenderable.toString().contains("<" + name + ">")) {
                 info.cancel();
                 return;
             }

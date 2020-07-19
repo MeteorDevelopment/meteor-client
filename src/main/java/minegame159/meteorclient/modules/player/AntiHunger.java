@@ -40,7 +40,7 @@ public class AntiHunger extends ToggleModule {
 
     @Override
     public void onActivate() {
-        lastOnGround = mc.player.onGround;
+        lastOnGround = mc.player.isOnGround();
         sendOnGroundTruePacket = true;
     }
 
@@ -56,16 +56,16 @@ public class AntiHunger extends ToggleModule {
             }
         }
 
-        if (event.packet instanceof PlayerMoveC2SPacket && onGround.get() && mc.player.onGround && mc.player.fallDistance <= 0.0 && !mc.interactionManager.isBreakingBlock()) {
+        if (event.packet instanceof PlayerMoveC2SPacket && onGround.get() && mc.player.isOnGround() && mc.player.fallDistance <= 0.0 && !mc.interactionManager.isBreakingBlock()) {
             ((IPlayerMoveC2SPacket) event.packet).setOnGround(false);
         }
     });
 
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
-        if (mc.player.onGround && !lastOnGround && !sendOnGroundTruePacket) sendOnGroundTruePacket = true;
+        if (mc.player.isOnGround() && !lastOnGround && !sendOnGroundTruePacket) sendOnGroundTruePacket = true;
 
-        if (mc.player.onGround && sendOnGroundTruePacket && onGround.get()) {
+        if (mc.player.isOnGround() && sendOnGroundTruePacket && onGround.get()) {
             ignorePacket = true;
             mc.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket(true));
             ignorePacket = false;
@@ -73,6 +73,6 @@ public class AntiHunger extends ToggleModule {
             sendOnGroundTruePacket = false;
         }
 
-        lastOnGround = mc.player.onGround;
+        lastOnGround = mc.player.isOnGround();
     });
 }

@@ -12,12 +12,12 @@ import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.InvUtils;
 import minegame159.meteorclient.utils.Utils;
-import net.minecraft.container.SlotActionType;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.ElytraItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
+import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.math.Vec3d;
 
 public class ElytraPlus extends ToggleModule {
@@ -178,7 +178,7 @@ public class ElytraPlus extends ToggleModule {
                 if(mc.player.inventory.getArmorStack(2).getMaxDamage() - mc.player.inventory.getArmorStack(2).getDamage() <= replaceDurability.get()){
                     int slot = -1;
                     for (int i = 9; i < 45; i++) {
-                        ItemStack stack = mc.player.inventory.getInvStack(i);
+                        ItemStack stack = mc.player.inventory.getStack(i);
                         if (stack.getItem() == Items.ELYTRA && stack.getMaxDamage() - stack.getDamage() > replaceDurability.get()) {
                             slot = i;
                         }

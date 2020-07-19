@@ -57,11 +57,11 @@ public class BlockSelection extends ToggleModule {
         Box box = shape.getBoundingBox();
 
         if (mode.get() == Mode.Lines || mode.get() == Mode.Both) {
-            ShapeBuilder.boxEdges(pos.getX() + box.x1,  pos.getY() + box.y1, pos.getZ() + box.z1, pos.getX() + box.x2,  pos.getY() + box.y2, pos.getZ() + box.z2, color.get());
+            ShapeBuilder.boxEdges(pos.getX() + box.minX,  pos.getY() + box.minY, pos.getZ() + box.minZ, pos.getX() + box.maxX,  pos.getY() + box.maxY, pos.getZ() + box.maxZ, color.get());
         }
         if (mode.get() == Mode.Sides || mode.get() == Mode.Both) {
             setSideColor();
-            ShapeBuilder.boxSides(pos.getX() + box.x1,  pos.getY() + box.y1, pos.getZ() + box.z1, pos.getX() + box.x2,  pos.getY() + box.y2, pos.getZ() + box.z2, sideColor);
+            ShapeBuilder.boxSides(pos.getX() + box.minX,  pos.getY() + box.minY, pos.getZ() + box.minZ, pos.getX() + box.maxX,  pos.getY() + box.maxY, pos.getZ() + box.maxZ, sideColor);
         }
     });
 
