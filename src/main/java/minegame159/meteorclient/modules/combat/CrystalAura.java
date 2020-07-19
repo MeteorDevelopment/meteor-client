@@ -193,7 +193,7 @@ public class CrystalAura extends ToggleModule {
                     int preSlot = mc.player.inventory.selectedSlot;
                     if(mc.player.getActiveStatusEffects().containsKey(StatusEffects.WEAKNESS)){
                         for(int i = 0; i < 9; i++){
-                            if(mc.player.inventory.getInvStack(i).getItem() instanceof SwordItem || mc.player.inventory.getInvStack(i).getItem() instanceof AxeItem){
+                            if(mc.player.inventory.getStack(i).getItem() instanceof SwordItem || mc.player.inventory.getStack(i).getItem() instanceof AxeItem){
                                 mc.player.inventory.selectedSlot = i;
                             }
                         }

@@ -103,7 +103,7 @@ public class AutoReplenish extends ToggleModule {
                 int slot = -1;
                 if (searchHotbar.get()) {
                     for (int j = 0; j < 9; j++) {
-                        if (mc.player.inventory.getInvStack(j).getItem() == stack.getItem() && mc.player.inventory.selectedSlot != j && i != j) {
+                        if (mc.player.inventory.getStack(j).getItem() == stack.getItem() && mc.player.inventory.selectedSlot != j && i != j) {
                             slot = j;
                             break;
                         }
@@ -111,7 +111,7 @@ public class AutoReplenish extends ToggleModule {
                 }
                 if (slot == -1) {
                     for (int j = 9; j < 45; j++) {
-                        if (mc.player.inventory.getInvStack(j).getItem() == stack.getItem()) {
+                        if (mc.player.inventory.getStack(j).getItem() == stack.getItem()) {
                             slot = j;
                             break;
                         }
@@ -130,14 +130,14 @@ public class AutoReplenish extends ToggleModule {
             if(stack.getCount() < amount.get() && (stack.getMaxCount() > amount.get() || stack.getCount() < stack.getMaxCount())) {
                 int slot = -1;
                 for (int i = 9; i < 45; i++) {
-                    if (mc.player.inventory.getInvStack(i).getItem() == stack.getItem()) {
+                    if (mc.player.inventory.getStack(i).getItem() == stack.getItem()) {
                         slot = i;
                         break;
                     }
                 }
                 if (searchHotbar.get() && slot == -1) {
                     for (int j = 0; j < 9; j++) {
-                        if (mc.player.inventory.getInvStack(j).getItem() == stack.getItem()) {
+                        if (mc.player.inventory.getStack(j).getItem() == stack.getItem()) {
                             slot = j;
                             break;
                         }

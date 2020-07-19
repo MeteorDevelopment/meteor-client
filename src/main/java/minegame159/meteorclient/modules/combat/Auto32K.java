@@ -14,11 +14,11 @@ import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.gui.screen.ingame.Generic3x3ContainerScreen;
 import net.minecraft.client.gui.screen.ingame.HopperScreen;
-import net.minecraft.container.SlotActionType;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.*;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
@@ -121,7 +121,7 @@ public class Auto32K extends ToggleModule {
                         return;
                     }
                     mc.player.setSneaking(false);
-                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(bestBlock.up()), mc.player.getHorizontalFacing(), bestBlock.up(), false));
+                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(bestBlock.up().getX(), bestBlock.up().getY(), bestBlock.up().getZ()), mc.player.getHorizontalFacing(), bestBlock.up(), false));
                     phase = 8;
                 }
             } else if (mode.get() == Mode.Dispenser) {
@@ -143,20 +143,20 @@ public class Auto32K extends ToggleModule {
                 } else if (phase == 1) {
                     mc.player.inventory.selectedSlot = dispenserSlot;
                     if (x == -1) {
-                        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(-90f, mc.player.pitch, mc.player.onGround));
+                        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(-90f, mc.player.pitch, mc.player.isOnGround()));
                     } else if (x == 1) {
-                        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(90f, mc.player.pitch, mc.player.onGround));
+                        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(90f, mc.player.pitch, mc.player.isOnGround()));
                     } else if (z == -1) {
-                        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(1f, mc.player.pitch, mc.player.onGround));
+                        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(1f, mc.player.pitch, mc.player.isOnGround()));
                     } else if (z == 1) {
-                        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(179f, mc.player.pitch, mc.player.onGround));
+                        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(179f, mc.player.pitch, mc.player.isOnGround()));
                     }
                     phase += 1;
                 } else if (phase == 2) {
-                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(bestBlock), Direction.UP, bestBlock, false));
+                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(bestBlock.getX(), bestBlock.getY(), bestBlock.getZ()), Direction.UP, bestBlock, false));
                     phase += 1;
                 } else if (phase == 3) {
-                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(bestBlock.up()), mc.player.getHorizontalFacing().getOpposite(), bestBlock.up(), false));
+                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(bestBlock.up().getX(), bestBlock.up().getY(), bestBlock.up().getZ()), mc.player.getHorizontalFacing().getOpposite(), bestBlock.up(), false));
                     phase += 1;
                 }else if (phase == 4 && mc.currentScreen instanceof Generic3x3ContainerScreen) {
                     mc.player.getSpeed();
@@ -164,16 +164,16 @@ public class Auto32K extends ToggleModule {
                     InvUtils.clickSlot(4, 0, SlotActionType.PICKUP);
                     phase += 1;
                 }else if (phase == 5 && mc.currentScreen instanceof Generic3x3ContainerScreen) {
-                    mc.player.closeContainer();
+                    mc.player.closeHandledScreen();
                     phase += 1;
                 }else if (phase == 6) {
                     mc.player.inventory.selectedSlot = redstoneSlot;
                     mc.player.setSneaking(true);
-                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(bestBlock.up()), mc.player.getHorizontalFacing().getOpposite(), bestBlock.up(2), false));
+                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(bestBlock.up().getX(), bestBlock.up().getY(), bestBlock.up().getZ()), mc.player.getHorizontalFacing().getOpposite(), bestBlock.up(2), false));
                     mc.player.setSneaking(false);
                     phase += 1;
                 }else if (phase == 7){
-                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(bestBlock.up()), mc.player.getHorizontalFacing().getOpposite(), bestBlock.add(x, 0, z), false));
+                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(bestBlock.up().getX(), bestBlock.up().getY(), bestBlock.up().getZ()), mc.player.getHorizontalFacing().getOpposite(), bestBlock.add(x, 0, z), false));
                     phase += 1;
                 }
             }
@@ -185,7 +185,7 @@ public class Auto32K extends ToggleModule {
                     Iterator<Block> blocks = throwawayItems.get().iterator();
                     for (Item item = blocks.next().asItem(); blocks.hasNext(); item = blocks.next().asItem()) {
                         for (int i = 5; i <= 40; i++) {
-                            ItemStack stack = mc.player.inventory.getInvStack(i);
+                            ItemStack stack = mc.player.inventory.getStack(i);
                             if (stack.getItem() == item && stack.getCount() >= 4) {
                                 slot = i;
                                 count = stack.getCount();
@@ -195,7 +195,7 @@ public class Auto32K extends ToggleModule {
                         if (count >= 4) break;
                     }
                     for (int i = 1; i < 5; i++) {
-                        if (mc.player.container.getSlot(i).getStack().getItem() instanceof AirBlockItem) {
+                        if (mc.player.currentScreenHandler.getSlot(i).getStack().getItem() instanceof AirBlockItem) {
                             InvUtils.clickSlot(InvUtils.invIndexToSlotId(slot) - 4, 0, SlotActionType.PICKUP);
                             InvUtils.clickSlot(i, 1, SlotActionType.PICKUP);
                             InvUtils.clickSlot(InvUtils.invIndexToSlotId(slot) - 4, 0, SlotActionType.PICKUP);
@@ -206,23 +206,23 @@ public class Auto32K extends ToggleModule {
                 int slot = -1;
                 int dropSlot = -1;
                 for (int i = 32; i < 41; i++) {
-                    if (EnchantmentHelper.getLevel(Enchantments.SHARPNESS, mc.player.container.getSlot(i).getStack()) > 5) {
+                    if (EnchantmentHelper.getLevel(Enchantments.SHARPNESS, mc.player.currentScreenHandler.getSlot(i).getStack()) > 5) {
                         manage = false;
                         slot = i;
                         break;
-                    }else if (mc.player.container.getSlot(i).getStack().getItem() instanceof SwordItem
-                            && EnchantmentHelper.getLevel(Enchantments.SHARPNESS, mc.player.container.getSlot(i).getStack()) <= 5) {
+                    }else if (mc.player.currentScreenHandler.getSlot(i).getStack().getItem() instanceof SwordItem
+                            && EnchantmentHelper.getLevel(Enchantments.SHARPNESS, mc.player.currentScreenHandler.getSlot(i).getStack()) <= 5) {
                         dropSlot = i;
                     }
                 }
                 if (dropSlot != -1) InvUtils.clickSlot(InvUtils.invIndexToSlotId(dropSlot), 0, SlotActionType.THROW);
                 if(autoMove.get() && manage){
                     int slot2 = mc.player.inventory.getEmptySlot();
-                    if (slot2 < 9 && slot2 != -1 && EnchantmentHelper.getLevel(Enchantments.SHARPNESS, mc.player.container.getSlot(0).getStack()) > 5) {
+                    if (slot2 < 9 && slot2 != -1 && EnchantmentHelper.getLevel(Enchantments.SHARPNESS, mc.player.currentScreenHandler.getSlot(0).getStack()) > 5) {
                         InvUtils.clickSlot(0, 0, SlotActionType.PICKUP);
                         InvUtils.clickSlot(InvUtils.invIndexToSlotId(slot2), 0, SlotActionType.PICKUP);
-                    } else if (EnchantmentHelper.getLevel(Enchantments.SHARPNESS, mc.player.container.getSlot(0).getStack()) <= 5
-                            && mc.player.container.getSlot(0).getStack().getItem() != Items.AIR) {
+                    } else if (EnchantmentHelper.getLevel(Enchantments.SHARPNESS, mc.player.currentScreenHandler.getSlot(0).getStack()) <= 5
+                            && mc.player.currentScreenHandler.getSlot(0).getStack().getItem() != Items.AIR) {
                         InvUtils.clickSlot(0, 0, SlotActionType.THROW);
                     }
                 }

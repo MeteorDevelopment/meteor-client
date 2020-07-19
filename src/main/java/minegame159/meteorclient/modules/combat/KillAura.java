@@ -24,7 +24,6 @@ import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RayTraceContext;
 
-import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -167,8 +166,8 @@ public class KillAura extends ToggleModule {
 
     private boolean isPlayerOnGround(Entity entity){
         if (!onlyOnGround.get()) return true;
-        else if (onlyOnGround.get() && entity instanceof PlayerEntity && entity.onGround) return true;
-        else if (onlyOnGround.get() && entity instanceof PlayerEntity && !entity.onGround) return false;
+        else if (onlyOnGround.get() && entity instanceof PlayerEntity && entity.isOnGround()) return true;
+        else if (onlyOnGround.get() && entity instanceof PlayerEntity && !entity.isOnGround()) return false;
         else return onlyOnGround.get() && !(entity instanceof PlayerEntity);
     }
 
