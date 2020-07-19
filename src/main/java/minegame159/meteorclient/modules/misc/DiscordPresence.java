@@ -13,14 +13,14 @@ import net.arikia.dev.drpc.DiscordRPC;
 import net.arikia.dev.drpc.DiscordRichPresence;
 
 public class DiscordPresence extends ToggleModule {
-    private final static DiscordRichPresence presence = new DiscordRichPresence.Builder("https://discord.gg/BG2kMWb").build();
+    private final static DiscordRichPresence presence = new DiscordRichPresence.Builder("Meteor on Crack!").build();
 
     public DiscordPresence(){super(Category.Misc, "discord-presence", "That stuff you see in discord");}
 
     private int ticks = 0;
 
     @EventHandler
-    private Listener<TickEvent> OnTick = new Listener<>(event -> {
+    private final Listener<TickEvent> OnTick = new Listener<>(event -> {
         ticks++;
         if(ticks < 200){
             DiscordPresence.presence.smallImageKey = "minegame";
