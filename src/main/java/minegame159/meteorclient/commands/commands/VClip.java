@@ -21,7 +21,7 @@ public class VClip extends Command {
             double blocks = Double.parseDouble(args[0]);
             ClientPlayerEntity player = MinecraftClient.getInstance().player;
 
-            player.updatePosition(player.x, player.y + blocks, player.z);
+            player.updatePosition(player.getX(), player.getY() + blocks, player.getZ());
         } catch (NumberFormatException ignored) {
             sendErrorMsg();
         }
