@@ -135,6 +135,7 @@ public class Auto32K extends ToggleModule {
                 if (phase == 0) {
                     bestBlock = findValidBlocksDispenser();
                     mc.player.inventory.selectedSlot = hopperSlot;
+                    if(bestBlock == null) return;
                     if (!Utils.place(Blocks.HOPPER.getDefaultState(), bestBlock.add(x, 0, z))) {
                         Utils.sendMessage("#redFailed to place");
                         this.toggle();
