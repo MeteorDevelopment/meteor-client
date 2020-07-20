@@ -11,7 +11,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.HorseBaseEntity;
 
 public class EntityControl extends ToggleModule {
-    public EntityControl(){super(Category.Movement, "entity-control", "Lets you control horses without a saddle.");}
+    public EntityControl(){super(Category.Movement, "entity-control", "Lets you control horses, donkeys and mules without a saddle.");}
 
     @Override
     public void onDeactivate() {
