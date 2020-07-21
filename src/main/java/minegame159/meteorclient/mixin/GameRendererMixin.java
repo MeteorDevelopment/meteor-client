@@ -27,7 +27,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 @Mixin(GameRenderer.class)
 public abstract class GameRendererMixin {
@@ -44,9 +43,9 @@ public abstract class GameRendererMixin {
         a = false;
     }
 
-    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/GameRenderer;renderWorld(FJLnet/minecraft/client/util/math/MatrixStack;)V"), locals = LocalCapture.CAPTURE_FAILEXCEPTION)
-    private void onRenderRenderWorld(float tickDelta, long startTime, boolean tick, CallbackInfo info, int i, int j, MatrixStack matrixStack) {
-        Matrices.begin(matrixStack);
+    @Inject(method = "renderWorld", at = @At("HEAD"))
+    private void onRenderWorldHead(float tickDelta, long limitTime, MatrixStack matrix, CallbackInfo info) {
+        Matrices.begin(matrix);
         Matrices.push();
         RenderSystem.pushMatrix();
 
