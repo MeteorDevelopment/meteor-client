@@ -33,7 +33,7 @@ public class PacketMine extends ToggleModule {
     private final List<Block> blocks = new ArrayList<>();
 
     public PacketMine() {
-        super(Category.Player, "packet-mine", "Sends packet to minne blocks without mining animation.");
+        super(Category.Player, "packet-mine", "Sends packet to mine blocks without mining animation.");
     }
 
     @Override

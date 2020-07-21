@@ -176,7 +176,10 @@ public class Utils {
             case GLFW.GLFW_KEY_ENTER: return "Enter";
             case GLFW.GLFW_KEY_NUM_LOCK: return "Num Lock";
             case GLFW.GLFW_KEY_SPACE: return "Space";
-            default: return GLFW.glfwGetKeyName(key, 0);
+            default:
+                String keyName = GLFW.glfwGetKeyName(key, 0);
+                if (keyName == null) return "Unknown";
+                return keyName;
         }
     }
 
