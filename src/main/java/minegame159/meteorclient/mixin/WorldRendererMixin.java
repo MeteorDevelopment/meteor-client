@@ -19,6 +19,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(WorldRenderer.class)
 public class WorldRendererMixin {
+    @Inject(method = "checkEmpty", at = @At("HEAD"), cancellable = true)
+    private void onCheckEmpty(MatrixStack matrixStack, CallbackInfo info) {
+        info.cancel();
+    }
+
     @Inject(method = "renderWeather", at = @At("HEAD"), cancellable = true)
     private void onRenderWeather(LightmapTextureManager manager, float f, double d, double e, double g, CallbackInfo info) {
         if (ModuleManager.INSTANCE.get(NoRender.class).noWeather()) info.cancel();
