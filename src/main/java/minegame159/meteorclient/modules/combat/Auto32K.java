@@ -222,7 +222,7 @@ public class Auto32K extends ToggleModule {
                     int slot2 = mc.player.inventory.getEmptySlot();
                     if (slot2 < 9 && slot2 != -1 && EnchantmentHelper.getLevel(Enchantments.SHARPNESS, mc.player.container.getSlot(0).getStack()) > 5) {
                         InvUtils.clickSlot(0, 0, SlotActionType.PICKUP);
-                        InvUtils.clickSlot(InvUtils.invIndexToSlotId(slot2), 0, SlotActionType.PICKUP);
+                        InvUtils.clickSlot(InvUtils.invIndexToSlotId(slot2) - 4, 0, SlotActionType.PICKUP);
                     } else if (EnchantmentHelper.getLevel(Enchantments.SHARPNESS, mc.player.container.getSlot(0).getStack()) <= 5
                             && mc.player.container.getSlot(0).getStack().getItem() != Items.AIR) {
                         InvUtils.clickSlot(0, 0, SlotActionType.THROW);
