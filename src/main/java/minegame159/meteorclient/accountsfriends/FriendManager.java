@@ -48,6 +48,10 @@ public class FriendManager extends Savable<FriendManager> {
         return null;
     }
 
+    public Friend get(PlayerEntity player) {
+        return get(player.getGameProfile().getName());
+    }
+
     public boolean isTrusted(PlayerEntity player) {
         Friend friend = get(player.getGameProfile().getName());
         return friend != null && friend.trusted;
