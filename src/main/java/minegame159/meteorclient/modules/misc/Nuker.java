@@ -79,7 +79,7 @@ public class Nuker extends ToggleModule {
     );
 
     private final Setting<Boolean> noParticles = sgGeneral.add(new BoolSetting.Builder()
-            .name("no-particels")
+            .name("no-particles")
             .description("Disables block break particles.")
             .defaultValue(false)
             .build()
