@@ -12,6 +12,7 @@ import minegame159.meteorclient.modules.player.InvMove;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.Keyboard;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.options.KeyBinding;
 import net.minecraft.client.util.InputUtil;
@@ -52,7 +53,7 @@ public abstract class KeyboardMixin {
                 return;
             }
 
-            if (ModuleManager.INSTANCE.isActive(InvMove.class)) {
+            if (ModuleManager.INSTANCE.isActive(InvMove.class) && !(client.currentScreen instanceof ChatScreen)) {
                 InputUtil.KeyCode keyCode = InputUtil.getKeyCode(key, scancode);
                 KeyBinding.setKeyPressed(keyCode, i == GLFW.GLFW_PRESS);
             }
