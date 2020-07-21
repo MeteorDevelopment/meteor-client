@@ -42,8 +42,8 @@ public class WModule extends WWidget {
 
     @Override
     protected void onCalculateSize() {
-        width = 4 + titleWidth + 4;
-        height = 4 + MeteorClient.FONT.getHeight() + 4;
+        width = 3 + titleWidth + 3;
+        height = 3 + MeteorClient.FONT.getHeight() + 3;
     }
 
     @Override
@@ -101,6 +101,6 @@ public class WModule extends WWidget {
             renderer.renderQuad(x, y + height * (1 - animationProgress2), 1, height * animationProgress2, GuiConfig.INSTANCE.accent);
         }
 
-        renderer.renderText(module.title, x + width / 2 - titleWidth / 2, y + 4.5, GuiConfig.INSTANCE.text, false);
+        renderer.renderText(module.title, x + width / 2 - titleWidth / 2, y + 4, GuiConfig.INSTANCE.text, false);
     }
 }
