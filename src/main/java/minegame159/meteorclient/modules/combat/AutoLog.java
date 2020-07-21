@@ -12,7 +12,7 @@ import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.DamageCalcUtils;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.decoration.EnderCrystalEntity;
+import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.packet.s2c.play.DisconnectS2CPacket;
 import net.minecraft.text.LiteralText;
@@ -82,7 +82,7 @@ public class AutoLog extends ToggleModule {
                     break;
                 }
             }
-            if (entity instanceof EnderCrystalEntity && mc.player.distanceTo(entity) < range.get()) {
+            if (entity instanceof EndCrystalEntity && mc.player.distanceTo(entity) < range.get()) {
                 mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(new LiteralText("Crystal within specified range.")));
             }
         }
