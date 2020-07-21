@@ -1,7 +1,9 @@
 package minegame159.meteorclient.modules.misc;
 
+import com.google.gson.internal.$Gson$Preconditions;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
+import minegame159.meteorclient.accountsfriends.FriendManager;
 import minegame159.meteorclient.events.EntityAddedEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
@@ -33,6 +35,13 @@ public class EntityLogger extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> friends = sgGeneral.add(new BoolSetting.Builder()
+            .name("friends")
+            .description("Log friends.")
+            .defaultValue(true)
+            .build()
+    );
+
     public EntityLogger() {
         super(Category.Misc, "entity-logger", "Sends chat message when selected entities appear.");
     }
@@ -42,6 +51,10 @@ public class EntityLogger extends ToggleModule {
         if (event.entity.getUuid().equals(mc.player.getUuid())) return;
 
         if (entities.get().contains(event.entity.getType())) {
+            if (event.entity instanceof PlayerEntity) {
+                if (!friends.get() && FriendManager.INSTANCE.get((PlayerEntity) event.entity) != null) return;
+            }
+
             String name;
             if (playerNames.get() && event.entity instanceof PlayerEntity) name = ((PlayerEntity) event.entity).getGameProfile().getName() + " (Player)";
             else name = event.entity.getType().getName().asString();
