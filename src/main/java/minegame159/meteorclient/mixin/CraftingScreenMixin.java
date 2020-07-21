@@ -28,8 +28,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(CraftingScreen.class)
 public abstract class CraftingScreenMixin extends HandledScreen<CraftingScreenHandler> implements RecipeBookProvider {
-    @Shadow @Final private RecipeBookWidget recipeBookGui;
     @Shadow private boolean isNarrow;
+    @Shadow @Final private RecipeBookWidget recipeBook;
     private MinecraftClient mc;
     private ButtonWidget autoCraftBtn;
     private ButtonWidget configBtn;
@@ -71,7 +71,7 @@ public abstract class CraftingScreenMixin extends HandledScreen<CraftingScreenHa
 
     @Inject(method = "tick", at = @At("TAIL"))
     private void onTick(CallbackInfo info) {
-        int x = recipeBookGui.findLeftEdge(this.isNarrow, this.width, this.width) + 30 + 3 * 18 + 4;
+        int x = recipeBook.findLeftEdge(this.isNarrow, this.width, this.backgroundWidth) + 30 + 3 * 18 + 4;
         autoCraftBtn.x = x;
         configBtn.x = x;
 
