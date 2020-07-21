@@ -68,7 +68,7 @@ public class Auto32K extends ToggleModule {
     private final Setting<List<Block>> throwawayItems = sgGeneral.add(new BlockListSetting.Builder()
             .name("throwaway-blocks")
             .description("Acceptable blocks to use to fill the hopper")
-            .defaultValue(new ArrayList<>(0))
+            .defaultValue(setDefaultBlocks())
             .build()
     );
 
@@ -104,7 +104,8 @@ public class Auto32K extends ToggleModule {
                 List<BlockPos> sortedBlocks = findValidBlocksHopper();
                 sortedBlocks.sort(Comparator.comparingDouble(value -> mc.player.squaredDistanceTo(value.getX(), value.getY(), value.getZ())));
                 Iterator<BlockPos> sortedIterator = sortedBlocks.iterator();
-                BlockPos bestBlock = sortedIterator.next();
+                BlockPos bestBlock = null;
+                if(sortedIterator.hasNext()) bestBlock = sortedIterator.next();
 
                 if (bestBlock != null) {
                     mc.player.inventory.selectedSlot = hopperSlot;
@@ -134,6 +135,7 @@ public class Auto32K extends ToggleModule {
                 if (phase == 0) {
                     bestBlock = findValidBlocksDispenser();
                     mc.player.inventory.selectedSlot = hopperSlot;
+                    if(bestBlock == null) return;
                     if (!Utils.place(Blocks.HOPPER.getDefaultState(), bestBlock.add(x, 0, z))) {
                         Utils.sendMessage("#redFailed to place");
                         this.toggle();
@@ -179,7 +181,7 @@ public class Auto32K extends ToggleModule {
             }
         }else if(phase == 8) {
             if (mc.currentScreen instanceof HopperScreen) {
-                if (fillHopper.get()) {
+                if (fillHopper.get() && !throwawayItems.get().isEmpty()) {
                     int slot = -1;
                     int count = 0;
                     Iterator<Block> blocks = throwawayItems.get().iterator();
@@ -298,5 +300,12 @@ public class Auto32K extends ToggleModule {
 
     private boolean isValidSlot(int slot){
         return slot == -1 || slot >= 9;
+    }
+
+    private List<Block> setDefaultBlocks(){
+        List<Block> list = new ArrayList<>();
+        list.add(Blocks.OBSIDIAN);
+        list.add(Blocks.COBBLESTONE);
+        return list;
     }
 }

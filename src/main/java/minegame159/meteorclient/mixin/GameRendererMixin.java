@@ -1,5 +1,6 @@
 package minegame159.meteorclient.mixin;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.events.RenderEvent;
@@ -26,6 +27,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 @Mixin(GameRenderer.class)
 public abstract class GameRendererMixin {
@@ -33,24 +35,43 @@ public abstract class GameRendererMixin {
 
     @Shadow @Final private Camera camera;
 
+    private boolean a = false;
+
     @Inject(method = "render", at = @At("HEAD"), cancellable = true)
-    private void onRender(float tickDelta, long startTime, boolean tick, CallbackInfo info) {
+    private void onRenderHead(float tickDelta, long startTime, boolean tick, CallbackInfo info) {
         if (ModuleManager.INSTANCE.isActive(UnfocusedCPU.class) && !client.isWindowFocused()) info.cancel();
+
+        a = false;
+    }
+
+    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/GameRenderer;renderWorld(FJLnet/minecraft/client/util/math/MatrixStack;)V"), locals = LocalCapture.CAPTURE_FAILEXCEPTION)
+    private void onRenderRenderWorld(float tickDelta, long startTime, boolean tick, CallbackInfo info, int i, int j, MatrixStack matrixStack) {
+        Matrices.begin(matrixStack);
+        Matrices.push();
+        RenderSystem.pushMatrix();
+
+        a = true;
     }
 
     @Inject(method = "renderWorld", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiler/Profiler;swap(Ljava/lang/String;)V", args = { "ldc=hand" }))
-    public void onRenderWorld(float tickDelta, long limitTime, MatrixStack matrix, CallbackInfo info) {
+    private void onRenderWorld(float tickDelta, long limitTime, MatrixStack matrix, CallbackInfo info) {
         if (!Utils.canUpdate()) return;
 
         client.getProfiler().swap("meteor-client_render");
-
-        Matrices.begin(matrix);
 
         RenderEvent event = EventStore.renderEvent(tickDelta, camera.getPos().x, camera.getPos().y, camera.getPos().z);
 
         Renderer.begin(event);
         MeteorClient.EVENT_BUS.post(event);
         Renderer.end();
+    }
+
+    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;clear(IZ)V", ordinal = 0))
+    private void onRenderBeforeGuiRender(float tickDelta, long startTime, boolean tick, CallbackInfo info) {
+        if (a) {
+            Matrices.pop();
+            RenderSystem.popMatrix();
+        }
     }
 
     @Redirect(method = "updateTargetedEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;rayTrace(DFZ)Lnet/minecraft/util/hit/HitResult;"))
