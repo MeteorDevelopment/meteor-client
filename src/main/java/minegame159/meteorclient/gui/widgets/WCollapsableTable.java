@@ -1,8 +1,7 @@
 package minegame159.meteorclient.gui.widgets;
 
 import minegame159.meteorclient.gui.renderer.GuiRenderer;
-import net.minecraft.client.MinecraftClient;
-import org.lwjgl.glfw.GLFW;
+import minegame159.meteorclient.utils.Utils;
 
 public class WCollapsableTable extends WTable {
     private final String title;
@@ -98,7 +97,7 @@ public class WCollapsableTable extends WTable {
 
     @Override
     protected void onCalculateSize() {
-        maxHeight = MinecraftClient.getInstance().window.getScaledHeight() - 32;
+        maxHeight = Utils.getScaledWindowHeightGui() - 32;
 
         super.onCalculateSize();
 

@@ -10,6 +10,7 @@ import minegame159.meteorclient.rendering.ShapeBuilder;
 import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.Pool;
 import minegame159.meteorclient.utils.TextureRegion;
+import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.item.ItemStack;
@@ -54,8 +55,7 @@ public class GuiRenderer {
     }
 
     public void begin() {
-        MinecraftClient mc = MinecraftClient.getInstance();
-        scissor = currentScissor = scissorPool.get().set(null, 0, 0, mc.window.getScaledWidth(), mc.window.getScaledHeight(), false, false);
+        scissor = currentScissor = scissorPool.get().set(null, 0, 0, Utils.getScaledWindowWidthGui(), Utils.getScaledWindowHeightGui(), false, false);
     }
 
     void endBuffers() {
@@ -100,7 +100,7 @@ public class GuiRenderer {
 
     public void beginScissor(WWidget widget, double padTop, double padRight, double padBottom, double padLeft, boolean textOnly) {
         double x = widget.x + padLeft;
-        double y = MinecraftClient.getInstance().window.getScaledHeight() - widget.y - widget.height + padTop;
+        double y = Utils.getScaledWindowHeightGui() - widget.y - widget.height + padTop;
         double width = widget.width - padLeft - padRight;
         double height = widget.height - padTop - padBottom;
 

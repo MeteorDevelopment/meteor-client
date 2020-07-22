@@ -1,11 +1,10 @@
 package minegame159.meteorclient.gui.widgets;
 
 import minegame159.meteorclient.Config;
+import minegame159.meteorclient.gui.GuiConfig;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.gui.GuiConfig;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.util.Window;
+import minegame159.meteorclient.utils.Utils;
 
 public class WWindowController extends WWidget {
     public WWindowController() {
@@ -43,20 +42,19 @@ public class WWindowController extends WWidget {
             cell.width = ((WWindow) cell.getWidget()).width;
             cell.height = ((WWindow) cell.getWidget()).height;
 
-            Window window = MinecraftClient.getInstance().window;
             if (automatic) {
-                if (cellX + cell.width > window.getScaledWidth()) {
+                if (cellX + cell.width > Utils.getScaledWindowWidthGui()) {
                     cellX = x;
                     cellY += 10 + 40 + 10;
                 }
             }
 
-            if (cellX > window.getScaledWidth()) {
-                cellX = window.getScaledWidth() / 2.0 - cell.width / 2.0;
+            if (cellX > Utils.getScaledWindowWidthGui()) {
+                cellX = Utils.getScaledWindowWidthGui() / 2.0 - cell.width / 2.0;
                 if (cellX < 0) cellX = 0;
             }
-            if (cellY > window.getScaledHeight()) {
-                cellY = window.getScaledHeight() / 2.0 - cell.height / 2.0;
+            if (cellY > Utils.getScaledWindowHeightGui()) {
+                cellY = Utils.getScaledWindowHeightGui() / 2.0 - cell.height / 2.0;
                 if (cellY < 0) cellY = 0;
             }
 
