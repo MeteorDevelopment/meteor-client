@@ -725,7 +725,7 @@ public class HUD extends ToggleModule {
                 }
             });
         } else {
-            Chat.warning(this, "One of your armor pieces ir low.");
+            Chat.warning(this, "One of your armor pieces is low.");
         }
     }
 
