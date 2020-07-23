@@ -17,7 +17,6 @@ import net.minecraft.block.entity.BedBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.item.BedItem;
-import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -159,27 +158,25 @@ public class BedAura extends ToggleModule {
                 if(mc.world.getBlockState(bestBlock.add(0, 1, -1)).getBlock() == Blocks.AIR){
                     north = DamageCalcUtils.resistanceReduction(target, DamageCalcUtils.blastProtReduction(target, DamageCalcUtils.armourCalc(target, DamageCalcUtils.bedDamage(target, new Vec3d(bestBlock.add(0, 1, -1))))));
                 }
-                PlayerInteractBlockC2SPacket placePacket;
-                if (mc.player.getMainHandStack().getItem() instanceof BedItem) {
-                    placePacket = new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, bestBlock, false));
-                } else {
-                    placePacket = new PlayerInteractBlockC2SPacket(Hand.OFF_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, bestBlock, false));
-                }
+                Hand hand = Hand.MAIN_HAND;
+                if (!(mc.player.getMainHandStack().getItem() instanceof BedItem) && mc.player.getOffHandStack().getItem() instanceof BedItem) {
+                    hand = Hand.OFF_HAND;
+                } else if (!(mc.player.getMainHandStack().getItem() instanceof BedItem) && !(mc.player.getOffHandStack().getItem() instanceof BedItem)) return;
                 if((east > north) && (east > south) && (east > west)){
-                    mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(-90, 0, true));
-                    mc.player.networkHandler.sendPacket(placePacket);
+                    mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(-90f, mc.player.pitch, mc.player.onGround));
+                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(bestBlock), Direction.UP, bestBlock, false));
                     mc.player.swingHand(Hand.MAIN_HAND);
                 }else if((east < north) && (north > south) && (north > west)){
-                    mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(179, 0, true));
-                    mc.player.networkHandler.sendPacket(placePacket);
+                    mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(179f, mc.player.pitch, mc.player.onGround));
+                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(bestBlock), Direction.UP, bestBlock, false));
                     mc.player.swingHand(Hand.MAIN_HAND);
                 }else if((south > north) && (east < south) && (south > west)){
-                    mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(1, 0, true));
-                    mc.player.networkHandler.sendPacket(placePacket);
+                    mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(1f, mc.player.pitch, mc.player.onGround));
+                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(bestBlock), Direction.UP, bestBlock, false));
                     mc.player.swingHand(Hand.MAIN_HAND);
                 }else if((west > north) && (west > south) && (east < west)){
-                    mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(90, 0, true));
-                    mc.player.networkHandler.sendPacket(placePacket);
+                    mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(90f, mc.player.pitch, mc.player.onGround));
+                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(bestBlock), Direction.UP, bestBlock, false));
                     mc.player.swingHand(Hand.MAIN_HAND);
                 }
             }
