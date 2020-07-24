@@ -223,14 +223,11 @@ public class CrystalAura extends ToggleModule {
                             }
                         }
                     }
-                    double deltaX = entity.x - mc.player.x;
-                    double deltaZ = entity.z - mc.player.z;
-                    double deltaY = entity.y - (mc.player.y + mc.player.getEyeHeight(mc.player.getPose()));
-                    double yawAngle = Math.toDegrees(Math.atan2(deltaZ, deltaX)) - 90;
-                    double idk = Math.sqrt(deltaX * deltaX + deltaZ * deltaZ);
-                    double pitchAngle = -Math.toDegrees(Math.atan2(deltaY, idk));
-                    PlayerMoveC2SPacket.LookOnly packet = new PlayerMoveC2SPacket.LookOnly(((float) yawAngle),(float) pitchAngle, mc.player.onGround);
+
+                    Vec3d vec1 = new Vec3d(entity.x, entity.y, entity.z);
+                    PlayerMoveC2SPacket.LookOnly packet = new PlayerMoveC2SPacket.LookOnly(Utils.getNeededYaw(vec1), Utils.getNeededPitch(vec1), mc.player.onGround);
                     mc.player.networkHandler.sendPacket(packet);
+
                     mc.interactionManager.attackEntity(mc.player, entity);
                     mc.player.swingHand(Hand.MAIN_HAND);
                     mc.player.inventory.selectedSlot = preSlot;
