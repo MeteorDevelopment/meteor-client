@@ -170,14 +170,14 @@ public class CrystalAura extends ToggleModule {
                 if (i == null) continue;
 
                 Vec3d convert = new Vec3d(i.getX(), i.getY(), i.getZ()).add(0, 1, 0);
-                double selfDamage = getDamage(mc.player, convert);
+                double selfDamage = DamageCalcUtils.crystalDamage(mc.player, convert);
                 if (getTotalHealth(mc.player) - selfDamage < minHealth.get()
                         && mode.get() != Mode.suicide) continue;
 
-                double damage = getDamage(target, convert);
+                double damage = DamageCalcUtils.crystalDamage(target, convert);
 
                 convert = new Vec3d(bestBlock.getX(), bestBlock.getY(), bestBlock.getZ()).add(0, 1, 0);
-                if (damage > getDamage(target, convert)
+                if (damage > DamageCalcUtils.crystalDamage(target, convert)
                         && (selfDamage < maxDamage.get() || mode.get() == Mode.suicide) && damage > minDamage.get()) {
                     bestBlock = i;
                 }
@@ -210,8 +210,8 @@ public class CrystalAura extends ToggleModule {
                 .filter(Entity::isAlive)
                 .filter(entity -> ignoreWalls.get() || mc.player.canSee(entity))
                 .filter(entity -> !(breakMode.get() == Mode.safe)
-                        || (getTotalHealth(mc.player) - getDamage(mc.player, entity.getPos()) > minHealth.get()
-                        && getDamage(mc.player, entity.getPos()) < maxDamage.get()))
+                        || (getTotalHealth(mc.player) - DamageCalcUtils.crystalDamage(mc.player, entity.getPos()) > minHealth.get()
+                        && DamageCalcUtils.crystalDamage(mc.player, entity.getPos()) < maxDamage.get()))
                 .min(Comparator.comparingDouble(o -> o.distanceTo(mc.player)))
                 .ifPresent(entity -> {
                     int preSlot = mc.player.inventory.selectedSlot;
@@ -259,10 +259,6 @@ public class CrystalAura extends ToggleModule {
             }
         }
         return allBlocks;
-    }
-
-    private double getDamage(PlayerEntity target, Vec3d pos) {
-        return DamageCalcUtils.resistanceReduction(target, DamageCalcUtils.blastProtReduction(target, DamageCalcUtils.armourCalc(target, DamageCalcUtils.crystalDamage(target, pos))));
     }
 
     private float getTotalHealth(PlayerEntity target) {

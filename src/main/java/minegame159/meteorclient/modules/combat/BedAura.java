@@ -130,12 +130,12 @@ public class BedAura extends ToggleModule {
             for (BlockPos i = null; validBlocks.hasNext(); i = validBlocks.next()) {
                 if (i == null) continue;
                 Vec3d convert = new Vec3d(i.getX(), i.getY() + 1, i.getZ());
-                if (mc.player.getHealth() + mc.player.getAbsorptionAmount() - DamageCalcUtils.resistanceReduction(mc.player, DamageCalcUtils.blastProtReduction(mc.player, DamageCalcUtils.armourCalc(mc.player, DamageCalcUtils.bedDamage(mc.player, convert))))
+                if (mc.player.getHealth() + mc.player.getAbsorptionAmount() - DamageCalcUtils.bedDamage(mc.player, convert)
                         < minHealth.get() && mode.get() != Mode.suicide) continue;
-                double damage = DamageCalcUtils.resistanceReduction(target, DamageCalcUtils.blastProtReduction(target, DamageCalcUtils.armourCalc(target, DamageCalcUtils.bedDamage(target, convert))));
-                double selfDamage = DamageCalcUtils.resistanceReduction(mc.player, DamageCalcUtils.blastProtReduction(mc.player, DamageCalcUtils.armourCalc(mc.player, DamageCalcUtils.crystalDamage(mc.player, convert))));
+                double damage = DamageCalcUtils.bedDamage(target, convert);
+                double selfDamage = DamageCalcUtils.bedDamage(mc.player, convert);
                 convert = new Vec3d(bestBlock.getX(), bestBlock.getY() + 1, bestBlock.getZ());
-                if (damage > DamageCalcUtils.resistanceReduction(target, DamageCalcUtils.blastProtReduction(target, DamageCalcUtils.armourCalc(target, DamageCalcUtils.bedDamage(target, convert))))
+                if (damage > DamageCalcUtils.bedDamage(target, convert)
                         && (selfDamage < maxDamage.get() || mode.get() == Mode.suicide) && damage > minDamage.get()) {
                     bestBlock = i;
                     break;
@@ -147,16 +147,16 @@ public class BedAura extends ToggleModule {
                 double south = -1;
                 double west = -1;
                 if(mc.world.getBlockState(bestBlock.add(1, 1, 0)).getBlock() == Blocks.AIR){
-                    east = DamageCalcUtils.resistanceReduction(target, DamageCalcUtils.blastProtReduction(target, DamageCalcUtils.armourCalc(target, DamageCalcUtils.bedDamage(target, new Vec3d(bestBlock.add(1, 1, 0))))));
+                    east = DamageCalcUtils.bedDamage(target, new Vec3d(bestBlock.add(1, 1, 0)));
                 }
                 if(mc.world.getBlockState(bestBlock.add(-1, 1, 0)).getBlock() == Blocks.AIR){
-                    west = DamageCalcUtils.resistanceReduction(target, DamageCalcUtils.blastProtReduction(target, DamageCalcUtils.armourCalc(target, DamageCalcUtils.bedDamage(target, new Vec3d(bestBlock.add(-1, 1, 0))))));
+                    west = DamageCalcUtils.bedDamage(target, new Vec3d(bestBlock.add(-1, 1, 0)));
                 }
                 if(mc.world.getBlockState(bestBlock.add(0, 1, 1)).getBlock() == Blocks.AIR){
-                    south = DamageCalcUtils.resistanceReduction(target, DamageCalcUtils.blastProtReduction(target, DamageCalcUtils.armourCalc(target, DamageCalcUtils.bedDamage(target, new Vec3d(bestBlock.add(0, 1, 1))))));
+                    south = DamageCalcUtils.bedDamage(target, new Vec3d(bestBlock.add(0, 1, 1)));
                 }
                 if(mc.world.getBlockState(bestBlock.add(0, 1, -1)).getBlock() == Blocks.AIR){
-                    north = DamageCalcUtils.resistanceReduction(target, DamageCalcUtils.blastProtReduction(target, DamageCalcUtils.armourCalc(target, DamageCalcUtils.bedDamage(target, new Vec3d(bestBlock.add(0, 1, -1))))));
+                    north = DamageCalcUtils.bedDamage(target, new Vec3d(bestBlock.add(0, 1, -1)));
                 }
                 Hand hand = Hand.MAIN_HAND;
                 if (!(mc.player.getMainHandStack().getItem() instanceof BedItem) && mc.player.getOffHandStack().getItem() instanceof BedItem) {
@@ -178,8 +178,8 @@ public class BedAura extends ToggleModule {
         }
         for(BlockEntity entity : mc.world.blockEntities){
             if(entity instanceof BedBlockEntity && Math.sqrt(entity.getSquaredDistance(mc.player.x, mc.player.y, mc.player.z)) <= breakRange.get()){
-                if(DamageCalcUtils.resistanceReduction(mc.player, DamageCalcUtils.blastProtReduction(mc.player, DamageCalcUtils.armourCalc(mc.player, DamageCalcUtils.bedDamage(mc.player, new Vec3d(entity.getPos().getX(), entity.getPos().getY(), entity.getPos().getZ()))))) < maxDamage.get()
-                    || (mc.player.getHealth() + mc.player.getAbsorptionAmount() - DamageCalcUtils.resistanceReduction(mc.player, DamageCalcUtils.blastProtReduction(mc.player, DamageCalcUtils.armourCalc(mc.player, DamageCalcUtils.bedDamage(mc.player, new Vec3d(entity.getPos().getX(), entity.getPos().getY(), entity.getPos().getZ())))))) < minHealth.get() || clickMode.get().equals(Mode.suicide)){
+                if(DamageCalcUtils.bedDamage(mc.player, new Vec3d(entity.getPos().getX(), entity.getPos().getY(), entity.getPos().getZ())) < maxDamage.get()
+                    || (mc.player.getHealth() + mc.player.getAbsorptionAmount() - DamageCalcUtils.bedDamage(mc.player, new Vec3d(entity.getPos().getX(), entity.getPos().getY(), entity.getPos().getZ()))) < minHealth.get() || clickMode.get().equals(Mode.suicide)){
                     mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(mc.player.x, mc.player.y, mc.player.z), Direction.UP, entity.getPos(), false));
                 }
 
