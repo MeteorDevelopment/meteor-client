@@ -4,7 +4,6 @@ package minegame159.meteorclient.utils;
 //Updated by squidoodly 19/06/2020
 //Updated by squidoodly 24/07/2020
 
-import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
