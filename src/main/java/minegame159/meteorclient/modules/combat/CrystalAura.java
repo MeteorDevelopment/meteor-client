@@ -15,6 +15,7 @@ import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.DamageCalcUtils;
 import minegame159.meteorclient.utils.InvUtils;
+import minegame159.meteorclient.utils.Utils;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.entity.Entity;
@@ -194,6 +195,10 @@ public class CrystalAura extends ToggleModule {
                 Hand hand = Hand.MAIN_HAND;
                 if (!(mc.player.getMainHandStack().getItem() == Items.END_CRYSTAL) && mc.player.getOffHandStack().getItem() == Items.END_CRYSTAL) hand = Hand.OFF_HAND;
                 else if (!(mc.player.getMainHandStack().getItem() == Items.END_CRYSTAL) && !(mc.player.getOffHandStack().getItem() == Items.END_CRYSTAL)) return;
+
+                Vec3d vec1 = new Vec3d(bestBlock.getX() + 0.5, bestBlock.getY() + 0.5, bestBlock.getZ() + 0.5);
+                PlayerMoveC2SPacket.LookOnly packet = new PlayerMoveC2SPacket.LookOnly(Utils.getNeededYaw(vec1), Utils.getNeededPitch(vec1), mc.player.onGround);
+                mc.player.networkHandler.sendPacket(packet);
 
                 mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(new Vec3d(bestBlock), Direction.UP, bestBlock, false));
                 mc.player.swingHand(Hand.MAIN_HAND);
