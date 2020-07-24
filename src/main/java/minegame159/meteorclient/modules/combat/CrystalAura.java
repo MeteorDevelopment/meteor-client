@@ -170,11 +170,11 @@ public class CrystalAura extends ToggleModule {
                 if (i == null) continue;
 
                 Vec3d convert = new Vec3d(i.getX(), i.getY(), i.getZ()).add(0, 1, 0);
-                if (getTotalHealth(mc.player) - getDamage(mc.player, convert) < minHealth.get()
+                double selfDamage = getDamage(mc.player, convert);
+                if (getTotalHealth(mc.player) - selfDamage < minHealth.get()
                         && mode.get() != Mode.suicide) continue;
 
                 double damage = getDamage(target, convert);
-                double selfDamage = getDamage(mc.player, convert);
 
                 convert = new Vec3d(bestBlock.getX(), bestBlock.getY(), bestBlock.getZ()).add(0, 1, 0);
                 if (damage > getDamage(target, convert)
