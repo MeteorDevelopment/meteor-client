@@ -5,17 +5,24 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.accountsfriends.FriendManager;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.movement.NoFall;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.DamageCalcUtils;
+import net.minecraft.block.entity.BedBlockEntity;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.decoration.EnderCrystalEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.SwordItem;
 import net.minecraft.network.packet.s2c.play.DisconnectS2CPacket;
 import net.minecraft.text.LiteralText;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.dimension.DimensionType;
 
 public class AutoLog extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -27,6 +34,13 @@ public class AutoLog extends ToggleModule {
             .min(0)
             .max(20)
             .sliderMax(20)
+            .build()
+    );
+
+    private final Setting<Boolean> smart = sgGeneral.add(new BoolSetting.Builder()
+            .name("smart")
+            .description("Disconnects when you are about to take too much damage.")
+            .defaultValue(true)
             .build()
     );
 
@@ -70,6 +84,10 @@ public class AutoLog extends ToggleModule {
             mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(new LiteralText("Health was lower than " + health.get())));
         }
 
+        if(smart.get() && mc.player.getHealth() + mc.player.getAbsorptionAmount() - getHealthReduction() < health.get()){
+            mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(new LiteralText("Health was going to be lower than " + health.get())));
+        }
+
         for (Entity entity : mc.world.getEntities()) {
             if(entity instanceof PlayerEntity) {
                 if (onlyTrusted.get() && entity != mc.player && !FriendManager.INSTANCE.isTrusted((PlayerEntity) entity)) {
@@ -82,9 +100,38 @@ public class AutoLog extends ToggleModule {
                     break;
                 }
             }
-            if (entity instanceof EnderCrystalEntity && mc.player.distanceTo(entity) < range.get()) {
+            if (entity instanceof EnderCrystalEntity && mc.player.distanceTo(entity) < range.get() && crystalLog.get()) {
                 mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(new LiteralText("Crystal within specified range.")));
             }
         }
     });
+
+    private double getHealthReduction(){
+        double damageTaken = 0;
+        for(Entity entity : mc.world.getEntities()){
+            if(entity instanceof EnderCrystalEntity && damageTaken < DamageCalcUtils.crystalDamage(mc.player, entity.getPos())){
+                damageTaken = DamageCalcUtils.crystalDamage(mc.player, entity.getPos());
+            }else if(entity instanceof PlayerEntity && damageTaken < DamageCalcUtils.getSwordDamage((PlayerEntity) entity)){
+                if(!FriendManager.INSTANCE.isTrusted((PlayerEntity) entity) && mc.player.getPos().distanceTo(entity.getPos()) < 5){
+                    if(((PlayerEntity) entity).getActiveItem().getItem() instanceof SwordItem){
+                        damageTaken = DamageCalcUtils.getSwordDamage((PlayerEntity) entity);
+                    }
+                }
+            }
+        }
+        if(!ModuleManager.INSTANCE.get(NoFall.class).isActive() && mc.player.fallDistance > 3){
+            double damage =mc.player.fallDistance * 0.5;
+            if(damage > damageTaken){
+                damageTaken = damage;
+            }
+        }
+        if (mc.world.dimension.getType() != DimensionType.OVERWORLD) {
+            for (BlockEntity blockEntity : mc.world.blockEntities) {
+                if (blockEntity instanceof BedBlockEntity && damageTaken < DamageCalcUtils.bedDamage(mc.player, new Vec3d(blockEntity.getPos().getX(), blockEntity.getPos().getY(), blockEntity.getPos().getZ()))) {
+                    damageTaken = DamageCalcUtils.bedDamage(mc.player, new Vec3d(blockEntity.getPos().getX(), blockEntity.getPos().getY(), blockEntity.getPos().getZ()));
+                }
+            }
+        }
+        return damageTaken;
+    }
 }
