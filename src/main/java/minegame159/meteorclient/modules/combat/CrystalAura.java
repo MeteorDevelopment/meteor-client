@@ -180,7 +180,6 @@ public class CrystalAura extends ToggleModule {
                 if (damage > getDamage(target, convert)
                         && (selfDamage < maxDamage.get() || mode.get() == Mode.suicide) && damage > minDamage.get()) {
                     bestBlock = i;
-                    break;
                 }
             }
             if(autoSwitch.get() && mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL){
