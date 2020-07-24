@@ -2,6 +2,7 @@ package minegame159.meteorclient.modules.combat;
 
 //Updated by squidoodly 31/04/2020
 //Updated by squidoodly 19/06/2020
+//Updated by squidoodly 24/07/2020
 
 import com.google.common.collect.Streams;
 import me.zero.alpine.event.EventPriority;
@@ -14,17 +15,15 @@ import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.DamageCalcUtils;
 import minegame159.meteorclient.utils.InvUtils;
-import minegame159.meteorclient.utils.Utils;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.decoration.EnderCrystalEntity;
 import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.AxeItem;
-import net.minecraft.item.BedItem;
 import net.minecraft.item.Items;
 import net.minecraft.item.SwordItem;
-import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -84,6 +83,13 @@ public class CrystalAura extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> spoofChange = sgGeneral.add(new BoolSetting.Builder()
+            .name("spoof-change")
+            .description("Spoofs item change to crystal.")
+            .defaultValue(false)
+            .build()
+    );
+
     private final Setting<Double> minDamage = sgPlace.add(new DoubleSetting.Builder()
             .name("min-damage")
             .description("The minimum damage the crystal will place")
@@ -130,13 +136,22 @@ public class CrystalAura extends ToggleModule {
         super(Category.Combat, "crystal-aura", "Places and breaks end crystals automatically");
     }
 
+    private int preSlot;
+
     @EventHandler
-    private Listener<TickEvent> onTick = new Listener<>(event -> {
-        if ((mc.player.getHealth() + mc.player.getAbsorptionAmount()) <= minHealth.get() && mode.get() != Mode.suicide) return;
+    private final Listener<TickEvent> onTick = new Listener<>(event -> {
+        if (getTotalHealth(mc.player) <= minHealth.get() && mode.get() != Mode.suicide) return;
         if(place.get() && ((mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL) && !autoSwitch.get())) return;
         if(place.get()) {
             ListIterator<BlockPos> validBlocks = Objects.requireNonNull(findValidBlocks()).listIterator();
-            Iterator<AbstractClientPlayerEntity> validEntities = mc.world.getPlayers().stream().filter(entityPlayer -> !FriendManager.INSTANCE.isTrusted(entityPlayer)).filter(entityPlayer -> !entityPlayer.getDisplayName().equals(mc.player.getDisplayName())).filter(entityPlayer -> Math.sqrt(mc.player.squaredDistanceTo(new Vec3d(entityPlayer.x, entityPlayer.y, entityPlayer.z))) <= 10).collect(Collectors.toList()).iterator();
+
+            Iterator<AbstractClientPlayerEntity> validEntities = mc.world.getPlayers().stream()
+                    .filter(entityPlayer -> !FriendManager.INSTANCE.isTrusted(entityPlayer))
+                    .filter(entityPlayer -> !entityPlayer.getDisplayName().equals(mc.player.getDisplayName()))
+                    .filter(entityPlayer -> Math.sqrt(mc.player.squaredDistanceTo(new Vec3d(entityPlayer.x, entityPlayer.y, entityPlayer.z))) <= 10)
+                    .collect(Collectors.toList())
+                    .iterator();
+
             AbstractClientPlayerEntity target;
             if (validEntities.hasNext()) {
                 target = validEntities.next();
@@ -152,13 +167,16 @@ public class CrystalAura extends ToggleModule {
             BlockPos bestBlock = mc.player.getBlockPos();
             for (BlockPos i = null; validBlocks.hasNext(); i = validBlocks.next()) {
                 if (i == null) continue;
+
                 Vec3d convert = new Vec3d(i.getX(), i.getY(), i.getZ()).add(0, 1, 0);
-                if (mc.player.getHealth() + mc.player.getAbsorptionAmount() - DamageCalcUtils.resistanceReduction(mc.player, DamageCalcUtils.blastProtReduction(mc.player, DamageCalcUtils.armourCalc(mc.player, DamageCalcUtils.crystalDamage(mc.player, convert))))
-                        < minHealth.get() && mode.get() != Mode.suicide) continue;
-                double damage = DamageCalcUtils.resistanceReduction(target, DamageCalcUtils.blastProtReduction(target, DamageCalcUtils.armourCalc(target, DamageCalcUtils.crystalDamage(target, convert))));
-                double selfDamage = DamageCalcUtils.resistanceReduction(mc.player, DamageCalcUtils.blastProtReduction(mc.player, DamageCalcUtils.armourCalc(mc.player, DamageCalcUtils.crystalDamage(mc.player, convert))));
+                if (getTotalHealth(mc.player) - getDamage(mc.player, convert) < minHealth.get()
+                        && mode.get() != Mode.suicide) continue;
+
+                double damage = getDamage(target, convert);
+                double selfDamage = getDamage(mc.player, convert);
+
                 convert = new Vec3d(bestBlock.getX(), bestBlock.getY(), bestBlock.getZ()).add(0, 1, 0);
-                if (damage > DamageCalcUtils.resistanceReduction(target, DamageCalcUtils.blastProtReduction(target, DamageCalcUtils.armourCalc(target, DamageCalcUtils.crystalDamage(target, convert))))
+                if (damage > getDamage(target, convert)
                         && (selfDamage < maxDamage.get() || mode.get() == Mode.suicide) && damage > minDamage.get()) {
                     bestBlock = i;
                     break;
@@ -167,31 +185,33 @@ public class CrystalAura extends ToggleModule {
             if(autoSwitch.get() && mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL){
                 int slot = InvUtils.findItemWithCount(Items.END_CRYSTAL).slot;
                 if(slot != -1 && slot < 9){
+                    if (spoofChange.get()) preSlot = mc.player.inventory.selectedSlot;
                     mc.player.inventory.selectedSlot = slot;
                 }
             }
             if (!bestBlock.equals(mc.player.getBlockPos())) {
+
                 Hand hand = Hand.MAIN_HAND;
-                if (!(mc.player.getMainHandStack().getItem() == Items.END_CRYSTAL) && mc.player.getOffHandStack().getItem() == Items.END_CRYSTAL) {
-                    hand = Hand.OFF_HAND;
-                } else if (!(mc.player.getMainHandStack().getItem() == Items.END_CRYSTAL) && !(mc.player.getOffHandStack().getItem() == Items.END_CRYSTAL)) return;
+                if (!(mc.player.getMainHandStack().getItem() == Items.END_CRYSTAL) && mc.player.getOffHandStack().getItem() == Items.END_CRYSTAL) hand = Hand.OFF_HAND;
+                else if (!(mc.player.getMainHandStack().getItem() == Items.END_CRYSTAL) && !(mc.player.getOffHandStack().getItem() == Items.END_CRYSTAL)) return;
+
                 mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(new Vec3d(bestBlock), Direction.UP, bestBlock, false));
                 mc.player.swingHand(Hand.MAIN_HAND);
             }
+            if (spoofChange.get() && preSlot != mc.player.inventory.selectedSlot) mc.player.inventory.selectedSlot = preSlot;
         }
         Streams.stream(mc.world.getEntities())
                 .filter(entity -> entity instanceof EnderCrystalEntity)
                 .filter(entity -> entity.distanceTo(mc.player) <= breakRange.get())
                 .filter(Entity::isAlive)
                 .filter(entity -> ignoreWalls.get() || mc.player.canSee(entity))
-                .filter(entity -> !(breakMode.get() == Mode.safe) || (mc.player.getHealth() + mc.player.getAbsorptionAmount()
-                        - DamageCalcUtils.resistanceReduction(mc.player, DamageCalcUtils.blastProtReduction(mc.player, DamageCalcUtils.armourCalc(mc.player, DamageCalcUtils.getDamageMultiplied(DamageCalcUtils.crystalDamage(mc.player, entity.getPos())))))
-                        > minHealth.get() && DamageCalcUtils.resistanceReduction(mc.player, DamageCalcUtils.blastProtReduction(mc.player, DamageCalcUtils.armourCalc(mc.player, DamageCalcUtils.getDamageMultiplied(DamageCalcUtils.crystalDamage(mc.player, entity.getPos())))))
-                        < maxDamage.get()))
+                .filter(entity -> !(breakMode.get() == Mode.safe)
+                        || (getTotalHealth(mc.player) - getDamage(mc.player, entity.getPos()) > minHealth.get()
+                        && getDamage(mc.player, entity.getPos()) < maxDamage.get()))
                 .min(Comparator.comparingDouble(o -> o.distanceTo(mc.player)))
                 .ifPresent(entity -> {
                     int preSlot = mc.player.inventory.selectedSlot;
-                    if(mc.player.getActiveStatusEffects().containsKey(StatusEffects.WEAKNESS)){
+                    if(mc.player.getActiveStatusEffects().containsKey(StatusEffects.WEAKNESS) && antiWeakness.get()){
                         for(int i = 0; i < 9; i++){
                             if(mc.player.inventory.getInvStack(i).getItem() instanceof SwordItem || mc.player.inventory.getInvStack(i).getItem() instanceof AxeItem){
                                 mc.player.inventory.selectedSlot = i;
@@ -219,8 +239,8 @@ public class CrystalAura extends ToggleModule {
             if(i == null) continue;
             if((mc.world.getBlockState(i).getBlock() == Blocks.BEDROCK
                     || mc.world.getBlockState(i).getBlock() == Blocks.OBSIDIAN)
-                    && (mc.world.getBlockState(i.up()).getBlock() == Blocks.AIR && mc.world.getEntities(null, new Box(i.up().getX(), i.up().getY(), i.up().getZ(), i.up().getX() + 1.0D, i.up().getY() + 2.0D, i.up().getZ() + 1.0D)).isEmpty())
-                    && mc.world.getBlockState(i.up(2)).getBlock() == Blocks.AIR && mc.world.getEntities(null, new Box(i.up(2).getX(), i.up(2).getY(), i.up(2).getZ(), i.up(2).getX() + 1.0D, i.up(2).getY() + 2.0D, i.up(2).getZ() + 1.0D)).isEmpty()){
+                    && isEmpty(i.up())
+                    && isEmpty(i.up(2))){
                 validBlocks.add(i);
             }
         }
@@ -238,5 +258,17 @@ public class CrystalAura extends ToggleModule {
             }
         }
         return allBlocks;
+    }
+
+    private double getDamage(PlayerEntity target, Vec3d pos) {
+        return DamageCalcUtils.resistanceReduction(target, DamageCalcUtils.blastProtReduction(target, DamageCalcUtils.armourCalc(target, DamageCalcUtils.crystalDamage(target, pos))));
+    }
+
+    private float getTotalHealth(PlayerEntity target) {
+        return target.getHealth() + target.getAbsorptionAmount();
+    }
+
+    private boolean isEmpty(BlockPos pos) {
+        return mc.world.getBlockState(pos).getBlock() == Blocks.AIR && mc.world.getEntities(null, new Box(pos.getX(), pos.getY(), pos.getZ(), pos.getX() + 1.0D, pos.getY() + 2.0D, pos.getZ() + 1.0D)).isEmpty();
     }
 }
