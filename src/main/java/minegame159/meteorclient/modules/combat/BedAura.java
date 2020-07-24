@@ -162,23 +162,18 @@ public class BedAura extends ToggleModule {
                 if (!(mc.player.getMainHandStack().getItem() instanceof BedItem) && mc.player.getOffHandStack().getItem() instanceof BedItem) {
                     hand = Hand.OFF_HAND;
                 } else if (!(mc.player.getMainHandStack().getItem() instanceof BedItem) && !(mc.player.getOffHandStack().getItem() instanceof BedItem)) return;
+
                 if((east > north) && (east > south) && (east > west)){
                     mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(-90f, mc.player.pitch, mc.player.onGround));
-                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(bestBlock), Direction.UP, bestBlock, false));
-                    mc.player.swingHand(Hand.MAIN_HAND);
                 }else if((east < north) && (north > south) && (north > west)){
                     mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(179f, mc.player.pitch, mc.player.onGround));
-                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(bestBlock), Direction.UP, bestBlock, false));
-                    mc.player.swingHand(Hand.MAIN_HAND);
                 }else if((south > north) && (east < south) && (south > west)){
                     mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(1f, mc.player.pitch, mc.player.onGround));
-                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(bestBlock), Direction.UP, bestBlock, false));
-                    mc.player.swingHand(Hand.MAIN_HAND);
                 }else if((west > north) && (west > south) && (east < west)){
                     mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(90f, mc.player.pitch, mc.player.onGround));
-                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(bestBlock), Direction.UP, bestBlock, false));
-                    mc.player.swingHand(Hand.MAIN_HAND);
                 }
+                mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(new Vec3d(bestBlock), Direction.UP, bestBlock, false));
+                mc.player.swingHand(Hand.MAIN_HAND);
             }
         }
         for(BlockEntity entity : mc.world.blockEntities){

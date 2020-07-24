@@ -14,12 +14,14 @@ import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.DamageCalcUtils;
 import minegame159.meteorclient.utils.InvUtils;
+import minegame159.meteorclient.utils.Utils;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.decoration.EnderCrystalEntity;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.AxeItem;
+import net.minecraft.item.BedItem;
 import net.minecraft.item.Items;
 import net.minecraft.item.SwordItem;
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
@@ -169,13 +171,11 @@ public class CrystalAura extends ToggleModule {
                 }
             }
             if (!bestBlock.equals(mc.player.getBlockPos())) {
-                PlayerInteractBlockC2SPacket placePacket;
-                if (mc.player.getMainHandStack().getItem() == Items.END_CRYSTAL) {
-                    placePacket = new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, bestBlock, false));
-                } else {
-                    placePacket = new PlayerInteractBlockC2SPacket(Hand.OFF_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, bestBlock, false));
-                }
-                mc.player.networkHandler.sendPacket(placePacket);
+                Hand hand = Hand.MAIN_HAND;
+                if (!(mc.player.getMainHandStack().getItem() == Items.END_CRYSTAL) && mc.player.getOffHandStack().getItem() == Items.END_CRYSTAL) {
+                    hand = Hand.OFF_HAND;
+                } else if (!(mc.player.getMainHandStack().getItem() == Items.END_CRYSTAL) && !(mc.player.getOffHandStack().getItem() == Items.END_CRYSTAL)) return;
+                mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(new Vec3d(bestBlock), Direction.UP, bestBlock, false));
                 mc.player.swingHand(Hand.MAIN_HAND);
             }
         }
