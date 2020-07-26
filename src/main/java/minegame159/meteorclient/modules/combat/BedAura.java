@@ -113,7 +113,12 @@ public class BedAura extends ToggleModule {
         if (place.get() && (!(mc.player.getMainHandStack().getItem() instanceof BedItem) && !(mc.player.getOffHandStack().getItem() instanceof BedItem))) return;
         if (place.get()) {
             ListIterator<BlockPos> validBlocks = Objects.requireNonNull(findValidBlocks()).listIterator();
-            Iterator<AbstractClientPlayerEntity> validEntities = mc.world.getPlayers().stream().filter(entityPlayer -> !FriendManager.INSTANCE.isTrusted(entityPlayer)).filter(entityPlayer -> !entityPlayer.getDisplayName().equals(mc.player.getDisplayName())).filter(entityPlayer -> Math.sqrt(mc.player.squaredDistanceTo(new Vec3d(entityPlayer.x, entityPlayer.y, entityPlayer.z))) <= 10).collect(Collectors.toList()).iterator();
+            Iterator<AbstractClientPlayerEntity> validEntities = mc.world.getPlayers().stream()
+                    .filter(FriendManager.INSTANCE::attack)
+                    .filter(entityPlayer -> !entityPlayer.getDisplayName().equals(mc.player.getDisplayName()))
+                    .filter(entityPlayer -> Math.sqrt(mc.player.squaredDistanceTo(new Vec3d(entityPlayer.x, entityPlayer.y, entityPlayer.z))) <= 10)
+                    .collect(Collectors.toList()).iterator();
+
             AbstractClientPlayerEntity target;
             if (validEntities.hasNext()) {
                 target = validEntities.next();
@@ -130,10 +135,10 @@ public class BedAura extends ToggleModule {
             for (BlockPos i = null; validBlocks.hasNext(); i = validBlocks.next()) {
                 if (i == null) continue;
                 Vec3d convert = new Vec3d(i.getX(), i.getY() + 1, i.getZ());
-                if (mc.player.getHealth() + mc.player.getAbsorptionAmount() - DamageCalcUtils.bedDamage(mc.player, convert)
-                        < minHealth.get() && mode.get() != Mode.suicide) continue;
-                double damage = DamageCalcUtils.bedDamage(target, convert);
                 double selfDamage = DamageCalcUtils.bedDamage(mc.player, convert);
+                if (mc.player.getHealth() + mc.player.getAbsorptionAmount() - selfDamage < minHealth.get()
+                        && mode.get() != Mode.suicide) continue;
+                double damage = DamageCalcUtils.bedDamage(target, convert);
                 convert = new Vec3d(bestBlock.getX(), bestBlock.getY() + 1, bestBlock.getZ());
                 if (damage > DamageCalcUtils.bedDamage(target, convert)
                         && (selfDamage < maxDamage.get() || mode.get() == Mode.suicide) && damage > minDamage.get()) {
@@ -145,23 +150,22 @@ public class BedAura extends ToggleModule {
                 double east = -1;
                 double south = -1;
                 double west = -1;
-                if(mc.world.getBlockState(bestBlock.add(1, 1, 0)).getBlock() == Blocks.AIR){
+                if(mc.world.isAir(bestBlock.add(1, 1, 0))){
                     east = DamageCalcUtils.bedDamage(target, new Vec3d(bestBlock.add(1, 1, 0)));
                 }
-                if(mc.world.getBlockState(bestBlock.add(-1, 1, 0)).getBlock() == Blocks.AIR){
+                if(mc.world.isAir(bestBlock.add(-1, 1, 0))){
                     west = DamageCalcUtils.bedDamage(target, new Vec3d(bestBlock.add(-1, 1, 0)));
                 }
-                if(mc.world.getBlockState(bestBlock.add(0, 1, 1)).getBlock() == Blocks.AIR){
+                if(mc.world.isAir(bestBlock.add(0, 1, 1))){
                     south = DamageCalcUtils.bedDamage(target, new Vec3d(bestBlock.add(0, 1, 1)));
                 }
-                if(mc.world.getBlockState(bestBlock.add(0, 1, -1)).getBlock() == Blocks.AIR){
+                if(mc.world.isAir(bestBlock.add(0, 1, -1))){
                     north = DamageCalcUtils.bedDamage(target, new Vec3d(bestBlock.add(0, 1, -1)));
                 }
                 Hand hand = Hand.MAIN_HAND;
                 if (!(mc.player.getMainHandStack().getItem() instanceof BedItem) && mc.player.getOffHandStack().getItem() instanceof BedItem) {
                     hand = Hand.OFF_HAND;
-                } else if (!(mc.player.getMainHandStack().getItem() instanceof BedItem) && !(mc.player.getOffHandStack().getItem() instanceof BedItem)) return;
-
+                }
                 if((east > north) && (east > south) && (east > west)){
                     mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(-90f, mc.player.pitch, mc.player.onGround));
                 }else if((east < north) && (north > south) && (north > west)){
@@ -191,14 +195,10 @@ public class BedAura extends ToggleModule {
         List<BlockPos> validBlocks = new ArrayList<>();
         for(BlockPos i = null; allBlocks.hasNext(); i = allBlocks.next()){
             if(i == null) continue;
-            if(mc.world.getBlockState(i).getBlock() != Blocks.AIR
-                    && ((mc.world.getBlockState(i.up()).getBlock() == Blocks.AIR
+            if(!mc.world.isAir(i) && (mc.world.isAir(i.up())
                     && mc.world.getEntities(null, new Box(i.up().getX(), i.up().getY(), i.up().getZ(), i.up().getX() + 1.0D, i.up().getY() + 1.0D, i.up().getZ() + 1.0D)).isEmpty())
-                    && (mc.world.getBlockState(i.add(1, 1, 0)).getBlock() == Blocks.AIR
-                    || mc.world.getBlockState(i.add(-1, 1, 0)).getBlock() == Blocks.AIR
-                    || mc.world.getBlockState(i.add(0, 1, 1)).getBlock() == Blocks.AIR
-                    || mc.world.getBlockState(i.add(0, 1, -1)).getBlock() == Blocks.AIR)))
-            {
+                    && (mc.world.isAir(i.add(1, 1, 0)) || mc.world.isAir(i.add(-1, 1, 0))
+                    || mc.world.isAir(i.add(0, 1, 1)) || mc.world.isAir(i.add(0, 1, -1)))) {
                 validBlocks.add(i);
             }
         }
