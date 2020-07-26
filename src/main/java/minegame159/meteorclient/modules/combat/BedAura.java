@@ -138,7 +138,6 @@ public class BedAura extends ToggleModule {
                 if (damage > DamageCalcUtils.bedDamage(target, convert)
                         && (selfDamage < maxDamage.get() || mode.get() == Mode.suicide) && damage > minDamage.get()) {
                     bestBlock = i;
-                    break;
                 }
             }
             if (!bestBlock.equals(mc.player.getBlockPos())) {
