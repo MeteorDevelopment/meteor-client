@@ -162,7 +162,7 @@ public class CrystalAura extends ToggleModule {
             ListIterator<BlockPos> validBlocks = Objects.requireNonNull(findValidBlocks()).listIterator();
 
             Iterator<AbstractClientPlayerEntity> validEntities = mc.world.getPlayers().stream()
-                    .filter(entityPlayer -> !FriendManager.INSTANCE.attack(entityPlayer))
+                    .filter(FriendManager.INSTANCE::attack)
                     .filter(entityPlayer -> !entityPlayer.getDisplayName().equals(mc.player.getDisplayName()))
                     .filter(entityPlayer -> Math.sqrt(mc.player.squaredDistanceTo(new Vec3d(entityPlayer.x, entityPlayer.y, entityPlayer.z))) <= 10)
                     .collect(Collectors.toList())
@@ -255,8 +255,7 @@ public class CrystalAura extends ToggleModule {
             if(i == null) continue;
             if((mc.world.getBlockState(i).getBlock() == Blocks.BEDROCK
                     || mc.world.getBlockState(i).getBlock() == Blocks.OBSIDIAN)
-                    && isEmpty(i.up())
-                    && isEmpty(i.up(2))){
+                    && isEmpty(i.up())){
                 validBlocks.add(i);
             }
         }
@@ -281,6 +280,6 @@ public class CrystalAura extends ToggleModule {
     }
 
     private boolean isEmpty(BlockPos pos) {
-        return mc.world.getBlockState(pos).getBlock() == Blocks.AIR && mc.world.getEntities(null, new Box(pos.getX(), pos.getY(), pos.getZ(), pos.getX() + 1.0D, pos.getY() + 2.0D, pos.getZ() + 1.0D)).isEmpty();
+        return mc.world.isAir(pos) && mc.world.getEntities(null, new Box(pos.getX(), pos.getY(), pos.getZ(), pos.getX() + 1.0D, pos.getY() + 2.0D, pos.getZ() + 1.0D)).isEmpty();
     }
 }

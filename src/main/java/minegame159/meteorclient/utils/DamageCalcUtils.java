@@ -7,15 +7,18 @@ package minegame159.meteorclient.utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
+import net.minecraft.entity.DamageUtil;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.explosion.Explosion;
 
-import java.util.Iterator;
 import java.util.Objects;
 
 public class DamageCalcUtils {
@@ -23,77 +26,49 @@ public class DamageCalcUtils {
     public static MinecraftClient mc = MinecraftClient.getInstance();
 
     //Always Calculate damage, then armour, then enchantments, then potion effect
-    public static double crystalDamage(Entity player, Vec3d crystal){
+    public static double crystalDamage(LivingEntity player, Vec3d crystal){
         //Calculate crystal damage
         if(Math.sqrt(player.squaredDistanceTo(crystal)) > 12) return 0;
         double exposure = Explosion.getExposure(crystal, player);
         double impact = (1D - (Math.sqrt(player.squaredDistanceTo(crystal)) / 12D))*exposure;
-        double damage = ((impact*impact+impact)*42)+1;
+        double damage = ((impact*impact+impact) / 2 * 7 * (6 * 2) + 1);
 
         //Multiply damage by difficulty
         damage = getDamageMultiplied(damage);
 
         //Reduce my armour
-        damage = armourCalc(player, damage);
-
-        //Reduce by enchants
-        damage  = blastProtReduction(player, damage);
+        damage = DamageUtil.getDamageLeft((float)damage, (float)player.getArmor(), (float)player.getAttributeInstance(EntityAttributes.ARMOR_TOUGHNESS).getValue());
 
         //Reduce by resistance
         damage = resistanceReduction((PlayerEntity) player, damage);
+
+        //Reduce by enchants
+        damage  = blastProtReduction(player, damage, new Explosion(mc.world, null, crystal.x, crystal.y, crystal.z, 6f, false, Explosion.DestructionType.DESTROY));
+
 
         if(damage < 0) damage = 0;
         return damage;
     }
 
     //Always Calculate damage, then armour, then enchantments, then potion effect
-    public static double bedDamage(Entity player, Vec3d bed){
+    public static double bedDamage(LivingEntity player, Vec3d bed){
         if(Math.sqrt(player.squaredDistanceTo(bed)) > 10) return 0;
         double exposure = Explosion.getExposure(bed, player);
         double impact = (1D - (Math.sqrt(player.squaredDistanceTo(bed)) / 10D))*exposure;
-        double damage = ((impact*impact+impact)*35)+1;
+        double damage = ((impact*impact+impact)/ 2 * 7 * (5 * 2) + 1);
 
         //Multiply damage by difficulty
-        //damage = getDamageMultiplied(damage);
+        damage = getDamageMultiplied(damage);
 
         //Reduce my armour
-        damage = armourCalc(player, damage);
-
-        //Reduce by enchants
-        damage  = blastProtReduction(player, damage);
+        damage = DamageUtil.getDamageLeft((float)damage, (float)player.getArmor(), (float)player.getAttributeInstance(EntityAttributes.ARMOR_TOUGHNESS).getValue());
 
         //Reduce by resistance
         damage = resistanceReduction((PlayerEntity) player, damage);
 
-        if(damage < 0) damage = 0;
-        return damage;
-    }
+        //Reduce by enchants
+        damage  = blastProtReduction(player, damage, new Explosion(mc.world, null, bed.x, bed.y, bed.z, 5f, false, Explosion.DestructionType.DESTROY));
 
-    private static double armourCalc(Entity player, double damage){
-        double defencePoints = 0;
-        float toughness = 0;
-        Iterator<ItemStack> playerArmour = player.getArmorItems().iterator();
-        Item boots = playerArmour.next().getItem();
-        Item leggings = playerArmour.next().getItem();
-        Item chestplate = playerArmour.next().getItem();
-        Item helmet = playerArmour.next().getItem();
-        if(boots instanceof ArmorItem){
-            defencePoints += getDefencePoints((ArmorItem) boots);
-            toughness += getArmourToughness((ArmorItem) boots);
-        }
-        if(leggings instanceof ArmorItem){
-            defencePoints += getDefencePoints((ArmorItem) leggings);
-            toughness += getArmourToughness((ArmorItem) leggings);
-        }
-        if(chestplate instanceof ArmorItem){
-            defencePoints += getDefencePoints((ArmorItem) chestplate);
-            toughness = toughness + getArmourToughness((ArmorItem) chestplate);
-        }
-        if(helmet instanceof ArmorItem){
-            defencePoints += getDefencePoints((ArmorItem) helmet);
-            toughness += getArmourToughness((ArmorItem) helmet);
-        }
-        damage = damage*(1 - ((Math.min(20, Math.max((defencePoints/5), defencePoints - (damage/(2+(toughness/4))))))/25));
         if(damage < 0) damage = 0;
         return damage;
     }
@@ -125,29 +100,32 @@ public class DamageCalcUtils {
         }
 
         //Reduce by armour
-        damage = armourCalc(entity, damage);
-
-        //Reduce by enchants
-        damage = normalProtReduction(entity, damage);
+        damage = DamageUtil.getDamageLeft((float)damage, (float)entity.getArmor(), (float)entity.getAttributeInstance(EntityAttributes.ARMOR_TOUGHNESS).getValue());
 
         //Reduce by resistance
         damage = resistanceReduction(entity, damage);
+
+        //Reduce by enchants
+        damage = normalProtReduction(entity, damage);
 
         if(damage < 0) damage = 0;
         return damage;
     }
 
-    public static int getDefencePoints(ArmorItem item){
-        return item.getProtection();
-    }
-
-    public static float getArmourToughness(ArmorItem item){
-        return item.getMaterial().getToughness();
-    }
-
     private static double getDamageMultiplied(double damage){
-        int diff = mc.world.getDifficulty().getId();
-        return damage * (diff == 0 ? 0 : (diff == 1 ? 0.5f : (diff == 2 ? 1 : 1.5f)));
+        Difficulty diff = mc.world.getDifficulty();
+        if (diff == Difficulty.PEACEFUL) {
+            damage = 0.0F;
+        }
+
+        if (diff == Difficulty.EASY) {
+            damage = Math.min(damage / 2.0F + 1.0F, damage);
+        }
+
+        if (diff == Difficulty.HARD) {
+            damage = damage * 3.0F / 2.0F;
+        }
+        return damage;
     }
 
     private static double normalProtReduction(Entity player, double damage){
@@ -160,8 +138,8 @@ public class DamageCalcUtils {
         return damage;
     }
 
-    private static double blastProtReduction(Entity player, double damage){
-        int protLevel = EnchantmentHelper.getProtectionAmount(player.getArmorItems(), DamageSource.FIREWORKS);
+    private static double blastProtReduction(Entity player, double damage, Explosion explosion){
+        int protLevel = EnchantmentHelper.getProtectionAmount(player.getArmorItems(), DamageSource.explosion(explosion));
         if(protLevel > 20){
             protLevel = 20;
         }
@@ -171,12 +149,13 @@ public class DamageCalcUtils {
     }
 
     private static double resistanceReduction(PlayerEntity player, double damage){
-        int level = 0;
-        if(player.getActiveStatusEffects().containsKey(StatusEffects.RESISTANCE)){
-            level = Objects.requireNonNull(player.getStatusEffect(StatusEffects.RESISTANCE)).getAmplifier() + 1;
+        if (player.hasStatusEffect(StatusEffects.RESISTANCE)) {
+            int lvl = (player.getStatusEffect(StatusEffects.RESISTANCE).getAmplifier() + 1) * 5;
+            int j = 25 - lvl;
+            double f = damage * (float) j;
+            damage = Math.max(f / 25.0F, 0.0F);
         }
-        damage = damage * (1 - (0.2 * level));
-        if(damage < 0) damage = 0;
+        if (damage < 0) damage = 0;
         return damage;
     }
 }
