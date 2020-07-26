@@ -25,9 +25,9 @@ public class DamageCalcUtils {
     //Always Calculate damage, then armour, then enchantments, then potion effect
     public static double crystalDamage(Entity player, Vec3d crystal){
         //Calculate crystal damage
-        if(Math.sqrt(mc.player.squaredDistanceTo(crystal)) > 12) return 0;
+        if(Math.sqrt(player.squaredDistanceTo(crystal)) > 12) return 0;
         double exposure = Explosion.getExposure(crystal, player);
-        double impact = (1D - (Math.sqrt(mc.player.squaredDistanceTo(crystal)) / 12D))*exposure;
+        double impact = (1D - (Math.sqrt(player.squaredDistanceTo(crystal)) / 12D))*exposure;
         double damage = ((impact*impact+impact)*42)+1;
 
         //Multiply damage by difficulty
@@ -48,13 +48,13 @@ public class DamageCalcUtils {
 
     //Always Calculate damage, then armour, then enchantments, then potion effect
     public static double bedDamage(Entity player, Vec3d bed){
-        if(Math.sqrt(mc.player.squaredDistanceTo(bed)) > 10) return 0;
+        if(Math.sqrt(player.squaredDistanceTo(bed)) > 10) return 0;
         double exposure = Explosion.getExposure(bed, player);
-        double impact = (1D - (Math.sqrt(mc.player.squaredDistanceTo(bed)) / 10D))*exposure;
+        double impact = (1D - (Math.sqrt(player.squaredDistanceTo(bed)) / 10D))*exposure;
         double damage = ((impact*impact+impact)*35)+1;
 
         //Multiply damage by difficulty
-        damage = getDamageMultiplied(damage);
+        //damage = getDamageMultiplied(damage);
 
         //Reduce my armour
         damage = armourCalc(player, damage);
