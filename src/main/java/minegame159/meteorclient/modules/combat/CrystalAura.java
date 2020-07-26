@@ -126,6 +126,15 @@ public class CrystalAura extends ToggleModule {
             .build()
     );
 
+    private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
+            .name("delay")
+            .description("Delay ticks between placements and attacks.")
+            .defaultValue(2)
+            .min(0)
+            .max(10)
+            .build()
+    );
+
     private final Setting<Boolean> antiWeakness = sgGeneral.add(new BoolSetting.Builder()
             .name("anti-weakness")
             .description("Switches to tools when you have weakness")
@@ -138,16 +147,22 @@ public class CrystalAura extends ToggleModule {
     }
 
     private int preSlot;
+    private int delayLeft = delay.get();
 
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
         if (getTotalHealth(mc.player) <= minHealth.get() && mode.get() != Mode.suicide) return;
-        if(place.get() && ((mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL) && !autoSwitch.get())) return;
+        if (delayLeft > 0) {
+            delayLeft--;
+            return;
+        } else {
+            delayLeft = delay.get();
+        }
         if(place.get()) {
             ListIterator<BlockPos> validBlocks = Objects.requireNonNull(findValidBlocks()).listIterator();
 
             Iterator<AbstractClientPlayerEntity> validEntities = mc.world.getPlayers().stream()
-                    .filter(entityPlayer -> !FriendManager.INSTANCE.isTrusted(entityPlayer))
+                    .filter(entityPlayer -> !FriendManager.INSTANCE.attack(entityPlayer))
                     .filter(entityPlayer -> !entityPlayer.getDisplayName().equals(mc.player.getDisplayName()))
                     .filter(entityPlayer -> Math.sqrt(mc.player.squaredDistanceTo(new Vec3d(entityPlayer.x, entityPlayer.y, entityPlayer.z))) <= 10)
                     .collect(Collectors.toList())
@@ -189,11 +204,11 @@ public class CrystalAura extends ToggleModule {
                     mc.player.inventory.selectedSlot = slot;
                 }
             }
-            if (!bestBlock.equals(mc.player.getBlockPos())) {
+            if (!bestBlock.equals(mc.player.getBlockPos()) && DamageCalcUtils.crystalDamage(target, new Vec3d(bestBlock.getX(), bestBlock.getY(), bestBlock.getZ()).add(0, 1, 0)) > minDamage.get()) {
 
                 Hand hand = Hand.MAIN_HAND;
-                if (!(mc.player.getMainHandStack().getItem() == Items.END_CRYSTAL) && mc.player.getOffHandStack().getItem() == Items.END_CRYSTAL) hand = Hand.OFF_HAND;
-                else if (!(mc.player.getMainHandStack().getItem() == Items.END_CRYSTAL) && !(mc.player.getOffHandStack().getItem() == Items.END_CRYSTAL)) return;
+                if (mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() == Items.END_CRYSTAL) hand = Hand.OFF_HAND;
+                else if (mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL) return;
 
                 Vec3d vec1 = new Vec3d(bestBlock.getX() + 0.5, bestBlock.getY() + 0.5, bestBlock.getZ() + 0.5);
                 PlayerMoveC2SPacket.LookOnly packet = new PlayerMoveC2SPacket.LookOnly(Utils.getNeededYaw(vec1), Utils.getNeededPitch(vec1), mc.player.onGround);

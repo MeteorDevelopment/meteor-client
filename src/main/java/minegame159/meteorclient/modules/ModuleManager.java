@@ -220,6 +220,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new Trigger());
         addModule(new AutoExp());
         addModule(new AimAssist());
+        addModule(new AutoArmor());
     }
 
     private void initPlayer() {
@@ -237,7 +238,6 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new AutoMount());
         addModule(new XpBottleThrower());
         addModule(new MiddleClickExtra());
-        addModule(new AutoArmor());
         addModule(new AutoDrop());
         addModule(new AutoRightClick());
         addModule(new Yaw());
