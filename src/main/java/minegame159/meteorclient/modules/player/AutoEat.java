@@ -77,7 +77,7 @@ public class AutoEat extends ToggleModule {
         if (isEating) {
             ((IKeyBinding) mc.options.keyUse).setPressed(false);
             isEating = false;
-            mc.player.inventory.selectedSlot = preSelectedSlot;
+            if (preSelectedSlot != -1) mc.player.inventory.selectedSlot = preSelectedSlot;
             BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume");
         }
     }
@@ -99,13 +99,13 @@ public class AutoEat extends ToggleModule {
                     ModuleManager.INSTANCE.get(CrystalAura.class).toggle();
                     wasCrystalActive = false;
                 }
-                mc.player.inventory.selectedSlot = preSelectedSlot;
+                if (preSelectedSlot != -1) mc.player.inventory.selectedSlot = preSelectedSlot;
                 BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume");
 
                 return;
             }
 
-            if(slot != InvUtils.OFFHAND_SLOT) {
+            if(slot != InvUtils.OFFHAND_SLOT && slot != -1) {
                 mc.player.inventory.selectedSlot = slot;
             }
 
@@ -166,7 +166,7 @@ public class AutoEat extends ToggleModule {
         if (slot != -1 && (20 - mc.player.getHungerManager().getFoodLevel() >= bestHunger && sgAutoHunger.isEnabled()) || (20 - mc.player.getHungerManager().getFoodLevel() >= minHunger.get() && sgManualHunger.isEnabled())) {
             preSelectedSlot = mc.player.inventory.selectedSlot;
             this.slot = slot;
-            if(slot != InvUtils.OFFHAND_SLOT) {
+            if(slot != InvUtils.OFFHAND_SLOT && slot != -1) {
                 mc.player.inventory.selectedSlot = slot;
             }
             isEating = true;
