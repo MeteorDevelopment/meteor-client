@@ -135,7 +135,7 @@ public class Nametags extends ToggleModule {
     private final Listener<RenderEvent> onRender = new Listener<>(event -> {
         for (Entity entity : mc.world.getEntities()) {
             if (!(entity instanceof PlayerEntity) || entity == mc.player || entity == mc.cameraEntity) continue;
-            if (yourself.get() && entity.getUuid().equals(mc.player.getUuid())) continue;
+            if (!yourself.get() && entity.getUuid().equals(mc.player.getUuid())) continue;
 
             renderNametag(event, (PlayerEntity) entity);
         }
