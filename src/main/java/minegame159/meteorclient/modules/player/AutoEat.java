@@ -45,6 +45,13 @@ public class AutoEat extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> noBad = sgGeneral.add(new BoolSetting.Builder()
+            .name("filter-negative-effects")
+            .description("Filters out food items that give you negative potion effects.")
+            .defaultValue(true)
+            .build()
+    );
+
     private final Setting<Boolean> disableAuras = sgGeneral.add(new BoolSetting.Builder()
             .name("disable-auras")
             .description("disable all auras")
@@ -137,6 +144,10 @@ public class AutoEat extends ToggleModule {
         for (int i = 0; i < 9; i++) {
             Item item = mc.player.inventory.getInvStack(i).getItem();
             if (!item.isFood()) continue;
+            if (noBad.get()) {
+                if (item == Items.POISONOUS_POTATO || item == Items.PUFFERFISH || item == Items.CHICKEN
+                    || item == Items.ROTTEN_FLESH || item == Items.SPIDER_EYE || item == Items.SUSPICIOUS_STEW) continue;
+            }
 
             if (item == Items.ENCHANTED_GOLDEN_APPLE && item.getFoodComponent().getHunger() > bestHunger) {
                 if (egaps.get()) {
