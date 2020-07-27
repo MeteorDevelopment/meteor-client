@@ -164,7 +164,7 @@ public class CrystalAura extends ToggleModule {
             Iterator<AbstractClientPlayerEntity> validEntities = mc.world.getPlayers().stream()
                     .filter(FriendManager.INSTANCE::attack)
                     .filter(entityPlayer -> !entityPlayer.getDisplayName().equals(mc.player.getDisplayName()))
-                    .filter(entityPlayer -> Math.sqrt(mc.player.squaredDistanceTo(new Vec3d(entityPlayer.x, entityPlayer.y, entityPlayer.z))) <= 10)
+                    .filter(entityPlayer -> mc.player.distanceTo(entityPlayer) <= 10)
                     .collect(Collectors.toList())
                     .iterator();
 
@@ -184,15 +184,14 @@ public class CrystalAura extends ToggleModule {
             for (BlockPos i = null; validBlocks.hasNext(); i = validBlocks.next()) {
                 if (i == null) continue;
 
-                Vec3d convert = new Vec3d(i.getX(), i.getY(), i.getZ()).add(0, 1, 0);
+                Vec3d convert = new Vec3d(i.up());
                 double selfDamage = DamageCalcUtils.crystalDamage(mc.player, convert);
                 if (getTotalHealth(mc.player) - selfDamage < minHealth.get()
                         && mode.get() != Mode.suicide) continue;
 
                 double damage = DamageCalcUtils.crystalDamage(target, convert);
 
-                convert = new Vec3d(bestBlock.getX(), bestBlock.getY(), bestBlock.getZ()).add(0, 1, 0);
-                if (damage > DamageCalcUtils.crystalDamage(target, convert)
+                if (damage > DamageCalcUtils.crystalDamage(target, new Vec3d(bestBlock.up()))
                         && (selfDamage < maxDamage.get() || mode.get() == Mode.suicide) && damage > minDamage.get()) {
                     bestBlock = i;
                 }
@@ -204,13 +203,13 @@ public class CrystalAura extends ToggleModule {
                     mc.player.inventory.selectedSlot = slot;
                 }
             }
-            if (!bestBlock.equals(mc.player.getBlockPos()) && DamageCalcUtils.crystalDamage(target, new Vec3d(bestBlock.getX(), bestBlock.getY(), bestBlock.getZ()).add(0, 1, 0)) > minDamage.get()) {
+            if (!bestBlock.equals(mc.player.getBlockPos()) && DamageCalcUtils.crystalDamage(target, new Vec3d(bestBlock.up())) > minDamage.get()) {
 
                 Hand hand = Hand.MAIN_HAND;
                 if (mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() == Items.END_CRYSTAL) hand = Hand.OFF_HAND;
                 else if (mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL) return;
 
-                Vec3d vec1 = new Vec3d(bestBlock.getX() + 0.5, bestBlock.getY() + 0.5, bestBlock.getZ() + 0.5);
+                Vec3d vec1 = new Vec3d(bestBlock).add(0.5, 0.5, 0.5);
                 PlayerMoveC2SPacket.LookOnly packet = new PlayerMoveC2SPacket.LookOnly(Utils.getNeededYaw(vec1), Utils.getNeededPitch(vec1), mc.player.onGround);
                 mc.player.networkHandler.sendPacket(packet);
 
@@ -238,7 +237,7 @@ public class CrystalAura extends ToggleModule {
                         }
                     }
 
-                    Vec3d vec1 = new Vec3d(entity.x, entity.y, entity.z);
+                    Vec3d vec1 = new Vec3d(entity.getBlockPos());
                     PlayerMoveC2SPacket.LookOnly packet = new PlayerMoveC2SPacket.LookOnly(Utils.getNeededYaw(vec1), Utils.getNeededPitch(vec1), mc.player.onGround);
                     mc.player.networkHandler.sendPacket(packet);
 

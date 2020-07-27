@@ -127,8 +127,8 @@ public class AutoLog extends ToggleModule {
         }
         if (mc.world.dimension.getType() != DimensionType.OVERWORLD) {
             for (BlockEntity blockEntity : mc.world.blockEntities) {
-                if (blockEntity instanceof BedBlockEntity && damageTaken < DamageCalcUtils.bedDamage(mc.player, new Vec3d(blockEntity.getPos().getX(), blockEntity.getPos().getY(), blockEntity.getPos().getZ()))) {
-                    damageTaken = DamageCalcUtils.bedDamage(mc.player, new Vec3d(blockEntity.getPos().getX(), blockEntity.getPos().getY(), blockEntity.getPos().getZ()));
+                if (blockEntity instanceof BedBlockEntity && damageTaken < DamageCalcUtils.bedDamage(mc.player, new Vec3d(blockEntity.getPos()))) {
+                    damageTaken = DamageCalcUtils.bedDamage(mc.player, new Vec3d(blockEntity.getPos()));
                 }
             }
         }
