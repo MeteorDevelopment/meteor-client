@@ -8,13 +8,20 @@ import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.DamageCalcUtils;
 import minegame159.meteorclient.utils.InvUtils;
+import net.minecraft.block.entity.BedBlockEntity;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.container.SlotActionType;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.decoration.EnderCrystalEntity;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.dimension.DimensionType;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -46,7 +53,7 @@ public class AutoArmor extends ToggleModule {
     );
 
     private final Setting<Boolean> bProtLegs = sgGeneral.add(new BoolSetting.Builder()
-            .name("blast-prot-leggings")
+            .name("blast-protection-leggings")
             .description("Prioritizes blast protection on leggings")
             .defaultValue(true)
             .build()
@@ -59,7 +66,9 @@ public class AutoArmor extends ToggleModule {
             .build()
     );
 
-    private final Setting<Integer> weight = sgGeneral.add(new IntSetting.Builder().name("weight").description("How preferred mending is.")
+    private final Setting<Integer> weight = sgGeneral.add(new IntSetting.Builder()
+            .name("weight")
+            .description("How preferred mending is.")
             .defaultValue(2)
             .min(1)
             .max(10)
@@ -71,6 +80,13 @@ public class AutoArmor extends ToggleModule {
             .name("avoided-enchantments")
             .description("Enchantments that will only be equipped as a last resort.")
             .defaultValue(setDefaultValue())
+            .build()
+    );
+
+    private final Setting<Boolean> banBinding = sgGeneral.add(new BoolSetting.Builder()
+            .name("ban-binding")
+            .description("Stops you from putting on any item with Curse of Binding")
+            .defaultValue(false)
             .build()
     );
 
@@ -91,14 +107,75 @@ public class AutoArmor extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> pause = sgGeneral.add(new BoolSetting.Builder()
+            .name("pause-between-pieces")
+            .description("Pauses between each individual piece being moved.(helps prevent desync)")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
+            .name("delay")
+            .description("The delay between pieces being moved.(helps prevent desync)")
+            .defaultValue(1)
+            .min(0)
+            .max(20)
+            .sliderMax(5)
+            .build()
+    );
+
+    private final Setting<Boolean> boomSwitch = sgGeneral.add(new BoolSetting.Builder()
+            .name("switch-for-explosion")
+            .description("Switches to Blast Protection automatically if you're going to get hit by an explosion")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Integer> boomDamage = sgGeneral.add(new IntSetting.Builder()
+            .name("max-explosion-damage")
+            .description("The maximum damage you will take before switching to Blast Protection.")
+            .defaultValue(5)
+            .min(1)
+            .max(18)
+            .sliderMax(10)
+            .build()
+    );
+
+    private final Setting<Integer> switchCooldown = sgGeneral.add(new IntSetting.Builder().name("switch-cooldown")
+            .description("A cooldown before switching from an automatically switched protection to your chosen protection.")
+            .defaultValue(20)
+            .min(0)
+            .max(60)
+            .sliderMax(40)
+            .build()
+    );
+
+    private int delayLeft = delay.get();
+    private boolean didSkip = false;
+
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
+        if (boomSwitch.get() && mode.get() != Prot.Blast_Protection && explosionNear()) {
+            mode.set(Prot.Blast_Protection);
+            delayLeft = 0;
+            didSkip = true;
+        }
+        if (delayLeft > 0) {
+            delayLeft --;
+            return;
+        } else {
+            delayLeft = delay.get();
+        }
         Prot preMode = mode.get();
-        int currentItemScore = 0;
+        if (didSkip) {
+            delayLeft = switchCooldown.get();
+            didSkip = false;
+        }
+        int currentItemScore = -1;
         ItemStack itemStack;
         for (int a = 0; a < 4; a++) {
             itemStack = mc.player.inventory.getArmorStack(a);
-            if (EnchantmentHelper.getLevel(Enchantments.BINDING_CURSE, itemStack) > 0) continue;
+            if (EnchantmentHelper.hasBindingCurse(itemStack)) continue;
             if (itemStack.getItem() instanceof ArmorItem) {
                 if (a == 1 && bProtLegs.get()) {
                     mode.set(Prot.Blast_Protection);
@@ -110,7 +187,7 @@ public class AutoArmor extends ToggleModule {
             for (int i = 0; i < 36; i++) {
                 ItemStack stack = mc.player.inventory.getInvStack(i);
                 if (stack.getItem() instanceof ArmorItem
-                        && (((ArmorItem)stack.getItem()).getSlotType().getEntitySlotId() == a)) {
+                        && (((ArmorItem) stack.getItem()).getSlotType().getEntitySlotId() == a)) {
                     int temp = getItemScore(stack);
                     if (bestScore < temp) {
                         bestScore = temp;
@@ -122,6 +199,7 @@ public class AutoArmor extends ToggleModule {
                 InvUtils.clickSlot(InvUtils.invIndexToSlotId(bestSlot), 0, SlotActionType.PICKUP);
                 InvUtils.clickSlot(8 - a, 0, SlotActionType.PICKUP);
                 InvUtils.clickSlot(InvUtils.invIndexToSlotId(bestSlot), 0, SlotActionType.PICKUP);
+                if (pause.get()) break;
             }
             mode.set(preMode);
         }
@@ -129,10 +207,11 @@ public class AutoArmor extends ToggleModule {
 
     private int getItemScore(ItemStack itemStack){
         int score = 0;
-        if (antiBreak.get() && (itemStack.getMaxDamage() - itemStack.getDamage()) <= breakDurability.get()) return -1;
+        if (antiBreak.get() && (itemStack.getMaxDamage() - itemStack.getDamage()) <= breakDurability.get()) return 0;
+        if (banBinding.get() && EnchantmentHelper.hasBindingCurse(itemStack)) return -10;
         Iterator<Enchantment> bad = avoidEnch.get().iterator();
         for (Enchantment ench = bad.next(); bad.hasNext(); ench = bad.next()) {
-            if (EnchantmentHelper.getLevel(ench, itemStack) > 0) return 0;
+            if (EnchantmentHelper.getLevel(ench, itemStack) > 0) return 1;
         }
         score += 8 * EnchantmentHelper.getLevel(mode.get().enchantment, itemStack);
         score += 2 * EnchantmentHelper.getLevel(Enchantments.PROTECTION, itemStack);
@@ -143,6 +222,22 @@ public class AutoArmor extends ToggleModule {
         score += EnchantmentHelper.getLevel(Enchantments.UNBREAKING, itemStack);
         if (preferMending.get() && EnchantmentHelper.getLevel(Enchantments.MENDING, itemStack) > 0) score += weight.get();
         return score;
+    }
+
+    private boolean explosionNear() {
+        for (Entity entity : mc.world.getEntities()) {
+            if (entity instanceof EnderCrystalEntity && DamageCalcUtils.crystalDamage(mc.player, entity.getPos()) > boomDamage.get()) {
+                return true;
+            }
+        }
+        if (mc.world.dimension.getType() != DimensionType.OVERWORLD) {
+            for (BlockEntity blockEntity : mc.world.blockEntities) {
+                if (blockEntity instanceof BedBlockEntity && DamageCalcUtils.bedDamage(mc.player, new Vec3d(blockEntity.getPos())) > boomDamage.get()) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private List<Enchantment> setDefaultValue() {
