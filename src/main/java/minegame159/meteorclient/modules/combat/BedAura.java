@@ -73,6 +73,13 @@ public class BedAura extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> airPlace = sgGeneral.add(new BoolSetting.Builder()
+            .name("air-place")
+            .description("Places beds in the air if they do more damage.")
+            .defaultValue(false)
+            .build()
+    );
+
     private final Setting<Double> minDamage = sgPlace.add(new DoubleSetting.Builder()
             .name("min-damage")
             .description("The minimum damage the beds will place")
@@ -194,11 +201,15 @@ public class BedAura extends ToggleModule {
         List<BlockPos> validBlocks = new ArrayList<>();
         for(BlockPos i = null; allBlocks.hasNext(); i = allBlocks.next()){
             if(i == null) continue;
-            if(!mc.world.isAir(i) && (mc.world.isAir(i.up())
+            if((mc.world.isAir(i.up())
                     && mc.world.getEntities(null, new Box(i.up().getX(), i.up().getY(), i.up().getZ(), i.up().getX() + 1.0D, i.up().getY() + 1.0D, i.up().getZ() + 1.0D)).isEmpty())
                     && (mc.world.isAir(i.add(1, 1, 0)) || mc.world.isAir(i.add(-1, 1, 0))
                     || mc.world.isAir(i.add(0, 1, 1)) || mc.world.isAir(i.add(0, 1, -1)))) {
-                validBlocks.add(i);
+                if (airPlace.get()) {
+                    validBlocks.add(i);
+                } else if (!airPlace.get() && !mc.world.isAir(i)) {
+                    validBlocks.add(i);
+                }
             }
         }
         return validBlocks;
