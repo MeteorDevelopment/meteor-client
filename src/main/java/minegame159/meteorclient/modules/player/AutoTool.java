@@ -52,7 +52,7 @@ public class AutoTool extends ToggleModule {
 
     private final Setting<Boolean> enderChestOnlyWithSilkTouch = sgGeneral.add(new BoolSetting.Builder()
             .name("ender-chest-only-with-silk-touch")
-            .description("Mine ender chest only wiht silk touch.")
+            .description("Mine ender chest only with silk touch.")
             .defaultValue(true)
             .build()
     );
