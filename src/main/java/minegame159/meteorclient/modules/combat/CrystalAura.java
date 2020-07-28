@@ -3,6 +3,7 @@ package minegame159.meteorclient.modules.combat;
 //Updated by squidoodly 31/04/2020
 //Updated by squidoodly 19/06/2020
 //Updated by squidoodly 24/07/2020
+//Updated by squidoodly 26-28/07/2020
 
 import com.google.common.collect.Streams;
 import me.zero.alpine.event.EventPriority;
@@ -102,6 +103,13 @@ public class CrystalAura extends ToggleModule {
             .name("max-damage")
             .description("The maximum self-damage allowed")
             .defaultValue(3)
+            .build()
+    );
+
+    private final Setting<Boolean> strict = sgPlace.add(new BoolSetting.Builder()
+            .name("strict")
+            .description("Helps compatibility with some servers.")
+            .defaultValue(false)
             .build()
     );
 
@@ -255,7 +263,11 @@ public class CrystalAura extends ToggleModule {
             if((mc.world.getBlockState(i).getBlock() == Blocks.BEDROCK
                     || mc.world.getBlockState(i).getBlock() == Blocks.OBSIDIAN)
                     && isEmpty(i.up())){
-                validBlocks.add(i);
+                if (!strict.get()) {
+                    validBlocks.add(i);
+                } else if (strict.get() && isEmpty(i.up(2))) {
+                    validBlocks.add(i);
+                }
             }
         }
         return validBlocks;
