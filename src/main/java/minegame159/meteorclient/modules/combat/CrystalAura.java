@@ -113,6 +113,23 @@ public class CrystalAura extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> multiPlace = sgPlace.add(new BoolSetting.Builder()
+            .name("multi-place")
+            .description("Places multiple crystals in one tick.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Integer> multiPlaceMax = sgPlace.add(new IntSetting.Builder()
+            .name("multi-place-limit")
+            .description("How many crystals will be placed in one tick.")
+            .defaultValue(3)
+            .min(2)
+            .max(20)
+            .sliderMax(10)
+            .build()
+    );
+
     private final Setting<Double> minHealth = sgPlace.add(new DoubleSetting.Builder()
             .name("min-health")
             .description("The minimum health you have to be for it to place")
@@ -167,7 +184,6 @@ public class CrystalAura extends ToggleModule {
             delayLeft = delay.get();
         }
         if(place.get()) {
-            ListIterator<BlockPos> validBlocks = Objects.requireNonNull(findValidBlocks()).listIterator();
 
             Iterator<AbstractClientPlayerEntity> validEntities = mc.world.getPlayers().stream()
                     .filter(FriendManager.INSTANCE::attack)
@@ -188,41 +204,31 @@ public class CrystalAura extends ToggleModule {
                     target = i;
                 }
             }
-            BlockPos bestBlock = mc.player.getBlockPos();
-            for (BlockPos i = null; validBlocks.hasNext(); i = validBlocks.next()) {
-                if (i == null) continue;
+            List<BlockPos> validBlocks = findValidBlocks(target);
 
-                Vec3d convert = new Vec3d(i.up());
-                double selfDamage = DamageCalcUtils.crystalDamage(mc.player, convert);
-                if (getTotalHealth(mc.player) - selfDamage < minHealth.get()
-                        && mode.get() != Mode.suicide) continue;
+            if (validBlocks.size() > 0 && DamageCalcUtils.crystalDamage(target, new Vec3d(validBlocks.get(0))) > minDamage.get()) {
 
-                double damage = DamageCalcUtils.crystalDamage(target, convert);
-
-                if (damage > DamageCalcUtils.crystalDamage(target, new Vec3d(bestBlock.up()))
-                        && (selfDamage < maxDamage.get() || mode.get() == Mode.suicide) && damage > minDamage.get()) {
-                    bestBlock = i;
+                if(autoSwitch.get() && mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL){
+                    int slot = InvUtils.findItemWithCount(Items.END_CRYSTAL).slot;
+                    if(slot != -1 && slot < 9){
+                        if (spoofChange.get()) preSlot = mc.player.inventory.selectedSlot;
+                        mc.player.inventory.selectedSlot = slot;
+                    }
                 }
-            }
-            if(autoSwitch.get() && mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL){
-                int slot = InvUtils.findItemWithCount(Items.END_CRYSTAL).slot;
-                if(slot != -1 && slot < 9){
-                    if (spoofChange.get()) preSlot = mc.player.inventory.selectedSlot;
-                    mc.player.inventory.selectedSlot = slot;
-                }
-            }
-            if (!bestBlock.equals(mc.player.getBlockPos()) && DamageCalcUtils.crystalDamage(target, new Vec3d(bestBlock.up())) > minDamage.get()) {
 
                 Hand hand = Hand.MAIN_HAND;
                 if (mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() == Items.END_CRYSTAL) hand = Hand.OFF_HAND;
                 else if (mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL) return;
-
-                Vec3d vec1 = new Vec3d(bestBlock).add(0.5, 0.5, 0.5);
-                PlayerMoveC2SPacket.LookOnly packet = new PlayerMoveC2SPacket.LookOnly(Utils.getNeededYaw(vec1), Utils.getNeededPitch(vec1), mc.player.onGround);
-                mc.player.networkHandler.sendPacket(packet);
-
-                mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(new Vec3d(bestBlock), Direction.UP, bestBlock, false));
-                mc.player.swingHand(Hand.MAIN_HAND);
+                BlockPos bestBlock;
+                if (multiPlace.get()) {
+                    for (int i = 0; i < multiPlaceMax.get() || i < validBlocks.size(); i++) {
+                        bestBlock = validBlocks.get(i);
+                        placeBlock(bestBlock, hand);
+                    }
+                } else {
+                    bestBlock = validBlocks.get(0);
+                    placeBlock(bestBlock, hand);
+                }
             }
             if (spoofChange.get() && preSlot != mc.player.inventory.selectedSlot) mc.player.inventory.selectedSlot = preSlot;
         }
@@ -255,7 +261,16 @@ public class CrystalAura extends ToggleModule {
                 });
     }, EventPriority.HIGH);
 
-    private List<BlockPos> findValidBlocks(){
+    private void placeBlock(BlockPos block, Hand hand){
+        Vec3d vec1 = new Vec3d(block).add(0.5, 0.5, 0.5);
+        PlayerMoveC2SPacket.LookOnly packet = new PlayerMoveC2SPacket.LookOnly(Utils.getNeededYaw(vec1), Utils.getNeededPitch(vec1), mc.player.onGround);
+        mc.player.networkHandler.sendPacket(packet);
+
+        mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(new Vec3d(block), Direction.UP, block , false));
+        mc.player.swingHand(Hand.MAIN_HAND);
+    }
+
+    private List<BlockPos> findValidBlocks(AbstractClientPlayerEntity target){
         Iterator<BlockPos> allBlocks = getRange(mc.player.getBlockPos(), placeRange.get()).iterator();
         List<BlockPos> validBlocks = new ArrayList<>();
         for(BlockPos i = null; allBlocks.hasNext(); i = allBlocks.next()){
@@ -270,6 +285,7 @@ public class CrystalAura extends ToggleModule {
                 }
             }
         }
+        validBlocks.sort(Comparator.comparingDouble(value ->  DamageCalcUtils.crystalDamage(target, new Vec3d(value))));
         return validBlocks;
     }
 
