@@ -89,7 +89,7 @@ public class AutoLog extends ToggleModule {
         }
 
         for (Entity entity : mc.world.getEntities()) {
-            if(entity instanceof PlayerEntity) {
+            if(entity instanceof PlayerEntity && entity.getUuid() != mc.player.getUuid()) {
                 if (onlyTrusted.get() && entity != mc.player && !FriendManager.INSTANCE.isTrusted((PlayerEntity) entity)) {
                         mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(new LiteralText("Non-trusted player appeared in your render distance")));
                         break;
