@@ -51,7 +51,7 @@ public class Nuker extends ToggleModule {
 
     private final Setting<List<Block>> selectedBlocks = sgGeneral.add(new BlockListSetting.Builder()
             .name("selected-blocks")
-            .description("Which blocks to mine when onlySelectex is true.")
+            .description("Which blocks to mine when only selected is true.")
             .defaultValue(new ArrayList<>(0))
             .build()
     );
