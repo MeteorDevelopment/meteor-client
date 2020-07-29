@@ -286,6 +286,7 @@ public class CrystalAura extends ToggleModule {
             }
         }
         validBlocks.sort(Comparator.comparingDouble(value ->  DamageCalcUtils.crystalDamage(target, new Vec3d(value))));
+        Collections.reverse(validBlocks);
         return validBlocks;
     }
 
