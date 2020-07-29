@@ -80,6 +80,10 @@ public class AutoLog extends ToggleModule {
 
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
+        if (mc.player.getHealth() <= 0) {
+            this.toggle();
+            return;
+        }
         if (mc.player.getHealth() <= health.get()) {
             mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(new LiteralText("Health was lower than " + health.get())));
         }
