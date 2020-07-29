@@ -155,6 +155,7 @@ public class AutoArmor extends ToggleModule {
 
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
+        if (mc.player.abilities.creativeMode) return;
         if (boomSwitch.get() && mode.get() != Prot.Blast_Protection && explosionNear()) {
             mode.set(Prot.Blast_Protection);
             delayLeft = 0;
