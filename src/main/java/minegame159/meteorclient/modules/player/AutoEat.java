@@ -92,6 +92,7 @@ public class AutoEat extends ToggleModule {
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
         if (mc.player.abilities.creativeMode) return;
+        if (isEating && !mc.player.getMainHandStack().getItem().isFood()) ((IKeyBinding) mc.options.keyUse).setPressed(false);
 
         if (isEating) {
             if (mc.player.getHungerManager().getFoodLevel() > preFoodLevel) {
