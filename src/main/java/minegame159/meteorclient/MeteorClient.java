@@ -124,10 +124,10 @@ public class MeteorClient implements ClientModInitializer, Listenable {
 
         if (fontFile == null) {
             try {
-                fontFile = new File(FOLDER, "Comfortaa.ttf");
+                fontFile = new File(FOLDER, "JetBrainsMono-Regular.ttf");
                 fontFile.getParentFile().mkdirs();
 
-                InputStream in = MeteorClient.class.getResourceAsStream("/assets/meteor-client/Comfortaa.ttf");
+                InputStream in = MeteorClient.class.getResourceAsStream("/assets/meteor-client/JetBrainsMono-Regular.ttf");
                 OutputStream out = new FileOutputStream(fontFile);
 
                 byte[] bytes = new byte[255];
