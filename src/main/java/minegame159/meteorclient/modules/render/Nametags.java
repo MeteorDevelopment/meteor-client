@@ -27,8 +27,12 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.DyeableArmorItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.registry.Registry;
 import org.lwjgl.opengl.GL11;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Nametags extends ToggleModule {
@@ -49,6 +53,13 @@ public class Nametags extends ToggleModule {
             .name("display-armor-enchants")
             .description("Display armor enchantments.")
             .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<List<Enchantment>> displayedEnchantments = sgGeneral.add(new EnchListSetting.Builder()
+            .name("displayed-enchantments")
+            .description("The enchantments that are shown on nametags")
+            .defaultValue(setDefualtList())
             .build()
     );
 
@@ -188,17 +199,23 @@ public class Nametags extends ToggleModule {
             for (int i = 0; i < 4; i++) {
                 ItemStack itemStack = entity.inventory.armor.get(i);
                 Map<Enchantment, Integer> enchantments = EnchantmentHelper.getEnchantments(itemStack);
+                Map<Enchantment, Integer> enchantmentsToShowScale = new HashMap<>();
+                for (Enchantment enchantment : displayedEnchantments.get()) {
+                    if (enchantments.containsKey(enchantment)) {
+                        enchantmentsToShowScale.put(enchantment, enchantments.get(enchantment));
+                    }
+                }
 
                 if (armorWidths[i] == 0) armorWidths[i] = 16;
                 if (!itemStack.isEmpty() && displayArmor.get()) hasArmor = true;
 
                 if (displayArmorEnchants.get()) {
-                    for (Enchantment enchantment : enchantments.keySet()) {
-                        String enchantName = Utils.getEnchantShortName(enchantment) + " " + enchantments.get(enchantment);
+                    for (Enchantment enchantment : enchantmentsToShowScale.keySet()) {
+                        String enchantName = Utils.getEnchantShortName(enchantment) + " " + enchantmentsToShowScale.get(enchantment);
                         armorWidths[i] = Math.max(armorWidths[i], MeteorClient.FONT.getStringWidth(enchantName));
                     }
 
-                    maxEnchantCount = Math.max(maxEnchantCount, enchantments.size());
+                    maxEnchantCount = Math.max(maxEnchantCount, enchantmentsToShowScale.size());
                 }
             }
             MeteorClient.FONT.scale = 1;
@@ -322,13 +339,19 @@ public class Nametags extends ToggleModule {
             for (int i = 0; i < 4; i++) {
                 ItemStack itemStack = entity.inventory.armor.get(i);
                 Map<Enchantment, Integer> enchantments = EnchantmentHelper.getEnchantments(itemStack);
+                Map<Enchantment, Integer> enchantmentsToShow = new HashMap<>();
+                for (Enchantment enchantment : displayedEnchantments.get()) {
+                    if (enchantments.containsKey(enchantment)) {
+                        enchantmentsToShow.put(enchantment, enchantments.get(enchantment));
+                    }
+                }
 
                 double aW = armorWidths[i];
                 double enchantY = 0;
-                double addY = (armorHeight - enchantments.size() * MeteorClient.FONT.getHeight()) / 2;
+                double addY = (armorHeight - enchantmentsToShow.size() * MeteorClient.FONT.getHeight()) / 2;
 
-                for (Enchantment enchantment : enchantments.keySet()) {
-                    String enchantName = Utils.getEnchantShortName(enchantment) + " " + enchantments.get(enchantment);
+                for (Enchantment enchantment : enchantmentsToShow.keySet()) {
+                    String enchantName = Utils.getEnchantShortName(enchantment) + " " + enchantmentsToShow.get(enchantment);
                     MeteorClient.FONT.renderStringWithShadow(enchantName, itemX + ((aW - MeteorClient.FONT.getStringWidth(enchantName)) / 2), -heightUp + enchantY + addY, enchantmentTextColor.get());
 
                     enchantY += MeteorClient.FONT.getHeight();
@@ -342,5 +365,13 @@ public class Nametags extends ToggleModule {
         MeteorClient.FONT.end();
 
         Matrices.pop();
+    }
+
+    private List<Enchantment> setDefualtList(){
+        List<Enchantment> ench = new ArrayList<>();
+        for (Enchantment enchantment : Registry.ENCHANTMENT) {
+            ench.add(enchantment);
+        }
+        return ench;
     }
 }
