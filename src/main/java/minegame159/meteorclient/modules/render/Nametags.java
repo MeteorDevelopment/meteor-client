@@ -1,6 +1,7 @@
 package minegame159.meteorclient.modules.render;
 
 //Updated by squidoodly 03/07/2020
+//Updated by squidoodly 30/07/2020
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
@@ -36,6 +37,11 @@ import java.util.List;
 import java.util.Map;
 
 public class Nametags extends ToggleModule {
+    public enum Position {
+        ABOVE,
+        ON_TOP
+    }
+
     private static final Color BACKGROUND = new Color(0, 0, 0, 75);
     private static final Color WHITE = new Color(255, 255, 255);
 
@@ -53,6 +59,13 @@ public class Nametags extends ToggleModule {
             .name("display-armor-enchants")
             .description("Display armor enchantments.")
             .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Position> displayOnItem = sgGeneral.add(new EnumSetting.Builder<Position>()
+            .name("enchantment-position")
+            .description("Where enchantments are rendered.")
+            .defaultValue(Position.ON_TOP)
             .build()
     );
 
@@ -349,6 +362,9 @@ public class Nametags extends ToggleModule {
                 double aW = armorWidths[i];
                 double enchantY = 0;
                 double addY = (armorHeight - enchantmentsToShow.size() * MeteorClient.FONT.getHeight()) / 2;
+                if (displayOnItem.get() == Position.ABOVE) {
+                    addY -= 16;
+                }
 
                 for (Enchantment enchantment : enchantmentsToShow.keySet()) {
                     String enchantName = Utils.getEnchantShortName(enchantment) + " " + enchantmentsToShow.get(enchantment);
