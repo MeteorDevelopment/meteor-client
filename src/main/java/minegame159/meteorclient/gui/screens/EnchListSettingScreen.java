@@ -61,7 +61,7 @@ public class EnchListSettingScreen extends WindowScreen{
         } else {
             List<Pair<Enchantment, Integer>> enchs = new ArrayList<>();
             Registry.ENCHANTMENT.forEach(ench -> {
-                int words = Utils.search(ench.getName(1).asFormattedString(), filter.text);
+                int words = Utils.search(ench.getName(1).asString(), filter.text);
                 if(words > 0) enchs.add(new Pair<>(ench, words));
             });
             enchs.sort(Comparator.comparingInt(value -> -value.getRight()));
@@ -73,7 +73,7 @@ public class EnchListSettingScreen extends WindowScreen{
         //Selected enchantments
         WTable table2 = add(new WTable()).top().getWidget();
         for (Enchantment ench : setting.get()) {
-            table2.add(new WLabel(ench.getName(1).asFormattedString()));
+            table2.add(new WLabel(ench.getName(1).asString()));
 
             WMinus minus = table2.add(new WMinus()).getWidget();
             minus.action = minus1 -> {
