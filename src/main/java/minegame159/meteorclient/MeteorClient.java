@@ -19,6 +19,7 @@ import minegame159.meteorclient.utils.Capes;
 import minegame159.meteorclient.utils.EChestMemory;
 import minegame159.meteorclient.utils.EntityUtils;
 import minegame159.meteorclient.utils.Utils;
+import net.arikia.dev.drpc.DiscordRPC;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.keybinding.FabricKeyBinding;
 import net.fabricmc.fabric.api.client.keybinding.KeyBindingRegistry;
@@ -89,6 +90,7 @@ public class MeteorClient implements ClientModInitializer, Listenable {
         FriendManager.INSTANCE.save();
         MacroManager.INSTANCE.save();
         AccountManager.INSTANCE.save();
+        DiscordRPC.discordShutdown();
 
         Ignore.save();
     }
