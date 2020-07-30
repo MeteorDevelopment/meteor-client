@@ -152,10 +152,8 @@ public class DamageCalcUtils {
 
     private static double resistanceReduction(PlayerEntity player, double damage){
         if (player.hasStatusEffect(StatusEffects.RESISTANCE)) {
-            int lvl = (player.getStatusEffect(StatusEffects.RESISTANCE).getAmplifier() + 1) * 5;
-            int j = 25 - lvl;
-            double f = damage * (float) j;
-            damage = Math.max(f / 25.0F, 0.0F);
+            int lvl = (player.getStatusEffect(StatusEffects.RESISTANCE).getAmplifier() + 1);
+            damage *= (1 - (lvl * 0.2));
         }
         if (damage < 0) damage = 0;
         return damage;

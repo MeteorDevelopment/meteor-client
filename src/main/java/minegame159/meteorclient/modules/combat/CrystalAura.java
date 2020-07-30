@@ -113,23 +113,6 @@ public class CrystalAura extends ToggleModule {
             .build()
     );
 
-    private final Setting<Boolean> multiPlace = sgPlace.add(new BoolSetting.Builder()
-            .name("multi-place")
-            .description("Places multiple crystals in one tick.")
-            .defaultValue(false)
-            .build()
-    );
-
-    private final Setting<Integer> multiPlaceMax = sgPlace.add(new IntSetting.Builder()
-            .name("multi-place-limit")
-            .description("How many crystals will be placed in one tick.")
-            .defaultValue(3)
-            .min(2)
-            .max(20)
-            .sliderMax(10)
-            .build()
-    );
-
     private final Setting<Double> minHealth = sgPlace.add(new DoubleSetting.Builder()
             .name("min-health")
             .description("The minimum health you have to be for it to place")
@@ -206,7 +189,18 @@ public class CrystalAura extends ToggleModule {
             }
             List<BlockPos> validBlocks = findValidBlocks(target);
 
-            if (validBlocks.size() > 0 && DamageCalcUtils.crystalDamage(target, new Vec3d(validBlocks.get(0))) > minDamage.get()) {
+            BlockPos bestBlock = null;
+            for (BlockPos blockPos : validBlocks) {
+                if (DamageCalcUtils.crystalDamage(target, new Vec3d(blockPos.up())) > minDamage.get()) {
+                    if (bestBlock == null) {
+                        bestBlock = blockPos;
+                    } else if (DamageCalcUtils.crystalDamage(target, new Vec3d(blockPos.up()))
+                            > DamageCalcUtils.crystalDamage(target, new Vec3d(bestBlock.up()))) {
+                        bestBlock = blockPos;
+                    }
+                }
+            }
+            if (bestBlock != null) {
 
                 if(autoSwitch.get() && mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL){
                     int slot = InvUtils.findItemWithCount(Items.END_CRYSTAL).slot;
@@ -219,16 +213,7 @@ public class CrystalAura extends ToggleModule {
                 Hand hand = Hand.MAIN_HAND;
                 if (mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() == Items.END_CRYSTAL) hand = Hand.OFF_HAND;
                 else if (mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL) return;
-                BlockPos bestBlock;
-                if (multiPlace.get()) {
-                    for (int i = 0; i < multiPlaceMax.get() || i < validBlocks.size(); i++) {
-                        bestBlock = validBlocks.get(i);
-                        placeBlock(bestBlock, hand);
-                    }
-                } else {
-                    bestBlock = validBlocks.get(0);
                     placeBlock(bestBlock, hand);
-                }
             }
             if (spoofChange.get() && preSlot != mc.player.inventory.selectedSlot) mc.player.inventory.selectedSlot = preSlot;
         }
@@ -285,7 +270,8 @@ public class CrystalAura extends ToggleModule {
                 }
             }
         }
-        validBlocks.sort(Comparator.comparingDouble(value ->  DamageCalcUtils.crystalDamage(target, new Vec3d(value))));
+        validBlocks.sort(Comparator.comparingDouble(value ->  DamageCalcUtils.crystalDamage(target, new Vec3d(value.up()))));
+        validBlocks.removeIf(blockpos -> DamageCalcUtils.crystalDamage(mc.player, new Vec3d(blockpos.up())) > maxDamage.get());
         Collections.reverse(validBlocks);
         return validBlocks;
     }
