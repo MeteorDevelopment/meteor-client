@@ -12,6 +12,7 @@ import minegame159.meteorclient.utils.DamageCalcUtils;
 import minegame159.meteorclient.utils.InvUtils;
 import net.minecraft.block.entity.BedBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.container.SlotActionType;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -49,6 +50,13 @@ public class AutoArmor extends ToggleModule {
             .name("prioritize")
             .description("Which protection to prioritize.")
             .defaultValue(Prot.Protection)
+            .build()
+    );
+
+    private final Setting<Boolean> pauseInInventory = sgGeneral.add(new BoolSetting.Builder()
+            .name("pause-in-inventory")
+            .description("Stops moving armour when you are in an inventory")
+            .defaultValue(false)
             .build()
     );
 
@@ -156,6 +164,7 @@ public class AutoArmor extends ToggleModule {
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
         if (mc.player.abilities.creativeMode) return;
+        if (pauseInInventory.get() && mc.currentScreen instanceof InventoryScreen) return;
         if (boomSwitch.get() && mode.get() != Prot.Blast_Protection && explosionNear()) {
             mode.set(Prot.Blast_Protection);
             delayLeft = 0;
