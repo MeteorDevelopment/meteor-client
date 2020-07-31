@@ -15,6 +15,7 @@ import minegame159.meteorclient.utils.DamageCalcUtils;
 import net.minecraft.block.entity.BedBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BedItem;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.Hand;
@@ -73,6 +74,29 @@ public class BedAura extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> autoSwitch = sgGeneral.add(new BoolSetting.Builder()
+            .name("auto-switch")
+            .description("Switches to bed automatically")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> switchBack = sgGeneral.add(new BoolSetting.Builder()
+            .name("switch-back")
+            .description("Switches back to the previous slot after auto switching.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
+            .name("delay")
+            .description("The delay between placements.")
+            .defaultValue(2)
+            .min(0)
+            .max(10)
+            .build()
+    );
+
     private final Setting<Boolean> airPlace = sgGeneral.add(new BoolSetting.Builder()
             .name("air-place")
             .description("Places beds in the air if they do more damage.")
@@ -108,8 +132,16 @@ public class BedAura extends ToggleModule {
             .build()
     );
 
+    private int delayLeft = delay.get();
+
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
+        if (delayLeft > 0) {
+            delayLeft --;
+            return;
+        } else {
+            delayLeft = delay.get();
+        }
         if( mc.player.dimension == DimensionType.OVERWORLD) {
             Chat.warning(this, "You are in the overworld. Disabling!");
             this.toggle();
@@ -118,7 +150,6 @@ public class BedAura extends ToggleModule {
         if ((mc.player.getHealth() + mc.player.getAbsorptionAmount()) <= minHealth.get() && mode.get() != Mode.suicide) return;
         if (place.get() && (!(mc.player.getMainHandStack().getItem() instanceof BedItem) && !(mc.player.getOffHandStack().getItem() instanceof BedItem))) return;
         if (place.get()) {
-            ListIterator<BlockPos> validBlocks = Objects.requireNonNull(findValidBlocks()).listIterator();
             Iterator<AbstractClientPlayerEntity> validEntities = mc.world.getPlayers().stream()
                     .filter(FriendManager.INSTANCE::attack)
                     .filter(entityPlayer -> !entityPlayer.getDisplayName().equals(mc.player.getDisplayName()))
@@ -137,21 +168,18 @@ public class BedAura extends ToggleModule {
                     target = i;
                 }
             }
-            BlockPos bestBlock = mc.player.getBlockPos();
-            for (BlockPos i = null; validBlocks.hasNext(); i = validBlocks.next()) {
-                if (i == null) continue;
-                Vec3d convert = new Vec3d(i.up());
-                double selfDamage = DamageCalcUtils.bedDamage(mc.player, convert);
-                if (mc.player.getHealth() + mc.player.getAbsorptionAmount() - selfDamage < minHealth.get()
-                        && mode.get() != Mode.suicide) continue;
-                double damage = DamageCalcUtils.bedDamage(target, convert);
-                convert = new Vec3d(bestBlock.up());
-                if (damage > DamageCalcUtils.bedDamage(target, convert)
-                        && (selfDamage < maxDamage.get() || mode.get() == Mode.suicide) && damage > minDamage.get()) {
-                    bestBlock = i;
+            List<BlockPos> validBlocks = findValidBlocks(target);
+            BlockPos bestBlock = validBlocks.get(0);
+            int preSlot = -1;
+            if (DamageCalcUtils.bedDamage(target, new Vec3d(bestBlock.up())) > minDamage.get()) {
+                if (autoSwitch.get()) {
+                    for (int i = 0; i < 9; i++) {
+                        if (mc.player.inventory.getInvStack(i).getItem() instanceof BedItem) {
+                            preSlot = mc.player.inventory.selectedSlot;
+                            mc.player.inventory.selectedSlot = i;
+                        }
+                    }
                 }
-            }
-            if (!bestBlock.equals(mc.player.getBlockPos())) {
                 double north = -1;
                 double east = -1;
                 double south = -1;
@@ -183,6 +211,9 @@ public class BedAura extends ToggleModule {
                 }
                 mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(new Vec3d(bestBlock), Direction.UP, bestBlock, false));
                 mc.player.swingHand(Hand.MAIN_HAND);
+                if (preSlot != -1 && mc.player.inventory.selectedSlot != preSlot && switchBack.get()){
+                    mc.player.inventory.selectedSlot = preSlot;
+                }
             }
         }
         for(BlockEntity entity : mc.world.blockEntities){
@@ -196,7 +227,7 @@ public class BedAura extends ToggleModule {
         }
     });
 
-    private List<BlockPos> findValidBlocks(){
+    private List<BlockPos> findValidBlocks(PlayerEntity target){
         Iterator<BlockPos> allBlocks = getRange(mc.player.getBlockPos(), placeRange.get()).iterator();
         List<BlockPos> validBlocks = new ArrayList<>();
         for(BlockPos i = null; allBlocks.hasNext(); i = allBlocks.next()){
@@ -212,6 +243,9 @@ public class BedAura extends ToggleModule {
                 }
             }
         }
+        validBlocks.sort(Comparator.comparingDouble(value ->  DamageCalcUtils.crystalDamage(target, new Vec3d(value.up()))));
+        validBlocks.removeIf(blockpos -> DamageCalcUtils.crystalDamage(mc.player, new Vec3d(blockpos.up())) > maxDamage.get());
+        Collections.reverse(validBlocks);
         return validBlocks;
     }
 
