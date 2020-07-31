@@ -136,7 +136,7 @@ public class CrystalAura extends ToggleModule {
 
     private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
             .name("delay")
-            .description("Delay ticks between placements and attacks.")
+            .description("Delay ticks between placements.")
             .defaultValue(2)
             .min(0)
             .max(10)
