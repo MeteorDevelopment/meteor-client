@@ -75,21 +75,23 @@ public class DamageCalcUtils {
         return damage;
     }
 
-    public static double getSwordDamage(PlayerEntity entity){
+    public static double getSwordDamage(PlayerEntity entity, boolean charged){
         //Get sword damage
         double damage = 0;
-        if(entity.getActiveItem().getItem() == Items.DIAMOND_SWORD) {
-            damage += 7;
-        }else if(entity.getActiveItem().getItem() == Items.GOLDEN_SWORD){
-            damage += 4;
-        }else if(entity.getActiveItem().getItem() == Items.IRON_SWORD){
-            damage += 6;
-        }else if(entity.getActiveItem().getItem() == Items.STONE_SWORD){
-            damage += 5;
-        }else if(entity.getActiveItem().getItem() == Items.WOODEN_SWORD){
-            damage += 4;
+        if (charged) {
+            if (entity.getActiveItem().getItem() == Items.DIAMOND_SWORD) {
+                damage += 7;
+            } else if (entity.getActiveItem().getItem() == Items.GOLDEN_SWORD) {
+                damage += 4;
+            } else if (entity.getActiveItem().getItem() == Items.IRON_SWORD) {
+                damage += 6;
+            } else if (entity.getActiveItem().getItem() == Items.STONE_SWORD) {
+                damage += 5;
+            } else if (entity.getActiveItem().getItem() == Items.WOODEN_SWORD) {
+                damage += 4;
+            }
+            damage *= 1.5;
         }
-        damage *= 1.5;
         if(entity.getActiveItem().getEnchantments() != null){
             if(EnchantmentHelper.getEnchantments(entity.getActiveItem()).containsKey(Enchantments.SHARPNESS)){
                 int level = EnchantmentHelper.getLevel(Enchantments.SHARPNESS, entity.getActiveItem());
