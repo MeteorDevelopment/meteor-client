@@ -21,6 +21,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.SwordItem;
 import net.minecraft.network.packet.s2c.play.DisconnectS2CPacket;
 import net.minecraft.text.LiteralText;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.dimension.DimensionType;
 
@@ -113,7 +114,7 @@ public class AutoLog extends ToggleModule {
     private double getHealthReduction(){
         double damageTaken = 0;
         for(Entity entity : mc.world.getEntities()){
-            if(entity instanceof EnderCrystalEntity && damageTaken < DamageCalcUtils.crystalDamage(mc.player, entity.getPos())){
+            if(entity instanceof EndCrystalEntity && damageTaken < DamageCalcUtils.crystalDamage(mc.player, entity.getPos())){
                 damageTaken = DamageCalcUtils.crystalDamage(mc.player, entity.getPos());
             }else if(entity instanceof PlayerEntity && damageTaken < DamageCalcUtils.getSwordDamage((PlayerEntity) entity)){
                 if(!FriendManager.INSTANCE.isTrusted((PlayerEntity) entity) && mc.player.getPos().distanceTo(entity.getPos()) < 5){
@@ -129,10 +130,13 @@ public class AutoLog extends ToggleModule {
                 damageTaken = damage;
             }
         }
-        if (mc.world.dimension.getType() != DimensionType.OVERWORLD) {
+        if (!mc.world.getDimensionRegistryKey().getValue().getPath().equals("overworld")) {
             for (BlockEntity blockEntity : mc.world.blockEntities) {
-                if (blockEntity instanceof BedBlockEntity && damageTaken < DamageCalcUtils.bedDamage(mc.player, new Vec3d(blockEntity.getPos()))) {
-                    damageTaken = DamageCalcUtils.bedDamage(mc.player, new Vec3d(blockEntity.getPos()));
+                BlockPos bp = blockEntity.getPos();
+                Vec3d pos = new Vec3d(bp.getX(), bp.getY(), bp.getZ());
+
+                if (blockEntity instanceof BedBlockEntity && damageTaken < DamageCalcUtils.bedDamage(mc.player, pos)) {
+                    damageTaken = DamageCalcUtils.bedDamage(mc.player, pos);
                 }
             }
         }

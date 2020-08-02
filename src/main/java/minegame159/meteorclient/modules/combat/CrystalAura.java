@@ -191,11 +191,14 @@ public class CrystalAura extends ToggleModule {
 
             BlockPos bestBlock = null;
             for (BlockPos blockPos : validBlocks) {
-                if (DamageCalcUtils.crystalDamage(target, new Vec3d(blockPos.up())) > minDamage.get()) {
+                BlockPos pos = blockPos.up();
+                if (DamageCalcUtils.crystalDamage(target, new Vec3d(pos.getX(), pos.getY(), pos.getZ())) > minDamage.get()) {
+                    pos = blockPos.up();
+                    BlockPos pos2 = bestBlock.up();
                     if (bestBlock == null) {
                         bestBlock = blockPos;
-                    } else if (DamageCalcUtils.crystalDamage(target, new Vec3d(blockPos.up()))
-                            > DamageCalcUtils.crystalDamage(target, new Vec3d(bestBlock.up()))) {
+                    } else if (DamageCalcUtils.crystalDamage(target, new Vec3d(pos.getX(), pos.getY(), pos.getZ()))
+                            > DamageCalcUtils.crystalDamage(target, new Vec3d(pos2.getX(), pos2.getY(), pos2.getZ()))) {
                         bestBlock = blockPos;
                     }
                 }
@@ -236,7 +239,8 @@ public class CrystalAura extends ToggleModule {
                         }
                     }
 
-                    Vec3d vec1 = new Vec3d(entity.getBlockPos());
+                    BlockPos pos = entity.getBlockPos();
+                    Vec3d vec1 = new Vec3d(pos.getX(), pos.getY(), pos.getZ());
                     PlayerMoveC2SPacket.LookOnly packet = new PlayerMoveC2SPacket.LookOnly(Utils.getNeededYaw(vec1), Utils.getNeededPitch(vec1), mc.player.isOnGround());
                     mc.player.networkHandler.sendPacket(packet);
 
@@ -247,11 +251,11 @@ public class CrystalAura extends ToggleModule {
     }, EventPriority.HIGH);
 
     private void placeBlock(BlockPos block, Hand hand){
-        Vec3d vec1 = new Vec3d(block).add(0.5, 0.5, 0.5);
-        PlayerMoveC2SPacket.LookOnly packet = new PlayerMoveC2SPacket.LookOnly(Utils.getNeededYaw(vec1), Utils.getNeededPitch(vec1), mc.player.onGround);
+        Vec3d vec1 = new Vec3d(block.getX(), block.getY(), block.getZ()).add(0.5, 0.5, 0.5);
+        PlayerMoveC2SPacket.LookOnly packet = new PlayerMoveC2SPacket.LookOnly(Utils.getNeededYaw(vec1), Utils.getNeededPitch(vec1), mc.player.isOnGround());
         mc.player.networkHandler.sendPacket(packet);
 
-        mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(new Vec3d(block), Direction.UP, block , false));
+        mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(new Vec3d(block.getX(), block.getY(), block.getZ()), Direction.UP, block , false));
         mc.player.swingHand(Hand.MAIN_HAND);
     }
 
@@ -270,8 +274,14 @@ public class CrystalAura extends ToggleModule {
                 }
             }
         }
-        validBlocks.sort(Comparator.comparingDouble(value ->  DamageCalcUtils.crystalDamage(target, new Vec3d(value.up()))));
-        validBlocks.removeIf(blockpos -> DamageCalcUtils.crystalDamage(mc.player, new Vec3d(blockpos.up())) > maxDamage.get());
+        validBlocks.sort(Comparator.comparingDouble(value ->  {
+            BlockPos pos = value.up();
+            return DamageCalcUtils.crystalDamage(target, new Vec3d(pos.getX(), pos.getY(), pos.getZ()));
+        }));
+        validBlocks.removeIf(blockpos -> {
+            BlockPos pos = blockpos.up();
+            return DamageCalcUtils.crystalDamage(mc.player, new Vec3d(pos.getX(), pos.getY(), pos.getZ())) > maxDamage.get();
+        });
         Collections.reverse(validBlocks);
         return validBlocks;
     }

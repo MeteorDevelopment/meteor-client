@@ -173,10 +173,11 @@ public class BedAura extends ToggleModule {
             List<BlockPos> validBlocks = findValidBlocks(target);
             BlockPos bestBlock = validBlocks.get(0);
             int preSlot = -1;
-            if (DamageCalcUtils.bedDamage(target, new Vec3d(bestBlock.up())) > minDamage.get()) {
+            BlockPos pos = bestBlock.up();
+            if (DamageCalcUtils.bedDamage(target, new Vec3d(pos.getX(), pos.getY(), pos.getZ())) > minDamage.get()) {
                 if (autoSwitch.get()) {
                     for (int i = 0; i < 9; i++) {
-                        if (mc.player.inventory.getInvStack(i).getItem() instanceof BedItem) {
+                        if (mc.player.inventory.getStack(i).getItem() instanceof BedItem) {
                             preSlot = mc.player.inventory.selectedSlot;
                             mc.player.inventory.selectedSlot = i;
                         }
@@ -193,25 +194,28 @@ public class BedAura extends ToggleModule {
                     west = DamageCalcUtils.bedDamage(target, new Vec3d(bestBlock.getX() - 1, bestBlock.getY() + 1, bestBlock.getZ()));
                 }
                 if(mc.world.isAir(bestBlock.add(0, 1, 1))){
-                    south = DamageCalcUtils.bedDamage(target, new Vec3d(bestBlock.add(0, 1, 1)));
+                    pos = bestBlock.add(0, 1, 1);
+                    south = DamageCalcUtils.bedDamage(target, new Vec3d(pos.getX(), pos.getY(), pos.getZ()));
                 }
                 if(mc.world.isAir(bestBlock.add(0, 1, -1))){
-                    north = DamageCalcUtils.bedDamage(target, new Vec3d(bestBlock.add(0, 1, -1)));
+                    pos = bestBlock.add(0, 1, -1);
+                    north = DamageCalcUtils.bedDamage(target, new Vec3d(pos.getX(), pos.getY(), pos.getZ()));
                 }
                 Hand hand = Hand.MAIN_HAND;
                 if (!(mc.player.getMainHandStack().getItem() instanceof BedItem) && mc.player.getOffHandStack().getItem() instanceof BedItem) {
                     hand = Hand.OFF_HAND;
                 }
                 if((east > north) && (east > south) && (east > west)){
-                    mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(-90f, mc.player.pitch, mc.player.onGround));
+                    mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(-90f, mc.player.pitch, mc.player.isOnGround()));
                 }else if((east < north) && (north > south) && (north > west)){
-                    mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(179f, mc.player.pitch, mc.player.onGround));
+                    mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(179f, mc.player.pitch, mc.player.isOnGround()));
                 }else if((south > north) && (east < south) && (south > west)){
-                    mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(1f, mc.player.pitch, mc.player.onGround));
+                    mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(1f, mc.player.pitch, mc.player.isOnGround()));
                 }else if((west > north) && (west > south) && (east < west)){
-                    mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(90f, mc.player.pitch, mc.player.onGround));
+                    mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(90f, mc.player.pitch, mc.player.isOnGround()));
                 }
-                mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(new Vec3d(bestBlock), Direction.UP, bestBlock, false));
+                pos = bestBlock;
+                mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(new Vec3d(pos.getX(), pos.getY(), pos.getZ()), Direction.UP, bestBlock, false));
                 mc.player.swingHand(Hand.MAIN_HAND);
                 if (preSlot != -1 && mc.player.inventory.selectedSlot != preSlot && switchBack.get()){
                     mc.player.inventory.selectedSlot = preSlot;
@@ -220,8 +224,10 @@ public class BedAura extends ToggleModule {
         }
         for(BlockEntity entity : mc.world.blockEntities){
             if(entity instanceof BedBlockEntity && Utils.distance(entity.getPos().getX(), entity.getPos().getY(), entity.getPos().getZ(), mc.player.getX(), mc.player.getY(), mc.player.getZ()) <= breakRange.get()){
-                if(DamageCalcUtils.bedDamage(mc.player, new Vec3d(entity.getPos())) < maxDamage.get()
-                    || (mc.player.getHealth() + mc.player.getAbsorptionAmount() - DamageCalcUtils.bedDamage(mc.player, new Vec3d(entity.getPos()))) < minHealth.get() || clickMode.get().equals(Mode.suicide)){
+                BlockPos bp = entity.getPos();
+                Vec3d pos = new Vec3d(bp.getX(), bp.getY(), bp.getZ());
+                if(DamageCalcUtils.bedDamage(mc.player, pos) < maxDamage.get()
+                    || (mc.player.getHealth() + mc.player.getAbsorptionAmount() - DamageCalcUtils.bedDamage(mc.player, pos)) < minHealth.get() || clickMode.get().equals(Mode.suicide)){
                     mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, entity.getPos(), false));
                 }
 
@@ -245,8 +251,14 @@ public class BedAura extends ToggleModule {
                 }
             }
         }
-        validBlocks.sort(Comparator.comparingDouble(value ->  DamageCalcUtils.crystalDamage(target, new Vec3d(value.up()))));
-        validBlocks.removeIf(blockpos -> DamageCalcUtils.crystalDamage(mc.player, new Vec3d(blockpos.up())) > maxDamage.get());
+        validBlocks.sort(Comparator.comparingDouble(value -> {
+            BlockPos pos = value.up();
+            return DamageCalcUtils.crystalDamage(target, new Vec3d(pos.getX(), pos.getY(), pos.getZ()));
+        }));
+        validBlocks.removeIf(blockpos -> {
+            BlockPos pos = blockpos.up();
+            return DamageCalcUtils.crystalDamage(mc.player, new Vec3d(pos.getX(), pos.getY(), pos.getZ())) > maxDamage.get();
+        });
         Collections.reverse(validBlocks);
         return validBlocks;
     }
