@@ -142,7 +142,7 @@ public class MeteorClient implements ClientModInitializer, Listenable {
         }
 
         try {
-            FONT = new MFont(Font.createFont(Font.TRUETYPE_FONT, fontFile).deriveFont(18f), true, true);
+            FONT = new MFont(Font.createFont(Font.TRUETYPE_FONT, fontFile).deriveFont(16f), true, true);
         } catch (FontFormatException | IOException e) {
             e.printStackTrace();
         }
