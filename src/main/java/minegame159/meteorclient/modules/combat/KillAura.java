@@ -12,6 +12,7 @@ import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.DamageCalcUtils;
 import net.minecraft.command.arguments.EntityAnchorArgumentType;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
@@ -230,9 +231,7 @@ public class KillAura extends ToggleModule {
                 .ifPresent(tempEntity -> {
                     entity = tempEntity;
                     if (entity instanceof PlayerEntity && instaKill.get()) {
-                        double damage = EnchantmentHelper.getLevel(Enchantments.SHARPNESS, mc.player.getMainHandStack()) > 0 ?
-                                (EnchantmentHelper.getLevel(Enchantments.SHARPNESS, mc.player.getMainHandStack()) * 0.5) + 0.5 : 0;
-                        if ((((PlayerEntity) entity).getHealth() + ((PlayerEntity) entity).getAbsorptionAmount()) - damage <= 0) {
+                        if (DamageCalcUtils.getSwordDamage((PlayerEntity) entity, false) >= ((PlayerEntity) entity).getHealth() + ((PlayerEntity) entity).getAbsorptionAmount()) {
                             if (rotate.get()) {
                                 ((IVec3d) vec3d1).set(entity.x, entity.y + entity.getHeight() / 2, entity.z);
                                 mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, vec3d1);
