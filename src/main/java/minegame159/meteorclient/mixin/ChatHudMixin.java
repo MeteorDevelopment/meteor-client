@@ -36,7 +36,7 @@ public abstract class ChatHudMixin {
 
     @Inject(at = @At("HEAD"), method = "addMessage(Lnet/minecraft/text/StringRenderable;IIZ)V", cancellable = true)
     private void onAddMessage(StringRenderable stringRenderable, int messageId, int timestamp, boolean bl, CallbackInfo info) {
-        String message = stringRenderable.toString();
+        String message = stringRenderable.getString();
 
         // Ignore players
         for (String name : Ignore.ignoredPlayers) {
