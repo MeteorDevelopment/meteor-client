@@ -10,6 +10,7 @@ import minegame159.meteorclient.utils.Pool;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
@@ -51,7 +52,7 @@ public class Nuker extends ToggleModule {
 
     private final Setting<List<Block>> selectedBlocks = sgGeneral.add(new BlockListSetting.Builder()
             .name("selected-blocks")
-            .description("Which blocks to mine when onlySelectex is true.")
+            .description("Which blocks to mine when only selected is true.")
             .defaultValue(new ArrayList<>(0))
             .build()
     );
@@ -101,6 +102,10 @@ public class Nuker extends ToggleModule {
 
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
+        if (mc.world.getBlockState(lastBlockPos).getBlock() != Blocks.AIR) {
+            mc.interactionManager.method_2902(lastBlockPos, Direction.UP);
+            return;
+        }
         // Calculate stuff
         double pX = mc.player.getX() - 0.5;
         double pY = mc.player.getY();

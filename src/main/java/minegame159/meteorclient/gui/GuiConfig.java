@@ -13,6 +13,8 @@ import java.util.Map;
 public class GuiConfig implements ISerializable<GuiConfig> {
     public static GuiConfig INSTANCE;
 
+    public double guiScale = 2;
+
     public Color text = new Color(255, 255, 255);
     public Color windowHeaderText = new Color(255, 255, 255);
     public Color loggedInText = new Color(45, 225, 45);
@@ -75,6 +77,8 @@ public class GuiConfig implements ISerializable<GuiConfig> {
     public CompoundTag toTag() {
         CompoundTag tag = new CompoundTag();
 
+        tag.putDouble("guiScale", guiScale);
+
         tag.put("text", text.toTag());
         tag.put("windowHeaderText", text.toTag());
         tag.put("loggedInText", loggedInText.toTag());
@@ -130,6 +134,8 @@ public class GuiConfig implements ISerializable<GuiConfig> {
 
     @Override
     public GuiConfig fromTag(CompoundTag tag) {
+        if (tag.contains("guiScale")) guiScale = tag.getDouble("guiScale");
+
         read(tag, "text", text);
         read(tag, "windowHeaderText", windowHeaderText);
         read(tag, "loggedInText", loggedInText);

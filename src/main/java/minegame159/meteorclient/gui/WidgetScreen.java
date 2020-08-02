@@ -1,5 +1,6 @@
 package minegame159.meteorclient.gui;
 
+import com.mojang.blaze3d.platform.GlStateManager;
 import minegame159.meteorclient.gui.renderer.GuiRenderer;
 import minegame159.meteorclient.gui.widgets.Cell;
 import minegame159.meteorclient.gui.widgets.WWidget;
@@ -40,6 +41,14 @@ public class WidgetScreen extends Screen {
 
     @Override
     public void mouseMoved(double mouseX, double mouseY) {
+        double s = mc.window.getScaleFactor();
+        double scale = GuiConfig.INSTANCE.guiScale;
+
+        mouseX *= s;
+        mouseY *= s;
+        mouseX /= scale;
+        mouseY /= scale;
+
         root.mouseMoved(mouseX, mouseY);
     }
 
@@ -86,12 +95,26 @@ public class WidgetScreen extends Screen {
     public void render(int mouseX, int mouseY, float delta) {
         if (!Utils.canUpdate()) renderBackground();
 
+        double s = mc.window.getScaleFactor();
+        double scale = GuiConfig.INSTANCE.guiScale;
+
+        mouseX *= s;
+        mouseY *= s;
+        mouseX /= scale;
+        mouseY /= scale;
+
         Matrices.begin(new MatrixStack());
+        GlStateManager.pushMatrix();
+        GlStateManager.scaled(1 / s, 1 / s, 1);
+        GlStateManager.scaled(scale, scale, 1);
+
         GuiRenderer.INSTANCE.begin();
         root.render(GuiRenderer.INSTANCE, mouseX, mouseY, delta);
         GuiRenderer.INSTANCE.end();
 
         if (renderDebug) GuiRenderer.INSTANCE.renderDebug(root);
+
+        GlStateManager.popMatrix();
     }
 
     @Override
@@ -114,8 +137,8 @@ public class WidgetScreen extends Screen {
     private class WRoot extends WWidget {
         @Override
         protected void onCalculateSize() {
-            width = mc.getWindow().getScaledWidth();
-            height = mc.getWindow().getScaledHeight();
+            width = Utils.getScaledWindowWidthGui();
+            height = Utils.getScaledWindowHeightGui();
         }
     }
 }
