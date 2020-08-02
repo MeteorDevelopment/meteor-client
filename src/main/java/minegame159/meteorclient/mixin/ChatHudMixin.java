@@ -36,9 +36,11 @@ public abstract class ChatHudMixin {
 
     @Inject(at = @At("HEAD"), method = "addMessage(Lnet/minecraft/text/StringRenderable;IIZ)V", cancellable = true)
     private void onAddMessage(StringRenderable stringRenderable, int messageId, int timestamp, boolean bl, CallbackInfo info) {
+        String message = stringRenderable.toString();
+
         // Ignore players
         for (String name : Ignore.ignoredPlayers) {
-            if (stringRenderable.toString().contains("<" + name + ">")) {
+            if (message.contains("<" + name + ">")) {
                 info.cancel();
                 return;
             }
@@ -47,7 +49,7 @@ public abstract class ChatHudMixin {
         // Anti Spam
         AntiSpam antiSpam = ModuleManager.INSTANCE.get(AntiSpam.class);
         for (int i = 0; i < antiSpam.getDepth(); i++) {
-            if (checkMsg(stringRenderable.getString(), timestamp, messageId, i)) {
+            if (checkMsg(message, timestamp, messageId, i)) {
                 if (antiSpam.isMoveToBottom() && i != 0) {
                     ChatHudLine msg = visibleMessages.remove(i);
                     visibleMessages.add(0, msg);
@@ -60,11 +62,11 @@ public abstract class ChatHudMixin {
         }
 
         //Friend Colour
-        if (ModuleManager.INSTANCE.get(FriendColor.class).isActive() && !message.asString().split(" ")[1].equals(lastMessage)) {
+        if (ModuleManager.INSTANCE.get(FriendColor.class).isActive() && !message.split(" ")[1].equals(lastMessage)) {
             for (Friend friend : FriendManager.INSTANCE.getAll()) {
-                if (message.asString().contains(friend.name)) {
-                    lastMessage = message.asString().split(" ")[1];
-                    String convert = message.asString().substring(("<" + friend.name + ">").length());
+                if (message.contains(friend.name)) {
+                    lastMessage = message.split(" ")[1];
+                    String convert = message.substring(("<" + friend.name + ">").length());
                     Utils.sendMessage("<§d" + friend.name + "§r>" + convert);
                     lastMessage = null;
                     info.cancel();

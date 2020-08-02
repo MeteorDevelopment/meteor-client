@@ -38,7 +38,7 @@ public class DamageCalcUtils {
         damage = getDamageMultiplied(damage);
 
         //Reduce my armour
-        damage = DamageUtil.getDamageLeft((float)damage, (float)player.getArmor(), (float)player.getAttributeInstance(EntityAttributes.ARMOR_TOUGHNESS).getValue());
+        damage = DamageUtil.getDamageLeft((float)damage, (float)player.getArmor(), (float)player.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS).getValue());
 
         //Reduce by resistance
         damage = resistanceReduction((PlayerEntity) player, damage);
@@ -63,7 +63,7 @@ public class DamageCalcUtils {
         damage = getDamageMultiplied(damage);
 
         //Reduce my armour
-        damage = DamageUtil.getDamageLeft((float)damage, (float)player.getArmor(), (float)player.getAttributeInstance(EntityAttributes.ARMOR_TOUGHNESS).getValue());
+        damage = DamageUtil.getDamageLeft((float)damage, (float)player.getArmor(), (float)player.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS).getValue());
 
         //Reduce by resistance
         damage = resistanceReduction((PlayerEntity) player, damage);
@@ -102,7 +102,7 @@ public class DamageCalcUtils {
         }
 
         //Reduce by armour
-        damage = DamageUtil.getDamageLeft((float)damage, (float)entity.getArmor(), (float)entity.getAttributeInstance(EntityAttributes.ARMOR_TOUGHNESS).getValue());
+        damage = DamageUtil.getDamageLeft((float)damage, (float)entity.getArmor(), (float)entity.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS).getValue());
 
         //Reduce by resistance
         damage = resistanceReduction(entity, damage);

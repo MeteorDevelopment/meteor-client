@@ -13,14 +13,15 @@ import minegame159.meteorclient.utils.InvUtils;
 import net.minecraft.block.entity.BedBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
-import net.minecraft.container.SlotActionType;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.decoration.EnderCrystalEntity;
+import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.screen.slot.SlotActionType;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.dimension.DimensionType;
 
@@ -195,7 +196,7 @@ public class AutoArmor extends ToggleModule {
             int bestSlot = -1;
             int bestScore = 0;
             for (int i = 0; i < 36; i++) {
-                ItemStack stack = mc.player.inventory.getInvStack(i);
+                ItemStack stack = mc.player.inventory.getStack(i);
                 if (stack.getItem() instanceof ArmorItem
                         && (((ArmorItem) stack.getItem()).getSlotType().getEntitySlotId() == a)) {
                     int temp = getItemScore(stack);
@@ -236,13 +237,14 @@ public class AutoArmor extends ToggleModule {
 
     private boolean explosionNear() {
         for (Entity entity : mc.world.getEntities()) {
-            if (entity instanceof EnderCrystalEntity && DamageCalcUtils.crystalDamage(mc.player, entity.getPos()) > boomDamage.get()) {
+            if (entity instanceof EndCrystalEntity && DamageCalcUtils.crystalDamage(mc.player, entity.getPos()) > boomDamage.get()) {
                 return true;
             }
         }
-        if (mc.world.dimension.getType() != DimensionType.OVERWORLD) {
+        if (!mc.world.getDimensionRegistryKey().getValue().getPath().equals("overworld")) {
             for (BlockEntity blockEntity : mc.world.blockEntities) {
-                if (blockEntity instanceof BedBlockEntity && DamageCalcUtils.bedDamage(mc.player, new Vec3d(blockEntity.getPos())) > boomDamage.get()) {
+                BlockPos pos = blockEntity.getPos();
+                if (blockEntity instanceof BedBlockEntity && DamageCalcUtils.bedDamage(mc.player, new Vec3d(pos.getX(), pos.getY(), pos.getZ())) > boomDamage.get()) {
                     return true;
                 }
             }
