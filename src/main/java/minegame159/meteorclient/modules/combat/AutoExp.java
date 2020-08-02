@@ -8,7 +8,6 @@ import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
-import minegame159.meteorclient.modules.player.AutoArmor;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -69,19 +68,18 @@ public class AutoExp extends ToggleModule {
 
     @Override
     public void onActivate(){
-        if(disableAuras.get()) {
-            if (ModuleManager.INSTANCE.get(AutoArmor.class).isActive()) {
-                wasArmourActive = true;
-                ModuleManager.INSTANCE.get(AutoArmor.class).toggle();
+        if (ModuleManager.INSTANCE.get(AutoArmor.class).isActive()) {
+            wasArmourActive = true;
+            ModuleManager.INSTANCE.get(AutoArmor.class).toggle();
+        }
+        if (disableAuras.get()) {
+            if (ModuleManager.INSTANCE.get(KillAura.class).isActive()) {
+                wasKillActive = true;
+                ModuleManager.INSTANCE.get(KillAura.class).toggle();
             }
-            if (disableAuras.get()) {
-                if (ModuleManager.INSTANCE.get(KillAura.class).isActive()) {
-                    wasKillActive = true;
-                    ModuleManager.INSTANCE.get(KillAura.class).toggle();
-                }
-                if (ModuleManager.INSTANCE.get(CrystalAura.class).isActive()) {
-                    wasCrystalActive = true;
-                }
+            if (ModuleManager.INSTANCE.get(CrystalAura.class).isActive()) {
+                wasCrystalActive = true;
+                ModuleManager.INSTANCE.get(CrystalAura.class).toggle();
             }
         }
         lastHealth = mc.player.getHealth() + mc.player.getAbsorptionAmount();

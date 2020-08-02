@@ -2,6 +2,7 @@ package minegame159.meteorclient.utils;
 
 import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import minegame159.meteorclient.gui.GuiConfig;
 import minegame159.meteorclient.mixininterface.IMinecraftClient;
 import minegame159.meteorclient.mixininterface.IMinecraftServer;
 import minegame159.meteorclient.mixininterface.IVec3d;
@@ -63,6 +64,14 @@ public class Utils {
         DecimalFormatSymbols dfs = new DecimalFormatSymbols();
         dfs.setDecimalSeparator('.');
         df.setDecimalFormatSymbols(dfs);
+    }
+
+    public static double getScaledWindowWidthGui() {
+        return mc.getWindow().getWidth() / GuiConfig.INSTANCE.guiScale;
+    }
+
+    public static double getScaledWindowHeightGui() {
+        return mc.getWindow().getHeight() / GuiConfig.INSTANCE.guiScale;
     }
 
     public static Object2IntMap<StatusEffect> createStatusEffectMap() {

@@ -1,9 +1,13 @@
 package minegame159.meteorclient.mixin;
 
+import minegame159.meteorclient.accountsfriends.Friend;
+import minegame159.meteorclient.accountsfriends.FriendManager;
 import minegame159.meteorclient.commands.commands.Ignore;
 import minegame159.meteorclient.mixininterface.IChatHudLine;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.misc.AntiSpam;
+import minegame159.meteorclient.modules.render.FriendColor;
+import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.gui.hud.ChatHud;
 import net.minecraft.client.gui.hud.ChatHudLine;
 import net.minecraft.text.LiteralText;
@@ -28,6 +32,8 @@ public abstract class ChatHudMixin {
 
     @Shadow @Final private List<ChatHudLine> messages;
 
+    private String lastMessage = null;
+
     @Inject(at = @At("HEAD"), method = "addMessage(Lnet/minecraft/text/StringRenderable;IIZ)V", cancellable = true)
     private void onAddMessage(StringRenderable stringRenderable, int messageId, int timestamp, boolean bl, CallbackInfo info) {
         // Ignore players
@@ -50,6 +56,20 @@ public abstract class ChatHudMixin {
 
                 info.cancel();
                 return;
+            }
+        }
+
+        //Friend Colour
+        if (ModuleManager.INSTANCE.get(FriendColor.class).isActive() && !message.asString().split(" ")[1].equals(lastMessage)) {
+            for (Friend friend : FriendManager.INSTANCE.getAll()) {
+                if (message.asString().contains(friend.name)) {
+                    lastMessage = message.asString().split(" ")[1];
+                    String convert = message.asString().substring(("<" + friend.name + ">").length());
+                    Utils.sendMessage("<§d" + friend.name + "§r>" + convert);
+                    lastMessage = null;
+                    info.cancel();
+                    return;
+                }
             }
         }
     }
