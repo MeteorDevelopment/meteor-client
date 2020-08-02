@@ -3,11 +3,14 @@ package minegame159.meteorclient.gui.screens.topbar;
 import minegame159.meteorclient.Config;
 import minegame159.meteorclient.gui.GuiConfig;
 import minegame159.meteorclient.gui.TopBarType;
+import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.gui.widgets.WWindow;
 import minegame159.meteorclient.settings.ColorSetting;
+import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.settings.Settings;
 import minegame159.meteorclient.utils.Color;
+import net.minecraft.client.MinecraftClient;
 
 public class TopBarGui extends TopBarScreen {
     public TopBarGui() {
@@ -15,6 +18,23 @@ public class TopBarGui extends TopBarScreen {
 
         Settings s = new Settings();
         SettingGroup sg = s.getDefaultGroup();
+
+        sg.add(new DoubleSetting.Builder()
+                .name("gui-scale")
+                .description("Scale of the GUI.")
+                .defaultValue(2)
+                .min(1)
+                .max(4)
+                .noSlider()
+                .onChanged(aDouble -> {
+                    GuiConfig.INSTANCE.guiScale = aDouble;
+                    if (MinecraftClient.getInstance().currentScreen instanceof WidgetScreen) {
+                        ((WidgetScreen) MinecraftClient.getInstance().currentScreen).root.invalidate();
+                    }
+                })
+                .onModuleActivated(doubleSetting -> doubleSetting.set(GuiConfig.INSTANCE.guiScale))
+                .build()
+        );
 
         sg.add(new ColorSetting.Builder()
                 .name("text")

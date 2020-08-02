@@ -32,7 +32,7 @@ public class NoRender extends ToggleModule {
 
     private final Setting<Boolean> noPortalOverlay = sgGeneral.add(new BoolSetting.Builder()
             .name("no-portal-overlay")
-            .description("Disables portal overflay.")
+            .description("Disables portal overlay.")
             .defaultValue(true)
             .build()
     );

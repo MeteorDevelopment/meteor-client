@@ -220,6 +220,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new Trigger());
         addModule(new AutoExp());
         addModule(new AimAssist());
+        addModule(new AutoArmor());
     }
 
     private void initPlayer() {
@@ -237,7 +238,6 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new AutoMount());
         addModule(new XpBottleThrower());
         addModule(new MiddleClickExtra());
-        addModule(new AutoArmor());
         addModule(new AutoDrop());
         addModule(new AutoRightClick());
         addModule(new Yaw());
@@ -294,6 +294,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new NoRender());
         addModule(new Breadcrumbs());
         addModule(new BlockSelection());
+        addModule(new FriendColor());
     }
 
     private void initMisc() {
@@ -321,7 +322,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new EChestPreview());
         addModule(new Timer());
         addModule(new Suffix());
-        addModule(new UwUAura());
+        addModule(new MessageAura());
         addModule(new AutoMountBypassDupe());
         addModule(new Nuker());
         addModule(new SoundBlocker());

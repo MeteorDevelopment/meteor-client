@@ -57,29 +57,51 @@ public class OffhandExtra extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> selfToggle = sgGeneral.add(new BoolSetting.Builder()
+            .name("self-toggle")
+            .description("Toggles when you run out of the item you chose")
+            .defaultValue(true)
+            .build()
+    );
+
     public OffhandExtra() {
         super(Category.Combat, "offhand-extra", "Allows you to use items in your offhand. Requires AutoTotem to be on smart mode.");
     }
 
+    private boolean isClicking = false;
+    private boolean sentMessage = false;
+
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
+        if (!mc.player.isUsingItem()) isClicking = false;
         if (ModuleManager.INSTANCE.get(AutoTotem.class).getLocked()) return;
         if (Asimov.get() && !(mc.currentScreen instanceof ContainerScreen<?>)) {
             Item item = getItem();
             InvUtils.FindItemResult result = InvUtils.findItemWithCount(item);
             if (result.slot == -1 && mc.player.getOffHandStack().getItem() != getItem()) {
-                sendErrorMsg();
-                this.toggle();
+                if (!sentMessage) {
+                    Chat.warning(this, "None of the chosen item found.");
+                    sentMessage = true;
+                }
+                if (selfToggle.get()) this.toggle();
                 return;
             }
-            if (mc.player.getOffHandStack().isEmpty()) {
+            boolean empty = mc.player.getOffHandStack().isEmpty();
+            if (mc.player.getOffHandStack().getItem() != item && replace.get()) {
                 InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
                 InvUtils.clickSlot(InvUtils.OFFHAND_SLOT, 0, SlotActionType.PICKUP);
-            } else if (mc.player.getOffHandStack().getItem() != item && replace.get()) {
-                InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
-                InvUtils.clickSlot(InvUtils.OFFHAND_SLOT, 0, SlotActionType.PICKUP);
-                InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
+                if (!empty) InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
+                sentMessage = false;
             }
+        } else if (!Asimov.get() && !isClicking && mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING) {
+            InvUtils.FindItemResult result = InvUtils.findItemWithCount(Items.TOTEM_OF_UNDYING);
+            boolean empty = mc.player.getOffHandStack().isEmpty();
+            if (result.slot != -1) {
+                InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
+                InvUtils.clickSlot(InvUtils.OFFHAND_SLOT, 0, SlotActionType.PICKUP);
+                if (!empty) InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
+            }
+
         }
     });
 
@@ -88,27 +110,26 @@ public class OffhandExtra extends ToggleModule {
         if (ModuleManager.INSTANCE.get(AutoTotem.class).getLocked()) return;
         if ((mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING || (mc.player.getHealth() + mc.player.getAbsorptionAmount() > health.get())
                && (mc.player.getOffHandStack().getItem() != getItem()) && !(mc.currentScreen instanceof ContainerScreen<?>))) {
+            isClicking = true;
             Item item = getItem();
             InvUtils.FindItemResult result = InvUtils.findItemWithCount(item);
             if (result.slot == -1 && mc.player.getOffHandStack().getItem() != getItem()) {
-                sendErrorMsg();
-                this.toggle();
+                if (!sentMessage) {
+                    Chat.warning(this, "None of the chosen item found.");
+                    sentMessage = true;
+                }
+                if (selfToggle.get()) this.toggle();
                 return;
             }
-            if (mc.player.getOffHandStack().isEmpty()) {
+            boolean empty = mc.player.getOffHandStack().isEmpty();
+            if (mc.player.getOffHandStack().getItem() != item && replace.get()) {
                 InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
                 InvUtils.clickSlot(InvUtils.OFFHAND_SLOT, 0, SlotActionType.PICKUP);
-            } else if (mc.player.getOffHandStack().getItem() != item && replace.get()) {
-                InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
-                InvUtils.clickSlot(InvUtils.OFFHAND_SLOT, 0, SlotActionType.PICKUP);
-                InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
+                if (!empty) InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
+                sentMessage = false;
             }
         }
     });
-
-    private void sendErrorMsg() {
-        Chat.warning(this, "None of the chosen item found. Disabling!");
-    }
 
     private Item getItem(){
         Item item = Items.TOTEM_OF_UNDYING;

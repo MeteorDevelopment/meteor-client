@@ -1,6 +1,7 @@
 package minegame159.meteorclient.settings;
 
 import minegame159.meteorclient.gui.widgets.WDoubleEdit;
+import minegame159.meteorclient.gui.widgets.WWidget;
 import net.minecraft.nbt.CompoundTag;
 
 import java.util.function.Consumer;
@@ -9,14 +10,14 @@ public class DoubleSetting extends Setting<Double> {
     private final Double min, max;
     private final Double sliderMin, sliderMax;
 
-    private DoubleSetting(String name, String description, Double defaultValue, Consumer<Double> onChanged, Consumer<Setting<Double>> onModuleActivated, Double min, Double max, Double sliderMin, Double sliderMax) {
+    private DoubleSetting(String name, String description, Double defaultValue, Consumer<Double> onChanged, Consumer<Setting<Double>> onModuleActivated, Double min, Double max, Double sliderMin, Double sliderMax, boolean noSlider) {
         super(name, description, defaultValue, onChanged, onModuleActivated);
         this.min = min;
         this.max = max;
         this.sliderMin = sliderMin;
         this.sliderMax = sliderMax;
 
-        widget = new WDoubleEdit(sliderMin != null ? sliderMin : 0, sliderMax != null ? sliderMax : 10, get());
+        widget = new WDoubleEdit(sliderMin != null ? sliderMin : 0, sliderMax != null ? sliderMax : 10, get(), noSlider);
         ((WDoubleEdit) widget).action = doubleEdit -> {
             if (!set((double) Math.round(doubleEdit.get() * 1000) / 1000)) doubleEdit.set(get());
         };
@@ -77,6 +78,7 @@ public class DoubleSetting extends Setting<Double> {
         private Consumer<Setting<Double>> onModuleActivated;
         private Double min, max;
         private Double sliderMin, sliderMax;
+        private boolean noSlider;
 
         public Builder name(String name) {
             this.name = name;
@@ -123,8 +125,13 @@ public class DoubleSetting extends Setting<Double> {
             return this;
         }
 
+        public Builder noSlider() {
+            noSlider = true;
+            return this;
+        }
+
         public DoubleSetting build() {
-            return new DoubleSetting(name, description, defaultValue, onChanged, onModuleActivated, min, max, sliderMin, sliderMax);
+            return new DoubleSetting(name, description, defaultValue, onChanged, onModuleActivated, min, max, sliderMin, sliderMax, noSlider);
         }
     }
 }
