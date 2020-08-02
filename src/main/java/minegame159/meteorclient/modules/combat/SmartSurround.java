@@ -60,7 +60,7 @@ public class SmartSurround extends ToggleModule {
     private final Listener<EntityAddedEvent> onSpawn = new Listener<>(event -> {
         crystal = event.entity;
         if (event.entity.getType() == EntityType.END_CRYSTAL) {
-            if (DamageCalcUtils.resistanceReduction(mc.player, DamageCalcUtils.blastProtReduction(mc.player, DamageCalcUtils.armourCalc(mc.player, DamageCalcUtils.getDamageMultiplied(DamageCalcUtils.crystalDamage(mc.player, event.entity.getPos()))))) > minDamage.get()) {
+            if (DamageCalcUtils.crystalDamage(mc.player, event.entity.getPos()) > minDamage.get()) {
                 slot = findObiInHotbar();
                 if (slot == -1 && onlyObsidian.get()) {
                     Chat.warning(this, "No Obsidian in hotbar. Disabling!");

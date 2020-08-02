@@ -20,6 +20,7 @@ import minegame159.meteorclient.utils.Capes;
 import minegame159.meteorclient.utils.EChestMemory;
 import minegame159.meteorclient.utils.EntityUtils;
 import minegame159.meteorclient.utils.Utils;
+import net.arikia.dev.drpc.DiscordRPC;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.loader.api.FabricLoader;
@@ -88,6 +89,7 @@ public class MeteorClient implements ClientModInitializer, Listenable {
         FriendManager.INSTANCE.save();
         MacroManager.INSTANCE.save();
         AccountManager.INSTANCE.save();
+        DiscordRPC.discordShutdown();
 
         Ignore.save();
     }
@@ -121,10 +123,10 @@ public class MeteorClient implements ClientModInitializer, Listenable {
 
         if (fontFile == null) {
             try {
-                fontFile = new File(FOLDER, "Comfortaa.ttf");
+                fontFile = new File(FOLDER, "JetBrainsMono-Regular.ttf");
                 fontFile.getParentFile().mkdirs();
 
-                InputStream in = MeteorClient.class.getResourceAsStream("/assets/meteor-client/Comfortaa.ttf");
+                InputStream in = MeteorClient.class.getResourceAsStream("/assets/meteor-client/JetBrainsMono-Regular.ttf");
                 OutputStream out = new FileOutputStream(fontFile);
 
                 byte[] bytes = new byte[255];
@@ -159,7 +161,7 @@ public class MeteorClient implements ClientModInitializer, Listenable {
         fontStorage.setFonts(fonts);
         TEXT_RENDERER = new TextRenderer(mc.getTextureManager(), fontStorage);*/
         try {
-            FONT = new MFont(Font.createFont(Font.TRUETYPE_FONT, fontFile).deriveFont(18f), true, true);
+            FONT = new MFont(Font.createFont(Font.TRUETYPE_FONT, fontFile).deriveFont(16f), true, true);
         } catch (FontFormatException | IOException e) {
             e.printStackTrace();
         }

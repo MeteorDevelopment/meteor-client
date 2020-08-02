@@ -2,7 +2,6 @@ package minegame159.meteorclient.modules.render;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.accountsfriends.Friend;
 import minegame159.meteorclient.accountsfriends.FriendManager;
 import minegame159.meteorclient.events.RenderEvent;
 import minegame159.meteorclient.modules.Category;
@@ -22,7 +21,8 @@ public class ESP extends ToggleModule {
     public enum Mode {
         Lines,
         Sides,
-        Both
+        Both,
+        Glowing
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -159,6 +159,9 @@ public class ESP extends ToggleModule {
 
         for (Entity entity : mc.world.getEntities()) {
             if (entity == mc.player || !entities.get().contains(entity.getType())) continue;
+            if (mode.get() == Mode.Glowing && entities.get().contains(entity.getType())) {
+                entity.setGlowing(true);
+            }
 
             if (entity instanceof PlayerEntity) {
                 render(event, entity, FriendManager.INSTANCE.getColor((PlayerEntity) entity, playersColor.get()));

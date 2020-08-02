@@ -2,6 +2,8 @@ package minegame159.meteorclient.modules.combat;
 
 //Updated by squidoodly 31/04/2020
 //Updated by squidoodly 19/06/2020
+//Updated by squidoodly 24/07/2020
+//Updated by squidoodly 26-28/07/2020
 
 import com.google.common.collect.Streams;
 import me.zero.alpine.event.EventPriority;
@@ -14,15 +16,16 @@ import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.DamageCalcUtils;
 import minegame159.meteorclient.utils.InvUtils;
+import minegame159.meteorclient.utils.Utils;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.AxeItem;
 import net.minecraft.item.Items;
 import net.minecraft.item.SwordItem;
-import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -82,6 +85,13 @@ public class CrystalAura extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> spoofChange = sgGeneral.add(new BoolSetting.Builder()
+            .name("spoof-change")
+            .description("Spoofs item change to crystal.")
+            .defaultValue(false)
+            .build()
+    );
+
     private final Setting<Double> minDamage = sgPlace.add(new DoubleSetting.Builder()
             .name("min-damage")
             .description("The minimum damage the crystal will place")
@@ -93,6 +103,13 @@ public class CrystalAura extends ToggleModule {
             .name("max-damage")
             .description("The maximum self-damage allowed")
             .defaultValue(3)
+            .build()
+    );
+
+    private final Setting<Boolean> strict = sgPlace.add(new BoolSetting.Builder()
+            .name("strict")
+            .description("Helps compatibility with some servers.")
+            .defaultValue(false)
             .build()
     );
 
@@ -117,6 +134,15 @@ public class CrystalAura extends ToggleModule {
             .build()
     );
 
+    private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
+            .name("delay")
+            .description("Delay ticks between placements.")
+            .defaultValue(2)
+            .min(0)
+            .max(10)
+            .build()
+    );
+
     private final Setting<Boolean> antiWeakness = sgGeneral.add(new BoolSetting.Builder()
             .name("anti-weakness")
             .description("Switches to tools when you have weakness")
@@ -128,13 +154,27 @@ public class CrystalAura extends ToggleModule {
         super(Category.Combat, "crystal-aura", "Places and breaks end crystals automatically");
     }
 
+    private int preSlot;
+    private int delayLeft = delay.get();
+
     @EventHandler
-    private Listener<TickEvent> onTick = new Listener<>(event -> {
-        if ((mc.player.getHealth() + mc.player.getAbsorptionAmount()) <= minHealth.get() && mode.get() != Mode.suicide) return;
-        if(place.get() && ((mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL) && !autoSwitch.get())) return;
+    private final Listener<TickEvent> onTick = new Listener<>(event -> {
+        if (getTotalHealth(mc.player) <= minHealth.get() && mode.get() != Mode.suicide) return;
+        if (delayLeft > 0) {
+            delayLeft--;
+            return;
+        } else {
+            delayLeft = delay.get();
+        }
         if(place.get()) {
-            ListIterator<BlockPos> validBlocks = Objects.requireNonNull(findValidBlocks()).listIterator();
-            Iterator<AbstractClientPlayerEntity> validEntities = mc.world.getPlayers().stream().filter(entityPlayer -> !FriendManager.INSTANCE.isTrusted(entityPlayer)).filter(entityPlayer -> !entityPlayer.getDisplayName().equals(mc.player.getDisplayName())).filter(entityPlayer -> Math.sqrt(mc.player.squaredDistanceTo(new Vec3d(entityPlayer.getX(), entityPlayer.getY(), entityPlayer.getZ()))) <= 10).collect(Collectors.toList()).iterator();
+
+            Iterator<AbstractClientPlayerEntity> validEntities = mc.world.getPlayers().stream()
+                    .filter(FriendManager.INSTANCE::attack)
+                    .filter(entityPlayer -> !entityPlayer.getDisplayName().equals(mc.player.getDisplayName()))
+                    .filter(entityPlayer -> mc.player.distanceTo(entityPlayer) <= 10)
+                    .collect(Collectors.toList())
+                    .iterator();
+
             AbstractClientPlayerEntity target;
             if (validEntities.hasNext()) {
                 target = validEntities.next();
@@ -147,83 +187,92 @@ public class CrystalAura extends ToggleModule {
                     target = i;
                 }
             }
-            BlockPos bestBlock = mc.player.getBlockPos();
-            for (BlockPos i = null; validBlocks.hasNext(); i = validBlocks.next()) {
-                if (i == null) continue;
-                Vec3d convert = new Vec3d(i.getX(), i.getY(), i.getZ()).add(0, 1, 0);
-                if (mc.player.getHealth() + mc.player.getAbsorptionAmount() - DamageCalcUtils.resistanceReduction(mc.player, DamageCalcUtils.blastProtReduction(mc.player, DamageCalcUtils.armourCalc(mc.player, DamageCalcUtils.crystalDamage(mc.player, convert))))
-                        < minHealth.get() && mode.get() != Mode.suicide) continue;
-                double damage = DamageCalcUtils.resistanceReduction(target, DamageCalcUtils.blastProtReduction(target, DamageCalcUtils.armourCalc(target, DamageCalcUtils.crystalDamage(target, convert))));
-                double selfDamage = DamageCalcUtils.resistanceReduction(mc.player, DamageCalcUtils.blastProtReduction(mc.player, DamageCalcUtils.armourCalc(mc.player, DamageCalcUtils.crystalDamage(mc.player, convert))));
-                convert = new Vec3d(bestBlock.getX(), bestBlock.getY(), bestBlock.getZ()).add(0, 1, 0);
-                if (damage > DamageCalcUtils.resistanceReduction(target, DamageCalcUtils.blastProtReduction(target, DamageCalcUtils.armourCalc(target, DamageCalcUtils.crystalDamage(target, convert))))
-                        && (selfDamage < maxDamage.get() || mode.get() == Mode.suicide) && damage > minDamage.get()) {
-                    bestBlock = i;
-                    break;
+            List<BlockPos> validBlocks = findValidBlocks(target);
+
+            BlockPos bestBlock = null;
+            for (BlockPos blockPos : validBlocks) {
+                if (DamageCalcUtils.crystalDamage(target, new Vec3d(blockPos.up())) > minDamage.get()) {
+                    if (bestBlock == null) {
+                        bestBlock = blockPos;
+                    } else if (DamageCalcUtils.crystalDamage(target, new Vec3d(blockPos.up()))
+                            > DamageCalcUtils.crystalDamage(target, new Vec3d(bestBlock.up()))) {
+                        bestBlock = blockPos;
+                    }
                 }
             }
-            if(autoSwitch.get() && mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL){
-                int slot = InvUtils.findItemWithCount(Items.END_CRYSTAL).slot;
-                if(slot != -1 && slot < 9){
-                    mc.player.inventory.selectedSlot = slot;
+            if (bestBlock != null) {
+
+                if(autoSwitch.get() && mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL){
+                    int slot = InvUtils.findItemWithCount(Items.END_CRYSTAL).slot;
+                    if(slot != -1 && slot < 9){
+                        if (spoofChange.get()) preSlot = mc.player.inventory.selectedSlot;
+                        mc.player.inventory.selectedSlot = slot;
+                    }
                 }
+
+                Hand hand = Hand.MAIN_HAND;
+                if (mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() == Items.END_CRYSTAL) hand = Hand.OFF_HAND;
+                else if (mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL) return;
+                    placeBlock(bestBlock, hand);
             }
-            if (!bestBlock.equals(mc.player.getBlockPos())) {
-                PlayerInteractBlockC2SPacket placePacket;
-                if (mc.player.getMainHandStack().getItem() == Items.END_CRYSTAL) {
-                    placePacket = new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, bestBlock, false));
-                } else {
-                    placePacket = new PlayerInteractBlockC2SPacket(Hand.OFF_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, bestBlock, false));
-                }
-                mc.player.networkHandler.sendPacket(placePacket);
-                mc.player.swingHand(Hand.MAIN_HAND);
-            }
+            if (spoofChange.get() && preSlot != mc.player.inventory.selectedSlot) mc.player.inventory.selectedSlot = preSlot;
         }
         Streams.stream(mc.world.getEntities())
                 .filter(entity -> entity instanceof EndCrystalEntity)
                 .filter(entity -> entity.distanceTo(mc.player) <= breakRange.get())
                 .filter(Entity::isAlive)
                 .filter(entity -> ignoreWalls.get() || mc.player.canSee(entity))
-                .filter(entity -> !(breakMode.get() == Mode.safe) || (mc.player.getHealth() + mc.player.getAbsorptionAmount()
-                        - DamageCalcUtils.resistanceReduction(mc.player, DamageCalcUtils.blastProtReduction(mc.player, DamageCalcUtils.armourCalc(mc.player, DamageCalcUtils.getDamageMultiplied(DamageCalcUtils.crystalDamage(mc.player, entity.getPos())))))
-                        > minHealth.get() && DamageCalcUtils.resistanceReduction(mc.player, DamageCalcUtils.blastProtReduction(mc.player, DamageCalcUtils.armourCalc(mc.player, DamageCalcUtils.getDamageMultiplied(DamageCalcUtils.crystalDamage(mc.player, entity.getPos())))))
-                        < maxDamage.get()))
+                .filter(entity -> !(breakMode.get() == Mode.safe)
+                        || (getTotalHealth(mc.player) - DamageCalcUtils.crystalDamage(mc.player, entity.getPos()) > minHealth.get()
+                        && DamageCalcUtils.crystalDamage(mc.player, entity.getPos()) < maxDamage.get()))
                 .min(Comparator.comparingDouble(o -> o.distanceTo(mc.player)))
                 .ifPresent(entity -> {
                     int preSlot = mc.player.inventory.selectedSlot;
-                    if(mc.player.getActiveStatusEffects().containsKey(StatusEffects.WEAKNESS)){
+                    if(mc.player.getActiveStatusEffects().containsKey(StatusEffects.WEAKNESS) && antiWeakness.get()){
                         for(int i = 0; i < 9; i++){
                             if(mc.player.inventory.getStack(i).getItem() instanceof SwordItem || mc.player.inventory.getStack(i).getItem() instanceof AxeItem){
                                 mc.player.inventory.selectedSlot = i;
                             }
                         }
                     }
-                    double deltaX = entity.getX() - mc.player.getX();
-                    double deltaZ = entity.getZ() - mc.player.getZ();
-                    double deltaY = entity.getY() - (mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()));
-                    double yawAngle = Math.toDegrees(Math.atan2(deltaZ, deltaX)) - 90;
-                    double idk = Math.sqrt(deltaX * deltaX + deltaZ * deltaZ);
-                    double pitchAngle = -Math.toDegrees(Math.atan2(deltaY, idk));
-                    PlayerMoveC2SPacket.LookOnly packet = new PlayerMoveC2SPacket.LookOnly(((float) yawAngle),(float) pitchAngle, mc.player.isOnGround());
+
+                    Vec3d vec1 = new Vec3d(entity.getBlockPos());
+                    PlayerMoveC2SPacket.LookOnly packet = new PlayerMoveC2SPacket.LookOnly(Utils.getNeededYaw(vec1), Utils.getNeededPitch(vec1), mc.player.isOnGround());
                     mc.player.networkHandler.sendPacket(packet);
+
                     mc.interactionManager.attackEntity(mc.player, entity);
                     mc.player.swingHand(Hand.MAIN_HAND);
                     mc.player.inventory.selectedSlot = preSlot;
                 });
     }, EventPriority.HIGH);
 
-    private List<BlockPos> findValidBlocks(){
+    private void placeBlock(BlockPos block, Hand hand){
+        Vec3d vec1 = new Vec3d(block).add(0.5, 0.5, 0.5);
+        PlayerMoveC2SPacket.LookOnly packet = new PlayerMoveC2SPacket.LookOnly(Utils.getNeededYaw(vec1), Utils.getNeededPitch(vec1), mc.player.onGround);
+        mc.player.networkHandler.sendPacket(packet);
+
+        mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(new Vec3d(block), Direction.UP, block , false));
+        mc.player.swingHand(Hand.MAIN_HAND);
+    }
+
+    private List<BlockPos> findValidBlocks(AbstractClientPlayerEntity target){
         Iterator<BlockPos> allBlocks = getRange(mc.player.getBlockPos(), placeRange.get()).iterator();
         List<BlockPos> validBlocks = new ArrayList<>();
         for(BlockPos i = null; allBlocks.hasNext(); i = allBlocks.next()){
             if(i == null) continue;
             if((mc.world.getBlockState(i).getBlock() == Blocks.BEDROCK
                     || mc.world.getBlockState(i).getBlock() == Blocks.OBSIDIAN)
-                    && (mc.world.getBlockState(i.up()).getBlock() == Blocks.AIR && mc.world.getEntities(null, new Box(i.up().getX(), i.up().getY(), i.up().getZ(), i.up().getX() + 1.0D, i.up().getY() + 2.0D, i.up().getZ() + 1.0D)).isEmpty())
-                    && mc.world.getBlockState(i.up(2)).getBlock() == Blocks.AIR && mc.world.getEntities(null, new Box(i.up(2).getX(), i.up(2).getY(), i.up(2).getZ(), i.up(2).getX() + 1.0D, i.up(2).getY() + 2.0D, i.up(2).getZ() + 1.0D)).isEmpty()){
-                validBlocks.add(i);
+                    && isEmpty(i.up())){
+                if (!strict.get()) {
+                    validBlocks.add(i);
+                } else if (strict.get() && isEmpty(i.up(2))) {
+                    validBlocks.add(i);
+                }
             }
         }
+        validBlocks.sort(Comparator.comparingDouble(value ->  DamageCalcUtils.crystalDamage(target, new Vec3d(value.up()))));
+        validBlocks.removeIf(blockpos -> DamageCalcUtils.crystalDamage(mc.player, new Vec3d(blockpos.up())) > maxDamage.get());
+        Collections.reverse(validBlocks);
         return validBlocks;
     }
 
@@ -238,5 +287,13 @@ public class CrystalAura extends ToggleModule {
             }
         }
         return allBlocks;
+    }
+
+    private float getTotalHealth(PlayerEntity target) {
+        return target.getHealth() + target.getAbsorptionAmount();
+    }
+
+    private boolean isEmpty(BlockPos pos) {
+        return mc.world.isAir(pos) && mc.world.getEntities(null, new Box(pos.getX(), pos.getY(), pos.getZ(), pos.getX() + 1.0D, pos.getY() + 2.0D, pos.getZ() + 1.0D)).isEmpty();
     }
 }

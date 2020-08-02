@@ -45,6 +45,13 @@ public class AutoEat extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> noBad = sgGeneral.add(new BoolSetting.Builder()
+            .name("filter-negative-effects")
+            .description("Filters out food items that give you negative potion effects.")
+            .defaultValue(true)
+            .build()
+    );
+
     private final Setting<Boolean> disableAuras = sgGeneral.add(new BoolSetting.Builder()
             .name("disable-auras")
             .description("disable all auras")
@@ -77,7 +84,7 @@ public class AutoEat extends ToggleModule {
         if (isEating) {
             ((IKeyBinding) mc.options.keyUse).setPressed(false);
             isEating = false;
-            mc.player.inventory.selectedSlot = preSelectedSlot;
+            if (preSelectedSlot != -1) mc.player.inventory.selectedSlot = preSelectedSlot;
             BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume");
         }
     }
@@ -85,6 +92,7 @@ public class AutoEat extends ToggleModule {
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
         if (mc.player.abilities.creativeMode) return;
+        if (isEating && !mc.player.getMainHandStack().getItem().isFood()) ((IKeyBinding) mc.options.keyUse).setPressed(false);
 
         if (isEating) {
             if (mc.player.getHungerManager().getFoodLevel() > preFoodLevel) {
@@ -99,13 +107,13 @@ public class AutoEat extends ToggleModule {
                     ModuleManager.INSTANCE.get(CrystalAura.class).toggle();
                     wasCrystalActive = false;
                 }
-                mc.player.inventory.selectedSlot = preSelectedSlot;
+                if (preSelectedSlot != -1) mc.player.inventory.selectedSlot = preSelectedSlot;
                 BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume");
 
                 return;
             }
 
-            if(slot != InvUtils.OFFHAND_SLOT) {
+            if(slot != InvUtils.OFFHAND_SLOT && slot != -1) {
                 mc.player.inventory.selectedSlot = slot;
             }
 
@@ -137,6 +145,10 @@ public class AutoEat extends ToggleModule {
         for (int i = 0; i < 9; i++) {
             Item item = mc.player.inventory.getStack(i).getItem();
             if (!item.isFood()) continue;
+            if (noBad.get()) {
+                if (item == Items.POISONOUS_POTATO || item == Items.PUFFERFISH || item == Items.CHICKEN
+                    || item == Items.ROTTEN_FLESH || item == Items.SPIDER_EYE || item == Items.SUSPICIOUS_STEW) continue;
+            }
 
             if (item == Items.ENCHANTED_GOLDEN_APPLE && item.getFoodComponent().getHunger() > bestHunger) {
                 if (egaps.get()) {
@@ -166,7 +178,7 @@ public class AutoEat extends ToggleModule {
         if (slot != -1 && (20 - mc.player.getHungerManager().getFoodLevel() >= bestHunger && sgAutoHunger.isEnabled()) || (20 - mc.player.getHungerManager().getFoodLevel() >= minHunger.get() && sgManualHunger.isEnabled())) {
             preSelectedSlot = mc.player.inventory.selectedSlot;
             this.slot = slot;
-            if(slot != InvUtils.OFFHAND_SLOT) {
+            if(slot != InvUtils.OFFHAND_SLOT && slot != -1) {
                 mc.player.inventory.selectedSlot = slot;
             }
             isEating = true;
