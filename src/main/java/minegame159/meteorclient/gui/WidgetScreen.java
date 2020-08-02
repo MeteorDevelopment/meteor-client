@@ -41,7 +41,7 @@ public class WidgetScreen extends Screen {
 
     @Override
     public void mouseMoved(double mouseX, double mouseY) {
-        double s = mc.window.getScaleFactor();
+        double s = mc.getWindow().getScaleFactor();
         double scale = GuiConfig.INSTANCE.guiScale;
 
         mouseX *= s;
@@ -95,7 +95,7 @@ public class WidgetScreen extends Screen {
     public void render(int mouseX, int mouseY, float delta) {
         if (!Utils.canUpdate()) renderBackground();
 
-        double s = mc.window.getScaleFactor();
+        double s = mc.getWindow().getScaleFactor();
         double scale = GuiConfig.INSTANCE.guiScale;
 
         mouseX *= s;

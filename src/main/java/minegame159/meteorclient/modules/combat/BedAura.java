@@ -217,7 +217,7 @@ public class BedAura extends ToggleModule {
             }
         }
         for(BlockEntity entity : mc.world.blockEntities){
-            if(entity instanceof BedBlockEntity && Math.sqrt(entity.getSquaredDistance(mc.player.x, mc.player.y, mc.player.z)) <= breakRange.get()){
+            if(entity instanceof BedBlockEntity && Math.sqrt(entity.getSquaredDistance(mc.player.getX(), mc.player.getY(), mc.player.getZ())) <= breakRange.get()){
                 if(DamageCalcUtils.bedDamage(mc.player, new Vec3d(entity.getPos())) < maxDamage.get()
                     || (mc.player.getHealth() + mc.player.getAbsorptionAmount() - DamageCalcUtils.bedDamage(mc.player, new Vec3d(entity.getPos()))) < minHealth.get() || clickMode.get().equals(Mode.suicide)){
                     mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, entity.getPos(), false));

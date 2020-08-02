@@ -66,11 +66,11 @@ public class Utils {
     }
 
     public static double getScaledWindowWidthGui() {
-        return mc.window.getWidth() / GuiConfig.INSTANCE.guiScale;
+        return mc.getWindow().getWidth() / GuiConfig.INSTANCE.guiScale;
     }
 
     public static double getScaledWindowHeightGui() {
-        return mc.window.getHeight() / GuiConfig.INSTANCE.guiScale;
+        return mc.getWindow().getHeight() / GuiConfig.INSTANCE.guiScale;
     }
 
     public static Object2IntMap<StatusEffect> createStatusEffectMap() {

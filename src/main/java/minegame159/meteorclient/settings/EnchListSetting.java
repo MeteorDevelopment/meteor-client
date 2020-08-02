@@ -68,7 +68,7 @@ public class EnchListSetting extends Setting<List<Enchantment>>{
 
         ListTag valueTag = new ListTag();
         for(Enchantment ench : get()) {
-            valueTag.add(new StringTag(Registry.ENCHANTMENT.getId(ench).toString()));
+            valueTag.add(StringTag.of(Registry.ENCHANTMENT.getId(ench).toString()));
         }
         tag.put("value", valueTag);
 
