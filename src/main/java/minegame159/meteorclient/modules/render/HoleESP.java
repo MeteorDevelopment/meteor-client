@@ -80,7 +80,7 @@ public class HoleESP extends ToggleModule {
     private final List<Hole> holes = new ArrayList<>();
 
     public HoleESP() {
-        super(Category.Render, "hole-esp", "Displays holes that u can be in so u dont take explosion damage.");
+        super(Category.Render, "hole-esp", "Displays holes that you can be in so you don't take explosion damage.");
     }
 
     @EventHandler
