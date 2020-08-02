@@ -103,7 +103,7 @@ public class Nuker extends ToggleModule {
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
         if (mc.world.getBlockState(lastBlockPos).getBlock() != Blocks.AIR) {
-            mc.interactionManager.method_2902(lastBlockPos, Direction.UP);
+            mc.interactionManager.updateBlockBreakingProgress(lastBlockPos, Direction.UP);
             return;
         }
         // Calculate stuff
