@@ -41,6 +41,13 @@ public class AutoTotem extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> fallback = sgGeneral.add(new BoolSetting.Builder()
+            .name("fallback")
+            .description("Enables offhand extra when you are out of totems.")
+            .defaultValue(true)
+            .build()
+    );
+
     private final Setting<Boolean> inventorySwitch = sgGeneral.add(new BoolSetting.Builder()
             .name("inventory")
             .description("Switches totems while you are in your inventory")
@@ -75,6 +82,16 @@ public class AutoTotem extends ToggleModule {
         int preTotemCount = totemCount;
         InvUtils.FindItemResult result = InvUtils.findItemWithCount(Items.TOTEM_OF_UNDYING);
 
+        if (result.count <= 0
+                && mc.player.inventory.getCursorStack().getItem() != Items.TOTEM_OF_UNDYING
+                && mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING
+                && fallback.get()) {
+            if (!ModuleManager.INSTANCE.get(OffhandExtra.class).isActive()) ModuleManager.INSTANCE.get(OffhandExtra.class).toggle();
+            ModuleManager.INSTANCE.get(OffhandExtra.class).setTotems(true);
+        } else if (result.count > 0 && ModuleManager.INSTANCE.get(OffhandExtra.class).isActive()) {
+            ModuleManager.INSTANCE.get(OffhandExtra.class).setTotems(false);
+        }
+
         if (result.found() && mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING && !smart.get()) {
             locked = true;
             if(mc.player.inventory.getCursorStack().getItem() != Items.TOTEM_OF_UNDYING) {
@@ -96,7 +113,10 @@ public class AutoTotem extends ToggleModule {
             locked = false;
         }
 
-        if (result.count != preTotemCount) totemCountString = Integer.toString(result.count);
+        if (result.count != preTotemCount) {
+            totemCountString = Integer.toString(result.count);
+            totemCount = result.count;
+        }
     });
 
     @Override
