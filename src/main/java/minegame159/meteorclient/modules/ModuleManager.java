@@ -221,6 +221,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new AutoExp());
         addModule(new AimAssist());
         addModule(new AutoArmor());
+        addModule(new AnchorAura());
     }
 
     private void initPlayer() {
