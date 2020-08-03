@@ -5,6 +5,6 @@ import minegame159.meteorclient.modules.ToggleModule;
 
 public class SafeWalk extends ToggleModule {
     public SafeWalk() {
-        super(Category.Movement, "safe-walk", "Don't fall of blocks like if you were sneaking.");
+        super(Category.Movement, "safe-walk", "Stops you from walking off the edge of blocks.");
     }
 }
