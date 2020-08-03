@@ -70,6 +70,7 @@ public class OffhandExtra extends ToggleModule {
 
     private boolean isClicking = false;
     private boolean sentMessage = false;
+    private boolean noTotems = false;
 
     @Override
     public void onDeactivate() {
@@ -88,7 +89,7 @@ public class OffhandExtra extends ToggleModule {
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
         if (!mc.player.isUsingItem()) isClicking = false;
         if (ModuleManager.INSTANCE.get(AutoTotem.class).getLocked()) return;
-        if (Asimov.get() && !(mc.currentScreen instanceof ContainerScreen<?>)) {
+        if ((Asimov.get() || noTotems) && !(mc.currentScreen instanceof ContainerScreen<?>)) {
             Item item = getItem();
             InvUtils.FindItemResult result = InvUtils.findItemWithCount(item);
             if (result.slot == -1 && mc.player.getOffHandStack().getItem() != getItem()) {
@@ -156,6 +157,10 @@ public class OffhandExtra extends ToggleModule {
             item = Items.EXPERIENCE_BOTTLE;
         }
         return item;
+    }
+
+    public void setTotems(boolean set) {
+        noTotems = set;
     }
 
 }
