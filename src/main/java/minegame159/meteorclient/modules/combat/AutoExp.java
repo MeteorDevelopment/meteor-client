@@ -45,7 +45,7 @@ public class AutoExp extends ToggleModule {
 
     private final Setting<Boolean> disableAuras = sgGeneral.add(new BoolSetting.Builder()
             .name("disable-auras")
-            .description("disable all auras")
+            .description("Disable all auras")
             .defaultValue(false)
             .build()
     );
