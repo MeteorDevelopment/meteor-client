@@ -68,7 +68,11 @@ public class EnchListSetting extends Setting<List<Enchantment>>{
 
         ListTag valueTag = new ListTag();
         for(Enchantment ench : get()) {
-            valueTag.add(new StringTag(Registry.ENCHANTMENT.getId(ench).toString()));
+            try {
+                valueTag.add(new StringTag(Registry.ENCHANTMENT.getId(ench).toString()));
+            } catch (NullPointerException ignored) {
+                //Cringe. Idk what's going on but it crashed me so...
+            }
         }
         tag.put("value", valueTag);
 
