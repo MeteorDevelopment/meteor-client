@@ -219,7 +219,7 @@ public class BedAura extends ToggleModule {
                 mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(new Vec3d(bestBlock), Direction.UP, bestBlock, false));
                 mc.player.swingHand(Hand.MAIN_HAND);
                 if (smartDelay.get()){
-                    if (DamageCalcUtils.crystalDamage(target, target.getPos()) - DamageCalcUtils.crystalDamage(target, new Vec3d(bestBlock)) < 10) {
+                    if (DamageCalcUtils.bedDamage(target, target.getPos()) - DamageCalcUtils.bedDamage(target, new Vec3d(bestBlock)) < 10) {
                         delayLeft = 10;
                     }
                 }
