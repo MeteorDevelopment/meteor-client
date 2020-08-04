@@ -6,10 +6,7 @@ import minegame159.meteorclient.events.RenderEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.rendering.ShapeBuilder;
-import minegame159.meteorclient.settings.ColorSetting;
-import minegame159.meteorclient.settings.EnumSetting;
-import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Color;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.hit.BlockHitResult;
@@ -30,6 +27,13 @@ public class BlockSelection extends ToggleModule {
             .name("mode")
             .description("Rendering mode")
             .defaultValue(Mode.Lines)
+            .build()
+    );
+
+    private final Setting<Boolean> advanced = sgGeneral.add(new BoolSetting.Builder()
+            .name("advanced")
+            .description("Shows more advanced outline.")
+            .defaultValue(true)
             .build()
     );
 
@@ -56,12 +60,24 @@ public class BlockSelection extends ToggleModule {
         if (shape.isEmpty()) return;
         Box box = shape.getBoundingBox();
 
-        if (mode.get() == Mode.Lines || mode.get() == Mode.Both) {
-            ShapeBuilder.boxEdges(pos.getX() + box.x1,  pos.getY() + box.y1, pos.getZ() + box.z1, pos.getX() + box.x2,  pos.getY() + box.y2, pos.getZ() + box.z2, color.get());
-        }
-        if (mode.get() == Mode.Sides || mode.get() == Mode.Both) {
-            setSideColor();
-            ShapeBuilder.boxSides(pos.getX() + box.x1,  pos.getY() + box.y1, pos.getZ() + box.z1, pos.getX() + box.x2,  pos.getY() + box.y2, pos.getZ() + box.z2, sideColor);
+        if (advanced.get()) {
+            shape.forEachBox((minX, d, e, f, g, h) -> {
+                if (mode.get() == Mode.Lines || mode.get() == Mode.Both) {
+                    ShapeBuilder.boxEdges(pos.getX() + minX, pos.getY() + d, pos.getZ() + e, pos.getX() + f, pos.getY() + g, pos.getZ() + h, color.get());
+                }
+                if (mode.get() == Mode.Sides || mode.get() == Mode.Both) {
+                    setSideColor();
+                    ShapeBuilder.boxSides(pos.getX() + minX, pos.getY() + d, pos.getZ() + e, pos.getX() + f, pos.getY() + g, pos.getZ() + h, sideColor);
+                }
+            });
+        } else {
+            if (mode.get() == Mode.Lines || mode.get() == Mode.Both) {
+                ShapeBuilder.boxEdges(pos.getX() + box.x1, pos.getY() + box.y1, pos.getZ() + box.z1, pos.getX() + box.x2, pos.getY() + box.y2, pos.getZ() + box.z2, color.get());
+            }
+            if (mode.get() == Mode.Sides || mode.get() == Mode.Both) {
+                setSideColor();
+                ShapeBuilder.boxSides(pos.getX() + box.x1, pos.getY() + box.y1, pos.getZ() + box.z1, pos.getX() + box.x2, pos.getY() + box.y2, pos.getZ() + box.z2, sideColor);
+            }
         }
     });
 
