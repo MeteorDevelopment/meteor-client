@@ -40,7 +40,7 @@ public class GuiConfig implements ISerializable<GuiConfig> {
     public Color minusHovered = new Color(225, 60, 60);
     public Color minusPressed = new Color(225, 75, 75);
 
-    public Color accent = new Color(0, 255, 180);
+    public Color accent = new Color(135, 0, 255);
 
     public Color moduleBackground = new Color(50, 50, 50);
 
