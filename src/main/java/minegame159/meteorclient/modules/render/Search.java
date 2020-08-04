@@ -9,7 +9,6 @@ import minegame159.meteorclient.events.ChunkDataEvent;
 import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.events.RenderEvent;
 import minegame159.meteorclient.events.TickEvent;
-import minegame159.meteorclient.events.packets.ReceivePacketEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.rendering.ShapeBuilder;
@@ -20,7 +19,6 @@ import minegame159.meteorclient.utils.Pool;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Direction;
@@ -147,20 +145,14 @@ public class Search extends ToggleModule {
         });
     }
 
-    @EventHandler
-    private final Listener<ReceivePacketEvent> onReceivePacket = new Listener<>(event -> {
-        if (!(event.packet instanceof BlockUpdateS2CPacket)) return;
-
-        BlockPos blockPos = ((BlockUpdateS2CPacket) event.packet).getPos();
-        BlockState bs = ((BlockUpdateS2CPacket) event.packet).getState();
-
+    public void onBlockUpdate(BlockPos blockPos, BlockState blockState) {
         MeteorTaskExecutor.execute(() -> {
             int chunkX = blockPos.getX() >> 4;
             int chunkZ = blockPos.getZ() >> 4;
             long key = ChunkPos.toLong(chunkX, chunkZ);
 
             synchronized (chunks) {
-                if (blocks.get().contains(bs.getBlock())) {
+                if (blocks.get().contains(blockState.getBlock())) {
                     chunks.computeIfAbsent(key, aLong -> new MyChunk(chunkX, chunkZ)).add(blockPos, true);
                 } else {
                     MyChunk chunk = chunks.get(key);
@@ -168,7 +160,7 @@ public class Search extends ToggleModule {
                 }
             }
         });
-    });
+    }
 
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
