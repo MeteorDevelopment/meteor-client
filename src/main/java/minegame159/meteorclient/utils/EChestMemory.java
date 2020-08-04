@@ -24,7 +24,7 @@ public class EChestMemory {
     }
 
     private static final Listener<BlockActivateEvent> onBlockActivate = new Listener<>(event -> {
-        if (event.blockState.getBlock() instanceof EnderChestBlock) echestOpenedState = 1;
+        if (event.blockState.getBlock() instanceof EnderChestBlock && echestOpenedState == 0) echestOpenedState = 1;
     });
 
     private static final Listener<OpenScreenEvent> onOpenScreenEvent = new Listener<>(event -> {
@@ -34,7 +34,7 @@ public class EChestMemory {
         }
         if (echestOpenedState == 0) return;
 
-        if (MC.currentScreen == null) return;
+        if (!(MC.currentScreen instanceof GenericContainerScreen)) return;
         GenericContainer container = ((GenericContainerScreen) MC.currentScreen).getContainer();
         if (container == null) return;
         Inventory inv = container.getInventory();
