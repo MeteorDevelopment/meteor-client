@@ -21,7 +21,7 @@ public abstract class Savable<T> implements ISerializable<T> {
         }
     }
     public void save() {
-        save(file);
+        save(getFile());
     }
 
     public void load(File file) {
@@ -34,7 +34,7 @@ public abstract class Savable<T> implements ISerializable<T> {
         }
     }
     public void load() {
-        load(file);
+        load(getFile());
     }
 
     public File getFile() {
