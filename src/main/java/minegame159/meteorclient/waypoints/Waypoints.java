@@ -8,7 +8,6 @@ import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.events.GameDisconnectedEvent;
 import minegame159.meteorclient.events.GameJoinedEvent;
 import minegame159.meteorclient.events.RenderEvent;
-import minegame159.meteorclient.rendering.MFont;
 import minegame159.meteorclient.rendering.Matrices;
 import minegame159.meteorclient.rendering.ShapeBuilder;
 import minegame159.meteorclient.utils.Color;
@@ -30,7 +29,6 @@ import java.util.*;
 
 public class Waypoints extends Savable<Waypoints> implements Listenable, Iterable<Waypoint> {
     public static final Map<String, Texture> ICONS = new HashMap<>();
-    public static MFont FONT;
     public static final Waypoints INSTANCE = new Waypoints();
 
     private static final String[] BUILTIN_ICONS = { "Square", "Circle", "Triangle", "Star", "Diamond" };
@@ -138,18 +136,18 @@ public class Waypoints extends Savable<Waypoints> implements Listenable, Iterabl
             String distText = Math.round(dist) + " blocks";
 
             // Render background
-            double i = FONT.getStringWidth(waypoint.name) / 2.0;
-            double i2 = FONT.getStringWidth(distText) / 2.0;
+            double i = MeteorClient.FONT_2X.getStringWidth(waypoint.name) / 2.0;
+            double i2 = MeteorClient.FONT_2X.getStringWidth(distText) / 2.0;
             ShapeBuilder.begin(null, GL11.GL_TRIANGLES, VertexFormats.POSITION_COLOR);
-            ShapeBuilder.quad(-i - 1, -1 - FONT.getHeight(), 0, -i - 1, 8 - FONT.getHeight(), 0, i + 1, 8 - FONT.getHeight(), 0, i + 1, -1 - FONT.getHeight(), 0, BACKGROUND);
+            ShapeBuilder.quad(-i - 1, -1 - MeteorClient.FONT_2X.getHeight(), 0, -i - 1, 8 - MeteorClient.FONT_2X.getHeight(), 0, i + 1, 8 - MeteorClient.FONT_2X.getHeight(), 0, i + 1, -1 - MeteorClient.FONT_2X.getHeight(), 0, BACKGROUND);
             ShapeBuilder.quad(-i2 - 1, -1, 0, -i2 - 1, 8, 0, i2 + 1, 8, 0, i2 + 1, -1, 0, BACKGROUND);
             ShapeBuilder.end();
 
             waypoint.renderIcon(-8, 9, 0, a);
 
             // Render name text
-            FONT.renderString(waypoint.name, -i, -FONT.getHeight(), TEXT);
-            FONT.renderString(distText, -i2, 0, TEXT);
+            MeteorClient.FONT_2X.renderString(waypoint.name, -i, -MeteorClient.FONT_2X.getHeight(), TEXT);
+            MeteorClient.FONT_2X.renderString(distText, -i2, 0, TEXT);
 
             Matrices.pop();
 

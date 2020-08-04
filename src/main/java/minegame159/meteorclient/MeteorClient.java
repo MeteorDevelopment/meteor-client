@@ -36,7 +36,7 @@ import java.io.*;
 public class MeteorClient implements ClientModInitializer, Listenable {
     public static MeteorClient INSTANCE;
     public static final EventBus EVENT_BUS = new EventManager();
-    public static MFont FONT;
+    public static MFont FONT, FONT_2X;
     public static boolean IS_DISCONNECTING;
     public static final File FOLDER = new File(FabricLoader.getInstance().getGameDirectory(), "meteor-client");
 
@@ -145,8 +145,8 @@ public class MeteorClient implements ClientModInitializer, Listenable {
 
         try {
             FONT = new MFont(Font.createFont(Font.TRUETYPE_FONT, fontFile).deriveFont(16f), true, true);
-            Waypoints.FONT = new MFont(Font.createFont(Font.TRUETYPE_FONT, fontFile).deriveFont(16f * 2), true, true);
-            Waypoints.FONT.scale = 0.5;
+            FONT_2X = new MFont(Font.createFont(Font.TRUETYPE_FONT, fontFile).deriveFont(16f * 2), true, true);
+            FONT_2X.scale = 0.5;
         } catch (FontFormatException | IOException e) {
             e.printStackTrace();
         }
