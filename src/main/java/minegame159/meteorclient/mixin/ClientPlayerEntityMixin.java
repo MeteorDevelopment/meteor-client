@@ -6,6 +6,7 @@ import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.events.SendMessageEvent;
 import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.movement.NoSlow;
 import minegame159.meteorclient.modules.player.Portals;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
@@ -53,5 +54,11 @@ public abstract class ClientPlayerEntityMixin {
     private Screen updateNauseaGetCurrentScreenProxy(MinecraftClient client) {
         if (ModuleManager.INSTANCE.isActive(Portals.class)) return null;
         return client.currentScreen;
+    }
+
+    @Redirect(method = "tickMovement", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;isUsingItem()Z"))
+    private boolean proxy_tickMovement_isUsingItem(ClientPlayerEntity player) {
+        if (ModuleManager.INSTANCE.get(NoSlow.class).items()) return false;
+        return player.isUsingItem();
     }
 }
