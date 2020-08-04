@@ -19,6 +19,7 @@ import minegame159.meteorclient.utils.Capes;
 import minegame159.meteorclient.utils.EChestMemory;
 import minegame159.meteorclient.utils.EntityUtils;
 import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.waypoints.Waypoints;
 import net.arikia.dev.drpc.DiscordRPC;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.keybinding.FabricKeyBinding;
@@ -71,6 +72,7 @@ public class MeteorClient implements ClientModInitializer, Listenable {
 
         load();
         Ignore.load();
+        Waypoints.loadIcons();
 
         EVENT_BUS.subscribe(this);
         Runtime.getRuntime().addShutdownHook(new Thread(this::stop));
@@ -143,6 +145,8 @@ public class MeteorClient implements ClientModInitializer, Listenable {
 
         try {
             FONT = new MFont(Font.createFont(Font.TRUETYPE_FONT, fontFile).deriveFont(16f), true, true);
+            Waypoints.FONT = new MFont(Font.createFont(Font.TRUETYPE_FONT, fontFile).deriveFont(16f * 2), true, true);
+            Waypoints.FONT.scale = 0.5;
         } catch (FontFormatException | IOException e) {
             e.printStackTrace();
         }
