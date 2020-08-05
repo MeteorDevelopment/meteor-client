@@ -70,12 +70,12 @@ public class Freecam extends ToggleModule {
     }
 
     @EventHandler
-    private Listener<SendPacketEvent> onSendPacket = new Listener<>(event -> {
+    private final Listener<SendPacketEvent> onSendPacket = new Listener<>(event -> {
         if (event.packet instanceof ClientCommandC2SPacket || event.packet instanceof PlayerMoveC2SPacket || event.packet instanceof PlayerInputC2SPacket) event.cancel();
     });
 
     @EventHandler
-    private Listener<TickEvent> onTick = new Listener<>(event -> {
+    private final Listener<TickEvent> onTick = new Listener<>(event -> {
         camera.setVelocity(0, 0, 0);
 
         camera.yaw = mc.player.yaw;
