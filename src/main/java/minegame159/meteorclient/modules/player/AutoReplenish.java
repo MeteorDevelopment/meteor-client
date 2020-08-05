@@ -110,7 +110,7 @@ public class AutoReplenish extends ToggleModule {
                     }
                 }
                 if (slot == -1) {
-                    for (int j = 9; j < 45; j++) {
+                    for (int j = 9; j < mc.player.inventory.main.size(); j++) {
                         if (mc.player.inventory.getInvStack(j).getItem() == stack.getItem()) {
                             slot = j;
                             break;
@@ -129,7 +129,7 @@ public class AutoReplenish extends ToggleModule {
             if(stack.getItem() == Items.AIR) return;
             if(stack.getCount() < amount.get() && (stack.getMaxCount() > amount.get() || stack.getCount() < stack.getMaxCount())) {
                 int slot = -1;
-                for (int i = 9; i < 45; i++) {
+                for (int i = 9; i < mc.player.inventory.main.size(); i++) {
                     if (mc.player.inventory.getInvStack(i).getItem() == stack.getItem()) {
                         slot = i;
                         break;
@@ -143,7 +143,9 @@ public class AutoReplenish extends ToggleModule {
                         }
                     }
                 }
-                moveItems(slot, InvUtils.OFFHAND_SLOT, true);
+                if (slot != -1) {
+                    moveItems(slot, InvUtils.OFFHAND_SLOT, true);
+                }
             }
         }
 
