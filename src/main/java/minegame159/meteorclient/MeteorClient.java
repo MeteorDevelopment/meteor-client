@@ -62,8 +62,9 @@ public class MeteorClient implements ClientModInitializer, Listenable {
         Utils.mc = mc;
         EntityUtils.mc = mc;
 
-        loadFont();
         Config.INSTANCE = new Config();
+        Config.INSTANCE.load();
+        loadFont();
 
         ModuleManager.INSTANCE = new ModuleManager();
         CommandManager.init();
@@ -80,7 +81,6 @@ public class MeteorClient implements ClientModInitializer, Listenable {
     }
 
     public void load() {
-        Config.INSTANCE.load();
         if (!ModuleManager.INSTANCE.load()) ModuleManager.INSTANCE.get(DiscordPresence.class).toggle(false);
         FriendManager.INSTANCE.load();
         MacroManager.INSTANCE.load();
@@ -150,6 +150,17 @@ public class MeteorClient implements ClientModInitializer, Listenable {
             FONT_2X.scale = 0.5;
         } catch (FontFormatException | IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    public void resetFont() {
+        File[] files = FOLDER.exists() ? FOLDER.listFiles() : new File[0];
+        if (files != null) {
+            for (File file : files) {
+                if (file.getName().endsWith(".ttf") || file.getName().endsWith(".TTF")) {
+                    file.delete();
+                }
+            }
         }
     }
 
