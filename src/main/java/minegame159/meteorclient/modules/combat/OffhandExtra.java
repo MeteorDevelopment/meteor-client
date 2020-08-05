@@ -163,4 +163,6 @@ public class OffhandExtra extends ToggleModule {
         noTotems = set;
     }
 
+    public boolean getMessageSent(){return sentMessage;}
+
 }
