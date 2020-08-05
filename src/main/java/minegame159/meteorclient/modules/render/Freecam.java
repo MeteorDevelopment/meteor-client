@@ -37,10 +37,6 @@ public class Freecam extends ToggleModule {
 
     @Override
     public void onActivate() {
-        if (mc.world == null) {
-            this.toggle();
-            return;
-        }
         camera = new OtherClientPlayerEntity(mc.world, mc.player.getGameProfile());
         camera.copyPositionAndRotation(mc.player);
         camera.horizontalCollision = false;
