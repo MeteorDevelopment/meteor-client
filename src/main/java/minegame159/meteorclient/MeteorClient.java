@@ -14,6 +14,7 @@ import minegame159.meteorclient.gui.GuiThings;
 import minegame159.meteorclient.gui.screens.topbar.TopBarModules;
 import minegame159.meteorclient.macros.MacroManager;
 import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.misc.DiscordPresence;
 import minegame159.meteorclient.rendering.MFont;
 import minegame159.meteorclient.utils.Capes;
 import minegame159.meteorclient.utils.EChestMemory;
@@ -80,7 +81,7 @@ public class MeteorClient implements ClientModInitializer, Listenable {
 
     public void load() {
         Config.INSTANCE.load();
-        ModuleManager.INSTANCE.load();
+        if (!ModuleManager.INSTANCE.load()) ModuleManager.INSTANCE.get(DiscordPresence.class).toggle(false);
         FriendManager.INSTANCE.load();
         MacroManager.INSTANCE.load();
         AccountManager.INSTANCE.load();
