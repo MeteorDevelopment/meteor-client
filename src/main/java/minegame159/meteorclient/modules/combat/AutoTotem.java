@@ -86,8 +86,12 @@ public class AutoTotem extends ToggleModule {
                 && mc.player.inventory.getCursorStack().getItem() != Items.TOTEM_OF_UNDYING
                 && mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING
                 && fallback.get()) {
-            if (!ModuleManager.INSTANCE.get(OffhandExtra.class).isActive()) ModuleManager.INSTANCE.get(OffhandExtra.class).toggle();
+            if (!ModuleManager.INSTANCE.get(OffhandExtra.class).isActive()
+                    && !ModuleManager.INSTANCE.get(OffhandExtra.class).getMessageSent())
+                ModuleManager.INSTANCE.get(OffhandExtra.class).toggle();
+
             ModuleManager.INSTANCE.get(OffhandExtra.class).setTotems(true);
+            return;
         } else if (result.count > 0 && ModuleManager.INSTANCE.get(OffhandExtra.class).isActive()) {
             ModuleManager.INSTANCE.get(OffhandExtra.class).setTotems(false);
         }
