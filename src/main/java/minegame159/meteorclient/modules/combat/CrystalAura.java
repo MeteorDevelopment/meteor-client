@@ -227,7 +227,7 @@ public class CrystalAura extends ToggleModule {
                 else if (mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL) {return;}
                 placeBlock(bestBlock, hand);
                 if (smartDelay.get()){
-                    if (DamageCalcUtils.crystalDamage(target, target.getPos()) - DamageCalcUtils.crystalDamage(target, new Vec3d(bestBlock)) < 10) {
+                    if (DamageCalcUtils.crystalDamage(target, target.getPos()) - DamageCalcUtils.crystalDamage(target, new Vec3d(bestBlock.getX(), bestBlock.getY(), bestBlock.getZ())) < 10) {
                         delayLeft = 10;
                     }
                 }

@@ -54,9 +54,9 @@ public class DeathPosition extends ToggleModule {
                 waypoint.z = (int) mc.player.getZ();
                 waypoint.maxVisibleDistance = Integer.MAX_VALUE;
 
-                if (mc.player.dimension == DimensionType.OVERWORLD) waypoint.overworld = true;
-                else if (mc.player.dimension == DimensionType.THE_NETHER) waypoint.nether = true;
-                else if (mc.player.dimension == DimensionType.THE_END) waypoint.end = true;
+                if (mc.world.getDimensionRegistryKey().getValue().getPath().equals("overworld")) waypoint.overworld = true;
+                else if (mc.world.getDimensionRegistryKey().getValue().getPath().equals("the_nether")) waypoint.nether = true;
+                else if (mc.world.getDimensionRegistryKey().getValue().getPath().equals("the_end")) waypoint.end = true;
 
                 Waypoints.INSTANCE.add(waypoint);
             }

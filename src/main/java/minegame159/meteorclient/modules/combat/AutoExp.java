@@ -227,7 +227,7 @@ public class AutoExp extends ToggleModule {
             InvUtils.clickSlot(searchCraftingSlots(), 0, SlotActionType.PICKUP);
         }
         if (lookDown.get()) {
-            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(mc.player.yaw, 90, mc.player.onGround));
+            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(mc.player.yaw, 90, mc.player.isOnGround()));
         }
         mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
     });

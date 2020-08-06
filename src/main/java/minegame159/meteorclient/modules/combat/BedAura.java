@@ -13,7 +13,6 @@ import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.DamageCalcUtils;
 import minegame159.meteorclient.utils.Utils;
-import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BedBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
@@ -225,7 +224,7 @@ public class BedAura extends ToggleModule {
                 mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(new Vec3d(pos.getX(), pos.getY(), pos.getZ()), Direction.UP, bestBlock, false));
                 mc.player.swingHand(Hand.MAIN_HAND);
                 if (smartDelay.get()){
-                    if (DamageCalcUtils.bedDamage(target, target.getPos()) - DamageCalcUtils.bedDamage(target, new Vec3d(bestBlock)) < 10) {
+                    if (DamageCalcUtils.bedDamage(target, target.getPos()) - DamageCalcUtils.bedDamage(target, new Vec3d(bestBlock.getX(), bestBlock.getY(), bestBlock.getZ())) < 10) {
                         delayLeft = 10;
                     }
                 }

@@ -21,7 +21,6 @@ import net.minecraft.client.texture.AbstractTexture;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.NativeImageBackedTexture;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.dimension.DimensionType;
 import org.lwjgl.opengl.GL11;
 
 import java.io.*;
@@ -66,11 +65,11 @@ public class Waypoints extends Savable<Waypoints> implements Listenable, Iterabl
     });
 
     private boolean checkDimension(Waypoint waypoint) {
-        DimensionType dimension = MinecraftClient.getInstance().player.dimension;
+        String dimension = MinecraftClient.getInstance().world.getDimensionRegistryKey().getValue().getPath();
 
-        if (waypoint.overworld && dimension == DimensionType.OVERWORLD) return true;
-        if (waypoint.nether && dimension == DimensionType.THE_NETHER) return true;
-        return waypoint.end && dimension == DimensionType.THE_END;
+        if (waypoint.overworld && dimension.equals("overworld")) return true;
+        if (waypoint.nether && dimension.equals("the_nether")) return true;
+        return waypoint.end && dimension.equals("the_end");
     }
 
     @EventHandler
