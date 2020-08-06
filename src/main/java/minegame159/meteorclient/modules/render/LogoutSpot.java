@@ -25,7 +25,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
@@ -99,7 +98,7 @@ public class LogoutSpot extends ToggleModule {
             int toRemove = -1;
 
             for (int i = 0; i < players.size(); i++) {
-                if (players.get(i).uuid.equals(event.entity.getUuidAsString())) {
+                if (players.get(i).uuid.equals(event.entity.getUuid())) {
                     toRemove = i;
                     break;
                 }
