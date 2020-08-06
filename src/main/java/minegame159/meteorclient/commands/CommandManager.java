@@ -29,6 +29,7 @@ public class CommandManager {
         addCommand(new HClip());
         addCommand(new VClip());
         addCommand(new Friend());
+        addCommand(new ResetGui());
     }
 
     public static Command get(String name) {

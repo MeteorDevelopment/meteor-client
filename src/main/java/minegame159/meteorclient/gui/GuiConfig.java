@@ -73,6 +73,11 @@ public class GuiConfig implements ISerializable<GuiConfig> {
         return windowConfigs.computeIfAbsent(type, type1 -> new WindowConfig(defaultExpanded));
     }
 
+    public void clearWindowConfigs() {
+        windowConfigs.clear();
+        Config.INSTANCE.save();
+    }
+
     @Override
     public CompoundTag toTag() {
         CompoundTag tag = new CompoundTag();
