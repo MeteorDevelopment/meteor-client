@@ -2,6 +2,7 @@ package minegame159.meteorclient.utils;
 
 import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import minegame159.meteorclient.Config;
 import minegame159.meteorclient.gui.GuiConfig;
 import minegame159.meteorclient.mixininterface.IMinecraftClient;
 import minegame159.meteorclient.mixininterface.IVec3d;
@@ -52,10 +53,6 @@ public class Utils {
     private static final Vec3d vec1 = new Vec3d(0, 0, 0);
     private static final Vec3d vec2 = new Vec3d(0, 0, 0);
     private static final DecimalFormat df;
-    private static final BlockPos.Mutable blockPos = new BlockPos.Mutable();
-    private static final AtomicInteger x = new AtomicInteger();
-    private static final AtomicInteger y = new AtomicInteger();
-    private static final AtomicInteger z     = new AtomicInteger();
 
     static {
         df = new DecimalFormat("0");
@@ -63,6 +60,26 @@ public class Utils {
         DecimalFormatSymbols dfs = new DecimalFormatSymbols();
         dfs.setDecimalSeparator('.');
         df.setDecimalFormatSymbols(dfs);
+    }
+
+    public static boolean versionIsHigherOrEqual(String targetVersion) {
+        String[] comps = Config.INSTANCE.getVersion().split("\\.");
+        String[] targetComps = targetVersion.split("\\.");
+
+        if (comps.length != 3 && targetComps.length != 3) return false;
+
+        try {
+            for (int i = 0; i < comps.length; i++) {
+                int comp = Integer.parseInt(comps[i]);
+                int targetComp = Integer.parseInt(targetComps[i]);
+
+                if (comp < targetComp) return false;
+            }
+        } catch (NumberFormatException ignored) {
+            return false;
+        }
+
+        return true;
     }
 
     public static double getScaledWindowWidthGui() {

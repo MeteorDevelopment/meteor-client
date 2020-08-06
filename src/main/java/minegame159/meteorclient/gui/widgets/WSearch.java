@@ -42,7 +42,7 @@ public class WSearch extends WWindow {
                 row();
             }
             for (Pair<Module, Integer> pair : modules) {
-                add(new WModule(pair.getLeft()));
+                add(new WModule(pair.getLeft())).space(0);
                 row();
             }
 

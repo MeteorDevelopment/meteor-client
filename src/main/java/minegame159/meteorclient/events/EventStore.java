@@ -56,6 +56,7 @@ public class EventStore {
     private static final BlockActivateEvent blockActivateEvent = new BlockActivateEvent();
     private static final SendMessageEvent sendMessageEvent = new SendMessageEvent();
     private static final PlaySoundEvent playSoundEvent = new PlaySoundEvent();
+    private static final WaypointListChangedEvent waypointListChangedEvent = new WaypointListChangedEvent();
 
     public static PlaySoundPacketEvent playSoundPacketEvent(PlaySoundS2CPacket packet) {
         playSoundPacketEvent.packet = packet;
@@ -228,5 +229,9 @@ public class EventStore {
         playSoundEvent.setCancelled(false);
         playSoundEvent.sound = sound;
         return playSoundEvent;
+    }
+
+    public static WaypointListChangedEvent waypointListChangedEvent() {
+        return waypointListChangedEvent;
     }
 }

@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class WTable extends WWidget {
-    public final Cell<?> defaultCell = new Cell<>().centerY().space(4);
+    public final Cell<?> defaultCell = new Cell<>().centerY().space(2);
 
     public double maxHeight;
     public double animationProgress = 1;

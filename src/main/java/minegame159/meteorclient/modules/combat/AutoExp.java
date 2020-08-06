@@ -20,6 +20,7 @@ import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.Hand;
 
 import java.util.Iterator;
@@ -45,8 +46,15 @@ public class AutoExp extends ToggleModule {
 
     private final Setting<Boolean> disableAuras = sgGeneral.add(new BoolSetting.Builder()
             .name("disable-auras")
-            .description("disable all auras")
+            .description("Disable all auras")
             .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> lookDown = sgGeneral.add(new BoolSetting.Builder()
+            .name("look-down")
+            .description("Looks down when throwing exp bottles")
+            .defaultValue(true)
             .build()
     );
 
@@ -54,7 +62,8 @@ public class AutoExp extends ToggleModule {
             .name("disable-on-damage")
             .description("Disables this when you take damage")
             .defaultValue(true)
-            .build());
+            .build()
+    );
     
     public AutoExp() {
         super(Category.Combat, "auto-exp", "Throws exp to mend your armour (only works with diamond)");
@@ -216,6 +225,9 @@ public class AutoExp extends ToggleModule {
         }else if(!helmet.isDamaged() && (slot == -1) && (mc.player.inventory.getEmptySlot() == -1)){
             InvUtils.clickSlot(5, 0, SlotActionType.PICKUP);
             InvUtils.clickSlot(searchCraftingSlots(), 0, SlotActionType.PICKUP);
+        }
+        if (lookDown.get()) {
+            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(mc.player.yaw, 90, mc.player.onGround));
         }
         mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
     });
