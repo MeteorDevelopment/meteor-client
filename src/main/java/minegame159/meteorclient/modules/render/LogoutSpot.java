@@ -211,16 +211,16 @@ public class LogoutSpot extends ToggleModule {
             Matrices.scale(-scale, -scale, scale);
 
             // Render background
-            double i = MeteorClient.FONT.getStringWidth(name) / 2.0 + MeteorClient.FONT.getStringWidth(healthText) / 2.0;
+            double i = MeteorClient.FONT_2X.getStringWidth(name) / 2.0 + MeteorClient.FONT_2X.getStringWidth(healthText) / 2.0;
             ShapeBuilder.begin(null, GL11.GL_TRIANGLES, VertexFormats.POSITION_COLOR);
             ShapeBuilder.quad(-i - 1, -1, 0, -i - 1, 8, 0, i + 1, 8, 0, i + 1, -1, 0, BACKGROUND);
             ShapeBuilder.end();
 
             // Render name and health texts
-            MeteorClient.FONT.begin();
-            double hX = MeteorClient.FONT.renderString(name, -i, 0, TEXT);
-            MeteorClient.FONT.renderString(healthText, hX, 0, healthColor);
-            MeteorClient.FONT.end();
+            MeteorClient.FONT_2X.begin();
+            double hX = MeteorClient.FONT_2X.renderString(name, -i, 0, TEXT);
+            MeteorClient.FONT_2X.renderString(healthText, hX, 0, healthColor);
+            MeteorClient.FONT_2X.end();
 
             Matrices.pop();
         }
