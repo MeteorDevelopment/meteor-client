@@ -18,9 +18,9 @@ public class EditWaypointScreen extends WindowScreen {
         this.waypoint = newWaypoint ? new Waypoint() : waypoint;
 
         if (newWaypoint) {
-            this.waypoint.x = (int) mc.player.x;
-            this.waypoint.y = (int) mc.player.y + 2;
-            this.waypoint.z = (int) mc.player.z;
+            this.waypoint.x = (int) mc.player.getX();
+            this.waypoint.y = (int) mc.player.getY() + 2;
+            this.waypoint.z = (int) mc.player.getZ();
 
             if (mc.player.dimension == DimensionType.OVERWORLD) this.waypoint.overworld = true;
             else if (mc.player.dimension == DimensionType.THE_NETHER) this.waypoint.nether = true;

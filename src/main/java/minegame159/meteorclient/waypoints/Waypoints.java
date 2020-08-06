@@ -17,9 +17,9 @@ import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.VertexFormats;
+import net.minecraft.client.texture.AbstractTexture;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.NativeImageBackedTexture;
-import net.minecraft.client.texture.Texture;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.dimension.DimensionType;
 import org.lwjgl.opengl.GL11;
@@ -28,7 +28,7 @@ import java.io.*;
 import java.util.*;
 
 public class Waypoints extends Savable<Waypoints> implements Listenable, Iterable<Waypoint> {
-    public static final Map<String, Texture> ICONS = new HashMap<>();
+    public static final Map<String, AbstractTexture> ICONS = new HashMap<>();
     public static final Waypoints INSTANCE = new Waypoints();
 
     private static final String[] BUILTIN_ICONS = { "Square", "Circle", "Triangle", "Star", "Diamond" };
@@ -196,7 +196,7 @@ public class Waypoints extends Savable<Waypoints> implements Listenable, Iterabl
             if (file.getName().endsWith(".png")) {
                 try {
                     String name = file.getName().replace(".png", "");
-                    Texture texture = new NativeImageBackedTexture(NativeImage.read(new FileInputStream(file)));
+                    AbstractTexture texture = new NativeImageBackedTexture(NativeImage.read(new FileInputStream(file)));
                     ICONS.put(name, texture);
                 } catch (IOException e) {
                     e.printStackTrace();
