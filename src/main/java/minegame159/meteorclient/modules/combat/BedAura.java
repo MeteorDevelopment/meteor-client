@@ -99,6 +99,13 @@ public class BedAura extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> smartDelay = sgGeneral.add(new BoolSetting.Builder()
+            .name("smart-delay")
+            .description("Reduces crystal consumption when doing large amounts of damage.")
+            .defaultValue(true)
+            .build()
+    );
+
     private final Setting<Boolean> airPlace = sgGeneral.add(new BoolSetting.Builder()
             .name("air-place")
             .description("Places beds in the air if they do more damage.")
@@ -217,6 +224,11 @@ public class BedAura extends ToggleModule {
                 pos = bestBlock;
                 mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(new Vec3d(pos.getX(), pos.getY(), pos.getZ()), Direction.UP, bestBlock, false));
                 mc.player.swingHand(Hand.MAIN_HAND);
+                if (smartDelay.get()){
+                    if (DamageCalcUtils.bedDamage(target, target.getPos()) - DamageCalcUtils.bedDamage(target, new Vec3d(bestBlock)) < 10) {
+                        delayLeft = 10;
+                    }
+                }
                 if (preSlot != -1 && mc.player.inventory.selectedSlot != preSlot && switchBack.get()){
                     mc.player.inventory.selectedSlot = preSlot;
                 }

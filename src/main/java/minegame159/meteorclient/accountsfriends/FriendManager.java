@@ -11,9 +11,10 @@ import net.minecraft.nbt.ListTag;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
-public class FriendManager extends Savable<FriendManager> {
+public class FriendManager extends Savable<FriendManager> implements Iterable<Friend> {
     public static final FriendManager INSTANCE = new FriendManager();
 
     private static final Color WHITE = new Color(255, 255, 255);
@@ -24,10 +25,15 @@ public class FriendManager extends Savable<FriendManager> {
         super(new File(MeteorClient.FOLDER, "friends.nbt"));
     }
 
-    public void add(Friend friend) {
-        friends.add(friend);
-        MeteorClient.EVENT_BUS.post(EventStore.friendListChangedEvent());
-        save();
+    public boolean add(Friend friend) {
+        if (!friends.contains(friend)) {
+            friends.add(friend);
+            MeteorClient.EVENT_BUS.post(EventStore.friendListChangedEvent());
+            save();
+            return true;
+        }
+
+        return false;
     }
 
     public List<Friend> getAll() {
@@ -72,10 +78,23 @@ public class FriendManager extends Savable<FriendManager> {
         else add(friend);
     }
 
-    public void remove(Friend friend) {
-        friends.remove(friend);
-        MeteorClient.EVENT_BUS.post(EventStore.friendListChangedEvent());
-        save();
+    public boolean remove(Friend friend) {
+        if (friends.remove(friend)) {
+            MeteorClient.EVENT_BUS.post(EventStore.friendListChangedEvent());
+            save();
+            return true;
+        }
+
+        return false;
+    }
+
+    public int count() {
+        return friends.size();
+    }
+
+    @Override
+    public Iterator<Friend> iterator() {
+        return friends.iterator();
     }
 
     @Override

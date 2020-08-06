@@ -28,16 +28,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class KeyboardMixin {
     @Shadow @Final private MinecraftClient client;
 
-    @Shadow private boolean repeatEvents;
-    private int key, scancode, i, j;
-
     @Inject(method = "onKey", at = @At("HEAD"), cancellable = true)
     public void onKey(long window, int key, int scancode, int i, int j, CallbackInfo info) {
-        this.key = key;
-        this.scancode = scancode;
-        this.i = i;
-        this.j = j;
-
         if (key != GLFW.GLFW_KEY_UNKNOWN && GuiThings.postKeyEvents()) {
             KeyBinding shulkerPeek = MeteorClient.INSTANCE.shulkerPeek;
             if (shulkerPeek.matchesKey(key, scancode) && (i == GLFW.GLFW_PRESS || i == GLFW.GLFW_REPEAT)) ((IKeyBinding) shulkerPeek).setPressed(true);
@@ -47,7 +39,11 @@ public abstract class KeyboardMixin {
 
             if (!Utils.canUpdate() && i == GLFW.GLFW_PRESS) {
                 MeteorClient.INSTANCE.onKeyInMainMenu(key);
-                if (client.currentScreen instanceof WidgetScreen && GuiThings.postKeyEvents()) ModuleManager.INSTANCE.onKey.invoke(EventStore.keyEvent(key, true));
+                if (client.currentScreen instanceof WidgetScreen && GuiThings.postKeyEvents()) {
+                    ModuleManager.INSTANCE.onKeyOnlyBinding = true;
+                    ModuleManager.INSTANCE.onKey.invoke(EventStore.keyEvent(key, true));
+                    ModuleManager.INSTANCE.onKeyOnlyBinding = false;
+                }
                 return;
             }
 

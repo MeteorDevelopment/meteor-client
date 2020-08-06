@@ -12,7 +12,7 @@ import java.util.Map;
 public class Config extends Savable<Config> {
     public static Config INSTANCE;
 
-    private String version = "0.2.9-beta1";
+    private final String version = "0.2.9";
     private String prefix = ".";
     public AutoCraft autoCraft = new AutoCraft();
     public GuiConfig guiConfig = new GuiConfig();
@@ -75,6 +75,11 @@ public class Config extends Savable<Config> {
         categoryColors = NbtUtils.mapFromTag(tag.getCompound("categoryColors"), Category::valueOf, tag1 -> new Color().fromTag((CompoundTag) tag1));
         guiConfig.fromTag(tag.getCompound("guiConfig"));
         chatCommandsInfo = !tag.contains("chatCommandsInfo") || tag.getBoolean("chatCommandsInfo");
+
+        // In 0.2.9 the default font was changed, detect when people load up 0.2.9 for the first time
+        if (tag.getString("version").equals("0.2.8") && Utils.versionIsHigherOrEqual("0.2.9")) {
+            MeteorClient.INSTANCE.resetFont();
+        }
 
         return this;
     }

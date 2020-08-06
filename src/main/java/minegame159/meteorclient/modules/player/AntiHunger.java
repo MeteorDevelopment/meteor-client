@@ -35,7 +35,7 @@ public class AntiHunger extends ToggleModule {
     private boolean ignorePacket;
 
     public AntiHunger() {
-        super(Category.Player, "anti-hunger", "Lose your food slower.");
+        super(Category.Player, "anti-hunger", "Reduces hunger consumption.");
     }
 
     @Override

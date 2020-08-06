@@ -185,6 +185,7 @@ public class AutoArmor extends ToggleModule {
         int currentItemScore = -1;
         ItemStack itemStack;
         for (int a = 0; a < 4; a++) {
+            currentItemScore = 0;
             itemStack = mc.player.inventory.getArmorStack(a);
             if (EnchantmentHelper.hasBindingCurse(itemStack)) continue;
             if (itemStack.getItem() instanceof ArmorItem) {

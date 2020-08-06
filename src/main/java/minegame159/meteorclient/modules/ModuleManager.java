@@ -37,6 +37,8 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
     private final List<ToggleModule> active = new ArrayList<>();
     private Module moduleToBind;
 
+    public boolean onKeyOnlyBinding = false;
+
     public ModuleManager() {
         super(new File(MeteorClient.FOLDER, "modules.nbt"));
 
@@ -147,11 +149,13 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         }
 
         // Find module bound to that key
-        for (Module module : modules.values()) {
-            if (module.getKey() == event.key) {
-                module.doAction();
+        if (!onKeyOnlyBinding) {
+            for (Module module : modules.values()) {
+                if (module.getKey() == event.key) {
+                    module.doAction();
 
-                save();
+                    save();
+                }
             }
         }
     }, EventPriority.HIGHEST + 1);
@@ -161,7 +165,6 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         synchronized (active) {
             for (ToggleModule module : active) module.onActivate();
         }
-        INSTANCE.get(DiscordPresence.class).onActivate();
     });
 
     @EventHandler
@@ -274,6 +277,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new AntiLevitation());
         addModule(new Scaffold());
         addModule(new BoatFly());
+        addModule(new NoSlow());
     }
 
     private void initRender() {
