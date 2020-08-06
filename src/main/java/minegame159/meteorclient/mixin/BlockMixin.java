@@ -23,10 +23,10 @@ public class BlockMixin {
 
     @Inject(at = @At("HEAD"), method = "shouldDrawSide", cancellable = true)
     private static void onShouldDrawSide(BlockState state, BlockView view, BlockPos pos, Direction facing, CallbackInfoReturnable<Boolean> info) {
-        if (ModuleManager.INSTANCE.get(XRay.class).isBlocked(state.getBlock())) {
-            info.setReturnValue(false);
-        } else {
-            info.setReturnValue(true);
+        XRay xray = ModuleManager.INSTANCE.get(XRay.class);
+
+        if (xray.isActive()) {
+            info.setReturnValue(!xray.isBlocked(state.getBlock()));
         }
     }
 }
