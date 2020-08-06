@@ -70,12 +70,26 @@ public class OffhandExtra extends ToggleModule {
 
     private boolean isClicking = false;
     private boolean sentMessage = false;
+    private boolean noTotems = false;
+
+    @Override
+    public void onDeactivate() {
+        if (ModuleManager.INSTANCE.get(AutoTotem.class).isActive()) {
+            InvUtils.FindItemResult result = InvUtils.findItemWithCount(Items.TOTEM_OF_UNDYING);
+            boolean empty = mc.player.getOffHandStack().isEmpty();
+            if (result.slot != -1) {
+                InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
+                InvUtils.clickSlot(InvUtils.OFFHAND_SLOT, 0, SlotActionType.PICKUP);
+                if (!empty) InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
+            }
+        }
+    }
 
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
         if (!mc.player.isUsingItem()) isClicking = false;
         if (ModuleManager.INSTANCE.get(AutoTotem.class).getLocked()) return;
-        if (Asimov.get() && !(mc.currentScreen instanceof ContainerScreen<?>)) {
+        if ((Asimov.get() || noTotems) && !(mc.currentScreen instanceof ContainerScreen<?>)) {
             Item item = getItem();
             InvUtils.FindItemResult result = InvUtils.findItemWithCount(item);
             if (result.slot == -1 && mc.player.getOffHandStack().getItem() != getItem()) {
@@ -144,5 +158,11 @@ public class OffhandExtra extends ToggleModule {
         }
         return item;
     }
+
+    public void setTotems(boolean set) {
+        noTotems = set;
+    }
+
+    public boolean getMessageSent(){return sentMessage;}
 
 }

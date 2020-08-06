@@ -12,6 +12,7 @@ import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.DamageCalcUtils;
 import net.minecraft.command.arguments.EntityAnchorArgumentType;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
@@ -27,6 +28,7 @@ import net.minecraft.world.RayTraceContext;
 import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class KillAura extends ToggleModule {
     public enum Priority {
@@ -60,6 +62,16 @@ public class KillAura extends ToggleModule {
             .name("only-on-ground")
             .description("Only attacks players that are on the ground (useful to bypass anti-cheats)")
             .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Integer> hitChance = sgGeneral.add(new IntSetting.Builder()
+            .name("hit-chance")
+            .description("The probability of your hits counting")
+            .defaultValue(100)
+            .min(0)
+            .max(100)
+            .sliderMax(100)
             .build()
     );
 
@@ -136,6 +148,7 @@ public class KillAura extends ToggleModule {
     private Entity entity;
     private boolean didHit = false;
     private boolean wasPathing = false;
+    private final Random random = new Random(System.currentTimeMillis());
 
     private final Vec3d vec3d1 = new Vec3d(0, 0, 0);
     private final Vec3d vec3d2 = new Vec3d(0, 0, 0);
@@ -209,7 +222,7 @@ public class KillAura extends ToggleModule {
     }
 
     @EventHandler
-    private Listener<TickEvent> onTick = new Listener<>(event -> {
+    private final Listener<TickEvent> onTick = new Listener<>(event -> {
         if (mc.player.getHealth() <= 0) return;
 
         if(entity == null && wasPathing){
@@ -229,10 +242,9 @@ public class KillAura extends ToggleModule {
                 .min(this::sort)
                 .ifPresent(tempEntity -> {
                     entity = tempEntity;
+                    if (random.nextInt(100) > hitChance.get()) return;
                     if (entity instanceof PlayerEntity && instaKill.get()) {
-                        double damage = EnchantmentHelper.getLevel(Enchantments.SHARPNESS, mc.player.getMainHandStack()) > 0 ?
-                                (EnchantmentHelper.getLevel(Enchantments.SHARPNESS, mc.player.getMainHandStack()) * 0.5) + 0.5 : 0;
-                        if ((((PlayerEntity) entity).getHealth() + ((PlayerEntity) entity).getAbsorptionAmount()) - damage <= 0) {
+                        if (DamageCalcUtils.getSwordDamage((PlayerEntity) entity, false) >= ((PlayerEntity) entity).getHealth() + ((PlayerEntity) entity).getAbsorptionAmount()) {
                             if (rotate.get()) {
                                 ((IVec3d) vec3d1).set(entity.getX(), entity.getY() + entity.getHeight() / 2, entity.getZ());
                                 mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, vec3d1);
@@ -280,7 +292,7 @@ public class KillAura extends ToggleModule {
                 return;
             }
         }
-        if(entity != null) {
+        if(entity != null && random.nextInt(100) < hitChance.get()) {
             // Rotate
             if (rotate.get()) {
                 ((IVec3d) vec3d1).set(entity.getX(), entity.getY() + entity.getHeight() / 2, entity.getZ());

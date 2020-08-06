@@ -26,7 +26,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
@@ -100,7 +99,7 @@ public class LogoutSpot extends ToggleModule {
             int toRemove = -1;
 
             for (int i = 0; i < players.size(); i++) {
-                if (players.get(i).uuid.equals(event.entity.getUuidAsString())) {
+                if (players.get(i).uuid.equals(event.entity.getUuid())) {
                     toRemove = i;
                     break;
                 }
@@ -213,16 +212,16 @@ public class LogoutSpot extends ToggleModule {
             Matrices.scale(-scale, -scale, scale);
 
             // Render background
-            double i = MeteorClient.FONT.getStringWidth(name) / 2.0 + MeteorClient.FONT.getStringWidth(healthText) / 2.0;
+            double i = MeteorClient.FONT_2X.getStringWidth(name) / 2.0 + MeteorClient.FONT_2X.getStringWidth(healthText) / 2.0;
             ShapeBuilder.begin(null, GL11.GL_TRIANGLES, VertexFormats.POSITION_COLOR);
             ShapeBuilder.quad(-i - 1, -1, 0, -i - 1, 8, 0, i + 1, 8, 0, i + 1, -1, 0, BACKGROUND);
             ShapeBuilder.end();
 
             // Render name and health texts
-            MeteorClient.FONT.begin();
-            double hX = MeteorClient.FONT.renderString(name, -i, 0, TEXT);
-            MeteorClient.FONT.renderString(healthText, hX, 0, healthColor);
-            MeteorClient.FONT.end();
+            MeteorClient.FONT_2X.begin();
+            double hX = MeteorClient.FONT_2X.renderString(name, -i, 0, TEXT);
+            MeteorClient.FONT_2X.renderString(healthText, hX, 0, healthColor);
+            MeteorClient.FONT_2X.end();
 
             Matrices.pop();
         }

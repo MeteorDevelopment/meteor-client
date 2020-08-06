@@ -82,8 +82,8 @@ public class ElytraPlus extends ToggleModule {
     );
 
     private final Setting<Boolean> dontGoIntoUnloadedChunks = sgGeneral.add(new BoolSetting.Builder()
-            .name("dont-go-into-unloaded-chunks")
-            .description("Dont go into unloaded chunks.")
+            .name("don't-go-into-unloaded-chunks")
+            .description("Don't go into unloaded chunks.")
             .defaultValue(true)
             .build()
     );
@@ -110,7 +110,7 @@ public class ElytraPlus extends ToggleModule {
     private boolean lastForwardPressed;
 
     public ElytraPlus() {
-        super(Category.Movement, "Elytra+", "Makes elytra better,");
+        super(Category.Movement, "Elytra+", "Makes elytra better.");
     }
 
     @Override

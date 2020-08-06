@@ -17,6 +17,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 import org.lwjgl.opengl.GL11;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class GuiRenderer {
     public static final GuiRenderer INSTANCE = new GuiRenderer();
 
@@ -43,6 +46,8 @@ public class GuiRenderer {
     // Scissor stuff
     final Pool<Scissor> scissorPool = new Pool<>(Scissor::new);
     private Scissor scissor, currentScissor;
+
+    private final List<Runnable> customPostOperations = new ArrayList<>();
 
     private Operation tooltip;
 
@@ -71,6 +76,9 @@ public class GuiRenderer {
         scissorPool.free(scissor);
         scissor = null;
 
+        for (Runnable runnable : customPostOperations) runnable.run();
+        customPostOperations.clear();
+
         if (tooltip != null) {
             double x = ((TextOperation) tooltip).x - 2;
             double y = ((TextOperation) tooltip).y - 2;
@@ -85,6 +93,10 @@ public class GuiRenderer {
             tooltip.free(this);
             tooltip = null;
         }
+    }
+
+    public void addCustomPostOperation(Runnable runnable) {
+        customPostOperations.add(runnable);
     }
 
     // Scissor
