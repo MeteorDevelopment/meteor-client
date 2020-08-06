@@ -6,7 +6,6 @@ import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.waypoints.Waypoint;
 import minegame159.meteorclient.waypoints.Waypoints;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.world.dimension.DimensionType;
 
 public class WWaypoint extends WTable {
     private static final Color WHITE = new Color(255, 255, 255);
@@ -21,10 +20,10 @@ public class WWaypoint extends WTable {
 
         WLabel name = add(new WLabel(waypoint.name)).getWidget();
         boolean goodDimension = false;
-        DimensionType dimension = MinecraftClient.getInstance().player.dimension;
-        if (waypoint.overworld && dimension == DimensionType.OVERWORLD) goodDimension = true;
-        else if (waypoint.nether && dimension == DimensionType.THE_NETHER) goodDimension = true;
-        else if (waypoint.end && dimension == DimensionType.THE_END) goodDimension = true;
+        String dimension = MinecraftClient.getInstance().world.getDimensionRegistryKey().getValue().getPath();
+        if (waypoint.overworld && dimension.equals("overworld")) goodDimension = true;
+        else if (waypoint.nether && dimension.equals("the_nether")) goodDimension = true;
+        else if (waypoint.end && dimension.equals("the_end")) goodDimension = true;
         name.color = goodDimension ? WHITE : GRAY;
 
         add(new WCheckbox(waypoint.visible)).getWidget().action = checkbox -> {
