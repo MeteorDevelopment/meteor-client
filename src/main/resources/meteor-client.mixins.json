@@ -73,7 +73,10 @@
     "EnchantingTableBlockEntityRendererMixin",
     "SignBlockEntityRendererMixin",
     "SoundSystemMixin",
-    "PacketInflaterMixin"
+    "PacketInflaterMixin",
+    "CobwebBlockMixin",
+    "SoulSandBlockMixin",
+    "SlimeBlockMixin"
   ],
   "injectors": {
     "defaultRequire": 1

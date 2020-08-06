@@ -21,20 +21,23 @@ public abstract class Savable<T> implements ISerializable<T> {
         }
     }
     public void save() {
-        save(file);
+        save(getFile());
     }
 
-    public void load(File file) {
+    public boolean load(File file) {
         try {
             if (file.exists()) {
                 fromTag(NbtIo.read(file));
+                return true;
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        return false;
     }
-    public void load() {
-        load(file);
+    public boolean load() {
+        return load(getFile());
     }
 
     public File getFile() {

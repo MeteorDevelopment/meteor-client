@@ -15,11 +15,13 @@ import minegame159.meteorclient.gui.screens.topbar.TopBarModules;
 import minegame159.meteorclient.macros.MacroManager;
 import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.misc.DiscordPresence;
 import minegame159.meteorclient.rendering.MFont;
 import minegame159.meteorclient.utils.Capes;
 import minegame159.meteorclient.utils.EChestMemory;
 import minegame159.meteorclient.utils.EntityUtils;
 import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.waypoints.Waypoints;
 import net.arikia.dev.drpc.DiscordRPC;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
@@ -35,7 +37,7 @@ import java.io.*;
 public class MeteorClient implements ClientModInitializer, Listenable {
     public static MeteorClient INSTANCE;
     public static final EventBus EVENT_BUS = new EventManager();
-    public static MFont FONT;
+    public static MFont FONT, FONT_2X;
     public static boolean IS_DISCONNECTING;
     public static final File FOLDER = new File(FabricLoader.getInstance().getGameDirectory(), "meteor-client");
 
@@ -59,8 +61,9 @@ public class MeteorClient implements ClientModInitializer, Listenable {
         Utils.mc = mc;
         EntityUtils.mc = mc;
 
-        loadFont();
         Config.INSTANCE = new Config();
+        Config.INSTANCE.load();
+        loadFont();
 
         ModuleManager.INSTANCE = new ModuleManager();
         CommandManager.init();
@@ -70,14 +73,14 @@ public class MeteorClient implements ClientModInitializer, Listenable {
 
         load();
         Ignore.load();
+        Waypoints.loadIcons();
 
         EVENT_BUS.subscribe(this);
         Runtime.getRuntime().addShutdownHook(new Thread(this::stop));
     }
 
     public void load() {
-        Config.INSTANCE.load();
-        ModuleManager.INSTANCE.load();
+        if (!ModuleManager.INSTANCE.load()) ModuleManager.INSTANCE.get(DiscordPresence.class).toggle(false);
         FriendManager.INSTANCE.load();
         MacroManager.INSTANCE.load();
         AccountManager.INSTANCE.load();
@@ -162,8 +165,21 @@ public class MeteorClient implements ClientModInitializer, Listenable {
         TEXT_RENDERER = new TextRenderer(mc.getTextureManager(), fontStorage);*/
         try {
             FONT = new MFont(Font.createFont(Font.TRUETYPE_FONT, fontFile).deriveFont(16f), true, true);
+            FONT_2X = new MFont(Font.createFont(Font.TRUETYPE_FONT, fontFile).deriveFont(16f * 2), true, true);
+            FONT_2X.scale = 0.5;
         } catch (FontFormatException | IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    public void resetFont() {
+        File[] files = FOLDER.exists() ? FOLDER.listFiles() : new File[0];
+        if (files != null) {
+            for (File file : files) {
+                if (file.getName().endsWith(".ttf") || file.getName().endsWith(".TTF")) {
+                    file.delete();
+                }
+            }
         }
     }
 

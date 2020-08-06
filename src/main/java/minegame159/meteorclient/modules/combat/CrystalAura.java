@@ -143,6 +143,13 @@ public class CrystalAura extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> smartDelay = sgGeneral.add(new BoolSetting.Builder()
+            .name("smart-delay")
+            .description("Reduces crystal consumption when doing large amounts of damage.")
+            .defaultValue(true)
+            .build()
+    );
+
     private final Setting<Boolean> antiWeakness = sgGeneral.add(new BoolSetting.Builder()
             .name("anti-weakness")
             .description("Switches to tools when you have weakness")
@@ -217,8 +224,13 @@ public class CrystalAura extends ToggleModule {
 
                 Hand hand = Hand.MAIN_HAND;
                 if (mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() == Items.END_CRYSTAL) hand = Hand.OFF_HAND;
-                else if (mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL) return;
-                    placeBlock(bestBlock, hand);
+                else if (mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL) {return;}
+                placeBlock(bestBlock, hand);
+                if (smartDelay.get()){
+                    if (DamageCalcUtils.crystalDamage(target, target.getPos()) - DamageCalcUtils.crystalDamage(target, new Vec3d(bestBlock)) < 10) {
+                        delayLeft = 10;
+                    }
+                }
             }
             if (spoofChange.get() && preSlot != mc.player.inventory.selectedSlot) mc.player.inventory.selectedSlot = preSlot;
         }
