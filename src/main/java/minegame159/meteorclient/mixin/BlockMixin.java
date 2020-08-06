@@ -25,6 +25,8 @@ public class BlockMixin {
     private static void onShouldDrawSide(BlockState state, BlockView view, BlockPos pos, Direction facing, CallbackInfoReturnable<Boolean> info) {
         if (ModuleManager.INSTANCE.get(XRay.class).isBlocked(state.getBlock())) {
             info.setReturnValue(false);
+        } else {
+            info.setReturnValue(true);
         }
     }
 }
