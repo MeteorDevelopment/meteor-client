@@ -23,12 +23,13 @@ public class NoSlow extends ToggleModule {
             .build()
     );
 
-    private final Setting<Boolean> soulSand = sgGeneral.add(new BoolSetting.Builder()
+    // TODO: Why we still here, just to suffer?
+    /*private final Setting<Boolean> soulSand = sgGeneral.add(new BoolSetting.Builder()
             .name("soul-sand")
             .description("No slow from soul sand.")
             .defaultValue(true)
             .build()
-    );
+    );*/
 
     private final Setting<Boolean> slimeBlock = sgGeneral.add(new BoolSetting.Builder()
             .name("slime-block")
@@ -49,9 +50,9 @@ public class NoSlow extends ToggleModule {
         return isActive() && web.get();
     }
 
-    public boolean soulSand() {
+    /*public boolean soulSand() {
         return isActive() && soulSand.get();
-    }
+    }*/
 
     public boolean slimeBlock() {
         return isActive() && slimeBlock.get();
