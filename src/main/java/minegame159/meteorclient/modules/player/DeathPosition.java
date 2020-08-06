@@ -7,12 +7,27 @@ import minegame159.meteorclient.gui.widgets.WLabel;
 import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.settings.BoolSetting;
+import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.Chat;
+import minegame159.meteorclient.waypoints.Waypoint;
+import minegame159.meteorclient.waypoints.Waypoints;
+import net.minecraft.world.dimension.DimensionType;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class DeathPosition extends ToggleModule {
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+
+    private final Setting<Boolean> createWaypoint = sgGeneral.add(new BoolSetting.Builder()
+            .name("create-waypoint")
+            .description("Creates waypoint when you die.")
+            .defaultValue(true)
+            .build()
+    );
+
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
 
     private final WLabel label = new WLabel("No latest death");
@@ -26,7 +41,25 @@ public class DeathPosition extends ToggleModule {
         if (event.entity.getUuid() != null && event.entity.getUuid().equals(mc.player.getUuid()) && event.entity.getHealth() <= 0) {
             label.setText(String.format("Latest death: %.1f, %.1f, %.1f", mc.player.x, mc.player.y, mc.player.z));
 
-            Chat.info(this, "Died at (highlight)%.0f(default), (highlight)%.0f(default), (highlight)%.0f (default)on (highlight)%s(default).", mc.player.x, mc.player.y, mc.player.z, dateFormat.format(new Date()));
+            String time = dateFormat.format(new Date());
+            Chat.info(this, "Died at (highlight)%.0f(default), (highlight)%.0f(default), (highlight)%.0f (default)on (highlight)%s(default).", mc.player.x, mc.player.y, mc.player.z, time);
+
+            // Create waypoint
+            if (createWaypoint.get()) {
+                Waypoint waypoint = new Waypoint();
+                waypoint.name = "Death " + time;
+
+                waypoint.x = (int) mc.player.x;
+                waypoint.y = (int) mc.player.y + 2;
+                waypoint.z = (int) mc.player.z;
+                waypoint.maxVisibleDistance = Integer.MAX_VALUE;
+
+                if (mc.player.dimension == DimensionType.OVERWORLD) waypoint.overworld = true;
+                else if (mc.player.dimension == DimensionType.THE_NETHER) waypoint.nether = true;
+                else if (mc.player.dimension == DimensionType.THE_END) waypoint.end = true;
+
+                Waypoints.INSTANCE.add(waypoint);
+            }
         }
     });
 
