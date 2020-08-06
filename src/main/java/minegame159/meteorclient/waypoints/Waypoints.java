@@ -146,8 +146,10 @@ public class Waypoints extends Savable<Waypoints> implements Listenable, Iterabl
             waypoint.renderIcon(-8, 9, 0, a);
 
             // Render name text
+            MeteorClient.FONT_2X.begin();
             MeteorClient.FONT_2X.renderString(waypoint.name, -i, -MeteorClient.FONT_2X.getHeight(), TEXT);
             MeteorClient.FONT_2X.renderString(distText, -i2, 0, TEXT);
+            MeteorClient.FONT_2X.end();
 
             Matrices.pop();
 
