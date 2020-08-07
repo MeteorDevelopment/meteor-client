@@ -245,9 +245,11 @@ public class AnchorAura extends ToggleModule {
     }
 
     private List<BlockPos> findAnchors(PlayerEntity target) {
+        assert mc.player != null;
         Iterator<BlockPos> allBlocks = getRange(mc.player.getBlockPos(), breakRange.get()).iterator();
         List<BlockPos> validBlocks = new ArrayList<>();
         for(BlockPos i = null; allBlocks.hasNext(); i = allBlocks.next()){
+            assert mc.world != null;
             if (mc.world.getBlockState(i).getBlock() == Blocks.RESPAWN_ANCHOR) {
                 validBlocks.add(i);
             }
