@@ -60,17 +60,18 @@ public abstract class ChatHudMixin {
         }
 
         //Friend Colour
-        if (ModuleManager.INSTANCE.get(FriendColor.class).isActive() && !message.asString().split(" ")[1].equals(lastMessage)) {
-            for (Friend friend : FriendManager.INSTANCE.getAll()) {
-                if (message.asString().contains(friend.name)) {
-                    lastMessage = message.asString().split(" ")[1];
-                    String convert = message.asString().substring(("<" + friend.name + ">").length());
-                    Utils.sendMessage("<§d" + friend.name + "§r>" + convert);
-                    lastMessage = null;
-                    info.cancel();
-                    return;
+        if (ModuleManager.INSTANCE.get(FriendColor.class).isActive() && !message.asString().equals(lastMessage)) {
+            String convert = message.asString();
+            List<Friend> friends = FriendManager.INSTANCE.getAll();
+            for (Friend friend : friends) {
+                if (convert.contains(friend.name)) {
+                    convert = convert.replaceAll(friend.name, "§d" + friend.name + "§r");
                 }
             }
+            lastMessage = convert;
+            Utils.sendMessage(convert);
+            lastMessage = null;
+            info.cancel();
         }
     }
 
