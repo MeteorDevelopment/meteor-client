@@ -9,6 +9,7 @@ import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.player.InvMove;
+import minegame159.meteorclient.utils.Input;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.Keyboard;
 import net.minecraft.client.MinecraftClient;
@@ -31,6 +32,8 @@ public abstract class KeyboardMixin {
     @Inject(method = "onKey", at = @At("HEAD"), cancellable = true)
     public void onKey(long window, int key, int scancode, int i, int j, CallbackInfo info) {
         if (key != GLFW.GLFW_KEY_UNKNOWN && GuiThings.postKeyEvents()) {
+            Input.setKeyState(key, i != GLFW.GLFW_RELEASE);
+
             KeyBinding shulkerPeek = MeteorClient.INSTANCE.shulkerPeek;
             if (shulkerPeek.matchesKey(key, scancode) && (i == GLFW.GLFW_PRESS || i == GLFW.GLFW_REPEAT)) ((IKeyBinding) shulkerPeek).setPressed(true);
             else ((IKeyBinding) shulkerPeek).setPressed(false);
@@ -45,11 +48,6 @@ public abstract class KeyboardMixin {
                     ModuleManager.INSTANCE.onKeyOnlyBinding = false;
                 }
                 return;
-            }
-
-            if (ModuleManager.INSTANCE.isActive(InvMove.class) && !(client.currentScreen instanceof ChatScreen) && !(client.currentScreen instanceof SignEditScreen)) {
-                InputUtil.KeyCode keyCode = InputUtil.getKeyCode(key, scancode);
-                KeyBinding.setKeyPressed(keyCode, i == GLFW.GLFW_PRESS);
             }
 
             if (!client.isPaused() && (client.currentScreen == null || (client.currentScreen instanceof WidgetScreen && GuiThings.postKeyEvents()))) {
