@@ -35,8 +35,8 @@ dependencies {
 	include "com.github.ZeroMemes:Alpine:1.9"
 	include "net.jodah:typetools:0.5.0"
 
-	modImplementation "com.github.Vatuu:discord-rpc:1.6.2"
-	include "com.github.Vatuu:discord-rpc:1.6.2"
+	modImplementation "com.jagrosh:DiscordIPC:0.4"
+	include "com.jagrosh:DiscordIPC:0.4"
 
 	modImplementation "com.gitlab.CDAGaming:fabritone:fabritone~1.14.x-Fabric-SNAPSHOT"
 	include "com.gitlab.CDAGaming:fabritone:fabritone~1.14.x-Fabric-SNAPSHOT"
