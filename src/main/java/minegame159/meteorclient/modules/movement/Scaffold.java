@@ -5,10 +5,7 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
-import minegame159.meteorclient.settings.BoolSetting;
-import minegame159.meteorclient.settings.IntSetting;
-import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -17,6 +14,9 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.shape.VoxelShapes;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Scaffold extends ToggleModule {
     private final SettingGroup sg = settings.getDefaultGroup();
@@ -49,6 +49,13 @@ public class Scaffold extends ToggleModule {
             .name("swing-hand")
             .description("Only client side.")
             .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<List<Block>> blackList = sg.add(new BlockListSetting.Builder()
+            .name("blacklist")
+            .description("Stops you from placing certain blocks as scaffold.")
+            .defaultValue(new ArrayList<>())
             .build()
     );
 
@@ -173,6 +180,8 @@ public class Scaffold extends ToggleModule {
         for (int i = 0; i < 9; i++) {
             ItemStack stack = mc.player.inventory.getInvStack(i);
             if (stack.isEmpty() || !(stack.getItem() instanceof BlockItem)) continue;
+
+            if (blackList.get().contains(Block.getBlockFromItem(stack.getItem()))) continue;
 
             // Filter out non solid blocks
             Block block = ((BlockItem) stack.getItem()).getBlock();
