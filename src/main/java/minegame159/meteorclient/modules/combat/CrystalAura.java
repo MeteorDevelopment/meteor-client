@@ -163,6 +163,7 @@ public class CrystalAura extends ToggleModule {
 
     private int preSlot;
     private int delayLeft = delay.get();
+    private Vec3d bestBlock;
 
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
@@ -194,7 +195,7 @@ public class CrystalAura extends ToggleModule {
                     target = i;
                 }
             }
-            BlockPos bestBlock = findValidBlocks(target);
+            bestBlock = findValidBlocks(target);
             if (bestBlock != null) {
 
                 if(autoSwitch.get() && mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL){
@@ -210,7 +211,7 @@ public class CrystalAura extends ToggleModule {
                 else if (mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL) {return;}
                 placeBlock(bestBlock, hand);
                 if (smartDelay.get()){
-                    if (DamageCalcUtils.crystalDamage(target, target.getPos()) - DamageCalcUtils.crystalDamage(target, new Vec3d(bestBlock)) < 10) {
+                    if (DamageCalcUtils.crystalDamage(target, target.getPos()) - DamageCalcUtils.crystalDamage(target, bestBlock) < 10) {
                         delayLeft = 10;
                     }
                 }
@@ -236,7 +237,7 @@ public class CrystalAura extends ToggleModule {
                         }
                     }
 
-                    Vec3d vec1 = new Vec3d(entity.getBlockPos());
+                    Vec3d vec1 = entity.getPos();
                     PlayerMoveC2SPacket.LookOnly packet = new PlayerMoveC2SPacket.LookOnly(Utils.getNeededYaw(vec1), Utils.getNeededPitch(vec1), mc.player.onGround);
                     mc.player.networkHandler.sendPacket(packet);
 
@@ -246,37 +247,38 @@ public class CrystalAura extends ToggleModule {
                 });
     }, EventPriority.HIGH);
 
-    private void placeBlock(BlockPos block, Hand hand){
-        Vec3d vec1 = new Vec3d(block).add(0.5, 0.5, 0.5);
+    private void placeBlock(Vec3d block, Hand hand){
+        Vec3d vec1 = block.add(0.5, 0.5, 0.5);
         PlayerMoveC2SPacket.LookOnly packet = new PlayerMoveC2SPacket.LookOnly(Utils.getNeededYaw(vec1), Utils.getNeededPitch(vec1), mc.player.onGround);
         mc.player.networkHandler.sendPacket(packet);
 
-        mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(new Vec3d(block), Direction.UP, block , false));
+        mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(block, Direction.UP, new BlockPos(block), false));
         mc.player.swingHand(Hand.MAIN_HAND);
     }
 
-    private BlockPos findValidBlocks(AbstractClientPlayerEntity target){
-        BlockPos bestBlock = null;
+    private Vec3d findValidBlocks(AbstractClientPlayerEntity target){
+        bestBlock = null;
         BlockPos playerPos = mc.player.getBlockPos();
+        Vec3d pos;
         for(double i = playerPos.getX() - placeRange.get(); i < playerPos.getX() + placeRange.get(); i++){
             for(double j = playerPos.getZ() - placeRange.get(); j < playerPos.getZ() + placeRange.get(); j++){
                 for(int k = playerPos.getY() - 3; k < playerPos.getY() + 3; k++){
-                    BlockPos pos = new BlockPos(i, k, j);
-                    if((mc.world.getBlockState(pos).getBlock() == Blocks.BEDROCK
-                            || mc.world.getBlockState(pos).getBlock() == Blocks.OBSIDIAN)
-                            && isEmpty(pos.up())){
+                    pos = new Vec3d(i, k, j);
+                    if((mc.world.getBlockState(new BlockPos(pos)).getBlock() == Blocks.BEDROCK
+                            || mc.world.getBlockState(new BlockPos(pos)).getBlock() == Blocks.OBSIDIAN)
+                            && isEmpty(new BlockPos(pos.add(0, 1, 0)))){
                         if (!strict.get()) {
                             if (bestBlock == null) bestBlock = pos;
-                            if (DamageCalcUtils.crystalDamage(target, new Vec3d(bestBlock))
-                                    < DamageCalcUtils.crystalDamage(target, new Vec3d(pos))
-                                    && DamageCalcUtils.crystalDamage(mc.player, new Vec3d(pos)) < minDamage.get()) {
+                            if (DamageCalcUtils.crystalDamage(target, bestBlock)
+                                    < DamageCalcUtils.crystalDamage(target, pos)
+                                    && DamageCalcUtils.crystalDamage(mc.player, pos) < minDamage.get()) {
                                 bestBlock = pos;
                             }
-                        } else if (strict.get() && isEmpty(pos.up(2))) {
+                        } else if (strict.get() && isEmpty(new BlockPos(pos.add(0, 2, 0)))) {
                             if (bestBlock == null) bestBlock = pos;
-                            if (DamageCalcUtils.crystalDamage(target, new Vec3d(bestBlock))
-                                    < DamageCalcUtils.crystalDamage(target, new Vec3d(pos))
-                                    && DamageCalcUtils.crystalDamage(mc.player, new Vec3d(pos)) < minDamage.get()) {
+                            if (DamageCalcUtils.crystalDamage(target, bestBlock)
+                                    < DamageCalcUtils.crystalDamage(target, pos)
+                                    && DamageCalcUtils.crystalDamage(mc.player, pos) < minDamage.get()) {
                                 bestBlock = pos;
                             }
                         }
