@@ -34,6 +34,13 @@ public class InvMove extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> sprint = sgGeneral.add(new BoolSetting.Builder()
+            .name("sprint")
+            .description("Allows you to sprint.")
+            .defaultValue(true)
+            .build()
+    );
+
     private final Setting<Boolean> arrowsRotate = sgGeneral.add(new BoolSetting.Builder()
             .name("arrows-rotate")
             .description("Allows you to use arrow keys to rotate.")
@@ -44,7 +51,7 @@ public class InvMove extends ToggleModule {
     private final Setting<Double> rotateSpeed = sgGeneral.add(new DoubleSetting.Builder()
             .name("rotate-speed")
             .description("Rotation speed.")
-            .defaultValue(1)
+            .defaultValue(4)
             .min(0)
             .build()
     );
@@ -55,11 +62,11 @@ public class InvMove extends ToggleModule {
 
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
-        if (!isCorrectScreen()) tickSneakAndJump();
+        if (!skip()) tickSneakJumpAndSprint();
     });
 
     public void tick() {
-        if (!isActive() || isCorrectScreen()) return;
+        if (!isActive() || skip()) return;
 
         mc.player.input.movementForward = 0;
         mc.player.input.movementSideways = 0;
@@ -84,7 +91,7 @@ public class InvMove extends ToggleModule {
             mc.player.input.movementSideways++;
         } else mc.player.input.pressingLeft = false;
 
-        tickSneakAndJump();
+        tickSneakJumpAndSprint();
 
         if (arrowsRotate.get()) {
             if (Input.isPressed(GLFW.GLFW_KEY_RIGHT)) mc.player.yaw += rotateSpeed.get();
@@ -96,12 +103,13 @@ public class InvMove extends ToggleModule {
         }
     }
 
-    private void tickSneakAndJump() {
+    private void tickSneakJumpAndSprint() {
         mc.player.input.jumping = jump.get() && Input.isPressed(mc.options.keyJump);
         mc.player.input.sneaking = sneak.get() && Input.isPressed(mc.options.keySneak);
+        mc.player.setSprinting(sprint.get() && Input.isPressed(mc.options.keySprint));
     }
 
-    private boolean isCorrectScreen() {
+    private boolean skip() {
         return mc.currentScreen == null || mc.currentScreen instanceof WidgetScreen || mc.currentScreen instanceof ChatScreen || mc.currentScreen instanceof SignEditScreen || mc.currentScreen instanceof AnvilScreen;
     }
 }
