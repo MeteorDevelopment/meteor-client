@@ -2,59 +2,110 @@ package minegame159.meteorclient.modules.misc;
 
 //Created by squidoodly 12/05/2020
 
+import com.jagrosh.discordipc.IPCClient;
+import com.jagrosh.discordipc.IPCListener;
+import com.jagrosh.discordipc.entities.RichPresence;
+import com.jagrosh.discordipc.exceptions.NoDiscordClientException;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.utils.Utils;
-import net.arikia.dev.drpc.DiscordEventHandlers;
-import net.arikia.dev.drpc.DiscordRPC;
-import net.arikia.dev.drpc.DiscordRichPresence;
+import org.json.JSONObject;
+
+import java.time.OffsetDateTime;
 
 public class DiscordPresence extends ToggleModule {
-    private final static DiscordRichPresence presence = new DiscordRichPresence.Builder("Meteor on Crack!").build();
+    private enum SmallImage {
+        MineGame("minegame", "MineGame159"),
+        Squid("squidoodly", "squidoodly");
 
-    public DiscordPresence(){super(Category.Misc, "discord-presence", "That stuff you see in discord");}
+        private final String key, text;
 
-    private int ticks = 0;
-
-    @EventHandler
-    private final Listener<TickEvent> OnTick = new Listener<>(event -> {
-        ticks++;
-        if(ticks < 200){
-            DiscordPresence.presence.smallImageKey = "minegame";
-            DiscordPresence.presence.smallImageText = "MineGame159";
-        }else if(ticks < 400){
-            DiscordPresence.presence.smallImageKey = "squidoodly";
-            DiscordPresence.presence.smallImageText = "squidoodly";
-        }else{
-            ticks = 0;
+        SmallImage(String key, String text) {
+            this.key = key;
+            this.text = text;
         }
-        DiscordRPC.discordUpdatePresence(presence);
-        DiscordRPC.discordRunCallbacks();
-    });
+
+        void apply(RichPresence.Builder presence) {
+            presence.setSmallImage(key, text);
+        }
+
+        SmallImage next() {
+            if (this == MineGame) return Squid;
+            return MineGame;
+        }
+    }
+
+    private IPCClient client;
+    private final RichPresence.Builder presence = new RichPresence.Builder();
+
+    private boolean ready;
+    private int ticks;
+    private SmallImage currentSmallImage;
+
+    public DiscordPresence() {
+        super(Category.Misc, "discord-presence", "That stuff you see in discord");
+
+        client = new IPCClient(709793491911180378L);
+        client.setListener(new IPCListener() {
+            @Override
+            public void onReady(IPCClient client) {
+                ready = true;
+
+                presence.setStartTimestamp(OffsetDateTime.now());
+                if (mc.isInSingleplayer()) presence.setDetails(getName() + " || SinglePlayer");
+                else presence.setDetails(getName() + " || " + getServer());
+                presence.setLargeImage("meteor_client", "https://meteorclient.com/");
+                currentSmallImage.apply(presence);
+
+                client.sendRichPresence(presence.build());
+            }
+
+            @Override
+            public void onClose(IPCClient client, JSONObject json) {
+                ready = false;
+            }
+
+            @Override
+            public void onDisconnect(IPCClient client, Throwable t) {
+                ready = false;
+            }
+        });
+    }
 
     @Override
     public void onActivate(){
-        DiscordEventHandlers handlers = new DiscordEventHandlers.Builder()
-                .setReadyEventHandler(user -> {System.out.println("Initializing Discord Presence");}).build();
-        DiscordRPC.discordInitialize("709793491911180378", handlers, true);
-        DiscordPresence.presence.startTimestamp = System.currentTimeMillis()/1000;
-        if(mc.isInSingleplayer()) {
-            DiscordPresence.presence.details = getName() + " || SinglePlayer";
-        }else{
-            DiscordPresence.presence.details = getName() + " || " + getServer();
+        ticks = 0;
+        currentSmallImage = SmallImage.MineGame;
+
+        try {
+            client.connect();
+        } catch (NoDiscordClientException e) {
+            e.printStackTrace();
         }
-        DiscordPresence.presence.largeImageKey = "meteor_client";
-        DiscordPresence.presence.largeImageText = "https://meteorclient.com/";
-        DiscordRPC.discordUpdatePresence(presence);
     }
 
     @Override
     public void onDeactivate(){
-        DiscordRPC.discordShutdown();
+        client.close();
     }
+
+    @EventHandler
+    private final Listener<TickEvent> OnTick = new Listener<>(event -> {
+        if (ready) {
+            ticks++;
+
+            if (ticks >= 200) {
+                currentSmallImage = currentSmallImage.next();
+                currentSmallImage.apply(presence);
+                client.sendRichPresence(presence.build());
+
+                ticks = 0;
+            }
+        }
+    });
 
     private String getServer(){
         return Utils.getWorldName();
