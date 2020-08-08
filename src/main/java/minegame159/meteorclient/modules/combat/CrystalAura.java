@@ -194,19 +194,7 @@ public class CrystalAura extends ToggleModule {
                     target = i;
                 }
             }
-            List<BlockPos> validBlocks = findValidBlocks(target);
-
-            BlockPos bestBlock = null;
-            for (BlockPos blockPos : validBlocks) {
-                if (DamageCalcUtils.crystalDamage(target, new Vec3d(blockPos.up())) > minDamage.get()) {
-                    if (bestBlock == null) {
-                        bestBlock = blockPos;
-                    } else if (DamageCalcUtils.crystalDamage(target, new Vec3d(blockPos.up()))
-                            > DamageCalcUtils.crystalDamage(target, new Vec3d(bestBlock.up()))) {
-                        bestBlock = blockPos;
-                    }
-                }
-            }
+            BlockPos bestBlock = findValidBlocks(target);
             if (bestBlock != null) {
 
                 if(autoSwitch.get() && mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL){
@@ -267,38 +255,34 @@ public class CrystalAura extends ToggleModule {
         mc.player.swingHand(Hand.MAIN_HAND);
     }
 
-    private List<BlockPos> findValidBlocks(AbstractClientPlayerEntity target){
-        Iterator<BlockPos> allBlocks = getRange(mc.player.getBlockPos(), placeRange.get()).iterator();
-        List<BlockPos> validBlocks = new ArrayList<>();
-        for(BlockPos i = null; allBlocks.hasNext(); i = allBlocks.next()){
-            if(i == null) continue;
-            if((mc.world.getBlockState(i).getBlock() == Blocks.BEDROCK
-                    || mc.world.getBlockState(i).getBlock() == Blocks.OBSIDIAN)
-                    && isEmpty(i.up())){
-                if (!strict.get()) {
-                    validBlocks.add(i);
-                } else if (strict.get() && isEmpty(i.up(2))) {
-                    validBlocks.add(i);
+    private BlockPos findValidBlocks(AbstractClientPlayerEntity target){
+        BlockPos bestBlock = null;
+        BlockPos playerPos = mc.player.getBlockPos();
+        for(double i = playerPos.getX() - placeRange.get(); i < playerPos.getX() + placeRange.get(); i++){
+            for(double j = playerPos.getZ() - placeRange.get(); j < playerPos.getZ() + placeRange.get(); j++){
+                for(int k = playerPos.getY() - 3; k < playerPos.getY() + 3; k++){
+                    BlockPos pos = new BlockPos(i, k, j);
+                    if((mc.world.getBlockState(pos).getBlock() == Blocks.BEDROCK
+                            || mc.world.getBlockState(pos).getBlock() == Blocks.OBSIDIAN)
+                            && isEmpty(pos.up())){
+                        if (!strict.get()) {
+                            if (bestBlock == null) bestBlock = pos;
+                            if (DamageCalcUtils.crystalDamage(target, new Vec3d(bestBlock))
+                                    < DamageCalcUtils.crystalDamage(target, new Vec3d(pos))) {
+                                bestBlock = pos;
+                            }
+                        } else if (strict.get() && isEmpty(pos.up(2))) {
+                            if (bestBlock == null) bestBlock = pos;
+                            if (DamageCalcUtils.crystalDamage(target, new Vec3d(bestBlock))
+                                    < DamageCalcUtils.crystalDamage(target, new Vec3d(pos))) {
+                                bestBlock = pos;
+                            }
+                        }
+                    }
                 }
             }
         }
-        validBlocks.sort(Comparator.comparingDouble(value ->  DamageCalcUtils.crystalDamage(target, new Vec3d(value.up()))));
-        validBlocks.removeIf(blockpos -> DamageCalcUtils.crystalDamage(mc.player, new Vec3d(blockpos.up())) > maxDamage.get());
-        Collections.reverse(validBlocks);
-        return validBlocks;
-    }
-
-    private List<BlockPos> getRange(BlockPos player, double range){
-        List<BlockPos> allBlocks = new ArrayList<>();
-        for(double i = player.getX() - range; i < player.getX() + range; i++){
-            for(double j = player.getZ() - range; j < player.getZ() + range; j++){
-                for(int k = player.getY() - 3; k < player.getY() + 3; k++){
-                    BlockPos x = new BlockPos(i, k, j);
-                    allBlocks.add(x);
-                }
-            }
-        }
-        return allBlocks;
+        return bestBlock;
     }
 
     private float getTotalHealth(PlayerEntity target) {
