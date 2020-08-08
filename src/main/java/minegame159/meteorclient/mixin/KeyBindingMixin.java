@@ -18,7 +18,7 @@ public class KeyBindingMixin implements IKeyBinding {
     }
 
     @Override
-    public InputUtil.KeyCode getKeyCode() {
+    public InputUtil.KeyCode getKey() {
         return keyCode;
     }
 }
