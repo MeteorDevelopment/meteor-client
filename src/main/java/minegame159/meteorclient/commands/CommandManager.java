@@ -30,6 +30,7 @@ public class CommandManager {
         addCommand(new VClip());
         addCommand(new Friend());
         addCommand(new ResetGui());
+        addCommand(new Peek());
     }
 
     public static Command get(String name) {
