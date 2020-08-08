@@ -59,6 +59,13 @@ public class Scaffold extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> selfToggle = sg.add(new BoolSetting.Builder()
+            .name("self-toggle")
+            .description("Toggles when you run out of blocks.")
+            .defaultValue(true)
+            .build()
+    );
+
     private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
     private BlockState blockState, slotBlockState;
     private int slot, prevSelectedSlot;
@@ -156,6 +163,7 @@ public class Scaffold extends ToggleModule {
             slot = findSlot(blockState);
             if (slot == -1) {
                 mc.player.inventory.selectedSlot = prevSelectedSlot;
+                if (selfToggle.get()) this.toggle();
                 return false;
             }
         }
