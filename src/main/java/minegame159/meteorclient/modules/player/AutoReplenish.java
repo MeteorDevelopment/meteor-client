@@ -126,25 +126,26 @@ public class AutoReplenish extends ToggleModule {
         // OffHand, stackable items
         if (offhand.get()) {
             ItemStack stack = mc.player.getOffHandStack();
-            if(stack.getItem() == Items.AIR) return;
-            if(stack.getCount() < amount.get() && (stack.getMaxCount() > amount.get() || stack.getCount() < stack.getMaxCount())) {
-                int slot = -1;
-                for (int i = 9; i < mc.player.inventory.main.size(); i++) {
-                    if (mc.player.inventory.getInvStack(i).getItem() == stack.getItem()) {
-                        slot = i;
-                        break;
-                    }
-                }
-                if (searchHotbar.get() && slot == -1) {
-                    for (int j = 0; j < 9; j++) {
-                        if (mc.player.inventory.getInvStack(j).getItem() == stack.getItem()) {
-                            slot = j;
+            if(stack.getItem() != Items.AIR) {
+                if (stack.getCount() < amount.get() && (stack.getMaxCount() > amount.get() || stack.getCount() < stack.getMaxCount())) {
+                    int slot = -1;
+                    for (int i = 9; i < mc.player.inventory.main.size(); i++) {
+                        if (mc.player.inventory.getInvStack(i).getItem() == stack.getItem()) {
+                            slot = i;
                             break;
                         }
                     }
-                }
-                if (slot != -1) {
-                    moveItems(slot, InvUtils.OFFHAND_SLOT, true);
+                    if (searchHotbar.get() && slot == -1) {
+                        for (int j = 0; j < 9; j++) {
+                            if (mc.player.inventory.getInvStack(j).getItem() == stack.getItem()) {
+                                slot = j;
+                                break;
+                            }
+                        }
+                    }
+                    if (slot != -1) {
+                        moveItems(slot, InvUtils.OFFHAND_SLOT, true);
+                    }
                 }
             }
         }
