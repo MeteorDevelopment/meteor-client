@@ -268,13 +268,15 @@ public class CrystalAura extends ToggleModule {
                         if (!strict.get()) {
                             if (bestBlock == null) bestBlock = pos;
                             if (DamageCalcUtils.crystalDamage(target, new Vec3d(bestBlock))
-                                    < DamageCalcUtils.crystalDamage(target, new Vec3d(pos))) {
+                                    < DamageCalcUtils.crystalDamage(target, new Vec3d(pos))
+                                    && DamageCalcUtils.crystalDamage(mc.player, new Vec3d(pos)) < minDamage.get()) {
                                 bestBlock = pos;
                             }
                         } else if (strict.get() && isEmpty(pos.up(2))) {
                             if (bestBlock == null) bestBlock = pos;
                             if (DamageCalcUtils.crystalDamage(target, new Vec3d(bestBlock))
-                                    < DamageCalcUtils.crystalDamage(target, new Vec3d(pos))) {
+                                    < DamageCalcUtils.crystalDamage(target, new Vec3d(pos))
+                                    && DamageCalcUtils.crystalDamage(mc.player, new Vec3d(pos)) < minDamage.get()) {
                                 bestBlock = pos;
                             }
                         }
