@@ -195,6 +195,20 @@ public class Scaffold extends ToggleModule {
             break;
         }
 
+        ItemStack handStack = mc.player.getMainHandStack();
+        if (handStack.isEmpty() || !(handStack.getItem() instanceof BlockItem)) return slot;
+
+        if (blackList.get().contains(Block.getBlockFromItem(handStack.getItem()))) return slot;
+
+        // Filter out non solid blocks
+        Block block = ((BlockItem) handStack.getItem()).getBlock();
+        slotBlockState = block.getDefaultState();
+        if (!Block.isShapeFullCube(slotBlockState.getCollisionShape(mc.world, setPos(0, -1, 0)))) return slot;
+
+        // Filter out blocks that would fall
+        if (block instanceof FallingBlock && FallingBlock.canFallThrough(blockState)) return slot;
+        slot = mc.player.inventory.selectedSlot;
+
         return slot;
     }
 
