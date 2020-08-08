@@ -65,6 +65,13 @@ public class KillAura extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> nametagged = sgGeneral.add(new BoolSetting.Builder()
+            .name("nametagged")
+            .description("Hit nametagged mobs.")
+            .defaultValue(false)
+            .build()
+    );
+
     private final Setting<Integer> hitChance = sgGeneral.add(new IntSetting.Builder()
             .name("hit-chance")
             .description("The probability of your hits counting")
@@ -221,6 +228,15 @@ public class KillAura extends ToggleModule {
         }
     }
 
+    private boolean checkName(Entity entity){
+        if (entity.hasCustomName() && !nametagged.get()) {
+            return false;
+        } else if (entity.hasCustomName() && nametagged.get()) {
+            return true;
+        }
+        return true;
+    }
+
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
         if (mc.player.getHealth() <= 0) return;
@@ -239,6 +255,7 @@ public class KillAura extends ToggleModule {
                 .filter(this::canSeeEntity)
                 .filter(Entity::isAlive)
                 .filter(this::isPlayerOnGround)
+                .filter(this::checkName)
                 .min(this::sort)
                 .ifPresent(tempEntity -> {
                     entity = tempEntity;
