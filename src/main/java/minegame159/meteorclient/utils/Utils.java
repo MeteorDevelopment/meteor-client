@@ -298,6 +298,9 @@ public class Utils {
     public static int random(int min, int max) {
         return random.nextInt(max - min) + min;
     }
+    public static double random(double min, double max) {
+        return min + (max - min) * random.nextDouble();
+    }
 
     public static void sendMessage(String msg, Object... args) {
         if (mc.player == null) return;

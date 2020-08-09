@@ -16,7 +16,7 @@ import java.nio.ByteBuffer;
 
 public class MFont {
     private static final int IMG_SIZE = 512;
-    private static final minegame159.meteorclient.utils.Color SHADOW_COLOR = new minegame159.meteorclient.utils.Color(25, 25, 25, 175);
+    private static final minegame159.meteorclient.utils.Color SHADOW_COLOR = new minegame159.meteorclient.utils.Color(60, 60, 60, 180);
 
     private final MeshBuilder mb = new MeshBuilder(16384);
     private final Texture texture;

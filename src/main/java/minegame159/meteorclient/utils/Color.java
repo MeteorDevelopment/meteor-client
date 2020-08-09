@@ -124,4 +124,61 @@ public class Color implements ISerializable<Color> {
     public static int toRGBAA(int color) {
         return (color >> 24) & 0x000000FF;
     }
+
+    public static Color fromHsv(double h, double s, double v) {
+        double      hh, p, q, t, ff;
+        int        i;
+        double      r, g, b;
+
+        if(s <= 0.0) {       // < is bogus, just shuts up warnings
+            r = v;
+            g = v;
+            b = v;
+            return new Color((int) (r * 255), (int) (g * 255), (int) (b * 255), 255);
+        }
+        hh = h;
+        if(hh >= 360.0) hh = 0.0;
+        hh /= 60.0;
+        i = (int) hh;
+        ff = hh - i;
+        p = v * (1.0 - s);
+        q = v * (1.0 - (s * ff));
+        t = v * (1.0 - (s * (1.0 - ff)));
+
+        switch(i) {
+            case 0:
+                r = v;
+                g = t;
+                b = p;
+                break;
+            case 1:
+                r = q;
+                g = v;
+                b = p;
+                break;
+            case 2:
+                r = p;
+                g = v;
+                b = t;
+                break;
+
+            case 3:
+                r = p;
+                g = q;
+                b = v;
+                break;
+            case 4:
+                r = t;
+                g = p;
+                b = v;
+                break;
+            case 5:
+            default:
+                r = v;
+                g = p;
+                b = q;
+                break;
+        }
+        return new Color((int) (r * 255), (int) (g * 255), (int) (b * 255), 255);
+    }
 }
