@@ -40,6 +40,9 @@ dependencies {
 
 	modImplementation "com.gitlab.CDAGaming:fabritone:fabritone~1.14.x-Fabric-SNAPSHOT"
 	include "com.gitlab.CDAGaming:fabritone:fabritone~1.14.x-Fabric-SNAPSHOT"
+
+	modImplementation "org.json:json:20200518"
+	include "org.json:json:20200518"
 }
 
 processResources {
