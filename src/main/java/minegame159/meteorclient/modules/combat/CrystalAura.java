@@ -166,60 +166,11 @@ public class CrystalAura extends ToggleModule {
     private Vec3d bestBlock;
     private BlockPos playerPos;
     private Vec3d pos;
+    private boolean didBreak = false;
 
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
         if (getTotalHealth(mc.player) <= minHealth.get() && mode.get() != Mode.suicide) return;
-        if (delayLeft > 0) {
-            delayLeft--;
-            return;
-        } else {
-            delayLeft = delay.get();
-        }
-        if(place.get()) {
-
-            Iterator<AbstractClientPlayerEntity> validEntities = mc.world.getPlayers().stream()
-                    .filter(FriendManager.INSTANCE::attack)
-                    .filter(entityPlayer -> !entityPlayer.getDisplayName().equals(mc.player.getDisplayName()))
-                    .filter(entityPlayer -> mc.player.distanceTo(entityPlayer) <= 10)
-                    .collect(Collectors.toList())
-                    .iterator();
-
-            AbstractClientPlayerEntity target;
-            if (validEntities.hasNext()) {
-                target = validEntities.next();
-            } else {
-                return;
-            }
-            for (AbstractClientPlayerEntity i = null; validEntities.hasNext(); i = validEntities.next()) {
-                if (i == null) continue;
-                if (mc.player.distanceTo(i) < mc.player.distanceTo(target)) {
-                    target = i;
-                }
-            }
-            findValidBlocks(target);
-            if (bestBlock != null) {
-
-                if(autoSwitch.get() && mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL){
-                    int slot = InvUtils.findItemWithCount(Items.END_CRYSTAL).slot;
-                    if(slot != -1 && slot < 9){
-                        if (spoofChange.get()) preSlot = mc.player.inventory.selectedSlot;
-                        mc.player.inventory.selectedSlot = slot;
-                    }
-                }
-
-                Hand hand = Hand.MAIN_HAND;
-                if (mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() == Items.END_CRYSTAL) hand = Hand.OFF_HAND;
-                else if (mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL) {return;}
-                placeBlock(bestBlock, hand);
-                if (smartDelay.get()){
-                    if (DamageCalcUtils.crystalDamage(target, target.getPos()) - DamageCalcUtils.crystalDamage(target, bestBlock) < 10) {
-                        delayLeft = 10;
-                    }
-                }
-            }
-            if (spoofChange.get() && preSlot != mc.player.inventory.selectedSlot) mc.player.inventory.selectedSlot = preSlot;
-        }
         Streams.stream(mc.world.getEntities())
                 .filter(entity -> entity instanceof EnderCrystalEntity)
                 .filter(entity -> entity.distanceTo(mc.player) <= breakRange.get())
@@ -247,6 +198,64 @@ public class CrystalAura extends ToggleModule {
                     mc.player.swingHand(Hand.MAIN_HAND);
                     mc.player.inventory.selectedSlot = preSlot;
                 });
+        if (didBreak) {
+            if (delayLeft > 0) {
+                delayLeft--;
+                return;
+            } else {
+                delayLeft = delay.get();
+            }
+            if (place.get()) {
+
+                Iterator<AbstractClientPlayerEntity> validEntities = mc.world.getPlayers().stream()
+                        .filter(FriendManager.INSTANCE::attack)
+                        .filter(entityPlayer -> !entityPlayer.getDisplayName().equals(mc.player.getDisplayName()))
+                        .filter(entityPlayer -> mc.player.distanceTo(entityPlayer) <= 10)
+                        .collect(Collectors.toList())
+                        .iterator();
+
+                AbstractClientPlayerEntity target;
+                if (validEntities.hasNext()) {
+                    target = validEntities.next();
+                } else {
+                    return;
+                }
+                for (AbstractClientPlayerEntity i = null; validEntities.hasNext(); i = validEntities.next()) {
+                    if (i == null) continue;
+                    if (mc.player.distanceTo(i) < mc.player.distanceTo(target)) {
+                        target = i;
+                    }
+                }
+                findValidBlocks(target);
+                if (bestBlock != null) {
+
+                    if (autoSwitch.get() && mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL) {
+                        int slot = InvUtils.findItemWithCount(Items.END_CRYSTAL).slot;
+                        if (slot != -1 && slot < 9) {
+                            if (spoofChange.get()) preSlot = mc.player.inventory.selectedSlot;
+                            mc.player.inventory.selectedSlot = slot;
+                        }
+                    }
+
+                    Hand hand = Hand.MAIN_HAND;
+                    if (mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() == Items.END_CRYSTAL)
+                        hand = Hand.OFF_HAND;
+                    else if (mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL) {
+                        return;
+                    }
+                    placeBlock(bestBlock, hand);
+                    if (smartDelay.get()) {
+                        if (DamageCalcUtils.crystalDamage(target, target.getPos()) - DamageCalcUtils.crystalDamage(target, bestBlock) < 10) {
+                            delayLeft = 10;
+                        }
+                    }
+                }
+                if (spoofChange.get() && preSlot != mc.player.inventory.selectedSlot)
+                    mc.player.inventory.selectedSlot = preSlot;
+            }
+            didBreak = false;
+        }
+        didBreak = true;
     }, EventPriority.HIGH);
 
     private void placeBlock(Vec3d block, Hand hand){
