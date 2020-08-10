@@ -140,6 +140,12 @@ public class BedAura extends ToggleModule {
     );
 
     private int delayLeft = delay.get();
+    private Vec3d bestBlock;
+    private BlockPos bestBlockPos;
+    private BlockPos playerPos;
+    private BlockPos pos;
+    private Vec3d vecPos;
+    private BlockPos posUp;
 
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
@@ -175,10 +181,10 @@ public class BedAura extends ToggleModule {
                     target = i;
                 }
             }
-            List<BlockPos> validBlocks = findValidBlocks(target);
-            BlockPos bestBlock = validBlocks.get(0);
+            findValidBlocks(target);
+            bestBlockPos = new BlockPos(bestBlock.x, bestBlock.y, bestBlock.z);
             int preSlot = -1;
-            if (DamageCalcUtils.bedDamage(target, new Vec3d(bestBlock.up())) > minDamage.get()) {
+            if (DamageCalcUtils.bedDamage(target, bestBlock.add(0, 1, 0)) > minDamage.get()) {
                 if (autoSwitch.get()) {
                     for (int i = 0; i < 9; i++) {
                         if (mc.player.inventory.getInvStack(i).getItem() instanceof BedItem) {
@@ -191,17 +197,17 @@ public class BedAura extends ToggleModule {
                 double east = -1;
                 double south = -1;
                 double west = -1;
-                if(mc.world.isAir(bestBlock.add(1, 1, 0))){
-                    east = DamageCalcUtils.bedDamage(target, new Vec3d(bestBlock.add(1, 1, 0)));
+                if(mc.world.getBlockState(bestBlockPos.add(1, 1, 0)).getMaterial().isReplaceable()){
+                    east = DamageCalcUtils.bedDamage(target, bestBlock.add(1, 1, 0));
                 }
-                if(mc.world.isAir(bestBlock.add(-1, 1, 0))){
-                    west = DamageCalcUtils.bedDamage(target, new Vec3d(bestBlock.add(-1, 1, 0)));
+                if(mc.world.getBlockState(bestBlockPos.add(-1, 1, 0)).getMaterial().isReplaceable()){
+                    west = DamageCalcUtils.bedDamage(target, bestBlock.add(-1, 1, 0));
                 }
-                if(mc.world.isAir(bestBlock.add(0, 1, 1))){
-                    south = DamageCalcUtils.bedDamage(target, new Vec3d(bestBlock.add(0, 1, 1)));
+                if(mc.world.getBlockState(bestBlockPos.add(0, 1, 1)).getMaterial().isReplaceable()){
+                    south = DamageCalcUtils.bedDamage(target, bestBlock.add(0, 1, 1));
                 }
-                if(mc.world.isAir(bestBlock.add(0, 1, -1))){
-                    north = DamageCalcUtils.bedDamage(target, new Vec3d(bestBlock.add(0, 1, -1)));
+                if(mc.world.getBlockState(bestBlockPos.add(0, 1, -1)).getMaterial().isReplaceable()){
+                    north = DamageCalcUtils.bedDamage(target, bestBlock.add(0, 1, -1));
                 }
                 Hand hand = Hand.MAIN_HAND;
                 if (!(mc.player.getMainHandStack().getItem() instanceof BedItem) && mc.player.getOffHandStack().getItem() instanceof BedItem) {
@@ -216,10 +222,10 @@ public class BedAura extends ToggleModule {
                 }else if((west > north) && (west > south) && (east < west)){
                     mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(90f, mc.player.pitch, mc.player.onGround));
                 }
-                mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(new Vec3d(bestBlock), Direction.UP, bestBlock, false));
+                mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(bestBlock, Direction.UP, bestBlockPos, false));
                 mc.player.swingHand(Hand.MAIN_HAND);
                 if (smartDelay.get()){
-                    if (DamageCalcUtils.bedDamage(target, target.getPos()) - DamageCalcUtils.bedDamage(target, new Vec3d(bestBlock)) < 10) {
+                    if (DamageCalcUtils.bedDamage(target, target.getPos()) - DamageCalcUtils.bedDamage(target, bestBlock.add(0, 1, 0)) < 10) {
                         delayLeft = 10;
                     }
                 }
@@ -232,6 +238,7 @@ public class BedAura extends ToggleModule {
             if(entity instanceof BedBlockEntity && Math.sqrt(entity.getSquaredDistance(mc.player.x, mc.player.y, mc.player.z)) <= breakRange.get()){
                 if(DamageCalcUtils.bedDamage(mc.player, new Vec3d(entity.getPos())) < maxDamage.get()
                     || (mc.player.getHealth() + mc.player.getAbsorptionAmount() - DamageCalcUtils.bedDamage(mc.player, new Vec3d(entity.getPos()))) < minHealth.get() || clickMode.get().equals(Mode.suicide)){
+                    mc.player.setSneaking(false);
                     mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, entity.getPos(), false));
                 }
 
@@ -239,38 +246,37 @@ public class BedAura extends ToggleModule {
         }
     });
 
-    private List<BlockPos> findValidBlocks(PlayerEntity target){
-        Iterator<BlockPos> allBlocks = getRange(mc.player.getBlockPos(), placeRange.get()).iterator();
-        List<BlockPos> validBlocks = new ArrayList<>();
-        for(BlockPos i = null; allBlocks.hasNext(); i = allBlocks.next()){
-            if(i == null) continue;
-            if((mc.world.isAir(i.up())
-                    && mc.world.getEntities(null, new Box(i.up().getX(), i.up().getY(), i.up().getZ(), i.up().getX() + 1.0D, i.up().getY() + 1.0D, i.up().getZ() + 1.0D)).isEmpty())
-                    && (mc.world.isAir(i.add(1, 1, 0)) || mc.world.isAir(i.add(-1, 1, 0))
-                    || mc.world.isAir(i.add(0, 1, 1)) || mc.world.isAir(i.add(0, 1, -1)))) {
-                if (airPlace.get()) {
-                    validBlocks.add(i);
-                } else if (!airPlace.get() && !mc.world.isAir(i)) {
-                    validBlocks.add(i);
+    private void findValidBlocks(PlayerEntity target){
+        bestBlock = null;
+        BlockPos playerPos = mc.player.getBlockPos();
+        for(double i = playerPos.getX() - placeRange.get(); i < playerPos.getX() + placeRange.get(); i++){
+            for(double j = playerPos.getZ() - placeRange.get(); j < playerPos.getZ() + placeRange.get(); j++){
+                for(int k = playerPos.getY() - 3; k < playerPos.getY() + 3; k++) {
+                    pos = new BlockPos(i, k, j);
+                    vecPos = new Vec3d(i, k, j);
+                    posUp = pos.add(0, 1, 0);
+                    if ((mc.world.getBlockState(posUp).getMaterial().isReplaceable())
+                            && mc.world.getEntities(null, new Box(posUp.getX(), posUp.getY(), posUp.getZ(), posUp.getX() + 1.0D, posUp.getY() + 1.0D, posUp.getZ() + 1.0D)).isEmpty()
+                            && (mc.world.getBlockState(new BlockPos(posUp).add(1, 0, 0)).getMaterial().isReplaceable() || mc.world.getBlockState(posUp.add(-1, 0, 0)).getMaterial().isReplaceable()
+                            || mc.world.getBlockState(posUp.add(0, 0, 1)).getMaterial().isReplaceable() || mc.world.getBlockState(posUp.add(0, 0, -1)).getMaterial().isReplaceable())) {
+                        if (airPlace.get()) {
+                            if (bestBlock == null) bestBlock = vecPos;
+                            if (DamageCalcUtils.bedDamage(target, bestBlock.add(0, 1, 0))
+                                    < DamageCalcUtils.bedDamage(target, vecPos.add(0, 1, 0))
+                                    && DamageCalcUtils.bedDamage(mc.player, vecPos.add(0, 1, 0)) < minDamage.get()) {
+                                bestBlock = vecPos;
+                            }
+                        } else if (!airPlace.get() && !mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
+                            if (bestBlock == null) bestBlock = vecPos;
+                            if (DamageCalcUtils.bedDamage(target, bestBlock.add(0, 1, 0))
+                                    < DamageCalcUtils.bedDamage(target, vecPos.add(0, 1, 0))
+                                    && DamageCalcUtils.bedDamage(mc.player, vecPos.add(0, 1, 0)) < minDamage.get()) {
+                                bestBlock = vecPos;
+                            }
+                        }
+                    }
                 }
             }
         }
-        validBlocks.sort(Comparator.comparingDouble(value ->  DamageCalcUtils.crystalDamage(target, new Vec3d(value.up()))));
-        validBlocks.removeIf(blockpos -> DamageCalcUtils.crystalDamage(mc.player, new Vec3d(blockpos.up())) > maxDamage.get());
-        Collections.reverse(validBlocks);
-        return validBlocks;
-    }
-
-    private List<BlockPos> getRange(BlockPos player, double range){
-        List<BlockPos> allBlocks = new ArrayList<>();
-        for(double i = player.getX() - range; i < player.getX() + range; i++){
-            for(double j = player.getZ() - range; j < player.getZ() + range; j++){
-                for(int k = player.getY() - 3; k < player.getY() + 3; k++){
-                    BlockPos x = new BlockPos(i, k, j);
-                    allBlocks.add(x);
-                }
-            }
-        }
-        return allBlocks;
     }
 }

@@ -164,6 +164,8 @@ public class CrystalAura extends ToggleModule {
     private int preSlot;
     private int delayLeft = delay.get();
     private Vec3d bestBlock;
+    private BlockPos playerPos;
+    private Vec3d pos;
 
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
@@ -195,7 +197,7 @@ public class CrystalAura extends ToggleModule {
                     target = i;
                 }
             }
-            bestBlock = findValidBlocks(target);
+            findValidBlocks(target);
             if (bestBlock != null) {
 
                 if(autoSwitch.get() && mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL){
@@ -256,10 +258,9 @@ public class CrystalAura extends ToggleModule {
         mc.player.swingHand(Hand.MAIN_HAND);
     }
 
-    private Vec3d findValidBlocks(AbstractClientPlayerEntity target){
+    private void findValidBlocks(AbstractClientPlayerEntity target){
         bestBlock = null;
-        BlockPos playerPos = mc.player.getBlockPos();
-        Vec3d pos;
+        playerPos = mc.player.getBlockPos();
         for(double i = playerPos.getX() - placeRange.get(); i < playerPos.getX() + placeRange.get(); i++){
             for(double j = playerPos.getZ() - placeRange.get(); j < playerPos.getZ() + placeRange.get(); j++){
                 for(int k = playerPos.getY() - 3; k < playerPos.getY() + 3; k++){
@@ -269,16 +270,16 @@ public class CrystalAura extends ToggleModule {
                             && isEmpty(new BlockPos(pos.add(0, 1, 0)))){
                         if (!strict.get()) {
                             if (bestBlock == null) bestBlock = pos;
-                            if (DamageCalcUtils.crystalDamage(target, bestBlock)
-                                    < DamageCalcUtils.crystalDamage(target, pos)
-                                    && DamageCalcUtils.crystalDamage(mc.player, pos) < minDamage.get()) {
+                            if (DamageCalcUtils.crystalDamage(target, bestBlock.add(0, 1, 0))
+                                    < DamageCalcUtils.crystalDamage(target, pos.add(0, 1, 0))
+                                    && DamageCalcUtils.crystalDamage(mc.player, pos.add(0 ,1, 0)) < minDamage.get()) {
                                 bestBlock = pos;
                             }
                         } else if (strict.get() && isEmpty(new BlockPos(pos.add(0, 2, 0)))) {
                             if (bestBlock == null) bestBlock = pos;
-                            if (DamageCalcUtils.crystalDamage(target, bestBlock)
-                                    < DamageCalcUtils.crystalDamage(target, pos)
-                                    && DamageCalcUtils.crystalDamage(mc.player, pos) < minDamage.get()) {
+                            if (DamageCalcUtils.crystalDamage(target, bestBlock.add(0, 1, 0))
+                                    < DamageCalcUtils.crystalDamage(target, pos.add(0, 1, 0))
+                                    && DamageCalcUtils.crystalDamage(mc.player, pos.add( 0, 1, 0)) < minDamage.get()) {
                                 bestBlock = pos;
                             }
                         }
@@ -286,7 +287,6 @@ public class CrystalAura extends ToggleModule {
                 }
             }
         }
-        return bestBlock;
     }
 
     private float getTotalHealth(PlayerEntity target) {
