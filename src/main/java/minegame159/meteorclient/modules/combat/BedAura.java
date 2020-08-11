@@ -198,67 +198,69 @@ public class BedAura extends ToggleModule {
                     }
                 }
                 findValidBlocks(target);
-                bestBlockPos = new BlockPos(bestBlock.x, bestBlock.y, bestBlock.z);
-                int preSlot = -1;
-                if (DamageCalcUtils.bedDamage(target, bestBlock.add(0, 1, 0)) > minDamage.get()) {
-                    if (autoSwitch.get()) {
-                        for (int i = 0; i < 9; i++) {
-                            if (mc.player.inventory.getInvStack(i).getItem() instanceof BedItem) {
-                                preSlot = mc.player.inventory.selectedSlot;
-                                mc.player.inventory.selectedSlot = i;
+                if (bestBlock != null) {
+                    bestBlockPos = new BlockPos(bestBlock.x, bestBlock.y, bestBlock.z);
+                    int preSlot = -1;
+                    if (DamageCalcUtils.bedDamage(target, bestBlock.add(0, 1, 0)) > minDamage.get()) {
+                        if (autoSwitch.get()) {
+                            for (int i = 0; i < 9; i++) {
+                                if (mc.player.inventory.getInvStack(i).getItem() instanceof BedItem) {
+                                    preSlot = mc.player.inventory.selectedSlot;
+                                    mc.player.inventory.selectedSlot = i;
+                                }
                             }
                         }
-                    }
-                    double north = -1;
-                    double east = -1;
-                    double south = -1;
-                    double west = -1;
-                    if (mc.world.getBlockState(bestBlockPos.add(1, 1, 0)).getMaterial().isReplaceable()) {
-                        east = DamageCalcUtils.bedDamage(target, bestBlock.add(1, 1, 0));
-                    }
-                    if (mc.world.getBlockState(bestBlockPos.add(-1, 1, 0)).getMaterial().isReplaceable()) {
-                        west = DamageCalcUtils.bedDamage(target, bestBlock.add(-1, 1, 0));
-                    }
-                    if (mc.world.getBlockState(bestBlockPos.add(0, 1, 1)).getMaterial().isReplaceable()) {
-                        south = DamageCalcUtils.bedDamage(target, bestBlock.add(0, 1, 1));
-                    }
-                    if (mc.world.getBlockState(bestBlockPos.add(0, 1, -1)).getMaterial().isReplaceable()) {
-                        north = DamageCalcUtils.bedDamage(target, bestBlock.add(0, 1, -1));
-                    }
-                    Hand hand = Hand.MAIN_HAND;
-                    if (!(mc.player.getMainHandStack().getItem() instanceof BedItem) && mc.player.getOffHandStack().getItem() instanceof BedItem) {
-                        hand = Hand.OFF_HAND;
-                    }
-                    if ((east > north) && (east > south) && (east > west)) {
-                        preYaw = mc.player.yaw;
-                        mc.player.yaw = -90f;
-                        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(-90f, mc.player.pitch, mc.player.onGround));
-                        mc.player.yaw = preYaw;
-                    } else if ((east < north) && (north > south) && (north > west)) {
-                        preYaw = mc.player.yaw;
-                        mc.player.yaw = 179f;
-                        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(179f, mc.player.pitch, mc.player.onGround));
-                        mc.player.yaw = preYaw;
-                    } else if ((south > north) && (east < south) && (south > west)) {
-                        preYaw = mc.player.yaw;
-                        mc.player.yaw = 1f;
-                        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(1f, mc.player.pitch, mc.player.onGround));
-                        mc.player.yaw = preYaw;
-                    } else if ((west > north) && (west > south) && (east < west)) {
-                        preYaw = mc.player.yaw;
-                        mc.player.yaw = 90f;
-                        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(90f, mc.player.pitch, mc.player.onGround));
-                        mc.player.yaw = preYaw;
-                    }
-                    mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(bestBlock, Direction.UP, bestBlockPos, false));
-                    mc.player.swingHand(Hand.MAIN_HAND);
-                    if (smartDelay.get()) {
-                        if (DamageCalcUtils.bedDamage(target, target.getPos()) - DamageCalcUtils.bedDamage(target, bestBlock.add(0, 1, 0)) < 10) {
-                            delayLeft = 10;
+                        double north = -1;
+                        double east = -1;
+                        double south = -1;
+                        double west = -1;
+                        if (mc.world.getBlockState(bestBlockPos.add(1, 1, 0)).getMaterial().isReplaceable()) {
+                            east = DamageCalcUtils.bedDamage(target, bestBlock.add(1, 1, 0));
                         }
-                    }
-                    if (preSlot != -1 && mc.player.inventory.selectedSlot != preSlot && switchBack.get()) {
-                        mc.player.inventory.selectedSlot = preSlot;
+                        if (mc.world.getBlockState(bestBlockPos.add(-1, 1, 0)).getMaterial().isReplaceable()) {
+                            west = DamageCalcUtils.bedDamage(target, bestBlock.add(-1, 1, 0));
+                        }
+                        if (mc.world.getBlockState(bestBlockPos.add(0, 1, 1)).getMaterial().isReplaceable()) {
+                            south = DamageCalcUtils.bedDamage(target, bestBlock.add(0, 1, 1));
+                        }
+                        if (mc.world.getBlockState(bestBlockPos.add(0, 1, -1)).getMaterial().isReplaceable()) {
+                            north = DamageCalcUtils.bedDamage(target, bestBlock.add(0, 1, -1));
+                        }
+                        Hand hand = Hand.MAIN_HAND;
+                        if (!(mc.player.getMainHandStack().getItem() instanceof BedItem) && mc.player.getOffHandStack().getItem() instanceof BedItem) {
+                            hand = Hand.OFF_HAND;
+                        }
+                        if ((east > north) && (east > south) && (east > west)) {
+                            preYaw = mc.player.yaw;
+                            mc.player.yaw = -90f;
+                            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(-90f, mc.player.pitch, mc.player.onGround));
+                            mc.player.yaw = preYaw;
+                        } else if ((east < north) && (north > south) && (north > west)) {
+                            preYaw = mc.player.yaw;
+                            mc.player.yaw = 179f;
+                            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(179f, mc.player.pitch, mc.player.onGround));
+                            mc.player.yaw = preYaw;
+                        } else if ((south > north) && (east < south) && (south > west)) {
+                            preYaw = mc.player.yaw;
+                            mc.player.yaw = 1f;
+                            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(1f, mc.player.pitch, mc.player.onGround));
+                            mc.player.yaw = preYaw;
+                        } else if ((west > north) && (west > south) && (east < west)) {
+                            preYaw = mc.player.yaw;
+                            mc.player.yaw = 90f;
+                            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(90f, mc.player.pitch, mc.player.onGround));
+                            mc.player.yaw = preYaw;
+                        }
+                        mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(bestBlock, Direction.UP, bestBlockPos, false));
+                        mc.player.swingHand(Hand.MAIN_HAND);
+                        if (smartDelay.get()) {
+                            if (DamageCalcUtils.bedDamage(target, target.getPos()) - DamageCalcUtils.bedDamage(target, bestBlock.add(0, 1, 0)) < 10) {
+                                delayLeft = 10;
+                            }
+                        }
+                        if (preSlot != -1 && mc.player.inventory.selectedSlot != preSlot && switchBack.get()) {
+                            mc.player.inventory.selectedSlot = preSlot;
+                        }
                     }
                 }
             }
