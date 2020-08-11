@@ -183,7 +183,7 @@ public class AnchorAura extends ToggleModule {
         if (glowSlot != -1 && nonGlowSlot != -1) {
             findAnchors(target);
             if (bestBlock != null) {
-                Vec3d pos = new Vec3d(bestBlock.getX(), bestBlock.getY(), bestBlock.getZ());
+                Vec3d pos = new Vec3d(bestBlock.getX() + 0.5D, bestBlock.getY() + 0.5D, bestBlock.getZ() + 0.5D);
                 mc.player.world.removeBlock(bestBlock, false);
                 if ((DamageCalcUtils.bedDamage(mc.player, pos) < maxDamage.get() || breakMode.get() == Mode.suicide)
                         && DamageCalcUtils.bedDamage(target, pos) > minDamage.get()) {
