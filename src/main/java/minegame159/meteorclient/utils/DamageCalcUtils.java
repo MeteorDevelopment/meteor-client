@@ -69,7 +69,7 @@ public class DamageCalcUtils {
         damage = resistanceReduction((PlayerEntity) player, damage);
 
         //Reduce by enchants
-        damage  = blastProtReduction(player, damage, new Explosion(mc.world, null, bed.x, bed.y, bed.z, 5f, false, Explosion.DestructionType.DESTROY));
+        damage  = blastProtReduction(player, damage, new Explosion(mc.world, null, bed.x, bed.y, bed.z, 5f, true, Explosion.DestructionType.DESTROY));
 
         if(damage < 0) damage = 0;
         return damage;
