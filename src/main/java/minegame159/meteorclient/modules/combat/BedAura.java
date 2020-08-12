@@ -219,16 +219,16 @@ public class BedAura extends ToggleModule {
                         double south = -1;
                         double west = -1;
                         if (mc.world.getBlockState(bestBlockPos.add(1, 1, 0)).getMaterial().isReplaceable()) {
-                            east = DamageCalcUtils.bedDamage(target, bestBlock.add(1, 1, 0));
+                            east = DamageCalcUtils.bedDamage(target, bestBlock.add(1.5, 1.5, 0.5));
                         }
                         if (mc.world.getBlockState(bestBlockPos.add(-1, 1, 0)).getMaterial().isReplaceable()) {
-                            west = DamageCalcUtils.bedDamage(target, bestBlock.add(-1, 1, 0));
+                            west = DamageCalcUtils.bedDamage(target, bestBlock.add(-1.5, 1.5, 0.5));
                         }
                         if (mc.world.getBlockState(bestBlockPos.add(0, 1, 1)).getMaterial().isReplaceable()) {
-                            south = DamageCalcUtils.bedDamage(target, bestBlock.add(0, 1, 1));
+                            south = DamageCalcUtils.bedDamage(target, bestBlock.add(0.5, 1.5, 1.5));
                         }
                         if (mc.world.getBlockState(bestBlockPos.add(0, 1, -1)).getMaterial().isReplaceable()) {
-                            north = DamageCalcUtils.bedDamage(target, bestBlock.add(0, 1, -1));
+                            north = DamageCalcUtils.bedDamage(target, bestBlock.add(0.5, 1.5, -1.5));
                         }
                         Hand hand = Hand.MAIN_HAND;
                         if (!(mc.player.getMainHandStack().getItem() instanceof BedItem) && mc.player.getOffHandStack().getItem() instanceof BedItem) {
@@ -290,22 +290,22 @@ public class BedAura extends ToggleModule {
                         if (airPlace.get()) {
                             if (bestBlock == null) {
                                 bestBlock = vecPos;
-                                bestDamage = DamageCalcUtils.bedDamage(target, bestBlock.add(0, 1, 0));
+                                bestDamage = DamageCalcUtils.bedDamage(target, bestBlock.add(0.5, 1.5, 0.5));
                             }
-                            if (bestDamage < DamageCalcUtils.bedDamage(target, vecPos.add(0, 1, 0))
-                                    && (DamageCalcUtils.bedDamage(mc.player, vecPos.add(0, 1, 0)) < minDamage.get() || mode.get() == Mode.suicide)) {
+                            if (bestDamage < DamageCalcUtils.bedDamage(target, vecPos.add(0.5, 1.5, 0.5))
+                                    && (DamageCalcUtils.bedDamage(mc.player, vecPos.add(0.5, 1.5, 0.5)) < minDamage.get() || mode.get() == Mode.suicide)) {
                                 bestBlock = vecPos;
-                                bestDamage = DamageCalcUtils.bedDamage(target, bestBlock.add(0, 1, 0));
+                                bestDamage = DamageCalcUtils.bedDamage(target, bestBlock.add(0.5, 1.5, 0.5));
                             }
                         } else if (!airPlace.get() && !mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
                             if (bestBlock == null) {
                                 bestBlock = vecPos;
-                                bestDamage = DamageCalcUtils.bedDamage(target, bestBlock.add(0, 1, 0));
+                                bestDamage = DamageCalcUtils.bedDamage(target, bestBlock.add(0.5, 1.5, 0.5));
                             }
-                            if (bestDamage < DamageCalcUtils.bedDamage(target, vecPos.add(0, 1, 0))
-                                    && (DamageCalcUtils.bedDamage(mc.player, vecPos.add(0, 1, 0)) < minDamage.get() || mode.get() == Mode.suicide)) {
+                            if (bestDamage < DamageCalcUtils.bedDamage(target, vecPos.add(0.5, 1.5, 0.5))
+                                    && (DamageCalcUtils.bedDamage(mc.player, vecPos.add(0.5, 1.5, 0.5)) < minDamage.get() || mode.get() == Mode.suicide)) {
                                 bestBlock = vecPos;
-                                bestDamage = DamageCalcUtils.bedDamage(target, bestBlock.add(0, 1, 0));
+                                bestDamage = DamageCalcUtils.bedDamage(target, bestBlock.add(0.5, 1.5, 0.5));
                             }
                         }
                     }
