@@ -141,6 +141,9 @@ public class BedAura extends ToggleModule {
 
     private int delayLeft = delay.get();
     private Vec3d bestBlock;
+    private double bestDamage;
+    private Vec3d playerPos;
+    private double currentDamage;
     private BlockPos bestBlockPos;
     private BlockPos pos;
     private Vec3d vecPos;
@@ -153,8 +156,9 @@ public class BedAura extends ToggleModule {
         if (mc.player.getHealth() + mc.player.getAbsorptionAmount() <= minHealth.get() && mode.get() != Mode.suicide) return;
         for(BlockEntity entity : mc.world.blockEntities){
             if(entity instanceof BedBlockEntity && Math.sqrt(entity.getSquaredDistance(mc.player.x, mc.player.y, mc.player.z)) <= breakRange.get()){
-                if(DamageCalcUtils.bedDamage(mc.player, new Vec3d(entity.getPos())) < maxDamage.get()
-                        || (mc.player.getHealth() + mc.player.getAbsorptionAmount() - DamageCalcUtils.bedDamage(mc.player, new Vec3d(entity.getPos()))) < minHealth.get() || clickMode.get().equals(Mode.suicide)){
+                currentDamage = DamageCalcUtils.bedDamage(mc.player, new Vec3d(entity.getPos()));
+                if(currentDamage < maxDamage.get()
+                        || (mc.player.getHealth() + mc.player.getAbsorptionAmount() - currentDamage) < minHealth.get() || clickMode.get().equals(Mode.suicide)){
                     mc.player.setSneaking(false);
                     mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, entity.getPos(), false));
                 }
@@ -176,8 +180,8 @@ public class BedAura extends ToggleModule {
             }
             if ((mc.player.getHealth() + mc.player.getAbsorptionAmount()) <= minHealth.get() && mode.get() != Mode.suicide)
                 return;
-            if (place.get() && (!(mc.player.getMainHandStack().getItem() instanceof BedItem) && !(mc.player.getOffHandStack().getItem() instanceof BedItem)))
-                return;
+            if (place.get() && (!(mc.player.getMainHandStack().getItem() instanceof BedItem)
+                    && !(mc.player.getOffHandStack().getItem() instanceof BedItem)) && !autoSwitch.get()) return;
             if (place.get()) {
                 Iterator<AbstractClientPlayerEntity> validEntities = mc.world.getPlayers().stream()
                         .filter(FriendManager.INSTANCE::attack)
@@ -201,7 +205,7 @@ public class BedAura extends ToggleModule {
                 if (bestBlock != null) {
                     bestBlockPos = new BlockPos(bestBlock.x, bestBlock.y, bestBlock.z);
                     int preSlot = -1;
-                    if (DamageCalcUtils.bedDamage(target, bestBlock.add(0, 1, 0)) > minDamage.get()) {
+                    if (bestDamage > minDamage.get()) {
                         if (autoSwitch.get()) {
                             for (int i = 0; i < 9; i++) {
                                 if (mc.player.inventory.getInvStack(i).getItem() instanceof BedItem) {
@@ -254,7 +258,7 @@ public class BedAura extends ToggleModule {
                         mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(bestBlock, Direction.UP, bestBlockPos, false));
                         mc.player.swingHand(Hand.MAIN_HAND);
                         if (smartDelay.get()) {
-                            if (DamageCalcUtils.bedDamage(target, target.getPos()) - DamageCalcUtils.bedDamage(target, bestBlock.add(0, 1, 0)) < 10) {
+                            if (DamageCalcUtils.bedDamage(target, target.getPos()) - bestDamage < 10) {
                                 delayLeft = 10;
                             }
                         }
@@ -271,10 +275,11 @@ public class BedAura extends ToggleModule {
 
     private void findValidBlocks(PlayerEntity target){
         bestBlock = null;
-        BlockPos playerPos = mc.player.getBlockPos();
-        for(double i = playerPos.getX() - placeRange.get(); i < playerPos.getX() + placeRange.get(); i++){
-            for(double j = playerPos.getZ() - placeRange.get(); j < playerPos.getZ() + placeRange.get(); j++){
-                for(int k = playerPos.getY() - 3; k < playerPos.getY() + 3; k++) {
+        bestDamage = 0;
+        playerPos = mc.player.getPos();
+        for(double i = playerPos.x - placeRange.get(); i < playerPos.x + placeRange.get(); i++){
+            for(double j = playerPos.z - placeRange.get(); j < playerPos.z + placeRange.get(); j++){
+                for(double k = playerPos.y - 3; k < playerPos.y + 3; k++) {
                     pos = new BlockPos(i, k, j);
                     vecPos = new Vec3d(i, k, j);
                     posUp = pos.add(0, 1, 0);
@@ -283,18 +288,24 @@ public class BedAura extends ToggleModule {
                             && (mc.world.getBlockState(new BlockPos(posUp).add(1, 0, 0)).getMaterial().isReplaceable() || mc.world.getBlockState(posUp.add(-1, 0, 0)).getMaterial().isReplaceable()
                             || mc.world.getBlockState(posUp.add(0, 0, 1)).getMaterial().isReplaceable() || mc.world.getBlockState(posUp.add(0, 0, -1)).getMaterial().isReplaceable())) {
                         if (airPlace.get()) {
-                            if (bestBlock == null) bestBlock = vecPos;
-                            if (DamageCalcUtils.bedDamage(target, bestBlock.add(0, 1, 0))
-                                    < DamageCalcUtils.bedDamage(target, vecPos.add(0, 1, 0))
-                                    && DamageCalcUtils.bedDamage(mc.player, vecPos.add(0, 1, 0)) < minDamage.get()) {
+                            if (bestBlock == null) {
                                 bestBlock = vecPos;
+                                bestDamage = DamageCalcUtils.bedDamage(target, bestBlock.add(0, 1, 0));
+                            }
+                            if (bestDamage < DamageCalcUtils.bedDamage(target, vecPos.add(0, 1, 0))
+                                    && (DamageCalcUtils.bedDamage(mc.player, vecPos.add(0, 1, 0)) < minDamage.get() || mode.get() == Mode.suicide)) {
+                                bestBlock = vecPos;
+                                bestDamage = DamageCalcUtils.bedDamage(target, bestBlock.add(0, 1, 0));
                             }
                         } else if (!airPlace.get() && !mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
-                            if (bestBlock == null) bestBlock = vecPos;
-                            if (DamageCalcUtils.bedDamage(target, bestBlock.add(0, 1, 0))
-                                    < DamageCalcUtils.bedDamage(target, vecPos.add(0, 1, 0))
-                                    && DamageCalcUtils.bedDamage(mc.player, vecPos.add(0, 1, 0)) < minDamage.get()) {
+                            if (bestBlock == null) {
                                 bestBlock = vecPos;
+                                bestDamage = DamageCalcUtils.bedDamage(target, bestBlock.add(0, 1, 0));
+                            }
+                            if (bestDamage < DamageCalcUtils.bedDamage(target, vecPos.add(0, 1, 0))
+                                    && (DamageCalcUtils.bedDamage(mc.player, vecPos.add(0, 1, 0)) < minDamage.get() || mode.get() == Mode.suicide)) {
+                                bestBlock = vecPos;
+                                bestDamage = DamageCalcUtils.bedDamage(target, bestBlock.add(0, 1, 0));
                             }
                         }
                     }
