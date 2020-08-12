@@ -263,12 +263,18 @@ public class CrystalAura extends ToggleModule {
     }, EventPriority.HIGH);
 
     private void placeBlock(Vec3d block, Hand hand){
+        float yaw = mc.player.yaw;
+        float pitch = mc.player.pitch;
         Vec3d vec1 = block.add(0.5, 0.5, 0.5);
         PlayerMoveC2SPacket.LookOnly packet = new PlayerMoveC2SPacket.LookOnly(Utils.getNeededYaw(vec1), Utils.getNeededPitch(vec1), mc.player.onGround);
         mc.player.networkHandler.sendPacket(packet);
 
         mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(block, Direction.UP, new BlockPos(block), false));
         mc.player.swingHand(Hand.MAIN_HAND);
+        packet = new PlayerMoveC2SPacket.LookOnly(yaw, pitch, mc.player.onGround);
+        mc.player.networkHandler.sendPacket(packet);
+        mc.player.yaw = yaw;
+        mc.player.pitch = pitch;
     }
 
     private void findValidBlocks(AbstractClientPlayerEntity target){
