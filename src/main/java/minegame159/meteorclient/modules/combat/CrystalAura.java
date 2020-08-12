@@ -164,9 +164,15 @@ public class CrystalAura extends ToggleModule {
     private int preSlot;
     private int delayLeft = delay.get();
     private Vec3d bestBlock;
-    private BlockPos playerPos;
+    private double bestDamage;
+    private Vec3d playerPos;
     private Vec3d pos;
     private boolean didBreak = false;
+
+    @Override
+    public void onDeactivate() {
+        mc.player.inventory.selectedSlot = preSlot;
+    }
 
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
@@ -226,26 +232,24 @@ public class CrystalAura extends ToggleModule {
                         target = i;
                     }
                 }
+                if (autoSwitch.get() && mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL) {
+                    int slot = InvUtils.findItemWithCount(Items.END_CRYSTAL).slot;
+                    if (slot != -1 && slot < 9) {
+                        preSlot = mc.player.inventory.selectedSlot;
+                        mc.player.inventory.selectedSlot = slot;
+                    }
+                }
+                Hand hand = Hand.MAIN_HAND;
+                if (mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() == Items.END_CRYSTAL)
+                    hand = Hand.OFF_HAND;
+                else if (mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL) {
+                    return;
+                }
                 findValidBlocks(target);
                 if (bestBlock != null) {
-
-                    if (autoSwitch.get() && mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL) {
-                        int slot = InvUtils.findItemWithCount(Items.END_CRYSTAL).slot;
-                        if (slot != -1 && slot < 9) {
-                            if (spoofChange.get()) preSlot = mc.player.inventory.selectedSlot;
-                            mc.player.inventory.selectedSlot = slot;
-                        }
-                    }
-
-                    Hand hand = Hand.MAIN_HAND;
-                    if (mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() == Items.END_CRYSTAL)
-                        hand = Hand.OFF_HAND;
-                    else if (mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL) {
-                        return;
-                    }
                     placeBlock(bestBlock, hand);
                     if (smartDelay.get()) {
-                        if (DamageCalcUtils.crystalDamage(target, target.getPos()) - DamageCalcUtils.crystalDamage(target, bestBlock) < 10) {
+                        if (DamageCalcUtils.crystalDamage(target, target.getPos()) - bestDamage < 10) {
                             delayLeft = 10;
                         }
                     }
@@ -269,27 +273,34 @@ public class CrystalAura extends ToggleModule {
 
     private void findValidBlocks(AbstractClientPlayerEntity target){
         bestBlock = null;
-        playerPos = mc.player.getBlockPos();
-        for(double i = playerPos.getX() - placeRange.get(); i < playerPos.getX() + placeRange.get(); i++){
-            for(double j = playerPos.getZ() - placeRange.get(); j < playerPos.getZ() + placeRange.get(); j++){
-                for(int k = playerPos.getY() - 3; k < playerPos.getY() + 3; k++){
+        playerPos = mc.player.getPos();
+        for(double i = playerPos.x - placeRange.get(); i < playerPos.x + placeRange.get(); i++){
+            for(double j = playerPos.z - placeRange.get(); j < playerPos.z + placeRange.get(); j++){
+                for(double k = playerPos.y - 3; k < playerPos.y + 3; k++){
                     pos = new Vec3d(i, k, j);
                     if((mc.world.getBlockState(new BlockPos(pos)).getBlock() == Blocks.BEDROCK
                             || mc.world.getBlockState(new BlockPos(pos)).getBlock() == Blocks.OBSIDIAN)
                             && isEmpty(new BlockPos(pos.add(0, 1, 0)))){
                         if (!strict.get()) {
-                            if (bestBlock == null) bestBlock = pos;
-                            if (DamageCalcUtils.crystalDamage(target, bestBlock.add(0, 1, 0))
-                                    < DamageCalcUtils.crystalDamage(target, pos.add(0, 1, 0))
-                                    && DamageCalcUtils.crystalDamage(mc.player, pos.add(0 ,1, 0)) < minDamage.get()) {
+                            if (bestBlock == null) {
                                 bestBlock = pos;
+                                bestDamage = DamageCalcUtils.crystalDamage(target, bestBlock.add(0.5, 1.5, 0.5));
+                            }
+                            if (bestDamage < DamageCalcUtils.crystalDamage(target, pos.add(0.5, 1.5, 0.5))
+                                    && (DamageCalcUtils.crystalDamage(mc.player, pos.add(0.5,1.5, 0.5)) < minDamage.get() || mode.get() == Mode.suicide)) {
+                                bestBlock = pos;
+                                bestDamage = DamageCalcUtils.crystalDamage(target, bestBlock.add(0.5, 1.5, 0.5));
                             }
                         } else if (strict.get() && isEmpty(new BlockPos(pos.add(0, 2, 0)))) {
-                            if (bestBlock == null) bestBlock = pos;
-                            if (DamageCalcUtils.crystalDamage(target, bestBlock.add(0, 1, 0))
-                                    < DamageCalcUtils.crystalDamage(target, pos.add(0, 1, 0))
-                                    && DamageCalcUtils.crystalDamage(mc.player, pos.add( 0, 1, 0)) < minDamage.get()) {
+                            if (bestBlock == null) {
                                 bestBlock = pos;
+                                bestDamage = DamageCalcUtils.crystalDamage(target, bestBlock.add(0.5, 1.5, 0.5));
+                            }
+                            if (bestDamage
+                                    < DamageCalcUtils.crystalDamage(target, pos.add(0.5, 1.5, 0.5))
+                                    && (DamageCalcUtils.crystalDamage(mc.player, pos.add( 0.5, 1.5, 0.5)) < minDamage.get()) || mode.get() == Mode.suicide) {
+                                bestBlock = pos;
+                                bestDamage = DamageCalcUtils.crystalDamage(target, bestBlock.add(0.5, 1.5, 0.5));
                             }
                         }
                     }
