@@ -19,6 +19,8 @@ import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.mob.MobEntity;
+import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.HitResult;
@@ -69,6 +71,13 @@ public class KillAura extends ToggleModule {
             .name("nametagged")
             .description("Hit nametagged mobs.")
             .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> babies = sgGeneral.add(new BoolSetting.Builder()
+            .name("babies")
+            .description("Hit baby animals.")
+            .defaultValue(true)
             .build()
     );
 
@@ -180,6 +189,11 @@ public class KillAura extends ToggleModule {
         if (entity instanceof PlayerEntity) {
             if (friends.get()) return true;
             return FriendManager.INSTANCE.attack((PlayerEntity) entity);
+        }
+
+        if (entity instanceof AnimalEntity) {
+            if (babies.get()) return true;
+            return !((AnimalEntity) entity).isBaby();
         }
 
         return true;
