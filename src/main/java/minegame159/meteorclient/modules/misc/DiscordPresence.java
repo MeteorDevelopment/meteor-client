@@ -111,8 +111,10 @@ public class DiscordPresence extends ToggleModule {
     });
 
     private void updateDetails() {
-        presence.details = getText();
-        if (ready) DiscordRPC.discordUpdatePresence(presence);
+        if (isActive()) {
+            presence.details = getText();
+            if (ready) DiscordRPC.discordUpdatePresence(presence);
+        }
     }
 
     private String getText() {
