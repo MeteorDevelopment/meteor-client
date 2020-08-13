@@ -44,7 +44,7 @@ public class DiscordPresence extends ToggleModule {
             .name("display-name")
             .description("Displays your name in discord rpc.")
             .defaultValue(true)
-            .onModuleActivated(booleanSetting -> updateDetails())
+            .onChanged(booleanSetting -> updateDetails())
             .build()
     );
 
@@ -52,7 +52,7 @@ public class DiscordPresence extends ToggleModule {
             .name("display-server")
             .description("Displays the server you are in.")
             .defaultValue(true)
-            .onModuleActivated(booleanSetting -> updateDetails())
+            .onChanged(booleanSetting -> updateDetails())
             .build()
     );
 
