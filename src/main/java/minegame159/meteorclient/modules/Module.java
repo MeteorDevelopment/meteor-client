@@ -40,7 +40,7 @@ public abstract class Module implements Listenable, ISerializable<Module> {
         this.name = name;
         this.title = Utils.nameToTitle(name);
         this.description = description;
-        this.color = new Color(Utils.random(180, 255), Utils.random(180, 255), Utils.random(180, 255), 255);
+        this.color = Color.fromHsv(Utils.random(0.0, 360.0), 0.35, 1);
     }
 
     public WidgetScreen getScreen() {

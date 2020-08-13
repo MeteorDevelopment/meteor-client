@@ -2,6 +2,7 @@ package minegame159.meteorclient.modules.misc;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
+import minegame159.meteorclient.Config;
 import minegame159.meteorclient.events.SendMessageEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
@@ -25,6 +26,8 @@ public class Suffix extends ToggleModule {
 
     @EventHandler
     private final Listener<SendMessageEvent> onSendMessage = new Listener<>(event -> {
-        event.msg += text.get();
+        if (!event.msg.startsWith(Config.INSTANCE.getPrefix() + "b")) {
+            event.msg += text.get();
+        }
     });
 }
