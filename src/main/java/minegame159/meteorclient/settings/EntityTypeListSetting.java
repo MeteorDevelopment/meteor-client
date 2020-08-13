@@ -2,6 +2,7 @@ package minegame159.meteorclient.settings;
 
 import minegame159.meteorclient.gui.screens.EntityTypeListSettingScreen;
 import minegame159.meteorclient.gui.widgets.WButton;
+import minegame159.meteorclient.utils.EntityUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.EntityType;
 import net.minecraft.nbt.CompoundTag;
@@ -16,9 +17,12 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class EntityTypeListSetting extends Setting<List<EntityType<?>>> {
-    public EntityTypeListSetting(String name, String description, List<EntityType<?>> defaultValue, Consumer<List<EntityType<?>>> onChanged, Consumer<Setting<List<EntityType<?>>>> onModuleActivated) {
+    public final boolean onlyAttackable;
+
+    public EntityTypeListSetting(String name, String description, List<EntityType<?>> defaultValue, Consumer<List<EntityType<?>>> onChanged, Consumer<Setting<List<EntityType<?>>>> onModuleActivated, boolean onlyAttackable) {
         super(name, description, defaultValue, onChanged, onModuleActivated);
 
+        this.onlyAttackable = onlyAttackable;
         value = new ArrayList<>(defaultValue);
         
         widget = new WButton("Select");
@@ -85,7 +89,8 @@ public class EntityTypeListSetting extends Setting<List<EntityType<?>>> {
 
         ListTag valueTag = tag.getList("value", 8);
         for (Tag tagI : valueTag) {
-            get().add(Registry.ENTITY_TYPE.get(new Identifier(tagI.asString())));
+            EntityType<?> type = Registry.ENTITY_TYPE.get(new Identifier(tagI.asString()));
+            if (!onlyAttackable || EntityUtils.isAttackable(type)) get().add(type);
         }
 
         changed();
@@ -97,6 +102,7 @@ public class EntityTypeListSetting extends Setting<List<EntityType<?>>> {
         private List<EntityType<?>> defaultValue;
         private Consumer<List<EntityType<?>>> onChanged;
         private Consumer<Setting<List<EntityType<?>>>> onModuleActivated;
+        private boolean onlyAttackable = false;
 
         public Builder name(String name) {
             this.name = name;
@@ -123,8 +129,13 @@ public class EntityTypeListSetting extends Setting<List<EntityType<?>>> {
             return this;
         }
 
+        public Builder onlyAttackable() {
+            onlyAttackable = true;
+            return this;
+        }
+
         public EntityTypeListSetting build() {
-            return new EntityTypeListSetting(name, description, defaultValue, onChanged, onModuleActivated);
+            return new EntityTypeListSetting(name, description, defaultValue, onChanged, onModuleActivated, onlyAttackable);
         }
     }
 }
