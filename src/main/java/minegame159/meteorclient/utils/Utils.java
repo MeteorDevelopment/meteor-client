@@ -41,7 +41,6 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Arrays;
 import java.util.Random;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public class Utils {
@@ -61,6 +60,21 @@ public class Utils {
         DecimalFormatSymbols dfs = new DecimalFormatSymbols();
         dfs.setDecimalSeparator('.');
         df.setDecimalFormatSymbols(dfs);
+    }
+
+    public static void getItemsInContainerItem(ItemStack itemStack, ItemStack[] items) {
+        Arrays.fill(items, ItemStack.EMPTY);
+        CompoundTag nbt = itemStack.getTag();
+
+        if (nbt != null && nbt.contains("BlockEntityTag")) {
+            CompoundTag nbt2 = nbt.getCompound("BlockEntityTag");
+            if (nbt2.contains("Items")) {
+                ListTag nbt3 = (ListTag) nbt2.get("Items");
+                for (int i = 0; i < nbt3.size(); i++) {
+                    items[nbt3.getCompound(i).getByte("Slot")] = ItemStack.fromTag(nbt3.getCompound(i));
+                }
+            }
+        }
     }
 
     public static boolean versionIsHigherOrEqual(String targetVersion) {
@@ -84,11 +98,11 @@ public class Utils {
     }
 
     public static double getScaledWindowWidthGui() {
-        return mc.getWindow().getWidth() / GuiConfig.INSTANCE.guiScale;
+        return mc.getWindow().getFramebufferWidth() / GuiConfig.INSTANCE.guiScale;
     }
 
     public static double getScaledWindowHeightGui() {
-        return mc.getWindow().getHeight() / GuiConfig.INSTANCE.guiScale;
+        return mc.getWindow().getFramebufferHeight() / GuiConfig.INSTANCE.guiScale;
     }
 
     public static Object2IntMap<StatusEffect> createStatusEffectMap() {
@@ -284,6 +298,9 @@ public class Utils {
 
     public static int random(int min, int max) {
         return random.nextInt(max - min) + min;
+    }
+    public static double random(double min, double max) {
+        return min + (max - min) * random.nextDouble();
     }
 
     public static void sendMessage(String msg, Object... args) {
