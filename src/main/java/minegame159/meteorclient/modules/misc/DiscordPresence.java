@@ -2,10 +2,6 @@ package minegame159.meteorclient.modules.misc;
 
 //Created by squidoodly 12/05/2020
 
-import com.jagrosh.discordipc.IPCClient;
-import com.jagrosh.discordipc.IPCListener;
-import com.jagrosh.discordipc.entities.RichPresence;
-import com.jagrosh.discordipc.exceptions.NoDiscordClientException;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.TickEvent;
@@ -15,9 +11,9 @@ import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.Utils;
-import org.json.JSONObject;
-
-import java.time.OffsetDateTime;
+import net.arikia.dev.drpc.DiscordEventHandlers;
+import net.arikia.dev.drpc.DiscordRPC;
+import net.arikia.dev.drpc.DiscordRichPresence;
 
 public class DiscordPresence extends ToggleModule {
     private enum SmallImage {
@@ -31,8 +27,9 @@ public class DiscordPresence extends ToggleModule {
             this.text = text;
         }
 
-        void apply(RichPresence.Builder presence) {
-            presence.setSmallImage(key, text);
+        void apply(DiscordRichPresence presence) {
+            presence.smallImageKey = key;
+            presence.smallImageText = text;
         }
 
         SmallImage next() {
@@ -47,6 +44,7 @@ public class DiscordPresence extends ToggleModule {
             .name("display-name")
             .description("Displays your name in discord rpc.")
             .defaultValue(true)
+            .onModuleActivated(booleanSetting -> updateDetails())
             .build()
     );
 
@@ -54,43 +52,18 @@ public class DiscordPresence extends ToggleModule {
             .name("display-server")
             .description("Displays the server you are in.")
             .defaultValue(true)
+            .onModuleActivated(booleanSetting -> updateDetails())
             .build()
     );
 
-    private IPCClient client;
-    private final RichPresence.Builder presence = new RichPresence.Builder();
-
+    private final DiscordRichPresence presence = new DiscordRichPresence();
     private boolean ready;
+
     private int ticks;
     private SmallImage currentSmallImage;
 
     public DiscordPresence() {
         super(Category.Misc, "discord-presence", "That stuff you see in discord");
-
-        client = new IPCClient(709793491911180378L);
-        client.setListener(new IPCListener() {
-            @Override
-            public void onReady(IPCClient client) {
-                ready = true;
-
-                presence.setStartTimestamp(OffsetDateTime.now());
-                presence.setDetails(getText());
-                presence.setLargeImage("meteor_client", "https://meteorclient.com/");
-                currentSmallImage.apply(presence);
-
-                client.sendRichPresence(presence.build());
-            }
-
-            @Override
-            public void onClose(IPCClient client, JSONObject json) {
-                ready = false;
-            }
-
-            @Override
-            public void onDisconnect(IPCClient client, Throwable t) {
-                ready = false;
-            }
-        });
     }
 
     @Override
@@ -98,32 +71,49 @@ public class DiscordPresence extends ToggleModule {
         ticks = 0;
         currentSmallImage = SmallImage.MineGame;
 
-        try {
-            client.connect();
-        } catch (NoDiscordClientException e) {
-            e.printStackTrace();
-        }
+        DiscordRPC.discordInitialize("709793491911180378", new DiscordEventHandlers.Builder()
+                .setReadyEventHandler(user -> {
+                    ready = true;
+
+                    presence.startTimestamp = System.currentTimeMillis();
+                    presence.details = getText();
+                    presence.largeImageKey = "meteor_client";
+                    presence.largeImageText = "https://meteorclient.com/";
+                    currentSmallImage.apply(presence);
+
+                    DiscordRPC.discordUpdatePresence(presence);
+                })
+                .setDisconnectedEventHandler((errorCode, message) -> ready = false)
+                .setErroredEventHandler((errorCode, message) -> ready = false)
+                .build(), false);
     }
 
     @Override
     public void onDeactivate(){
-        client.close();
+        DiscordRPC.discordShutdown();
     }
 
     @EventHandler
-    private final Listener<TickEvent> OnTick = new Listener<>(event -> {
+    private final Listener<TickEvent> onTick = new Listener<>(event -> {
         if (ready) {
             ticks++;
 
             if (ticks >= 200) {
                 currentSmallImage = currentSmallImage.next();
                 currentSmallImage.apply(presence);
-                client.sendRichPresence(presence.build());
+                DiscordRPC.discordUpdatePresence(presence);
 
                 ticks = 0;
             }
         }
+
+        DiscordRPC.discordRunCallbacks();
     });
+
+    private void updateDetails() {
+        presence.details = getText();
+        if (ready) DiscordRPC.discordUpdatePresence(presence);
+    }
 
     private String getText() {
         if (mc.isInSingleplayer()) {

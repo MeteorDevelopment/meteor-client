@@ -38,18 +38,8 @@ dependencies {
 	modImplementation "com.gitlab.CDAGaming:fabritone:fabritone~1.14.x-Fabric-SNAPSHOT"
 	include "com.gitlab.CDAGaming:fabritone:fabritone~1.14.x-Fabric-SNAPSHOT"
 
-	// Everything down from here is for discord
-	modImplementation "com.jagrosh:DiscordIPC:0.4"
-	include "com.jagrosh:DiscordIPC:0.4"
-
-	modImplementation "org.json:json:20200518"
-	include "org.json:json:20200518"
-
-	modImplementation "org.slf4j:slf4j-api:2.0.0-alpha1"
-	include "org.slf4j:slf4j-api:2.0.0-alpha1"
-
-	modImplementation "com.cosium.junixsocket:junixsocket-common:2.0.4.3"
-	include "com.cosium.junixsocket:junixsocket-common:2.0.4.3"
+	modImplementation "com.github.Vatuu:discord-rpc:1.6.2"
+	include "com.github.Vatuu:discord-rpc:1.6.2"
 }
 
 processResources {
