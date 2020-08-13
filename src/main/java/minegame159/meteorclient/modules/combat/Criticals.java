@@ -6,7 +6,9 @@ import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.AttackEntityEvent;
 import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.movement.NoFall;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.math.Vec3d;
 
@@ -19,9 +21,15 @@ public class Criticals extends ToggleModule {
         super(Category.Combat, "criticals", "Critical attacks.");
     }
 
+    private boolean wasActive = false;
+
     @EventHandler
     private final Listener<AttackEntityEvent> onAttackEntity = new Listener<>(event -> {
         if (!shouldDoCriticals()) return;
+        if (ModuleManager.INSTANCE.get(NoFall.class).isActive()){
+            wasActive = true;
+            ModuleManager.INSTANCE.get(NoFall.class).toggle();
+        }
 
         double x = mc.player.getX();
         double y = mc.player.getY();
@@ -33,6 +41,10 @@ public class Criticals extends ToggleModule {
         if(sqrt(mc.player.getVelocity().x * mc.player.getVelocity().x + mc.player.getVelocity().z * mc.player.getVelocity().z) > 0.2f) mc.player.setVelocity(sin(-yaw) * 0.2f, mc.player.getVelocity().y, cos(yaw) * 0.2f);
         mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(x, y + 0.0625, z, false));
         mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(x, y, z, false));
+
+        if (wasActive) {
+            ModuleManager.INSTANCE.get(NoFall.class).toggle();
+        }
     });
 
     private boolean shouldDoCriticals() {

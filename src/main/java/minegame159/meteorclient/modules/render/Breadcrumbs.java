@@ -10,6 +10,7 @@ import minegame159.meteorclient.rendering.ShapeBuilder;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.Pool;
+import net.minecraft.world.dimension.DimensionType;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
@@ -48,6 +49,8 @@ public class Breadcrumbs extends ToggleModule {
 
     private Section section;
 
+    private DimensionType lastDimension;
+
     public Breadcrumbs() {
         super(Category.Render, "breadcrumbs", "Displays a line where you walked.");
     }
@@ -56,6 +59,8 @@ public class Breadcrumbs extends ToggleModule {
     public void onActivate() {
         section = sectionPool.get();
         section.set1();
+
+        lastDimension = mc.player.dimension;
     }
 
     @Override
@@ -66,6 +71,11 @@ public class Breadcrumbs extends ToggleModule {
 
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
+        if (lastDimension != mc.player.dimension) {
+            for (Section sec : sections) sectionPool.free(sec);
+            sections.clear();
+        }
+
         if (isFarEnough(section.x1, section.y1, section.z1)) {
             section.set2();
 
@@ -78,6 +88,8 @@ public class Breadcrumbs extends ToggleModule {
             section = sectionPool.get();
             section.set1();
         }
+
+        lastDimension = mc.player.dimension;
     });
 
     @EventHandler

@@ -21,12 +21,12 @@ import minegame159.meteorclient.utils.EChestMemory;
 import minegame159.meteorclient.utils.EntityUtils;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.waypoints.Waypoints;
-import net.arikia.dev.drpc.DiscordRPC;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.keybinding.FabricKeyBinding;
 import net.fabricmc.fabric.api.client.keybinding.KeyBindingRegistry;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.util.Identifier;
 import org.lwjgl.glfw.GLFW;
@@ -44,6 +44,8 @@ public class MeteorClient implements ClientModInitializer, Listenable {
     private MinecraftClient mc;
     private FabricKeyBinding openClickGui = FabricKeyBinding.Builder.create(new Identifier("meteor-client", "open-click-gui"), InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_RIGHT_SHIFT, "Meteor Client").build();
     public FabricKeyBinding shulkerPeek = FabricKeyBinding.Builder.create(new Identifier("meteor-client", "shulker-peek"), InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_LEFT_ALT, "Meteor Client").build();
+
+    public Screen screenToOpen;
 
     @Override
     public void onInitializeClient() {
@@ -93,7 +95,6 @@ public class MeteorClient implements ClientModInitializer, Listenable {
         FriendManager.INSTANCE.save();
         MacroManager.INSTANCE.save();
         AccountManager.INSTANCE.save();
-        DiscordRPC.discordShutdown();
 
         Ignore.save();
     }
@@ -105,6 +106,11 @@ public class MeteorClient implements ClientModInitializer, Listenable {
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
         Capes.tick();
+
+        if (screenToOpen != null && mc.currentScreen == null) {
+            mc.openScreen(screenToOpen);
+            screenToOpen = null;
+        }
 
         if (openClickGui.isPressed() && mc.currentScreen == null && GuiThings.postKeyEvents()) {
             openClickGui();
