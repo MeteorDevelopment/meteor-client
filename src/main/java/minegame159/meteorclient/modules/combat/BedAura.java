@@ -155,7 +155,7 @@ public class BedAura extends ToggleModule {
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
         if (mc.player.getHealth() + mc.player.getAbsorptionAmount() <= minHealth.get() && mode.get() != Mode.suicide) return;
         for(BlockEntity entity : mc.world.blockEntities){
-            if(entity instanceof BedBlockEntity && Math.sqrt(entity.getSquaredDistance(mc.player.getX(), mc.player.getY(), mc.player.getZ())) <= breakRange.get()){
+            if(entity instanceof BedBlockEntity && Math.sqrt(entity.getSquaredDistance(mc.player.x, mc.player.y, mc.player.z)) <= breakRange.get()){
                 currentDamage = DamageCalcUtils.bedDamage(mc.player, new Vec3d(entity.getPos()));
                 if(currentDamage < maxDamage.get()
                         || (mc.player.getHealth() + mc.player.getAbsorptionAmount() - currentDamage) < minHealth.get() || clickMode.get().equals(Mode.suicide)){
