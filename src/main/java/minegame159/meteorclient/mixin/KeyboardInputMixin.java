@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(KeyboardInput.class)
 public class KeyboardInputMixin {
     @Inject(method = "tick", at = @At("TAIL"))
-    private void onTick(boolean bl, boolean bl2, CallbackInfo info) {
+    private void onTick(boolean bl, CallbackInfo info) {
         ModuleManager.INSTANCE.get(InvMove.class).tick();
     }
 }
