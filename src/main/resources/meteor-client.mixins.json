@@ -76,7 +76,8 @@
     "PacketInflaterMixin",
     "CobwebBlockMixin",
     "SoulSandBlockMixin",
-    "SlimeBlockMixin"
+    "SlimeBlockMixin",
+    "KeyboardInputMixin"
   ],
   "injectors": {
     "defaultRequire": 1

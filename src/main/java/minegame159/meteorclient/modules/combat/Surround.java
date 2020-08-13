@@ -13,6 +13,8 @@ import net.minecraft.block.BlockState;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
+import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.util.math.MathHelper;
 
 public class Surround extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -38,13 +40,42 @@ public class Surround extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> center = sgGeneral.add(new BoolSetting.Builder()
+            .name("center")
+            .description("Moves you to the center of the block.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Boolean> disableOnJump = sgGeneral.add(new BoolSetting.Builder()
+            .name("disable-on-jump")
+            .description("Automatically disables when you jump.")
+            .defaultValue(true)
+            .build()
+    );
+
     public Surround() {
         super(Category.Combat, "surround", "Surrounds you with obsidian (or other blocks) to take less damage.");
+    }
+
+    @Override
+    public void onActivate() {
+        if (center.get()) {
+            double x = MathHelper.floor(mc.player.getX()) + 0.5;
+            double z = MathHelper.floor(mc.player.getZ()) + 0.5;
+            mc.player.updatePosition(x, mc.player.getY(), z);
+            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(mc.player.getX(), mc.player.getY(), mc.player.getZ(), mc.player.onGround));
+        }
     }
 
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
         if (onlyOnGround.get() && !mc.player.isOnGround()) return;
+
+        if (disableOnJump.get() && mc.options.keyJump.isPressed()) {
+            toggle();
+            return;
+        }
 
         int slot;
         if (mc.player.getMainHandStack().getItem() == Items.OBSIDIAN) slot = mc.player.inventory.selectedSlot;

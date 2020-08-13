@@ -1,7 +1,8 @@
 package minegame159.meteorclient.gui.screens;
 
 import minegame159.meteorclient.gui.widgets.*;
-import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.EntityTypeListSetting;
+import minegame159.meteorclient.utils.EntityUtils;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.entity.EntityType;
 import net.minecraft.util.Pair;
@@ -13,13 +14,13 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class EntityTypeListSettingScreen extends WindowScreen {
-    private final Setting<List<EntityType<?>>> setting;
+    private final EntityTypeListSetting setting;
     private final WTextBox filter;
 
     private WCollapsableTable animals, waterAnimals, monsters, ambient, misc;
     int hasAnimal = 0, hasWaterAnimal = 0, hasMonster = 0, hasAmbient = 0, hasMisc = 0;
 
-    public EntityTypeListSettingScreen(Setting<List<EntityType<?>>> setting) {
+    public EntityTypeListSettingScreen(EntityTypeListSetting setting) {
         super("Select entities", true);
         this.setting = setting;
 
@@ -37,12 +38,14 @@ public class EntityTypeListSettingScreen extends WindowScreen {
     private void initWidgets() {
         hasAnimal = hasWaterAnimal = hasMonster = hasAmbient = hasMisc = 0;
         for (EntityType<?> entityType : setting.get()) {
-            switch (entityType.getSpawnGroup()) {
-                case CREATURE:       hasAnimal++; break;
-                case WATER_CREATURE: hasWaterAnimal++; break;
-                case MONSTER:        hasMonster++; break;
-                case AMBIENT:        hasAmbient++; break;
-                case MISC:           hasMisc++; break;
+            if (!setting.onlyAttackable || EntityUtils.isAttackable(entityType)) {
+                switch (entityType.getSpawnGroup()) {
+                    case CREATURE:       hasAnimal++; break;
+                    case WATER_CREATURE: hasWaterAnimal++; break;
+                    case MONSTER:        hasMonster++; break;
+                    case AMBIENT:        hasAmbient++; break;
+                    case MISC:           hasMisc++; break;
+                }
             }
         }
 
@@ -95,27 +98,29 @@ public class EntityTypeListSettingScreen extends WindowScreen {
         row();
 
         Consumer<EntityType<?>> entityTypeForEach = entityType -> {
-            switch (entityType.getSpawnGroup()) {
-                case CREATURE:
-                    animalsE.add(entityType);
-                    addEntityType(animals, animalsC, entityType);
-                    break;
-                case WATER_CREATURE:
-                    waterAnimalsE.add(entityType);
-                    addEntityType(waterAnimals, waterAnimalsC, entityType);
-                    break;
-                case MONSTER:
-                    monstersE.add(entityType);
-                    addEntityType(monsters, monstersC, entityType);
-                    break;
-                case AMBIENT:
-                    ambientE.add(entityType);
-                    addEntityType(ambient, ambientC, entityType);
-                    break;
-                case MISC:
-                    miscE.add(entityType);
-                    addEntityType(misc, miscC, entityType);
-                    break;
+            if (!setting.onlyAttackable || EntityUtils.isAttackable(entityType)) {
+                switch (entityType.getSpawnGroup()) {
+                    case CREATURE:
+                        animalsE.add(entityType);
+                        addEntityType(animals, animalsC, entityType);
+                        break;
+                    case WATER_CREATURE:
+                        waterAnimalsE.add(entityType);
+                        addEntityType(waterAnimals, waterAnimalsC, entityType);
+                        break;
+                    case MONSTER:
+                        monstersE.add(entityType);
+                        addEntityType(monsters, monstersC, entityType);
+                        break;
+                    case AMBIENT:
+                        ambientE.add(entityType);
+                        addEntityType(ambient, ambientC, entityType);
+                        break;
+                    case MISC:
+                        miscE.add(entityType);
+                        addEntityType(misc, miscC, entityType);
+                        break;
+                }
             }
         };
 

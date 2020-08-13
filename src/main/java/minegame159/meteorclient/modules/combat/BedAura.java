@@ -141,149 +141,177 @@ public class BedAura extends ToggleModule {
     );
 
     private int delayLeft = delay.get();
+    private Vec3d bestBlock;
+    private double bestDamage;
+    private Vec3d playerPos;
+    private double currentDamage;
+    private BlockPos bestBlockPos;
+    private BlockPos pos;
+    private Vec3d vecPos;
+    private BlockPos posUp;
+    private float preYaw;
+    private boolean didBreak = false;
 
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
-        if (delayLeft > 0) {
-            delayLeft --;
-            return;
-        } else {
-            delayLeft = delay.get();
-        }
-        if( mc.world.getDimension() == DimensionType.getOverworldDimensionType()) {
-            Chat.warning(this, "You are in the overworld. Disabling!");
-            this.toggle();
-            return;
-        }
-        if ((mc.player.getHealth() + mc.player.getAbsorptionAmount()) <= minHealth.get() && mode.get() != Mode.suicide) return;
-        if (place.get() && (!(mc.player.getMainHandStack().getItem() instanceof BedItem) && !(mc.player.getOffHandStack().getItem() instanceof BedItem))) return;
-        if (place.get()) {
-            Iterator<AbstractClientPlayerEntity> validEntities = mc.world.getPlayers().stream()
-                    .filter(FriendManager.INSTANCE::attack)
-                    .filter(entityPlayer -> !entityPlayer.getDisplayName().equals(mc.player.getDisplayName()))
-                    .filter(entityPlayer -> mc.player.distanceTo(entityPlayer) <= 10)
-                    .collect(Collectors.toList()).iterator();
-
-            AbstractClientPlayerEntity target;
-            if (validEntities.hasNext()) {
-                target = validEntities.next();
-            } else {
-                return;
-            }
-            for (AbstractClientPlayerEntity i = null; validEntities.hasNext(); i = validEntities.next()) {
-                if (i == null) continue;
-                if (mc.player.distanceTo(i) < mc.player.distanceTo(target)) {
-                    target = i;
-                }
-            }
-            List<BlockPos> validBlocks = findValidBlocks(target);
-            BlockPos bestBlock = validBlocks.get(0);
-            int preSlot = -1;
-            BlockPos pos = bestBlock.up();
-            if (DamageCalcUtils.bedDamage(target, new Vec3d(pos.getX(), pos.getY(), pos.getZ())) > minDamage.get()) {
-                if (autoSwitch.get()) {
-                    for (int i = 0; i < 9; i++) {
-                        if (mc.player.inventory.getStack(i).getItem() instanceof BedItem) {
-                            preSlot = mc.player.inventory.selectedSlot;
-                            mc.player.inventory.selectedSlot = i;
-                        }
-                    }
-                }
-                double north = -1;
-                double east = -1;
-                double south = -1;
-                double west = -1;
-                if(mc.world.isAir(bestBlock.add(1, 1, 0))){
-                    east = DamageCalcUtils.bedDamage(target, new Vec3d(bestBlock.getX() + 1, bestBlock.getY() + 1, bestBlock.getZ()));
-                }
-                if(mc.world.isAir(bestBlock.add(-1, 1, 0))){
-                    west = DamageCalcUtils.bedDamage(target, new Vec3d(bestBlock.getX() - 1, bestBlock.getY() + 1, bestBlock.getZ()));
-                }
-                if(mc.world.isAir(bestBlock.add(0, 1, 1))){
-                    pos = bestBlock.add(0, 1, 1);
-                    south = DamageCalcUtils.bedDamage(target, new Vec3d(pos.getX(), pos.getY(), pos.getZ()));
-                }
-                if(mc.world.isAir(bestBlock.add(0, 1, -1))){
-                    pos = bestBlock.add(0, 1, -1);
-                    north = DamageCalcUtils.bedDamage(target, new Vec3d(pos.getX(), pos.getY(), pos.getZ()));
-                }
-                Hand hand = Hand.MAIN_HAND;
-                if (!(mc.player.getMainHandStack().getItem() instanceof BedItem) && mc.player.getOffHandStack().getItem() instanceof BedItem) {
-                    hand = Hand.OFF_HAND;
-                }
-                if((east > north) && (east > south) && (east > west)){
-                    mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(-90f, mc.player.pitch, mc.player.isOnGround()));
-                }else if((east < north) && (north > south) && (north > west)){
-                    mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(179f, mc.player.pitch, mc.player.isOnGround()));
-                }else if((south > north) && (east < south) && (south > west)){
-                    mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(1f, mc.player.pitch, mc.player.isOnGround()));
-                }else if((west > north) && (west > south) && (east < west)){
-                    mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(90f, mc.player.pitch, mc.player.isOnGround()));
-                }
-                pos = bestBlock;
-                mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(new Vec3d(pos.getX(), pos.getY(), pos.getZ()), Direction.UP, bestBlock, false));
-                mc.player.swingHand(Hand.MAIN_HAND);
-                if (smartDelay.get()){
-                    if (DamageCalcUtils.bedDamage(target, target.getPos()) - DamageCalcUtils.bedDamage(target, new Vec3d(bestBlock.getX(), bestBlock.getY(), bestBlock.getZ())) < 10) {
-                        delayLeft = 10;
-                    }
-                }
-                if (preSlot != -1 && mc.player.inventory.selectedSlot != preSlot && switchBack.get()){
-                    mc.player.inventory.selectedSlot = preSlot;
-                }
-            }
-        }
+        if (mc.player.getHealth() + mc.player.getAbsorptionAmount() <= minHealth.get() && mode.get() != Mode.suicide) return;
         for(BlockEntity entity : mc.world.blockEntities){
-            if(entity instanceof BedBlockEntity && Utils.distance(entity.getPos().getX(), entity.getPos().getY(), entity.getPos().getZ(), mc.player.getX(), mc.player.getY(), mc.player.getZ()) <= breakRange.get()){
-                BlockPos bp = entity.getPos();
-                Vec3d pos = new Vec3d(bp.getX(), bp.getY(), bp.getZ());
-                if(DamageCalcUtils.bedDamage(mc.player, pos) < maxDamage.get()
-                    || (mc.player.getHealth() + mc.player.getAbsorptionAmount() - DamageCalcUtils.bedDamage(mc.player, pos)) < minHealth.get() || clickMode.get().equals(Mode.suicide)){
+            if(entity instanceof BedBlockEntity && Math.sqrt(entity.getSquaredDistance(mc.player.getX(), mc.player.getY(), mc.player.getZ())) <= breakRange.get()){
+                currentDamage = DamageCalcUtils.bedDamage(mc.player, new Vec3d(entity.getPos()));
+                if(currentDamage < maxDamage.get()
+                        || (mc.player.getHealth() + mc.player.getAbsorptionAmount() - currentDamage) < minHealth.get() || clickMode.get().equals(Mode.suicide)){
+                    mc.player.setSneaking(false);
                     mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, entity.getPos(), false));
                 }
 
             }
         }
+        if (didBreak) {
+            if (delayLeft > 0) {
+                delayLeft--;
+                return;
+            } else {
+                delayLeft = delay.get();
+            }
+
+            if (mc.world.getDimension() == DimensionType.getOverworldDimensionType()) {
+                Chat.warning(this, "You are in the overworld. Disabling!");
+                this.toggle();
+                return;
+            }
+            if ((mc.player.getHealth() + mc.player.getAbsorptionAmount()) <= minHealth.get() && mode.get() != Mode.suicide)
+                return;
+            if (place.get() && (!(mc.player.getMainHandStack().getItem() instanceof BedItem)
+                    && !(mc.player.getOffHandStack().getItem() instanceof BedItem)) && !autoSwitch.get()) return;
+            if (place.get()) {
+                Iterator<AbstractClientPlayerEntity> validEntities = mc.world.getPlayers().stream()
+                        .filter(FriendManager.INSTANCE::attack)
+                        .filter(entityPlayer -> !entityPlayer.getDisplayName().equals(mc.player.getDisplayName()))
+                        .filter(entityPlayer -> mc.player.distanceTo(entityPlayer) <= 10)
+                        .collect(Collectors.toList()).iterator();
+
+                AbstractClientPlayerEntity target;
+                if (validEntities.hasNext()) {
+                    target = validEntities.next();
+                } else {
+                    return;
+                }
+                for (AbstractClientPlayerEntity i = null; validEntities.hasNext(); i = validEntities.next()) {
+                    if (i == null) continue;
+                    if (mc.player.distanceTo(i) < mc.player.distanceTo(target)) {
+                        target = i;
+                    }
+                }
+                findValidBlocks(target);
+                if (bestBlock != null) {
+                    bestBlockPos = new BlockPos(bestBlock.x, bestBlock.y, bestBlock.z);
+                    int preSlot = -1;
+                    if (bestDamage > minDamage.get()) {
+                        if (autoSwitch.get()) {
+                            for (int i = 0; i < 9; i++) {
+                                if (mc.player.inventory.getInvStack(i).getItem() instanceof BedItem) {
+                                    preSlot = mc.player.inventory.selectedSlot;
+                                    mc.player.inventory.selectedSlot = i;
+                                }
+                            }
+                        }
+                        double north = -1;
+                        double east = -1;
+                        double south = -1;
+                        double west = -1;
+                        if (mc.world.getBlockState(bestBlockPos.add(1, 1, 0)).getMaterial().isReplaceable()) {
+                            east = DamageCalcUtils.bedDamage(target, bestBlock.add(1.5, 1.5, 0.5));
+                        }
+                        if (mc.world.getBlockState(bestBlockPos.add(-1, 1, 0)).getMaterial().isReplaceable()) {
+                            west = DamageCalcUtils.bedDamage(target, bestBlock.add(-1.5, 1.5, 0.5));
+                        }
+                        if (mc.world.getBlockState(bestBlockPos.add(0, 1, 1)).getMaterial().isReplaceable()) {
+                            south = DamageCalcUtils.bedDamage(target, bestBlock.add(0.5, 1.5, 1.5));
+                        }
+                        if (mc.world.getBlockState(bestBlockPos.add(0, 1, -1)).getMaterial().isReplaceable()) {
+                            north = DamageCalcUtils.bedDamage(target, bestBlock.add(0.5, 1.5, -1.5));
+                        }
+                        Hand hand = Hand.MAIN_HAND;
+                        if (!(mc.player.getMainHandStack().getItem() instanceof BedItem) && mc.player.getOffHandStack().getItem() instanceof BedItem) {
+                            hand = Hand.OFF_HAND;
+                        }
+                        if ((east > north) && (east > south) && (east > west)) {
+                            preYaw = mc.player.yaw;
+                            mc.player.yaw = -90f;
+                            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(-90f, mc.player.pitch, mc.player.onGround));
+                            mc.player.yaw = preYaw;
+                        } else if ((east < north) && (north > south) && (north > west)) {
+                            preYaw = mc.player.yaw;
+                            mc.player.yaw = 179f;
+                            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(179f, mc.player.pitch, mc.player.onGround));
+                            mc.player.yaw = preYaw;
+                        } else if ((south > north) && (east < south) && (south > west)) {
+                            preYaw = mc.player.yaw;
+                            mc.player.yaw = 1f;
+                            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(1f, mc.player.pitch, mc.player.onGround));
+                            mc.player.yaw = preYaw;
+                        } else if ((west > north) && (west > south) && (east < west)) {
+                            preYaw = mc.player.yaw;
+                            mc.player.yaw = 90f;
+                            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(90f, mc.player.pitch, mc.player.onGround));
+                            mc.player.yaw = preYaw;
+                        }
+                        mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(bestBlock, Direction.UP, bestBlockPos, false));
+                        mc.player.swingHand(Hand.MAIN_HAND);
+                        if (smartDelay.get()) {
+                            if (DamageCalcUtils.bedDamage(target, target.getPos()) - bestDamage < 10) {
+                                delayLeft = 10;
+                            }
+                        }
+                        if (preSlot != -1 && mc.player.inventory.selectedSlot != preSlot && switchBack.get()) {
+                            mc.player.inventory.selectedSlot = preSlot;
+                        }
+                    }
+                }
+            }
+            didBreak = false;
+        }
+        didBreak = true;
     });
 
-    private List<BlockPos> findValidBlocks(PlayerEntity target){
-        Iterator<BlockPos> allBlocks = getRange(mc.player.getBlockPos(), placeRange.get()).iterator();
-        List<BlockPos> validBlocks = new ArrayList<>();
-        for(BlockPos i = null; allBlocks.hasNext(); i = allBlocks.next()){
-            if(i == null) continue;
-            if((mc.world.isAir(i.up())
-                    && mc.world.getEntities(null, new Box(i.up().getX(), i.up().getY(), i.up().getZ(), i.up().getX() + 1.0D, i.up().getY() + 1.0D, i.up().getZ() + 1.0D)).isEmpty())
-                    && (mc.world.isAir(i.add(1, 1, 0)) || mc.world.isAir(i.add(-1, 1, 0))
-                    || mc.world.isAir(i.add(0, 1, 1)) || mc.world.isAir(i.add(0, 1, -1)))) {
-                if (airPlace.get()) {
-                    validBlocks.add(i);
-                } else if (!airPlace.get() && !mc.world.isAir(i)) {
-                    validBlocks.add(i);
+    private void findValidBlocks(PlayerEntity target){
+        bestBlock = null;
+        bestDamage = 0;
+        playerPos = mc.player.getPos();
+        for(double i = playerPos.x - placeRange.get(); i < playerPos.x + placeRange.get(); i++){
+            for(double j = playerPos.z - placeRange.get(); j < playerPos.z + placeRange.get(); j++){
+                for(double k = playerPos.y - 3; k < playerPos.y + 3; k++) {
+                    pos = new BlockPos(i, k, j);
+                    vecPos = new Vec3d(i, k, j);
+                    posUp = pos.add(0, 1, 0);
+                    if ((mc.world.getBlockState(posUp).getMaterial().isReplaceable())
+                            && mc.world.getEntities(null, new Box(posUp.getX(), posUp.getY(), posUp.getZ(), posUp.getX() + 1.0D, posUp.getY() + 1.0D, posUp.getZ() + 1.0D)).isEmpty()
+                            && (mc.world.getBlockState(new BlockPos(posUp).add(1, 0, 0)).getMaterial().isReplaceable() || mc.world.getBlockState(posUp.add(-1, 0, 0)).getMaterial().isReplaceable()
+                            || mc.world.getBlockState(posUp.add(0, 0, 1)).getMaterial().isReplaceable() || mc.world.getBlockState(posUp.add(0, 0, -1)).getMaterial().isReplaceable())) {
+                        if (airPlace.get()) {
+                            if (bestBlock == null) {
+                                bestBlock = vecPos;
+                                bestDamage = DamageCalcUtils.bedDamage(target, bestBlock.add(0.5, 1.5, 0.5));
+                            }
+                            if (bestDamage < DamageCalcUtils.bedDamage(target, vecPos.add(0.5, 1.5, 0.5))
+                                    && (DamageCalcUtils.bedDamage(mc.player, vecPos.add(0.5, 1.5, 0.5)) < minDamage.get() || mode.get() == Mode.suicide)) {
+                                bestBlock = vecPos;
+                                bestDamage = DamageCalcUtils.bedDamage(target, bestBlock.add(0.5, 1.5, 0.5));
+                            }
+                        } else if (!airPlace.get() && !mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
+                            if (bestBlock == null) {
+                                bestBlock = vecPos;
+                                bestDamage = DamageCalcUtils.bedDamage(target, bestBlock.add(0.5, 1.5, 0.5));
+                            }
+                            if (bestDamage < DamageCalcUtils.bedDamage(target, vecPos.add(0.5, 1.5, 0.5))
+                                    && (DamageCalcUtils.bedDamage(mc.player, vecPos.add(0.5, 1.5, 0.5)) < minDamage.get() || mode.get() == Mode.suicide)) {
+                                bestBlock = vecPos;
+                                bestDamage = DamageCalcUtils.bedDamage(target, bestBlock.add(0.5, 1.5, 0.5));
+                            }
+                        }
+                    }
                 }
             }
         }
-        validBlocks.sort(Comparator.comparingDouble(value -> {
-            BlockPos pos = value.up();
-            return DamageCalcUtils.crystalDamage(target, new Vec3d(pos.getX(), pos.getY(), pos.getZ()));
-        }));
-        validBlocks.removeIf(blockpos -> {
-            BlockPos pos = blockpos.up();
-            return DamageCalcUtils.crystalDamage(mc.player, new Vec3d(pos.getX(), pos.getY(), pos.getZ())) > maxDamage.get();
-        });
-        Collections.reverse(validBlocks);
-        return validBlocks;
-    }
-
-    private List<BlockPos> getRange(BlockPos player, double range){
-        List<BlockPos> allBlocks = new ArrayList<>();
-        for(double i = player.getX() - range; i < player.getX() + range; i++){
-            for(double j = player.getZ() - range; j < player.getZ() + range; j++){
-                for(int k = player.getY() - 3; k < player.getY() + 3; k++){
-                    BlockPos x = new BlockPos(i, k, j);
-                    allBlocks.add(x);
-                }
-            }
-        }
-        return allBlocks;
     }
 }

@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.Shadow;
 public class KeyBindingMixin implements IKeyBinding {
     @Shadow private boolean pressed;
 
-    @Shadow private InputUtil.Key boundKey;
+    @Shadow private InputUtil.KeyCode keyCode;
 
     @Override
     public void setPressed(boolean pressed) {
@@ -18,7 +18,7 @@ public class KeyBindingMixin implements IKeyBinding {
     }
 
     @Override
-    public InputUtil.Key getBoundKey() {
-        return boundKey;
+    public InputUtil.KeyCode getKey() {
+        return keyCode;
     }
 }

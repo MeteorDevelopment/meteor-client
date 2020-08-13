@@ -19,6 +19,8 @@ import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.mob.MobEntity;
+import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.HitResult;
@@ -54,6 +56,7 @@ public class KillAura extends ToggleModule {
             .name("entities")
             .description("Entities to attack.")
             .defaultValue(new ArrayList<>(0))
+            .onlyAttackable()
             .build()
     );
 
@@ -61,6 +64,20 @@ public class KillAura extends ToggleModule {
             .name("only-on-ground")
             .description("Only attacks players that are on the ground (useful to bypass anti-cheats)")
             .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> nametagged = sgGeneral.add(new BoolSetting.Builder()
+            .name("nametagged")
+            .description("Hit nametagged mobs.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> babies = sgGeneral.add(new BoolSetting.Builder()
+            .name("babies")
+            .description("Hit baby animals.")
+            .defaultValue(true)
             .build()
     );
 
@@ -174,6 +191,11 @@ public class KillAura extends ToggleModule {
             return FriendManager.INSTANCE.attack((PlayerEntity) entity);
         }
 
+        if (entity instanceof AnimalEntity) {
+            if (babies.get()) return true;
+            return !((AnimalEntity) entity).isBaby();
+        }
+
         return true;
     }
 
@@ -220,6 +242,15 @@ public class KillAura extends ToggleModule {
         }
     }
 
+    private boolean checkName(Entity entity){
+        if (entity.hasCustomName() && !nametagged.get()) {
+            return false;
+        } else if (entity.hasCustomName() && nametagged.get()) {
+            return true;
+        }
+        return true;
+    }
+
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
         if (mc.player.getHealth() <= 0) return;
@@ -238,6 +269,7 @@ public class KillAura extends ToggleModule {
                 .filter(this::canSeeEntity)
                 .filter(Entity::isAlive)
                 .filter(this::isPlayerOnGround)
+                .filter(this::checkName)
                 .min(this::sort)
                 .ifPresent(tempEntity -> {
                     entity = tempEntity;

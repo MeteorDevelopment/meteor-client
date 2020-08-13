@@ -4,6 +4,7 @@ import minegame159.meteorclient.commands.Command;
 import minegame159.meteorclient.commands.CommandManager;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.utils.Chat;
 
@@ -31,7 +32,7 @@ public class CommandDispatcher {
 
         if (args.length <= 0) {
             module.doAction();
-            if (Config.INSTANCE.chatCommandsInfo) Chat.info("Toggled (highlight)%s(default).", module.title);
+            if (Config.INSTANCE.chatCommandsInfo && module instanceof ToggleModule) Chat.info("Toggled (highlight)%s(default) %s.", module.title, ((ToggleModule) module).isActive() ? "on" : "off");
         } else {
             // Set or get module setting
             Setting<?> setting = module.settings.get(args[0]);
