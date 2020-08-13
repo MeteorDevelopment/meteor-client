@@ -107,7 +107,7 @@ public class ShulkerBoxBlockMixin {
                 }
 
                 tooltip.add(new LiteralText(""));
-                tooltip.add(new LiteralText("Press " + Formatting.YELLOW + Utils.getKeyName(((IKeyBinding) MeteorClient.INSTANCE.shulkerPeek).getBoundKey().getCode()) + Formatting.RESET + " to peek"));
+                tooltip.add(new LiteralText("Press " + Formatting.YELLOW + Utils.getKeyName(((IKeyBinding) MeteorClient.INSTANCE.shulkerPeek).getKey().getCode()) + Formatting.RESET + " to peek"));
             }
         }
     }

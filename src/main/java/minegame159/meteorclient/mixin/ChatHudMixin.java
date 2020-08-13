@@ -62,8 +62,8 @@ public abstract class ChatHudMixin {
         }
 
         //Friend Colour
-        if (ModuleManager.INSTANCE.get(FriendColor.class).isActive() && !message.asString().equals(lastMessage)) {
-            String convert = message.asString();
+        if (ModuleManager.INSTANCE.get(FriendColor.class).isActive() && !message.equals(lastMessage)) {
+            String convert = message;
             List<Friend> friends = FriendManager.INSTANCE.getAll();
             for (Friend friend : friends) {
                 if (convert.contains(friend.name)) {
