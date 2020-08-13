@@ -1,4 +1,4 @@
-package minegame159.meteorclient.modules.player;
+package minegame159.meteorclient.modules.movement;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
@@ -57,7 +57,7 @@ public class InvMove extends ToggleModule {
     );
 
     public InvMove() {
-        super(Category.Player, "inv-move", "Allows you to move while in guis.");
+        super(Category.Movement, "inv-move", "Allows you to move while in guis.");
     }
 
     @EventHandler
