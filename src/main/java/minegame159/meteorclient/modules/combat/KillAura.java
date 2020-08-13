@@ -57,6 +57,7 @@ public class KillAura extends ToggleModule {
             .name("entities")
             .description("Entities to attack.")
             .defaultValue(new ArrayList<>(0))
+            .onlyAttackable()
             .build()
     );
 
