@@ -62,6 +62,10 @@ public class Utils {
         df.setDecimalFormatSymbols(dfs);
     }
 
+    public static Vec3d vec3d(BlockPos pos) {
+        return new Vec3d(pos.getX(), pos.getY(), pos.getZ());
+    }
+
     public static void getItemsInContainerItem(ItemStack itemStack, ItemStack[] items) {
         Arrays.fill(items, ItemStack.EMPTY);
         CompoundTag nbt = itemStack.getTag();

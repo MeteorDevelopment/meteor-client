@@ -60,7 +60,7 @@ public class Breadcrumbs extends ToggleModule {
         section = sectionPool.get();
         section.set1();
 
-        lastDimension = mc.player.dimension;
+        lastDimension = mc.world.getDimension();
     }
 
     @Override
@@ -71,7 +71,7 @@ public class Breadcrumbs extends ToggleModule {
 
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
-        if (lastDimension != mc.player.dimension) {
+        if (lastDimension != mc.world.getDimension()) {
             for (Section sec : sections) sectionPool.free(sec);
             sections.clear();
         }
@@ -89,7 +89,7 @@ public class Breadcrumbs extends ToggleModule {
             section.set1();
         }
 
-        lastDimension = mc.player.dimension;
+        lastDimension = mc.world.getDimension();
     });
 
     @EventHandler

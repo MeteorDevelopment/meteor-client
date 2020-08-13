@@ -64,7 +64,7 @@ public class Surround extends ToggleModule {
             double x = MathHelper.floor(mc.player.getX()) + 0.5;
             double z = MathHelper.floor(mc.player.getZ()) + 0.5;
             mc.player.updatePosition(x, mc.player.getY(), z);
-            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(mc.player.getX(), mc.player.getY(), mc.player.getZ(), mc.player.onGround));
+            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(mc.player.getX(), mc.player.getY(), mc.player.getZ(), mc.player.isOnGround()));
         }
     }
 

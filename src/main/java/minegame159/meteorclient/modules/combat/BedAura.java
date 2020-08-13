@@ -156,8 +156,8 @@ public class BedAura extends ToggleModule {
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
         if (mc.player.getHealth() + mc.player.getAbsorptionAmount() <= minHealth.get() && mode.get() != Mode.suicide) return;
         for(BlockEntity entity : mc.world.blockEntities){
-            if(entity instanceof BedBlockEntity && Math.sqrt(entity.getSquaredDistance(mc.player.getX(), mc.player.getY(), mc.player.getZ())) <= breakRange.get()){
-                currentDamage = DamageCalcUtils.bedDamage(mc.player, new Vec3d(entity.getPos()));
+            if(entity instanceof BedBlockEntity && Utils.distance(entity.getPos().getX(), entity.getPos().getY(), entity.getPos().getZ(), mc.player.getX(), mc.player.getY(), mc.player.getZ()) <= breakRange.get()){
+                currentDamage = DamageCalcUtils.bedDamage(mc.player, Utils.vec3d(entity.getPos()));
                 if(currentDamage < maxDamage.get()
                         || (mc.player.getHealth() + mc.player.getAbsorptionAmount() - currentDamage) < minHealth.get() || clickMode.get().equals(Mode.suicide)){
                     mc.player.setSneaking(false);
@@ -209,7 +209,7 @@ public class BedAura extends ToggleModule {
                     if (bestDamage > minDamage.get()) {
                         if (autoSwitch.get()) {
                             for (int i = 0; i < 9; i++) {
-                                if (mc.player.inventory.getInvStack(i).getItem() instanceof BedItem) {
+                                if (mc.player.inventory.getStack(i).getItem() instanceof BedItem) {
                                     preSlot = mc.player.inventory.selectedSlot;
                                     mc.player.inventory.selectedSlot = i;
                                 }
@@ -238,22 +238,22 @@ public class BedAura extends ToggleModule {
                         if ((east > north) && (east > south) && (east > west)) {
                             preYaw = mc.player.yaw;
                             mc.player.yaw = -90f;
-                            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(-90f, mc.player.pitch, mc.player.onGround));
+                            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(-90f, mc.player.pitch, mc.player.isOnGround()));
                             mc.player.yaw = preYaw;
                         } else if ((east < north) && (north > south) && (north > west)) {
                             preYaw = mc.player.yaw;
                             mc.player.yaw = 179f;
-                            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(179f, mc.player.pitch, mc.player.onGround));
+                            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(179f, mc.player.pitch, mc.player.isOnGround()));
                             mc.player.yaw = preYaw;
                         } else if ((south > north) && (east < south) && (south > west)) {
                             preYaw = mc.player.yaw;
                             mc.player.yaw = 1f;
-                            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(1f, mc.player.pitch, mc.player.onGround));
+                            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(1f, mc.player.pitch, mc.player.isOnGround()));
                             mc.player.yaw = preYaw;
                         } else if ((west > north) && (west > south) && (east < west)) {
                             preYaw = mc.player.yaw;
                             mc.player.yaw = 90f;
-                            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(90f, mc.player.pitch, mc.player.onGround));
+                            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(90f, mc.player.pitch, mc.player.isOnGround()));
                             mc.player.yaw = preYaw;
                         }
                         mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(bestBlock, Direction.UP, bestBlockPos, false));

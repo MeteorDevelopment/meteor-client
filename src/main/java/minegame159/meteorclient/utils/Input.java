@@ -11,7 +11,7 @@ public class Input {
     }
 
     public static boolean isPressed(KeyBinding keyBinding) {
-        int key = ((IKeyBinding) keyBinding).getKey().getKeyCode();
+        int key = ((IKeyBinding) keyBinding).getKey().getCode();
         return key < keys.length && keys[key];
     }
 

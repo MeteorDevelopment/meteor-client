@@ -190,7 +190,7 @@ public class MeteorClient implements ClientModInitializer, Listenable {
     }
 
     public void onKeyInMainMenu(int key) {
-        if (key == ((IKeyBinding) openClickGui).getBoundKey().getCode()) {
+        if (key == ((IKeyBinding) openClickGui).getKey().getCode()) {
             openClickGui();
         }
     }
