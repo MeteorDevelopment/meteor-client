@@ -11,6 +11,9 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.settings.BoolSetting;
+import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.Utils;
 import org.json.JSONObject;
 
@@ -38,6 +41,22 @@ public class DiscordPresence extends ToggleModule {
         }
     }
 
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+
+    private final Setting<Boolean> displayName = sgGeneral.add(new BoolSetting.Builder()
+            .name("display-name")
+            .description("Displays your name in discord rpc.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Boolean> displayServer = sgGeneral.add(new BoolSetting.Builder()
+            .name("display-server")
+            .description("Displays the server you are in.")
+            .defaultValue(true)
+            .build()
+    );
+
     private IPCClient client;
     private final RichPresence.Builder presence = new RichPresence.Builder();
 
@@ -55,8 +74,7 @@ public class DiscordPresence extends ToggleModule {
                 ready = true;
 
                 presence.setStartTimestamp(OffsetDateTime.now());
-                if (mc.isInSingleplayer()) presence.setDetails(getName() + " || SinglePlayer");
-                else presence.setDetails(getName() + " || " + getServer());
+                presence.setDetails(getText());
                 presence.setLargeImage("meteor_client", "https://meteorclient.com/");
                 currentSmallImage.apply(presence);
 
@@ -106,6 +124,19 @@ public class DiscordPresence extends ToggleModule {
             }
         }
     });
+
+    private String getText() {
+        if (mc.isInSingleplayer()) {
+            if (displayName.get()) return getName() + " || SinglePlayer";
+            else return "SinglePlayer";
+        }
+
+        if (displayName.get() && displayServer.get()) return getName() + " || " + getServer();
+        else if (!displayName.get() && displayServer.get()) return getServer();
+        else if (displayName.get() && !displayServer.get()) return getName();
+
+        return "";
+    }
 
     private String getServer(){
         return Utils.getWorldName();
