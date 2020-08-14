@@ -16,6 +16,11 @@ import net.minecraft.client.gui.screen.ingame.ContainerScreen;
 import net.minecraft.container.SlotActionType;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.Hand;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.EntityHitResult;
+import net.minecraft.util.hit.HitResult;
 
 public class OffhandExtra extends ToggleModule {
     public enum Mode{
@@ -121,7 +126,7 @@ public class OffhandExtra extends ToggleModule {
 
     @EventHandler
     private final Listener<RightClickEvent> onRightClick = new Listener<>(event -> {
-        if (ModuleManager.INSTANCE.get(AutoTotem.class).getLocked()) return;
+        if (ModuleManager.INSTANCE.get(AutoTotem.class).getLocked() || !canMove()) return;
         if ((mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING || (mc.player.getHealth() + mc.player.getAbsorptionAmount() > health.get())
                && (mc.player.getOffHandStack().getItem() != getItem()) && !(mc.currentScreen instanceof ContainerScreen<?>))) {
             isClicking = true;
@@ -164,5 +169,18 @@ public class OffhandExtra extends ToggleModule {
     }
 
     public boolean getMessageSent(){return sentMessage;}
+
+    private boolean canMove(){
+        if (mc.crosshairTarget.getType().equals(HitResult.Type.MISS)) {
+            return true;
+        } else if (mc.crosshairTarget.getType().equals(HitResult.Type.ENTITY)) {
+            EntityHitResult hitResult = (EntityHitResult) mc.crosshairTarget;
+            return mc.player.interact(hitResult.getEntity(), Hand.MAIN_HAND) == ActionResult.PASS;
+        } else if (mc.crosshairTarget.getType().equals(HitResult.Type.BLOCK)) {
+            BlockHitResult blockHitResult = (BlockHitResult)mc.crosshairTarget;
+            return !mc.world.getBlockState(blockHitResult.getBlockPos()).activate(mc.world, mc.player, Hand.MAIN_HAND, blockHitResult);
+        }
+        return false;
+    }
 
 }
