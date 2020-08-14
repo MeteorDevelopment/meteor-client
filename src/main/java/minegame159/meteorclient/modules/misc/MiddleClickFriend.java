@@ -15,7 +15,8 @@ public class MiddleClickFriend extends ToggleModule {
     }
 
     @EventHandler
-    private Listener<MiddleMouseButtonEvent> onMiddleMouseButton = new Listener<>(event -> {
+    private final Listener<MiddleMouseButtonEvent> onMiddleMouseButton = new Listener<>(event -> {
+        if (mc.currentScreen != null) return;
         if (mc.targetedEntity instanceof PlayerEntity) FriendManager.INSTANCE.addOrRemove(new Friend((PlayerEntity) mc.targetedEntity));
     });
 }
