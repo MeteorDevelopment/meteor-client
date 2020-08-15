@@ -225,6 +225,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new AimAssist());
         addModule(new AutoArmor());
         addModule(new AntiBed());
+        addModule(new TotemPopNotifier());
     }
 
     private void initPlayer() {
