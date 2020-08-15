@@ -3,7 +3,6 @@ package minegame159.meteorclient.modules.render;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.RenderEvent;
-import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
@@ -44,9 +43,6 @@ public class Trajectories extends ToggleModule {
     public Trajectories() {
         super(Category.Render, "trajectories", "Displays trajectory of held items.");
     }
-
-    @EventHandler
-    private final Listener<TickEvent> onTick = new Listener<>(event -> calculatePath(1f / 20));
 
     @EventHandler
     private final Listener<RenderEvent> onRender = new Listener<>(event -> {
