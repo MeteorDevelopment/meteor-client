@@ -3,6 +3,7 @@ package minegame159.meteorclient.mixin;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.events.OpenScreenEvent;
+import minegame159.meteorclient.gui.GuiThings;
 import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.mixininterface.IMinecraftClient;
 import minegame159.meteorclient.modules.ModuleManager;
@@ -25,6 +26,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import javax.annotation.Nullable;
 import java.net.Proxy;
 
 @Mixin(MinecraftClient.class)
@@ -47,6 +49,10 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
 
     @Shadow public ClientPlayerEntity player;
 
+    @Shadow @Nullable public Screen currentScreen;
+
+    @Shadow protected abstract void init();
+
     @Inject(method = "init", at = @At("TAIL"))
     private void onInit(CallbackInfo info) {
         MeteorClient.INSTANCE.onInitializeClient();
@@ -67,7 +73,12 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
         OpenScreenEvent event = EventStore.openScreenEvent(screen);
         MeteorClient.EVENT_BUS.post(event);
 
-        if (event.isCancelled()) info.cancel();
+        if (event.isCancelled()) {
+            info.cancel();
+            return;
+        }
+
+        if (currentScreen instanceof WidgetScreen && !(screen instanceof WidgetScreen)) GuiThings.resetPostKeyEvents();
     }
 
     @Redirect(method = "doItemUse", at = @At(value = "FIELD", target = "Lnet/minecraft/client/MinecraftClient;crosshairTarget:Lnet/minecraft/util/hit/HitResult;", ordinal = 1))

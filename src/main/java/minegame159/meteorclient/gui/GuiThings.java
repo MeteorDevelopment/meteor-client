@@ -9,4 +9,7 @@ public class GuiThings {
     public static boolean postKeyEvents() {
         return postKeyEvents <= 0;
     }
+    public static void resetPostKeyEvents() {
+        postKeyEvents = 0;
+    }
 }

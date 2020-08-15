@@ -19,6 +19,7 @@ import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.Savable;
 import minegame159.meteorclient.utils.Utils;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -137,7 +138,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
 
     @EventHandler
     public Listener<KeyEvent> onKey = new Listener<>(event -> {
-        if (!event.push) return;
+        if (!event.push || MinecraftClient.getInstance().currentScreen != null) return;
 
         // Check if binding module
         if (moduleToBind != null) {
