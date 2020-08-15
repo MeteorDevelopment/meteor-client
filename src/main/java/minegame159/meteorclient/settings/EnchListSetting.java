@@ -41,13 +41,16 @@ public class EnchListSetting extends Setting<List<Enchantment>>{
         String[] values = str.split(",");
         List<Enchantment> enchs = new ArrayList<>(1);
 
-        for (String value : values) {
-            String val = value.trim();
-            Identifier id;
-            if (val.contains(":")) id = new Identifier(val);
-            else id = new Identifier("minecraft", val);
-            enchs.add(Registry.ENCHANTMENT.get(id));
-        }
+        try {
+            for (String value : values) {
+                String val = value.trim();
+                Identifier id;
+                if (val.contains(":")) id = new Identifier(val);
+                else id = new Identifier("minecraft", val);
+                if (Registry.ENCHANTMENT.containsId(id)) enchs.add(Registry.ENCHANTMENT.get(id));
+            }
+        } catch (Exception ignored) {}
+
         return enchs;
     }
 
