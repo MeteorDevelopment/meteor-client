@@ -9,11 +9,11 @@ import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.Utils;
-import net.minecraft.block.BlockState;
-import net.minecraft.item.BlockItem;
+import net.minecraft.block.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 
 public class Surround extends ToggleModule {
@@ -26,10 +26,10 @@ public class Surround extends ToggleModule {
             .build()
     );
 
-    private final Setting<Boolean> onlyObsidian = sgGeneral.add(new BoolSetting.Builder()
-            .name("only-obsidian")
-            .description("Only uses obsidian.")
-            .defaultValue(true)
+    private final Setting<Boolean> onlyWhenSneaking = sgGeneral.add(new BoolSetting.Builder()
+            .name("only-when-sneaking")
+            .description("Places blocks only when sneaking.")
+            .defaultValue(false)
             .build()
     );
 
@@ -47,12 +47,23 @@ public class Surround extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> instant = sgGeneral.add(new BoolSetting.Builder()
+            .name("instant")
+            .description("Places all blocks in one tick.")
+            .defaultValue(true)
+            .build()
+    );
+
     private final Setting<Boolean> disableOnJump = sgGeneral.add(new BoolSetting.Builder()
             .name("disable-on-jump")
             .description("Automatically disables when you jump.")
             .defaultValue(true)
             .build()
     );
+
+    private int prevSlot;
+    private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
+    private boolean return_;
 
     public Surround() {
         super(Category.Combat, "surround", "Surrounds you with obsidian (or other blocks) to take less damage.");
@@ -71,76 +82,96 @@ public class Surround extends ToggleModule {
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
         if (onlyOnGround.get() && !mc.player.onGround) return;
+        if (onlyWhenSneaking.get() && !mc.options.keySneak.isPressed()) return;
 
         if (disableOnJump.get() && mc.options.keyJump.isPressed()) {
             toggle();
             return;
         }
 
-        int slot;
-        if (mc.player.getMainHandStack().getItem() == Items.OBSIDIAN) slot = mc.player.inventory.selectedSlot;
-        else slot = findSlot();
+        // Place
+        return_ = false;
 
-        boolean allPlaced = true;
+        boolean p1 = tryPlace(1, 0);
+        if (return_) return;
+        boolean p2 = tryPlace(-1, 0);
+        if (return_) return;
+        boolean p3 = tryPlace(0, 1);
+        if (return_) return;
+        boolean p4 = tryPlace(0, -1);
+        if (return_) return;
 
-        if (slot != -1) {
-            int preSelectedSlot = mc.player.inventory.selectedSlot;
-            mc.player.inventory.selectedSlot = slot;
-            BlockState blockState = ((BlockItem) mc.player.inventory.getMainHandStack().getItem()).getBlock().getDefaultState();
-
-            Utils.place(blockState, mc.player.getBlockPos().add(1, 0, 0));
-            if (mc.world.getBlockState(mc.player.getBlockPos().add(1, 0, 0)).getMaterial().isReplaceable()) allPlaced = false;
-            if (mc.player.getMainHandStack().getItem() != Items.OBSIDIAN) slot = findSlot();
-            if (slot == -1) {
-                mc.player.inventory.selectedSlot = preSelectedSlot;
-                if (turnOff.get() && allPlaced) toggle();
-                return;
-            }
-
-            Utils.place(blockState, mc.player.getBlockPos().add(-1, 0, 0));
-            if (mc.world.getBlockState(mc.player.getBlockPos().add(-1, 0, 0)).getMaterial().isReplaceable()) allPlaced = false;
-            if (mc.player.getMainHandStack().getItem() != Items.OBSIDIAN) slot = findSlot();
-            if (slot == -1) {
-                mc.player.inventory.selectedSlot = preSelectedSlot;
-                if (turnOff.get() && allPlaced) toggle();
-                return;
-            }
-
-            Utils.place(blockState, mc.player.getBlockPos().add(0, 0, 1));
-            if (mc.world.getBlockState(mc.player.getBlockPos().add(0, 0, 1)).getMaterial().isReplaceable()) allPlaced = false;
-            if (mc.player.getMainHandStack().getItem() != Items.OBSIDIAN) slot = findSlot();
-            if (slot == -1) {
-                mc.player.inventory.selectedSlot = preSelectedSlot;
-                if (turnOff.get() && allPlaced) toggle();
-                return;
-            }
-
-            Utils.place(blockState, mc.player.getBlockPos().add(0, 0, -1));
-            if (mc.world.getBlockState(mc.player.getBlockPos().add(0, 0, -1)).getMaterial().isReplaceable()) allPlaced = false;
-
-            mc.player.inventory.selectedSlot = preSelectedSlot;
-
-            if (turnOff.get() && allPlaced) toggle();
-        }
+        // Auto turn off
+        if (turnOff.get() && p1 && p2 && p3 && p4) toggle();
     });
 
-    private int findSlot() {
-        int slot = -1;
+    private boolean tryPlace(int x, int z) {
+        boolean p = place(x, 0, z);
+        if (return_) return p;
+        if (p) return true;
+
+        for (int i = 0; i < 5; i++) {
+            int x2 = x;
+            int y2 = 0;
+            int z2 = z;
+
+            switch (i) {
+                case 0: y2--; break;
+                case 1: x2++; break;
+                case 2: x2--; break;
+                case 3: z2++; break;
+                case 4: z2--; break;
+            }
+
+            p = place(x2, y2, z2);
+            if (return_) return p;
+            if (p) {
+                place(x, 0, z);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean place(int x, int y, int z) {
+        setBlockPos(x, y, z);
+
+        boolean wasObby = !instant.get() && mc.world.getBlockState(blockPos).getBlock() == Blocks.OBSIDIAN;
+
+        if (findSlot()) {
+            Utils.place(Blocks.OBSIDIAN.getDefaultState(), blockPos, true, false, true);
+            resetSlot();
+
+            if (!instant.get()) {
+                boolean isObby = mc.world.getBlockState(blockPos).getBlock() == Blocks.OBSIDIAN;
+                if (!wasObby && isObby) return_ = true;
+            }
+        }
+
+        return !mc.world.getBlockState(blockPos).getMaterial().isReplaceable();
+    }
+
+    private void setBlockPos(int x, int y, int z) {
+        blockPos.set(mc.player);
+        blockPos.setOffset(x, y, z);
+    }
+
+    private boolean findSlot() {
+        prevSlot = mc.player.inventory.selectedSlot;
 
         for (int i = 0; i < 9; i++) {
             Item item = mc.player.inventory.getInvStack(i).getItem();
-
-            if (!(item instanceof BlockItem)) continue;
-
             if (item == Items.OBSIDIAN) {
-                return i;
-            }
-
-            if (!onlyObsidian.get()) {
-                if (((BlockItem) item).getBlock().getDefaultState().isSimpleFullBlock(mc.world, null)) slot = i;
+                mc.player.inventory.selectedSlot = i;
+                return true;
             }
         }
 
-        return slot;
+        return false;
+    }
+
+    private void resetSlot() {
+        mc.player.inventory.selectedSlot = prevSlot;
     }
 }
