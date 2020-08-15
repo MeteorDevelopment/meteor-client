@@ -73,7 +73,8 @@
     "SoulSandBlockMixin",
     "SlimeBlockMixin",
     "KeyboardInputMixin",
-    "GuiCloseC2SPacketMixin"
+    "GuiCloseC2SPacketMixin",
+    "BlockHitResultMixin"
   ],
   "injectors": {
     "defaultRequire": 1
