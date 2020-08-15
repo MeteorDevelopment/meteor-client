@@ -252,6 +252,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new LiquidInteract());
         addModule(new MountBypass());
         addModule(new PacketMine());
+        addModule(new XCarry());
     }
 
     private void initMovement() {

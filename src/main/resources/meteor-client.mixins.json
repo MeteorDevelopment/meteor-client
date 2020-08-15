@@ -72,7 +72,8 @@
     "CobwebBlockMixin",
     "SoulSandBlockMixin",
     "SlimeBlockMixin",
-    "KeyboardInputMixin"
+    "KeyboardInputMixin",
+    "GuiCloseC2SPacketMixin"
   ],
   "injectors": {
     "defaultRequire": 1
