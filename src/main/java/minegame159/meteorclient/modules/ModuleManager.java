@@ -245,8 +245,6 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new MiddleClickExtra());
         addModule(new AutoDrop());
         addModule(new AutoRightClick());
-        addModule(new Yaw());
-        addModule(new Pitch());
         addModule(new Portals());
         addModule(new Reach());
         addModule(new PotionSpoof());
@@ -255,6 +253,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new PacketMine());
         addModule(new XCarry());
         addModule(new BuildHeight());
+        addModule(new Rotation());
     }
 
     private void initMovement() {
