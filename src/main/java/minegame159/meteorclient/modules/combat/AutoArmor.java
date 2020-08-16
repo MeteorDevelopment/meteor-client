@@ -242,7 +242,7 @@ public class AutoArmor extends ToggleModule {
                 return true;
             }
         }
-        if (!mc.world.getDimensionRegistryKey().getValue().getPath().equals("overworld")) {
+        if (!mc.world.getRegistryKey().getValue().getPath().equals("overworld")) {
             for (BlockEntity blockEntity : mc.world.blockEntities) {
                 BlockPos pos = blockEntity.getPos();
                 if (blockEntity instanceof BedBlockEntity && DamageCalcUtils.bedDamage(mc.player, new Vec3d(pos.getX(), pos.getY(), pos.getZ())) > boomDamage.get()) {

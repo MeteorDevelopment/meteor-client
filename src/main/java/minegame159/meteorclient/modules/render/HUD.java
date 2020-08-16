@@ -42,6 +42,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.lwjgl.opengl.GL11;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class HUD extends ToggleModule {
     public enum DurabilityType{
@@ -538,7 +539,7 @@ public class HUD extends ToggleModule {
 
         if (biome.get()) {
             playerBlockPos.set(mc.player.getX(), mc.player.getY(), mc.player.getZ());
-            drawInfo("Biome: ", mc.world.getBiome(playerBlockPos).getName().getString(), y);
+            drawInfo("Biome: ", Arrays.stream(mc.world.getBiome(playerBlockPos).getCategory().getName().split("_")).map(StringUtils::capitalize).collect(Collectors.joining(" ")), y);
             y += MeteorClient.FONT.getHeight() + 2;
         }
 
@@ -665,17 +666,17 @@ public class HUD extends ToggleModule {
         }
 
         if (position.get()) {
-            if (mc.world.getDimensionRegistryKey().getValue().getPath().equals("overworld")) {
+            if (mc.world.getRegistryKey().getValue().getPath().equals("overworld")) {
                 drawPosition(event.screenWidth, "Nether Pos: ", y, mc.cameraEntity.getX() / 8.0, mc.cameraEntity.getY(), mc.cameraEntity.getZ() / 8.0);
                 y -= MeteorClient.FONT.getHeight() + 2;
                 drawPosition(event.screenWidth, "Pos: ", y, mc.cameraEntity.getX(), mc.cameraEntity.getY(), mc.cameraEntity.getZ());
                 y -= MeteorClient.FONT.getHeight() + 2;
-            } else if (mc.world.getDimensionRegistryKey().getValue().getPath().equals("the_nether")) {
+            } else if (mc.world.getRegistryKey().getValue().getPath().equals("the_nether")) {
                 drawPosition(event.screenWidth, "Overworld Pos: ", y, mc.cameraEntity.getX() * 8.0, mc.cameraEntity.getY(), mc.cameraEntity.getZ() * 8.0);
                 y -= MeteorClient.FONT.getHeight() + 2;
                 drawPosition(event.screenWidth, "Pos: ", y, mc.cameraEntity.getX(), mc.cameraEntity.getY(), mc.cameraEntity.getZ());
                 y -= MeteorClient.FONT.getHeight() + 2;
-            } else if (mc.world.getDimensionRegistryKey().getValue().getPath().equals("the_end")) {
+            } else if (mc.world.getRegistryKey().getValue().getPath().equals("the_end")) {
                 drawPosition(event.screenWidth, "Pos: ", y, mc.cameraEntity.getX(), mc.cameraEntity.getY(), mc.cameraEntity.getZ());
                 y -= MeteorClient.FONT.getHeight() + 2;
             }

@@ -130,7 +130,7 @@ public class AutoLog extends ToggleModule {
                 damageTaken = damage;
             }
         }
-        if (!mc.world.getDimensionRegistryKey().getValue().getPath().equals("overworld")) {
+        if (!mc.world.getRegistryKey().getValue().getPath().equals("overworld")) {
             for (BlockEntity blockEntity : mc.world.blockEntities) {
                 BlockPos bp = blockEntity.getPos();
                 Vec3d pos = new Vec3d(bp.getX(), bp.getY(), bp.getZ());

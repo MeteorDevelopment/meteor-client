@@ -174,7 +174,7 @@ public class BedAura extends ToggleModule {
                 delayLeft = delay.get();
             }
 
-            if (mc.world.getDimension() == DimensionType.getOverworldDimensionType()) {
+            if (mc.world.getRegistryKey().getValue().getPath().equals("overworld")) {
                 Chat.warning(this, "You are in the overworld. Disabling!");
                 this.toggle();
                 return;
@@ -285,7 +285,7 @@ public class BedAura extends ToggleModule {
                     vecPos = new Vec3d(i, k, j);
                     posUp = pos.add(0, 1, 0);
                     if ((mc.world.getBlockState(posUp).getMaterial().isReplaceable())
-                            && mc.world.getEntities(null, new Box(posUp.getX(), posUp.getY(), posUp.getZ(), posUp.getX() + 1.0D, posUp.getY() + 1.0D, posUp.getZ() + 1.0D)).isEmpty()
+                            && mc.world.getOtherEntities(null, new Box(posUp.getX(), posUp.getY(), posUp.getZ(), posUp.getX() + 1.0D, posUp.getY() + 1.0D, posUp.getZ() + 1.0D)).isEmpty()
                             && (mc.world.getBlockState(new BlockPos(posUp).add(1, 0, 0)).getMaterial().isReplaceable() || mc.world.getBlockState(posUp.add(-1, 0, 0)).getMaterial().isReplaceable()
                             || mc.world.getBlockState(posUp.add(0, 0, 1)).getMaterial().isReplaceable() || mc.world.getBlockState(posUp.add(0, 0, -1)).getMaterial().isReplaceable())) {
                         if (airPlace.get()) {

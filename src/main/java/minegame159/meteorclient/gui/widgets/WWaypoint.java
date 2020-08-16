@@ -20,7 +20,7 @@ public class WWaypoint extends WTable {
 
         WLabel name = add(new WLabel(waypoint.name)).getWidget();
         boolean goodDimension = false;
-        String dimension = MinecraftClient.getInstance().world.getDimensionRegistryKey().getValue().getPath();
+        String dimension = MinecraftClient.getInstance().world.getRegistryKey().getValue().getPath();
         if (waypoint.overworld && dimension.equals("overworld")) goodDimension = true;
         else if (waypoint.nether && dimension.equals("the_nether")) goodDimension = true;
         else if (waypoint.end && dimension.equals("the_end")) goodDimension = true;
