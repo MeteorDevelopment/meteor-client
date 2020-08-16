@@ -154,8 +154,8 @@ public class Surround extends ToggleModule {
     }
 
     private void setBlockPos(int x, int y, int z) {
-        blockPos.set(mc.player);
-        blockPos.setOffset(x, y, z);
+        blockPos.set(mc.player.getX(), mc.player.getY(), mc.player.getZ());
+        blockPos.add(x, y, z);
     }
 
     private boolean findSlot() {

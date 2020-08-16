@@ -22,14 +22,14 @@ public class XCarry extends ToggleModule {
 
     @Override
     public void onDeactivate() {
-        if (invOpened) mc.player.networkHandler.sendPacket(new GuiCloseC2SPacket(mc.player.playerContainer.syncId));
+        if (invOpened) mc.player.networkHandler.sendPacket(new GuiCloseC2SPacket(mc.player.playerScreenHandler.syncId));
     }
 
     @EventHandler
     private final Listener<SendPacketEvent> onSendPacket = new Listener<>(event -> {
         if (!(event.packet instanceof GuiCloseC2SPacket)) return;
 
-        if (((IGuiCloseC2SPacket) event.packet).getSyncId() == mc.player.playerContainer.syncId) {
+        if (((IGuiCloseC2SPacket) event.packet).getSyncId() == mc.player.playerScreenHandler.syncId) {
             invOpened = true;
             event.cancel();
         }
