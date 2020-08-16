@@ -84,6 +84,8 @@ public class SettingGroup implements Iterable<Setting<?>> {
     }
 
     private void fillTable(WTable table, Setting<?> setting) {
+        if (setting.widget instanceof WTextBox) ((WTextBox) setting.widget).setFocused(false, false);
+
         WLabel label = table.add(new WLabel(setting.title)).getWidget();
         label.tooltip = setting.description;
 

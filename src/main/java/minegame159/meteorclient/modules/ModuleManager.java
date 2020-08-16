@@ -19,6 +19,7 @@ import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.Savable;
 import minegame159.meteorclient.utils.Utils;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -149,7 +150,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         }
 
         // Find module bound to that key
-        if (!onKeyOnlyBinding) {
+        if (!onKeyOnlyBinding && MinecraftClient.getInstance().currentScreen == null) {
             for (Module module : modules.values()) {
                 if (module.getKey() == event.key) {
                     module.doAction();
@@ -225,6 +226,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new AimAssist());
         addModule(new AutoArmor());
         addModule(new AntiBed());
+        addModule(new TotemPopNotifier());
     }
 
     private void initPlayer() {
@@ -244,14 +246,15 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new MiddleClickExtra());
         addModule(new AutoDrop());
         addModule(new AutoRightClick());
-        addModule(new Yaw());
-        addModule(new Pitch());
         addModule(new Portals());
         addModule(new Reach());
         addModule(new PotionSpoof());
         addModule(new LiquidInteract());
         addModule(new MountBypass());
         addModule(new PacketMine());
+        addModule(new XCarry());
+        addModule(new BuildHeight());
+        addModule(new Rotation());
     }
 
     private void initMovement() {
@@ -291,9 +294,10 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new Nametags());
         addModule(new InventoryViewer());
         addModule(new HoleESP());
-        addModule(new LogoutSpot());
+        addModule(new LogoutSpots());
         addModule(new Trajectories());
-        addModule(new NoClip());
+        addModule(new Chams());
+        addModule(new CameraClip());
         addModule(new Search());
         addModule(new EntityOwner());
         addModule(new NoRender());

@@ -79,7 +79,6 @@ public class Breadcrumbs extends ToggleModule {
         if (isFarEnough(section.x1, section.y1, section.z1)) {
             section.set2();
 
-            System.out.println(sections.size());
             if (sections.size() >= maxSections.get()) {
                 sectionPool.free(sections.poll());
             }
