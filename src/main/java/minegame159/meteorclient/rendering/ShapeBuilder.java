@@ -136,6 +136,13 @@ public class ShapeBuilder {
     }
 
     // Other
+    public static void quadWithLinesVertical(double x1, double y1, double z1, double x2, double y2, double z2, Color sideColor, Color lineColor) {
+        quad(x1, y1, z1, x2, y1, z2, x2, y2, z2, x1, y2, z1, sideColor);
+        line(x1, y1, z1, x2, y1, z2, lineColor);
+        line(x1, y1, z1, x1, y2, z1, lineColor);
+        line(x1, y2, z1, x2, y2, z2, lineColor);
+        line(x2, y1, z2, x2, y2, z2, lineColor);
+    }
     public static void quadWithLines(double x, double y, double z, double width, double height, Color sideColor, Color lineColor) {
         quad(x, y, z, x, y, z + height, x + width, y, z + height, x + width, y, z, sideColor);
         line(x, y, z, x, y, z + height, lineColor);

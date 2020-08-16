@@ -29,7 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class LogoutSpot extends ToggleModule {
+public class LogoutSpots extends ToggleModule {
     private static final Color BACKGROUND = new Color(0, 0, 0, 75);
     private static final Color TEXT = new Color(255, 255, 255);
     private static final Color GREEN = new Color(25, 225, 25);
@@ -67,8 +67,8 @@ public class LogoutSpot extends ToggleModule {
 
     private int timer;
 
-    public LogoutSpot() {
-        super(Category.Render, "logout-spot", "Displays players logout position.");
+    public LogoutSpots() {
+        super(Category.Render, "logout-spots", "Displays players logout position.");
         lineColor.changed();
     }
 
@@ -188,7 +188,7 @@ public class LogoutSpot extends ToggleModule {
             // Compute scale
             double scale = 0.025;
             double dist = Utils.distanceToCamera(x, y, z);
-            if (dist > 10) scale *= dist / 10 * LogoutSpot.this.scale.get();
+            if (dist > 10) scale *= dist / 10 * LogoutSpots.this.scale.get();
 
             if (dist > mc.options.viewDistance * 16) return;
 
