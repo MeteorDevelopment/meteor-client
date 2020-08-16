@@ -4,9 +4,12 @@ package minegame159.meteorclient.modules.misc;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
+import minegame159.meteorclient.accountsfriends.Friend;
+import minegame159.meteorclient.accountsfriends.FriendManager;
 import minegame159.meteorclient.events.EntityAddedEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.settings.StringSetting;
@@ -25,10 +28,19 @@ public class MessageAura extends ToggleModule {
             .defaultValue("Meteor on Crack!").build()
     );
 
+    private final Setting<Boolean> ignoreFriends = sgGeneral.add(new BoolSetting.Builder()
+            .name("ignore-friends")
+            .description("Doesn't send messages to friends.")
+            .defaultValue(false)
+            .build()
+    );
+
     @EventHandler
     private final Listener<EntityAddedEvent> onEntityAdded = new Listener<>(event -> {
         if (!(event.entity instanceof PlayerEntity) || event.entity.getUuid().equals(mc.player.getUuid())) return;
 
-        mc.player.sendChatMessage("/msg " + ((PlayerEntity) event.entity).getGameProfile().getName() + " " + message.get());
+        if (!ignoreFriends.get() || (ignoreFriends.get() && !FriendManager.INSTANCE.contains(new Friend((PlayerEntity)event.entity)))) {
+            mc.player.sendChatMessage("/msg " + ((PlayerEntity) event.entity).getGameProfile().getName() + " " + message.get());
+        }
     });
 }
