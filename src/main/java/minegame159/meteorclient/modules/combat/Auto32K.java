@@ -241,8 +241,8 @@ public class Auto32K extends ToggleModule {
         for(BlockPos i = null; allBlocks.hasNext(); i = allBlocks.next()){
             if(i == null) continue;
             if(!mc.world.getBlockState(i).getMaterial().isReplaceable()
-                    && (mc.world.getBlockState(i.up()).getBlock() == Blocks.AIR && mc.world.getEntities(null, new Box(i.up().getX(), i.up().getY(), i.up().getZ(), i.up().getX() + 1.0D, i.up().getY() + 2.0D, i.up().getZ() + 1.0D)).isEmpty())
-                    && mc.world.getBlockState(i.up(2)).getBlock() == Blocks.AIR && mc.world.getEntities(null, new Box(i.up(2).getX(), i.up(2).getY(), i.up(2).getZ(), i.up(2).getX() + 1.0D, i.up(2).getY() + 2.0D, i.up(2).getZ() + 1.0D)).isEmpty()){
+                    && (mc.world.getBlockState(i.up()).getBlock() == Blocks.AIR && mc.world.getOtherEntities(null, new Box(i.up().getX(), i.up().getY(), i.up().getZ(), i.up().getX() + 1.0D, i.up().getY() + 2.0D, i.up().getZ() + 1.0D)).isEmpty())
+                    && mc.world.getBlockState(i.up(2)).getBlock() == Blocks.AIR && mc.world.getOtherEntities(null, new Box(i.up(2).getX(), i.up(2).getY(), i.up(2).getZ(), i.up(2).getX() + 1.0D, i.up(2).getY() + 2.0D, i.up(2).getZ() + 1.0D)).isEmpty()){
                 validBlocks.add(i);
             }
         }
@@ -256,26 +256,26 @@ public class Auto32K extends ToggleModule {
         for(BlockPos i = null; allBlocks.hasNext(); i = allBlocks.next()){
             if(i == null) continue;
             if(!mc.world.getBlockState(i).getMaterial().isReplaceable()
-                    && (mc.world.getBlockState(i.up()).getBlock() == Blocks.AIR && mc.world.getEntities(null, new Box(i.up().getX(), i.up().getY(), i.up().getZ(), i.up().getX() + 1.0D, i.up().getY() + 2.0D, i.up().getZ() + 1.0D)).isEmpty())
-                    && (mc.world.getBlockState(i.up(2)).getBlock() == Blocks.AIR && mc.world.getEntities(null, new Box(i.up(2).getX(), i.up(2).getY(), i.up(2).getZ(), i.up(2).getX() + 1.0D, i.up(2).getY() + 2.0D, i.up(2).getZ() + 1.0D)).isEmpty())
-                    && (mc.world.getBlockState(i.up(3)).getBlock() == Blocks.AIR && mc.world.getEntities(null, new Box(i.up(3).getX(), i.up(3).getY(), i.up(3).getZ(), i.up(2).getX() + 1.0D, i.up(2).getY() + 2.0D, i.up(2).getZ() + 1.0D)).isEmpty())){
-                if (mc.world.getBlockState(i.add(-1, 1, 0)).getBlock() == Blocks.AIR && mc.world.getEntities(null, new Box(i.add(-1, 1, 0).getX(), i.add(-1, 1, 0).getY(), i.add(-1, 1, 0).getZ(), i.add(-1, 1, 0).getX() + 1.0D, i.add(-1, 1, 0).getY() + 2.0D, i.add(-1, 1, 0).getZ() + 1.0D)).isEmpty()
-                        && mc.world.getBlockState(i.add(-1, 0, 0)).getBlock() == Blocks.AIR && mc.world.getEntities(null, new Box(i.add(-1, 0, 0).getX(), i.add(-1, 0, 0).getY(), i.add(-1, 0, 0).getZ(), i.add(-1, 0, 0).getX() + 1.0D, i.add(-1, 0, 0).getY() + 2.0D, i.add(-1, 0, 0).getZ() + 1.0D)).isEmpty()) {
+                    && (mc.world.getBlockState(i.up()).getBlock() == Blocks.AIR && mc.world.getOtherEntities(null, new Box(i.up().getX(), i.up().getY(), i.up().getZ(), i.up().getX() + 1.0D, i.up().getY() + 2.0D, i.up().getZ() + 1.0D)).isEmpty())
+                    && (mc.world.getBlockState(i.up(2)).getBlock() == Blocks.AIR && mc.world.getOtherEntities(null, new Box(i.up(2).getX(), i.up(2).getY(), i.up(2).getZ(), i.up(2).getX() + 1.0D, i.up(2).getY() + 2.0D, i.up(2).getZ() + 1.0D)).isEmpty())
+                    && (mc.world.getBlockState(i.up(3)).getBlock() == Blocks.AIR && mc.world.getOtherEntities(null, new Box(i.up(3).getX(), i.up(3).getY(), i.up(3).getZ(), i.up(2).getX() + 1.0D, i.up(2).getY() + 2.0D, i.up(2).getZ() + 1.0D)).isEmpty())){
+                if (mc.world.getBlockState(i.add(-1, 1, 0)).getBlock() == Blocks.AIR && mc.world.getOtherEntities(null, new Box(i.add(-1, 1, 0).getX(), i.add(-1, 1, 0).getY(), i.add(-1, 1, 0).getZ(), i.add(-1, 1, 0).getX() + 1.0D, i.add(-1, 1, 0).getY() + 2.0D, i.add(-1, 1, 0).getZ() + 1.0D)).isEmpty()
+                        && mc.world.getBlockState(i.add(-1, 0, 0)).getBlock() == Blocks.AIR && mc.world.getOtherEntities(null, new Box(i.add(-1, 0, 0).getX(), i.add(-1, 0, 0).getY(), i.add(-1, 0, 0).getZ(), i.add(-1, 0, 0).getX() + 1.0D, i.add(-1, 0, 0).getY() + 2.0D, i.add(-1, 0, 0).getZ() + 1.0D)).isEmpty()) {
                     x = -1;
                     z = 0;
                     return i;
-                }else if (mc.world.getBlockState(i.add(1, 1, 0)).getBlock() == Blocks.AIR && mc.world.getEntities(null, new Box(i.add(1, 1, 0).getX(), i.add(1, 1, 0).getY(), i.add(1, 1, 0).getZ(), i.add(1, 1, 0).getX() + 1.0D, i.add(1, 1, 0).getY() + 2.0D, i.add(1, 1, 0).getZ() + 1.0D)).isEmpty()
-                        && mc.world.getBlockState(i.add(1, 0, 0)).getBlock() == Blocks.AIR && mc.world.getEntities(null, new Box(i.add(1, 0, 0).getX(), i.add(1, 0, 0).getY(), i.add(1, 0, 0).getZ(), i.add(1, 0, 0).getX() + 1.0D, i.add(1, 0, 0).getY() + 2.0D, i.add(1, 0, 0).getZ() + 1.0D)).isEmpty()) {
+                }else if (mc.world.getBlockState(i.add(1, 1, 0)).getBlock() == Blocks.AIR && mc.world.getOtherEntities(null, new Box(i.add(1, 1, 0).getX(), i.add(1, 1, 0).getY(), i.add(1, 1, 0).getZ(), i.add(1, 1, 0).getX() + 1.0D, i.add(1, 1, 0).getY() + 2.0D, i.add(1, 1, 0).getZ() + 1.0D)).isEmpty()
+                        && mc.world.getBlockState(i.add(1, 0, 0)).getBlock() == Blocks.AIR && mc.world.getOtherEntities(null, new Box(i.add(1, 0, 0).getX(), i.add(1, 0, 0).getY(), i.add(1, 0, 0).getZ(), i.add(1, 0, 0).getX() + 1.0D, i.add(1, 0, 0).getY() + 2.0D, i.add(1, 0, 0).getZ() + 1.0D)).isEmpty()) {
                     x = 1;
                     z = 0;
                     return i;
-                }else if (mc.world.getBlockState(i.add(0, 1, -1)).getBlock() == Blocks.AIR && mc.world.getEntities(null, new Box(i.add(0, 1, -1).getX(), i.add(0, 1, -1).getY(), i.add(0, 1, -1).getZ(), i.add(0, 1, -1).getX() + 1.0D, i.add(0, 1, -1).getY() + 2.0D, i.add(0, 1, -1).getZ() + 1.0D)).isEmpty()
-                        && mc.world.getBlockState(i.add(0, 0, -1)).getBlock() == Blocks.AIR && mc.world.getEntities(null, new Box(i.add(0, 0, -1).getX(), i.add(0, 0, -1).getY(), i.add(0, 0, -1).getZ(), i.add(0, 0, -1).getX() + 1.0D, i.add(0, 0, -1).getY() + 2.0D, i.add(0, 0, -1).getZ() + 1.0D)).isEmpty()) {
+                }else if (mc.world.getBlockState(i.add(0, 1, -1)).getBlock() == Blocks.AIR && mc.world.getOtherEntities(null, new Box(i.add(0, 1, -1).getX(), i.add(0, 1, -1).getY(), i.add(0, 1, -1).getZ(), i.add(0, 1, -1).getX() + 1.0D, i.add(0, 1, -1).getY() + 2.0D, i.add(0, 1, -1).getZ() + 1.0D)).isEmpty()
+                        && mc.world.getBlockState(i.add(0, 0, -1)).getBlock() == Blocks.AIR && mc.world.getOtherEntities(null, new Box(i.add(0, 0, -1).getX(), i.add(0, 0, -1).getY(), i.add(0, 0, -1).getZ(), i.add(0, 0, -1).getX() + 1.0D, i.add(0, 0, -1).getY() + 2.0D, i.add(0, 0, -1).getZ() + 1.0D)).isEmpty()) {
                     x = 0;
                     z = -1;
                     return i;
-                }else if (mc.world.getBlockState(i.add(0, 1, 1)).getBlock() == Blocks.AIR && mc.world.getEntities(null, new Box(i.add(0, 1, 1).getX(), i.add(0, 1, 1).getY(), i.add(0, 1, 1).getZ(), i.add(0, 1, 1).getX() + 1.0D, i.add(0, 1, 1).getY() + 2.0D, i.add(0, 1, 1).getZ() + 1.0D)).isEmpty()
-                        && mc.world.getBlockState(i.add(0, 0, 1)).getBlock() == Blocks.AIR && mc.world.getEntities(null, new Box(i.add(0, 0, 1).getX(), i.add(0, 0, 1).getY(), i.add(0, 0, 1).getZ(), i.add(0, 0, 1).getX() + 1.0D, i.add(0, 0, 1).getY() + 2.0D, i.add(0, 0, 1).getZ() + 1.0D)).isEmpty()) {
+                }else if (mc.world.getBlockState(i.add(0, 1, 1)).getBlock() == Blocks.AIR && mc.world.getOtherEntities(null, new Box(i.add(0, 1, 1).getX(), i.add(0, 1, 1).getY(), i.add(0, 1, 1).getZ(), i.add(0, 1, 1).getX() + 1.0D, i.add(0, 1, 1).getY() + 2.0D, i.add(0, 1, 1).getZ() + 1.0D)).isEmpty()
+                        && mc.world.getBlockState(i.add(0, 0, 1)).getBlock() == Blocks.AIR && mc.world.getOtherEntities(null, new Box(i.add(0, 0, 1).getX(), i.add(0, 0, 1).getY(), i.add(0, 0, 1).getZ(), i.add(0, 0, 1).getX() + 1.0D, i.add(0, 0, 1).getY() + 2.0D, i.add(0, 0, 1).getZ() + 1.0D)).isEmpty()) {
                     x = 0;
                     z = 1;
                     return i;

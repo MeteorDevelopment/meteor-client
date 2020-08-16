@@ -147,7 +147,7 @@ public class AutoTotem extends ToggleModule {
                 damageTaken = damage;
             }
         }
-        if (mc.world.getDimension() != DimensionType.getOverworldDimensionType()) {
+        if (!mc.world.getRegistryKey().getValue().getPath().equals("overworld")) {
             for (BlockEntity blockEntity : mc.world.blockEntities) {
                 if (blockEntity instanceof BedBlockEntity && damageTaken < DamageCalcUtils.bedDamage(mc.player, new Vec3d(blockEntity.getPos().getX(), blockEntity.getPos().getY(), blockEntity.getPos().getZ()))) {
                     damageTaken = DamageCalcUtils.bedDamage(mc.player, new Vec3d(blockEntity.getPos().getX(), blockEntity.getPos().getY(), blockEntity.getPos().getZ()));

@@ -5,6 +5,7 @@ import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.settings.ColorSetting;
 import minegame159.meteorclient.waypoints.Waypoint;
 import minegame159.meteorclient.waypoints.Waypoints;
+import net.minecraft.world.dimension.DimensionType;
 
 public class EditWaypointScreen extends WindowScreen {
     private final Waypoint waypoint;
@@ -21,9 +22,9 @@ public class EditWaypointScreen extends WindowScreen {
             this.waypoint.y = (int) mc.player.getY() + 2;
             this.waypoint.z = (int) mc.player.getZ();
 
-            if (mc.world.getDimensionRegistryKey().getValue().getPath().equals("overworld")) this.waypoint.overworld = true;
-            else if (mc.world.getDimensionRegistryKey().getValue().getPath().equals("the_nether")) this.waypoint.nether = true;
-            else if (mc.world.getDimensionRegistryKey().getValue().getPath().equals("the_end")) this.waypoint.end = true;
+            if (mc.world.getRegistryKey().getValue().getPath().equals("overworld")) this.waypoint.overworld = true;
+            else if (mc.world.getRegistryKey().getValue().getPath().equals("the_nether")) this.waypoint.nether = true;
+            else if (mc.world.getRegistryKey().getValue().getPath().equals("the_end")) this.waypoint.end = true;
         }
 
         initWidgets();

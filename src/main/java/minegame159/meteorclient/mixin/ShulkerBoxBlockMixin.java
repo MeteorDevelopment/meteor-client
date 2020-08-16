@@ -36,7 +36,7 @@ public class ShulkerBoxBlockMixin {
      */
     @Overwrite
     @Environment(EnvType.CLIENT)
-    public void buildTooltip(ItemStack stack, BlockView view, List<Text> tooltip, TooltipContext options) {
+    public void appendTooltip(ItemStack stack, BlockView view, List<Text> tooltip, TooltipContext options) {
         CompoundTag compoundTag = stack.getSubTag("BlockEntityTag");
         if (compoundTag != null) {
             if (compoundTag.contains("LootTable", 8)) {

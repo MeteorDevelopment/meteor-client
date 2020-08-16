@@ -130,7 +130,7 @@ public class AntiBed extends ToggleModule {
                     || item == Items.LEVER || item == Items.TORCH
                     || item == Items.REDSTONE_TORCH || item instanceof SignItem
                     || item == Items.TRIPWIRE_HOOK || block instanceof StoneButtonBlock
-                    || block instanceof WoodButtonBlock) {
+                    || block instanceof WoodenButtonBlock) {
                 place(i);
                 if (item instanceof SignItem) closeScreen = true;
                 return;

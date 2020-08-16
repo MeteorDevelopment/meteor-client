@@ -58,7 +58,7 @@ public class AutoReconnect extends ToggleModule {
         private int timer;
 
         public AutoReconnectScreen(DisconnectedScreen screen) {
-            super(((IDisconnectedScreen) screen).getParent(), screen.getTitle().getString(), ((IDisconnectedScreen) screen).getReason());
+            super(((IDisconnectedScreen) screen).getParent(), screen.getTitle(), ((IDisconnectedScreen) screen).getReason());
             reasonHeight = ((IDisconnectedScreen) screen).getReasonHeight();
             timer = (int) (time.get() * 20);
         }

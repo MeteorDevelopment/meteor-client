@@ -11,7 +11,8 @@ import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.gui.hud.ChatHud;
 import net.minecraft.client.gui.hud.ChatHudLine;
 import net.minecraft.text.LiteralText;
-import net.minecraft.text.StringRenderable;
+import net.minecraft.text.OrderedText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -26,17 +27,17 @@ import java.util.regex.Pattern;
 
 @Mixin(ChatHud.class)
 public abstract class ChatHudMixin {
-    @Shadow @Final private List<ChatHudLine> visibleMessages;
+    @Shadow @Final private List<ChatHudLine<OrderedText>> visibleMessages;
 
     @Shadow public abstract int getWidth();
 
-    @Shadow @Final private List<ChatHudLine> messages;
+    @Shadow @Final private List<ChatHudLine<Text>> messages;
 
     private String lastMessage = null;
 
-    @Inject(at = @At("HEAD"), method = "addMessage(Lnet/minecraft/text/StringRenderable;IIZ)V", cancellable = true)
-    private void onAddMessage(StringRenderable stringRenderable, int messageId, int timestamp, boolean bl, CallbackInfo info) {
-        String message = stringRenderable.getString();
+    @Inject(at = @At("HEAD"), method = "addMessage(Lnet/minecraft/text/Text;IIZ)V", cancellable = true)
+    private void onAddMessage(Text text, int messageId, int timestamp, boolean bl, CallbackInfo info) {
+        String message = text.getString();
 
         // Ignore players
         for (String name : Ignore.ignoredPlayers) {
@@ -78,9 +79,9 @@ public abstract class ChatHudMixin {
     }
 
     private boolean checkMsg(String newMsg, int newTimestamp, int newId, int msgI) {
-        ChatHudLine msg = visibleMessages.size() > msgI ? visibleMessages.get(msgI) : null;
+        ChatHudLine<OrderedText> msg = visibleMessages.size() > msgI ? visibleMessages.get(msgI) : null;
         if (msg == null) return false;
-        String msgString = msg.getText().getString();
+        String msgString = msg.getText().toString();
 
         if (msgString.equals(newMsg)) {
             msgString += Formatting.GRAY + " (2)";

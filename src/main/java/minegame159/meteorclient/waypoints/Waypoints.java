@@ -65,7 +65,7 @@ public class Waypoints extends Savable<Waypoints> implements Listenable, Iterabl
     });
 
     private boolean checkDimension(Waypoint waypoint) {
-        String dimension = MinecraftClient.getInstance().world.getDimensionRegistryKey().getValue().getPath();
+        String dimension = MinecraftClient.getInstance().world.getRegistryKey().getValue().getPath();
 
         if (waypoint.overworld && dimension.equals("overworld")) return true;
         if (waypoint.nether && dimension.equals("the_nether")) return true;
