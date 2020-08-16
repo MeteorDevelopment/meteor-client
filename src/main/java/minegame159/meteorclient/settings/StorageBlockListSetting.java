@@ -42,13 +42,15 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
         String[] values = str.split(",");
         List<BlockEntityType<?>> blocks = new ArrayList<>(1);
 
-        for (String value : values) {
-            String val = value.trim();
-            Identifier id;
-            if (val.contains(":")) id = new Identifier(val);
-            else id = new Identifier("minecraft", val);
-            blocks.add(Registry.BLOCK_ENTITY_TYPE.get(id));
-        }
+        try {
+            for (String value : values) {
+                String val = value.trim();
+                Identifier id;
+                if (val.contains(":")) id = new Identifier(val);
+                else id = new Identifier("minecraft", val);
+                if (Registry.BLOCK_ENTITY_TYPE.containsId(id)) blocks.add(Registry.BLOCK_ENTITY_TYPE.get(id));
+            }
+        } catch (Exception ignored) {}
 
         return blocks;
     }

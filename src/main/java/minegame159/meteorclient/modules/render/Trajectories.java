@@ -14,7 +14,9 @@ import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.Pool;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.item.*;
+import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RayTraceContext;
 
@@ -34,12 +36,16 @@ public class Trajectories extends ToggleModule {
     private final Pool<Vec3d> vec3ds = new Pool<>(() -> new Vec3d(0, 0, 0));
     private final List<Vec3d> path = new ArrayList<>();
 
+    private boolean hitQuad, hitQuadHorizontal;
+    private double hitQuadX1, hitQuadY1, hitQuadZ1, hitQuadX2, hitQuadY2, hitQuadZ2;
+    private final Color hitQuadColor = new Color();
+
     public Trajectories() {
         super(Category.Render, "trajectories", "Displays trajectory of held items.");
     }
 
     @EventHandler
-    private Listener<RenderEvent> onRender = new Listener<>(event -> {
+    private final Listener<RenderEvent> onRender = new Listener<>(event -> {
         if (!Utils.isThrowable(mc.player.getMainHandStack().getItem())) return;
 
         calculatePath(event.tickDelta);
@@ -48,6 +54,14 @@ public class Trajectories extends ToggleModule {
         for (Vec3d point : path) {
             if (lastPoint != null) ShapeBuilder.line(lastPoint.x, lastPoint.y, lastPoint.z, point.x, point.y, point.z, color.get());
             lastPoint = point;
+        }
+
+        if (hitQuad) {
+            hitQuadColor.set(color.get());
+            hitQuadColor.a = 35;
+
+            if (hitQuadHorizontal) ShapeBuilder.quadWithLines(hitQuadX1, hitQuadY1, hitQuadZ1, 0.5, 0.5, hitQuadColor, color.get());
+            else ShapeBuilder.quadWithLinesVertical(hitQuadX1, hitQuadY1, hitQuadZ1, hitQuadX2, hitQuadY2, hitQuadZ2, hitQuadColor, color.get());
         }
     });
 
@@ -102,16 +116,20 @@ public class Trajectories extends ToggleModule {
         double gravity = getProjectileGravity(item);
         Vec3d eyesPos = mc.player.getPos().add(0, mc.player.getEyeHeight(mc.player.getPose()), 0);
 
+        HitResult lastHitResult = null;
+
         while (true) {
-            // aAdd to path
+            // Add to path
             Vec3d pos = addToPath(x, y, z);
 
-            // aApply motion
+            // Apply motion
             x += velocityX * 0.1;
             y += velocityY * 0.1;
             z += velocityZ * 0.1;
 
-            // aApply air friction
+            if (y < 0) break;
+
+            // Apply air friction
             velocityX *= 0.999;
             velocityY *= 0.999;
             velocityZ *= 0.999;
@@ -126,9 +144,41 @@ public class Trajectories extends ToggleModule {
 
             // Check for collision
             RayTraceContext context = new RayTraceContext(eyesPos, pos, RayTraceContext.ShapeType.COLLIDER, RayTraceContext.FluidHandling.NONE, mc.player);
-            HitResult result = mc.world.rayTrace(context);
-            if (result.getType() != HitResult.Type.MISS) break;
+            lastHitResult = mc.world.rayTrace(context);
+            if (lastHitResult.getType() != HitResult.Type.MISS) break;
         }
+
+        if (lastHitResult != null && lastHitResult.getType() == HitResult.Type.BLOCK) {
+            BlockHitResult r = (BlockHitResult) lastHitResult;
+
+            hitQuad = true;
+            hitQuadX1 = r.getPos().x;
+            hitQuadY1 = r.getPos().y;
+            hitQuadZ1 = r.getPos().z;
+            hitQuadX2 = r.getPos().x;
+            hitQuadY2 = r.getPos().y;
+            hitQuadZ2 = r.getPos().z;
+
+            if (r.getSide() == Direction.UP || r.getSide() == Direction.DOWN) {
+                hitQuadHorizontal = true;
+                hitQuadX1 -= 0.25;
+                hitQuadZ1 -= 0.25;
+                hitQuadX2 += 0.25;
+                hitQuadZ2 += 0.25;
+            } else if (r.getSide() == Direction.NORTH || r.getSide() == Direction.SOUTH) {
+                hitQuadHorizontal = false;
+                hitQuadX1 -= 0.25;
+                hitQuadY1 -= 0.25;
+                hitQuadX2 += 0.25;
+                hitQuadY2 += 0.25;
+            } else {
+                hitQuadHorizontal = false;
+                hitQuadZ1 -= 0.25;
+                hitQuadY1 -= 0.25;
+                hitQuadZ2 += 0.25;
+                hitQuadY2 += 0.25;
+            }
+        } else hitQuad = false;
     }
 
     private double getProjectileGravity(Item item) {

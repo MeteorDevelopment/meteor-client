@@ -30,13 +30,15 @@ public class ItemListSetting extends Setting<List<Item>> {
         String[] values = str.split(",");
         List<Item> items = new ArrayList<>(1);
 
-        for (String value : values) {
-            String val = value.trim();
-            Identifier id;
-            if (val.contains(":")) id = new Identifier(val);
-            else id = new Identifier("minecraft", val);
-            items.add(Registry.ITEM.get(id));
-        }
+        try {
+            for (String value : values) {
+                String val = value.trim();
+                Identifier id;
+                if (val.contains(":")) id = new Identifier(val);
+                else id = new Identifier("minecraft", val);
+                if (Registry.ITEM.containsId(id)) items.add(Registry.ITEM.get(id));
+            }
+        } catch (Exception ignored) {}
 
         return items;
     }
