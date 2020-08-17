@@ -88,7 +88,7 @@ public class Surround extends ToggleModule {
             return;
         }
 
-        if (onlyOnGround.get() && !mc.player.onGround) return;
+        if (onlyOnGround.get() && !mc.player.isOnGround()) return;
         if (onlyWhenSneaking.get() && !mc.options.keySneak.isPressed()) return;
 
         // Place
