@@ -94,8 +94,44 @@ public class AutoEat extends ToggleModule {
         if (mc.player.abilities.creativeMode) return;
         if (isEating && !mc.player.getMainHandStack().getItem().isFood()) ((IKeyBinding) mc.options.keyUse).setPressed(false);
 
+        int slot = -1;
+        int bestHunger = -1;
+
+        for (int i = 0; i < 9; i++) {
+            Item item = mc.player.inventory.getInvStack(i).getItem();
+            if (!item.isFood()) continue;
+            if (noBad.get()) {
+                if (item == Items.POISONOUS_POTATO || item == Items.PUFFERFISH || item == Items.CHICKEN
+                        || item == Items.ROTTEN_FLESH || item == Items.SPIDER_EYE || item == Items.SUSPICIOUS_STEW) continue;
+            }
+
+            if (item == Items.ENCHANTED_GOLDEN_APPLE && item.getFoodComponent().getHunger() > bestHunger) {
+                if (egaps.get()) {
+                    bestHunger = item.getFoodComponent().getHunger();
+                    slot = i;
+                }
+            } else if (item == Items.GOLDEN_APPLE && item.getFoodComponent().getHunger() > bestHunger) {
+                if (gaps.get()) {
+                    bestHunger = item.getFoodComponent().getHunger();
+                    slot = i;
+                }
+            } else if (item == Items.CHORUS_FRUIT && item.getFoodComponent().getHunger() > bestHunger) {
+                if (chorus.get()) {
+                    bestHunger = item.getFoodComponent().getHunger();
+                    slot = i;
+                }
+            } else if (item.getFoodComponent().getHunger() > bestHunger) {
+                bestHunger = item.getFoodComponent().getHunger();
+                slot = i;
+            }
+        }
+        if(mc.player.getOffHandStack().isFood() && mc.player.getOffHandStack().getItem().getFoodComponent().getHunger() > bestHunger){
+            bestHunger = mc.player.getOffHandStack().getItem().getFoodComponent().getHunger();
+            slot = InvUtils.OFFHAND_SLOT;
+        }
+
         if (isEating) {
-            if (mc.player.getHungerManager().getFoodLevel() > preFoodLevel) {
+            if (mc.player.getHungerManager().getFoodLevel() > preFoodLevel || slot == -1) {
                 isEating = false;
                 mc.interactionManager.stopUsingItem(mc.player);
                 ((IKeyBinding) mc.options.keyUse).setPressed(false);
@@ -137,42 +173,6 @@ public class AutoEat extends ToggleModule {
             }
 
             return;
-        }
-
-        int slot = -1;
-        int bestHunger = -1;
-
-        for (int i = 0; i < 9; i++) {
-            Item item = mc.player.inventory.getInvStack(i).getItem();
-            if (!item.isFood()) continue;
-            if (noBad.get()) {
-                if (item == Items.POISONOUS_POTATO || item == Items.PUFFERFISH || item == Items.CHICKEN
-                    || item == Items.ROTTEN_FLESH || item == Items.SPIDER_EYE || item == Items.SUSPICIOUS_STEW) continue;
-            }
-
-            if (item == Items.ENCHANTED_GOLDEN_APPLE && item.getFoodComponent().getHunger() > bestHunger) {
-                if (egaps.get()) {
-                    bestHunger = item.getFoodComponent().getHunger();
-                    slot = i;
-                }
-            } else if (item == Items.GOLDEN_APPLE && item.getFoodComponent().getHunger() > bestHunger) {
-                if (gaps.get()) {
-                    bestHunger = item.getFoodComponent().getHunger();
-                    slot = i;
-                }
-            } else if (item == Items.CHORUS_FRUIT && item.getFoodComponent().getHunger() > bestHunger) {
-                if (chorus.get()) {
-                    bestHunger = item.getFoodComponent().getHunger();
-                    slot = i;
-                }
-            } else if (item.getFoodComponent().getHunger() > bestHunger) {
-                bestHunger = item.getFoodComponent().getHunger();
-                slot = i;
-            }
-        }
-        if(mc.player.getOffHandStack().isFood() && mc.player.getOffHandStack().getItem().getFoodComponent().getHunger() > bestHunger){
-            bestHunger = mc.player.getOffHandStack().getItem().getFoodComponent().getHunger();
-            slot = InvUtils.OFFHAND_SLOT;
         }
 
         if (slot != -1 && (20 - mc.player.getHungerManager().getFoodLevel() >= bestHunger && sgAutoHunger.isEnabled()) || (20 - mc.player.getHungerManager().getFoodLevel() >= minHunger.get() && sgManualHunger.isEnabled())) {
