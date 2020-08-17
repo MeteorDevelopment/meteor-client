@@ -3,32 +3,23 @@ package minegame159.meteorclient.modules.render;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BoolSetting;
+import minegame159.meteorclient.settings.EntityTypeListSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.EntityUtils;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Chams extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     
-    private final Setting<Boolean> players = sgGeneral.add(new BoolSetting.Builder()
-            .name("players")
-            .description("Render players.")
-            .defaultValue(true)
-            .build()
-    );
-
-    private final Setting<Boolean> animals = sgGeneral.add(new BoolSetting.Builder()
-            .name("animals")
-            .description("Render animals")
-            .defaultValue(true)
-            .build()
-    );
-
-    private final Setting<Boolean> mobs = sgGeneral.add(new BoolSetting.Builder()
-            .name("mobs")
-            .description("Render mobs.")
-            .defaultValue(true)
+    private final Setting<List<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
+            .name("entities")
+            .description("Select entities to show through walls.")
+            .defaultValue(new ArrayList<>(0))
             .build()
     );
 
@@ -37,10 +28,6 @@ public class Chams extends ToggleModule {
     }
 
     public boolean shouldRender(LivingEntity entity) {
-        if (!isActive()) return false;
-        if (EntityUtils.isPlayer(entity)) return players.get();
-        if (EntityUtils.isAnimal(entity)) return animals.get();
-        if (EntityUtils.isMob(entity)) return mobs.get();
-        return false;
+        return entities.get().contains(entity.getType());
     }
 }
