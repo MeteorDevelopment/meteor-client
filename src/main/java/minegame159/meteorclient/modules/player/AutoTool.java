@@ -151,7 +151,7 @@ public class AutoTool extends ToggleModule {
         if (item instanceof SwordItem && material == Material.COBWEB) return true;
         if (item instanceof AxeItem && (block.getBlock() == Blocks.SCAFFOLDING || material == Material.WOOD || material == Material.BAMBOO || material == Material.BAMBOO_SAPLING || material == Material.PLANT))  return true;
         if (item instanceof PickaxeItem && (material == Material.SHULKER_BOX || material == Material.ICE || material == Material.METAL || material == Material.PISTON || material == Material.STONE)) return true;
-        if (item instanceof ShovelItem && (block.getBlock() == Blocks.GRASS_BLOCK || block.getBlock() == Blocks.MYCELIUM || material == Material.SNOW_BLOCK)) return true;
+        if (item instanceof ShovelItem && (block.getBlock() == Blocks.GRASS_BLOCK || block.getBlock() == Blocks.MYCELIUM || material == Material.SNOW_BLOCK || material == Material.AGGREGATE || material == Material.SOIL)) return true;
         if (item instanceof ShearsItem && (material == Material.WOOL || material == Material.CARPET)) return true;
         if (item instanceof HoeItem && (material == Material.SOLID_ORGANIC)) return true;
 
