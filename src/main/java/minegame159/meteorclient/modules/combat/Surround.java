@@ -8,6 +8,7 @@ import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.utils.Input;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.BlockItem;
@@ -82,13 +83,13 @@ public class Surround extends ToggleModule {
 
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
-        if (onlyOnGround.get() && !mc.player.isOnGround()) return;
-        if (onlyWhenSneaking.get() && !mc.options.keySneak.isPressed()) return;
-
         if (disableOnJump.get() && mc.options.keyJump.isPressed()) {
             toggle();
             return;
         }
+
+        if (onlyOnGround.get() && !mc.player.onGround) return;
+        if (onlyWhenSneaking.get() && !mc.options.keySneak.isPressed()) return;
 
         // Place
         return_ = false;

@@ -72,6 +72,11 @@ public class Freecam extends ToggleModule {
 
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
+        if (mc.player.deathTime > 0 || mc.player.getHealth() <= 0) {
+            toggle();
+            return;
+        }
+
         camera.setVelocity(0, 0, 0);
         if(mc.player == null) return;
 
