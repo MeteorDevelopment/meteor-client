@@ -79,7 +79,8 @@
     "SlimeBlockMixin",
     "KeyboardInputMixin",
     "GuiCloseC2SPacketMixin",
-    "BlockHitResultMixin"
+    "BlockHitResultMixin",
+    "HorseBaseEntityMixin"
   ],
   "injectors": {
     "defaultRequire": 1
