@@ -18,11 +18,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ESP extends ToggleModule {
+    private static final Color WHITE = new Color(255, 255, 255);
+
     public enum Mode {
         Lines,
         Sides,
         Both,
-        Glowing
+        Outline
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -97,11 +99,18 @@ public class ESP extends ToggleModule {
             .build()
     );
 
+    public static final List<Entity> OUTLINE_ENTITIES = new ArrayList<>();
+
     private final Color sideColor = new Color();
     private int count;
 
     public ESP() {
         super(Category.Render, "esp", "See entities through walls.");
+    }
+
+    @Override
+    public void onDeactivate() {
+        OUTLINE_ENTITIES.clear();
     }
 
     private void setSideColor(Color lineColor) {
@@ -112,7 +121,7 @@ public class ESP extends ToggleModule {
     private void render(RenderEvent event, Entity entity, Color lineColor) {
         setSideColor(lineColor);
 
-        double dist = mc.player.squaredDistanceTo(entity.x + entity.getWidth() / 2, entity.y + entity.getHeight() / 2, entity.z + entity.getWidth() / 2);
+        double dist = mc.cameraEntity.squaredDistanceTo(entity.x + entity.getWidth() / 2, entity.y + entity.getHeight() / 2, entity.z + entity.getWidth() / 2);
         double a = 1;
         if (dist <= fadeDistance.get() * fadeDistance.get()) a = dist / (fadeDistance.get() * fadeDistance.get());
 
@@ -149,36 +158,42 @@ public class ESP extends ToggleModule {
 
         lineColor.a = prevLineA;
         sideColor.a = prevSideA;
-
-        count++;
     }
 
     @EventHandler
     private final Listener<RenderEvent> onRender = new Listener<>(event -> {
         count = 0;
+        OUTLINE_ENTITIES.clear();
 
         for (Entity entity : mc.world.getEntities()) {
-            if (entity == mc.player || !entities.get().contains(entity.getType())) continue;
-            if (mode.get() == Mode.Glowing && entities.get().contains(entity.getType())) {
-                entity.setGlowing(true);
+            if (entity == mc.cameraEntity || !entities.get().contains(entity.getType())) continue;
+            count++;
+
+            if (mode.get() == Mode.Outline) {
+                OUTLINE_ENTITIES.add(entity);
+                continue;
             }
 
-            if (entity instanceof PlayerEntity) {
-                render(event, entity, FriendManager.INSTANCE.getColor((PlayerEntity) entity, playersColor.get()));
-            } else {
-                switch (entity.getType().getCategory()) {
-                    case CREATURE:       render(event, entity, animalsColor.get()); break;
-                    case WATER_CREATURE: render(event, entity, waterAnimalsColor.get()); break;
-                    case MONSTER:        render(event, entity, monstersColor.get()); break;
-                    case AMBIENT:        render(event, entity, ambientColor.get()); break;
-                    case MISC:           render(event, entity, miscColor.get()); break;
-                }
-            }
+            render(event, entity, getColor(entity));
         }
     });
 
     @Override
     public String getInfoString() {
         return Integer.toString(count);
+    }
+
+    public Color getColor(Entity entity) {
+        if (entity instanceof PlayerEntity) return FriendManager.INSTANCE.getColor((PlayerEntity) entity, playersColor.get());
+
+        switch (entity.getType().getCategory()) {
+            case CREATURE:       return animalsColor.get();
+            case WATER_CREATURE: return waterAnimalsColor.get();
+            case MONSTER:        return monstersColor.get();
+            case AMBIENT:        return ambientColor.get();
+            case MISC:           return miscColor.get();
+        }
+
+        return WHITE;
     }
 }
