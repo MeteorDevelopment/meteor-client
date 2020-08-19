@@ -45,6 +45,7 @@ public class Utils {
     public static MinecraftClient mc;
 
     public static boolean blockRenderingBlockEntitiesInXray;
+    public static boolean firstTimeTitleScreen = true;
 
     private static final Random random = new Random();
     private static final Vec3d eyesPos = new Vec3d(0, 0, 0);
