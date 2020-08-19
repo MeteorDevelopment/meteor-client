@@ -24,7 +24,8 @@ public class NewUpdateScreen extends WindowScreen {
 
         add(new WHorizontalSeparator()).fillX().expandX(); row();
 
-        add(new WButton("Download " + latestVer)).fillX().expandX().getWidget().action = button -> Util.getOperatingSystem().open("https://meteorclient.com/");
-        add(new WButton("OK")).fillX().expandX().getWidget().action = button -> onClose();
+        WTable buttonTable = add(new WTable()).getWidget();
+        buttonTable.add(new WButton("Download " + latestVer)).fillX().expandX().getWidget().action = button -> Util.getOperatingSystem().open("https://meteorclient.com/");
+        buttonTable.add(new WButton("OK")).fillX().expandX().getWidget().action = button -> onClose();
     }
 }
