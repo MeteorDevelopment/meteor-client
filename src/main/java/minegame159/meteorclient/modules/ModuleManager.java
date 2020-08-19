@@ -281,6 +281,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new BoatFly());
         addModule(new NoSlow());
         addModule(new InvMove());
+        addModule(new Anchor());
     }
 
     private void initRender() {
