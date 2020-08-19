@@ -1,7 +1,7 @@
 package minegame159.meteorclient;
 
-import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.gui.GuiConfig;
+import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.utils.*;
 import net.minecraft.nbt.CompoundTag;
 
@@ -12,7 +12,7 @@ import java.util.Map;
 public class Config extends Savable<Config> {
     public static Config INSTANCE;
 
-    private final String version = "0.3.1";
+    public final Version version = Version.parse("0.3.1");
     private String prefix = ".";
     public AutoCraft autoCraft = new AutoCraft();
     public GuiConfig guiConfig = new GuiConfig();
@@ -24,10 +24,6 @@ public class Config extends Savable<Config> {
 
     public Config() {
         super(new File(MeteorClient.FOLDER, "config.nbt"));
-    }
-
-    public String getVersion() {
-        return version;
     }
 
     public void setPrefix(String prefix) {
@@ -56,7 +52,7 @@ public class Config extends Savable<Config> {
     public CompoundTag toTag() {
         CompoundTag tag = new CompoundTag();
 
-        tag.putString("version", version);
+        tag.putString("version", version.toString());
         tag.putString("prefix", prefix);
         tag.put("autoCraft", autoCraft.toTag());
         tag.put("windowConfigs", NbtUtils.mapToTag(windowConfigs));
@@ -77,7 +73,10 @@ public class Config extends Savable<Config> {
         chatCommandsInfo = !tag.contains("chatCommandsInfo") || tag.getBoolean("chatCommandsInfo");
 
         // In 0.2.9 the default font was changed, detect when people load up 0.2.9 for the first time
-        if (tag.getString("version").equals("0.2.8") && Utils.versionIsHigherOrEqual("0.2.9")) {
+        Version lastVer = Version.parse(tag.getString("version"));
+        Version v029 = Version.parse("0.2.9");
+
+        if (lastVer.isLower(v029) && version.isHigherOrEqual(v029)) {
             MeteorClient.INSTANCE.resetFont();
         }
 
