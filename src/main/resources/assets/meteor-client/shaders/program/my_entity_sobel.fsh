@@ -7,8 +7,7 @@ varying vec2 oneTexel;
 
 void main(){
     vec4 center = texture2D(DiffuseSampler, texCoord);
-    gl_FragColor = center;
-    /*if (center.a != 0) discard;
+    if (center.a != 0) discard;
 
     vec4 left = texture2D(DiffuseSampler, texCoord - vec2(oneTexel.x, 0.0));
     vec4 right = texture2D(DiffuseSampler, texCoord + vec2(oneTexel.x, 0.0));
@@ -27,5 +26,5 @@ void main(){
     else if (up.a != 0) color = up.rgb;
     else color = down.rgb;
 
-    gl_FragColor = vec4(color, a);*/
+    gl_FragColor = vec4(color, a);
 }
