@@ -75,7 +75,8 @@
     "KeyboardInputMixin",
     "GuiCloseC2SPacketMixin",
     "BlockHitResultMixin",
-    "JsonGlProgramMixin"
+    "JsonGlProgramMixin",
+    "CreativeInventoryScreenMixin"
   ],
   "injectors": {
     "defaultRequire": 1

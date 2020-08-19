@@ -4,6 +4,7 @@ import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.gui.WidgetScreen;
+import minegame159.meteorclient.mixininterface.ICreativeInventoryScreen;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BoolSetting;
@@ -14,7 +15,9 @@ import minegame159.meteorclient.utils.Input;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.ingame.AnvilScreen;
+import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.SignEditScreen;
+import net.minecraft.item.ItemGroup;
 import org.lwjgl.glfw.GLFW;
 
 public class InvMove extends ToggleModule {
@@ -110,6 +113,6 @@ public class InvMove extends ToggleModule {
     }
 
     private boolean skip() {
-        return mc.currentScreen == null || mc.currentScreen instanceof WidgetScreen || mc.currentScreen instanceof ChatScreen || mc.currentScreen instanceof SignEditScreen || mc.currentScreen instanceof AnvilScreen;
+        return mc.currentScreen == null || (mc.currentScreen instanceof CreativeInventoryScreen && ((ICreativeInventoryScreen) mc.currentScreen).getSelectedTab() == ItemGroup.SEARCH.getIndex()) || mc.currentScreen instanceof WidgetScreen || mc.currentScreen instanceof ChatScreen || mc.currentScreen instanceof SignEditScreen || mc.currentScreen instanceof AnvilScreen;
     }
 }
