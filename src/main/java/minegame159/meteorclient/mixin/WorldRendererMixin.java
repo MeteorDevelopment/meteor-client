@@ -61,6 +61,10 @@ public class WorldRendererMixin {
     @Inject(method = "renderEntities", at = @At("TAIL"))
     private void onRenderEntitiesTail(Camera camera, VisibleRegion visibleRegion, float tickDelta, CallbackInfo info) {
         Utils.blockRenderingBlockEntitiesInXray = false;
+    }
+
+    @Inject(method = "renderEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/WorldRenderer;canDrawEntityOutlines()Z"))
+    private void onRenderEntitiesOutlines(Camera camera, VisibleRegion visibleRegion, float tickDelta, CallbackInfo info) {
         MinecraftClient mc = MinecraftClient.getInstance();
 
         if (ESP.OUTLINE_ENTITIES.size() > 0) {
@@ -85,7 +89,7 @@ public class WorldRendererMixin {
             GlStateManager.enableLighting();
             GlStateManager.depthMask(true);
             GlStateManager.enableFog();
-            GlStateManager.enableBlend();
+            //GlStateManager.enableBlend();
             GlStateManager.enableColorMaterial();
             GlStateManager.depthFunc(515);
             GlStateManager.enableDepthTest();
