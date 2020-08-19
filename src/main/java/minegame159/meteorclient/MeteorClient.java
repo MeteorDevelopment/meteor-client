@@ -26,8 +26,6 @@ import net.fabricmc.fabric.api.client.keybinding.FabricKeyBinding;
 import net.fabricmc.fabric.api.client.keybinding.KeyBindingRegistry;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gl.Framebuffer;
-import net.minecraft.client.gl.ShaderEffect;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.util.Identifier;
@@ -42,11 +40,6 @@ public class MeteorClient implements ClientModInitializer, Listenable {
     public static MFont FONT, FONT_2X;
     public static boolean IS_DISCONNECTING;
     public static final File FOLDER = new File(FabricLoader.getInstance().getGameDirectory(), "meteor-client");
-
-    public static Framebuffer outlinesFbo;
-    public static ShaderEffect outlinesShader;
-    public static boolean loadingOutlineShader;
-    public static boolean renderingOutlines;
 
     private MinecraftClient mc;
     private FabricKeyBinding openClickGui = FabricKeyBinding.Builder.create(new Identifier("meteor-client", "open-click-gui"), InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_RIGHT_SHIFT, "Meteor Client").build();

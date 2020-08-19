@@ -1,9 +1,9 @@
 package minegame159.meteorclient.mixin;
 
-import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.render.ESP;
 import minegame159.meteorclient.modules.render.Nametags;
+import minegame159.meteorclient.utils.Outlines;
 import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -23,7 +23,7 @@ public abstract class EntityRendererMixin<T extends Entity> {
 
     @Inject(method = "getOutlineColor", at = @At("HEAD"), cancellable = true)
     private void onGetOutlineColor(T entity, CallbackInfoReturnable<Integer> info) {
-        if (MeteorClient.renderingOutlines) {
+        if (Outlines.renderingOutlines) {
             info.setReturnValue(ModuleManager.INSTANCE.get(ESP.class).getColor(entity).getPacked());
         }
     }
