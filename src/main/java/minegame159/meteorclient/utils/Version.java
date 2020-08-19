@@ -14,20 +14,28 @@ public class Version {
         else this.string = String.format("%d.%d.%d beta%d", n1, n2, n3, beta);
     }
 
-    public boolean isHigherOrEqual(Version version) {
+    public boolean isHigher(Version version) {
         for (int i = 0; i < numbers.length; i++) {
-            if (numbers[i] < version.numbers[i]) return false;
+            if (numbers[i] > version.numbers[i]) return true;
         }
 
-        return true;
+        return false;
+    }
+
+    public boolean isHigherOrEqual(Version version) {
+        for (int i = 0; i < numbers.length; i++) {
+            if (numbers[i] >= version.numbers[i]) return true;
+        }
+
+        return false;
     }
 
     public boolean isLower(Version version) {
         for (int i = 0; i < numbers.length; i++) {
-            if (numbers[i] >= version.numbers[i]) return false;
+            if (numbers[i] < version.numbers[i]) return true;
         }
 
-        return true;
+        return false;
     }
 
     @Override

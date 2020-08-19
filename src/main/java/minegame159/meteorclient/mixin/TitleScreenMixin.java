@@ -1,6 +1,9 @@
 package minegame159.meteorclient.mixin;
 
-import minegame159.meteorclient.utils.Color;
+import minegame159.meteorclient.Config;
+import minegame159.meteorclient.gui.screens.NewUpdateScreen;
+import minegame159.meteorclient.utils.*;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.text.Text;
@@ -48,6 +51,21 @@ public class TitleScreenMixin extends Screen {
         text2Length = font.getStringWidth(text2);
         text3Length = font.getStringWidth(text3);
         text4Length = font.getStringWidth(text4);
+    }
+
+    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/TitleScreen;drawString(Lnet/minecraft/client/font/TextRenderer;Ljava/lang/String;III)V", ordinal = 0))
+    private void onRenderIdkDude(int mouseX, int mouseY, float delta, CallbackInfo info) {
+        if (Utils.firstTimeTitleScreen) {
+            Utils.firstTimeTitleScreen = false;
+            System.out.println("Checking latest version of Meteor Client.");
+
+            MeteorTaskExecutor.start();
+            MeteorTaskExecutor.execute(() -> HttpUtils.getLines("https://meteorclient.com/version.txt", s -> {
+                Version latestVer = Version.parse(s);
+                if (latestVer.isHigher(Config.INSTANCE.version)) MinecraftClient.getInstance().openScreen(new NewUpdateScreen(latestVer));
+            }));
+            MeteorTaskExecutor.stop();
+        }
     }
 
     @Inject(method = "render", at = @At("TAIL"))
