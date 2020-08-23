@@ -32,6 +32,8 @@ public abstract class ClientPlayerInteractionManagerMixin implements IClientPlay
 
     @Shadow private float currentBreakingProgress;
 
+    @Shadow private BlockPos currentBreakingPos;
+
     @Inject(method = "attackEntity", at = @At("HEAD"), cancellable = true)
     private void onAttackEntity(PlayerEntity player, Entity target, CallbackInfo info) {
         AttackEntityEvent event = EventStore.attackEntityEvent(target);
@@ -66,6 +68,11 @@ public abstract class ClientPlayerInteractionManagerMixin implements IClientPlay
         blockBreakingCooldown = value;
     }
 
+    @Inject(method = "breakBlock", at = @At("HEAD"))
+    private void onBreakBlock(BlockPos blockPos, CallbackInfoReturnable<Boolean> info) {
+        MeteorClient.EVENT_BUS.post(EventStore.breakBlockEvent(blockPos));
+    }
+
     @Override
     public void syncSelectedSlot2() {
         syncSelectedSlot();
@@ -74,5 +81,10 @@ public abstract class ClientPlayerInteractionManagerMixin implements IClientPlay
     @Override
     public double getBreakingProgress() {
         return currentBreakingProgress;
+    }
+
+    @Override
+    public BlockPos getCurrentBreakingBlockPos() {
+        return currentBreakingPos;
     }
 }

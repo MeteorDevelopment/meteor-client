@@ -9,6 +9,7 @@ import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.rendering.ShapeBuilder;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Color;
+import minegame159.meteorclient.utils.Outlines;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
@@ -18,11 +19,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ESP extends ToggleModule {
+    private static final Color WHITE = new Color(255, 255, 255);
+
     public enum Mode {
         Lines,
         Sides,
         Both,
-        Glowing
+        Outline
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -33,7 +36,7 @@ public class ESP extends ToggleModule {
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("mode")
             .description("Rendering mode.")
-            .defaultValue(Mode.Both)
+            .defaultValue(Mode.Outline)
             .build()
     );
 
@@ -49,42 +52,42 @@ public class ESP extends ToggleModule {
     private final Setting<Color> playersColor = sgColors.add(new ColorSetting.Builder()
             .name("players-color")
             .description("Players color.")
-            .defaultValue(new Color(205, 205, 205))
+            .defaultValue(new Color(255, 255, 255))
             .build()
     );
 
     private final Setting<Color> animalsColor = sgColors.add(new ColorSetting.Builder()
             .name("animals-color")
             .description("Animals color.")
-            .defaultValue(new Color(145, 255, 145, 255))
+            .defaultValue(new Color(25, 255, 25, 255))
             .build()
     );
 
     private final Setting<Color> waterAnimalsColor = sgColors.add(new ColorSetting.Builder()
             .name("water-animals-color")
             .description("Water animals color.")
-            .defaultValue(new Color(145, 145, 255, 255))
+            .defaultValue(new Color(25, 25, 255, 255))
             .build()
     );
 
     private final Setting<Color> monstersColor = sgColors.add(new ColorSetting.Builder()
             .name("monsters-color")
             .description("Monsters color.")
-            .defaultValue(new Color(255, 145, 145, 255))
+            .defaultValue(new Color(255, 25, 25, 255))
             .build()
     );
 
     private final Setting<Color> ambientColor = sgColors.add(new ColorSetting.Builder()
             .name("ambient-color")
             .description("Ambient color.")
-            .defaultValue(new Color(75, 75, 75, 255))
+            .defaultValue(new Color(25, 25, 25, 255))
             .build()
     );
 
     private final Setting<Color> miscColor = sgColors.add(new ColorSetting.Builder()
             .name("misc-color")
             .description("Misc color.")
-            .defaultValue(new Color(145, 145, 145, 255))
+            .defaultValue(new Color(125, 125, 125, 255))
             .build()
     );
 
@@ -112,7 +115,7 @@ public class ESP extends ToggleModule {
     private void render(RenderEvent event, Entity entity, Color lineColor) {
         setSideColor(lineColor);
 
-        double dist = mc.player.squaredDistanceTo(entity.getX() + entity.getWidth() / 2, entity.getY() + entity.getHeight() / 2, entity.getZ() + entity.getWidth() / 2);
+        double dist = mc.cameraEntity.squaredDistanceTo(entity.getX() + entity.getWidth() / 2, entity.getY() + entity.getHeight() / 2, entity.getZ() + entity.getWidth() / 2);
         double a = 1;
         if (dist <= fadeDistance.get() * fadeDistance.get()) a = dist / (fadeDistance.get() * fadeDistance.get());
 
@@ -149,8 +152,6 @@ public class ESP extends ToggleModule {
 
         lineColor.a = prevLineA;
         sideColor.a = prevSideA;
-
-        count++;
     }
 
     @EventHandler
@@ -158,27 +159,34 @@ public class ESP extends ToggleModule {
         count = 0;
 
         for (Entity entity : mc.world.getEntities()) {
-            if (entity == mc.player || !entities.get().contains(entity.getType())) continue;
-            if (mode.get() == Mode.Glowing && entities.get().contains(entity.getType())) {
-                entity.setGlowing(true);
+            if (entity == mc.cameraEntity || !entities.get().contains(entity.getType())) continue;
+            count++;
+
+            if (mode.get() == Mode.Outline) {
+                Outlines.ENTITIES.add(entity);
+                continue;
             }
 
-            if (entity instanceof PlayerEntity) {
-                render(event, entity, FriendManager.INSTANCE.getColor((PlayerEntity) entity, playersColor.get()));
-            } else {
-                switch (entity.getType().getCategory()) {
-                    case CREATURE:       render(event, entity, animalsColor.get()); break;
-                    case WATER_CREATURE: render(event, entity, waterAnimalsColor.get()); break;
-                    case MONSTER:        render(event, entity, monstersColor.get()); break;
-                    case AMBIENT:        render(event, entity, ambientColor.get()); break;
-                    case MISC:           render(event, entity, miscColor.get()); break;
-                }
-            }
+            render(event, entity, getColor(entity));
         }
     });
 
     @Override
     public String getInfoString() {
         return Integer.toString(count);
+    }
+
+    public Color getColor(Entity entity) {
+        if (entity instanceof PlayerEntity) return FriendManager.INSTANCE.getColor((PlayerEntity) entity, playersColor.get());
+
+        switch (entity.getType().getCategory()) {
+            case CREATURE:       return animalsColor.get();
+            case WATER_CREATURE: return waterAnimalsColor.get();
+            case MONSTER:        return monstersColor.get();
+            case AMBIENT:        return ambientColor.get();
+            case MISC:           return miscColor.get();
+        }
+
+        return WHITE;
     }
 }

@@ -281,6 +281,8 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new BoatFly());
         addModule(new NoSlow());
         addModule(new InvMove());
+        addModule(new Anchor());
+        addModule(new ClickTP());
     }
 
     private void initRender() {
@@ -336,5 +338,6 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new Nuker());
         addModule(new SoundBlocker());
         addModule(new AntiChunkBan());
+        addModule(new Announcer());
     }
 }
