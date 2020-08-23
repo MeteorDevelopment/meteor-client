@@ -1,0 +1,18 @@
+{
+  "targets": [
+    "swap",
+    "final"
+  ],
+  "passes": [
+    {
+      "name": "my_entity_outline",
+      "intarget": "final",
+      "outtarget": "swap"
+    },
+    {
+      "name": "blit",
+      "intarget": "swap",
+      "outtarget": "final"
+    }
+  ]
+}

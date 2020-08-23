@@ -20,7 +20,7 @@ public class CrashReportMixin {
         if (ModuleManager.INSTANCE != null) {
             sb.append("\n\n");
             sb.append("-- Meteor Client --\n");
-            sb.append("Version: ").append(Config.INSTANCE.getVersion()).append("\n");
+            sb.append("Version: ").append(Config.INSTANCE.version).append("\n");
 
             for (Category category : ModuleManager.CATEGORIES) {
                 List<Module> modules = ModuleManager.INSTANCE.getGroup(category);

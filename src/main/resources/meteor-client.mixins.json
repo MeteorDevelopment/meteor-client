@@ -75,7 +75,10 @@
     "SlimeBlockMixin",
     "KeyboardInputMixin",
     "GuiCloseC2SPacketMixin",
-    "BlockHitResultMixin"
+    "BlockHitResultMixin",
+    "JsonGlProgramMixin",
+    "CreativeInventoryScreenMixin",
+    "BlockItemMixin"
   ],
   "injectors": {
     "defaultRequire": 1
