@@ -8,6 +8,8 @@ import minegame159.meteorclient.modules.movement.Velocity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.ItemEntity;
 import net.minecraft.network.Packet;
 import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.util.math.Vec3d;
@@ -68,5 +70,15 @@ public abstract class ClientPlayNetworkHandlerMixin {
 
         Velocity velocity = ModuleManager.INSTANCE.get(Velocity.class);
         player.setVelocity(player.getVelocity().x + deltaX * velocity.getHorizontal(), player.getVelocity().y + deltaY * velocity.getVertical(), player.getVelocity().z + deltaZ * velocity.getHorizontal());
+    }
+
+    @Inject(method = "onItemPickupAnimation", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/world/ClientWorld;getEntityById(I)Lnet/minecraft/entity/Entity;", ordinal = 0))
+    private void onItemPickupAnimation(ItemPickupAnimationS2CPacket packet, CallbackInfo info) {
+        Entity itemEntity = client.world.getEntityById(packet.getEntityId());
+        Entity entity = client.world.getEntityById(packet.getCollectorEntityId());
+
+        if (itemEntity instanceof ItemEntity && entity == client.player) {
+            MeteorClient.EVENT_BUS.post(EventStore.pickItemsEvent(((ItemEntity) itemEntity).getStack(), packet.getStackAmount()));
+        }
     }
 }

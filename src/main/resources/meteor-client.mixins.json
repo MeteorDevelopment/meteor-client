@@ -76,7 +76,8 @@
     "GuiCloseC2SPacketMixin",
     "BlockHitResultMixin",
     "JsonGlProgramMixin",
-    "CreativeInventoryScreenMixin"
+    "CreativeInventoryScreenMixin",
+    "BlockItemMixin"
   ],
   "injectors": {
     "defaultRequire": 1
