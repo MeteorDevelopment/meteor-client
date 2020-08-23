@@ -7,6 +7,7 @@ import minegame159.meteorclient.events.packets.SendPacketEvent;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.utils.Pool;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.sound.SoundInstance;
@@ -14,6 +15,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MovementType;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.Packet;
 import net.minecraft.network.packet.s2c.play.ContainerSlotUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
@@ -57,6 +59,10 @@ public class EventStore {
     private static final SendMessageEvent sendMessageEvent = new SendMessageEvent();
     private static final PlaySoundEvent playSoundEvent = new PlaySoundEvent();
     private static final WaypointListChangedEvent waypointListChangedEvent = new WaypointListChangedEvent();
+    private static final BreakBlockEvent breakBlockEvent = new BreakBlockEvent();
+    private static final PlaceBlockEvent placeBlockEvent = new PlaceBlockEvent();
+    private static final DropItemsEvent dropItemsEvent = new DropItemsEvent();
+    private static final PickItemsEvent pickItemsEvent = new PickItemsEvent();
 
     public static PlaySoundPacketEvent playSoundPacketEvent(PlaySoundS2CPacket packet) {
         playSoundPacketEvent.packet = packet;
@@ -233,5 +239,27 @@ public class EventStore {
 
     public static WaypointListChangedEvent waypointListChangedEvent() {
         return waypointListChangedEvent;
+    }
+
+    public static BreakBlockEvent breakBlockEvent(BlockPos blockPos) {
+        breakBlockEvent.blockPos = blockPos;
+        return breakBlockEvent;
+    }
+
+    public static PlaceBlockEvent placeBlockEvent(BlockPos blockPos, Block block) {
+        placeBlockEvent.blockPos = blockPos;
+        placeBlockEvent.block = block;
+        return placeBlockEvent;
+    }
+
+    public static DropItemsEvent dropItemEvent(ItemStack itemStack) {
+        dropItemsEvent.itemStack = itemStack;
+        return dropItemsEvent;
+    }
+
+    public static PickItemsEvent pickItemsEvent(ItemStack itemStack, int count) {
+        pickItemsEvent.itemStack = itemStack;
+        pickItemsEvent.count = count;
+        return pickItemsEvent;
     }
 }
