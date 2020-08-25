@@ -139,7 +139,7 @@ public class CrystalAura extends ToggleModule {
             .description("Delay ticks between placements.")
             .defaultValue(2)
             .min(0)
-            .max(10)
+            .sliderMax(10)
             .build()
     );
 
