@@ -93,7 +93,7 @@ public class BedAura extends ToggleModule {
             .description("The delay between placements.")
             .defaultValue(2)
             .min(0)
-            .max(10)
+            .sliderMax(10)
             .build()
     );
 
