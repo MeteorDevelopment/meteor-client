@@ -190,6 +190,7 @@ public class BedAura extends ToggleModule {
                     .filter(FriendManager.INSTANCE::attack)
                     .filter(entityPlayer -> !entityPlayer.getDisplayName().equals(mc.player.getDisplayName()))
                     .filter(entityPlayer -> mc.player.distanceTo(entityPlayer) <= 10)
+                    .filter(entityPlayer -> !entityPlayer.isCreative() && !entityPlayer.isSpectator())
                     .collect(Collectors.toList()).iterator();
 
             AbstractClientPlayerEntity target;
