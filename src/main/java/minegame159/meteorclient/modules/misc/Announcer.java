@@ -12,7 +12,7 @@ import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.settings.StringSetting;
 import net.minecraft.block.Block;
-import net.minecraft.client.gui.screen.ingame.ContainerScreen;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.item.Item;
 
 public class Announcer extends ToggleModule {
@@ -380,7 +380,7 @@ public class Announcer extends ToggleModule {
 
         @EventHandler
         private final Listener<OpenScreenEvent> onOpenScreen = new Listener<>(event -> {
-            if (event.screen instanceof ContainerScreen<?>) {
+            if (event.screen instanceof HandledScreen<?>) {
                 String name = event.screen.getTitle().getString();
                 if (!name.isEmpty()) sendMsg(name);
             }

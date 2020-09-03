@@ -179,7 +179,7 @@ public class ESP extends ToggleModule {
     public Color getColor(Entity entity) {
         if (entity instanceof PlayerEntity) return FriendManager.INSTANCE.getColor((PlayerEntity) entity, playersColor.get());
 
-        switch (entity.getType().getCategory()) {
+        switch (entity.getType().getSpawnGroup()) {
             case CREATURE:       return animalsColor.get();
             case WATER_CREATURE: return waterAnimalsColor.get();
             case MONSTER:        return monstersColor.get();

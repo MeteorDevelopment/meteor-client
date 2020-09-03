@@ -80,7 +80,7 @@
     "KeyboardInputMixin",
     "GuiCloseC2SPacketMixin",
     "BlockHitResultMixin",
-    "HorseBaseEntityMixin"
+    "HorseBaseEntityMixin",
     "BlockHitResultMixin",
     "JsonGlProgramMixin",
     "CreativeInventoryScreenMixin",

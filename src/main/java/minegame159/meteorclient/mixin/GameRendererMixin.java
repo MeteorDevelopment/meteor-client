@@ -73,10 +73,10 @@ public abstract class GameRendererMixin {
         }
     }
 
-    @Redirect(method = "updateTargetedEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;rayTrace(DFZ)Lnet/minecraft/util/hit/HitResult;"))
+    @Redirect(method = "updateTargetedEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;raycast(DFZ)Lnet/minecraft/util/hit/HitResult;"))
     private HitResult updateTargetedEntityEntityRayTraceProxy(Entity entity, double maxDistance, float tickDelta, boolean includeFluids) {
-        if (ModuleManager.INSTANCE.isActive(LiquidInteract.class)) return entity.rayTrace(maxDistance, tickDelta, true);
-        return entity.rayTrace(maxDistance, tickDelta, includeFluids);
+        if (ModuleManager.INSTANCE.isActive(LiquidInteract.class)) return entity.raycast(maxDistance, tickDelta, true);
+        return entity.raycast(maxDistance, tickDelta, includeFluids);
     }
 
     @Inject(method = "bobViewWhenHurt", at = @At("HEAD"), cancellable = true)

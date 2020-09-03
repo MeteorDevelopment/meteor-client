@@ -35,7 +35,7 @@ public class ClickTP extends ToggleModule {
         if (mc.player.isUsingItem()) return;
 
         if (mc.options.keyUse.isPressed()) {
-            HitResult hitResult = mc.player.rayTrace(maxDistance.get(), 1f / 20f, false);
+            HitResult hitResult = mc.player.raycast(maxDistance.get(), 1f / 20f, false);
 
             if (hitResult.getType() == HitResult.Type.ENTITY && mc.player.interact(((EntityHitResult) hitResult).getEntity(), Hand.MAIN_HAND) != ActionResult.PASS) return;
 

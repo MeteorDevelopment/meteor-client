@@ -18,7 +18,7 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.RayTraceContext;
+import net.minecraft.world.RaycastContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -143,8 +143,8 @@ public class Trajectories extends ToggleModule {
             if (!mc.world.getChunkManager().isChunkLoaded(chunkX, chunkZ)) break;
 
             // Check for collision
-            RayTraceContext context = new RayTraceContext(eyesPos, pos, RayTraceContext.ShapeType.COLLIDER, RayTraceContext.FluidHandling.NONE, mc.player);
-            lastHitResult = mc.world.rayTrace(context);
+            RaycastContext context = new RaycastContext(eyesPos, pos, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player);
+            lastHitResult = mc.world.raycast(context);
             if (lastHitResult.getType() != HitResult.Type.MISS) break;
         }
 
