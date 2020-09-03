@@ -93,27 +93,29 @@ public class Surround extends ToggleModule {
         // Place
         return_ = false;
 
-        boolean p1 = tryPlace(1, 0);
+        boolean p1 = tryPlace(0, -1, 0);
         if (return_) return;
-        boolean p2 = tryPlace(-1, 0);
+        boolean p2 = tryPlace(1, 0, 0);
         if (return_) return;
-        boolean p3 = tryPlace(0, 1);
+        boolean p3 = tryPlace(-1, 0, 0);
         if (return_) return;
-        boolean p4 = tryPlace(0, -1);
+        boolean p4 = tryPlace(0, 0, 1);
+        if (return_) return;
+        boolean p5 = tryPlace(0, 0, -1);
         if (return_) return;
 
         // Auto turn off
-        if (turnOff.get() && p1 && p2 && p3 && p4) toggle();
+        if (turnOff.get() && p1 && p2 && p3 && p4 && p5) toggle();
     });
 
-    private boolean tryPlace(int x, int z) {
+    private boolean tryPlace(int x, int y, int z) {
         boolean p = place(x, 0, z);
         if (return_) return p;
         if (p) return true;
 
         for (int i = 0; i < 5; i++) {
             int x2 = x;
-            int y2 = 0;
+            int y2 = y;
             int z2 = z;
 
             switch (i) {
@@ -127,7 +129,7 @@ public class Surround extends ToggleModule {
             p = place(x2, y2, z2);
             if (return_) return p;
             if (p) {
-                place(x, 0, z);
+                place(x, y, z);
                 return true;
             }
         }
