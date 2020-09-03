@@ -21,7 +21,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
     }
 
     @Inject(method = "getRenderLayer", at = @At("HEAD"), cancellable = true)
-    private void onGetRenderLayer(T entity, boolean showBody, boolean translucent, CallbackInfoReturnable<RenderLayer> info) {
+    private void onGetRenderLayer(T entity, boolean showBody, boolean translucent, boolean showOutline, CallbackInfoReturnable<RenderLayer> info) {
         if (Outlines.renderingOutlines) {
             info.setReturnValue(MyRenderLayer.getOutlineRenderLayer(getTexture(entity)));
         }
