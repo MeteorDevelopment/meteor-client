@@ -19,8 +19,8 @@ public class BuildHeight extends ToggleModule {
         if (!(event.packet instanceof PlayerInteractBlockC2SPacket)) return;
 
         PlayerInteractBlockC2SPacket p = (PlayerInteractBlockC2SPacket) event.packet;
-        if (p.getHitY().getPos().y >= 255 && p.getHitY().getSide() == Direction.UP) {
-            ((IBlockHitResult) p.getHitY()).setSide(Direction.DOWN);
+        if (p.getBlockHitResult().getPos().y >= 255 && p.getBlockHitResult().getSide() == Direction.UP) {
+            ((IBlockHitResult) p.getBlockHitResult()).setSide(Direction.DOWN);
         }
     });
 }
