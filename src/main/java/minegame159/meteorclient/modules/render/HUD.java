@@ -502,7 +502,7 @@ public class HUD extends ToggleModule {
         }
 
         if (waterMark.get()) {
-            drawInfo("Meteor Client ", Config.INSTANCE.getVersion(), y);
+            drawInfo("Meteor Client ", Config.INSTANCE.version.toString(), y);
             y += MeteorClient.FONT.getHeight() + 2;
         }
 

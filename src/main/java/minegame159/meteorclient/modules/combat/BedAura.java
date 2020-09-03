@@ -105,6 +105,15 @@ public class BedAura extends ToggleModule {
             .build()
     );
 
+    private final Setting<Double> healthDifference = sgGeneral.add(new DoubleSetting.Builder()
+            .name("damage-increase")
+            .description("The damage increase for smart delay to work.")
+            .defaultValue(5)
+            .min(0)
+            .max(20)
+            .build()
+    );
+
     private final Setting<Boolean> airPlace = sgGeneral.add(new BoolSetting.Builder()
             .name("air-place")
             .description("Places beds in the air if they do more damage.")
@@ -143,17 +152,19 @@ public class BedAura extends ToggleModule {
     private int delayLeft = delay.get();
     private Vec3d bestBlock;
     private double bestDamage;
-    private Vec3d playerPos;
+    private BlockPos playerPos;
     private double currentDamage;
     private BlockPos bestBlockPos;
     private BlockPos pos;
     private Vec3d vecPos;
     private BlockPos posUp;
     private float preYaw;
-    private boolean didBreak = false;
+    private double lastDamage = 0;
+    private int direction = 0;
 
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
+        delayLeft --;
         if (mc.player.getHealth() + mc.player.getAbsorptionAmount() <= minHealth.get() && mode.get() != Mode.suicide) return;
         for(BlockEntity entity : mc.world.blockEntities){
             if(entity instanceof BedBlockEntity && Utils.distance(entity.getPos().getX(), entity.getPos().getY(), entity.getPos().getZ(), mc.player.getX(), mc.player.getY(), mc.player.getZ()) <= breakRange.get()){
@@ -166,121 +177,100 @@ public class BedAura extends ToggleModule {
 
             }
         }
-        if (didBreak) {
-            if (delayLeft > 0) {
-                delayLeft--;
-                return;
-            } else {
-                delayLeft = delay.get();
-            }
-
-            if (mc.world.getRegistryKey().getValue().getPath().equals("overworld")) {
-                Chat.warning(this, "You are in the overworld. Disabling!");
-                this.toggle();
-                return;
-            }
-            if ((mc.player.getHealth() + mc.player.getAbsorptionAmount()) <= minHealth.get() && mode.get() != Mode.suicide)
-                return;
-            if (place.get() && (!(mc.player.getMainHandStack().getItem() instanceof BedItem)
-                    && !(mc.player.getOffHandStack().getItem() instanceof BedItem)) && !autoSwitch.get()) return;
-            if (place.get()) {
-                Iterator<AbstractClientPlayerEntity> validEntities = mc.world.getPlayers().stream()
-                        .filter(FriendManager.INSTANCE::attack)
-                        .filter(entityPlayer -> !entityPlayer.getDisplayName().equals(mc.player.getDisplayName()))
-                        .filter(entityPlayer -> mc.player.distanceTo(entityPlayer) <= 10)
-                        .collect(Collectors.toList()).iterator();
-
-                AbstractClientPlayerEntity target;
-                if (validEntities.hasNext()) {
-                    target = validEntities.next();
-                } else {
-                    return;
-                }
-                for (AbstractClientPlayerEntity i = null; validEntities.hasNext(); i = validEntities.next()) {
-                    if (i == null) continue;
-                    if (mc.player.distanceTo(i) < mc.player.distanceTo(target)) {
-                        target = i;
-                    }
-                }
-                findValidBlocks(target);
-                if (bestBlock != null) {
-                    bestBlockPos = new BlockPos(bestBlock.x, bestBlock.y, bestBlock.z);
-                    int preSlot = -1;
-                    if (bestDamage > minDamage.get()) {
-                        if (autoSwitch.get()) {
-                            for (int i = 0; i < 9; i++) {
-                                if (mc.player.inventory.getStack(i).getItem() instanceof BedItem) {
-                                    preSlot = mc.player.inventory.selectedSlot;
-                                    mc.player.inventory.selectedSlot = i;
-                                }
-                            }
-                        }
-                        double north = -1;
-                        double east = -1;
-                        double south = -1;
-                        double west = -1;
-                        if (mc.world.getBlockState(bestBlockPos.add(1, 1, 0)).getMaterial().isReplaceable()) {
-                            east = DamageCalcUtils.bedDamage(target, bestBlock.add(1.5, 1.5, 0.5));
-                        }
-                        if (mc.world.getBlockState(bestBlockPos.add(-1, 1, 0)).getMaterial().isReplaceable()) {
-                            west = DamageCalcUtils.bedDamage(target, bestBlock.add(-1.5, 1.5, 0.5));
-                        }
-                        if (mc.world.getBlockState(bestBlockPos.add(0, 1, 1)).getMaterial().isReplaceable()) {
-                            south = DamageCalcUtils.bedDamage(target, bestBlock.add(0.5, 1.5, 1.5));
-                        }
-                        if (mc.world.getBlockState(bestBlockPos.add(0, 1, -1)).getMaterial().isReplaceable()) {
-                            north = DamageCalcUtils.bedDamage(target, bestBlock.add(0.5, 1.5, -1.5));
-                        }
-                        Hand hand = Hand.MAIN_HAND;
-                        if (!(mc.player.getMainHandStack().getItem() instanceof BedItem) && mc.player.getOffHandStack().getItem() instanceof BedItem) {
-                            hand = Hand.OFF_HAND;
-                        }
-                        if ((east > north) && (east > south) && (east > west)) {
-                            preYaw = mc.player.yaw;
-                            mc.player.yaw = -90f;
-                            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(-90f, mc.player.pitch, mc.player.isOnGround()));
-                            mc.player.yaw = preYaw;
-                        } else if ((east < north) && (north > south) && (north > west)) {
-                            preYaw = mc.player.yaw;
-                            mc.player.yaw = 179f;
-                            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(179f, mc.player.pitch, mc.player.isOnGround()));
-                            mc.player.yaw = preYaw;
-                        } else if ((south > north) && (east < south) && (south > west)) {
-                            preYaw = mc.player.yaw;
-                            mc.player.yaw = 1f;
-                            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(1f, mc.player.pitch, mc.player.isOnGround()));
-                            mc.player.yaw = preYaw;
-                        } else if ((west > north) && (west > south) && (east < west)) {
-                            preYaw = mc.player.yaw;
-                            mc.player.yaw = 90f;
-                            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(90f, mc.player.pitch, mc.player.isOnGround()));
-                            mc.player.yaw = preYaw;
-                        }
-                        mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(bestBlock, Direction.UP, bestBlockPos, false));
-                        mc.player.swingHand(Hand.MAIN_HAND);
-                        if (smartDelay.get()) {
-                            if (DamageCalcUtils.bedDamage(target, target.getPos()) - bestDamage < 10) {
-                                delayLeft = 10;
-                            }
-                        }
-                        if (preSlot != -1 && mc.player.inventory.selectedSlot != preSlot && switchBack.get()) {
-                            mc.player.inventory.selectedSlot = preSlot;
-                        }
-                    }
-                }
-            }
-            didBreak = false;
+        if (mc.world.getRegistryKey().getValue().getPath().equals("overworld")) {
+            Chat.warning(this, "You are in the overworld. Disabling!");
+            this.toggle();
+            return;
         }
-        didBreak = true;
+        if ((mc.player.getHealth() + mc.player.getAbsorptionAmount()) <= minHealth.get() && mode.get() != Mode.suicide)
+            return;
+        if (place.get() && (!(mc.player.getMainHandStack().getItem() instanceof BedItem)
+                && !(mc.player.getOffHandStack().getItem() instanceof BedItem)) && !autoSwitch.get()) return;
+        if (place.get()) {
+            Iterator<AbstractClientPlayerEntity> validEntities = mc.world.getPlayers().stream()
+                    .filter(FriendManager.INSTANCE::attack)
+                    .filter(entityPlayer -> !entityPlayer.getDisplayName().equals(mc.player.getDisplayName()))
+                    .filter(entityPlayer -> mc.player.distanceTo(entityPlayer) <= 10)
+                    .collect(Collectors.toList()).iterator();
+
+            AbstractClientPlayerEntity target;
+            if (validEntities.hasNext()) {
+                target = validEntities.next();
+            } else {
+                return;
+            }
+            for (AbstractClientPlayerEntity i = null; validEntities.hasNext(); i = validEntities.next()) {
+                if (i == null) continue;
+                if (mc.player.distanceTo(i) < mc.player.distanceTo(target)) {
+                    target = i;
+                }
+            }
+            if (!smartDelay.get() && delayLeft > 0) return;
+            findValidBlocks(target);
+            if (bestBlock != null && bestDamage >= minDamage.get()) {
+                if (!smartDelay.get()) {
+                    delayLeft = delay.get();
+                    placeBlock();
+                }else if (smartDelay.get() && (delayLeft <= 0 || bestDamage - lastDamage > healthDifference.get())) {
+                    lastDamage = bestDamage;
+                    placeBlock();
+                    if (delayLeft <= 0) delayLeft = 10;
+                }
+            }
+        }
     });
+
+    private void placeBlock(){
+        bestBlockPos = new BlockPos(bestBlock.x, bestBlock.y, bestBlock.z);
+        int preSlot = -1;
+        if (autoSwitch.get()) {
+            for (int i = 0; i < 9; i++) {
+                if (mc.player.inventory.getStack(i).getItem() instanceof BedItem) {
+                    preSlot = mc.player.inventory.selectedSlot;
+                    mc.player.inventory.selectedSlot = i;
+                }
+            }
+        }
+        Hand hand = Hand.MAIN_HAND;
+        if (!(mc.player.getMainHandStack().getItem() instanceof BedItem) && mc.player.getOffHandStack().getItem() instanceof BedItem) {
+            hand = Hand.OFF_HAND;
+        }
+        if (direction == 0) {
+            preYaw = mc.player.yaw;
+            mc.player.yaw = -90f;
+            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(-90f, mc.player.pitch, mc.player.isOnGround()));
+            mc.player.yaw = preYaw;
+        } else if (direction == 1) {
+            preYaw = mc.player.yaw;
+            mc.player.yaw = 179f;
+            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(179f, mc.player.pitch, mc.player.isOnGround()));
+            mc.player.yaw = preYaw;
+        } else if (direction == 2) {
+            preYaw = mc.player.yaw;
+            mc.player.yaw = 1f;
+            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(1f, mc.player.pitch, mc.player.isOnGround()));
+            mc.player.yaw = preYaw;
+        } else if (direction == 3) {
+            preYaw = mc.player.yaw;
+            mc.player.yaw = 90f;
+            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(90f, mc.player.pitch, mc.player.isOnGround()));
+            mc.player.yaw = preYaw;
+        }
+        lastDamage = bestDamage;
+        mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(bestBlock, Direction.UP, bestBlockPos, false));
+        mc.player.swingHand(Hand.MAIN_HAND);
+        if (preSlot != -1 && mc.player.inventory.selectedSlot != preSlot && switchBack.get()) {
+            mc.player.inventory.selectedSlot = preSlot;
+        }
+    }
 
     private void findValidBlocks(PlayerEntity target){
         bestBlock = null;
         bestDamage = 0;
-        playerPos = mc.player.getPos();
-        for(double i = playerPos.x - placeRange.get(); i < playerPos.x + placeRange.get(); i++){
-            for(double j = playerPos.z - placeRange.get(); j < playerPos.z + placeRange.get(); j++){
-                for(double k = playerPos.y - 3; k < playerPos.y + 3; k++) {
+        playerPos = mc.player.getBlockPos();
+        for(double i = playerPos.getX() - placeRange.get(); i < playerPos.getX() + placeRange.get(); i++){
+            for(double j = playerPos.getZ() - placeRange.get(); j < playerPos.getZ() + placeRange.get(); j++){
+                for(double k = playerPos.getY() - 3; k < playerPos.getY() + 3; k++) {
                     pos = new BlockPos(i, k, j);
                     vecPos = new Vec3d(i, k, j);
                     posUp = pos.add(0, 1, 0);
@@ -313,5 +303,33 @@ public class BedAura extends ToggleModule {
                 }
             }
         }
+        double north = -1;
+        double east = -1;
+        double south = -1;
+        double west = -1;
+        bestBlockPos = new BlockPos(bestBlock.x, bestBlock.y + 1, bestBlock.z);
+        if (mc.world.getBlockState(bestBlockPos.add(1, 1, 0)).getMaterial().isReplaceable()) {
+            east = DamageCalcUtils.bedDamage(target, bestBlock.add(1.5, 1.5, 0.5));
+        }
+        if (mc.world.getBlockState(bestBlockPos.add(-1, 1, 0)).getMaterial().isReplaceable()) {
+            west = DamageCalcUtils.bedDamage(target, bestBlock.add(-1.5, 1.5, 0.5));
+        }
+        if (mc.world.getBlockState(bestBlockPos.add(0, 1, 1)).getMaterial().isReplaceable()) {
+            south = DamageCalcUtils.bedDamage(target, bestBlock.add(0.5, 1.5, 1.5));
+        }
+        if (mc.world.getBlockState(bestBlockPos.add(0, 1, -1)).getMaterial().isReplaceable()) {
+            north = DamageCalcUtils.bedDamage(target, bestBlock.add(0.5, 1.5, -1.5));
+        }
+
+        if ((east > north) && (east > south) && (east > west)) {
+            direction = 0;
+        } else if ((east < north) && (north > south) && (north > west)) {
+            direction = 1;
+        } else if ((south > north) && (east < south) && (south > west)) {
+            direction = 2;
+        } else if ((west > north) && (west > south) && (east < west)) {
+            direction = 3;
+        }
+        bestDamage = Math.max(bestDamage, Math.max(north, Math.max(east, Math.max(south, west))));
     }
 }

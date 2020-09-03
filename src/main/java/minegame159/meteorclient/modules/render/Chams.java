@@ -28,6 +28,6 @@ public class Chams extends ToggleModule {
     }
 
     public boolean shouldRender(LivingEntity entity) {
-        return entities.get().contains(entity.getType());
+        return isActive() && entities.get().contains(entity.getType());
     }
 }
