@@ -4,6 +4,8 @@ import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.movement.Velocity;
+import minegame159.meteorclient.modules.render.ESP;
+import minegame159.meteorclient.utils.Outlines;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.MovementType;
@@ -13,6 +15,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(Entity.class)
 public abstract class EntityMixin {
@@ -43,5 +46,12 @@ public abstract class EntityMixin {
         if ((Object) this != MinecraftClient.getInstance().player) return;
 
         MeteorClient.EVENT_BUS.post(EventStore.playerMoveEvent(type, movement));
+    }
+
+    @Inject(method = "getTeamColorValue", at = @At("HEAD"), cancellable = true)
+    private void onGetTeamColorValue(CallbackInfoReturnable<Integer> info) {
+        if (Outlines.renderingOutlines) {
+            info.setReturnValue(ModuleManager.INSTANCE.get(ESP.class).getColor((Entity) (Object) this).getPacked());
+        }
     }
 }

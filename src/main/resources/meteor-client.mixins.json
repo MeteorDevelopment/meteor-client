@@ -78,7 +78,12 @@
     "BlockHitResultMixin",
     "JsonGlProgramMixin",
     "CreativeInventoryScreenMixin",
-    "BlockItemMixin"
+    "BlockItemMixin",
+    "LivingEntityRendererMixin",
+    "RenderLayersMixin",
+    "ModelMixin",
+    "ItemFrameEntityRendererMixin",
+    "RenderLayerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -43,7 +43,7 @@ public class ClickTP extends ToggleModule {
                 BlockPos pos = ((BlockHitResult) hitResult).getBlockPos();
                 Direction side = ((BlockHitResult) hitResult).getSide();
 
-                if (mc.world.getBlockState(pos).activate(mc.world, mc.player, Hand.MAIN_HAND, (BlockHitResult) hitResult)) return;
+                if (mc.world.getBlockState(pos).onUse(mc.world, mc.player, Hand.MAIN_HAND, (BlockHitResult) hitResult) != ActionResult.PASS) return;
 
                 mc.player.updatePosition(pos.getX() + 0.5 + side.getOffsetX(), pos.getY() + side.getOffsetY(), pos.getZ() + 0.5 + side.getOffsetZ());
             }
