@@ -126,8 +126,8 @@ public class Announcer extends ToggleModule {
                 updateLastPos();
             }
 
-            double deltaX = mc.player.x - lastX;
-            double deltaZ = mc.player.z - lastZ;
+            double deltaX = mc.player.getX() - lastX;
+            double deltaZ = mc.player.getZ() - lastZ;
             dist += Math.sqrt(deltaX * deltaX + deltaZ * deltaZ);
 
             if (timer >= delay.get()) {
@@ -145,8 +145,8 @@ public class Announcer extends ToggleModule {
         }
 
         void updateLastPos() {
-            lastX = mc.player.x;
-            lastZ = mc.player.z;
+            lastX = mc.player.getX();
+            lastZ = mc.player.getZ();
         }
 
         void sendMsg() {
