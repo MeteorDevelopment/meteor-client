@@ -81,6 +81,15 @@
     "GuiCloseC2SPacketMixin",
     "BlockHitResultMixin",
     "HorseBaseEntityMixin"
+    "BlockHitResultMixin",
+    "JsonGlProgramMixin",
+    "CreativeInventoryScreenMixin",
+    "BlockItemMixin",
+    "LivingEntityRendererMixin",
+    "RenderLayersMixin",
+    "ModelMixin",
+    "ItemFrameEntityRendererMixin",
+    "RenderLayerMixin"
   ],
   "injectors": {
     "defaultRequire": 1
