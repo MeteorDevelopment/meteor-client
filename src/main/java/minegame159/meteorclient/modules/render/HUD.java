@@ -402,7 +402,7 @@ public class HUD extends ToggleModule {
                     ItemStack itemStack = mc.player.inventory.armor.get(i);
 
                     mc.getItemRenderer().renderGuiItem(itemStack, x, y);
-                    if(!itemStack.isEmpty()) {
+                    if(!itemStack.isEmpty() && itemStack.isDamageable()) {
                         String message = Integer.toString(itemStack.getMaxDamage() - itemStack.getDamage());
                         MeteorClient.FONT.scale = scale.get();
                         MeteorClient.FONT.renderStringWithShadow(message, x + ((15 - (MeteorClient.FONT.getStringWidth(message))) / 2) + 1, y - 5, white);
@@ -416,8 +416,8 @@ public class HUD extends ToggleModule {
                     ItemStack itemStack = mc.player.inventory.armor.get(i);
 
                     mc.getItemRenderer().renderGuiItem(itemStack, x, y);
-                    if(!itemStack.isEmpty()) {
-                        String message = Integer.toString(Math.round(((itemStack.getMaxDamage() - itemStack.getDamage()) * 100) / itemStack.getMaxDamage()));
+                    if(!itemStack.isEmpty() && itemStack.isDamageable()) {
+                        String message = Integer.toString(Math.round(((itemStack.getMaxDamage() - itemStack.getDamage()) * 100f) / (float) itemStack.getMaxDamage()));
                         MeteorClient.FONT.scale = scale.get();
                         MeteorClient.FONT.renderStringWithShadow(message, x + ((15 - (MeteorClient.FONT.getStringWidth(message))) / 2) + 1, y - 5, white);
                         MeteorClient.FONT.scale = 1;
