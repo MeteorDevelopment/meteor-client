@@ -83,17 +83,17 @@ public class AutoTool extends ToggleModule {
             int slot = -1;
             int score = 0;
             for(int i = 0; i < 36; i++){
-                if ((mc.player.inventory.getInvStack(i).getMaxDamage() - mc.player.inventory.getInvStack(i).getDamage()) <= 11) continue;
-                if(material.get() == materialPreference.None && mc.player.inventory.getInvStack(i).getItem().getClass() == mc.player.getMainHandStack().getItem().getClass()){
+                if ((mc.player.inventory.getStack(i).getMaxDamage() - mc.player.inventory.getStack(i).getDamage()) <= 11) continue;
+                if(material.get() == materialPreference.None && mc.player.inventory.getStack(i).getItem().getClass() == mc.player.getMainHandStack().getItem().getClass()){
                     slot = i;
                     break;
                 }else if(material.get() == materialPreference.Same && mc.player.inventory.getStack(i).getItem() == mc.player.getMainHandStack().getItem()){
                     slot = i;
                     break;
                 }else if(material.get() == materialPreference.Best && blockState != null){
-                    if(mc.player.inventory.getInvStack(i).getItem().getClass() == mc.player.getMainHandStack().getItem().getClass()){
-                        if(score < Math.round(mc.player.inventory.getInvStack(i).getMiningSpeed(blockState))){
-                            score = Math.round(mc.player.inventory.getInvStack(i).getMiningSpeed(blockState));
+                    if(mc.player.inventory.getStack(i).getItem().getClass() == mc.player.getMainHandStack().getItem().getClass()){
+                        if(score < Math.round(mc.player.inventory.getStack(i).getMiningSpeedMultiplier(blockState))){
+                            score = Math.round(mc.player.inventory.getStack(i).getMiningSpeedMultiplier(blockState));
                             slot = i;
                         }
                     }

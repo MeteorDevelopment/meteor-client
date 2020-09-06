@@ -8,7 +8,6 @@ import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.utils.Input;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.BlockItem;
@@ -157,8 +156,7 @@ public class Surround extends ToggleModule {
     }
 
     private void setBlockPos(int x, int y, int z) {
-        blockPos.set(mc.player.getX(), mc.player.getY(), mc.player.getZ());
-        blockPos.add(x, y, z);
+        blockPos.set(mc.player.getX() + x, mc.player.getY() + y, mc.player.getZ() + z);
     }
 
     private boolean findSlot() {
