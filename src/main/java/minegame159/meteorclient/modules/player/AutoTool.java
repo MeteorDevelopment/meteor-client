@@ -6,6 +6,7 @@ import me.zero.alpine.event.EventPriority;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.StartBreakingBlockEvent;
+import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BoolSetting;
@@ -73,33 +74,33 @@ public class AutoTool extends ToggleModule {
         super(Category.Player, "auto-tool", "Automatically switches to the most effective tool when breaking blocks.");
     }
 
+    private BlockState blockState = null;
+
     @EventHandler
-    private final Listener<StartBreakingBlockEvent> onStartBreakingBlock = new Listener<>(event -> {
-        BlockState blockState = mc.world.getBlockState(event.blockPos);
+    private final Listener<TickEvent> onTick = new Listener<>(event -> {
         if(mc.player.getMainHandStack().getItem() instanceof ToolItem && antiBreak.get()
                 && (mc.player.getMainHandStack().getItem().getMaxDamage() - mc.player.getMainHandStack().getDamage()) <= 11){
             int slot = -1;
             int score = 0;
-            for(int i = 9; i < 36; i++){
-                if(material.get() == materialPreference.None && mc.player.inventory.getStack(i).getItem().getClass() == mc.player.getMainHandStack().getItem().getClass()
-                        && (mc.player.inventory.getStack(i).getMaxDamage() - mc.player.inventory.getStack(i).getDamage()) > 11){
+            for(int i = 0; i < 36; i++){
+                if ((mc.player.inventory.getInvStack(i).getMaxDamage() - mc.player.inventory.getInvStack(i).getDamage()) <= 11) continue;
+                if(material.get() == materialPreference.None && mc.player.inventory.getInvStack(i).getItem().getClass() == mc.player.getMainHandStack().getItem().getClass()){
                     slot = i;
                     break;
                 }else if(material.get() == materialPreference.Same && mc.player.inventory.getStack(i).getItem() == mc.player.getMainHandStack().getItem()){
                     slot = i;
                     break;
-                }else if(material.get() == materialPreference.Best){
-                    if(mc.player.inventory.getStack(i).getItem().getClass() == mc.player.getMainHandStack().getItem().getClass()
-                            && (mc.player.inventory.getStack(i).getMaxDamage() - mc.player.inventory.getStack(i).getDamage()) > 11){
-                        if(score < Math.round(mc.player.inventory.getStack(i).getMiningSpeedMultiplier(blockState))){
-                            score = Math.round(mc.player.inventory.getStack(i).getMiningSpeedMultiplier(blockState));
+                }else if(material.get() == materialPreference.Best && blockState != null){
+                    if(mc.player.inventory.getInvStack(i).getItem().getClass() == mc.player.getMainHandStack().getItem().getClass()){
+                        if(score < Math.round(mc.player.inventory.getInvStack(i).getMiningSpeed(blockState))){
+                            score = Math.round(mc.player.inventory.getInvStack(i).getMiningSpeed(blockState));
                             slot = i;
                         }
                     }
-                }
+                }else if (material.get() == materialPreference.Best && blockState == null) break;
             }
             if(slot == -1 && material.get() != materialPreference.None){
-                for(int i = 9; i < 36; i++){
+                for(int i = 0; i < 36; i++){
                     if(mc.player.inventory.getStack(i).getItem().getClass() == mc.player.getMainHandStack().getItem().getClass()
                             && (mc.player.inventory.getStack(i).getMaxDamage() - mc.player.inventory.getStack(i).getDamage()) > 11){
                         slot = i;
@@ -112,17 +113,25 @@ public class AutoTool extends ToggleModule {
                 InvUtils.clickSlot(InvUtils.invIndexToSlotId(slot), 0, SlotActionType.PICKUP);
                 InvUtils.clickSlot(InvUtils.invIndexToSlotId(mc.player.inventory.selectedSlot), 0, SlotActionType.PICKUP);
             }else if(mc.player.inventory.getEmptySlot() != -1){
+                int emptySlot = mc.player.inventory.getEmptySlot();
                 InvUtils.clickSlot(InvUtils.invIndexToSlotId(mc.player.inventory.selectedSlot), 0, SlotActionType.PICKUP);
-                InvUtils.clickSlot(InvUtils.invIndexToSlotId(mc.player.inventory.getEmptySlot()), 0, SlotActionType.PICKUP);
+                InvUtils.clickSlot(InvUtils.invIndexToSlotId(emptySlot), 0, SlotActionType.PICKUP);
+            }else {
+                if (mc.player.inventory.selectedSlot < 8) mc.player.inventory.selectedSlot = mc.player.inventory.selectedSlot + 1;
+                else mc.player.inventory.selectedSlot = mc.player.inventory.selectedSlot - 1;
             }
         }
+    });
 
+    @EventHandler
+    private final Listener<StartBreakingBlockEvent> onStartBreakingBlock = new Listener<>(event -> {
+        blockState = mc.world.getBlockState(event.blockPos);
         int bestScore = -1;
         int bestSlot = -1;
 
         for (int i = 0; i < 9; i++) {
             ItemStack itemStack = mc.player.inventory.getStack(i);
-            if (!isEffectiveOn(itemStack.getItem(), blockState)) continue;
+            if (!isEffectiveOn(itemStack.getItem(), blockState) || (itemStack.getMaxDamage() - itemStack.getDamage() <= 11)) continue;
             int score = 0;
 
             if (enderChestOnlyWithSilkTouch.get() && blockState.getBlock() == Blocks.ENDER_CHEST && EnchantmentHelper.getLevel(Enchantments.SILK_TOUCH, itemStack) == 0) continue;

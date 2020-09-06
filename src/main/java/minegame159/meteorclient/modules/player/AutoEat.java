@@ -94,7 +94,7 @@ public class AutoEat extends ToggleModule {
         if (mc.player.abilities.creativeMode) return;
         if (isEating && !mc.player.getMainHandStack().getItem().isFood()) ((IKeyBinding) mc.options.keyUse).setPressed(false);
 
-        int slot = -1;
+        slot = -1;
         int bestHunger = -1;
 
         for (int i = 0; i < 9; i++) {
@@ -149,7 +149,7 @@ public class AutoEat extends ToggleModule {
                 return;
             }
 
-            if(slot != InvUtils.OFFHAND_SLOT && slot != -1) {
+            if(slot != InvUtils.OFFHAND_SLOT) {
                 mc.player.inventory.selectedSlot = slot;
             }
 
@@ -177,7 +177,6 @@ public class AutoEat extends ToggleModule {
 
         if (slot != -1 && (20 - mc.player.getHungerManager().getFoodLevel() >= bestHunger && sgAutoHunger.isEnabled()) || (20 - mc.player.getHungerManager().getFoodLevel() >= minHunger.get() && sgManualHunger.isEnabled())) {
             preSelectedSlot = mc.player.inventory.selectedSlot;
-            this.slot = slot;
             if(slot != InvUtils.OFFHAND_SLOT && slot != -1) {
                 mc.player.inventory.selectedSlot = slot;
             }
