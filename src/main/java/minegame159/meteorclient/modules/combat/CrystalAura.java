@@ -24,6 +24,7 @@ import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.AxeItem;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.SwordItem;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
@@ -139,7 +140,7 @@ public class CrystalAura extends ToggleModule {
             .description("Delay ticks between placements.")
             .defaultValue(2)
             .min(0)
-            .max(10)
+            .sliderMax(10)
             .build()
     );
 
@@ -147,6 +148,39 @@ public class CrystalAura extends ToggleModule {
             .name("smart-delay")
             .description("Reduces crystal consumption when doing large amounts of damage.(Can tank performance on lower end PCs)")
             .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Boolean> facePlace = sgGeneral.add(new BoolSetting.Builder()
+            .name("face-place")
+            .description("Will face place when target is below a certain health or their armour is low.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Double> facePlaceHealth = sgGeneral.add(new DoubleSetting.Builder()
+            .name("face-place-health")
+            .description("The health required to face place")
+            .defaultValue(5)
+            .min(1)
+            .max(20)
+            .build()
+    );
+
+    private final Setting<Double> facePlaceDurability = sgGeneral.add(new DoubleSetting.Builder()
+            .name("face-place-durability")
+            .description("The durability required to face place (in percent)")
+            .defaultValue(2)
+            .min(1)
+            .max(100)
+            .sliderMax(100)
+            .build()
+    );
+
+    private final Setting<Boolean> spamFacePlace = sgGeneral.add(new BoolSetting.Builder()
+            .name("spam-face-place")
+            .description("Places faster when someone is below the face place health (requires smart delay)")
+            .defaultValue(false)
             .build()
     );
 
@@ -177,6 +211,7 @@ public class CrystalAura extends ToggleModule {
     private BlockPos playerPos;
     private Vec3d pos;
     private double lastDamage = 0;
+    private boolean shouldFacePlace = false;
 
     @Override
     public void onDeactivate() {
@@ -186,6 +221,7 @@ public class CrystalAura extends ToggleModule {
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
         delayLeft --;
+        shouldFacePlace = false;
         if (getTotalHealth(mc.player) <= minHealth.get() && mode.get() != Mode.suicide) return;
         Streams.stream(mc.world.getEntities())
                 .filter(entity -> entity instanceof EndCrystalEntity)
@@ -220,6 +256,7 @@ public class CrystalAura extends ToggleModule {
                     .filter(FriendManager.INSTANCE::attack)
                     .filter(entityPlayer -> !entityPlayer.getDisplayName().equals(mc.player.getDisplayName()))
                     .filter(entityPlayer -> mc.player.distanceTo(entityPlayer) <= 10)
+                    .filter(entityPlayer -> !entityPlayer.isCreative() && !entityPlayer.isSpectator())
                     .collect(Collectors.toList())
                     .iterator();
 
@@ -249,11 +286,25 @@ public class CrystalAura extends ToggleModule {
                 return;
             }
             findValidBlocks(target);
-            if (bestBlock != null && bestDamage >= minDamage.get()) {
+            if (facePlace.get() && Math.sqrt(target.squaredDistanceTo(bestBlock)) <= 2) {
+                if (target.getHealth() + target.getAbsorptionAmount() < facePlaceHealth.get())
+                    shouldFacePlace = true;
+                else {
+                    Iterator<ItemStack> armourItems = target.getArmorItems().iterator();
+                    for (ItemStack itemStack = null; armourItems.hasNext(); itemStack = armourItems.next()){
+                        if (itemStack == null) continue;
+                        if (!itemStack.isEmpty() && (((double)(itemStack.getMaxDamage() - itemStack.getDamage()) / itemStack.getMaxDamage()) * 100) <= facePlaceDurability.get()){
+                            shouldFacePlace = true;
+                        }
+                    }
+                }
+            }
+            if (bestBlock != null && (bestDamage >= minDamage.get() || shouldFacePlace)) {
                 if (!smartDelay.get()) {
                     delayLeft = delay.get();
                     placeBlock(bestBlock, hand);
-                }else if (smartDelay.get() && (delayLeft <= 0 || bestDamage - lastDamage > healthDifference.get())) {
+                }else if (smartDelay.get() && (delayLeft <= 0 || bestDamage - lastDamage > healthDifference.get()
+                        || (spamFacePlace.get() && shouldFacePlace))) {
                     lastDamage = bestDamage;
                     placeBlock(bestBlock, hand);
                     if (delayLeft <= 0) delayLeft = 10;

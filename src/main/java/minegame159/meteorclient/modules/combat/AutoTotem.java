@@ -103,9 +103,15 @@ public class AutoTotem extends ToggleModule {
             }
             InvUtils.clickSlot(InvUtils.OFFHAND_SLOT, 0, SlotActionType.PICKUP);
             InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
-        }else if(result.found() && !(mc.player.getOffHandStack().getItem() == Items.TOTEM_OF_UNDYING) && smart.get() &&
+        }else if(result.found() && mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING && smart.get() &&
                 ((mc.player.getHealth() + mc.player.getAbsorptionAmount()) < health.get() || ((mc.player.getHealth() + mc.player.getAbsorptionAmount()) - getHealthReduction()) < health.get())){
             locked = true;
+            if(mc.player.inventory.getCursorStack().getItem() != Items.TOTEM_OF_UNDYING) {
+                InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
+            }
+            InvUtils.clickSlot(InvUtils.OFFHAND_SLOT, 0, SlotActionType.PICKUP);
+            InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
+        }else if (result.found() && mc.player.getOffHandStack().isEmpty()) {
             if(mc.player.inventory.getCursorStack().getItem() != Items.TOTEM_OF_UNDYING) {
                 InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
             }

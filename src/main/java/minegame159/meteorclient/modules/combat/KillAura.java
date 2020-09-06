@@ -185,6 +185,7 @@ public class KillAura extends ToggleModule {
 
         if (entity instanceof PlayerEntity) {
             if (friends.get()) return true;
+            if (((PlayerEntity) entity).isCreative()) return false;
             return FriendManager.INSTANCE.attack((PlayerEntity) entity);
         }
 
