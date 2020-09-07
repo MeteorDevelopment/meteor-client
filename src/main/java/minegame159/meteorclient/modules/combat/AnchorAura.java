@@ -13,20 +13,16 @@ import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.DamageCalcUtils;
 import minegame159.meteorclient.utils.InvUtils;
-import minegame159.meteorclient.utils.Utils;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.ShapeContext;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemUsageContext;
 import net.minecraft.item.Items;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.dimension.DimensionType;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -130,6 +126,22 @@ public class AnchorAura extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> smartDelay = sgGeneral.add(new BoolSetting.Builder()
+            .name("smart-delay")
+            .description("Ensures optimal damage per anchor.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Double> healthDifference = sgGeneral.add(new DoubleSetting.Builder()
+            .name("damage-increase")
+            .description("The damage increase for smart delay to work.")
+            .defaultValue(5)
+            .min(0)
+            .max(20)
+            .build()
+    );
+
     public AnchorAura() {super(Category.Combat, "anchor-aura", "Places and explodes respawn anchors for you,");}
 
     private int delayLeft = delay.get();
@@ -137,12 +149,16 @@ public class AnchorAura extends ToggleModule {
     private BlockPos bestBlock;
     private BlockPos playerPos;
     private BlockPos pos;
-    private boolean didBreak = false;
+    private double bestDamage = 0;
+    private double lastDamage = 0;
+    private Vec3d vecPos;
+    private Vec3d bestBlockPos;
 
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
         assert mc.player != null;
         assert mc.world != null;
+        delayLeft --;
         if (mc.world.getDimension().isRespawnAnchorWorking()) {
             Chat.info(this, "You are not in the Overworld. (highlight)Disabling(default)!");
             this.toggle();
@@ -199,38 +215,34 @@ public class AnchorAura extends ToggleModule {
                 }
             }
         }
-        if (didBreak) {
-            if (delayLeft > 0) {
-                delayLeft--;
-                return;
-            } else {
-                delayLeft = delay.get();
-            }
-            if (place.get()) {
-                findValidBlocks(target);
-                if (bestBlock != null) {
-                    Vec3d pos = new Vec3d(bestBlock.getX() + 0.5D, bestBlock.getY() + 0.5D, bestBlock.getZ() + 0.5D);
-                    if ((DamageCalcUtils.bedDamage(mc.player, pos) < maxDamage.get() || breakMode.get() == Mode.suicide)
-                            && DamageCalcUtils.bedDamage(target, pos) > minDamage.get()) {
-                        if (autoSwitch.get() && mc.player.getMainHandStack().getItem() != Items.RESPAWN_ANCHOR) {
-                            int slot = InvUtils.findItemWithCount(Items.RESPAWN_ANCHOR).slot;
-                            if (slot != -1 && slot < 9) {
-                                if (spoofChange.get()) preSlot = mc.player.inventory.selectedSlot;
-                                mc.player.inventory.selectedSlot = slot;
-                            }
+        if (!smartDelay.get() && delayLeft > 0) return;
+        if (place.get()) {
+            findValidBlocks(target);
+            if (bestBlock != null) {
+                Vec3d pos = new Vec3d(bestBlock.getX() + 0.5D, bestBlock.getY() + 0.5D, bestBlock.getZ() + 0.5D);
+                if (bestDamage > minDamage.get()) {
+                    if (autoSwitch.get() && mc.player.getMainHandStack().getItem() != Items.RESPAWN_ANCHOR) {
+                        int slot = InvUtils.findItemWithCount(Items.RESPAWN_ANCHOR).slot;
+                        if (slot != -1 && slot < 9) {
+                            if (spoofChange.get()) preSlot = mc.player.inventory.selectedSlot;
+                            mc.player.inventory.selectedSlot = slot;
                         }
-                        if (mc.player.getMainHandStack().getItem() != Items.RESPAWN_ANCHOR && mc.player.getOffHandStack().getItem() != Items.RESPAWN_ANCHOR)
-                            return;
-                        mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(pos, Direction.UP, bestBlock, false));
                     }
-                    if (spoofChange.get() && preSlot != mc.player.inventory.selectedSlot) {
-                        mc.player.inventory.selectedSlot = preSlot;
+                    if (mc.player.getMainHandStack().getItem() != Items.RESPAWN_ANCHOR && mc.player.getOffHandStack().getItem() != Items.RESPAWN_ANCHOR) return;
+                    if (!smartDelay.get()) {
+                        delayLeft = delay.get();
+                        mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(pos, Direction.UP, bestBlock, false));
+                    } else if (smartDelay.get() && (delayLeft <= 0 || bestDamage - lastDamage > healthDifference.get())){
+                        lastDamage = bestDamage;
+                        mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(pos, Direction.UP, bestBlock, false));
+                        if (delayLeft <= 0) delayLeft = 10;
                     }
                 }
+                if (spoofChange.get() && preSlot != mc.player.inventory.selectedSlot) {
+                    mc.player.inventory.selectedSlot = preSlot;
+                }
             }
-            didBreak = false;
         }
-        didBreak = true;
     });
 
     private void findValidBlocks(PlayerEntity target) {
@@ -242,20 +254,33 @@ public class AnchorAura extends ToggleModule {
             for (double j = playerPos.getZ() - placeRange.get(); j < playerPos.getZ() + placeRange.get(); j++) {
                 for (int k = playerPos.getY() - 3; k < playerPos.getY() + 3; k++) {
                     pos = new BlockPos(i, k, j);
+                    vecPos = new Vec3d(pos.getX(), pos.getY(), pos.getZ());
                     if (mc.world.canPlace(Blocks.RESPAWN_ANCHOR.getDefaultState(), pos, ShapeContext.absent())) {
-                        if (airPlace.get()) {
-                            if (bestBlock == null) bestBlock = pos;
-                            if (DamageCalcUtils.bedDamage(target, new Vec3d(bestBlock.getX() + 0.5D, bestBlock.getY() + 0.5D, bestBlock.getZ() + 0.5D))
-                                    < DamageCalcUtils.bedDamage(target, new Vec3d(pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D))
-                                    && DamageCalcUtils.bedDamage(mc.player, new Vec3d(pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D)) < maxDamage.get()) {
+                        if (airPlace.get() && mc.world.getBlockState(pos.down()).getMaterial().isReplaceable()) {
+                            if (bestBlock == null) {
                                 bestBlock = pos;
+                                bestBlockPos = vecPos;
+                                bestDamage = DamageCalcUtils.bedDamage(target, bestBlockPos.add(0.5, 0.5, 0.5));
+                            }
+                            if (bestDamage < DamageCalcUtils.bedDamage(target, vecPos.add(0.5, 0.5, 0.5))
+                                    &&(mode.get() == Mode.suicide ||
+                                    DamageCalcUtils.bedDamage(mc.player, vecPos.add(0.5, 0.5, 0.5)) < maxDamage.get())) {
+                                bestBlock = pos;
+                                bestBlockPos = vecPos;
+                                bestDamage = DamageCalcUtils.bedDamage(target, bestBlockPos.add(0.5, 0.5, 0.5));
                             }
                         } else if (!airPlace.get() && !mc.world.getBlockState(pos.down()).getMaterial().isReplaceable()) {
-                            if (bestBlock == null) bestBlock = pos;
-                            if (DamageCalcUtils.bedDamage(target, new Vec3d(bestBlock.getX() + 0.5D, bestBlock.getY() + 0.5D, bestBlock.getZ() + 0.5D))
-                                    < DamageCalcUtils.bedDamage(target, new Vec3d(pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D))
-                                    && DamageCalcUtils.bedDamage(mc.player, new Vec3d(pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D)) < maxDamage.get()) {
+                            if (bestBlock == null) {
                                 bestBlock = pos;
+                                bestBlockPos = vecPos;
+                                bestDamage = DamageCalcUtils.bedDamage(target, bestBlockPos.add(0.5, 0.5, 0.5));
+                            }
+                            if (bestDamage < DamageCalcUtils.bedDamage(target, vecPos.add(0.5, 0.5, 0.5))
+                                    && (mode.get() == Mode.suicide ||
+                                    DamageCalcUtils.bedDamage(mc.player, vecPos.add(0.5, 0.5, 0.5)) < maxDamage.get())) {
+                                bestBlock = pos;
+                                bestBlockPos = vecPos;
+                                bestDamage = DamageCalcUtils.bedDamage(target, bestBlockPos.add(0.5, 0.5, 0.5));
                             }
                         }
                     }
@@ -274,11 +299,16 @@ public class AnchorAura extends ToggleModule {
                 for (int k = playerPos.getY() - 3; k < playerPos.getY() + 3; k++) {
                     pos = new BlockPos(i, k, j);
                     if (mc.world.getBlockState(pos).getBlock() == Blocks.RESPAWN_ANCHOR) {
-                        if (bestBlock == null) bestBlock = pos;
-                        if (DamageCalcUtils.bedDamage(target, new Vec3d(bestBlock.getX() + 0.5D, bestBlock.getY() + 0.5D, bestBlock.getZ() + 0.5D))
-                                < DamageCalcUtils.bedDamage(target, new Vec3d(pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D))
-                                && DamageCalcUtils.bedDamage(mc.player, new Vec3d(pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D)) < maxDamage.get()){
+                        if (bestBlock == null) {
                             bestBlock = pos;
+                            bestBlockPos = vecPos;
+                            bestDamage = DamageCalcUtils.bedDamage(target, bestBlockPos.add(0.5, 0.5, 0.5));
+                        }
+                        if (bestDamage < DamageCalcUtils.bedDamage(target, vecPos.add(0.5, 0.5, 0.5))
+                                && (mode.get() == Mode.suicide || DamageCalcUtils.bedDamage(mc.player, vecPos.add(0.5, 0.5, 0.5)) < maxDamage.get())){
+                            bestBlock = pos;
+                            bestBlockPos = vecPos;
+                            bestDamage = DamageCalcUtils.bedDamage(target, bestBlockPos.add(0.5, 0.5, 0.5));
                         }
                     }
                 }
@@ -288,10 +318,5 @@ public class AnchorAura extends ToggleModule {
 
     private float getTotalHealth(PlayerEntity target) {
         return target.getHealth() + target.getAbsorptionAmount();
-    }
-
-    private boolean isEmpty(BlockPos pos) {
-        assert mc.world != null;
-        return (mc.world.getBlockState(pos).getMaterial().isReplaceable() || mc.world.isAir(pos)) && !mc.world.getOtherEntities(null, new Box(pos.getX(), pos.getY(), pos.getZ(), pos.getX() + 1.0D, pos.getY() + 2.0D, pos.getZ() + 1.0D)).isEmpty();
     }
 }
