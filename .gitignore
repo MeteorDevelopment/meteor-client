@@ -3,6 +3,7 @@
 build
 out
 run
+logs
 
 obfuscation/meteor-client-*
 obfuscation/obfuscation-map-*
