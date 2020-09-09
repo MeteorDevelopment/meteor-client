@@ -256,6 +256,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new XCarry());
         addModule(new BuildHeight());
         addModule(new Rotation());
+        addModule(new ChestSwap());
     }
 
     private void initMovement() {
