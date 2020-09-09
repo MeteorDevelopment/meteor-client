@@ -6,6 +6,7 @@ import minegame159.meteorclient.events.RenderEvent;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.misc.UnfocusedCPU;
 import minegame159.meteorclient.modules.player.LiquidInteract;
+import minegame159.meteorclient.modules.player.NoMiningTrace;
 import minegame159.meteorclient.modules.render.NoRender;
 import minegame159.meteorclient.rendering.Matrices;
 import minegame159.meteorclient.rendering.Renderer;
@@ -50,6 +51,14 @@ public abstract class GameRendererMixin {
         Renderer.begin(event);
         MeteorClient.EVENT_BUS.post(event);
         Renderer.end();
+    }
+
+    @Inject(method = "updateTargetedEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/ProjectileUtil;rayTrace(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/util/math/Box;Ljava/util/function/Predicate;D)Lnet/minecraft/util/hit/EntityHitResult;"), cancellable = true)
+    private void onUpdateTargetedEntity(float tickDelta, CallbackInfo info) {
+        if (ModuleManager.INSTANCE.get(NoMiningTrace.class).canWork() && client.crosshairTarget.getType() == HitResult.Type.BLOCK) {
+            client.getProfiler().pop();
+            info.cancel();
+        }
     }
 
     @Redirect(method = "updateTargetedEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;rayTrace(DFZ)Lnet/minecraft/util/hit/HitResult;"))
