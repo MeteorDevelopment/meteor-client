@@ -32,7 +32,7 @@ public class CommandDispatcher {
 
         if (args.length <= 0) {
             module.doAction();
-            if (Config.INSTANCE.chatCommandsInfo && module instanceof ToggleModule) Chat.info("Toggled (highlight)%s(default) %s.", module.title, ((ToggleModule) module).isActive() ? "on" : "off");
+            if (module instanceof ToggleModule) ((ToggleModule) module).sendToggledMsg();
         } else {
             // Set or get module setting
             Setting<?> setting = module.settings.get(args[0]);

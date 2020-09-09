@@ -154,6 +154,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
             for (Module module : modules.values()) {
                 if (module.getKey() == event.key) {
                     module.doAction();
+                    if (module instanceof ToggleModule) ((ToggleModule) module).sendToggledMsg();
 
                     save();
                 }
