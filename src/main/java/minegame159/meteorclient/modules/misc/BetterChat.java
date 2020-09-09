@@ -1,0 +1,175 @@
+package minegame159.meteorclient.modules.misc;
+
+import minegame159.meteorclient.accountsfriends.Friend;
+import minegame159.meteorclient.accountsfriends.FriendManager;
+import minegame159.meteorclient.commands.commands.Ignore;
+import minegame159.meteorclient.mixininterface.IChatHudLine;
+import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.settings.BoolSetting;
+import minegame159.meteorclient.settings.IntSetting;
+import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.utils.Utils;
+import net.minecraft.client.gui.hud.ChatHudLine;
+import net.minecraft.text.LiteralText;
+import net.minecraft.util.Formatting;
+
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public class BetterChat extends ToggleModule {
+    // Ignore
+    private final SettingGroup sgIgnore = settings.createGroup("Ignore", "ignore-enabled", "Ignores player defined by .ignore command.", true);
+
+    // Anti Spam
+    private final SettingGroup sgAntiSpam = settings.createGroup("Anti Spam", "anti-spam-enabled", "Enables anti spam.", true);
+
+    private final Setting<Integer> antiSpamDepth = sgAntiSpam.add(new IntSetting.Builder()
+            .name("anti-spam-depth")
+            .description("How many messages to check for duplicates.")
+            .defaultValue(4)
+            .min(1)
+            .sliderMin(1)
+            .build()
+    );
+
+    private final Setting<Boolean> antiSpamMoveToBottom = sgAntiSpam.add(new BoolSetting.Builder()
+            .name("anti-spam-move-to-bottom")
+            .description("Move duplicate messages to bottom.")
+            .defaultValue(true)
+            .build()
+    );
+
+    // Longer Chat
+    private final SettingGroup sgLongerChat = settings.createGroup("Longer Chat", "longer-chat-enabled", "Makes chat longer.", true);
+
+    private final Setting<Integer> longerChatLines = sgLongerChat.add(new IntSetting.Builder()
+            .name("longer-chat-lines")
+            .description("Chat lines.")
+            .defaultValue(1000)
+            .min(100)
+            .sliderMax(1000)
+            .build()
+    );
+
+    // Friend Color
+    private final SettingGroup sgFriendColor = settings.createGroup("Friend Color", "friend-color-enabled", "Highlights friends with color in chat.", true);
+
+    private boolean skipMessage;
+
+    public BetterChat() {
+        super(Category.Misc, "better-chat", "Improves chat in many ways.");
+    }
+
+    public boolean onMsg(String message, int messageId, int timestamp, List<ChatHudLine> messages, List<ChatHudLine> visibleMessages) {
+        if (!isActive() || skipMessage) return false;
+
+        if (sgIgnore.isEnabled() && ignoreOnMsg(message)) return true;
+        if (sgAntiSpam.isEnabled() && antiSpamOnMsg(message, messageId, timestamp, messages, visibleMessages)) return true;
+        return sgFriendColor.isEnabled() && friendColorOnMsg(message);
+    }
+
+    // IGNORE
+
+    private boolean ignoreOnMsg(String message) {
+        for (String name : Ignore.ignoredPlayers) {
+            if (message.contains("<" + name + ">")) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    // ANTI SPAM
+
+    private boolean antiSpamOnMsg(String message, int messageId, int timestamp, List<ChatHudLine> messages, List<ChatHudLine> visibleMessages) {
+        for (int i = 0; i < antiSpamDepth.get(); i++) {
+            if (antiSpamCheckMsg(visibleMessages, message, timestamp, messageId, i)) {
+                if (antiSpamMoveToBottom.get() && i != 0) {
+                    ChatHudLine msg = visibleMessages.remove(i);
+                    visibleMessages.add(0, msg);
+                    messages.add(0, msg);
+                }
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean antiSpamCheckMsg(List<ChatHudLine> visibleMessages, String newMsg, int newTimestamp, int newId, int msgI) {
+        ChatHudLine msg = visibleMessages.size() > msgI ? visibleMessages.get(msgI) : null;
+        if (msg == null) return false;
+        String msgString = msg.getText().asFormattedString();
+
+        if (msgString.equals(newMsg)) {
+            msgString += Formatting.GRAY + " (2)";
+
+            ((IChatHudLine) msg).setText(new LiteralText(msgString));
+            ((IChatHudLine) msg).setTimestamp(newTimestamp);
+            ((IChatHudLine) msg).setId(newId);
+
+            return true;
+        } else {
+            Matcher matcher = Pattern.compile(".*(\\([0-9]+\\)$)").matcher(msgString);
+
+            if (matcher.matches()) {
+                String group = matcher.group(1);
+                int number = Integer.parseInt(group.substring(1, group.length() - 1));
+
+                int i = msgString.lastIndexOf(group);
+                msgString = msgString.substring(0, i - Formatting.GRAY.toString().length() - 1);
+
+                if (msgString.equals(newMsg)) {
+                    msgString += Formatting.GRAY + " (" + (number + 1) + ")";
+
+                    ((IChatHudLine) msg).setText(new LiteralText(msgString));
+                    ((IChatHudLine) msg).setTimestamp(newTimestamp);
+                    ((IChatHudLine) msg).setId(newId);
+
+                    return true;
+                }
+            }
+
+            return false;
+        }
+    }
+
+    // LONGER CHAT
+
+    public boolean isLongerChat() {
+        return sgLongerChat.isEnabled();
+    }
+
+    public int getChatLength() {
+        return longerChatLines.get();
+    }
+
+    // FRIEND COLOR
+
+    private boolean friendColorOnMsg(String message) {
+        List<Friend> friends = FriendManager.INSTANCE.getAll();
+        boolean hadFriends = false;
+
+        for (Friend friend : friends) {
+            if (message.contains(friend.name)) {
+                message = message.replaceAll(friend.name, "§d" + friend.name + "§r");
+                hadFriends = true;
+            }
+        }
+
+        if (hadFriends) {
+            skipMessage = true;
+            Utils.sendMessage(message);
+            skipMessage = false;
+            
+            return true;
+        }
+
+        return false;
+    }
+}
