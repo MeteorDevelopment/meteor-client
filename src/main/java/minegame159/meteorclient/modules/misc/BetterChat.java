@@ -13,6 +13,7 @@ import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.gui.hud.ChatHudLine;
 import net.minecraft.text.LiteralText;
+import net.minecraft.util.ChatUtil;
 import net.minecraft.util.Formatting;
 
 import java.util.List;
@@ -86,6 +87,8 @@ public class BetterChat extends ToggleModule {
     // ANTI SPAM
 
     private boolean antiSpamOnMsg(String message, int messageId, int timestamp, List<ChatHudLine> messages, List<ChatHudLine> visibleMessages) {
+        message = ChatUtil.stripTextFormat(message);
+
         for (int i = 0; i < antiSpamDepth.get(); i++) {
             if (antiSpamCheckMsg(visibleMessages, message, timestamp, messageId, i)) {
                 if (antiSpamMoveToBottom.get() && i != 0) {
@@ -106,7 +109,7 @@ public class BetterChat extends ToggleModule {
         if (msg == null) return false;
         String msgString = msg.getText().asFormattedString();
 
-        if (msgString.equals(newMsg)) {
+        if (ChatUtil.stripTextFormat(msgString).equals(newMsg)) {
             msgString += Formatting.GRAY + " (2)";
 
             ((IChatHudLine) msg).setText(new LiteralText(msgString));
@@ -124,7 +127,7 @@ public class BetterChat extends ToggleModule {
                 int i = msgString.lastIndexOf(group);
                 msgString = msgString.substring(0, i - Formatting.GRAY.toString().length() - 1);
 
-                if (msgString.equals(newMsg)) {
+                if (ChatUtil.stripTextFormat(msgString).equals(newMsg)) {
                     msgString += Formatting.GRAY + " (" + (number + 1) + ")";
 
                     ((IChatHudLine) msg).setText(new LiteralText(msgString));
@@ -166,7 +169,7 @@ public class BetterChat extends ToggleModule {
             skipMessage = true;
             Utils.sendMessage(message);
             skipMessage = false;
-            
+
             return true;
         }
 
