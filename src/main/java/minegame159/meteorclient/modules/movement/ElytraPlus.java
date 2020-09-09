@@ -128,7 +128,7 @@ public class ElytraPlus extends ToggleModule {
         jumpTimer = 0;
 
         if (chestSwap.get() && mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() != Items.ELYTRA) {
-            ModuleManager.INSTANCE.get(ChestSwap.class).toggle();
+            ModuleManager.INSTANCE.get(ChestSwap.class).swap();
         }
     }
 
@@ -137,7 +137,7 @@ public class ElytraPlus extends ToggleModule {
         if (sgAutopilot.isEnabled()) ((IKeyBinding) mc.options.keyForward).setPressed(false);
 
         if (chestSwap.get() && mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() == Items.ELYTRA) {
-            ModuleManager.INSTANCE.get(ChestSwap.class).toggle();
+            ModuleManager.INSTANCE.get(ChestSwap.class).swap();
         }
     }
 

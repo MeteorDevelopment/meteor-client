@@ -162,7 +162,7 @@ public class AutoArmor extends ToggleModule {
     private final Setting<Boolean> ignoreElytra = sgGeneral.add(new BoolSetting.Builder()
             .name("ignore-elytra")
             .description("Doesn't replace elytra when you have it equipped.")
-            .defaultValue(true)
+            .defaultValue(false)
             .build()
     );
 
