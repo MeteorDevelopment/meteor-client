@@ -305,11 +305,9 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new NoRender());
         addModule(new Breadcrumbs());
         addModule(new BlockSelection());
-        addModule(new FriendColor());
     }
 
     private void initMisc() {
-        addModule(new LongerChat());
         addModule(new AutoSign());
         addModule(new AntiWeather());
         addModule(new AutoReconnect());
@@ -327,7 +325,6 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new Spam());
         addModule(new UnfocusedCPU());
         addModule(new ItemByteSize());
-        addModule(new AntiSpam());
         addModule(new PacketCanceller());
         addModule(new EntityLogger());
         addModule(new EChestPreview());
@@ -339,5 +336,6 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new SoundBlocker());
         addModule(new AntiChunkBan());
         addModule(new Announcer());
+        addModule(new BetterChat());
     }
 }
