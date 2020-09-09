@@ -21,6 +21,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.decoration.EnderCrystalEntity;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.dimension.DimensionType;
 
@@ -158,6 +159,13 @@ public class AutoArmor extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> ignoreElytra = sgGeneral.add(new BoolSetting.Builder()
+            .name("ignore-elytra")
+            .description("Doesn't replace elytra when you have it equipped.")
+            .defaultValue(true)
+            .build()
+    );
+
     private int delayLeft = delay.get();
     private boolean didSkip = false;
 
@@ -186,6 +194,7 @@ public class AutoArmor extends ToggleModule {
         for (int a = 0; a < 4; a++) {
             currentItemScore = 0;
             itemStack = mc.player.inventory.getArmorStack(a);
+            if (ignoreElytra.get() && itemStack.getItem() == Items.ELYTRA) continue;
             if (EnchantmentHelper.hasBindingCurse(itemStack)) continue;
             if (itemStack.getItem() instanceof ArmorItem) {
                 if (a == 1 && bProtLegs.get()) {
