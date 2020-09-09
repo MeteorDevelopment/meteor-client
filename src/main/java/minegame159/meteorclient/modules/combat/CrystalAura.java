@@ -35,7 +35,8 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.Iterator;
 import java.util.stream.Collectors;
 
 public class CrystalAura extends ToggleModule {
@@ -214,8 +215,13 @@ public class CrystalAura extends ToggleModule {
     private boolean shouldFacePlace = false;
 
     @Override
+    public void onActivate() {
+        preSlot = -1;
+    }
+
+    @Override
     public void onDeactivate() {
-        mc.player.inventory.selectedSlot = preSlot;
+        if (preSlot != -1) mc.player.inventory.selectedSlot = preSlot;
     }
 
     @EventHandler
