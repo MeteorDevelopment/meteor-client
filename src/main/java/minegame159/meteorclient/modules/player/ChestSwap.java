@@ -68,6 +68,7 @@ public class ChestSwap extends ToggleModule {
 
     @Override
     public void sendToggledMsg() {
-        if (Config.INSTANCE.chatCommandsInfo) Chat.info("Triggered (highlight)%s(default).", title);
+        if (stayOn.get()) super.sendToggledMsg();
+        else if (Config.INSTANCE.chatCommandsInfo) Chat.info("Triggered (highlight)%s(default).", title);
     }
 }
