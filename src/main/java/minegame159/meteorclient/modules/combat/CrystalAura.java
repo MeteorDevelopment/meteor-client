@@ -220,6 +220,9 @@ public class CrystalAura extends ToggleModule {
 
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
+        assert mc.player != null;
+        assert mc.world != null;
+        assert mc.interactionManager != null;
         delayLeft --;
         shouldFacePlace = false;
         if (getTotalHealth(mc.player) <= minHealth.get() && mode.get() != Mode.suicide) return;
