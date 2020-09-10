@@ -292,6 +292,7 @@ public class CrystalAura extends ToggleModule {
                 return;
             }
             findValidBlocks(target);
+            if (bestBlock == null) return;
             if (facePlace.get() && Math.sqrt(target.squaredDistanceTo(bestBlock)) <= 2) {
                 if (target.getHealth() + target.getAbsorptionAmount() < facePlaceHealth.get())
                     shouldFacePlace = true;
