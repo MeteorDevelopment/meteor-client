@@ -14,6 +14,7 @@ import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.InvUtils;
 import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.ContainerScreen;
+import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.container.SlotActionType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -70,6 +71,20 @@ public class AutoReplenish extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> workInCont = sgGeneral.add(new BoolSetting.Builder()
+            .name("work-in-containers")
+            .description("Allows this to work while you are in containers.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> workInInv = sgGeneral.add(new BoolSetting.Builder()
+            .name("work-in-inv")
+            .description("Allows this to work in you inventory.")
+            .defaultValue(true)
+            .build()
+    );
+
     private final List<Item> items = new ArrayList<>();
 
     private Item lastMainHand, lastOffHand;
@@ -91,7 +106,13 @@ public class AutoReplenish extends ToggleModule {
 
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
-        if(mc.currentScreen instanceof ContainerScreen) return;
+        if (!workInCont.get() && !workInInv.get()) {
+            if (mc.currentScreen instanceof ContainerScreen) return;
+        } else if (workInCont.get() && !workInInv.get()) {
+            if (mc.currentScreen instanceof ContainerScreen && mc.currentScreen instanceof InventoryScreen) return;
+        } else if (!workInCont.get() && workInInv.get()) {
+            if (mc.currentScreen instanceof ContainerScreen && !(mc.currentScreen instanceof InventoryScreen)) return;
+        }
 
         // Hotbar, stackable items
         for (int i = 0; i < 9; i++) {
