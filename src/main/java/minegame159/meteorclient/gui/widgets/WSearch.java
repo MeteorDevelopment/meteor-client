@@ -19,18 +19,18 @@ public class WSearch extends WWindow {
             winConfig.setPos(x, y);
         };
 
-        initWidgets();
+        initWidgets(true);
     }
 
-    private void initWidgets() {
+    private void initWidgets(boolean first) {
         boolean focused = filter != null && filter.isFocused();
         if (focused) GuiThings.setPostKeyEvents(false);
 
         filter = add(new WTextBox(filter != null ? filter.text : "", 70)).fillX().expandX().getWidget();
-        filter.setFocused(focused);
+        filter.setFocused(focused || (first && isExpanded()));
         filter.action = textBox -> {
             clear();
-            initWidgets();
+            initWidgets(false);
         };
         row();
 
