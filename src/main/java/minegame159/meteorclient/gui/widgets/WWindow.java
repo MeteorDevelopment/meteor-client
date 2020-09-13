@@ -74,6 +74,10 @@ public class WWindow extends WTable {
         header.triangle.setChecked(!expanded);
     }
 
+    public boolean isExpanded() {
+        return expanded;
+    }
+
     @Override
     public boolean mouseClicked(int button) {
         for (Cell<?> cell : cells) {

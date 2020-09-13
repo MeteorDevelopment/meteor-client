@@ -10,13 +10,13 @@ import me.zero.alpine.event.EventPriority;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.accountsfriends.FriendManager;
+import minegame159.meteorclient.events.RenderEvent;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.rendering.ShapeBuilder;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.DamageCalcUtils;
-import minegame159.meteorclient.utils.InvUtils;
-import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.*;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.entity.Entity;
@@ -30,12 +30,13 @@ import net.minecraft.item.SwordItem;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.*;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class CrystalAura extends ToggleModule {
@@ -200,6 +201,22 @@ public class CrystalAura extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> render = sgGeneral.add(new BoolSetting.Builder()
+            .name("render")
+            .description("Render a box where it is placing a crystal.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Color> renderColor = sgGeneral.add(new ColorSetting.Builder()
+            .name("render-color")
+            .description("Render color.")
+            .defaultValue(new Color(25, 225, 225))
+            .build()
+    );
+
+    private final Color sideColor = new Color();
+
     public CrystalAura() {
         super(Category.Combat, "crystal-aura", "Places and breaks end crystals automatically");
     }
@@ -213,16 +230,35 @@ public class CrystalAura extends ToggleModule {
     private double lastDamage = 0;
     private boolean shouldFacePlace = false;
 
+    private final Pool<RenderBlock> renderBlockPool = new Pool<>(RenderBlock::new);
+    private final List<RenderBlock> renderBlocks = new ArrayList<>();
+
+    @Override
+    public void onActivate() {
+        preSlot = -1;
+    }
+
     @Override
     public void onDeactivate() {
-        mc.player.inventory.selectedSlot = preSlot;
+        if (preSlot != -1) mc.player.inventory.selectedSlot = preSlot;
+
+        for (RenderBlock renderBlock : renderBlocks) {
+            renderBlockPool.free(renderBlock);
+        }
+        renderBlocks.clear();
     }
 
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
-        assert mc.player != null;
-        assert mc.world != null;
-        assert mc.interactionManager != null;
+        for (Iterator<RenderBlock> it = renderBlocks.iterator(); it.hasNext();) {
+            RenderBlock renderBlock = it.next();
+
+            if (renderBlock.shouldRemove()) {
+                it.remove();
+                renderBlockPool.free(renderBlock);
+            }
+        }
+
         delayLeft --;
         shouldFacePlace = false;
         if (getTotalHealth(mc.player) <= minHealth.get() && mode.get() != Mode.suicide) return;
@@ -259,7 +295,7 @@ public class CrystalAura extends ToggleModule {
                     .filter(FriendManager.INSTANCE::attack)
                     .filter(entityPlayer -> !entityPlayer.getDisplayName().equals(mc.player.getDisplayName()))
                     .filter(entityPlayer -> mc.player.distanceTo(entityPlayer) <= 10)
-                    .filter(entityPlayer -> !entityPlayer.isCreative() && !entityPlayer.isSpectator())
+                    .filter(entityPlayer -> !entityPlayer.isCreative() && !entityPlayer.isSpectator() && entityPlayer.getHealth() > 0)
                     .collect(Collectors.toList())
                     .iterator();
 
@@ -289,6 +325,7 @@ public class CrystalAura extends ToggleModule {
                 return;
             }
             findValidBlocks(target);
+            if (bestBlock == null) return;
             if (facePlace.get() && Math.sqrt(target.squaredDistanceTo(bestBlock)) <= 2) {
                 if (target.getHealth() + target.getAbsorptionAmount() < facePlaceHealth.get())
                     shouldFacePlace = true;
@@ -318,6 +355,18 @@ public class CrystalAura extends ToggleModule {
         }
     }, EventPriority.HIGH);
 
+    @EventHandler
+    private final Listener<RenderEvent> onRender = new Listener<>(event -> {
+        if (render.get()) {
+            sideColor.set(renderColor.get());
+            sideColor.a = 45;
+
+            for (RenderBlock renderBlock : renderBlocks) {
+                renderBlock.render();
+            }
+        }
+    });
+
     private void placeBlock(Vec3d block, Hand hand){
         float yaw = mc.player.yaw;
         float pitch = mc.player.pitch;
@@ -331,6 +380,12 @@ public class CrystalAura extends ToggleModule {
         mc.player.networkHandler.sendPacket(packet);
         mc.player.yaw = yaw;
         mc.player.pitch = pitch;
+
+        if (render.get()) {
+            RenderBlock renderBlock = renderBlockPool.get();
+            renderBlock.reset(block);
+            renderBlocks.add(renderBlock);
+        }
     }
 
     private void findValidBlocks(AbstractClientPlayerEntity target){
@@ -377,5 +432,28 @@ public class CrystalAura extends ToggleModule {
 
     private boolean isEmpty(BlockPos pos) {
         return mc.world.isAir(pos) && mc.world.getOtherEntities(null, new Box(pos.getX(), pos.getY(), pos.getZ(), pos.getX() + 1.0D, pos.getY() + 2.0D, pos.getZ() + 1.0D)).isEmpty();
+    }
+
+    private class RenderBlock {
+        private int x, y, z;
+        private int timer;
+
+        public void reset(Vec3d pos) {
+            x = MathHelper.floor(pos.getX());
+            y = MathHelper.floor(pos.getY());
+            z = MathHelper.floor(pos.getZ());
+            timer = 4;
+        }
+
+        public boolean shouldRemove() {
+            if (timer <= 0) return true;
+            timer--;
+            return false;
+        }
+
+        public void render() {
+            ShapeBuilder.boxSides(x, y, z, x+1, y+1, z+1, sideColor);
+            ShapeBuilder.boxEdges(x, y, z, x+1, y+1, z+1, renderColor.get());
+        }
     }
 }

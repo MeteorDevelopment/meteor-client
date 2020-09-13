@@ -5,6 +5,11 @@ import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.InvUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.screen.slot.SlotActionType;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.Registry;
 
 public class Drop extends Command {
     public Drop() {
@@ -48,12 +53,19 @@ public class Drop extends Command {
                 }
                 break;
             default:
-                sendErrorMessage();
+                Item item = Registry.ITEM.get(new Identifier("minecraft", args[0].toLowerCase()));
+                if (item == Items.AIR) sendErrorMessage();
+                else {
+                    for (int i = 0; i < mc.player.inventory.main.size(); i++) {
+                        ItemStack itemStack = mc.player.inventory.main.get(i);
+                        if (itemStack.getItem() == item) InvUtils.clickSlot(InvUtils.invIndexToSlotId(i), 1, SlotActionType.THROW);
+                    }
+                }
                 break;
         }
     }
 
     private void sendErrorMessage() {
-        Chat.error("You need to select a mode. (hand, offhand, hotbar, inventory, all)");
+        Chat.error("You need to select a mode. (hand, offhand, hotbar, inventory, all, <item_name>)");
     }
 }

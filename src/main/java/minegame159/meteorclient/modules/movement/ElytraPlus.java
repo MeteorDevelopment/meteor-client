@@ -7,7 +7,9 @@ import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.player.ChestSwap;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.InvUtils;
@@ -88,6 +90,13 @@ public class ElytraPlus extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> chestSwap = sgGeneral.add(new BoolSetting.Builder()
+            .name("chest-swap")
+            .description("Enables ChestSwap when toggling this module.")
+            .defaultValue(true)
+            .build()
+    );
+
     private final Setting<Double> autopilotMinimumHeight = sgAutopilot.add(new DoubleSetting.Builder()
             .name("minimum-height")
             .description("Autopilot minimum height.")
@@ -117,15 +126,23 @@ public class ElytraPlus extends ToggleModule {
     public void onActivate() {
         lastJumpPressed = false;
         jumpTimer = 0;
+
+        if (chestSwap.get() && mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() != Items.ELYTRA) {
+            ModuleManager.INSTANCE.get(ChestSwap.class).swap();
+        }
     }
 
     @Override
     public void onDeactivate() {
         if (sgAutopilot.isEnabled()) ((IKeyBinding) mc.options.keyForward).setPressed(false);
+
+        if (chestSwap.get() && mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() == Items.ELYTRA) {
+            ModuleManager.INSTANCE.get(ChestSwap.class).swap();
+        }
     }
 
     @EventHandler
-    private Listener<PlayerMoveEvent> onPlayerMove = new Listener<>(event -> {
+    private final Listener<PlayerMoveEvent> onPlayerMove = new Listener<>(event -> {
         if (!(mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() instanceof ElytraItem)) return;
 
         handleAutoTakeOff();

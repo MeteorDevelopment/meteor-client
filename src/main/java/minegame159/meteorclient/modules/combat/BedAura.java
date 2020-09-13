@@ -166,16 +166,20 @@ public class BedAura extends ToggleModule {
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
         delayLeft --;
         if (mc.player.getHealth() + mc.player.getAbsorptionAmount() <= minHealth.get() && mode.get() != Mode.suicide) return;
-        for(BlockEntity entity : mc.world.blockEntities){
-            if(entity instanceof BedBlockEntity && Utils.distance(entity.getPos().getX(), entity.getPos().getY(), entity.getPos().getZ(), mc.player.getX(), mc.player.getY(), mc.player.getZ()) <= breakRange.get()){
-                currentDamage = DamageCalcUtils.bedDamage(mc.player, Utils.vec3d(entity.getPos()));
-                if(currentDamage < maxDamage.get()
-                        || (mc.player.getHealth() + mc.player.getAbsorptionAmount() - currentDamage) < minHealth.get() || clickMode.get().equals(Mode.suicide)){
-                    mc.player.setSneaking(false);
-                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, entity.getPos(), false));
-                }
+        try {
+            for (BlockEntity entity : mc.world.blockEntities) {
+                if (entity instanceof BedBlockEntity && Utils.distance(entity.getPos().getX(), entity.getPos().getY(), entity.getPos().getZ(), mc.player.getX(), mc.player.getY(), mc.player.getZ()) <= breakRange.get()) {
+                    currentDamage = DamageCalcUtils.bedDamage(mc.player, Utils.vec3d(entity.getPos()));
+                    if (currentDamage < maxDamage.get()
+                            || (mc.player.getHealth() + mc.player.getAbsorptionAmount() - currentDamage) < minHealth.get() || clickMode.get().equals(Mode.suicide)) {
+                        mc.player.setSneaking(false);
+                        mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, entity.getPos(), false));
+                    }
 
+                }
             }
+        } catch (ConcurrentModificationException ignored) {
+            return;
         }
         if (mc.world.getRegistryKey().getValue().getPath().equals("overworld")) {
             Chat.warning(this, "You are in the overworld. Disabling!");
@@ -308,7 +312,7 @@ public class BedAura extends ToggleModule {
         double east = -1;
         double south = -1;
         double west = -1;
-        bestBlockPos = new BlockPos(bestBlock.x, bestBlock.y + 1, bestBlock.z);
+        bestBlockPos = new BlockPos(bestBlock.x, bestBlock.y, bestBlock.z);
         if (mc.world.getBlockState(bestBlockPos.add(1, 1, 0)).getMaterial().isReplaceable()) {
             east = DamageCalcUtils.bedDamage(target, bestBlock.add(1.5, 1.5, 0.5));
         }

@@ -53,7 +53,10 @@ public class TopBarFriends extends TopBarScreen implements Listenable {
         username.setFocused(true);
 
         WPlus add = addList.add(new WPlus()).getWidget();
-        add.action = plus -> FriendManager.INSTANCE.add(new Friend(username.text.trim()));
+        add.action = plus -> {
+            String name = username.text.trim();
+            if (!name.isEmpty()) FriendManager.INSTANCE.add(new Friend(name));
+        };
     }
 
     @EventHandler

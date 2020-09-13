@@ -11,6 +11,10 @@ import minegame159.meteorclient.mixininterface.IClientPlayerInteractionManager;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.combat.BedAura;
+import minegame159.meteorclient.modules.combat.CrystalAura;
+import minegame159.meteorclient.modules.combat.KillAura;
+import minegame159.meteorclient.modules.combat.Surround;
 import minegame159.meteorclient.rendering.ShapeBuilder;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Chat;
@@ -54,6 +58,7 @@ public class HUD extends ToggleModule {
     private static final Color white = new Color(255, 255, 255);
     private static final Color gray = new Color(185, 185, 185);
     private static final Color red = new Color(225, 45, 45);
+    private static final Color green = new Color(45, 225, 45);
 
     private final SettingGroup sgArmor = settings.createGroup("Armor", "armor-enabled", "Armor HUD", true);
     private final SettingGroup sgTopLeft = settings.createGroup("Top Left");
@@ -178,7 +183,7 @@ public class HUD extends ToggleModule {
     private final Setting<Boolean> entities = sgTopLeft.add(new BoolSetting.Builder()
             .name("entities")
             .description("Display number of entities.")
-            .defaultValue(true)
+            .defaultValue(false)
             .onChanged(aBoolean -> updateEntities = true)
             .build()
     );
@@ -196,6 +201,13 @@ public class HUD extends ToggleModule {
             .description("Separates sheeps by color in entity list.")
             .defaultValue(false)
             .onChanged(aBoolean -> updateEntities = true)
+            .build()
+    );
+
+    private final Setting<Boolean> combatInfo = sgTopLeft.add(new BoolSetting.Builder()
+            .name("combat-info")
+            .description("Shows which combat modules you have on.")
+            .defaultValue(false)
             .build()
     );
 
@@ -581,6 +593,24 @@ public class HUD extends ToggleModule {
                 y += MeteorClient.FONT.getHeight() + 2;
             }
         }
+
+        if (combatInfo.get()) {
+            y += MeteorClient.FONT.getHeight() + 2;
+            drawCombatInfo(KillAura.class, "KA", y);
+            y += MeteorClient.FONT.getHeight() + 2;
+            drawCombatInfo(CrystalAura.class, "CA", y);
+            y += MeteorClient.FONT.getHeight() + 2;
+            drawCombatInfo(BedAura.class, "BA", y);
+            y += MeteorClient.FONT.getHeight() + 2;
+            drawCombatInfo(Surround.class, "SR", y);
+            y += MeteorClient.FONT.getHeight() + 2;
+        }
+    }
+
+    private void drawCombatInfo(Class<? extends ToggleModule> module, String name, double y) {
+        boolean on = ModuleManager.INSTANCE.isActive(module);
+        double x = MeteorClient.FONT.renderStringWithShadow(name, 2, y, white);
+        MeteorClient.FONT.renderStringWithShadow(on ? " ON" : " OFF", x, y, on ? green : red);
     }
 
     private void drawInfo(String text1, String text2, double x, double y, Color text1Color) {
