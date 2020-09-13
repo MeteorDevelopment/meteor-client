@@ -60,7 +60,7 @@ public class Breadcrumbs extends ToggleModule {
         section = sectionPool.get();
         section.set1();
 
-        lastDimension = mc.player.dimension;
+        lastDimension = mc.world.getDimension();
     }
 
     @Override
@@ -71,7 +71,7 @@ public class Breadcrumbs extends ToggleModule {
 
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
-        if (lastDimension != mc.player.dimension) {
+        if (lastDimension != mc.world.getDimension()) {
             for (Section sec : sections) sectionPool.free(sec);
             sections.clear();
         }
@@ -88,7 +88,7 @@ public class Breadcrumbs extends ToggleModule {
             section.set1();
         }
 
-        lastDimension = mc.player.dimension;
+        lastDimension = mc.world.getDimension();
     });
 
     @EventHandler
@@ -97,7 +97,7 @@ public class Breadcrumbs extends ToggleModule {
     });
 
     private boolean isFarEnough(double x, double y, double z) {
-        return Math.abs(mc.player.x - x) >= sectionLength.get() || Math.abs(mc.player.y - y) >= sectionLength.get() || Math.abs(mc.player.z - z) >= sectionLength.get();
+        return Math.abs(mc.player.getX() - x) >= sectionLength.get() || Math.abs(mc.player.getY() - y) >= sectionLength.get() || Math.abs(mc.player.getZ() - z) >= sectionLength.get();
     }
 
     private class Section {
@@ -105,15 +105,15 @@ public class Breadcrumbs extends ToggleModule {
         public float x2, y2, z2;
 
         public void set1() {
-            x1 = (float) mc.player.x;
-            y1 = (float) mc.player.y;
-            z1 = (float) mc.player.z;
+            x1 = (float) mc.player.getX();
+            y1 = (float) mc.player.getY();
+            z1 = (float) mc.player.getZ();
         }
 
         public void set2() {
-            x2 = (float) mc.player.x;
-            y2 = (float) mc.player.y;
-            z2 = (float) mc.player.z;
+            x2 = (float) mc.player.getX();
+            y2 = (float) mc.player.getY();
+            z2 = (float) mc.player.getZ();
         }
 
         public void render() {

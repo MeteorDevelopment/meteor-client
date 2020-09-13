@@ -25,7 +25,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Direction;
-import net.minecraft.world.RayTraceContext;
+import net.minecraft.world.RaycastContext;
 
 public class SmartSurround extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -67,7 +67,7 @@ public class SmartSurround extends ToggleModule {
                     return;
                 }
                 for (int i = 0; i < 9; i++) {
-                    Item item = mc.player.inventory.getInvStack(i).getItem();
+                    Item item = mc.player.inventory.getStack(i).getItem();
                     if (item instanceof BlockItem) {
                         slot = i;
                         mc.player.inventory.selectedSlot = slot;
@@ -108,10 +108,7 @@ public class SmartSurround extends ToggleModule {
                 placeObi(rPosX, rPosZ - 1, crystal);
                 placeObi(rPosX + 1, rPosZ, crystal);
             }
-            if (mc.world.rayTrace(
-                    new RayTraceContext(mc.player.getPos(), crystal.getPos(),
-                            RayTraceContext.ShapeType.COLLIDER, RayTraceContext.FluidHandling.NONE, mc.player)).getType()
-                    != HitResult.Type.MISS) {
+            if (mc.world.raycast(new RaycastContext(mc.player.getPos(), crystal.getPos(), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player)).getType() != HitResult.Type.MISS) {
                 slot = -1;
                 mc.player.inventory.selectedSlot = oldSlot;
             }
@@ -130,7 +127,7 @@ public class SmartSurround extends ToggleModule {
         oldSlot = mc.player.inventory.selectedSlot;
         int newSlot = -1;
         for (int i = 0; i < 9; i++) {
-            Item item = mc.player.inventory.getInvStack(i).getItem();
+            Item item = mc.player.inventory.getStack(i).getItem();
             if (item == Items.OBSIDIAN) {
                 newSlot = i;
                 mc.player.inventory.selectedSlot = newSlot;

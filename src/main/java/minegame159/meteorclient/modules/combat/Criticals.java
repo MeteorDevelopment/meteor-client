@@ -31,9 +31,9 @@ public class Criticals extends ToggleModule {
             ModuleManager.INSTANCE.get(NoFall.class).toggle();
         }
 
-        double x = mc.player.x;
-        double y = mc.player.y;
-        double z = mc.player.z;
+        double x = mc.player.getX();
+        double y = mc.player.getY();
+        double z = mc.player.getZ();
 
         Vec3d vec3d = new Vec3d(mc.player.getVelocity().x, mc.player.getVelocity().y, mc.player.getVelocity().z);
         double yaw = Math.toRadians(getRotationFromVec3d(vec3d));
@@ -49,7 +49,7 @@ public class Criticals extends ToggleModule {
 
     private boolean shouldDoCriticals() {
         boolean a = !mc.player.isSubmergedInWater() && !mc.player.isInLava() && !mc.player.isClimbing();
-        if(!mc.player.onGround)return false;
+        if (!mc.player.isOnGround()) return false;
         return a;
     }
 

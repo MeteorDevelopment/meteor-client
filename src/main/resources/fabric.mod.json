@@ -22,10 +22,12 @@
     "meteor-client.mixins.json"
   ],
 
+  "accessWidener": "meteor-client.accesswidener",
+
   "depends": {
     "fabricloader": ">=0.7.2",
     "fabric": "*",
-    "minecraft": "1.14.x"
+    "minecraft": "1.16.x"
   },
   "suggests": {
     "flamingo": "*"

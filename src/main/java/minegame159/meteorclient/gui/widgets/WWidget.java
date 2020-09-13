@@ -54,7 +54,7 @@ public abstract class WWidget {
 
     public void move(double deltaX, double deltaY, boolean callMouseMoved) {
         move(this, deltaX, deltaY);
-        if (callMouseMoved) mouseMoved(MinecraftClient.getInstance().mouse.getX() / MinecraftClient.getInstance().window.getScaleFactor(), MinecraftClient.getInstance().mouse.getY() / MinecraftClient.getInstance().window.getScaleFactor());
+        if (callMouseMoved) mouseMoved(MinecraftClient.getInstance().mouse.getX() / MinecraftClient.getInstance().getWindow().getScaleFactor(), MinecraftClient.getInstance().mouse.getY() / MinecraftClient.getInstance().getWindow().getScaleFactor());
     }
     protected void move(WWidget widget, double deltaX, double deltaY) {
         widget.x += deltaX;
@@ -74,7 +74,7 @@ public abstract class WWidget {
         // Calculate widget positions from bottom to top
         calculateWidgetPositions();
 
-        mouseMoved(MinecraftClient.getInstance().mouse.getX() / MinecraftClient.getInstance().window.getScaleFactor(), MinecraftClient.getInstance().mouse.getY() / MinecraftClient.getInstance().window.getScaleFactor());
+        mouseMoved(MinecraftClient.getInstance().mouse.getX() / MinecraftClient.getInstance().getWindow().getScaleFactor(), MinecraftClient.getInstance().mouse.getY() / MinecraftClient.getInstance().getWindow().getScaleFactor());
         setNeedsLayout(this, false);
     }
     private void setNeedsLayout(WWidget widget, boolean needsLayout) {

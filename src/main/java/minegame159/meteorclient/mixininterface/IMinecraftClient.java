@@ -14,4 +14,6 @@ public interface IMinecraftClient {
     public Proxy getProxy();
 
     public void setSession(Session session);
+
+    public int getFps();
 }

@@ -14,6 +14,7 @@ import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.InvUtils;
+import net.minecraft.block.BlockState;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.block.Blocks;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -24,6 +25,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 
 public class EChestFarmer extends ToggleModule {
+    private static final BlockState ENDER_CHEST = Blocks.ENDER_CHEST.getDefaultState();
+
     public EChestFarmer(){
         super(Category.Misc, "EChest-farmer", "Places and mines EChests where you are looking.");
     }
@@ -75,8 +78,8 @@ public class EChestFarmer extends ToggleModule {
         int slot = -1;
         if(itemResult.count != 0 && itemResult.slot < 9 && itemResult.slot != -1) {
             for (int i = 0; i < 9; i++) {
-                if (ModuleManager.INSTANCE.get(AutoTool.class).isEffectiveOn(mc.player.inventory.getInvStack(i).getItem(), Blocks.ENDER_CHEST)
-                        && EnchantmentHelper.getLevel(Enchantments.SILK_TOUCH, mc.player.inventory.getInvStack(i)) == 0) {
+                if (ModuleManager.INSTANCE.get(AutoTool.class).isEffectiveOn(mc.player.inventory.getStack(i).getItem(), ENDER_CHEST)
+                        && EnchantmentHelper.getLevel(Enchantments.SILK_TOUCH, mc.player.inventory.getStack(i)) == 0) {
                     slot = i;
                 }
             }
@@ -86,7 +89,7 @@ public class EChestFarmer extends ToggleModule {
                     if (mc.player.inventory.selectedSlot != slot) {
                         mc.player.inventory.selectedSlot = slot;
                     }
-                    mc.interactionManager.method_2902(pos, Direction.UP);
+                    mc.interactionManager.updateBlockBreakingProgress(pos, Direction.UP);
                     numLeft -= 1;
                     if(numLeft == 0){
                         stop = true;

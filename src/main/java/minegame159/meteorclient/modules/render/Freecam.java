@@ -78,6 +78,7 @@ public class Freecam extends ToggleModule {
         }
 
         camera.setVelocity(0, 0, 0);
+        if(mc.player == null) return;
 
         camera.yaw = mc.player.yaw;
         camera.headYaw = mc.player.headYaw;
@@ -100,8 +101,6 @@ public class Freecam extends ToggleModule {
         if (mc.options.keyJump.isPressed()) vel = vel.add(0, speed, 0);
         if (mc.options.keySneak.isPressed()) vel = vel.subtract(0, speed, 0);
 
-        camera.x += vel.x;
-        camera.y += vel.y;
-        camera.z += vel.z;
+        camera.setPos(camera.getX() + vel.x, camera.getY() + vel.y, camera.getZ() + vel.z);
     });
 }

@@ -8,6 +8,7 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.accountsfriends.FriendManager;
 import minegame159.meteorclient.events.RenderEvent;
+import minegame159.meteorclient.mixininterface.IBakedQuad;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.rendering.Matrices;
@@ -187,7 +188,7 @@ public class Nametags extends ToggleModule {
         // Compute health things
         float absorption = entity.getAbsorptionAmount();
         int health = Math.round(entity.getHealth() + absorption);
-        double healthPercentage = health / (entity.getMaximumHealth() + absorption);
+        double healthPercentage = health / (entity.getMaxHealth() + absorption);
 
         String name = entity.getGameProfile().getName();
         String healthText = " " + health;
@@ -195,9 +196,9 @@ public class Nametags extends ToggleModule {
 
         // Setup the rotation
         Matrices.push();
-        double x = entity.prevX + (entity.x - entity.prevX) * event.tickDelta;
-        double y = entity.prevY + (entity.y - entity.prevY) * event.tickDelta + entity.getHeight() + 0.5;
-        double z = entity.prevZ + (entity.z - entity.prevZ) * event.tickDelta;
+        double x = entity.prevX + (entity.getX() - entity.prevX) * event.tickDelta;
+        double y = entity.prevY + (entity.getY() - entity.prevY) * event.tickDelta + entity.getHeight() + 0.5;
+        double z = entity.prevZ + (entity.getZ() - entity.prevZ) * event.tickDelta;
         Matrices.translate(x - event.offsetX, y - event.offsetY, z - event.offsetZ);
         Matrices.rotate(-camera.getYaw(), 0, 1, 0);
         Matrices.rotate(camera.getPitch(), 1, 0, 0);
@@ -211,7 +212,7 @@ public class Nametags extends ToggleModule {
             MeteorClient.FONT_2X.scale = 0.5 * enchantTextScale.get();
             for (int i = 0; i < 4; i++) {
                 ItemStack itemStack = entity.inventory.armor.get(i);
-                Map<Enchantment, Integer> enchantments = EnchantmentHelper.getEnchantments(itemStack);
+                Map<Enchantment, Integer> enchantments = EnchantmentHelper.get(itemStack);
                 Map<Enchantment, Integer> enchantmentsToShowScale = new HashMap<>();
                 for (Enchantment enchantment : displayedEnchantments.get()) {
                     if (enchantments.containsKey(enchantment)) {
@@ -270,8 +271,8 @@ public class Nametags extends ToggleModule {
 
                 if (itemStack.isDamaged()) isDamaged = true;
 
-                for (BakedQuad quad : mc.getItemRenderer().getModel(itemStack).getQuads(null, null, null)) {
-                    Sprite sprite = quad.getSprite();
+                for (BakedQuad quad : mc.getItemRenderer().getModels().getModel(itemStack).getQuads(null, null, null)) {
+                    Sprite sprite = ((IBakedQuad) quad).getSprite();
 
                     if (itemStack.getItem() instanceof DyeableArmorItem) {
                         int c = ((DyeableArmorItem) itemStack.getItem()).getColor(itemStack);
@@ -351,7 +352,7 @@ public class Nametags extends ToggleModule {
 
             for (int i = 0; i < 4; i++) {
                 ItemStack itemStack = entity.inventory.armor.get(i);
-                Map<Enchantment, Integer> enchantments = EnchantmentHelper.getEnchantments(itemStack);
+                Map<Enchantment, Integer> enchantments = EnchantmentHelper.get(itemStack);
                 Map<Enchantment, Integer> enchantmentsToShow = new HashMap<>();
                 for (Enchantment enchantment : displayedEnchantments.get()) {
                     if (enchantments.containsKey(enchantment)) {

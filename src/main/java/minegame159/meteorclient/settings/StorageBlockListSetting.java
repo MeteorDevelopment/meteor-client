@@ -48,7 +48,7 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
                 Identifier id;
                 if (val.contains(":")) id = new Identifier(val);
                 else id = new Identifier("minecraft", val);
-                if (Registry.BLOCK_ENTITY.containsId(id)) blocks.add(Registry.BLOCK_ENTITY.get(id));
+                if (Registry.BLOCK_ENTITY_TYPE.containsId(id)) blocks.add(Registry.BLOCK_ENTITY_TYPE.get(id));
             }
         } catch (Exception ignored) {}
 
@@ -76,7 +76,7 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
 
         ListTag valueTag = new ListTag();
         for (BlockEntityType<?> type : get()) {
-            valueTag.add(new StringTag(Registry.BLOCK_ENTITY.getId(type).toString()));
+            valueTag.add(StringTag.of(Registry.BLOCK_ENTITY_TYPE.getId(type).toString()));
         }
         tag.put("value", valueTag);
 
@@ -89,7 +89,7 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
 
         ListTag valueTag = tag.getList("value", 8);
         for (Tag tagI : valueTag) {
-            get().add(Registry.BLOCK_ENTITY.get(new Identifier(tagI.asString())));
+            get().add(Registry.BLOCK_ENTITY_TYPE.get(new Identifier(tagI.asString())));
         }
 
         changed();

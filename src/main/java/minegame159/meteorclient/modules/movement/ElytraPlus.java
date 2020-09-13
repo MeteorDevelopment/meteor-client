@@ -14,12 +14,12 @@ import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.InvUtils;
 import minegame159.meteorclient.utils.Utils;
-import net.minecraft.container.SlotActionType;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.ElytraItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
+import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.math.Vec3d;
 
 public class ElytraPlus extends ToggleModule {
@@ -166,8 +166,8 @@ public class ElytraPlus extends ToggleModule {
             handleHorizontalSpeed();
             handleVerticalSpeed();
 
-            int chunkX = (int) ((mc.player.x + velX) / 16);
-            int chunkZ = (int) ((mc.player.z + velZ) / 16);
+            int chunkX = (int) ((mc.player.getX() + velX) / 16);
+            int chunkZ = (int) ((mc.player.getZ() + velZ) / 16);
             if (dontGoIntoUnloadedChunks.get()) {
                 if (mc.world.getChunkManager().isChunkLoaded(chunkX, chunkZ)) {
                     ((IVec3d) event.movement).set(velX, velY, velZ);
@@ -195,7 +195,7 @@ public class ElytraPlus extends ToggleModule {
                 if(mc.player.inventory.getArmorStack(2).getMaxDamage() - mc.player.inventory.getArmorStack(2).getDamage() <= replaceDurability.get()){
                     int slot = -1;
                     for (int i = 9; i < 45; i++) {
-                        ItemStack stack = mc.player.inventory.getInvStack(i);
+                        ItemStack stack = mc.player.inventory.getStack(i);
                         if (stack.getItem() == Items.ELYTRA && stack.getMaxDamage() - stack.getDamage() > replaceDurability.get()) {
                             slot = i;
                         }
@@ -214,7 +214,7 @@ public class ElytraPlus extends ToggleModule {
         if (sgAutopilot.isEnabled()) {
             ((IKeyBinding) mc.options.keyForward).setPressed(true);
 
-            if (mc.player.y < autopilotMinimumHeight.get() && !decrementFireworkTimer) {
+            if (mc.player.getY() < autopilotMinimumHeight.get() && !decrementFireworkTimer) {
                 int slot = InvUtils.findItemInHotbar(Items.FIREWORK_ROCKET, itemStack -> true);
                 if (slot != -1) {
                     mc.player.inventory.selectedSlot = slot;

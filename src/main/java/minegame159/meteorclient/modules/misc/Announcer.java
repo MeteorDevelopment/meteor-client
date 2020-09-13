@@ -12,7 +12,7 @@ import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.settings.StringSetting;
 import net.minecraft.block.Block;
-import net.minecraft.client.gui.screen.ingame.ContainerScreen;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.item.Item;
 
 public class Announcer extends ToggleModule {
@@ -126,8 +126,8 @@ public class Announcer extends ToggleModule {
                 updateLastPos();
             }
 
-            double deltaX = mc.player.x - lastX;
-            double deltaZ = mc.player.z - lastZ;
+            double deltaX = mc.player.getX() - lastX;
+            double deltaZ = mc.player.getZ() - lastZ;
             dist += Math.sqrt(deltaX * deltaX + deltaZ * deltaZ);
 
             if (timer >= delay.get()) {
@@ -145,8 +145,8 @@ public class Announcer extends ToggleModule {
         }
 
         void updateLastPos() {
-            lastX = mc.player.x;
-            lastZ = mc.player.z;
+            lastX = mc.player.getX();
+            lastZ = mc.player.getZ();
         }
 
         void sendMsg() {
@@ -380,7 +380,7 @@ public class Announcer extends ToggleModule {
 
         @EventHandler
         private final Listener<OpenScreenEvent> onOpenScreen = new Listener<>(event -> {
-            if (event.screen instanceof ContainerScreen<?>) {
+            if (event.screen instanceof HandledScreen<?>) {
                 String name = event.screen.getTitle().getString();
                 if (!name.isEmpty()) sendMsg(name);
             }

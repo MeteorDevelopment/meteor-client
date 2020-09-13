@@ -38,12 +38,12 @@ public class StatusEffectSettingScreen extends WindowScreen {
         row();
 
         List<StatusEffect> statusEffects = new ArrayList<>(setting.get().keySet());
-        statusEffects.sort(Comparator.comparing(statusEffect -> statusEffect.method_5560().asString()));
+        statusEffects.sort(Comparator.comparing(statusEffect -> statusEffect.getName().getString()));
 
         WTable table = add(new WTable()).expandX().fillX().getWidget();
 
         for (StatusEffect statusEffect : statusEffects) {
-            String name = statusEffect.method_5560().asString();
+            String name = statusEffect.getName().getString();
             if (!StringUtils.containsIgnoreCase(name, filter.text)) continue;
 
             table.add(new WLabel(name));

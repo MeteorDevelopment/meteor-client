@@ -64,7 +64,7 @@ public class Speed extends ToggleModule {
     private Listener<PlayerMoveEvent> onPlayerMove = new Listener<>(event -> {
         if (event.type != MovementType.SELF || mc.player.isFallFlying() || mc.player.isClimbing() || mc.player.getVehicle() != null) return;
         if (!whenSneaking.get() && mc.player.isSneaking()) return;
-        if (onlyOnGround.get() && !mc.player.onGround) return;
+        if (onlyOnGround.get() && !mc.player.isOnGround()) return;
         if (!inWater.get() && mc.player.isTouchingWater()) return;
 
         float yaw = mc.player.yaw;

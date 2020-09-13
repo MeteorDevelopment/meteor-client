@@ -1,7 +1,7 @@
 package minegame159.meteorclient.mixininterface;
 
-import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.ChunkSectionPos;
 
 public interface IChunkDeltaUpdateS2CPacket {
-    public ChunkPos getChunkPos();
+    public ChunkSectionPos getChunkPos();
 }

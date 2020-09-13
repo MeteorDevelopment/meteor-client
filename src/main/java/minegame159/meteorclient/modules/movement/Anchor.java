@@ -38,9 +38,9 @@ public class Anchor extends ToggleModule {
 
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
-        int x = MathHelper.floor(mc.player.x);
-        int y = MathHelper.floor(mc.player.y);
-        int z = MathHelper.floor(mc.player.z);
+        int x = MathHelper.floor(mc.player.getX());
+        int y = MathHelper.floor(mc.player.getY());
+        int z = MathHelper.floor(mc.player.getZ());
 
         if (isHole(x, y, z)) {
             wasInHole = true;
@@ -69,8 +69,8 @@ public class Anchor extends ToggleModule {
         }
 
         if (foundHole) {
-            double deltaX = Utils.clamp(holeX - mc.player.x, -0.05, 0.05);
-            double deltaZ = Utils.clamp(holeZ - mc.player.z, -0.05, 0.05);
+            double deltaX = Utils.clamp(holeX - mc.player.getX(), -0.05, 0.05);
+            double deltaZ = Utils.clamp(holeZ - mc.player.getZ(), -0.05, 0.05);
 
             ((IVec3d) mc.player.getVelocity()).set(deltaX, mc.player.getVelocity().y, deltaZ);
         }

@@ -130,25 +130,25 @@ public class Tracers extends ToggleModule {
     }
 
     private void render(Entity entity, Color color, RenderEvent event) {
-        double x = entity.prevX + (entity.x - entity.prevX) * event.tickDelta;
-        double y = entity.prevY + (entity.y - entity.prevY) * event.tickDelta;
-        double z = entity.prevZ + (entity.z - entity.prevZ) * event.tickDelta;
+        double x = entity.prevX + (entity.getX() - entity.prevX) * event.tickDelta;
+        double y = entity.prevY + (entity.getY() - entity.prevY) * event.tickDelta;
+        double z = entity.prevZ + (entity.getZ() - entity.prevZ) * event.tickDelta;
 
-        double height = entity.getBoundingBox().y2 - entity.getBoundingBox().y1;
+        double height = entity.getBoundingBox().maxY - entity.getBoundingBox().minY;
 
         if (target.get() == Target.Head) y += height;
         else if (target.get() == Target.Body) y += height / 2;
 
-        ShapeBuilder.line(vec1.x - (mc.cameraEntity.x - event.offsetX), vec1.y - (mc.cameraEntity.y - event.offsetY), vec1.z - (mc.cameraEntity.z - event.offsetZ), x, y, z, color);
+        ShapeBuilder.line(vec1.x - (mc.cameraEntity.getX() - event.offsetX), vec1.y - (mc.cameraEntity.getY() - event.offsetY), vec1.z - (mc.cameraEntity.getZ() - event.offsetZ), x, y, z, color);
 
-        if (mode.get() == Mode.Stem) ShapeBuilder.line(x, entity.y, z, x, entity.y + height, z, color);
+        if (mode.get() == Mode.Stem) ShapeBuilder.line(x, entity.getY(), z, x, entity.getY() + height, z, color);
 
         count++;
     }
 
     private void render(BlockEntity blockEntity, RenderEvent event) {
         BlockPos pos = blockEntity.getPos();
-        ShapeBuilder.line(vec1.x - (mc.cameraEntity.x - event.offsetX), vec1.y - (mc.cameraEntity.y - event.offsetY), vec1.z - (mc.cameraEntity.z - event.offsetZ), pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5f, storageColor.get());
+        ShapeBuilder.line(vec1.x - (mc.cameraEntity.getX() - event.offsetX), vec1.y - (mc.cameraEntity.getY() - event.offsetY), vec1.z - (mc.cameraEntity.getZ() - event.offsetZ), pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5f, storageColor.get());
 
         count++;
     }
@@ -172,7 +172,7 @@ public class Tracers extends ToggleModule {
 
                 if (friend == null || friend.showInTracers) render(entity, color, event);
             } else {
-                switch (entity.getType().getCategory()) {
+                switch (entity.getType().getSpawnGroup()) {
                     case CREATURE:       render(entity, animalsColor.get(), event); break;
                     case WATER_CREATURE: render(entity, waterAnimalsColor.get(), event); break;
                     case MONSTER:        render(entity, monstersColor.get(), event); break;

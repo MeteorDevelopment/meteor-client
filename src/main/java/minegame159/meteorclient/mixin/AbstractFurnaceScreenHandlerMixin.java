@@ -1,13 +1,13 @@
 package minegame159.meteorclient.mixin;
 
-import minegame159.meteorclient.mixininterface.IAbstractFurnaceContainer;
-import net.minecraft.container.AbstractFurnaceContainer;
+import minegame159.meteorclient.mixininterface.IAbstractFurnaceScreenHandler;
 import net.minecraft.item.ItemStack;
+import net.minecraft.screen.AbstractFurnaceScreenHandler;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(AbstractFurnaceContainer.class)
-public abstract class AbstractFurnaceContainerMixin implements IAbstractFurnaceContainer {
+@Mixin(AbstractFurnaceScreenHandler.class)
+public abstract class AbstractFurnaceScreenHandlerMixin implements IAbstractFurnaceScreenHandler {
     @Shadow protected abstract boolean isSmeltable(ItemStack itemStack);
 
     @Shadow protected abstract boolean isFuel(ItemStack itemStack);

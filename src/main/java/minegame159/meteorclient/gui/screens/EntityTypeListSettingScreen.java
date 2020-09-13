@@ -39,7 +39,7 @@ public class EntityTypeListSettingScreen extends WindowScreen {
         hasAnimal = hasWaterAnimal = hasMonster = hasAmbient = hasMisc = 0;
         for (EntityType<?> entityType : setting.get()) {
             if (!setting.onlyAttackable || EntityUtils.isAttackable(entityType)) {
-                switch (entityType.getCategory()) {
+                switch (entityType.getSpawnGroup()) {
                     case CREATURE:       hasAnimal++; break;
                     case WATER_CREATURE: hasWaterAnimal++; break;
                     case MONSTER:        hasMonster++; break;
@@ -99,7 +99,7 @@ public class EntityTypeListSettingScreen extends WindowScreen {
 
         Consumer<EntityType<?>> entityTypeForEach = entityType -> {
             if (!setting.onlyAttackable || EntityUtils.isAttackable(entityType)) {
-                switch (entityType.getCategory()) {
+                switch (entityType.getSpawnGroup()) {
                     case CREATURE:
                         animalsE.add(entityType);
                         addEntityType(animals, animalsC, entityType);
@@ -130,7 +130,7 @@ public class EntityTypeListSettingScreen extends WindowScreen {
         } else {
             List<Pair<EntityType<?>, Integer>> entities = new ArrayList<>();
             Registry.ENTITY_TYPE.forEach(entity -> {
-                int words = Utils.search(entity.getName().asFormattedString(), filter.text);
+                int words = Utils.search(entity.getName().getString(), filter.text);
                 if (words > 0) entities.add(new Pair<>(entity, words));
             });
             entities.sort(Comparator.comparingInt(value -> -value.getRight()));
@@ -169,12 +169,12 @@ public class EntityTypeListSettingScreen extends WindowScreen {
     }
 
     private void addEntityType(WTable table, WCheckbox tableCheckbox, EntityType<?> entityType) {
-        table.add(new WLabel(entityType.getName().asString()));
+        table.add(new WLabel(entityType.getName().getString()));
         table.add(new WCheckbox(setting.get().contains(entityType))).fillX().right().getWidget().action = checkbox -> {
             if (checkbox.checked) {
                 if (!setting.get().contains(entityType)) {
                     setting.get().add(entityType);
-                    switch (entityType.getCategory()) {
+                    switch (entityType.getSpawnGroup()) {
                         case CREATURE:       if (hasAnimal == 0) tableCheckbox.checked = true; hasAnimal++; break;
                         case WATER_CREATURE: if (hasWaterAnimal == 0) tableCheckbox.checked = true; hasWaterAnimal++; break;
                         case MONSTER:        if (hasMonster == 0) tableCheckbox.checked = true; hasMonster++; break;
@@ -184,7 +184,7 @@ public class EntityTypeListSettingScreen extends WindowScreen {
                 }
             } else {
                 if (setting.get().remove(entityType)) {
-                    switch (entityType.getCategory()) {
+                    switch (entityType.getSpawnGroup()) {
                         case CREATURE:       hasAnimal--; if (hasAnimal == 0) tableCheckbox.checked = false; break;
                         case WATER_CREATURE: hasWaterAnimal--; if (hasWaterAnimal == 0) tableCheckbox.checked = false; break;
                         case MONSTER:        hasMonster--; if (hasMonster == 0) tableCheckbox.checked = false; break;

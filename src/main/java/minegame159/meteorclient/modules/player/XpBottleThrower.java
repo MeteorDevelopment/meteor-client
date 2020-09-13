@@ -32,7 +32,7 @@ public class XpBottleThrower extends ToggleModule {
         int slot = -1;
 
         for (int i = 0; i < 9; i++) {
-            if (mc.player.inventory.getInvStack(i).getItem() == Items.EXPERIENCE_BOTTLE) {
+            if (mc.player.inventory.getStack(i).getItem() == Items.EXPERIENCE_BOTTLE) {
                 slot = i;
                 break;
             }
@@ -40,7 +40,7 @@ public class XpBottleThrower extends ToggleModule {
 
         if (slot != -1) {
             if (lookDown.get()) {
-                mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(mc.player.yaw, 90, mc.player.onGround));
+                mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(mc.player.yaw, 90, mc.player.isOnGround()));
             }
             int preSelectedSlot = mc.player.inventory.selectedSlot;
             mc.player.inventory.selectedSlot = slot;

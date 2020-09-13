@@ -15,8 +15,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(SoulSandBlock.class)
 public class SoulSandBlockMixin {
-    @Inject(method = "onEntityCollision", at = @At("HEAD"), cancellable = true)
+    /*@Inject(method = "onEntityCollision", at = @At("HEAD"), cancellable = true)
     private void onEntityCollision(BlockState state, World world, BlockPos pos, Entity entity, CallbackInfo info) {
         if (ModuleManager.INSTANCE.get(NoSlow.class).soulSand() && entity == MinecraftClient.getInstance().player) info.cancel();
-    }
+    }*/
 }

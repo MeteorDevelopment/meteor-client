@@ -20,7 +20,7 @@ public class WItemWithLabel extends WTable {
     }
 
     public WItemWithLabel(ItemStack itemStack) {
-        this(itemStack, itemStack.getName().asString());
+        this(itemStack, itemStack.getName().getString());
     }
 
     private String getStringToAppend() {
@@ -40,7 +40,7 @@ public class WItemWithLabel extends WTable {
     public void set(ItemStack itemStack) {
         this.itemStack = itemStack;
         item.itemStack = itemStack;
-        label.setText(itemStack.getName().asString() + getStringToAppend());
+        label.setText(itemStack.getName().getString() + getStringToAppend());
     }
 
     public String getLabelText() {

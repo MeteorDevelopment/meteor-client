@@ -13,21 +13,17 @@ import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.DamageCalcUtils;
-import net.minecraft.command.arguments.EntityAnchorArgumentType;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.enchantment.Enchantments;
+import net.minecraft.command.argument.EntityAnchorArgumentType;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.RayTraceContext;
+import net.minecraft.world.RaycastContext;
 
-import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -203,20 +199,20 @@ public class KillAura extends ToggleModule {
 
     private boolean isPlayerOnGround(Entity entity){
         if (!onlyOnGround.get()) return true;
-        else if (onlyOnGround.get() && entity instanceof PlayerEntity && entity.onGround) return true;
-        else if (onlyOnGround.get() && entity instanceof PlayerEntity && !entity.onGround) return false;
+        else if (onlyOnGround.get() && entity instanceof PlayerEntity && entity.isOnGround()) return true;
+        else if (onlyOnGround.get() && entity instanceof PlayerEntity && !entity.isOnGround()) return false;
         else return onlyOnGround.get() && !(entity instanceof PlayerEntity);
     }
 
     private boolean canSeeEntity(Entity entity) {
         if (ignoreWalls.get()) return true;
 
-        ((IVec3d) vec3d1).set(mc.player.x, mc.player.y + mc.player.getStandingEyeHeight(), mc.player.z);
-        ((IVec3d) vec3d2).set(entity.x, entity.y, entity.z);
-        boolean canSeeFeet =  mc.world.rayTrace(new RayTraceContext(vec3d1, vec3d2, RayTraceContext.ShapeType.COLLIDER, RayTraceContext.FluidHandling.NONE, mc.player)).getType() == HitResult.Type.MISS;
+        ((IVec3d) vec3d1).set(mc.player.getX(), mc.player.getY() + mc.player.getStandingEyeHeight(), mc.player.getZ());
+        ((IVec3d) vec3d2).set(entity.getX(), entity.getY(), entity.getZ());
+        boolean canSeeFeet =  mc.world.raycast(new RaycastContext(vec3d1, vec3d2, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player)).getType() == HitResult.Type.MISS;
 
-        ((IVec3d) vec3d2).set(entity.x, entity.y + entity.getStandingEyeHeight(), entity.z);
-        boolean canSeeEyes =  mc.world.rayTrace(new RayTraceContext(vec3d1, vec3d2, RayTraceContext.ShapeType.COLLIDER, RayTraceContext.FluidHandling.NONE, mc.player)).getType() == HitResult.Type.MISS;
+        ((IVec3d) vec3d2).set(entity.getX(), entity.getY() + entity.getStandingEyeHeight(), entity.getZ());
+        boolean canSeeEyes =  mc.world.raycast(new RaycastContext(vec3d1, vec3d2, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player)).getType() == HitResult.Type.MISS;
 
         return canSeeFeet || canSeeEyes;
     }
@@ -279,7 +275,7 @@ public class KillAura extends ToggleModule {
                     if (entity instanceof PlayerEntity && instaKill.get()) {
                         if (DamageCalcUtils.getSwordDamage((PlayerEntity) entity, false) >= ((PlayerEntity) entity).getHealth() + ((PlayerEntity) entity).getAbsorptionAmount()) {
                             if (rotate.get()) {
-                                ((IVec3d) vec3d1).set(entity.x, entity.y + entity.getHeight() / 2, entity.z);
+                                ((IVec3d) vec3d1).set(entity.getX(), entity.getY() + entity.getHeight() / 2, entity.getZ());
                                 mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, vec3d1);
                             }
 
@@ -328,7 +324,7 @@ public class KillAura extends ToggleModule {
         if(entity != null && random.nextInt(100) < hitChance.get()) {
             // Rotate
             if (rotate.get()) {
-                ((IVec3d) vec3d1).set(entity.x, entity.y + entity.getHeight() / 2, entity.z);
+                ((IVec3d) vec3d1).set(entity.getX(), entity.getY() + entity.getHeight() / 2, entity.getZ());
                 mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, vec3d1);
             }
 

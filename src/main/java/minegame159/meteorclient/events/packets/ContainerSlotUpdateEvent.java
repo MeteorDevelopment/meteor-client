@@ -1,7 +1,7 @@
 package minegame159.meteorclient.events.packets;
 
-import net.minecraft.network.packet.s2c.play.ContainerSlotUpdateS2CPacket;
+import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
 
 public class ContainerSlotUpdateEvent {
-    public ContainerSlotUpdateS2CPacket packet;
+    public ScreenHandlerSlotUpdateS2CPacket packet;
 }

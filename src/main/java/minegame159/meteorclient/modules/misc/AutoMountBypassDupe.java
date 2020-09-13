@@ -18,7 +18,6 @@ import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.InvUtils;
 import net.minecraft.block.ShulkerBoxBlock;
 import net.minecraft.client.gui.screen.ingame.HorseScreen;
-import net.minecraft.container.SlotActionType;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.AbstractDonkeyEntity;
 import net.minecraft.entity.passive.LlamaEntity;
@@ -27,6 +26,7 @@ import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.Hand;
 import org.lwjgl.glfw.GLFW;
 
@@ -84,9 +84,9 @@ public class AutoMountBypassDupe extends ToggleModule {
 
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
-        if (GLFW.glfwGetKey(mc.window.getHandle(), GLFW.GLFW_KEY_ESCAPE) == GLFW.GLFW_PRESS) {
+        if (GLFW.glfwGetKey(mc.getWindow().getHandle(), GLFW.GLFW_KEY_ESCAPE) == GLFW.GLFW_PRESS) {
             toggle();
-            mc.player.closeContainer();
+            mc.player.closeHandledScreen();
             return;
         }
 
@@ -107,7 +107,7 @@ public class AutoMountBypassDupe extends ToggleModule {
         if (entity == null) return;
 
         if (sneak) {
-            mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.STOP_SNEAKING));
+            mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
             mc.player.setSneaking(false);
             sneak = false;
             return;
@@ -115,7 +115,7 @@ public class AutoMountBypassDupe extends ToggleModule {
 
         if (slots == -1) {
             if (entity.hasChest() || mc.player.getMainHandStack().getItem() == Items.CHEST){
-                mc.player.networkHandler.sendPacket(new PlayerInteractEntityC2SPacket(entity, Hand.MAIN_HAND));
+                mc.player.networkHandler.sendPacket(new PlayerInteractEntityC2SPacket(entity, Hand.MAIN_HAND, mc.player.isSneaking()));
             } else {
                 int slot = InvUtils.findItemWithCount(Items.CHEST).slot;
                 if (slot != -1 && slot < 9) {
@@ -129,7 +129,7 @@ public class AutoMountBypassDupe extends ToggleModule {
             if (isDupeTime()) {
                 if (!slotsToThrow.isEmpty()) {
                     if (faceDown.get()) {
-                        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(mc.player.yaw, 90, mc.player.onGround));
+                        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(mc.player.yaw, 90, mc.player.isOnGround()));
                     }
                     for (int i : slotsToThrow) {
                         InvUtils.clickSlot(i, 1, SlotActionType.THROW);
@@ -141,8 +141,8 @@ public class AutoMountBypassDupe extends ToggleModule {
                     }
                 }
             } else {
-                mc.player.closeContainer();
-                mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.START_SNEAKING));
+                mc.player.closeHandledScreen();
+                mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
 
                 mc.player.setSneaking(true);
                 sneak = true;
@@ -153,16 +153,16 @@ public class AutoMountBypassDupe extends ToggleModule {
             if (slotsToMove.isEmpty()) {
                 boolean empty = true;
                 for (int i = 2; i <= slots; i++) {
-                    if (!(mc.player.container.getStacks().get(i).isEmpty())) {
+                    if (!(mc.player.currentScreenHandler.getStacks().get(i).isEmpty())) {
                         empty = false;
                         break;
                     }
                 }
                 if (empty) {
-                    for (int i = slots + 2; i < mc.player.container.getStacks().size(); i++) {
-                        if (!(mc.player.container.getStacks().get(i).isEmpty())) {
-                            if (mc.player.container.getSlot(i).getStack().getItem() == Items.CHEST) continue;
-                            if (!(mc.player.container.getSlot(i).getStack().getItem() instanceof BlockItem && ((BlockItem) mc.player.container.getSlot(i).getStack().getItem()).getBlock() instanceof ShulkerBoxBlock) && shulkersOnly.get()) continue;
+                    for (int i = slots + 2; i < mc.player.currentScreenHandler.getStacks().size(); i++) {
+                        if (!(mc.player.currentScreenHandler.getStacks().get(i).isEmpty())) {
+                            if (mc.player.currentScreenHandler.getSlot(i).getStack().getItem() == Items.CHEST) continue;
+                            if (!(mc.player.currentScreenHandler.getSlot(i).getStack().getItem() instanceof BlockItem && ((BlockItem) mc.player.currentScreenHandler.getSlot(i).getStack().getItem()).getBlock() instanceof ShulkerBoxBlock) && shulkersOnly.get()) continue;
                             slotsToMove.add(i);
 
                             if (slotsToMove.size() >= slots) break;
@@ -170,7 +170,7 @@ public class AutoMountBypassDupe extends ToggleModule {
                     }
                 } else {
                     noCancel = true;
-                    mc.player.networkHandler.sendPacket(new PlayerInteractEntityC2SPacket(entity, Hand.MAIN_HAND, entity.getPos().add(entity.getWidth() / 2, entity.getHeight() / 2, entity.getWidth() / 2)));
+                    mc.player.networkHandler.sendPacket(new PlayerInteractEntityC2SPacket(entity, Hand.MAIN_HAND, entity.getPos().add(entity.getWidth() / 2, entity.getHeight() / 2, entity.getWidth() / 2), mc.player.isSneaking()));
                     noCancel = false;
                     return;
                 }
@@ -196,13 +196,13 @@ public class AutoMountBypassDupe extends ToggleModule {
     }
 
     private boolean isDupeTime() {
-        if (mc.player.getVehicle() != entity || entity.hasChest() || mc.player.container.getStacks().size() == 46) {
+        if (mc.player.getVehicle() != entity || entity.hasChest() || mc.player.currentScreenHandler.getStacks().size() == 46) {
             return false;
         }
 
-        if (mc.player.container.getStacks().size() > 38) {
+        if (mc.player.currentScreenHandler.getStacks().size() > 38) {
             for (int i = 2; i < getDupeSize() + 1; i++) {
-                if (mc.player.container.getSlot(i).hasStack()) {
+                if (mc.player.currentScreenHandler.getSlot(i).hasStack()) {
                     return true;
                 }
             }
@@ -212,10 +212,10 @@ public class AutoMountBypassDupe extends ToggleModule {
     }
 
     private int getDupeSize() {
-        if (mc.player.getVehicle() != entity || entity.hasChest() || mc.player.container.getStacks().size() == 46) {
+        if (mc.player.getVehicle() != entity || entity.hasChest() || mc.player.currentScreenHandler.getStacks().size() == 46) {
             return 0;
         }
 
-        return mc.player.container.getStacks().size() - 38;
+        return mc.player.currentScreenHandler.getStacks().size() - 38;
     }
 }

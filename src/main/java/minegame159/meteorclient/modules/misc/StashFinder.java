@@ -5,7 +5,7 @@ import baritone.api.pathing.goals.GoalXZ;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.MeteorClient;
@@ -19,6 +19,7 @@ import minegame159.meteorclient.utils.Utils;
 import net.minecraft.block.entity.*;
 import net.minecraft.client.toast.Toast;
 import net.minecraft.client.toast.ToastManager;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.ChunkPos;
 
@@ -44,8 +45,7 @@ public class StashFinder extends ToggleModule {
             .min(1)
             .build()
     );
-
-    private final Setting<Integer> minimumDistance = sgGeneral.add(new IntSetting.Builder()
+private final Setting<Integer> minimumDistance = sgGeneral.add(new IntSetting.Builder()
             .name("minimum-distance")
             .description("Minimum distance in blocks from spawn required to record that chunk.")
             .defaultValue(0)
@@ -53,7 +53,7 @@ public class StashFinder extends ToggleModule {
             .sliderMax(10000)
             .build()
     );
-    
+
     private final Setting<Boolean> sendNotifications = sgGeneral.add(new BoolSetting.Builder()
             .name("send-notifications")
             .description("Send minecraft notifications when new stashes are found.")
@@ -96,7 +96,7 @@ public class StashFinder extends ToggleModule {
         if (chunk.getTotal() >= minimumStorageCount.get()) {
             Chunk prevChunk = null;
             int i = chunks.indexOf(chunk);
-            
+
             if (i < 0) chunks.add(chunk);
             else prevChunk = chunks.set(i, chunk);
 
@@ -109,15 +109,15 @@ public class StashFinder extends ToggleModule {
                     private long lastTime = -1;
 
                     @Override
-                    public Visibility draw(ToastManager manager, long currentTime) {
+                    public Visibility draw(MatrixStack matrices, ToastManager manager, long currentTime) {
                         if (lastTime == -1) lastTime = currentTime;
                         else timer += currentTime - lastTime;
 
                         manager.getGame().getTextureManager().bindTexture(new Identifier("textures/gui/toasts.png"));
-                        GlStateManager.color4f(1.0F, 1.0F, 1.0F, 255.0F);
-                        manager.blit(0, 0, 0, 32, 160, 32);
+                        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 255.0F);
+                        manager.drawTexture(matrices, 0, 0, 0, 32, 160, 32);
 
-                        manager.getGame().textRenderer.draw("StashRecorder found stash.", 12.0F, 12.0F, -11534256);
+                        manager.getGame().textRenderer.draw(matrices, "StashRecorder found stash.", 12.0F, 12.0F, -11534256);
 
                         return timer >= 32000 ? Visibility.HIDE : Visibility.SHOW;
                     }
@@ -288,7 +288,7 @@ public class StashFinder extends ToggleModule {
             sb.append(chests).append(',').append(barrels).append(',').append(shulkers).append(',').append(enderChests).append(',').append(furnaces).append(',').append(dispensersDroppers).append(',').append(hoppers).append('\n');
             writer.write(sb.toString());
         }
-        
+
         public boolean countsEqual(Chunk c) {
             if (c == null) return false;
             return chests != c.chests || barrels != c.barrels || shulkers != c.shulkers || enderChests != c.enderChests || furnaces != c.furnaces || dispensersDroppers != c.dispensersDroppers || hoppers != c.hoppers;

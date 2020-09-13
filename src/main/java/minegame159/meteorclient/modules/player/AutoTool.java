@@ -14,14 +14,13 @@ import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.InvUtils;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.Material;
-import net.minecraft.container.SlotActionType;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.*;
+import net.minecraft.screen.slot.SlotActionType;
 
 public class AutoTool extends ToggleModule {
     public enum Prefer {
@@ -84,17 +83,17 @@ public class AutoTool extends ToggleModule {
             int slot = -1;
             int score = 0;
             for(int i = 0; i < 36; i++){
-                if ((mc.player.inventory.getInvStack(i).getMaxDamage() - mc.player.inventory.getInvStack(i).getDamage()) <= 11) continue;
-                if(material.get() == materialPreference.None && mc.player.inventory.getInvStack(i).getItem().getClass() == mc.player.getMainHandStack().getItem().getClass()){
+                if ((mc.player.inventory.getStack(i).getMaxDamage() - mc.player.inventory.getStack(i).getDamage()) <= 11) continue;
+                if(material.get() == materialPreference.None && mc.player.inventory.getStack(i).getItem().getClass() == mc.player.getMainHandStack().getItem().getClass()){
                     slot = i;
                     break;
-                }else if(material.get() == materialPreference.Same && mc.player.inventory.getInvStack(i).getItem() == mc.player.getMainHandStack().getItem()){
+                }else if(material.get() == materialPreference.Same && mc.player.inventory.getStack(i).getItem() == mc.player.getMainHandStack().getItem()){
                     slot = i;
                     break;
                 }else if(material.get() == materialPreference.Best && blockState != null){
-                    if(mc.player.inventory.getInvStack(i).getItem().getClass() == mc.player.getMainHandStack().getItem().getClass()){
-                        if(score < Math.round(mc.player.inventory.getInvStack(i).getMiningSpeed(blockState))){
-                            score = Math.round(mc.player.inventory.getInvStack(i).getMiningSpeed(blockState));
+                    if(mc.player.inventory.getStack(i).getItem().getClass() == mc.player.getMainHandStack().getItem().getClass()){
+                        if(score < Math.round(mc.player.inventory.getStack(i).getMiningSpeedMultiplier(blockState))){
+                            score = Math.round(mc.player.inventory.getStack(i).getMiningSpeedMultiplier(blockState));
                             slot = i;
                         }
                     }
@@ -102,8 +101,8 @@ public class AutoTool extends ToggleModule {
             }
             if(slot == -1 && material.get() != materialPreference.None){
                 for(int i = 0; i < 36; i++){
-                    if(mc.player.inventory.getInvStack(i).getItem().getClass() == mc.player.getMainHandStack().getItem().getClass()
-                            && (mc.player.inventory.getInvStack(i).getMaxDamage() - mc.player.inventory.getInvStack(i).getDamage()) > 11){
+                    if(mc.player.inventory.getStack(i).getItem().getClass() == mc.player.getMainHandStack().getItem().getClass()
+                            && (mc.player.inventory.getStack(i).getMaxDamage() - mc.player.inventory.getStack(i).getDamage()) > 11){
                         slot = i;
                         break;
                     }
@@ -131,13 +130,13 @@ public class AutoTool extends ToggleModule {
         int bestSlot = -1;
 
         for (int i = 0; i < 9; i++) {
-            ItemStack itemStack = mc.player.inventory.getInvStack(i);
-            if (!isEffectiveOn(itemStack.getItem(), blockState.getBlock()) || (itemStack.getMaxDamage() - itemStack.getDamage() <= 11)) continue;
+            ItemStack itemStack = mc.player.inventory.getStack(i);
+            if (!isEffectiveOn(itemStack.getItem(), blockState) || (itemStack.getMaxDamage() - itemStack.getDamage() <= 11)) continue;
             int score = 0;
 
             if (enderChestOnlyWithSilkTouch.get() && blockState.getBlock() == Blocks.ENDER_CHEST && EnchantmentHelper.getLevel(Enchantments.SILK_TOUCH, itemStack) == 0) continue;
 
-            score += Math.round(itemStack.getMiningSpeed(blockState));
+            score += Math.round(itemStack.getMiningSpeedMultiplier(blockState));
             score += EnchantmentHelper.getLevel(Enchantments.UNBREAKING, itemStack);
             score += EnchantmentHelper.getLevel(Enchantments.EFFICIENCY, itemStack);
             if (preferMending.get()) score += EnchantmentHelper.getLevel(Enchantments.MENDING, itemStack);
@@ -155,15 +154,14 @@ public class AutoTool extends ToggleModule {
         }
     }, EventPriority.HIGH);
 
-    public boolean isEffectiveOn(Item item, Block block) {
-        Material material = block.getMaterial(null);
+    public boolean isEffectiveOn(Item item, BlockState block) {
+        Material material = block.getMaterial();
 
         if (item instanceof SwordItem && material == Material.COBWEB) return true;
-        if (item instanceof AxeItem && (block == Blocks.SCAFFOLDING || material == Material.WOOD || material == Material.BAMBOO || material == Material.BAMBOO_SAPLING || material == Material.PLANT || material == Material.PUMPKIN))  return true;
-        if (item instanceof PickaxeItem && (material == Material.SHULKER_BOX || material == Material.ANVIL || material == Material.CLAY || material == Material.ICE || material == Material.PACKED_ICE || material == Material.METAL || material == Material.PISTON || material == Material.STONE || material == Material.PART)) return true;
-        if (item instanceof ShovelItem && (block == Blocks.GRASS_BLOCK || block == Blocks.MYCELIUM || material == Material.EARTH || material == Material.SNOW || material == Material.SNOW_BLOCK || material == Material.SAND)) return true;
+        if (item instanceof AxeItem && (block.getBlock() == Blocks.SCAFFOLDING || material == Material.WOOD || material == Material.BAMBOO || material == Material.BAMBOO_SAPLING || material == Material.PLANT))  return true;
+        if (item instanceof PickaxeItem && (material == Material.SHULKER_BOX || material == Material.ICE || material == Material.METAL || material == Material.PISTON || material == Material.STONE)) return true;
+        if (item instanceof ShovelItem && (block.getBlock() == Blocks.GRASS_BLOCK || block.getBlock() == Blocks.MYCELIUM || material == Material.SNOW_BLOCK)) return true;
         if (item instanceof ShearsItem && (material == Material.WOOL || material == Material.CARPET)) return true;
-        if (item instanceof HoeItem && material == Material.ORGANIC) return true;
 
         return false;
     }

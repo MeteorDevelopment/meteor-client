@@ -7,14 +7,15 @@ import minegame159.meteorclient.settings.PotionSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.Chat;
+import minegame159.meteorclient.utils.InvUtils;
 import minegame159.meteorclient.utils.MyPotion;
-import net.minecraft.container.BrewingStandContainer;
-import net.minecraft.container.SlotActionType;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionUtil;
 import net.minecraft.potion.Potions;
+import net.minecraft.screen.BrewingStandScreenHandler;
+import net.minecraft.screen.slot.SlotActionType;
 
 public class AutoBrewer extends ToggleModule {
     public enum Modifier {
@@ -55,7 +56,7 @@ public class AutoBrewer extends ToggleModule {
         first = false;
     }
 
-    public void tick(BrewingStandContainer c) {
+    public void tick(BrewingStandScreenHandler c) {
         timer++;
 
         // When brewing stand is opened
@@ -97,7 +98,7 @@ public class AutoBrewer extends ToggleModule {
         }
     }
 
-    private boolean applyModifier(BrewingStandContainer c) {
+    private boolean applyModifier(BrewingStandScreenHandler c) {
         if (modifier.get() != Modifier.None) {
             Item item;
             if (modifier.get() == Modifier.Splash) item = Items.GUNPOWDER;
@@ -113,7 +114,7 @@ public class AutoBrewer extends ToggleModule {
             }
 
             if (slot == -1) {
-                Chat.warning(this, "Disabled because you don't have any %s left in your inventory.", item.getName().asString());
+                Chat.warning(this, "Disabled because you don't have any %s left in your inventory.", item.getName().getString());
                 toggle();
                 return true;
             }
@@ -124,7 +125,7 @@ public class AutoBrewer extends ToggleModule {
         return false;
     }
 
-    private boolean insertIngredient(BrewingStandContainer c, Item ingredient) {
+    private boolean insertIngredient(BrewingStandScreenHandler c, Item ingredient) {
         int slot = -1;
 
         for (int slotI = 5; slotI < c.slots.size(); slotI++) {
@@ -135,7 +136,7 @@ public class AutoBrewer extends ToggleModule {
         }
 
         if (slot == -1) {
-            Chat.warning(this, "Disabled because you don't have any %s left in your inventory.", ingredient.getName().asString());
+            Chat.warning(this, "Disabled because you don't have any %s left in your inventory.", ingredient.getName().getString());
             toggle();
             return true;
         }
@@ -145,7 +146,7 @@ public class AutoBrewer extends ToggleModule {
         return false;
     }
 
-    private boolean checkFuel(BrewingStandContainer c) {
+    private boolean checkFuel(BrewingStandScreenHandler c) {
         if (c.getFuel() == 0) {
             int slot = -1;
 
@@ -168,13 +169,13 @@ public class AutoBrewer extends ToggleModule {
         return false;
     }
 
-    private void moveOneItem(BrewingStandContainer c, int from, int to) {
-        mc.interactionManager.method_2906(c.syncId, from, 0, SlotActionType.PICKUP, mc.player);
-        mc.interactionManager.method_2906(c.syncId, to, 1, SlotActionType.PICKUP, mc.player);
-        mc.interactionManager.method_2906(c.syncId, from, 0, SlotActionType.PICKUP, mc.player);
+    private void moveOneItem(BrewingStandScreenHandler c, int from, int to) {
+        InvUtils.clickSlot(from, 0, SlotActionType.PICKUP);
+        InvUtils.clickSlot(to, 1, SlotActionType.PICKUP);
+        InvUtils.clickSlot(from, 0, SlotActionType.PICKUP);
     }
 
-    private boolean insertWaterBottles(BrewingStandContainer c) {
+    private boolean insertWaterBottles(BrewingStandScreenHandler c) {
         for (int i = 0; i < 3; i++) {
             int slot = -1;
 
@@ -194,16 +195,16 @@ public class AutoBrewer extends ToggleModule {
                 return true;
             }
 
-            mc.interactionManager.method_2906(c.syncId, slot, 0, SlotActionType.PICKUP, mc.player);
-            mc.interactionManager.method_2906(c.syncId, i, 0, SlotActionType.PICKUP, mc.player);
+            InvUtils.clickSlot(slot, 0, SlotActionType.PICKUP);
+            InvUtils.clickSlot(i, 0, SlotActionType.PICKUP);
         }
 
         return false;
     }
 
-    private boolean takePotions(BrewingStandContainer c) {
+    private boolean takePotions(BrewingStandScreenHandler c) {
         for (int i = 0; i < 3; i++) {
-            mc.interactionManager.method_2906(c.syncId, i, 0, SlotActionType.QUICK_MOVE, mc.player);
+            InvUtils.clickSlot(i, 0, SlotActionType.QUICK_MOVE);
 
             if (!c.slots.get(i).getStack().isEmpty()) {
                 Chat.warning(this, "Disabled because your inventory is full.");

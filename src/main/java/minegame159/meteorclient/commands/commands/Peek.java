@@ -6,11 +6,11 @@ import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.ShulkerBoxScreen;
-import net.minecraft.container.ShulkerBoxContainer;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.BasicInventory;
+import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.screen.ShulkerBoxScreenHandler;
 import net.minecraft.text.Text;
 
 public class Peek extends Command {
@@ -33,12 +33,12 @@ public class Peek extends Command {
         }
 
         Utils.getItemsInContainerItem(itemStack, ITEMS);
-        MeteorClient.INSTANCE.screenToOpen = new PeekShulkerBoxScreen(new ShulkerBoxContainer(0, player.inventory, new BasicInventory(ITEMS)), player.inventory, itemStack.getName());
+        MeteorClient.INSTANCE.screenToOpen = new PeekShulkerBoxScreen(new ShulkerBoxScreenHandler(0, player.inventory, new SimpleInventory(ITEMS)), player.inventory, itemStack.getName());
     }
 
     private static class PeekShulkerBoxScreen extends ShulkerBoxScreen {
-        public PeekShulkerBoxScreen(ShulkerBoxContainer shulkerBoxContainer, PlayerInventory playerInventory, Text text) {
-            super(shulkerBoxContainer, playerInventory, text);
+        public PeekShulkerBoxScreen(ShulkerBoxScreenHandler handler, PlayerInventory inventory, Text title) {
+            super(handler, inventory, title);
         }
 
         @Override
