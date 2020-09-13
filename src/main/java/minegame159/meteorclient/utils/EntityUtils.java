@@ -4,7 +4,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ItemEntity;
-import net.minecraft.entity.decoration.EnderCrystalEntity;
+import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.entity.mob.AmbientEntity;
 import net.minecraft.entity.mob.Monster;
 import net.minecraft.entity.mob.WaterCreatureEntity;
@@ -35,7 +35,7 @@ public class EntityUtils {
     }
 
     public static boolean isCrystal(Entity entity) {
-        return entity instanceof EnderCrystalEntity;
+        return entity instanceof EndCrystalEntity;
     }
 
     public static boolean isVehicle(Entity entity) {

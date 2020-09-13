@@ -1,9 +1,9 @@
 package minegame159.meteorclient.rendering;
 
 import net.minecraft.client.render.VertexFormats;
+import net.minecraft.client.texture.AbstractTexture;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.NativeImageBackedTexture;
-import net.minecraft.client.texture.Texture;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 
@@ -19,7 +19,7 @@ public class MFont {
     private static final minegame159.meteorclient.utils.Color SHADOW_COLOR = new minegame159.meteorclient.utils.Color(60, 60, 60, 180);
 
     private final MeshBuilder mb = new MeshBuilder(16384);
-    private final Texture texture;
+    private final AbstractTexture texture;
     private final CharData[] charData = new CharData[256];
     private int fontHeight = -1;
 
@@ -29,7 +29,7 @@ public class MFont {
         texture = setupTexture(font, antiAlias, fractionalMetrics, this.charData);
     }
 
-    private Texture setupTexture(Font font, boolean antiAlias, boolean fractionalMetrics, CharData[] chars) {
+    private AbstractTexture setupTexture(Font font, boolean antiAlias, boolean fractionalMetrics, CharData[] chars) {
         BufferedImage img = generateFontImage(font, antiAlias, fractionalMetrics, chars);
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();

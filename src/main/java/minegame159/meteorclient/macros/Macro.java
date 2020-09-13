@@ -49,7 +49,7 @@ public class Macro implements Listenable, ISerializable<Macro> {
 
         // Messages
         ListTag messagesTag = new ListTag();
-        for (String message : messages) messagesTag.add(new StringTag(message));
+        for (String message : messages) messagesTag.add(StringTag.of(message));
         tag.put("messages", messagesTag);
 
         return tag;

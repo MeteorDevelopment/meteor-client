@@ -1,5 +1,6 @@
 package minegame159.meteorclient.mixin;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.events.RenderEvent;
@@ -14,6 +15,7 @@ import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.GameRenderer;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -33,18 +35,29 @@ public abstract class GameRendererMixin {
 
     @Shadow @Final private Camera camera;
 
+    private boolean a = false;
+
     @Inject(method = "render", at = @At("HEAD"), cancellable = true)
-    private void onRender(float tickDelta, long startTime, boolean tick, CallbackInfo info) {
+    private void onRenderHead(float tickDelta, long startTime, boolean tick, CallbackInfo info) {
         if (ModuleManager.INSTANCE.isActive(UnfocusedCPU.class) && !client.isWindowFocused()) info.cancel();
+
+        a = false;
     }
 
-    @Inject(at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiler/Profiler;swap(Ljava/lang/String;)V", args = { "ldc=hand" }), method = "renderCenter")
-    public void onRenderCenter(float tickDelta, long endTime, CallbackInfo info) {
+    @Inject(method = "renderWorld", at = @At("HEAD"))
+    private void onRenderWorldHead(float tickDelta, long limitTime, MatrixStack matrix, CallbackInfo info) {
+        Matrices.begin(matrix);
+        Matrices.push();
+        RenderSystem.pushMatrix();
+
+        a = true;
+    }
+
+    @Inject(method = "renderWorld", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiler/Profiler;swap(Ljava/lang/String;)V", args = { "ldc=hand" }))
+    private void onRenderWorld(float tickDelta, long limitTime, MatrixStack matrix, CallbackInfo info) {
         if (!Utils.canUpdate()) return;
 
         client.getProfiler().swap("meteor-client_render");
-
-        Matrices.begin();
 
         RenderEvent event = EventStore.renderEvent(tickDelta, camera.getPos().x, camera.getPos().y, camera.getPos().z);
 
@@ -53,7 +66,7 @@ public abstract class GameRendererMixin {
         Renderer.end();
     }
 
-    @Inject(method = "updateTargetedEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/ProjectileUtil;rayTrace(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/util/math/Box;Ljava/util/function/Predicate;D)Lnet/minecraft/util/hit/EntityHitResult;"), cancellable = true)
+    @Inject(method = "updateTargetedEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/projectile/ProjectileUtil;raycast(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/util/math/Box;Ljava/util/function/Predicate;D)Lnet/minecraft/util/hit/EntityHitResult;"), cancellable = true)
     private void onUpdateTargetedEntity(float tickDelta, CallbackInfo info) {
         if (ModuleManager.INSTANCE.get(NoMiningTrace.class).canWork() && client.crosshairTarget.getType() == HitResult.Type.BLOCK) {
             client.getProfiler().pop();
@@ -61,25 +74,23 @@ public abstract class GameRendererMixin {
         }
     }
 
-    @Redirect(method = "updateTargetedEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;rayTrace(DFZ)Lnet/minecraft/util/hit/HitResult;"))
+    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;clear(IZ)V", ordinal = 0))
+    private void onRenderBeforeGuiRender(float tickDelta, long startTime, boolean tick, CallbackInfo info) {
+        if (a) {
+            Matrices.pop();
+            RenderSystem.popMatrix();
+        }
+    }
+
+    @Redirect(method = "updateTargetedEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;raycast(DFZ)Lnet/minecraft/util/hit/HitResult;"))
     private HitResult updateTargetedEntityEntityRayTraceProxy(Entity entity, double maxDistance, float tickDelta, boolean includeFluids) {
-        if (ModuleManager.INSTANCE.isActive(LiquidInteract.class)) return entity.rayTrace(maxDistance, tickDelta, true);
-        return entity.rayTrace(maxDistance, tickDelta, includeFluids);
+        if (ModuleManager.INSTANCE.isActive(LiquidInteract.class)) return entity.raycast(maxDistance, tickDelta, true);
+        return entity.raycast(maxDistance, tickDelta, includeFluids);
     }
 
     @Inject(method = "bobViewWhenHurt", at = @At("HEAD"), cancellable = true)
-    private void onBobViewWhenHurt(float tickDelta, CallbackInfo info) {
+    private void onBobViewWhenHurt(MatrixStack matrixStack, float f, CallbackInfo info) {
         if (ModuleManager.INSTANCE.get(NoRender.class).noHurtCam()) info.cancel();
-    }
-
-    @Inject(method = "renderWeather", at = @At("HEAD"), cancellable = true)
-    private void onRenderWeather(float f, CallbackInfo info) {
-        if (ModuleManager.INSTANCE.get(NoRender.class).noWeather()) info.cancel();
-    }
-
-    @Inject(method = "renderRain", at = @At("HEAD"), cancellable = true)
-    private void onRenderRain(CallbackInfo info) {
-        if (ModuleManager.INSTANCE.get(NoRender.class).noWeather()) info.cancel();
     }
 
     @Inject(method = "showFloatingItem", at = @At("HEAD"), cancellable = true)
@@ -89,7 +100,7 @@ public abstract class GameRendererMixin {
         }
     }
 
-    @Redirect(method = "applyCameraTransformations", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/MathHelper;lerp(FFF)F"))
+    @Redirect(method = "renderWorld", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/MathHelper;lerp(FFF)F"))
     private float applyCameraTransformationsMathHelperLerpProxy(float delta, float first, float second) {
         if (ModuleManager.INSTANCE.get(NoRender.class).noNausea()) return 0;
         return MathHelper.lerp(delta, first, second);

@@ -115,7 +115,7 @@ public class ESP extends ToggleModule {
     private void render(RenderEvent event, Entity entity, Color lineColor) {
         setSideColor(lineColor);
 
-        double dist = mc.cameraEntity.squaredDistanceTo(entity.x + entity.getWidth() / 2, entity.y + entity.getHeight() / 2, entity.z + entity.getWidth() / 2);
+        double dist = mc.cameraEntity.squaredDistanceTo(entity.getX() + entity.getWidth() / 2, entity.getY() + entity.getHeight() / 2, entity.getZ() + entity.getWidth() / 2);
         double a = 1;
         if (dist <= fadeDistance.get() * fadeDistance.get()) a = dist / (fadeDistance.get() * fadeDistance.get());
 
@@ -126,25 +126,25 @@ public class ESP extends ToggleModule {
         sideColor.a *= a;
 
         if (a >= 0.075) {
-            double x = (entity.x - entity.prevX) * event.tickDelta;
-            double y = (entity.y - entity.prevY) * event.tickDelta;
-            double z = (entity.z - entity.prevZ) * event.tickDelta;
+            double x = (entity.getX() - entity.prevX) * event.tickDelta;
+            double y = (entity.getY() - entity.prevY) * event.tickDelta;
+            double z = (entity.getZ() - entity.prevZ) * event.tickDelta;
 
             switch (mode.get()) {
                 case Lines: {
                     Box box = entity.getBoundingBox();
-                    ShapeBuilder.boxEdges(x + box.x1, y + box.y1, z + box.z1, x + box.x2, y + box.y2, z + box.z2, lineColor);
+                    ShapeBuilder.boxEdges(x + box.minX, y + box.minY, z + box.minZ, x + box.maxX, y + box.maxY, z + box.maxZ, lineColor);
                     break;
                 }
                 case Sides: {
                     Box box = entity.getBoundingBox();
-                    ShapeBuilder.boxSides(x + box.x1, y + box.y1, z + box.z1, x + box.x2, y + box.y2, z + box.z2, sideColor);
+                    ShapeBuilder.boxSides(x + box.minX, y + box.minY, z + box.minZ, x + box.maxX, y + box.maxY, z + box.maxZ, sideColor);
                     break;
                 }
                 case Both: {
                     Box box = entity.getBoundingBox();
-                    ShapeBuilder.boxEdges(x + box.x1, y + box.y1, z + box.z1, x + box.x2, y + box.y2, z + box.z2, lineColor);
-                    ShapeBuilder.boxSides(x + box.x1, y + box.y1, z + box.z1, x + box.x2, y + box.y2, z + box.z2, sideColor);
+                    ShapeBuilder.boxEdges(x + box.minX, y + box.minY, z + box.minZ, x + box.maxX, y + box.maxY, z + box.maxZ, lineColor);
+                    ShapeBuilder.boxSides(x + box.minX, y + box.minY, z + box.minZ, x + box.maxX, y + box.maxY, z + box.maxZ, sideColor);
                     break;
                 }
             }
@@ -179,7 +179,7 @@ public class ESP extends ToggleModule {
     public Color getColor(Entity entity) {
         if (entity instanceof PlayerEntity) return FriendManager.INSTANCE.getColor((PlayerEntity) entity, playersColor.get());
 
-        switch (entity.getType().getCategory()) {
+        switch (entity.getType().getSpawnGroup()) {
             case CREATURE:       return animalsColor.get();
             case WATER_CREATURE: return waterAnimalsColor.get();
             case MONSTER:        return monstersColor.get();

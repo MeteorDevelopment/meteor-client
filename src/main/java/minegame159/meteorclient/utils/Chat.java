@@ -30,9 +30,9 @@ public class Chat {
     private static void sendMsg(Module module, String msg, Formatting color) {
         if (MinecraftClient.getInstance().world == null) return;
         if (module != null) {
-            MinecraftClient.getInstance().player.sendMessage(new LiteralText(String.format("%s[%sMeteor%s] %s[%s] %s%s", Formatting.GRAY, Formatting.BLUE,Formatting.GRAY, Formatting.AQUA, module.title, color, msg)));
+            MinecraftClient.getInstance().player.sendMessage(new LiteralText(String.format("%s[%sMeteor%s] %s[%s] %s%s", Formatting.GRAY, Formatting.BLUE,Formatting.GRAY, Formatting.AQUA, module.title, color, msg)), false);
         } else {
-            MinecraftClient.getInstance().player.sendMessage(new LiteralText(String.format("%s[%sMeteor%s] %s%s", Formatting.GRAY, Formatting.BLUE, Formatting.GRAY, color, msg)));
+            MinecraftClient.getInstance().player.sendMessage(new LiteralText(String.format("%s[%sMeteor%s] %s%s", Formatting.GRAY, Formatting.BLUE, Formatting.GRAY, color, msg)), false);
         }
     }
 

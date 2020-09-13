@@ -4,9 +4,11 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import minegame159.meteorclient.gui.renderer.GuiRenderer;
 import minegame159.meteorclient.gui.widgets.Cell;
 import minegame159.meteorclient.gui.widgets.WWidget;
+import minegame159.meteorclient.rendering.Matrices;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.LiteralText;
 import org.lwjgl.glfw.GLFW;
 
@@ -39,7 +41,7 @@ public class WidgetScreen extends Screen {
 
     @Override
     public void mouseMoved(double mouseX, double mouseY) {
-        double s = mc.window.getScaleFactor();
+        double s = mc.getWindow().getScaleFactor();
         double scale = GuiConfig.INSTANCE.guiScale;
 
         mouseX *= s;
@@ -90,10 +92,10 @@ public class WidgetScreen extends Screen {
     }
 
     @Override
-    public void render(int mouseX, int mouseY, float delta) {
-        if (!Utils.canUpdate()) renderBackground();
+    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+        if (!Utils.canUpdate()) renderBackground(matrices);
 
-        double s = mc.window.getScaleFactor();
+        double s = mc.getWindow().getScaleFactor();
         double scale = GuiConfig.INSTANCE.guiScale;
 
         mouseX *= s;
@@ -101,6 +103,7 @@ public class WidgetScreen extends Screen {
         mouseX /= scale;
         mouseY /= scale;
 
+        Matrices.begin(new MatrixStack());
         GlStateManager.pushMatrix();
         GlStateManager.scaled(1 / s, 1 / s, 1);
         GlStateManager.scaled(scale, scale, 1);

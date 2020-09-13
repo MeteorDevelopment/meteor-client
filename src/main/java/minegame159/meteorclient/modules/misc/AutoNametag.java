@@ -47,7 +47,7 @@ public class AutoNametag extends ToggleModule {
             boolean foundNametag = !findNametag;
             if (findNametag) {
                 for (int i = 0; i < 9; i++) {
-                    ItemStack itemStack = mc.player.inventory.getInvStack(i);
+                    ItemStack itemStack = mc.player.inventory.getStack(i);
                     if (itemStack.getItem() instanceof NameTagItem) {
                         mc.player.inventory.selectedSlot = i;
                         foundNametag = true;

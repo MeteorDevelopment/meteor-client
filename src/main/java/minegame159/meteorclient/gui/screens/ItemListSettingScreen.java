@@ -59,7 +59,7 @@ public class ItemListSettingScreen extends WindowScreen {
         } else {
             List<Pair<Item, Integer>> items = new ArrayList<>();
             Registry.ITEM.forEach(item -> {
-                int words = Utils.search(item.getName().asFormattedString(), filter.text);
+                int words = Utils.search(item.getName().getString(), filter.text);
                 if (words > 0) items.add(new Pair<>(item, words));
             });
             items.sort(Comparator.comparingInt(value -> -value.getRight()));

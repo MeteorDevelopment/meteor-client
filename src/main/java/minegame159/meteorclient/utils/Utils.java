@@ -4,16 +4,17 @@ import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import minegame159.meteorclient.gui.GuiConfig;
 import minegame159.meteorclient.mixininterface.IMinecraftClient;
+import minegame159.meteorclient.mixininterface.IMinecraftServer;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.ShapeContext;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.Camera;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityContext;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.item.*;
 import net.minecraft.nbt.CompoundTag;
@@ -61,6 +62,10 @@ public class Utils {
         df.setDecimalFormatSymbols(dfs);
     }
 
+    public static Vec3d vec3d(BlockPos pos) {
+        return new Vec3d(pos.getX(), pos.getY(), pos.getZ());
+    }
+
     public static void getItemsInContainerItem(ItemStack itemStack, ItemStack[] items) {
         Arrays.fill(items, ItemStack.EMPTY);
         CompoundTag nbt = itemStack.getTag();
@@ -77,11 +82,11 @@ public class Utils {
     }
 
     public static double getScaledWindowWidthGui() {
-        return mc.window.getFramebufferWidth() / GuiConfig.INSTANCE.guiScale;
+        return mc.getWindow().getFramebufferWidth() / GuiConfig.INSTANCE.guiScale;
     }
 
     public static double getScaledWindowHeightGui() {
-        return mc.window.getFramebufferHeight() / GuiConfig.INSTANCE.guiScale;
+        return mc.getWindow().getFramebufferHeight() / GuiConfig.INSTANCE.guiScale;
     }
 
     public static Object2IntMap<StatusEffect> createStatusEffectMap() {
@@ -113,7 +118,7 @@ public class Utils {
         if (enchantment == Enchantments.QUICK_CHARGE) return "Quick C";
         if (enchantment == Enchantments.VANISHING_CURSE) return "Curse V";
 
-        return enchantment.getName(0).asString().substring(0, 4);
+        return enchantment.getName(0).getString().substring(0, 4);
     }
 
     public static int search(String text, String filter) {
@@ -144,7 +149,7 @@ public class Utils {
     public static String getWorldName() {
         if (mc.isInSingleplayer()) {
             // Singleplaer
-            File folder = mc.getServer().getWorld(mc.world.dimension.getType()).getSaveHandler().getWorldDir();
+            File folder = ((IMinecraftServer) mc.getServer()).getSession().getWorldDirectory(mc.world.getRegistryKey());
             if (folder.toPath().relativize(mc.runDirectory.toPath()).getNameCount() != 2) {
                 folder = folder.getParentFile();
             }
@@ -204,7 +209,7 @@ public class Utils {
 
     public static boolean place(BlockState blockState, BlockPos blockPos, boolean swingHand, boolean checkFaceVisibility, boolean checkForEntities) {
         // Calculate eyes pos
-        ((IVec3d) eyesPos).set(mc.player.x, mc.player.y + mc.player.getEyeHeight(mc.player.getPose()), mc.player.z);
+        ((IVec3d) eyesPos).set(mc.player.getX(), mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()), mc.player.getZ());
 
         // Check if current block is replaceable
         if (!mc.world.getBlockState(blockPos).getMaterial().isReplaceable()) return false;
@@ -230,10 +235,10 @@ public class Utils {
             if(eyesPos.squaredDistanceTo(vec1) > 18.0625) continue;
 
             // Check if intersects entities
-            if (checkForEntities && !mc.world.canPlace(blockState, blockPos, EntityContext.absent())) continue;
+            if (checkForEntities && !mc.world.canPlace(blockState, blockPos, ShapeContext.absent())) continue;
 
             // Place block
-            PlayerMoveC2SPacket.LookOnly packet = new PlayerMoveC2SPacket.LookOnly(getNeededYaw(vec1), getNeededPitch(vec1), mc.player.onGround);
+            PlayerMoveC2SPacket.LookOnly packet = new PlayerMoveC2SPacket.LookOnly(getNeededYaw(vec1), getNeededPitch(vec1), mc.player.isOnGround());
             mc.player.networkHandler.sendPacket(packet);
             mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(vec1, side2, neighbor, false));
             mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
@@ -250,13 +255,13 @@ public class Utils {
     }
 
     public static float getNeededYaw(Vec3d vec) {
-        return mc.player.yaw + MathHelper.wrapDegrees((float) Math.toDegrees(Math.atan2(vec.z - mc.player.z, vec.x - mc.player.x)) - 90f - mc.player.yaw);
+        return mc.player.yaw + MathHelper.wrapDegrees((float) Math.toDegrees(Math.atan2(vec.z - mc.player.getZ(), vec.x - mc.player.getX())) - 90f - mc.player.yaw);
     }
 
     public static float getNeededPitch(Vec3d vec) {
-        double diffX = vec.x - mc.player.x;
-        double diffY = vec.y - (mc.player.y + mc.player.getEyeHeight(mc.player.getPose()));
-        double diffZ = vec.z - mc.player.z;
+        double diffX = vec.x - mc.player.getX();
+        double diffY = vec.y - (mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()));
+        double diffZ = vec.z - mc.player.getZ();
 
         double diffXZ = Math.sqrt(diffX * diffX + diffZ * diffZ);
 
@@ -268,7 +273,7 @@ public class Utils {
         return Math.sqrt(camera.getPos().squaredDistanceTo(x, y, z));
     }
     public static double distanceToCamera(Entity entity) {
-        return distanceToCamera(entity.x, entity.y, entity.z);
+        return distanceToCamera(entity.getX(), entity.getY(), entity.getZ());
     }
 
     public static boolean canUpdate() {
@@ -293,7 +298,7 @@ public class Utils {
         msg = msg.replaceAll("#pink", Formatting.LIGHT_PURPLE.toString());
         msg = msg.replaceAll("#gray", Formatting.GRAY.toString());
 
-        mc.player.sendMessage(new LiteralText(msg));
+        mc.player.sendMessage(new LiteralText(msg), false);
     }
 
     public static void leftClick() {

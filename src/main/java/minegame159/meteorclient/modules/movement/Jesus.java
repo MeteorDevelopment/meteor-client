@@ -92,12 +92,12 @@ public class Jesus extends ToggleModule {
         boolean foundSolid = false;
 
         ArrayList<Box> blockCollisions = mc.world
-                .method_20812(mc.player, mc.player.getBoundingBox().offset(0, -0.5, 0))
+                .getBlockCollisions(mc.player, mc.player.getBoundingBox().offset(0, -0.5, 0))
                 .map(VoxelShape::getBoundingBox)
                 .collect(Collectors.toCollection(ArrayList::new));
 
         for(Box bb : blockCollisions) {
-            blockPos.set(MathHelper.lerp(0.5D, bb.x1, bb.x2), MathHelper.lerp(0.5D, bb.y1, bb.y2), MathHelper.lerp(0.5D, bb.z1, bb.z2));
+            blockPos.set(MathHelper.lerp(0.5D, bb.minX, bb.maxX), MathHelper.lerp(0.5D, bb.minY, bb.maxY), MathHelper.lerp(0.5D, bb.minZ, bb.maxZ));
             Material material = mc.world.getBlockState(blockPos).getMaterial();
 
             if(material == Material.WATER || material == Material.LAVA) foundLiquid = true;

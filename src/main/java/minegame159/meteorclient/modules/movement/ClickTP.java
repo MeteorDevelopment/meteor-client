@@ -35,7 +35,7 @@ public class ClickTP extends ToggleModule {
         if (mc.player.isUsingItem()) return;
 
         if (mc.options.keyUse.isPressed()) {
-            HitResult hitResult = mc.player.rayTrace(maxDistance.get(), 1f / 20f, false);
+            HitResult hitResult = mc.player.raycast(maxDistance.get(), 1f / 20f, false);
 
             if (hitResult.getType() == HitResult.Type.ENTITY && mc.player.interact(((EntityHitResult) hitResult).getEntity(), Hand.MAIN_HAND) != ActionResult.PASS) return;
 
@@ -43,7 +43,7 @@ public class ClickTP extends ToggleModule {
                 BlockPos pos = ((BlockHitResult) hitResult).getBlockPos();
                 Direction side = ((BlockHitResult) hitResult).getSide();
 
-                if (mc.world.getBlockState(pos).activate(mc.world, mc.player, Hand.MAIN_HAND, (BlockHitResult) hitResult)) return;
+                if (mc.world.getBlockState(pos).onUse(mc.world, mc.player, Hand.MAIN_HAND, (BlockHitResult) hitResult) != ActionResult.PASS) return;
 
                 mc.player.updatePosition(pos.getX() + 0.5 + side.getOffsetX(), pos.getY() + side.getOffsetY(), pos.getZ() + 0.5 + side.getOffsetZ());
             }

@@ -18,6 +18,7 @@ import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.network.ServerInfo;
+import net.minecraft.text.LiteralText;
 
 public class AutoReconnect extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -57,7 +58,7 @@ public class AutoReconnect extends ToggleModule {
         private int timer;
 
         public AutoReconnectScreen(DisconnectedScreen screen) {
-            super(((IDisconnectedScreen) screen).getParent(), screen.getTitle().asString(), ((IDisconnectedScreen) screen).getReason());
+            super(((IDisconnectedScreen) screen).getParent(), screen.getTitle(), ((IDisconnectedScreen) screen).getReason());
             reasonHeight = ((IDisconnectedScreen) screen).getReasonHeight();
             timer = (int) (time.get() * 20);
         }
@@ -65,7 +66,7 @@ public class AutoReconnect extends ToggleModule {
         @Override
         protected void init() {
             super.init();
-            reconnectBtn = addButton(new ButtonWidget(width / 2 - 100, height / 2 + reasonHeight / 2 + 9 + 30, 200, 20, "Reconnecting in " + timer / 20f, button -> timerActive = !timerActive));
+            reconnectBtn = addButton(new ButtonWidget(width / 2 - 100, height / 2 + reasonHeight / 2 + 9 + 30, 200, 20, new LiteralText("Reconnecting in " + timer / 20f), button -> timerActive = !timerActive));
         }
 
         @Override
@@ -73,12 +74,12 @@ public class AutoReconnect extends ToggleModule {
             super.tick();
 
             if (timer <= 0) {
-                minecraft.openScreen(new ConnectScreen(new MultiplayerScreen(new TitleScreen()), minecraft, lastServerInfo));
+                client.openScreen(new ConnectScreen(new MultiplayerScreen(new TitleScreen()), client, lastServerInfo));
             }
 
             if (timerActive) {
                 timer--;
-                ((IAbstractButtonWidget) reconnectBtn).setText(String.format("Reconnecting in %.1f", timer / 20f));
+                ((IAbstractButtonWidget) reconnectBtn).setText(new LiteralText(String.format("Reconnecting in %.1f", timer / 20f)));
             }
         }
     }

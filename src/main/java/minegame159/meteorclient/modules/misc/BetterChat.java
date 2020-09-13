@@ -13,6 +13,8 @@ import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.gui.hud.ChatHudLine;
 import net.minecraft.text.LiteralText;
+import net.minecraft.text.OrderedText;
+import net.minecraft.text.Text;
 import net.minecraft.util.ChatUtil;
 import net.minecraft.util.Formatting;
 
@@ -64,7 +66,7 @@ public class BetterChat extends ToggleModule {
         super(Category.Misc, "better-chat", "Improves chat in many ways.");
     }
 
-    public boolean onMsg(String message, int messageId, int timestamp, List<ChatHudLine> messages, List<ChatHudLine> visibleMessages) {
+    public boolean onMsg(String message, int messageId, int timestamp, List<ChatHudLine<Text>> messages, List<ChatHudLine<OrderedText>> visibleMessages) {
         if (!isActive() || skipMessage) return false;
 
         if (sgIgnore.isEnabled() && ignoreOnMsg(message)) return true;
@@ -86,7 +88,7 @@ public class BetterChat extends ToggleModule {
 
     // ANTI SPAM
 
-    private boolean antiSpamOnMsg(String message, int messageId, int timestamp, List<ChatHudLine> messages, List<ChatHudLine> visibleMessages) {
+    private boolean antiSpamOnMsg(String message, int messageId, int timestamp, List<ChatHudLine<Text>> messages, List<ChatHudLine<OrderedText>> visibleMessages) {
         message = ChatUtil.stripTextFormat(message);
 
         for (int i = 0; i < antiSpamDepth.get(); i++) {
@@ -104,17 +106,17 @@ public class BetterChat extends ToggleModule {
         return false;
     }
 
-    private boolean antiSpamCheckMsg(List<ChatHudLine> visibleMessages, String newMsg, int newTimestamp, int newId, int msgI) {
-        ChatHudLine msg = visibleMessages.size() > msgI ? visibleMessages.get(msgI) : null;
+    private boolean antiSpamCheckMsg(List<ChatHudLine<OrderedText>> visibleMessages, String newMsg, int newTimestamp, int newId, int msgI) {
+        ChatHudLine<OrderedText> msg = visibleMessages.size() > msgI ? visibleMessages.get(msgI) : null;
         if (msg == null) return false;
-        String msgString = msg.getText().asFormattedString();
+        String msgString = msg.getText().toString();
 
         if (ChatUtil.stripTextFormat(msgString).equals(newMsg)) {
             msgString += Formatting.GRAY + " (2)";
 
-            ((IChatHudLine) msg).setText(new LiteralText(msgString));
-            ((IChatHudLine) msg).setTimestamp(newTimestamp);
-            ((IChatHudLine) msg).setId(newId);
+            ((IChatHudLine<Text>) msg).setText(new LiteralText(msgString));
+            ((IChatHudLine<Text>) msg).setTimestamp(newTimestamp);
+            ((IChatHudLine<Text>) msg).setId(newId);
 
             return true;
         } else {

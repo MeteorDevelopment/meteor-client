@@ -1,29 +1,41 @@
 package minegame159.meteorclient.rendering;
 
-import org.lwjgl.opengl.GL11;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.util.math.Matrix4f;
+import net.minecraft.util.math.Quaternion;
 
 public class Matrices {
-    public static void begin() {
-        // Here for newer versions that doesn't use opengl's matrix stack
+    private static MatrixStack matrixStack;
+
+    public static void begin(MatrixStack matrixStack) {
+        Matrices.matrixStack = matrixStack;
     }
 
     public static void push() {
-        GL11.glPushMatrix();
+        matrixStack.push();
     }
 
     public static void translate(double x, double y, double z) {
-        GL11.glTranslated(x, y, z);
+        matrixStack.translate(x, y, z);
     }
 
     public static void rotate(double angle, double x, double y, double z) {
-        GL11.glRotated(angle, x, y, z);
+        matrixStack.multiply(new Quaternion((float) (x * angle), (float) (y * angle), (float) (z * angle), true));
     }
 
     public static void scale(double x, double y, double z) {
-        GL11.glScaled(x, y, z);
+        matrixStack.scale((float) x, (float) y, (float) z);
     }
 
     public static void pop() {
-        GL11.glPopMatrix();
+        matrixStack.pop();
+    }
+
+    public static Matrix4f getTop() {
+        return matrixStack.peek().getModel();
+    }
+
+    public static MatrixStack getMatrixStack() {
+        return matrixStack;
     }
 }

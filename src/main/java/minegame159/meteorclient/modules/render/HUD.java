@@ -1,11 +1,12 @@
 package minegame159.meteorclient.modules.render;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.Config;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.*;
+import minegame159.meteorclient.mixininterface.IMinecraftClient;
 import minegame159.meteorclient.mixininterface.IClientPlayerInteractionManager;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
@@ -22,9 +23,11 @@ import minegame159.meteorclient.utils.EntityUtils;
 import minegame159.meteorclient.utils.TickRate;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.PlayerListEntry;
+import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.toast.Toast;
 import net.minecraft.client.toast.ToastManager;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.effect.StatusEffect;
@@ -39,11 +42,11 @@ import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.world.dimension.DimensionType;
 import org.apache.commons.lang3.StringUtils;
 import org.lwjgl.opengl.GL11;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class HUD extends ToggleModule {
     public enum DurabilityType{
@@ -327,7 +330,7 @@ public class HUD extends ToggleModule {
     private String getEntityName(Entity entity) {
         if (entity instanceof PlayerEntity) return "Player";
         if (entity instanceof ItemEntity) return "Item";
-        String name = entityCustomNames.get() ? entity.getDisplayName().asString() : entity.getType().getName().asString();
+        String name = entityCustomNames.get() ? entity.getDisplayName().getString() : entity.getType().getName().getString();
         if (separateSheepsByColor.get() && entity instanceof SheepEntity) return StringUtils.capitalize(((SheepEntity) entity).getColor().getName().replace('_', ' ')) + " - " + name;
         return name;
     }
@@ -404,7 +407,7 @@ public class HUD extends ToggleModule {
                 for (int i = mc.player.inventory.armor.size() - 1; i >= 0; i--) {
                     ItemStack itemStack = mc.player.inventory.armor.get(i);
 
-                    mc.getItemRenderer().renderGuiItem(itemStack, x, y);
+                    mc.getItemRenderer().renderGuiItemIcon(itemStack, x, y);
                     mc.getItemRenderer().renderGuiItemOverlay(mc.textRenderer, itemStack, x, y);
 
                     x += 20;
@@ -413,7 +416,7 @@ public class HUD extends ToggleModule {
                 for (int i = mc.player.inventory.armor.size() - 1; i >= 0; i--) {
                     ItemStack itemStack = mc.player.inventory.armor.get(i);
 
-                    mc.getItemRenderer().renderGuiItem(itemStack, x, y);
+                    mc.getItemRenderer().renderGuiItemIcon(itemStack, x, y);
                     if(!itemStack.isEmpty() && itemStack.isDamageable()) {
                         String message = Integer.toString(itemStack.getMaxDamage() - itemStack.getDamage());
                         MeteorClient.FONT.scale = scale.get();
@@ -427,7 +430,7 @@ public class HUD extends ToggleModule {
                 for (int i = mc.player.inventory.armor.size() - 1; i >= 0; i--) {
                     ItemStack itemStack = mc.player.inventory.armor.get(i);
 
-                    mc.getItemRenderer().renderGuiItem(itemStack, x, y);
+                    mc.getItemRenderer().renderGuiItemIcon(itemStack, x, y);
                     if(!itemStack.isEmpty() && itemStack.isDamageable()) {
                         String message = Integer.toString(Math.round(((itemStack.getMaxDamage() - itemStack.getDamage()) * 100f) / (float) itemStack.getMaxDamage()));
                         MeteorClient.FONT.scale = scale.get();
@@ -441,13 +444,13 @@ public class HUD extends ToggleModule {
                 for (int i = mc.player.inventory.armor.size() - 1; i >= 0; i--) {
                     ItemStack itemStack = mc.player.inventory.armor.get(i);
 
-                    mc.getItemRenderer().renderGuiItem(itemStack, x, y);
+                    mc.getItemRenderer().renderGuiItemIcon(itemStack, x, y);
 
                     x += 20;
                 }
             }
 
-            GlStateManager.disableLighting();
+            DiffuseLighting.disable();
         }
 
     });
@@ -477,12 +480,12 @@ public class HUD extends ToggleModule {
             double radius = 32;
             if (mc.options.viewDistance > 4) radius += 16;
 
-            double centerX = mc.player.x;
-            double centerZ = mc.player.z;
+            double centerX = mc.player.getX();
+            double centerZ = mc.player.getZ();
 
             for (Entity entity : mc.world.getEntities()) {
-                double x = entity.x - centerX;
-                double z = entity.z - centerZ;
+                double x = entity.getX() - centerX;
+                double z = entity.getZ() - centerZ;
                 if (Math.abs(x) > radius || Math.abs(z) > radius) continue;
 
                 Color color;
@@ -516,7 +519,7 @@ public class HUD extends ToggleModule {
         }
 
         if (fps.get()) {
-            drawInfo("FPS: ", MinecraftClient.getCurrentFps() + "", y);
+            drawInfo("FPS: ", ((IMinecraftClient) MinecraftClient.getInstance()).getFps() + "", y);
             y += MeteorClient.FONT.getHeight() + 2;
         }
 
@@ -538,8 +541,8 @@ public class HUD extends ToggleModule {
         }
 
         if (speed.get()) {
-            double tX = Math.abs(mc.player.x - mc.player.prevX);
-            double tZ = Math.abs(mc.player.z - mc.player.prevZ);
+            double tX = Math.abs(mc.player.getX() - mc.player.prevX);
+            double tZ = Math.abs(mc.player.getZ() - mc.player.prevZ);
             double length = Math.sqrt(tX * tX + tZ * tZ);
 
             drawInfo("Speed: ", String.format("%.1f", length * 20), y);
@@ -547,8 +550,8 @@ public class HUD extends ToggleModule {
         }
 
         if (biome.get()) {
-            playerBlockPos.set(mc.player);
-            drawInfo("Biome: ", mc.world.getBiome(playerBlockPos).getName().asString(), y);
+            playerBlockPos.set(mc.player.getX(), mc.player.getY(), mc.player.getZ());
+            drawInfo("Biome: ", Arrays.stream(mc.world.getBiome(playerBlockPos).getCategory().getName().split("_")).map(StringUtils::capitalize).collect(Collectors.joining(" ")), y);
             y += MeteorClient.FONT.getHeight() + 2;
         }
 
@@ -575,8 +578,8 @@ public class HUD extends ToggleModule {
 
         if (lookingAt.get()) {
             String text = "";
-            if (mc.crosshairTarget.getType() == HitResult.Type.BLOCK) text = mc.world.getBlockState(((BlockHitResult) mc.crosshairTarget).getBlockPos()).getBlock().getName().asString();
-            else if (mc.crosshairTarget.getType() == HitResult.Type.ENTITY) text = ((EntityHitResult) mc.crosshairTarget).getEntity().getDisplayName().asString();
+            if (mc.crosshairTarget.getType() == HitResult.Type.BLOCK) text = mc.world.getBlockState(((BlockHitResult) mc.crosshairTarget).getBlockPos()).getBlock().getName().getString();
+            else if (mc.crosshairTarget.getType() == HitResult.Type.ENTITY) text = ((EntityHitResult) mc.crosshairTarget).getEntity().getDisplayName().getString();
 
             drawInfo("Looking At: ", text, y);
             y += MeteorClient.FONT.getHeight() + 2;
@@ -621,7 +624,7 @@ public class HUD extends ToggleModule {
         drawInfo(text1, text2, y, white);
     }
     private void drawInfoRight(String text1, String text2, double y, Color text1Color) {
-        drawInfo(text1, text2, mc.window.getScaledWidth() - MeteorClient.FONT.getStringWidth(text1) - MeteorClient.FONT.getStringWidth(text2) - 2, y, text1Color);
+        drawInfo(text1, text2, mc.getWindow().getScaledWidth() - MeteorClient.FONT.getStringWidth(text1) - MeteorClient.FONT.getStringWidth(text2) - 2, y, text1Color);
     }
     private void drawInfoRight(String text1, String text2, double y) {
         drawInfoRight(text1, text2, y, white);
@@ -693,18 +696,18 @@ public class HUD extends ToggleModule {
         }
 
         if (position.get()) {
-            if (mc.player.dimension == DimensionType.OVERWORLD) {
-                drawPosition(event.screenWidth, "Nether Pos: ", y, mc.cameraEntity.x / 8.0, mc.cameraEntity.y, mc.cameraEntity.z / 8.0);
+            if (mc.world.getRegistryKey().getValue().getPath().equals("overworld")) {
+                drawPosition(event.screenWidth, "Nether Pos: ", y, mc.cameraEntity.getX() / 8.0, mc.cameraEntity.getY(), mc.cameraEntity.getZ() / 8.0);
                 y -= MeteorClient.FONT.getHeight() + 2;
-                drawPosition(event.screenWidth, "Pos: ", y, mc.cameraEntity.x, mc.cameraEntity.y, mc.cameraEntity.z);
+                drawPosition(event.screenWidth, "Pos: ", y, mc.cameraEntity.getX(), mc.cameraEntity.getY(), mc.cameraEntity.getZ());
                 y -= MeteorClient.FONT.getHeight() + 2;
-            } else if (mc.player.dimension == DimensionType.THE_NETHER) {
-                drawPosition(event.screenWidth, "Overworld Pos: ", y, mc.cameraEntity.x * 8.0, mc.cameraEntity.y, mc.cameraEntity.z * 8.0);
+            } else if (mc.world.getRegistryKey().getValue().getPath().equals("the_nether")) {
+                drawPosition(event.screenWidth, "Overworld Pos: ", y, mc.cameraEntity.getX() * 8.0, mc.cameraEntity.getY(), mc.cameraEntity.getZ() * 8.0);
                 y -= MeteorClient.FONT.getHeight() + 2;
-                drawPosition(event.screenWidth, "Pos: ", y, mc.cameraEntity.x, mc.cameraEntity.y, mc.cameraEntity.z);
+                drawPosition(event.screenWidth, "Pos: ", y, mc.cameraEntity.getX(), mc.cameraEntity.getY(), mc.cameraEntity.getZ());
                 y -= MeteorClient.FONT.getHeight() + 2;
-            } else if (mc.player.dimension == DimensionType.THE_END) {
-                drawPosition(event.screenWidth, "Pos: ", y, mc.cameraEntity.x, mc.cameraEntity.y, mc.cameraEntity.z);
+            } else if (mc.world.getRegistryKey().getValue().getPath().equals("the_end")) {
+                drawPosition(event.screenWidth, "Pos: ", y, mc.cameraEntity.getX(), mc.cameraEntity.getY(), mc.cameraEntity.getZ());
                 y -= MeteorClient.FONT.getHeight() + 2;
             }
         }
@@ -718,7 +721,7 @@ public class HUD extends ToggleModule {
                 white.g = Color.toRGBAG(c);
                 white.b = Color.toRGBAB(c);
 
-                drawInfoRight(statusEffect.method_5560().asString(), " " + (statusEffectInstance.getAmplifier() + 1) + " (" + StatusEffectUtil.durationToString(statusEffectInstance, 1) + ")", y, white);
+                drawInfoRight(statusEffect.getName().getString(), " " + (statusEffectInstance.getAmplifier() + 1) + " (" + StatusEffectUtil.durationToString(statusEffectInstance, 1) + ")", y, white);
                 y -= MeteorClient.FONT.getHeight() + 2;
 
                 white.r = white.g = white.b = 255;
@@ -741,15 +744,15 @@ public class HUD extends ToggleModule {
                 private long lastTime = -1;
 
                 @Override
-                public Visibility draw(ToastManager manager, long currentTime) {
+                public Visibility draw(MatrixStack matrices, ToastManager manager, long currentTime) {
                     if (lastTime == -1) lastTime = currentTime;
                     else timer += currentTime - lastTime;
 
                     manager.getGame().getTextureManager().bindTexture(new Identifier("textures/gui/toasts.png"));
-                    GlStateManager.color4f(1.0F, 1.0F, 1.0F, 255.0F);
-                    manager.blit(0, 0, 0, 32, 160, 32);
+                    RenderSystem.color4f(1.0F, 1.0F, 1.0F, 255.0F);
+                    manager.drawTexture(matrices, 0, 0, 0, 32, 160, 32);
 
-                    manager.getGame().textRenderer.draw("Armor Low.", 12.0F, 12.0F, -11534256);
+                    manager.getGame().textRenderer.draw(matrices, "Armor Low.", 12.0F, 12.0F, -11534256);
 
                     return timer >= 32000 ? Visibility.HIDE : Visibility.SHOW;
                 }

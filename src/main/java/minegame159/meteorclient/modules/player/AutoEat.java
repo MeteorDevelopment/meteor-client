@@ -98,7 +98,7 @@ public class AutoEat extends ToggleModule {
         int bestHunger = -1;
 
         for (int i = 0; i < 9; i++) {
-            Item item = mc.player.inventory.getInvStack(i).getItem();
+            Item item = mc.player.inventory.getStack(i).getItem();
             if (!item.isFood()) continue;
             if (noBad.get()) {
                 if (item == Items.POISONOUS_POTATO || item == Items.PUFFERFISH || item == Items.CHICKEN

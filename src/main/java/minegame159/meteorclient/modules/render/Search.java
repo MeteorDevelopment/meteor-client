@@ -97,7 +97,7 @@ public class Search extends ToggleModule {
     public void onActivate() {
         MeteorTaskExecutor.start();
 
-        lastDimension = mc.player.dimension;
+        lastDimension = mc.world.getDimension();
 
         searchViewDistance();
     }
@@ -164,7 +164,7 @@ public class Search extends ToggleModule {
 
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
-        if (lastDimension != mc.player.dimension) {
+        if (lastDimension != mc.world.getDimension()) {
             synchronized (chunks) {
                 for (MyChunk chunk : chunks.values()) chunk.dispose();
                 chunks.clear();
@@ -179,7 +179,7 @@ public class Search extends ToggleModule {
             toUpdate.clear();
         }
 
-        lastDimension = mc.player.dimension;
+        lastDimension = mc.world.getDimension();
     });
 
     @EventHandler
@@ -357,12 +357,12 @@ public class Search extends ToggleModule {
                 fullCube = Block.isShapeFullCube(shape);
 
                 if (!shape.isEmpty()) {
-                    x1 = x + shape.getMinimum(Direction.Axis.X);
-                    y1 = y + shape.getMinimum(Direction.Axis.Y);
-                    z1 = z + shape.getMinimum(Direction.Axis.Z);
-                    x2 = x + shape.getMaximum(Direction.Axis.X);
-                    y2 = y + shape.getMaximum(Direction.Axis.Y);
-                    z2 = z + shape.getMaximum(Direction.Axis.Z);
+                    x1 = x + shape.getMin(Direction.Axis.X);
+                    y1 = y + shape.getMin(Direction.Axis.Y);
+                    z1 = z + shape.getMin(Direction.Axis.Z);
+                    x2 = x + shape.getMax(Direction.Axis.X);
+                    y2 = y + shape.getMax(Direction.Axis.Y);
+                    z2 = z + shape.getMax(Direction.Axis.Z);
                 }
             }
 
@@ -423,7 +423,7 @@ public class Search extends ToggleModule {
 
             // Tracers
             if (sgTracers.isEnabled()) {
-                ShapeBuilder.line(vec1.x - (mc.cameraEntity.x - event.offsetX), vec1.y - (mc.cameraEntity.y - event.offsetY), vec1.z - (mc.cameraEntity.z - event.offsetZ), x + 0.5, y + 0.5, z + 0.5f, tracersColor.get());
+                ShapeBuilder.line(vec1.x - (mc.cameraEntity.getX() - event.offsetX), vec1.y - (mc.cameraEntity.getY() - event.offsetY), vec1.z - (mc.cameraEntity.getZ() - event.offsetZ), x + 0.5, y + 0.5, z + 0.5f, tracersColor.get());
             }
         }
 

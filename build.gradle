@@ -13,6 +13,7 @@ version = project.mod_version
 group = project.maven_group
 
 minecraft {
+	accessWidener "src/main/resources/meteor-client.accesswidener"
 }
 
 repositories {
@@ -35,8 +36,8 @@ dependencies {
 	include "com.github.ZeroMemes:Alpine:1.9"
 	include "net.jodah:typetools:0.5.0"
 
-	modImplementation "com.gitlab.CDAGaming:fabritone:fabritone~1.14.x-Fabric-SNAPSHOT"
-	include "com.gitlab.CDAGaming:fabritone:fabritone~1.14.x-Fabric-SNAPSHOT"
+	modImplementation "com.gitlab.CDAGaming:fabritone:fabritone~1.16.x-Fabric-SNAPSHOT"
+	include "com.gitlab.CDAGaming:fabritone:fabritone~1.16.x-Fabric-SNAPSHOT"
 
 	modImplementation "com.github.Vatuu:discord-rpc:1.6.2"
 	include "com.github.Vatuu:discord-rpc:1.6.2"

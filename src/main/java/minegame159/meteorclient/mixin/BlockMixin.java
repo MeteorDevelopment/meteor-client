@@ -2,8 +2,10 @@ package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.render.XRay;
+import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.item.ItemConvertible;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.BlockView;
@@ -13,12 +15,15 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(Block.class)
-public class BlockMixin {
-    @Inject(method = "getAmbientOcclusionLightLevel", at = @At("HEAD"), cancellable = true)
-    private void onGetAmbientOcclusionLightLevel(BlockState state, BlockView view, BlockPos pos, CallbackInfoReturnable<Float> info) {
-        if (ModuleManager.INSTANCE.isActive(XRay.class)) {
-            info.setReturnValue(1f);
-        }
+public abstract class BlockMixin extends AbstractBlock implements ItemConvertible {
+    public BlockMixin(Settings settings) {
+        super(settings);
+    }
+
+    @Override
+    public float getAmbientOcclusionLightLevel(BlockState state, BlockView world, BlockPos pos) {
+        if (ModuleManager.INSTANCE.isActive(XRay.class)) return 1;
+        return super.getAmbientOcclusionLightLevel(state, world, pos);
     }
 
     @Inject(at = @At("HEAD"), method = "shouldDrawSide", cancellable = true)

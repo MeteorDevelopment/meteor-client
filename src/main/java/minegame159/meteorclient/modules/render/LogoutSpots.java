@@ -1,6 +1,6 @@
 package minegame159.meteorclient.modules.render;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.MeteorClient;
@@ -19,6 +19,7 @@ import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.client.render.Camera;
+import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -145,10 +146,10 @@ public class LogoutSpots extends ToggleModule {
     private final Listener<RenderEvent> onRender = new Listener<>(event -> {
         for (Entry player : players) player.render(event);
 
-        GlStateManager.disableDepthTest();
-        GlStateManager.disableTexture();
-        GlStateManager.disableLighting();
-        GlStateManager.enableBlend();
+        RenderSystem.disableDepthTest();
+        RenderSystem.disableTexture();
+        DiffuseLighting.disable();
+        RenderSystem.enableBlend();
     });
 
     @Override
@@ -166,9 +167,9 @@ public class LogoutSpots extends ToggleModule {
         public final String healthText;
 
         public Entry(PlayerEntity entity) {
-            x = entity.x;
-            y = entity.y;
-            z = entity.z;
+            x = entity.getX();
+            y = entity.getY();
+            z = entity.getZ();
 
             width = entity.getBoundingBox().getXLength();
             height = entity.getBoundingBox().getZLength();
@@ -176,7 +177,7 @@ public class LogoutSpots extends ToggleModule {
             uuid = entity.getUuid();
             name = entity.getGameProfile().getName();
             health = Math.round(entity.getHealth() + entity.getAbsorptionAmount());
-            maxHealth = Math.round(entity.getMaximumHealth() + entity.getAbsorptionAmount());
+            maxHealth = Math.round(entity.getMaxHealth() + entity.getAbsorptionAmount());
 
             healthText = " " + health;
         }

@@ -1,6 +1,7 @@
 package minegame159.meteorclient.mixin;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.render.NoRender;
 import minegame159.meteorclient.modules.render.XRay;
@@ -13,10 +14,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(BackgroundRenderer.class)
 public class BackgroundRendererMixin {
-    @Inject(method = "applyFog", at = @At("TAIL"))
-    private void onApplyFog(Camera camera, int i, CallbackInfo info) {
+    @Inject(method = "applyFog", at = @At("TAIL"), cancellable = true)
+    private static void onApplyFog(Camera camera, BackgroundRenderer.FogType fogType, float viewDistance, boolean thickFog, CallbackInfo info) {
         if (ModuleManager.INSTANCE.get(NoRender.class).noFog() || ModuleManager.INSTANCE.isActive(XRay.class)) {
-            GlStateManager.disableFog();
+            if (fogType == BackgroundRenderer.FogType.FOG_TERRAIN) {
+                RenderSystem.fogStart(viewDistance * 4f);
+                RenderSystem.fogEnd(viewDistance * 4.25f);
+                RenderSystem.fogMode(GlStateManager.FogMode.LINEAR);
+                RenderSystem.setupNvFogDistance();
+            }
         }
     }
 }

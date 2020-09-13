@@ -13,7 +13,6 @@ import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.Mouse;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.util.Session;
 import net.minecraft.client.util.Window;
 import net.minecraft.client.world.ClientWorld;
@@ -41,19 +40,17 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
 
     @Shadow public Mouse mouse;
 
-    @Shadow public Window window;
+    @Shadow private Window window;
 
     @Shadow @Final private Proxy netProxy;
 
     @Shadow private Session session;
 
-    @Shadow public ClientPlayerEntity player;
+    @Shadow private static int currentFps;
 
     @Shadow @Nullable public Screen currentScreen;
 
-    @Shadow protected abstract void init();
-
-    @Inject(method = "init", at = @At("TAIL"))
+    @Inject(method = "<init>", at = @At("TAIL"))
     private void onInit(CallbackInfo info) {
         MeteorClient.INSTANCE.onInitializeClient();
     }
@@ -110,5 +107,10 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
     @Override
     public void setSession(Session session) {
         this.session = session;
+    }
+
+    @Override
+    public int getFps() {
+        return currentFps;
     }
 }

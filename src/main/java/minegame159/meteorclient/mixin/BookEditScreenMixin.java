@@ -5,11 +5,11 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.BookEditScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.StringTag;
+import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.Final;
@@ -28,17 +28,11 @@ import java.util.List;
 
 @Mixin(BookEditScreen.class)
 public abstract class BookEditScreenMixin extends Screen {
-    @Shadow @Final private ItemStack itemStack;
-
     @Shadow @Final private List<String> pages;
 
     @Shadow private int currentPage;
 
-    @Shadow private int cursorIndex;
-
     @Shadow private boolean dirty;
-
-    @Shadow private int highlightTo;
 
     @Shadow protected abstract void updateButtons();
 
@@ -48,9 +42,9 @@ public abstract class BookEditScreenMixin extends Screen {
 
     @Inject(method = "init", at = @At("TAIL"))
     private void onInit(CallbackInfo info) {
-        addButton(new ButtonWidget(4, 4, 70, 16, "Copy", button -> {
+        addButton(new ButtonWidget(4, 4, 70, 16, new LiteralText("Copy"), button -> {
             ListTag listTag = new ListTag();
-            pages.stream().map(StringTag::new).forEach(listTag::add);
+            pages.stream().map(StringTag::of).forEach(listTag::add);
 
             CompoundTag tag = new CompoundTag();
             tag.put("pages", listTag);
@@ -64,10 +58,10 @@ public abstract class BookEditScreenMixin extends Screen {
                 e.printStackTrace();
             }
 
-            GLFW.glfwSetClipboardString(MinecraftClient.getInstance().window.getHandle(), Base64.getEncoder().encodeToString(bytes.array));
+            GLFW.glfwSetClipboardString(MinecraftClient.getInstance().getWindow().getHandle(), Base64.getEncoder().encodeToString(bytes.array));
         }));
-        addButton(new ButtonWidget(4, 4 + 16 + 4, 70, 16, "Paste", button -> {
-            byte[] bytes = Base64.getDecoder().decode(GLFW.glfwGetClipboardString(MinecraftClient.getInstance().window.getHandle()));
+        addButton(new ButtonWidget(4, 4 + 16 + 4, 70, 16, new LiteralText("Paste"), button -> {
+            byte[] bytes = Base64.getDecoder().decode(GLFW.glfwGetClipboardString(MinecraftClient.getInstance().getWindow().getHandle()));
             DataInputStream in = new DataInputStream(new ByteArrayInputStream(bytes));
 
             try {

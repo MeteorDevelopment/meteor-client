@@ -18,7 +18,7 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.RayTraceContext;
+import net.minecraft.world.RaycastContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -73,9 +73,9 @@ public class Trajectories extends ToggleModule {
         Item item = mc.player.getMainHandStack().getItem();
 
         // Calculate starting position
-        double x = mc.player.lastRenderX + (mc.player.x - mc.player.lastRenderX) * tickDelta - Math.cos(Math.toRadians(mc.player.yaw)) * 0.16;
-        double y = mc.player.lastRenderY + (mc.player.y - mc.player.lastRenderY) * tickDelta + mc.player.getStandingEyeHeight() - 0.1;
-        double z = mc.player.lastRenderZ + (mc.player.z - mc.player.lastRenderZ) * tickDelta - Math.sin(Math.toRadians(mc.player.yaw)) * 0.16;
+        double x = mc.player.lastRenderX + (mc.player.getX() - mc.player.lastRenderX) * tickDelta - Math.cos(Math.toRadians(mc.player.yaw)) * 0.16;
+        double y = mc.player.lastRenderY + (mc.player.getY() - mc.player.lastRenderY) * tickDelta + mc.player.getStandingEyeHeight() - 0.1;
+        double z = mc.player.lastRenderZ + (mc.player.getZ() - mc.player.lastRenderZ) * tickDelta - Math.sin(Math.toRadians(mc.player.yaw)) * 0.16;
 
         // Motion factor. Arrows go faster than snowballs and all that
         double velocityFactor = item instanceof RangedWeaponItem ? 1.0 : 0.4;
@@ -143,8 +143,8 @@ public class Trajectories extends ToggleModule {
             if (!mc.world.getChunkManager().isChunkLoaded(chunkX, chunkZ)) break;
 
             // Check for collision
-            RayTraceContext context = new RayTraceContext(eyesPos, pos, RayTraceContext.ShapeType.COLLIDER, RayTraceContext.FluidHandling.NONE, mc.player);
-            lastHitResult = mc.world.rayTrace(context);
+            RaycastContext context = new RaycastContext(eyesPos, pos, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player);
+            lastHitResult = mc.world.raycast(context);
             if (lastHitResult.getType() != HitResult.Type.MISS) break;
         }
 

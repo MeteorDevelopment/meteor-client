@@ -4,6 +4,8 @@ import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.misc.BetterChat;
 import net.minecraft.client.gui.hud.ChatHud;
 import net.minecraft.client.gui.hud.ChatHudLine;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -17,9 +19,9 @@ import java.util.List;
 
 @Mixin(ChatHud.class)
 public abstract class ChatHudMixin {
-    @Shadow @Final private List<ChatHudLine> visibleMessages;
+    @Shadow @Final private List<ChatHudLine<OrderedText>> visibleMessages;
 
-    @Shadow @Final private List<ChatHudLine> messages;
+    @Shadow @Final private List<ChatHudLine<Text>> messages;
 
     @Inject(at = @At("HEAD"), method = "addMessage(Lnet/minecraft/text/Text;IIZ)V", cancellable = true)
     private void onAddMessage(Text message, int messageId, int timestamp, boolean bl, CallbackInfo info) {

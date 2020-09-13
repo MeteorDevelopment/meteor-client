@@ -3,18 +3,21 @@ package minegame159.meteorclient.mixin;
 import minegame159.meteorclient.Config;
 import minegame159.meteorclient.gui.screens.AutoCraftScreen;
 import minegame159.meteorclient.utils.Chat;
+import minegame159.meteorclient.utils.InvUtils;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.ingame.ContainerScreen;
-import net.minecraft.client.gui.screen.ingame.CraftingTableScreen;
+import net.minecraft.client.gui.screen.ingame.CraftingScreen;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.client.gui.screen.recipebook.RecipeBookProvider;
 import net.minecraft.client.gui.screen.recipebook.RecipeBookWidget;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.container.CraftingTableContainer;
-import net.minecraft.container.Slot;
-import net.minecraft.container.SlotActionType;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.screen.CraftingScreenHandler;
+import net.minecraft.screen.slot.Slot;
+import net.minecraft.screen.slot.SlotActionType;
+import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -23,10 +26,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(CraftingTableScreen.class)
-public abstract class CraftingTableScreenMixin extends ContainerScreen<CraftingTableContainer> {
-    @Shadow @Final private RecipeBookWidget recipeBookGui;
-    @Shadow private boolean isNarrow;
+@Mixin(CraftingScreen.class)
+public abstract class CraftingScreenMixin extends HandledScreen<CraftingScreenHandler> implements RecipeBookProvider {
+    @Shadow @Final private RecipeBookWidget recipeBook;
+    @Shadow private boolean narrow;
     private MinecraftClient mc;
     private ButtonWidget autoCraftBtn;
     private ButtonWidget configBtn;
@@ -36,7 +39,7 @@ public abstract class CraftingTableScreenMixin extends ContainerScreen<CraftingT
     private Item[] ingredients = new Item[9];
     private int timer;
 
-    public CraftingTableScreenMixin(CraftingTableContainer container, PlayerInventory playerInventory, Text name) {
+    public CraftingScreenMixin(CraftingScreenHandler container, PlayerInventory playerInventory, Text name) {
         super(container, playerInventory, name);
     }
 
@@ -47,8 +50,8 @@ public abstract class CraftingTableScreenMixin extends ContainerScreen<CraftingT
         autoCrafting = false;
         craftingI = 0;
 
-        autoCraftBtn = addButton(new ButtonWidget(x + 30 + 3 * 18 + 4, y + 16, 70, 13, "Auto craft", button -> onAutoCraft()));
-        configBtn = addButton(new ButtonWidget(x + 30 + 3 * 18 + 4, y + 17 + 2 * 20, 70, 13, "Config", button -> MinecraftClient.getInstance().openScreen(new AutoCraftScreen())));
+        autoCraftBtn = addButton(new ButtonWidget(x + 30 + 3 * 18 + 4, y + 16, 70, 13, new LiteralText("Auto craft"), button -> onAutoCraft()));
+        configBtn = addButton(new ButtonWidget(x + 30 + 3 * 18 + 4, y + 17 + 2 * 20, 70, 13, new LiteralText("Config"), button -> MinecraftClient.getInstance().openScreen(new AutoCraftScreen())));
     }
 
     private void onAutoCraft() {
@@ -59,7 +62,7 @@ public abstract class CraftingTableScreenMixin extends ContainerScreen<CraftingT
                 craftingI = 0;
                 for (int i = 1; i < 10; i++) ingredients[i - 1] = getStack(i).getItem();
 
-                autoCraftBtn.setMessage("Stop crafting");
+                autoCraftBtn.setMessage(new LiteralText("Stop crafting"));
             }
         } else {
             stopCrafting(null);
@@ -68,7 +71,7 @@ public abstract class CraftingTableScreenMixin extends ContainerScreen<CraftingT
 
     @Inject(method = "tick", at = @At("TAIL"))
     private void onTick(CallbackInfo info) {
-        int x = recipeBookGui.findLeftEdge(this.isNarrow, this.width, this.containerWidth) + 30 + 3 * 18 + 4;
+        int x = recipeBook.findLeftEdge(this.narrow, this.width, this.backgroundWidth) + 30 + 3 * 18 + 4;
         autoCraftBtn.x = x;
         configBtn.x = x;
 
@@ -80,7 +83,7 @@ public abstract class CraftingTableScreenMixin extends ContainerScreen<CraftingT
             //if (timer < 2) return;
 
             if (craftingI == 0) {
-                mc.interactionManager.method_2906(container.syncId, 0, 0, SlotActionType.QUICK_MOVE, mc.player);
+                InvUtils.clickSlot(0, 0, SlotActionType.QUICK_MOVE);
 
                 if (!getStack(0).isEmpty()) {
                     stopCrafting("Stopped because your inventory is full.");
@@ -113,7 +116,7 @@ public abstract class CraftingTableScreenMixin extends ContainerScreen<CraftingT
 
         int ingredientSlot = -1;
 
-        for (int i = 10; i < container.slots.size(); i++) {
+        for (int i = 10; i < handler.slots.size(); i++) {
             if (getStack(i).getItem() == ingredients[slot - 1]) {
                 ingredientSlot = i;
                 break;
@@ -127,13 +130,13 @@ public abstract class CraftingTableScreenMixin extends ContainerScreen<CraftingT
     }
 
     private void moveIngredients(int from, int to) {
-        mc.interactionManager.method_2906(container.syncId, from, 0, SlotActionType.PICKUP, mc.player);
+        InvUtils.clickSlot(from, 0, SlotActionType.PICKUP);
 
         if (Config.INSTANCE.autoCraft.isCraftByOne()) {
-            mc.interactionManager.method_2906(container.syncId, to, 1, SlotActionType.PICKUP, mc.player);
-            mc.interactionManager.method_2906(container.syncId, from, 0, SlotActionType.PICKUP, mc.player);
+            InvUtils.clickSlot(to, 1, SlotActionType.PICKUP);
+            InvUtils.clickSlot(from, 0, SlotActionType.PICKUP);
         } else {
-            mc.interactionManager.method_2906(container.syncId, to, 0, SlotActionType.PICKUP, mc.player);
+            InvUtils.clickSlot(to, 0, SlotActionType.PICKUP);
         }
     }
 
@@ -145,11 +148,11 @@ public abstract class CraftingTableScreenMixin extends ContainerScreen<CraftingT
     private void stopCrafting(String msg) {
         if (msg != null) Chat.info(msg);
         autoCrafting = false;
-        autoCraftBtn.setMessage("Auto craft");
+        autoCraftBtn.setMessage(new LiteralText("Auto craft"));
     }
 
     private ItemStack getStack(int slot) {
-        ItemStack itemStack = container.getSlot(slot).getStack();
+        ItemStack itemStack = handler.getSlot(slot).getStack();
         return itemStack == null ? ItemStack.EMPTY : itemStack;
     }
 }

@@ -5,6 +5,8 @@ import minegame159.meteorclient.utils.Color;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -30,16 +32,16 @@ public class MultiplayerScreenMixin extends Screen {
 
         loggedInAs = "Logged in as ";
 
-        loggedInAsLength = font.getStringWidth(loggedInAs);
+        loggedInAsLength = textRenderer.getWidth(loggedInAs);
 
-        addButton(new ButtonWidget(this.width - 75 - 3, 3, 75, 20, "Accounts", button -> {
-            minecraft.openScreen(new AccountsScreen());
+        addButton(new ButtonWidget(this.width - 75 - 3, 3, 75, 20, new LiteralText("Accounts"), button -> {
+            client.openScreen(new AccountsScreen());
         }));
     }
 
     @Inject(method = "render", at = @At("TAIL"))
-    private void onRender(int mouseX, int mouseY, float delta, CallbackInfo info) {
-        drawString(font, loggedInAs, 3, 3, textColor1);
-        drawString(font, minecraft.getSession().getUsername(), 3 + loggedInAsLength, 3, textColor2);
+    private void onRender(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo info) {
+        textRenderer.draw(matrices, loggedInAs, 3, 3, textColor1);
+        textRenderer.draw(matrices, client.getSession().getUsername(), 3 + loggedInAsLength, 3, textColor2);
     }
 }

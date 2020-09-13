@@ -42,7 +42,7 @@ public class EnchListSettingScreen extends WindowScreen{
         Consumer<Enchantment> enchForEach = enchantment -> {
             if(setting.get().contains(enchantment)) return;
 
-            table1.add(new WLabel(enchantment.getName(1).asString()));
+            table1.add(new WLabel(enchantment.getName(1).getString()));
 
             WPlus plus = table1.add(new WPlus()).getWidget();
             plus.action = plus1 -> {
@@ -61,7 +61,7 @@ public class EnchListSettingScreen extends WindowScreen{
         } else {
             List<Pair<Enchantment, Integer>> enchs = new ArrayList<>();
             Registry.ENCHANTMENT.forEach(ench -> {
-                int words = Utils.search(ench.getName(1).asString(), filter.text);
+                int words = Utils.search(ench.getName(1).getString(), filter.text);
                 if(words > 0) enchs.add(new Pair<>(ench, words));
             });
             enchs.sort(Comparator.comparingInt(value -> -value.getRight()));
@@ -73,7 +73,7 @@ public class EnchListSettingScreen extends WindowScreen{
         //Selected enchantments
         WTable table2 = add(new WTable()).top().getWidget();
         for (Enchantment ench : setting.get()) {
-            table2.add(new WLabel(ench.getName(1).asString()));
+            table2.add(new WLabel(ench.getName(1).getString()));
 
             WMinus minus = table2.add(new WMinus()).getWidget();
             minus.action = minus1 -> {

@@ -40,7 +40,7 @@ public class AutoJump extends ToggleModule {
 
     @EventHandler
     private Listener<TickEvent> onTick = new Listener<>(event -> {
-        if (!mc.player.onGround || mc.player.isSneaking()) return;
+        if (!mc.player.isOnGround() || mc.player.isSneaking()) return;
 
         if (jump()) mc.player.jump();
     });

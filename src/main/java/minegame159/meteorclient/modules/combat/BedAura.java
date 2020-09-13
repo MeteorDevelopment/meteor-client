@@ -12,6 +12,7 @@ import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.DamageCalcUtils;
+import minegame159.meteorclient.utils.Utils;
 import net.minecraft.block.entity.BedBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
@@ -167,8 +168,8 @@ public class BedAura extends ToggleModule {
         if (mc.player.getHealth() + mc.player.getAbsorptionAmount() <= minHealth.get() && mode.get() != Mode.suicide) return;
         try {
             for (BlockEntity entity : mc.world.blockEntities) {
-                if (entity instanceof BedBlockEntity && Math.sqrt(entity.getSquaredDistance(mc.player.x, mc.player.y, mc.player.z)) <= breakRange.get()) {
-                    currentDamage = DamageCalcUtils.bedDamage(mc.player, new Vec3d(entity.getPos()));
+                if (entity instanceof BedBlockEntity && Utils.distance(entity.getPos().getX(), entity.getPos().getY(), entity.getPos().getZ(), mc.player.getX(), mc.player.getY(), mc.player.getZ()) <= breakRange.get()) {
+                    currentDamage = DamageCalcUtils.bedDamage(mc.player, Utils.vec3d(entity.getPos()));
                     if (currentDamage < maxDamage.get()
                             || (mc.player.getHealth() + mc.player.getAbsorptionAmount() - currentDamage) < minHealth.get() || clickMode.get().equals(Mode.suicide)) {
                         mc.player.setSneaking(false);
@@ -180,7 +181,7 @@ public class BedAura extends ToggleModule {
         } catch (ConcurrentModificationException ignored) {
             return;
         }
-        if (mc.player.dimension == DimensionType.OVERWORLD) {
+        if (mc.world.getRegistryKey().getValue().getPath().equals("overworld")) {
             Chat.warning(this, "You are in the overworld. Disabling!");
             this.toggle();
             return;
@@ -229,7 +230,7 @@ public class BedAura extends ToggleModule {
         int preSlot = -1;
         if (autoSwitch.get()) {
             for (int i = 0; i < 9; i++) {
-                if (mc.player.inventory.getInvStack(i).getItem() instanceof BedItem) {
+                if (mc.player.inventory.getStack(i).getItem() instanceof BedItem) {
                     preSlot = mc.player.inventory.selectedSlot;
                     mc.player.inventory.selectedSlot = i;
                 }
@@ -242,22 +243,22 @@ public class BedAura extends ToggleModule {
         if (direction == 0) {
             preYaw = mc.player.yaw;
             mc.player.yaw = -90f;
-            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(-90f, mc.player.pitch, mc.player.onGround));
+            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(-90f, mc.player.pitch, mc.player.isOnGround()));
             mc.player.yaw = preYaw;
         } else if (direction == 1) {
             preYaw = mc.player.yaw;
             mc.player.yaw = 179f;
-            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(179f, mc.player.pitch, mc.player.onGround));
+            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(179f, mc.player.pitch, mc.player.isOnGround()));
             mc.player.yaw = preYaw;
         } else if (direction == 2) {
             preYaw = mc.player.yaw;
             mc.player.yaw = 1f;
-            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(1f, mc.player.pitch, mc.player.onGround));
+            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(1f, mc.player.pitch, mc.player.isOnGround()));
             mc.player.yaw = preYaw;
         } else if (direction == 3) {
             preYaw = mc.player.yaw;
             mc.player.yaw = 90f;
-            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(90f, mc.player.pitch, mc.player.onGround));
+            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(90f, mc.player.pitch, mc.player.isOnGround()));
             mc.player.yaw = preYaw;
         }
         lastDamage = bestDamage;
@@ -279,7 +280,7 @@ public class BedAura extends ToggleModule {
                     vecPos = new Vec3d(i, k, j);
                     posUp = pos.add(0, 1, 0);
                     if ((mc.world.getBlockState(posUp).getMaterial().isReplaceable())
-                            && mc.world.getEntities(null, new Box(posUp.getX(), posUp.getY(), posUp.getZ(), posUp.getX() + 1.0D, posUp.getY() + 1.0D, posUp.getZ() + 1.0D)).isEmpty()
+                            && mc.world.getOtherEntities(null, new Box(posUp.getX(), posUp.getY(), posUp.getZ(), posUp.getX() + 1.0D, posUp.getY() + 1.0D, posUp.getZ() + 1.0D)).isEmpty()
                             && (mc.world.getBlockState(new BlockPos(posUp).add(1, 0, 0)).getMaterial().isReplaceable() || mc.world.getBlockState(posUp.add(-1, 0, 0)).getMaterial().isReplaceable()
                             || mc.world.getBlockState(posUp.add(0, 0, 1)).getMaterial().isReplaceable() || mc.world.getBlockState(posUp.add(0, 0, -1)).getMaterial().isReplaceable())) {
                         if (airPlace.get()) {

@@ -1,6 +1,7 @@
 package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.MeteorClient;
+import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.misc.ShulkerTooltip;
 import minegame159.meteorclient.utils.Utils;
@@ -12,11 +13,12 @@ import net.minecraft.inventory.Inventories;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.text.LiteralText;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
-import net.minecraft.util.DefaultedList;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Pair;
+import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.world.BlockView;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -34,7 +36,7 @@ public class ShulkerBoxBlockMixin {
      */
     @Overwrite
     @Environment(EnvType.CLIENT)
-    public void buildTooltip(ItemStack stack, BlockView view, List<Text> tooltip, TooltipContext options) {
+    public void appendTooltip(ItemStack stack, BlockView view, List<Text> tooltip, TooltipContext options) {
         CompoundTag compoundTag = stack.getSubTag("BlockEntityTag");
         if (compoundTag != null) {
             if (compoundTag.contains("LootTable", 8)) {
@@ -81,7 +83,7 @@ public class ShulkerBoxBlockMixin {
 
                     for (Pair<Text, Integer> itemCount : items) {
                         displaysItemStacks++;
-                        Text text = itemCount.getLeft().deepCopy();
+                        MutableText text = itemCount.getLeft().copy();
                         text.append(" x").append(String.valueOf(itemCount.getRight()));
                         tooltip.add(text);
                     }
@@ -92,7 +94,7 @@ public class ShulkerBoxBlockMixin {
 
                             if (displaysItemStacks <= 4) {
                                 displaysItemStacks++;
-                                Text text = itemStack.getName().deepCopy();
+                                MutableText text = itemStack.getName().copy();
                                 text.append(" x").append(String.valueOf(itemStack.getCount()));
                                 tooltip.add(text);
                             }
@@ -105,7 +107,7 @@ public class ShulkerBoxBlockMixin {
                 }
 
                 tooltip.add(new LiteralText(""));
-                tooltip.add(new LiteralText("Press " + Formatting.YELLOW + Utils.getKeyName(MeteorClient.INSTANCE.shulkerPeek.getBoundKey().getKeyCode()) + Formatting.RESET + " to peek"));
+                tooltip.add(new LiteralText("Press " + Formatting.YELLOW + Utils.getKeyName(((IKeyBinding) MeteorClient.INSTANCE.shulkerPeek).getKey().getCode()) + Formatting.RESET + " to peek"));
             }
         }
     }

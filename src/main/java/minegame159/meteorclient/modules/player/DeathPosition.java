@@ -39,24 +39,24 @@ public class DeathPosition extends ToggleModule {
     @EventHandler
     private final Listener<TookDamageEvent> onTookDamage = new Listener<>(event -> {
         if (event.entity.getUuid() != null && event.entity.getUuid().equals(mc.player.getUuid()) && event.entity.getHealth() <= 0) {
-            label.setText(String.format("Latest death: %.1f, %.1f, %.1f", mc.player.x, mc.player.y, mc.player.z));
+            label.setText(String.format("Latest death: %.1f, %.1f, %.1f", mc.player.getX(), mc.player.getY(), mc.player.getZ()));
 
             String time = dateFormat.format(new Date());
-            Chat.info(this, "Died at (highlight)%.0f(default), (highlight)%.0f(default), (highlight)%.0f (default)on (highlight)%s(default).", mc.player.x, mc.player.y, mc.player.z, time);
+            Chat.info(this, "Died at (highlight)%.0f(default), (highlight)%.0f(default), (highlight)%.0f (default)on (highlight)%s(default).", mc.player.getX(), mc.player.getY(), mc.player.getZ(), time);
 
             // Create waypoint
             if (createWaypoint.get()) {
                 Waypoint waypoint = new Waypoint();
                 waypoint.name = "Death " + time;
 
-                waypoint.x = (int) mc.player.x;
-                waypoint.y = (int) mc.player.y + 2;
-                waypoint.z = (int) mc.player.z;
+                waypoint.x = (int) mc.player.getX();
+                waypoint.y = (int) mc.player.getY() + 2;
+                waypoint.z = (int) mc.player.getZ();
                 waypoint.maxVisibleDistance = Integer.MAX_VALUE;
 
-                if (mc.player.dimension == DimensionType.OVERWORLD) waypoint.overworld = true;
-                else if (mc.player.dimension == DimensionType.THE_NETHER) waypoint.nether = true;
-                else if (mc.player.dimension == DimensionType.THE_END) waypoint.end = true;
+                if (mc.world.getRegistryKey().getValue().getPath().equals("overworld")) waypoint.overworld = true;
+                else if (mc.world.getRegistryKey().getValue().getPath().equals("the_nether")) waypoint.nether = true;
+                else if (mc.world.getRegistryKey().getValue().getPath().equals("the_end")) waypoint.end = true;
 
                 Waypoints.INSTANCE.add(waypoint);
             }

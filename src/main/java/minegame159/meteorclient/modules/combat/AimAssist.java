@@ -17,7 +17,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.RayTraceContext;
+import net.minecraft.world.RaycastContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -128,9 +128,9 @@ public class AimAssist extends ToggleModule {
     private void aimInstantly() {
         setVec3dToTargetPoint(vec3d1, entity);
 
-        double deltaX = vec3d1.x - mc.player.x;
-        double deltaZ = vec3d1.z - mc.player.z;
-        double deltaY = vec3d1.y - (mc.player.y + mc.player.getEyeHeight(mc.player.getPose()));
+        double deltaX = vec3d1.x - mc.player.getX();
+        double deltaZ = vec3d1.z - mc.player.getZ();
+        double deltaY = vec3d1.y - (mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()));
 
         // Yaw
         double angle = Math.toDegrees(Math.atan2(deltaZ, deltaX)) - 90;
@@ -145,9 +145,9 @@ public class AimAssist extends ToggleModule {
     private void aim(double delta) {
         setVec3dToTargetPoint(vec3d1, entity);
 
-        double deltaX = vec3d1.x - mc.player.x;
-        double deltaZ = vec3d1.z - mc.player.z;
-        double deltaY = vec3d1.y - (mc.player.y + mc.player.getEyeHeight(mc.player.getPose()));
+        double deltaX = vec3d1.x - mc.player.getX();
+        double deltaZ = vec3d1.z - mc.player.getZ();
+        double deltaY = vec3d1.y - (mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()));
 
         // Yaw
         double angle = Math.toDegrees(Math.atan2(deltaZ, deltaX)) - 90;
@@ -167,9 +167,9 @@ public class AimAssist extends ToggleModule {
 
     private void setVec3dToTargetPoint(Vec3d vec3d, Entity entity) {
         switch (target.get()) {
-            case Eyes: ((IVec3d) vec3d).set(entity.x, entity.y + entity.getEyeHeight(entity.getPose()), entity.z); break;
-            case Body: ((IVec3d) vec3d).set(entity.x, entity.y + entity.getEyeHeight(entity.getPose()) / 2, entity.z); break;
-            case Feet: ((IVec3d) vec3d).set(entity.x, entity.y, entity.z); break;
+            case Eyes: ((IVec3d) vec3d).set(entity.getX(), entity.getY() + entity.getEyeHeight(entity.getPose()), entity.getZ()); break;
+            case Body: ((IVec3d) vec3d).set(entity.getX(), entity.getY() + entity.getEyeHeight(entity.getPose()) / 2, entity.getZ()); break;
+            case Feet: ((IVec3d) vec3d).set(entity.getX(), entity.getY(), entity.getZ()); break;
         }
     }
 
@@ -187,12 +187,12 @@ public class AimAssist extends ToggleModule {
     private boolean canSeeEntity(Entity entity) {
         if (ignoreWalls.get()) return true;
 
-        ((IVec3d) vec3d1).set(mc.player.x, mc.player.y + mc.player.getStandingEyeHeight(), mc.player.z);
-        ((IVec3d) vec3d2).set(entity.x, entity.y, entity.z);
-        boolean canSeeFeet =  mc.world.rayTrace(new RayTraceContext(vec3d1, vec3d2, RayTraceContext.ShapeType.COLLIDER, RayTraceContext.FluidHandling.NONE, mc.player)).getType() == HitResult.Type.MISS;
+        ((IVec3d) vec3d1).set(mc.player.getX(), mc.player.getY() + mc.player.getStandingEyeHeight(), mc.player.getZ());
+        ((IVec3d) vec3d2).set(entity.getX(), entity.getY(), entity.getZ());
+        boolean canSeeFeet =  mc.world.raycast(new RaycastContext(vec3d1, vec3d2, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player)).getType() == HitResult.Type.MISS;
 
-        ((IVec3d) vec3d2).set(entity.x, entity.y + entity.getStandingEyeHeight(), entity.z);
-        boolean canSeeEyes =  mc.world.rayTrace(new RayTraceContext(vec3d1, vec3d2, RayTraceContext.ShapeType.COLLIDER, RayTraceContext.FluidHandling.NONE, mc.player)).getType() == HitResult.Type.MISS;
+        ((IVec3d) vec3d2).set(entity.getX(), entity.getY() + entity.getStandingEyeHeight(), entity.getZ());
+        boolean canSeeEyes =  mc.world.raycast(new RaycastContext(vec3d1, vec3d2, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player)).getType() == HitResult.Type.MISS;
 
         return canSeeFeet || canSeeEyes;
     }

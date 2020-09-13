@@ -14,14 +14,14 @@ import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.InvUtils;
-import net.minecraft.client.gui.screen.ingame.ContainerScreen;
-import net.minecraft.container.SlotActionType;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.SwordItem;
+import net.minecraft.screen.slot.SlotActionType;
 
 public class AutoMend extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -53,7 +53,7 @@ public class AutoMend extends ToggleModule {
 
     private void replaceItem(boolean offhandEmpty) {
         for (int i = 0; i < mc.player.inventory.main.size(); i++) {
-            ItemStack itemStack = mc.player.inventory.getInvStack(i);
+            ItemStack itemStack = mc.player.inventory.getStack(i);
             if (EnchantmentHelper.getLevel(Enchantments.MENDING, itemStack) == 0 || !itemStack.isDamaged()) continue;
             if (!swords.get() && itemStack.getItem() instanceof SwordItem) continue;
 
@@ -80,9 +80,9 @@ public class AutoMend extends ToggleModule {
 
     private void replaceArmour(int slot, boolean empty){
         for (int i = 0; i < mc.player.inventory.main.size(); i++) {
-            ItemStack itemStack = mc.player.inventory.getInvStack(i);
+            ItemStack itemStack = mc.player.inventory.getStack(i);
             if(!(itemStack.getItem() instanceof ArmorItem)) continue;
-            if(!checkSlot(mc.player.inventory.getInvStack(i), slot)) continue;
+            if(!checkSlot(mc.player.inventory.getStack(i), slot)) continue;
             if (EnchantmentHelper.getLevel(Enchantments.MENDING, itemStack) == 0 || !itemStack.isDamaged()) continue;
 
             InvUtils.clickSlot(InvUtils.invIndexToSlotId(i), 0, SlotActionType.PICKUP);
@@ -91,7 +91,7 @@ public class AutoMend extends ToggleModule {
 
             break;
         }
-        if(!mc.player.inventory.getInvStack(39 - (slot - 5)).isDamaged() && removeFinished.get() && mc.player.inventory.getEmptySlot() != -1){
+        if(!mc.player.inventory.getStack(39 - (slot - 5)).isDamaged() && removeFinished.get() && mc.player.inventory.getEmptySlot() != -1){
             InvUtils.clickSlot(slot, 0, SlotActionType.PICKUP);
             InvUtils.clickSlot(InvUtils.invIndexToSlotId(mc.player.inventory.getEmptySlot()), 0, SlotActionType.PICKUP);
         }
@@ -99,7 +99,7 @@ public class AutoMend extends ToggleModule {
 
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
-        if (mc.currentScreen instanceof ContainerScreen<?>) return;
+        if (mc.currentScreen instanceof HandledScreen<?>) return;
 
         if (mc.player.getOffHandStack().isEmpty()) replaceItem(true);
         else if (!mc.player.getOffHandStack().isDamaged()) replaceItem(false);
@@ -111,9 +111,9 @@ public class AutoMend extends ToggleModule {
                 armourSlots.set(false);
             }
             for (int i = 5; i < 9; i++) {
-                if (mc.player.inventory.getInvStack(39 - (i - 5)).isEmpty()) replaceArmour(i, true);
-                else if (!mc.player.inventory.getInvStack(39 - (i - 5)).isDamaged()) replaceArmour(i, false);
-                else if (EnchantmentHelper.getLevel(Enchantments.MENDING, mc.player.inventory.getInvStack(39 - (i - 5))) == 0) replaceArmour(i, false);
+                if (mc.player.inventory.getStack(39 - (i - 5)).isEmpty()) replaceArmour(i, true);
+                else if (!mc.player.inventory.getStack(39 - (i - 5)).isDamaged()) replaceArmour(i, false);
+                else if (EnchantmentHelper.getLevel(Enchantments.MENDING, mc.player.inventory.getStack(39 - (i - 5))) == 0) replaceArmour(i, false);
             }
         }
     });

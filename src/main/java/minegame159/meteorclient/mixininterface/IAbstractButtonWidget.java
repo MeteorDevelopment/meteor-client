@@ -1,5 +1,7 @@
 package minegame159.meteorclient.mixininterface;
 
+import net.minecraft.text.Text;
+
 public interface IAbstractButtonWidget {
-    public void setText(String text);
+    public void setText(Text text);
 }

@@ -11,6 +11,7 @@ import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.utils.Utils;
 import net.minecraft.block.*;
 import net.minecraft.client.gui.screen.ingame.SignEditScreen;
 import net.minecraft.item.*;
@@ -66,17 +67,17 @@ public class AntiBed extends ToggleModule {
             return;
         }
         if (!mc.world.getBlockState(mc.player.getBlockPos().up()).isAir()) return;
-        if (onlyOnGround.get() && !mc.player.onGround) return;
+        if (onlyOnGround.get() && !mc.player.isOnGround()) return;
         if (place == 0) {
             place --;
-            mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(mc.player.getBlockPos().up()), Direction.DOWN, mc.player.getBlockPos().up(), mc.player.onGround));
+            mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(Utils.vec3d(mc.player.getBlockPos().up()), Direction.DOWN, mc.player.getBlockPos().up(), mc.player.isOnGround()));
             ((IKeyBinding)mc.options.keySneak).setPressed(false);
             if (selfToggle.get()) this.toggle();
         } else if (place > 0) {
             place --;
         }
         for (int i = 0; i < 9; i++) {
-            ItemStack itemStack = mc.player.inventory.getInvStack(i);
+            ItemStack itemStack = mc.player.inventory.getStack(i);
             Item item = itemStack.getItem();
             Block block = Block.getBlockFromItem(item);
             if (item == Items.STRING
@@ -91,7 +92,7 @@ public class AntiBed extends ToggleModule {
                 return;
             } else if (block instanceof DoorBlock) {
                 if (autoCenter.get()) {
-                    Vec3d playerVec = new Vec3d(mc.player.getBlockPos());
+                    Vec3d playerVec = Utils.vec3d(mc.player.getBlockPos());
                     if (mc.player.getHorizontalFacing() == Direction.SOUTH) {
                         playerVec = playerVec.add(0.5, 0, 0.7);
                     } else if (mc.player.getHorizontalFacing() == Direction.NORTH) {
@@ -102,26 +103,26 @@ public class AntiBed extends ToggleModule {
                         playerVec = playerVec.add(0.3, 0, 0.5);
                     }
                     mc.player.updatePosition(playerVec.x, playerVec.y, playerVec.z);
-                    mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(playerVec.x, playerVec.y, playerVec.z, mc.player.onGround));
+                    mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(playerVec.x, playerVec.y, playerVec.z, mc.player.isOnGround()));
                 }
                 place(i);
                 return;
             } else if (item == Items.LADDER) {
                 if (autoCenter.get()) {
-                    Vec3d playerVec = new Vec3d(mc.player.getBlockPos());
+                    Vec3d playerVec = Utils.vec3d(mc.player.getBlockPos());
                     BlockPos blockPos = checkBlocks();
                     if (blockPos == null) return;
-                    if (playerVec.subtract(new Vec3d(blockPos)).x > 0) {
+                    if (playerVec.subtract(Utils.vec3d(blockPos)).x > 0) {
                         playerVec = playerVec.add(0.7, 0, 0.5);
-                    } else if (playerVec.subtract(new Vec3d(blockPos)).x < 0) {
+                    } else if (playerVec.subtract(Utils.vec3d(blockPos)).x < 0) {
                         playerVec = playerVec.add(0.3, 0, 0.5);
-                    } else if (playerVec.subtract(new Vec3d(blockPos)).z > 0) {
+                    } else if (playerVec.subtract(Utils.vec3d(blockPos)).z > 0) {
                         playerVec = playerVec.add(0.5, 0, 0.7);
-                    } else if (playerVec.subtract(new Vec3d(blockPos)).z < 0) {
+                    } else if (playerVec.subtract(Utils.vec3d(blockPos)).z < 0) {
                         playerVec = playerVec.add(0.5, 0, 0.3);
                     }
                     mc.player.updatePosition(playerVec.x, playerVec.y, playerVec.z);
-                    mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(playerVec.x, playerVec.y, playerVec.z, mc.player.onGround));
+                    mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(playerVec.x, playerVec.y, playerVec.z, mc.player.isOnGround()));
                 }
                 place(i);
                 return;
@@ -129,7 +130,7 @@ public class AntiBed extends ToggleModule {
                     || item == Items.LEVER || item == Items.TORCH
                     || item == Items.REDSTONE_TORCH || item instanceof SignItem
                     || item == Items.TRIPWIRE_HOOK || block instanceof StoneButtonBlock
-                    || block instanceof WoodButtonBlock) {
+                    || block instanceof WoodenButtonBlock) {
                 place(i);
                 if (item instanceof SignItem) closeScreen = true;
                 return;
@@ -138,7 +139,7 @@ public class AntiBed extends ToggleModule {
                 mc.player.inventory.selectedSlot = i;
                 boolean sneaking = mc.player.isSneaking();
                 mc.player.setSneaking(true);
-                mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(mc.player.getBlockPos()), Direction.DOWN, mc.player.getBlockPos(), mc.player.onGround));
+                mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(Utils.vec3d(mc.player.getBlockPos()), Direction.DOWN, mc.player.getBlockPos(), mc.player.isOnGround()));
                 mc.player.setSneaking(sneaking);
                 mc.player.inventory.selectedSlot = preSlot;
                 place(i);
@@ -166,7 +167,7 @@ public class AntiBed extends ToggleModule {
         mc.player.inventory.selectedSlot = i;
         boolean sneaking = mc.player.isSneaking();
         mc.player.setSneaking(true);
-        mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(mc.player.getBlockPos().up()), Direction.DOWN, mc.player.getBlockPos().up(), mc.player.onGround));
+        mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(Utils.vec3d(mc.player.getBlockPos().up()), Direction.DOWN, mc.player.getBlockPos().up(), mc.player.isOnGround()));
         mc.player.setSneaking(sneaking);
         mc.player.inventory.selectedSlot = preSlot;
         if (selfToggle.get()) this.toggle();

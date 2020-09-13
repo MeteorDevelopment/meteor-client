@@ -41,7 +41,7 @@ public class DamageCalcUtils {
         damage = resistanceReduction((PlayerEntity) player, damage);
 
         //Reduce my armour
-        damage = DamageUtil.getDamageLeft((float)damage, (float)player.getArmor(), (float)player.getAttributeInstance(EntityAttributes.ARMOR_TOUGHNESS).getValue());
+        damage = DamageUtil.getDamageLeft((float)damage, (float)player.getArmor(), (float)player.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS).getValue());
 
         //Reduce by enchants
         damage  = blastProtReduction(player, damage, new Explosion(mc.world, null, crystal.x, crystal.y, crystal.z, 6f, false, Explosion.DestructionType.DESTROY));
@@ -66,10 +66,10 @@ public class DamageCalcUtils {
         damage = resistanceReduction((PlayerEntity) player, damage);
 
         //Reduce my armour
-        damage = DamageUtil.getDamageLeft((float)damage, (float)player.getArmor(), (float)player.getAttributeInstance(EntityAttributes.ARMOR_TOUGHNESS).getValue());
+        damage = DamageUtil.getDamageLeft((float)damage, (float)player.getArmor(), (float)player.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS).getValue());
 
         //Reduce by enchants
-        damage  = blastProtReduction(player, damage, new Explosion(mc.world, null, bed.x, bed.y, bed.z, 5f, false, Explosion.DestructionType.DESTROY));
+        damage  = blastProtReduction(player, damage, new Explosion(mc.world, null, bed.x, bed.y, bed.z, 5f, true, Explosion.DestructionType.DESTROY));
 
         if(damage < 0) damage = 0;
         return damage;
@@ -93,7 +93,7 @@ public class DamageCalcUtils {
             damage *= 1.5;
         }
         if(entity.getActiveItem().getEnchantments() != null){
-            if(EnchantmentHelper.getEnchantments(entity.getActiveItem()).containsKey(Enchantments.SHARPNESS)){
+            if(EnchantmentHelper.get(entity.getActiveItem()).containsKey(Enchantments.SHARPNESS)){
                 int level = EnchantmentHelper.getLevel(Enchantments.SHARPNESS, entity.getActiveItem());
                 damage += (0.5 * level) + 0.5;
             }
@@ -107,7 +107,7 @@ public class DamageCalcUtils {
         damage = resistanceReduction(entity, damage);
 
         //Reduce by armour
-        damage = DamageUtil.getDamageLeft((float)damage, (float)entity.getArmor(), (float)entity.getAttributeInstance(EntityAttributes.ARMOR_TOUGHNESS).getValue());
+        damage = DamageUtil.getDamageLeft((float)damage, (float)entity.getArmor(), (float)entity.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS).getValue());
 
         //Reduce by enchants
         damage = normalProtReduction(entity, damage);

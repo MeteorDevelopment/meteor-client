@@ -71,7 +71,7 @@ public class SoundEventListSetting extends Setting<List<SoundEvent>> {
 
         ListTag valueTag = new ListTag();
         for (SoundEvent sound : get()) {
-            valueTag.add(new StringTag(Registry.SOUND_EVENT.getId(sound).toString()));
+            valueTag.add(StringTag.of(Registry.SOUND_EVENT.getId(sound).toString()));
         }
         tag.put("value", valueTag);
 

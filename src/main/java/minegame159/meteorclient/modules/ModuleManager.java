@@ -227,6 +227,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new AimAssist());
         addModule(new AutoArmor());
         addModule(new AntiBed());
+        addModule(new AnchorAura());
         addModule(new TotemPopNotifier());
     }
 
@@ -301,7 +302,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new HoleESP());
         addModule(new LogoutSpots());
         addModule(new Trajectories());
-        addModule(new Chams());
+        //addModule(new Chams());
         addModule(new CameraClip());
         addModule(new Search());
         addModule(new EntityOwner());

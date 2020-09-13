@@ -1,6 +1,7 @@
 package minegame159.meteorclient.mixin;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.modules.ModuleManager;
@@ -8,8 +9,12 @@ import minegame159.meteorclient.modules.render.HUD;
 import minegame159.meteorclient.modules.render.NoRender;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.hud.InGameHud;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.util.math.Vector3f;
 import net.minecraft.entity.Entity;
 import net.minecraft.scoreboard.ScoreboardObjective;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Matrix4f;
 import org.lwjgl.opengl.GL11;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -26,21 +31,27 @@ public abstract class InGameHudMixin {
 
     @Shadow @Final private MinecraftClient client;
 
-    @Inject(at = @At("TAIL"), method = "render")
-    private void onRender(float tickDelta, CallbackInfo info) {
+    @Shadow public abstract void clear();
+
+    @Inject(method = "render", at = @At("TAIL"))
+    private void onRender(MatrixStack matrixStack, float tickDelta, CallbackInfo info) {
         client.getProfiler().swap("meteor-client_render");
 
-        GlStateManager.enableBlend();
-        GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-        GlStateManager.lineWidth(1);
+        RenderSystem.pushMatrix();
+
+        RenderSystem.enableBlend();
+        RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA);
+        RenderSystem.lineWidth(1);
         GL11.glEnable(GL11.GL_LINE_SMOOTH);
 
         MeteorClient.EVENT_BUS.post(EventStore.render2DEvent(scaledWidth, scaledHeight, tickDelta));
 
         GL11.glDisable(GL11.GL_LINE_SMOOTH);
-        GlStateManager.lineWidth(1);
-        GlStateManager.disableBlend();
-        GlStateManager.disableBlend();
+        RenderSystem.lineWidth(1);
+        RenderSystem.disableBlend();
+        RenderSystem.disableBlend();
+
+        RenderSystem.popMatrix();
     }
 
     @Inject(method = "renderStatusEffectOverlay", at = @At("HEAD"), cancellable = true)
@@ -64,7 +75,7 @@ public abstract class InGameHudMixin {
     }
 
     @Inject(method = "renderScoreboardSidebar", at = @At("HEAD"), cancellable = true)
-    private void onRenderScoreboardSidebar(ScoreboardObjective scoreboardObjective, CallbackInfo info) {
+    private void onRenderScoreboardSidebar(MatrixStack matrixStack, ScoreboardObjective scoreboardObjective, CallbackInfo info) {
         if (ModuleManager.INSTANCE.get(NoRender.class).noScoreboard()) info.cancel();
     }
 }
