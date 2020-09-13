@@ -3,6 +3,7 @@
 ![GitHub last commit](https://img.shields.io/github/last-commit/MineGame159/meteor-client)
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/w/MineGame159/meteor-client)
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/MineGame159/meteor-client)
+![GitHub lines of code](https://tokei.rs/b1/github/MineGame159/meteor-client)
 ![GitHub contributors](https://img.shields.io/github/contributors/MineGame159/meteor-client)
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/MineGame159/meteor-client/Java%20CI%20with%20Gradle)
 
