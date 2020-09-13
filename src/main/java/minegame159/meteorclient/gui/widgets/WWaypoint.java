@@ -27,12 +27,11 @@ public class WWaypoint extends WTable {
         else if (waypoint.end && dimension == DimensionType.THE_END) goodDimension = true;
         name.color = goodDimension ? WHITE : GRAY;
 
-        add(new WCheckbox(waypoint.visible)).getWidget().action = checkbox -> {
+        WTable right = add(new WTable()).fillX().right().getWidget();
+        right.add(new WCheckbox(waypoint.visible)).getWidget().action = checkbox -> {
             waypoint.visible = checkbox.checked;
             Waypoints.INSTANCE.save();
         };
-
-        WTable right = add(new WTable()).fillX().right().getWidget();
         right.add(new WButton(GuiRenderer.TEX_EDIT)).getWidget().action = button -> MinecraftClient.getInstance().openScreen(new EditWaypointScreen(waypoint));
         right.add(new WMinus()).getWidget().action = minus -> Waypoints.INSTANCE.remove(waypoint);
     }

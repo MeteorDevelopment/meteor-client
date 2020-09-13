@@ -60,7 +60,7 @@ public class AutoShearer extends ToggleModule {
             if (findNewShears) {
                 int slot = InvUtils.findItemInHotbar(Items.SHEARS, itemStack -> (!preserveBrokenShears.get() || (preserveBrokenShears.get() && itemStack.getDamage() < itemStack.getMaxDamage() - 1)));
 
-                if (slot != 1) {
+                if (slot != -1) {
                     mc.player.inventory.selectedSlot = slot;
                     foundShears = true;
                 }
