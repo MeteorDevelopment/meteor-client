@@ -8,10 +8,10 @@ import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.InvUtils;
-import net.minecraft.container.SlotActionType;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
+import net.minecraft.screen.slot.SlotActionType;
 
 public class ChestSwap extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();

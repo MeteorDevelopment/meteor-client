@@ -1,7 +1,5 @@
 package minegame159.meteorclient.mixininterface;
 
-import net.minecraft.text.Text;
-
 public interface IChatHudLine<T> {
     public void setText(T text);
 
