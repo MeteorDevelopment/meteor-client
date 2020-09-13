@@ -19,5 +19,8 @@ Follow guide at [meteorclient.com](https://meteorclient.com/info).
 ## Contributors
 When developing features for Meteor do it for the oldest minecraft version possible. For example if you make pull request with your feature to 1.16 branch but the feature is not specific to 1.16 then the pull request will be closed.
 
+## Donation
+We would appreciate if you donated to us through [PayPal](https://paypal.me/MineGame159). Include your Discord tag so we can give you donator role and contact you. Minimum for donator role is 5$.
+
 ## License
 If you are making a custom version of Meteor Client or using its features you are **required** to disclose the source code, state changes, use the same license and follow the [license terms](https://github.com/MineGame159/meteor-client/blob/master/LICENSE).
