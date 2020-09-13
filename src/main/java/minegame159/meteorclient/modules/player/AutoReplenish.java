@@ -14,9 +14,7 @@ import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.InvUtils;
 import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.gui.screen.ingame.ContainerScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
-import net.minecraft.container.SlotActionType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -126,7 +124,7 @@ public class AutoReplenish extends ToggleModule {
                 int slot = -1;
                 if (searchHotbar.get()) {
                     for (int j = 0; j < 9; j++) {
-                        if (mc.player.inventory.getStack(j).getItem() == stack.getItem() && ItemStack.areTagsEqual(stack, mc.player.inventory.getInvStack(j)) && mc.player.inventory.selectedSlot != j && i != j) {
+                        if (mc.player.inventory.getStack(j).getItem() == stack.getItem() && ItemStack.areTagsEqual(stack, mc.player.inventory.getStack(j)) && mc.player.inventory.selectedSlot != j && i != j) {
                             slot = j;
                             break;
                         }
@@ -134,7 +132,7 @@ public class AutoReplenish extends ToggleModule {
                 }
                 if (slot == -1) {
                     for (int j = 9; j < mc.player.inventory.main.size(); j++) {
-                        if (mc.player.inventory.getStack(j).getItem() == stack.getItem() && ItemStack.areTagsEqual(stack, mc.player.inventory.getInvStack(j))) {
+                        if (mc.player.inventory.getStack(j).getItem() == stack.getItem() && ItemStack.areTagsEqual(stack, mc.player.inventory.getStack(j))) {
                             slot = j;
                             break;
                         }
@@ -153,14 +151,14 @@ public class AutoReplenish extends ToggleModule {
                 if (stack.getCount() < amount.get() && (stack.getMaxCount() > amount.get() || stack.getCount() < stack.getMaxCount())) {
                     int slot = -1;
                     for (int i = 9; i < mc.player.inventory.main.size(); i++) {
-                        if (mc.player.inventory.getStack(i).getItem() == stack.getItem() && ItemStack.areTagsEqual(stack, mc.player.inventory.getInvStack(i))) {
+                        if (mc.player.inventory.getStack(i).getItem() == stack.getItem() && ItemStack.areTagsEqual(stack, mc.player.inventory.getStack(i))) {
                             slot = i;
                             break;
                         }
                     }
                     if (searchHotbar.get() && slot == -1) {
                         for (int i = 0; i < 9; i++) {
-                            if (mc.player.inventory.getStack(i).getItem() == stack.getItem() && ItemStack.areTagsEqual(stack, mc.player.inventory.getInvStack(i))) {
+                            if (mc.player.inventory.getStack(i).getItem() == stack.getItem() && ItemStack.areTagsEqual(stack, mc.player.inventory.getStack(i))) {
                                 slot = i;
                                 break;
                             }
