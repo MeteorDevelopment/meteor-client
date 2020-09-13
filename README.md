@@ -7,7 +7,7 @@
 ![GitHub contributors](https://img.shields.io/github/contributors/MineGame159/meteor-client)
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/MineGame159/meteor-client/Java%20CI%20with%20Gradle)
 
-Minecraft fabric utility mod for minecraft versions 1.14.4 and higher.  
+Minecraft fabric utility mod for the latest minecraft version but has built in multiconnect so you can connect to older versions.
 Join our [Discord](https://discord.gg/bBGQZvd).
 
 ## Installation
