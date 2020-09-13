@@ -17,9 +17,6 @@ Follow guide at [meteorclient.com](https://meteorclient.com/info).
 - Clone this repository
 - Run `./gradlew build`
 
-## Contributors
-When developing features for Meteor do it for the oldest minecraft version possible. For example if you make pull request with your feature to 1.16 branch but the feature is not specific to 1.16 then the pull request will be closed.
-
 ## Donation
 We would appreciate if you donated to us through [PayPal](https://paypal.me/MineGame159). Include your Discord tag so we can give you donator role and contact you. Minimum for donator role is 5$.
 
