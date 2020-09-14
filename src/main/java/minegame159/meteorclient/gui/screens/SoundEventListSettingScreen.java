@@ -3,10 +3,11 @@ package minegame159.meteorclient.gui.screens;
 import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.utils.Utils;
+import net.minecraft.client.sound.WeightedSoundSet;
 import net.minecraft.sound.SoundEvent;
+import net.minecraft.text.Text;
 import net.minecraft.util.Pair;
 import net.minecraft.util.registry.Registry;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -87,7 +88,13 @@ public class SoundEventListSettingScreen extends WindowScreen {
     }
 
     private String getName(SoundEvent sound) {
-        return StringUtils.capitalize(sound.getId().getPath());
+        WeightedSoundSet soundSet = mc.getSoundManager().get(sound.getId());
+        if (soundSet == null) return sound.getId().getPath();
+
+        Text text = soundSet.getSubtitle();
+        if (text == null) return sound.getId().getPath();
+
+        return text.getString();
     }
 
     private void reload() {
