@@ -1,6 +1,6 @@
 package minegame159.meteorclient.utils;
 
-import minegame159.meteorclient.mixininterface.IKeyBinding;
+import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.options.KeyBinding;
 
 public class Input {
@@ -11,7 +11,7 @@ public class Input {
     }
 
     public static boolean isPressed(KeyBinding keyBinding) {
-        int key = ((IKeyBinding) keyBinding).getKey().getCode();
+        int key = KeyBindingHelper.getBoundKeyOf(keyBinding).getCode();
         return key < keys.length && keys[key];
     }
 

@@ -1,12 +1,12 @@
 package minegame159.meteorclient.mixin;
 
-import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.misc.ShulkerTooltip;
+import minegame159.meteorclient.utils.KeyBinds;
 import minegame159.meteorclient.utils.Utils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.block.ShulkerBoxBlock;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.inventory.Inventories;
@@ -107,7 +107,7 @@ public class ShulkerBoxBlockMixin {
                 }
 
                 tooltip.add(new LiteralText(""));
-                tooltip.add(new LiteralText("Press " + Formatting.YELLOW + Utils.getKeyName(((IKeyBinding) MeteorClient.INSTANCE.shulkerPeek).getKey().getCode()) + Formatting.RESET + " to peek"));
+                tooltip.add(new LiteralText("Press " + Formatting.YELLOW + Utils.getKeyName(KeyBindingHelper.getBoundKeyOf(KeyBinds.SHULKER_PEEK).getCode()) + Formatting.RESET + " to peek"));
             }
         }
     }

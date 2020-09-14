@@ -9,6 +9,7 @@ import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.utils.Input;
+import minegame159.meteorclient.utils.KeyBinds;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.Keyboard;
 import net.minecraft.client.MinecraftClient;
@@ -30,7 +31,7 @@ public abstract class KeyboardMixin {
         if (key != GLFW.GLFW_KEY_UNKNOWN && GuiThings.postKeyEvents()) {
             Input.setKeyState(key, i != GLFW.GLFW_RELEASE);
 
-            KeyBinding shulkerPeek = MeteorClient.INSTANCE.shulkerPeek;
+            KeyBinding shulkerPeek = KeyBinds.SHULKER_PEEK;
             if (shulkerPeek.matchesKey(key, scancode) && (i == GLFW.GLFW_PRESS || i == GLFW.GLFW_REPEAT)) ((IKeyBinding) shulkerPeek).setPressed(true);
             else ((IKeyBinding) shulkerPeek).setPressed(false);
 
