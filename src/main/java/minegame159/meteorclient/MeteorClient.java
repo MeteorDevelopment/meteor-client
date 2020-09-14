@@ -13,23 +13,16 @@ import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.gui.GuiThings;
 import minegame159.meteorclient.gui.screens.topbar.TopBarModules;
 import minegame159.meteorclient.macros.MacroManager;
-import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.misc.DiscordPresence;
 import minegame159.meteorclient.rendering.MFont;
-import minegame159.meteorclient.utils.Capes;
-import minegame159.meteorclient.utils.EChestMemory;
-import minegame159.meteorclient.utils.EntityUtils;
-import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.*;
 import minegame159.meteorclient.waypoints.Waypoints;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.options.KeyBinding;
-import net.minecraft.client.util.InputUtil;
-import org.lwjgl.glfw.GLFW;
 
 import java.awt.*;
 import java.io.*;
@@ -42,16 +35,13 @@ public class MeteorClient implements ClientModInitializer, Listenable {
     public static final File FOLDER = new File(FabricLoader.getInstance().getGameDirectory(), "meteor-client");
 
     private MinecraftClient mc;
-    private KeyBinding openClickGui = new KeyBinding("key.meteor-client.open-click-gui", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_RIGHT_SHIFT, "Meteor Client");
-    public KeyBinding shulkerPeek = new KeyBinding("key.meteor-client.shulker-peek", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_LEFT_ALT, "Meteor Client");
 
     public Screen screenToOpen;
 
     @Override
     public void onInitializeClient() {
         if (INSTANCE == null) {
-            KeyBindingHelper.registerKeyBinding(openClickGui);
-            KeyBindingHelper.registerKeyBinding(shulkerPeek);
+            KeyBinds.Register();
 
             INSTANCE = this;
             return;
@@ -111,7 +101,7 @@ public class MeteorClient implements ClientModInitializer, Listenable {
             screenToOpen = null;
         }
 
-        if (openClickGui.isPressed() && mc.currentScreen == null && GuiThings.postKeyEvents()) {
+        if (KeyBinds.OPEN_CLICK_GUI.isPressed() && mc.currentScreen == null && GuiThings.postKeyEvents()) {
             openClickGui();
         }
 
@@ -149,26 +139,6 @@ public class MeteorClient implements ClientModInitializer, Listenable {
             }
         }
 
-        /*FontStorage fontStorage = new FontStorage(mc.getTextureManager(), new Identifier("meteor-client", "font"));
-        List<Font> fonts = new ArrayList<>(1);
-
-        try {
-            InputStream in = new FileInputStream(fontFile);
-            ByteBuffer buffer = TextureUtil.readResource(in);
-            buffer.flip();
-
-            STBTTFontinfo fontInfo = STBTTFontinfo.malloc();
-            STBTruetype.stbtt_InitFont(fontInfo, buffer);
-
-            in.close();
-
-            fonts.add(new TrueTypeFont(buffer, fontInfo, 12, 0, 0, 0, ""));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        fontStorage.setFonts(fonts);
-        TEXT_RENDERER = new TextRenderer(mc.getTextureManager(), fontStorage);*/
         try {
             FONT = new MFont(Font.createFont(Font.TRUETYPE_FONT, fontFile).deriveFont(16f), true, true);
             FONT_2X = new MFont(Font.createFont(Font.TRUETYPE_FONT, fontFile).deriveFont(16f * 2), true, true);
@@ -190,7 +160,7 @@ public class MeteorClient implements ClientModInitializer, Listenable {
     }
 
     public void onKeyInMainMenu(int key) {
-        if (key == ((IKeyBinding) openClickGui).getKey().getCode()) {
+        if (key == KeyBindingHelper.getBoundKeyOf(KeyBinds.OPEN_CLICK_GUI).getCode()) {
             openClickGui();
         }
     }

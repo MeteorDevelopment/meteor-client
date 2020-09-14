@@ -1,11 +1,11 @@
 package minegame159.meteorclient.mixin;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.misc.EChestPreview;
 import minegame159.meteorclient.modules.player.MountBypass;
 import minegame159.meteorclient.utils.EChestMemory;
+import minegame159.meteorclient.utils.KeyBinds;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
@@ -70,7 +70,7 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
     private void onRender(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo info) {
         if (focusedSlot != null && !focusedSlot.getStack().isEmpty()) {
             // Shulker Preview
-            if (Utils.isShulker(focusedSlot.getStack().getItem()) && MeteorClient.INSTANCE.shulkerPeek.isPressed()) {
+            if (Utils.isShulker(focusedSlot.getStack().getItem()) && KeyBinds.SHULKER_PEEK.isPressed()) {
                 CompoundTag compoundTag = focusedSlot.getStack().getSubTag("BlockEntityTag");
                 if (compoundTag != null) {
                     if (compoundTag.contains("Items", 9)) {
@@ -92,7 +92,7 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
     @Inject(method = "drawMouseoverTooltip", at = @At("HEAD"), cancellable = true)
     private void onDrawMouseoverTooltip(MatrixStack matrices, int x, int y, CallbackInfo info) {
         if (focusedSlot != null && !focusedSlot.getStack().isEmpty()) {
-            if (Utils.isShulker(focusedSlot.getStack().getItem()) && MeteorClient.INSTANCE.shulkerPeek.isPressed()) info.cancel();
+            if (Utils.isShulker(focusedSlot.getStack().getItem()) && KeyBinds.SHULKER_PEEK.isPressed()) info.cancel();
             else if (focusedSlot.getStack().getItem() == Items.ENDER_CHEST && ModuleManager.INSTANCE.isActive(EChestPreview.class)) info.cancel();
         }
     }
