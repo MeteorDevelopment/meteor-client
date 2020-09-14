@@ -44,6 +44,11 @@ public class Rotation extends ToggleModule {
         super(Category.Player, "rotation", "Allows you to lock your yaw and pitch.");
     }
 
+    @Override
+    public void onActivate() {
+        onTick.invoke(null);
+    }
+
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
         // Yaw
