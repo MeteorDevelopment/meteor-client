@@ -43,7 +43,8 @@ public class ModuleScreen extends WindowScreen implements Listenable {
                 row();
             }
 
-            add(customWidget);
+            Cell<WWidget> cell = add(customWidget);
+            if (customWidget instanceof WTable) cell.fillX().expandX();
             row();
         }
 
