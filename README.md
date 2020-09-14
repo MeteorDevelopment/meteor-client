@@ -17,6 +17,11 @@ Follow guide at [meteorclient.com](https://meteorclient.com/info).
 - Clone this repository
 - Run `./gradlew build`
 
+## Dev builds
+- Click `Actions` at the top of github
+- Open the latest commit
+- Download `Artifacts`, inside that there is the .jar file
+
 ## Donation
 We would appreciate if you donated to us through [PayPal](https://paypal.me/MineGame159). Include your Discord tag so we can give you donator role and contact you. Minimum for donator role is 5$.
 
