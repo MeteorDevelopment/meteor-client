@@ -50,6 +50,13 @@ public class AutoRightClick extends ToggleModule {
         timer = 0;
     }
 
+    @Override
+    public void onDeactivate() {
+        if (mode.get() == Mode.Hold && mc.options.keyUse.isPressed()) {
+            ((IKeyBinding)mc.options.keyUse).setPressed(false);
+        }
+    }
+
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
         if (mc.player.getHealth() <= 0) return;
