@@ -57,7 +57,7 @@ public class EntityLogger extends ToggleModule {
 
             String name;
             if (playerNames.get() && event.entity instanceof PlayerEntity) name = ((PlayerEntity) event.entity).getGameProfile().getName() + " (Player)";
-            else name = event.entity.getType().getName().asString();
+            else name = event.entity.getType().getName().getString();
 
             Chat.info(this, "(highlight)%s (default)spawned at (highlight)%.0f(default), (highlight)%.0f(default), (highlight)%.0f(default).", name, event.entity.getX(), event.entity.getY(), event.entity.getZ());
         }
