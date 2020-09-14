@@ -18,6 +18,6 @@ public class AutoSprint extends ToggleModule {
 
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
-        mc.player.setSprinting(!mc.player.isSneaking());
+        mc.player.setSprinting(true);
     });
 }
