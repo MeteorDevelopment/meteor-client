@@ -128,7 +128,7 @@ public class SmartSurround extends ToggleModule {
         int newSlot = -1;
         for (int i = 0; i < 9; i++) {
             Item item = mc.player.inventory.getStack(i).getItem();
-            if (item == Items.OBSIDIAN) {
+            if (item == Items.OBSIDIAN || item == Items.CRYING_OBSIDIAN) {
                 newSlot = i;
                 mc.player.inventory.selectedSlot = newSlot;
                 break;

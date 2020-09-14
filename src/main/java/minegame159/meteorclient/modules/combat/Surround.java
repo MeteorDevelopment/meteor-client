@@ -167,7 +167,7 @@ public class Surround extends ToggleModule {
 
             if (!(item instanceof BlockItem)) continue;
 
-            if (item == Items.OBSIDIAN) {
+            if (item == Items.OBSIDIAN || item == Items.CRYING_OBSIDIAN) {
                 mc.player.inventory.selectedSlot = i;
                 return true;
             }
