@@ -21,11 +21,11 @@ Follow guide at [meteorclient.com](https://meteorclient.com/info).
 We would appreciate if you donated to us through [PayPal](https://paypal.me/MineGame159). Include your Discord tag so we can give you donator role and contact you. Minimum for donator role is 5$.
 
 ## Thank you
-[ZeroMemes](https://github.com/ZeroMemes) for [Alpine](https://github.com/ZeroMemes/Alpine)
-[Earthcomputer](https://github.com/Earthcomputer) for [Multiconnect](https://github.com/Earthcomputer/multiconnect)
-[Cabaletta](https://github.com/cabaletta) for [Baritone](https://github.com/cabaletta/baritone)
-[CDAGaming](https://gitlab.com/CDAGaming) for [Fabritone](https://gitlab.com/CDAGaming/fabritone)
-[Vatuu](https://github.com/Vatuu) for [Discord Rpc](https://github.com/Vatuu/discord-rpc)
+[ZeroMemes](https://github.com/ZeroMemes) for [Alpine](https://github.com/ZeroMemes/Alpine)  
+[Earthcomputer](https://github.com/Earthcomputer) for [Multiconnect](https://github.com/Earthcomputer/multiconnect)  
+[Cabaletta](https://github.com/cabaletta) for [Baritone](https://github.com/cabaletta/baritone)  
+[CDAGaming](https://gitlab.com/CDAGaming) for [Fabritone](https://gitlab.com/CDAGaming/fabritone)  
+[Vatuu](https://github.com/Vatuu) for [Discord Rpc](https://github.com/Vatuu/discord-rpc)  
 The [Fabric Team](https://github.com/FabricMC) for [Fabric](https://github.com/FabricMC/fabric-loader) and [Yarn](https://github.com/FabricMC/yarn)
 
 ## License
