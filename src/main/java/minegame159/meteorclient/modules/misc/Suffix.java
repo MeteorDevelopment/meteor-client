@@ -12,6 +12,7 @@ import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.settings.StringSetting;
+import minegame159.meteorclient.utils.Utils;
 
 public class Suffix extends ToggleModule {
     private static final Char2CharMap SMALL_CAPS = new Char2CharArrayMap();
@@ -38,6 +39,13 @@ public class Suffix extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> random = sgGeneral.add(new BoolSetting.Builder()
+            .name("random")
+            .description("Example: <msg> (538)")
+            .defaultValue(false)
+            .build()
+    );
+
     private final StringBuilder sb = new StringBuilder();
 
     public Suffix() {
@@ -52,17 +60,23 @@ public class Suffix extends ToggleModule {
     });
 
     private String getSuffix() {
-        String text = this.text.get();
+        String text;
 
-        if (smallCaps.get()) {
-            sb.setLength(0);
+        if (random.get()) {
+            text = String.format(" (%03d)", Utils.random(0, 1000));
+        } else {
+            text = this.text.get();
 
-            for (char ch : text.toCharArray()) {
-                if (SMALL_CAPS.containsKey(ch)) sb.append(SMALL_CAPS.get(ch));
-                else sb.append(ch);
+            if (smallCaps.get()) {
+                sb.setLength(0);
+
+                for (char ch : text.toCharArray()) {
+                    if (SMALL_CAPS.containsKey(ch)) sb.append(SMALL_CAPS.get(ch));
+                    else sb.append(ch);
+                }
+
+                text = sb.toString();
             }
-
-            text = sb.toString();
         }
 
         return text;
