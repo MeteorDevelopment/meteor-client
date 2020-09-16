@@ -49,14 +49,7 @@ public class EntityOwner extends ToggleModule {
     }
 
     @Override
-    public void onActivate() {
-        MeteorTaskExecutor.start();
-    }
-
-    @Override
     public void onDeactivate() {
-        MeteorTaskExecutor.stop();
-
         uuidToName.clear();
     }
 
@@ -113,7 +106,7 @@ public class EntityOwner extends ToggleModule {
         if (name != null) return name;
 
         // Make http request to mojang api
-        MeteorTaskExecutor.execute(() -> {
+        MeteorExecutor.execute(() -> {
             if (isActive()) {
                 List<UuidNameHistoryResponseItem> response = HttpUtils.get("https://api.mojang.com/user/profiles/" + uuid.toString().replace("-", "") + "/names", RESPONSE_TYPE);
 

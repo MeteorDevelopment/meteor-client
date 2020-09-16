@@ -23,15 +23,13 @@ public class Capes {
     private static final List<Cape> TO_RETRY = new ArrayList<>();
 
     public static void init() {
-        MeteorTaskExecutor.start();
-        MeteorTaskExecutor.execute(() -> HttpUtils.getLines(CAPE_OWNERS_URL, s -> {
+        MeteorExecutor.execute(() -> HttpUtils.getLines(CAPE_OWNERS_URL, s -> {
             String[] split = s.split(" ");
             if (split.length >= 2) {
                 OWNERS.put(UUID.fromString(split[0]), split[1]);
                 if (!TEXTURES.containsKey(split[1])) TEXTURES.put(split[1], new Cape(split[1]));
             }
         }));
-        MeteorTaskExecutor.stop();
     }
 
     public static Identifier getCape(PlayerEntity player) {
@@ -74,8 +72,7 @@ public class Capes {
             if (downloaded || downloading || retryTimer > 0) return;
             downloading = true;
 
-            MeteorTaskExecutor.start();
-            MeteorTaskExecutor.execute(() -> {
+            MeteorExecutor.execute(() -> {
                 try {
                     InputStream in = HttpUtils.get(CAPE_FOLDER_URL + path);
                     if (in == null) {
@@ -96,7 +93,6 @@ public class Capes {
                     e.printStackTrace();
                 }
             });
-            MeteorTaskExecutor.stop();
         }
 
         public void register() {
