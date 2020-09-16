@@ -14,7 +14,7 @@ import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.rendering.ShapeBuilder;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Color;
-import minegame159.meteorclient.utils.MeteorTaskExecutor;
+import minegame159.meteorclient.utils.MeteorExecutor;
 import minegame159.meteorclient.utils.Pool;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.block.Block;
@@ -95,8 +95,6 @@ public class Search extends ToggleModule {
 
     @Override
     public void onActivate() {
-        MeteorTaskExecutor.start();
-
         lastDimension = mc.world.getDimension();
 
         searchViewDistance();
@@ -104,8 +102,6 @@ public class Search extends ToggleModule {
 
     @Override
     public void onDeactivate() {
-        MeteorTaskExecutor.stop();
-
         for (MyChunk chunk : chunks.values()) chunk.dispose();
         chunks.clear();
     }
@@ -123,7 +119,7 @@ public class Search extends ToggleModule {
     private final Listener<ChunkDataEvent> onChunkData = new Listener<>(event -> searchChunk(event.chunk, event));
 
     private void searchChunk(Chunk chunk, ChunkDataEvent event) {
-        MeteorTaskExecutor.execute(() -> {
+        MeteorExecutor.execute(() -> {
             MyChunk myChunk = new MyChunk(chunk.getPos().x, chunk.getPos().z);
 
             for (int x = chunk.getPos().getStartX(); x <= chunk.getPos().getEndX(); x++) {
@@ -146,7 +142,7 @@ public class Search extends ToggleModule {
     }
 
     public void onBlockUpdate(BlockPos blockPos, BlockState blockState) {
-        MeteorTaskExecutor.execute(() -> {
+        MeteorExecutor.execute(() -> {
             int chunkX = blockPos.getX() >> 4;
             int chunkZ = blockPos.getZ() >> 4;
             long key = ChunkPos.toLong(chunkX, chunkZ);
