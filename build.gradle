@@ -37,9 +37,10 @@ dependencies {
 	include "com.github.ZeroMemes:Alpine:1.9"
 	include "net.jodah:typetools:0.5.0"
 
-	modImplementation 'net.earthcomputer:multiconnect:1.3.19'
-	include 'net.earthcomputer:multiconnect:1.3.19'
-	modRuntime 'net.earthcomputer:multiconnect:1.3.19:slim'
+	modImplementation 'net.earthcomputer:multiconnect:1.3.20'
+	include 'net.earthcomputer:multiconnect:1.3.20'
+	modRuntime 'net.earthcomputer:multiconnect:1.3.20:slim'
+	modRuntime 'net.earthcomputer:multiconnect:1.3.20:api'
 
 	modImplementation "com.gitlab.CDAGaming:fabritone:fabritone~1.16.x-Fabric-SNAPSHOT"
 	include "com.gitlab.CDAGaming:fabritone:fabritone~1.16.x-Fabric-SNAPSHOT"
