@@ -18,6 +18,10 @@ public class AutoSprint extends ToggleModule {
 
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
-        mc.player.setSprinting(true);
+    	if(mc.player.forwardSpeed > 0) {
+    		
+            mc.player.setSprinting(true);
+    		
+    	}
     });
 }
