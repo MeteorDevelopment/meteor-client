@@ -350,7 +350,7 @@ public class CrystalAura extends ToggleModule {
                     if (delayLeft <= 0) delayLeft = 10;
                 }
             }
-            if (spoofChange.get() && preSlot != mc.player.inventory.selectedSlot)
+            if (spoofChange.get() && preSlot != mc.player.inventory.selectedSlot && preSlot != -1)
                 mc.player.inventory.selectedSlot = preSlot;
         }
     }, EventPriority.HIGH);
