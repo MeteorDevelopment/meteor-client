@@ -5,7 +5,7 @@ package minegame159.meteorclient.modules.combat;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.accountsfriends.FriendManager;
+import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
@@ -29,7 +29,6 @@ import net.minecraft.item.Items;
 import net.minecraft.item.SwordItem;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.dimension.DimensionType;
 
 public class AutoTotem extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();

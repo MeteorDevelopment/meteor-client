@@ -60,6 +60,14 @@ public class TopBarGui extends TopBarScreen {
                 .onModuleActivated(colorSetting -> colorSetting.set(GuiConfig.INSTANCE.loggedInText))
                 .build()
         );
+        sg.add(new ColorSetting.Builder()
+                .name("account-type-text")
+                .description("Account type text color.")
+                .defaultValue(new Color(150, 150, 150))
+                .onChanged(color -> GuiConfig.INSTANCE.accountTypeText.set(color))
+                .onModuleActivated(colorSetting -> colorSetting.set(GuiConfig.INSTANCE.accountTypeText))
+                .build()
+        );
 
         sg.add(new ColorSetting.Builder()
                 .name("background")

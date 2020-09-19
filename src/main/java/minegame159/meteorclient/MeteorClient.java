@@ -5,8 +5,8 @@ import me.zero.alpine.bus.EventManager;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listenable;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.accountsfriends.AccountManager;
-import minegame159.meteorclient.accountsfriends.FriendManager;
+import minegame159.meteorclient.accounts.AccountManager;
+import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.commands.CommandManager;
 import minegame159.meteorclient.commands.commands.Ignore;
 import minegame159.meteorclient.events.TickEvent;
@@ -60,7 +60,6 @@ public class MeteorClient implements ClientModInitializer, Listenable {
         MeteorExecutor.init();
         ModuleManager.INSTANCE = new ModuleManager();
         CommandManager.init();
-        AccountManager.init();
         EChestMemory.init();
         Capes.init();
 

@@ -2,7 +2,7 @@ package minegame159.meteorclient.modules.combat;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.accountsfriends.FriendManager;
+import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
@@ -23,7 +23,6 @@ import net.minecraft.network.packet.s2c.play.DisconnectS2CPacket;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.dimension.DimensionType;
 
 public class AutoLog extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();

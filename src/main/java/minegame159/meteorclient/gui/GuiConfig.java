@@ -18,6 +18,7 @@ public class GuiConfig implements ISerializable<GuiConfig> {
     public Color text = new Color(255, 255, 255);
     public Color windowHeaderText = new Color(255, 255, 255);
     public Color loggedInText = new Color(45, 225, 45);
+    public Color accountTypeText = new Color(150, 150, 150);
 
     public Color background = new Color(20, 20, 20, 200);
     public Color backgroundHovered = new Color(30, 30, 30, 200);
@@ -87,6 +88,7 @@ public class GuiConfig implements ISerializable<GuiConfig> {
         tag.put("text", text.toTag());
         tag.put("windowHeaderText", text.toTag());
         tag.put("loggedInText", loggedInText.toTag());
+        tag.put("accountTypeText", accountTypeText.toTag());
 
         tag.put("background", background.toTag());
         tag.put("backgroundHovered", backgroundHovered.toTag());
@@ -144,6 +146,7 @@ public class GuiConfig implements ISerializable<GuiConfig> {
         read(tag, "text", text);
         read(tag, "windowHeaderText", windowHeaderText);
         read(tag, "loggedInText", loggedInText);
+        read(tag, "accountTypeText", accountTypeText);
 
         read(tag, "background", background);
         read(tag, "backgroundHovered", backgroundHovered);

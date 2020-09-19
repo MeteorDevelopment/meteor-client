@@ -21,6 +21,8 @@ public class WidgetScreen extends Screen {
     private int prePostKeyEvents;
     private boolean renderDebug = false;
 
+    public boolean locked;
+
     public WidgetScreen(String title) {
         super(new LiteralText(title));
 
@@ -41,6 +43,8 @@ public class WidgetScreen extends Screen {
 
     @Override
     public void mouseMoved(double mouseX, double mouseY) {
+        if (locked) return;
+
         double s = mc.getWindow().getScaleFactor();
         double scale = GuiConfig.INSTANCE.guiScale;
 
@@ -54,21 +58,29 @@ public class WidgetScreen extends Screen {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (locked) return false;
+
         return root.mouseClicked(button);
     }
 
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        if (locked) return false;
+
         return root.mouseReleased(button);
     }
 
     @Override
     public boolean mouseScrolled(double d, double e, double amount) {
+        if (locked) return false;
+
         return root.mouseScrolled(amount);
     }
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (locked) return false;
+
         if (modifiers == GLFW.GLFW_MOD_CONTROL && keyCode == GLFW.GLFW_KEY_9) {
             renderDebug = !renderDebug;
             return true;
@@ -78,11 +90,15 @@ public class WidgetScreen extends Screen {
     }
 
     public void keyRepeated(int key, int mods) {
+        if (locked) return;
+
         root.keyRepeated(key, mods);
     }
 
     @Override
     public boolean charTyped(char chr, int keyCode) {
+        if (locked) return false;
+
         return root.charTyped(chr, keyCode);
     }
 
@@ -125,8 +141,15 @@ public class WidgetScreen extends Screen {
 
     @Override
     public void onClose() {
+        if (locked) return;
+
         GuiThings.postKeyEvents = prePostKeyEvents;
         mc.openScreen(parent);
+    }
+
+    @Override
+    public boolean shouldCloseOnEsc() {
+        return !locked;
     }
 
     @Override

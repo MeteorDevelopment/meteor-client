@@ -1,6 +1,6 @@
 package minegame159.meteorclient.commands.commands;
 
-import minegame159.meteorclient.accountsfriends.FriendManager;
+import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.commands.Command;
 import minegame159.meteorclient.utils.Chat;
 
@@ -29,7 +29,7 @@ public class Friend extends Command {
                     name += args[i];
                 }
 
-                if (FriendManager.INSTANCE.add(new minegame159.meteorclient.accountsfriends.Friend(name))) {
+                if (FriendManager.INSTANCE.add(new minegame159.meteorclient.friends.Friend(name))) {
                     Chat.info("Added (highlight)%s (default)to friends.", name);
                 }
 
@@ -47,7 +47,7 @@ public class Friend extends Command {
                     name += args[i];
                 }
 
-                if (FriendManager.INSTANCE.remove(new minegame159.meteorclient.accountsfriends.Friend(name))) {
+                if (FriendManager.INSTANCE.remove(new minegame159.meteorclient.friends.Friend(name))) {
                     Chat.info("Removed (highlight)%s (default)from friends.", name);
                 }
 
@@ -56,7 +56,7 @@ public class Friend extends Command {
             case "list": {
                 Chat.info("You have (highlight)%d (default)friends:", FriendManager.INSTANCE.count());
 
-                for (minegame159.meteorclient.accountsfriends.Friend friend : FriendManager.INSTANCE) {
+                for (minegame159.meteorclient.friends.Friend friend : FriendManager.INSTANCE) {
                     Chat.info(" - (highlight)%s", friend.name);
                 }
 

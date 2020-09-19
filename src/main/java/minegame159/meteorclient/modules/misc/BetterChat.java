@@ -1,7 +1,7 @@
 package minegame159.meteorclient.modules.misc;
 
-import minegame159.meteorclient.accountsfriends.Friend;
-import minegame159.meteorclient.accountsfriends.FriendManager;
+import minegame159.meteorclient.friends.Friend;
+import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.commands.commands.Ignore;
 import minegame159.meteorclient.mixininterface.IChatHudLine;
 import minegame159.meteorclient.modules.Category;

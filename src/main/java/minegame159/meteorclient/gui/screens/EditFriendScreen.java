@@ -1,6 +1,6 @@
 package minegame159.meteorclient.gui.screens;
 
-import minegame159.meteorclient.accountsfriends.Friend;
+import minegame159.meteorclient.friends.Friend;
 import minegame159.meteorclient.gui.widgets.WButton;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Color;

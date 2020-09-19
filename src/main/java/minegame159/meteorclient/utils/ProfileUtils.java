@@ -2,8 +2,8 @@ package minegame159.meteorclient.utils;
 
 import minegame159.meteorclient.Config;
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.accountsfriends.AccountManager;
-import minegame159.meteorclient.accountsfriends.FriendManager;
+import minegame159.meteorclient.accounts.AccountManager;
+import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.macros.MacroManager;
 import minegame159.meteorclient.modules.ModuleManager;
 import org.apache.commons.io.FileUtils;

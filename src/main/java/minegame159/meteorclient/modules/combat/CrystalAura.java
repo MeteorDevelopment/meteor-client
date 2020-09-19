@@ -9,7 +9,7 @@ import com.google.common.collect.Streams;
 import me.zero.alpine.event.EventPriority;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.accountsfriends.FriendManager;
+import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.events.RenderEvent;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.modules.Category;
