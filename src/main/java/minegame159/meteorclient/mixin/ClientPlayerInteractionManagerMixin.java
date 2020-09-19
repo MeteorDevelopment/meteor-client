@@ -1,7 +1,7 @@
 package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.accountsfriends.FriendManager;
+import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.events.AttackEntityEvent;
 import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.events.StartBreakingBlockEvent;

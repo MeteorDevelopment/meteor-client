@@ -13,6 +13,7 @@ import minegame159.meteorclient.utils.TextureRegion;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.VertexFormats;
+import net.minecraft.client.texture.AbstractTexture;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 import org.lwjgl.opengl.GL11;
@@ -42,6 +43,7 @@ public class GuiRenderer {
     final Pool<LineOperation> lineOperationPool = new Pool<>(LineOperation::new);
     final Pool<ItemOperation> itemOperationPool = new Pool<>(ItemOperation::new);
     final Pool<TextOperation> textOperationPool = new Pool<>(TextOperation::new);
+    final Pool<TextureOperation> textureOperationPool = new Pool<>(TextureOperation::new);
 
     // Scissor stuff
     final Pool<Scissor> scissorPool = new Pool<>(Scissor::new);
@@ -174,6 +176,11 @@ public class GuiRenderer {
 
     public void renderTooltip(String text, double x, double y, Color color) {
         tooltip = textOperationPool.get().set(text, x, y, color, true);
+    }
+
+    // Head
+    public void renderTexture(double x, double y, double width, double height, double rotation, AbstractTexture texture) {
+        currentScissor.postOperations.add(textureOperationPool.get().set(x, y, width, height, rotation, texture));
     }
 
     // Debug

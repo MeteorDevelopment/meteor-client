@@ -1,4 +1,4 @@
-package minegame159.meteorclient.accountsfriends;
+package minegame159.meteorclient.friends;
 
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.EventStore;

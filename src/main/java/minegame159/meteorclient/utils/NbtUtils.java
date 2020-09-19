@@ -18,7 +18,10 @@ public class NbtUtils {
 
     public static <T> List<T> listFromTag(ListTag tag, ToValue<T> toItem) {
         List<T> list = new ArrayList<>(tag.size());
-        for (Tag itemTag : tag) list.add(toItem.toValue(itemTag));
+        for (Tag itemTag : tag) {
+            T value = toItem.toValue(itemTag);
+            if (value != null) list.add(value);
+        }
         return list;
     }
 
