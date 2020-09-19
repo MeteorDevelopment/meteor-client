@@ -5,7 +5,7 @@
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/MineGame159/meteor-client)
 ![GitHub lines of code](https://tokei.rs/b1/github/MineGame159/meteor-client)
 ![GitHub contributors](https://img.shields.io/github/contributors/MineGame159/meteor-client)
-![Jenkins](https://img.shields.io/jenkins/build?jobUrl=https%3A%2F%2Fjenkins.wnuke.dev%2Fjob%2Fmeteor%2Fjob%2Fmeteor-client%2Fjob%2Fmaster)
+[![Jenkins](https://jenkins.wnuke.dev/job/meteor/job/meteor-client/job/master/badge/icon)](https://jenkins.wnuke.dev/job/meteor/job/meteor-client/job/master/)
 
 Minecraft fabric utility mod for the latest minecraft version but has built in multiconnect so you can connect to older versions.
 Join our [Discord](https://discord.gg/bBGQZvd).
