@@ -32,7 +32,7 @@ public class MeteorClient implements ClientModInitializer, Listenable {
     public static final EventBus EVENT_BUS = new EventManager();
     public static MFont FONT, FONT_2X;
     public static boolean IS_DISCONNECTING;
-    public static final File FOLDER = new File(FabricLoader.getInstance().getGameDirectory(), "meteor-client");
+    public static final File FOLDER = new File(FabricLoader.getInstance().getGameDir().toString(), "meteor-client");
 
     private MinecraftClient mc;
 
