@@ -34,7 +34,7 @@ pipeline {
         if (msg.length() > 1024) msg.take(msg.length() - 1024)
 
         def filename
-        if (!currentBuild.changeSets.isEmpty()) { 
+        if (!currentBuild.rawBuild.getArtifacts().isEmpty()) { 
         msg += "\n **Artifacts:**\n"
         currentBuild.rawBuild.getArtifacts().each {
             filename = it.getFileName()
@@ -43,7 +43,7 @@ pipeline {
         }
 
         withCredentials([string(credentialsId: 'meteor-discord-release', variable: 'discordWebhook')]) {
-            discordSend thumbnail: "https://avatars1.githubusercontent.com/u/68797713?s=400&u=285a0b2bce2887db6b3f19e861da02face9f4ccc&v=4", successful: currentBuild.resultIsBetterOrEqualTo('SUCCESS'), description: "${msg}", link: env.BUILD_URL, title: "toastclient-fabric #${BUILD_NUMBER}", webhookURL: "${discordWebhook}"
+            discordSend thumbnail: "http://wnuke.dev/radiation-symbol.png", successful: currentBuild.resultIsBetterOrEqualTo('SUCCESS'), description: "${msg}", link: env.BUILD_URL, title: "meteor-client v${VERSION} build #${BUILD_NUMBER}", webhookURL: "${discordWebhook}"
         }
       }
     }
