@@ -141,7 +141,7 @@ public class OffhandExtra extends ToggleModule {
                 return;
             }
             boolean empty = mc.player.getOffHandStack().isEmpty();
-            if (mc.player.getOffHandStack().getItem() != item && replace.get()) {
+            if (mc.player.getOffHandStack().getItem() != item && mc.player.getMainHandStack().getItem() != item && replace.get()) {
                 InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
                 InvUtils.clickSlot(InvUtils.OFFHAND_SLOT, 0, SlotActionType.PICKUP);
                 if (!empty) InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);

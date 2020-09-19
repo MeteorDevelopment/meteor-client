@@ -74,6 +74,11 @@ public class AutoTotem extends ToggleModule {
         super(Category.Combat, "auto-totem", "Automatically equips totems.");
     }
 
+    @Override
+    public void onDeactivate() {
+        locked = false;
+    }
+
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
         if (mc.currentScreen instanceof HandledScreen<?> && (!(mc.currentScreen instanceof InventoryScreen) || !inventorySwitch.get())) return;
