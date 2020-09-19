@@ -43,7 +43,7 @@ pipeline {
         }
 
         withCredentials([string(credentialsId: 'meteor-discord-release', variable: 'discordWebhook')]) {
-            discordSend thumbnail: "http://wnuke.dev/radiation-symbol.png", successful: currentBuild.resultIsBetterOrEqualTo('SUCCESS'), description: "${msg}", link: env.BUILD_URL, title: "meteor-client v${VERSION} build #${BUILD_NUMBER}", webhookURL: "${discordWebhook}"
+            discordSend thumbnail: "https://meteorclient.com/icon.png", successful: currentBuild.resultIsBetterOrEqualTo('SUCCESS'), description: "${msg}", link: env.BUILD_URL, title: "meteor-client v${VERSION} build #${BUILD_NUMBER}", webhookURL: "${discordWebhook}"
         }
       }
     }
