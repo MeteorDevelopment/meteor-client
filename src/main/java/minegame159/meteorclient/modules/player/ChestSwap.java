@@ -20,7 +20,7 @@ public class ChestSwap extends ToggleModule {
         Diamond,
         Netherite,
         PreferDiamond,
-        PrederNetherite
+        PreferNetherite
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -28,7 +28,7 @@ public class ChestSwap extends ToggleModule {
     private final Setting<Chestplate> chestplate = sgGeneral.add(new EnumSetting.Builder<Chestplate>()
             .name("chestplate")
             .description("Which chestplate to switch to.")
-            .defaultValue(Chestplate.PrederNetherite)
+            .defaultValue(Chestplate.PreferNetherite)
             .build()
     );
 
@@ -94,7 +94,7 @@ public class ChestSwap extends ToggleModule {
                         bestSlot = i;
                     }
                     break;
-                case PrederNetherite:
+                case PreferNetherite:
                     if (item == Items.DIAMOND_CHESTPLATE) {
                         bestSlot = i;
                     } else if (item == Items.NETHERITE_CHESTPLATE) {
