@@ -6,7 +6,9 @@ import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.player.ChestSwap;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.DamageCalcUtils;
 import minegame159.meteorclient.utils.InvUtils;
@@ -195,7 +197,7 @@ public class AutoArmor extends ToggleModule {
         for (int a = 0; a < 4; a++) {
             currentItemScore = 0;
             itemStack = mc.player.inventory.getArmorStack(a);
-            if (ignoreElytra.get() && itemStack.getItem() == Items.ELYTRA) continue;
+            if ((ignoreElytra.get() || ModuleManager.INSTANCE.get(ChestSwap.class).isActive()) && itemStack.getItem() == Items.ELYTRA) continue;
             if (EnchantmentHelper.hasBindingCurse(itemStack)) continue;
             if (itemStack.getItem() instanceof ArmorItem) {
                 if (a == 1 && bProtLegs.get()) {
