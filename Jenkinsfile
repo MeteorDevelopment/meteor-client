@@ -41,7 +41,7 @@ pipeline {
                 if (msg.length() > 1024) msg.take(msg.length() - 1024)
 
                 def filename
-                if (!currentBuild.changeSets.isEmpty()) {
+                if (!currentBuild.rawBuild.getArtifacts().isEmpty()) {
                     msg += "\n **Artifacts:**\n"
                     currentBuild.rawBuild.getArtifacts().each {
                         filename = it.getFileName()
