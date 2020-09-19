@@ -39,8 +39,9 @@ dependencies {
 
 	modImplementation 'net.earthcomputer:multiconnect:1.3.21'
 	include 'net.earthcomputer:multiconnect:1.3.21'
+	modImplementation 'net.earthcomputer:multiconnect:1.3.21:api'
+	include 'net.earthcomputer:multiconnect:1.3.21:api'
 	modRuntime 'net.earthcomputer:multiconnect:1.3.21:slim'
-	modRuntime 'net.earthcomputer:multiconnect:1.3.21:api'
 
 	modImplementation "com.gitlab.CDAGaming:fabritone:fabritone~1.16.x-Fabric-SNAPSHOT"
 	include "com.gitlab.CDAGaming:fabritone:fabritone~1.16.x-Fabric-SNAPSHOT"
