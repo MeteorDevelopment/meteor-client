@@ -5,7 +5,7 @@
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/MineGame159/meteor-client)
 ![GitHub lines of code](https://tokei.rs/b1/github/MineGame159/meteor-client)
 ![GitHub contributors](https://img.shields.io/github/contributors/MineGame159/meteor-client)
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/MineGame159/meteor-client/Java%20CI%20with%20Gradle)
+[![Jenkins](https://jenkins.wnuke.dev/job/meteor/job/meteor-client/job/master/badge/icon)](https://jenkins.wnuke.dev/job/meteor/job/meteor-client/job/master/)
 
 Minecraft fabric utility mod for the latest minecraft version but has built in multiconnect so you can connect to older versions.
 Join our [Discord](https://discord.gg/bBGQZvd).
@@ -18,9 +18,7 @@ Follow guide at [meteorclient.com](https://meteorclient.com/info).
 - Run `./gradlew build`
 
 ## Dev builds
-- Click `Actions` at the top of github
-- Open the latest commit
-- Download `Artifacts`, inside that there is the .jar file
+- You can find dev builts at [jenkins](https://jenkins.wnuke.dev/job/meteor/job/meteor-client).
 
 ## Donation
 We would appreciate if you donated to us through [PayPal](https://paypal.me/MineGame159). Include your Discord tag so we can give you donator role and contact you. Minimum for donator role is 5$.
