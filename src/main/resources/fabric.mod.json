@@ -12,7 +12,7 @@
   "license": "MIT",
   "icon": "assets/meteor-client/icon.png",
 
-  "environment": "*",
+  "environment": "client",
   "entrypoints": {
     "client": [
       "minegame159.meteorclient.MeteorClient"
