@@ -3,9 +3,13 @@ package minegame159.meteorclient.mixin;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.movement.NoSlow;
 import minegame159.meteorclient.modules.movement.Velocity;
 import minegame159.meteorclient.modules.render.ESP;
 import minegame159.meteorclient.utils.Outlines;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.MovementType;
@@ -53,5 +57,11 @@ public abstract class EntityMixin {
         if (Outlines.renderingOutlines) {
             info.setReturnValue(ModuleManager.INSTANCE.get(ESP.class).getColor((Entity) (Object) this).getPacked());
         }
+    }
+
+    @Redirect(method = "getVelocityMultiplier", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;getBlock()Lnet/minecraft/block/Block;"))
+    private Block getVelocityMultiplierGetBlockProxy(BlockState blockState) {
+        if (blockState.getBlock() == Blocks.SOUL_SAND && ModuleManager.INSTANCE.get(NoSlow.class).soulSand()) return Blocks.STONE;
+        return blockState.getBlock();
     }
 }

@@ -75,7 +75,6 @@
     "SoundSystemMixin",
     "PacketInflaterMixin",
     "CobwebBlockMixin",
-    "SoulSandBlockMixin",
     "SlimeBlockMixin",
     "KeyboardInputMixin",
     "GuiCloseC2SPacketMixin",
