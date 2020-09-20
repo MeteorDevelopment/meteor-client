@@ -7,7 +7,7 @@
 ![GitHub contributors](https://img.shields.io/github/contributors/MineGame159/meteor-client)
 [![Jenkins](https://jenkins.wnuke.dev/job/meteor/job/meteor-client/job/master/badge/icon)](https://jenkins.wnuke.dev/job/meteor/job/meteor-client/job/master/)
 
-Minecraft fabric utility mod for the latest minecraft version but has built in multiconnect so you can connect to older versions.
+Minecraft fabric utility mod for the latest minecraft version.  
 Join our [Discord](https://discord.gg/bBGQZvd).
 
 ## Installation
@@ -18,14 +18,16 @@ Follow guide at [meteorclient.com](https://meteorclient.com/info).
 - Run `./gradlew build`
 
 ## Dev builds
-- You can find dev builts at [jenkins](https://jenkins.wnuke.dev/job/meteor/job/meteor-client).
+You can find dev builts at [jenkins](https://jenkins.wnuke.dev/job/meteor/job/meteor-client).
+
+## Older versions
+If you want to connect to servers that run older version you can download [multiconnect](https://www.curseforge.com/minecraft/mc-mods/multiconnect).
 
 ## Donation
 We would appreciate if you donated to us through [PayPal](https://paypal.me/MineGame159). Include your Discord tag so we can give you donator role and contact you. Minimum for donator role is 5$.
 
 ## Thank you
 [ZeroMemes](https://github.com/ZeroMemes) for [Alpine](https://github.com/ZeroMemes/Alpine)  
-[Earthcomputer](https://github.com/Earthcomputer) for [Multiconnect](https://github.com/Earthcomputer/multiconnect)  
 [Cabaletta](https://github.com/cabaletta) for [Baritone](https://github.com/cabaletta/baritone)  
 [CDAGaming](https://gitlab.com/CDAGaming) for [Fabritone](https://gitlab.com/CDAGaming/fabritone)  
 [Vatuu](https://github.com/Vatuu) for [Discord Rpc](https://github.com/Vatuu/discord-rpc)  
