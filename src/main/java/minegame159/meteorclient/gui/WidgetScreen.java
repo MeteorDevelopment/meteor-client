@@ -3,6 +3,7 @@ package minegame159.meteorclient.gui;
 import com.mojang.blaze3d.platform.GlStateManager;
 import minegame159.meteorclient.gui.renderer.GuiRenderer;
 import minegame159.meteorclient.gui.widgets.Cell;
+import minegame159.meteorclient.gui.widgets.WTextBox;
 import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.rendering.Matrices;
 import minegame159.meteorclient.utils.Utils;
@@ -18,10 +19,11 @@ public class WidgetScreen extends Screen {
 
     public Screen parent;
     public final WWidget root;
-    private int prePostKeyEvents;
+    private final int prePostKeyEvents;
     private boolean renderDebug = false;
 
     public boolean locked;
+    private boolean firstInit = true;
 
     public WidgetScreen(String title) {
         super(new LiteralText(title));
@@ -31,6 +33,24 @@ public class WidgetScreen extends Screen {
         this.parent = mc.currentScreen;
         this.root = new WRoot();
         this.prePostKeyEvents = GuiThings.postKeyEvents;
+    }
+
+    @Override
+    protected void init() {
+        if (firstInit) {
+            firstInit = false;
+            return;
+        }
+
+        loopWidget(root);
+    }
+
+    private void loopWidget(WWidget widget) {
+        if (widget instanceof WTextBox && ((WTextBox) widget).isFocused()) GuiThings.setPostKeyEvents(true);
+
+        for (Cell<?> cell : widget.getCells()) {
+            loopWidget(cell.getWidget());
+        }
     }
 
     public <T extends WWidget> Cell<T> add(T widget) {
@@ -157,7 +177,7 @@ public class WidgetScreen extends Screen {
         return false;
     }
 
-    private class WRoot extends WWidget {
+    private static class WRoot extends WWidget {
         @Override
         protected void onCalculateSize() {
             width = Utils.getScaledWindowWidthGui();

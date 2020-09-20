@@ -232,6 +232,8 @@ public class WTable extends WWidget {
             // Update y
             y += rowHeight;
         }
+
+        moveWidgets(0, verticalScroll);
     }
 
     public void moveWidgets(double deltaX, double deltaY) {
