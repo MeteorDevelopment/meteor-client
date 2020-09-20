@@ -135,6 +135,13 @@ public class NoRender extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> noBlockBreakParticles = sgGeneral.add(new BoolSetting.Builder()
+            .name("no-block-break-particles")
+            .description("Disables block break particles.")
+            .defaultValue(false)
+            .build()
+    );
+
     public NoRender() {
         super(Category.Render, "no-render", "Disables some things from rendering.");
     }
@@ -209,5 +216,9 @@ public class NoRender extends ToggleModule {
 
     public boolean noSignText() {
         return isActive() && noSignText.get();
+    }
+
+    public boolean noBlockBreakParticles() {
+        return isActive() && noBlockBreakParticles.get();
     }
 }
