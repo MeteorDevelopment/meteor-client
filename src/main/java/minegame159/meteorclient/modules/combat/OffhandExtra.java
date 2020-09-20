@@ -176,11 +176,8 @@ public class OffhandExtra extends ToggleModule {
         } else if (mc.crosshairTarget.getType().equals(HitResult.Type.ENTITY)) {
             EntityHitResult hitResult = (EntityHitResult) mc.crosshairTarget;
             return mc.player.interact(hitResult.getEntity(), Hand.MAIN_HAND) == ActionResult.PASS;
-        } else if (mc.crosshairTarget.getType().equals(HitResult.Type.BLOCK)) {
-            BlockHitResult blockHitResult = (BlockHitResult)mc.crosshairTarget;
-            return !mc.world.getBlockState(blockHitResult.getBlockPos()).onUse(mc.world, mc.player, Hand.MAIN_HAND, blockHitResult).isAccepted();
         }
-        return false;
+        return true;
     }
 
 }
