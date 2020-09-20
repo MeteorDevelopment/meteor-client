@@ -75,7 +75,7 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
             return;
         }
 
-        if (currentScreen instanceof WidgetScreen && !(screen instanceof WidgetScreen)) GuiThings.resetPostKeyEvents();
+        GuiThings.resetPostKeyEvents();
     }
 
     @Redirect(method = "doItemUse", at = @At(value = "FIELD", target = "Lnet/minecraft/client/MinecraftClient;crosshairTarget:Lnet/minecraft/util/hit/HitResult;", ordinal = 1))

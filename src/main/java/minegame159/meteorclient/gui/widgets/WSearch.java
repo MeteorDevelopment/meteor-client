@@ -1,7 +1,6 @@
 package minegame159.meteorclient.gui.widgets;
 
 import minegame159.meteorclient.gui.GuiConfig;
-import minegame159.meteorclient.gui.GuiThings;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
 import net.minecraft.util.Pair;
@@ -24,7 +23,6 @@ public class WSearch extends WWindow {
 
     private void initWidgets(boolean first) {
         boolean focused = filter != null && filter.isFocused();
-        if (focused) GuiThings.setPostKeyEvents(false);
 
         filter = add(new WTextBox(filter != null ? filter.text : "", 70)).fillX().expandX().getWidget();
         filter.setFocused(focused || (first && isExpanded()));
