@@ -313,7 +313,6 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
 
     private void initMisc() {
         addModule(new AutoSign());
-        addModule(new AntiWeather());
         addModule(new AutoReconnect());
         addModule(new ShulkerTooltip());
         addModule(new AutoShearer());
