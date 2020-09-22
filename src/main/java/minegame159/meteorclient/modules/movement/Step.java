@@ -1,5 +1,6 @@
 package minegame159.meteorclient.modules.movement;
 
+import baritone.api.BaritoneAPI;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.TickEvent;
@@ -35,6 +36,7 @@ public class Step extends ToggleModule {
     );
 
     private float prevStepHeight;
+    private boolean prevBaritoneAssumeStep;
 
     public Step() {
         super(Category.Movement, "step", "Allows you to step up full blocks.");
@@ -43,6 +45,9 @@ public class Step extends ToggleModule {
     @Override
     public void onActivate() {
         prevStepHeight = mc.player.stepHeight;
+
+        prevBaritoneAssumeStep = BaritoneAPI.getSettings().assumeStep.value;
+        BaritoneAPI.getSettings().assumeStep.value = true;
     }
 
     @EventHandler
@@ -56,5 +61,7 @@ public class Step extends ToggleModule {
     @Override
     public void onDeactivate() {
         mc.player.stepHeight = prevStepHeight;
+
+        BaritoneAPI.getSettings().assumeStep.value = prevBaritoneAssumeStep;
     }
 }
