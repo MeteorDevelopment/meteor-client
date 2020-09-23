@@ -3,6 +3,7 @@ import java.util.jar.JarFile
 plugins {
 	id 'fabric-loom' version '0.4-SNAPSHOT'
 	id 'maven-publish'
+	id 'com.github.johnrengelman.shadow' version '6.0.0'
 }
 
 sourceCompatibility = JavaVersion.VERSION_1_8
@@ -18,10 +19,14 @@ minecraft {
 
 repositories {
 	maven { url "https://jitpack.io" }
-	maven { url 'https://dl.bintray.com/earthcomputer/mods' }
 }
 
 dependencies {
+	def dependency = { id ->
+		modImplementation id
+		shadow id
+	}
+
 	//to change the versions see the gradle.properties file
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
@@ -33,15 +38,15 @@ dependencies {
 	// PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
 	// You may need to force-disable transitiveness on them.
 
-	modImplementation "com.github.ZeroMemes:Alpine:1.9"
-	include "com.github.ZeroMemes:Alpine:1.9"
-	include "net.jodah:typetools:0.5.0"
-
 	modImplementation "com.gitlab.CDAGaming:fabritone:fabritone~1.16.x-Fabric-SNAPSHOT"
 	include "com.gitlab.CDAGaming:fabritone:fabritone~1.16.x-Fabric-SNAPSHOT"
 
-	modImplementation "com.github.Vatuu:discord-rpc:1.6.2"
-	include "com.github.Vatuu:discord-rpc:1.6.2"
+	dependency "com.github.ZeroMemes:Alpine:1.9"
+	dependency "com.github.Vatuu:discord-rpc:1.6.2"
+}
+
+shadowJar {
+	configurations = [ project.configurations.shadow ]
 }
 
 processResources {
@@ -159,23 +164,7 @@ jar {
 	from "LICENSE"
 }
 
-// configure the maven publication
-publishing {
-	publications {
-		mavenJava(MavenPublication) {
-			// add all the jars that should be included when publishing to maven
-			artifact(remapJar) {
-				builtBy remapJar
-			}
-			artifact(sourcesJar) {
-				builtBy remapSourcesJar
-			}
-		}
-	}
-
-	// select the repositories you want to publish to
-	repositories {
-		// uncomment to publish to the local maven
-		// mavenLocal()
-	}
+remapJar {
+	dependsOn shadowJar
+	input.set(shadowJar.archiveFile)
 }
