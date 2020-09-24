@@ -18,8 +18,9 @@ import minegame159.meteorclient.rendering.ShapeBuilder;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.*;
 import net.minecraft.block.Blocks;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
@@ -37,7 +38,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class CrystalAura extends ToggleModule {
     public enum Mode{
@@ -77,6 +77,14 @@ public class CrystalAura extends ToggleModule {
             .name("break-mode")
             .description("The way crystals are broken.")
             .defaultValue(Mode.safe)
+            .build()
+    );
+
+    private final Setting<List<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
+            .name("entities")
+            .description("Entities to attack.")
+            .defaultValue(getDefualt())
+            .onlyAttackable()
             .build()
     );
 
@@ -291,24 +299,31 @@ public class CrystalAura extends ToggleModule {
                 });
         if (!smartDelay.get() && delayLeft > 0) return;
         if (place.get()) {
-            Iterator<AbstractClientPlayerEntity> validEntities = mc.world.getPlayers().stream()
-                    .filter(FriendManager.INSTANCE::attack)
-                    .filter(entityPlayer -> !entityPlayer.getDisplayName().equals(mc.player.getDisplayName()))
-                    .filter(entityPlayer -> mc.player.distanceTo(entityPlayer) <= 10)
-                    .filter(entityPlayer -> !entityPlayer.isCreative() && !entityPlayer.isSpectator() && entityPlayer.getHealth() > 0)
-                    .collect(Collectors.toList())
-                    .iterator();
-
-            AbstractClientPlayerEntity target;
-            if (validEntities.hasNext()) {
-                target = validEntities.next();
-            } else {
+            List<LivingEntity> validEntities = new ArrayList<>();
+            LivingEntity target = null;
+            Iterator<Entity> entitiesList = mc.world.getEntities().iterator();
+            LivingEntity livingEntity;
+            for (Entity entity = entitiesList.next(); entitiesList.hasNext(); entity = entitiesList.next()) {
+                if (entities.get().contains(entity.getType()) && entity.distanceTo(mc.player) <= 10){
+                    if (entity instanceof LivingEntity && ((LivingEntity) entity).getHealth() > 0){
+                        livingEntity = (LivingEntity)entity;
+                        if (entity instanceof PlayerEntity
+                                && !(entity.getDisplayName().equals(mc.player.getDisplayName()))
+                                && (FriendManager.INSTANCE.attack(((PlayerEntity) entity)))
+                                && !((PlayerEntity) entity).isCreative() && entity.isSpectator()) {
+                            validEntities.add(livingEntity);
+                        }
+                        validEntities.add(livingEntity);
+                    }
+                }
+            }
+            if (validEntities.isEmpty()) {
                 return;
             }
-            for (AbstractClientPlayerEntity i = null; validEntities.hasNext(); i = validEntities.next()) {
-                if (i == null) continue;
-                if (mc.player.distanceTo(i) < mc.player.distanceTo(target)) {
-                    target = i;
+            for (int i = 0; i < validEntities.size(); i++) {
+                if (target == null) target = validEntities.get(i);
+                if (validEntities.get(i).distanceTo(mc.player) < target.distanceTo(mc.player)) {
+                    target = validEntities.get(i);
                 }
             }
             if (autoSwitch.get() && mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL) {
@@ -388,7 +403,7 @@ public class CrystalAura extends ToggleModule {
         }
     }
 
-    private void findValidBlocks(AbstractClientPlayerEntity target){
+    private void findValidBlocks(LivingEntity target){
         bestBlock = null;
         playerPos = mc.player.getBlockPos();
         for(double i = playerPos.getX() - placeRange.get(); i < playerPos.getX() + placeRange.get(); i++){
@@ -455,5 +470,11 @@ public class CrystalAura extends ToggleModule {
             ShapeBuilder.boxSides(x, y, z, x+1, y+1, z+1, sideColor);
             ShapeBuilder.boxEdges(x, y, z, x+1, y+1, z+1, renderColor.get());
         }
+    }
+
+    private List<EntityType<?>> getDefualt(){
+        List<EntityType<?>> list = new ArrayList<>();
+        list.add(EntityType.PLAYER);
+        return list;
     }
 }
