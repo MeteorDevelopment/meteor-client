@@ -6,6 +6,7 @@ import minegame159.meteorclient.friends.Friend;
 import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.events.RenderEvent;
 import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.rendering.ShapeBuilder;
 import minegame159.meteorclient.settings.*;
@@ -139,7 +140,7 @@ public class Tracers extends ToggleModule {
         if (target.get() == Target.Head) y += height;
         else if (target.get() == Target.Body) y += height / 2;
 
-        ShapeBuilder.line(vec1.x - (mc.cameraEntity.getX() - event.offsetX), vec1.y - (mc.cameraEntity.getY() - event.offsetY), vec1.z - (mc.cameraEntity.getZ() - event.offsetZ), x, y, z, color);
+        ShapeBuilder.line(vec1.x - (mc.gameRenderer.getCamera().getPos().x - event.offsetX), vec1.y - (mc.gameRenderer.getCamera().getPos().y - event.offsetY), vec1.z - (mc.gameRenderer.getCamera().getPos().z - event.offsetZ), x, y, z, color);
 
         if (mode.get() == Mode.Stem) ShapeBuilder.line(x, entity.getY(), z, x, entity.getY() + height, z, color);
 
@@ -148,7 +149,7 @@ public class Tracers extends ToggleModule {
 
     private void render(BlockEntity blockEntity, RenderEvent event) {
         BlockPos pos = blockEntity.getPos();
-        ShapeBuilder.line(vec1.x - (mc.cameraEntity.getX() - event.offsetX), vec1.y - (mc.cameraEntity.getY() - event.offsetY), vec1.z - (mc.cameraEntity.getZ() - event.offsetZ), pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5f, storageColor.get());
+        ShapeBuilder.line(vec1.x - (mc.gameRenderer.getCamera().getPos().x - event.offsetX), vec1.y - (mc.gameRenderer.getCamera().getPos().y - event.offsetY), vec1.z - (mc.gameRenderer.getCamera().getPos().z - event.offsetZ), pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5f, storageColor.get());
 
         count++;
     }
@@ -158,12 +159,12 @@ public class Tracers extends ToggleModule {
         count = 0;
 
         vec1 = new Vec3d(0, 0, 1)
-                .rotateX(-(float) Math.toRadians(mc.cameraEntity.pitch))
-                .rotateY(-(float) Math.toRadians(mc.cameraEntity.yaw))
-                .add(mc.cameraEntity.getPos());
+                .rotateX(-(float) Math.toRadians(mc.gameRenderer.getCamera().getPitch()))
+                .rotateY(-(float) Math.toRadians(mc.gameRenderer.getCamera().getYaw()))
+                .add(mc.gameRenderer.getCamera().getPos());
 
         for (Entity entity : mc.world.getEntities()) {
-            if (entity == mc.cameraEntity || !entities.get().contains(entity.getType())) continue;
+            if ((!ModuleManager.INSTANCE.isActive(Freecam.class) && entity == mc.player) || !entities.get().contains(entity.getType())) continue;
 
             if (entity instanceof PlayerEntity) {
                 Color color = playersColor.get();

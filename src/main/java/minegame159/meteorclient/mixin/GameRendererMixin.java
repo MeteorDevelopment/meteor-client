@@ -4,10 +4,12 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.events.RenderEvent;
+import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.misc.UnfocusedCPU;
 import minegame159.meteorclient.modules.player.LiquidInteract;
 import minegame159.meteorclient.modules.player.NoMiningTrace;
+import minegame159.meteorclient.modules.render.Freecam;
 import minegame159.meteorclient.modules.render.NoRender;
 import minegame159.meteorclient.rendering.Matrices;
 import minegame159.meteorclient.rendering.Renderer;
@@ -34,6 +36,8 @@ public abstract class GameRendererMixin {
     @Shadow @Final private MinecraftClient client;
 
     @Shadow @Final private Camera camera;
+
+    @Shadow public abstract void updateTargetedEntity(float tickDelta);
 
     private boolean a = false;
 
@@ -104,5 +108,52 @@ public abstract class GameRendererMixin {
     private float applyCameraTransformationsMathHelperLerpProxy(float delta, float first, float second) {
         if (ModuleManager.INSTANCE.get(NoRender.class).noNausea()) return 0;
         return MathHelper.lerp(delta, first, second);
+    }
+
+    // Freecam
+
+    private boolean freecamSet = false;
+
+    @Inject(method = "updateTargetedEntity", at = @At("INVOKE"), cancellable = true)
+    private void updateTargetedEntityInvoke(float tickDelta, CallbackInfo info) {
+        Freecam freecam = ModuleManager.INSTANCE.get(Freecam.class);
+
+        if (freecam.isActive() && client.getCameraEntity() != null && !freecamSet) {
+            info.cancel();
+            Entity camera = client.getCameraEntity();
+
+            double x = camera.getX();
+            double y = camera.getY();
+            double z = camera.getZ();
+            double prevX = camera.prevX;
+            double prevY = camera.prevY;
+            double prevZ = camera.prevZ;
+            float yaw = camera.yaw;
+            float pitch = camera.pitch;
+            float prevYaw = camera.prevYaw;
+            float prevPitch = camera.prevPitch;
+
+            ((IVec3d) camera.getPos()).set(freecam.pos.x, freecam.pos.y - camera.getEyeHeight(camera.getPose()), freecam.pos.z);
+            camera.prevX = freecam.prevPos.x;
+            camera.prevY = freecam.prevPos.y - camera.getEyeHeight(camera.getPose());
+            camera.prevZ = freecam.prevPos.z;
+            camera.yaw = freecam.yaw;
+            camera.pitch = freecam.pitch;
+            camera.prevYaw = freecam.prevYaw;
+            camera.prevPitch = freecam.prevPitch;
+
+            freecamSet = true;
+            updateTargetedEntity(tickDelta);
+            freecamSet = false;
+
+            ((IVec3d) camera.getPos()).set(x, y, z);
+            camera.prevX = prevX;
+            camera.prevY = prevY;
+            camera.prevZ = prevZ;
+            camera.yaw = yaw;
+            camera.pitch = pitch;
+            camera.prevYaw = prevYaw;
+            camera.prevPitch = prevPitch;
+        }
     }
 }

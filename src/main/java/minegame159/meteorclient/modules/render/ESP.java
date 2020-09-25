@@ -5,6 +5,7 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.events.RenderEvent;
 import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.rendering.ShapeBuilder;
 import minegame159.meteorclient.settings.*;
@@ -159,7 +160,7 @@ public class ESP extends ToggleModule {
         count = 0;
 
         for (Entity entity : mc.world.getEntities()) {
-            if (entity == mc.cameraEntity || !entities.get().contains(entity.getType())) continue;
+            if ((!ModuleManager.INSTANCE.isActive(Freecam.class) && entity == mc.player) || !entities.get().contains(entity.getType())) continue;
             count++;
 
             if (mode.get() == Mode.Outline) {

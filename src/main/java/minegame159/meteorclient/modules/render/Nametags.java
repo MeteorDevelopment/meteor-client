@@ -10,6 +10,7 @@ import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.events.RenderEvent;
 import minegame159.meteorclient.mixininterface.IBakedQuad;
 import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.rendering.Matrices;
 import minegame159.meteorclient.rendering.ShapeBuilder;
@@ -159,7 +160,8 @@ public class Nametags extends ToggleModule {
     @EventHandler
     private final Listener<RenderEvent> onRender = new Listener<>(event -> {
         for (Entity entity : mc.world.getEntities()) {
-            if (!(entity instanceof PlayerEntity) || entity == mc.player || entity == mc.cameraEntity) continue;
+            boolean a = !ModuleManager.INSTANCE.isActive(Freecam.class);
+            if (!(entity instanceof PlayerEntity) || (a && entity == mc.player) || (a && entity == mc.cameraEntity)) continue;
             if (!yourself.get() && entity.getUuid().equals(mc.player.getUuid())) continue;
 
             renderNametag(event, (PlayerEntity) entity);

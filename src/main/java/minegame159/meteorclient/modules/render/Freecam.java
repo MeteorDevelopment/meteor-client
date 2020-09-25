@@ -2,19 +2,16 @@ package minegame159.meteorclient.modules.render;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
+import minegame159.meteorclient.events.KeyEvent;
 import minegame159.meteorclient.events.TickEvent;
-import minegame159.meteorclient.events.packets.SendPacketEvent;
-import minegame159.meteorclient.mixininterface.IPlayerEntity;
+import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
-import net.minecraft.client.network.OtherClientPlayerEntity;
-import net.minecraft.entity.Entity;
-import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerInputC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 
 public class Freecam extends ToggleModule {
@@ -28,8 +25,13 @@ public class Freecam extends ToggleModule {
             .build()
     );
 
-    private OtherClientPlayerEntity camera;
-    private OtherClientPlayerEntity dummy;
+    public final Vec3d pos = new Vec3d(0, 0, 0);
+    public final Vec3d prevPos = new Vec3d(0, 0, 0);
+
+    public float yaw, pitch;
+    public float prevYaw, prevPitch;
+
+    private boolean forward, backward, right, left, up, down;
 
     public Freecam() {
         super(Category.Render, "freecam", "You know what it does.");
@@ -37,70 +39,127 @@ public class Freecam extends ToggleModule {
 
     @Override
     public void onActivate() {
-        camera = new OtherClientPlayerEntity(mc.world, mc.player.getGameProfile());
-        camera.copyPositionAndRotation(mc.player);
-        camera.horizontalCollision = false;
-        camera.verticalCollision = false;
-        ((IPlayerEntity) camera).setInventory(mc.player.inventory);
+        ((IVec3d) pos).set(mc.gameRenderer.getCamera().getPos());
+        ((IVec3d) prevPos).set(mc.gameRenderer.getCamera().getPos());
 
-        dummy = new OtherClientPlayerEntity(mc.world, mc.player.getGameProfile());
-        dummy.copyPositionAndRotation(mc.player);
-        dummy.setBoundingBox(dummy.getBoundingBox().expand(0.1));
-        ((IPlayerEntity) dummy).setInventory(mc.player.inventory);
+        yaw = mc.player.yaw;
+        pitch = mc.player.pitch;
+        prevYaw = yaw;
+        prevPitch = pitch;
 
-        mc.world.addEntity(camera.getEntityId(), camera);
-        mc.world.addEntity(dummy.getEntityId(), dummy);
+        forward = false;
+        backward = false;
+        right = false;
+        left = false;
+        up = false;
+        down = false;
 
-        mc.cameraEntity = camera;
+        //mc.chunkCullingEnabled = false;
+        //mc.worldRenderer.reload();
     }
-
-    @Override
-    public void onDeactivate() {
-        if (mc.world == null) {
-            return;
-        }
-        mc.cameraEntity = mc.player;
-
-        mc.world.removeEntity(camera.getEntityId());
-        mc.world.removeEntity(dummy.getEntityId());
-    }
-
-    @EventHandler
-    private final Listener<SendPacketEvent> onSendPacket = new Listener<>(event -> {
-        if (event.packet instanceof ClientCommandC2SPacket || event.packet instanceof PlayerMoveC2SPacket || event.packet instanceof PlayerInputC2SPacket) event.cancel();
-    });
 
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
-        if (mc.player.deathTime > 0 || mc.player.getHealth() <= 0) {
-            toggle();
-            return;
+        Vec3d forward = Vec3d.fromPolar(0, getYaw(1 / 20f));
+        Vec3d right = Vec3d.fromPolar(0, getYaw(1 / 20f) + 90);
+        double velX = 0;
+        double velY = 0;
+        double velZ = 0;
+
+        double s = 0.5;
+        if (mc.options.keySprint.isPressed()) s = 1;
+
+        boolean a = false;
+        if (this.forward) {
+            velX += forward.x * s * speed.get();
+            velZ += forward.z * s * speed.get();
+            a = true;
+        }
+        if (this.backward) {
+            velX -= forward.x * s * speed.get();
+            velZ -= forward.z * s * speed.get();
+            a = true;
         }
 
-        camera.setVelocity(0, 0, 0);
-        if(mc.player == null) return;
+        boolean b = false;
+        if (this.right) {
+            velX += right.x * s * speed.get();
+            velZ += right.z * s * speed.get();
+            b = true;
+        }
+        if (this.left) {
+            velX -= right.x * s * speed.get();
+            velZ -= right.z * s * speed.get();
+            b = true;
+        }
 
-        camera.yaw = mc.player.yaw;
-        camera.headYaw = mc.player.headYaw;
-        camera.elytraYaw = mc.player.elytraYaw;
-        camera.pitch = mc.player.pitch;
-        camera.elytraPitch = mc.player.elytraPitch;
-        camera.setHealth(mc.player.getHealth());
-        camera.setAbsorptionAmount(mc.player.getAbsorptionAmount());
-        camera.getActiveStatusEffects().putAll(mc.player.getActiveStatusEffects());
+        if (a && b) {
+            double diagonal = 1 / Math.sqrt(2);
+            velX *= diagonal;
+            velZ *= diagonal;
+        }
 
-        double speed = this.speed.get() / 2;
-        Vec3d vel = camera.getVelocity();
-        Vec3d forward = new Vec3d(0, 0, speed).rotateY(-(float) Math.toRadians(camera.headYaw));
-        Vec3d strafe = forward.rotateY((float) Math.toRadians(90));
+        if (this.up) {
+            velY += s * speed.get();
+        }
+        if (this.down) {
+            velY -= s * speed.get();
+        }
 
-        if (mc.options.keyForward.isPressed()) vel = vel.add(forward.x, 0, forward.z);
-        if (mc.options.keyBack.isPressed()) vel = vel.subtract(forward.x, 0, forward.z);
-        if (mc.options.keyLeft.isPressed()) vel = vel.add(strafe.x, 0, strafe.z);
-        if (mc.options.keyRight.isPressed()) vel = vel.subtract(strafe.x, 0, strafe.z);
-        if (mc.options.keyJump.isPressed()) vel = vel.add(0, speed, 0);
-        if (mc.options.keySneak.isPressed()) vel = vel.subtract(0, speed, 0);
-
-        camera.setPos(camera.getX() + vel.x, camera.getY() + vel.y, camera.getZ() + vel.z);
+        ((IVec3d) prevPos).set(pos);
+        ((IVec3d) pos).set(pos.x + velX, pos.y + velY, pos.z + velZ);
     });
+
+    @EventHandler
+    private final Listener<KeyEvent> onKey = new Listener<>(event -> {
+        boolean cancel = true;
+
+        if (KeyBindingHelper.getBoundKeyOf(mc.options.keyForward).getCode() == event.key) {
+            forward = event.push;
+        } else if (KeyBindingHelper.getBoundKeyOf(mc.options.keyBack).getCode() == event.key) {
+            backward = event.push;
+        } else if (KeyBindingHelper.getBoundKeyOf(mc.options.keyRight).getCode() == event.key) {
+            right = event.push;
+        } else if (KeyBindingHelper.getBoundKeyOf(mc.options.keyLeft).getCode() == event.key) {
+            left = event.push;
+        } else if (KeyBindingHelper.getBoundKeyOf(mc.options.keyJump).getCode() == event.key) {
+            up = event.push;
+        } else if (KeyBindingHelper.getBoundKeyOf(mc.options.keySneak).getCode() == event.key) {
+            down = event.push;
+        } else {
+            cancel = false;
+        }
+
+        if (cancel) event.cancel();
+    });
+
+    public void changeLookDirection(double deltaX, double deltaY) {
+        prevYaw = yaw;
+        prevPitch = pitch;
+
+        yaw += deltaX;
+        pitch += deltaY;
+
+        pitch = MathHelper.clamp(pitch, -90, 90);
+    }
+
+    public double getX(float delta) {
+        return MathHelper.lerp(delta, prevPos.x, pos.x);
+    }
+
+    public double getY(float delta) {
+        return MathHelper.lerp(delta, prevPos.y, pos.y);
+    }
+
+    public double getZ(float delta) {
+        return MathHelper.lerp(delta, prevPos.z, pos.z);
+    }
+
+    public float getYaw(float delta) {
+        return MathHelper.lerp(delta, prevYaw, yaw);
+    }
+
+    public float getPitch(float delta) {
+        return MathHelper.lerp(delta, prevPitch, pitch);
+    }
 }

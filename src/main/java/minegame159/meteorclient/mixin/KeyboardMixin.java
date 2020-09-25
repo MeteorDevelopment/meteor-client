@@ -48,7 +48,7 @@ public abstract class KeyboardMixin {
             }
 
             if (!client.isPaused() && (client.currentScreen == null || (client.currentScreen instanceof WidgetScreen && GuiThings.postKeyEvents()))) {
-                KeyEvent event = EventStore.keyEvent(key, i == GLFW.GLFW_PRESS);
+                KeyEvent event = EventStore.keyEvent(key, i != GLFW.GLFW_RELEASE);
                 MeteorClient.EVENT_BUS.post(event);
 
                 if (event.isCancelled()) info.cancel();
