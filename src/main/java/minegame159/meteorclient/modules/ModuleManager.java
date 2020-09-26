@@ -229,6 +229,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new AntiBed());
         addModule(new AnchorAura());
         addModule(new TotemPopNotifier());
+        addModule(new BowSpam());
     }
 
     private void initPlayer() {
