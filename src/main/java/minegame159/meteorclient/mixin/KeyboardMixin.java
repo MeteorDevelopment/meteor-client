@@ -28,7 +28,7 @@ public abstract class KeyboardMixin {
 
     @Inject(method = "onKey", at = @At("HEAD"), cancellable = true)
     public void onKey(long window, int key, int scancode, int i, int j, CallbackInfo info) {
-        if (key != GLFW.GLFW_KEY_UNKNOWN && GuiThings.postKeyEvents()) {
+        if (key != GLFW.GLFW_KEY_UNKNOWN && i != GLFW.GLFW_REPEAT && GuiThings.postKeyEvents()) {
             Input.setKeyState(key, i != GLFW.GLFW_RELEASE);
 
             KeyBinding shulkerPeek = KeyBinds.SHULKER_PEEK;
