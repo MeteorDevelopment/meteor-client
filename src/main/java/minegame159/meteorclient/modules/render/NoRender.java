@@ -142,6 +142,13 @@ public class NoRender extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> noFallingBlocks = sgGeneral.add(new BoolSetting.Builder()
+            .name("no-falling-blocks")
+            .description("Disables rendering of falling blocks.")
+            .defaultValue(false)
+            .build()
+    );
+
     public NoRender() {
         super(Category.Render, "no-render", "Disables some things from rendering.");
     }
@@ -220,5 +227,9 @@ public class NoRender extends ToggleModule {
 
     public boolean noBlockBreakParticles() {
         return isActive() && noBlockBreakParticles.get();
+    }
+
+    public boolean noFallingBlocks() {
+        return isActive() && noFallingBlocks.get();
     }
 }
