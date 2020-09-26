@@ -33,6 +33,7 @@ public abstract class Module implements Listenable, ISerializable<Module> {
     public boolean serialize = true;
 
     private int key = -1;
+    public boolean toggleOnKeyRelease = false;
 
     public Module(Category category, String name, String description) {
         this.mc = MinecraftClient.getInstance();
@@ -69,6 +70,7 @@ public abstract class Module implements Listenable, ISerializable<Module> {
 
         tag.putString("name", name);
         tag.putInt("key", key);
+        tag.putBoolean("toggleOnKeyRelease", toggleOnKeyRelease);
         tag.put("settings", NbtUtils.listToTag(settings));
 
         return tag;
@@ -78,6 +80,7 @@ public abstract class Module implements Listenable, ISerializable<Module> {
     public Module fromTag(CompoundTag tag) {
         // General
         key = tag.getInt("key");
+        toggleOnKeyRelease = tag.getBoolean("toggleOnKeyRelease");
 
         // Settings
         ListTag settingsTag = tag.getList("settings", 10);
