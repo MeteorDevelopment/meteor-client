@@ -39,6 +39,7 @@ public class ModuleScreen extends WindowScreen implements Listenable {
         WWidget customWidget = module.getWidget();
         if (customWidget != null) {
             if (module.settings.sizeGroups() > 0) {
+                row();
                 add(new WHorizontalSeparator()).fillX().expandX();
                 row();
             }
@@ -50,6 +51,7 @@ public class ModuleScreen extends WindowScreen implements Listenable {
 
         if (module instanceof ToggleModule) {
             if (customWidget != null || module.settings.sizeGroups() > 0) {
+                row();
                 add(new WHorizontalSeparator()).fillX().expandX();
                 row();
             }
@@ -70,25 +72,33 @@ public class ModuleScreen extends WindowScreen implements Listenable {
             };
             row();
 
+            // Toggle on key release
+            WTable tokrTable = add(new WTable()).fillX().expandX().getWidget();
+            tokrTable.add(new WLabel("Toggle on key release:"));
+            tokrTable.add(new WCheckbox(module.toggleOnKeyRelease)).getWidget().action = checkbox -> {
+                module.toggleOnKeyRelease = checkbox.checked;
+                ModuleManager.INSTANCE.save();
+            };
+            row();
+
             add(new WHorizontalSeparator()).fillX().expandX();
             row();
 
             // Bottom
-            WTable bottomTable = add(new WTable()).getWidget();
-
-            //   Visible
-            bottomTable.add(new WLabel("Visible: ")).getWidget().tooltip = "Visible in HUD.";
-            WCheckbox visibleCheckbox = bottomTable.add(new WCheckbox(((ToggleModule) module).isVisible())).getWidget();
-            visibleCheckbox.tooltip = "Visible in HUD.";
-            visibleCheckbox.action = checkbox -> {
-                if (((ToggleModule) module).isVisible() != checkbox.checked) ((ToggleModule) module).setVisible(checkbox.checked);
-            };
-            bottomTable.row();
+            WTable bottomTable = add(new WTable()).fillX().expandX().getWidget();
 
             //   Active
             bottomTable.add(new WLabel("Active:"));
             bottomTable.add(new WCheckbox(((ToggleModule) module).isActive())).getWidget().action = checkbox -> {
                 if (((ToggleModule) module).isActive() != checkbox.checked) ((ToggleModule) module).toggle(mc.world != null);
+            };
+
+            //   Visible
+            bottomTable.add(new WLabel("Visible: ")).fillX().right().getWidget().tooltip = "Visible in HUD.";
+            WCheckbox visibleCheckbox = bottomTable.add(new WCheckbox(((ToggleModule) module).isVisible())).getWidget();
+            visibleCheckbox.tooltip = "Visible in HUD.";
+            visibleCheckbox.action = checkbox -> {
+                if (((ToggleModule) module).isVisible() != checkbox.checked) ((ToggleModule) module).setVisible(checkbox.checked);
             };
         }
     }

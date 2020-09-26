@@ -138,10 +138,8 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
 
     @EventHandler
     public Listener<KeyEvent> onKey = new Listener<>(event -> {
-        if (!event.push) return;
-
         // Check if binding module
-        if (moduleToBind != null) {
+        if (event.push && moduleToBind != null) {
             moduleToBind.setKey(event.key);
             Chat.info("Module (highlight)%s (default)bound to (highlight)%s(default).", moduleToBind.title, Utils.getKeyName(event.key));
             moduleToBind = null;
@@ -152,7 +150,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         // Find module bound to that key
         if (!onKeyOnlyBinding && MinecraftClient.getInstance().currentScreen == null) {
             for (Module module : modules.values()) {
-                if (module.getKey() == event.key) {
+                if (module.getKey() == event.key && (event.push || module.toggleOnKeyRelease)) {
                     module.doAction();
                     if (module instanceof ToggleModule) ((ToggleModule) module).sendToggledMsg();
 
