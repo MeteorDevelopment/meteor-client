@@ -61,9 +61,9 @@ public class Criticals extends ToggleModule {
 
     @EventHandler
     private final Listener<SendPacketEvent> onSendPacket = new Listener<>(event -> {
-        if (!shouldDoCriticals()) return;
 
         if (event.packet instanceof PlayerInteractEntityC2SPacket && ((PlayerInteractEntityC2SPacket) event.packet).getType() == PlayerInteractEntityC2SPacket.InteractionType.ATTACK) {
+            if (!shouldDoCriticals()) return;
             if(ModuleManager.INSTANCE.get(NoFall.class).isActive()){
                 ModuleManager.INSTANCE.get(NoFall.class).toggle();
             }
@@ -71,6 +71,7 @@ public class Criticals extends ToggleModule {
             else doJumpMode(event);
             if (wasToggled) ModuleManager.INSTANCE.get(NoFall.class).toggle();
         } else if (event.packet instanceof HandSwingC2SPacket && mode.get() != Mode.Packet) {
+            if (!shouldDoCriticals()) return;
             if(ModuleManager.INSTANCE.get(NoFall.class).isActive()){
                 ModuleManager.INSTANCE.get(NoFall.class).toggle();
             }
