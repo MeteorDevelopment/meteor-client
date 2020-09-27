@@ -9,6 +9,7 @@ import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
@@ -25,6 +26,13 @@ public class Freecam extends ToggleModule {
             .description("Speed")
             .defaultValue(1.0)
             .min(0.0)
+            .build()
+    );
+
+    private final Setting<Boolean> reloadChunks = sgGeneral.add(new BoolSetting.Builder()
+            .name("reload-chunks")
+            .description("Disables cave culling.")
+            .defaultValue(true)
             .build()
     );
 
@@ -58,6 +66,12 @@ public class Freecam extends ToggleModule {
         down = false;
 
         unpress();
+        if (reloadChunks.get()) mc.worldRenderer.reload();
+    }
+
+    @Override
+    public void onDeactivate() {
+        if (reloadChunks.get()) mc.worldRenderer.reload();
     }
 
     @EventHandler
