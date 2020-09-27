@@ -7,6 +7,10 @@ import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.StartBreakingBlockEvent;
 import minegame159.meteorclient.events.TickEvent;
+import minegame159.meteorclient.mixin.AxeItemAccessor;
+import minegame159.meteorclient.mixin.HoeItemAccessor;
+import minegame159.meteorclient.mixin.PickaxeItemAccessor;
+import minegame159.meteorclient.mixin.ShovelItemAccessor;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BoolSetting;
@@ -14,6 +18,7 @@ import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.InvUtils;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.Material;
@@ -22,7 +27,13 @@ import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.*;
 import net.minecraft.screen.slot.SlotActionType;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class AutoTool extends ToggleModule {
+    private static final Set<Material> EMPTY_MATERIALS = new HashSet<>(0);
+    private static final Set<Block> EMPTY_BLOCKS = new HashSet<>(0);
+
     public enum Prefer {
         None,
         Fortune,
@@ -154,15 +165,31 @@ public class AutoTool extends ToggleModule {
         }
     }, EventPriority.HIGH);
 
-    public boolean isEffectiveOn(Item item, BlockState block) {
-        Material material = block.getMaterial();
+    public boolean isEffectiveOn(Item item, BlockState blockState) {
+        if (item.isEffectiveOn(blockState)) return true;
 
-        if (item instanceof SwordItem && material == Material.COBWEB) return true;
-        if (item instanceof AxeItem && (block.getBlock() == Blocks.SCAFFOLDING || material == Material.WOOD || material == Material.BAMBOO || material == Material.BAMBOO_SAPLING || material == Material.PLANT))  return true;
-        if (item instanceof PickaxeItem && (material == Material.SHULKER_BOX || material == Material.ICE || material == Material.METAL || material == Material.PISTON || material == Material.STONE)) return true;
-        if (item instanceof ShovelItem && (block.getBlock() == Blocks.GRASS_BLOCK || block.getBlock() == Blocks.MYCELIUM || material == Material.SNOW_BLOCK || block.getBlock() == Blocks.DIRT)) return true;
-        if (item instanceof ShearsItem && (material == Material.WOOL || material == Material.CARPET)) return true;
+        Set<Material> effectiveMaterials;
+        Set<Block> effectiveBlocks;
 
-        return false;
+        if (item instanceof PickaxeItem) {
+            effectiveMaterials = EMPTY_MATERIALS;
+            effectiveBlocks = PickaxeItemAccessor.getEffectiveBlocks();
+        } else if (item instanceof AxeItem) {
+            effectiveMaterials = AxeItemAccessor.getEffectiveMaterials();
+            effectiveBlocks = AxeItemAccessor.getEffectiveBlocks();
+        } else if (item instanceof ShovelItem) {
+            effectiveMaterials = EMPTY_MATERIALS;
+            effectiveBlocks = ShovelItemAccessor.getEffectiveBlocks();
+        } else if (item instanceof HoeItem) {
+            effectiveMaterials = EMPTY_MATERIALS;
+            effectiveBlocks = HoeItemAccessor.getEffectiveBlocks();
+        } else if (item instanceof SwordItem) {
+            effectiveMaterials = EMPTY_MATERIALS;
+            effectiveBlocks = EMPTY_BLOCKS;
+        } else {
+            return false;
+        }
+
+        return effectiveMaterials.contains(blockState.getMaterial()) || effectiveBlocks.contains(blockState.getBlock());
     }
 }

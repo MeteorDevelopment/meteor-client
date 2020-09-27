@@ -88,7 +88,11 @@
     "RenderLayersMixin",
     "ModelMixin",
     "ItemFrameEntityRendererMixin",
-    "RenderLayerMixin"
+    "RenderLayerMixin",
+    "PickaxeItemAccessor",
+    "AxeItemAccessor",
+    "ShovelItemAccessor",
+    "HoeItemAccessor"
   ],
   "injectors": {
     "defaultRequire": 1
