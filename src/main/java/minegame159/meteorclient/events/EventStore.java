@@ -6,6 +6,7 @@ import minegame159.meteorclient.events.packets.ReceivePacketEvent;
 import minegame159.meteorclient.events.packets.SendPacketEvent;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.utils.KeyAction;
 import minegame159.meteorclient.utils.Pool;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -95,10 +96,10 @@ public class EventStore {
         return entityRemovedEvent;
     }
 
-    public static KeyEvent keyEvent(int key, boolean push) {
+    public static KeyEvent keyEvent(int key, KeyAction action) {
         keyEvent.setCancelled(false);
         keyEvent.key = key;
-        keyEvent.push = push;
+        keyEvent.action = action;
         return keyEvent;
     }
 

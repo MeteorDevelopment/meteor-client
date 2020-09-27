@@ -5,6 +5,7 @@ import me.zero.alpine.listener.Listenable;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.KeyEvent;
 import minegame159.meteorclient.utils.ISerializable;
+import minegame159.meteorclient.utils.KeyAction;
 import minegame159.meteorclient.utils.NbtUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.nbt.CompoundTag;
@@ -30,8 +31,8 @@ public class Macro implements Listenable, ISerializable<Macro> {
     }
 
     @EventHandler
-    private transient Listener<KeyEvent> onKey = new Listener<>(event -> {
-        if (event.push && event.key == key && MinecraftClient.getInstance().currentScreen == null) {
+    private final Listener<KeyEvent> onKey = new Listener<>(event -> {
+        if (event.action == KeyAction.Press && event.key == key && MinecraftClient.getInstance().currentScreen == null) {
             for (String command : messages) {
                 MinecraftClient.getInstance().player.sendChatMessage(command);
             }

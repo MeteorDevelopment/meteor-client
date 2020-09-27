@@ -5,6 +5,7 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.KeyEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.utils.KeyAction;
 
 public class AirJump extends ToggleModule {
     public AirJump() {
@@ -12,8 +13,8 @@ public class AirJump extends ToggleModule {
     }
 
     @EventHandler
-    private Listener<KeyEvent> onKey = new Listener<>(event -> {
-        if (event.push && mc.options.keyJump.matchesKey(event.key, 0)) {
+    private final Listener<KeyEvent> onKey = new Listener<>(event -> {
+        if (event.action == KeyAction.Press && mc.options.keyJump.matchesKey(event.key, 0)) {
             mc.player.jump();
         }
     });

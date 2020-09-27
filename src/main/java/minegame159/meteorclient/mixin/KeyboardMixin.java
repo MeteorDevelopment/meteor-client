@@ -9,6 +9,7 @@ import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.utils.Input;
+import minegame159.meteorclient.utils.KeyAction;
 import minegame159.meteorclient.utils.KeyBinds;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.Keyboard;
@@ -28,7 +29,7 @@ public abstract class KeyboardMixin {
 
     @Inject(method = "onKey", at = @At("HEAD"), cancellable = true)
     public void onKey(long window, int key, int scancode, int i, int j, CallbackInfo info) {
-        if (key != GLFW.GLFW_KEY_UNKNOWN && i != GLFW.GLFW_REPEAT && GuiThings.postKeyEvents()) {
+        if (key != GLFW.GLFW_KEY_UNKNOWN && GuiThings.postKeyEvents()) {
             Input.setKeyState(key, i != GLFW.GLFW_RELEASE);
 
             KeyBinding shulkerPeek = KeyBinds.SHULKER_PEEK;
@@ -41,14 +42,14 @@ public abstract class KeyboardMixin {
                 MeteorClient.INSTANCE.onKeyInMainMenu(key);
                 if (client.currentScreen instanceof WidgetScreen && GuiThings.postKeyEvents()) {
                     ModuleManager.INSTANCE.onKeyOnlyBinding = true;
-                    ModuleManager.INSTANCE.onKey.invoke(EventStore.keyEvent(key, true));
+                    ModuleManager.INSTANCE.onKey.invoke(EventStore.keyEvent(key, KeyAction.Press));
                     ModuleManager.INSTANCE.onKeyOnlyBinding = false;
                 }
                 return;
             }
 
             if (!client.isPaused() && (client.currentScreen == null || (client.currentScreen instanceof WidgetScreen && GuiThings.postKeyEvents()))) {
-                KeyEvent event = EventStore.keyEvent(key, i != GLFW.GLFW_RELEASE);
+                KeyEvent event = EventStore.keyEvent(key, KeyAction.get(i));
                 MeteorClient.EVENT_BUS.post(event);
 
                 if (event.isCancelled()) info.cancel();
