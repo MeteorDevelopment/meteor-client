@@ -66,7 +66,7 @@ public class AutoExp extends ToggleModule {
 );
     
     public AutoExp() {
-        super(Category.Combat, "auto-exp", "Throws exp to mend your armour (only works with diamond)");
+        super(Category.Combat, "auto-exp", "Throws exp to mend your armour.");
     }
 
     private boolean wasArmourActive = false;
@@ -125,8 +125,8 @@ public class AutoExp extends ToggleModule {
         ItemStack chestplate = armour.next();
         ItemStack helmet = armour.next();
         if(!boots.isDamaged() && !leggings.isDamaged() && !chestplate.isDamaged() && !helmet.isDamaged() &&
-                (findBrokenArmour(Items.DIAMOND_BOOTS) == -1) && (findBrokenArmour(Items.DIAMOND_LEGGINGS) == -1)
-                && (findBrokenArmour(Items.DIAMOND_CHESTPLATE) == -1) && (findBrokenArmour(Items.DIAMOND_HELMET) == -1)) {
+                (findBrokenArmour(Items.DIAMOND_BOOTS, Items.NETHERITE_BOOTS) == -1) && (findBrokenArmour(Items.DIAMOND_LEGGINGS, Items.NETHERITE_LEGGINGS) == -1)
+                && (findBrokenArmour(Items.DIAMOND_CHESTPLATE, Items.NETHERITE_CHESTPLATE) == -1) && (findBrokenArmour(Items.DIAMOND_HELMET, Items.NETHERITE_HELMET) == -1)) {
             this.toggle();
             Chat.warning(this, "No broken armor with mending. Disabling!");
             return;
@@ -148,7 +148,7 @@ public class AutoExp extends ToggleModule {
         }
 
         //for boots
-        slot = findBrokenArmour(Items.DIAMOND_BOOTS);
+        slot = findBrokenArmour(Items.DIAMOND_BOOTS, Items.NETHERITE_BOOTS);
         boolean empty = boots.isEmpty();
         if(!boots.isDamaged() && (slot != -1)){
             InvUtils.clickSlot(8, 0, SlotActionType.PICKUP);
@@ -168,7 +168,7 @@ public class AutoExp extends ToggleModule {
         }
 
         //for leggings
-        slot = findBrokenArmour(Items.DIAMOND_LEGGINGS);
+        slot = findBrokenArmour(Items.DIAMOND_LEGGINGS, Items.NETHERITE_LEGGINGS);
         empty = leggings.isEmpty();
         if(!leggings.isDamaged() && (slot != -1)){
             InvUtils.clickSlot(7, 0, SlotActionType.PICKUP);
@@ -188,7 +188,7 @@ public class AutoExp extends ToggleModule {
         }
 
         //for chestplate
-        slot = findBrokenArmour(Items.DIAMOND_CHESTPLATE);
+        slot = findBrokenArmour(Items.DIAMOND_CHESTPLATE, Items.NETHERITE_CHESTPLATE);
         empty = chestplate.isEmpty();
         if(!chestplate.isDamaged() && (slot != -1)){
             InvUtils.clickSlot(6, 0, SlotActionType.PICKUP);
@@ -208,7 +208,7 @@ public class AutoExp extends ToggleModule {
         }
 
         //for helmet
-        slot = findBrokenArmour(Items.DIAMOND_HELMET);
+        slot = findBrokenArmour(Items.DIAMOND_HELMET, Items.NETHERITE_HELMET);
         empty = helmet.isEmpty();
         if(!helmet.isDamaged() && (slot != -1)){
             InvUtils.clickSlot(5, 0, SlotActionType.PICKUP);
@@ -232,10 +232,10 @@ public class AutoExp extends ToggleModule {
         mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
     });
 
-    private int findBrokenArmour(Item item){
+    private int findBrokenArmour(Item item1, Item item2){
         for(int i = 0; i <mc.player.inventory.size(); i++){
             ItemStack itemStack = mc.player.inventory.getStack(i);
-            if(itemStack.isDamaged() && itemStack.getItem() == item && (EnchantmentHelper.getLevel(Enchantments.MENDING, itemStack) >= 1)){
+            if(itemStack.isDamaged() && (itemStack.getItem() == item1 || itemStack.getItem() == item2) && (EnchantmentHelper.getLevel(Enchantments.MENDING, itemStack) >= 1)){
                 return i;
             }
         }
