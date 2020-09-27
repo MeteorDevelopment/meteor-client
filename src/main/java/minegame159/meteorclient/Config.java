@@ -12,7 +12,7 @@ import java.util.Map;
 public class Config extends Savable<Config> {
     public static Config INSTANCE;
 
-    public final Version version = Version.parse("0.3.3");
+    public final Version version = Version.parse("0.3.4");
     private String prefix = ".";
     public AutoCraft autoCraft = new AutoCraft();
     public GuiConfig guiConfig = new GuiConfig();
