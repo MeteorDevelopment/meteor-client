@@ -15,6 +15,7 @@ import minegame159.meteorclient.modules.combat.BedAura;
 import minegame159.meteorclient.modules.combat.CrystalAura;
 import minegame159.meteorclient.modules.combat.KillAura;
 import minegame159.meteorclient.modules.combat.Surround;
+import minegame159.meteorclient.modules.misc.Timer;
 import minegame159.meteorclient.rendering.ShapeBuilder;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Chat;
@@ -544,6 +545,9 @@ public class HUD extends ToggleModule {
             double tX = Math.abs(mc.player.getX() - mc.player.prevX);
             double tZ = Math.abs(mc.player.getZ() - mc.player.prevZ);
             double length = Math.sqrt(tX * tX + tZ * tZ);
+            if (ModuleManager.INSTANCE.get(Timer.class).isActive()){
+                length *= ModuleManager.INSTANCE.get(Timer.class).getMultiplier();
+            }
 
             drawInfo("Speed: ", String.format("%.1f", length * 20), y);
             y += MeteorClient.FONT.getHeight() + 2;
