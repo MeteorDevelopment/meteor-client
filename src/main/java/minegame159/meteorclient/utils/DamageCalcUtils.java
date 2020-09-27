@@ -38,7 +38,7 @@ public class DamageCalcUtils {
         damage = getDamageMultiplied(damage);
 
         //Reduce by resistance
-        damage = resistanceReduction((PlayerEntity) player, damage);
+        damage = resistanceReduction(player, damage);
 
         //Reduce my armour
         damage = DamageUtil.getDamageLeft((float)damage, (float)player.getArmor(), (float)player.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS).getValue());
@@ -63,7 +63,7 @@ public class DamageCalcUtils {
         damage = getDamageMultiplied(damage);
 
         //Reduce by resistance
-        damage = resistanceReduction((PlayerEntity) player, damage);
+        damage = resistanceReduction(player, damage);
 
         //Reduce my armour
         damage = DamageUtil.getDamageLeft((float)damage, (float)player.getArmor(), (float)player.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS).getValue());
@@ -152,7 +152,7 @@ public class DamageCalcUtils {
         return damage;
     }
 
-    private static double resistanceReduction(PlayerEntity player, double damage){
+    private static double resistanceReduction(LivingEntity player, double damage){
         if (player.hasStatusEffect(StatusEffects.RESISTANCE)) {
             int lvl = (player.getStatusEffect(StatusEffects.RESISTANCE).getAmplifier() + 1);
             damage *= (1 - (lvl * 0.2));

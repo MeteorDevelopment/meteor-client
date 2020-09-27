@@ -303,7 +303,8 @@ public class CrystalAura extends ToggleModule {
             LivingEntity target = null;
             Iterator<Entity> entitiesList = mc.world.getEntities().iterator();
             LivingEntity livingEntity;
-            for (Entity entity = entitiesList.next(); entitiesList.hasNext(); entity = entitiesList.next()) {
+            for (Entity entity = null; entitiesList.hasNext(); entity = entitiesList.next()) {
+                if (entity == null) continue;
                 if (entities.get().contains(entity.getType()) && entity.distanceTo(mc.player) <= 10){
                     if (entity instanceof LivingEntity && ((LivingEntity) entity).getHealth() > 0){
                         livingEntity = (LivingEntity)entity;
