@@ -385,6 +385,8 @@ public class HUD extends ToggleModule {
                         itemStackMap.put(i, itemStack);
                         sendNotification();
                     }
+                }else if ((itemStack.getMaxDamage() - itemStack.getDamage()) > warningDurability.get() && itemStackMap.containsKey(i)){
+                    itemStackMap.remove(i);
                 }
             }
         }
