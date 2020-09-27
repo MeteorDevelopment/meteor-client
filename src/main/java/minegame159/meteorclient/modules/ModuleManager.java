@@ -17,6 +17,7 @@ import minegame159.meteorclient.modules.player.*;
 import minegame159.meteorclient.modules.render.*;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.utils.Chat;
+import minegame159.meteorclient.utils.KeyAction;
 import minegame159.meteorclient.utils.Savable;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
@@ -138,8 +139,10 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
 
     @EventHandler
     public Listener<KeyEvent> onKey = new Listener<>(event -> {
+        if (event.action == KeyAction.Repeat) return;
+
         // Check if binding module
-        if (event.push && moduleToBind != null) {
+        if (event.action == KeyAction.Press && moduleToBind != null) {
             moduleToBind.setKey(event.key);
             Chat.info("Module (highlight)%s (default)bound to (highlight)%s(default).", moduleToBind.title, Utils.getKeyName(event.key));
             moduleToBind = null;
@@ -150,7 +153,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         // Find module bound to that key
         if (!onKeyOnlyBinding && MinecraftClient.getInstance().currentScreen == null) {
             for (Module module : modules.values()) {
-                if (module.getKey() == event.key && (event.push || module.toggleOnKeyRelease)) {
+                if (module.getKey() == event.key && (event.action == KeyAction.Press || module.toggleOnKeyRelease)) {
                     module.doAction();
                     if (module instanceof ToggleModule) ((ToggleModule) module).sendToggledMsg();
 

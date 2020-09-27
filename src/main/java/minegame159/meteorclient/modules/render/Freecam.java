@@ -3,13 +3,16 @@ package minegame159.meteorclient.modules.render;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.KeyEvent;
+import minegame159.meteorclient.events.OpenScreenEvent;
 import minegame159.meteorclient.events.TickEvent;
+import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.utils.KeyAction;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
@@ -54,8 +57,19 @@ public class Freecam extends ToggleModule {
         up = false;
         down = false;
 
-        //mc.chunkCullingEnabled = false;
-        //mc.worldRenderer.reload();
+        unpress();
+    }
+
+    @EventHandler
+    private final Listener<OpenScreenEvent> onOpenScreen = new Listener<>(event -> unpress());
+
+    private void unpress() {
+        ((IKeyBinding) mc.options.keyForward).setPressed(false);
+        ((IKeyBinding) mc.options.keyBack).setPressed(false);
+        ((IKeyBinding) mc.options.keyRight).setPressed(false);
+        ((IKeyBinding) mc.options.keyLeft).setPressed(false);
+        ((IKeyBinding) mc.options.keyJump).setPressed(false);
+        ((IKeyBinding) mc.options.keySneak).setPressed(false);
     }
 
     @EventHandler
@@ -65,6 +79,8 @@ public class Freecam extends ToggleModule {
         double velX = 0;
         double velY = 0;
         double velZ = 0;
+
+        if (mc.options.keyForward.isPressed()) System.out.println("OMG");
 
         double s = 0.5;
         if (mc.options.keySprint.isPressed()) s = 1;
@@ -115,17 +131,17 @@ public class Freecam extends ToggleModule {
         boolean cancel = true;
 
         if (KeyBindingHelper.getBoundKeyOf(mc.options.keyForward).getCode() == event.key) {
-            forward = event.push;
+            forward = event.action != KeyAction.Release;
         } else if (KeyBindingHelper.getBoundKeyOf(mc.options.keyBack).getCode() == event.key) {
-            backward = event.push;
+            backward = event.action != KeyAction.Release;
         } else if (KeyBindingHelper.getBoundKeyOf(mc.options.keyRight).getCode() == event.key) {
-            right = event.push;
+            right = event.action != KeyAction.Release;
         } else if (KeyBindingHelper.getBoundKeyOf(mc.options.keyLeft).getCode() == event.key) {
-            left = event.push;
+            left = event.action != KeyAction.Release;
         } else if (KeyBindingHelper.getBoundKeyOf(mc.options.keyJump).getCode() == event.key) {
-            up = event.push;
+            up = event.action != KeyAction.Release;
         } else if (KeyBindingHelper.getBoundKeyOf(mc.options.keySneak).getCode() == event.key) {
-            down = event.push;
+            down = event.action != KeyAction.Release;
         } else {
             cancel = false;
         }
