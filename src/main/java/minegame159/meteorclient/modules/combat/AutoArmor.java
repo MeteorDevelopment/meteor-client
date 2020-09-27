@@ -170,7 +170,7 @@ public class AutoArmor extends ToggleModule {
 
     private int delayLeft = delay.get();
     private boolean didSkip = false;
-    private int currentBest, currentProt, currentBlast, currentFire, currentProj, currentArmour = 0;
+    private int currentBest, currentProt, currentBlast, currentFire, currentProj, currentArmour, currentUnbreaking, currentMending = 0;
     private float currentToughness = 0;
 
     @EventHandler
@@ -203,6 +203,8 @@ public class AutoArmor extends ToggleModule {
             currentProj = 0;
             currentArmour = 0;
             currentToughness = 0;
+            currentUnbreaking = 0;
+            currentMending = 0;
             if ((ignoreElytra.get() || ModuleManager.INSTANCE.get(ChestSwap.class).isActive()) && itemStack.getItem() == Items.ELYTRA) continue;
             if (EnchantmentHelper.hasBindingCurse(itemStack)) continue;
             if (itemStack.getItem() instanceof ArmorItem) {
@@ -249,8 +251,8 @@ public class AutoArmor extends ToggleModule {
         score += 2 * (EnchantmentHelper.getLevel(Enchantments.PROJECTILE_PROTECTION, itemStack) - currentProj);
         score += 2 * (((ArmorItem) itemStack.getItem()).getProtection() - currentArmour);
         score += 2 * (((ArmorItem) itemStack.getItem()).method_26353() - currentToughness);
-        score += EnchantmentHelper.getLevel(Enchantments.UNBREAKING, itemStack);
-        if (preferMending.get() && EnchantmentHelper.getLevel(Enchantments.MENDING, itemStack) > 0) score += weight.get();
+        score += EnchantmentHelper.getLevel(Enchantments.UNBREAKING, itemStack) - currentUnbreaking;
+        if (preferMending.get() && (EnchantmentHelper.getLevel(Enchantments.MENDING, itemStack) - currentMending) > 0) score += weight.get();
         return score;
     }
 
@@ -262,6 +264,8 @@ public class AutoArmor extends ToggleModule {
         currentProj = EnchantmentHelper.getLevel(Enchantments.PROJECTILE_PROTECTION, itemStack);
         currentArmour = ((ArmorItem) itemStack.getItem()).getProtection();
         currentToughness = ((ArmorItem) itemStack.getItem()).method_26353();
+        currentUnbreaking = EnchantmentHelper.getLevel(Enchantments.UNBREAKING, itemStack);
+        currentMending = EnchantmentHelper.getLevel(Enchantments.MENDING, itemStack);
     }
 
     private boolean explosionNear() {
