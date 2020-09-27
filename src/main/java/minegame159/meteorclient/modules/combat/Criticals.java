@@ -64,19 +64,11 @@ public class Criticals extends ToggleModule {
 
         if (event.packet instanceof PlayerInteractEntityC2SPacket && ((PlayerInteractEntityC2SPacket) event.packet).getType() == PlayerInteractEntityC2SPacket.InteractionType.ATTACK) {
             if (!shouldDoCriticals()) return;
-            if(ModuleManager.INSTANCE.get(NoFall.class).isActive()){
-                ModuleManager.INSTANCE.get(NoFall.class).toggle();
-            }
             if (mode.get() == Mode.Packet) doPacketMode();
             else doJumpMode(event);
-            if (wasToggled) ModuleManager.INSTANCE.get(NoFall.class).toggle();
         } else if (event.packet instanceof HandSwingC2SPacket && mode.get() != Mode.Packet) {
             if (!shouldDoCriticals()) return;
-            if(ModuleManager.INSTANCE.get(NoFall.class).isActive()){
-                ModuleManager.INSTANCE.get(NoFall.class).toggle();
-            }
             doJumpModeSwing(event);
-            if (wasToggled) ModuleManager.INSTANCE.get(NoFall.class).toggle();
         }
     });
 
