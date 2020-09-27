@@ -327,19 +327,6 @@ public class CrystalAura extends ToggleModule {
                     target = validEntities.get(i);
                 }
             }
-            if (autoSwitch.get() && mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL) {
-                int slot = InvUtils.findItemWithCount(Items.END_CRYSTAL).slot;
-                if (slot != -1 && slot < 9) {
-                    preSlot = mc.player.inventory.selectedSlot;
-                    mc.player.inventory.selectedSlot = slot;
-                }
-            }
-            Hand hand = Hand.MAIN_HAND;
-            if (mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() == Items.END_CRYSTAL)
-                hand = Hand.OFF_HAND;
-            else if (mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL) {
-                return;
-            }
             findValidBlocks(target);
             if (bestBlock == null) return;
             if (facePlace.get() && Math.sqrt(target.squaredDistanceTo(bestBlock)) <= 2) {
@@ -356,6 +343,19 @@ public class CrystalAura extends ToggleModule {
                 }
             }
             if (bestBlock != null && (bestDamage >= minDamage.get() || shouldFacePlace)) {
+                if (autoSwitch.get() && mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL) {
+                    int slot = InvUtils.findItemWithCount(Items.END_CRYSTAL).slot;
+                    if (slot != -1 && slot < 9) {
+                        preSlot = mc.player.inventory.selectedSlot;
+                        mc.player.inventory.selectedSlot = slot;
+                    }
+                }
+                Hand hand = Hand.MAIN_HAND;
+                if (mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() == Items.END_CRYSTAL)
+                    hand = Hand.OFF_HAND;
+                else if (mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL) {
+                    return;
+                }
                 if (!smartDelay.get()) {
                     delayLeft = delay.get();
                     placeBlock(bestBlock, hand);
