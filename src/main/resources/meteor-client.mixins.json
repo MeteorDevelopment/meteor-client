@@ -85,14 +85,11 @@
     "CreativeInventoryScreenMixin",
     "BlockItemMixin",
     "LivingEntityRendererMixin",
-    "RenderLayersMixin",
-    "ModelMixin",
-    "ItemFrameEntityRendererMixin",
-    "RenderLayerMixin",
     "PickaxeItemAccessor",
     "AxeItemAccessor",
     "ShovelItemAccessor",
-    "HoeItemAccessor"
+    "HoeItemAccessor",
+    "WorldRendererAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

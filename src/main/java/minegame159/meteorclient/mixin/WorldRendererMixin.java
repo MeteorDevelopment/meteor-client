@@ -2,30 +2,31 @@ package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.render.BlockSelection;
+import minegame159.meteorclient.modules.render.ESP;
 import minegame159.meteorclient.modules.render.NoRender;
+import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.Outlines;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.block.BlockState;
+import net.minecraft.client.gl.Framebuffer;
 import net.minecraft.client.render.*;
-import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Matrix4f;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import javax.annotation.Nullable;
+
 @Mixin(WorldRenderer.class)
 public abstract class WorldRendererMixin {
-    @Shadow @Final private EntityRenderDispatcher entityRenderDispatcher;
+    @Shadow protected abstract void renderEntity(Entity entity, double cameraX, double cameraY, double cameraZ, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers);
 
-    @Shadow public abstract void tick();
-
-    @Shadow @Final private BufferBuilderStorage bufferBuilders;
+    @Shadow @Nullable private Framebuffer entityOutlinesFramebuffer;
 
     @Inject(method = "loadEntityOutlineShader", at = @At("TAIL"))
     private void onLoadEntityOutlineShader(CallbackInfo info) {
@@ -51,13 +52,40 @@ public abstract class WorldRendererMixin {
     private void onRenderEntitiesTail(Entity entity, double cameraX, double cameraY, double cameraZ, float tickDelta, MatrixStack matrix, VertexConsumerProvider vertexConsumers, CallbackInfo info) {
         Utils.blockRenderingBlockEntitiesInXray = false;
     }
-    
-    @Inject(method = "render", at = @At("TAIL"))
-    private void onRender(MatrixStack matrices, float tickDelta, long limitTime, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightmapTextureManager lightmapTextureManager, Matrix4f matrix4f, CallbackInfo info) {
-        Frustum frustum = new Frustum(matrices.peek().getModel(), matrix4f);
-        frustum.setPosition(camera.getPos().x, camera.getPos().y, camera.getPos().z);
 
-        Outlines.render(entityRenderDispatcher, frustum, camera, tickDelta, matrices, bufferBuilders);
+    @Inject(method = "drawBlockOutline", at = @At("HEAD"), cancellable = true)
+    private void onDrawHighlightedBlockOutline(MatrixStack matrixStack, VertexConsumer vertexConsumer, Entity entity, double d, double e, double f, BlockPos blockPos, BlockState blockState, CallbackInfo info) {
+        if (ModuleManager.INSTANCE.isActive(BlockSelection.class)) info.cancel();
+    }
+
+    // Outlines
+
+    @Inject(method = "render", at = @At("HEAD"))
+    private void onRenderHead(MatrixStack matrices, float tickDelta, long limitTime, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightmapTextureManager lightmapTextureManager, Matrix4f matrix4f, CallbackInfo info) {
+        Outlines.beginRender();
+    }
+
+    @Inject(method = "renderEntity", at = @At("INVOKE"), cancellable = true)
+    private void renderEntity(Entity entity, double cameraX, double cameraY, double cameraZ, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, CallbackInfo info) {
+        if (vertexConsumers == Outlines.vertexConsumerProvider) return;
+
+        ESP esp = ModuleManager.INSTANCE.get(ESP.class);
+        Color color = esp.getOutlineColor(entity);
+
+        if (color != null) {
+            Framebuffer fbo = this.entityOutlinesFramebuffer;
+            this.entityOutlinesFramebuffer = Outlines.outlinesFbo;
+
+            Outlines.vertexConsumerProvider.setColor(color.r, color.g, color.b, color.a);
+            renderEntity(entity, cameraX, cameraY, cameraZ, tickDelta, matrices, Outlines.vertexConsumerProvider);
+
+            this.entityOutlinesFramebuffer = fbo;
+        }
+    }
+    
+    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/OutlineVertexConsumerProvider;draw()V"))
+    private void onRender(MatrixStack matrices, float tickDelta, long limitTime, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightmapTextureManager lightmapTextureManager, Matrix4f matrix4f, CallbackInfo info) {
+        Outlines.endRender(tickDelta);
     }
 
     @Inject(method = "drawEntityOutlinesFramebuffer", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gl/Framebuffer;draw(IIZ)V"))
@@ -68,10 +96,5 @@ public abstract class WorldRendererMixin {
     @Inject(method = "onResized", at = @At("HEAD"))
     private void onResized(int i, int j, CallbackInfo info) {
         Outlines.onResized(i, j);
-    }
-
-    @Inject(method = "drawBlockOutline", at = @At("HEAD"), cancellable = true)
-    private void onDrawHighlightedBlockOutline(MatrixStack matrixStack, VertexConsumer vertexConsumer, Entity entity, double d, double e, double f, BlockPos blockPos, BlockState blockState, CallbackInfo info) {
-        if (ModuleManager.INSTANCE.isActive(BlockSelection.class)) info.cancel();
     }
 }
