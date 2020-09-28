@@ -2,15 +2,14 @@ package minegame159.meteorclient.modules.render;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.events.RenderEvent;
+import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.rendering.ShapeBuilder;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Color;
-import minegame159.meteorclient.utils.Outlines;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
@@ -88,7 +87,7 @@ public class ESP extends ToggleModule {
     private final Setting<Color> miscColor = sgColors.add(new ColorSetting.Builder()
             .name("misc-color")
             .description("Misc color.")
-            .defaultValue(new Color(125, 125, 125, 255))
+            .defaultValue(new Color(175, 175, 175, 255))
             .build()
     );
 
@@ -102,6 +101,7 @@ public class ESP extends ToggleModule {
     );
 
     private final Color sideColor = new Color();
+    private final Color outlineColor = new Color();
     private int count;
 
     public ESP() {
@@ -164,7 +164,6 @@ public class ESP extends ToggleModule {
             count++;
 
             if (mode.get() == Mode.Outline) {
-                Outlines.ENTITIES.add(entity);
                 continue;
             }
 
@@ -189,5 +188,22 @@ public class ESP extends ToggleModule {
         }
 
         return WHITE;
+    }
+
+    public Color getOutlineColor(Entity entity) {
+        if (!entities.get().contains(entity.getType())) return null;
+        Color color = getColor(entity);
+
+        double dist = mc.cameraEntity.squaredDistanceTo(entity.getX() + entity.getWidth() / 2, entity.getY() + entity.getHeight() / 2, entity.getZ() + entity.getWidth() / 2);
+        double a = 1;
+        if (dist <= fadeDistance.get() * fadeDistance.get()) a = dist / (fadeDistance.get() * fadeDistance.get());
+
+        if (a >= 0.075) {
+            outlineColor.set(color);
+            outlineColor.a *= a;
+            return outlineColor;
+        }
+
+        return null;
     }
 }
