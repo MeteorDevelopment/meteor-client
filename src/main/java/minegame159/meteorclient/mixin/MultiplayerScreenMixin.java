@@ -41,7 +41,7 @@ public class MultiplayerScreenMixin extends Screen {
 
     @Inject(method = "render", at = @At("TAIL"))
     private void onRender(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo info) {
-        textRenderer.draw(matrices, loggedInAs, 3, 3, textColor1);
-        textRenderer.draw(matrices, client.getSession().getUsername(), 3 + loggedInAsLength, 3, textColor2);
+        textRenderer.drawWithShadow(matrices, loggedInAs, 3, 3, textColor1);
+        textRenderer.drawWithShadow(matrices, client.getSession().getUsername(), 3 + loggedInAsLength, 3, textColor2);
     }
 }

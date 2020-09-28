@@ -69,9 +69,9 @@ public class TitleScreenMixin extends Screen {
 
     @Inject(method = "render", at = @At("TAIL"))
     private void onRender(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo info) {
-        textRenderer.draw(matrices, text1, width - text4Length - text3Length - text2Length - text1Length - 3, 3, text1Color);
-        textRenderer.draw(matrices, text2, width - text4Length - text3Length - text2Length - 3, 3, text2Color);
-        textRenderer.draw(matrices, text3, width - text4Length - text3Length - 3, 3, text3Color);
-        textRenderer.draw(matrices, text4, width - text4Length - 3, 3, text4Color);
+        textRenderer.drawWithShadow(matrices, text1, width - text4Length - text3Length - text2Length - text1Length - 3, 3, text1Color);
+        textRenderer.drawWithShadow(matrices, text2, width - text4Length - text3Length - text2Length - 3, 3, text2Color);
+        textRenderer.drawWithShadow(matrices, text3, width - text4Length - text3Length - 3, 3, text3Color);
+        textRenderer.drawWithShadow(matrices, text4, width - text4Length - 3, 3, text4Color);
     }
 }
