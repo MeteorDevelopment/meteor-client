@@ -19,7 +19,7 @@ axios
     for (let i in res.data.commits) {
       let commit = res.data.commits[i]
 
-      changes += "\n- `" + commit.sha.substring(0, 8) + "` *" + commit.commit.message + "*"
+      changes += "\n- [`" + commit.sha.substring(0, 8) + "`](https://github.com/MineGame159/meteor-client/commit/" + commit.sha + ") *" + commit.commit.message + "*"
       hasChanges = true
     }
     if (hasChanges) description += changes
