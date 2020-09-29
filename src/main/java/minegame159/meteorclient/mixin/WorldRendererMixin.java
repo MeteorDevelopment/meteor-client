@@ -3,12 +3,14 @@ package minegame159.meteorclient.mixin;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.render.BlockSelection;
 import minegame159.meteorclient.modules.render.ESP;
+import minegame159.meteorclient.modules.render.Freecam;
 import minegame159.meteorclient.modules.render.NoRender;
 import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.Outlines;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.gl.Framebuffer;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.*;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
@@ -18,6 +20,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import javax.annotation.Nullable;
@@ -58,6 +61,11 @@ public abstract class WorldRendererMixin {
         if (ModuleManager.INSTANCE.isActive(BlockSelection.class)) info.cancel();
     }
 
+    @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;isSpectator()Z"))
+    private boolean renderIsSpectatorProxy(ClientPlayerEntity player) {
+        return ModuleManager.INSTANCE.isActive(Freecam.class) || player.isSpectator();
+    }
+
     // Outlines
 
     @Inject(method = "render", at = @At("HEAD"))
@@ -70,6 +78,8 @@ public abstract class WorldRendererMixin {
         if (vertexConsumers == Outlines.vertexConsumerProvider) return;
 
         ESP esp = ModuleManager.INSTANCE.get(ESP.class);
+        if (!esp.isActive()) return;
+
         Color color = esp.getOutlineColor(entity);
 
         if (color != null) {
