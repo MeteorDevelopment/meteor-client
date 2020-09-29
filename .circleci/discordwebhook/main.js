@@ -3,6 +3,9 @@ const axios = require("axios")
 const branch = process.argv[2]
 const version = process.argv[3]
 const build = parseInt(process.argv[4]) + 1
+const compareUrl = process.argv[5]
+
+console.log(compareUrl)
 
 let success = true
 let description = ""
