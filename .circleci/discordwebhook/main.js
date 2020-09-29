@@ -30,7 +30,7 @@ axios
       description += "\n\n**Download:** [meteor-client-" + version + "-" + build + "](" + downloadUrl + ")"
     }
 
-    axios.post("https://discordapp.com/api/webhooks/760506437348229151/PDbacrTK-dHeYtRVb4YPj-bzb_bj4Bs_Q6Bga8iA4SLXFeKS6prj13uqQs0St5FLKWHF", {
+    axios.post("https://discordapp.com/api/webhooks/756782683027275846/hM4ERZ6DJ1KUIDinVlvejBPF3jascPThCiDjCFvIdknJTUjVn6IRUkAK7jcwjaOFPe5w", {
       username: "Dev Builds",
       avatar_url: "https://meteorclient.com/icon.png",
       embeds: [
