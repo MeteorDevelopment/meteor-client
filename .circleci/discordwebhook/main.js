@@ -1,4 +1,4 @@
-const axios = require("axios")
+const axios = require("axios").default
 
 const branch = process.argv[2]
 const version = process.argv[3]
@@ -11,13 +11,16 @@ axios
     let success = true
     let description = ""
 
-    console.log(res)
-
     description += "**Branch:** " + branch
     description += "\n**Status:** " + (success ? "success" : "failure")
 
-    description += "\n\n**Changes:**"
-    description += "\n- and what here"
+    let changes = "\n\n**Changes:**"
+    let hasChanges = false
+    for (let commit in res.data.commits) {
+      description += "\n- `[" + commit.sha.substring(0, 8) + "](https://github.com/MineGame159/meteor-client/commit/" + commit.sha + ")` *" + commit.commit.message + "*"
+      hasChanges = true
+    }
+    if (hasChanges) description += changes
 
     if (success) {
       description += "\n\n**Download:** [meteor-client-" + version + "](https://" + build + "-256699023-gh.circle-artifacts.com/0/build/libs/meteor-client-" + version + ".jar)"
