@@ -342,5 +342,6 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new AntiChunkBan());
         addModule(new Announcer());
         addModule(new BetterChat());
+        addModule(new FancyChat());
     }
 }
