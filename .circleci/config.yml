@@ -29,4 +29,4 @@ jobs:
           key: v1-dependencies-{{ checksum "build.gradle" }}
 
       - store_artifacts:
-        path: /build/libs/meteor-client-0.3.4.jar
+          path: /build/libs/meteor-client-0.3.4.jar
