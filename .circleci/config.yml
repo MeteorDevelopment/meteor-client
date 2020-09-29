@@ -38,7 +38,7 @@ jobs:
           key: v1-dependencies-{{ checksum "build.gradle" }}
 
       - store_artifacts:
-          path: build/libs/meteor-client-<< pipeline.parameters.version >>.jar
+          path: build/libs/*.jar
       
       - node/install:
           install-yarn: true
