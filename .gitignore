@@ -4,3 +4,4 @@ build
 out
 run
 logs
+.circleci/discordwebhook/node_modules
