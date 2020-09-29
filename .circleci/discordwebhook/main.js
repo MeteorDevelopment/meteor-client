@@ -2,7 +2,7 @@ const axios = require("axios")
 
 const branch = process.argv[2]
 const version = process.argv[3]
-const build = process.argv[4]
+const build = parseInt(process.argv[4]) + 1
 
 let success = true
 let description = ""
