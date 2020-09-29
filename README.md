@@ -18,7 +18,7 @@ Follow guide at [meteorclient.com](https://meteorclient.com/info).
 - Run `./gradlew build`
 
 ## Dev builds
-You can find dev builts at [jenkins](https://jenkins.wnuke.dev/job/meteor/job/meteor-client).
+You can find dev builts at [circleci](https://app.circleci.com/pipelines/github/MineGame159/meteor-client?branch=master).
 
 ## Older versions
 If you want to connect to servers that run older version you can download [multiconnect](https://www.curseforge.com/minecraft/mc-mods/multiconnect).
