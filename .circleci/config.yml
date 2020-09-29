@@ -3,6 +3,11 @@ version: 2.1
 orbs:
   node: circleci/node@4.0.1
 
+parameters:
+  version:
+    type: string
+    default: 0.3.4
+
 jobs:
   build:
     docker:
@@ -14,8 +19,6 @@ jobs:
       # Customize the JVM maximum heap limit
       JVM_OPTS: -Xmx3200m
       TERM: dumb
-      VERSION: 0.3.4
-      BUILD: << pipeline.number >>
 
     steps:
       - checkout
@@ -35,7 +38,7 @@ jobs:
           key: v1-dependencies-{{ checksum "build.gradle" }}
 
       - store_artifacts:
-          path: build/libs/meteor-client-<< pipeline.number >>.jar
+          path: build/libs/meteor-client-<< pipeline.parameters.version >>.jar
       
       - node/install:
           install-yarn: true
@@ -45,4 +48,4 @@ jobs:
           command: |
             cd .circleci/discordwebhook
             yarn install
-            yarn start << pipeline.git.branch >> $VERSION $BUILD
+            yarn start << pipeline.git.branch >> << pipeline.parameters.version >> << pipeline.number >>
