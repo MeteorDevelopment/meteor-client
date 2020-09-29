@@ -38,7 +38,7 @@ jobs:
           key: v1-dependencies-{{ checksum "build.gradle" }}
 
       - store_artifacts:
-          path: build/libs/*.jar
+          path: build/libs/
       
       - node/install:
           install-yarn: true
@@ -48,4 +48,4 @@ jobs:
           command: |
             cd .circleci/discordwebhook
             yarn install
-            yarn start << pipeline.git.branch >> << pipeline.parameters.version >> << pipeline.number >> https://api.github.com/repos/MineGame159/meteor-client/compare/<< pipeline.git.base_revision >>...<< pipeline.git.revision >>
+            yarn start << pipeline.git.branch >> << pipeline.parameters.version >> $CIRCLE_BUILD_NUM https://api.github.com/repos/MineGame159/meteor-client/compare/<< pipeline.git.base_revision >>...<< pipeline.git.revision >>
