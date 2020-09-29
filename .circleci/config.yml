@@ -36,11 +36,10 @@ jobs:
 
       - store_artifacts:
           path: build/libs/meteor-client-$VERSION.jar
-
-      - node/install-packages:
-          app-dir: ~/repo/.circleci/discordwebhook
-          cache-path: node_modules
-          override-ci-command: npm i
+      
+      - run:
+        name: Install npm dependencies
+        command: npm install
 
       - run:
         name: Discord webhook
