@@ -37,8 +37,6 @@ jobs:
       - store_artifacts:
           path: build/libs/meteor-client-$VERSION.jar
 
-      - node/install-npm:
-
       - node/install-packages:
           app-dir: ~/repo/.circleci/discordwebhook
           cache-path: node_modules
