@@ -14,4 +14,4 @@ artifacts:
     name: 'meteor-client-0.3.4-{build}'
 
 build_script:
-  - gradlew build
+  - ./gradlew build
