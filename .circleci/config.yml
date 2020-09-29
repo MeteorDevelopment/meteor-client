@@ -38,9 +38,9 @@ jobs:
           path: build/libs/meteor-client-$VERSION.jar
       
       - run:
-        name: Install npm dependencies
-        command: npm install
+          name: Install npm dependencies
+          command: npm install
 
       - run:
-        name: Discord webhook
-        command: npm start << pipeline.git.branch >> $VERSION $BUILD
+          name: Discord webhook
+          command: npm start << pipeline.git.branch >> $VERSION $BUILD
