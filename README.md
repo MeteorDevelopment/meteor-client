@@ -5,7 +5,7 @@
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/MineGame159/meteor-client)
 ![GitHub lines of code](https://tokei.rs/b1/github/MineGame159/meteor-client)
 ![GitHub contributors](https://img.shields.io/github/contributors/MineGame159/meteor-client)
-[![Jenkins](https://jenkins.wnuke.dev/job/meteor/job/meteor-client/job/master/badge/icon)](https://jenkins.wnuke.dev/job/meteor/job/meteor-client/job/master/)
+![CircleCI](https://circleci.com/gh/MineGame159/meteor-client/tree/master.svg?style=svg)
 
 Minecraft fabric utility mod for the latest minecraft version.  
 Join our [Discord](https://discord.gg/bBGQZvd).
