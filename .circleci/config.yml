@@ -1,7 +1,7 @@
-version: 2
+version: 2.1
 
 orbs:
-  node: circleci/node@3.0.0
+  node: circleci/node@4.0.1
 
 jobs:
   build:
@@ -37,10 +37,13 @@ jobs:
       - store_artifacts:
           path: build/libs/meteor-client-$VERSION.jar
       
+      - node/install:
+          install-yarn: true
+      
       - run:
-          name: Install npm dependencies
-          command: npm install
+          name: Install yarn dependencies
+          command: yarn install
 
       - run:
           name: Discord webhook
-          command: npm start << pipeline.git.branch >> $VERSION $BUILD
+          command: yarn start << pipeline.git.branch >> $VERSION $BUILD
