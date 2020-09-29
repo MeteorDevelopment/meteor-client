@@ -39,11 +39,10 @@ jobs:
       
       - node/install:
           install-yarn: true
-      
-      - run:
-          name: Install yarn dependencies
-          command: yarn install
 
       - run:
           name: Discord webhook
-          command: yarn start << pipeline.git.branch >> $VERSION $BUILD
+          command: |
+            cd .circleci/discordwebhook
+            yarn install
+            yarn start << pipeline.git.branch >> $VERSION $BUILD
