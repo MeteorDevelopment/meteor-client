@@ -30,7 +30,7 @@ axios
       description += "\n\n**Download:** [meteor-client-" + version + "-" + build + "](" + downloadUrl + ")"
     }
 
-    axios.post("https://discordapp.com/api/webhooks/756782683027275846/hM4ERZ6DJ1KUIDinVlvejBPF3jascPThCiDjCFvIdknJTUjVn6IRUkAK7jcwjaOFPe5w", {
+    axios.post(process.env.discord_webhook, {
       username: "Dev Builds",
       avatar_url: "https://meteorclient.com/icon.png",
       embeds: [
