@@ -25,7 +25,7 @@ axios
     if (hasChanges) description += changes
 
     if (success) {
-      description += "\n\n**Download:** [meteor-client-" + version + "](https://" + build + "-256699023-gh.circle-artifacts.com/0/build/libs/meteor-client-" + version + ".jar)"
+      description += "\n\n**Download:** [meteor-client-" + version + "](https://" + build + "-256699023-gh.circle-artifacts.com/0/build/libs/meteor-client-" + version + "-" + build + ".jar)"
     }
 
     axios.post("https://discordapp.com/api/webhooks/760506437348229151/PDbacrTK-dHeYtRVb4YPj-bzb_bj4Bs_Q6Bga8iA4SLXFeKS6prj13uqQs0St5FLKWHF", {
