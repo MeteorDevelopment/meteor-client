@@ -308,10 +308,10 @@ public class CrystalAura extends ToggleModule {
                     if (entity instanceof LivingEntity && ((LivingEntity) entity).getHealth() > 0){
                         livingEntity = (LivingEntity)entity;
                         if (entity instanceof PlayerEntity) {
-                            if (entity.getDisplayName().equals(mc.player.getDisplayName())) continue;
-                            if ((FriendManager.INSTANCE.attack(((PlayerEntity) entity)))
-                                    && !((PlayerEntity) entity).isCreative() && entity.isSpectator()) {
-                                validEntities.add(livingEntity);
+                            if (entity.getDisplayName().equals(mc.player.getDisplayName())
+                                    || !(FriendManager.INSTANCE.attack(((PlayerEntity) entity)))
+                                    || ((PlayerEntity) entity).isCreative() || entity.isSpectator()) {
+                                continue;
                             }
                         }
                         validEntities.add(livingEntity);
