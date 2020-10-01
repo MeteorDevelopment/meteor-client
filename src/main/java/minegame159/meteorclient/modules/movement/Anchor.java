@@ -28,12 +28,29 @@ public class Anchor extends ToggleModule {
             .build()
     );
 
+    private final Setting<Integer> minPitch = sgGeneral.add(new IntSetting.Builder()
+            .name("min-pitch")
+            .description("Minimum pitch at which anchor will work. (90 - -90)")
+            .defaultValue(-90)
+            .min(-90)
+            .max(90)
+            .sliderMin(-90)
+            .sliderMax(90)
+            .build()
+    );
+
     private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
     private boolean wasInHole;
     private int holeX, holeZ;
 
     public Anchor() {
         super(Category.Movement, "anchor", "Helps you get into holes.");
+    }
+
+    @Override
+    public void onActivate() {
+        wasInHole = false;
+        holeX = holeZ = 0;
     }
 
     @EventHandler
@@ -50,7 +67,9 @@ public class Anchor extends ToggleModule {
         }
 
         if (wasInHole && holeX == x && holeZ == z) return;
-        else if (wasInHole && holeX != x && holeZ != z) wasInHole = false;
+        else if (wasInHole) wasInHole = false;
+
+        if (mc.player.pitch < minPitch.get()) return;
 
         boolean foundHole = false;
         double holeX = 0;
@@ -87,7 +106,7 @@ public class Anchor extends ToggleModule {
     private boolean isHoleBlock(int x, int y, int z) {
         blockPos.set(x, y, z);
         Block block = mc.world.getBlockState(blockPos).getBlock();
-        return block == Blocks.BEDROCK || block == Blocks.OBSIDIAN;
+        return block == Blocks.BEDROCK || block == Blocks.OBSIDIAN || block == Blocks.CRYING_OBSIDIAN;
     }
 
     private boolean isAir(int x, int y, int z) {
