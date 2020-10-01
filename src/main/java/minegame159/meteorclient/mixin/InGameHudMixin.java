@@ -10,11 +10,8 @@ import minegame159.meteorclient.modules.render.NoRender;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.client.util.math.Vector3f;
 import net.minecraft.entity.Entity;
 import net.minecraft.scoreboard.ScoreboardObjective;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Matrix4f;
 import org.lwjgl.opengl.GL11;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -33,7 +30,7 @@ public abstract class InGameHudMixin {
 
     @Shadow public abstract void clear();
 
-    @Inject(method = "render", at = @At("TAIL"))
+    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerInventory;getArmorStack(I)Lnet/minecraft/item/ItemStack;"))
     private void onRender(MatrixStack matrixStack, float tickDelta, CallbackInfo info) {
         client.getProfiler().swap("meteor-client_render");
 
