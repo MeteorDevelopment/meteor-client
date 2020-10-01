@@ -6,6 +6,7 @@ import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
@@ -25,7 +26,15 @@ public class BowSpam extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> onlyWhenHoldingRightClick = sgGeneral.add(new BoolSetting.Builder()
+            .name("only-when-holding-right-click")
+            .description("Works only when holding right click.")
+            .defaultValue(false)
+            .build()
+    );
+
     private boolean wasBow = false;
+    private boolean wasHoldingRightClick = false;
 
     public BowSpam() {
         super(Category.Combat, "bow-spam", "Spams arrows.");
@@ -34,6 +43,7 @@ public class BowSpam extends ToggleModule {
     @Override
     public void onActivate() {
         wasBow = false;
+        wasHoldingRightClick = false;
     }
 
     @Override
@@ -43,17 +53,26 @@ public class BowSpam extends ToggleModule {
 
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
-        boolean isBow = mc.player.getMainHandStack().getItem() == Items.BOW;
-        if (!isBow && wasBow) setPressed(false);
+        if (!onlyWhenHoldingRightClick.get() || mc.options.keyUse.isPressed()) {
+            boolean isBow = mc.player.getMainHandStack().getItem() == Items.BOW;
+            if (!isBow && wasBow) setPressed(false);
 
-        wasBow = isBow;
-        if (!isBow) return;
+            wasBow = isBow;
+            if (!isBow) return;
 
-        if (mc.player.getItemUseTime() >= charge.get()) {
-            mc.player.stopUsingItem();
-            mc.interactionManager.stopUsingItem(mc.player);
+            if (mc.player.getItemUseTime() >= charge.get()) {
+                mc.player.stopUsingItem();
+                mc.interactionManager.stopUsingItem(mc.player);
+            } else {
+                setPressed(true);
+            }
+
+            wasHoldingRightClick = mc.options.keyUse.isPressed();
         } else {
-            setPressed(true);
+            if (wasHoldingRightClick) {
+                setPressed(false);
+                wasHoldingRightClick = false;
+            }
         }
     });
 
