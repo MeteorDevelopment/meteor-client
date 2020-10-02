@@ -156,4 +156,9 @@ public abstract class GameRendererMixin {
             camera.prevPitch = prevPitch;
         }
     }
+
+    @Inject(method = "renderHand", at = @At("INVOKE"), cancellable = true)
+    private void renderHand(MatrixStack matrices, Camera camera, float tickDelta, CallbackInfo info) {
+        if (!ModuleManager.INSTANCE.get(Freecam.class).renderHands()) info.cancel();
+    }
 }
