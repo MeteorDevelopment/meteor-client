@@ -36,6 +36,13 @@ public class Freecam extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> renderHands = sgGeneral.add(new BoolSetting.Builder()
+            .name("render-hands")
+            .description("Render hands when in freecam.")
+            .defaultValue(true)
+            .build()
+    );
+
     public final Vec3d pos = new Vec3d(0, 0, 0);
     public final Vec3d prevPos = new Vec3d(0, 0, 0);
 
@@ -191,5 +198,9 @@ public class Freecam extends ToggleModule {
 
     public float getPitch(float delta) {
         return MathHelper.lerp(delta, prevPitch, pitch);
+    }
+
+    public boolean renderHands() {
+        return !isActive() || renderHands.get();
     }
 }
