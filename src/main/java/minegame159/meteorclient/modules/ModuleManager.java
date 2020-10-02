@@ -261,6 +261,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new Rotation());
         addModule(new ChestSwap());
         addModule(new NoMiningTrace());
+        addModule(new EndermanLook());
     }
 
     private void initMovement() {
