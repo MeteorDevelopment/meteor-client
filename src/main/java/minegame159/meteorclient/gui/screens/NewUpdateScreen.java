@@ -1,11 +1,11 @@
 package minegame159.meteorclient.gui.screens;
 
+import com.g00fy2.versioncompare.Version;
 import minegame159.meteorclient.Config;
 import minegame159.meteorclient.gui.widgets.WButton;
 import minegame159.meteorclient.gui.widgets.WHorizontalSeparator;
 import minegame159.meteorclient.gui.widgets.WLabel;
 import minegame159.meteorclient.gui.widgets.WTable;
-import minegame159.meteorclient.utils.Version;
 import net.minecraft.util.Util;
 
 public class NewUpdateScreen extends WindowScreen {
@@ -20,12 +20,12 @@ public class NewUpdateScreen extends WindowScreen {
         versionsTable.add(new WLabel("Your version:"));
         versionsTable.add(new WLabel(Config.INSTANCE.version.toString())); versionsTable.row();
         versionsTable.add(new WLabel("Latest version:"));
-        versionsTable.add(new WLabel(latestVer.toString()));
+        versionsTable.add(new WLabel(latestVer.getOriginalString()));
 
         add(new WHorizontalSeparator()).fillX().expandX(); row();
 
         WTable buttonTable = add(new WTable()).getWidget();
-        buttonTable.add(new WButton("Download " + latestVer)).fillX().expandX().getWidget().action = button -> Util.getOperatingSystem().open("https://meteorclient.com/");
+        buttonTable.add(new WButton("Download " + latestVer.getOriginalString())).fillX().expandX().getWidget().action = button -> Util.getOperatingSystem().open("https://meteorclient.com/");
         buttonTable.add(new WButton("OK")).fillX().expandX().getWidget().action = button -> onClose();
     }
 }
