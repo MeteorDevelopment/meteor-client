@@ -35,7 +35,7 @@ public class WWindowController extends WWidget {
                 cellX = winConfig.getX();
                 cellY = winConfig.getY();
             } else {
-                cellX += 16;
+                cellX += 2;
                 automatic = true;
             }
 
