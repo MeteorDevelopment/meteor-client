@@ -31,6 +31,7 @@ We would appreciate if you donated to us through [PayPal](https://paypal.me/Mine
 [Cabaletta](https://github.com/cabaletta) for [Baritone](https://github.com/cabaletta/baritone)  
 [CDAGaming](https://gitlab.com/CDAGaming) for [Fabritone](https://gitlab.com/CDAGaming/fabritone)  
 [Vatuu](https://github.com/Vatuu) for [Discord Rpc](https://github.com/Vatuu/discord-rpc)  
+[G00fY2](https://github.com/G00fY2) for [Version Compare](https://github.com/G00fY2/version-compare)  
 The [Fabric Team](https://github.com/FabricMC) for [Fabric](https://github.com/FabricMC/fabric-loader) and [Yarn](https://github.com/FabricMC/yarn)
 
 ## License
