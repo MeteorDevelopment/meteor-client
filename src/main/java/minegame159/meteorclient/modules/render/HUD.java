@@ -703,7 +703,7 @@ public class HUD extends ToggleModule {
 
         if (position.get()) {
             double x1 = mc.gameRenderer.getCamera().getPos().x;
-            double y1 = mc.gameRenderer.getCamera().getPos().y;
+            double y1 = mc.gameRenderer.getCamera().getPos().y - mc.player.getEyeHeight(mc.player.getPose());
             double z1 = mc.gameRenderer.getCamera().getPos().z;
 
             if (mc.world.getRegistryKey().getValue().getPath().equals("overworld")) {
