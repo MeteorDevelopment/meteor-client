@@ -231,6 +231,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new AnchorAura());
         addModule(new TotemPopNotifier());
         addModule(new BowSpam());
+        addModule(new AutoTrap());
     }
 
     private void initPlayer() {
