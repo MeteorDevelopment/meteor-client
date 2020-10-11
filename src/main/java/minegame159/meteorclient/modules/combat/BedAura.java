@@ -307,6 +307,7 @@ public class BedAura extends ToggleModule {
                 }
             }
         }
+        if (bestBlock == null) return;
         double north = -1;
         double east = -1;
         double south = -1;
