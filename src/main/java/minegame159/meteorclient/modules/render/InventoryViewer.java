@@ -19,6 +19,13 @@ public class InventoryViewer extends ToggleModule {
     private final SettingGroup sgBackground = settings.createGroup("Background", "draw-background", "Draw inventory background.", true);
     private final SettingGroup sgX = settings.createGroup("X");
     private final SettingGroup sgY = settings.createGroup("Y");
+
+    private final Setting<Boolean> bgDark = sgBackground.add(new BoolSetting.Builder()
+            .name("background-dark")
+            .description("Draws inventory with dark background.")
+            .defaultValue(false)
+            .build()
+    );
     
     private final Setting<Boolean> bgTransparent = sgBackground.add(new BoolSetting.Builder()
             .name("background-transparent")
@@ -58,7 +65,9 @@ public class InventoryViewer extends ToggleModule {
     );
 
     private static final Identifier TEXTURE = new Identifier("meteor-client", "container_3x9.png");
+    private static final Identifier TEXTURE_DARK = new Identifier("meteor-client", "container_3x9-dark.png");
     private static final Identifier TEXTURE_TRANSPARENT = new Identifier("meteor-client", "container_3x9-transparent.png");
+    private static final Identifier TEXTURE_DARK_TRANSPARENT = new Identifier("meteor-client", "container_3x9-dark-transparent.png");
 
     private static final int WIDTH = 176;
     private static final int HEIGHT = 67;
@@ -90,8 +99,18 @@ public class InventoryViewer extends ToggleModule {
     }
 
     private void drawBackground(int x, int y) {
+        Identifier BACKGROUND = TEXTURE;
+        if (bgDark.get() && bgTransparent.get()){
+            BACKGROUND = TEXTURE_DARK_TRANSPARENT;
+        } else if(bgDark.get()){
+            BACKGROUND = TEXTURE_DARK;
+        } else if (bgTransparent.get()) {
+            BACKGROUND = TEXTURE_TRANSPARENT;
+        } else {
+            BACKGROUND = TEXTURE;
+        }
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        mc.getTextureManager().bindTexture(bgTransparent.get() ? TEXTURE_TRANSPARENT : TEXTURE);
+        mc.getTextureManager().bindTexture(BACKGROUND);
         DrawableHelper.drawTexture(Matrices.getMatrixStack(), x, y, 0, 0, 0, WIDTH, HEIGHT, HEIGHT, WIDTH);
     }
 
