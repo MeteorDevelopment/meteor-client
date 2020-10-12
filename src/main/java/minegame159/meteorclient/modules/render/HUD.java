@@ -14,6 +14,7 @@ import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.modules.combat.BedAura;
 import minegame159.meteorclient.modules.combat.CrystalAura;
 import minegame159.meteorclient.modules.combat.KillAura;
+import minegame159.meteorclient.modules.combat.AutoTrap;
 import minegame159.meteorclient.modules.combat.Surround;
 import minegame159.meteorclient.modules.misc.Timer;
 import minegame159.meteorclient.rendering.ShapeBuilder;
@@ -46,6 +47,7 @@ import net.minecraft.util.math.Direction;
 import org.apache.commons.lang3.StringUtils;
 import org.lwjgl.opengl.GL11;
 
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -58,10 +60,16 @@ public class HUD extends ToggleModule {
     }
     private static final Color white = new Color(255, 255, 255);
     private static final Color gray = new Color(185, 185, 185);
-    private static final Color red = new Color(225, 45, 45);
     private static final Color green = new Color(45, 225, 45);
+    private static final Color purple = new Color(120, 43, 153);
+    private static final Color red = new Color(225, 45, 45);
+    private static final Color amber = new Color(235, 158, 52);
+    private static final Color yellow = new Color(255, 255, 5);
+
+
 
     private final SettingGroup sgArmor = settings.createGroup("Armor", "armor-enabled", "Armor HUD", true);
+    private final SettingGroup sgTopCenter = settings.createGroup("Top Center");
     private final SettingGroup sgTopLeft = settings.createGroup("Top Left");
     private final SettingGroup sgMinimap = settings.createGroup("Minimap", "minimap-enabled", "Minimap.", true);
     private final SettingGroup sgTopRight = settings.createGroup("Top Right");
@@ -109,6 +117,17 @@ public class HUD extends ToggleModule {
             .defaultValue(false)
             .build()
     );
+
+    // Top Center
+
+    private final Setting<Boolean> serverLagNotifier = sgTopCenter.add(new BoolSetting.Builder()
+            .name("lag-notifier")
+            .description("Time since last tick.").defaultValue(true).build()
+    );
+
+    private final Setting<Boolean> userWelcome = sgTopCenter.add( new BoolSetting.Builder()
+            .name("user-welcome")
+            .description("Welcome message.").defaultValue(true).build());
 
     // Top Left
 
@@ -402,6 +421,7 @@ public class HUD extends ToggleModule {
     @EventHandler
     private final Listener<Render2DEvent> onRender2D = new Listener<>(event -> {
         MeteorClient.FONT.begin();
+        renderTopCenter(event);
         renderTopLeft(event);
         renderTopRight(event);
         renderBottomRight(event);
@@ -475,6 +495,30 @@ public class HUD extends ToggleModule {
         ShapeBuilder.triangle(2 + x * s, 2 + y * s, size * s, angle, color, false);
     }
 
+    private void renderTopCenter(Render2DEvent event) { if
+    (mc.options.debugEnabled) return;
+        int y = 4;
+        if (userWelcome.get()) {
+            drawInfoCenter("Welcome to Meteor Client, ", mc.player.getGameProfile().getName() + "!", y, white, purple);
+            y += MeteorClient.FONT.getHeight() + 4;
+        }
+
+        float timeSinceLastTick = TickRate.INSTANCE.getTimeSinceLastTick();
+
+
+
+        Color warningColor = red;
+        if (timeSinceLastTick > 10) warningColor = red;
+        else if (timeSinceLastTick > 3) warningColor = amber;
+        else warningColor = yellow;
+        if (serverLagNotifier.get()) {
+            if (timeSinceLastTick >= 1f) {
+                drawInfoCenter("Since last tick: ", String.format("%.1f", timeSinceLastTick), y, white, warningColor);
+                y += MeteorClient.FONT.getHeight() + 4;
+            }
+        }
+    }
+
     private void renderTopLeft(Render2DEvent event) {
         if (mc.options.debugEnabled) return;
         int y = 2;
@@ -543,17 +587,7 @@ public class HUD extends ToggleModule {
             drawInfo("TPS: ", String.format("%.1f", TickRate.INSTANCE.getTickRate()), y);
             y += MeteorClient.FONT.getHeight() + 2;
         }
-
-        float timeSinceLastTick = TickRate.INSTANCE.getTimeSinceLastTick();
-        if (serverLagNotifier.get()) {
-            if (timeSinceLastTick >= 1f) {
-                drawInfo("Since last tick: ", String.format("%.1f", timeSinceLastTick), y, red);
-                y += MeteorClient.FONT.getHeight() + 2;
-            }
-        }
-
-
-
+      
         if (speed.get()) {
             double tX = Math.abs(mc.player.getX() - mc.player.prevX);
             double tZ = Math.abs(mc.player.getZ() - mc.player.prevZ);
@@ -621,6 +655,8 @@ public class HUD extends ToggleModule {
             y += MeteorClient.FONT.getHeight() + 2;
             drawCombatInfo(Surround.class, "SR", y);
             y += MeteorClient.FONT.getHeight() + 2;
+            drawCombatInfo(AutoTrap.class, "AT", y);
+            y += MeteorClient.FONT.getHeight() + 2;
         }
     }
 
@@ -639,6 +675,15 @@ public class HUD extends ToggleModule {
     }
     private void drawInfo(String text1, String text2, double y) {
         drawInfo(text1, text2, y, white);
+    }
+
+    private void drawInfoCenter(String text1, String text2, double x, double y, Color text1Color, Color text2Color) {
+        MeteorClient.FONT.renderStringWithShadow(text1, x, y, text1Color);
+        MeteorClient.FONT.renderStringWithShadow(text2, x + MeteorClient.FONT.getStringWidth(text1), y, text2Color);
+    }
+
+    private void drawInfoCenter(String text1, String text2, double y, Color text1Color, Color text2Color) {
+        drawInfoCenter(text1, text2, mc.getWindow().getScaledWidth() / 2 - (MeteorClient.FONT.getStringWidth(text1)+MeteorClient.FONT.getStringWidth(text2))  / 2, y, text1Color, text2Color);
     }
     private void drawInfoRight(String text1, String text2, double y, Color text1Color) {
         drawInfo(text1, text2, mc.getWindow().getScaledWidth() - MeteorClient.FONT.getStringWidth(text1) - MeteorClient.FONT.getStringWidth(text2) - 2, y, text1Color);
