@@ -47,6 +47,7 @@ import net.minecraft.util.math.Direction;
 import org.apache.commons.lang3.StringUtils;
 import org.lwjgl.opengl.GL11;
 
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -59,8 +60,13 @@ public class HUD extends ToggleModule {
     }
     private static final Color white = new Color(255, 255, 255);
     private static final Color gray = new Color(185, 185, 185);
-    private static final Color red = new Color(225, 45, 45);
     private static final Color green = new Color(45, 225, 45);
+    private static final Color purple = new Color(120, 43, 153);
+    private static final Color red = new Color(225, 45, 45);
+    private static final Color amber = new Color(235, 158, 52);
+    private static final Color yellow = new Color(255, 255, 5);
+
+
 
     private final SettingGroup sgArmor = settings.createGroup("Armor", "armor-enabled", "Armor HUD", true);
     private final SettingGroup sgTopCenter = settings.createGroup("Top Center");
@@ -486,14 +492,21 @@ public class HUD extends ToggleModule {
     (mc.options.debugEnabled) return;
         int y = 4;
         if (userWelcome.get()) {
-            drawInfoCenter("Welcome to Meteor Client, ", mc.player.getGameProfile().getName(), y, white);
+            drawInfoCenter("Welcome to Meteor Client, ", mc.player.getGameProfile().getName() + "!", y, white, purple);
             y += MeteorClient.FONT.getHeight() + 4;
         }
 
         float timeSinceLastTick = TickRate.INSTANCE.getTimeSinceLastTick();
+
+
+
+        Color warningColor = red;
+        if (timeSinceLastTick > 10) warningColor = red;
+        else if (timeSinceLastTick > 3) warningColor = amber;
+        else warningColor = yellow;
         if (serverLagNotifier.get()) {
             if (timeSinceLastTick >= 1f) {
-                drawInfoCenter("Since last tick: ", String.format("%.1f", timeSinceLastTick), y, red);
+                drawInfoCenter("Since last tick: ", String.format("%.1f", timeSinceLastTick), y, white, warningColor);
                 y += MeteorClient.FONT.getHeight() + 4;
             }
         }
@@ -657,14 +670,14 @@ public class HUD extends ToggleModule {
         drawInfo(text1, text2, y, white);
     }
 
-    private void drawInfoCenter(String text1, String text2, double y, Color text1Color) {
-        drawInfo(text1, text2, mc.getWindow().getScaledWidth() / 2 - (MeteorClient.FONT.getStringWidth(text1)+MeteorClient.FONT.getStringWidth(text2))  / 2, y, text1Color);
+    private void drawInfoCenter(String text1, String text2, double x, double y, Color text1Color, Color text2Color) {
+        MeteorClient.FONT.renderStringWithShadow(text1, x, y, text1Color);
+        MeteorClient.FONT.renderStringWithShadow(text2, x + MeteorClient.FONT.getStringWidth(text1), y, text2Color);
     }
 
-    private void drawInfoCenter(String text1, String text2, double y) {
-        drawInfoCenter(text1, text2, y, white);
+    private void drawInfoCenter(String text1, String text2, double y, Color text1Color, Color text2Color) {
+        drawInfoCenter(text1, text2, mc.getWindow().getScaledWidth() / 2 - (MeteorClient.FONT.getStringWidth(text1)+MeteorClient.FONT.getStringWidth(text2))  / 2, y, text1Color, text2Color);
     }
-
     private void drawInfoRight(String text1, String text2, double y, Color text1Color) {
         drawInfo(text1, text2, mc.getWindow().getScaledWidth() - MeteorClient.FONT.getStringWidth(text1) - MeteorClient.FONT.getStringWidth(text2) - 2, y, text1Color);
     }
