@@ -7,6 +7,7 @@ import minegame159.meteorclient.events.PlayerMoveEvent;
 import minegame159.meteorclient.mixininterface.ILookBehavior;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.DoubleSetting;
@@ -61,7 +62,7 @@ public class Speed extends ToggleModule {
     }
 
     @EventHandler
-    private Listener<PlayerMoveEvent> onPlayerMove = new Listener<>(event -> {
+    private final Listener<PlayerMoveEvent> onPlayerMove = new Listener<>(event -> {
         if (event.type != MovementType.SELF || mc.player.isFallFlying() || mc.player.isClimbing() || mc.player.getVehicle() != null) return;
         if (!whenSneaking.get() && mc.player.isSneaking()) return;
         if (onlyOnGround.get() && !mc.player.isOnGround()) return;
@@ -113,6 +114,12 @@ public class Speed extends ToggleModule {
             double value = (mc.player.getStatusEffect(StatusEffects.SPEED).getAmplifier() + 1) * 0.205;
             velX += velX * value;
             velZ += velZ * value;
+        }
+
+        Anchor anchor = ModuleManager.INSTANCE.get(Anchor.class);
+        if (anchor.isActive() && anchor.controlMovement) {
+            velX = anchor.deltaX;
+            velZ = anchor.deltaZ;
         }
 
         ((IVec3d) event.movement).set(velX, event.movement.y, velZ);
