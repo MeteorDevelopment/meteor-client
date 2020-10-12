@@ -14,6 +14,7 @@ import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.modules.combat.BedAura;
 import minegame159.meteorclient.modules.combat.CrystalAura;
 import minegame159.meteorclient.modules.combat.KillAura;
+import minegame159.meteorclient.modules.combat.AutoTrap;
 import minegame159.meteorclient.modules.combat.Surround;
 import minegame159.meteorclient.modules.misc.Timer;
 import minegame159.meteorclient.rendering.ShapeBuilder;
@@ -620,6 +621,8 @@ public class HUD extends ToggleModule {
             drawCombatInfo(BedAura.class, "BA", y);
             y += MeteorClient.FONT.getHeight() + 2;
             drawCombatInfo(Surround.class, "SR", y);
+            y += MeteorClient.FONT.getHeight() + 2;
+            drawCombatInfo(AutoTrap.class, "AT", y);
             y += MeteorClient.FONT.getHeight() + 2;
         }
     }
