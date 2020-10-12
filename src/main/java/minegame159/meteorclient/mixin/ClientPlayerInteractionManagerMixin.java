@@ -1,13 +1,11 @@
 package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.events.AttackEntityEvent;
 import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.events.StartBreakingBlockEvent;
 import minegame159.meteorclient.mixininterface.IClientPlayerInteractionManager;
 import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.modules.combat.AntiFriendHit;
 import minegame159.meteorclient.modules.misc.Nuker;
 import minegame159.meteorclient.modules.player.Reach;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
@@ -40,7 +38,6 @@ public abstract class ClientPlayerInteractionManagerMixin implements IClientPlay
         MeteorClient.EVENT_BUS.post(event);
 
         if (event.isCancelled()) info.cancel();
-        if(target instanceof PlayerEntity &&  ModuleManager.INSTANCE.get(AntiFriendHit.class).isActive() && !FriendManager.INSTANCE.attack((PlayerEntity) target)) info.cancel();
     }
 
     @Inject(method = "attackBlock", at = @At("HEAD"), cancellable = true)

@@ -131,6 +131,13 @@ public class HUD extends ToggleModule {
 
     // Top Left
 
+
+    private final Setting<Boolean> serverLagNotifier = sgTopLeft.add(new BoolSetting.Builder()
+            .name("lag-notifier")
+            .description("Time since last tick.").defaultValue(true).build()
+    );
+
+
     private final Setting<Boolean> waterMark = sgTopLeft.add(new BoolSetting.Builder()
             .name("water-mark")
             .description("Water mark.")
@@ -580,7 +587,7 @@ public class HUD extends ToggleModule {
             drawInfo("TPS: ", String.format("%.1f", TickRate.INSTANCE.getTickRate()), y);
             y += MeteorClient.FONT.getHeight() + 2;
         }
-
+      
         if (speed.get()) {
             double tX = Math.abs(mc.player.getX() - mc.player.prevX);
             double tZ = Math.abs(mc.player.getZ() - mc.player.prevZ);
