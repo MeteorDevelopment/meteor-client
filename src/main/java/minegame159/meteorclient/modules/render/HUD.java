@@ -408,6 +408,7 @@ public class HUD extends ToggleModule {
     @EventHandler
     private final Listener<Render2DEvent> onRender2D = new Listener<>(event -> {
         MeteorClient.FONT.begin();
+        renderTopCenter(event);
         renderTopLeft(event);
         renderTopRight(event);
         renderBottomRight(event);
