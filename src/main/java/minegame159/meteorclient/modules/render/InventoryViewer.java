@@ -26,6 +26,13 @@ public class InventoryViewer extends ToggleModule {
             .defaultValue(false)
             .build()
     );
+
+    private final Setting<Boolean> bgFlat = sgBackground.add(new BoolSetting.Builder()
+            .name("background-flat")
+            .description("Draws inventory with flat background.")
+            .defaultValue(false)
+            .build()
+    );
     
     private final Setting<Boolean> bgTransparent = sgBackground.add(new BoolSetting.Builder()
             .name("background-transparent")
@@ -65,8 +72,10 @@ public class InventoryViewer extends ToggleModule {
     );
 
     private static final Identifier TEXTURE = new Identifier("meteor-client", "container_3x9.png");
-    private static final Identifier TEXTURE_DARK = new Identifier("meteor-client", "container_3x9-dark.png");
+    private static final Identifier TEXTURE_FLAT = new Identifier("meteor-client", "container_3x9-flat.png");
     private static final Identifier TEXTURE_TRANSPARENT = new Identifier("meteor-client", "container_3x9-transparent.png");
+    private static final Identifier TEXTURE_DARK = new Identifier("meteor-client", "container_3x9-dark.png");
+    private static final Identifier TEXTURE_DARK_FLAT = new Identifier("meteor-client", "container_3x9-dark-flat.png");
     private static final Identifier TEXTURE_DARK_TRANSPARENT = new Identifier("meteor-client", "container_3x9-dark-transparent.png");
 
     private static final int WIDTH = 176;
@@ -100,13 +109,22 @@ public class InventoryViewer extends ToggleModule {
 
     private void drawBackground(int x, int y) {
         Identifier BACKGROUND = TEXTURE;
-        if (bgDark.get() && bgTransparent.get()){
+        if (bgDark.get() && bgTransparent.get() && !bgFlat.get()){
             BACKGROUND = TEXTURE_DARK_TRANSPARENT;
-        } else if(bgDark.get()){
-            BACKGROUND = TEXTURE_DARK;
-        } else if (bgTransparent.get()) {
+        }
+        if (bgDark.get() && !bgTransparent.get() && bgFlat.get()){
+            BACKGROUND = TEXTURE_DARK_FLAT;
+        }
+        if (!bgDark.get() && bgTransparent.get() && bgFlat.get()){
             BACKGROUND = TEXTURE_TRANSPARENT;
-        } else {
+        }
+        if (!bgDark.get() && !bgTransparent.get() && bgFlat.get()){
+            BACKGROUND = TEXTURE_FLAT;
+        }
+        if (bgDark.get() && !bgTransparent.get() && !bgFlat.get()){
+            BACKGROUND = TEXTURE_DARK;
+        }
+        if (!bgDark.get() && !bgTransparent.get() && !bgFlat.get()){
             BACKGROUND = TEXTURE;
         }
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
