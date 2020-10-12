@@ -43,6 +43,9 @@ public class Anchor extends ToggleModule {
     private boolean wasInHole;
     private int holeX, holeZ;
 
+    public boolean controlMovement;
+    public double deltaX, deltaZ;
+
     public Anchor() {
         super(Category.Movement, "anchor", "Helps you get into holes.");
     }
@@ -55,6 +58,8 @@ public class Anchor extends ToggleModule {
 
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
+        controlMovement = false;
+
         int x = MathHelper.floor(mc.player.getX());
         int y = MathHelper.floor(mc.player.getY());
         int z = MathHelper.floor(mc.player.getZ());
@@ -88,8 +93,9 @@ public class Anchor extends ToggleModule {
         }
 
         if (foundHole) {
-            double deltaX = Utils.clamp(holeX - mc.player.getX(), -0.05, 0.05);
-            double deltaZ = Utils.clamp(holeZ - mc.player.getZ(), -0.05, 0.05);
+            controlMovement = true;
+            deltaX = Utils.clamp(holeX - mc.player.getX(), -0.05, 0.05);
+            deltaZ = Utils.clamp(holeZ - mc.player.getZ(), -0.05, 0.05);
 
             ((IVec3d) mc.player.getVelocity()).set(deltaX, mc.player.getVelocity().y, deltaZ);
         }
