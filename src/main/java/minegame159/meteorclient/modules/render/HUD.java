@@ -112,6 +112,13 @@ public class HUD extends ToggleModule {
 
     // Top Left
 
+
+    private final Setting<Boolean> serverLagNotifier = sgTopLeft.add(new BoolSetting.Builder()
+            .name("lag-notifier")
+            .description("Time since last tick.").defaultValue(true).build()
+    );
+
+
     private final Setting<Boolean> waterMark = sgTopLeft.add(new BoolSetting.Builder()
             .name("water-mark")
             .description("Water mark.")
@@ -538,10 +545,14 @@ public class HUD extends ToggleModule {
         }
 
         float timeSinceLastTick = TickRate.INSTANCE.getTimeSinceLastTick();
-        if (timeSinceLastTick >= 1f) {
-            drawInfo("Since last tick: ", String.format("%.1f", timeSinceLastTick), y, red);
-            y += MeteorClient.FONT.getHeight() + 2;
+        if (serverLagNotifier.get()) {
+            if (timeSinceLastTick >= 1f) {
+                drawInfo("Since last tick: ", String.format("%.1f", timeSinceLastTick), y, red);
+                y += MeteorClient.FONT.getHeight() + 2;
+            }
         }
+
+
 
         if (speed.get()) {
             double tX = Math.abs(mc.player.getX() - mc.player.prevX);
