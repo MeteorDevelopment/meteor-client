@@ -60,7 +60,7 @@ public class WTextBox extends WWidget {
             return true;
         }
 
-        if (key == GLFW.GLFW_KEY_V && mods == GLFW.GLFW_MOD_CONTROL && focused) {
+        if (key == GLFW.GLFW_KEY_V && (mods == GLFW.GLFW_MOD_CONTROL || mods == GLFW.GLFW_MOD_SUPER) && focused) {
             text += MinecraftClient.getInstance().keyboard.getClipboard();
             callAction();
             return true;
