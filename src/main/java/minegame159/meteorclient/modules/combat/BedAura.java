@@ -12,13 +12,16 @@ import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.DamageCalcUtils;
+import minegame159.meteorclient.utils.InvUtils;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.block.entity.BedBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BedItem;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
@@ -84,6 +87,13 @@ public class BedAura extends ToggleModule {
     private final Setting<Boolean> switchBack = sgGeneral.add(new BoolSetting.Builder()
             .name("switch-back")
             .description("Switches back to the previous slot after auto switching.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> autoMove = sgGeneral.add(new BoolSetting.Builder()
+            .name("auto-move")
+            .description("Moves beds into your last hotbar slot.")
             .defaultValue(false)
             .build()
     );
@@ -160,10 +170,12 @@ public class BedAura extends ToggleModule {
     private float preYaw;
     private double lastDamage = 0;
     private int direction = 0;
+    int preSlot = -1;
 
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
         delayLeft --;
+        preSlot = -1;
         if (mc.player.getHealth() + mc.player.getAbsorptionAmount() <= minHealth.get() && mode.get() != Mode.suicide) return;
         try {
             for (BlockEntity entity : mc.world.blockEntities) {
@@ -188,8 +200,46 @@ public class BedAura extends ToggleModule {
         if ((mc.player.getHealth() + mc.player.getAbsorptionAmount()) <= minHealth.get() && mode.get() != Mode.suicide)
             return;
         if (place.get() && (!(mc.player.getMainHandStack().getItem() instanceof BedItem)
-                && !(mc.player.getOffHandStack().getItem() instanceof BedItem)) && !autoSwitch.get()) return;
+                && !(mc.player.getOffHandStack().getItem() instanceof BedItem)) && !autoSwitch.get() && !autoMove.get()) return;
         if (place.get()) {
+            boolean doMove = true;
+            if (!(mc.player.getMainHandStack().getItem() instanceof BedItem)
+                    && !(mc.player.getOffHandStack().getItem() instanceof BedItem)){
+                if (autoMove.get()){
+                    for (int i = 0; i < 9; i++) {
+                        if (mc.player.inventory.getStack(i).getItem() instanceof BedItem) {
+                            doMove = false;
+                            break;
+                        }
+                    }
+                    if (doMove){
+                        int slot = -1;
+                        for (int i = 0; i < mc.player.inventory.main.size(); i++){
+                            ItemStack itemStack = mc.player.inventory.main.get(i);
+                            if (itemStack.getItem() instanceof BedItem){
+                                slot = i;
+                            }
+                        }
+                        InvUtils.clickSlot(InvUtils.invIndexToSlotId(8), 0, SlotActionType.PICKUP);
+                        InvUtils.clickSlot(InvUtils.invIndexToSlotId(slot), 0, SlotActionType.PICKUP);
+                        InvUtils.clickSlot(InvUtils.invIndexToSlotId(8), 0, SlotActionType.PICKUP);
+                    }
+                }
+                if (autoSwitch.get()){
+                    for (int i = 0; i < 9; i++) {
+                        if (mc.player.inventory.getStack(i).getItem() instanceof BedItem) {
+                            preSlot = mc.player.inventory.selectedSlot;
+                            mc.player.inventory.selectedSlot = i;
+                            break;
+                        }
+                    }
+                }
+
+            }
+            if (!(mc.player.getMainHandStack().getItem() instanceof BedItem)
+                    && !(mc.player.getOffHandStack().getItem() instanceof BedItem)){
+                return;
+            }
             Iterator<AbstractClientPlayerEntity> validEntities = mc.world.getPlayers().stream()
                     .filter(FriendManager.INSTANCE::attack)
                     .filter(entityPlayer -> !entityPlayer.getDisplayName().equals(mc.player.getDisplayName()))
@@ -226,15 +276,6 @@ public class BedAura extends ToggleModule {
 
     private void placeBlock(){
         bestBlockPos = new BlockPos(bestBlock.x, bestBlock.y, bestBlock.z);
-        int preSlot = -1;
-        if (autoSwitch.get()) {
-            for (int i = 0; i < 9; i++) {
-                if (mc.player.inventory.getStack(i).getItem() instanceof BedItem) {
-                    preSlot = mc.player.inventory.selectedSlot;
-                    mc.player.inventory.selectedSlot = i;
-                }
-            }
-        }
         Hand hand = Hand.MAIN_HAND;
         if (!(mc.player.getMainHandStack().getItem() instanceof BedItem) && mc.player.getOffHandStack().getItem() instanceof BedItem) {
             hand = Hand.OFF_HAND;
