@@ -134,7 +134,7 @@ public class Spam extends ToggleModule {
 
         if (tag.contains("messages")) {
             ListTag messagesTag = tag.getList("messages", 8);
-            for (Tag messageTag : messagesTag) messages.add(messageTag.toString());
+            for (Tag messageTag : messagesTag) messages.add(messageTag.asString());
         } else {
             messages.add("Meteor on Crack!");
         }
