@@ -28,6 +28,7 @@ public class AutoTrap extends ToggleModule {
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
         obsidianSlot = -1;
+        target = null;
         for(int i = 0; i < 9; i++){
             if (mc.player.inventory.getStack(i).getItem() == Blocks.OBSIDIAN.asItem()){
                 obsidianSlot = i;
@@ -43,6 +44,7 @@ public class AutoTrap extends ToggleModule {
                 target = player;
             }
         }
+        if (target == null) return;
         if (mc.player.distanceTo(target) < 4){
             prevSlot = mc.player.inventory.selectedSlot;
             mc.player.inventory.selectedSlot = obsidianSlot;
