@@ -314,6 +314,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new NoRender());
         addModule(new Breadcrumbs());
         addModule(new BlockSelection());
+        addModule(new MeteorShower());
     }
 
     private void initMisc() {
