@@ -74,6 +74,7 @@ public class HUD extends ToggleModule {
     private final SettingGroup sgMinimap = settings.createGroup("Minimap", "minimap-enabled", "Minimap.", true);
     private final SettingGroup sgTopRight = settings.createGroup("Top Right");
     private final SettingGroup sgBottomRight = settings.createGroup("Bottom Right");
+    private final SettingGroup sgPlayerModel = settings.createGroup("Player Model");
 
     // Armor
 
@@ -302,6 +303,15 @@ public class HUD extends ToggleModule {
             .build()
     );
 
+    // Player Model
+
+    private final Setting<Boolean> playerModel = sgPlayerModel.add(new BoolSetting.Builder()
+            .name("Player Model")
+            .description("Render mini me player model.")
+            .defaultValue(true)
+            .build()
+    );
+
     private final HashMap<String, EntityInfo> entityCounts = new HashMap<>();
     private int maxLetterCount = 0;
     private boolean updateEntities;
@@ -511,6 +521,11 @@ public class HUD extends ToggleModule {
             }
         }
     }
+
+    public boolean playerModel() {
+        return isActive() && playerModel.get();
+    }
+
 
     private void renderTopLeft(Render2DEvent event) {
         if (mc.options.debugEnabled) return;

@@ -7,6 +7,7 @@ import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.render.HUD;
 import minegame159.meteorclient.modules.render.NoRender;
+import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.util.math.MatrixStack;
@@ -19,6 +20,10 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.render.entity.EntityRenderDispatcher;
 
 @Mixin(InGameHud.class)
 public abstract class InGameHudMixin {
@@ -74,5 +79,35 @@ public abstract class InGameHudMixin {
     @Inject(method = "renderScoreboardSidebar", at = @At("HEAD"), cancellable = true)
     private void onRenderScoreboardSidebar(MatrixStack matrixStack, ScoreboardObjective scoreboardObjective, CallbackInfo info) {
         if (ModuleManager.INSTANCE.get(NoRender.class).noScoreboard()) info.cancel();
+    }
+
+    @Inject(method="render", at=@At("RETURN"))
+    public void renderPlayerModel(MatrixStack matrices, float f, CallbackInfo ci) {
+        if (ModuleManager.INSTANCE.get(HUD.class).playerModel()) {
+            if (this.client.options.debugEnabled || this.client.options.hudHidden) {
+                return;
+            }
+            ClientPlayerEntity player = this.client.player;
+            EntityRenderDispatcher entityRenderDispatcher = this.client.getEntityRenderDispatcher();
+            MatrixStack matrixStack = new MatrixStack();
+
+            RenderSystem.pushMatrix();
+            boolean entityShadows = entityRenderDispatcher.gameOptions.entityShadows;
+            boolean change_swim_fly = true;
+            boolean dynamic_scale = false;
+            float glY = (float) 10 + (20.0f + (float) 50 / 2.0f);
+            float glX = (float) 10 + 20.0f;
+            int scaleY = MathHelper.ceil((float) 50 / (dynamic_scale ? player.getHeight() : 2.0f));
+            int scaleX = MathHelper.ceil((float) 25 / (dynamic_scale ? player.getWidth() : 1.0f));
+            float scale = Math.min(scaleX, scaleY) * -1.0f;
+            RenderSystem.translatef(glX, glY - (change_swim_fly && (player.isSwimming() || player.isFallFlying()) ? (float) 50 / 2.0f : 0.0f), 50.0f);
+            matrixStack.scale(scale, scale, scale);
+            entityRenderDispatcher.setRenderShadows(false);
+            VertexConsumerProvider.Immediate immediate = this.client.getBufferBuilders().getEntityVertexConsumers();
+            entityRenderDispatcher.render(player, 0.0, 0.0, 0.0, 0.0f, 1.0f, matrixStack, immediate, 0xF000F0);
+            immediate.draw();
+            entityRenderDispatcher.setRenderShadows(entityShadows);
+            RenderSystem.popMatrix();
+        }
     }
 }
