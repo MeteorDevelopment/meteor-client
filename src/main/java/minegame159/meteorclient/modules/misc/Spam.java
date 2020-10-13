@@ -54,6 +54,8 @@ public class Spam extends ToggleModule {
 
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
+        if (messages.isEmpty()) return;
+
         if (timer <= 0) {
             int i;
             if (random.get()) {
