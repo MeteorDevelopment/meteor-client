@@ -141,7 +141,7 @@ public class InventoryViewer extends ToggleModule {
                 break;
             case FLAT:
                 ShapeBuilder.begin(null, GL11.GL_TRIANGLES, VertexFormats.POSITION_COLOR);
-                ShapeBuilder.quad(posX +7, posY + 6, 0, posX + 169, posY + 6, 0, posX + 169, posY + 60, 0, posX + 7, posY + 60, 0, flatBgColor.get());
+                ShapeBuilder.quad(posX + 6, posY + 6, WIDTH - 12, HEIGHT - 12, flatBgColor.get());
                 ShapeBuilder.end();
         }
     }

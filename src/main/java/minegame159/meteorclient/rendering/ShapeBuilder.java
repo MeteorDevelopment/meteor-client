@@ -38,6 +38,32 @@ public class ShapeBuilder {
         triangles.pos(x4, y4, z4).color(color).endVertex();
     }
 
+    public static void quad(double x, double y, double width, double height, Color color) {
+        quad(x, y, 0, x + width, y, 0, x + width, y + height, 0, x, y + height, 0, color);
+    }
+
+    public static void quad(double x, double y, double width, double height, double rotation, Color color) {
+        double cos = Math.cos(Math.toRadians(rotation));
+        double sin = Math.sin(Math.toRadians(rotation));
+
+        double oX = x + width / 2;
+        double oY = y + height / 2;
+
+        double _x1 = ((x - oX) * cos) - ((y - oY) * sin) + oX;
+        double _y1 = ((y - oY) * cos) + ((x - oX) * sin) + oY;
+
+        double _x2 = ((x + width - oX) * cos) - ((y - oY) * sin) + oX;
+        double _y2 = ((y - oY) * cos) + ((x + width - oX) * sin) + oY;
+
+        double _x3 = ((x + width - oX) * cos) - ((y + height - oY) * sin) + oX;
+        double _y3 = ((y + height - oY) * cos) + ((x + width - oX) * sin) + oY;
+
+        double _x4 = ((x - oX) * cos) - ((y + height - oY) * sin) + oX;
+        double _y4 = ((y + height - oY) * cos) + ((x - oX) * sin) + oY;
+
+        quad(_x1, _y1, 0, _x2, _y2, 0, _x3, _y3, 0, _x4, _y4, 0, color);
+    }
+
     public static void texQuad(double x, double y, double width, double height, double srcX, double srcY, double srcWidth, double srcHeight, Color color1, Color color2, Color color3, Color color4) {
         triangles.pos(x, y, 0).texture(srcX, srcY).color(color1).endVertex();
         triangles.pos(x + width, y, 0).texture(srcX + srcWidth, srcY).color(color2).endVertex();
