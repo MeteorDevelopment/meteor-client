@@ -25,15 +25,22 @@ public class AirJump extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> onHold = sgGeneral.add(new BoolSetting.Builder()
+            .name("on-hold")
+            .description("Whether to jump when you hold jump as well as when you press.")
+            .defaultValue(true)
+            .build()
+    );
+
     private int level = 0;
 
     @EventHandler
     private final Listener<KeyEvent> onKey = new Listener<>(event -> {
-        if ((event.action == KeyAction.Press || event.action == KeyAction.Repeat) && mc.options.keyJump.matchesKey(event.key, 0)) {
+        if ((event.action == KeyAction.Press || (event.action == KeyAction.Repeat && onHold.get())) && mc.options.keyJump.matchesKey(event.key, 0)) {
             mc.player.jump();
             level = mc.player.getBlockPos().getY();
         }
-        if ((event.action == KeyAction.Press || event.action == KeyAction.Repeat) && mc.options.keySneak.matchesKey(event.key, 0)){
+        if ((event.action == KeyAction.Press || (event.action == KeyAction.Repeat && onHold.get())) && mc.options.keySneak.matchesKey(event.key, 0)){
             level -= 1;
         }
     });
