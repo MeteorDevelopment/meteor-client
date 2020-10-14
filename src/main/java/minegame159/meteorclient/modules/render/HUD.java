@@ -19,10 +19,7 @@ import minegame159.meteorclient.modules.combat.Surround;
 import minegame159.meteorclient.modules.misc.Timer;
 import minegame159.meteorclient.rendering.ShapeBuilder;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.Chat;
-import minegame159.meteorclient.utils.Color;
-import minegame159.meteorclient.utils.EntityUtils;
-import minegame159.meteorclient.utils.TickRate;
+import minegame159.meteorclient.utils.*;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.client.render.DiffuseLighting;
@@ -46,7 +43,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import org.apache.commons.lang3.StringUtils;
 import org.lwjgl.opengl.GL11;
-
+import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -74,6 +71,7 @@ public class HUD extends ToggleModule {
     private final SettingGroup sgMinimap = settings.createGroup("Minimap", "minimap-enabled", "Minimap.", true);
     private final SettingGroup sgTopRight = settings.createGroup("Top Right");
     private final SettingGroup sgBottomRight = settings.createGroup("Bottom Right");
+    private final SettingGroup sgPlayerModel = settings.createGroup("Player Model");
 
     // Armor
 
@@ -302,6 +300,59 @@ public class HUD extends ToggleModule {
             .build()
     );
 
+    // Player Model
+
+    private final Setting<Boolean> playerModel = sgPlayerModel.add(new BoolSetting.Builder()
+            .name("Player Model")
+            .description("Render mini player model.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Boolean> background = sgPlayerModel.add(new BoolSetting.Builder()
+            .name("render-background")
+            .description("Render a background behind the player model.")
+            .defaultValue(true)
+            .build()
+    );
+
+    public final Setting<Color> bgColor = sgPlayerModel.add(new ColorSetting.Builder()
+            .name("background-color")
+            .description("Background color.")
+            .defaultValue(new Color(0, 0, 0, 30))
+            .build()
+    );
+
+    private final Setting<AlignmentX> xAlignment = sgPlayerModel.add(new EnumSetting.Builder<AlignmentX>()
+            .name("x-alignment")
+            .description("X alignment.")
+            .defaultValue(AlignmentX.Left)
+            .build()
+    );
+
+    private final Setting<Integer> xOffset = sgPlayerModel.add(new IntSetting.Builder()
+            .name("x-offset")
+            .description("X offset.")
+            .defaultValue(3)
+            .sliderMax(200)
+            .build()
+    );
+
+    private final Setting<AlignmentY> yAlignment = sgPlayerModel.add(new EnumSetting.Builder<AlignmentY>()
+            .name("y-alignment")
+            .description("Y alignment.")
+            .defaultValue(AlignmentY.Bottom)
+            .build()
+    );
+
+    private final Setting<Integer> yOffset = sgPlayerModel.add(new IntSetting.Builder()
+            .name("y-offset")
+            .description("Y offset.")
+            .defaultValue(3)
+            .sliderMax(200)
+            .build()
+    );
+
     private final HashMap<String, EntityInfo> entityCounts = new HashMap<>();
     private int maxLetterCount = 0;
     private boolean updateEntities;
@@ -414,6 +465,7 @@ public class HUD extends ToggleModule {
     @EventHandler
     private final Listener<Render2DEvent> onRender2D = new Listener<>(event -> {
         MeteorClient.FONT.begin();
+        renderPlayerModel(event);
         renderTopCenter(event);
         renderTopLeft(event);
         renderTopRight(event);
@@ -511,6 +563,61 @@ public class HUD extends ToggleModule {
             }
         }
     }
+
+    public void renderPlayerModel(Render2DEvent event) {
+        if (playerModel.get()) {
+            int posX = getX(mc.getWindow().getScaledWidth());
+            int posY = getY(mc.getWindow().getScaledHeight());
+            if (background.get()) {
+                ShapeBuilder.begin(null, GL11.GL_TRIANGLES, VertexFormats.POSITION_COLOR);
+                ShapeBuilder.quad(posX, posY, 0, posX + WIDTH, posY, 0, posX + WIDTH, posY + HEIGHT, 0, posX, posY + HEIGHT, 0, bgColor.get());
+                ShapeBuilder.end();
+            }
+            InventoryScreen.drawEntity(posX + 25, posY + 66, 30, 0, 0, mc.player);
+
+/* This is the other method of rendering the player which includes yeaw headYaw and pitch so ill leave it here for now
+            EntityRenderDispatcher entityRenderDispatcher = mc.getEntityRenderDispatcher();
+            MatrixStack matrixStack = new MatrixStack();
+            RenderSystem.pushMatrix();
+            boolean entityShadows = entityRenderDispatcher.gameOptions.entityShadows;
+            float glY = (float) 10 + (20.0f + (float) 50 / 2.0f);
+            float glX = (float) 10 + 20.0f;
+            int scaleY = MathHelper.ceil((float) 50 / (mc.player.getHeight()));
+            int scaleX = MathHelper.ceil((float) 25 / (mc.player.getWidth()));
+            float scale = Math.min(scaleX, scaleY) * -1.0f;
+            RenderSystem.translatef(glX, glY - ((mc.player.isSwimming() || mc.player.isFallFlying()) ? (float) 50 / 2.0f : 0.0f), 50.0f);
+            matrixStack.scale(scale, scale, scale);
+            entityRenderDispatcher.setRenderShadows(false);
+            VertexConsumerProvider.Immediate immediate = mc.getBufferBuilders().getEntityVertexConsumers();
+            entityRenderDispatcher.render(mc.player, -posX, -posY, 0.0, 0.0f, 1.0f, matrixStack, immediate, 0xF000F0);
+            immediate.draw();
+            entityRenderDispatcher.setRenderShadows(entityShadows);
+            RenderSystem.popMatrix();
+*/
+        }
+    }
+
+    private static final int WIDTH = 51;
+    private static final int HEIGHT = 75;
+
+    private int getX(int screenWidth) {
+        switch (xAlignment.get()) {
+            case Left:   return xOffset.get();
+            case Center: return screenWidth / 2 - WIDTH / 2 + xOffset.get();
+            case Right:  return screenWidth - WIDTH - xOffset.get();
+            default:     return 0;
+        }
+    }
+
+    private int getY(int screenHeight) {
+        switch (yAlignment.get()) {
+            case Top:    return yOffset.get();
+            case Center: return screenHeight / 2 - HEIGHT / 2 + yOffset.get();
+            case Bottom: return screenHeight - HEIGHT - yOffset.get();
+            default:     return 0;
+        }
+    }
+
 
     private void renderTopLeft(Render2DEvent event) {
         if (mc.options.debugEnabled) return;
