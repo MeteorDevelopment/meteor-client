@@ -532,7 +532,7 @@ public class HUD extends ToggleModule {
 
     private void renderMMQuad(double x, double y, double width, double height, Color color) {
         double s = mmScale.get();
-        ShapeBuilder.quad(2 + x * s, 2 + y * s, 0, 2 + (x + width) * s, 2 + y * s, 0, 2 + (x + width) * s, 2 + (y + height) * s, 0, 2 + x * s, 2 + (y + height) * s, 0, color);
+        ShapeBuilder.quad(2 + x * s, 2 + y * s, width * s, height * s, color);
     }
 
     private void renderMMTriangle(double x, double y, double size, double angle, Color color) {
@@ -570,7 +570,7 @@ public class HUD extends ToggleModule {
             int posY = getY(mc.getWindow().getScaledHeight());
             if (background.get()) {
                 ShapeBuilder.begin(null, GL11.GL_TRIANGLES, VertexFormats.POSITION_COLOR);
-                ShapeBuilder.quad(posX, posY, 0, posX + WIDTH, posY, 0, posX + WIDTH, posY + HEIGHT, 0, posX, posY + HEIGHT, 0, bgColor.get());
+                ShapeBuilder.quad(posX, posY, WIDTH, HEIGHT, bgColor.get());
                 ShapeBuilder.end();
             }
             InventoryScreen.drawEntity(posX + 25, posY + 66, 30, 0, 0, mc.player);
