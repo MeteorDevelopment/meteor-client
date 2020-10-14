@@ -54,6 +54,8 @@ public class Spam extends ToggleModule {
 
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
+        if (messages.isEmpty()) return;
+
         if (timer <= 0) {
             int i;
             if (random.get()) {
@@ -132,7 +134,7 @@ public class Spam extends ToggleModule {
 
         if (tag.contains("messages")) {
             ListTag messagesTag = tag.getList("messages", 8);
-            for (Tag messageTag : messagesTag) messages.add(messageTag.toString());
+            for (Tag messageTag : messagesTag) messages.add(messageTag.asString());
         } else {
             messages.add("Meteor on Crack!");
         }
