@@ -309,10 +309,17 @@ public class HUD extends ToggleModule {
             .build()
     );
 
-    public final Setting<Color> flatBgColor = sgPlayerModel.add(new ColorSetting.Builder()
-            .name("flat-background-color")
-            .description("Flat background color.")
-            .defaultValue(new Color(0, 0, 0, 64))
+    private final Setting<Boolean> background = sgPlayerModel.add(new BoolSetting.Builder()
+            .name("render-background")
+            .description("Render a background behind the player model.")
+            .defaultValue(true)
+            .build()
+    );
+
+    public final Setting<Color> bgColor = sgPlayerModel.add(new ColorSetting.Builder()
+            .name("background-color")
+            .description("Background color.")
+            .defaultValue(new Color(0, 0, 0, 30))
             .build()
     );
 
@@ -457,8 +464,8 @@ public class HUD extends ToggleModule {
 
     @EventHandler
     private final Listener<Render2DEvent> onRender2D = new Listener<>(event -> {
-        renderPlayerModel(event);
         MeteorClient.FONT.begin();
+        renderPlayerModel(event);
         renderTopCenter(event);
         renderTopLeft(event);
         renderTopRight(event);
@@ -561,12 +568,14 @@ public class HUD extends ToggleModule {
         if (playerModel.get()) {
             int posX = getX(mc.getWindow().getScaledWidth());
             int posY = getY(mc.getWindow().getScaledHeight());
-            InventoryScreen.drawEntity(posX + 51, posY + 75, 30, 0, 0, mc.player);
-/*
-            ShapeBuilder.begin(null, GL11.GL_TRIANGLES, VertexFormats.POSITION_COLOR);
-            ShapeBuilder.quad(posX, posY, 0, posX + WIDTH, posY, 0, posX + WIDTH, posY + HEIGHT, 0, posX, posY + HEIGHT, 0, white);
-            ShapeBuilder.end();
+            if (background.get()) {
+                ShapeBuilder.begin(null, GL11.GL_TRIANGLES, VertexFormats.POSITION_COLOR);
+                ShapeBuilder.quad(posX, posY, 0, posX + WIDTH, posY, 0, posX + WIDTH, posY + HEIGHT, 0, posX, posY + HEIGHT, 0, bgColor.get());
+                ShapeBuilder.end();
+            }
+            InventoryScreen.drawEntity(posX + 25, posY + 66, 30, 0, 0, mc.player);
 
+/* This is the other method of rendering the player which includes yeaw headYaw and pitch so ill leave it here for now
             EntityRenderDispatcher entityRenderDispatcher = mc.getEntityRenderDispatcher();
             MatrixStack matrixStack = new MatrixStack();
             RenderSystem.pushMatrix();
