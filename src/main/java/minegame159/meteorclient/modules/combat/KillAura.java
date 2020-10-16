@@ -1,6 +1,9 @@
 package minegame159.meteorclient.modules.combat;
 
-//Updated by squidoodly 14/07/2020
+/**
+ * Updated by squidoodly 14/07/2020
+ * Updated by Sigha 16/10/2020 (ty seasnail & MineGame159 for help)
+*/
 
 import baritone.api.BaritoneAPI;
 import com.google.common.collect.Streams;
@@ -19,10 +22,12 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.AxeItem;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
+import net.minecraft.item.SwordItem;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +39,13 @@ public class KillAura extends ToggleModule {
         HighestDistance,
         LowestHealth,
         HighestHealth
+    }
+
+    public enum OnlyWhen {
+        AXE,
+        SWORD,
+        AXEORSWORD,
+        ANY
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -134,6 +146,15 @@ public class KillAura extends ToggleModule {
             .name("one-tick-delay")
             .description("Adds one tick delay.")
             .defaultValue(true)
+            .build()
+    );
+
+
+
+    private final Setting<OnlyWhen> itemOnly = sgGeneral.add(new EnumSetting.Builder<OnlyWhen>()
+            .name("Item-only")
+            .description("Only hits an entity when the specified item is in your hand. (or any item)")
+            .defaultValue(OnlyWhen.ANY)
             .build()
     );
 
@@ -249,9 +270,27 @@ public class KillAura extends ToggleModule {
         return true;
     }
 
+
+    private boolean itemInHand(){
+        switch(itemOnly.get()){
+            case AXE:
+                return mc.player.getMainHandStack().getItem() instanceof AxeItem;
+            case SWORD:
+                return mc.player.getMainHandStack().getItem() instanceof SwordItem;
+            case AXEORSWORD:
+                return mc.player.getMainHandStack().getItem() instanceof AxeItem || mc.player.getMainHandStack().getItem() instanceof SwordItem;
+            default:
+                return true;
+        }
+
+    }
+
+
+
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
         if (mc.player.getHealth() <= 0) return;
+        if (!itemInHand()) return;
 
         if(entity == null && wasPathing){
             BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume");
