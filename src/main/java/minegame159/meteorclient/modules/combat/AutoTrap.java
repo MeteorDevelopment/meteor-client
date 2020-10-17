@@ -49,24 +49,28 @@ public class AutoTrap extends ToggleModule {
             prevSlot = mc.player.inventory.selectedSlot;
             mc.player.inventory.selectedSlot = obsidianSlot;
             targetPos = target.getBlockPos().up();
-            if(mc.world.getBlockState(targetPos.add(1, 0, 0)).isAir()){
+            if(mc.world.getBlockState(targetPos.add(1, 0, 0)).getMaterial().isReplaceable()){
                 mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(target.getPos().add(1, 0, 0), Direction.UP, targetPos.add(1, 0, 0), false));
                 mc.player.swingHand(Hand.MAIN_HAND);
             }
-            if(mc.world.getBlockState(targetPos.add(-1, 0, 0)).isAir()){
+            if(mc.world.getBlockState(targetPos.add(-1, 0, 0)).getMaterial().isReplaceable()){
                 mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(target.getPos().add(-1, 0, 0), Direction.UP, targetPos.add(-1, 0, 0), false));
                 mc.player.swingHand(Hand.MAIN_HAND);
             }
-            if(mc.world.getBlockState(targetPos.add(0, 0, 1)).isAir()){
+            if(mc.world.getBlockState(targetPos.add(0, 0, 1)).getMaterial().isReplaceable()){
                 mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(target.getPos().add(0, 0, 1), Direction.UP, targetPos.add(0, 0, 1), false));
                 mc.player.swingHand(Hand.MAIN_HAND);
             }
-            if(mc.world.getBlockState(targetPos.add(0, 0, -1)).isAir()){
+            if(mc.world.getBlockState(targetPos.add(0, 0, -1)).getMaterial().isReplaceable()){
                 mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(target.getPos().add(0, 0, -1), Direction.UP, targetPos.add(0, 0, -1), false));
                 mc.player.swingHand(Hand.MAIN_HAND);
             }
-            if(mc.world.getBlockState(targetPos.add(0, 1, 0)).isAir()){
+            if(mc.world.getBlockState(targetPos.add(0, 1, 0)).getMaterial().isReplaceable()){
                 mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(target.getPos().add(0, 1, 0), Direction.UP, targetPos.add(0, 1, 0), false));
+                mc.player.swingHand(Hand.MAIN_HAND);
+            }
+            if(mc.world.getBlockState(targetPos.add(0, -2, 0)).getMaterial().isReplaceable()){
+                mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(target.getPos().add(0, -2, 0), Direction.UP, targetPos.add(0, 1, 0), false));
                 mc.player.swingHand(Hand.MAIN_HAND);
             }
             mc.player.inventory.selectedSlot = prevSlot;
