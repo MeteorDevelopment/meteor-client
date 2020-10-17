@@ -21,6 +21,7 @@ import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.Items;
 import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 
@@ -84,6 +85,7 @@ public class EChestFarmer extends ToggleModule {
                 }
             }
             if (slot != -1 && itemResult.slot != -1 && itemResult.slot < 9) {
+                if (mc.crosshairTarget.getType() != HitResult.Type.BLOCK) return;
                 BlockPos pos = ((BlockHitResult) mc.crosshairTarget).getBlockPos();
                 if(mc.world.getBlockState(pos).getBlock() == Blocks.ENDER_CHEST){
                     if (mc.player.inventory.selectedSlot != slot) {
