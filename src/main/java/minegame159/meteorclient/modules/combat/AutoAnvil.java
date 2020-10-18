@@ -7,10 +7,7 @@ import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
-import minegame159.meteorclient.settings.DoubleSetting;
-import minegame159.meteorclient.settings.IntSetting;
-import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.settings.*;
 import net.minecraft.client.gui.screen.ingame.AnvilScreen;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -45,6 +42,13 @@ public class AutoAnvil extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> placeButton = sgGeneral.add(new BoolSetting.Builder()
+            .name("place-button")
+            .description("Auto places a button beneath the target.")
+            .defaultValue(false)
+            .build()
+    );
+
     public AutoAnvil() {
         super(Category.Combat, "auto-anvil", "Automatically places anvils above players.");
     }
@@ -69,6 +73,17 @@ public class AutoAnvil extends ToggleModule {
         }
         if (anvilSlot == -1) return;
 
+        int buttonSlot = -1;
+        for (int i = 0; i < 9; i++) {
+            Item item = mc.player.inventory.getStack(i).getItem();
+
+            if (item == Items.ACACIA_BUTTON || item == Items.OAK_BUTTON || item == Items.STONE_BUTTON || item == Items.SPRUCE_BUTTON || item == Items.BIRCH_BUTTON || item == Items.BIRCH_BUTTON || item == Items.JUNGLE_BUTTON || item == Items.DARK_OAK_BUTTON || item == Items.CRIMSON_BUTTON || item == Items.WARPED_BUTTON || item == Items.POLISHED_BLACKSTONE_BUTTON) {
+                buttonSlot = i;
+                break;
+            }
+        }
+        if (buttonSlot == -1) return;
+
         if (target != null) {
             if (mc.player.distanceTo(target) > range.get() || !target.isAlive()) target = null;
             if (mc.player.currentScreenHandler instanceof AnvilScreenHandler) mc.player.closeScreen();
@@ -86,6 +101,16 @@ public class AutoAnvil extends ToggleModule {
 
         if (target != null) {
             int prevSlot = mc.player.inventory.selectedSlot;
+
+            if (placeButton.get()) {
+                mc.player.inventory.selectedSlot = buttonSlot;
+                BlockPos targetPos = target.getBlockPos();
+                if (mc.world.getBlockState(targetPos.add(0, 0, 0)).isAir()) {
+                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(target.getPos(), Direction.DOWN, target.getBlockPos(), true));
+                    mc.player.swingHand(Hand.MAIN_HAND);
+                }
+            }
+
             mc.player.inventory.selectedSlot = anvilSlot;
             BlockPos targetPos = target.getBlockPos().up();
 
