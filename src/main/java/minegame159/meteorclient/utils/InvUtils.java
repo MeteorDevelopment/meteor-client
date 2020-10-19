@@ -21,7 +21,7 @@ public class InvUtils {
         findItemResult.slot = -1;
         findItemResult.count = 0;
 
-        for (int i = 0; i < 4 * 9; i++) {
+        for (int i = 0; i < mc.player.inventory.size(); i++) {
             ItemStack itemStack = mc.player.inventory.getStack(i);
 
             if (itemStack.getItem() == item) {
@@ -34,7 +34,7 @@ public class InvUtils {
     }
 
     public static int findItem(Item item, Predicate<ItemStack> isGood) {
-        for (int i = 0; i < 4 * 9; i++) {
+        for (int i = 0; i < mc.player.inventory.size(); i++) {
             ItemStack itemStack = mc.player.inventory.getStack(i);
             if (itemStack.getItem() == item && isGood.test(itemStack)) return i;
         }
