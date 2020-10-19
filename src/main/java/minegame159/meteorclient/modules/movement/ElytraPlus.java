@@ -19,14 +19,27 @@ import net.minecraft.item.ElytraItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
+import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.math.Vec3d;
 
 public class ElytraPlus extends ToggleModule {
+    public enum Mode{
+        Normal,
+        Packet
+    }
+
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgAutopilot = settings.createGroup("Autopilot", "autopilot", "Automatically flies forward maintaining minimum height.", false, settingGroup -> {
         if (isActive() && !settingGroup.isEnabled()) ((IKeyBinding) mc.options.keyForward).setPressed(false);
     });
+
+    private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
+            .name("mode")
+            .description("The mode used to make you fly.")
+            .defaultValue(Mode.Normal)
+            .build()
+    );
     
     private final Setting<Boolean> autoTakeOff = sgGeneral.add(new BoolSetting.Builder()
             .name("auto-take-off")
@@ -207,6 +220,24 @@ public class ElytraPlus extends ToggleModule {
                     }
                 }
             }
+        }
+        if (mode.get() == Mode.Packet && mc.player.inventory.getArmorStack(2).getItem() == Items.ELYTRA && mc.player.fallDistance > 0.2 && !mc.options.keySneak.isPressed()) {
+            Vec3d vec3d = new Vec3d(0, 0, 0);
+            if (mc.options.keyForward.isPressed()){
+                vec3d.add(0, 0, horizontalSpeed.get());
+                vec3d.rotateY(-(float)Math.toRadians(mc.player.yaw));
+            } else if (mc.options.keyBack.isPressed()){
+                vec3d.add( 0, 0, horizontalSpeed.get());
+                vec3d.rotateY((float)Math.toRadians(mc.player.yaw));
+            }
+            if (mc.options.keyJump.isPressed()){
+                vec3d.add(0, verticalSpeed.get(), 0);
+            } else if (!mc.options.keyJump.isPressed()) {
+                vec3d.add(0, -verticalSpeed.get(), 0);
+            }
+            mc.player.setVelocity(vec3d);
+            mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.START_FALL_FLYING));
+            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket(true));
         }
     });
 
