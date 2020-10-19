@@ -65,7 +65,7 @@ public class OffhandExtra extends ToggleModule {
     private final Setting<Boolean> selfToggle = sgGeneral.add(new BoolSetting.Builder()
             .name("self-toggle")
             .description("Toggles when you run out of the item you chose")
-            .defaultValue(true)
+            .defaultValue(false)
             .build()
     );
 
