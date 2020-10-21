@@ -149,6 +149,13 @@ public class NoRender extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> noPotionIcons = sgGeneral.add(new BoolSetting.Builder()
+            .name("no-potion-icons")
+            .description("Disables rendering of staus effect icons.")
+            .defaultValue(false)
+            .build()
+    );
+
     public NoRender() {
         super(Category.Render, "no-render", "Disables some things from rendering.");
     }
@@ -231,5 +238,9 @@ public class NoRender extends ToggleModule {
 
     public boolean noFallingBlocks() {
         return isActive() && noFallingBlocks.get();
+    }
+
+    public boolean noPotionIcons() {
+        return isActive() && noPotionIcons.get();
     }
 }
