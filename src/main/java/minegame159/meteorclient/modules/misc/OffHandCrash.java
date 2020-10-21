@@ -58,7 +58,6 @@ public class OffHandCrash extends ToggleModule {
     private final Listener<PlaySoundEvent> onPlaySound = new Listener<>(event -> {
         if (antiCrash.get() && event.sound.getId().toString().equals("minecraft:item.armor.equip_generic")){
             event.cancel();
-            System.out.println("pog");
         }
     });
 }
