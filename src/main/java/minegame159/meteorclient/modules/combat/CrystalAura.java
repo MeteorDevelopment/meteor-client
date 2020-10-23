@@ -160,6 +160,13 @@ public class CrystalAura extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> singlePlace = sgGeneral.add(new BoolSetting.Builder()
+            .name("single-place")
+            .description("Will only allow one crystal to be placed at any one time.")
+            .defaultValue(false)
+            .build()
+    );
+
     private final Setting<Boolean> facePlace = sgGeneral.add(new BoolSetting.Builder()
             .name("face-place")
             .description("Will face place when target is below a certain health or their armour is low.")
@@ -237,6 +244,8 @@ public class CrystalAura extends ToggleModule {
     private Vec3d pos;
     private double lastDamage = 0;
     private boolean shouldFacePlace = false;
+    private EndCrystalEntity current = null;
+    private boolean isThere = false;
 
     private final Pool<RenderBlock> renderBlockPool = new Pool<>(RenderBlock::new);
     private final List<RenderBlock> renderBlocks = new ArrayList<>();
@@ -268,6 +277,17 @@ public class CrystalAura extends ToggleModule {
         }
 
         delayLeft --;
+        if (current != null && mc.player.distanceTo(current) > breakRange.get()) current = null;
+        isThere = false;
+        if (singlePlace.get() && current != null) {
+            for (Entity entity : mc.world.getEntities()) {
+                if (entity.getBlockPos().equals(current.getBlockPos()) && entity instanceof EndCrystalEntity) {
+                    isThere = true;
+                    break;
+                }
+            }
+            if (!isThere) current = null;
+        }
         shouldFacePlace = false;
         if (getTotalHealth(mc.player) <= minHealth.get() && mode.get() != Mode.suicide) return;
         Streams.stream(mc.world.getEntities())
@@ -285,10 +305,12 @@ public class CrystalAura extends ToggleModule {
                         for(int i = 0; i < 9; i++){
                             if(mc.player.inventory.getStack(i).getItem() instanceof SwordItem || mc.player.inventory.getStack(i).getItem() instanceof AxeItem){
                                 mc.player.inventory.selectedSlot = i;
+                                break;
                             }
                         }
                     }
 
+                    if (current != null && entity.getBlockPos().equals(current.getBlockPos())) current = null;
                     Vec3d vec1 = entity.getPos();
                     PlayerMoveC2SPacket.LookOnly packet = new PlayerMoveC2SPacket.LookOnly(Utils.getNeededYaw(vec1), Utils.getNeededPitch(vec1), mc.player.isOnGround());
                     mc.player.networkHandler.sendPacket(packet);
@@ -298,7 +320,7 @@ public class CrystalAura extends ToggleModule {
                     mc.player.inventory.selectedSlot = preSlot;
                 });
         if (!smartDelay.get() && delayLeft > 0) return;
-        if (place.get()) {
+        if (place.get() && (!singlePlace.get() || current == null)) {
             List<LivingEntity> validEntities = new ArrayList<>();
             LivingEntity target = null;
             Iterator<Entity> entitiesList = mc.world.getEntities().iterator();
@@ -384,6 +406,7 @@ public class CrystalAura extends ToggleModule {
     });
 
     private void placeBlock(Vec3d block, Hand hand){
+         if (singlePlace.get()) current = new EndCrystalEntity(mc.world, bestBlock.x, bestBlock.y + 1, bestBlock.z);
         float yaw = mc.player.yaw;
         float pitch = mc.player.pitch;
         Vec3d vec1 = block.add(0.5, 0.5, 0.5);
