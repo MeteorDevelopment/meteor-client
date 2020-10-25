@@ -1,52 +1,86 @@
 package minegame159.meteorclient.gui.widgets;
 
-import minegame159.meteorclient.MeteorClient;
+import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
+import it.unimi.dsi.fastutil.doubles.DoubleList;
 import minegame159.meteorclient.gui.GuiConfig;
-import minegame159.meteorclient.gui.GuiThings;
-import minegame159.meteorclient.gui.listeners.TextBoxChangeListener;
+import minegame159.meteorclient.gui.GuiKeyEvents;
 import minegame159.meteorclient.gui.renderer.GuiRenderer;
+import minegame159.meteorclient.gui.renderer.Region;
 import net.minecraft.client.MinecraftClient;
 import org.lwjgl.glfw.GLFW;
 
 public class WTextBox extends WWidget {
-    public interface Filter {
-        public boolean accept(WTextBox textBox, char c);
-    }
+    public Runnable action;
 
-    public TextBoxChangeListener action;
-    public Filter filter;
-
-    public String text;
+    private String text;
+    private final DoubleList textWidths = new DoubleArrayList();
+    private int cursor = 0;
+    private int fixedCursor = -1;
 
     private final double uWidth;
     private boolean focused;
 
-    private int cursorTimer;
+    private double cursorTimer;
     private boolean cursorVisible;
 
-    public WTextBox(String text, double uWidth) {
-        this.text = text != null ? text : "";
-        this.uWidth = uWidth;
+    private GuiRenderer renderer;
+
+    public WTextBox(String text, double width) {
+        this.text = text;
+        this.uWidth = width;
+    }
+
+    public void setText(String text) {
+        this.text = text;
+        cursor = -1;
+        if (renderer != null) calculateTextWidths();
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public boolean isFocused() {
+        return focused;
+    }
+
+    public void setFocused(boolean focused) {
+        if (!this.focused && focused) GuiKeyEvents.setPostKeyEvents(true);
+        else if (this.focused && !focused) GuiKeyEvents.setPostKeyEvents(false);
+
+        this.focused = focused;
+    }
+
+    public int getCursor() {
+        return cursor;
     }
 
     @Override
-    protected void onCalculateSize() {
-        width = 3 + uWidth + 3;
-        height = 3 + MeteorClient.FONT.getHeight() + 3;
+    protected void onCalculateSize(GuiRenderer renderer) {
+        width = 6 + uWidth + 6;
+        height = 6 + renderer.textHeight() + 6;
     }
 
     @Override
-    protected boolean onMouseClicked(int button) {
-        if (!focused && mouseOver) GuiThings.setPostKeyEvents(true);
-        else if (focused && !mouseOver) GuiThings.setPostKeyEvents(false);
+    protected boolean onMouseClicked(boolean used, int button) {
+        if (!focused && mouseOver) GuiKeyEvents.setPostKeyEvents(true);
+        else if (focused && !mouseOver) GuiKeyEvents.setPostKeyEvents(false);
 
-        focused = mouseOver;
+        if (!used) {
+            focused = mouseOver;
 
-        if (focused && button == 1) {
-            String preText = text;
-            text = "";
-            if (!preText.equals(text)) callAction();
-            return true;
+            if (focused && button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) {
+                String preText = text;
+                text = "";
+                if (!text.equals(preText)) {
+                    if (!callActionOnTextChanged()) calculateTextWidths();
+                }
+
+                resetCursorTimer();
+                return true;
+            }
+        } else {
+            if (!mouseOver) focused = false;
         }
 
         return false;
@@ -54,16 +88,65 @@ public class WTextBox extends WWidget {
 
     @Override
     protected boolean onKeyPressed(int key, int mods) {
-        if (focused && key == GLFW.GLFW_KEY_BACKSPACE && text.length() > 0) {
-            text = text.substring(0, text.length() - 1);
-            callAction();
-            return true;
-        }
+        if (focused) {
+            if (key == GLFW.GLFW_KEY_V && (mods == GLFW.GLFW_MOD_CONTROL || mods == GLFW.GLFW_MOD_SUPER)) {
+                String clipboard = MinecraftClient.getInstance().keyboard.getClipboard();
+                int addedChars = 0;
 
-        if (key == GLFW.GLFW_KEY_V && (mods == GLFW.GLFW_MOD_CONTROL || mods == GLFW.GLFW_MOD_SUPER) && focused) {
-            text += MinecraftClient.getInstance().keyboard.getClipboard();
-            callAction();
-            return true;
+                StringBuilder sb = new StringBuilder(text.length() + clipboard.length());
+                sb.append(text, 0, cursor);
+                for (int i = 0; i < clipboard.length(); i++) {
+                    char c = clipboard.charAt(i);
+                    if (addChar(c)) {
+                        sb.append(c);
+                        addedChars++;
+                    }
+                }
+                sb.append(text, cursor, text.length());
+                text = sb.toString();
+
+                if (!callActionOnTextChanged()) {
+                    fixedCursor = cursor + addedChars;
+                    calculateTextWidths();
+                }
+
+                resetCursorTimer();
+                return true;
+            } else if (key == GLFW.GLFW_KEY_C && (mods == GLFW.GLFW_MOD_CONTROL || mods == GLFW.GLFW_MOD_SUPER)) {
+                MinecraftClient.getInstance().keyboard.setClipboard(text);
+                return true;
+            } else if (key == GLFW.GLFW_KEY_X && (mods == GLFW.GLFW_MOD_CONTROL || mods == GLFW.GLFW_MOD_SUPER)) {
+                MinecraftClient.getInstance().keyboard.setClipboard(text);
+                String preText = text;
+                text = "";
+
+                if (!preText.equals(text)) {
+                    if (!callActionOnTextChanged()) calculateTextWidths();
+                }
+
+                resetCursorTimer();
+                return true;
+            } else if (key == GLFW.GLFW_KEY_BACKSPACE && (mods == GLFW.GLFW_MOD_CONTROL || mods == GLFW.GLFW_MOD_SUPER)) {
+                String preText = text;
+
+                int lengthToDelete = 0;
+                boolean hadSpace = false;
+                for (int i = text.length() - 1; i >= 0; i--) {
+                    if (hadSpace) break;
+                    if (text.charAt(i) == ' ') hadSpace = true;
+                    lengthToDelete++;
+                }
+                text = text.substring(0, text.length() - lengthToDelete);
+
+                if (!preText.equals(text)) {
+                    if (!callActionOnTextChanged()) calculateTextWidths();
+                }
+
+                resetCursorTimer();
+                return true;
+            }
+
+            return onKeyPressedOrRepeated(key);
         }
 
         return false;
@@ -71,9 +154,43 @@ public class WTextBox extends WWidget {
 
     @Override
     protected boolean onKeyRepeated(int key, int mods) {
-        if (focused && key == GLFW.GLFW_KEY_BACKSPACE && text.length() > 0) {
-            text = text.substring(0, text.length() - 1);
-            callAction();
+        if (focused) {
+            return onKeyPressedOrRepeated(key);
+        }
+
+        return false;
+    }
+
+    private boolean onKeyPressedOrRepeated(int key) {
+        if (key == GLFW.GLFW_KEY_LEFT) {
+            cursor--;
+            if (cursor < 0) cursor = 0;
+            resetCursorTimer();
+            return true;
+        } else if (key == GLFW.GLFW_KEY_RIGHT) {
+            cursor++;
+            if (cursor > text.length()) cursor = text.length();
+            resetCursorTimer();
+            return true;
+        } else if (key == GLFW.GLFW_KEY_BACKSPACE && cursor > 0) {
+            text = text.substring(0, cursor - 1) + text.substring(cursor);
+
+            if (!callActionOnTextChanged()) {
+                fixedCursor = cursor - 1;
+                calculateTextWidths();
+            }
+
+            resetCursorTimer();
+            return true;
+        } else if (key == GLFW.GLFW_KEY_DELETE && cursor < text.length()) {
+            text = text.substring(0, cursor) + text.substring(cursor + 1);
+
+            if (!callActionOnTextChanged()) {
+                fixedCursor = cursor;
+                calculateTextWidths();
+            }
+
+            resetCursorTimer();
             return true;
         }
 
@@ -83,66 +200,97 @@ public class WTextBox extends WWidget {
     @Override
     protected boolean onCharTyped(char c, int key) {
         if (focused) {
-            if (filter == null) {
-                text += c;
-                callAction();
-            } else if (filter.accept(this, c)) {
-                text += c;
-                callAction();
+            if (addChar(c)) {
+                text = text.substring(0, cursor) + c + text.substring(cursor);
+
+                if (!callActionOnTextChanged()) {
+                    fixedCursor = cursor + 1;
+                    calculateTextWidths();
+                }
+
+                resetCursorTimer();
             }
+
             return true;
         }
 
         return false;
     }
 
-    protected void callAction() {
-        if (action != null) action.onTextBoxChange(this);
-    }
-
-    public boolean isFocused() {
-        return focused;
-    }
-
-    public void setFocused(boolean focused, boolean changeKeyEvents) {
-        if (changeKeyEvents) {
-            if (!this.focused && focused) GuiThings.setPostKeyEvents(true);
-            else if (this.focused && !focused) GuiThings.setPostKeyEvents(false);
-        }
-        this.focused = focused;
-    }
-
-    public void setFocused(boolean focused) {
-        setFocused(focused, true);
+    protected boolean addChar(char c) {
+        return true;
     }
 
     @Override
-    protected void onTick() {
-        if (cursorTimer >= 10) {
-            cursorVisible = !cursorVisible;
-            cursorTimer = 0;
-        } else {
-            cursorTimer++;
+    public void render(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
+        if (!visible) return;
+        if (this.renderer == null) {
+            this.renderer = renderer;
+            calculateTextWidths();
         }
+        this.renderer = renderer;
+        tooltip = text;
+        super.render(renderer, mouseX, mouseY, delta);
     }
 
     @Override
     protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
-        renderer.renderBackground(this, false, false);
+        renderer.background(this, false, false);
 
-        double textWidth = MeteorClient.FONT.getStringWidth(text);
+        if (cursorTimer >= 1) {
+            cursorVisible = !cursorVisible;
+            cursorTimer = 0;
+        } else {
+            cursorTimer += delta / 8;
+        }
 
-        double overflowWidth = textWidth - width + 3 + 3;
+        double overflowWidth = getCursorTextWidthForPreview() - width + 16;
         if (overflowWidth < 0) overflowWidth = 0;
 
-        if (text.length() > 0) {
-            if (overflowWidth > 0) renderer.beginScissor(this, 0, 3, 0, 3, true);
-            renderer.renderText(text, x + 3 - overflowWidth, y + 3, GuiConfig.INSTANCE.text, false);
-            if (overflowWidth > 0) renderer.endScissor();
+        if (!text.isEmpty()) {
+            renderer.beginScissor(x + 6, y + 6, width - 12, height - 12);
+            renderer.text(text, x + 6 - overflowWidth, y + 6, false, GuiConfig.INSTANCE.text);
+            renderer.endScissor();
         }
 
         if (focused && cursorVisible) {
-            renderer.renderQuad(x + 3 + textWidth - overflowWidth, y + 3, 1, MeteorClient.FONT.getHeight(), GuiConfig.INSTANCE.text);
+            renderer.quad(Region.FULL, x + 6 + getCursorTextWidth() - overflowWidth, y + 6, 1, renderer.textHeight(), GuiConfig.INSTANCE.text);
         }
+    }
+
+    private void resetCursorTimer() {
+        cursorTimer = 0;
+        cursorVisible = true;
+    }
+
+    protected boolean callActionOnTextChanged() {
+        return false;
+    }
+
+    private void calculateTextWidths() {
+        textWidths.clear();
+
+        for (int i = 0; i <= text.length(); i++) {
+            textWidths.add(renderer.textWidth(text, i));
+        }
+
+        if (fixedCursor != -1) {
+            this.cursor = fixedCursor;
+            fixedCursor = -1;
+        } else {
+            this.cursor = text.length();
+        }
+    }
+
+    private double getCursorTextWidth() {
+        if (textWidths.isEmpty()) return 0;
+        return textWidths.getDouble(cursor);
+    }
+
+    private double getCursorTextWidthForPreview() {
+        if (textWidths.isEmpty()) return 0;
+        int c = cursor + 2;
+        if (c > text.length()) c = text.length();
+        return textWidths.getDouble(c);
     }
 }

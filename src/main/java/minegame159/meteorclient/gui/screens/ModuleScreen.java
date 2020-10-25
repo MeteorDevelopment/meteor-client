@@ -1,17 +1,16 @@
 package minegame159.meteorclient.gui.screens;
 
 import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listenable;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.ModuleBindChangedEvent;
-import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.gui.widgets.*;
+import net.minecraft.client.MinecraftClient;
 import org.lwjgl.glfw.GLFW;
 
-public class ModuleScreen extends WindowScreen implements Listenable {
+public class ModuleScreen extends WindowScreen {
     private Module module;
 
     private WLabel bindLabel;
@@ -32,16 +31,14 @@ public class ModuleScreen extends WindowScreen implements Listenable {
         if (module.settings.sizeGroups() > 0) {
             add(module.settings.createTable(false)).fillX().expandX().getWidget();
         } else {
-            add(new WHorizontalSeparator()).fillX().expandX();
-            row();
+            add(new WHorizontalSeparator());
         }
 
         WWidget customWidget = module.getWidget();
         if (customWidget != null) {
             if (module.settings.sizeGroups() > 0) {
                 row();
-                add(new WHorizontalSeparator()).fillX().expandX();
-                row();
+                add(new WHorizontalSeparator());
             }
 
             Cell<WWidget> cell = add(customWidget);
@@ -52,19 +49,18 @@ public class ModuleScreen extends WindowScreen implements Listenable {
         if (module instanceof ToggleModule) {
             if (customWidget != null || module.settings.sizeGroups() > 0) {
                 row();
-                add(new WHorizontalSeparator()).fillX().expandX();
-                row();
+                add(new WHorizontalSeparator());
             }
 
             // Bind
             WTable bindList = add(new WTable()).fillX().expandX().getWidget();
             bindLabel = bindList.add(new WLabel(getBindLabelText())).getWidget();
-            bindList.add(new WButton("Set bind")).getWidget().action = button -> {
+            bindList.add(new WButton("Set bind")).getWidget().action = () -> {
                 ModuleManager.INSTANCE.setModuleToBind(module);
                 canResetBind = false;
                 bindLabel.setText("Bind: press any key");
             };
-            bindList.add(new WButton("Reset bind")).getWidget().action = button -> {
+            bindList.add(new WButton("Reset bind")).getWidget().action = () -> {
                 if (canResetBind) {
                     module.setKey(-1);
                     bindLabel.setText(getBindLabelText());
@@ -75,42 +71,37 @@ public class ModuleScreen extends WindowScreen implements Listenable {
             // Toggle on key release
             WTable tokrTable = add(new WTable()).fillX().expandX().getWidget();
             tokrTable.add(new WLabel("Toggle on key release:"));
-            tokrTable.add(new WCheckbox(module.toggleOnKeyRelease)).getWidget().action = checkbox -> {
-                module.toggleOnKeyRelease = checkbox.checked;
+            WCheckbox toggleOnKeyRelease = tokrTable.add(new WCheckbox(module.toggleOnKeyRelease)).getWidget();
+            toggleOnKeyRelease.action = () -> {
+                module.toggleOnKeyRelease = toggleOnKeyRelease.checked;
                 ModuleManager.INSTANCE.save();
             };
             row();
 
-            add(new WHorizontalSeparator()).fillX().expandX();
-            row();
+            add(new WHorizontalSeparator());
 
             // Bottom
             WTable bottomTable = add(new WTable()).fillX().expandX().getWidget();
 
             //   Active
             bottomTable.add(new WLabel("Active:"));
-            bottomTable.add(new WCheckbox(((ToggleModule) module).isActive())).getWidget().action = checkbox -> {
-                if (((ToggleModule) module).isActive() != checkbox.checked) ((ToggleModule) module).toggle(mc.world != null);
+            WCheckbox active = bottomTable.add(new WCheckbox(((ToggleModule) module).isActive())).getWidget();
+            active.action = () -> {
+                if (((ToggleModule) module).isActive() != active.checked) ((ToggleModule) module).toggle(MinecraftClient.getInstance().world != null);
             };
 
             //   Visible
             bottomTable.add(new WLabel("Visible: ")).fillX().right().getWidget().tooltip = "Visible in HUD.";
             WCheckbox visibleCheckbox = bottomTable.add(new WCheckbox(((ToggleModule) module).isVisible())).getWidget();
             visibleCheckbox.tooltip = "Visible in HUD.";
-            visibleCheckbox.action = checkbox -> {
-                if (((ToggleModule) module).isVisible() != checkbox.checked) ((ToggleModule) module).setVisible(checkbox.checked);
+            visibleCheckbox.action = () -> {
+                if (((ToggleModule) module).isVisible() != visibleCheckbox.checked) ((ToggleModule) module).setVisible(visibleCheckbox.checked);
             };
         }
     }
 
-    @Override
-    protected void init() {
-        super.init();
-        MeteorClient.EVENT_BUS.subscribe(this);
-    }
-
     @EventHandler
-    private Listener<ModuleBindChangedEvent> onModuleBindChanged = new Listener<>(event -> {
+    private final Listener<ModuleBindChangedEvent> onModuleBindChanged = new Listener<>(event -> {
         if (event.module == module) {
             canResetBind = true;
             bindLabel.setText(getBindLabelText());
@@ -119,11 +110,5 @@ public class ModuleScreen extends WindowScreen implements Listenable {
 
     private String getBindLabelText() {
         return "Bind: " + (module.getKey() == -1 ? "none" : GLFW.glfwGetKeyName(module.getKey(), 0));
-    }
-
-    @Override
-    public void onClose() {
-        MeteorClient.EVENT_BUS.unsubscribe(this);
-        super.onClose();
     }
 }

@@ -16,13 +16,13 @@ public class WTexture extends WWidget {
     }
 
     @Override
-    protected void onCalculateSize() {
-        super.width = width;
-        super.height = height;
+    protected void onCalculateSize(GuiRenderer renderer) {
+        super.width = width * 2;
+        super.height = height * 2;
     }
 
     @Override
     protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
-        renderer.renderTexture(x, y, width, height, rotation, texture);
+        renderer.texture(x, y, super.width, super.height, rotation, texture);
     }
 }

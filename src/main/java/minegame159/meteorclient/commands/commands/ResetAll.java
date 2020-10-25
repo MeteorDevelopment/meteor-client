@@ -4,6 +4,7 @@ import minegame159.meteorclient.commands.Command;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.SettingGroup;
 
 public class ResetAll extends Command {
     public ResetAll() {
@@ -13,7 +14,9 @@ public class ResetAll extends Command {
     @Override
     public void run(String[] args) {
         for (Module module : ModuleManager.INSTANCE.getAll()) {
-            for (Setting<?> setting : module.settings) setting.reset();
+            for (SettingGroup sg : module.settings) {
+                for (Setting<?> setting : sg) setting.reset();
+            }
         }
     }
 }

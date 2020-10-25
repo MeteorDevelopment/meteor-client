@@ -1,55 +1,33 @@
 package minegame159.meteorclient.settings;
 
-import minegame159.meteorclient.gui.renderer.GuiRenderer;
 import minegame159.meteorclient.gui.widgets.*;
+import minegame159.meteorclient.utils.ISerializable;
+import minegame159.meteorclient.utils.NbtUtils;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class SettingGroup implements Iterable<Setting<?>> {
-    private static final EmptyIterator EMPTY_ITERATOR = new EmptyIterator();
-
+public class SettingGroup implements ISerializable<SettingGroup>, Iterable<Setting<?>> {
     public final String name;
+    public boolean sectionExpanded;
 
-    private final Settings parent;
-    private final Setting<Boolean> enabledSetting;
     final List<Setting<?>> settings = new ArrayList<>(1);
-    private final EnabledChangedListener enabledChangedListener;
 
-    private SettingGroup disabledGroup;
-
-    SettingGroup(Settings parent, String name, String enabledName, String enabledDescription, boolean enabled, EnabledChangedListener enabledChangedListener) {
-        this.parent = parent;
+    SettingGroup(String name, boolean sectionExpanded) {
         this.name = name;
-
-        if (enabledName != null) {
-            enabledSetting = add(new BoolSetting.Builder()
-                    .name(enabledName)
-                    .description(enabledDescription)
-                    .defaultValue(enabled)
-                    .onChanged(aBoolean -> {
-                        parent.refreshTable();
-                        if (enabledChangedListener != null) enabledChangedListener.onEnabledChanged(this);
-                    })
-                    .build());
-        } else enabledSetting = null;
-
-        this.enabledChangedListener = enabledChangedListener;
+        this.sectionExpanded = sectionExpanded;
     }
 
-    public boolean hasName() {
-        return name != null;
-    }
-
-    public boolean isEnabled() {
-        return enabledSetting == null || enabledSetting.get();
-    }
-
-    public void setEnabled(boolean enabled) {
-        if (enabledSetting != null) {
-            enabledSetting.set(enabled);
+    public Setting<?> get(String name) {
+        for (Setting<?> setting : this) {
+            if (setting.name.equals(name)) return setting;
         }
+
+        return null;
     }
 
     public <T> Setting<T> add(Setting<T> setting) {
@@ -57,78 +35,63 @@ public class SettingGroup implements Iterable<Setting<?>> {
         return setting;
     }
 
-    public boolean hasDisabledGroup() {
-        return disabledGroup != null;
-    }
-
-    public SettingGroup getDisabledGroup() {
-        if (disabledGroup == null) disabledGroup = new SettingGroup(parent, null, null, null, false, null);
-        return disabledGroup;
-    }
-
     public void fillTable(WTable table) {
-        if (hasName()) {
-            table.add(new WHorizontalSeparator(name)).fillX().expandX();
-            table.row();
+        WSection section = table.add(new WSection(name, sectionExpanded)).fillX().expandX().getWidget();
+        section.action = () -> sectionExpanded = section.isExpanded();
+
+        for (Setting<?> setting : settings) {
+            fillTable(section, setting);
         }
-
-        if (enabledSetting != null) fillTable(table, enabledSetting);
-
-        if (isEnabled()) {
-            for (Setting<?> setting : settings) {
-                if (setting != enabledSetting) fillTable(table, setting);
-            }
-        } else if (hasDisabledGroup()) {
-            getDisabledGroup().fillTable(table);
-        }
-    }
-
-    private void fillTable(WTable table, Setting<?> setting) {
-        if (setting.widget instanceof WTextBox) ((WTextBox) setting.widget).setFocused(false, false);
-
-        WLabel label = table.add(new WLabel(setting.title)).getWidget();
-        label.tooltip = setting.description;
-
-        WWidget widget = table.add(setting.widget).getWidget();
-        widget.tooltip = setting.description;
-
-        WButton reset = table.add(new WButton(GuiRenderer.TEX_RESET)).fillX().right().getWidget();
-        reset.tooltip = "Reset";
-        reset.action = button -> setting.reset();
 
         table.row();
     }
 
+    private void fillTable(WSection section, Setting<?> setting) {
+        if (setting.widget instanceof WTextBox) ((WTextBox) setting.widget).setFocused(false);
+
+        WLabel label = section.add(new WLabel(setting.title)).getWidget();
+        label.tooltip = setting.description;
+
+        Cell<?> cell = section.add(setting.widget).fillX();
+        if (setting.widget instanceof WIntEdit || setting.widget instanceof WDoubleEdit) cell.expandX();
+        WWidget widget = cell.getWidget();
+        widget.tooltip = setting.description;
+
+        WButton reset = section.add(new WButton(WButton.ButtonRegion.Reset)).getWidget();
+        reset.tooltip = "Reset";
+        reset.action = setting::reset;
+
+        section.row();
+    }
+
     @Override
     public Iterator<Setting<?>> iterator() {
-        return new SettingGroupIterator();
+        return settings.iterator();
     }
 
-    private class SettingGroupIterator implements Iterator<Setting<?>> {
-        private final Iterator<Setting<?>> iter1 = settings.iterator();
-        private final Iterator<Setting<?>> iter2 = disabledGroup != null ? disabledGroup.iterator() : EMPTY_ITERATOR;
+    @Override
+    public CompoundTag toTag() {
+        CompoundTag tag = new CompoundTag();
 
-        @Override
-        public boolean hasNext() {
-            return iter1.hasNext() || iter2.hasNext();
-        }
+        tag.putString("name", name);
+        tag.putBoolean("sectionExpanded", sectionExpanded);
+        tag.put("settings", NbtUtils.listToTag(settings));
 
-        @Override
-        public Setting<?> next() {
-            if (iter1.hasNext()) return iter1.next();
-            return iter2.next();
-        }
+        return tag;
     }
 
-    private static class EmptyIterator implements Iterator<Setting<?>> {
-        @Override
-        public boolean hasNext() {
-            return false;
+    @Override
+    public SettingGroup fromTag(CompoundTag tag) {
+        sectionExpanded = tag.getBoolean("sectionExpanded");
+
+        ListTag settingsTag = tag.getList("settings", 10);
+        for (Tag t : settingsTag) {
+            CompoundTag settingTag = (CompoundTag) t;
+
+            Setting<?> setting = get(settingTag.getString("name"));
+            if (setting != null) setting.fromTag(settingTag);
         }
 
-        @Override
-        public Setting<?> next() {
-            return null;
-        }
+        return this;
     }
 }

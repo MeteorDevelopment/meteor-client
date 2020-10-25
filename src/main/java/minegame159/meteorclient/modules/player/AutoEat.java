@@ -21,9 +21,9 @@ import net.minecraft.util.Hand;
 
 public class AutoEat extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgManualHunger = settings.createGroup("HungerManagement", "manual-hunger-management", "Allows you to choose the hunger to eat at", true);
-    private final SettingGroup sgAutoHunger = sgManualHunger.getDisabledGroup();
-    
+    private final SettingGroup sgHunger = settings.createGroup("Hunger");
+
+    // General
     private final Setting<Boolean> egaps = sgGeneral.add(new BoolSetting.Builder()
             .name("egaps")
             .description("Eat enchanted golden apples.")
@@ -59,7 +59,15 @@ public class AutoEat extends ToggleModule {
             .build()
     );
 
-    private final Setting<Integer> minHunger = sgManualHunger.add(new IntSetting.Builder()
+    // Hunger
+    private final Setting<Boolean> autoHunger = sgHunger.add(new BoolSetting.Builder()
+            .name("auto-hunger")
+            .description("Automatically eats whenever it can.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Integer> minHunger = sgHunger.add(new IntSetting.Builder()
             .name("hunger")
             .description("The hunger you eat at.")
             .defaultValue(17)
@@ -175,7 +183,7 @@ public class AutoEat extends ToggleModule {
             return;
         }
 
-        if (slot != -1 && (20 - mc.player.getHungerManager().getFoodLevel() >= bestHunger && sgAutoHunger.isEnabled()) || (20 - mc.player.getHungerManager().getFoodLevel() >= minHunger.get() && sgManualHunger.isEnabled())) {
+        if (slot != -1 && (20 - mc.player.getHungerManager().getFoodLevel() >= bestHunger && autoHunger.get()) || (20 - mc.player.getHungerManager().getFoodLevel() >= minHunger.get() && autoHunger.get())) {
             preSelectedSlot = mc.player.inventory.selectedSlot;
             if(slot != InvUtils.OFFHAND_SLOT && slot != -1) {
                 mc.player.inventory.selectedSlot = slot;

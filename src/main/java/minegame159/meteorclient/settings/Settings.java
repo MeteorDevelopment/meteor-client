@@ -1,20 +1,33 @@
 package minegame159.meteorclient.settings;
 
 import minegame159.meteorclient.gui.widgets.WTable;
+import minegame159.meteorclient.utils.ISerializable;
+import minegame159.meteorclient.utils.NbtUtils;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class Settings implements Iterable<Setting<?>> {
+public class Settings implements ISerializable<Settings>, Iterable<SettingGroup> {
     private SettingGroup defaultGroup;
     private final List<SettingGroup> groups = new ArrayList<>(1);
 
-    private WTable table;
-
     public Setting<?> get(String name) {
-        for (Setting<?> setting : this) {
-            if (name.equalsIgnoreCase(setting.name)) return setting;
+        for (SettingGroup sg : this) {
+            for (Setting<?> setting : sg) {
+                if (name.equalsIgnoreCase(setting.name)) return setting;
+            }
+        }
+
+        return null;
+    }
+
+    public SettingGroup getGroup(String name) {
+        for (SettingGroup sg : this) {
+            if (sg.name.equals(name)) return sg;
         }
 
         return null;
@@ -25,31 +38,27 @@ public class Settings implements Iterable<Setting<?>> {
     }
 
     public SettingGroup getDefaultGroup() {
-        if (defaultGroup == null) {
-            defaultGroup = new SettingGroup(this, "General", null, null, false, null);
-            groups.add(defaultGroup);
-        }
+        if (defaultGroup == null) defaultGroup = createGroup("General");
         return defaultGroup;
     }
 
-    public SettingGroup createGroup(String name, String enabledName, String enabledDescription, boolean enabled, EnabledChangedListener enabledChangedListener) {
-        SettingGroup group = new SettingGroup(this, name, enabledName, enabledDescription, enabled, enabledChangedListener);
+    public SettingGroup createGroup(String name, boolean expanded) {
+        SettingGroup group = new SettingGroup(name, expanded);
         groups.add(group);
         return group;
     }
-    public SettingGroup createGroup(String name, String enabledName, String enabledDescription, boolean enabled) {
-        return createGroup(name, enabledName, enabledDescription, enabled, null);
-    }
     public SettingGroup createGroup(String name) {
-        return createGroup(name, null, null, false, null);
+        return createGroup(name, true);
     }
 
     public WTable createTable(boolean activate) {
-        table = new WTable();
+        WTable table = new WTable();
 
-        for (Setting<?> setting : this) {
-            if (activate) setting.onActivated();
-            setting.resetWidget();
+        for (SettingGroup sg : this) {
+            for (Setting<?> setting : sg) {
+                if (activate) setting.onActivated();
+                setting.resetWidget();
+            }
         }
 
         for (SettingGroup group : groups) {
@@ -62,43 +71,29 @@ public class Settings implements Iterable<Setting<?>> {
         return createTable(true);
     }
 
-    void refreshTable() {
-        if (table != null) {
-            table.clear();
-
-            for (SettingGroup group : groups) {
-                group.fillTable(table);
-            }
-        }
+    @Override
+    public Iterator<SettingGroup> iterator() {
+        return groups.iterator();
     }
 
     @Override
-    public Iterator<Setting<?>> iterator() {
-        return new SettingsIterator();
+    public CompoundTag toTag() {
+        CompoundTag tag = new CompoundTag();
+        tag.put("groups", NbtUtils.listToTag(groups));
+        return tag;
     }
 
-    private class SettingsIterator implements Iterator<Setting<?>> {
-        private int groupI = 0;
-        private Iterator<Setting<?>> groupIterator;
+    @Override
+    public Settings fromTag(CompoundTag tag) {
+        ListTag groupsTag = tag.getList("groups", 10);
 
-        public SettingsIterator() {
-            if (groups.size() > 0) groupIterator = groups.get(groupI++).iterator();
+        for (Tag t : groupsTag) {
+            CompoundTag groupTag = (CompoundTag) t;
+
+            SettingGroup sg = getGroup(groupTag.getString("name"));
+            if (sg != null) sg.fromTag(groupTag);
         }
 
-        @Override
-        public boolean hasNext() {
-            return groupI < groups.size() || (groupIterator != null && groupIterator.hasNext());
-        }
-
-        @Override
-        public Setting<?> next() {
-            if (groupIterator.hasNext()) return groupIterator.next();
-
-            while (true) {
-                groupIterator = groups.get(groupI++).iterator();
-
-                if (groupIterator.hasNext()) return groupIterator.next();
-            }
-        }
+        return this;
     }
 }

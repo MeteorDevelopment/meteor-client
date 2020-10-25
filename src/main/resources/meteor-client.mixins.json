@@ -38,7 +38,6 @@
     "AbstractFurnaceScreenHandlerMixin",
     "ClientPlayerInteractionManagerMixin",
     "MiningToolItemMixin",
-    "CraftingScreenMixin",
     "PlayerEntityMixin",
     "FluidBlockMixin",
     "ParticleManagerMixin",

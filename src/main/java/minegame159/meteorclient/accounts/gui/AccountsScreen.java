@@ -1,51 +1,45 @@
 package minegame159.meteorclient.accounts.gui;
 
 import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listenable;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.accounts.Account;
 import minegame159.meteorclient.accounts.AccountManager;
 import minegame159.meteorclient.events.AccountListChangedEvent;
-import minegame159.meteorclient.gui.listeners.ButtonClickListener;
+import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.gui.screens.WindowScreen;
 import minegame159.meteorclient.gui.widgets.WButton;
 import minegame159.meteorclient.gui.widgets.WTable;
+import minegame159.meteorclient.utils.MeteorExecutor;
 import net.minecraft.client.MinecraftClient;
 
-public class AccountsScreen extends WindowScreen implements Listenable {
+public class AccountsScreen extends WindowScreen {
     public AccountsScreen() {
         super("Accounts", true);
 
         initWidgets();
     }
 
-    @Override
-    protected void init() {
-        super.init();
-        MeteorClient.EVENT_BUS.subscribe(this);
-    }
-
     void initWidgets() {
+        // Accounts
         if (AccountManager.INSTANCE.size() > 0) {
-            WTable table = add(new WTable()).fillX().expandX().getWidget();
+            WTable t = add(new WTable()).fillX().expandX().getWidget();
             row();
 
             for (Account<?> account : AccountManager.INSTANCE) {
-                table.add(new WAccount(this, account)).fillX().expandX();
-                table.row();
+                t.add(new WAccount(this, account)).fillX().expandX();
+                t.row();
             }
         }
 
-        // Add Account
-        WTable table = add(new WTable()).fillX().expandX().getWidget();
-        addButton(table, "Cracked", button -> MinecraftClient.getInstance().openScreen(new AddCrackedAccountScreen()));
-        addButton(table, "Premium", button -> MinecraftClient.getInstance().openScreen(new AddPremiumAccountScreen()));
-        addButton(table, "The Altening", button -> MinecraftClient.getInstance().openScreen(new AddTheAlteningAccountScreen()));
+        // Add account
+        WTable t = add(new WTable()).fillX().expandX().getWidget();
+        addButton(t, "Cracked", () -> MinecraftClient.getInstance().openScreen(new AddCrackedAccountScreen()));
+        addButton(t, "Premium", () -> MinecraftClient.getInstance().openScreen(new AddPremiumAccountScreen()));
+        addButton(t, "The Altening", () -> MinecraftClient.getInstance().openScreen(new AddTheAlteningAccountScreen()));
     }
 
-    private void addButton(WTable table, String text, ButtonClickListener action) {
-        WButton button = table.add(new WButton(text)).fillX().expandX().getWidget();
+    private void addButton(WTable t, String text, Runnable action) {
+        WButton button = t.add(new WButton(text)).fillX().expandX().getWidget();
         button.action = action;
     }
 
@@ -55,9 +49,19 @@ public class AccountsScreen extends WindowScreen implements Listenable {
         initWidgets();
     });
 
-    @Override
-    public void onClose() {
-        MeteorClient.EVENT_BUS.unsubscribe(this);
-        super.onClose();
+    static void addAccount(WButton add, WidgetScreen screen, Account<?> account) {
+        add.setText("...");
+        screen.locked = true;
+
+        MeteorExecutor.execute(() -> {
+            if (account.fetchInfo() && account.fetchHead()) {
+                AccountManager.INSTANCE.add(account);
+                screen.locked = false;
+                screen.onClose();
+            }
+
+            add.setText("Add");
+            screen.locked = false;
+        });
     }
 }

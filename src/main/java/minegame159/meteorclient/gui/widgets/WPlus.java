@@ -1,51 +1,26 @@
 package minegame159.meteorclient.gui.widgets;
 
 import minegame159.meteorclient.gui.GuiConfig;
-import minegame159.meteorclient.gui.listeners.PlusClickListener;
 import minegame159.meteorclient.gui.renderer.GuiRenderer;
+import minegame159.meteorclient.gui.renderer.Region;
 import minegame159.meteorclient.utils.Color;
 
-public class WPlus extends WWidget {
-    public PlusClickListener action;
-
-    private boolean pressed;
-
+public class WPlus extends WPressable {
     @Override
-    protected void onCalculateSize() {
-        width = 4 + 6 + 4;
-        height = 4 + 6 + 4;
-    }
-
-    @Override
-    protected boolean onMouseClicked(int button) {
-        if (mouseOver) {
-            pressed = true;
-            return true;
-        }
-
-        return false;
-    }
-
-    @Override
-    protected boolean onMouseReleased(int button) {
-        if (pressed) {
-            pressed = false;
-            if (action != null) action.onPlusClick(this);
-            return true;
-        }
-
-        return false;
+    protected void onCalculateSize(GuiRenderer renderer) {
+        width = 6 + renderer.textHeight() + 6;
+        height = 6 + renderer.textHeight() + 6;
     }
 
     @Override
     protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
-        renderer.renderBackground(this, mouseOver, pressed);
+        renderer.background(this, mouseOver, pressed);
 
         Color color = GuiConfig.INSTANCE.plus;
         if (pressed) color = GuiConfig.INSTANCE.plusPressed;
         else if (mouseOver) color = GuiConfig.INSTANCE.plusHovered;
 
-        renderer.renderQuad(x + 4, y + 4 + 2, 6, 2, color);
-        renderer.renderQuad(x + 4 + 2, y + 4, 2, 6, color);
+        renderer.quad(Region.FULL, x + 7, y + 6 + renderer.textHeight() / 2 - 1, renderer.textHeight() - 1, 3, color);
+        renderer.quad(Region.FULL, x + 6 + renderer.textHeight() / 2 - 1, y + 7, 3, renderer.textHeight() - 1, color);
     }
 }

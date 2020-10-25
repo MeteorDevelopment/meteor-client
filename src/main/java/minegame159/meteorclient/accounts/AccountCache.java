@@ -65,9 +65,9 @@ public class AccountCache implements ISerializable<AccountCache> {
             }
 
             if (steve) {
-                STEVE = new ByteTexture(8, 8, head);
+                STEVE = new ByteTexture(8, 8, head, false);
             } else {
-                headTexture = new ByteTexture(8, 8, head);
+                headTexture = new ByteTexture(8, 8, head, false);
             }
 
             return true;

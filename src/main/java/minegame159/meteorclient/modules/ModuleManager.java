@@ -16,6 +16,7 @@ import minegame159.meteorclient.modules.movement.*;
 import minegame159.meteorclient.modules.player.*;
 import minegame159.meteorclient.modules.render.*;
 import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.KeyAction;
 import minegame159.meteorclient.utils.Savable;
@@ -107,11 +108,13 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         List<Pair<Module, Integer>> modules = new ArrayList<>();
 
         for (Module module : this.modules.values()) {
-            for (Setting<?> setting : module.settings) {
-                int words = Utils.search(setting.title, text);
-                if (words > 0) {
-                    modules.add(new Pair<>(module, words));
-                    break;
+            for (SettingGroup sg : module.settings) {
+                for (Setting<?> setting : sg) {
+                    int words = Utils.search(setting.title, text);
+                    if (words > 0) {
+                        modules.add(new Pair<>(module, words));
+                        break;
+                    }
                 }
             }
         }

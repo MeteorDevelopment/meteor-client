@@ -10,7 +10,7 @@ public class BoolSetting extends Setting<Boolean> {
         super(name, description, defaultValue, onChanged, onModuleActivated);
 
         widget = new WCheckbox(get());
-        ((WCheckbox) widget).action = checkbox -> set(checkbox.checked);
+        ((WCheckbox) widget).action = () -> set(((WCheckbox) widget).checked);
     }
 
     @Override

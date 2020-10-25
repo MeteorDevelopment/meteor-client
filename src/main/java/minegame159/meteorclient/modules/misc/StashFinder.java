@@ -10,10 +10,10 @@ import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.ChunkDataEvent;
-import minegame159.meteorclient.gui.screens.StashRecorderChunkScreen;
-import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.gui.screens.StashFinderChunkScreen;
+import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.block.entity.*;
@@ -140,7 +140,7 @@ private final Setting<Integer> minimumDistance = sgGeneral.add(new IntSetting.Bu
         WTable table = new WTable();
         if (chunks.size() > 0) list.add(table);
 
-        clear.action = button -> {
+        clear.action = () -> {
             chunks.clear();
             table.clear();
         };
@@ -157,13 +157,13 @@ private final Setting<Integer> minimumDistance = sgGeneral.add(new IntSetting.Bu
             table.add(new WLabel("Total: " + chunk.getTotal()));
 
             WButton open = table.add(new WButton("Open")).getWidget();
-            open.action = button -> mc.openScreen(new StashRecorderChunkScreen(chunk));
+            open.action = () -> mc.openScreen(new StashFinderChunkScreen(chunk));
 
             WButton gotoBtn = table.add(new WButton("Goto")).getWidget();
-            gotoBtn.action = button -> BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalXZ(chunk.x, chunk.z));
+            gotoBtn.action = () -> BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalXZ(chunk.x, chunk.z));
 
             WMinus remove = table.add(new WMinus()).getWidget();
-            remove.action = minus -> {
+            remove.action = () -> {
                 if (chunks.remove(chunk)) {
                     table.clear();
                     fillTable(table);

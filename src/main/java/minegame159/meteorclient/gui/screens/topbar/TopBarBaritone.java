@@ -1,510 +1,96 @@
 package minegame159.meteorclient.gui.screens.topbar;
 
 import baritone.api.BaritoneAPI;
-import baritone.api.Settings;
-import minegame159.meteorclient.gui.TopBarType;
-import minegame159.meteorclient.gui.widgets.WWindow;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.Color;
 
-public class TopBarBaritone extends TopBarScreen {
+import java.awt.*;
+import java.lang.reflect.Field;
+
+public class TopBarBaritone extends TopBarWindowScreen {
     public TopBarBaritone() {
         super(TopBarType.Baritone);
+    }
 
-        Settings bS = BaritoneAPI.getSettings();
-        minegame159.meteorclient.settings.Settings s = new minegame159.meteorclient.settings.Settings();
-        
-        SettingGroup sgAllow = s.createGroup("Allow");
-        SettingGroup sgAssume = s.createGroup("Assume");
-        SettingGroup sgRender = s.createGroup("Render");
-        SettingGroup sgPenalties = s.createGroup("Penalties");
-        SettingGroup sgColors = s.createGroup("Colors");
-        SettingGroup sgOther = s.createGroup("Other");
+    @Override
+    protected void initWidgets() {
+        Settings s = new Settings();
 
-        // Allow
-        sgAllow.add(new BoolSetting.Builder()
-                .name("allow-break")
-                .description("Allow Baritone to break blocks.")
-                .defaultValue(bS.allowBreak.defaultValue)
-                .onChanged(aBoolean -> bS.allowBreak.value = aBoolean)
-                .onModuleActivated(booleanSetting -> booleanSetting.set(bS.allowBreak.value))
-                .build()
-        );
-        sgAllow.add(new BoolSetting.Builder()
-                .name("allow-sprint")
-                .description("Allow Baritone to sprint.")
-                .defaultValue(bS.allowSprint.defaultValue)
-                .onChanged(aBoolean -> bS.allowSprint.value = aBoolean)
-                .onModuleActivated(booleanSetting -> booleanSetting.set(bS.allowSprint.value))
-                .build()
-        );
-        sgAllow.add(new BoolSetting.Builder()
-                .name("allow-place")
-                .description("Allow Baritone to place blocks.")
-                .defaultValue(bS.allowPlace.defaultValue)
-                .onChanged(aBoolean -> bS.allowPlace.value = aBoolean)
-                .onModuleActivated(booleanSetting -> booleanSetting.set(bS.allowPlace.value))
-                .build()
-        );
-        sgAllow.add(new BoolSetting.Builder()
-                .name("allow-inventory")
-                .description("Allow Baritone to move items in your inventory to your hotbar.")
-                .defaultValue(bS.allowInventory.defaultValue)
-                .onChanged(aBoolean -> bS.allowInventory.value = aBoolean)
-                .onModuleActivated(booleanSetting -> booleanSetting.set(bS.allowInventory.value))
-                .build()
-        );
-        sgAllow.add(new BoolSetting.Builder()
-                .name("allow-parkour")
-                .description("Allow Baritone to perform parkour.")
-                .defaultValue(bS.allowParkour.defaultValue)
-                .onChanged(aBoolean -> bS.allowParkour.value = aBoolean)
-                .onModuleActivated(booleanSetting -> booleanSetting.set(bS.allowParkour.value))
-                .build()
-        );
-        sgAllow.add(new BoolSetting.Builder()
-                .name("allow-parkour-place")
-                .description("Allow Baritone to place blocks to perform parkour.")
-                .defaultValue(bS.allowParkourPlace.defaultValue)
-                .onChanged(aBoolean -> bS.allowParkourPlace.value = aBoolean)
-                .onModuleActivated(booleanSetting -> booleanSetting.set(bS.allowParkourPlace.value))
-                .build()
-        );
-        sgAllow.add(new BoolSetting.Builder()
-                .name("allow-water-bucket-fall")
-                .description("Allow Baritone to fall arbitrary distances and place a water bucket beneath it. Reliability: questionable.")
-                .defaultValue(bS.allowWaterBucketFall.value)
-                .onChanged(aBoolean -> bS.allowWaterBucketFall.value = aBoolean)
-                .onModuleActivated(booleanSetting -> booleanSetting.set(bS.allowWaterBucketFall.value))
-                .build()
-        );
+        SettingGroup sgBool = s.createGroup("Checkboxes");
+        SettingGroup sgDouble = s.createGroup("Numbers");
+        SettingGroup sgInt = s.createGroup("Whole Numbers");
+        SettingGroup sgColor = s.createGroup("Colors");
 
-        // Assume
-        sgAssume.add(new BoolSetting.Builder()
-                .name("assume-walk-on-water")
-                .description("Allow Baritone to assume it can walk on still water just like any other block. This functionality is assumed to be provided by a separate library that might have imported Baritone.")
-                .defaultValue(bS.assumeWalkOnWater.defaultValue)
-                .onChanged(aBoolean -> bS.assumeWalkOnWater.value = aBoolean)
-                .onModuleActivated(booleanSetting -> booleanSetting.set(bS.assumeWalkOnWater.value))
-                .build()
-        );
-        sgAssume.add(new BoolSetting.Builder()
-                .name("assume-walk-on-lava")
-                .description("If you have Fire Resistance and Jesus then I guess you could turn this on lol.")
-                .defaultValue(bS.assumeWalkOnLava.defaultValue)
-                .onChanged(aBoolean -> bS.assumeWalkOnLava.value = aBoolean)
-                .onModuleActivated(booleanSetting -> booleanSetting.set(bS.assumeWalkOnLava.value))
-                .build()
-        );
-        sgAssume.add(new BoolSetting.Builder()
-                .name("assume-step")
-                .description("Assume step functionality; don't jump on an Ascend.")
-                .defaultValue(bS.assumeStep.defaultValue)
-                .onChanged(aBoolean -> bS.assumeStep.value = aBoolean)
-                .onModuleActivated(booleanSetting -> booleanSetting.set(bS.assumeStep.value))
-                .build()
-        );
-        sgAssume.add(new BoolSetting.Builder()
-                .name("assume-safe-walk")
-                .description("Assume safe walk functionality; don't sneak on a backplace traverse.")
-                .defaultValue(bS.assumeSafeWalk.defaultValue)
-                .onChanged(aBoolean -> bS.assumeSafeWalk.value = aBoolean)
-                .onModuleActivated(booleanSetting -> booleanSetting.set(bS.assumeSafeWalk.value))
-                .build()
-        );
+        try {
+            Class<? extends baritone.api.Settings> klass = BaritoneAPI.getSettings().getClass();
+            for (Field field : klass.getDeclaredFields()) {
+                Object obj = field.get(BaritoneAPI.getSettings());
+                if (!(obj instanceof baritone.api.Settings.Setting)) continue;
 
-        // Render
-        sgRender.add(new BoolSetting.Builder()
-                .name("render-path")
-                .description("Render the path.")
-                .defaultValue(bS.renderPath.defaultValue)
-                .onChanged(aBoolean -> bS.renderPath.value = aBoolean)
-                .onModuleActivated(booleanSetting -> booleanSetting.set(bS.renderPath.value))
-                .build()
-        );
-        sgRender.add(new BoolSetting.Builder()
-                .name("render-path-as-line")
-                .description("Render the path as line instead of a frickin thingy.")
-                .defaultValue(bS.renderPathAsLine.defaultValue)
-                .onChanged(aBoolean -> bS.renderPathAsLine.value = aBoolean)
-                .onModuleActivated(booleanSetting -> booleanSetting.set(bS.renderPathAsLine.value))
-                .build()
-        );
-        sgRender.add(new BoolSetting.Builder()
-                .name("render-goal")
-                .description("Render the goal.")
-                .defaultValue(bS.renderGoal.defaultValue)
-                .onChanged(aBoolean -> bS.renderGoal.value = aBoolean)
-                .onModuleActivated(booleanSetting -> booleanSetting.set(bS.renderGoal.value))
-                .build()
-        );
-        sgRender.add(new BoolSetting.Builder()
-                .name("render-selection-boxes")
-                .description("Render the selection boxes.")
-                .defaultValue(bS.renderSelectionBoxes.defaultValue)
-                .onChanged(aBoolean -> bS.renderSelectionBoxes.value = aBoolean)
-                .onModuleActivated(booleanSetting -> booleanSetting.set(bS.renderSelectionBoxes.value))
-                .build()
-        );
-        sgRender.add(new BoolSetting.Builder()
-                .name("render-goal-ignore-depth")
-                .description("Ignore depth when rendering the goal")
-                .defaultValue(bS.renderGoalIgnoreDepth.defaultValue)
-                .onChanged(aBoolean -> bS.renderGoalIgnoreDepth.value = aBoolean)
-                .onModuleActivated(booleanSetting -> booleanSetting.set(bS.renderGoalIgnoreDepth.value))
-                .build()
-        );
-        sgRender.add(new BoolSetting.Builder()
-                .name("render-goal-XZ-beacon")
-                .description("Renders X/Z type Goals with the vanilla beacon beam effect. Combining this with renderGoalIgnoreDepth will cause strange render clipping.")
-                .defaultValue(bS.renderGoalXZBeacon.defaultValue)
-                .onChanged(aBoolean -> bS.renderGoalXZBeacon.value = aBoolean)
-                .onModuleActivated(booleanSetting -> booleanSetting.set(bS.renderGoalXZBeacon.value))
-                .build()
-        );
-        sgRender.add(new BoolSetting.Builder()
-                .name("render-path-ignore-deph")
-                .description("Ignore path when rendering the path.")
-                .defaultValue(bS.renderPathIgnoreDepth.defaultValue)
-                .onChanged(aBoolean -> bS.renderPathIgnoreDepth.value = aBoolean)
-                .onModuleActivated(booleanSetting -> booleanSetting.set(bS.renderPathIgnoreDepth.value))
-                .build()
-        );
-        sgRender.add(new BoolSetting.Builder()
-                .name("render-selection")
-                .description("Render the selections.")
-                .defaultValue(bS.renderSelection.defaultValue)
-                .onChanged(aBoolean -> bS.renderSelection.value = aBoolean)
-                .onModuleActivated(booleanSetting -> booleanSetting.set(bS.renderSelection.value))
-                .build()
-        );
-        sgRender.add(new BoolSetting.Builder()
-                .name("render-selection-ignore-depth")
-                .description("Ignore depth when rendering selection.")
-                .defaultValue(bS.renderSelectionBoxesIgnoreDepth.defaultValue)
-                .onChanged(aBoolean -> bS.renderSelectionIgnoreDepth.value = aBoolean)
-                .onModuleActivated(booleanSetting -> booleanSetting.set(bS.renderSelectionIgnoreDepth.value))
-                .build()
-        );
-        sgRender.add(new BoolSetting.Builder()
-                .name("render-selection-corners.")
-                .description("Render the selection corners.")
-                .defaultValue(bS.renderSelectionCorners.defaultValue)
-                .onChanged(aBoolean -> bS.renderSelectionCorners.value = aBoolean)
-                .onModuleActivated(booleanSetting -> booleanSetting.set(bS.renderSelectionCorners.value))
-                .build()
-        );
+                baritone.api.Settings.Setting setting = (baritone.api.Settings.Setting<?>) obj;
+                Object value = setting.value;
 
-        // Penalties
-        sgPenalties.add(new DoubleSetting.Builder()
-                .name("block-placement-penalty")
-                .description("Decrease to make Baritone more often consider would require placing blocks.")
-                .defaultValue(bS.blockPlacementPenalty.defaultValue)
-                .onChanged(aDouble -> bS.blockPlacementPenalty.value = aDouble)
-                .onModuleActivated(doubleSetting -> doubleSetting.set(bS.blockPlacementPenalty.value))
-                .min(0)
-                .build()
-        );
-        sgPenalties.add(new DoubleSetting.Builder()
-                .name("block-break-additional-penalty")
-                .description("This is just a tiebreaker to make it less likely to break blocks if it can avoid it.")
-                .defaultValue(bS.blockBreakAdditionalPenalty.defaultValue)
-                .onChanged(aDouble -> bS.blockBreakAdditionalPenalty.value = aDouble)
-                .onModuleActivated(doubleSetting -> doubleSetting.set(bS.blockBreakAdditionalPenalty.value))
-                .min(0)
-                .build()
-        );
-        sgPenalties.add(new DoubleSetting.Builder()
-                .name("jump-penalty")
-                .description("Additional penalty for hitting the space bar (ascend, pillar, or parkour) because it uses hunger.")
-                .defaultValue(bS.jumpPenalty.defaultValue)
-                .onChanged(aDouble -> bS.jumpPenalty.value = aDouble)
-                .onModuleActivated(doubleSetting -> doubleSetting.set(bS.jumpPenalty.value))
-                .min(0)
-                .build()
-        );
-        sgPenalties.add(new DoubleSetting.Builder()
-                .name("walk-on-water-penalty")
-                .description("Walking on water uses up hunger really quick, so penalize it.")
-                .defaultValue(bS.walkOnWaterOnePenalty.defaultValue)
-                .onChanged(aDouble -> bS.walkOnWaterOnePenalty.value = aDouble)
-                .onModuleActivated(doubleSetting -> doubleSetting.set(bS.walkOnWaterOnePenalty.value))
-                .min(0)
-                .build()
-        );
+                if (value instanceof Boolean) {
+                    sgBool.add(new BoolSetting.Builder()
+                            .name(setting.getName())
+                            .description(setting.getName())
+                            .defaultValue((boolean) setting.defaultValue)
+                            .onChanged(aBoolean -> setting.value = aBoolean)
+                            .onModuleActivated(booleanSetting -> booleanSetting.set((Boolean) setting.value))
+                            .build()
+                    );
+                } else if (value instanceof Double) {
+                    sgDouble.add(new DoubleSetting.Builder()
+                            .name(setting.getName())
+                            .description(setting.getName())
+                            .defaultValue((double) setting.defaultValue)
+                            .onChanged(aDouble -> setting.value = aDouble)
+                            .onModuleActivated(doubleSetting -> doubleSetting.set((Double) setting.value))
+                            .build()
+                    );
+                } else if (value instanceof Float) {
+                    sgDouble.add(new DoubleSetting.Builder()
+                            .name(setting.getName())
+                            .description(setting.getName())
+                            .defaultValue(((Float) setting.defaultValue).doubleValue())
+                            .onChanged(aDouble -> setting.value = aDouble.floatValue())
+                            .onModuleActivated(doubleSetting -> doubleSetting.set(((Float) setting.value).doubleValue()))
+                            .build()
+                    );
+                } else if (value instanceof Integer) {
+                    sgInt.add(new IntSetting.Builder()
+                            .name(setting.getName())
+                            .description(setting.getName())
+                            .defaultValue((int) setting.defaultValue)
+                            .onChanged(integer -> setting.value = integer)
+                            .onModuleActivated(integerSetting -> integerSetting.set((Integer) setting.value))
+                            .build()
+                    );
+                } else if (value instanceof Long) {
+                    sgInt.add(new IntSetting.Builder()
+                            .name(setting.getName())
+                            .description(setting.getName())
+                            .defaultValue(((Long) setting.defaultValue).intValue())
+                            .onChanged(integer -> setting.value = integer.longValue())
+                            .onModuleActivated(integerSetting -> integerSetting.set(((Long) setting.value).intValue()))
+                            .build()
+                    );
+                } else if (value instanceof Color) {
+                    Color c = (Color) setting.value;
 
-        // Colors
-        sgColors.add(new ColorSetting.Builder()
-                .name("color-current-path")
-                .description("The color of the current path.")
-                .defaultValue(new Color(bS.colorCurrentPath.defaultValue))
-                .onChanged(color1 -> bS.colorCurrentPath.value = new java.awt.Color(color1.getPacked(), true))
-                .onModuleActivated(colorSetting -> colorSetting.set(new Color(bS.colorCurrentPath.value.getRGB())))
-                .build()
-        );
-        sgColors.add(new ColorSetting.Builder()
-                .name("color-next-path")
-                .description("The color of the next path.")
-                .defaultValue(new Color(bS.colorNextPath.defaultValue))
-                .onChanged(color1 -> bS.colorNextPath.value = new java.awt.Color(color1.getPacked(), true))
-                .onModuleActivated(colorSetting -> colorSetting.set(new Color(bS.colorNextPath.value.getRGB())))
-                .build()
-        );
-        sgColors.add(new ColorSetting.Builder()
-                .name("color-blocks-to-break")
-                .description("The color of the blocks to break.")
-                .defaultValue(new Color(bS.colorBlocksToBreak.defaultValue))
-                .onChanged(color1 -> bS.colorBlocksToBreak.value = new java.awt.Color(color1.getPacked(), true))
-                .onModuleActivated(colorSetting -> colorSetting.set(new Color(bS.colorBlocksToBreak.value.getRGB())))
-                .build()
-        );
-        sgColors.add(new ColorSetting.Builder()
-                .name("color-blocks-to-place")
-                .description("The color of the blocks to place.")
-                .defaultValue(new Color(bS.colorBlocksToPlace.defaultValue))
-                .onChanged(color1 -> bS.colorBlocksToPlace.value = new java.awt.Color(color1.getPacked(), true))
-                .onModuleActivated(colorSetting -> colorSetting.set(new Color(bS.colorBlocksToPlace.value.getRGB())))
-                .build()
-        );
-        sgColors.add(new ColorSetting.Builder()
-                .name("color-blocks-to-walk-into")
-                .description("The color of the blocks to walk into.")
-                .defaultValue(new Color(bS.colorBlocksToWalkInto.defaultValue))
-                .onChanged(color1 -> bS.colorBlocksToWalkInto.value = new java.awt.Color(color1.getPacked(), true))
-                .onModuleActivated(colorSetting -> colorSetting.set(new Color(bS.colorBlocksToWalkInto.value.getRGB())))
-                .build()
-        );
-        sgColors.add(new ColorSetting.Builder()
-                .name("color-best-path-so-far")
-                .description("The color of the best path so far.")
-                .defaultValue(new Color(bS.colorBestPathSoFar.defaultValue))
-                .onChanged(color1 -> bS.colorBestPathSoFar.value = new java.awt.Color(color1.getPacked(), true))
-                .onModuleActivated(colorSetting -> colorSetting.set(new Color(bS.colorBestPathSoFar.value.getRGB())))
-                .build()
-        );
-        sgColors.add(new ColorSetting.Builder()
-                .name("color-most-recent-considered")
-                .description("The color of the most recent considered node.")
-                .defaultValue(new Color(bS.colorMostRecentConsidered.defaultValue))
-                .onChanged(color1 -> bS.colorMostRecentConsidered.value = new java.awt.Color(color1.getPacked(), true))
-                .onModuleActivated(colorSetting -> colorSetting.set(new Color(bS.colorMostRecentConsidered.value.getRGB())))
-                .build()
-        );
-        sgColors.add(new ColorSetting.Builder()
-                .name("color-goal-box")
-                .description("The color of the goal box.")
-                .defaultValue(new Color(bS.colorGoalBox.defaultValue))
-                .onChanged(color1 -> bS.colorGoalBox.value = new java.awt.Color(color1.getPacked(), true))
-                .onModuleActivated(colorSetting -> colorSetting.set(new Color(bS.colorGoalBox.value.getRGB())))
-                .build()
-        );
-        sgColors.add(new ColorSetting.Builder()
-                .name("color-inverted-goal-box")
-                .description("The color of the goal box when it's inverted.")
-                .defaultValue(new Color(bS.colorInvertedGoalBox.defaultValue))
-                .onChanged(color1 -> bS.colorInvertedGoalBox.value = new java.awt.Color(color1.getPacked(), true))
-                .onModuleActivated(colorSetting -> colorSetting.set(new Color(bS.colorInvertedGoalBox.value.getRGB())))
-                .build()
-        );
-        sgColors.add(new ColorSetting.Builder()
-                .name("color-selection")
-                .description("The color of all selections.")
-                .defaultValue(new Color(bS.colorSelection.defaultValue))
-                .onChanged(color1 -> bS.colorSelection.value = new java.awt.Color(color1.getPacked(), true))
-                .onModuleActivated(colorSetting -> colorSetting.set(new Color(bS.colorSelection.value.getRGB())))
-                .build()
-        );
-        sgColors.add(new ColorSetting.Builder()
-                .name("color-selection-pos-1")
-                .description("The color of the selection pos 1.")
-                .defaultValue(new Color(bS.colorSelectionPos1.defaultValue))
-                .onChanged(color1 -> bS.colorSelectionPos1.value = new java.awt.Color(color1.getPacked(), true))
-                .onModuleActivated(colorSetting -> colorSetting.set(new Color(bS.colorSelectionPos1.value.getRGB())))
-                .build()
-        );
-        sgColors.add(new ColorSetting.Builder()
-                .name("color-selection-pos-2")
-                .description("The color of the selection pos 2.")
-                .defaultValue(new Color(bS.colorSelectionPos2.defaultValue))
-                .onChanged(color1 -> bS.colorSelectionPos2.value = new java.awt.Color(color1.getPacked(), true))
-                .onModuleActivated(colorSetting -> colorSetting.set(new Color(bS.colorSelectionPos2.value.getRGB())))
-                .build()
-        );
+                    sgColor.add(new ColorSetting.Builder()
+                            .name(setting.getName())
+                            .description(setting.getName())
+                            .defaultValue(new minegame159.meteorclient.utils.Color(c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha()))
+                            .onChanged(color -> setting.value = new Color(color.r, color.g, color.b, color.a))
+                            .onModuleActivated(colorSetting -> colorSetting.set(new minegame159.meteorclient.utils.Color(c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha())))
+                            .build()
+                    );
+                }
+            }
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
 
-        // Other
-        sgOther.add(new BoolSetting.Builder()
-                .name("legit-mine")
-                .description("Disallow MineBehavior from using X-Ray to see where the ores are. Turn this option on to force it to mine \"legit\" where it will only mine an ore once it can actually see it, so it won't do or know anything that a normal player couldn't. If you don't want it to look like you're X-Raying, turn this on.")
-                .defaultValue(bS.legitMine.defaultValue)
-                .onChanged(aBoolean -> bS.legitMine.value = aBoolean)
-                .onModuleActivated(booleanSetting -> booleanSetting.set(bS.legitMine.value))
-                .build()
-        );
-        sgOther.add(new BoolSetting.Builder()
-                .name("backfill")
-                .description("Fill in blocks behind you")
-                .defaultValue(bS.backfill.defaultValue)
-                .onChanged(aBoolean -> bS.backfill.value = aBoolean)
-                .onModuleActivated(booleanSetting -> booleanSetting.set(bS.backfill.value))
-                .build()
-        );
-        sgOther.add(new IntSetting.Builder()
-                .name("follow-radius")
-                .description("The radius (for the GoalNear) of how close to your target position you actually have to be.")
-                .defaultValue(bS.followRadius.defaultValue)
-                .onChanged(integer -> bS.followRadius.value = integer)
-                .onModuleActivated(doubleSetting -> doubleSetting.set(bS.followRadius.value))
-                .min(0)
-                .build()
-        );
-        sgOther.add(new BoolSetting.Builder()
-                .name("build-in-layers")
-                .description("Don't consider the next layer in builder until the current one is done.")
-                .defaultValue(bS.buildInLayers.defaultValue)
-                .onChanged(aBoolean -> bS.buildInLayers.value = aBoolean)
-                .onModuleActivated(booleanSetting -> booleanSetting.set(bS.buildInLayers.value))
-                .build()
-        );
-        sgOther.add(new BoolSetting.Builder()
-                .name("layer-order")
-                .description("false = build from bottom to top, true = build from top to bottom")
-                .defaultValue(bS.layerOrder.defaultValue)
-                .onChanged(aBoolean -> bS.layerOrder.value = aBoolean)
-                .onModuleActivated(booleanSetting -> booleanSetting.set(bS.layerOrder.value))
-                .build()
-        );
-        sgOther.add(new BoolSetting.Builder()
-                .name("mine-scan-dropped-items")
-                .description("While mining, should it also consider dropped items of the correct type as a pathing destination (as well as ore blocks)?")
-                .defaultValue(bS.mineScanDroppedItems.defaultValue)
-                .onChanged(aBoolean -> bS.mineScanDroppedItems.value = aBoolean)
-                .onModuleActivated(booleanSetting -> booleanSetting.set(bS.mineScanDroppedItems.value))
-                .build()
-        );
-        sgOther.add(new BoolSetting.Builder()
-                .name("anti-cheat-compatibility")
-                .description("Will cause some minor behavioral differences to ensure that Baritone works on anticheats.")
-                .defaultValue(bS.antiCheatCompatibility.defaultValue)
-                .onChanged(aBoolean -> bS.antiCheatCompatibility.value = aBoolean)
-                .onModuleActivated(booleanSetting -> booleanSetting.set(bS.antiCheatCompatibility.value))
-                .build()
-        );
-        sgOther.add(new BoolSetting.Builder()
-                .name("censor-coordinates")
-                .description("Censor coordinates in goals and block positions.")
-                .defaultValue(bS.censorCoordinates.defaultValue)
-                .onChanged(aBoolean -> bS.censorCoordinates.value = aBoolean)
-                .onModuleActivated(booleanSetting -> booleanSetting.set(bS.censorCoordinates.value))
-                .build()
-        );
-        sgOther.add(new BoolSetting.Builder()
-                .name("censor-ran-commands")
-                .description("Censor arguments to ran commands, to hide, for example, coordinates to @goal.")
-                .defaultValue(bS.censorRanCommands.defaultValue)
-                .onChanged(aBoolean -> bS.censorRanCommands.value = aBoolean)
-                .onModuleActivated(booleanSetting -> booleanSetting.set(bS.censorRanCommands.value))
-                .build()
-        );
-        sgOther.add(new BoolSetting.Builder()
-                .name("container-memory")
-                .description("Remember the contents of containers (chests, echests, furnaces).")
-                .defaultValue(bS.containerMemory.defaultValue)
-                .onChanged(aBoolean -> bS.containerMemory.value = aBoolean)
-                .onModuleActivated(booleanSetting -> booleanSetting.set(bS.containerMemory.value))
-                .build()
-        );
-        sgOther.add(new BoolSetting.Builder()
-                .name("desktop-notifications")
-                .description("Desktop notifications.")
-                .defaultValue(bS.desktopNotifications.defaultValue)
-                .onChanged(aBoolean -> bS.desktopNotifications.value = aBoolean)
-                .onModuleActivated(booleanSetting -> booleanSetting.set(bS.desktopNotifications.value))
-                .build()
-        );
-        sgOther.add(new BoolSetting.Builder()
-                .name("echo-commands")
-                .description("Echo commands to chat when they are run.")
-                .defaultValue(bS.echoCommands.defaultValue)
-                .onChanged(aBoolean -> bS.echoCommands.value = aBoolean)
-                .onModuleActivated(booleanSetting -> booleanSetting.set(bS.echoCommands.value))
-                .build()
-        );
-        sgOther.add(new BoolSetting.Builder()
-                .name("enter-portal.")
-                .description("When running a goto towards a nether portal block, walk all the way into the portal instead of stopping one block before.")
-                .defaultValue(bS.enterPortal.defaultValue)
-                .onChanged(aBoolean -> bS.enterPortal.value = aBoolean)
-                .onModuleActivated(booleanSetting -> booleanSetting.set(bS.enterPortal.value))
-                .build()
-        );
-        sgOther.add(new BoolSetting.Builder()
-                .name("free-look")
-                .description("Move without having to force the client-sided rotations.")
-                .defaultValue(bS.freeLook.defaultValue)
-                .onChanged(aBoolean -> bS.freeLook.value = aBoolean)
-                .onModuleActivated(booleanSetting -> booleanSetting.set(bS.freeLook.value))
-                .build()
-        );
-        sgOther.add(new BoolSetting.Builder()
-                .name("map-art-mode")
-                .description("Build in map art mode, which makes baritone only care about the top block in each column.")
-                .defaultValue(bS.mapArtMode.defaultValue)
-                .onChanged(aBoolean -> bS.mapArtMode.value = aBoolean)
-                .onModuleActivated(booleanSetting -> booleanSetting.set(bS.mapArtMode.value))
-                .build()
-        );
-        sgOther.add(new IntSetting.Builder()
-                .name("max-fall-height-bucket")
-                .description("How far are you allowed to fall onto solid ground (with a water bucket)? It's not that reliable, so I've set it below what would kill an unarmored player (23).")
-                .defaultValue(bS.maxFallHeightBucket.defaultValue)
-                .onChanged(integer -> bS.maxFallHeightBucket.value = integer)
-                .onModuleActivated(doubleSetting -> doubleSetting.set(bS.maxFallHeightBucket.value))
-                .min(0)
-                .build()
-        );
-        sgOther.add(new IntSetting.Builder()
-                .name("max-fall-height-no-water")
-                .description("How far are you allowed to fall onto solid ground (without a water bucket)? 3 won't deal any damage.")
-                .defaultValue(bS.maxFallHeightNoWater.defaultValue)
-                .onChanged(integer -> bS.maxFallHeightNoWater.value = integer)
-                .onModuleActivated(doubleSetting -> doubleSetting.set(bS.maxFallHeightNoWater.value))
-                .min(0)
-                .build()
-        );
-        sgOther.add(new BoolSetting.Builder()
-                .name("prefer-silk-touch")
-                .description("Always prefer silk touch tools over regular tools.")
-                .defaultValue(bS.preferSilkTouch.defaultValue)
-                .onChanged(aBoolean -> bS.preferSilkTouch.value = aBoolean)
-                .onModuleActivated(booleanSetting -> booleanSetting.set(bS.preferSilkTouch.value))
-                .build()
-        );
-        sgOther.add(new BoolSetting.Builder()
-                .name("replant-crops")
-                .description("Replant normal Crops while farming and leave cactus and sugarcane to regrow.")
-                .defaultValue(bS.replantCrops.defaultValue)
-                .onChanged(aBoolean -> bS.replantCrops.value = aBoolean)
-                .onModuleActivated(booleanSetting -> booleanSetting.set(bS.replantCrops.value))
-                .build()
-        );
-        sgOther.add(new BoolSetting.Builder()
-                .name("replant-nether-wart")
-                .description("Replant nether wart while farming.")
-                .defaultValue(bS.replantNetherWart.defaultValue)
-                .onChanged(aBoolean -> bS.replantNetherWart.value = aBoolean)
-                .onModuleActivated(booleanSetting -> booleanSetting.set(bS.replantNetherWart.value))
-                .build()
-        );
-        sgOther.add(new BoolSetting.Builder()
-                .name("sprint-in-water")
-                .description("Continue sprinting while in water.")
-                .defaultValue(bS.sprintInWater.defaultValue)
-                .onChanged(aBoolean -> bS.sprintInWater.value = aBoolean)
-                .onModuleActivated(booleanSetting -> booleanSetting.set(bS.sprintInWater.value))
-                .build()
-        );
-
-        WWindow window = add(new WWindow(title, true)).centerXY().getWidget();
-        window.add(s.createTable()).fillX().expandX();
+        add(s.createTable()).fillX().expandX();
     }
 }

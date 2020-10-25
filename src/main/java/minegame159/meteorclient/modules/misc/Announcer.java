@@ -7,10 +7,7 @@ import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.*;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
-import minegame159.meteorclient.settings.DoubleSetting;
-import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.settings.StringSetting;
+import minegame159.meteorclient.settings.*;
 import net.minecraft.block.Block;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.item.Item;
@@ -60,15 +57,25 @@ public class Announcer extends ToggleModule {
     private abstract class Feature implements Listenable {
         protected SettingGroup sg;
 
+        private final Setting<Boolean> enabled;
+
         protected Feature(String name, String enabledName, String enabledDescription) {
-            this.sg = settings.createGroup(name, enabledName, enabledDescription, true, settingGroup -> {
-                if (isActive() && isEnabled()) {
-                    MeteorClient.EVENT_BUS.subscribe(this);
-                    reset();
-                } else if (isActive() && !isEnabled()) {
-                    MeteorClient.EVENT_BUS.unsubscribe(this);
-                }
-            });
+            this.sg = settings.createGroup(name);
+
+            enabled = sg.add(new BoolSetting.Builder()
+                    .name(enabledName)
+                    .description(enabledDescription)
+                    .defaultValue(true)
+                    .onChanged(aBoolean -> {
+                        if (isActive() && isEnabled()) {
+                            MeteorClient.EVENT_BUS.subscribe(this);
+                            reset();
+                        } else if (isActive() && !isEnabled()) {
+                            MeteorClient.EVENT_BUS.unsubscribe(this);
+                        }
+                    })
+                    .build()
+            );
         }
 
         abstract void reset();
@@ -76,7 +83,7 @@ public class Announcer extends ToggleModule {
         abstract void tick();
 
         boolean isEnabled() {
-            return sg.isEnabled();
+            return enabled.get();
         }
     }
 

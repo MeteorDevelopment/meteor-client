@@ -6,16 +6,17 @@ import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listenable;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.accounts.AccountManager;
-import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.commands.CommandManager;
 import minegame159.meteorclient.commands.commands.Ignore;
 import minegame159.meteorclient.events.TickEvent;
-import minegame159.meteorclient.gui.GuiThings;
-import minegame159.meteorclient.gui.screens.topbar.TopBarModules;
+import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.macros.MacroManager;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.misc.DiscordPresence;
+import minegame159.meteorclient.gui.GuiKeyEvents;
+import minegame159.meteorclient.gui.screens.topbar.TopBarModules;
 import minegame159.meteorclient.rendering.MFont;
+import minegame159.meteorclient.rendering.MyFont;
 import minegame159.meteorclient.utils.*;
 import minegame159.meteorclient.waypoints.Waypoints;
 import net.fabricmc.api.ClientModInitializer;
@@ -31,6 +32,7 @@ public class MeteorClient implements ClientModInitializer, Listenable {
     public static MeteorClient INSTANCE;
     public static final EventBus EVENT_BUS = new EventManager();
     public static MFont FONT, FONT_2X;
+    public static MyFont FONT_GUI, FONT_GUI_TITLE;
     public static boolean IS_DISCONNECTING;
     public static final File FOLDER = new File(FabricLoader.getInstance().getGameDir().toString(), "meteor-client");
 
@@ -101,7 +103,7 @@ public class MeteorClient implements ClientModInitializer, Listenable {
             screenToOpen = null;
         }
 
-        if (KeyBinds.OPEN_CLICK_GUI.isPressed() && mc.currentScreen == null && GuiThings.postKeyEvents()) {
+        if (KeyBinds.OPEN_CLICK_GUI.isPressed() && mc.currentScreen == null && GuiKeyEvents.postKeyEvents()) {
             openClickGui();
         }
 
@@ -143,6 +145,8 @@ public class MeteorClient implements ClientModInitializer, Listenable {
             FONT = new MFont(Font.createFont(Font.TRUETYPE_FONT, fontFile).deriveFont(16f), true, true);
             FONT_2X = new MFont(Font.createFont(Font.TRUETYPE_FONT, fontFile).deriveFont(16f * 2), true, true);
             FONT_2X.scale = 0.5;
+            FONT_GUI = new MyFont(fontFile, 18);
+            FONT_GUI_TITLE = new MyFont(fontFile, 22);
         } catch (FontFormatException | IOException e) {
             e.printStackTrace();
         }

@@ -1,74 +1,47 @@
 package minegame159.meteorclient.gui.screens.topbar;
 
 import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listenable;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.MeteorClient;
+import minegame159.meteorclient.events.FriendListChangedEvent;
+import minegame159.meteorclient.friends.EditFriendScreen;
 import minegame159.meteorclient.friends.Friend;
 import minegame159.meteorclient.friends.FriendManager;
-import minegame159.meteorclient.events.FriendListChangedEvent;
-import minegame159.meteorclient.gui.TopBarType;
-import minegame159.meteorclient.gui.renderer.GuiRenderer;
-import minegame159.meteorclient.gui.screens.EditFriendScreen;
 import minegame159.meteorclient.gui.widgets.*;
+import net.minecraft.client.MinecraftClient;
 
-public class TopBarFriends extends TopBarScreen implements Listenable {
-    private WWindow window;
-
+public class TopBarFriends extends TopBarWindowScreen {
     public TopBarFriends() {
         super(TopBarType.Friends);
-
-        window = add(new WWindow(title, true)).centerXY().getWidget();
-
-        initWidgets();
     }
 
     @Override
-    public void clear() {
-        window.clear();
-    }
-
-    @Override
-    protected void init() {
-        super.init();
-        MeteorClient.EVENT_BUS.subscribe(this);
-    }
-
-    private void initWidgets() {
+    protected void initWidgets() {
         // Friends
-        for (Friend friend : FriendManager.INSTANCE.getAll()) {
-            window.add(new WLabel(friend.name));
+        for (Friend friend : FriendManager.INSTANCE) {
+            add(new WLabel(friend.name));
+            add(new WButton(WButton.ButtonRegion.Edit)).getWidget().action = () -> MinecraftClient.getInstance().openScreen(new EditFriendScreen(friend));
 
-            window.add(new WButton(GuiRenderer.TEX_EDIT)).getWidget().action = button -> mc.openScreen(new EditFriendScreen(friend));
+            WMinus remove = add(new WMinus()).getWidget();
+            remove.action = () -> FriendManager.INSTANCE.remove(friend);
 
-            WMinus remove = window.add(new WMinus()).getWidget();
-            remove.action = minus -> FriendManager.INSTANCE.remove(friend);
-
-            window.row();
+            row();
         }
 
-        // Add
-        WTable addList = window.add(new WTable()).fillX().expandX().getWidget();
-        WTextBox username = addList.add(new WTextBox("", 200)).fillX().expandX().getWidget();
+        // Add friend
+        WTable t = add(new WTable()).fillX().expandX().getWidget();
+        WTextBox username = t.add(new WTextBox("", 400)).fillX().expandX().getWidget();
         username.setFocused(true);
 
-        WPlus add = addList.add(new WPlus()).getWidget();
-        add.action = plus -> {
-            String name = username.text.trim();
+        WPlus add = t.add(new WPlus()).getWidget();
+        add.action = () -> {
+            String name = username.getText().trim();
             if (!name.isEmpty()) FriendManager.INSTANCE.add(new Friend(name));
         };
     }
 
     @EventHandler
-    private Listener<FriendListChangedEvent> onFriendListChanged = new Listener<>(event -> {
+    private final Listener<FriendListChangedEvent> onFriendListChanged = new Listener<>(event -> {
         clear();
         initWidgets();
     });
-
-    @Override
-    public void onClose() {
-        MeteorClient.EVENT_BUS.unsubscribe(this);
-        FriendManager.INSTANCE.save();
-        super.onClose();
-    }
 }

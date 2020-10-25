@@ -2,7 +2,7 @@ package minegame159.meteorclient.settings;
 
 import it.unimi.dsi.fastutil.objects.Object2BooleanArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
-import minegame159.meteorclient.gui.screens.PacketBoolSettingScreen;
+import minegame159.meteorclient.gui.screens.settings.PacketBoolSettingScreen;
 import minegame159.meteorclient.gui.widgets.WButton;
 import minegame159.meteorclient.utils.PacketUtils;
 import net.minecraft.client.MinecraftClient;
@@ -18,7 +18,7 @@ public class PacketBoolSetting extends Setting<Object2BooleanMap<Class<? extends
         value = new Object2BooleanArrayMap<>(defaultValue);
 
         widget = new WButton("Select");
-        ((WButton) widget).action = button -> MinecraftClient.getInstance().openScreen(new PacketBoolSettingScreen(this));
+        ((WButton) widget).action = () -> MinecraftClient.getInstance().openScreen(new PacketBoolSettingScreen(this));
     }
 
     @Override

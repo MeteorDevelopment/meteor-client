@@ -1,8 +1,8 @@
 package minegame159.meteorclient.modules.misc;
 
+import minegame159.meteorclient.commands.commands.Ignore;
 import minegame159.meteorclient.friends.Friend;
 import minegame159.meteorclient.friends.FriendManager;
-import minegame159.meteorclient.commands.commands.Ignore;
 import minegame159.meteorclient.mixininterface.IChatHudLine;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
@@ -24,10 +24,24 @@ import java.util.regex.Pattern;
 
 public class BetterChat extends ToggleModule {
     // Ignore
-    private final SettingGroup sgIgnore = settings.createGroup("Ignore", "ignore-enabled", "Ignores player defined by .ignore command.", true);
+    private final SettingGroup sgIgnore = settings.createGroup("Ignore");
+
+    private final Setting<Boolean> ignoreEnabled = sgIgnore.add(new BoolSetting.Builder()
+            .name("ignore-enabled")
+            .description("Ignores player defined by .ignore command.")
+            .defaultValue(true)
+            .build()
+    );
 
     // Anti Spam
-    private final SettingGroup sgAntiSpam = settings.createGroup("Anti Spam", "anti-spam-enabled", "Enables anti spam.", true);
+    private final SettingGroup sgAntiSpam = settings.createGroup("Anti Spam");
+
+    private final Setting<Boolean> antiSpamEnabled = sgAntiSpam.add(new BoolSetting.Builder()
+            .name("anti-spam-enabled")
+            .description("Enables anti spam.")
+            .defaultValue(true)
+            .build()
+    );
 
     private final Setting<Integer> antiSpamDepth = sgAntiSpam.add(new IntSetting.Builder()
             .name("anti-spam-depth")
@@ -46,7 +60,14 @@ public class BetterChat extends ToggleModule {
     );
 
     // Longer Chat
-    private final SettingGroup sgLongerChat = settings.createGroup("Longer Chat", "longer-chat-enabled", "Makes chat longer.", true);
+    private final SettingGroup sgLongerChat = settings.createGroup("Longer Chat");
+
+    private final Setting<Boolean> longerChatEnabled = sgLongerChat.add(new BoolSetting.Builder()
+            .name("longer-chat-enabled")
+            .description("Makes chat longer.")
+            .defaultValue(true)
+            .build()
+    );
 
     private final Setting<Integer> longerChatLines = sgLongerChat.add(new IntSetting.Builder()
             .name("longer-chat-lines")
@@ -58,7 +79,14 @@ public class BetterChat extends ToggleModule {
     );
 
     // Friend Color
-    private final SettingGroup sgFriendColor = settings.createGroup("Friend Color", "friend-color-enabled", "Highlights friends with color in chat.", true);
+    private final SettingGroup sgFriendColor = settings.createGroup("Friend Color");
+
+    private final Setting<Boolean> friendColorEnabled = sgFriendColor.add(new BoolSetting.Builder()
+            .name("friend-color-enabled")
+            .description("Highlights friends with color in chat.")
+            .defaultValue(true)
+            .build()
+    );
 
     private boolean skipMessage;
 
@@ -69,9 +97,9 @@ public class BetterChat extends ToggleModule {
     public boolean onMsg(String message, int messageId, int timestamp, List<ChatHudLine<Text>> messages, List<ChatHudLine<OrderedText>> visibleMessages) {
         if (!isActive() || skipMessage) return false;
 
-        if (sgIgnore.isEnabled() && ignoreOnMsg(message)) return true;
-        if (sgAntiSpam.isEnabled() && antiSpamOnMsg(message, messageId, timestamp, messages, visibleMessages)) return true;
-        return sgFriendColor.isEnabled() && friendColorOnMsg(message);
+        if (ignoreEnabled.get() && ignoreOnMsg(message)) return true;
+        if (antiSpamEnabled.get() && antiSpamOnMsg(message, messageId, timestamp, messages, visibleMessages)) return true;
+        return friendColorEnabled.get() && friendColorOnMsg(message);
     }
 
     // IGNORE
@@ -147,7 +175,7 @@ public class BetterChat extends ToggleModule {
     // LONGER CHAT
 
     public boolean isLongerChat() {
-        return sgLongerChat.isEnabled();
+        return longerChatEnabled.get();
     }
 
     public int getChatLength() {

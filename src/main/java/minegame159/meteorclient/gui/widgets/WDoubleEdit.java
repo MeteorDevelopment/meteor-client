@@ -1,36 +1,34 @@
 package minegame159.meteorclient.gui.widgets;
 
-import minegame159.meteorclient.gui.listeners.DoubleEditChangeListener;
-
 public class WDoubleEdit extends WTable {
-    public DoubleEditChangeListener action;
+    public Runnable action;
 
     private final WDoubleTextBox textBox;
     private WSlider slider;
 
-    public WDoubleEdit(double min, double max, double value, boolean noSlider) {
-        textBox = add(new WDoubleTextBox(value, 50)).getWidget();
-        if (!noSlider) slider = add(new WSlider(min, max, value, 75)).getWidget();
+    public WDoubleEdit(double value, double sliderMin, double sliderMax, boolean noSlider) {
+        textBox = add(new WDoubleTextBox(value, 60)).getWidget();
+        if (!noSlider) slider = add(new WSlider(value, sliderMin, sliderMax, 200)).fillX().expandX().getWidget();
 
-        textBox.action = textBox1 -> {
-            if (!noSlider) slider.value = textBox1.value;
-            if (action != null) action.onDoubleEditChange(this);
+        textBox.action = () -> {
+            if (slider != null) slider.value = textBox.getValue();
+            if (action != null) action.run();
         };
 
-        if (!noSlider) {
-            slider.action = slider1 -> {
-                textBox.setValue(slider1.value);
-                if (action != null) action.onDoubleEditChange(this);
+        if (slider != null) {
+            slider.action = wSlider -> {
+                textBox.setValue(slider.value);
+                if (action != null) action.run();
             };
         }
     }
 
-    public WDoubleEdit(double min, double max, double value) {
-        this(min, max, value, false);
+    public WDoubleEdit(double value, double sliderMin, double sliderMax) {
+        this(value, sliderMin, sliderMax, false);
     }
 
     public double get() {
-        return textBox.value;
+        return textBox.getValue();
     }
 
     public void set(double value) {

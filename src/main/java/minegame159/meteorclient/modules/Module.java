@@ -6,15 +6,12 @@ import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.gui.screens.ModuleScreen;
 import minegame159.meteorclient.gui.widgets.WWidget;
-import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.Settings;
 import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.ISerializable;
-import minegame159.meteorclient.utils.NbtUtils;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 
 import java.util.Objects;
@@ -71,7 +68,7 @@ public abstract class Module implements Listenable, ISerializable<Module> {
         tag.putString("name", name);
         tag.putInt("key", key);
         tag.putBoolean("toggleOnKeyRelease", toggleOnKeyRelease);
-        tag.put("settings", NbtUtils.listToTag(settings));
+        tag.put("settings", settings.toTag());
 
         return tag;
     }
@@ -83,12 +80,8 @@ public abstract class Module implements Listenable, ISerializable<Module> {
         toggleOnKeyRelease = tag.getBoolean("toggleOnKeyRelease");
 
         // Settings
-        ListTag settingsTag = tag.getList("settings", 10);
-        for (Tag settingTagI : settingsTag) {
-            CompoundTag settingTag = (CompoundTag) settingTagI;
-            Setting<?> setting = settings.get(settingTag.getString("name"));
-            if (setting != null) setting.fromTag(settingTag);
-        }
+        Tag settingsTag = tag.get("settings");
+        if (settingsTag instanceof CompoundTag) settings.fromTag((CompoundTag) settingsTag);
 
         return this;
     }

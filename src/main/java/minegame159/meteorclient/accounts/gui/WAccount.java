@@ -17,13 +17,14 @@ public class WAccount extends WTable {
         if (MinecraftClient.getInstance().getSession().getUsername().equalsIgnoreCase(account.getUsername())) name.color = GuiConfig.INSTANCE.loggedInText;
 
         // Account Type
-        WLabel type = add(new WLabel("(" + account.getType().toString() + ")")).fillX().right().getWidget();
+        WLabel type = add(new WLabel("(" + account.getType() + ")")).fillX().right().getWidget();
         type.color = GuiConfig.INSTANCE.accountTypeText;
 
-        // Log In
-        WButton logIn = add(new WButton("Log In")).getWidget();
-        logIn.action = button -> {
-            logIn.setText("...");
+        // Login
+        WButton login = add(new WButton("Login")).getWidget();
+        login.action = () -> {
+            login.freezeWidth();
+            login.setText("...");
             screen.locked = true;
 
             MeteorExecutor.execute(() -> {
@@ -36,13 +37,13 @@ public class WAccount extends WTable {
                     screen.initWidgets();
                 }
 
-                logIn.setText("Log In");
+                login.setText("Login");
                 screen.locked = false;
             });
         };
 
         // Remove
         WMinus minus = add(new WMinus()).getWidget();
-        minus.action = minus1 -> AccountManager.INSTANCE.remove(account);
+        minus.action = () -> AccountManager.INSTANCE.remove(account);
     }
 }

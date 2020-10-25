@@ -1,25 +1,21 @@
 package minegame159.meteorclient.settings;
 
 import minegame159.meteorclient.gui.widgets.WDoubleEdit;
-import minegame159.meteorclient.gui.widgets.WWidget;
 import net.minecraft.nbt.CompoundTag;
 
 import java.util.function.Consumer;
 
 public class DoubleSetting extends Setting<Double> {
     private final Double min, max;
-    private final Double sliderMin, sliderMax;
 
     private DoubleSetting(String name, String description, Double defaultValue, Consumer<Double> onChanged, Consumer<Setting<Double>> onModuleActivated, Double min, Double max, Double sliderMin, Double sliderMax, boolean noSlider) {
         super(name, description, defaultValue, onChanged, onModuleActivated);
         this.min = min;
         this.max = max;
-        this.sliderMin = sliderMin;
-        this.sliderMax = sliderMax;
 
-        widget = new WDoubleEdit(sliderMin != null ? sliderMin : 0, sliderMax != null ? sliderMax : 10, get(), noSlider);
-        ((WDoubleEdit) widget).action = doubleEdit -> {
-            if (!set((double) Math.round(doubleEdit.get() * 1000) / 1000)) doubleEdit.set(get());
+        widget = new WDoubleEdit(get(), sliderMin != null ? sliderMin : 0, sliderMax != null ? sliderMax : 10, noSlider);
+        ((WDoubleEdit) widget).action = () -> {
+            if (!set((double) Math.round(((WDoubleEdit) widget).get() * 1000) / 1000)) ((WDoubleEdit) widget).set(get());
         };
     }
 

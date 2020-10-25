@@ -1,76 +1,74 @@
 package minegame159.meteorclient.gui.widgets;
 
-import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.gui.GuiConfig;
-import minegame159.meteorclient.gui.listeners.ButtonClickListener;
 import minegame159.meteorclient.gui.renderer.GuiRenderer;
-import minegame159.meteorclient.utils.TextureRegion;
+import minegame159.meteorclient.gui.renderer.Region;
+import minegame159.meteorclient.utils.Color;
 
-public class WButton extends WWidget {
-    public ButtonClickListener action;
+public class WButton extends WPressable {
+    public enum ButtonRegion {
+        Edit(Region.EDIT, GuiConfig.INSTANCE.edit, GuiConfig.INSTANCE.editHovered, GuiConfig.INSTANCE.editPressed),
+        Reset(Region.RESET, GuiConfig.INSTANCE.reset, GuiConfig.INSTANCE.resetHovered, GuiConfig.INSTANCE.resetPressed);
+
+        public final Region region;
+        public final Color color, hovered, pressed;
+
+        ButtonRegion(Region region, Color color, Color hovered, Color pressed) {
+            this.region = region;
+            this.color = color;
+            this.hovered = hovered;
+            this.pressed = pressed;
+        }
+    }
 
     private String text;
     private double textWidth;
 
-    private TextureRegion tex;
+    private final ButtonRegion region;
 
-    private boolean pressed;
+    public WButton(String text, ButtonRegion region) {
+        this.text = text;
+        this.textWidth = -1;
 
-    public WButton(String text, TextureRegion tex) {
-        if (text != null) setText(text);
-        else this.tex = tex;
+        this.region = region;
     }
 
     public WButton(String text) {
         this(text, null);
     }
 
-    public WButton(TextureRegion tex) {
-        this(null, tex);
+    public WButton(ButtonRegion region) {
+        this(null, region);
     }
 
     public void setText(String text) {
-        this.text = text != null ? text : "";
-        this.textWidth = MeteorClient.FONT.getStringWidth(this.text);
+        this.text = text;
+        this.textWidth = -1;
 
         invalidate();
     }
 
     @Override
-    protected void onCalculateSize() {
-        width = 3 + (text != null ? MeteorClient.FONT.getStringWidth(text) : MeteorClient.FONT.getHeight()) + 3;
-        height = 3 + MeteorClient.FONT.getHeight() + 3;
-    }
+    protected void onCalculateSize(GuiRenderer renderer) {
+        if (textWidth == -1 && text != null) textWidth = renderer.textWidth(text);
 
-    @Override
-    protected boolean onMouseClicked(int button) {
-        if (mouseOver) {
-            pressed = true;
-            return true;
-        }
-
-        return false;
-    }
-
-    @Override
-    protected boolean onMouseReleased(int button) {
-        if (pressed) {
-            pressed = false;
-            if (action != null) action.onButtonClick(this);
-            return true;
-        }
-
-        return false;
+        width = 6 + (text == null ? renderer.textHeight() : textWidth) + 6;
+        height = 6 + renderer.textHeight() + 6;
     }
 
     @Override
     protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
-        renderer.renderBackground(this, mouseOver, pressed);
+        renderer.background(this, super.pressed);
 
         if (text != null) {
-            renderer.renderText(text, x + width / 2 - textWidth / 2, y + 3.5, GuiConfig.INSTANCE.text, false);
+            renderer.text(text, x + width / 2 - textWidth / 2, y + 6, false, GuiConfig.INSTANCE.text);
         } else {
-            renderer.renderQuad(x + 3, y + 3, width - 6, height - 6, tex, tex.getColor(mouseOver, pressed));
+            Color color;
+            if (pressed) color = region.pressed;
+            else if (mouseOver) color = region.hovered;
+            else color = region.color;
+
+            renderer.quad(region.region, x + 6, y + 6, renderer.textHeight(), renderer.textHeight(), color);
         }
     }
 }

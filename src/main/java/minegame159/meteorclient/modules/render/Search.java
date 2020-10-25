@@ -33,12 +33,11 @@ import java.util.List;
 
 public class Search extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgTracers = settings.createGroup("Tracers", "tracers", "Draw lines to the blocks.", false);
+    private final SettingGroup sgTracers = settings.createGroup("Tracers");
 
     private final Long2ObjectArrayMap<MyChunk> chunks = new Long2ObjectArrayMap<>();
 
     // General
-
     private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
             .name("blocks")
             .description("Blocks to search for.")
@@ -71,6 +70,12 @@ public class Search extends ToggleModule {
     );
 
     // Tracers
+    private final Setting<Boolean> tracersEnabled = sgTracers.add(new BoolSetting.Builder()
+            .name("tracers-enabled")
+            .description("Draw lines to the blocks.")
+            .defaultValue(false)
+            .build()
+    );
 
     private final Setting<Color> tracersColor = sgTracers.add(new ColorSetting.Builder()
             .name("tracers-color")
@@ -418,7 +423,7 @@ public class Search extends ToggleModule {
             }
 
             // Tracers
-            if (sgTracers.isEnabled()) {
+            if (tracersEnabled.get()) {
                 ShapeBuilder.line(vec1.x - (mc.cameraEntity.getX() - event.offsetX), vec1.y - (mc.cameraEntity.getY() - event.offsetY), vec1.z - (mc.cameraEntity.getZ() - event.offsetZ), x + 0.5, y + 0.5, z + 0.5f, tracersColor.get());
             }
         }

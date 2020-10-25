@@ -1,141 +1,124 @@
 package minegame159.meteorclient.gui.renderer;
 
-import minegame159.meteorclient.Config;
+import it.unimi.dsi.fastutil.Stack;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.gui.GuiConfig;
-import minegame159.meteorclient.gui.widgets.Cell;
 import minegame159.meteorclient.gui.widgets.WWidget;
-import minegame159.meteorclient.rendering.Renderer;
-import minegame159.meteorclient.rendering.ShapeBuilder;
+import minegame159.meteorclient.rendering.MeshBuilder;
+import minegame159.meteorclient.rendering.MyFont;
 import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.Pool;
-import minegame159.meteorclient.utils.TextureRegion;
-import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.texture.AbstractTexture;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.lwjgl.opengl.GL11.*;
+
 public class GuiRenderer {
-    public static final GuiRenderer INSTANCE = new GuiRenderer();
+    private static final Color WHITE = new Color(255, 255, 255);
+    private static final Identifier TEXTURE = new Identifier("meteor-client", "newgui.png");
 
-    private static final Color DEBUG_COLOR_WIDGET = new Color(25, 25, 225);
-    private static final Color DEBUG_COLOR_CELL = new Color(25, 225, 25);
+    private final MeshBuilder mb = new MeshBuilder();
 
-    // Static texture stuff
-    private static final Identifier TEXTURE = new Identifier("meteor-client", "gui.png");
-    private static final int TEXTURE_WIDTH = 97;
-    private static final int TEXTURE_HEIGHT = 32;
+    private final Stack<Scissor> scissorStack = new ObjectArrayList<>();
+    private final Pool<Scissor> scissorPool = new Pool<>(Scissor::new);
 
-    public static final TextureRegion TEX_QUAD = new TextureRegion(TEXTURE_WIDTH, TEXTURE_HEIGHT, 0, 0, 1, 1, null, null, null);
-    public static final TextureRegion TEX_RESET = new TextureRegion(TEXTURE_WIDTH, TEXTURE_HEIGHT, 1, 0, 32, 32, GuiConfig.INSTANCE.reset, GuiConfig.INSTANCE.resetHovered, GuiConfig.INSTANCE.resetPressed);
-    public static final TextureRegion TEX_SLIDER_HANDLE = new TextureRegion(TEXTURE_WIDTH, TEXTURE_HEIGHT, 33, 0, 32, 32, GuiConfig.INSTANCE.sliderHandle, GuiConfig.INSTANCE.sliderHandleHovered, GuiConfig.INSTANCE.sliderHandlePressed);
-    public static final TextureRegion TEX_EDIT = new TextureRegion(TEXTURE_WIDTH, TEXTURE_HEIGHT, 65, 0, 32, 32, GuiConfig.INSTANCE.edit, GuiConfig.INSTANCE.editHovered, GuiConfig.INSTANCE.editPressed);
+    private final List<Text> texts = new ArrayList<>();
+    private final Pool<Text> textPool = new Pool<>(Text::new);
 
-    // Operation pools
-    final Pool<QuadOperation> quadOperationPool = new Pool<>(QuadOperation::new);
-    final Pool<TriangleOperation> triangleOperationPool = new Pool<>(TriangleOperation::new);
-    final Pool<LineOperation> lineOperationPool = new Pool<>(LineOperation::new);
-    final Pool<ItemOperation> itemOperationPool = new Pool<>(ItemOperation::new);
-    final Pool<TextOperation> textOperationPool = new Pool<>(TextOperation::new);
-    final Pool<TextureOperation> textureOperationPool = new Pool<>(TextureOperation::new);
+    private final List<Runnable> postTasks = new ArrayList<>();
 
-    // Scissor stuff
-    final Pool<Scissor> scissorPool = new Pool<>(Scissor::new);
-    private Scissor scissor, currentScissor;
-
-    private final List<Runnable> customPostOperations = new ArrayList<>();
-
-    private Operation tooltip;
-
-    // Begin and End
-    void beginBuffers() {
-        if (!Renderer.isBuilding()) {
-            Renderer.beginGui();
-            MeteorClient.FONT.begin();
-        }
-    }
+    public String tooltip;
 
     public void begin() {
-        scissor = currentScissor = scissorPool.get().set(null, 0, 0, Utils.getScaledWindowWidthGui(), Utils.getScaledWindowHeightGui(), false, false);
+        mb.begin(GL11.GL_TRIANGLES, VertexFormats.POSITION_COLOR_TEXTURE);
     }
 
-    void endBuffers() {
-        if (Renderer.isBuilding()) {
-            MinecraftClient.getInstance().getTextureManager().bindTexture(TEXTURE);
-            Renderer.end(true);
-            MeteorClient.FONT.end();
+    public void end(boolean root) {
+        double mouseX = MinecraftClient.getInstance().mouse.getX();
+        double mouseY = MinecraftClient.getInstance().mouse.getY();
+        double tooltipWidth = tooltip != null ? textWidth(tooltip) : 0;
+
+        if (root && tooltipWidth > 0) {
+            quad(Region.FULL, mouseX + 8, mouseY + 8, tooltipWidth + 8, textHeight() + 8, GuiConfig.INSTANCE.background);
         }
-    }
 
+        MinecraftClient.getInstance().getTextureManager().bindTexture(TEXTURE);
+        mb.end(true);
+
+        MeteorClient.FONT_GUI.begin();
+        if (root && tooltipWidth > 0) {
+            text(tooltip, mouseX + 8 + 4, mouseY + 8 + 4, false, GuiConfig.INSTANCE.text);
+        }
+        for (Text text : texts) {
+            text.render();
+            textPool.free(text);
+        }
+        texts.clear();
+        MeteorClient.FONT_GUI.end();
+
+        for (Runnable task : postTasks) task.run();
+        postTasks.clear();
+
+        tooltip = null;
+    }
     public void end() {
-        scissor.render(this);
-        scissorPool.free(scissor);
-        scissor = null;
+        end(false);
+    }
 
-        for (Runnable runnable : customPostOperations) runnable.run();
-        customPostOperations.clear();
+    public void beginScissor(double x, double y, double width, double height) {
+        if (!scissorStack.isEmpty()) {
+            Scissor parent = scissorStack.top();
 
-        if (tooltip != null) {
-            double x = ((TextOperation) tooltip).x - 2;
-            double y = ((TextOperation) tooltip).y - 2;
-            double w = MeteorClient.FONT.getStringWidth(((TextOperation) tooltip).text) + 4;
-            double h = MeteorClient.FONT.getHeight() + 4;
+            if (x < parent.x) x = parent.x;
+            else if (x + width > parent.x + parent.width) width -= (x + width) - (parent.x + parent.width);
 
-            ShapeBuilder.begin(null, GL11.GL_TRIANGLES, VertexFormats.POSITION_COLOR);
-            ShapeBuilder.quad(x, y, 0, x + w, y, 0, x + w, y + h, 0, x, y + h, 0, Config.INSTANCE.guiConfig.background);
-            ShapeBuilder.end();
-
-            tooltip.render(this);
-            tooltip.free(this);
-            tooltip = null;
+            if (y < parent.y) y = parent.y;
+            else if (y + height > parent.y + parent.height) height -= (y + height) - (parent.y + parent.height);
         }
-    }
 
-    public void addCustomPostOperation(Runnable runnable) {
-        customPostOperations.add(runnable);
-    }
+        Scissor scissor = scissorPool.get().set(x, y, width, height);
+        scissorStack.push(scissor);
 
-    // Scissor
-    public void beginScissor(double x, double y, double width, double height, boolean textOnly) {
-        Scissor newScissor = scissorPool.get().set(currentScissor, x, y, width, height, true, textOnly);
-        currentScissor.scissorStack.add(newScissor);
-        currentScissor = newScissor;
+        end();
+        begin();
+
+        glEnable(GL_SCISSOR_TEST);
+        scissor.apply();
     }
 
     public void endScissor() {
-        currentScissor = currentScissor.parent;
+        scissorStack.pop();
+
+        end();
+        if (scissorStack.isEmpty()) {
+            glDisable(GL_SCISSOR_TEST);
+        } else {
+            scissorStack.top().apply();
+        }
+        begin();
     }
 
-    public void beginScissor(WWidget widget, double padTop, double padRight, double padBottom, double padLeft, boolean textOnly) {
-        double x = widget.x + padLeft;
-        double y = Utils.getScaledWindowHeightGui() - widget.y - widget.height + padTop;
-        double width = widget.width - padLeft - padRight;
-        double height = widget.height - padTop - padBottom;
+    public void quad(Region region, double x, double y, double width, double height, Color color1, Color color2, Color color3, Color color4) {
+        mb.pos(x, y, 0).color(color1).texture(region.x, region.y).endVertex();
+        mb.pos(x + width, y, 0).color(color2).texture(region.x + region.width, region.y).endVertex();
+        mb.pos(x + width, y + height, 0).color(color3).texture(region.x + region.width, region.y + region.height).endVertex();
 
-        beginScissor(x, y, width, height, textOnly);
+        mb.pos(x, y, 0).color(color1).texture(region.x, region.y).endVertex();
+        mb.pos(x + width, y + height, 0).color(color3).texture(region.x + region.width, region.y + region.height).endVertex();
+        mb.pos(x, y + height, 0).color(color4).texture(region.x, region.y + region.height).endVertex();
     }
-
-    // Quad
-    public void renderQuad(double x, double y, double width, double height, TextureRegion tex, Color color1, Color color2, Color color3, Color color4) {
-        currentScissor.operations.add(quadOperationPool.get().set(x, y, width, height, tex, color1, color2, color3, color4));
-    }
-    public void renderQuad(double x, double y, double width, double height, TextureRegion tex, Color color) {
-        renderQuad(x, y, width, height, tex, color, color, color, color);
-    }
-    public void renderQuad(double x, double y, double width, double height, Color colorLeft, Color colorRight) {
-        renderQuad(x, y, width, height, null, colorLeft, colorRight, colorRight, colorLeft);
-    }
-    public void renderQuad(double x, double y, double width, double height, Color color) {
-        renderQuad(x, y, width, height, null, color, color, color, color);
+    public void quad(Region region, double x, double y, double width, double height, Color color) {
+        quad(region, x, y, width, height, color, color, color, color);
     }
 
-    public void renderBackground(WWidget widget, boolean hovered, boolean pressed) {
+    public void background(WWidget widget, boolean hovered, boolean pressed) {
         Color background = GuiConfig.INSTANCE.background;
         Color outline = GuiConfig.INSTANCE.outline;
 
@@ -147,64 +130,128 @@ public class GuiRenderer {
             outline = GuiConfig.INSTANCE.outlineHovered;
         }
 
-        renderQuad(widget.x, widget.y, widget.width, widget.height, background);
-        renderQuad(widget.x, widget.y, widget.width, 1, outline);
-        renderQuad(widget.x, widget.y + widget.height - 1, widget.width, 1, outline);
-        renderQuad(widget.x, widget.y, 1, widget.height, outline);
-        renderQuad(widget.x + widget.width - 1, widget.y, 1, widget.height, outline);
+        quad(Region.FULL, widget.x, widget.y, widget.width, widget.height, background);
+        quad(Region.FULL, widget.x, widget.y, widget.width, 2, outline);
+        quad(Region.FULL, widget.x, widget.y + widget.height - 2, widget.width, 2, outline);
+        quad(Region.FULL, widget.x, widget.y + 2, 2, widget.height - 4, outline);
+        quad(Region.FULL, widget.x + widget.width - 2, widget.y + 2, 2, widget.height - 4, outline);
+    }
+    public void background(WWidget widget, boolean pressed) {
+        background(widget, widget.mouseOver, pressed);
+    }
+    
+    public void triangle(double x, double y, double size, double rotation, Color color) {
+        double rad = Math.toRadians(rotation);
+        double cos = Math.cos(rad);
+        double sin = Math.sin(rad);
+
+        double oX = x + size / 2;
+        double oY = y + size / 4;
+
+        double _x = ((x - oX) * cos) - ((y - oY) * sin) + oX;
+        double _y = ((y - oY) * cos) + ((x - oX) * sin) + oY;
+        mb.pos(_x, _y, 0).color(color).texture(Region.FULL.x, Region.FULL.y).endVertex();
+
+        _x = ((x + size - oX) * cos) - ((y - oY) * sin) + oX;
+        _y = ((y - oY) * cos) + ((x + size - oX) * sin) + oY;
+        mb.pos(_x, _y, 0).color(color).texture(Region.FULL.x + Region.FULL.width, Region.FULL.y).endVertex();
+
+        double v = y + size / 2 - oY;
+        _x = ((x + size / 2 - oX) * cos) - (v * sin) + oX;
+        _y = (v * cos) + ((x + size / 2 - oX) * sin) + oY;
+        mb.pos(_x, _y, 0).color(color).texture(Region.FULL.x + Region.FULL.width, Region.FULL.y + Region.FULL.height).endVertex();
     }
 
-    // Triangle
-    public void renderTriangle(double x, double y, double size, double angle, Color color) {
-        currentScissor.operations.add(triangleOperationPool.get().set(x, y, size, angle, color));
+    public void text(String text, double x, double y, boolean shadow, Color color) {
+        texts.add(textPool.get().set(text, x, y, shadow, color, false));
+    }
+    public double textWidth(String text, int length) {
+        return MeteorClient.FONT_GUI.getWidth(text, length);
+    }
+    public double textWidth(String text) {
+        return MeteorClient.FONT_GUI.getWidth(text);
+    }
+    public double textHeight() {
+        return MeteorClient.FONT_GUI.getHeight();
     }
 
-    // Line
-    public void renderLine(double x1, double y1, double x2, double y2, Color color) {
-        currentScissor.operations.add(lineOperationPool.get().set(x1, y1, x2, y2, color));
+    public void title(String text, double x, double y, Color color) {
+        texts.add(textPool.get().set(text, x, y, false, color, true));
+    }
+    public double titleWidth(String text) {
+        return MeteorClient.FONT_GUI_TITLE.getWidth(text);
+    }
+    public double titleHeight() {
+        return MeteorClient.FONT_GUI_TITLE.getHeight();
     }
 
-    // Item
-    public void renderItem(double x, double y, ItemStack itemStack) {
-        currentScissor.postOperations.add(itemOperationPool.get().set(x, y, itemStack));
+    public void post(Runnable task) {
+        postTasks.add(task);
     }
 
-    // Text
-    public void renderText(String text, double x, double y, Color color, boolean shadow) {
-        currentScissor.postOperations.add(textOperationPool.get().set(text, x, y, color, shadow));
+    public void texture(double x, double y, double width, double height, double rotation, AbstractTexture texture) {
+        post(() -> {
+            mb.begin(GL_TRIANGLES, VertexFormats.POSITION_COLOR_TEXTURE);
+
+            mb.pos(x, y, 0).color(WHITE).texture(0, 0).endVertex();
+            mb.pos(x + width, y, 0).color(WHITE).texture(1, 0).endVertex();
+            mb.pos(x + width, y + height, 0).color(WHITE).texture(1, 1).endVertex();
+            mb.pos(x, y, 0).color(WHITE).texture(0, 0).endVertex();
+            mb.pos(x + width, y + height, 0).color(WHITE).texture(1, 1).endVertex();
+            mb.pos(x, y + height, 0).color(WHITE).texture(0, 1).endVertex();
+
+            texture.bindTexture();
+            GL11.glPushMatrix();
+            GL11.glTranslated(x + width / 2, y + height / 2, 0);
+            GL11.glRotated(rotation, 0, 0, 1);
+            GL11.glTranslated(-x - width / 2, -y - height / 2, 0);
+            mb.end(true);
+            GL11.glPopMatrix();
+        });
     }
 
-    public void renderTooltip(String text, double x, double y, Color color) {
-        tooltip = textOperationPool.get().set(text, x, y, color, true);
-    }
+    private static class Scissor {
+        public int x, y;
+        public int width, height;
 
-    // Head
-    public void renderTexture(double x, double y, double width, double height, double rotation, AbstractTexture texture) {
-        currentScissor.postOperations.add(textureOperationPool.get().set(x, y, width, height, rotation, texture));
-    }
+        public Scissor set(double x, double y, double width, double height) {
+            this.x = (int) Math.round(x);
+            this.y = (int) Math.round(y);
+            this.width = (int) Math.round(width);
+            this.height = (int) Math.round(height);
 
-    // Debug
-    private void renderDebug(WWidget widget, boolean begin) {
-        if (begin) begin();
+            if (this.width < 0) this.width = 0;
+            if (this.height < 0) this.height = 0;
 
-        renderLine(widget.x, widget.y, widget.x + widget.width, widget.y, DEBUG_COLOR_WIDGET);
-        renderLine(widget.x, widget.y + widget.height, widget.x + widget.width, widget.y + widget.height, DEBUG_COLOR_WIDGET);
-        renderLine(widget.x, widget.y, widget.x, widget.y + widget.height, DEBUG_COLOR_WIDGET);
-        renderLine(widget.x + widget.width, widget.y, widget.x + widget.width, widget.y + widget.height, DEBUG_COLOR_WIDGET);
-
-        for (Cell<?> cell : widget.getCells()) {
-            renderLine(cell.getX(), cell.getY(), cell.getX() + cell.getWidth(), cell.getY(), DEBUG_COLOR_CELL);
-            renderLine(cell.getX(), cell.getY() + cell.getHeight(), cell.getX() + cell.getWidth(), cell.getY() + cell.getHeight(), DEBUG_COLOR_CELL);
-            renderLine(cell.getX(), cell.getY(), cell.getX(), cell.getY() + cell.getHeight(), DEBUG_COLOR_CELL);
-            renderLine(cell.getX() + cell.getWidth(), cell.getY(), cell.getX() + cell.getWidth(), cell.getY() + cell.getHeight(), DEBUG_COLOR_CELL);
-
-            renderDebug(cell.getWidget(), false);
+            return this;
         }
 
-        if (begin) end();
+        public void apply() {
+            glScissor(x, MinecraftClient.getInstance().getWindow().getFramebufferHeight() - y - height, width, height);
+        }
     }
 
-    public void renderDebug(WWidget widget) {
-        renderDebug(widget, true);
+    private static class Text {
+        public String text;
+        public double x, y;
+        public boolean shadow;
+        public Color color;
+        private boolean title;
+
+        public Text set(String text, double x, double y, boolean shadow, Color color, boolean title) {
+            this.text = text;
+            this.x = x;
+            this.y = y;
+            this.shadow = shadow;
+            this.color = color;
+            this.title = title;
+
+            return this;
+        }
+
+        public void render() {
+            MyFont font = title ? MeteorClient.FONT_GUI_TITLE : MeteorClient.FONT_GUI;
+            font.render(text, x, y, color);
+        }
     }
 }

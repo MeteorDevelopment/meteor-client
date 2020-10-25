@@ -9,8 +9,8 @@ import baritone.api.BaritoneAPI;
 import com.google.common.collect.Streams;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.events.TickEvent;
+import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
@@ -23,11 +23,11 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.AxeItem;
+import net.minecraft.item.SwordItem;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
-import net.minecraft.item.SwordItem;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,17 +42,17 @@ public class KillAura extends ToggleModule {
     }
 
     public enum OnlyWhen {
-        AXE,
-        SWORD,
-        AXEORSWORD,
-        ANY
+        Sword,
+        Axe,
+        SwordOrAxe,
+        Any
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgDelay = settings.createGroup("Delay", "smart-delay", "Smart delay.", true);
-    private final SettingGroup sgDelayDisabled = sgDelay.getDisabledGroup();
-    private final SettingGroup sgRandomDelay = settings.createGroup("Random Delay", "random-delay-enabled", "Adds a random delay to hits to try and bypass anti-cheats.", false);
+    private final SettingGroup sgDelay = settings.createGroup("Delay");
+    private final SettingGroup sgRandomHitDelay = settings.createGroup("Random Hit Delay");
 
+    // General
     private final Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()
             .name("range")
             .description("Attack range.")
@@ -149,16 +149,22 @@ public class KillAura extends ToggleModule {
             .build()
     );
 
-
-
     private final Setting<OnlyWhen> itemOnly = sgGeneral.add(new EnumSetting.Builder<OnlyWhen>()
             .name("Item-only")
             .description("Only hits an entity when the specified item is in your hand. (or any item)")
-            .defaultValue(OnlyWhen.ANY)
+            .defaultValue(OnlyWhen.Any)
             .build()
     );
 
-    private final Setting<Integer> hitDelay = sgDelayDisabled.add(new IntSetting.Builder()
+    // Delay
+    private final Setting<Boolean> smartDelay = sgDelay.add(new BoolSetting.Builder()
+            .name("smart-delay")
+            .description("Smart delay.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Integer> hitDelay = sgDelay.add(new IntSetting.Builder()
             .name("hit-delay")
                 .description("Hit delay in ticks. 20 ticks = 1 second.")
                 .defaultValue(0)
@@ -166,8 +172,16 @@ public class KillAura extends ToggleModule {
                 .sliderMax(60)
                 .build()
     );
-                                                            
-    private final Setting<Integer> randomDelayMax = sgRandomDelay.add(new IntSetting.Builder()
+
+    // Random hit delay
+    private final Setting<Boolean> randomHitDelayEnabled = sgRandomHitDelay.add(new BoolSetting.Builder()
+            .name("random-hit-delay-enabled")
+            .description("Adds a random delay to hits to try and bypass anti-cheats.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Integer> randomDelayMax = sgRandomHitDelay.add(new IntSetting.Builder()
             .name("random-delay-max")
             .description("Maximum random value for random delay.")
             .defaultValue(4)
@@ -273,11 +287,11 @@ public class KillAura extends ToggleModule {
 
     private boolean itemInHand(){
         switch(itemOnly.get()){
-            case AXE:
+            case Axe:
                 return mc.player.getMainHandStack().getItem() instanceof AxeItem;
-            case SWORD:
+            case Sword:
                 return mc.player.getMainHandStack().getItem() instanceof SwordItem;
-            case AXEORSWORD:
+            case SwordOrAxe:
                 return mc.player.getMainHandStack().getItem() instanceof AxeItem || mc.player.getMainHandStack().getItem() instanceof SwordItem;
             default:
                 return true;
@@ -331,7 +345,7 @@ public class KillAura extends ToggleModule {
 
         if(didHit) return;
 
-        if (sgDelay.isEnabled()) {
+        if (smartDelay.get()) {
             // Smart delay
             if (mc.player.getAttackCooldownProgress(0.5f) < 1) return;
 
@@ -354,7 +368,7 @@ public class KillAura extends ToggleModule {
         }
 
         // Random hit delay
-        if (sgRandomDelay.isEnabled()) {
+        if (randomHitDelayEnabled.get()) {
             if (randomHitDelayTimer > 0) {
                 randomHitDelayTimer--;
                 return;
@@ -372,7 +386,7 @@ public class KillAura extends ToggleModule {
             mc.player.swingHand(Hand.MAIN_HAND);
 
             // Set next random delay length
-            if (sgRandomDelay.isEnabled()) randomHitDelayTimer = (int) Math.round(Math.random() * randomDelayMax.get());
+            if (randomHitDelayEnabled.get()) randomHitDelayTimer = (int) Math.round(Math.random() * randomDelayMax.get());
         }
     });
 }

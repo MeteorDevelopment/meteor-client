@@ -20,7 +20,7 @@ import net.minecraft.util.Identifier;
 import org.lwjgl.opengl.GL11;
 
 public class InventoryViewer extends ToggleModule {
-    private final SettingGroup sgBackground = settings.createGroup("Background", "draw-background", "Draw inventory background.", true);
+    private final SettingGroup sgBackground = settings.createGroup("Background");
     private final SettingGroup sgX = settings.createGroup("X");
     private final SettingGroup sgY = settings.createGroup("Y");
 
@@ -31,6 +31,14 @@ public class InventoryViewer extends ToggleModule {
         DARK_TRANSPARENT,
         FLAT
     }
+
+    // Background
+    private final Setting<Boolean> bgEnabled = sgBackground.add(new BoolSetting.Builder()
+            .name("background-enabled")
+            .description("Draws intentory background.")
+            .defaultValue(true)
+            .build()
+    );
 
     private final Setting<mode> bgMode = sgBackground.add(new EnumSetting.Builder<mode>()
             .name("background-mode")
@@ -45,6 +53,7 @@ public class InventoryViewer extends ToggleModule {
             .build()
     );
 
+    // X
     private final Setting<AlignmentX> xAlignment = sgX.add(new EnumSetting.Builder<AlignmentX>()
             .name("x-alignment")
             .description("X alignment.")
@@ -60,6 +69,7 @@ public class InventoryViewer extends ToggleModule {
             .build()
     );
 
+    // Y
     private final Setting<AlignmentY> yAlignment = sgY.add(new EnumSetting.Builder<AlignmentY>()
             .name("y-alignment")
             .description("Y alignment.")
@@ -87,13 +97,11 @@ public class InventoryViewer extends ToggleModule {
         super(Category.Render, "inventory-viewer", "Displays your inventory.");
     }
 
-
-
     @EventHandler
-    private Listener<Render2DEvent> onRender2D = new Listener<>(event -> {
+    private final Listener<Render2DEvent> onRender2D = new Listener<>(event -> {
         int x = getX(event.screenWidth);
         int y = getY(event.screenHeight);
-        if (sgBackground.isEnabled()) drawBackground(x, y);
+        if (bgEnabled.get()) drawBackground(x, y);
         DiffuseLighting.enable();
 
         for (int row = 0; row < 3; row++) {

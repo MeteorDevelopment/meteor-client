@@ -1,17 +1,18 @@
 package minegame159.meteorclient.gui.screens.topbar;
 
 import minegame159.meteorclient.Config;
-import minegame159.meteorclient.gui.TopBarType;
-import minegame159.meteorclient.gui.widgets.WWindow;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Color;
 
-public class TopBarConfig extends TopBarScreen {
+public class TopBarConfig extends TopBarWindowScreen {
     public TopBarConfig() {
         super(TopBarType.Config);
+    }
 
+    @Override
+    protected void initWidgets() {
         Settings s = new Settings();
 
         SettingGroup sgGeneral = s.getDefaultGroup();
@@ -50,13 +51,6 @@ public class TopBarConfig extends TopBarScreen {
             );
         }
 
-        WWindow window = add(new WWindow(title, true)).centerXY().getWidget();
-        window.add(s.createTable()).fillX().expandX();
-    }
-
-    @Override
-    public void onClose() {
-        Config.INSTANCE.save();
-        super.onClose();
+        add(s.createTable()).fillX().expandX();
     }
 }
