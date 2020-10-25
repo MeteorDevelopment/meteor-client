@@ -7,6 +7,7 @@ import minegame159.meteorclient.events.StartBreakingBlockEvent;
 import minegame159.meteorclient.mixininterface.IClientPlayerInteractionManager;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.misc.Nuker;
+import minegame159.meteorclient.modules.player.NoBreakDelay;
 import minegame159.meteorclient.modules.player.Reach;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
 import net.minecraft.entity.Entity;
@@ -56,6 +57,7 @@ public abstract class ClientPlayerInteractionManagerMixin implements IClientPlay
     @Redirect(method = "updateBlockBreakingProgress", at = @At(value = "FIELD", target = "Lnet/minecraft/client/network/ClientPlayerInteractionManager;blockBreakingCooldown:I", opcode = Opcodes.PUTFIELD))
     private void onMethod_2902SetField_3716Proxy(ClientPlayerInteractionManager interactionManager, int value) {
         if (ModuleManager.INSTANCE.isActive(Nuker.class)) value = 0;
+        if (ModuleManager.INSTANCE.isActive(NoBreakDelay.class)) value = 0;
         blockBreakingCooldown = value;
     }
 
