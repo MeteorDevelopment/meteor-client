@@ -82,6 +82,7 @@ public class AutoEat extends ToggleModule {
     private boolean isEating;
     private int preSelectedSlot, preFoodLevel;
     private int slot;
+    private boolean wasThis = false;
 
     public AutoEat() {
         super(Category.Player, "auto-eat", "Automatically eats food.");
@@ -93,7 +94,7 @@ public class AutoEat extends ToggleModule {
             ((IKeyBinding) mc.options.keyUse).setPressed(false);
             isEating = false;
             if (preSelectedSlot != -1) mc.player.inventory.selectedSlot = preSelectedSlot;
-            BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume");
+            if (wasThis) BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume"); wasThis = false;
         }
     }
 
@@ -152,7 +153,7 @@ public class AutoEat extends ToggleModule {
                     wasCrystalActive = false;
                 }
                 if (preSelectedSlot != -1) mc.player.inventory.selectedSlot = preSelectedSlot;
-                BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume");
+                if (wasThis) BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume"); wasThis = false;
 
                 return;
             }
@@ -191,6 +192,7 @@ public class AutoEat extends ToggleModule {
             isEating = true;
             preFoodLevel = mc.player.getHungerManager().getFoodLevel();
             BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("pause");
+            wasThis = true;
         }
     });
 
