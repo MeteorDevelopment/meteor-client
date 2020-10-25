@@ -5,7 +5,9 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.KeyEvent;
 import minegame159.meteorclient.events.TickEvent;
 import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.render.Freecam;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
@@ -36,6 +38,7 @@ public class AirJump extends ToggleModule {
 
     @EventHandler
     private final Listener<KeyEvent> onKey = new Listener<>(event -> {
+        if (ModuleManager.INSTANCE.isActive(Freecam.class)) return;
         if ((event.action == KeyAction.Press || (event.action == KeyAction.Repeat && onHold.get())) && mc.options.keyJump.matchesKey(event.key, 0)) {
             mc.player.jump();
             level = mc.player.getBlockPos().getY();
@@ -47,6 +50,7 @@ public class AirJump extends ToggleModule {
 
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
+        if (ModuleManager.INSTANCE.isActive(Freecam.class)) return;
         if (maintainY.get() && mc.player.getBlockPos().getY() == level){
             mc.player.jump();
         }
