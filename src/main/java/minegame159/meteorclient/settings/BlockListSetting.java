@@ -1,6 +1,6 @@
 package minegame159.meteorclient.settings;
 
-import minegame159.meteorclient.gui.screens.BlockListSettingScreen;
+import minegame159.meteorclient.gui.screens.settings.BlockListSettingScreen;
 import minegame159.meteorclient.gui.widgets.WButton;
 import net.minecraft.block.Block;
 import net.minecraft.client.MinecraftClient;
@@ -22,7 +22,7 @@ public class BlockListSetting extends Setting<List<Block>> {
         value = new ArrayList<>(defaultValue);
 
         widget = new WButton("Select");
-        ((WButton) widget).action = button -> MinecraftClient.getInstance().openScreen(new BlockListSettingScreen(this));
+        ((WButton) widget).action = () -> MinecraftClient.getInstance().openScreen(new BlockListSettingScreen(this));
     }
 
     @Override

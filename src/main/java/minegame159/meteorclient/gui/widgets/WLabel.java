@@ -1,45 +1,90 @@
 package minegame159.meteorclient.gui.widgets;
 
-import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.gui.GuiConfig;
 import minegame159.meteorclient.gui.renderer.GuiRenderer;
 import minegame159.meteorclient.utils.Color;
-import minegame159.meteorclient.utils.Utils;
+import net.minecraft.client.MinecraftClient;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class WLabel extends WWidget {
     public Color color;
 
     private String text;
+    private boolean recalculate;
+    private final List<String> lines;
     public boolean shadow;
 
+    public double maxWidth;
+
     public WLabel(String text, boolean shadow) {
-        this.text = text;
+        this.lines = new ArrayList<>(1);
         this.shadow = shadow;
 
-        color = GuiConfig.INSTANCE.text;
+        this.color = GuiConfig.INSTANCE.text;
+
+        this.text = text;
+        lines.add(text);
+        recalculate = true;
+
+        maxWidth = Math.max(MinecraftClient.getInstance().getWindow().getFramebufferWidth() / 2, 512);
     }
 
     public WLabel(String text) {
         this(text, false);
     }
 
-    public String getText() {
-        return text;
+    @Override
+    protected void onCalculateSize(GuiRenderer renderer) {
+        width = 0;
+        height = renderer.textHeight() * lines.size();
+
+        for (String line : lines) {
+            width = Math.max(width, renderer.textWidth(line));
+        }
+
+        if (recalculate && width > maxWidth) {
+            boolean split = false;
+
+            for (int i = 0; i < lines.size(); i++) {
+                String line = lines.get(i);
+
+                double lastLineWidth = 0;
+                for (int j = 0; j < line.length(); j++) {
+                    double lineWidth = renderer.textWidth(line, j + 1);
+                    if (lineWidth > maxWidth && lastLineWidth <= maxWidth) {
+                        lines.add(i, line.substring(0, j));
+                        lines.set(i + 1, line.substring(j));
+                        split = true;
+                    }
+                    lastLineWidth = lineWidth;
+                }
+            }
+
+            if (split) onCalculateSize(renderer);
+        }
     }
 
     public void setText(String text) {
         this.text = text;
+        lines.clear();
+        lines.add(text);
+        recalculate = true;
         invalidate();
     }
 
-    @Override
-    protected void onCalculateSize() {
-        width = MeteorClient.FONT.getStringWidth(text);
-        height = MeteorClient.FONT.getHeight();
+    public String getText() {
+        return text;
     }
 
     @Override
     protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
-        renderer.renderText(text, x, y, color, shadow);
+        double y = this.y;
+
+        for (String line : lines) {
+            renderer.text(line, x, y, shadow, color);
+            y += renderer.textHeight();
+        }
     }
 }

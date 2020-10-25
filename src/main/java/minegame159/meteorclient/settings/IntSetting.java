@@ -16,9 +16,9 @@ public class IntSetting extends Setting<Integer> {
         this.sliderMin = sliderMin;
         this.sliderMax = sliderMax;
 
-        widget = new WIntEdit(sliderMin != null ? sliderMin : 0, sliderMax != null ? sliderMax : 10, get());
-        ((WIntEdit) widget).action = intEdit -> {
-            if (!set(intEdit.get())) intEdit.set(get());
+        widget = new WIntEdit(get(), sliderMin != null ? sliderMin : 0, sliderMax != null ? sliderMax : 10);
+        ((WIntEdit) widget).action = () -> {
+            if (!set(((WIntEdit) widget).get())) ((WIntEdit) widget).set(get());
         };
     }
 

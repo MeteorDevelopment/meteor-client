@@ -11,8 +11,15 @@ import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 
 public class Rotation extends ToggleModule {
-    // YAW
-    private final SettingGroup sgYaw = settings.createGroup("Yaw", "lock-yaw", "Locks your yaw.", false);
+    // Yaw
+    private final SettingGroup sgYaw = settings.createGroup("Yaw");
+
+    private final Setting<Boolean> yawEnabled = sgYaw.add(new BoolSetting.Builder()
+            .name("yaw-enabled")
+            .description("Locks your yaw.")
+            .defaultValue(true)
+            .build()
+    );
 
     private final Setting<Double> yawAngle = sgYaw.add(new DoubleSetting.Builder()
             .name("yaw-angle")
@@ -28,8 +35,15 @@ public class Rotation extends ToggleModule {
             .build()
     );
 
-    // PITCH
-    private final SettingGroup sgPitch = settings.createGroup("Pitch", "lock-pitch", "Locks your pitch.", false);
+    // Pitch
+    private final SettingGroup sgPitch = settings.createGroup("Pitch");
+
+    private final Setting<Boolean> pitchEnabled = sgPitch.add(new BoolSetting.Builder()
+            .name("pitch-enabled")
+            .description("Locks your pitch.")
+            .defaultValue(true)
+            .build()
+    );
 
     private final Setting<Double> pitchAngle = sgPitch.add(new DoubleSetting.Builder()
             .name("pitch-angle")
@@ -52,13 +66,13 @@ public class Rotation extends ToggleModule {
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
         // Yaw
-        if (sgYaw.isEnabled()) {
+        if (yawEnabled.get()) {
             if (yawAutoAngle.get()) mc.player.yaw = getYawDirection();
             else mc.player.yaw = yawAngle.get().floatValue();
         }
 
         // Pitch
-        if (sgPitch.isEnabled()) {
+        if (pitchEnabled.get()) {
             mc.player.pitch = pitchAngle.get().floatValue();
         }
     });

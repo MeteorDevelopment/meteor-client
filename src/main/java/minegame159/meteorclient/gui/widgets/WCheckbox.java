@@ -1,15 +1,12 @@
 package minegame159.meteorclient.gui.widgets;
 
 import minegame159.meteorclient.gui.GuiConfig;
-import minegame159.meteorclient.gui.listeners.CheckboxClickListener;
 import minegame159.meteorclient.gui.renderer.GuiRenderer;
+import minegame159.meteorclient.gui.renderer.Region;
 import minegame159.meteorclient.utils.Utils;
 
-public class WCheckbox extends WWidget {
-    public CheckboxClickListener action;
-
+public class WCheckbox extends WPressable {
     public boolean checked;
-    private boolean pressed;
 
     private double animationProgress;
 
@@ -19,42 +16,28 @@ public class WCheckbox extends WWidget {
     }
 
     @Override
-    protected void onCalculateSize() {
-        width = 3 + 8 + 3;
-        height = 3 + 8 + 3;
+    protected void onAction(int button) {
+        checked = !checked;
     }
 
     @Override
-    protected boolean onMouseClicked(int button) {
-        if (mouseOver) {
-            pressed = true;
-            return true;
-        }
-
-        return false;
-    }
-
-    @Override
-    protected boolean onMouseReleased(int button) {
-        if (pressed) {
-            pressed = false;
-            checked = !checked;
-            if (action != null) action.onCheckboxClick(this);
-            return true;
-        }
-
-        return false;
+    protected void onCalculateSize(GuiRenderer renderer) {
+        double h = renderer.textHeight();
+        width = 6 + h + 6;
+        height = 6 + h + 6;
     }
 
     @Override
     protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
-        renderer.renderBackground(this, mouseOver, pressed);
+        renderer.background(this, pressed);
 
         animationProgress += delta * (checked ? 1 : -1);
         animationProgress = Utils.clamp(animationProgress, 0, 1);
 
+        double h = renderer.textHeight();
+
         if (animationProgress > 0) {
-            renderer.renderQuad(x + 3 + 4 * (1 - animationProgress), y + 3 + 4 * (1 - animationProgress), 8 * animationProgress, 8 * animationProgress, pressed ? GuiConfig.INSTANCE.checkboxPressed : GuiConfig.INSTANCE.checkbox);
+            renderer.quad(Region.FULL, x + 6 + h / 2 * (1 - animationProgress), y + 6 + h / 2 * (1 - animationProgress), h * animationProgress, h * animationProgress, pressed ? GuiConfig.INSTANCE.checkboxPressed : GuiConfig.INSTANCE.checkbox);
         }
     }
 }

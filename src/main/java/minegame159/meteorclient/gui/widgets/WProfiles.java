@@ -1,17 +1,17 @@
 package minegame159.meteorclient.gui.widgets;
 
 import minegame159.meteorclient.gui.GuiConfig;
+import minegame159.meteorclient.gui.screens.topbar.TopBarModules;
 import minegame159.meteorclient.utils.ProfileUtils;
-
-import java.util.List;
 
 public class WProfiles extends WWindow {
     public WProfiles() {
-        super("Profiles", false, GuiConfig.WindowType.Profiles);
+        super("Profiles", GuiConfig.INSTANCE.getWindowConfig(GuiConfig.WindowType.Profiles).isExpanded(), true);
+        type = GuiConfig.WindowType.Profiles;
 
-        onDragged = window -> {
-            GuiConfig.WindowConfig winConfig = GuiConfig.INSTANCE.getWindowConfig(type, false);
-            winConfig.setPos(x, y);
+        action = () -> {
+            GuiConfig.INSTANCE.getWindowConfig(type).setPos(x, y);
+            TopBarModules.MOVED = true;
         };
 
         initWidgets();
@@ -19,39 +19,38 @@ public class WProfiles extends WWindow {
 
     private void initWidgets() {
         // Profiles
-        WTable profilesList = add(new WTable()).getWidget();
-        List<String> profiles = ProfileUtils.getProfiles();
-        for (String profile : profiles) {
-            profilesList.add(new WLabel(profile));
+        WTable profiles = add(new WTable()).getWidget();
+        for (String profile : ProfileUtils.getProfiles()) {
+            profiles.add(new WLabel(profile));
 
-            WButton save = profilesList.add(new WButton("Save")).getWidget();
-            save.action = button -> ProfileUtils.save(profile);
+            WButton save = profiles.add(new WButton("Save")).getWidget();
+            save.action = () -> ProfileUtils.save(profile);
 
-            WButton load = profilesList.add(new WButton("Load")).getWidget();
-            load.action = button -> ProfileUtils.load(profile);
+            WButton load = profiles.add(new WButton("Load")).getWidget();
+            load.action = () -> ProfileUtils.load(profile);
 
-            WMinus delete = profilesList.add(new WMinus()).getWidget();
-            delete.action = minus -> {
+            WMinus delete = profiles.add(new WMinus()).getWidget();
+            delete.action = () -> {
                 ProfileUtils.delete(profile);
                 clear();
                 initWidgets();
             };
 
-            profilesList.row();
+            profiles.row();
         }
         row();
 
-        // New profile
-        if (profiles.size() > 0) {
-            add(new WHorizontalSeparator()).fillX().expandX();
+        // New Profile
+        if (profiles.getCells().size() > 0) {
+            add(new WHorizontalSeparator());
             row();
         }
 
-        WTable newList = add(new WTable()).fillX().expandX().getWidget();
-        WTextBox name = newList.add(new WTextBox("", 70)).fillX().expandX().getWidget();
-        WPlus save = newList.add(new WPlus()).getWidget();
-        save.action = plus -> {
-            if (ProfileUtils.save(name.text)) {
+        WTable t = add(new WTable()).fillX().expandX().getWidget();
+        WTextBox name = t.add(new WTextBox("", 140)).fillX().expandX().getWidget();
+        WPlus add = t.add(new WPlus()).getWidget();
+        add.action = () -> {
+            if (ProfileUtils.save(name.getText())) {
                 clear();
                 initWidgets();
             }

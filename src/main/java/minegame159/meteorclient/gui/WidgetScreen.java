@@ -1,8 +1,12 @@
 package minegame159.meteorclient.gui;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
+import me.zero.alpine.listener.Listenable;
+import minegame159.meteorclient.MeteorClient;
+import minegame159.meteorclient.gui.renderer.GuiDebugRenderer;
 import minegame159.meteorclient.gui.renderer.GuiRenderer;
 import minegame159.meteorclient.gui.widgets.Cell;
+import minegame159.meteorclient.gui.widgets.WRoot;
 import minegame159.meteorclient.gui.widgets.WTextBox;
 import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.rendering.Matrices;
@@ -13,44 +17,26 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.LiteralText;
 import org.lwjgl.glfw.GLFW;
 
-public class WidgetScreen extends Screen {
-    public final String title;
-    protected final MinecraftClient mc;
+public abstract class WidgetScreen extends Screen implements Listenable {
+    private static final GuiRenderer GUI_RENDERER = new GuiRenderer();
+    private static final GuiDebugRenderer GUI_DEBUG_RENDERER = new GuiDebugRenderer();
 
     public Screen parent;
     public final WWidget root;
+
     private final int prePostKeyEvents;
+    private boolean firstInit = true;
     private boolean renderDebug = false;
 
     public boolean locked;
-    private boolean firstInit = true;
 
     public WidgetScreen(String title) {
         super(new LiteralText(title));
 
-        this.title = title;
-        this.mc = MinecraftClient.getInstance();
-        this.parent = mc.currentScreen;
-        this.root = new WRoot();
-        this.prePostKeyEvents = GuiThings.postKeyEvents;
-    }
+        this.parent = MinecraftClient.getInstance().currentScreen;
+        this.root = new WFullScreenRoot();
 
-    @Override
-    protected void init() {
-        if (firstInit) {
-            firstInit = false;
-            return;
-        }
-
-        loopWidget(root);
-    }
-
-    private void loopWidget(WWidget widget) {
-        if (widget instanceof WTextBox && ((WTextBox) widget).isFocused()) GuiThings.setPostKeyEvents(true);
-
-        for (Cell<?> cell : widget.getCells()) {
-            loopWidget(cell.getWidget());
-        }
+        this.prePostKeyEvents = GuiKeyEvents.postKeyEvents;
     }
 
     public <T extends WWidget> Cell<T> add(T widget) {
@@ -62,16 +48,33 @@ public class WidgetScreen extends Screen {
     }
 
     @Override
+    protected void init() {
+        MeteorClient.EVENT_BUS.subscribe(this);
+
+        if (firstInit) {
+            firstInit = false;
+            return;
+        }
+
+        loopWidget(root);
+    }
+
+    private void loopWidget(WWidget widget) {
+        if (widget instanceof WTextBox && ((WTextBox) widget).isFocused()) GuiKeyEvents.setPostKeyEvents(true);
+
+        for (Cell<?> cell : widget.getCells()) {
+            loopWidget(cell.getWidget());
+        }
+    }
+
+    @Override
     public void mouseMoved(double mouseX, double mouseY) {
         if (locked) return;
 
-        double s = mc.getWindow().getScaleFactor();
-        double scale = GuiConfig.INSTANCE.guiScale;
+        double s = MinecraftClient.getInstance().getWindow().getScaleFactor();
 
         mouseX *= s;
         mouseY *= s;
-        mouseX /= scale;
-        mouseY /= scale;
 
         root.mouseMoved(mouseX, mouseY);
     }
@@ -80,14 +83,14 @@ public class WidgetScreen extends Screen {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (locked) return false;
 
-        return root.mouseClicked(button);
+        return root.mouseClicked(false, button);
     }
 
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         if (locked) return false;
 
-        return root.mouseReleased(button);
+        return root.mouseReleased(false, button);
     }
 
     @Override
@@ -101,12 +104,19 @@ public class WidgetScreen extends Screen {
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (locked) return false;
 
+        return super.keyPressed(keyCode, scanCode, modifiers) || root.keyPressed(keyCode, modifiers);
+    }
+
+    @Override
+    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
+        if (locked) return false;
+
         if (modifiers == GLFW.GLFW_MOD_CONTROL && keyCode == GLFW.GLFW_KEY_9) {
             renderDebug = !renderDebug;
             return true;
         }
 
-        return root.keyPressed(keyCode, modifiers) || super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyReleased(keyCode, scanCode, modifiers);
     }
 
     public void keyRepeated(int key, int mods) {
@@ -123,34 +133,33 @@ public class WidgetScreen extends Screen {
     }
 
     @Override
-    public void tick() {
-        root.tick();
-    }
-
-    @Override
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         if (!Utils.canUpdate()) renderBackground(matrices);
 
-        double s = mc.getWindow().getScaleFactor();
-        double scale = GuiConfig.INSTANCE.guiScale;
-
-        mouseX *= s;
-        mouseY *= s;
-        mouseX /= scale;
-        mouseY /= scale;
+        // Apply projection without scaling
+        RenderSystem.matrixMode(5889);
+        RenderSystem.loadIdentity();
+        RenderSystem.ortho(0.0D, MinecraftClient.getInstance().getWindow().getFramebufferWidth(), MinecraftClient.getInstance().getWindow().getFramebufferHeight(), 0.0D, 1000.0D, 3000.0D);
+        RenderSystem.matrixMode(5888);
+        RenderSystem.loadIdentity();
+        RenderSystem.translatef(0.0F, 0.0F, -2000.0F);
 
         Matrices.begin(new MatrixStack());
-        GlStateManager.pushMatrix();
-        GlStateManager.scaled(1 / s, 1 / s, 1);
-        GlStateManager.scaled(scale, scale, 1);
 
-        GuiRenderer.INSTANCE.begin();
-        root.render(GuiRenderer.INSTANCE, mouseX, mouseY, delta);
-        GuiRenderer.INSTANCE.end();
+        // Render gui
+        GUI_RENDERER.begin();
+        root.render(GUI_RENDERER, mouseX, mouseY, delta);
+        GUI_RENDERER.end(true);
 
-        if (renderDebug) GuiRenderer.INSTANCE.renderDebug(root);
+        if (renderDebug) GUI_DEBUG_RENDERER.render(root);
 
-        GlStateManager.popMatrix();
+        // Apply back original scaled projection
+        RenderSystem.matrixMode(5889);
+        RenderSystem.loadIdentity();
+        RenderSystem.ortho(0.0D, MinecraftClient.getInstance().getWindow().getFramebufferWidth() / MinecraftClient.getInstance().getWindow().getScaleFactor(), MinecraftClient.getInstance().getWindow().getFramebufferHeight() / MinecraftClient.getInstance().getWindow().getScaleFactor(), 0.0D, 1000.0D, 3000.0D);
+        RenderSystem.matrixMode(5888);
+        RenderSystem.loadIdentity();
+        RenderSystem.translatef(0.0F, 0.0F, -2000.0F);
     }
 
     @Override
@@ -163,8 +172,9 @@ public class WidgetScreen extends Screen {
     public void onClose() {
         if (locked) return;
 
-        GuiThings.postKeyEvents = prePostKeyEvents;
-        mc.openScreen(parent);
+        MeteorClient.EVENT_BUS.unsubscribe(this);
+        GuiKeyEvents.postKeyEvents = prePostKeyEvents;
+        MinecraftClient.getInstance().openScreen(parent);
     }
 
     @Override
@@ -177,11 +187,29 @@ public class WidgetScreen extends Screen {
         return false;
     }
 
-    private static class WRoot extends WWidget {
+    private static class WFullScreenRoot extends WWidget implements WRoot {
+        private boolean valid = false;
+
         @Override
-        protected void onCalculateSize() {
-            width = Utils.getScaledWindowWidthGui();
-            height = Utils.getScaledWindowHeightGui();
+        public void invalidate() {
+            valid = false;
+        }
+
+        @Override
+        protected void onCalculateSize(GuiRenderer renderer) {
+            width = MinecraftClient.getInstance().getWindow().getFramebufferWidth();
+            height = MinecraftClient.getInstance().getWindow().getFramebufferHeight();
+        }
+
+        @Override
+        protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
+            if (!valid) {
+                calculateSize(renderer);
+                calculateWidgetPositions();
+
+                valid = true;
+                mouseMoved(MinecraftClient.getInstance().mouse.getX(), MinecraftClient.getInstance().mouse.getY());
+            }
         }
     }
 }

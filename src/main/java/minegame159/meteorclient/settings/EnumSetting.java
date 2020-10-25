@@ -1,6 +1,6 @@
 package minegame159.meteorclient.settings;
 
-import minegame159.meteorclient.gui.widgets.WEnumButton;
+import minegame159.meteorclient.gui.widgets.WDropbox;
 import net.minecraft.nbt.CompoundTag;
 
 import java.lang.reflect.InvocationTargetException;
@@ -18,8 +18,8 @@ public class EnumSetting<T extends Enum<?>> extends Setting<T> {
             e.printStackTrace();
         }
 
-        widget = new WEnumButton<>(get());
-        ((WEnumButton<T>) widget).action = twEnumButton -> set(twEnumButton.value);
+        widget = new WDropbox<>(get());
+        ((WDropbox<T>) widget).action = () -> set(((WDropbox<T>) widget).getValue());
     }
 
     @Override
@@ -33,7 +33,7 @@ public class EnumSetting<T extends Enum<?>> extends Setting<T> {
 
     @Override
     public void resetWidget() {
-        ((WEnumButton<T>) widget).setValue(get());
+        ((WDropbox<T>) widget).setValue(get());
     }
 
     @Override

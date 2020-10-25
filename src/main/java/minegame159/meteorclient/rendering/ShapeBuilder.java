@@ -1,7 +1,6 @@
 package minegame159.meteorclient.rendering;
 
 import minegame159.meteorclient.events.RenderEvent;
-import minegame159.meteorclient.gui.renderer.GuiRenderer;
 import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.TextureRegion;
 import net.minecraft.client.render.VertexFormat;
@@ -78,7 +77,7 @@ public class ShapeBuilder {
     }
 
     // Triangle
-    public static void triangle(double x, double y, double size, double angle, Color color, boolean texture) {
+    public static void triangle(double x, double y, double size, double angle, Color color) {
         double cos = Math.cos(Math.toRadians(angle));
         double sin = Math.sin(Math.toRadians(angle));
 
@@ -87,22 +86,16 @@ public class ShapeBuilder {
 
         double _x = ((x - oX) * cos) - ((y - oY) * sin) + oX;
         double _y = ((y - oY) * cos) + ((x - oX) * sin) + oY;
-        if (texture) triangles.pos(_x, _y, 0).texture(GuiRenderer.TEX_QUAD.x, GuiRenderer.TEX_QUAD.y).color(color).endVertex();
-        else triangles.pos(_x, _y, 0).color(color).endVertex();
+        triangles.pos(_x, _y, 0).color(color).endVertex();
 
         _x = ((x + size - oX) * cos) - ((y - oY) * sin) + oX;
         _y = ((y - oY) * cos) + ((x + size - oX) * sin) + oY;
-        if (texture) triangles.pos(_x, _y, 0).texture(GuiRenderer.TEX_QUAD.x + GuiRenderer.TEX_QUAD.width, GuiRenderer.TEX_QUAD.y).color(color).endVertex();
-        else triangles.pos(_x, _y, 0).color(color).endVertex();
+        triangles.pos(_x, _y, 0).color(color).endVertex();
 
-        double v = y + size / (texture ? 2 : 0.9) - oY;
+        double v = y + size / 0.9 - oY;
         _x = ((x + size / 2 - oX) * cos) - (v * sin) + oX;
         _y = (v * cos) + ((x + size / 2 - oX) * sin) + oY;
-        if (texture) triangles.pos(_x, _y, 0).texture(GuiRenderer.TEX_QUAD.x + GuiRenderer.TEX_QUAD.width, GuiRenderer.TEX_QUAD.y + GuiRenderer.TEX_QUAD.height).color(color).endVertex();
-        else triangles.pos(_x, _y, 0).color(color).endVertex();
-    }
-    public static void triangle(double x, double y, double size, double angle, Color color) {
-        triangle(x, y, size, angle, color, true);
+        triangles.pos(_x, _y, 0).color(color).endVertex();
     }
 
     // Line

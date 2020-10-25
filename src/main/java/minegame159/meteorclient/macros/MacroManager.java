@@ -8,9 +8,10 @@ import net.minecraft.nbt.CompoundTag;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
-public class MacroManager extends Savable<MacroManager> {
+public class MacroManager extends Savable<MacroManager> implements Iterable<Macro> {
     public static final MacroManager INSTANCE = new MacroManager();
 
     private List<Macro> macros = new ArrayList<>();
@@ -36,6 +37,11 @@ public class MacroManager extends Savable<MacroManager> {
             MeteorClient.EVENT_BUS.post(EventStore.macroListChangedEvent());
             save();
         }
+    }
+
+    @Override
+    public Iterator<Macro> iterator() {
+        return macros.iterator();
     }
 
     @Override

@@ -5,21 +5,17 @@ import it.unimi.dsi.fastutil.doubles.DoubleList;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import minegame159.meteorclient.gui.renderer.GuiRenderer;
-import net.minecraft.client.MinecraftClient;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class WTable extends WWidget {
-    public final Cell<?> defaultCell = new Cell<>().centerY().space(2);
+    public final Cell<?> defaultCell = new Cell<>().centerY().space(4);
 
-    public double maxHeight;
-    public double animationProgress = 1;
+    private double paddingVertical, paddingHorizontal;
 
-    final List<List<Cell<?>>> rows = new ArrayList<>(1);
+    private final List<List<Cell<?>>> rows = new ArrayList<>(1);
     private int rowI;
-
-    private double padTop, padRight, padBottom, padLeft;
 
     private final DoubleList rowWidths = new DoubleArrayList(1);
     private final DoubleList rowHeights = new DoubleArrayList(1);
@@ -29,10 +25,6 @@ public class WTable extends WWidget {
 
     private final DoubleList rowSpaceTop = new DoubleArrayList(1);
     private final DoubleList rowSpaceBottom = new DoubleArrayList(1);
-
-    private double fullHeight = -1;
-    public double verticalScroll;
-    public boolean enabledScroll = true;
 
     @Override
     public <T extends WWidget> Cell<T> add(T widget) {
@@ -44,11 +36,26 @@ public class WTable extends WWidget {
             rows.add(row);
         } else row = rows.get(rowI);
         row.add(cell);
+
+        if (widget instanceof WHorizontalSeparator) {
+            cell.fillX().expandX();
+            if (parent instanceof WWindow) ((WWindow) parent).row();
+            else row();
+        } else if (widget instanceof WVerticalSeparator) {
+            cell.expandY();
+        } else if (widget instanceof WSection) {
+            cell.fillX().expandX();
+        }
+
         return cell;
     }
 
     public void row() {
         rowI++;
+    }
+
+    protected void removeRow() {
+        rowI--;
     }
 
     @Override
@@ -58,69 +65,43 @@ public class WTable extends WWidget {
         rowI = 0;
     }
 
-    public WTable padTop(double pad) {
-        padTop = pad;
+    public WTable pad(double pad) {
+        paddingVertical = pad;
+        paddingHorizontal = pad;
         return this;
     }
-    public WTable padRight(double pad) {
-        padRight = pad;
-        return this;
-    }
-    public WTable padBottom(double pad) {
-        padBottom = pad;
-        return this;
-    }
-    public WTable padLeft(double pad) {
-        padLeft = pad;
+
+    public WTable padVertical(double pad) {
+        paddingVertical = pad;
         return this;
     }
 
     public WTable padHorizontal(double pad) {
-        padRight = padLeft = pad;
+        paddingHorizontal = pad;
         return this;
     }
-    public WTable padVertical(double pad) {
-        padTop = padBottom = pad;
-        return this;
-    }
-    public WTable pad(double pad) {
-        padTop = padRight = padBottom = padLeft = pad;
-        return this;
+
+    public double getVerticalPad() {
+        return paddingVertical;
     }
 
     @Override
-    protected boolean onMouseScrolled(double amount) {
-        if (fullHeight != -1 && mouseOver) {
-            double preVerticalScroll = verticalScroll;
-            verticalScroll += amount * 16;
-
-            if (verticalScroll > 0) verticalScroll = 0;
-            else if (verticalScroll < -(fullHeight - height)) verticalScroll = -(fullHeight - height);
-
-            moveWidgets(0, verticalScroll - preVerticalScroll);
-            return true;
-        }
-
-        return false;
-    }
-
-    @Override
-    protected void onCalculateSize() {
+    protected void onCalculateSize(GuiRenderer renderer) {
         calculateInfo();
 
         // Reset
         rowWidths.clear();
 
-        double y = this.y + padTop;
-        double maxX = this.x + padLeft;
-        double maxY = this.y + padTop;
+        double y = this.y + paddingVertical;
+        double maxX = this.x + paddingHorizontal;
+        double maxY = this.y + paddingVertical;
         double spaceVertical = 0;
 
         for (int rowI = 0; rowI < rows.size(); rowI++) {
             List<Cell<?>> row = rows.get(rowI);
 
-            double x = this.x + padLeft;
-            double rowMaxX = this.x + padLeft;
+            double x = this.x + paddingHorizontal;
+            double rowMaxX = this.x + paddingHorizontal;
             double rowHeight = rowHeights.getDouble(rowI);
             double spaceHorizontal = 0;
 
@@ -157,7 +138,7 @@ public class WTable extends WWidget {
             }
 
             // Update row width
-            rowWidths.add(rowMaxX - this.x + padRight);
+            rowWidths.add(rowMaxX - this.x + paddingHorizontal);
 
             // Update max x and y
             maxX = Math.max(maxX, rowMaxX);
@@ -168,32 +149,19 @@ public class WTable extends WWidget {
         }
 
         // Calculate size
-        width = maxX - this.x + padRight;
-        height = maxY - this.y + padBottom;
-
-        // Check if vertical scrolling needs to be enabled
-        if (enabledScroll && maxHeight != 0 && height > maxHeight) {
-            fullHeight = height;
-            height = maxHeight;
-
-            if (verticalScroll < -(fullHeight - height)) verticalScroll = -(fullHeight - height);
-
-            moveWidgets(0, -verticalScroll);
-        } else {
-            fullHeight = -1;
-            verticalScroll = 0;
-        }
+        width = maxX - this.x + paddingHorizontal;
+        height = maxY - this.y + paddingVertical;
     }
 
     @Override
     protected void onCalculateWidgetPositions() {
-        double y = this.y + padTop;
+        double y = this.y + paddingVertical;
         double spaceVertical = 0;
 
         for (int rowI = 0; rowI < rows.size(); rowI++) {
             List<Cell<?>> row = rows.get(rowI);
 
-            double x = this.x + padLeft;
+            double x = this.x + paddingHorizontal;
             double rowHeight = rowHeights.getDouble(rowI);
             double fillXAdd = rowFillXCount.getInt(rowI) > 0 ? (width - rowWidths.getDouble(rowI)) / rowFillXCount.getInt(rowI) : 0;
 
@@ -232,13 +200,6 @@ public class WTable extends WWidget {
             // Update y
             y += rowHeight;
         }
-
-        moveWidgets(0, verticalScroll);
-    }
-
-    public void moveWidgets(double deltaX, double deltaY) {
-        for (Cell<?> cell : getCells()) move(cell.getWidget(), deltaX, deltaY);
-        mouseMoved(MinecraftClient.getInstance().mouse.getX() / MinecraftClient.getInstance().getWindow().getScaleFactor(), MinecraftClient.getInstance().mouse.getY() / MinecraftClient.getInstance().getWindow().getScaleFactor());
     }
 
     private void calculateInfo() {
@@ -283,17 +244,6 @@ public class WTable extends WWidget {
 
             this.rowSpaceTop.add(rowSpaceTop);
             this.rowSpaceBottom.add(rowSpaceBottom);
-        }
-    }
-
-    @Override
-    public void render(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
-        if (fullHeight != -1 || (animationProgress != 0 && animationProgress != 1)) {
-            renderer.beginScissor(this, (height - padTop) * (1 - animationProgress), 0, 0, 0, false);
-        }
-        super.render(renderer, mouseX, mouseY, delta);
-        if (fullHeight != -1 || (animationProgress != 0 && animationProgress != 1)) {
-            renderer.endScissor();
         }
     }
 }

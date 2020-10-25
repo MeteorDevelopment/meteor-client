@@ -63,17 +63,21 @@ public class HUD extends ToggleModule {
     private static final Color amber = new Color(235, 158, 52);
     private static final Color yellow = new Color(255, 255, 5);
 
-
-
-    private final SettingGroup sgArmor = settings.createGroup("Armor", "armor-enabled", "Armor HUD", true);
+    private final SettingGroup sgArmor = settings.createGroup("Armor");
     private final SettingGroup sgTopCenter = settings.createGroup("Top Center");
     private final SettingGroup sgTopLeft = settings.createGroup("Top Left");
-    private final SettingGroup sgMinimap = settings.createGroup("Minimap", "minimap-enabled", "Minimap.", true);
+    private final SettingGroup sgMinimap = settings.createGroup("Minimap");
     private final SettingGroup sgTopRight = settings.createGroup("Top Right");
     private final SettingGroup sgBottomRight = settings.createGroup("Bottom Right");
     private final SettingGroup sgPlayerModel = settings.createGroup("Player Model");
 
     // Armor
+    private final Setting<Boolean> armorEnabled = sgArmor.add(new BoolSetting.Builder()
+            .name("armor-enabled")
+            .description("Armor HUD.")
+            .defaultValue(true)
+            .build()
+    );
 
     private final Setting<DurabilityType> armorDurability = sgArmor.add(new EnumSetting.Builder<DurabilityType>()
             .name("armor-durability")
@@ -117,7 +121,6 @@ public class HUD extends ToggleModule {
     );
 
     // Top Center
-
     private final Setting<Boolean> serverLagNotifier = sgTopCenter.add(new BoolSetting.Builder()
             .name("lag-notifier")
             .description("Time since last tick.").defaultValue(true).build()
@@ -128,7 +131,6 @@ public class HUD extends ToggleModule {
             .description("Welcome message.").defaultValue(true).build());
 
     // Top Left
-
     private final Setting<Boolean> waterMark = sgTopLeft.add(new BoolSetting.Builder()
             .name("water-mark")
             .description("Water mark.")
@@ -230,6 +232,12 @@ public class HUD extends ToggleModule {
     );
 
     // Minimap
+    private final Setting<Boolean> minimapEnabled = sgMinimap.add(new BoolSetting.Builder()
+            .name("minimap-enabled")
+            .description("Minimap HUD.")
+            .defaultValue(true)
+            .build()
+    );
 
     private final Setting<Double> mmScale = sgMinimap.add(new DoubleSetting.Builder()
             .name("minimap-scale")
@@ -269,7 +277,6 @@ public class HUD extends ToggleModule {
     );
 
     // Top Right
-
     private final Setting<Boolean> activeModules = sgTopRight.add(new BoolSetting.Builder()
             .name("active-modules")
             .description("Display active modules.")
@@ -278,7 +285,6 @@ public class HUD extends ToggleModule {
     );
 
     // Bottom Right
-
     public final Setting<Boolean> potionTimers = sgBottomRight.add(new BoolSetting.Builder()
             .name("potion-timers")
             .description("Display potion timers and hide minecraft default potion icons.")
@@ -301,7 +307,6 @@ public class HUD extends ToggleModule {
     );
 
     // Player Model
-
     private final Setting<Boolean> playerModel = sgPlayerModel.add(new BoolSetting.Builder()
             .name("Player Model")
             .description("Render mini player model.")
@@ -472,7 +477,7 @@ public class HUD extends ToggleModule {
         renderBottomRight(event);
         MeteorClient.FONT.end();
 
-        if (sgArmor.isEnabled()) {
+        if (armorEnabled.get()) {
             int x = event.screenWidth / 2 + 12;
             int y = event.screenHeight - 38;
 
@@ -537,7 +542,7 @@ public class HUD extends ToggleModule {
 
     private void renderMMTriangle(double x, double y, double size, double angle, Color color) {
         double s = mmScale.get();
-        ShapeBuilder.triangle(2 + x * s, 2 + y * s, size * s, angle, color, false);
+        ShapeBuilder.triangle(2 + x * s, 2 + y * s, size * s, angle, color);
     }
 
     private void renderTopCenter(Render2DEvent event) { if
@@ -623,7 +628,7 @@ public class HUD extends ToggleModule {
         if (mc.options.debugEnabled) return;
         int y = 2;
 
-        if (sgMinimap.isEnabled()) {
+        if (minimapEnabled.get()) {
             ShapeBuilder.begin(null, GL11.GL_TRIANGLES, VertexFormats.POSITION_COLOR);
             renderMMQuad(0, 0, 100, 100, mmBackground.get());
             renderMMQuad(0, 0, 100, 1, mmBackground.get());

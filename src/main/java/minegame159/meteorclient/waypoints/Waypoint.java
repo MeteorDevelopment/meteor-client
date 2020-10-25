@@ -22,10 +22,9 @@ public class Waypoint implements ISerializable<Waypoint> {
 
     public boolean overworld, nether, end;
 
-    public void renderIcon(double x, double y, double z, double a) {
+    public void renderIcon(double x, double y, double z, double a, double size) {
         MB.begin(null, GL11.GL_TRIANGLES, VertexFormats.POSITION_TEXTURE_COLOR);
 
-        double size = 16;
         int preA = color.a;
         color.a *= a;
 
@@ -44,7 +43,7 @@ public class Waypoint implements ISerializable<Waypoint> {
     }
 
     public void renderIcon(double x, double y, double z) {
-        renderIcon(x, y, z, 1);
+        renderIcon(x, y, z, 1, 16);
     }
 
     private int findIconIndex() {

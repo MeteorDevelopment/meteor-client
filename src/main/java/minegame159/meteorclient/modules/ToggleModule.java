@@ -4,6 +4,7 @@ import minegame159.meteorclient.Config;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.Chat;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Formatting;
@@ -25,8 +26,10 @@ public abstract class ToggleModule extends Module {
             ModuleManager.INSTANCE.addActive(this);
             MeteorClient.EVENT_BUS.subscribe(this);
 
-            for (Setting setting : settings) {
-                if (setting.onModuleActivated != null) setting.onModuleActivated.accept(setting);
+            for (SettingGroup sg : settings) {
+                for (Setting setting : sg) {
+                    if (setting.onModuleActivated != null) setting.onModuleActivated.accept(setting);
+                }
             }
 
             if (onActivateDeactivate) onActivate();

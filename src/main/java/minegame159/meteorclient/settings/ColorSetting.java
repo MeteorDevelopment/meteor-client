@@ -1,7 +1,6 @@
 package minegame159.meteorclient.settings;
 
-import minegame159.meteorclient.gui.renderer.GuiRenderer;
-import minegame159.meteorclient.gui.screens.ColorSettingScreen;
+import minegame159.meteorclient.gui.screens.settings.ColorSettingScreen;
 import minegame159.meteorclient.gui.widgets.WButton;
 import minegame159.meteorclient.gui.widgets.WQuad;
 import minegame159.meteorclient.gui.widgets.WTable;
@@ -12,7 +11,7 @@ import net.minecraft.nbt.CompoundTag;
 import java.util.function.Consumer;
 
 public class ColorSetting extends Setting<Color> {
-    private WQuad quad;
+    private final WQuad quad;
 
     public ColorSetting(String name, String description, Color defaultValue, Consumer<Color> onChanged, Consumer<Setting<Color>> onModuleActivated) {
         super(name, description, defaultValue, onChanged, onModuleActivated);
@@ -20,12 +19,10 @@ public class ColorSetting extends Setting<Color> {
         widget = new WTable();
         quad = widget.add(new WQuad(get())).getWidget();
 
-        WButton button = widget.add(new WButton(GuiRenderer.TEX_EDIT)).getWidget();
-        button.action = button1 -> {
+        WButton button = widget.add(new WButton(WButton.ButtonRegion.Edit)).getWidget();
+        button.action = () -> {
             ColorSettingScreen colorSettingScreen = new ColorSettingScreen(this);
-            colorSettingScreen.action = colorSettingScreen1 -> {
-                quad.color.set(get());
-            };
+            colorSettingScreen.action = () -> quad.color.set(get());
             MinecraftClient.getInstance().openScreen(colorSettingScreen);
         };
     }

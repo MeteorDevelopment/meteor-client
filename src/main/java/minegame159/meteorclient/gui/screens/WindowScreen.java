@@ -5,13 +5,13 @@ import minegame159.meteorclient.gui.widgets.Cell;
 import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.gui.widgets.WWindow;
 
-public class WindowScreen extends WidgetScreen {
-    protected WWindow window;
+public abstract class WindowScreen extends WidgetScreen {
+    private final WWindow window;
 
     public WindowScreen(String title, boolean expanded) {
         super(title);
 
-        initWidgets(expanded);
+        window = super.add(new WWindow(title, expanded)).centerXY().getWidget();
     }
 
     @Override
@@ -26,9 +26,5 @@ public class WindowScreen extends WidgetScreen {
     @Override
     public void clear() {
         window.clear();
-    }
-
-    private void initWidgets(boolean expanded) {
-        window = super.add(new WWindow(title, expanded)).centerXY().getWidget();
     }
 }

@@ -12,26 +12,38 @@ import java.nio.ByteBuffer;
 import static org.lwjgl.opengl.GL11C.*;
 
 public class ByteTexture extends AbstractTexture {
-    public ByteTexture(int width, int height, byte[] data) {
+    public ByteTexture(int width, int height, byte[] data, boolean text) {
         if (!RenderSystem.isOnRenderThread()) {
-            RenderSystem.recordRenderCall(() -> upload(width, height, data));
+            RenderSystem.recordRenderCall(() -> upload(width, height, data, text));
         } else {
-            upload(width, height, data);
+            upload(width, height, data, text);
         }
     }
 
-    private void upload(int width, int height, byte[] data) {
-        TextureUtil.allocate(getGlId(), width, height);
-        bindTexture();
+    public ByteTexture(int width, int height, ByteBuffer buffer, boolean text) {
+        if (!RenderSystem.isOnRenderThread()) {
+            RenderSystem.recordRenderCall(() -> upload(width, height, buffer, text));
+        } else {
+            upload(width, height, buffer, text);
+        }
+    }
 
+    private void upload(int width, int height, byte[] data, boolean text) {
         ByteBuffer buffer = BufferUtils.createByteBuffer(data.length).put(data);
         buffer.flip();
 
+        upload(width, height, buffer, text);
+    }
+
+    private void upload(int width, int height, ByteBuffer buffer, boolean text) {
+        TextureUtil.allocate(getGlId(), width, height);
+        bindTexture();
+
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, buffer);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, text ? GL_LINEAR : GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, text ? GL_LINEAR : GL_NEAREST);
+        glTexImage2D(GL_TEXTURE_2D, 0, text ? GL_ALPHA : GL_RGB, width, height, 0, text ? GL_ALPHA : GL_RGB, GL_UNSIGNED_BYTE, buffer);
     }
 
     @Override

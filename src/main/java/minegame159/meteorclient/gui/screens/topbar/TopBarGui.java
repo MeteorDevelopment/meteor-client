@@ -1,8 +1,6 @@
 package minegame159.meteorclient.gui.screens.topbar;
 
-import minegame159.meteorclient.Config;
 import minegame159.meteorclient.gui.GuiConfig;
-import minegame159.meteorclient.gui.TopBarType;
 import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.gui.widgets.WWindow;
 import minegame159.meteorclient.settings.ColorSetting;
@@ -12,18 +10,21 @@ import minegame159.meteorclient.settings.Settings;
 import minegame159.meteorclient.utils.Color;
 import net.minecraft.client.MinecraftClient;
 
-public class TopBarGui extends TopBarScreen {
+public class TopBarGui extends TopBarWindowScreen {
     public TopBarGui() {
         super(TopBarType.Gui);
+    }
 
+    @Override
+    protected void initWidgets() {
         Settings s = new Settings();
         SettingGroup sg = s.getDefaultGroup();
 
         sg.add(new DoubleSetting.Builder()
                 .name("gui-scale")
                 .description("Scale of the GUI.")
-                .defaultValue(2)
-                .min(1)
+                .defaultValue(1)
+                .min(0.5)
                 .max(4)
                 .noSlider()
                 .onChanged(aDouble -> {
@@ -33,6 +34,17 @@ public class TopBarGui extends TopBarScreen {
                     }
                 })
                 .onModuleActivated(doubleSetting -> doubleSetting.set(GuiConfig.INSTANCE.guiScale))
+                .build()
+        );
+
+        sg.add(new DoubleSetting.Builder()
+                .name("scroll-sensitivity")
+                .description("Sensitivity of scrolling in the GUI.")
+                .defaultValue(1)
+                .min(0.5)
+                .max(4)
+                .onChanged(aDouble -> GuiConfig.INSTANCE.scrollSensitivity = aDouble)
+                .onModuleActivated(doubleSetting -> doubleSetting.set(GuiConfig.INSTANCE.scrollSensitivity))
                 .build()
         );
 
@@ -91,6 +103,31 @@ public class TopBarGui extends TopBarScreen {
                 .defaultValue(new Color(40, 40, 40, 200))
                 .onChanged(color -> GuiConfig.INSTANCE.backgroundPressed.set(color))
                 .onModuleActivated(colorSetting -> colorSetting.set(GuiConfig.INSTANCE.backgroundPressed))
+                .build()
+        );
+
+        sg.add(new ColorSetting.Builder()
+                .name("scrollbar")
+                .description("Scrollbar color")
+                .defaultValue(new Color(80, 80, 80, 200))
+                .onChanged(color -> GuiConfig.INSTANCE.scrollbar.set(color))
+                .onModuleActivated(colorSetting -> colorSetting.set(GuiConfig.INSTANCE.scrollbar))
+                .build()
+        );
+        sg.add(new ColorSetting.Builder()
+                .name("scrollbar-hovered")
+                .description("Scrollbar hovered color")
+                .defaultValue(new Color(90, 90, 90, 200))
+                .onChanged(color -> GuiConfig.INSTANCE.scrollbarHovered.set(color))
+                .onModuleActivated(colorSetting -> colorSetting.set(GuiConfig.INSTANCE.scrollbarHovered))
+                .build()
+        );
+        sg.add(new ColorSetting.Builder()
+                .name("scrollbar-pressed")
+                .description("Scrollbar pressed color")
+                .defaultValue(new Color(100, 100, 100, 200))
+                .onChanged(color -> GuiConfig.INSTANCE.scrollbarPressed.set(color))
+                .onModuleActivated(colorSetting -> colorSetting.set(GuiConfig.INSTANCE.scrollbarPressed))
                 .build()
         );
 
@@ -330,13 +367,6 @@ public class TopBarGui extends TopBarScreen {
                 .build()
         );
 
-        WWindow window = add(new WWindow(title, true)).centerXY().getWidget();
-        window.add(s.createTable()).fillX().expandX();
-    }
-
-    @Override
-    public void onClose() {
-        Config.INSTANCE.save();
-        super.onClose();
+        add(s.createTable()).fillX().expandX();
     }
 }

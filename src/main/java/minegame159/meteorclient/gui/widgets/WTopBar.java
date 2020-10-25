@@ -1,10 +1,10 @@
 package minegame159.meteorclient.gui.widgets;
 
-import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.gui.GuiConfig;
-import minegame159.meteorclient.gui.TopBarType;
 import minegame159.meteorclient.gui.renderer.GuiRenderer;
+import minegame159.meteorclient.gui.renderer.Region;
 import minegame159.meteorclient.gui.screens.topbar.TopBarScreen;
+import minegame159.meteorclient.gui.screens.topbar.TopBarType;
 import minegame159.meteorclient.utils.Color;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
@@ -19,51 +19,36 @@ public class WTopBar extends WTable {
         }
     }
 
-    private static class WTopBarButton extends WWidget {
-        TopBarType type;
+    private static class WTopBarButton extends WPressable {
+        private final TopBarType type;
+        private final String name;
 
-        boolean pressed;
-
-        WTopBarButton(TopBarType type) {
+        private WTopBarButton(TopBarType type) {
             this.type = type;
+            this.name = type.toString();
         }
 
         @Override
-        protected void onCalculateSize() {
-            width = 2 + MeteorClient.FONT.getStringWidth(type.toString()) + 2;
-            height = 2 + MeteorClient.FONT.getHeight() + 2;
+        protected void onCalculateSize(GuiRenderer renderer) {
+            width = 4 + renderer.textWidth(name) + 4;
+            height = 4 + renderer.textHeight() + 4;
         }
 
         @Override
-        protected boolean onMouseClicked(int button) {
-            if (mouseOver) {
-                pressed = true;
-                return true;
+        protected void onAction(int button) {
+            Screen screen = MinecraftClient.getInstance().currentScreen;
+
+            if (!(screen instanceof TopBarScreen) || ((TopBarScreen) screen).type != type) {
+                MinecraftClient mc = MinecraftClient.getInstance();
+
+                double mouseX = mc.mouse.getX();
+                double mouseY = mc.mouse.getY();
+
+                if (screen != null) screen.onClose();
+                mc.openScreen(type.createScreen());
+
+                GLFW.glfwSetCursorPos(mc.getWindow().getHandle(), mouseX, mouseY);
             }
-
-            return false;
-        }
-
-        @Override
-        protected boolean onMouseReleased(int button) {
-            if (mouseOver) {
-                pressed = false;
-                Screen screen = MinecraftClient.getInstance().currentScreen;
-                if (!(screen instanceof TopBarScreen) || ((TopBarScreen) screen).type != type) {
-                    MinecraftClient mc = MinecraftClient.getInstance();;
-
-                    double mouseX = mc.mouse.getX();
-                    double mouseY = mc.mouse.getY();
-
-                    if (screen != null) screen.onClose();
-                    mc.openScreen(type.createScreen());
-
-                    GLFW.glfwSetCursorPos(mc.getWindow().getHandle(), mouseX, mouseY);
-                }
-                return true;
-            }
-
-            return false;
         }
 
         @Override
@@ -75,8 +60,8 @@ public class WTopBar extends WTable {
             Screen screen = MinecraftClient.getInstance().currentScreen;
             if (screen instanceof TopBarScreen && ((TopBarScreen) screen).type == type) color = GuiConfig.INSTANCE.backgroundPressed;
 
-            renderer.renderQuad(x, y, width, height, color);
-            renderer.renderText(type.toString(), x + 2, y + 2, GuiConfig.INSTANCE.text, false);
+            renderer.quad(Region.FULL, x, y, width, height, color);
+            renderer.text(name, x + 4, y + 4, false, GuiConfig.INSTANCE.text);
         }
     }
 }

@@ -3,7 +3,9 @@ package minegame159.meteorclient;
 import com.g00fy2.versioncompare.Version;
 import minegame159.meteorclient.gui.GuiConfig;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.utils.*;
+import minegame159.meteorclient.utils.Color;
+import minegame159.meteorclient.utils.NbtUtils;
+import minegame159.meteorclient.utils.Savable;
 import net.minecraft.nbt.CompoundTag;
 
 import java.io.File;
@@ -15,12 +17,10 @@ public class Config extends Savable<Config> {
 
     public final Version version = new Version("0.3.5");
     private String prefix = ".";
-    public AutoCraft autoCraft = new AutoCraft();
     public GuiConfig guiConfig = new GuiConfig();
 
     public boolean chatCommandsInfo = true;
 
-    private Map<WindowType, WindowConfig> windowConfigs = new HashMap<>();
     private Map<Category, Color> categoryColors = new HashMap<>();
 
     public Config() {
@@ -34,10 +34,6 @@ public class Config extends Savable<Config> {
 
     public String getPrefix() {
         return prefix;
-    }
-
-    public WindowConfig getWindowConfig(WindowType type, boolean defaultExpanded) {
-        return windowConfigs.computeIfAbsent(type, type1 -> new WindowConfig(defaultExpanded));
     }
 
     public void setCategoryColor(Category category, Color color) {
@@ -55,8 +51,6 @@ public class Config extends Savable<Config> {
 
         tag.putString("version", version.getOriginalString());
         tag.putString("prefix", prefix);
-        tag.put("autoCraft", autoCraft.toTag());
-        tag.put("windowConfigs", NbtUtils.mapToTag(windowConfigs));
         tag.put("categoryColors", NbtUtils.mapToTag(categoryColors));
         tag.put("guiConfig", guiConfig.toTag());
         tag.putBoolean("chatCommandsInfo", chatCommandsInfo);
@@ -67,8 +61,6 @@ public class Config extends Savable<Config> {
     @Override
     public Config fromTag(CompoundTag tag) {
         prefix = tag.getString("prefix");
-        autoCraft.fromTag(tag.getCompound("autoCraft"));
-        windowConfigs = NbtUtils.mapFromTag(tag.getCompound("windowConfigs"), WindowType::valueOf, tag1 -> new WindowConfig(false).fromTag((CompoundTag) tag1));
         categoryColors = NbtUtils.mapFromTag(tag.getCompound("categoryColors"), Category::valueOf, tag1 -> new Color().fromTag((CompoundTag) tag1));
         guiConfig.fromTag(tag.getCompound("guiConfig"));
         chatCommandsInfo = !tag.contains("chatCommandsInfo") || tag.getBoolean("chatCommandsInfo");
@@ -82,108 +74,5 @@ public class Config extends Savable<Config> {
         }
 
         return this;
-    }
-
-    public class AutoCraft implements ISerializable<AutoCraft> {
-        private boolean craftByOne = true;
-        private boolean stopWhenNoIngredients = true;
-
-        private AutoCraft() {}
-
-        public void setCraftByOne(boolean craftByOne) {
-            this.craftByOne = craftByOne;
-            save();
-        }
-
-        public boolean isCraftByOne() {
-            return craftByOne;
-        }
-
-        public void setStopWhenNoIngredients(boolean stopWhenNoIngredients) {
-            this.stopWhenNoIngredients = stopWhenNoIngredients;
-            save();
-        }
-
-        public boolean isStopWhenNoIngredients() {
-            return stopWhenNoIngredients;
-        }
-
-        @Override
-        public CompoundTag toTag() {
-            CompoundTag tag = new CompoundTag();
-
-            tag.putBoolean("craftByOne", craftByOne);
-            tag.putBoolean("stopWhenNoIngredients", stopWhenNoIngredients);
-
-            return tag;
-        }
-
-        @Override
-        public AutoCraft fromTag(CompoundTag tag) {
-            craftByOne = tag.getBoolean("craftByOne");
-            stopWhenNoIngredients = tag.getBoolean("stopWhenNoIngredients");
-
-            return this;
-        }
-    }
-
-    public class WindowConfig implements ISerializable<WindowConfig> {
-        private Vector2 pos = new Vector2(-1, -1);
-        private boolean expanded;
-
-        private WindowConfig(boolean expanded) {
-            this.expanded = expanded;
-        }
-
-        public double getX() {
-            return pos.x;
-        }
-
-        public double getY() {
-            return pos.y;
-        }
-
-        public void setPos(double x, double y) {
-            this.pos.set(x, y);
-            save();
-        }
-
-        public boolean isExpanded() {
-            return expanded;
-        }
-
-        public void setExpanded(boolean expanded) {
-            this.expanded = expanded;
-            save();
-        }
-
-        @Override
-        public CompoundTag toTag() {
-            CompoundTag tag = new CompoundTag();
-
-            tag.put("pos", pos.toTag());
-            tag.putBoolean("expanded", expanded);
-
-            return tag;
-        }
-
-        @Override
-        public WindowConfig fromTag(CompoundTag tag) {
-            pos.fromTag(tag.getCompound("pos"));
-            expanded = tag.getBoolean("expanded");
-
-            return this;
-        }
-    }
-
-    public enum WindowType {
-        Combat,
-        Player,
-        Movement,
-        Render,
-        Misc,
-        Setting,
-        Profiles,
-        Search
     }
 }

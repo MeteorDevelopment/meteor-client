@@ -24,16 +24,15 @@ import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.math.Vec3d;
 
 public class ElytraPlus extends ToggleModule {
-    public enum Mode{
+    public enum Mode {
         Normal,
         Packet
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgAutopilot = settings.createGroup("Autopilot", "autopilot", "Automatically flies forward maintaining minimum height.", false, settingGroup -> {
-        if (isActive() && !settingGroup.isEnabled()) ((IKeyBinding) mc.options.keyForward).setPressed(false);
-    });
+    private final SettingGroup sgAutopilot = settings.createGroup("Autopilot");
 
+    // General
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("mode")
             .description("The mode used to make you fly.")
@@ -110,6 +109,17 @@ public class ElytraPlus extends ToggleModule {
             .build()
     );
 
+    // Autopilot
+    private final Setting<Boolean> autopilotEnabled = sgAutopilot.add(new BoolSetting.Builder()
+            .name("autopilot-enabled")
+            .description("Automatically flies forward maintaining minimum height.")
+            .defaultValue(false)
+            .onChanged(aBoolean -> {
+                if (isActive() && !aBoolean) ((IKeyBinding) mc.options.keyForward).setPressed(false);
+            })
+            .build()
+    );
+
     private final Setting<Double> autopilotMinimumHeight = sgAutopilot.add(new DoubleSetting.Builder()
             .name("minimum-height")
             .description("Autopilot minimum height.")
@@ -147,7 +157,7 @@ public class ElytraPlus extends ToggleModule {
 
     @Override
     public void onDeactivate() {
-        if (sgAutopilot.isEnabled()) ((IKeyBinding) mc.options.keyForward).setPressed(false);
+        if (autopilotEnabled.get()) ((IKeyBinding) mc.options.keyForward).setPressed(false);
 
         if (chestSwap.get() && mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() == Items.ELYTRA) {
             ModuleManager.INSTANCE.get(ChestSwap.class).swap();
@@ -223,18 +233,21 @@ public class ElytraPlus extends ToggleModule {
         }
         if (mode.get() == Mode.Packet && mc.player.inventory.getArmorStack(2).getItem() == Items.ELYTRA && mc.player.fallDistance > 0.2 && !mc.options.keySneak.isPressed()) {
             Vec3d vec3d = new Vec3d(0, 0, 0);
-            if (mc.options.keyForward.isPressed()){
+
+            if (mc.options.keyForward.isPressed()) {
                 vec3d.add(0, 0, horizontalSpeed.get());
                 vec3d.rotateY(-(float)Math.toRadians(mc.player.yaw));
-            } else if (mc.options.keyBack.isPressed()){
+            } else if (mc.options.keyBack.isPressed()) {
                 vec3d.add( 0, 0, horizontalSpeed.get());
                 vec3d.rotateY((float)Math.toRadians(mc.player.yaw));
             }
-            if (mc.options.keyJump.isPressed()){
+
+            if (mc.options.keyJump.isPressed()) {
                 vec3d.add(0, verticalSpeed.get(), 0);
             } else if (!mc.options.keyJump.isPressed()) {
                 vec3d.add(0, -verticalSpeed.get(), 0);
             }
+
             mc.player.setVelocity(vec3d);
             mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.START_FALL_FLYING));
             mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket(true));
@@ -242,7 +255,7 @@ public class ElytraPlus extends ToggleModule {
     });
 
     private void handleAutopilot() {
-        if (sgAutopilot.isEnabled()) {
+        if (autopilotEnabled.get()) {
             ((IKeyBinding) mc.options.keyForward).setPressed(true);
 
             if (mc.player.getY() < autopilotMinimumHeight.get() && !decrementFireworkTimer) {
@@ -255,7 +268,7 @@ public class ElytraPlus extends ToggleModule {
                     fireworkTimer = 20;
                 } else {
                     Chat.warning(this, "Disabled autopilot because you don't have any fireworks left in your hotbar.");
-                    sgAutopilot.setEnabled(false);
+                    autopilotEnabled.set(false);
                 }
             }
 

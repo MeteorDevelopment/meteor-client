@@ -15,8 +15,9 @@ import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
 
 public class AutoFish extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgSplashRangeDetection = settings.createGroup("Splash Sound Range Detection", "Allows you to use multiple accounts next to each other.", "splash-range-detection", false);
+    private final SettingGroup sgSplashRangeDetection = settings.createGroup("Splash Sound Range Detection");
 
+    // General
     private final Setting<Boolean> autoCast = sgGeneral.add(new BoolSetting.Builder()
             .name("auto-cast")
             .description("Automatically casts when not fishing.")
@@ -48,6 +49,14 @@ public class AutoFish extends ToggleModule {
             .defaultValue(14)
             .min(0)
             .sliderMax(60)
+            .build()
+    );
+
+    // Splash range detection
+    private final Setting<Boolean> splashDetectionRangeEnabled = sgSplashRangeDetection.add(new BoolSetting.Builder()
+            .name("splash-detection-range-enabled")
+            .description("Allows you to use multiple accounts next to each other.")
+            .defaultValue(false)
             .build()
     );
 
@@ -85,7 +94,7 @@ public class AutoFish extends ToggleModule {
         FishingBobberEntity b = mc.player.fishHook;
 
         if (p.getSound().getId().getPath().equals("entity.fishing_bobber.splash")) {
-            if (!sgSplashRangeDetection.isEnabled() || Utils.distance(b.getX(), b.getY(), b.getZ(), p.getX(), p.getY(), p.getZ()) <= splashDetectionRange.get()) {
+            if (!splashDetectionRangeEnabled.get() || Utils.distance(b.getX(), b.getY(), b.getZ(), p.getX(), p.getY(), p.getZ()) <= splashDetectionRange.get()) {
                 ticksEnabled = true;
                 ticksToRightClick = ticksCatch.get();
                 ticksData = 0;

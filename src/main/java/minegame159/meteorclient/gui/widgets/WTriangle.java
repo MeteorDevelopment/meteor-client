@@ -1,62 +1,32 @@
 package minegame159.meteorclient.gui.widgets;
 
 import minegame159.meteorclient.gui.GuiConfig;
-import minegame159.meteorclient.gui.listeners.TriangleClickListener;
 import minegame159.meteorclient.gui.renderer.GuiRenderer;
 import minegame159.meteorclient.utils.Color;
-import minegame159.meteorclient.utils.Utils;
 
-public class WTriangle extends WWidget {
-    public TriangleClickListener action;
-    public boolean accentColor;
+public class WTriangle extends WPressable {
+    public Color color, colorHovered, colorPressed;
 
-    public boolean checked;
+    public double rotation;
 
-    boolean pressed;
-    private double angle;
-
-    @Override
-    protected void onCalculateSize() {
-        width = 10;
-        height = 10;
+    public WTriangle() {
+        color = GuiConfig.INSTANCE.background;
+        colorHovered = GuiConfig.INSTANCE.backgroundHovered;
+        colorPressed = GuiConfig.INSTANCE.backgroundPressed;
     }
 
     @Override
-    protected boolean onMouseClicked(int button) {
-        if (mouseOver) {
-            pressed = true;
-            return true;
-        }
-
-        return false;
-    }
-
-    @Override
-    protected boolean onMouseReleased(int button) {
-        if (pressed) {
-            pressed = false;
-            checked = !checked;
-            if (action != null) action.onTriangleClick(this);
-            return true;
-        }
-
-        return false;
-    }
-
-    public void setChecked(boolean checked) {
-        this.checked = checked;
-        angle = checked ? -90 : 0;
+    protected void onCalculateSize(GuiRenderer renderer) {
+        width = height = renderer.textHeight();
     }
 
     @Override
     protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
-        Color color = accentColor ? GuiConfig.INSTANCE.accent : GuiConfig.INSTANCE.background;
-        if (pressed) color = accentColor ? GuiConfig.INSTANCE.accent : GuiConfig.INSTANCE.backgroundPressed;
-        else if (mouseOver) color = accentColor ? GuiConfig.INSTANCE.accent : GuiConfig.INSTANCE.backgroundHovered;
+        Color color;
+        if (pressed) color = colorPressed;
+        else if (mouseOver) color = colorHovered;
+        else color = this.color;
 
-        angle += delta * 40 * (checked ? -1 : 1);
-        angle = Utils.clamp(angle, -90, 0);
-
-        renderer.renderTriangle(x, y + height / 4, width, angle, color);
+        renderer.triangle(x, y + width / 4, width, rotation, color);
     }
 }

@@ -11,9 +11,9 @@ public class StringSetting extends Setting<String> {
 
         value = defaultValue;
 
-        widget = new WTextBox(get(), 200);
-        ((WTextBox) widget).action = textBox -> {
-            if (!set(textBox.text)) textBox.text = get();
+        widget = new WTextBox(get(), 400);
+        ((WTextBox) widget).action = () -> {
+            if (!set(((WTextBox) widget).getText())) ((WTextBox) widget).setText(get());
         };
     }
 
@@ -33,7 +33,7 @@ public class StringSetting extends Setting<String> {
 
     @Override
     public void resetWidget() {
-        ((WTextBox) widget).text = get();
+        ((WTextBox) widget).setText(get());
     }
 
     @Override

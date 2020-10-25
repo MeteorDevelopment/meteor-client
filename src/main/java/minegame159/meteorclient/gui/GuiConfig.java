@@ -13,7 +13,8 @@ import java.util.Map;
 public class GuiConfig implements ISerializable<GuiConfig> {
     public static GuiConfig INSTANCE;
 
-    public double guiScale = 2;
+    public double guiScale = 1;
+    public double scrollSensitivity = 1;
 
     public Color text = new Color(255, 255, 255);
     public Color windowHeaderText = new Color(255, 255, 255);
@@ -23,6 +24,10 @@ public class GuiConfig implements ISerializable<GuiConfig> {
     public Color background = new Color(20, 20, 20, 200);
     public Color backgroundHovered = new Color(30, 30, 30, 200);
     public Color backgroundPressed = new Color(40, 40, 40, 200);
+
+    public Color scrollbar = new Color(80, 80, 80, 200);
+    public Color scrollbarHovered = new Color(90, 90, 90, 200);
+    public Color scrollbarPressed = new Color(100, 100, 100, 200);
 
     public Color outline = new Color(0, 0, 0, 225);
     public Color outlineHovered = new Color(10, 10, 10, 225);
@@ -70,8 +75,8 @@ public class GuiConfig implements ISerializable<GuiConfig> {
         INSTANCE = this;
     }
 
-    public WindowConfig getWindowConfig(WindowType type, boolean defaultExpanded) {
-        return windowConfigs.computeIfAbsent(type, type1 -> new WindowConfig(defaultExpanded));
+    public WindowConfig getWindowConfig(WindowType type) {
+        return windowConfigs.computeIfAbsent(type, type1 -> new WindowConfig());
     }
 
     public void clearWindowConfigs() {
@@ -84,6 +89,7 @@ public class GuiConfig implements ISerializable<GuiConfig> {
         CompoundTag tag = new CompoundTag();
 
         tag.putDouble("guiScale", guiScale);
+        tag.putDouble("scrollSensitivity", scrollSensitivity);
 
         tag.put("text", text.toTag());
         tag.put("windowHeaderText", text.toTag());
@@ -93,6 +99,10 @@ public class GuiConfig implements ISerializable<GuiConfig> {
         tag.put("background", background.toTag());
         tag.put("backgroundHovered", backgroundHovered.toTag());
         tag.put("backgroundPressed", backgroundPressed.toTag());
+
+        tag.put("scrollbar", scrollbar.toTag());
+        tag.put("scrollbarHovered", scrollbarHovered.toTag());
+        tag.put("scrollbarPressed", scrollbarPressed.toTag());
 
         tag.put("outline", outline.toTag());
         tag.put("outlineHovered", outlineHovered.toTag());
@@ -142,6 +152,7 @@ public class GuiConfig implements ISerializable<GuiConfig> {
     @Override
     public GuiConfig fromTag(CompoundTag tag) {
         if (tag.contains("guiScale")) guiScale = tag.getDouble("guiScale");
+        if (tag.contains("scrollSensitivity")) scrollSensitivity = tag.getDouble("scrollSensitivity");
 
         read(tag, "text", text);
         read(tag, "windowHeaderText", windowHeaderText);
@@ -151,6 +162,10 @@ public class GuiConfig implements ISerializable<GuiConfig> {
         read(tag, "background", background);
         read(tag, "backgroundHovered", backgroundHovered);
         read(tag, "backgroundPressed", backgroundPressed);
+
+        read(tag, "scrollbar", scrollbar);
+        read(tag, "scrollbarHovered", scrollbarHovered);
+        read(tag, "scrollbarPressed", scrollbarPressed);
 
         read(tag, "outline", outline);
         read(tag, "outlineHovered", outlineHovered);
@@ -192,7 +207,7 @@ public class GuiConfig implements ISerializable<GuiConfig> {
         read(tag, "editHovered", editHovered);
         read(tag, "editPressed", editPressed);
 
-        windowConfigs = NbtUtils.mapFromTag(tag.getCompound("windowConfigs"), WindowType::valueOf, tag1 -> new WindowConfig(false).fromTag((CompoundTag) tag1));
+        windowConfigs = NbtUtils.mapFromTag(tag.getCompound("windowConfigs"), WindowType::valueOf, tag1 -> new WindowConfig().fromTag((CompoundTag) tag1));
 
         return this;
     }
@@ -212,13 +227,9 @@ public class GuiConfig implements ISerializable<GuiConfig> {
         Search
     }
 
-    public class WindowConfig implements ISerializable<WindowConfig> {
-        private Vector2 pos = new Vector2(-1, -1);
+    public static class WindowConfig implements ISerializable<WindowConfig> {
+        private final Vector2 pos = new Vector2(-1, -1);
         private boolean expanded;
-
-        private WindowConfig(boolean expanded) {
-            this.expanded = expanded;
-        }
 
         public double getX() {
             return pos.x;

@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class Macro implements Listenable, ISerializable<Macro> {
-    public String name;
+    public String name = "";
     public List<String> messages = new ArrayList<>(1);
     public int key = -1;
 

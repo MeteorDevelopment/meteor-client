@@ -1,46 +1,55 @@
 package minegame159.meteorclient.gui.widgets;
 
-import minegame159.meteorclient.gui.TextBoxFilters;
-import minegame159.meteorclient.gui.listeners.DoubleTextBoxChangeListener;
-import minegame159.meteorclient.utils.Utils;
+import java.util.Locale;
 
 public class WDoubleTextBox extends WTextBox {
-    public DoubleTextBoxChangeListener action;
-
-    public double value;
+    private double value;
 
     public WDoubleTextBox(double value, double width) {
-        super(Utils.doubleToString(value), width);
-        filter = TextBoxFilters.floating;
+        super("", width);
 
-        this.value = value;
-
-        super.action = this::textChanged;
+        setValue(value);
     }
 
     @Override
-    protected void callAction() {
-        if (text.length() > 1 || (text.length() == 1 && text.charAt(0) != '-')) super.callAction();
+    protected boolean addChar(char c) {
+        if (c >= '0' && c <= '9') return true;
+        if (c == '-' && getCursor() == 0 && !getText().contains("-")) return true;
+        return c == '.' && !getText().contains(".");
     }
 
-    private void textChanged(WTextBox textBox) {
+    @Override
+    protected boolean callActionOnTextChanged() {
         double lastValue = value;
-        if (text.isEmpty()) value = 0;
-        else if (text.length() == 1 && text.charAt(0) == '-') value = 0;
-        else {
+
+        if (getText().isEmpty()) {
+            value = 0;
+            return false;
+        } else if (getText().equals("-") || getText().equals(".") || getText().equals("-.")) {
+            value = -0;
+            return false;
+        } else {
             try {
-                value = Double.parseDouble(text);
+                value = Double.parseDouble(getText());
+                if (action != null && value != lastValue) {
+                    action.run();
+                    return true;
+                }
+                return false;
             } catch (NumberFormatException ignored) {
-                value = 0;
-                text = Utils.doubleToString(value);
+                setValue(0);
+                if (action != null && value != lastValue) action.run();
+                return true;
             }
         }
+    }
 
-        if (action != null && value != lastValue) action.onDoubleTextBoxChange(this);
+    public double getValue() {
+        return value;
     }
 
     public void setValue(double value) {
         this.value = value;
-        text = Utils.doubleToString(value);
+        setText(String.format(Locale.US, "%.2f", value));
     }
 }

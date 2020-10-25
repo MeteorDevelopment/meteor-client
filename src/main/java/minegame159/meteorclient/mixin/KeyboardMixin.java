@@ -4,10 +4,10 @@ import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.CharTypedEvent;
 import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.events.KeyEvent;
-import minegame159.meteorclient.gui.GuiThings;
-import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.gui.GuiKeyEvents;
+import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.utils.Input;
 import minegame159.meteorclient.utils.KeyAction;
 import minegame159.meteorclient.utils.KeyBinds;
@@ -29,30 +29,35 @@ public abstract class KeyboardMixin {
 
     @Inject(method = "onKey", at = @At("HEAD"), cancellable = true)
     public void onKey(long window, int key, int scancode, int i, int j, CallbackInfo info) {
-        if (key != GLFW.GLFW_KEY_UNKNOWN && GuiThings.postKeyEvents()) {
-            Input.setKeyState(key, i != GLFW.GLFW_RELEASE);
-
-            KeyBinding shulkerPeek = KeyBinds.SHULKER_PEEK;
-            if (shulkerPeek.matchesKey(key, scancode) && (i == GLFW.GLFW_PRESS || i == GLFW.GLFW_REPEAT)) ((IKeyBinding) shulkerPeek).setPressed(true);
-            else ((IKeyBinding) shulkerPeek).setPressed(false);
-
-            if (client.currentScreen instanceof WidgetScreen && i == GLFW.GLFW_REPEAT) ((WidgetScreen) client.currentScreen).keyRepeated(key, j);
-
-            if (!Utils.canUpdate() && i == GLFW.GLFW_PRESS) {
-                MeteorClient.INSTANCE.onKeyInMainMenu(key);
-                if (client.currentScreen instanceof WidgetScreen && GuiThings.postKeyEvents()) {
-                    ModuleManager.INSTANCE.onKeyOnlyBinding = true;
-                    ModuleManager.INSTANCE.onKey.invoke(EventStore.keyEvent(key, KeyAction.Press));
-                    ModuleManager.INSTANCE.onKeyOnlyBinding = false;
-                }
-                return;
+        if (key != GLFW.GLFW_KEY_UNKNOWN) {
+            if (client.currentScreen instanceof WidgetScreen && i == GLFW.GLFW_REPEAT) {
+                ((WidgetScreen) client.currentScreen).keyRepeated(key, j);
             }
 
-            if (!client.isPaused() && (client.currentScreen == null || (client.currentScreen instanceof WidgetScreen && GuiThings.postKeyEvents()))) {
-                KeyEvent event = EventStore.keyEvent(key, KeyAction.get(i));
-                MeteorClient.EVENT_BUS.post(event);
+            if (GuiKeyEvents.postKeyEvents()){
+                Input.setKeyState(key, i != GLFW.GLFW_RELEASE);
 
-                if (event.isCancelled()) info.cancel();
+                KeyBinding shulkerPeek = KeyBinds.SHULKER_PEEK;
+                ((IKeyBinding) shulkerPeek).setPressed(shulkerPeek.matchesKey(key, scancode) && (i == GLFW.GLFW_PRESS || i == GLFW.GLFW_REPEAT));
+
+                if (!Utils.canUpdate() && i == GLFW.GLFW_PRESS) {
+                    MeteorClient.INSTANCE.onKeyInMainMenu(key);
+
+                    if (client.currentScreen instanceof WidgetScreen) {
+                        ModuleManager.INSTANCE.onKeyOnlyBinding = true;
+                        ModuleManager.INSTANCE.onKey.invoke(EventStore.keyEvent(key, KeyAction.Press));
+                        ModuleManager.INSTANCE.onKeyOnlyBinding = false;
+                    }
+
+                    return;
+                }
+
+                if (!client.isPaused() && (client.currentScreen == null || client.currentScreen instanceof WidgetScreen)) {
+                    KeyEvent event = EventStore.keyEvent(key, KeyAction.get(i));
+                    MeteorClient.EVENT_BUS.post(event);
+
+                    if (event.isCancelled()) info.cancel();
+                }
             }
         }
     }

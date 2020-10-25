@@ -37,11 +37,9 @@ public class AimAssist extends ToggleModule {
     }
     
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgInstantSpeed = settings.createGroup("Speed", "speed-instant", "Instantly looks at the entity.", false);
-    private final SettingGroup sgSpeed = sgInstantSpeed.getDisabledGroup();
+    private final SettingGroup sgSpeed = settings.createGroup("Speed");
 
     // General
-
     private final Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()
             .name("range")
             .description("Aim range.")
@@ -86,6 +84,12 @@ public class AimAssist extends ToggleModule {
     );
 
     // Speed
+    private final Setting<Boolean> speedInstant = sgSpeed.add(new BoolSetting.Builder()
+            .name("speed-instant")
+            .description("Instantly looks at the entity.")
+            .defaultValue(false)
+            .build()
+    );
 
     private final Setting<Double> speed = sgSpeed.add(new DoubleSetting.Builder()
             .name("speed")
@@ -121,7 +125,7 @@ public class AimAssist extends ToggleModule {
     private final Listener<RenderEvent> onRender = new Listener<>(event -> {
         if (entity == null) return;
 
-        if (sgInstantSpeed.isEnabled()) aimInstantly();
+        if (speedInstant.get()) aimInstantly();
         else aim(event.tickDelta);
     });
 

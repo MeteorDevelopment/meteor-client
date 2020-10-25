@@ -3,9 +3,9 @@ package minegame159.meteorclient.modules.misc;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.TickEvent;
-import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -83,8 +83,7 @@ public class Spam extends ToggleModule {
     }
 
     private void fillTable(WTable table) {
-        table.add(new WHorizontalSeparator("Messages")).fillX().expandX();
-        table.row();
+        table.add(new WHorizontalSeparator("Messages"));
 
         // Messages
         for (int i = 0; i < messages.size(); i++) {
@@ -92,10 +91,10 @@ public class Spam extends ToggleModule {
             String message = messages.get(i);
 
             WTextBox textBox = table.add(new WTextBox(message, 100)).fillX().expandX().getWidget();
-            textBox.action = textBox1 -> messages.set(msgI, textBox1.text);
+            textBox.action = () -> messages.set(msgI, textBox.getText());
 
             WMinus minus = table.add(new WMinus()).getWidget();
-            minus.action = minus1 -> {
+            minus.action = () -> {
                 messages.remove(msgI);
 
                 table.clear();
@@ -107,7 +106,7 @@ public class Spam extends ToggleModule {
 
         // New Message
         WPlus plus = table.add(new WPlus()).fillX().right().getWidget();
-        plus.action = plus1 -> {
+        plus.action = () -> {
             messages.add("");
 
             table.clear();

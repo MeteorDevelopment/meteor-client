@@ -10,8 +10,8 @@ import java.util.List;
 
 public class WItemWithLabel extends WTable {
     private ItemStack itemStack;
-    private WItem item;
-    private WLabel label;
+    private final WItem item;
+    private final WLabel label;
 
     public WItemWithLabel(ItemStack itemStack, String name) {
         this.itemStack = itemStack;

@@ -142,7 +142,7 @@ public class Waypoints extends Savable<Waypoints> implements Listenable, Iterabl
             ShapeBuilder.quad(-i2 - 1, -1, 0, -i2 - 1, 8, 0, i2 + 1, 8, 0, i2 + 1, -1, 0, BACKGROUND);
             ShapeBuilder.end();
 
-            waypoint.renderIcon(-8, 9, 0, a);
+            waypoint.renderIcon(-8, 9, 0, a, 16);
 
             // Render name text
             MeteorClient.FONT_2X.begin();

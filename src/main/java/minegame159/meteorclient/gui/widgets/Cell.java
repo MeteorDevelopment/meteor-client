@@ -3,22 +3,26 @@ package minegame159.meteorclient.gui.widgets;
 import minegame159.meteorclient.utils.AlignmentX;
 import minegame159.meteorclient.utils.AlignmentY;
 
-import java.util.Objects;
-
 public class Cell<T extends WWidget> {
     T widget;
 
-    double x, y;
-    double width, height;
+    public double x, y;
+    public double width, height;
 
     double padTop, padRight, padBottom, padLeft;
     double spaceTop, spaceRight, spaceBottom, spaceLeft;
 
-    AlignmentX alignX = AlignmentX.Left;
-    AlignmentY alignY = AlignmentY.Top;
+    private AlignmentX alignX = AlignmentX.Left;
+    private AlignmentY alignY = AlignmentY.Top;
 
     boolean fillX;
-    boolean expandX, expandY;
+    private boolean expandX, expandY;
+
+    public T getWidget() {
+        return widget;
+    }
+
+    // Spacing
 
     public Cell<T> spaceTop(double space) {
         spaceTop = space;
@@ -52,6 +56,40 @@ public class Cell<T extends WWidget> {
         return this;
     }
 
+    // Padding
+
+    public Cell<T> padTop(double pad) {
+        padTop = pad;
+        return this;
+    }
+    public Cell<T> padRight(double pad) {
+        padRight = pad;
+        return this;
+    }
+    public Cell<T> padBottom(double pad) {
+        padBottom = pad;
+        return this;
+    }
+    public Cell<T> padLeft(double pad) {
+        padLeft = pad;
+        return this;
+    }
+
+    public Cell<T> padHorizontal(double pad) {
+        padRight = padLeft = pad;
+        return this;
+    }
+    public Cell<T> padVertical(double pad) {
+        padTop = padBottom = pad;
+        return this;
+    }
+    public Cell<T> pad(double pad) {
+        padTop = padRight = padBottom = padLeft = pad;
+        return this;
+    }
+
+    // Expand
+
     public Cell<T> expandX() {
         expandX = true;
         return this;
@@ -61,10 +99,14 @@ public class Cell<T extends WWidget> {
         return this;
     }
 
+    // Fill
+
     public Cell<T> fillX() {
         fillX = true;
         return this;
     }
+
+    // Alignment
 
     public Cell<T> right() {
         alignX = AlignmentX.Right;
@@ -98,55 +140,7 @@ public class Cell<T extends WWidget> {
         return this;
     }
 
-    public Cell<T> padTop(double pad) {
-        padTop = pad;
-        return this;
-    }
-    public Cell<T> padRight(double pad) {
-        padRight = pad;
-        return this;
-    }
-    public Cell<T> padBottom(double pad) {
-        padBottom = pad;
-        return this;
-    }
-    public Cell<T> padLeft(double pad) {
-        padLeft = pad;
-        return this;
-    }
-
-    public Cell<T> padHorizontal(double pad) {
-        padRight = padLeft = pad;
-        return this;
-    }
-    public Cell<T> padVertical(double pad) {
-        padTop = padBottom = pad;
-        return this;
-    }
-    public Cell<T> pad(double pad) {
-        padTop = padRight = padBottom = padLeft = pad;
-        return this;
-    }
-
-    public double getX() {
-        return x;
-    }
-    public double getY() {
-        return y;
-    }
-
-    public double getWidth() {
-        return width;
-    }
-    public double getHeight() {
-        return height;
-    }
-
-    public T getWidget() {
-        return widget;
-    }
-
-    public void set(Cell cell) {
+    public void set(Cell<?> cell) {
         x = cell.x;
         y = cell.y;
         width = cell.width;
@@ -165,15 +159,15 @@ public class Cell<T extends WWidget> {
         expandX = expandY = cell.expandY;
     }
 
-    void alignWidget() {
-        if (expandX){
+    public void alignWidget() {
+        if (expandX) {
             widget.x = x;
             widget.width = width;
         } else {
             switch (alignX) {
-                case Left:   widget.x = x;break;
-                case Center: widget.x = x + width / 2 - widget.width / 2;break;
-                case Right:  widget.x = x + width - widget.width;break;
+                case Left:   widget.x = x; break;
+                case Center: widget.x = x + width / 2 - widget.width / 2; break;
+                case Right:  widget.x = x + width - widget.width; break;
             }
         }
 
@@ -182,35 +176,16 @@ public class Cell<T extends WWidget> {
             widget.height = height;
         } else {
             switch (alignY) {
-                case Top:    widget.y = y;break;
-                case Center: widget.y = y + height / 2 - widget.height / 2;break;
-                case Bottom: widget.y = y + height - widget.height;break;
+                case Top:    widget.y = y; break;
+                case Center: widget.y = y + height / 2 - widget.height / 2; break;
+                case Bottom: widget.y = y + height - widget.height; break;
             }
         }
     }
 
-    void reset() {
-        widget = null;
-        x = y = 0;
-        width = height = 0;
-        padTop = padRight = padBottom = padLeft = 0;
-        spaceTop = spaceRight = spaceBottom = spaceLeft = 0;
-        alignX = AlignmentX.Left;
-        alignY = AlignmentY.Top;
-        fillX = false;
-        expandX = expandY = false;
-    }
+    public double getX() { return x; }
+    public double getY() { return y; }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Cell cell = (Cell) o;
-        return Objects.equals(widget, cell.widget);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(widget);
-    }
+    public double getWidth() { return width; }
+    public double getHeight() { return height; }
 }

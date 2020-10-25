@@ -2,7 +2,7 @@ package minegame159.meteorclient.settings;
 
 import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import minegame159.meteorclient.gui.screens.StatusEffectSettingScreen;
+import minegame159.meteorclient.gui.screens.settings.StatusEffectSettingScreen;
 import minegame159.meteorclient.gui.widgets.WButton;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
@@ -18,7 +18,7 @@ public class StatusEffectSetting extends Setting<Object2IntMap<StatusEffect>> {
         super(name, description, defaultValue, onChanged, onModuleActivated);
 
         widget = new WButton("Select");
-        ((WButton) widget).action = button -> MinecraftClient.getInstance().openScreen(new StatusEffectSettingScreen(this));
+        ((WButton) widget).action = () -> MinecraftClient.getInstance().openScreen(new StatusEffectSettingScreen(this));
     }
 
     @Override

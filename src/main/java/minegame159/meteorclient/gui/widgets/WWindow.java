@@ -1,48 +1,39 @@
 package minegame159.meteorclient.gui.widgets;
 
 import minegame159.meteorclient.gui.GuiConfig;
-import minegame159.meteorclient.gui.listeners.WindowDragListener;
 import minegame159.meteorclient.gui.renderer.GuiRenderer;
+import minegame159.meteorclient.gui.renderer.Region;
 import minegame159.meteorclient.utils.Utils;
-import net.minecraft.client.MinecraftClient;
 import org.lwjgl.glfw.GLFW;
 
 public class WWindow extends WTable {
-    public WindowDragListener onDragged;
-    public final GuiConfig.WindowType type;
+    public Runnable action;
+    public GuiConfig.WindowType type;
 
-    private final String title;
-    private WTable table;
-
-    private boolean expanded;
-    private Header header;
-
-    private double padding, spacing;
+    private final WHeader header;
+    private final WTable table;
 
     private boolean wasMoved;
     private double mX, mY;
 
-    public WWindow(String title, boolean expanded, double padding, double spacing, GuiConfig.WindowType type) {
-        this.title = title;
+    private boolean expanded;
+    private double animationProgress;
+
+    public WWindow(String title, boolean expanded, boolean scrollOnlyWhenMouseOver) {
         this.expanded = expanded;
-        this.padding = padding;
-        this.spacing = spacing;
-        this.type = type;
+        this.animationProgress = expanded ? 1 : 0;
 
         defaultCell.space(0);
-        initWidgets();
 
-        if (type != null) {
-            setExpanded(GuiConfig.INSTANCE.getWindowConfig(type, expanded).isExpanded());
-        }
-    }
+        header = super.add(new WHeader(title)).fillX().expandX().getWidget();
+        super.row();
 
-    public WWindow(String title, boolean expanded, GuiConfig.WindowType type) {
-        this(title, expanded, 6, 4, type);
+        table = super.add(new WView(scrollOnlyWhenMouseOver)).fillX().expandX().getWidget().add(new WTable()).fillX().expandX().getWidget();
+        table.pad(8);
     }
 
     public WWindow(String title, boolean expanded) {
-        this(title, expanded, null);
+        this(title, expanded, false);
     }
 
     @Override
@@ -56,22 +47,22 @@ public class WWindow extends WTable {
     }
 
     @Override
+    public <T extends WWidget> void remove(T widget) {
+        table.remove(widget);
+    }
+
+    @Override
     public void clear() {
         table.clear();
     }
 
-    private void initWidgets() {
-        header = super.add(new Header()).fillX().expandX().getWidget();
-        super.row();
-
-        table = super.add(new WTable()).fillX().expandX().getWidget();
-        table.pad(padding);
-        table.defaultCell.space(spacing);
+    @Override
+    public WTable pad(double pad) {
+        return table.pad(pad);
     }
 
-    public void setExpanded(boolean expanded) {
-        this.expanded = expanded;
-        header.triangle.setChecked(!expanded);
+    public Cell<?> getDefaultCell() {
+        return table.defaultCell;
     }
 
     public boolean isExpanded() {
@@ -79,170 +70,121 @@ public class WWindow extends WTable {
     }
 
     @Override
-    public boolean mouseClicked(int button) {
-        for (Cell<?> cell : cells) {
-            if ((expanded || cell.getWidget() instanceof Header) && cell.getWidget().mouseClicked(button)) return true;
-        }
-        return onMouseClicked(button);
-    }
-
-    @Override
-    public boolean mouseReleased(int button) {
-        for (Cell<?> cell : cells) {
-            if ((expanded || cell.getWidget() instanceof Header) && cell.getWidget().mouseReleased(button)) return true;
-        }
-        return onMouseReleased(button);
-    }
-
-    @Override
-    public void mouseMoved(double x, double y) {
-        for (Cell<?> cell : cells) {
-            if (expanded || cell.getWidget() instanceof Header) cell.getWidget().mouseMoved(x, y);
-        }
-        boolean preMouseOver = mouseOver;
-        mouseOver = isOver(x, y);
-        if (preMouseOver && mouseOver) mouseOverTimer = 0;
-        onMouseMoved(x, y);
-    }
-
-    @Override
-    public boolean mouseScrolled(double amount) {
-        for (Cell<?> cell : cells) {
-            if ((expanded || cell.getWidget() instanceof Header) && cell.getWidget().mouseScrolled(amount)) return true;
-        }
-        return onMouseScrolled(amount);
-    }
-
-    @Override
-    public boolean keyPressed(int key, int mods) {
-        for (Cell<?> cell : cells) {
-            if ((expanded || cell.getWidget() instanceof Header) && cell.getWidget().keyPressed(key, mods)) return true;
-        }
-        return onKeyPressed(key, mods);
-    }
-
-    @Override
-    public boolean keyRepeated(int key, int mods) {
-        for (Cell<?> cell : cells) {
-            if ((expanded || cell.getWidget() instanceof Header) && cell.getWidget().keyRepeated(key, mods)) return true;
-        }
-        return onKeyRepeated(key, mods);
-    }
-
-    @Override
-    public boolean charTyped(char c, int key) {
-        for (Cell<?> cell : cells) {
-            if ((expanded || cell.getWidget() instanceof Header) && cell.getWidget().charTyped(c, key)) return true;
-        }
-        return onCharTyped(c, key);
-    }
-
-    @Override
-    protected void onCalculateSize() {
-        maxHeight = Utils.getScaledWindowHeightGui() - 32;
-        animationProgress = expanded ? 1 : 0;
-
-        super.onCalculateSize();
-    }
-
-    @Override
     protected void onCalculateWidgetPositions() {
         super.onCalculateWidgetPositions();
 
         if (wasMoved) {
-            move(mX - x, mY - y, true);
+            move(mX - x, mY - y, false);
         }
     }
 
     @Override
     public void render(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
-        animationProgress += delta / 4 * (expanded ? 1 : -1);
-        animationProgress = Utils.clamp(animationProgress, header.height / height, 1);
+        if (!visible) return;
 
+        boolean scissor = (animationProgress != 0 && animationProgress != 1) || (expanded && animationProgress != 1);
+        if (scissor) renderer.beginScissor(x, y, width, (height - header.height) * animationProgress + header.height);
         super.render(renderer, mouseX, mouseY, delta);
-    }
-
-    @Override
-    protected void onRenderWidget(WWidget widget, GuiRenderer renderer, double mouseX, double mouseY, double delta) {
-        if (expanded || animationProgress > header.height / height) widget.render(renderer, mouseX, mouseY, delta);
-        else {
-            if (widget instanceof Header) widget.render(renderer, mouseX, mouseY, delta);
-        }
+        if (scissor) renderer.endScissor();
     }
 
     @Override
     protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
-        if (expanded || animationProgress > 0) renderer.renderQuad(x, y, width, height, GuiConfig.INSTANCE.background);
+        if (expanded || animationProgress > 0) {
+            renderer.quad(Region.FULL, x, y + header.height, width, height - header.height, GuiConfig.INSTANCE.background);
+        }
     }
 
-    private class Header extends WTable {
-        WLabel label;
-        WTriangle triangle;
+    @Override
+    protected void onRenderWidget(WWidget widget, GuiRenderer renderer, double mouseX, double mouseY, double delta) {
+        if (expanded || animationProgress > 0 || widget instanceof WHeader) {
+            widget.render(renderer, mouseX, mouseY, delta);
+        }
+    }
 
-        boolean dragging;
-        double lastMouseX, lastMouseY;
+    @Override
+    protected boolean propagateEvents(WWidget widget) {
+        return expanded || widget instanceof WHeader;
+    }
 
-        Header() {
-            pad(4);
+    private class WHeader extends WWidget {
+        private final String title;
+        private final WTriangle triangle;
 
-            label = add(new WLabel(title, true)).fillX().centerX().padRight(4).getWidget();
+        private boolean dragging;
+        private double lastMouseX, lastMouseY;
 
-            triangle = add(new WTriangle()).getWidget();
-            triangle.action = triangle1 -> {
-                expanded = !triangle1.checked;
-                if (type != null) GuiConfig.INSTANCE.getWindowConfig(type, false).setExpanded(!triangle1.checked);
+        public WHeader(String title) {
+            this.title = title;
+
+            add(new WTitle(title)).pad(4).fillX().centerX();
+
+            triangle = add(new WTriangle()).pad(4).fillX().centerY().right().getWidget();
+            triangle.action = () -> {
+                expanded = !expanded;
+                if (type != null) GuiConfig.INSTANCE.getWindowConfig(type).setExpanded(expanded);
             };
         }
 
         @Override
-        protected boolean onMouseClicked(int button) {
-            if (mouseOver && button == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
-                dragging = true;
-                return true;
-            }
+        protected void onCalculateSize(GuiRenderer renderer) {
+            width = 4 + renderer.textWidth(title) + 4 + 4 + renderer.textHeight() + 4 + 44;
+            height = 0;
 
-            return false;
+            for (Cell<?> cell : cells) {
+                height = Math.max(height, cell.padTop + cell.getWidget().height + cell.padBottom);
+            }
         }
 
         @Override
-        protected boolean onMouseReleased(int button) {
+        protected boolean onMouseClicked(boolean used, int button) {
+            if (used) return false;
+
             if (mouseOver) {
-                dragging = false;
-
                 if (button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) {
-                    triangle.pressed = true;
-                    triangle.onMouseReleased(button);
+                    expanded = !expanded;
+                    if (type != null) GuiConfig.INSTANCE.getWindowConfig(type).setExpanded(expanded);
+                    return true;
+                } else if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
+                    dragging = true;
+                    return true;
                 }
-
-                return true;
             }
 
             return false;
         }
 
         @Override
-        protected void onMouseMoved(double x, double y) {
+        protected boolean onMouseReleased(boolean used, int button) {
+            dragging = false;
+            return mouseOver && !used;
+        }
+
+        @Override
+        protected void onMouseMoved(double mouseX, double mouseY) {
             if (dragging) {
-                WWindow.this.move(x - lastMouseX, y - lastMouseY, false);
+                WWindow.this.move(mouseX - lastMouseX, mouseY - lastMouseY, false);
+
+                wasMoved = true;
                 mX = WWindow.this.x;
                 mY = WWindow.this.y;
-                wasMoved = true;
 
-                if (onDragged != null) onDragged.onWindowDrag(WWindow.this);
+                if (action != null) action.run();
             }
 
-            lastMouseX = x;
-            lastMouseY = y;
-        }
-
-        @Override
-        protected void onCalculateWidgetPositions() {
-            super.onCalculateWidgetPositions();
+            lastMouseX = mouseX;
+            lastMouseY = mouseY;
         }
 
         @Override
         protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
-            renderer.renderQuad(x, y, width, height, GuiConfig.INSTANCE.accent);
+            renderer.quad(Region.FULL, x, y, width, height, GuiConfig.INSTANCE.accent);
+
+            if (expanded) animationProgress += delta / 4;
+            else animationProgress -= delta / 4;
+            animationProgress = Utils.clamp(animationProgress, 0, 1);
+
+            triangle.rotation = (1 - animationProgress) * -90;
         }
     }
 }
