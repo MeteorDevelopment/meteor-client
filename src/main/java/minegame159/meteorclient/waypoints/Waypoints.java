@@ -10,10 +10,7 @@ import minegame159.meteorclient.events.GameJoinedEvent;
 import minegame159.meteorclient.events.RenderEvent;
 import minegame159.meteorclient.rendering.Matrices;
 import minegame159.meteorclient.rendering.ShapeBuilder;
-import minegame159.meteorclient.utils.Color;
-import minegame159.meteorclient.utils.NbtUtils;
-import minegame159.meteorclient.utils.Savable;
-import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.*;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.VertexFormats;
@@ -65,11 +62,11 @@ public class Waypoints extends Savable<Waypoints> implements Listenable, Iterabl
     });
 
     private boolean checkDimension(Waypoint waypoint) {
-        String dimension = MinecraftClient.getInstance().world.getRegistryKey().getValue().getPath();
+        Dimension dimension = Utils.getDimension();
 
-        if (waypoint.overworld && dimension.equals("overworld")) return true;
-        if (waypoint.nether && dimension.equals("the_nether")) return true;
-        return waypoint.end && dimension.equals("the_end");
+        if (waypoint.overworld && dimension == Dimension.Overworld) return true;
+        if (waypoint.nether && dimension == Dimension.Nether) return true;
+        return waypoint.end && dimension == Dimension.End;
     }
 
     @EventHandler

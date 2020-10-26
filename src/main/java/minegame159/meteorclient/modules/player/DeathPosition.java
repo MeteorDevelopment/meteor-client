@@ -11,6 +11,7 @@ import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.Chat;
+import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.waypoints.Waypoint;
 import minegame159.meteorclient.waypoints.Waypoints;
 
@@ -53,9 +54,11 @@ public class DeathPosition extends ToggleModule {
                 waypoint.z = (int) mc.player.getZ();
                 waypoint.maxVisibleDistance = Integer.MAX_VALUE;
 
-                if (mc.world.getRegistryKey().getValue().getPath().equals("overworld")) waypoint.overworld = true;
-                else if (mc.world.getRegistryKey().getValue().getPath().equals("the_nether")) waypoint.nether = true;
-                else if (mc.world.getRegistryKey().getValue().getPath().equals("the_end")) waypoint.end = true;
+                switch (Utils.getDimension()) {
+                    case Overworld: waypoint.overworld = true; break;
+                    case Nether:    waypoint.nether = true; break;
+                    case End:       waypoint.end = true; break;
+                }
 
                 Waypoints.INSTANCE.add(waypoint);
             }
