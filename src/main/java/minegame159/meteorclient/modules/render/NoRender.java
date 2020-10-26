@@ -151,7 +151,14 @@ public class NoRender extends ToggleModule {
 
     private final Setting<Boolean> noPotionIcons = sgGeneral.add(new BoolSetting.Builder()
             .name("no-potion-icons")
-            .description("Disables rendering of staus effect icons.")
+            .description("Disables rendering of status effect icons.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> noArmorStands = sgGeneral.add(new BoolSetting.Builder()
+            .name("no-armor-stands")
+            .description("Disables rendering of armor stands.")
             .defaultValue(false)
             .build()
     );
@@ -242,5 +249,9 @@ public class NoRender extends ToggleModule {
 
     public boolean noPotionIcons() {
         return isActive() && noPotionIcons.get();
+    }
+
+    public boolean noArmorStands() {
+        return isActive() && noArmorStands.get();
     }
 }

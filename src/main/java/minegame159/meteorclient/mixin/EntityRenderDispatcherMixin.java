@@ -8,6 +8,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.FallingBlockEntity;
 import net.minecraft.entity.ItemEntity;
+import net.minecraft.entity.decoration.ArmorStandEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -19,6 +20,9 @@ public class EntityRenderDispatcherMixin {
     private <E extends Entity> void onRender(E entity, double x, double y, double z, float yaw, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, CallbackInfo info) {
         NoRender noRender = ModuleManager.INSTANCE.get(NoRender.class);
 
-        if ((noRender.noItems() && entity instanceof ItemEntity) || (noRender.noFallingBlocks() && entity instanceof FallingBlockEntity)) info.cancel();
+        if ((noRender.noItems() && entity instanceof ItemEntity) ||
+                (noRender.noFallingBlocks() && entity instanceof FallingBlockEntity) ||
+                (noRender.noArmorStands() && entity instanceof ArmorStandEntity)
+        ) info.cancel();
     }
 }
