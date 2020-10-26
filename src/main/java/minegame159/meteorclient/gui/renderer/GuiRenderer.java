@@ -63,8 +63,10 @@ public class GuiRenderer {
         texts.clear();
         MeteorClient.FONT_GUI.end();
 
-        for (Runnable task : postTasks) task.run();
-        postTasks.clear();
+        if (root) {
+            for (Runnable task : postTasks) task.run();
+            postTasks.clear();
+        }
 
         tooltip = null;
     }

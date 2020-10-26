@@ -165,7 +165,7 @@ public abstract class WWidget {
         } catch (ConcurrentModificationException ignored) {}
         return onMouseClicked(used, button);
     }
-    protected boolean onMouseClicked(boolean used, int button) { return false; }
+    protected boolean onMouseClicked(boolean used, int button) { return used; }
 
     public boolean mouseReleased(boolean used, int button) {
         try {
@@ -177,7 +177,7 @@ public abstract class WWidget {
         } catch (ConcurrentModificationException ignored) {}
         return onMouseReleased(used, button);
     }
-    protected boolean onMouseReleased(boolean used, int button) { return false; }
+    protected boolean onMouseReleased(boolean used, int button) { return used; }
 
     public boolean mouseScrolled(double amount) {
         for (Cell<?> cell : cells) {
