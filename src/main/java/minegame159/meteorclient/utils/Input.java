@@ -2,6 +2,7 @@ package minegame159.meteorclient.utils;
 
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.options.KeyBinding;
+import org.lwjgl.glfw.GLFW;
 
 public class Input {
     private static final boolean[] keys = new boolean[512];
@@ -12,10 +13,12 @@ public class Input {
 
     public static boolean isPressed(KeyBinding keyBinding) {
         int key = KeyBindingHelper.getBoundKeyOf(keyBinding).getCode();
+        if (key == GLFW.GLFW_KEY_UNKNOWN) return false;
         return key < keys.length && keys[key];
     }
 
     public static boolean isPressed(int key) {
+        if (key == GLFW.GLFW_KEY_UNKNOWN) return false;
         return key < keys.length && keys[key];
     }
 }
