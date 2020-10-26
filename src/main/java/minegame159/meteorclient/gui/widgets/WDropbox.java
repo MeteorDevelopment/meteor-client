@@ -41,6 +41,7 @@ public class WDropbox<T extends Enum<?>> extends WWidget {
     public void setValue(T value) {
         this.value = value;
         this.valueName = value.toString();
+        this.valueNameWidth = -1;
     }
 
     public T getValue() {
@@ -67,7 +68,9 @@ public class WDropbox<T extends Enum<?>> extends WWidget {
 
     @Override
     protected boolean onMouseClicked(boolean used, int button) {
-        if (open) root.mouseClicked(used, button);
+        if (open) {
+            if (root.mouseClicked(used, button)) return true;
+        }
 
         if (open && (!mouseOver && !root.mouseOver)) {
             open = false;
@@ -127,6 +130,8 @@ public class WDropbox<T extends Enum<?>> extends WWidget {
     @Override
     protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
         renderer.background(this, mouseOver, false);
+
+        if (valueNameWidth == -1) valueNameWidth = renderer.textWidth(valueName);
 
         renderer.text(valueName, x + 6 + (root.width - valueNameWidth) / 2, y + 6, false, GuiConfig.INSTANCE.text);
         renderer.triangle(x + 6 + root.width + 4, y + 6 + renderer.textHeight() / 4, renderer.textHeight(), 0, GuiConfig.INSTANCE.separator);
