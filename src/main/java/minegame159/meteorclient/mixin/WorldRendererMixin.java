@@ -78,7 +78,7 @@ public abstract class WorldRendererMixin {
         if (vertexConsumers == Outlines.vertexConsumerProvider) return;
 
         ESP esp = ModuleManager.INSTANCE.get(ESP.class);
-        if (!esp.isActive()) return;
+        if (!esp.isActive() || !esp.isOutline()) return;
 
         Color color = esp.getOutlineColor(entity);
 

@@ -206,4 +206,8 @@ public class ESP extends ToggleModule {
 
         return null;
     }
+
+    public boolean isOutline() {
+        return mode.get() == Mode.Outline;
+    }
 }
