@@ -1,9 +1,10 @@
 package minegame159.meteorclient.gui.widgets;
 
-import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.gui.GuiConfig;
 import minegame159.meteorclient.gui.renderer.GuiRenderer;
 import minegame159.meteorclient.gui.renderer.Region;
+import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.utils.AlignmentX;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import org.lwjgl.glfw.GLFW;
@@ -78,7 +79,10 @@ public class WModule extends WPressable {
             renderer.quad(Region.FULL, x, y + height * (1 - animationProgress2), 2, height * animationProgress2, GuiConfig.INSTANCE.accent);
         }
 
-        renderer.text(module.title, x + width / 2 - titleWidth / 2, y + 4, false, GuiConfig.INSTANCE.text);
+        double nameX = x;
+        if (GuiConfig.INSTANCE.moduleNameAlignment == AlignmentX.Center) nameX += + width / 2 - titleWidth / 2;
+        else if (GuiConfig.INSTANCE.moduleNameAlignment == AlignmentX.Right) nameX += width - titleWidth;
 
+        renderer.text(module.title, nameX, y + 4, false, GuiConfig.INSTANCE.text);
     }
 }

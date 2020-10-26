@@ -2,11 +2,8 @@ package minegame159.meteorclient.gui.screens.topbar;
 
 import minegame159.meteorclient.gui.GuiConfig;
 import minegame159.meteorclient.gui.WidgetScreen;
-import minegame159.meteorclient.gui.widgets.WWindow;
-import minegame159.meteorclient.settings.ColorSetting;
-import minegame159.meteorclient.settings.DoubleSetting;
-import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.settings.Settings;
+import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.AlignmentX;
 import minegame159.meteorclient.utils.Color;
 import net.minecraft.client.MinecraftClient;
 
@@ -45,6 +42,15 @@ public class TopBarGui extends TopBarWindowScreen {
                 .max(4)
                 .onChanged(aDouble -> GuiConfig.INSTANCE.scrollSensitivity = aDouble)
                 .onModuleActivated(doubleSetting -> doubleSetting.set(GuiConfig.INSTANCE.scrollSensitivity))
+                .build()
+        );
+
+        sg.add(new EnumSetting.Builder<AlignmentX>()
+                .name("module-name-alignment")
+                .description("Alignment of module name text in click gui.")
+                .defaultValue(AlignmentX.Center)
+                .onChanged(anEnum -> GuiConfig.INSTANCE.moduleNameAlignment = anEnum)
+                .onModuleActivated(alignmentXSetting -> alignmentXSetting.set(GuiConfig.INSTANCE.moduleNameAlignment))
                 .build()
         );
 

@@ -1,10 +1,7 @@
 package minegame159.meteorclient.gui;
 
 import minegame159.meteorclient.Config;
-import minegame159.meteorclient.utils.Color;
-import minegame159.meteorclient.utils.ISerializable;
-import minegame159.meteorclient.utils.NbtUtils;
-import minegame159.meteorclient.utils.Vector2;
+import minegame159.meteorclient.utils.*;
 import net.minecraft.nbt.CompoundTag;
 
 import java.util.HashMap;
@@ -15,6 +12,8 @@ public class GuiConfig implements ISerializable<GuiConfig> {
 
     public double guiScale = 1;
     public double scrollSensitivity = 1;
+
+    public AlignmentX moduleNameAlignment = AlignmentX.Center;
 
     public Color text = new Color(255, 255, 255);
     public Color windowHeaderText = new Color(255, 255, 255);
@@ -91,6 +90,8 @@ public class GuiConfig implements ISerializable<GuiConfig> {
         tag.putDouble("guiScale", guiScale);
         tag.putDouble("scrollSensitivity", scrollSensitivity);
 
+        tag.putString("moduleNameAlignment", moduleNameAlignment.name());
+
         tag.put("text", text.toTag());
         tag.put("windowHeaderText", text.toTag());
         tag.put("loggedInText", loggedInText.toTag());
@@ -153,6 +154,8 @@ public class GuiConfig implements ISerializable<GuiConfig> {
     public GuiConfig fromTag(CompoundTag tag) {
         if (tag.contains("guiScale")) guiScale = tag.getDouble("guiScale");
         if (tag.contains("scrollSensitivity")) scrollSensitivity = tag.getDouble("scrollSensitivity");
+
+        if (tag.contains("moduleNameAlignment")) moduleNameAlignment = AlignmentX.valueOf(tag.getString("moduleNameAlignment"));
 
         read(tag, "text", text);
         read(tag, "windowHeaderText", windowHeaderText);
