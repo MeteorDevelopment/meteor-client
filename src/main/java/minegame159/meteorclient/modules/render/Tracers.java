@@ -77,7 +77,7 @@ public class Tracers extends ToggleModule {
     private final Setting<Color> playersColor = sgColors.add(new ColorSetting.Builder()
             .name("players-colors")
             .description("Players color.")
-            .defaultValue(new Color(205, 205, 127))
+            .defaultValue(new Color(205, 205, 205, 127))
             .build()
     );
 
