@@ -264,6 +264,7 @@ public class WTextBox extends WWidget {
     }
 
     protected boolean callActionOnTextChanged() {
+        if (action != null) action.run();
         return false;
     }
 
