@@ -11,16 +11,13 @@ import minegame159.meteorclient.mixininterface.IMinecraftClient;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
-import minegame159.meteorclient.modules.combat.BedAura;
-import minegame159.meteorclient.modules.combat.CrystalAura;
-import minegame159.meteorclient.modules.combat.KillAura;
-import minegame159.meteorclient.modules.combat.AutoTrap;
-import minegame159.meteorclient.modules.combat.Surround;
+import minegame159.meteorclient.modules.combat.*;
 import minegame159.meteorclient.modules.misc.Timer;
 import minegame159.meteorclient.rendering.ShapeBuilder;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.*;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.render.VertexFormats;
@@ -43,7 +40,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import org.apache.commons.lang3.StringUtils;
 import org.lwjgl.opengl.GL11;
-import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -867,19 +863,25 @@ public class HUD extends ToggleModule {
             double y1 = mc.gameRenderer.getCamera().getPos().y - mc.player.getEyeHeight(mc.player.getPose());
             double z1 = mc.gameRenderer.getCamera().getPos().z;
 
-            if (mc.world.getRegistryKey().getValue().getPath().equals("overworld")) {
-                drawPosition(event.screenWidth, "Nether Pos: ", y, x1 / 8.0, y1, z1 / 8.0);
-                y -= MeteorClient.FONT.getHeight() + 2;
-                drawPosition(event.screenWidth, "Pos: ", y, x1, y1, z1);
-                y -= MeteorClient.FONT.getHeight() + 2;
-            } else if (mc.world.getRegistryKey().getValue().getPath().equals("the_nether")) {
-                drawPosition(event.screenWidth, "Overworld Pos: ", y, x1 * 8.0, y1, z1 * 8.0);
-                y -= MeteorClient.FONT.getHeight() + 2;
-                drawPosition(event.screenWidth, "Pos: ", y, x1, y1, z1);
-                y -= MeteorClient.FONT.getHeight() + 2;
-            } else if (mc.world.getRegistryKey().getValue().getPath().equals("the_end")) {
-                drawPosition(event.screenWidth, "Pos: ", y, x1, y1, z1);
-                y -= MeteorClient.FONT.getHeight() + 2;
+            switch (Utils.getDimension()) {
+                case Overworld:
+                    drawPosition(event.screenWidth, "Nether Pos: ", y, x1 / 8.0, y1, z1 / 8.0);
+                    y -= MeteorClient.FONT.getHeight() + 2;
+                    drawPosition(event.screenWidth, "Pos: ", y, x1, y1, z1);
+                    y -= MeteorClient.FONT.getHeight() + 2;
+                    break;
+
+                case Nether:
+                    drawPosition(event.screenWidth, "Overworld Pos: ", y, x1 * 8.0, y1, z1 * 8.0);
+                    y -= MeteorClient.FONT.getHeight() + 2;
+                    drawPosition(event.screenWidth, "Pos: ", y, x1, y1, z1);
+                    y -= MeteorClient.FONT.getHeight() + 2;
+                    break;
+
+                case End:
+                    drawPosition(event.screenWidth, "Pos: ", y, x1, y1, z1);
+                    y -= MeteorClient.FONT.getHeight() + 2;
+                    break;
             }
         }
 

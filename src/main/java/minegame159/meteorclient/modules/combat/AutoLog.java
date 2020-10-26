@@ -2,8 +2,8 @@ package minegame159.meteorclient.modules.combat;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.events.TickEvent;
+import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
@@ -13,6 +13,8 @@ import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.DamageCalcUtils;
+import minegame159.meteorclient.utils.Dimension;
+import minegame159.meteorclient.utils.Utils;
 import net.minecraft.block.entity.BedBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.Entity;
@@ -129,7 +131,7 @@ public class AutoLog extends ToggleModule {
                 damageTaken = damage;
             }
         }
-        if (!mc.world.getRegistryKey().getValue().getPath().equals("overworld")) {
+        if (Utils.getDimension() != Dimension.Overworld) {
             for (BlockEntity blockEntity : mc.world.blockEntities) {
                 BlockPos bp = blockEntity.getPos();
                 Vec3d pos = new Vec3d(bp.getX(), bp.getY(), bp.getZ());

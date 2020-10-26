@@ -4,6 +4,7 @@ import minegame159.meteorclient.gui.screens.WindowScreen;
 import minegame159.meteorclient.gui.screens.settings.ColorSettingScreen;
 import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.settings.ColorSetting;
+import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.waypoints.Waypoint;
 import minegame159.meteorclient.waypoints.Waypoints;
 import net.minecraft.client.MinecraftClient;
@@ -25,10 +26,10 @@ public class EditWaypointScreen extends WindowScreen {
             this.waypoint.y = (int) mc.player.getY() + 2;
             this.waypoint.z = (int) mc.player.getZ();
 
-            switch (mc.world.getRegistryKey().getValue().getPath()) {
-                case "overworld": this.waypoint.overworld = true; break;
-                case "the_nether": this.waypoint.nether = true; break;
-                case "the_end": this.waypoint.end = true; break;
+            switch (Utils.getDimension()) {
+                case Overworld: this.waypoint.overworld = true; break;
+                case Nether:    this.waypoint.nether = true; break;
+                case End:       this.waypoint.end = true; break;
             }
         }
 

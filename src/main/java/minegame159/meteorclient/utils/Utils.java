@@ -66,6 +66,14 @@ public class Utils {
         df.setDecimalFormatSymbols(dfs);
     }
 
+    public static Dimension getDimension() {
+        switch (MinecraftClient.getInstance().world.getRegistryKey().getValue().getPath()) {
+            case "the_nether": return Dimension.Nether;
+            case "the_end":    return Dimension.End;
+            default:           return Dimension.Overworld;
+        }
+    }
+
     public static Vec3d vec3d(BlockPos pos) {
         return new Vec3d(pos.getX(), pos.getY(), pos.getZ());
     }
@@ -152,7 +160,7 @@ public class Utils {
 
     public static String getWorldName() {
         if (mc.isInSingleplayer()) {
-            // Singleplaer
+            // Singleplayer
             File folder = ((IMinecraftServer) mc.getServer()).getSession().getWorldDirectory(mc.world.getRegistryKey());
             if (folder.toPath().relativize(mc.runDirectory.toPath()).getNameCount() != 2) {
                 folder = folder.getParentFile();

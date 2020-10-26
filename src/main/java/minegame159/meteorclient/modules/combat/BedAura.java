@@ -5,15 +5,12 @@ package minegame159.meteorclient.modules.combat;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.events.TickEvent;
+import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.Chat;
-import minegame159.meteorclient.utils.DamageCalcUtils;
-import minegame159.meteorclient.utils.InvUtils;
-import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.*;
 import net.minecraft.block.entity.BedBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
@@ -29,7 +26,8 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 
-import java.util.*;
+import java.util.ConcurrentModificationException;
+import java.util.Iterator;
 import java.util.stream.Collectors;
 
 public class BedAura extends ToggleModule {
@@ -192,7 +190,7 @@ public class BedAura extends ToggleModule {
         } catch (ConcurrentModificationException ignored) {
             return;
         }
-        if (mc.world.getRegistryKey().getValue().getPath().equals("overworld")) {
+        if (Utils.getDimension() == Dimension.Overworld) {
             Chat.warning(this, "You are in the overworld. Disabling!");
             this.toggle();
             return;

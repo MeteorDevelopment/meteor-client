@@ -2,6 +2,8 @@ package minegame159.meteorclient.waypoints.gui;
 
 import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.utils.Color;
+import minegame159.meteorclient.utils.Dimension;
+import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.waypoints.Waypoint;
 import minegame159.meteorclient.waypoints.Waypoints;
 import net.minecraft.client.MinecraftClient;
@@ -17,10 +19,10 @@ public class WWaypoint extends WTable {
         // Name
         WLabel name = add(new WLabel(waypoint.name)).getWidget();
         boolean goodDimension = false;
-        String dimension = MinecraftClient.getInstance().world.getRegistryKey().getValue().getPath();
-        if (waypoint.overworld && dimension.equals("overworld")) goodDimension = true;
-        else if (waypoint.nether && dimension.equals("the_nether")) goodDimension = true;
-        else if (waypoint.end && dimension.equals("the_end")) goodDimension = true;
+        Dimension dimension = Utils.getDimension();
+        if (waypoint.overworld && dimension == Dimension.Overworld) goodDimension = true;
+        else if (waypoint.nether && dimension == Dimension.Nether) goodDimension = true;
+        else if (waypoint.end && dimension == Dimension.End) goodDimension = true;
         name.color = goodDimension ? WHITE : GRAY;
 
         // Visible, edit, remove
