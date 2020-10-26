@@ -24,6 +24,17 @@ public class AutoWalk extends ToggleModule {
             .name("mode")
             .description("Walking mode.")
             .defaultValue(Mode.Smart)
+            .onChanged(mode1 -> {
+                if (isActive()) {
+                    if (mode1 == Mode.Simple) {
+                        BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
+                        goal = null;
+                    } else {
+                        timer = 0;
+                        createGoal();
+                    }
+                }
+            })
             .build()
     );
 
@@ -36,21 +47,19 @@ public class AutoWalk extends ToggleModule {
 
     @Override
     public void onActivate() {
-        if (mode.get() == Mode.Smart) {
-            timer = 0;
-            goal = new GoalDirection(mc.player.getPos(), mc.player.yaw);
-            BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(goal);
-        }
+        if (mode.get() == Mode.Smart) createGoal();
     }
 
     @Override
     public void onDeactivate() {
         if (mode.get() == Mode.Simple) ((IKeyBinding) mc.options.keyForward).setPressed(false);
         else BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
+
+        goal = null;
     }
 
     @EventHandler
-    private Listener<TickEvent> onTick = new Listener<>(event -> {
+    private final Listener<TickEvent> onTick = new Listener<>(event -> {
         if (mode.get() == Mode.Simple) {
             ((IKeyBinding) mc.options.keyForward).setPressed(true);
         } else {
@@ -62,4 +71,10 @@ public class AutoWalk extends ToggleModule {
             timer++;
         }
     });
+
+    private void createGoal() {
+        timer = 0;
+        goal = new GoalDirection(mc.player.getPos(), mc.player.yaw);
+        BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(goal);
+    }
 }
