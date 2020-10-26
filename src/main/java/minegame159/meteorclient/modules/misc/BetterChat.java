@@ -79,14 +79,14 @@ public class BetterChat extends ToggleModule {
     );
 
     // Friend Color
-    private final SettingGroup sgFriendColor = settings.createGroup("Friend Color");
+    /*private final SettingGroup sgFriendColor = settings.createGroup("Friend Color");
 
     private final Setting<Boolean> friendColorEnabled = sgFriendColor.add(new BoolSetting.Builder()
             .name("friend-color-enabled")
             .description("Highlights friends with color in chat.")
             .defaultValue(true)
             .build()
-    );
+    );*/
 
     private boolean skipMessage;
 
@@ -99,7 +99,8 @@ public class BetterChat extends ToggleModule {
 
         if (ignoreEnabled.get() && ignoreOnMsg(message)) return true;
         if (antiSpamEnabled.get() && antiSpamOnMsg(message, messageId, timestamp, messages, visibleMessages)) return true;
-        return friendColorEnabled.get() && friendColorOnMsg(message);
+        //return friendColorEnabled.get() && friendColorOnMsg(message);
+        return false;
     }
 
     // IGNORE
