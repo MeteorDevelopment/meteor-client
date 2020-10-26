@@ -77,49 +77,49 @@ public class Tracers extends ToggleModule {
     private final Setting<Color> playersColor = sgColors.add(new ColorSetting.Builder()
             .name("players-colors")
             .description("Players color.")
-            .defaultValue(new Color(205, 205, 205))
+            .defaultValue(new Color(205, 205, 127))
             .build()
     );
 
     private final Setting<Color> animalsColor = sgColors.add(new ColorSetting.Builder()
             .name("animals-color")
             .description("Animals color.")
-            .defaultValue(new Color(145, 255, 145, 255))
+            .defaultValue(new Color(145, 255, 145, 127))
             .build()
     );
 
     private final Setting<Color> waterAnimalsColor = sgColors.add(new ColorSetting.Builder()
             .name("water-animals-color")
             .description("Water animals color.")
-            .defaultValue(new Color(145, 145, 255, 255))
+            .defaultValue(new Color(145, 145, 255, 127))
             .build()
     );
 
     private final Setting<Color> monstersColor = sgColors.add(new ColorSetting.Builder()
             .name("monsters-color")
             .description("Monsters color.")
-            .defaultValue(new Color(255, 145, 145, 255))
+            .defaultValue(new Color(255, 145, 145, 127))
             .build()
     );
 
     private final Setting<Color> ambientColor = sgColors.add(new ColorSetting.Builder()
             .name("ambient-color")
             .description("Ambient color.")
-            .defaultValue(new Color(75, 75, 75, 255))
+            .defaultValue(new Color(75, 75, 75, 127))
             .build()
     );
 
     private final Setting<Color> miscColor = sgColors.add(new ColorSetting.Builder()
             .name("misc-color")
             .description("Misc color.")
-            .defaultValue(new Color(145, 145, 145, 255))
+            .defaultValue(new Color(145, 145, 145, 127))
             .build()
     );
 
     private final Setting<Color> storageColor = sgColors.add(new ColorSetting.Builder()
             .name("storage-color")
             .description("Storage color.")
-            .defaultValue(new Color(255, 160, 0))
+            .defaultValue(new Color(255, 160, 0, 127))
             .build()
     );
 
