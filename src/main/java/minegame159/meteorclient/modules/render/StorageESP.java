@@ -120,7 +120,10 @@ public class StorageESP extends ToggleModule {
         count = 0;
 
         for (BlockEntity blockEntity : mc.world.blockEntities) {
+            if (blockEntity.isRemoved()) continue;
+
             getTileEntityColor(blockEntity);
+
             if (render) {
                 double x1 = blockEntity.getPos().getX();
                 double y1 = blockEntity.getPos().getY();
