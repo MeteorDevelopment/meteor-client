@@ -185,6 +185,8 @@ public class Tracers extends ToggleModule {
 
         if (storage.get()) {
             for (BlockEntity blockEntity : mc.world.blockEntities) {
+                if (blockEntity.isRemoved()) continue;
+
                 if (blockEntity instanceof ChestBlockEntity || blockEntity instanceof BarrelBlockEntity || blockEntity instanceof ShulkerBoxBlockEntity) {
                     render(blockEntity, event);
                 }
