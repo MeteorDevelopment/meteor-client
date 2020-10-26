@@ -25,6 +25,8 @@ public class WTextBox extends WWidget {
 
     private GuiRenderer renderer;
 
+    private boolean changed;
+
     public WTextBox(String text, double width) {
         this.text = text;
         this.uWidth = width;
@@ -34,6 +36,7 @@ public class WTextBox extends WWidget {
         this.text = text;
         cursor = -1;
         if (renderer != null) calculateTextWidths();
+        changed = true;
     }
 
     public String getText() {
@@ -73,7 +76,9 @@ public class WTextBox extends WWidget {
                 String preText = text;
                 text = "";
                 if (!text.equals(preText)) {
-                    if (!callActionOnTextChanged()) calculateTextWidths();
+                    changed = false;
+                    callActionOnTextChanged();
+                    if (!changed) calculateTextWidths();
                 }
 
                 resetCursorTimer();
@@ -105,7 +110,9 @@ public class WTextBox extends WWidget {
                 sb.append(text, cursor, text.length());
                 text = sb.toString();
 
-                if (!callActionOnTextChanged()) {
+                changed = false;
+                callActionOnTextChanged();
+                if (!changed) {
                     fixedCursor = cursor + addedChars;
                     calculateTextWidths();
                 }
@@ -121,7 +128,9 @@ public class WTextBox extends WWidget {
                 text = "";
 
                 if (!preText.equals(text)) {
-                    if (!callActionOnTextChanged()) calculateTextWidths();
+                    changed = false;
+                    callActionOnTextChanged();
+                    if (!changed) calculateTextWidths();
                 }
 
                 resetCursorTimer();
@@ -139,7 +148,9 @@ public class WTextBox extends WWidget {
                 text = text.substring(0, text.length() - lengthToDelete);
 
                 if (!preText.equals(text)) {
-                    if (!callActionOnTextChanged()) calculateTextWidths();
+                    changed = false;
+                    callActionOnTextChanged();
+                    if (!changed) calculateTextWidths();
                 }
 
                 resetCursorTimer();
@@ -175,7 +186,9 @@ public class WTextBox extends WWidget {
         } else if (key == GLFW.GLFW_KEY_BACKSPACE && cursor > 0) {
             text = text.substring(0, cursor - 1) + text.substring(cursor);
 
-            if (!callActionOnTextChanged()) {
+            changed = false;
+            callActionOnTextChanged();
+            if (!changed) {
                 fixedCursor = cursor - 1;
                 calculateTextWidths();
             }
@@ -185,7 +198,9 @@ public class WTextBox extends WWidget {
         } else if (key == GLFW.GLFW_KEY_DELETE && cursor < text.length()) {
             text = text.substring(0, cursor) + text.substring(cursor + 1);
 
-            if (!callActionOnTextChanged()) {
+            changed = false;
+            callActionOnTextChanged();
+            if (!changed) {
                 fixedCursor = cursor;
                 calculateTextWidths();
             }
@@ -203,7 +218,9 @@ public class WTextBox extends WWidget {
             if (addChar(c)) {
                 text = text.substring(0, cursor) + c + text.substring(cursor);
 
-                if (!callActionOnTextChanged()) {
+                changed = false;
+                callActionOnTextChanged();
+                if (!changed) {
                     fixedCursor = cursor + 1;
                     calculateTextWidths();
                 }
@@ -263,9 +280,8 @@ public class WTextBox extends WWidget {
         cursorVisible = true;
     }
 
-    protected boolean callActionOnTextChanged() {
+    protected void callActionOnTextChanged() {
         if (action != null) action.run();
-        return false;
     }
 
     private void calculateTextWidths() {

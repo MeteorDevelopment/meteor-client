@@ -19,29 +19,19 @@ public class WDoubleTextBox extends WTextBox {
     }
 
     @Override
-    protected boolean callActionOnTextChanged() {
+    protected void callActionOnTextChanged() {
         double lastValue = value;
 
-        if (getText().isEmpty()) {
-            value = 0;
-            return false;
-        } else if (getText().equals("-") || getText().equals(".") || getText().equals("-.")) {
-            value = -0;
-            return false;
+        if (getText().isEmpty() || getText().equals("-") || getText().equals(".") || getText().equals("-.")) {
         } else {
             try {
                 value = Double.parseDouble(getText());
-                if (action != null && value != lastValue) {
-                    action.run();
-                    return true;
-                }
-                return false;
             } catch (NumberFormatException ignored) {
                 setValue(0);
-                if (action != null && value != lastValue) action.run();
-                return true;
             }
         }
+
+        if (action != null && value != lastValue) action.run();
     }
 
     public double getValue() {

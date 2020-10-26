@@ -16,20 +16,13 @@ public class WIntTextBox extends WTextBox {
     }
 
     @Override
-    protected boolean callActionOnTextChanged() {
+    protected void callActionOnTextChanged() {
         int lastValue = value;
 
-        if (getText().isEmpty()) {
-            value = 0;
-            return false;
-        } else if (getText().equals("-")) {
-            value = -0;
-            return false;
+        if (getText().isEmpty() || getText().equals("-")) {
         } else {
             try {
                 value = Integer.parseInt(getText());
-                if (action != null && value != lastValue) action.run();
-                return true;
             } catch (NumberFormatException ignored) {
                 try {
                     long longValue = Long.parseLong(getText());
@@ -39,10 +32,10 @@ public class WIntTextBox extends WTextBox {
                 }
 
                 setValue(value);
-                if (action != null && value != lastValue) action.run();
-                return true;
             }
         }
+
+        if (action != null && value != lastValue) action.run();
     }
 
     public int getValue() {
