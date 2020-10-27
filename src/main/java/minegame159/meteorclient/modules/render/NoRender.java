@@ -163,6 +163,12 @@ public class NoRender extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> noGuiBackground = sgGeneral.add(new BoolSetting.Builder()
+            .name("no-gui-background")
+            .description("Disables rendering of the gui background.")
+            .defaultValue(false)
+            .build()
+    );
     public NoRender() {
         super(Category.Render, "no-render", "Disables some things from rendering.");
     }
@@ -253,5 +259,9 @@ public class NoRender extends ToggleModule {
 
     public boolean noArmorStands() {
         return isActive() && noArmorStands.get();
+    }
+
+    public boolean noGuiBackground() {
+        return isActive() && noGuiBackground.get();
     }
 }
