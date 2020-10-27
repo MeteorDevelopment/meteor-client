@@ -261,6 +261,8 @@ public class WTextBox extends WWidget {
             cursorTimer += delta / 8;
         }
 
+        if (fixedCursor != -1) calculateTextWidths();
+
         double overflowWidth = getCursorTextWidthForPreview() - width + 16;
         if (overflowWidth < 0) overflowWidth = 0;
 
@@ -285,6 +287,7 @@ public class WTextBox extends WWidget {
     }
 
     private void calculateTextWidths() {
+        if (renderer == null) return;
         textWidths.clear();
 
         for (int i = 0; i <= text.length(); i++) {
