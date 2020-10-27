@@ -24,7 +24,6 @@ public abstract class ToggleModule extends Module {
         if (!active) {
             active = true;
             ModuleManager.INSTANCE.addActive(this);
-            MeteorClient.EVENT_BUS.subscribe(this);
 
             for (SettingGroup sg : settings) {
                 for (Setting setting : sg) {
@@ -32,13 +31,19 @@ public abstract class ToggleModule extends Module {
                 }
             }
 
-            if (onActivateDeactivate) onActivate();
+            if (onActivateDeactivate) {
+                MeteorClient.EVENT_BUS.subscribe(this);
+                onActivate();
+            }
         }
         else {
             active = false;
             ModuleManager.INSTANCE.removeActive(this);
-            MeteorClient.EVENT_BUS.unsubscribe(this);
-            if (onActivateDeactivate) onDeactivate();
+
+            if (onActivateDeactivate) {
+                MeteorClient.EVENT_BUS.unsubscribe(this);
+                onDeactivate();
+            }
         }
     }
     public void toggle() {
