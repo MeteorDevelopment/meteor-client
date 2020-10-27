@@ -32,12 +32,15 @@ public class GuiRenderer {
     private final List<Text> texts = new ArrayList<>();
     private final Pool<Text> textPool = new Pool<>(Text::new);
 
-    private final List<Runnable> postTasks = new ArrayList<>();
-
     public String tooltip;
 
-    public void begin() {
+    public void begin(boolean root) {
         mb.begin(GL11.GL_TRIANGLES, VertexFormats.POSITION_COLOR_TEXTURE);
+
+        //if (root) beginScissor(0, 0, 0, 0, false);
+    }
+    public void begin() {
+        begin(false);
     }
 
     public void end(boolean root) {
@@ -63,10 +66,7 @@ public class GuiRenderer {
         texts.clear();
         MeteorClient.FONT_GUI.end();
 
-        if (root) {
-            for (Runnable task : postTasks) task.run();
-            postTasks.clear();
-        }
+        //if (root) endScissor();
 
         tooltip = null;
     }
@@ -74,7 +74,7 @@ public class GuiRenderer {
         end(false);
     }
 
-    public void beginScissor(double x, double y, double width, double height) {
+    public void beginScissor(double x, double y, double width, double height, boolean changeGlState) {
         if (!scissorStack.isEmpty()) {
             Scissor parent = scissorStack.top();
 
@@ -85,26 +85,37 @@ public class GuiRenderer {
             else if (y + height > parent.y + parent.height) height -= (y + height) - (parent.y + parent.height);
         }
 
-        Scissor scissor = scissorPool.get().set(x, y, width, height);
+        Scissor scissor = scissorPool.get().set(x, y, width, height, changeGlState);
         scissorStack.push(scissor);
 
-        end();
-        begin();
+        if (changeGlState) {
+            end();
+            begin();
 
-        glEnable(GL_SCISSOR_TEST);
-        scissor.apply();
+            glEnable(GL_SCISSOR_TEST);
+            scissor.apply();
+        }
+    }
+    public void beginScissor(double x, double y, double width, double height) {
+        beginScissor(x, y, width, height, true);
     }
 
     public void endScissor() {
-        scissorStack.pop();
+        Scissor scissor = scissorStack.pop();
 
-        end();
-        if (scissorStack.isEmpty()) {
-            glDisable(GL_SCISSOR_TEST);
-        } else {
-            scissorStack.top().apply();
+        for (Runnable task : scissor.postTasks) {
+            task.run();
         }
-        begin();
+
+        if (scissor.changeGlState) {
+            end();
+            if (scissorStack.isEmpty() || !scissorStack.top().changeGlState) {
+                glDisable(GL_SCISSOR_TEST);
+            } else {
+                scissorStack.top().apply();
+            }
+            begin();
+        }
     }
 
     public void quad(Region region, double x, double y, double width, double height, Color color1, Color color2, Color color3, Color color4) {
@@ -188,7 +199,7 @@ public class GuiRenderer {
     }
 
     public void post(Runnable task) {
-        postTasks.add(task);
+        scissorStack.top().postTasks.add(task);
     }
 
     public void texture(double x, double y, double width, double height, double rotation, AbstractTexture texture) {
@@ -216,14 +227,20 @@ public class GuiRenderer {
         public int x, y;
         public int width, height;
 
-        public Scissor set(double x, double y, double width, double height) {
+        public boolean changeGlState;
+        public List<Runnable> postTasks = new ArrayList<>();
+
+        public Scissor set(double x, double y, double width, double height, boolean changeGlState) {
             this.x = (int) Math.round(x);
             this.y = (int) Math.round(y);
             this.width = (int) Math.round(width);
             this.height = (int) Math.round(height);
+            this.changeGlState = changeGlState;
 
             if (this.width < 0) this.width = 0;
             if (this.height < 0) this.height = 0;
+
+            postTasks.clear();
 
             return this;
         }
