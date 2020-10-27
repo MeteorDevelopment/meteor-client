@@ -43,7 +43,9 @@ public class WIntTextBox extends WTextBox {
     }
 
     public void setValue(int value) {
-        this.value = value;
-        setText(Integer.toString(value));
+        if (this.value != value) {
+            this.value = value;
+            setText(Integer.toString(value));
+        }
     }
 }

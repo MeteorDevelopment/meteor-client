@@ -15,7 +15,7 @@ public class DoubleSetting extends Setting<Double> {
 
         widget = new WDoubleEdit(get(), sliderMin != null ? sliderMin : 0, sliderMax != null ? sliderMax : 10, noSlider);
         ((WDoubleEdit) widget).action = () -> {
-            if (!set((double) Math.round(((WDoubleEdit) widget).get() * 1000) / 1000)) ((WDoubleEdit) widget).set(get());
+            if (!set(((WDoubleEdit) widget).get())) ((WDoubleEdit) widget).set(get());
         };
     }
 
