@@ -76,7 +76,8 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
 
         ListTag valueTag = new ListTag();
         for (BlockEntityType<?> type : get()) {
-            valueTag.add(StringTag.of(Registry.BLOCK_ENTITY_TYPE.getId(type).toString()));
+            Identifier id = Registry.BLOCK_ENTITY_TYPE.getId(type);
+            if (id != null) valueTag.add(StringTag.of(id.toString()));
         }
         tag.put("value", valueTag);
 
@@ -89,7 +90,8 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
 
         ListTag valueTag = tag.getList("value", 8);
         for (Tag tagI : valueTag) {
-            get().add(Registry.BLOCK_ENTITY_TYPE.get(new Identifier(tagI.asString())));
+            BlockEntityType<?> type = Registry.BLOCK_ENTITY_TYPE.get(new Identifier(tagI.asString()));
+            if (type != null) get().add(type);
         }
 
         changed();
