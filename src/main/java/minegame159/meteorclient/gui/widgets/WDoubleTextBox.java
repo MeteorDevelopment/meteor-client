@@ -39,7 +39,9 @@ public class WDoubleTextBox extends WTextBox {
     }
 
     public void setValue(double value) {
-        this.value = value;
-        setText(String.format(Locale.US, "%.2f", value));
+        if (this.value != value) {
+            this.value = value;
+            setText(String.format(Locale.US, "%.2f", value));
+        }
     }
 }
