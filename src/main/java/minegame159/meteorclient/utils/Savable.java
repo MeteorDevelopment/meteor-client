@@ -1,5 +1,6 @@
 package minegame159.meteorclient.utils;
 
+import com.google.common.io.Files;
 import net.minecraft.nbt.NbtIo;
 
 import java.io.File;
@@ -14,8 +15,12 @@ public abstract class Savable<T> implements ISerializable<T> {
 
     public void save(File file) {
         try {
+            File tempFile = File.createTempFile("meteor-client", file.getName());
+            NbtIo.write(toTag(), tempFile);
+
             file.getParentFile().mkdirs();
-            NbtIo.write(toTag(), file);
+            Files.copy(tempFile, file);
+            tempFile.delete();
         } catch (IOException e) {
             e.printStackTrace();
         }
