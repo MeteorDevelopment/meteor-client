@@ -147,7 +147,7 @@ public abstract class WidgetScreen extends Screen implements Listenable {
         Matrices.begin(new MatrixStack());
 
         // Render gui
-        GUI_RENDERER.begin();
+        GUI_RENDERER.begin(true);
         root.render(GUI_RENDERER, mouseX, mouseY, delta);
         GUI_RENDERER.end(true);
 
