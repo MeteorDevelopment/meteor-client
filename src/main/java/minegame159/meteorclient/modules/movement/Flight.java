@@ -3,9 +3,12 @@ package minegame159.meteorclient.modules.movement;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.TickEvent;
+import minegame159.meteorclient.events.packets.SendPacketEvent;
+import minegame159.meteorclient.mixininterface.IPlayerMoveC2SPacket;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.*;
+import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 
 public class Flight extends ToggleModule {
     public enum Mode {
@@ -29,39 +32,9 @@ public class Flight extends ToggleModule {
             .build()
     );
 
-    private final Setting<Boolean> antiKick = sgGeneral.add(new BoolSetting.Builder()
-            .name("anti-kick"
-            ).description("Toggles flight to try and stop you getting kicked.")
-            .defaultValue(false)
-            .build()
-    );
-
-    private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
-            .name("delay")
-            .description("The time in between toggles.(20 ticks = 1 second)")
-            .defaultValue(60)
-            .min(1)
-            .max(5000)
-            .sliderMax(200)
-            .build()
-    );
-
-    private final Setting<Integer> offTime = sgGeneral.add(new IntSetting.Builder()
-            .name("off-time")
-            .description("The time the flight is toggled off.(20 ticks = 1 second)")
-            .defaultValue(5)
-            .min(1)
-            .max(20)
-            .sliderMax(10)
-            .build()
-    );
-
     public Flight() {
         super(Category.Movement, "flight", "FLYYYY! You will take fall damage so enable no fall.");
     }
-
-    private int delayLeft = delay.get();
-    private int offLeft = offTime.get();
 
     @Override
     public void onActivate() {
@@ -84,24 +57,40 @@ public class Flight extends ToggleModule {
 
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
-        if (antiKick.get() && delayLeft > 0) {
-            delayLeft --;
-        } else if (antiKick.get() && delayLeft <= 0 && offLeft > 0) {
-            offLeft --;
-            mc.player.abilities.flying = false;
-            mc.player.abilities.setFlySpeed(0.05f);
-            if (mc.player.abilities.creativeMode) return;
-            mc.player.abilities.allowFlying = false;
-            return;
-        }else if (antiKick.get() && delayLeft <=0 && offLeft <= 0) {
-            delayLeft = delay.get();
-            offLeft = offTime.get();
-        }
         if (mode.get() == Mode.Vanilla && !mc.player.isSpectator()) {
             mc.player.abilities.setFlySpeed(speed.get().floatValue());
             mc.player.abilities.flying = true;
             if (mc.player.abilities.creativeMode) return;
             mc.player.abilities.allowFlying = true;
+        }
+    });
+
+    private long lastModifiedTime = 0;
+    private double lastY = Double.MAX_VALUE;
+
+    /**
+     * @see net.minecraft.server.network.ServerPlayNetworkHandler#onPlayerMove(PlayerMoveC2SPacket) 
+     */
+    @EventHandler
+    private final Listener<SendPacketEvent> onSendPacket = new Listener<>(event -> {
+        if (!(event.packet instanceof PlayerMoveC2SPacket)) {
+            return;
+        }
+
+        PlayerMoveC2SPacket packet = (PlayerMoveC2SPacket) event.packet;
+        long currentTime = System.currentTimeMillis();
+        double currentY = packet.getY(Double.MAX_VALUE);
+        if (currentY != Double.MAX_VALUE) {
+            // maximum time we can be "floating" is 80 ticks, so 4 seconds max
+            // we'll be safe and modify every second or what we can assume is 20 ticks
+            if (currentTime - lastModifiedTime > 1000 && lastY != Double.MAX_VALUE) {
+                // actual check is for >= -0.03125D but we have to do a bit more than that
+                // probably due to compression or some shit idk
+                ((IPlayerMoveC2SPacket) packet).setY(lastY - 0.03130D);
+                lastModifiedTime = currentTime;
+            } else {
+                lastY = currentY;
+            }
         }
     });
 }
