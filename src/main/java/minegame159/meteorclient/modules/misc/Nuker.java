@@ -90,6 +90,7 @@ public class Nuker extends ToggleModule {
     private final List<BlockPos.Mutable> blocks = new ArrayList<>();
     private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
     private final BlockPos.Mutable lastBlockPos = new BlockPos.Mutable();
+    private boolean hasLastBlockPos;
 
     public Nuker() {
         super(Category.Misc, "nuker", "Breaks blocks around you.");
@@ -98,14 +99,18 @@ public class Nuker extends ToggleModule {
     @Override
     public void onDeactivate() {
         mc.interactionManager.cancelBlockBreaking();
+        hasLastBlockPos = false;
     }
 
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
-        if (mc.world.getBlockState(lastBlockPos).getBlock() != Blocks.AIR) {
+        if (hasLastBlockPos && mc.world.getBlockState(lastBlockPos).getBlock() != Blocks.AIR) {
             mc.interactionManager.updateBlockBreakingProgress(lastBlockPos, Direction.UP);
             return;
         }
+
+        hasLastBlockPos = false;
+
         // Calculate stuff
         double pX = mc.player.getX() - 0.5;
         double pY = mc.player.getY();
@@ -180,6 +185,7 @@ public class Nuker extends ToggleModule {
                 mc.player.swingHand(Hand.MAIN_HAND);
 
                 breaking = true;
+                hasLastBlockPos = true;
                 break;
             }
         }
