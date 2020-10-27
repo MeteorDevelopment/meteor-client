@@ -12,6 +12,7 @@ import minegame159.meteorclient.utils.Pool;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.texture.AbstractTexture;
+import net.minecraft.client.util.Window;
 import net.minecraft.util.Identifier;
 import org.lwjgl.opengl.GL11;
 
@@ -37,7 +38,10 @@ public class GuiRenderer {
     public void begin(boolean root) {
         mb.begin(GL11.GL_TRIANGLES, VertexFormats.POSITION_COLOR_TEXTURE);
 
-        //if (root) beginScissor(0, 0, 0, 0, false);
+        if (root) {
+            Window window = MinecraftClient.getInstance().getWindow();
+            beginScissor(0, 0, window.getFramebufferWidth(), window.getFramebufferHeight(), false);
+        }
     }
     public void begin() {
         begin(false);
@@ -66,7 +70,7 @@ public class GuiRenderer {
         texts.clear();
         MeteorClient.FONT_GUI.end();
 
-        //if (root) endScissor();
+        if (root) endScissor();
 
         tooltip = null;
     }
