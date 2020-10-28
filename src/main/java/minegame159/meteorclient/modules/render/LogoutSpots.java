@@ -16,6 +16,7 @@ import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.Color;
+import minegame159.meteorclient.utils.Dimension;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.client.render.Camera;
@@ -66,6 +67,7 @@ public class LogoutSpots extends ToggleModule {
     private final List<PlayerEntity> lastPlayers = new ArrayList<>();
 
     private int timer;
+    private Dimension lastDimension;
 
     public LogoutSpots() {
         super(Category.Render, "logout-spots", "Displays players logout position.");
@@ -78,6 +80,7 @@ public class LogoutSpots extends ToggleModule {
         updateLastPlayers();
 
         timer = 10;
+        lastDimension = Utils.getDimension();
     }
 
     @Override
@@ -135,6 +138,10 @@ public class LogoutSpots extends ToggleModule {
         } else {
             timer--;
         }
+
+        Dimension dimension = Utils.getDimension();
+        if (dimension != lastDimension) players.clear();
+        lastDimension = dimension;
     });
 
     private void add(Entry entry) {
