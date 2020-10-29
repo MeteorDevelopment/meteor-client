@@ -84,6 +84,7 @@ public class AutoTotem extends ToggleModule {
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
         if (mc.currentScreen instanceof HandledScreen<?> && (!(mc.currentScreen instanceof InventoryScreen) || !inventorySwitch.get())) return;
+        if (mc.currentScreen != null && mc.player.inventory.size() < 44) return;
 
         int preTotemCount = totemCount;
         InvUtils.FindItemResult result = InvUtils.findItemWithCount(Items.TOTEM_OF_UNDYING);
