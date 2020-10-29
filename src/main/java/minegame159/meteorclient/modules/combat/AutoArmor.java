@@ -175,7 +175,7 @@ public class AutoArmor extends ToggleModule {
 
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
-        if (mc.player.inventory.size() < 44) return;
+        if (mc.currentScreen != null && mc.player.inventory.size() < 44) return;
         if (mc.player.abilities.creativeMode) return;
         if (pauseInInventory.get() && mc.currentScreen instanceof InventoryScreen) return;
         if (boomSwitch.get() && mode.get() != Prot.Blast_Protection && explosionNear()) {
