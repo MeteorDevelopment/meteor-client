@@ -92,6 +92,7 @@ public class OffhandExtra extends ToggleModule {
 
     @EventHandler
     private final Listener<TickEvent> onTick = new Listener<>(event -> {
+        if (mc.currentScreen != null && mc.player.inventory.size() < 44) return;
         if (!mc.player.isUsingItem()) isClicking = false;
         if (ModuleManager.INSTANCE.get(AutoTotem.class).getLocked()) return;
         if ((Asimov.get() || noTotems) && !(mc.currentScreen instanceof HandledScreen<?>)) {
