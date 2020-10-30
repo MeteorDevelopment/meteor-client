@@ -11,23 +11,34 @@ import java.io.InputStream;
 import java.util.*;
 
 public class Capes {
-    private static final String CAPE_OWNERS_URL = "https://raw.githubusercontent.com/MeteorClient/meteorclient.github.io/master/capes/owners.txt";
-    private static final String CAPE_FOLDER_URL = "https://raw.githubusercontent.com/MeteorClient/meteorclient.github.io/master/";
-
-    private static final Identifier EMPTY_CAPE = new Identifier("meteor-client", "empty_cape.png");
+    private static final String CAPE_OWNERS_URL = "http://api.meteorclient.com:8082/capeowners";
+    private static final String CAPES_URL = "http://api.meteorclient.com:8082/capes";
 
     private static final Map<UUID, String> OWNERS = new HashMap<>();
+    private static final Map<String, String> URLS = new HashMap<>();
     private static final Map<String, Cape> TEXTURES = new HashMap<>();
 
     private static final List<Cape> TO_REGISTER = new ArrayList<>();
     private static final List<Cape> TO_RETRY = new ArrayList<>();
+    private static final List<Cape> TO_REMOVE = new ArrayList<>();
 
     public static void init() {
+        // Cape owners
         MeteorExecutor.execute(() -> HttpUtils.getLines(CAPE_OWNERS_URL, s -> {
             String[] split = s.split(" ");
+
             if (split.length >= 2) {
                 OWNERS.put(UUID.fromString(split[0]), split[1]);
                 if (!TEXTURES.containsKey(split[1])) TEXTURES.put(split[1], new Cape(split[1]));
+            }
+        }));
+
+        // Capes
+        MeteorExecutor.execute(() -> HttpUtils.getLines(CAPES_URL, s -> {
+            String[] split = s.split(" ");
+
+            if (split.length >= 2) {
+                if (!URLS.containsKey(split[0])) URLS.put(split[0], split[1]);
             }
         }));
     }
@@ -36,10 +47,12 @@ public class Capes {
         String capeName = OWNERS.get(player.getUuid());
         if (capeName != null) {
             Cape cape = TEXTURES.get(capeName);
+            if (cape == null) return null;
+
             if (cape.isDownloaded()) return cape;
 
             cape.download();
-            return EMPTY_CAPE;
+            return null;
         }
 
         return null;
@@ -54,9 +67,22 @@ public class Capes {
         synchronized (TO_RETRY) {
             TO_RETRY.removeIf(Cape::tick);
         }
+
+        synchronized (TO_REMOVE) {
+            for (Cape cape : TO_REMOVE) {
+                URLS.remove(cape.name);
+                TEXTURES.remove(cape.name);
+                TO_REGISTER.remove(cape);
+                TO_RETRY.remove(cape);
+            }
+
+            TO_REMOVE.clear();
+        }
     }
 
     private static class Cape extends Identifier {
+        private final String name;
+
         private boolean downloaded;
         private boolean downloading;
 
@@ -65,7 +91,9 @@ public class Capes {
         private int retryTimer;
 
         public Cape(String name) {
-            super("meteor-client", "capes/" + name + ".png");
+            super("meteor-client", "capes/" + name);
+
+            this.name = name;
         }
 
         public void download() {
@@ -74,7 +102,16 @@ public class Capes {
 
             MeteorExecutor.execute(() -> {
                 try {
-                    InputStream in = HttpUtils.get(CAPE_FOLDER_URL + path);
+                    String url = URLS.get(name);
+                    if (url == null) {
+                        synchronized (TO_RETRY) {
+                            TO_REMOVE.add(this);
+                            downloading = false;
+                            return;
+                        }
+                    }
+
+                    InputStream in = HttpUtils.get(url);
                     if (in == null) {
                         synchronized (TO_RETRY) {
                             TO_RETRY.add(this);
