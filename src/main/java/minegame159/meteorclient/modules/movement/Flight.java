@@ -2,7 +2,8 @@ package minegame159.meteorclient.modules.movement;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.TickEvent;
+import minegame159.meteorclient.events.PostTickEvent;
+import minegame159.meteorclient.events.PreTickEvent;
 import minegame159.meteorclient.events.packets.SendPacketEvent;
 import minegame159.meteorclient.mixininterface.IPlayerMoveC2SPacket;
 import minegame159.meteorclient.modules.Category;
@@ -55,8 +56,25 @@ public class Flight extends ToggleModule {
         }
     }
 
+    private boolean flip;
+    private float lastYaw;
+
     @EventHandler
-    private final Listener<TickEvent> onTick = new Listener<>(event -> {
+    private final Listener<PreTickEvent> onPreTick = new Listener<>(event -> {
+        float currentYaw = mc.player.yaw;
+        if (mc.player.fallDistance >= 3f && currentYaw == lastYaw && mc.player.getVelocity().length() < 0.003d) {
+            mc.player.yaw += flip ? 1 : -1;
+            flip = !flip;
+        }
+        lastYaw = currentYaw;
+    });
+
+    @EventHandler
+    private final Listener<PostTickEvent> onPostTick = new Listener<>(event -> {
+        if (mc.player.yaw != lastYaw) {
+            mc.player.yaw = lastYaw;
+        }
+
         if (mode.get() == Mode.Vanilla && !mc.player.isSpectator()) {
             mc.player.abilities.setFlySpeed(speed.get().floatValue());
             mc.player.abilities.flying = true;
@@ -82,8 +100,9 @@ public class Flight extends ToggleModule {
         double currentY = packet.getY(Double.MAX_VALUE);
         if (currentY != Double.MAX_VALUE) {
             // maximum time we can be "floating" is 80 ticks, so 4 seconds max
-            // we'll be safe and modify every second or what we can assume is 20 ticks
-            if (currentTime - lastModifiedTime > 1000 && lastY != Double.MAX_VALUE) {
+            if (currentTime - lastModifiedTime > 250
+                    && lastY != Double.MAX_VALUE
+                    && mc.world.getBlockState(mc.player.getBlockPos().down()).isAir()) {
                 // actual check is for >= -0.03125D but we have to do a bit more than that
                 // probably due to compression or some shit idk
                 ((IPlayerMoveC2SPacket) packet).setY(lastY - 0.03130D);

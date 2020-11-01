@@ -2,7 +2,7 @@ package minegame159.meteorclient.modules.movement;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.TickEvent;
+import minegame159.meteorclient.events.PostTickEvent;
 import minegame159.meteorclient.events.packets.SendPacketEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
@@ -29,7 +29,7 @@ public class Blink extends ToggleModule {
     }
 
     @EventHandler
-    private final Listener<TickEvent> onTick = new Listener<>(event -> timer++);
+    private final Listener<PostTickEvent> onTick = new Listener<>(event -> timer++);
 
     @EventHandler
     private final Listener<SendPacketEvent> onSendPacket = new Listener<>(event -> {

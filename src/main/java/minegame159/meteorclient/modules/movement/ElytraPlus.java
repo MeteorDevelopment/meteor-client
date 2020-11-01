@@ -3,7 +3,7 @@ package minegame159.meteorclient.modules.movement;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.PlayerMoveEvent;
-import minegame159.meteorclient.events.TickEvent;
+import minegame159.meteorclient.events.PostTickEvent;
 import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
@@ -207,7 +207,7 @@ public class ElytraPlus extends ToggleModule {
     });
 
     @EventHandler
-    private Listener<TickEvent> onTick = new Listener<>(event -> {
+    private Listener<PostTickEvent> onTick = new Listener<>(event -> {
         if (decrementFireworkTimer) {
             if (fireworkTimer <= 0) decrementFireworkTimer = false;
 

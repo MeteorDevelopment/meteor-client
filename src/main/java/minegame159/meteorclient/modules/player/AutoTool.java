@@ -6,7 +6,7 @@ import me.zero.alpine.event.EventPriority;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.StartBreakingBlockEvent;
-import minegame159.meteorclient.events.TickEvent;
+import minegame159.meteorclient.events.PostTickEvent;
 import minegame159.meteorclient.mixin.AxeItemAccessor;
 import minegame159.meteorclient.mixin.HoeItemAccessor;
 import minegame159.meteorclient.mixin.PickaxeItemAccessor;
@@ -88,7 +88,7 @@ public class AutoTool extends ToggleModule {
     private BlockState blockState = null;
 
     @EventHandler
-    private final Listener<TickEvent> onTick = new Listener<>(event -> {
+    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
         if(mc.player.getMainHandStack().getItem() instanceof ToolItem && antiBreak.get()
                 && (mc.player.getMainHandStack().getItem().getMaxDamage() - mc.player.getMainHandStack().getDamage()) <= 11){
             int slot = -1;
