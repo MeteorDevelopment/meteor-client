@@ -16,7 +16,7 @@ public class HandView extends ToggleModule {
 
     private final Setting<Double> mainhandY = sgGeneral.add(new DoubleSetting.Builder()
             .name("mainhand-y")
-            .description("")
+            .description("The hand progress, or Y level of your main hand.")
             .defaultValue(0.8)
             .min(0.3)
             .max(3.4)
@@ -25,7 +25,7 @@ public class HandView extends ToggleModule {
 
     private final Setting<Double> offhandY = sgGeneral.add(new DoubleSetting.Builder()
             .name("offhand-y")
-            .description("")
+            .description("The hand progress, or Y level of your offhand.")
             .defaultValue(0.8)
             .min(0.3)
             .max(3.4)
