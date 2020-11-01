@@ -48,7 +48,7 @@ public class Announcer extends ToggleModule {
     }
 
     @EventHandler
-    private final Listener<TickEvent> onTick = new Listener<>(event -> {
+    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
         for (Feature feature : features) {
             if (feature.isEnabled()) feature.tick();
         }

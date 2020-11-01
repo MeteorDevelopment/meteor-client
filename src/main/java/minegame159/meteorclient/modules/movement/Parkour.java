@@ -2,7 +2,7 @@ package minegame159.meteorclient.modules.movement;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.TickEvent;
+import minegame159.meteorclient.events.PostTickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import net.minecraft.util.math.Box;
@@ -16,7 +16,7 @@ public class Parkour extends ToggleModule {
     }
 
     @EventHandler
-    private Listener<TickEvent> onTick = new Listener<>(event -> {
+    private Listener<PostTickEvent> onTick = new Listener<>(event -> {
         if(!mc.player.isOnGround() || mc.options.keyJump.isPressed()) return;
 
         if(mc.player.isSneaking() || mc.options.keySneak.isPressed()) return;
