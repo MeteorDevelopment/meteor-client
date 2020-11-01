@@ -313,11 +313,12 @@ public class CrystalAura extends ToggleModule {
         if (!smartDelay.get() && delayLeft > 0) return;
         if (place.get() && (!singlePlace.get() || current == null)) {
             Optional<LivingEntity> livingEntity = Streams.stream(mc.world.getEntities())
+                    .filter(Entity::isAlive)
                     .filter(entity -> entity instanceof LivingEntity)
                     .filter(entity -> entities.get().contains(entity.getType()))
                     .filter(entity -> entity.distanceTo(mc.player) <= breakRange.get() * 2)
-                    .filter(Entity::isAlive)
                     .min(Comparator.comparingDouble(o -> o.distanceTo(mc.player)))
+                    .filter(entity -> entity.distanceTo(mc.player) <= breakRange.get() * 2)
                     .map(entity -> (LivingEntity) entity);
             if (!livingEntity.isPresent()) return;
             LivingEntity target = livingEntity.get();

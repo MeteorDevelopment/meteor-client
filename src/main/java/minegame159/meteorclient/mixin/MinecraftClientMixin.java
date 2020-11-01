@@ -59,7 +59,7 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
     private void onPreTick(CallbackInfo info) {
         if (Utils.canUpdate()) {
             world.getProfiler().swap("meteor-client_pre_update");
-            MeteorClient.EVENT_BUS.post(EventStore.postTickEvent());
+            MeteorClient.EVENT_BUS.post(EventStore.preTickEvent());
         }
     }
 
