@@ -39,7 +39,8 @@ public class EventStore {
     private static final OpenScreenEvent openScreenEvent = new OpenScreenEvent();
     private static final Render2DEvent render2DEvent = new Render2DEvent();
     private static final RenderEvent renderEvent = new RenderEvent();
-    private static final TickEvent tickEvent = new TickEvent();
+    private static final PreTickEvent preTickEvent = new PreTickEvent();
+    private static final PostTickEvent postTickEvent = new PostTickEvent();
     private static final TookDamageEvent tookDamageEvent = new TookDamageEvent();
     private static final GameJoinedEvent gameJoinedEvent = new GameJoinedEvent();
     private static final GameDisconnectedEvent gameDisconnectedEvent = new GameDisconnectedEvent();
@@ -134,8 +135,12 @@ public class EventStore {
         return renderEvent;
     }
 
-    public static TickEvent tickEvent() {
-        return tickEvent;
+    public static PreTickEvent preTickEvent() {
+        return preTickEvent;
+    }
+
+    public static PostTickEvent postTickEvent() {
+        return postTickEvent;
     }
 
     public static TookDamageEvent tookDamageEvent(LivingEntity entity, DamageSource source) {

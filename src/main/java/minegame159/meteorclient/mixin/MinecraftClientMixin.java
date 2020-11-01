@@ -55,11 +55,19 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
         MeteorClient.INSTANCE.onInitializeClient();
     }
 
+    @Inject(at = @At("HEAD"), method = "tick")
+    private void onPreTick(CallbackInfo info) {
+        if (Utils.canUpdate()) {
+            world.getProfiler().swap("meteor-client_pre_update");
+            MeteorClient.EVENT_BUS.post(EventStore.postTickEvent());
+        }
+    }
+
     @Inject(at = @At("TAIL"), method = "tick")
     private void onTick(CallbackInfo info) {
         if (Utils.canUpdate()) {
-            world.getProfiler().swap("meteor-client_update");
-            MeteorClient.EVENT_BUS.post(EventStore.tickEvent());
+            world.getProfiler().swap("meteor-client_post_update");
+            MeteorClient.EVENT_BUS.post(EventStore.postTickEvent());
         }
     }
 

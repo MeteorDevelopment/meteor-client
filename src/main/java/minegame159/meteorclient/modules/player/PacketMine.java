@@ -3,7 +3,7 @@ package minegame159.meteorclient.modules.player;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.StartBreakingBlockEvent;
-import minegame159.meteorclient.events.TickEvent;
+import minegame159.meteorclient.events.PostTickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BoolSetting;
@@ -53,7 +53,7 @@ public class PacketMine extends ToggleModule {
     });
 
     @EventHandler
-    private final Listener<TickEvent> onTick = new Listener<>(event -> {
+    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
         if (oneByOne.get()) {
             if (blocks.size() > 0 && blocks.get(blocks.size() - 1).sendPackets()) {
                 blocks.remove(blocks.size() - 1);
