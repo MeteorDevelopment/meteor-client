@@ -1,10 +1,5 @@
 package minegame159.meteorclient.modules.combat;
 
-//Updated by squidoodly 31/04/2020
-//Updated by squidoodly 19/06/2020
-//Updated by squidoodly 24/07/2020
-//Updated by squidoodly 26-28/07/2020
-
 import com.google.common.collect.Streams;
 import me.zero.alpine.event.EventPriority;
 import me.zero.alpine.listener.EventHandler;
@@ -33,11 +28,7 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.*;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.*;
 
 public class CrystalAura extends ToggleModule {
     public enum Mode{
@@ -321,19 +312,15 @@ public class CrystalAura extends ToggleModule {
                 });
         if (!smartDelay.get() && delayLeft > 0) return;
         if (place.get() && (!singlePlace.get() || current == null)) {
-            LivingEntity target;
-            AtomicReference<LivingEntity> livingEntity = null;
-            Streams.stream(mc.world.getEntities())
+            Optional<LivingEntity> livingEntity = Streams.stream(mc.world.getEntities())
                     .filter(entity -> entity instanceof LivingEntity)
-                    .filter(entity -> entities.get().contains(entity))
+                    .filter(entity -> entities.get().contains(entity.getType()))
                     .filter(entity -> entity.distanceTo(mc.player) <= breakRange.get() * 2)
                     .filter(Entity::isAlive)
                     .min(Comparator.comparingDouble(o -> o.distanceTo(mc.player)))
-                    .ifPresent(entity -> {
-                        livingEntity.set((LivingEntity)entity);
-                    });
-            if (livingEntity == null) return;
-            target = livingEntity.get();
+                    .map(entity -> (LivingEntity) entity);
+            if (!livingEntity.isPresent()) return;
+            LivingEntity target = livingEntity.get();
             findValidBlocks(target);
             if (bestBlock == null) return;
             if (facePlace.get() && Math.sqrt(target.squaredDistanceTo(bestBlock)) <= 2) {
