@@ -2,7 +2,7 @@ package minegame159.meteorclient.modules.player;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.TickEvent;
+import minegame159.meteorclient.events.PostTickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BoolSetting;
@@ -39,7 +39,7 @@ public class AutoDrop extends ToggleModule {
     }
 
     @EventHandler
-    private Listener<TickEvent> onTick = new Listener<>(event -> {
+    private Listener<PostTickEvent> onTick = new Listener<>(event -> {
         if (mc.currentScreen instanceof HandledScreen<?>) return;
 
         for (int i = excludeHotbar.get() ? 9 : 0; i < mc.player.inventory.size(); i++) {

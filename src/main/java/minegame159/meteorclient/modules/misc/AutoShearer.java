@@ -2,7 +2,7 @@ package minegame159.meteorclient.modules.misc;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.TickEvent;
+import minegame159.meteorclient.events.PostTickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BoolSetting;
@@ -39,7 +39,7 @@ public class AutoShearer extends ToggleModule {
     }
 
     @EventHandler
-    private Listener<TickEvent> onTick = new Listener<>(event -> {
+    private Listener<PostTickEvent> onTick = new Listener<>(event -> {
         for (Entity entity : mc.world.getEntities()) {
             if (!(entity instanceof SheepEntity) || ((SheepEntity) entity).isSheared() || ((SheepEntity) entity).isBaby() || mc.player.distanceTo(entity) > distance.get()) continue;
 

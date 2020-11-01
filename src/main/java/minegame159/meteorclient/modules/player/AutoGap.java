@@ -4,7 +4,7 @@ package minegame159.meteorclient.modules.player;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.TickEvent;
+import minegame159.meteorclient.events.PostTickEvent;
 import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
@@ -73,7 +73,7 @@ public class AutoGap extends ToggleModule {
     private boolean wasAutoEatOn = false;
 
     @EventHandler
-    private final Listener<TickEvent> onTick = new Listener<>(event -> {
+    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
         if(mc.options.keyUse.isPressed() && !wasThis && ModuleManager.INSTANCE.get(AutoEat.class).isActive() && preferAutoEat.get()){
             return;
         }else if(mc.options.keyUse.isPressed() && wasThis && ModuleManager.INSTANCE.get(AutoEat.class).isActive() && !preferAutoEat.get()){

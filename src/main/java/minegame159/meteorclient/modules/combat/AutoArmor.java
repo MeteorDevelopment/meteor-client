@@ -4,7 +4,7 @@ package minegame159.meteorclient.modules.combat;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.TickEvent;
+import minegame159.meteorclient.events.PostTickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
@@ -174,7 +174,7 @@ public class AutoArmor extends ToggleModule {
     private float currentToughness = 0;
 
     @EventHandler
-    private final Listener<TickEvent> onTick = new Listener<>(event -> {
+    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
         if (mc.currentScreen != null && mc.player.inventory.size() < 44) return;
         if (mc.player.abilities.creativeMode) return;
         if (pauseInInventory.get() && mc.currentScreen instanceof InventoryScreen) return;

@@ -424,7 +424,7 @@ public class HUD extends ToggleModule {
     }
 
     @EventHandler
-    private final Listener<TickEvent> onTick = new Listener<>(event -> {
+    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
         updateEntitiesTimer--;
 
         if (entities.get()) {

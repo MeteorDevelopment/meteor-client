@@ -2,7 +2,7 @@ package minegame159.meteorclient.modules.misc;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.TickEvent;
+import minegame159.meteorclient.events.PostTickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.*;
@@ -103,7 +103,7 @@ public class Nuker extends ToggleModule {
     }
 
     @EventHandler
-    private final Listener<TickEvent> onTick = new Listener<>(event -> {
+    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
         if (hasLastBlockPos && mc.world.getBlockState(lastBlockPos).getBlock() != Blocks.AIR) {
             mc.interactionManager.updateBlockBreakingProgress(lastBlockPos, Direction.UP);
             return;

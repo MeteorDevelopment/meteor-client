@@ -5,7 +5,7 @@ package minegame159.meteorclient.modules.combat;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.RightClickEvent;
-import minegame159.meteorclient.events.TickEvent;
+import minegame159.meteorclient.events.PostTickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
@@ -16,11 +16,6 @@ import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.screen.slot.SlotActionType;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.EntityHitResult;
-import net.minecraft.util.hit.HitResult;
 
 public class OffhandExtra extends ToggleModule {
     public enum Mode{
@@ -91,7 +86,7 @@ public class OffhandExtra extends ToggleModule {
     }
 
     @EventHandler
-    private final Listener<TickEvent> onTick = new Listener<>(event -> {
+    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
         if (mc.currentScreen != null && mc.player.inventory.size() < 44) return;
         if (!mc.player.isUsingItem()) isClicking = false;
         if (ModuleManager.INSTANCE.get(AutoTotem.class).getLocked()) return;

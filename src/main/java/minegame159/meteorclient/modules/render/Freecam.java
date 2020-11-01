@@ -4,7 +4,7 @@ import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.KeyEvent;
 import minegame159.meteorclient.events.OpenScreenEvent;
-import minegame159.meteorclient.events.TickEvent;
+import minegame159.meteorclient.events.PostTickEvent;
 import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
@@ -94,7 +94,7 @@ public class Freecam extends ToggleModule {
     }
 
     @EventHandler
-    private final Listener<TickEvent> onTick = new Listener<>(event -> {
+    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
         Vec3d forward = Vec3d.fromPolar(0, getYaw(1 / 20f));
         Vec3d right = Vec3d.fromPolar(0, getYaw(1 / 20f) + 90);
         double velX = 0;
