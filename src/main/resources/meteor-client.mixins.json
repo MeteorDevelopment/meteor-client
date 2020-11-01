@@ -49,6 +49,7 @@
     "GenericContainerScreenMixin",
     "GuiCloseC2SPacketMixin",
     "HandledScreenMixin",
+    "HeldItemRendererAccessor",
     "HoeItemAccessor",
     "HorseBaseEntityMixin",
     "InGameHudMixin",

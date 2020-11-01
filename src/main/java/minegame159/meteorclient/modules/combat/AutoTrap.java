@@ -62,6 +62,7 @@ public class AutoTrap extends ToggleModule {
     private BlockPos targetPos;
     private int obsidianSlot;
     private int prevSlot;
+    private int blocksPlaced;
 
     @EventHandler
     private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
@@ -92,26 +93,29 @@ public class AutoTrap extends ToggleModule {
             //PLACEMENT
             switch(topPlacement.get()) {
                 case Full:
+                    blocksPlaced = 0;
                     if(mc.world.getBlockState(targetPosUp.add(0, 1, 0)).getMaterial().isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(target.getPos(), Direction.UP, targetPosUp.add(0, 1, 0), false));
-                        mc.player.swingHand(Hand.MAIN_HAND);
+                        blocksPlaced++;
                     }
                     if(mc.world.getBlockState(targetPosUp.add(1, 0, 0)).getMaterial().isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(target.getPos(), Direction.UP, targetPosUp.add(1, 0, 0), false));
-                        mc.player.swingHand(Hand.MAIN_HAND);
+                        blocksPlaced++;
                     }
                     if(mc.world.getBlockState(targetPosUp.add(-1, 0, 0)).getMaterial().isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(target.getPos(), Direction.UP, targetPosUp.add(-1, 0, 0), false));
-                        mc.player.swingHand(Hand.MAIN_HAND);
+                        blocksPlaced++;
                     }
                     if(mc.world.getBlockState(targetPosUp.add(0, 0, 1)).getMaterial().isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(target.getPos(), Direction.UP, targetPosUp.add(0, 0, 1), false));
-                        mc.player.swingHand(Hand.MAIN_HAND);
+                        blocksPlaced++;
                     }
                     if(mc.world.getBlockState(targetPosUp.add(0, 0, -1)).getMaterial().isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(target.getPos(), Direction.UP, targetPosUp.add(0, 0, -1), false));
-                        mc.player.swingHand(Hand.MAIN_HAND);
+                        blocksPlaced++;
                     }
+                    if (blocksPlaced >= 1) mc.player.swingHand(Hand.MAIN_HAND);
+                    blocksPlaced = 0;
                     break;
                 case Top:
                     if(mc.world.getBlockState(targetPosUp.add(0, 1, 0)).getMaterial().isReplaceable()){
@@ -124,26 +128,29 @@ public class AutoTrap extends ToggleModule {
 
             switch(bottomPlacement.get()) {
                 case Platform:
+                    blocksPlaced = 0;
                     if(mc.world.getBlockState(targetPos.add(0, -1, 0)).getMaterial().isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(target.getPos().add(0, -1, 0), Direction.DOWN, targetPos.add(0, -1, 0), false));
-                        mc.player.swingHand(Hand.MAIN_HAND);
+                        blocksPlaced++;
                     }
                     if(mc.world.getBlockState(targetPos.add(1, -1, 0)).getMaterial().isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(target.getPos().add(1, -1, 0), Direction.DOWN, targetPos.add(1, -1, 0), false));
-                        mc.player.swingHand(Hand.MAIN_HAND);
+                        blocksPlaced++;
                     }
                     if(mc.world.getBlockState(targetPos.add(-1, -1, 0)).getMaterial().isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(target.getPos().add(-1, -1, 0), Direction.DOWN, targetPos.add(-1, -1, 0), false));
-                        mc.player.swingHand(Hand.MAIN_HAND);
+                        blocksPlaced++;
                     }
                     if(mc.world.getBlockState(targetPos.add(0, -1, 1)).getMaterial().isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(target.getPos().add(0, -1, 1), Direction.DOWN, targetPos.add(0, -1, 1), false));
-                        mc.player.swingHand(Hand.MAIN_HAND);
+                        blocksPlaced++;
                     }
                     if(mc.world.getBlockState(targetPos.add(0, -1, -1)).getMaterial().isReplaceable()){
                         mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(target.getPos().add(0, -1, -1), Direction.DOWN, targetPos.add(0, -1, -1), false));
-                        mc.player.swingHand(Hand.MAIN_HAND);
+                        blocksPlaced++;
                     }
+                    if (blocksPlaced >= 1) mc.player.swingHand(Hand.MAIN_HAND);
+                    blocksPlaced = 0;
                     break;
                 case Single:
                     if (mc.world.getBlockState(targetPos.add(0, -1, 0)).isAir()) {
@@ -154,7 +161,6 @@ public class AutoTrap extends ToggleModule {
                 case None:
             }
             if (turnOff.get()) toggle();
-
             mc.player.inventory.selectedSlot = prevSlot;
         }
     });
