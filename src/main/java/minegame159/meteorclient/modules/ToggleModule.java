@@ -6,6 +6,7 @@ import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.Chat;
+import minegame159.meteorclient.utils.Utils;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Formatting;
 
@@ -74,7 +75,7 @@ public abstract class ToggleModule extends Module {
         super.fromTag(tag);
 
         boolean active = tag.getBoolean("active");
-        if (active != isActive()) toggle(false);
+        if (active != isActive()) toggle(Utils.canUpdate());
         setVisible(tag.getBoolean("visible"));
 
         return this;
