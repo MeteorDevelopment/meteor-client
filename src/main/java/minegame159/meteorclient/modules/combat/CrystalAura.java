@@ -316,7 +316,6 @@ public class CrystalAura extends ToggleModule {
                     .filter(Entity::isAlive)
                     .filter(entity -> entity instanceof LivingEntity)
                     .filter(entity -> entities.get().contains(entity.getType()))
-                    .filter(entity -> entity.distanceTo(mc.player) <= breakRange.get() * 2)
                     .min(Comparator.comparingDouble(o -> o.distanceTo(mc.player)))
                     .filter(entity -> entity.distanceTo(mc.player) <= breakRange.get() * 2)
                     .map(entity -> (LivingEntity) entity);
