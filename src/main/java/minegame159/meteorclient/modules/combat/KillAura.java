@@ -32,6 +32,9 @@ import net.minecraft.world.RaycastContext;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class KillAura extends ToggleModule {
     public enum Priority {
@@ -111,6 +114,13 @@ public class KillAura extends ToggleModule {
             .name("ignore-walls")
             .description("Attack through walls.")
             .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Boolean> multiAura = sgGeneral.add(new BoolSetting.Builder()
+            .name("multi-aura")
+            .description("Target multiple entities at once.")
+            .defaultValue(false)
             .build()
     );
 
@@ -314,34 +324,36 @@ public class KillAura extends ToggleModule {
         entity = null;
         didHit = false;
 
-        Streams.stream(mc.world.getEntities())
+        Supplier<Stream<Entity>> entityStreamSupplier = () -> Streams.stream(mc.world.getEntities())
                 .filter(this::isInRange)
                 .filter(this::canAttackEntity)
                 .filter(this::canSeeEntity)
                 .filter(Entity::isAlive)
                 .filter(this::isPlayerOnGround)
-                .filter(this::checkName)
+                .filter(this::checkName);
+
+        entityStreamSupplier.get()
                 .min(this::sort)
                 .ifPresent(tempEntity -> {
-                    entity = tempEntity;
-                    if (random.nextInt(100) > hitChance.get()) return;
-                    if (entity instanceof PlayerEntity && instaKill.get()) {
-                        if (DamageCalcUtils.getSwordDamage((PlayerEntity) entity, false) >= ((PlayerEntity) entity).getHealth() + ((PlayerEntity) entity).getAbsorptionAmount()) {
-                            if (rotate.get()) {
-                                ((IVec3d) vec3d1).set(entity.getX(), entity.getY() + entity.getHeight() / 2, entity.getZ());
-                                mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, vec3d1);
-                            }
+                        entity = tempEntity;
+                        if (random.nextInt(100) > hitChance.get()) return;
+                        if (entity instanceof PlayerEntity && instaKill.get()) {
+                            if (DamageCalcUtils.getSwordDamage((PlayerEntity) entity, false) >= ((PlayerEntity) entity).getHealth() + ((PlayerEntity) entity).getAbsorptionAmount()) {
+                                if (rotate.get()) {
+                                    ((IVec3d) vec3d1).set(entity.getX(), entity.getY() + entity.getHeight() / 2, entity.getZ());
+                                    mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, vec3d1);
+                                }
 
-                            mc.interactionManager.attackEntity(mc.player, entity);
-                            mc.player.swingHand(Hand.MAIN_HAND);
-                            didHit = true;
+                                mc.interactionManager.attackEntity(mc.player, entity);
+                                mc.player.swingHand(Hand.MAIN_HAND);
+                                didHit = true;
+                            }
                         }
-                    }
-                    if (pauseOnCombat.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing() && !wasPathing) {
-                        BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("pause");
-                        wasPathing = true;
-                    }
-                });
+                        if (pauseOnCombat.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing() && !wasPathing) {
+                            BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("pause");
+                            wasPathing = true;
+                        }
+                    });
 
         if(didHit) return;
 
@@ -374,7 +386,28 @@ public class KillAura extends ToggleModule {
                 return;
             }
         }
-        if(entity != null && random.nextInt(100) < hitChance.get()) {
+
+        ArrayList<Entity> entities = entityStreamSupplier.get().collect(Collectors.toCollection(ArrayList::new));
+
+        if(multiAura.get() && !entities.isEmpty()) {
+            for (Entity e : entities) {
+                //Count hitchances like normal, just skip the loop instead of return
+                if (random.nextInt(100) > hitChance.get()) continue;
+
+                //Get rotations as usual
+                if (rotate.get()) {
+                    ((IVec3d) vec3d1).set(e.getX(), e.getY() + e.getHeight() / 2, e.getZ());
+                    mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, vec3d1);
+                }
+
+                //Attack all valid entities according to filter
+                mc.interactionManager.attackEntity(mc.player, e);
+            }
+            //Just swing hand once as if we had used Sweeping Edge
+            mc.player.swingHand(Hand.MAIN_HAND);
+            if (randomHitDelayEnabled.get()) randomHitDelayTimer = (int) Math.round(Math.random() * randomDelayMax.get());
+
+        } else if(entity != null && random.nextInt(100) < hitChance.get()) {
             // Rotate
             if (rotate.get()) {
                 ((IVec3d) vec3d1).set(entity.getX(), entity.getY() + entity.getHeight() / 2, entity.getZ());
