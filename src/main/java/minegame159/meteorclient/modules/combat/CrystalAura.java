@@ -314,6 +314,7 @@ public class CrystalAura extends ToggleModule {
         if (place.get() && (!singlePlace.get() || current == null)) {
             Optional<LivingEntity> livingEntity = Streams.stream(mc.world.getEntities())
                     .filter(Entity::isAlive)
+                    .filter(entity -> entity != mc.player)
                     .filter(entity -> entity instanceof LivingEntity)
                     .filter(entity -> entities.get().contains(entity.getType()))
                     .min(Comparator.comparingDouble(o -> o.distanceTo(mc.player)))
