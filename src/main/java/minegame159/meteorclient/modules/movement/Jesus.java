@@ -1,5 +1,6 @@
 package minegame159.meteorclient.modules.movement;
 
+import baritone.api.BaritoneAPI;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.PostTickEvent;
@@ -23,18 +24,36 @@ public class Jesus extends ToggleModule {
     private int tickTimer = 10;
     private int packetTimer = 0;
 
-    private BlockPos.Mutable blockPos = new BlockPos.Mutable();
+    private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
+
+    private boolean preBaritoneAssumeWalkOnWater;
+    private boolean preBaritoneAssumeWalkOnLava;
 
     public Jesus() {
         super(Category.Movement, "jesus", "Walk on water, be like jesus.");
     }
 
+    @Override
+    public void onActivate() {
+        preBaritoneAssumeWalkOnWater = BaritoneAPI.getSettings().assumeWalkOnWater.value;
+        preBaritoneAssumeWalkOnLava = BaritoneAPI.getSettings().assumeWalkOnLava.value;
+
+        BaritoneAPI.getSettings().assumeWalkOnWater.value = true;
+        BaritoneAPI.getSettings().assumeWalkOnLava.value = true;
+    }
+
+    @Override
+    public void onDeactivate() {
+        BaritoneAPI.getSettings().assumeWalkOnWater.value = preBaritoneAssumeWalkOnWater;
+        BaritoneAPI.getSettings().assumeWalkOnLava.value = preBaritoneAssumeWalkOnLava;
+    }
+
     @EventHandler
-    private Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
         if(mc.options.keySneak.isPressed()) return;
 
         // Move up in water
-        if(mc.player.isTouchingWater()) {
+        if(mc.player.isTouchingWater() || mc.player.isInLava()) {
             Vec3d velocity = mc.player.getVelocity();
             ((IVec3d) velocity).set(velocity.x, 0.11, velocity.z);
             tickTimer = 0;
@@ -50,7 +69,7 @@ public class Jesus extends ToggleModule {
     });
 
     @EventHandler
-    private Listener<SendPacketEvent> onSendPacket = new Listener<>(event -> {
+    private final Listener<SendPacketEvent> onSendPacket = new Listener<>(event -> {
         if(!(event.packet instanceof PlayerMoveC2SPacket)) return;
         PlayerMoveC2SPacket packet = (PlayerMoveC2SPacket) event.packet;
 
@@ -58,7 +77,7 @@ public class Jesus extends ToggleModule {
         if(!(packet instanceof PlayerMoveC2SPacket.PositionOnly || packet instanceof PlayerMoveC2SPacket.Both)) return;
 
         // Check inWater, fallDistance and if over liquid
-        if(mc.player.isTouchingWater() || mc.player.fallDistance > 3f || !isOverLiquid()) return;
+        if(mc.player.isTouchingWater() || mc.player.isInLava() || mc.player.fallDistance > 3f || !isOverLiquid()) return;
 
         // If not actually moving, cancel packet
         if(mc.player.input.movementForward == 0 && mc.player.input.movementSideways == 0) {
@@ -108,6 +127,6 @@ public class Jesus extends ToggleModule {
     }
 
     public boolean shouldBeSolid() {
-        return isActive() && mc.player != null && mc.player.fallDistance <= 3 && !mc.options.keySneak.isPressed() && !mc.player.isTouchingWater();
+        return isActive() && mc.player != null && mc.player.fallDistance <= 3 && !mc.options.keySneak.isPressed() && !mc.player.isTouchingWater() && !mc.player.isInLava();
     }
 }
