@@ -243,6 +243,8 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new AutoTrap());
         addModule(new AutoAnvil());
         addModule(new SelfTrap());
+        addModule(new SelfWeb());
+        addModule(new AutoWeb());
     }
 
     private void initPlayer() {
