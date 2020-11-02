@@ -26,12 +26,6 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 public abstract class ClientPlayNetworkHandlerMixin {
     @Shadow private MinecraftClient client;
 
-    @Inject(at = @At("TAIL"), method = "onGameJoin")
-    private void onGameJoin(GameJoinS2CPacket packet, CallbackInfo info) {
-        MeteorClient.IS_DISCONNECTING = false;
-        MeteorClient.EVENT_BUS.post(EventStore.gameJoinedEvent());
-    }
-
     @Inject(at = @At("HEAD"), method = "sendPacket", cancellable = true)
     public void onSendPacket(Packet packet, CallbackInfo info) {
         SendPacketEvent event = EventStore.sendPacketEvent(packet);

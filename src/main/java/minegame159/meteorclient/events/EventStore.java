@@ -20,7 +20,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.Packet;
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
 import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
-import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
@@ -153,8 +152,7 @@ public class EventStore {
         return gameJoinedEvent;
     }
 
-    public static GameDisconnectedEvent gameDisconnectedEvent(Text disconnectReason) {
-        gameDisconnectedEvent.disconnectReason = disconnectReason;
+    public static GameDisconnectedEvent gameDisconnectedEvent() {
         return gameDisconnectedEvent;
     }
 
