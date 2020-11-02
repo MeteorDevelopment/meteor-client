@@ -11,7 +11,6 @@ import minegame159.meteorclient.modules.ModuleManager;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ShapeContext;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ServerInfo;
 import net.minecraft.client.render.Camera;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.Enchantments;
@@ -52,8 +51,6 @@ public class Utils {
 
     public static boolean blockRenderingBlockEntitiesInXray;
     public static boolean firstTimeTitleScreen = true;
-
-    public static ServerInfo lastServerInfo;
 
     private static final Random random = new Random();
     private static final Vec3d eyesPos = new Vec3d(0, 0, 0);
@@ -172,7 +169,7 @@ public class Utils {
         }
 
         // Multiplayer
-        String name = mc.isConnectedToRealms() ? "realms" : lastServerInfo.address;
+        String name = mc.isConnectedToRealms() ? "realms" : mc.getCurrentServerEntry().address;
         if (SystemUtils.IS_OS_WINDOWS) {
             name = name.replace(":", "_");
         }
