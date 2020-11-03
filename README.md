@@ -1,11 +1,11 @@
 # Meteor Client
 ![Discord](https://img.shields.io/discord/689197705683140636)
-![GitHub last commit](https://img.shields.io/github/last-commit/MineGame159/meteor-client)
-![GitHub commit activity](https://img.shields.io/github/commit-activity/w/MineGame159/meteor-client)
-![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/MineGame159/meteor-client)
-![GitHub lines of code](https://tokei.rs/b1/github/MineGame159/meteor-client)
-![GitHub contributors](https://img.shields.io/github/contributors/MineGame159/meteor-client)
-![CircleCI](https://circleci.com/gh/MineGame159/meteor-client/tree/master.svg?style=svg)
+![GitHub last commit](https://img.shields.io/github/last-commit/MeteorDevelopment/meteor-client)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/w/MeteorDevelopment/meteor-client)
+![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/MeteorDevelopment/meteor-client)
+![GitHub lines of code](https://tokei.rs/b1/github/MeteorDevelopment/meteor-client)
+![GitHub contributors](https://img.shields.io/github/contributors/MeteorDevelopment/meteor-client)
+![CircleCI](https://circleci.com/gh/MeteorDevelopment/meteor-client/tree/master.svg?style=svg)
 
 Minecraft fabric utility mod for the latest minecraft version.  
 Join our [Discord](https://discord.gg/bBGQZvd).

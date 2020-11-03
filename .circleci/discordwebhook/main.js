@@ -5,7 +5,7 @@ const version = process.argv[3]
 const build = process.argv[4]
 const compareUrl = process.argv[5]
 
-const downloadUrl = "https://" + build + "-256699023-gh.circle-artifacts.com/0/build/libs/meteor-client-" + version + "-" + build + ".jar"
+const downloadUrl = "https://" + build + "-309730396-gh.circle-artifacts.com/0/build/libs/meteor-client-" + version + "-" + build + ".jar"
 
 axios
   .get(compareUrl)
@@ -21,7 +21,7 @@ axios
     for (let i in res.data.commits) {
       let commit = res.data.commits[i]
 
-      changes += "\n- [`" + commit.sha.substring(0, 7) + "`](https://github.com/MineGame159/meteor-client/commit/" + commit.sha + ") *" + commit.commit.message + "*"
+      changes += "\n- [`" + commit.sha.substring(0, 7) + "`](https://github.com/MeteorDevelopment/meteor-client/commit/" + commit.sha + ") *" + commit.commit.message + "*"
       hasChanges = true
     }
     if (hasChanges) description += changes
