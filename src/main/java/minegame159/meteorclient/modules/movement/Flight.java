@@ -89,7 +89,7 @@ public class Flight extends ToggleModule {
             mc.player.abilities.allowFlying = true;
         } else if (mode.get() == Mode.Velocity) {
             // TODO: deal with underwater movement, find a way to "spoof" not being in water
-            // also, all of the multiplication below is to get the speed to rougly match the speed
+            // also, all of the multiplication below is to get the speed to roughly match the speed
             // you get when using vanilla fly
             mc.player.abilities.flying = false;
             mc.player.flyingSpeed = speed.get().floatValue() * (mc.player.isSprinting() ? 15f : 10f);
