@@ -10,10 +10,13 @@ import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.*;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.server.network.ServerPlayNetworkHandler;
+import net.minecraft.util.math.Vec3d;
 
 public class Flight extends ToggleModule {
     public enum Mode {
-        Vanilla
+        Abilities,
+        Velocity
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -21,7 +24,7 @@ public class Flight extends ToggleModule {
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("mode")
             .description("Mode.")
-            .defaultValue(Mode.Vanilla)
+            .defaultValue(Mode.Abilities)
             .build()
     );
 
@@ -33,13 +36,17 @@ public class Flight extends ToggleModule {
             .build()
     );
 
+    public Mode getMode() {
+        return this.mode.get();
+    }
+
     public Flight() {
         super(Category.Movement, "flight", "FLYYYY! You will take fall damage so enable no fall.");
     }
 
     @Override
     public void onActivate() {
-        if (mode.get() == Mode.Vanilla && !mc.player.isSpectator()) {
+        if (mode.get() == Mode.Abilities && !mc.player.isSpectator()) {
             mc.player.abilities.flying = true;
             if (mc.player.abilities.creativeMode) return;
             mc.player.abilities.allowFlying = true;
@@ -48,7 +55,7 @@ public class Flight extends ToggleModule {
 
     @Override
     public void onDeactivate() {
-        if (mode.get() == Mode.Vanilla && !mc.player.isSpectator()) {
+        if (mode.get() == Mode.Abilities && !mc.player.isSpectator()) {
             mc.player.abilities.flying = false;
             mc.player.abilities.setFlySpeed(0.05f);
             if (mc.player.abilities.creativeMode) return;
@@ -75,11 +82,27 @@ public class Flight extends ToggleModule {
             mc.player.yaw = lastYaw;
         }
 
-        if (mode.get() == Mode.Vanilla && !mc.player.isSpectator()) {
+        if (mode.get() == Mode.Abilities && !mc.player.isSpectator()) {
             mc.player.abilities.setFlySpeed(speed.get().floatValue());
             mc.player.abilities.flying = true;
             if (mc.player.abilities.creativeMode) return;
             mc.player.abilities.allowFlying = true;
+        } else if (mode.get() == Mode.Velocity) {
+            // TODO: deal with underwater movement, find a way to "spoof" not being in water
+            // also, all of the multiplication below is to get the speed to rougly match the speed
+            // you get when using vanilla fly
+            mc.player.abilities.flying = false;
+            mc.player.flyingSpeed = speed.get().floatValue() * (mc.player.isSprinting() ? 15f : 10f);
+
+            mc.player.setVelocity(0, 0, 0);
+            Vec3d initialVelocity = mc.player.getVelocity();
+
+            if (mc.options.keyJump.isPressed()) {
+                mc.player.setVelocity(initialVelocity.add(0, speed.get() * 5f, 0));
+            }
+            if (mc.options.keySneak.isPressed()) {
+                mc.player.setVelocity(initialVelocity.subtract(0, speed.get() * 5f, 0));
+            }
         }
     });
 
@@ -87,7 +110,7 @@ public class Flight extends ToggleModule {
     private double lastY = Double.MAX_VALUE;
 
     /**
-     * @see net.minecraft.server.network.ServerPlayNetworkHandler#onPlayerMove(PlayerMoveC2SPacket) 
+     * @see ServerPlayNetworkHandler#onPlayerMove(PlayerMoveC2SPacket)
      */
     @EventHandler
     private final Listener<SendPacketEvent> onSendPacket = new Listener<>(event -> {
