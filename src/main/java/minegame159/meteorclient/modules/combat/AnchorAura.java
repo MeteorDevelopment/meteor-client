@@ -254,7 +254,7 @@ public class AnchorAura extends ToggleModule {
             for (double j = playerPos.getZ() - placeRange.get(); j < playerPos.getZ() + placeRange.get(); j++) {
                 for (int k = playerPos.getY() - 3; k < playerPos.getY() + 3; k++) {
                     pos = new BlockPos(i, k, j);
-                    vecPos = new Vec3d(pos.getX(), pos.getY(), pos.getZ());
+                    vecPos = new Vec3d(i, k, j);
                     if (mc.world.canPlace(Blocks.RESPAWN_ANCHOR.getDefaultState(), pos, ShapeContext.absent())) {
                         if (airPlace.get() && mc.world.getBlockState(pos.down()).getMaterial().isReplaceable()) {
                             if (bestBlock == null) {
@@ -298,6 +298,7 @@ public class AnchorAura extends ToggleModule {
             for (double j = playerPos.getZ() - breakRange.get(); j < playerPos.getZ() + breakRange.get(); j++) {
                 for (int k = playerPos.getY() - 3; k < playerPos.getY() + 3; k++) {
                     pos = new BlockPos(i, k, j);
+                    vecPos = new Vec3d(i, k, j);
                     if (mc.world.getBlockState(pos).getBlock() == Blocks.RESPAWN_ANCHOR) {
                         if (bestBlock == null) {
                             bestBlock = pos;
