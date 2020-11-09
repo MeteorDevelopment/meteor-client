@@ -15,6 +15,7 @@ import minegame159.meteorclient.modules.misc.*;
 import minegame159.meteorclient.modules.movement.*;
 import minegame159.meteorclient.modules.player.*;
 import minegame159.meteorclient.modules.render.*;
+import minegame159.meteorclient.modules.render.hud.HUD;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.Chat;
@@ -316,7 +317,6 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new Freecam());
         addModule(new Tracers());
         addModule(new Nametags());
-        addModule(new InventoryViewer());
         addModule(new HoleESP());
         addModule(new LogoutSpots());
         addModule(new Trajectories());

@@ -10,13 +10,13 @@ import minegame159.meteorclient.commands.CommandManager;
 import minegame159.meteorclient.commands.commands.Ignore;
 import minegame159.meteorclient.events.PostTickEvent;
 import minegame159.meteorclient.friends.FriendManager;
+import minegame159.meteorclient.gui.GuiKeyEvents;
+import minegame159.meteorclient.gui.screens.topbar.TopBarModules;
 import minegame159.meteorclient.macros.MacroManager;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.misc.DiscordPresence;
-import minegame159.meteorclient.gui.GuiKeyEvents;
-import minegame159.meteorclient.gui.screens.topbar.TopBarModules;
+import minegame159.meteorclient.rendering.Fonts;
 import minegame159.meteorclient.rendering.MFont;
-import minegame159.meteorclient.rendering.MyFont;
 import minegame159.meteorclient.utils.*;
 import minegame159.meteorclient.waypoints.Waypoints;
 import net.fabricmc.api.ClientModInitializer;
@@ -25,14 +25,12 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 
-import java.awt.*;
-import java.io.*;
+import java.io.File;
 
 public class MeteorClient implements ClientModInitializer, Listenable {
     public static MeteorClient INSTANCE;
     public static final EventBus EVENT_BUS = new EventManager();
-    public static MFont FONT, FONT_2X;
-    public static MyFont FONT_GUI, FONT_GUI_TITLE;
+    public static MFont FONT_2X;
     public static boolean IS_DISCONNECTING;
     public static final File FOLDER = new File(FabricLoader.getInstance().getGameDir().toString(), "meteor-client");
 
@@ -57,7 +55,7 @@ public class MeteorClient implements ClientModInitializer, Listenable {
 
         Config.INSTANCE = new Config();
         Config.INSTANCE.load();
-        loadFont();
+        Fonts.init();
 
         MeteorExecutor.init();
         ModuleManager.INSTANCE = new ModuleManager();
@@ -109,59 +107,6 @@ public class MeteorClient implements ClientModInitializer, Listenable {
 
         mc.player.getActiveStatusEffects().values().removeIf(statusEffectInstance -> statusEffectInstance.getDuration() <= 0);
     });
-
-    private void loadFont() {
-        File[] files = FOLDER.exists() ? FOLDER.listFiles() : new File[0];
-        File fontFile = null;
-        if (files != null) {
-            for (File file : files) {
-                if (file.getName().endsWith(".ttf") || file.getName().endsWith(".TTF")) {
-                    fontFile = file;
-                    break;
-                }
-            }
-        }
-
-        if (fontFile == null) {
-            try {
-                fontFile = new File(FOLDER, "JetBrainsMono-Regular.ttf");
-                fontFile.getParentFile().mkdirs();
-
-                InputStream in = MeteorClient.class.getResourceAsStream("/assets/meteor-client/JetBrainsMono-Regular.ttf");
-                OutputStream out = new FileOutputStream(fontFile);
-
-                byte[] bytes = new byte[255];
-                int read;
-                while ((read = in.read(bytes)) > 0) out.write(bytes, 0, read);
-
-                in.close();
-                out.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        try {
-            FONT = new MFont(Font.createFont(Font.TRUETYPE_FONT, fontFile).deriveFont(16f), true, true);
-            FONT_2X = new MFont(Font.createFont(Font.TRUETYPE_FONT, fontFile).deriveFont(16f * 2), true, true);
-            FONT_2X.scale = 0.5;
-            FONT_GUI = new MyFont(fontFile, 18);
-            FONT_GUI_TITLE = new MyFont(fontFile, 22);
-        } catch (FontFormatException | IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void resetFont() {
-        File[] files = FOLDER.exists() ? FOLDER.listFiles() : new File[0];
-        if (files != null) {
-            for (File file : files) {
-                if (file.getName().endsWith(".ttf") || file.getName().endsWith(".TTF")) {
-                    file.delete();
-                }
-            }
-        }
-    }
 
     public void onKeyInMainMenu(int key) {
         if (key == KeyBindingHelper.getBoundKeyOf(KeyBinds.OPEN_CLICK_GUI).getCode()) {

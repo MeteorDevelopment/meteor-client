@@ -2,9 +2,9 @@ package minegame159.meteorclient.gui.renderer;
 
 import it.unimi.dsi.fastutil.Stack;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.gui.GuiConfig;
 import minegame159.meteorclient.gui.widgets.WWidget;
+import minegame159.meteorclient.rendering.Fonts;
 import minegame159.meteorclient.rendering.MeshBuilder;
 import minegame159.meteorclient.rendering.MyFont;
 import minegame159.meteorclient.utils.Color;
@@ -59,7 +59,7 @@ public class GuiRenderer {
         MinecraftClient.getInstance().getTextureManager().bindTexture(TEXTURE);
         mb.end(true);
 
-        MeteorClient.FONT_GUI.begin();
+        Fonts.get().begin();
         if (root && tooltipWidth > 0) {
             text(tooltip, mouseX + 8 + 4, mouseY + 8 + 4, false, GuiConfig.INSTANCE.text);
         }
@@ -68,7 +68,7 @@ public class GuiRenderer {
             textPool.free(text);
         }
         texts.clear();
-        MeteorClient.FONT_GUI.end();
+        Fonts.get().end();
 
         if (root) endScissor();
 
@@ -183,23 +183,23 @@ public class GuiRenderer {
         texts.add(textPool.get().set(text, x, y, shadow, color, false));
     }
     public double textWidth(String text, int length) {
-        return MeteorClient.FONT_GUI.getWidth(text, length);
+        return Fonts.get().getWidth(text, length);
     }
     public double textWidth(String text) {
-        return MeteorClient.FONT_GUI.getWidth(text);
+        return Fonts.get().getWidth(text);
     }
     public double textHeight() {
-        return MeteorClient.FONT_GUI.getHeight();
+        return Fonts.get().getHeight();
     }
 
     public void title(String text, double x, double y, Color color) {
         texts.add(textPool.get().set(text, x, y, false, color, true));
     }
     public double titleWidth(String text) {
-        return MeteorClient.FONT_GUI_TITLE.getWidth(text);
+        return Fonts.getTitle().getWidth(text);
     }
     public double titleHeight() {
-        return MeteorClient.FONT_GUI_TITLE.getHeight();
+        return Fonts.getTitle().getHeight();
     }
 
     public void post(Runnable task) {
@@ -273,7 +273,7 @@ public class GuiRenderer {
         }
 
         public void render() {
-            MyFont font = title ? MeteorClient.FONT_GUI_TITLE : MeteorClient.FONT_GUI;
+            MyFont font = title ? Fonts.getTitle() : Fonts.get();
             font.render(text, x, y, color);
         }
     }

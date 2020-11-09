@@ -1,6 +1,5 @@
 package minegame159.meteorclient.gui;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import me.zero.alpine.listener.Listenable;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.gui.renderer.GuiDebugRenderer;
@@ -137,12 +136,7 @@ public abstract class WidgetScreen extends Screen implements Listenable {
         if (!Utils.canUpdate()) renderBackground(matrices);
 
         // Apply projection without scaling
-        RenderSystem.matrixMode(5889);
-        RenderSystem.loadIdentity();
-        RenderSystem.ortho(0.0D, MinecraftClient.getInstance().getWindow().getFramebufferWidth(), MinecraftClient.getInstance().getWindow().getFramebufferHeight(), 0.0D, 1000.0D, 3000.0D);
-        RenderSystem.matrixMode(5888);
-        RenderSystem.loadIdentity();
-        RenderSystem.translatef(0.0F, 0.0F, -2000.0F);
+        Utils.unscaledProjection();
 
         Matrices.begin(new MatrixStack());
 
@@ -154,12 +148,7 @@ public abstract class WidgetScreen extends Screen implements Listenable {
         if (renderDebug) GUI_DEBUG_RENDERER.render(root);
 
         // Apply back original scaled projection
-        RenderSystem.matrixMode(5889);
-        RenderSystem.loadIdentity();
-        RenderSystem.ortho(0.0D, MinecraftClient.getInstance().getWindow().getFramebufferWidth() / MinecraftClient.getInstance().getWindow().getScaleFactor(), MinecraftClient.getInstance().getWindow().getFramebufferHeight() / MinecraftClient.getInstance().getWindow().getScaleFactor(), 0.0D, 1000.0D, 3000.0D);
-        RenderSystem.matrixMode(5888);
-        RenderSystem.loadIdentity();
-        RenderSystem.translatef(0.0F, 0.0F, -2000.0F);
+        Utils.scaledProjection();
     }
 
     @Override
