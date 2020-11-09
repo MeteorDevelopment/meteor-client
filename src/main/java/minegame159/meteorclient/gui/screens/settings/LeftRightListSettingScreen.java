@@ -42,7 +42,7 @@ public abstract class LeftRightListSettingScreen<T> extends WindowScreen {
         row();
 
         // Left (all)
-        WTable left = abc(registry, pairs -> registry.forEach(t -> {
+        WTable left = abc(pairs -> registry.forEach(t -> {
             if (setting.get().contains(t)) return;
 
             int words = Utils.search(getValueName(t), filterText);
@@ -60,7 +60,7 @@ public abstract class LeftRightListSettingScreen<T> extends WindowScreen {
         if (left.getCells().size() > 0) add(new WVerticalSeparator());
 
         // Right (selected)
-        abc(registry, pairs -> {
+        abc(pairs -> {
             for (T value : setting.get()) {
                 int words = Utils.search(getValueName(value), filterText);
                 if (words > 0) pairs.add(new Pair<>(value, words));
@@ -74,7 +74,7 @@ public abstract class LeftRightListSettingScreen<T> extends WindowScreen {
         });
     }
 
-    private WTable abc(Registry<T> registry, Consumer<List<Pair<T, Integer>>> addValues, boolean isLeft, Consumer<T> buttonAction) {
+    private WTable abc(Consumer<List<Pair<T, Integer>>> addValues, boolean isLeft, Consumer<T> buttonAction) {
         // Create
         WTable table = add(new WTable()).top().getWidget();
         Consumer<T> forEach = t -> {

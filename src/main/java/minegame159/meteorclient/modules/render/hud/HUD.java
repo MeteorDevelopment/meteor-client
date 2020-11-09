@@ -8,7 +8,9 @@ import minegame159.meteorclient.gui.widgets.WLabel;
 import minegame159.meteorclient.gui.widgets.WTable;
 import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.combat.*;
 import minegame159.meteorclient.modules.render.hud.modules.*;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.AlignmentX;
@@ -29,8 +31,10 @@ public class HUD extends ToggleModule {
     private final SettingGroup sgInvViewer = settings.createGroup("Inventory Viewer");
     private final SettingGroup sgPlayerModel = settings.createGroup("Player Model");
     private final SettingGroup sgArmor = settings.createGroup("Armor");
+    private final SettingGroup sgModuleInfo = settings.createGroup("Module Info");
 
     private final ActiveModulesHud activeModulesHud = new ActiveModulesHud(this);
+    private final ModuleInfoHud moduleInfoHud = new ModuleInfoHud(this);
 
     // General
     private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
@@ -145,12 +149,45 @@ public class HUD extends ToggleModule {
             .build()
     );
 
+    // Module Info
+    private final Setting<List<ToggleModule>> moduleInfoModules = sgModuleInfo.add(new ModuleListSetting.Builder()
+            .name("module-info-modules")
+            .description("Which modules to display")
+            .defaultValue(moduleInfoModulesDefaultValue())
+            .onChanged(toggleModules -> moduleInfoHud.recalculate())
+            .build()
+    );
+
+    private final Setting<Color> moduleInfoOnColor = sgModuleInfo.add(new ColorSetting.Builder()
+            .name("module-info-on-color")
+            .description("Color when module is on.")
+            .defaultValue(new Color(25, 225, 25))
+            .build()
+    );
+
+    private final Setting<Color> moduleInfoOffColor = sgModuleInfo.add(new ColorSetting.Builder()
+            .name("module-info-off-color")
+            .description("Color when module is off.")
+            .defaultValue(new Color(225, 25, 25))
+            .build()
+    );
+
     public final List<HudModule> modules = new ArrayList<>();
 
     public HUD() {
         super(Category.Render, "HUD", "In game overlay.");
 
         init();
+    }
+
+    private static List<ToggleModule> moduleInfoModulesDefaultValue() {
+        List<ToggleModule> modules = new ArrayList<>();
+        modules.add(ModuleManager.INSTANCE.get(KillAura.class));
+        modules.add(ModuleManager.INSTANCE.get(CrystalAura.class));
+        modules.add(ModuleManager.INSTANCE.get(AnchorAura.class));
+        modules.add(ModuleManager.INSTANCE.get(BedAura.class));
+        modules.add(ModuleManager.INSTANCE.get(Surround.class));
+        return modules;
     }
 
     private void init() {
@@ -169,6 +206,7 @@ public class HUD extends ToggleModule {
         topLeft.add(new DurabilityHud(this));
         topLeft.add(new BreakingBlockHud(this));
         topLeft.add(new LookingAtHud(this));
+        topLeft.add(moduleInfoHud);
 
         // Top Center
         HudModuleLayer topCenter = new HudModuleLayer(RENDERER, modules, AlignmentX.Center, AlignmentY.Top, 0, 2);
@@ -304,5 +342,15 @@ public class HUD extends ToggleModule {
     }
     public double armorScale() {
         return armorScale.get();
+    }
+
+    public List<ToggleModule> moduleInfoModules() {
+        return moduleInfoModules.get();
+    }
+    public Color moduleInfoOnColor() {
+        return moduleInfoOnColor.get();
+    }
+    public Color moduleInfoOffColor() {
+        return moduleInfoOffColor.get();
     }
 }
