@@ -11,8 +11,8 @@ import java.io.InputStream;
 import java.util.*;
 
 public class Capes {
-    private static final String CAPE_OWNERS_URL = "http://api.meteorclient.com:8082/capeowners";
-    private static final String CAPES_URL = "http://api.meteorclient.com:8082/capes";
+    private static final String CAPE_OWNERS_URL = "http://meteorclient.com:8082/api/capeowners";
+    private static final String CAPES_URL = "http://meteorclient.com:8082/api/capes";
 
     private static final Map<UUID, String> OWNERS = new HashMap<>();
     private static final Map<String, String> URLS = new HashMap<>();

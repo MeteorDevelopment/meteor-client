@@ -18,6 +18,8 @@ import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
 public class MyFont {
+    private static final Color SHADOW_COLOR = new Color(60, 60, 60, 180);
+
     private final MeshBuilder mb = new MeshBuilder(16384);
 
     public final AbstractTexture texture;
@@ -26,6 +28,8 @@ public class MyFont {
     private final float scale;
     private final float ascent;
     private final CharData[] charData;
+
+    private double mScale;
 
     public MyFont(File file, int height) {
         this.height = height;
@@ -42,17 +46,17 @@ public class MyFont {
         // Allocate STBTTPackedchar buffer
         charData = new CharData[128];
         STBTTPackedchar.Buffer cdata = STBTTPackedchar.create(charData.length);
-        ByteBuffer bitmap = BufferUtils.createByteBuffer(512 * 512);
+        ByteBuffer bitmap = BufferUtils.createByteBuffer(768 * 768);
 
         // Create font texture
         STBTTPackContext packContext = STBTTPackContext.create();
-        STBTruetype.stbtt_PackBegin(packContext, bitmap, 512, 512, 0, 1);
+        STBTruetype.stbtt_PackBegin(packContext, bitmap, 768, 768, 0, 1);
         STBTruetype.stbtt_PackSetOversampling(packContext, 2, 2);
         STBTruetype.stbtt_PackFontRange(packContext, buffer, 0, height, 32, cdata);
         STBTruetype.stbtt_PackEnd(packContext);
 
         // Create texture object and get font scale
-        texture = new ByteTexture(512, 512, bitmap, true);
+        texture = new ByteTexture(768, 768, bitmap, true);
         scale = STBTruetype.stbtt_ScaleForPixelHeight(fontInfo, height);
 
         // Get font vertical ascent
@@ -66,8 +70,8 @@ public class MyFont {
         for (int i = 0; i < charData.length; i++) {
             STBTTPackedchar packedChar = cdata.get(i);
 
-            float ipw = 1f / 512;
-            float iph = 1f / 512;
+            float ipw = 1f / 768;
+            float iph = 1f / 768;
 
             charData[i] = new CharData(
                     packedChar.xoff(),
@@ -104,8 +108,13 @@ public class MyFont {
         return height;
     }
 
-    public void begin() {
+    public void begin(double scale) {
+        this.mScale = scale;
+
         mb.begin(GL11.GL_TRIANGLES, VertexFormats.POSITION_COLOR_TEXTURE);
+    }
+    public void begin() {
+        begin(1);
     }
 
     public boolean isBuilding() {
@@ -121,25 +130,30 @@ public class MyFont {
         boolean wasBuilding = isBuilding();
         if (!isBuilding()) begin();
 
-        y += ascent * scale;
+        y += ascent * scale * mScale;
 
         for (int i = 0; i < string.length(); i++) {
             int cp = string.charAt(i);
             if (cp < 32 || cp > 128) cp = 32;
             CharData c = charData[cp - 32];
 
-            mb.pos(x + c.x0, y + c.y0, 0).color(color).texture(c.u0, c.v0).endVertex();
-            mb.pos(x + c.x1, y + c.y0, 0).color(color).texture(c.u1, c.v0).endVertex();
-            mb.pos(x + c.x1, y + c.y1, 0).color(color).texture(c.u1, c.v1).endVertex();
+            mb.pos(x + c.x0 * mScale, y + c.y0 * mScale, 0).color(color).texture(c.u0, c.v0).endVertex();
+            mb.pos(x + c.x1 * mScale, y + c.y0 * mScale, 0).color(color).texture(c.u1, c.v0).endVertex();
+            mb.pos(x + c.x1 * mScale, y + c.y1 * mScale, 0).color(color).texture(c.u1, c.v1).endVertex();
 
-            mb.pos(x + c.x0, y + c.y0, 0).color(color).texture(c.u0, c.v0).endVertex();
-            mb.pos(x + c.x1, y + c.y1, 0).color(color).texture(c.u1, c.v1).endVertex();
-            mb.pos(x + c.x0, y + c.y1, 0).color(color).texture(c.u0, c.v1).endVertex();
+            mb.pos(x + c.x0 * mScale, y + c.y0 * mScale, 0).color(color).texture(c.u0, c.v0).endVertex();
+            mb.pos(x + c.x1 * mScale, y + c.y1 * mScale, 0).color(color).texture(c.u1, c.v1).endVertex();
+            mb.pos(x + c.x0 * mScale, y + c.y1 * mScale, 0).color(color).texture(c.u0, c.v1).endVertex();
 
-            x += c.xAdvance;
+            x += c.xAdvance * mScale;
         }
 
         if (!wasBuilding) end();
+    }
+
+    public void renderWithShadow(String string, double x, double y, Color color) {
+        render(string, x + 1, y + 1, SHADOW_COLOR);
+        render(string, x, y, color);
     }
 
     private static class CharData {

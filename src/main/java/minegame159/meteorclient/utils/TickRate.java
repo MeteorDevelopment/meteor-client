@@ -26,7 +26,7 @@ public class TickRate implements Listenable {
     }
 
     @EventHandler
-    private Listener<ReceivePacketEvent> onReceivePacket = new Listener<>(event -> {
+    private final Listener<ReceivePacketEvent> onReceivePacket = new Listener<>(event -> {
         if (event.packet instanceof WorldTimeUpdateS2CPacket) {
             if (timeLastTimeUpdate != -1L) {
                 float timeElapsed = (float) (System.currentTimeMillis() - timeLastTimeUpdate) / 1000.0F;
@@ -38,7 +38,7 @@ public class TickRate implements Listenable {
     });
 
     @EventHandler
-    private Listener<GameJoinedEvent> onGameJoined = new Listener<>(event -> {
+    private final Listener<GameJoinedEvent> onGameJoined = new Listener<>(event -> {
         Arrays.fill(tickRates, 0);
         nextIndex = 0;
         timeLastTimeUpdate = -1;
@@ -46,6 +46,7 @@ public class TickRate implements Listenable {
     });
 
     public float getTickRate() {
+        if (!Utils.canUpdate()) return 0;
         if (System.currentTimeMillis() - timeGameJoined < 4000) return 20;
 
         float numTicks = 0.0f;
