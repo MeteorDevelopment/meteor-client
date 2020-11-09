@@ -58,7 +58,7 @@ public class MeteorClient implements ClientModInitializer, Listenable {
         Fonts.init();
 
         MeteorExecutor.init();
-        ModuleManager.INSTANCE = new ModuleManager();
+        new ModuleManager();
         CommandManager.init();
         EChestMemory.init();
         Capes.init();
