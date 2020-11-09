@@ -354,7 +354,6 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new Timer());
         addModule(new Suffix());
         addModule(new MessageAura());
-        addModule(new AutoMountBypassDupe());
         addModule(new Nuker());
         addModule(new SoundBlocker());
         addModule(new AntiChunkBan());

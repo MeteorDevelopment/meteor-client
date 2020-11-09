@@ -3,7 +3,6 @@ package minegame159.meteorclient.mixin;
 import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.misc.EChestPreview;
-import minegame159.meteorclient.modules.player.MountBypass;
 import minegame159.meteorclient.utils.EChestMemory;
 import minegame159.meteorclient.utils.KeyBinds;
 import minegame159.meteorclient.utils.Utils;
@@ -12,20 +11,15 @@ import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.ingame.ScreenHandlerProvider;
-import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.passive.AbstractDonkeyEntity;
 import net.minecraft.inventory.Inventories;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
-import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
 import org.lwjgl.opengl.GL11;
@@ -53,17 +47,6 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
     @Inject(method = "init", at = @At("TAIL"))
     private void onInit(CallbackInfo info) {
         mc = MinecraftClient.getInstance();
-
-        // Dooop
-        if (mc.player.getVehicle() instanceof AbstractDonkeyEntity) {
-            AbstractDonkeyEntity entity = (AbstractDonkeyEntity) mc.player.getVehicle();
-
-            addButton(new ButtonWidget(x + 82, y + 2, 39, 12, new LiteralText("Dupe"), button -> {
-                ModuleManager.INSTANCE.get(MountBypass.class).dontCancel();
-
-                mc.getNetworkHandler().sendPacket(new PlayerInteractEntityC2SPacket(entity, Hand.MAIN_HAND, entity.getPos().add(entity.getWidth() / 2, entity.getHeight() / 2, entity.getWidth() / 2), mc.player.isSneaking()));
-            }));
-        }
     }
 
     @Inject(method = "render", at = @At("TAIL"))
