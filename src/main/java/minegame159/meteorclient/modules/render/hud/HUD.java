@@ -77,13 +77,13 @@ public class HUD extends ToggleModule {
     // Inventory Viewer
     private final Setting<InventoryViewerHud.Background> invViewerBackground = sgInvViewer.add(new EnumSetting.Builder<InventoryViewerHud.Background>()
             .name("inventory-viewer-background")
-            .description("Background of iventory viewer.")
+            .description("Background of inventory viewer.")
             .defaultValue(InventoryViewerHud.Background.Light)
             .build()
     );
 
     private final Setting<Color> invViewerColor = sgInvViewer.add(new ColorSetting.Builder()
-            .name("inventory-viewer-color")
+            .name("flat-mode-color")
             .description("Color of background on Flat mode.")
             .defaultValue(new Color(0, 0, 0, 64))
             .build()
@@ -102,8 +102,8 @@ public class HUD extends ToggleModule {
 
     // Player Model
     private final Setting<Boolean> playerModelBackground = sgPlayerModel.add(new BoolSetting.Builder()
-            .name("player-model")
-            .description("Displays a background behind your player model.")
+            .name("player-model-background")
+            .description("Displays a background behind the player model.")
             .defaultValue(true)
             .build()
     );
@@ -116,7 +116,7 @@ public class HUD extends ToggleModule {
     );
 
     private final Setting<Double> playerModelScale = sgPlayerModel.add(new DoubleSetting.Builder()
-            .name("player-model-background-scale")
+            .name("player-model-scale")
             .description("Scale of player model.")
             .defaultValue(2)
             .min(1)
@@ -217,12 +217,12 @@ public class HUD extends ToggleModule {
 
         WButton reset = table.add(new WButton("Reset")).getWidget();
         reset.action = this::init;
-        table.add(new WLabel("Resets positions, do this after changing scale"));
+        table.add(new WLabel("Resets positions (do this after changing scale)."));
         table.row();
 
         WButton editor = table.add(new WButton("Editor")).getWidget();
         editor.action = () -> mc.openScreen(new HudEditorScreen());
-        table.add(new WLabel("Right click elements to toggle"));
+        table.add(new WLabel("Right click elements to toggle."));
 
         return table;
     }
