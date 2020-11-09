@@ -148,7 +148,7 @@ public class HUD extends ToggleModule {
     public final List<HudModule> modules = new ArrayList<>();
 
     public HUD() {
-        super(Category.Render, "new-HUD", "In game overlay.");
+        super(Category.Render, "HUD", "In game overlay.");
 
         init();
     }
