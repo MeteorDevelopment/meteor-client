@@ -19,8 +19,8 @@ public class SelfWeb extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Boolean> doubles = sgGeneral.add(new BoolSetting.Builder()
-            .name("double")
-            .description("Places in your upper hitbox as well as your lower.")
+            .name("doubles")
+            .description("Places in your upper hitbox as well.")
             .defaultValue(false)
             .build()
     );
@@ -44,14 +44,17 @@ public class SelfWeb extends ToggleModule {
 
         int prevSlot = mc.player.inventory.selectedSlot;
         mc.player.inventory.selectedSlot = webSlot;
-        BlockPos playerPos = mc.player.getBlockPos().down();
+        BlockPos playerPos = mc.player.getBlockPos();
+        int swung = 0;
         if (mc.world.getBlockState(playerPos).isAir()) {
-            mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.DOWN, mc.player.getBlockPos().down(), true));
+            mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.DOWN, playerPos, true));
+            swung++;
         }
         if (doubles.get() && mc.world.getBlockState(playerPos.add(0, 1, 0)).isAir()) {
-            mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, mc.player.getBlockPos().add(0, 1, 0), true));
+            mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, playerPos.add(0, 1, 0), true));
+            swung++;
         }
-        mc.player.swingHand(Hand.MAIN_HAND);
+        if (swung >= 1) mc.player.swingHand(Hand.MAIN_HAND);
         mc.player.inventory.selectedSlot = prevSlot;
     });
 }
