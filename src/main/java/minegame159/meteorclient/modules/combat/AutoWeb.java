@@ -31,7 +31,7 @@ public class AutoWeb extends ToggleModule {
 
     private final Setting<Boolean> doubles = sgGeneral.add(new BoolSetting.Builder()
             .name("doubles")
-            .description("Places in the  upper hitbox as well.")
+            .description("Places in the targets upper hitbox as well.")
             .defaultValue(false)
             .build()
     );
@@ -60,7 +60,8 @@ public class AutoWeb extends ToggleModule {
         }
 
         for (PlayerEntity player : mc.world.getPlayers()) {
-            if (player == mc.player || !FriendManager.INSTANCE.attack(player) || !player.isAlive() || mc.player.distanceTo(player) > range.get()) continue;
+            if (player == mc.player || !FriendManager.INSTANCE.attack(player) || !player.isAlive() || mc.player.distanceTo(player) > range.get())
+                continue;
             if (target == null) {
                 target = player;
             } else if (mc.player.distanceTo(target) > mc.player.distanceTo(player)) {
@@ -72,15 +73,16 @@ public class AutoWeb extends ToggleModule {
             int prevSlot = mc.player.inventory.selectedSlot;
             mc.player.inventory.selectedSlot = webSlot;
             BlockPos targetPos = target.getBlockPos();
-            if (mc.world.getBlockState(targetPos.add(0, 0, 0)).isAir()) {
-                mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(target.getPos(), Direction.DOWN, target.getBlockPos(), true));
-                mc.player.swingHand(Hand.MAIN_HAND);
+            int swung = 0;
+            if (mc.world.getBlockState(targetPos).isAir()) {
+                mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.DOWN, targetPos, true));
+                swung++;
             }
             if (doubles.get() && mc.world.getBlockState(targetPos.add(0, 1, 0)).isAir()) {
-                mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(target.getPos(), Direction.DOWN, target.getBlockPos().add(0, 1,0), true));
-                mc.player.swingHand(Hand.MAIN_HAND);
+                mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, targetPos.add(0, 1, 0), true));
+                swung++;
             }
-            mc.player.swingHand(Hand.MAIN_HAND);
+            if (swung >= 1) mc.player.swingHand(Hand.MAIN_HAND);
             mc.player.inventory.selectedSlot = prevSlot;
         }
     });
