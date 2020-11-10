@@ -21,7 +21,7 @@ public class ItemListSettingScreen extends LeftRightListSettingScreen<Item> {
 
     @Override
     protected WWidget getValueWidget(Item value) {
-        return new WItemWithLabel(value.getStackForRender());
+        return new WItemWithLabel(value.getDefaultStack());
     }
 
     @Override

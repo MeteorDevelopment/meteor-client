@@ -71,10 +71,10 @@ public class ArmorHud extends HudModule {
         MinecraftClient mc = MinecraftClient.getInstance();
         if (mc.player == null) {
             switch (i) {
-                default: return Items.DIAMOND_BOOTS.getStackForRender();
-                case 1:  return Items.DIAMOND_LEGGINGS.getStackForRender();
-                case 2:  return Items.DIAMOND_CHESTPLATE.getStackForRender();
-                case 3:  return Items.DIAMOND_HELMET.getStackForRender();
+                default: return Items.DIAMOND_BOOTS.getDefaultStack();
+                case 1:  return Items.DIAMOND_LEGGINGS.getDefaultStack();
+                case 2:  return Items.DIAMOND_CHESTPLATE.getDefaultStack();
+                case 3:  return Items.DIAMOND_HELMET.getDefaultStack();
             }
         }
         return mc.player.inventory.getArmorStack(i);
