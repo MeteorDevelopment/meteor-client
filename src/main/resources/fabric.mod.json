@@ -4,12 +4,19 @@
   "version": "${version}",
 
   "name": "Meteor Client",
-  "description": "Utility mod.",
+  "description": "Based utility mod.",
   "authors": [
-    "MineGame159"
+    "MineGame159",
+    "squidoodly"
   ],
+  "contact": {
+    "homepage": "https://meteorclient.com",
+    "issues": "https://github.com/MeteorDevelopment/meteor-client/issues",
+    "sources": "https://github.com/MeteorDevelopment/meteor-client",
+    "discord": "https://meteorclient.com/discord"
+  },
 
-  "license": "MIT",
+  "license": "GPL-3.0",
   "icon": "assets/meteor-client/icon.png",
 
   "environment": "client",
@@ -25,7 +32,7 @@
   "accessWidener": "meteor-client.accesswidener",
 
   "depends": {
-    "fabricloader": ">=0.7.2",
+    "fabricloader": ">=0.7.4",
     "fabric": "*",
     "minecraft": "1.16.x"
   },
