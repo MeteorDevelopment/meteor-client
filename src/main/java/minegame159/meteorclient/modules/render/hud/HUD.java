@@ -131,6 +131,13 @@ public class HUD extends ToggleModule {
     );
 
     // Armor
+    private final Setting<Boolean> armorFlip = sgArmor.add(new BoolSetting.Builder()
+            .name("armor-flip-order")
+            .description("Flips the order of armor items.")
+            .defaultValue(true)
+            .build()
+    );
+
     private final Setting<ArmorHud.Durability> armorDurability = sgArmor.add(new EnumSetting.Builder<ArmorHud.Durability>()
             .name("armor-durability")
             .description("How to display armor durability.")
@@ -337,6 +344,9 @@ public class HUD extends ToggleModule {
         return playerModelScale.get();
     }
 
+    public boolean armorFlip() {
+        return armorFlip.get();
+    }
     public ArmorHud.Durability armorDurability() {
         return armorDurability.get();
     }

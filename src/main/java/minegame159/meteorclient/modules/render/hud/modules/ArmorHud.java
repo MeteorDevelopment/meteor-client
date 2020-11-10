@@ -31,7 +31,14 @@ public class ArmorHud extends HudModule {
         double x = box.getX();
         double y = box.getY();
 
-        for (int i = 0; i < 4; i++) {
+        int i = hud.armorFlip() ? 3 : 0;
+        while (true) {
+            if (hud.armorFlip()) {
+                if (i < 0) break;
+            } else {
+                if (i > 3) break;
+            }
+
             ItemStack itemStack = getItem(i);
 
             RenderSystem.pushMatrix();
@@ -64,6 +71,9 @@ public class ArmorHud extends HudModule {
             }
 
             RenderSystem.popMatrix();
+
+            if (hud.armorFlip()) i--;
+            else i++;
         }
     }
 
