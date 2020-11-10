@@ -72,7 +72,11 @@ public class MeteorClient implements ClientModInitializer, Listenable {
     }
 
     public void load() {
-        if (!ModuleManager.INSTANCE.load()) ModuleManager.INSTANCE.get(DiscordPresence.class).toggle(false);
+        if (!ModuleManager.INSTANCE.load()) {
+            ModuleManager.INSTANCE.get(DiscordPresence.class).toggle(false);
+            Utils.addMeteorPvpToServerList();
+        }
+
         FriendManager.INSTANCE.load();
         MacroManager.INSTANCE.load();
         AccountManager.INSTANCE.load();
