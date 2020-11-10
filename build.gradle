@@ -82,7 +82,7 @@ task generatePacketUtils() {
 	doLast {
 		// Get minecraft jar file
 		def mc = ""
-		def dir = new File(".gradle/loom-cache/1.16.3-projectmapped-net.fabricmc.yarn-1.16.3+build.7-v2")
+		def dir = new File(".gradle/loom-cache/${project.minecraft_version}-projectmapped-net.fabricmc.yarn-${project.yarn_mappings}-v2")
 		for (def file in dir.listFiles()) {
 			if (file.name.contains("minecraft") && file.name.contains("mapped") && file.name.endsWith((String) project.yarn_mappings + "-v2.jar")) {
 				mc = file.absolutePath

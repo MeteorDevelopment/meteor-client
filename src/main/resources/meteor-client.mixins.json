@@ -47,7 +47,7 @@
     "FluidBlockMixin",
     "GameRendererMixin",
     "GenericContainerScreenMixin",
-    "GuiCloseC2SPacketMixin",
+    "CloseHandledScreenC2SPacketMixin",
     "HandledScreenMixin",
     "HeldItemRendererAccessor",
     "HoeItemAccessor",

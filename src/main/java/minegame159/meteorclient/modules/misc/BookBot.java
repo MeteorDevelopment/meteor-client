@@ -20,7 +20,6 @@ import net.minecraft.nbt.StringTag;
 import net.minecraft.network.packet.c2s.play.BookUpdateC2SPacket;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.Style;
-import net.minecraft.util.Hand;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -259,7 +258,7 @@ public class BookBot extends ToggleModule {
         mc.player.getMainHandStack().putSubTag("pages", pages);
         mc.player.getMainHandStack().putSubTag("author", StringTag.of("Meteor Client"));
         mc.player.getMainHandStack().putSubTag("title", StringTag.of(name.get()));
-        mc.player.networkHandler.sendPacket(new BookUpdateC2SPacket(mc.player.getMainHandStack(), true, Hand.MAIN_HAND));
+        mc.player.networkHandler.sendPacket(new BookUpdateC2SPacket(mc.player.getMainHandStack(), true, mc.player.inventory.selectedSlot));
         booksLeft--;
     }
 

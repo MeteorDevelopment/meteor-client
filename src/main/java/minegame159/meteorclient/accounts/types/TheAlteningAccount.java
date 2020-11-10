@@ -20,6 +20,7 @@ public class TheAlteningAccount extends Account<TheAlteningAccount> {
     private static final String AUTH = "http://authserver.thealtening.com";
     private static final String ACCOUNT = "https://api.mojang.com";
     private static final String SESSION = "http://sessionserver.thealtening.com";
+    private static final String SERVICES = "https://api.minecraftservices.com";
 
     private static final Gson GSON = new Gson();
 
@@ -78,7 +79,7 @@ public class TheAlteningAccount extends Account<TheAlteningAccount> {
     }
 
     private YggdrasilUserAuthentication getAuth() {
-        YggdrasilUserAuthentication auth = (YggdrasilUserAuthentication) new YggdrasilAuthenticationService(((IMinecraftClient) MinecraftClient.getInstance()).getProxy(), "", Environment.create(AUTH, ACCOUNT, SESSION, "The Altening")).createUserAuthentication(Agent.MINECRAFT);
+        YggdrasilUserAuthentication auth = (YggdrasilUserAuthentication) new YggdrasilAuthenticationService(((IMinecraftClient) MinecraftClient.getInstance()).getProxy(), "", Environment.create(AUTH, ACCOUNT, SESSION, SERVICES, "The Altening")).createUserAuthentication(Agent.MINECRAFT);
 
         auth.setUsername(name);
         auth.setPassword("Meteor on Crack!");

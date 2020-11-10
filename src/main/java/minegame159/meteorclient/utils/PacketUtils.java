@@ -91,7 +91,7 @@ public class PacketUtils {
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.ScreenHandlerPropertyUpdateS2CPacket.class, "ScreenHandlerPropertyUpdateS2CPacket");
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.InventoryS2CPacket.class, "InventoryS2CPacket");
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.CloseScreenS2CPacket.class, "CloseScreenS2CPacket");
-        S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.ConfirmGuiActionS2CPacket.class, "ConfirmGuiActionS2CPacket");
+        S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.ConfirmScreenActionS2CPacket.class, "ConfirmScreenActionS2CPacket");
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.CommandTreeS2CPacket.class, "CommandTreeS2CPacket");
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.CommandSuggestionsS2CPacket.class, "CommandSuggestionsS2CPacket");
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.GameMessageS2CPacket.class, "GameMessageS2CPacket");
@@ -128,7 +128,7 @@ public class PacketUtils {
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.UpdateCommandBlockC2SPacket.class, "UpdateCommandBlockC2SPacket");
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket.class, "UpdateSelectedSlotC2SPacket");
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.UpdateBeaconC2SPacket.class, "UpdateBeaconC2SPacket");
-        C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.SelectVillagerTradeC2SPacket.class, "SelectVillagerTradeC2SPacket");
+        C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.SelectMerchantTradeC2SPacket.class, "SelectMerchantTradeC2SPacket");
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.AdvancementTabC2SPacket.class, "AdvancementTabC2SPacket");
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.ResourcePackStatusC2SPacket.class, "ResourcePackStatusC2SPacket");
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.RenameItemC2SPacket.class, "RenameItemC2SPacket");
@@ -150,10 +150,10 @@ public class PacketUtils {
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.QueryEntityNbtC2SPacket.class, "QueryEntityNbtC2SPacket");
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.BookUpdateC2SPacket.class, "BookUpdateC2SPacket");
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.CustomPayloadC2SPacket.class, "CustomPayloadC2SPacket");
-        C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.GuiCloseC2SPacket.class, "GuiCloseC2SPacket");
-        C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.ClickWindowC2SPacket.class, "ClickWindowC2SPacket");
+        C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket.class, "CloseHandledScreenC2SPacket");
+        C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.ClickSlotC2SPacket.class, "ClickSlotC2SPacket");
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.ButtonClickC2SPacket.class, "ButtonClickC2SPacket");
-        C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.ConfirmGuiActionC2SPacket.class, "ConfirmGuiActionC2SPacket");
+        C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.ConfirmScreenActionC2SPacket.class, "ConfirmScreenActionC2SPacket");
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.RequestCommandCompletionsC2SPacket.class, "RequestCommandCompletionsC2SPacket");
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.ClientSettingsC2SPacket.class, "ClientSettingsC2SPacket");
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.ClientStatusC2SPacket.class, "ClientStatusC2SPacket");
@@ -241,7 +241,7 @@ public class PacketUtils {
         S2C_PACKETS_R.put("ScreenHandlerPropertyUpdateS2CPacket", net.minecraft.network.packet.s2c.play.ScreenHandlerPropertyUpdateS2CPacket.class);
         S2C_PACKETS_R.put("InventoryS2CPacket", net.minecraft.network.packet.s2c.play.InventoryS2CPacket.class);
         S2C_PACKETS_R.put("CloseScreenS2CPacket", net.minecraft.network.packet.s2c.play.CloseScreenS2CPacket.class);
-        S2C_PACKETS_R.put("ConfirmGuiActionS2CPacket", net.minecraft.network.packet.s2c.play.ConfirmGuiActionS2CPacket.class);
+        S2C_PACKETS_R.put("ConfirmScreenActionS2CPacket", net.minecraft.network.packet.s2c.play.ConfirmScreenActionS2CPacket.class);
         S2C_PACKETS_R.put("CommandTreeS2CPacket", net.minecraft.network.packet.s2c.play.CommandTreeS2CPacket.class);
         S2C_PACKETS_R.put("CommandSuggestionsS2CPacket", net.minecraft.network.packet.s2c.play.CommandSuggestionsS2CPacket.class);
         S2C_PACKETS_R.put("GameMessageS2CPacket", net.minecraft.network.packet.s2c.play.GameMessageS2CPacket.class);
@@ -278,7 +278,7 @@ public class PacketUtils {
         C2S_PACKETS_R.put("UpdateCommandBlockC2SPacket", net.minecraft.network.packet.c2s.play.UpdateCommandBlockC2SPacket.class);
         C2S_PACKETS_R.put("UpdateSelectedSlotC2SPacket", net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket.class);
         C2S_PACKETS_R.put("UpdateBeaconC2SPacket", net.minecraft.network.packet.c2s.play.UpdateBeaconC2SPacket.class);
-        C2S_PACKETS_R.put("SelectVillagerTradeC2SPacket", net.minecraft.network.packet.c2s.play.SelectVillagerTradeC2SPacket.class);
+        C2S_PACKETS_R.put("SelectMerchantTradeC2SPacket", net.minecraft.network.packet.c2s.play.SelectMerchantTradeC2SPacket.class);
         C2S_PACKETS_R.put("AdvancementTabC2SPacket", net.minecraft.network.packet.c2s.play.AdvancementTabC2SPacket.class);
         C2S_PACKETS_R.put("ResourcePackStatusC2SPacket", net.minecraft.network.packet.c2s.play.ResourcePackStatusC2SPacket.class);
         C2S_PACKETS_R.put("RenameItemC2SPacket", net.minecraft.network.packet.c2s.play.RenameItemC2SPacket.class);
@@ -300,10 +300,10 @@ public class PacketUtils {
         C2S_PACKETS_R.put("QueryEntityNbtC2SPacket", net.minecraft.network.packet.c2s.play.QueryEntityNbtC2SPacket.class);
         C2S_PACKETS_R.put("BookUpdateC2SPacket", net.minecraft.network.packet.c2s.play.BookUpdateC2SPacket.class);
         C2S_PACKETS_R.put("CustomPayloadC2SPacket", net.minecraft.network.packet.c2s.play.CustomPayloadC2SPacket.class);
-        C2S_PACKETS_R.put("GuiCloseC2SPacket", net.minecraft.network.packet.c2s.play.GuiCloseC2SPacket.class);
-        C2S_PACKETS_R.put("ClickWindowC2SPacket", net.minecraft.network.packet.c2s.play.ClickWindowC2SPacket.class);
+        C2S_PACKETS_R.put("CloseHandledScreenC2SPacket", net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket.class);
+        C2S_PACKETS_R.put("ClickSlotC2SPacket", net.minecraft.network.packet.c2s.play.ClickSlotC2SPacket.class);
         C2S_PACKETS_R.put("ButtonClickC2SPacket", net.minecraft.network.packet.c2s.play.ButtonClickC2SPacket.class);
-        C2S_PACKETS_R.put("ConfirmGuiActionC2SPacket", net.minecraft.network.packet.c2s.play.ConfirmGuiActionC2SPacket.class);
+        C2S_PACKETS_R.put("ConfirmScreenActionC2SPacket", net.minecraft.network.packet.c2s.play.ConfirmScreenActionC2SPacket.class);
         C2S_PACKETS_R.put("RequestCommandCompletionsC2SPacket", net.minecraft.network.packet.c2s.play.RequestCommandCompletionsC2SPacket.class);
         C2S_PACKETS_R.put("ClientSettingsC2SPacket", net.minecraft.network.packet.c2s.play.ClientSettingsC2SPacket.class);
         C2S_PACKETS_R.put("ClientStatusC2SPacket", net.minecraft.network.packet.c2s.play.ClientStatusC2SPacket.class);
