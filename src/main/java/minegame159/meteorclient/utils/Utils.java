@@ -12,6 +12,8 @@ import minegame159.meteorclient.modules.ModuleManager;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ShapeContext;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ServerInfo;
+import net.minecraft.client.options.ServerList;
 import net.minecraft.client.render.Camera;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.Enchantments;
@@ -65,6 +67,26 @@ public class Utils {
         DecimalFormatSymbols dfs = new DecimalFormatSymbols();
         dfs.setDecimalSeparator('.');
         df.setDecimalFormatSymbols(dfs);
+    }
+
+    public static void addMeteorPvpToServerList() {
+        ServerList servers = new ServerList(mc);
+        servers.loadFile();
+
+        boolean contains = false;
+        for (int i = 0; i < servers.size(); i++) {
+            ServerInfo server = servers.get(i);
+
+            if (server.address.contains("pvp.meteorclient.com")) {
+                contains = true;
+                break;
+            }
+        }
+
+        if (!contains) {
+            servers.add(new ServerInfo("Meteor Pvp", "pvp.meteorclient.com", false));
+            servers.saveFile();
+        }
     }
 
     public static int getWindowWidth() {
