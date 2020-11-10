@@ -78,7 +78,6 @@ public class MeshBuilder {
         buffer.end();
         BufferRenderer.draw(buffer);
 
-        RenderSystem.disableBlend();
         RenderSystem.enableAlphaTest();
         RenderSystem.enableDepthTest();
         RenderSystem.enableTexture();
