@@ -44,8 +44,6 @@ public abstract class InGameHudMixin {
 
         GL11.glDisable(GL11.GL_LINE_SMOOTH);
         RenderSystem.lineWidth(1);
-        RenderSystem.disableBlend();
-        RenderSystem.disableBlend();
 
         RenderSystem.popMatrix();
     }
