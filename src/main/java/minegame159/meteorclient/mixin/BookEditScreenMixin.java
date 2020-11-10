@@ -61,7 +61,10 @@ public abstract class BookEditScreenMixin extends Screen {
             GLFW.glfwSetClipboardString(MinecraftClient.getInstance().getWindow().getHandle(), Base64.getEncoder().encodeToString(bytes.array));
         }));
         addButton(new ButtonWidget(4, 4 + 16 + 4, 70, 16, new LiteralText("Paste"), button -> {
-            byte[] bytes = Base64.getDecoder().decode(GLFW.glfwGetClipboardString(MinecraftClient.getInstance().getWindow().getHandle()));
+            String clipboard = GLFW.glfwGetClipboardString(MinecraftClient.getInstance().getWindow().getHandle());
+            if (clipboard == null) return;
+
+            byte[] bytes = Base64.getDecoder().decode(clipboard);
             DataInputStream in = new DataInputStream(new ByteArrayInputStream(bytes));
 
             try {
