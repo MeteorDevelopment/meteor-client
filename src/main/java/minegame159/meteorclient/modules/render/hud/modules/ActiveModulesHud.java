@@ -3,6 +3,7 @@ package minegame159.meteorclient.modules.render.hud.modules;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.ActiveModulesChangedEvent;
+import minegame159.meteorclient.events.ModuleVisibilityChangedEvent;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.modules.render.hud.HudRenderer;
@@ -24,6 +25,7 @@ public class ActiveModulesHud extends HudModule {
         super(hud, "active-modules", "Displays your active modules.");
 
         MeteorClient.EVENT_BUS.subscribe(new Listener<ActiveModulesChangedEvent>(event -> update = true));
+        MeteorClient.EVENT_BUS.subscribe(new Listener<ModuleVisibilityChangedEvent>(event -> update = true));
     }
 
     public void recalculate() {
