@@ -36,6 +36,11 @@ public class CrystalAura extends ToggleModule {
         suicide
     }
 
+    public enum Swing{
+        MainHand,
+        OffHand
+    }
+
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgPlace = settings.createGroup("Place");
 
@@ -68,6 +73,13 @@ public class CrystalAura extends ToggleModule {
             .name("break-mode")
             .description("The way crystals are broken.")
             .defaultValue(Mode.safe)
+            .build()
+    );
+
+    private final Setting<Swing> handSwing = sgGeneral.add(new EnumSetting.Builder<Swing>()
+            .name("hand-swing")
+            .description("Which hand to swing while breaking crystals.")
+            .defaultValue(Swing.MainHand)
             .build()
     );
 
@@ -307,8 +319,12 @@ public class CrystalAura extends ToggleModule {
                     mc.player.networkHandler.sendPacket(packet);
 
                     mc.interactionManager.attackEntity(mc.player, entity);
-                    mc.player.swingHand(Hand.MAIN_HAND);
                     mc.player.inventory.selectedSlot = preSlot;
+                    if(handSwing.get() == Swing.MainHand)
+                        mc.player.swingHand(Hand.MAIN_HAND);
+                    else
+                        mc.player.swingHand(Hand.OFF_HAND);
+
                 });
         if (!smartDelay.get() && delayLeft > 0) return;
         if (place.get() && (!singlePlace.get() || current == null)) {
@@ -387,11 +403,14 @@ public class CrystalAura extends ToggleModule {
         mc.player.networkHandler.sendPacket(packet);
 
         mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(block, Direction.UP, new BlockPos(block), false));
-        mc.player.swingHand(Hand.MAIN_HAND);
         packet = new PlayerMoveC2SPacket.LookOnly(yaw, pitch, mc.player.isOnGround());
         mc.player.networkHandler.sendPacket(packet);
         mc.player.yaw = yaw;
         mc.player.pitch = pitch;
+        if(handSwing.get() == Swing.MainHand)
+            mc.player.swingHand(Hand.MAIN_HAND);
+        else
+            mc.player.swingHand(Hand.OFF_HAND);
 
         if (render.get()) {
             RenderBlock renderBlock = renderBlockPool.get();
