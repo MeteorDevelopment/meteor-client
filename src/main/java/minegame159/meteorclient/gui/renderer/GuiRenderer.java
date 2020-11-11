@@ -62,6 +62,7 @@ public class GuiRenderer {
         Fonts.get().begin();
         if (root && tooltipWidth > 0) {
             text(tooltip, mouseX + 8 + 4, mouseY + 8 + 4, false, GuiConfig.INSTANCE.text);
+            tooltip = null;
         }
         for (Text text : texts) {
             text.render();
@@ -71,8 +72,6 @@ public class GuiRenderer {
         Fonts.get().end();
 
         if (root) endScissor();
-
-        tooltip = null;
     }
     public void end() {
         end(false);
