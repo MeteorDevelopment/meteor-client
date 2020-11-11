@@ -174,9 +174,12 @@ public class Nuker extends ToggleModule {
             } else {
                 // Check last block
                 if (!lastBlockPos.equals(pos)) {
-                    mc.interactionManager.cancelBlockBreaking();
-                    mc.interactionManager.attackBlock(pos, Direction.UP);
-                    mc.player.swingHand(Hand.MAIN_HAND);
+                    // Im not proud of this but it works so shut the fuck up
+                    try {
+                        mc.interactionManager.cancelBlockBreaking();
+                        mc.interactionManager.attackBlock(pos, Direction.UP);
+                        mc.player.swingHand(Hand.MAIN_HAND);
+                    } catch (Exception ignored) {}
                 }
 
                 // Break block
