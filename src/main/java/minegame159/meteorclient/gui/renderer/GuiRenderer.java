@@ -106,18 +106,18 @@ public class GuiRenderer {
     public void endScissor() {
         Scissor scissor = scissorStack.pop();
 
-        for (Runnable task : scissor.postTasks) {
-            task.run();
-        }
-
         if (scissor.changeGlState) {
             end();
+            for (Runnable task : scissor.postTasks) task.run();
+
             if (scissorStack.isEmpty() || !scissorStack.top().changeGlState) {
                 glDisable(GL_SCISSOR_TEST);
             } else {
                 scissorStack.top().apply();
             }
             begin();
+        } else {
+            for (Runnable task : scissor.postTasks) task.run();
         }
     }
 
