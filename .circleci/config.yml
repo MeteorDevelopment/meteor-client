@@ -6,7 +6,7 @@ orbs:
 parameters:
   version:
     type: string
-    default: 0.3.6
+    default: 0.3.7
 
 jobs:
   build:
