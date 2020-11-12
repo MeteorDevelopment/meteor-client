@@ -4,8 +4,10 @@ import com.google.common.collect.Streams;
 import me.zero.alpine.event.EventPriority;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
+import minegame159.meteorclient.events.EntityRemovedEvent;
 import minegame159.meteorclient.events.RenderEvent;
 import minegame159.meteorclient.events.PostTickEvent;
+import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.rendering.ShapeBuilder;
@@ -25,8 +27,10 @@ import net.minecraft.item.SwordItem;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.*;
+import net.minecraft.world.RaycastContext;
 
 import java.util.*;
 
@@ -158,6 +162,13 @@ public class CrystalAura extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> holdCrystal = sgGeneral.add(new BoolSetting.Builder()
+            .name("surround-break")
+            .description("Places a crystal next to a surrounded player and keeps it there so they can't surround again.")
+            .defaultValue(true)
+            .build()
+    );
+
     private final Setting<Boolean> facePlace = sgGeneral.add(new BoolSetting.Builder()
             .name("face-place")
             .description("Will face place when target is below a certain health or their armour is low.")
@@ -235,8 +246,12 @@ public class CrystalAura extends ToggleModule {
     private Vec3d pos;
     private double lastDamage = 0;
     private boolean shouldFacePlace = false;
+    private boolean shouldPlace = false;
     private EndCrystalEntity current = null;
     private boolean isThere = false;
+    private EndCrystalEntity heldCrystal = null;
+    private LivingEntity target;
+    private boolean locked = false;
 
     private final Pool<RenderBlock> renderBlockPool = new Pool<>(RenderBlock::new);
     private final List<RenderBlock> renderBlocks = new ArrayList<>();
@@ -255,6 +270,15 @@ public class CrystalAura extends ToggleModule {
         }
         renderBlocks.clear();
     }
+
+    @EventHandler
+    private final Listener<EntityRemovedEvent> onEntityRemoved = new Listener<>(event -> {
+        if (heldCrystal == null) return;
+        if (event.entity.getBlockPos().equals(heldCrystal.getBlockPos())) {
+            heldCrystal = null;
+            locked = false;
+        }
+    });
 
     @EventHandler
     private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
@@ -281,10 +305,14 @@ public class CrystalAura extends ToggleModule {
         }
         shouldFacePlace = false;
         if (getTotalHealth(mc.player) <= minHealth.get() && mode.get() != Mode.suicide) return;
+        if (target != null && heldCrystal != null && mc.world.raycast(new RaycastContext(target.getPos(), heldCrystal.getPos(), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, target)).getType()
+                == HitResult.Type.MISS) locked = false;
+        if (locked) return;
         Streams.stream(mc.world.getEntities())
                 .filter(entity -> entity instanceof EndCrystalEntity)
                 .filter(entity -> entity.distanceTo(mc.player) <= breakRange.get())
                 .filter(Entity::isAlive)
+                .filter(entity -> shouldBreak((EndCrystalEntity) entity))
                 .filter(entity -> ignoreWalls.get() || mc.player.canSee(entity))
                 .filter(entity -> !(breakMode.get() == Mode.safe)
                         || (getTotalHealth(mc.player) - DamageCalcUtils.crystalDamage(mc.player, entity.getPos()) > minHealth.get()
@@ -309,8 +337,10 @@ public class CrystalAura extends ToggleModule {
                     mc.interactionManager.attackEntity(mc.player, entity);
                     mc.player.swingHand(Hand.MAIN_HAND);
                     mc.player.inventory.selectedSlot = preSlot;
+                    if (heldCrystal != null && entity.getBlockPos().equals(heldCrystal.getBlockPos())) heldCrystal = null;
                 });
         if (!smartDelay.get() && delayLeft > 0) return;
+        if (!autoSwitch.get() && mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL) return;
         if (place.get() && (!singlePlace.get() || current == null)) {
             Optional<LivingEntity> livingEntity = Streams.stream(mc.world.getEntities())
                     .filter(Entity::isAlive)
@@ -321,7 +351,7 @@ public class CrystalAura extends ToggleModule {
                     .filter(entity -> entity.distanceTo(mc.player) <= breakRange.get() * 2)
                     .map(entity -> (LivingEntity) entity);
             if (!livingEntity.isPresent()) return;
-            LivingEntity target = livingEntity.get();
+            target = livingEntity.get();
             findValidBlocks(target);
             if (bestBlock == null) return;
             if (facePlace.get() && Math.sqrt(target.squaredDistanceTo(bestBlock)) <= 2) {
@@ -337,7 +367,7 @@ public class CrystalAura extends ToggleModule {
                     }
                 }
             }
-            if (bestBlock != null && (bestDamage >= minDamage.get() || shouldFacePlace)) {
+            if (bestBlock != null && (bestDamage >= minDamage.get() || shouldFacePlace || shouldPlace)) {
                 if (autoSwitch.get() && mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL) {
                     int slot = InvUtils.findItemWithCount(Items.END_CRYSTAL).slot;
                     if (slot != -1 && slot < 9) {
@@ -379,7 +409,7 @@ public class CrystalAura extends ToggleModule {
     });
 
     private void placeBlock(Vec3d block, Hand hand){
-         if (singlePlace.get()) current = new EndCrystalEntity(mc.world, bestBlock.x, bestBlock.y + 1, bestBlock.z);
+        if (singlePlace.get()) current = new EndCrystalEntity(mc.world, block.x, block.y + 1, block.z);
         float yaw = mc.player.yaw;
         float pitch = mc.player.pitch;
         Vec3d vec1 = block.add(0.5, 0.5, 0.5);
@@ -403,6 +433,7 @@ public class CrystalAura extends ToggleModule {
     private void findValidBlocks(LivingEntity target){
         bestBlock = null;
         playerPos = mc.player.getBlockPos();
+        boolean valid = isSurrounded(target);
         for(double i = playerPos.getX() - placeRange.get(); i < playerPos.getX() + placeRange.get(); i++){
             for(double j = playerPos.getZ() - placeRange.get(); j < playerPos.getZ() + placeRange.get(); j++){
                 for(double k = playerPos.getY() - 3; k < playerPos.getY() + 3; k++){
@@ -411,6 +442,20 @@ public class CrystalAura extends ToggleModule {
                             || mc.world.getBlockState(new BlockPos(pos)).getBlock() == Blocks.OBSIDIAN)
                             && isEmpty(new BlockPos(pos.add(0, 1, 0)))){
                         if (!strict.get()) {
+                            if (holdCrystal.get() && heldCrystal == null && valid
+                                    && target.getBlockPos().getY() == k + 1
+                                    && (Math.pow((target.getBlockPos().getX() - i), 2) + Math.pow((target.getBlockPos().getZ() - j), 2)) == 4d
+                                    && mc.world.raycast(new RaycastContext(target.getPos(), pos.add(0, 1, 0), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, target)).getType()
+                                    != HitResult.Type.MISS){
+                                if (DamageCalcUtils.crystalDamage(mc.player, pos.add(0.5,1, 0.5)) < maxDamage.get() || mode.get() == Mode.suicide) {
+                                    bestBlock = pos;
+                                    bestDamage = DamageCalcUtils.crystalDamage(target, bestBlock.add(0.5, 1, 0.5));
+                                    shouldPlace = true;
+                                    heldCrystal = new EndCrystalEntity(mc.world, i, k + 1, j);
+                                    locked = true;
+                                    return;
+                                }
+                            }
                             if (bestBlock == null) {
                                 bestBlock = pos;
                                 bestDamage = DamageCalcUtils.crystalDamage(target, bestBlock.add(0.5, 1, 0.5));
@@ -473,5 +518,18 @@ public class CrystalAura extends ToggleModule {
         List<EntityType<?>> list = new ArrayList<>();
         list.add(EntityType.PLAYER);
         return list;
+    }
+
+    private boolean shouldBreak(EndCrystalEntity entity){
+        return heldCrystal == null || !heldCrystal.getBlockPos().equals(entity.getBlockPos()) || mc.world.raycast(new RaycastContext(target.getPos(), heldCrystal.getPos(), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, target)).getType()
+                == HitResult.Type.MISS;
+    }
+
+    private boolean isSurrounded(LivingEntity target){
+        assert mc.world != null;
+        return !mc.world.getBlockState(target.getBlockPos().add(1, 0, 0)).isAir()
+                && !mc.world.getBlockState(target.getBlockPos().add(-1, 0, 0)).isAir()
+                && !mc.world.getBlockState(target.getBlockPos().add(0, 0, 1)).isAir() &&
+                !mc.world.getBlockState(target.getBlockPos().add(0, 0, -1)).isAir();
     }
 }
