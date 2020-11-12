@@ -38,6 +38,8 @@ dependencies {
 	// PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
 	// You may need to force-disable transitiveness on them.
 
+	modImplementation "com.github.jellysquid3:sodium-fabric:1.16.x~stable-SNAPSHOT"
+
 	modImplementation "com.gitlab.CDAGaming:fabritone:fabritone~1.16.x-Fabric-SNAPSHOT"
 	include "com.gitlab.CDAGaming:fabritone:fabritone~1.16.x-Fabric-SNAPSHOT"
 

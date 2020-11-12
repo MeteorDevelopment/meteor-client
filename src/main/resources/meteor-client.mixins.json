@@ -2,8 +2,6 @@
   "required": true,
   "package": "minegame159.meteorclient.mixin",
   "compatibilityLevel": "JAVA_8",
-  "mixins": [
-  ],
   "client": [
     "AbstractButtonWidgetMixin",
     "AbstractClientPlayerEntityMixin",
