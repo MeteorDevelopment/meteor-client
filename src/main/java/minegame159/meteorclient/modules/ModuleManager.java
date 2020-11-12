@@ -80,7 +80,8 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
     }
 
     public boolean isActive(Class<? extends ToggleModule> klass) {
-        return get(klass).isActive();
+        ToggleModule module = get(klass);
+        return module != null && module.isActive();
     }
 
     public List<Module> getGroup(Category category) {
