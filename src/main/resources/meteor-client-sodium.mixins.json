@@ -1,0 +1,11 @@
+{
+  "required": false,
+  "package": "minegame159.meteorclient.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "client": [
+    "BlockOcculsionCacheMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
