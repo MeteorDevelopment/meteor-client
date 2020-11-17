@@ -169,6 +169,13 @@ public class CrystalAura extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> surroundHold = sgGeneral.add(new BoolSetting.Builder()
+            .name("surround-hold")
+            .description("Places a crystal next to a player so they can't surround.")
+            .defaultValue(true)
+            .build()
+    );
+
     private final Setting<Boolean> facePlace = sgGeneral.add(new BoolSetting.Builder()
             .name("face-place")
             .description("Will face place when target is below a certain health or their armour is low.")
@@ -305,7 +312,7 @@ public class CrystalAura extends ToggleModule {
         }
         shouldFacePlace = false;
         if (getTotalHealth(mc.player) <= minHealth.get() && mode.get() != Mode.suicide) return;
-        if (target != null && heldCrystal != null && mc.world.raycast(new RaycastContext(target.getPos(), heldCrystal.getPos(), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, target)).getType()
+        if (target != null && heldCrystal != null && delayLeft <= 0 && mc.world.raycast(new RaycastContext(target.getPos(), heldCrystal.getPos(), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, target)).getType()
                 == HitResult.Type.MISS) locked = false;
         if (locked) return;
         Streams.stream(mc.world.getEntities())
@@ -320,9 +327,9 @@ public class CrystalAura extends ToggleModule {
                 .min(Comparator.comparingDouble(o -> o.distanceTo(mc.player)))
                 .ifPresent(entity -> {
                     int preSlot = mc.player.inventory.selectedSlot;
-                    if(mc.player.getActiveStatusEffects().containsKey(StatusEffects.WEAKNESS) && antiWeakness.get()){
-                        for(int i = 0; i < 9; i++){
-                            if(mc.player.inventory.getStack(i).getItem() instanceof SwordItem || mc.player.inventory.getStack(i).getItem() instanceof AxeItem){
+                    if (mc.player.getActiveStatusEffects().containsKey(StatusEffects.WEAKNESS) && antiWeakness.get()) {
+                        for (int i = 0; i < 9; i++) {
+                            if (mc.player.inventory.getStack(i).getItem() instanceof SwordItem || mc.player.inventory.getStack(i).getItem() instanceof AxeItem) {
                                 mc.player.inventory.selectedSlot = i;
                                 break;
                             }
@@ -443,6 +450,15 @@ public class CrystalAura extends ToggleModule {
                             || mc.world.getBlockState(new BlockPos(pos)).getBlock() == Blocks.OBSIDIAN)
                             && isEmpty(new BlockPos(pos.add(0, 1, 0)))){
                         if (!strict.get()) {
+                            if (surroundHold.get() && heldCrystal == null &&
+                                    (Math.pow((target.getBlockPos().getX() - i), 2) + Math.pow((target.getBlockPos().getZ() - j), 2)) == 1d){
+                                bestBlock = pos;
+                                bestDamage = DamageCalcUtils.crystalDamage(target, bestBlock.add(0.5, 1, 0.5));
+                                shouldPlace = true;
+                                heldCrystal = new EndCrystalEntity(mc.world, i, k + 1, j);
+                                locked = true;
+                                return;
+                            }
                             if (holdCrystal.get() && heldCrystal == null && valid
                                     && target.getBlockPos().getY() == k + 1
                                     && (Math.pow((target.getBlockPos().getX() - i), 2) + Math.pow((target.getBlockPos().getZ() - j), 2)) == 4d
