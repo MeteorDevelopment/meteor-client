@@ -5,7 +5,7 @@ const version = process.argv[3]
 const build = process.argv[4]
 const compareUrl = process.argv[5]
 
-const downloadUrl = "https://" + build + "-309730396-gh.circle-artifacts.com/0/build/libs/meteor-client-" + version + "-" + build + ".jar"
+const downloadUrl = "https://meteorclient.com/download?devBuild=" + build
 
 axios
   .get(compareUrl)
