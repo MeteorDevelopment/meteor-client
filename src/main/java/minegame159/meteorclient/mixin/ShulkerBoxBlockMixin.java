@@ -103,7 +103,7 @@ public class ShulkerBoxBlockMixin {
                 }
 
                 if (totalItemStacks - displaysItemStacks > 0) {
-                    tooltip.add((new TranslatableText("container.shulkerBox.more", new Object[]{totalItemStacks - displaysItemStacks})).formatted(Formatting.ITALIC));
+                    tooltip.add((new TranslatableText("container.shulkerBox.more", totalItemStacks - displaysItemStacks)).formatted(Formatting.ITALIC));
                 }
 
                 tooltip.add(new LiteralText(""));

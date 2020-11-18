@@ -48,7 +48,7 @@ public class Criticals extends ToggleModule {
     private HandSwingC2SPacket swingPacket;
     private boolean sendPackets;
     private int sendTimer;
-    private boolean wasToggled = false;
+    private final boolean wasToggled = false;
 
     @Override
     public void onActivate() {

@@ -5,15 +5,15 @@ import net.minecraft.client.util.Session;
 import java.net.Proxy;
 
 public interface IMinecraftClient {
-    public void leftClick();
+    void leftClick();
 
-    public void rightClick();
+    void rightClick();
 
-    public void setItemUseCooldown(int cooldown);
+    void setItemUseCooldown(int cooldown);
 
-    public Proxy getProxy();
+    Proxy getProxy();
 
-    public void setSession(Session session);
+    void setSession(Session session);
 
-    public int getFps();
+    int getFps();
 }

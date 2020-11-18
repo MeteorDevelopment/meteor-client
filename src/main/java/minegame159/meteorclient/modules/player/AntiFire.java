@@ -12,5 +12,5 @@ public class AntiFire extends ToggleModule {
     }
 
     @EventHandler
-    private Listener<PostTickEvent> onTick = new Listener<>(event -> mc.player.extinguish());
+    private final Listener<PostTickEvent> onTick = new Listener<>(event -> mc.player.extinguish());
 }

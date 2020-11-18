@@ -89,7 +89,7 @@ public class AutoFish extends ToggleModule {
     }
 
     @EventHandler
-    private Listener<PlaySoundPacketEvent> onPlaySoundPacket = new Listener<>(event -> {
+    private final Listener<PlaySoundPacketEvent> onPlaySoundPacket = new Listener<>(event -> {
         PlaySoundS2CPacket p = event.packet;
         FishingBobberEntity b = mc.player.fishHook;
 
@@ -103,7 +103,7 @@ public class AutoFish extends ToggleModule {
     });
 
     @EventHandler
-    private Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
         // Auto cast
         if (autoCastCheckTimer <= 0) {
             autoCastCheckTimer = 30;
@@ -143,7 +143,7 @@ public class AutoFish extends ToggleModule {
     });
 
     @EventHandler
-    private Listener<KeyEvent> onKey = new Listener<>(event -> {
+    private final Listener<KeyEvent> onKey = new Listener<>(event -> {
         if (mc.options.keyUse.isPressed()) ticksEnabled = false;
     });
 }

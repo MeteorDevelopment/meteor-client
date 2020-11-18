@@ -39,7 +39,7 @@ public class AutoDrop extends ToggleModule {
     }
 
     @EventHandler
-    private Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
         if (mc.currentScreen instanceof HandledScreen<?>) return;
 
         for (int i = excludeHotbar.get() ? 9 : 0; i < mc.player.inventory.size(); i++) {

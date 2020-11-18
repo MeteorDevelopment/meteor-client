@@ -41,7 +41,7 @@ public class AutoReconnect extends ToggleModule {
     }
 
     @EventHandler
-    private Listener<OpenScreenEvent> onOpenScreen = new Listener<>(event -> {
+    private final Listener<OpenScreenEvent> onOpenScreen = new Listener<>(event -> {
         if (lastServerInfo == null) return;
         if (!(event.screen instanceof DisconnectedScreen)) return;
         if (event.screen instanceof AutoReconnectScreen) return;
@@ -51,7 +51,7 @@ public class AutoReconnect extends ToggleModule {
     });
 
     private class AutoReconnectScreen extends DisconnectedScreen {
-        private int reasonHeight;
+        private final int reasonHeight;
 
         private ButtonWidget reconnectBtn;
         private boolean timerActive = true;

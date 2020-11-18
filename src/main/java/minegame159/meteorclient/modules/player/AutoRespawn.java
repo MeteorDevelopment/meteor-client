@@ -13,7 +13,7 @@ public class AutoRespawn extends ToggleModule {
     }
 
     @EventHandler
-    private Listener<OpenScreenEvent> onOpenScreenEvent = new Listener<>(event -> {
+    private final Listener<OpenScreenEvent> onOpenScreenEvent = new Listener<>(event -> {
         if (!(event.screen instanceof DeathScreen)) return;
 
         mc.player.requestRespawn();
