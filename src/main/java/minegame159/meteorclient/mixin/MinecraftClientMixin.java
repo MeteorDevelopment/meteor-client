@@ -9,6 +9,7 @@ import minegame159.meteorclient.modules.player.AutoEat;
 import minegame159.meteorclient.modules.player.AutoGap;
 import minegame159.meteorclient.gui.GuiKeyEvents;
 import minegame159.meteorclient.gui.WidgetScreen;
+import minegame159.meteorclient.utils.OnlinePlayers;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.Mouse;
@@ -57,6 +58,8 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
 
     @Inject(at = @At("HEAD"), method = "tick")
     private void onPreTick(CallbackInfo info) {
+        OnlinePlayers.update();
+
         if (Utils.canUpdate()) {
             world.getProfiler().swap("meteor-client_pre_update");
             MeteorClient.EVENT_BUS.post(EventStore.preTickEvent());
@@ -69,6 +72,11 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
             world.getProfiler().swap("meteor-client_post_update");
             MeteorClient.EVENT_BUS.post(EventStore.postTickEvent());
         }
+    }
+
+    @Inject(at = @At("HEAD"), method = "stop")
+    private void onStop(CallbackInfo info) {
+        MeteorClient.INSTANCE.stop();
     }
 
     @Inject(method = "openScreen", at = @At("HEAD"), cancellable = true)
