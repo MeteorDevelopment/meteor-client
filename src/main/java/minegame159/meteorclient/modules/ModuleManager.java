@@ -369,6 +369,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new BetterChat());
         addModule(new FancyChat());
         addModule(new OffHandCrash());
+        addModule(new LiquidFiller());
     }
 
     public static class ModuleRegistry extends Registry<ToggleModule> {
