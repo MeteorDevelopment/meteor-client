@@ -39,7 +39,7 @@ public class AutoShearer extends ToggleModule {
     }
 
     @EventHandler
-    private Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
         for (Entity entity : mc.world.getEntities()) {
             if (!(entity instanceof SheepEntity) || ((SheepEntity) entity).isSheared() || ((SheepEntity) entity).isBaby() || mc.player.distanceTo(entity) > distance.get()) continue;
 

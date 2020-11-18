@@ -11,7 +11,7 @@ public class WView extends WTable {
     private boolean hasScrollBar;
     private double actualHeight;
 
-    private boolean onlyWhenMouseOver;
+    private final boolean onlyWhenMouseOver;
     private double scrollHeight, lastScrollHeight;
 
     public WView(boolean onlyWhenMouseOver) {

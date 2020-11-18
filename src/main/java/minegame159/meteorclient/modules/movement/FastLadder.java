@@ -26,7 +26,7 @@ public class FastLadder extends ToggleModule {
     }
 
     @EventHandler
-    private Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
         if (!mc.player.isClimbing() || !mc.player.horizontalCollision) return;
         if (mc.player.input.movementForward == 0 && mc.player.input.movementSideways == 0) return;
 

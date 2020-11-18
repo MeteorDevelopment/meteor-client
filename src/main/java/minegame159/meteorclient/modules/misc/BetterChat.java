@@ -98,9 +98,8 @@ public class BetterChat extends ToggleModule {
         if (!isActive() || skipMessage) return false;
 
         if (ignoreEnabled.get() && ignoreOnMsg(message)) return true;
-        if (antiSpamEnabled.get() && antiSpamOnMsg(message, messageId, timestamp, messages, visibleMessages)) return true;
+        return antiSpamEnabled.get() && antiSpamOnMsg(message, messageId, timestamp, messages, visibleMessages);
         //return friendColorEnabled.get() && friendColorOnMsg(message);
-        return false;
     }
 
     // IGNORE

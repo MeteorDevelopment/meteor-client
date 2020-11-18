@@ -47,7 +47,7 @@ public class AutoWeapon extends ToggleModule {
     );
 
     @EventHandler
-    private Listener<AttackEntityEvent> onAttack = new Listener<>(event -> {
+    private final Listener<AttackEntityEvent> onAttack = new Listener<>(event -> {
             mc.player.inventory.selectedSlot = getBestWeapon();
     });
 

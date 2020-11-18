@@ -26,7 +26,7 @@ public class Trigger extends ToggleModule {
     }
 
     @EventHandler
-    private Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
         if (mc.player.getHealth() <= 0 || mc.player.getAttackCooldownProgress(0.5f) < 1) return;
         if (!(mc.targetedEntity instanceof LivingEntity)) return;
         if (((LivingEntity) mc.targetedEntity).getHealth() <= 0) return;

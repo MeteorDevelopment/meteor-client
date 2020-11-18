@@ -6,7 +6,9 @@ public class TextureRegion {
     public double x, y;
     public double width, height;
 
-    private Color color, colorHovered, colorPressed;
+    private final Color color;
+    private final Color colorHovered;
+    private final Color colorPressed;
 
     public TextureRegion(double textureWidth, double textuerHeight, int x, int y, int width, int height, Color color, Color colorHovered, Color colorPressed) {
         this.x = x / textureWidth;

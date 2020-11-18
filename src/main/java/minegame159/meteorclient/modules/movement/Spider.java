@@ -26,7 +26,7 @@ public class Spider extends ToggleModule {
     }
 
     @EventHandler
-    private Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
         if (!mc.player.horizontalCollision) return;
 
         Vec3d velocity = mc.player.getVelocity();

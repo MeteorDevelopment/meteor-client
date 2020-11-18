@@ -25,7 +25,7 @@ public class FullBright extends ToggleModule {
     }
 
     @EventHandler
-    private Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
         mc.options.gamma = 16;
     });
 }
