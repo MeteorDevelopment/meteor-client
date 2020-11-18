@@ -68,7 +68,6 @@ public class MeteorClient implements ClientModInitializer, Listenable {
         Waypoints.loadIcons();
 
         EVENT_BUS.subscribe(this);
-        Runtime.getRuntime().addShutdownHook(new Thread(this::stop));
     }
 
     public void load() {
@@ -82,7 +81,7 @@ public class MeteorClient implements ClientModInitializer, Listenable {
         AccountManager.INSTANCE.load();
     }
 
-    private void stop() {
+    public void stop() {
         Config.INSTANCE.save();
         ModuleManager.INSTANCE.save();
         FriendManager.INSTANCE.save();
@@ -90,6 +89,7 @@ public class MeteorClient implements ClientModInitializer, Listenable {
         AccountManager.INSTANCE.save();
 
         Ignore.save();
+        OnlinePlayers.leave();
     }
 
     private void openClickGui() {
