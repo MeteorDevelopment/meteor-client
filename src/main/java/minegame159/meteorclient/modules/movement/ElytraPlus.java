@@ -207,7 +207,7 @@ public class ElytraPlus extends ToggleModule {
     });
 
     @EventHandler
-    private Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
         if (decrementFireworkTimer) {
             if (fireworkTimer <= 0) decrementFireworkTimer = false;
 

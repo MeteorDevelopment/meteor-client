@@ -84,7 +84,7 @@ public class HoleESP extends ToggleModule {
     }
 
     @EventHandler
-    private Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
         for (Hole hole : holes) holePool.free(hole);
         holes.clear();
 

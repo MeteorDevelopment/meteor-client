@@ -38,10 +38,10 @@ public class NbtUtils {
     }
 
     public interface ToKey<T> {
-        public T toKey(String string);
+        T toKey(String string);
     }
 
     public interface ToValue<T> {
-        public T toValue(Tag tag);
+        T toValue(Tag tag);
     }
 }

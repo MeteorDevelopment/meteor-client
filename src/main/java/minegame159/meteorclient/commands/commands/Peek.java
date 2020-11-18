@@ -14,7 +14,7 @@ import net.minecraft.screen.ShulkerBoxScreenHandler;
 import net.minecraft.text.Text;
 
 public class Peek extends Command {
-    private static ItemStack[] ITEMS = new ItemStack[27];
+    private static final ItemStack[] ITEMS = new ItemStack[27];
 
     public Peek() {
         super("peek", "Lets you see whats inside shulker boxes.");

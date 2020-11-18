@@ -24,7 +24,7 @@ public class StringSetting extends Setting<String> {
 
     @Override
     public void reset(boolean callbacks) {
-        value = new String(defaultValue);
+        value = defaultValue;
         if (callbacks) {
             resetWidget();
             changed();
