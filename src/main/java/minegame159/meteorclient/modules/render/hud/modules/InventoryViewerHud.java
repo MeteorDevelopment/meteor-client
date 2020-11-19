@@ -1,8 +1,8 @@
 package minegame159.meteorclient.modules.render.hud.modules;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import minegame159.meteorclient.modules.render.hud.HudRenderer;
 import minegame159.meteorclient.modules.render.hud.HUD;
+import minegame159.meteorclient.modules.render.hud.HudRenderer;
 import minegame159.meteorclient.rendering.Matrices;
 import minegame159.meteorclient.rendering.ShapeBuilder;
 import net.minecraft.client.MinecraftClient;

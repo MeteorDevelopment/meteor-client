@@ -1,7 +1,6 @@
 package minegame159.meteorclient.modules.player;
 
 import com.google.common.collect.Streams;
-
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.PostTickEvent;

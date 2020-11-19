@@ -1,7 +1,6 @@
 package minegame159.meteorclient.utils;
 
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.util.math.Vec3d;
 
 import java.util.Objects;
 

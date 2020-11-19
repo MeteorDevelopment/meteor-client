@@ -22,9 +22,9 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.item.Items;
 import net.minecraft.util.math.Vec3d;
 
 import java.util.ArrayList;

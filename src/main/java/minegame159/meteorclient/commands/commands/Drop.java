@@ -4,10 +4,10 @@ import minegame159.meteorclient.commands.Command;
 import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.InvUtils;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
