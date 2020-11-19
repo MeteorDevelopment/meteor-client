@@ -3,13 +3,13 @@ package minegame159.meteorclient.gui.screens.topbar;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.MacroListChangedEvent;
-import minegame159.meteorclient.macros.EditMacroScreen;
-import minegame159.meteorclient.macros.Macro;
-import minegame159.meteorclient.macros.MacroManager;
 import minegame159.meteorclient.gui.widgets.WButton;
 import minegame159.meteorclient.gui.widgets.WLabel;
 import minegame159.meteorclient.gui.widgets.WMinus;
 import minegame159.meteorclient.gui.widgets.WTable;
+import minegame159.meteorclient.macros.EditMacroScreen;
+import minegame159.meteorclient.macros.Macro;
+import minegame159.meteorclient.macros.MacroManager;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 
