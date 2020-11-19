@@ -3,10 +3,10 @@ package minegame159.meteorclient.gui.screens;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.ModuleBindChangedEvent;
+import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
-import minegame159.meteorclient.gui.widgets.*;
 import net.minecraft.client.MinecraftClient;
 import org.lwjgl.glfw.GLFW;
 

@@ -1,8 +1,9 @@
 package minegame159.meteorclient.utils;
 
 import net.minecraft.network.Packet;
-import java.util.Map;
+
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 public class PacketUtils {

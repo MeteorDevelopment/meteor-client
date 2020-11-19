@@ -1,7 +1,7 @@
 package minegame159.meteorclient.commands.commands;
 
-import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.commands.Command;
+import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.utils.Chat;
 
 public class Friend extends Command {
