@@ -14,6 +14,7 @@ import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.texture.AbstractTexture;
 import net.minecraft.client.util.Window;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.Pair;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
@@ -34,6 +35,8 @@ public class GuiRenderer {
     private final Pool<Text> textPool = new Pool<>(Text::new);
 
     public String tooltip;
+
+    private MyFont font;
 
     public void begin(boolean root) {
         mb.begin(GL11.GL_TRIANGLES, VertexFormats.POSITION_COLOR_TEXTURE);
@@ -59,17 +62,33 @@ public class GuiRenderer {
         MinecraftClient.getInstance().getTextureManager().bindTexture(TEXTURE);
         mb.end(true);
 
-        Fonts.get().begin();
         if (root && tooltipWidth > 0) {
             text(tooltip, mouseX + 8 + 4, mouseY + 8 + 4, false, GuiConfig.INSTANCE.text);
             tooltip = null;
         }
+
+        Pair<MyFont, Double> font = Fonts.get(GuiConfig.INSTANCE.guiScale);
+        this.font = font.getLeft();
+        this.font.begin(font.getRight());
         for (Text text : texts) {
-            text.render();
-            textPool.free(text);
+            if (!text.title) {
+                text.render();
+                textPool.free(text);
+            }
         }
+        this.font.end();
+
+        font = Fonts.get(1.22222222 * GuiConfig.INSTANCE.guiScale);
+        this.font = font.getLeft();
+        this.font.begin(font.getRight());
+        for (Text text : texts) {
+            if (text.title) {
+                text.render();
+                textPool.free(text);
+            }
+        }
+        this.font.end();
         texts.clear();
-        Fonts.get().end();
 
         if (root) endScissor();
     }
@@ -182,23 +201,23 @@ public class GuiRenderer {
         texts.add(textPool.get().set(text, x, y, shadow, color, false));
     }
     public double textWidth(String text, int length) {
-        return Fonts.get().getWidth(text, length);
+        return Fonts.get().getWidth(text, length) * GuiConfig.INSTANCE.guiScale;
     }
     public double textWidth(String text) {
-        return Fonts.get().getWidth(text);
+        return Fonts.get().getWidth(text) * GuiConfig.INSTANCE.guiScale;
     }
     public double textHeight() {
-        return Fonts.get().getHeight();
+        return Fonts.get().getHeight() * GuiConfig.INSTANCE.guiScale;
     }
 
     public void title(String text, double x, double y, Color color) {
         texts.add(textPool.get().set(text, x, y, false, color, true));
     }
     public double titleWidth(String text) {
-        return Fonts.getTitle().getWidth(text);
+        return Fonts.get().getWidth(text) * 1.22222222 * GuiConfig.INSTANCE.guiScale;
     }
     public double titleHeight() {
-        return Fonts.getTitle().getHeight();
+        return Fonts.get().getHeight() * 1.22222222 * GuiConfig.INSTANCE.guiScale;
     }
 
     public void post(Runnable task) {
@@ -253,7 +272,7 @@ public class GuiRenderer {
         }
     }
 
-    private static class Text {
+    private class Text {
         public String text;
         public double x, y;
         public boolean shadow;
@@ -272,7 +291,6 @@ public class GuiRenderer {
         }
 
         public void render() {
-            MyFont font = title ? Fonts.getTitle() : Fonts.get();
             font.render(text, x, y, color);
         }
     }

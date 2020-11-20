@@ -1,5 +1,6 @@
 package minegame159.meteorclient.gui.widgets;
 
+import minegame159.meteorclient.gui.GuiConfig;
 import minegame159.meteorclient.gui.renderer.GuiRenderer;
 import net.minecraft.client.texture.AbstractTexture;
 
@@ -17,8 +18,8 @@ public class WTexture extends WWidget {
 
     @Override
     protected void onCalculateSize(GuiRenderer renderer) {
-        super.width = width * 2;
-        super.height = height * 2;
+        super.width = width * 2 * GuiConfig.INSTANCE.guiScale;
+        super.height = height * 2 * GuiConfig.INSTANCE.guiScale;
     }
 
     @Override

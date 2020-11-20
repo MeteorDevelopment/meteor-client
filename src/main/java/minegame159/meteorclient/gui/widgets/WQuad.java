@@ -1,5 +1,6 @@
 package minegame159.meteorclient.gui.widgets;
 
+import minegame159.meteorclient.gui.GuiConfig;
 import minegame159.meteorclient.gui.renderer.GuiRenderer;
 import minegame159.meteorclient.gui.renderer.Region;
 import minegame159.meteorclient.utils.Color;
@@ -13,8 +14,9 @@ public class WQuad extends WWidget {
 
     @Override
     protected void onCalculateSize(GuiRenderer renderer) {
-        width = 6 + renderer.textHeight() + 6;
-        height = 6 + renderer.textHeight() + 6;
+        double s = GuiConfig.INSTANCE.guiScale;
+        width = 6 * s + renderer.textHeight() + 6 * s;
+        height = 6 * s + renderer.textHeight() + 6 * s;
     }
 
     @Override
