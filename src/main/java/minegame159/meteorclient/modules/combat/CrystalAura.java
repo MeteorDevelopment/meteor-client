@@ -279,6 +279,7 @@ public class CrystalAura extends ToggleModule {
 
     @EventHandler
     private final Listener<EntityRemovedEvent> onEntityRemoved = new Listener<>(event -> {
+        if (heldCrystal == null) return;
         if (event.entity.getBlockPos().equals(heldCrystal.getBlockPos())) {
             heldCrystal = null;
             locked = false;
