@@ -31,8 +31,7 @@ public abstract class InGameHudMixin {
 
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerInventory;getArmorStack(I)Lnet/minecraft/item/ItemStack;"))
     private void onRender(MatrixStack matrixStack, float tickDelta, CallbackInfo info) {
-        client.getProfiler().swap("meteor-client_render");
-
+        client.getProfiler().push("meteor-client_render_2d");
         RenderSystem.pushMatrix();
 
         RenderSystem.enableBlend();
@@ -46,6 +45,7 @@ public abstract class InGameHudMixin {
         RenderSystem.lineWidth(1);
 
         RenderSystem.popMatrix();
+        client.getProfiler().pop();
     }
 
     @Inject(method = "renderStatusEffectOverlay", at = @At("HEAD"), cancellable = true)

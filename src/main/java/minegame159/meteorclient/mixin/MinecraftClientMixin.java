@@ -18,6 +18,7 @@ import net.minecraft.client.util.Session;
 import net.minecraft.client.util.Window;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.profiler.Profiler;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -51,6 +52,8 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
 
     @Shadow @Nullable public Screen currentScreen;
 
+    @Shadow public abstract Profiler getProfiler();
+
     @Inject(method = "<init>", at = @At("TAIL"))
     private void onInit(CallbackInfo info) {
         MeteorClient.INSTANCE.onInitializeClient();
@@ -61,16 +64,18 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
         OnlinePlayers.update();
 
         if (Utils.canUpdate()) {
-            world.getProfiler().swap("meteor-client_pre_update");
+            getProfiler().push("meteor-client_pre_update");
             MeteorClient.EVENT_BUS.post(EventStore.preTickEvent());
+            getProfiler().pop();
         }
     }
 
     @Inject(at = @At("TAIL"), method = "tick")
     private void onTick(CallbackInfo info) {
         if (Utils.canUpdate()) {
-            world.getProfiler().swap("meteor-client_post_update");
+            getProfiler().push("meteor-client_post_update");
             MeteorClient.EVENT_BUS.post(EventStore.postTickEvent());
+            getProfiler().pop();
         }
     }
 
