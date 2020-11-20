@@ -31,8 +31,8 @@ public class WSlider extends WWidget {
 
     @Override
     protected void onCalculateSize(GuiRenderer renderer) {
-        width = uWidth;
-        height = HANDLE_SIZE;
+        width = uWidth * GuiConfig.INSTANCE.guiScale;
+        height = getHandleSize();
     }
 
     @Override
@@ -40,8 +40,8 @@ public class WSlider extends WWidget {
         if (used) return false;
 
         if (mouseOver) {
-            double valueWidth = lastMouseX - (x + HANDLE_SIZE/2);
-            value = (valueWidth / (width - HANDLE_SIZE)) * (max - min) + min;
+            double valueWidth = lastMouseX - (x + getHandleSize()/2);
+            value = (valueWidth / (width - getHandleSize())) * (max - min) + min;
             if (action != null) action.accept(this);
 
             dragging = true;
@@ -60,26 +60,26 @@ public class WSlider extends WWidget {
     @Override
     protected void onMouseMoved(double mouseX, double mouseY) {
         double valuePercentage = (value - min) / (max - min);
-        double valueWidth = valuePercentage * (width - HANDLE_SIZE);
+        double valueWidth = valuePercentage * (width - getHandleSize());
 
-        double x = this.x + HANDLE_SIZE/2 + valueWidth - height / 2;
+        double x = this.x + getHandleSize()/2 + valueWidth - height / 2;
         handleMouseOver =  mouseX >= x && mouseX <= x + height && mouseY >= y && mouseY <= y + height;
 
-        boolean mouseOverX = mouseX >= this.x + HANDLE_SIZE/2 && mouseX <= this.x + HANDLE_SIZE/2 + width - HANDLE_SIZE;
+        boolean mouseOverX = mouseX >= this.x + getHandleSize()/2 && mouseX <= this.x + getHandleSize()/2 + width - getHandleSize();
         mouseOver = mouseOverX && mouseY >= this.y && mouseY <= this.y + height;
 
         if (dragging) {
             if (mouseOverX) {
                 valueWidth += mouseX - lastMouseX;
-                valueWidth = Utils.clamp(valueWidth, 0, width - HANDLE_SIZE);
+                valueWidth = Utils.clamp(valueWidth, 0, width - getHandleSize());
 
-                value = (valueWidth / (width - HANDLE_SIZE)) * (max - min) + min;
+                value = (valueWidth / (width - getHandleSize())) * (max - min) + min;
                 if (action != null) action.accept(this);
             } else {
-                if (value > min && mouseX < this.x + HANDLE_SIZE/2) {
+                if (value > min && mouseX < this.x + getHandleSize()/2) {
                     value = min;
                     if (action != null) action.accept(this);
-                } else if (value < max && mouseX > this.x + HANDLE_SIZE/2 + width - HANDLE_SIZE) {
+                } else if (value < max && mouseX > this.x + getHandleSize()/2 + width - getHandleSize()) {
                     value = max;
                     if (action != null) action.accept(this);
                 }
@@ -93,16 +93,22 @@ public class WSlider extends WWidget {
     protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
         value = Utils.clamp(value, min, max);
         double valuePercentage = (value - min) / (max - min);
-        double valueWidth = valuePercentage * (width - HANDLE_SIZE);
+        double valueWidth = valuePercentage * (width - getHandleSize());
 
-        renderer.quad(Region.FULL, x + HANDLE_SIZE/2, y + 6, valueWidth, 3, GuiConfig.INSTANCE.sliderLeft);
-        renderer.quad(Region.FULL, x + HANDLE_SIZE/2 + valueWidth, y + 6, width - valueWidth - HANDLE_SIZE, 3, GuiConfig.INSTANCE.sliderRight);
+        double s = GuiConfig.INSTANCE.guiScale;
+
+        renderer.quad(Region.FULL, x + getHandleSize()/2, y + 6 * s, valueWidth, 3 * s, GuiConfig.INSTANCE.sliderLeft);
+        renderer.quad(Region.FULL, x + getHandleSize()/2 + valueWidth, y + 6 * s, width - valueWidth - getHandleSize(), 3 * s, GuiConfig.INSTANCE.sliderRight);
 
         Color handleColor;
         if (dragging) handleColor = GuiConfig.INSTANCE.sliderHandlePressed;
         else if (handleMouseOver) handleColor = GuiConfig.INSTANCE.sliderHandleHovered;
         else handleColor = GuiConfig.INSTANCE.sliderHandle;
 
-        renderer.quad(Region.CIRCLE, x + valueWidth, y, HANDLE_SIZE, HANDLE_SIZE, handleColor);
+        renderer.quad(Region.CIRCLE, x + valueWidth, y, getHandleSize(), getHandleSize(), handleColor);
+    }
+
+    private double getHandleSize() {
+        return HANDLE_SIZE * GuiConfig.INSTANCE.guiScale;
     }
 }

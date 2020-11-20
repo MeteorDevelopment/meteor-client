@@ -1,6 +1,7 @@
 package minegame159.meteorclient.rendering;
 
 import minegame159.meteorclient.MeteorClient;
+import net.minecraft.util.Pair;
 
 import java.awt.*;
 import java.io.*;
@@ -62,8 +63,6 @@ public class Fonts {
         for (int i = 0; i < 5; i++) {
             fonts[i] = new MyFont(fontFile, (int) Math.round(18 * ((i * 0.5) + 1)));
         }
-
-        title = new MyFont(fontFile, 22);
     }
 
     public static MyFont get(int i) {
@@ -74,7 +73,16 @@ public class Fonts {
         return fonts[0];
     }
 
-    public static MyFont getTitle() {
-        return title;
+    public static Pair<MyFont, Double> get(double scale) {
+        double scaleA = Math.floor(scale * 10) / 10;
+
+        int scaleI;
+        if (scaleA >= 3) scaleI = 5;
+        else if (scaleA >= 2.5) scaleI = 4;
+        else if (scaleA >= 2) scaleI = 3;
+        else if (scaleA >= 1.5) scaleI = 2;
+        else scaleI = 1;
+
+        return new Pair<>(Fonts.get(scaleI - 1), (scale - (((scaleI - 1) * 0.5) + 1)) / scaleA + 1);
     }
 }

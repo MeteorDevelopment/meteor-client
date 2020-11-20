@@ -27,10 +27,10 @@ public class WHorizontalSeparator extends WWidget {
 
     @Override
     protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
-        double textStart = width / 2.0 - textWidth / 2.0 - 2;
+        double textStart = Math.round(width / 2.0 - textWidth / 2.0 - 2);
         double textEnd = 2 + textStart + textWidth + 2;
 
-        double offsetY = height / 2.0;
+        double offsetY = Math.round(height / 2.0);
 
         if (text != null) {
             renderer.quad(Region.FULL, x, y + offsetY, textStart, 1, GuiConfig.INSTANCE.separator);

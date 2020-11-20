@@ -22,13 +22,11 @@ public class WButton extends WPressable {
     }
 
     private String text;
-    private double textWidth;
 
     private final ButtonRegion region;
 
     public WButton(String text, ButtonRegion region) {
         this.text = text;
-        this.textWidth = -1;
 
         this.region = region;
     }
@@ -43,32 +41,32 @@ public class WButton extends WPressable {
 
     public void setText(String text) {
         this.text = text;
-        this.textWidth = -1;
 
         invalidate();
     }
 
     @Override
     protected void onCalculateSize(GuiRenderer renderer) {
-        if (textWidth == -1 && text != null) textWidth = renderer.textWidth(text);
-
-        width = 6 + (text == null ? renderer.textHeight() : textWidth) + 6;
-        height = 6 + renderer.textHeight() + 6;
+        double s = GuiConfig.INSTANCE.guiScale;
+        width = 6 * s + (text == null ? renderer.textHeight() : renderer.textWidth(text)) + 6 * s;
+        height = 6 * s + renderer.textHeight() + 6 * s;
     }
 
     @Override
     protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
         renderer.background(this, super.pressed);
 
+        double s = GuiConfig.INSTANCE.guiScale;
+
         if (text != null) {
-            renderer.text(text, x + width / 2 - textWidth / 2, y + 6, false, GuiConfig.INSTANCE.text);
+            renderer.text(text, x + width / 2 - renderer.textWidth(text) / 2, y + 6 * s, false, GuiConfig.INSTANCE.text);
         } else {
             Color color;
             if (pressed) color = region.pressed;
             else if (mouseOver) color = region.hovered;
             else color = region.color;
 
-            renderer.quad(region.region, x + 6, y + 6, renderer.textHeight(), renderer.textHeight(), color);
+            renderer.quad(region.region, x + 6 * s, y + 6 * s, renderer.textHeight(), renderer.textHeight(), color);
         }
     }
 }

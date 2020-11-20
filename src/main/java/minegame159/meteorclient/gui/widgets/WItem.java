@@ -1,6 +1,7 @@
 package minegame159.meteorclient.gui.widgets;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import minegame159.meteorclient.gui.GuiConfig;
 import minegame159.meteorclient.gui.renderer.GuiRenderer;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.DiffuseLighting;
@@ -16,8 +17,8 @@ public class WItem extends WWidget {
 
     @Override
     protected void onCalculateSize(GuiRenderer renderer) {
-        width = 32;
-        height = 32;
+        width = 32 * GuiConfig.INSTANCE.guiScale;
+        height = 32 * GuiConfig.INSTANCE.guiScale;
     }
 
     @Override
@@ -31,9 +32,11 @@ public class WItem extends WWidget {
             double s = window.getScaleFactor();
             double ss = Math.max(1, s - 1);
 
+            double sg = GuiConfig.INSTANCE.guiScale;
+
             GlStateManager.pushMatrix();
-            GlStateManager.translated(-x * ss, -y * ss, 0);
-            GlStateManager.scaled(2, 2, 1);
+            GlStateManager.translated(-x * ss * sg, -y * ss * sg, 0);
+            GlStateManager.scaled(1 + sg, 1 + sg, 1);
             MinecraftClient.getInstance().getItemRenderer().renderGuiItemIcon(itemStack, (int) x, (int) y);
             GlStateManager.popMatrix();
         });

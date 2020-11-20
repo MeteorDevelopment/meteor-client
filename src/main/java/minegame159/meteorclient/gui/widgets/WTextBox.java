@@ -60,8 +60,9 @@ public class WTextBox extends WWidget {
 
     @Override
     protected void onCalculateSize(GuiRenderer renderer) {
-        width = 6 + uWidth + 6;
-        height = 6 + renderer.textHeight() + 6;
+        double s = GuiConfig.INSTANCE.guiScale;
+        width = 6 * s + uWidth * s + 6 * s;
+        height = 6 * s + renderer.textHeight() + 6 * s;
     }
 
     @Override
@@ -266,14 +267,16 @@ public class WTextBox extends WWidget {
         double overflowWidth = getCursorTextWidthForPreview() - width + 16;
         if (overflowWidth < 0) overflowWidth = 0;
 
+        double s = GuiConfig.INSTANCE.guiScale;
+
         if (!text.isEmpty()) {
-            renderer.beginScissor(x + 6, y + 6, width - 12, height - 12);
-            renderer.text(text, x + 6 - overflowWidth, y + 6, false, GuiConfig.INSTANCE.text);
+            renderer.beginScissor(x + 6 * s, y + 6 * s, width - 12 * s, height - 12 * s);
+            renderer.text(text, x + 6 * s - overflowWidth, y + 6 * s, false, GuiConfig.INSTANCE.text);
             renderer.endScissor();
         }
 
         if (focused && cursorVisible) {
-            renderer.quad(Region.FULL, x + 6 + getCursorTextWidth() - overflowWidth, y + 6, 1, renderer.textHeight(), GuiConfig.INSTANCE.text);
+            renderer.quad(Region.FULL, x + 6 * s + getCursorTextWidth() - overflowWidth, y + 6 * s, 1, renderer.textHeight(), GuiConfig.INSTANCE.text);
         }
     }
 
