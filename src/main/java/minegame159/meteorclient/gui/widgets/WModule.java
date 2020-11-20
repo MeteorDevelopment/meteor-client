@@ -42,8 +42,9 @@ public class WModule extends WPressable {
     protected void onCalculateSize(GuiRenderer renderer) {
         if (titleWidth == 0) titleWidth = renderer.textWidth(module.title);
 
-        width = 4 + titleWidth + 4;
-        height = 4 + renderer.textHeight() + 4;
+        double s = GuiConfig.INSTANCE.guiScale;
+        width = 4 * s + titleWidth + 4 * s;
+        height = 4 * s + renderer.textHeight() + 4 * s;
     }
 
     @Override
@@ -76,7 +77,7 @@ public class WModule extends WPressable {
 
         if (animationProgress1 > 0  || animationProgress2 > 0) {
             renderer.quad(Region.FULL, x, y, width * animationProgress1, height, GuiConfig.INSTANCE.moduleBackground);
-            renderer.quad(Region.FULL, x, y + height * (1 - animationProgress2), 2, height * animationProgress2, GuiConfig.INSTANCE.accent);
+            renderer.quad(Region.FULL, x, y + height * (1 - animationProgress2), 2 * GuiConfig.INSTANCE.guiScale, height * animationProgress2, GuiConfig.INSTANCE.accent);
         }
 
         double nameX = x;
