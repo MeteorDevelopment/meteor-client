@@ -61,13 +61,15 @@ public abstract class GameRendererMixin {
     private void onRenderWorld(float tickDelta, long limitTime, MatrixStack matrix, CallbackInfo info) {
         if (!Utils.canUpdate()) return;
 
-        client.getProfiler().swap("meteor-client_render");
+        client.getProfiler().push("meteor-client_render");
 
         RenderEvent event = EventStore.renderEvent(tickDelta, camera.getPos().x, camera.getPos().y, camera.getPos().z);
 
         Renderer.begin(event);
         MeteorClient.EVENT_BUS.post(event);
         Renderer.end();
+
+        client.getProfiler().pop();
     }
 
     @Inject(method = "updateTargetedEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/projectile/ProjectileUtil;raycast(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/util/math/Box;Ljava/util/function/Predicate;D)Lnet/minecraft/util/hit/EntityHitResult;"), cancellable = true)
