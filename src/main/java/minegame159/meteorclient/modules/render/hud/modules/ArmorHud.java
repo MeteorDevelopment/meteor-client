@@ -63,10 +63,6 @@ public class ArmorHud extends HudModule {
                         renderer.text(message, x + 18 * i * hud.armorScale() + 8 * hud.armorScale() - messageWidth / 2.0, y + (box.height - renderer.textHeight()), hud.primaryColor());
                         break;
                     }
-                    default: {
-                        RenderSystem.popMatrix();
-                        break;
-                    }
                 }
             }
 
