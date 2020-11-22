@@ -68,6 +68,13 @@ public class BedAura extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> selfToggle = sgGeneral.add(new BoolSetting.Builder()
+            .name("self-toggle")
+            .description("Toggles this in the overworld.")
+            .defaultValue(true)
+            .build()
+    );
+
     private final Setting<Mode> clickMode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("break-mode")
             .description("The way the beds are broken")
@@ -190,7 +197,7 @@ public class BedAura extends ToggleModule {
         } catch (ConcurrentModificationException ignored) {
             return;
         }
-        if (Utils.getDimension() == Dimension.Overworld) {
+        if (selfToggle.get() && mc.world.getDimension().isBedWorking()) {
             Chat.warning(this, "You are in the overworld. Disabling!");
             this.toggle();
             return;
