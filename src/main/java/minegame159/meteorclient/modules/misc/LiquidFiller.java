@@ -2,17 +2,17 @@ package minegame159.meteorclient.modules.misc;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.PostTickEvent;
+import minegame159.meteorclient.events.PreTickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.BlockIterator;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 
 import java.util.ArrayList;
@@ -24,7 +24,26 @@ public class LiquidFiller extends ToggleModule {
         Water,
         Both
     }
+
     private final SettingGroup sgGeneral  = settings.getDefaultGroup();
+
+    private final Setting<Integer> horizontalRadius = sgGeneral.add(new IntSetting.Builder()
+            .name("horizontal-radius")
+            .description("Horizontal radius in which to search for holes.")
+            .defaultValue(4)
+            .min(0)
+            .sliderMax(6)
+            .build()
+    );
+
+    private final Setting<Integer> verticalRadius = sgGeneral.add(new IntSetting.Builder()
+            .name("vertical-radius")
+            .description("Vertical radius in which to search for holes.")
+            .defaultValue(4)
+            .min(0)
+            .sliderMax(6)
+            .build()
+    );
 
     private final Setting<List<Block>> whitelist = sgGeneral.add(new BlockListSetting.Builder()
             .name("block-whitelist")
@@ -40,69 +59,47 @@ public class LiquidFiller extends ToggleModule {
             .build()
     );
 
-    private final Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()
-            .name("range")
-            .description("How far away from you it will place.")
-            .defaultValue(4)
-            .min(1)
-            .max(10)
-            .build()
-    );
-
     public LiquidFiller(){
         super(Category.Misc, "Liquid-Filler", "Places blocks inside of liquid source blocks within range of you.");
     }
 
-    private int slot;
-
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
-        BlockPos player = mc.player.getBlockPos();
-        int rangeInt = range.get().intValue();
+    private final Listener<PreTickEvent> onTick = new Listener<>(event -> BlockIterator.register(horizontalRadius.get(), verticalRadius.get(), (blockPos, blockState) -> {
+        Block liquid = blockState.getBlock();
 
-        for (int y = -Math.min(rangeInt, player.getY()); y < Math.min(rangeInt, 255 - player.getY()); ++y) {
-            for (int x = -rangeInt; x < rangeInt; ++x) {
-                for (int z = -rangeInt; z < rangeInt; ++z) {
-                    BlockPos pos = player.add(x, y, z);
-                    Block liquid = mc.world.getBlockState(pos).getBlock();
+        if (blockState.getFluidState().getLevel() == 8 && blockState.getFluidState().isStill()) {
+            int slot = getSlot();
+            if (slot == -1) return;
 
-                    if (mc.world.getBlockState(pos).getFluidState().getLevel() == 8 && this.mc.world.getBlockState(pos).getFluidState().isStill()) {
-                        slot = getSlot();
-                        if (slot == -1) return;
-                        int prevSlot = mc.player.inventory.selectedSlot;
-                        mc.player.inventory.selectedSlot = slot;
+            int prevSlot = mc.player.inventory.selectedSlot;
+            mc.player.inventory.selectedSlot = slot;
 
-                        switch (placeInLiquids.get()) {
-                            case Lava:
-                                if (liquid == Blocks.LAVA) {
-                                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.DOWN, pos, true));
-                                    mc.player.swingHand(Hand.MAIN_HAND);
-                                }
-                                break;
-                            case Water:
-                                if (liquid == Blocks.WATER) {
-                                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.DOWN, pos, true));
-                                    mc.player.swingHand(Hand.MAIN_HAND);
-                                }
-                                break;
-                            case Both:
-                                if (mc.world.getBlockState(pos).getMaterial().isLiquid()) {
-                                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.DOWN, pos, true));
-                                    mc.player.swingHand(Hand.MAIN_HAND);
-                                }
-                                break;
-                        }
-
-                        mc.player.inventory.selectedSlot = prevSlot;
-                        break;
+            switch (placeInLiquids.get()) {
+                case Lava:
+                    if (liquid == Blocks.LAVA) {
+                        mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, blockPos, false));
                     }
-                }
+                    break;
+                case Water:
+                    if (liquid == Blocks.WATER) {
+                        mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, blockPos, false));
+                    }
+                    break;
+                case Both:
+                    if (blockState.getMaterial().isLiquid()) {
+                        mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, blockPos, false));
+                    }
+                    break;
             }
+
+            mc.player.inventory.selectedSlot = prevSlot;
+            BlockIterator.disableCurrent();
         }
-    });
+    }));
 
     private int getSlot() {
-        slot = -1;
+        int slot = -1;
+
         for (int i = 0; i < 9; i++){
             ItemStack block = mc.player.inventory.getStack(i);
             if ((block.getItem() instanceof BlockItem) && whitelist.get().contains(Block.getBlockFromItem(block.getItem()))) {
@@ -110,6 +107,7 @@ public class LiquidFiller extends ToggleModule {
                 break;
             }
         }
+
         return slot;
     }
 }
