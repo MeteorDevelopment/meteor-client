@@ -250,6 +250,7 @@ public class CrystalAura extends ToggleModule {
     private EndCrystalEntity heldCrystal = null;
     private LivingEntity target;
     private boolean locked = false;
+    private Hand hand;
 
     private final Pool<RenderBlock> renderBlockPool = new Pool<>(RenderBlock::new);
     private final List<RenderBlock> renderBlocks = new ArrayList<>();
@@ -262,7 +263,6 @@ public class CrystalAura extends ToggleModule {
     @Override
     public void onDeactivate() {
         if (preSlot != -1) mc.player.inventory.selectedSlot = preSlot;
-
         for (RenderBlock renderBlock : renderBlocks) {
             renderBlockPool.free(renderBlock);
         }
@@ -340,7 +340,7 @@ public class CrystalAura extends ToggleModule {
                     mc.player.networkHandler.sendPacket(packet);
 
                     mc.interactionManager.attackEntity(mc.player, entity);
-                    mc.player.swingHand(Hand.MAIN_HAND);
+                    mc.player.swingHand(hand);
                     mc.player.inventory.selectedSlot = preSlot;
                     if (heldCrystal != null && entity.getBlockPos().equals(heldCrystal.getBlockPos())) {
                         heldCrystal = null;
@@ -364,14 +364,14 @@ public class CrystalAura extends ToggleModule {
             if (surroundHold.get() && heldCrystal == null){
                 bestBlock = findOpen(target);
                 if (bestBlock != null){
-                    if (autoSwitch.get() && mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL) {
+                    if ((autoSwitch.get() && mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL || mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL)) {
                         int slot = InvUtils.findItemWithCount(Items.END_CRYSTAL).slot;
                         if (slot != -1 && slot < 9) {
                             preSlot = mc.player.inventory.selectedSlot;
                             mc.player.inventory.selectedSlot = slot;
                         }
                     }
-                    Hand hand = Hand.MAIN_HAND;
+                    hand = Hand.MAIN_HAND;
                     if (mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() == Items.END_CRYSTAL) {
                         hand = Hand.OFF_HAND;
                     } else if (mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL) {
@@ -454,7 +454,7 @@ public class CrystalAura extends ToggleModule {
         mc.player.networkHandler.sendPacket(packet);
 
         mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(block, Direction.UP, new BlockPos(block), false));
-        mc.player.swingHand(Hand.MAIN_HAND);
+        mc.player.swingHand(hand);
         packet = new PlayerMoveC2SPacket.LookOnly(yaw, pitch, mc.player.isOnGround());
         mc.player.networkHandler.sendPacket(packet);
         mc.player.yaw = yaw;
@@ -488,12 +488,12 @@ public class CrystalAura extends ToggleModule {
                                     && (Math.pow((target.getBlockPos().getX() - i), 2) + Math.pow((target.getBlockPos().getZ() - j), 2)) == 4d
                                     && mc.world.raycast(new RaycastContext(target.getPos(), pos.add(0, 1, 0), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, target)).getType()
                                     != HitResult.Type.MISS){
-                                    bestBlock = new Vec3d(Math.floor(pos.x), Math.floor(pos.y), Math.floor(pos.z));
-                                    bestDamage = DamageCalcUtils.crystalDamage(target, bestBlock.add(0.5, 1, 0.5));
-                                    shouldPlace = true;
-                                    heldCrystal = new EndCrystalEntity(mc.world, Math.floor(i), Math.floor(k) + 1, Math.floor(j));
-                                    locked = true;
-                                    return;
+                                bestBlock = new Vec3d(Math.floor(pos.x), Math.floor(pos.y), Math.floor(pos.z));
+                                bestDamage = DamageCalcUtils.crystalDamage(target, bestBlock.add(0.5, 1, 0.5));
+                                shouldPlace = true;
+                                heldCrystal = new EndCrystalEntity(mc.world, Math.floor(i), Math.floor(k) + 1, Math.floor(j));
+                                locked = true;
+                                return;
                             }
                             if (bestDamage < DamageCalcUtils.crystalDamage(target, new Vec3d(Math.floor(pos.x), Math.floor(pos.y), Math.floor(pos.z)).add(0.5, 1, 0.5))) {
                                 bestBlock = new Vec3d(Math.floor(pos.x), Math.floor(pos.y), Math.floor(pos.z));
