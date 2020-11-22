@@ -155,13 +155,6 @@ public class CrystalAura extends ToggleModule {
             .build()
     );
 
-    private final Setting<Boolean> singlePlace = sgGeneral.add(new BoolSetting.Builder()
-            .name("single-place")
-            .description("Will only allow one crystal to be placed at any one time.")
-            .defaultValue(false)
-            .build()
-    );
-
     private final Setting<Boolean> holdCrystal = sgGeneral.add(new BoolSetting.Builder()
             .name("surround-break")
             .description("Places a crystal next to a surrounded player and keeps it there so they can't surround again.")
@@ -254,7 +247,6 @@ public class CrystalAura extends ToggleModule {
     private double lastDamage = 0;
     private boolean shouldFacePlace = false;
     private boolean shouldPlace = false;
-    private EndCrystalEntity current = null;
     private EndCrystalEntity heldCrystal = null;
     private LivingEntity target;
     private boolean locked = false;
@@ -298,27 +290,20 @@ public class CrystalAura extends ToggleModule {
         }
 
         delayLeft --;
-        if (current != null && mc.player.distanceTo(current) > breakRange.get()) { current = null; }
         if (heldCrystal != null && mc.player.distanceTo(heldCrystal) > breakRange.get()) {
             heldCrystal = null;
             locked = false;
         }
         boolean isThere = false;
-        boolean isThere2 = false;
-        if (current != null || heldCrystal != null) {
+        if (heldCrystal != null) {
             for (Entity entity : mc.world.getEntities()) {
                 if (!(entity instanceof EndCrystalEntity)) continue;
-                if (current != null && entity.getBlockPos().equals(current.getBlockPos())) {
-                    isThere = true;
-                    if (isThere2) break;
-                }
                 if (heldCrystal != null && entity.getBlockPos().equals(heldCrystal.getBlockPos())) {
-                    isThere2 = true;
-                    if (isThere) break;
+                    isThere = true;
+                    break;
                 }
             }
-            if (!isThere) current = null;
-            if (!isThere2){
+            if (!isThere){
                 heldCrystal = null;
                 locked = false;
             }
@@ -350,7 +335,6 @@ public class CrystalAura extends ToggleModule {
                         }
                     }
 
-                    if (current != null && entity.getBlockPos().equals(current.getBlockPos())) current = null;
                     Vec3d vec1 = entity.getPos();
                     PlayerMoveC2SPacket.LookOnly packet = new PlayerMoveC2SPacket.LookOnly(Utils.getNeededYaw(vec1), Utils.getNeededPitch(vec1), mc.player.isOnGround());
                     mc.player.networkHandler.sendPacket(packet);
@@ -365,7 +349,7 @@ public class CrystalAura extends ToggleModule {
                 });
         if (!smartDelay.get() && delayLeft > 0) return;
         if (!autoSwitch.get() && mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL) return;
-        if (place.get() && (!singlePlace.get() || current == null)) {
+        if (place.get()) {
             Optional<LivingEntity> livingEntity = Streams.stream(mc.world.getEntities())
                     .filter(Entity::isAlive)
                     .filter(entity -> entity != mc.player)
@@ -463,7 +447,6 @@ public class CrystalAura extends ToggleModule {
     });
 
     private void placeBlock(Vec3d block, Hand hand){
-        if (singlePlace.get()) current = new EndCrystalEntity(mc.world, block.x, block.y + 1, block.z);
         float yaw = mc.player.yaw;
         float pitch = mc.player.pitch;
         Vec3d vec1 = block.add(0.5, 0.5, 0.5);
