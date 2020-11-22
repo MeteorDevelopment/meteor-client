@@ -59,11 +59,13 @@ public class LiquidFiller extends ToggleModule {
     private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
         BlockPos player = mc.player.getBlockPos();
         int rangeInt = range.get().intValue();
+
         for (int y = -Math.min(rangeInt, player.getY()); y < Math.min(rangeInt, 255 - player.getY()); ++y) {
             for (int x = -rangeInt; x < rangeInt; ++x) {
                 for (int z = -rangeInt; z < rangeInt; ++z) {
                     BlockPos pos = player.add(x, y, z);
                     Block liquid = mc.world.getBlockState(pos).getBlock();
+
                     if (mc.world.getBlockState(pos).getFluidState().getLevel() == 8 && this.mc.world.getBlockState(pos).getFluidState().isStill()) {
                         slot = getSlot();
                         if (slot == -1) return;
@@ -90,14 +92,14 @@ public class LiquidFiller extends ToggleModule {
                                 }
                                 break;
                         }
+
                         mc.player.inventory.selectedSlot = prevSlot;
+                        break;
                     }
                 }
             }
-            break;
         }
     });
-
 
     private int getSlot() {
         slot = -1;
