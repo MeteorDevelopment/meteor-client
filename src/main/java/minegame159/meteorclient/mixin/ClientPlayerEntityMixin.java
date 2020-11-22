@@ -7,6 +7,7 @@ import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.events.SendMessageEvent;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.movement.NoSlow;
+import minegame159.meteorclient.modules.movement.Scaffold;
 import minegame159.meteorclient.modules.player.Portals;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
@@ -19,6 +20,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ClientPlayerEntity.class)
 public abstract class ClientPlayerEntityMixin {
@@ -60,5 +62,10 @@ public abstract class ClientPlayerEntityMixin {
     private boolean proxy_tickMovement_isUsingItem(ClientPlayerEntity player) {
         if (ModuleManager.INSTANCE.get(NoSlow.class).items()) return false;
         return player.isUsingItem();
+    }
+
+    @Inject(method = "isSneaking", at = @At("HEAD"), cancellable = true)
+    private void onIsSneaking(CallbackInfoReturnable<Boolean> info) {
+        if (ModuleManager.INSTANCE.isActive(Scaffold.class)) info.setReturnValue(false);
     }
 }

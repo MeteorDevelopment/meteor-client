@@ -80,8 +80,17 @@ public class Scaffold extends ToggleModule {
     private BlockState blockState, slotBlockState;
     private int slot, prevSelectedSlot;
 
+    private boolean lastWasSneaking;
+    private double lastSneakingY;
+
     public Scaffold() {
         super(Category.Movement, "scaffold", "Places blocks under you.");
+    }
+
+    @Override
+    public void onActivate() {
+        lastWasSneaking = mc.player.input.sneaking;
+        if (lastWasSneaking) lastSneakingY = mc.player.getY();
     }
 
     @EventHandler
@@ -89,6 +98,15 @@ public class Scaffold extends ToggleModule {
         if (fastTower.get() && !mc.world.getBlockState(setPos(0, -1, 0)).getMaterial().isReplaceable() && mc.options.keyJump.isPressed() && findSlot(mc.world.getBlockState(setPos(0, -1, 0))) != -1 && mc.player.sidewaysSpeed == 0 &&mc.player.forwardSpeed == 0) mc.player.jump();
         blockState = mc.world.getBlockState(setPos(0, -1, 0));
         if (!blockState.getMaterial().isReplaceable()) return;
+
+        // Go downwards if pressing shift
+        boolean lastWasSneaking = this.lastWasSneaking;
+        this.lastWasSneaking = mc.player.input.sneaking;
+        if (mc.player.input.sneaking) {
+            if (!lastWasSneaking) lastSneakingY = mc.player.getY();
+
+            if (lastSneakingY - mc.player.getY() < 0.1) return;
+        }
 
         // Search for block in hotbar
         slot = findSlot(blockState);
@@ -128,8 +146,10 @@ public class Scaffold extends ToggleModule {
 
             // Place block
             Utils.place(slotBlockState, setPos(0, -1, 0), swingHand.get(), false, false);
+            if (mc.player.input.sneaking) this.lastWasSneaking = false;
         } else {
             mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos().add(0, -1, 0), Direction.UP, mc.player.getBlockPos().down(), false));
+            if (mc.player.input.sneaking) this.lastWasSneaking = false;
         }
 
         // Place blocks around if radius is bigger than 1
