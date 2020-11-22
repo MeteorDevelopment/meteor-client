@@ -2,12 +2,13 @@ package minegame159.meteorclient.modules.render;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.PostTickEvent;
+import minegame159.meteorclient.events.PreTickEvent;
 import minegame159.meteorclient.events.RenderEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.rendering.ShapeBuilder;
 import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.BlockIterator;
 import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.Pool;
 import net.minecraft.block.Block;
@@ -84,53 +85,49 @@ public class HoleESP extends ToggleModule {
     }
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private final Listener<PreTickEvent> onTick = new Listener<>(event -> {
         for (Hole hole : holes) holePool.free(hole);
         holes.clear();
 
-        for (int x = (int) mc.player.getX() - horizontalRadius.get(); x <= (int) mc.player.getX() + horizontalRadius.get(); x++) {
-            for (int y = (int) mc.player.getY() - verticalRadius.get(); y <= (int) mc.player.getY() + verticalRadius.get(); y++) {
-                for (int z = (int) mc.player.getZ() - horizontalRadius.get(); z <= (int) mc.player.getZ() + horizontalRadius.get(); z++) {
-                    blockPos.set(x, y, z);
+        BlockIterator.register(horizontalRadius.get(), verticalRadius.get(), (blockPos1, blockState) -> {
+            blockPos.set(blockPos1);
 
-                    if (!checkHeight()) continue;
+            if (!checkHeight()) return;
 
-                    Block bottom = mc.world.getBlockState(add(0, -1, 0)).getBlock();
-                    if (bottom != Blocks.BEDROCK && bottom != Blocks.OBSIDIAN) continue;
-                    Block forward = mc.world.getBlockState(add(0, 1, 1)).getBlock();
-                    if (forward != Blocks.BEDROCK && forward != Blocks.OBSIDIAN) continue;
-                    Block back = mc.world.getBlockState(add(0, 0, -2)).getBlock();
-                    if (back != Blocks.BEDROCK && back != Blocks.OBSIDIAN) continue;
-                    Block right = mc.world.getBlockState(add(1, 0, 1)).getBlock();
-                    if (right != Blocks.BEDROCK && right != Blocks.OBSIDIAN) continue;
-                    Block left = mc.world.getBlockState(add(-2, 0, 0)).getBlock();
-                    if (left != Blocks.BEDROCK && left != Blocks.OBSIDIAN) continue;
-                    add(1, 0, 0);
+            Block bottom = mc.world.getBlockState(add(0, -1, 0)).getBlock();
+            if (bottom != Blocks.BEDROCK && bottom != Blocks.OBSIDIAN) return;
+            Block forward = mc.world.getBlockState(add(0, 1, 1)).getBlock();
+            if (forward != Blocks.BEDROCK && forward != Blocks.OBSIDIAN) return;
+            Block back = mc.world.getBlockState(add(0, 0, -2)).getBlock();
+            if (back != Blocks.BEDROCK && back != Blocks.OBSIDIAN) return;
+            Block right = mc.world.getBlockState(add(1, 0, 1)).getBlock();
+            if (right != Blocks.BEDROCK && right != Blocks.OBSIDIAN) return;
+            Block left = mc.world.getBlockState(add(-2, 0, 0)).getBlock();
+            if (left != Blocks.BEDROCK && left != Blocks.OBSIDIAN) return;
+            add(1, 0, 0);
 
-                    if (bottom == Blocks.BEDROCK && forward == Blocks.BEDROCK && back == Blocks.BEDROCK && right == Blocks.BEDROCK && left == Blocks.BEDROCK) {
-                        holes.add(holePool.get().set(blockPos, allBedrock.get()));
-                    } else {
-                        int obsidian = 0;
+            if (bottom == Blocks.BEDROCK && forward == Blocks.BEDROCK && back == Blocks.BEDROCK && right == Blocks.BEDROCK && left == Blocks.BEDROCK) {
+                holes.add(holePool.get().set(blockPos, allBedrock.get()));
+            } else {
+                int obsidian = 0;
 
-                        if (bottom == Blocks.OBSIDIAN) obsidian++;
-                        if (forward == Blocks.OBSIDIAN) obsidian++;
-                        if (back == Blocks.OBSIDIAN) obsidian++;
-                        if (right == Blocks.OBSIDIAN) obsidian++;
-                        if (left == Blocks.OBSIDIAN) obsidian++;
+                if (bottom == Blocks.OBSIDIAN) obsidian++;
+                if (forward == Blocks.OBSIDIAN) obsidian++;
+                if (back == Blocks.OBSIDIAN) obsidian++;
+                if (right == Blocks.OBSIDIAN) obsidian++;
+                if (left == Blocks.OBSIDIAN) obsidian++;
 
-                        if (obsidian == 5) holes.add(holePool.get().set(blockPos, allObsidian.get()));
-                        else holes.add(holePool.get().set(blockPos, someObsidian.get()));
-                    }
-                }
+                if (obsidian == 5) holes.add(holePool.get().set(blockPos, allObsidian.get()));
+                else holes.add(holePool.get().set(blockPos, someObsidian.get()));
             }
-        }
+        });
     });
 
     private boolean checkHeight() {
-        if (mc.world.getBlockState(blockPos).getBlock() != Blocks.AIR) return false;
+        if (!mc.world.getBlockState(blockPos).getMaterial().isReplaceable()) return false;
 
         for (int i = 0; i < holeHeight.get() - 1; i++) {
-            if (mc.world.getBlockState(add(0, 1, 0)).getBlock() != Blocks.AIR) return false;
+            if (!mc.world.getBlockState(add(0, 1, 0)).getMaterial().isReplaceable()) return false;
         }
 
         add(0, -holeHeight.get() + 1, 0);
