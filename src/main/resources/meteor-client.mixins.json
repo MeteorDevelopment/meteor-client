@@ -86,7 +86,8 @@
     "TitleScreenMixin",
     "Vec3dMixin",
     "WorldRendererAccessor",
-    "WorldRendererMixin"
+    "WorldRendererMixin",
+    "SplashTextResourceSupplierMixin"
   ],
   "injectors": {
     "defaultRequire": 1
