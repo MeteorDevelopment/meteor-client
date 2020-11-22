@@ -14,6 +14,7 @@ import org.lwjgl.stb.STBTruetype;
 import org.lwjgl.system.MemoryStack;
 
 import java.io.File;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
@@ -37,7 +38,7 @@ public class MyFont {
         // Read file
         byte[] bytes = Utils.readBytes(file);
         ByteBuffer buffer = BufferUtils.createByteBuffer(bytes.length).put(bytes);
-        buffer.flip();
+        ((Buffer) buffer).flip();
 
         // Initialize font
         STBTTFontinfo fontInfo = STBTTFontinfo.create();

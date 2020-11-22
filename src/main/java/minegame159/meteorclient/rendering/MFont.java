@@ -12,6 +12,7 @@ import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
 public class MFont {
@@ -37,7 +38,7 @@ public class MFont {
             byte[] bytes = baos.toByteArray();
 
             ByteBuffer data = BufferUtils.createByteBuffer(bytes.length).put(bytes);
-            data.flip();
+            ((Buffer) data).flip();
 
             return new NativeImageBackedTexture(NativeImage.read(data));
         } catch (Exception e) {
