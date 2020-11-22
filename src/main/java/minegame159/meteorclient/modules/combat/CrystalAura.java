@@ -510,23 +510,23 @@ public class CrystalAura extends ToggleModule {
     private Vec3d findOpen(LivingEntity target){
         int x = 0;
         int z = 0;
-        if ((mc.world.getBlockState(new BlockPos(pos)).getBlock() == Blocks.BEDROCK
-                || mc.world.getBlockState(new BlockPos(pos)).getBlock() == Blocks.OBSIDIAN)
+        if ((mc.world.getBlockState(target.getBlockPos().add(1, -1, 0)).getBlock() == Blocks.BEDROCK
+                || mc.world.getBlockState(target.getBlockPos().add(1, -1, 0)).getBlock() == Blocks.OBSIDIAN)
                 &&Math.sqrt(mc.player.getBlockPos().getSquaredDistance(new Vec3i(target.getBlockPos().getX() + 1, target.getBlockPos().getY(), target.getBlockPos().getZ()))) < placeRange.get()
                 && isEmpty(target.getBlockPos().add(1, 0, 0))){
             x = 1;
-        } else if ((mc.world.getBlockState(new BlockPos(pos)).getBlock() == Blocks.BEDROCK
-                || mc.world.getBlockState(new BlockPos(pos)).getBlock() == Blocks.OBSIDIAN)
+        } else if ((mc.world.getBlockState(target.getBlockPos().add(-1, -1, 0)).getBlock() == Blocks.BEDROCK
+                || mc.world.getBlockState(target.getBlockPos().add(-1, -1, 0)).getBlock() == Blocks.OBSIDIAN)
                 && Math.sqrt(mc.player.getBlockPos().getSquaredDistance(new Vec3i(target.getBlockPos().getX() -1, target.getBlockPos().getY(), target.getBlockPos().getZ()))) < placeRange.get()
                 && isEmpty(target.getBlockPos().add(-1, 0, 0))){
             x = -1;
-        } else if ((mc.world.getBlockState(new BlockPos(pos)).getBlock() == Blocks.BEDROCK
-                || mc.world.getBlockState(new BlockPos(pos)).getBlock() == Blocks.OBSIDIAN)
+        } else if ((mc.world.getBlockState(target.getBlockPos().add(0, -1, 1)).getBlock() == Blocks.BEDROCK
+                || mc.world.getBlockState(target.getBlockPos().add(0, -1, 1)).getBlock() == Blocks.OBSIDIAN)
                 && Math.sqrt(mc.player.getBlockPos().getSquaredDistance(new Vec3i(target.getBlockPos().getX(), target.getBlockPos().getY(), target.getBlockPos().getZ() + 1))) < placeRange.get()
                 && isEmpty(target.getBlockPos().add(0, 0, 1))){
             z = 1;
-        } else if ((mc.world.getBlockState(new BlockPos(pos)).getBlock() == Blocks.BEDROCK
-                || mc.world.getBlockState(new BlockPos(pos)).getBlock() == Blocks.OBSIDIAN)
+        } else if ((mc.world.getBlockState(target.getBlockPos().add(0, -1, -1)).getBlock() == Blocks.BEDROCK
+                || mc.world.getBlockState(target.getBlockPos().add(0, -1, -1)).getBlock() == Blocks.OBSIDIAN)
                 && Math.sqrt(mc.player.getBlockPos().getSquaredDistance(new Vec3i(target.getBlockPos().getX(), target.getBlockPos().getY(), target.getBlockPos().getZ() - 1))) < placeRange.get()
                 && isEmpty(target.getBlockPos().add(0, 0, -1))){
             z = -1;
