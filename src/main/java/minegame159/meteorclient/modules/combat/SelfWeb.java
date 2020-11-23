@@ -8,12 +8,10 @@ import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.utils.PlayerUtils;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
 
 public class SelfWeb extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -45,16 +43,10 @@ public class SelfWeb extends ToggleModule {
         int prevSlot = mc.player.inventory.selectedSlot;
         mc.player.inventory.selectedSlot = webSlot;
         BlockPos playerPos = mc.player.getBlockPos();
-        int swung = 0;
-        if (mc.world.getBlockState(playerPos).isAir()) {
-            mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.DOWN, playerPos, true));
-            swung++;
-        }
-        if (doubles.get() && mc.world.getBlockState(playerPos.add(0, 1, 0)).isAir()) {
-            mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, playerPos.add(0, 1, 0), true));
-            swung++;
-        }
-        if (swung >= 1) mc.player.swingHand(Hand.MAIN_HAND);
+
+        PlayerUtils.placeBlock(playerPos);
+        if (doubles.get()) PlayerUtils.placeBlock(playerPos.add(0, 1, 0));
+
         mc.player.inventory.selectedSlot = prevSlot;
     });
 }

@@ -9,11 +9,9 @@ import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.Chat;
+import minegame159.meteorclient.utils.PlayerUtils;
 import net.minecraft.block.Blocks;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
 
 public class SelfTrap extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -36,35 +34,34 @@ public class SelfTrap extends ToggleModule {
         super(Category.Combat, "self-trap", "Places obsidian above your head.");
     }
 
-    BlockPos targetPos;
-    int obsidianSlot;
-    int prevSlot;
-    boolean sentMessage = false;
+    private boolean sentMessage = false;
 
     @EventHandler
     private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
-        obsidianSlot = -1;
+        int obsidianSlot = -1;
         for(int i = 0; i < 9; i++){
             if (mc.player.inventory.getStack(i).getItem() == Blocks.OBSIDIAN.asItem()){
                 obsidianSlot = i;
                 break;
             }
         }
+
         if (obsidianSlot == -1 && selfToggle.get()) {
             if (!sentMessage) {
                 Chat.warning(this, "No obsidian found… disabling.");
                 sentMessage = true;
             }
+
             this.toggle();
             return;
         } else if (obsidianSlot == -1) return;
-        prevSlot = mc.player.inventory.selectedSlot;
+
+        int prevSlot = mc.player.inventory.selectedSlot;
         mc.player.inventory.selectedSlot = obsidianSlot;
-        targetPos = mc.player.getBlockPos().up();
-        if(mc.world.getBlockState(targetPos.add(0, 1, 0)).getMaterial().isReplaceable()){
-            mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, targetPos.add(0, 1, 0), false));
-            mc.player.swingHand(Hand.MAIN_HAND);
-        }
+        BlockPos targetPos = mc.player.getBlockPos().up(2);
+
+        PlayerUtils.placeBlock(targetPos);
+
         if (turnOff.get()) toggle();
         mc.player.inventory.selectedSlot = prevSlot;
     });
