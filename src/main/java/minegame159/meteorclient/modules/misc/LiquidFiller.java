@@ -7,13 +7,11 @@ import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.BlockIterator;
+import minegame159.meteorclient.utils.PlayerUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.Direction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,39 +63,17 @@ public class LiquidFiller extends ToggleModule {
 
     @EventHandler
     private final Listener<PreTickEvent> onTick = new Listener<>(event -> BlockIterator.register(horizontalRadius.get(), verticalRadius.get(), (blockPos, blockState) -> {
-        Block liquid = blockState.getBlock();
-
         if (blockState.getFluidState().getLevel() == 8 && blockState.getFluidState().isStill()) {
-            int slot = getSlot();
-            if (slot == -1) return;
+            Block liquid = blockState.getBlock();
 
-            int prevSlot = mc.player.inventory.selectedSlot;
-            mc.player.inventory.selectedSlot = slot;
-
-            switch (placeInLiquids.get()) {
-                case Lava:
-                    if (liquid == Blocks.LAVA) {
-                        mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, blockPos, false));
-                    }
-                    break;
-                case Water:
-                    if (liquid == Blocks.WATER) {
-                        mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, blockPos, false));
-                    }
-                    break;
-                case Both:
-                    if (blockState.getMaterial().isLiquid()) {
-                        mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, blockPos, false));
-                    }
-                    break;
+            PlaceIn placeIn = placeInLiquids.get();
+            if (placeIn == PlaceIn.Both || (placeIn == PlaceIn.Lava && liquid == Blocks.LAVA) || (placeIn == PlaceIn.Water && liquid == Blocks.WATER)) {
+                if (PlayerUtils.placeBlock(blockPos, findSlot())) BlockIterator.disableCurrent();
             }
-
-            mc.player.inventory.selectedSlot = prevSlot;
-            BlockIterator.disableCurrent();
         }
     }));
 
-    private int getSlot() {
+    private int findSlot() {
         int slot = -1;
 
         for (int i = 0; i < 9; i++){

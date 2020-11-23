@@ -3,14 +3,10 @@ package minegame159.meteorclient.utils;
 import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import minegame159.meteorclient.gui.GuiConfig;
 import minegame159.meteorclient.mixininterface.IMinecraftClient;
 import minegame159.meteorclient.mixininterface.IMinecraftServer;
-import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.ShapeContext;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ServerInfo;
 import net.minecraft.client.options.ServerList;
@@ -22,18 +18,12 @@ import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.item.*;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.Formatting;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.registry.Registry;
-import net.minecraft.util.shape.VoxelShapes;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
@@ -56,9 +46,6 @@ public class Utils {
     public static boolean firstTimeTitleScreen = true;
 
     private static final Random random = new Random();
-    private static final Vec3d eyesPos = new Vec3d(0, 0, 0);
-    private static final Vec3d vec1 = new Vec3d(0, 0, 0);
-    private static final Vec3d vec2 = new Vec3d(0, 0, 0);
     private static final DecimalFormat df;
 
     static {
@@ -140,14 +127,6 @@ public class Utils {
                 }
             }
         }
-    }
-
-    public static double getScaledWindowWidthGui() {
-        return mc.getWindow().getFramebufferWidth() / GuiConfig.INSTANCE.guiScale;
-    }
-
-    public static double getScaledWindowHeightGui() {
-        return mc.getWindow().getFramebufferHeight() / GuiConfig.INSTANCE.guiScale;
     }
 
     public static Object2IntMap<StatusEffect> createStatusEffectMap() {
@@ -284,53 +263,6 @@ public class Utils {
         }
 
         return new byte[0];
-    }
-
-    public static boolean place(BlockState blockState, BlockPos blockPos, boolean swingHand, boolean checkFaceVisibility, boolean checkForEntities) {
-        // Calculate eyes pos
-        ((IVec3d) eyesPos).set(mc.player.getX(), mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()), mc.player.getZ());
-
-        // Check if current block is replaceable
-        if (!mc.world.getBlockState(blockPos).getMaterial().isReplaceable()) return false;
-
-        for (Direction side : Direction.values()) {
-            BlockPos neighbor = blockPos.offset(side);
-            Direction side2 = side.getOpposite();
-
-            // Check if side is visible (facing away from player)
-            if (checkFaceVisibility) {
-                ((IVec3d) vec1).set(blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5);
-                ((IVec3d) vec2).set(neighbor.getX() + 0.5, neighbor.getY() + 0.5, neighbor.getZ() + 0.5);
-                if (eyesPos.squaredDistanceTo(vec1) >= eyesPos.squaredDistanceTo(vec2)) continue;
-            }
-
-            // Check if neighbor can be right clicked
-            if (mc.world.getBlockState(neighbor).getOutlineShape(mc.world, blockPos) == VoxelShapes.empty()) continue;
-
-            // Calculate hit pos
-            ((IVec3d) vec1).set(neighbor.getX() + 0.5 + side2.getVector().getX() * 0.5, neighbor.getY() + 0.5 + side2.getVector().getY()     * 0.5, neighbor.getZ() + 0.5 + side2.getVector().getZ() * 0.5);
-
-            // Check if hitVec is within range (4.25 blocks)
-            if(eyesPos.squaredDistanceTo(vec1) > 18.0625) continue;
-
-            // Check if intersects entities
-            if (checkForEntities && !mc.world.canPlace(blockState, blockPos, ShapeContext.absent())) continue;
-
-            // Place block
-            PlayerMoveC2SPacket.LookOnly packet = new PlayerMoveC2SPacket.LookOnly(getNeededYaw(vec1), getNeededPitch(vec1), mc.player.isOnGround());
-            mc.player.networkHandler.sendPacket(packet);
-            mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(vec1, side2, neighbor, false));
-            mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
-            if (swingHand) mc.player.swingHand(Hand.MAIN_HAND);
-            else mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
-
-            return true;
-        }
-
-        return false;
-    }
-    public static boolean place(BlockState blockState, BlockPos blockPos) {
-        return place(blockState, blockPos, true, true, true);
     }
 
     public static float getNeededYaw(Vec3d vec) {

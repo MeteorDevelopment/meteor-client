@@ -10,16 +10,13 @@ import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.BlockIterator;
+import minegame159.meteorclient.utils.PlayerUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
 
 public class HoleFiller extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -74,14 +71,7 @@ public class HoleFiller extends ToggleModule {
             if (left != Blocks.BEDROCK && left != Blocks.OBSIDIAN) return;
             add(1, 0, 0);
 
-            int slot = findSlot();
-            if (slot != -1) {
-                int preSlot = mc.player.inventory.selectedSlot;
-                mc.player.inventory.selectedSlot = slot;
-                mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(blockPos.getX(), blockPos.getY(), blockPos.getZ()), Direction.UP, blockPos, false));
-                BlockIterator.disableCurrent();
-                mc.player.inventory.selectedSlot = preSlot;
-            }
+            if (PlayerUtils.placeBlock(blockPos, findSlot())) BlockIterator.disableCurrent();
         });
     });
 
