@@ -9,6 +9,7 @@ import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.PlayerUtils;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
@@ -19,6 +20,13 @@ import net.minecraft.util.math.MathHelper;
 
 public class Surround extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+
+    private final Setting<Boolean> doubleHeight = sgGeneral.add(new BoolSetting.Builder()
+            .name("double-height")
+            .description("Places obsidian around your head.")
+            .defaultValue(false)
+            .build()
+    );
     
     private final Setting<Boolean> onlyOnGround = sgGeneral.add(new BoolSetting.Builder()
             .name("only-on-ground")
@@ -86,8 +94,11 @@ public class Surround extends ToggleModule {
         // Place
         return_ = false;
 
+        // Bottom
         boolean p1 = place(0, -1, 0);
         if (return_) return;
+
+        // Sides
         boolean p2 = place(1, 0, 0);
         if (return_) return;
         boolean p3 = place(-1, 0, 0);
@@ -97,25 +108,43 @@ public class Surround extends ToggleModule {
         boolean p5 = place(0, 0, -1);
         if (return_) return;
 
+        // Sides up
+        boolean doubleHeightPlaced = false;
+        if (doubleHeight.get()) {
+            boolean p6 = place(1, 1, 0);
+            if (return_) return;
+            boolean p7 = place(-1, 1, 0);
+            if (return_) return;
+            boolean p8 = place(0, 1, 1);
+            if (return_) return;
+            boolean p9 = place(0, 1, -1);
+            if (return_) return;
+
+            if (p6 && p7 && p8 && p9) doubleHeightPlaced = true;
+        }
+
         // Auto turn off
-        if (turnOff.get() && p1 && p2 && p3 && p4 && p5) toggle();
+        if (turnOff.get() && p1 && p2 && p3 && p4 && p5) {
+            if (doubleHeightPlaced || !doubleHeight.get()) toggle();
+        }
     });
 
     private boolean place(int x, int y, int z) {
         setBlockPos(x, y, z);
 
-        boolean wasObby = mc.world.getBlockState(blockPos).getBlock() == Blocks.OBSIDIAN;
-        boolean a = false;
+        BlockState blockState = mc.world.getBlockState(blockPos);
+        boolean wasObby = blockState.getBlock() == Blocks.OBSIDIAN;
+        boolean placed = !blockState.getMaterial().isReplaceable();
 
-        if (findSlot()) {
-            a = PlayerUtils.placeBlock(blockPos);
+        if (!placed && findSlot()) {
+            placed = PlayerUtils.placeBlock(blockPos);
             resetSlot();
 
             boolean isObby = mc.world.getBlockState(blockPos).getBlock() == Blocks.OBSIDIAN;
             if (!wasObby && isObby) return_ = true;
         }
 
-        return a;
+        return placed;
     }
 
     private void setBlockPos(int x, int y, int z) {
@@ -130,7 +159,7 @@ public class Surround extends ToggleModule {
 
             if (!(item instanceof BlockItem)) continue;
 
-            if (item == Items.OBSIDIAN || item == Items.CRYING_OBSIDIAN) {
+            if (item == Items.OBSIDIAN) {
                 mc.player.inventory.selectedSlot = i;
                 return true;
             }
