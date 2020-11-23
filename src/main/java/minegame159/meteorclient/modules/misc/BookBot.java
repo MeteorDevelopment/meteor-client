@@ -1,3 +1,8 @@
+/*
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
+ * Copyright (c) 2020 Meteor Development.
+ */
+
 package minegame159.meteorclient.modules.misc;
 
 //Created by squidoodly 06/07/2020 AT FUCKING 12:00AM KILL ME
