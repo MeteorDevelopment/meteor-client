@@ -8,7 +8,7 @@ import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.PlayerUtils;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
@@ -44,13 +44,6 @@ public class Surround extends ToggleModule {
     private final Setting<Boolean> center = sgGeneral.add(new BoolSetting.Builder()
             .name("center")
             .description("Moves you to the center of the block.")
-            .defaultValue(true)
-            .build()
-    );
-
-    private final Setting<Boolean> instant = sgGeneral.add(new BoolSetting.Builder()
-            .name("instant")
-            .description("Places all blocks in one tick.")
             .defaultValue(true)
             .build()
     );
@@ -93,66 +86,36 @@ public class Surround extends ToggleModule {
         // Place
         return_ = false;
 
-        boolean p1 = tryPlace(0, -1, 0);
+        boolean p1 = place(0, -1, 0);
         if (return_) return;
-        boolean p2 = tryPlace(1, 0, 0);
+        boolean p2 = place(1, 0, 0);
         if (return_) return;
-        boolean p3 = tryPlace(-1, 0, 0);
+        boolean p3 = place(-1, 0, 0);
         if (return_) return;
-        boolean p4 = tryPlace(0, 0, 1);
+        boolean p4 = place(0, 0, 1);
         if (return_) return;
-        boolean p5 = tryPlace(0, 0, -1);
+        boolean p5 = place(0, 0, -1);
         if (return_) return;
 
         // Auto turn off
         if (turnOff.get() && p1 && p2 && p3 && p4 && p5) toggle();
     });
 
-    private boolean tryPlace(int x, int y, int z) {
-        boolean p = place(x, 0, z);
-        if (return_) return p;
-        if (p) return true;
-
-        for (int i = 0; i < 5; i++) {
-            int x2 = x;
-            int y2 = y;
-            int z2 = z;
-
-            switch (i) {
-                case 0: y2--; break;
-                case 1: x2++; break;
-                case 2: x2--; break;
-                case 3: z2++; break;
-                case 4: z2--; break;
-            }
-
-            p = place(x2, y2, z2);
-            if (return_) return p;
-            if (p) {
-                place(x, y, z);
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     private boolean place(int x, int y, int z) {
         setBlockPos(x, y, z);
 
-        boolean wasObby = !instant.get() && mc.world.getBlockState(blockPos).getBlock() == Blocks.OBSIDIAN;
+        boolean wasObby = mc.world.getBlockState(blockPos).getBlock() == Blocks.OBSIDIAN;
+        boolean a = false;
 
         if (findSlot()) {
-            Utils.place(Blocks.OBSIDIAN.getDefaultState(), blockPos, true, false, true);
+            a = PlayerUtils.placeBlock(blockPos);
             resetSlot();
 
-            if (!instant.get()) {
-                boolean isObby = mc.world.getBlockState(blockPos).getBlock() == Blocks.OBSIDIAN;
-                if (!wasObby && isObby) return_ = true;
-            }
+            boolean isObby = mc.world.getBlockState(blockPos).getBlock() == Blocks.OBSIDIAN;
+            if (!wasObby && isObby) return_ = true;
         }
 
-        return !mc.world.getBlockState(blockPos).getMaterial().isReplaceable();
+        return a;
     }
 
     private void setBlockPos(int x, int y, int z) {

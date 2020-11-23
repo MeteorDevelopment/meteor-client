@@ -14,7 +14,7 @@ import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.InvUtils;
-import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.PlayerUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -99,7 +99,7 @@ public class EChestFarmer extends ToggleModule {
                 } else if (mc.world.getBlockState(pos.up()).getBlock() == Blocks.AIR) {
                     if (mc.player.inventory.selectedSlot != itemResult.slot)
                     mc.player.inventory.selectedSlot = itemResult.slot;
-                    Utils.place(Blocks.ENDER_CHEST.getDefaultState(), pos.up());
+                    PlayerUtils.placeBlock(pos.up());
                 }
 
             }

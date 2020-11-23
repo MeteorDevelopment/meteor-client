@@ -9,6 +9,7 @@ import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.InvUtils;
+import minegame159.meteorclient.utils.PlayerUtils;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
@@ -109,14 +110,14 @@ public class Auto32K extends ToggleModule {
 
                 if (bestBlock != null) {
                     mc.player.inventory.selectedSlot = hopperSlot;
-                    while (!Utils.place(Blocks.HOPPER.getDefaultState(), bestBlock)) {
+                    while (!PlayerUtils.placeBlock(bestBlock)) {
                         if(sortedIterator.hasNext()) {
                             bestBlock = sortedIterator.next().up();
                         }else break;
                     }
                     mc.player.setSneaking(true);
                     mc.player.inventory.selectedSlot = shulkerSlot;
-                    if (!Utils.place(Blocks.SHULKER_BOX.getDefaultState(), bestBlock.up())) {
+                    if (!PlayerUtils.placeBlock(bestBlock.up())) {
                         Utils.sendMessage("#redFailed to place.");
                         this.toggle();
                         return;
@@ -136,7 +137,7 @@ public class Auto32K extends ToggleModule {
                     bestBlock = findValidBlocksDispenser();
                     mc.player.inventory.selectedSlot = hopperSlot;
                     if(bestBlock == null) return;
-                    if (!Utils.place(Blocks.HOPPER.getDefaultState(), bestBlock.add(x, 0, z))) {
+                    if (!PlayerUtils.placeBlock(bestBlock.add(x, 0, z))) {
                         Utils.sendMessage("#redFailed to place");
                         this.toggle();
                         return;
