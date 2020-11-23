@@ -20,11 +20,13 @@ import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.block.entity.*;
 import net.minecraft.client.toast.Toast;
 import net.minecraft.client.toast.ToastManager;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.ChunkPos;
 
@@ -32,6 +34,12 @@ import java.io.*;
 import java.util.*;
 
 public class StashFinder extends ToggleModule {
+
+    public enum Mode {
+        Chat,
+        Toast
+    }
+
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -50,7 +58,8 @@ public class StashFinder extends ToggleModule {
             .min(1)
             .build()
     );
-private final Setting<Integer> minimumDistance = sgGeneral.add(new IntSetting.Builder()
+    
+    private final Setting<Integer> minimumDistance = sgGeneral.add(new IntSetting.Builder()
             .name("minimum-distance")
             .description("Minimum distance in blocks from spawn required to record that chunk.")
             .defaultValue(0)
@@ -63,6 +72,13 @@ private final Setting<Integer> minimumDistance = sgGeneral.add(new IntSetting.Bu
             .name("send-notifications")
             .description("Send minecraft notifications when new stashes are found.")
             .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<StashFinder.Mode> mode = sgGeneral.add(new EnumSetting.Builder<StashFinder.Mode>()
+            .name("notification-mode")
+            .description("The mode to use for notifications.")
+            .defaultValue(Mode.Toast)
             .build()
     );
 
@@ -109,24 +125,27 @@ private final Setting<Integer> minimumDistance = sgGeneral.add(new IntSetting.Bu
             saveCsv();
 
             if (sendNotifications.get() && (!chunk.equals(prevChunk) || !chunk.countsEqual(prevChunk))) {
-                mc.getToastManager().add(new Toast() {
-                    private long timer;
-                    private long lastTime = -1;
+                if (mode.get() == Mode.Toast) {
+                    mc.getToastManager().add(new Toast() {
+                        private long timer;
+                        private long lastTime = -1;
 
-                    @Override
-                    public Visibility draw(MatrixStack matrices, ToastManager manager, long currentTime) {
-                        if (lastTime == -1) lastTime = currentTime;
-                        else timer += currentTime - lastTime;
+                        @Override
+                        public Visibility draw(MatrixStack matrices, ToastManager manager, long currentTime) {
+                            if (lastTime == -1) lastTime = currentTime;
+                            else timer += currentTime - lastTime;
 
-                        manager.getGame().getTextureManager().bindTexture(new Identifier("textures/gui/toasts.png"));
-                        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 255.0F);
-                        manager.drawTexture(matrices, 0, 0, 0, 32, 160, 32);
+                            manager.getGame().getTextureManager().bindTexture(new Identifier("textures/gui/toasts.png"));
+                            RenderSystem.color4f(1.0F, 1.0F, 1.0F, 255.0F);
+                            manager.drawTexture(matrices, 0, 0, 0, 32, 160, 32);
 
-                        manager.getGame().textRenderer.draw(matrices, "StashRecorder found stash.", 12.0F, 12.0F, -11534256);
+                            manager.getGame().textRenderer.draw(matrices, "StashRecorder found stash.", 12.0F, 12.0F, -11534256);
 
-                        return timer >= 32000 ? Visibility.HIDE : Visibility.SHOW;
-                    }
-                });
+                            return timer >= 32000 ? Visibility.HIDE : Visibility.SHOW;
+                        }
+                    });
+                } else
+                    Chat.info(Formatting.WHITE + "StashRecorder found stash.");
             }
         }
     });
