@@ -223,6 +223,13 @@ public class CrystalAura extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> noSwing = sgGeneral.add(new BoolSetting.Builder()
+            .name("no-swing")
+            .description("Stops your hand swinging.")
+            .defaultValue(false)
+            .build()
+    );
+
     private final Setting<Boolean> render = sgGeneral.add(new BoolSetting.Builder()
             .name("render")
             .description("Render a box where it is placing a crystal.")
@@ -255,7 +262,6 @@ public class CrystalAura extends ToggleModule {
     private EndCrystalEntity heldCrystal = null;
     private LivingEntity target;
     private boolean locked = false;
-    private Hand hand;
 
     private final Pool<RenderBlock> renderBlockPool = new Pool<>(RenderBlock::new);
     private final List<RenderBlock> renderBlocks = new ArrayList<>();
@@ -345,7 +351,7 @@ public class CrystalAura extends ToggleModule {
                     mc.player.networkHandler.sendPacket(packet);
 
                     mc.interactionManager.attackEntity(mc.player, entity);
-                    mc.player.swingHand(hand);
+                    if (!noSwing.get()) mc.player.swingHand(getHand());
                     mc.player.inventory.selectedSlot = preSlot;
                     if (heldCrystal != null && entity.getBlockPos().equals(heldCrystal.getBlockPos())) {
                         heldCrystal = null;
@@ -376,12 +382,6 @@ public class CrystalAura extends ToggleModule {
                             mc.player.inventory.selectedSlot = slot;
                         }
                     }
-                    hand = Hand.MAIN_HAND;
-                    if (mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() == Items.END_CRYSTAL) {
-                        hand = Hand.OFF_HAND;
-                    } else if (mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL) {
-                        return;
-                    }
                     bestDamage = DamageCalcUtils.crystalDamage(target, bestBlock.add(0, 1, 0));
                     heldCrystal = new EndCrystalEntity(mc.world, bestBlock.x, bestBlock.y + 1, bestBlock.z);
                     locked = true;
@@ -391,7 +391,7 @@ public class CrystalAura extends ToggleModule {
                         lastDamage = bestDamage;
                         if (delayLeft <= 0) delayLeft = 10;
                     }
-                    placeBlock(bestBlock, hand);
+                    placeBlock(bestBlock, getHand());
                     return;
                 }
             }
@@ -418,19 +418,14 @@ public class CrystalAura extends ToggleModule {
                         mc.player.inventory.selectedSlot = slot;
                     }
                 }
-                Hand hand = Hand.MAIN_HAND;
-                if (mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() == Items.END_CRYSTAL) {
-                    hand = Hand.OFF_HAND;
-                } else if (mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL) {
-                    return;
-                }
+
                 if (!smartDelay.get()) {
                     delayLeft = delay.get();
-                    placeBlock(bestBlock, hand);
+                    placeBlock(bestBlock, getHand());
                 }else if (smartDelay.get() && (delayLeft <= 0 || bestDamage - lastDamage > healthDifference.get()
                         || (spamFacePlace.get() && shouldFacePlace))) {
                     lastDamage = bestDamage;
-                    placeBlock(bestBlock, hand);
+                    placeBlock(bestBlock, getHand());
                     if (delayLeft <= 0) delayLeft = 10;
                 }
             }
@@ -459,7 +454,7 @@ public class CrystalAura extends ToggleModule {
         mc.player.networkHandler.sendPacket(packet);
 
         mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(block, Direction.UP, new BlockPos(block), false));
-        mc.player.swingHand(hand);
+        if (!noSwing.get()) mc.player.swingHand(hand);
         packet = new PlayerMoveC2SPacket.LookOnly(yaw, pitch, mc.player.isOnGround());
         mc.player.networkHandler.sendPacket(packet);
         mc.player.yaw = yaw;
@@ -590,5 +585,13 @@ public class CrystalAura extends ToggleModule {
                 && !mc.world.getBlockState(target.getBlockPos().add(-1, 0, 0)).isAir()
                 && !mc.world.getBlockState(target.getBlockPos().add(0, 0, 1)).isAir() &&
                 !mc.world.getBlockState(target.getBlockPos().add(0, 0, -1)).isAir();
+    }
+
+    public Hand getHand() {
+        Hand hand = Hand.MAIN_HAND;
+        if (mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() == Items.END_CRYSTAL) {
+            hand = Hand.OFF_HAND;
+        }
+        return hand;
     }
 }
