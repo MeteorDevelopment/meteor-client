@@ -19,6 +19,8 @@ public class WView extends WTable {
     private final boolean onlyWhenMouseOver;
     private double scrollHeight, lastScrollHeight;
 
+    private boolean moveWidgetsOnCalculatePositions;
+
     public WView(boolean onlyWhenMouseOver) {
         this.onlyWhenMouseOver = onlyWhenMouseOver;
 
@@ -37,6 +39,16 @@ public class WView extends WTable {
         recalculateScroll();
     }
 
+    @Override
+    protected void onCalculateWidgetPositions() {
+        super.onCalculateWidgetPositions();
+
+        if (moveWidgetsOnCalculatePositions) {
+            moveWidgets();
+            moveWidgetsOnCalculatePositions = false;
+        }
+    }
+
     private void recalculateScroll() {
         boolean hadScrollBar = hasScrollBar;
 
@@ -46,13 +58,17 @@ public class WView extends WTable {
             height = maxHeight;
 
             if (hadScrollBar) {
-                moveWidgets();
+                lastScrollHeight = 0;
+                moveWidgetsOnCalculatePositions = true;
             } else {
                 scrollHeight = 0;
                 lastScrollHeight = 0;
             }
         } else {
-            if (hadScrollBar) moveWidgets(scrollHeight);
+            if (hadScrollBar) {
+                lastScrollHeight = 0;
+                moveWidgetsOnCalculatePositions = true;
+            }
             hasScrollBar = false;
             actualHeight = height;
         }
