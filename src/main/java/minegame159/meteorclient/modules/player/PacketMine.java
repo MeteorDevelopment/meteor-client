@@ -49,6 +49,8 @@ public class PacketMine extends ToggleModule {
 
     @EventHandler
     private final Listener<StartBreakingBlockEvent> onStartBreakingBlock = new Listener<>(event -> {
+        if (mc.world.getBlockState(event.blockPos).getHardness(mc.world, event.blockPos) < 0) return;
+
         Block block = blockPool.get();
         block.blockPos = event.blockPos;
         block.direction = event.direction;
