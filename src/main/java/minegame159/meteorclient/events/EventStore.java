@@ -70,6 +70,7 @@ public class EventStore {
     private static final PlaceBlockEvent placeBlockEvent = new PlaceBlockEvent();
     private static final DropItemsEvent dropItemsEvent = new DropItemsEvent();
     private static final PickItemsEvent pickItemsEvent = new PickItemsEvent();
+    private static final ConnectToServerEvent connectToServerEvent = new ConnectToServerEvent();
 
     public static PlaySoundPacketEvent playSoundPacketEvent(PlaySoundS2CPacket packet) {
         playSoundPacketEvent.packet = packet;
@@ -272,5 +273,9 @@ public class EventStore {
         pickItemsEvent.itemStack = itemStack;
         pickItemsEvent.count = count;
         return pickItemsEvent;
+    }
+
+    public static ConnectToServerEvent connectToServerEvent() {
+        return connectToServerEvent;
     }
 }
