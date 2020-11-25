@@ -146,7 +146,7 @@ public abstract class WWidget {
     // Events
 
     protected boolean propagateEvents(WWidget widget) {
-        return parent == null || parent.propagateEvents(widget);
+        return !(parent instanceof WView) || parent.propagateEvents(widget);
     }
 
     public void mouseMoved(double mouseX, double mouseY) {
