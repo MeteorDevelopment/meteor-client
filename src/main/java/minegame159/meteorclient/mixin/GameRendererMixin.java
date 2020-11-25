@@ -44,6 +44,8 @@ public abstract class GameRendererMixin {
 
     @Shadow public abstract void updateTargetedEntity(float tickDelta);
 
+    @Shadow public abstract void reset();
+
     private boolean a = false;
 
     @Inject(method = "render", at = @At("HEAD"), cancellable = true)
@@ -95,7 +97,12 @@ public abstract class GameRendererMixin {
 
     @Redirect(method = "updateTargetedEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;raycast(DFZ)Lnet/minecraft/util/hit/HitResult;"))
     private HitResult updateTargetedEntityEntityRayTraceProxy(Entity entity, double maxDistance, float tickDelta, boolean includeFluids) {
-        if (ModuleManager.INSTANCE.isActive(LiquidInteract.class)) return entity.raycast(maxDistance, tickDelta, true);
+        if (ModuleManager.INSTANCE.isActive(LiquidInteract.class)) {
+            HitResult result = entity.raycast(maxDistance, tickDelta, includeFluids);
+            if (result.getType() != HitResult.Type.MISS) return result;
+
+            return entity.raycast(maxDistance, tickDelta, true);
+        }
         return entity.raycast(maxDistance, tickDelta, includeFluids);
     }
 
