@@ -13,11 +13,12 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.accounts.AccountManager;
 import minegame159.meteorclient.commands.CommandManager;
 import minegame159.meteorclient.commands.commands.Ignore;
+import minegame159.meteorclient.events.KeyEvent;
 import minegame159.meteorclient.events.PostTickEvent;
 import minegame159.meteorclient.friends.FriendManager;
-import minegame159.meteorclient.gui.GuiKeyEvents;
 import minegame159.meteorclient.gui.screens.topbar.TopBarModules;
 import minegame159.meteorclient.macros.MacroManager;
+import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.misc.DiscordPresence;
 import minegame159.meteorclient.rendering.Fonts;
@@ -29,6 +30,7 @@ import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.options.KeyBinding;
 
 import java.io.File;
 
@@ -111,16 +113,18 @@ public class MeteorClient implements ClientModInitializer, Listenable {
             screenToOpen = null;
         }
 
-        if (KeyBinds.OPEN_CLICK_GUI.isPressed() && mc.currentScreen == null && GuiKeyEvents.postKeyEvents()) {
-            openClickGui();
-        }
-
         mc.player.getActiveStatusEffects().values().removeIf(statusEffectInstance -> statusEffectInstance.getDuration() <= 0);
     });
 
-    public void onKeyInMainMenu(int key) {
-        if (key == KeyBindingHelper.getBoundKeyOf(KeyBinds.OPEN_CLICK_GUI).getCode()) {
+    @EventHandler
+    private final Listener<KeyEvent> onKey = new Listener<>(event -> {
+        // Click GUI
+        if (event.action == KeyAction.Press && event.key == KeyBindingHelper.getBoundKeyOf(KeyBinds.OPEN_CLICK_GUI).getCode()) {
             openClickGui();
         }
-    }
+
+        // Shulker Peek
+        KeyBinding shulkerPeek = KeyBinds.SHULKER_PEEK;
+        ((IKeyBinding) shulkerPeek).setPressed(shulkerPeek.matchesKey(event.key, 0) && event.action != KeyAction.Release);
+    });
 }
