@@ -146,12 +146,14 @@ public abstract class WWidget {
     // Events
 
     protected boolean propagateEvents(WWidget widget) {
-        return true;
+        return parent == null || parent.propagateEvents(widget);
     }
 
     public void mouseMoved(double mouseX, double mouseY) {
         for (Cell<?> cell : cells) {
-            if (propagateEvents(cell.getWidget())) cell.getWidget().mouseMoved(mouseX, mouseY);
+            if (propagateEvents(cell.getWidget())) {
+                cell.getWidget().mouseMoved(mouseX, mouseY);
+            }
         }
         boolean preMouseOver = mouseOver;
         mouseOver = isOver(mouseX, mouseY);
