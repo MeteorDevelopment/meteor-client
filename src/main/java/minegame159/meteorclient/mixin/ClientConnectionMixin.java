@@ -22,7 +22,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class ClientConnectionMixin {
     @Inject(method = "disconnect", at = @At("HEAD"))
     private void onDisconnect(Text disconnectReason, CallbackInfo info) {
-        if (Utils.canUpdate() && !MeteorClient.IS_DISCONNECTING) {
+        if (!MeteorClient.IS_DISCONNECTING) {
             MeteorClient.IS_DISCONNECTING = true;
             MeteorClient.EVENT_BUS.post(EventStore.gameDisconnectedEvent(disconnectReason));
         }
