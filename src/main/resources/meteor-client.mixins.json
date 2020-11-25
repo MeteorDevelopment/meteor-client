@@ -87,7 +87,8 @@
     "Vec3dMixin",
     "WorldRendererAccessor",
     "WorldRendererMixin",
-    "SplashTextResourceSupplierMixin"
+    "SplashTextResourceSupplierMixin",
+    "IdentifierAccessor"
   ],
   "injectors": {
     "defaultRequire": 1
