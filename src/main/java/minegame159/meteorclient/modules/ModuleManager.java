@@ -190,14 +190,19 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
     });
 
     @EventHandler
-    private final Listener<GameDisconnectedEvent> onGameDisconnected = new Listener<>(event -> disableAll());
+    private final Listener<GameDisconnectedEvent> onGameDisconnected = new Listener<>(event -> {
+        synchronized (active) {
+            for (ToggleModule module : active) {
+                MeteorClient.EVENT_BUS.unsubscribe(module);
+                module.onDeactivate();
+            }
+        }
+    });
 
     public void disableAll() {
         synchronized (active) {
-            for (ToggleModule module : active) {
+            for (ToggleModule module : active.toArray(new ToggleModule[0])) {
                 module.toggle();
-                MeteorClient.EVENT_BUS.unsubscribe(module);
-                module.onDeactivate();
             }
         }
     }
