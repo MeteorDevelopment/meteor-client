@@ -196,8 +196,11 @@ public class AutoEat extends ToggleModule {
             }
             isEating = true;
             preFoodLevel = mc.player.getHungerManager().getFoodLevel();
-            BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("pause");
-            wasThis = true;
+
+            if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing()) {
+                BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("pause");
+                wasThis = true;
+            }
         }
     });
 
