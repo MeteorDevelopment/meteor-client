@@ -26,7 +26,7 @@ public class BlockListSettingScreen extends LeftRightListSettingScreen<Block> {
 
     @Override
     protected WWidget getValueWidget(Block value) {
-        return new WItemWithLabel(value.asItem().getDefaultStack());
+        return new WItemWithLabel(value.asItem().getDefaultStack(), getValueName(value));
     }
 
     @Override
