@@ -49,6 +49,8 @@ public class ProfileUtils {
     }
 
     public static void load(String profile) {
+        ModuleManager.INSTANCE.disableAll();
+
         File folder = new File(FOLDER, profile);
 
         Config.INSTANCE.load(new File(folder, Config.INSTANCE.getFile().getName()));
