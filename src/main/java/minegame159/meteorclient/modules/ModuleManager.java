@@ -24,10 +24,7 @@ import minegame159.meteorclient.modules.render.*;
 import minegame159.meteorclient.modules.render.hud.HUD;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.utils.Chat;
-import minegame159.meteorclient.utils.KeyAction;
-import minegame159.meteorclient.utils.Savable;
-import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.*;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -36,6 +33,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryKey;
+import org.lwjgl.glfw.GLFW;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -169,7 +167,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         }
 
         // Find module bound to that key
-        if (!onKeyOnlyBinding && MinecraftClient.getInstance().currentScreen == null) {
+        if (!onKeyOnlyBinding && MinecraftClient.getInstance().currentScreen == null && !Input.isPressed(GLFW.GLFW_KEY_F3)) {
             for (Module module : modules.values()) {
                 if (module.getKey() == event.key && (event.action == KeyAction.Press || module.toggleOnKeyRelease)) {
                     module.doAction();
