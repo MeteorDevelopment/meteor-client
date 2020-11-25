@@ -48,18 +48,15 @@ public abstract class LeftRightListSettingScreen<T> extends WindowScreen {
 
         // Left (all)
         WTable left = abc(pairs -> registry.forEach(t -> {
-            if (setting.get().contains(t)) return;
+            if (skipValue(t) || setting.get().contains(t)) return;
 
             int words = Utils.search(getValueName(t), filterText);
             if (words > 0) pairs.add(new Pair<>(t, words));
         }), true, t -> {
-            if (!setting.get().contains(t)) {
-                setting.get().add(t);
+            addValue(registry, t);
 
-                setting.changed();
-                clear();
-                initWidgets(registry);
-            }
+            T v = getAdditionalValue(t);
+            if (v != null) addValue(registry, v);
         });
 
         if (left.getCells().size() > 0) add(new WVerticalSeparator());
@@ -67,16 +64,35 @@ public abstract class LeftRightListSettingScreen<T> extends WindowScreen {
         // Right (selected)
         abc(pairs -> {
             for (T value : setting.get()) {
+                if (skipValue(value)) continue;
+
                 int words = Utils.search(getValueName(value), filterText);
                 if (words > 0) pairs.add(new Pair<>(value, words));
             }
         }, false, t -> {
-            if (setting.get().remove(t)) {
-                setting.changed();
-                clear();
-                initWidgets(registry);
-            }
+            removeValue(registry, t);
+
+            T v = getAdditionalValue(t);
+            if (v != null) removeValue(registry, v);
         });
+    }
+
+    private void addValue(Registry<T> registry, T value) {
+        if (!setting.get().contains(value)) {
+            setting.get().add(value);
+
+            setting.changed();
+            clear();
+            initWidgets(registry);
+        }
+    }
+
+    private void removeValue(Registry<T> registry, T value) {
+        if (setting.get().remove(value)) {
+            setting.changed();
+            clear();
+            initWidgets(registry);
+        }
     }
 
     private WTable abc(Consumer<List<Pair<T, Integer>>> addValues, boolean isLeft, Consumer<T> buttonAction) {
@@ -109,4 +125,12 @@ public abstract class LeftRightListSettingScreen<T> extends WindowScreen {
     protected abstract WWidget getValueWidget(T value);
 
     protected abstract String getValueName(T value);
+
+    protected boolean skipValue(T value) {
+        return false;
+    }
+
+    protected T getAdditionalValue(T value) {
+        return null;
+    }
 }
