@@ -115,4 +115,10 @@ public class WView extends WTable {
         super.render(renderer, mouseX, mouseY, delta);
         if (scissor) renderer.endScissor();
     }
+
+    @Override
+    protected boolean propagateEvents(WWidget widget) {
+        return ((widget.y >= y && widget.y <= y + height) || (widget.y + widget.height >= y && widget.y + widget.height <= y + height)) ||
+                ((y >= widget.y && y <= widget.y + widget.height) || (y + height >= widget.y && y + height <= widget.y + widget.height));
+    }
 }
