@@ -11,15 +11,11 @@ import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.events.KeyEvent;
 import minegame159.meteorclient.gui.GuiKeyEvents;
 import minegame159.meteorclient.gui.WidgetScreen;
-import minegame159.meteorclient.mixininterface.IKeyBinding;
-import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.utils.Input;
 import minegame159.meteorclient.utils.KeyAction;
-import minegame159.meteorclient.utils.KeyBinds;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.Keyboard;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.options.KeyBinding;
 import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -39,30 +35,13 @@ public abstract class KeyboardMixin {
                 ((WidgetScreen) client.currentScreen).keyRepeated(key, j);
             }
 
-            if (GuiKeyEvents.postKeyEvents()){
+            if (GuiKeyEvents.postKeyEvents()) {
                 Input.setKeyState(key, i != GLFW.GLFW_RELEASE);
 
-                KeyBinding shulkerPeek = KeyBinds.SHULKER_PEEK;
-                ((IKeyBinding) shulkerPeek).setPressed(shulkerPeek.matchesKey(key, scancode) && (i == GLFW.GLFW_PRESS || i == GLFW.GLFW_REPEAT));
+                KeyEvent event = EventStore.keyEvent(key, KeyAction.get(i));
+                MeteorClient.EVENT_BUS.post(event);
 
-                if (!Utils.canUpdate() && i == GLFW.GLFW_PRESS) {
-                    MeteorClient.INSTANCE.onKeyInMainMenu(key);
-
-                    if (client.currentScreen instanceof WidgetScreen) {
-                        ModuleManager.INSTANCE.onKeyOnlyBinding = true;
-                        ModuleManager.INSTANCE.onKey.invoke(EventStore.keyEvent(key, KeyAction.Press));
-                        ModuleManager.INSTANCE.onKeyOnlyBinding = false;
-                    }
-
-                    return;
-                }
-
-                if (!client.isPaused() && (client.currentScreen == null || client.currentScreen instanceof WidgetScreen)) {
-                    KeyEvent event = EventStore.keyEvent(key, KeyAction.get(i));
-                    MeteorClient.EVENT_BUS.post(event);
-
-                    if (event.isCancelled()) info.cancel();
-                }
+                if (event.isCancelled()) info.cancel();
             }
         }
     }
