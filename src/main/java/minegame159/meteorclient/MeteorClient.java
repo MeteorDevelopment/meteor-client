@@ -120,7 +120,7 @@ public class MeteorClient implements ClientModInitializer, Listenable {
     private final Listener<KeyEvent> onKey = new Listener<>(event -> {
         // Click GUI
         if (event.action == KeyAction.Press && event.key == KeyBindingHelper.getBoundKeyOf(KeyBinds.OPEN_CLICK_GUI).getCode()) {
-            openClickGui();
+            if (!Utils.canUpdate() || mc.currentScreen == null) openClickGui();
         }
 
         // Shulker Peek
