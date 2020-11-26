@@ -41,7 +41,7 @@ public class Main {
                         Desktop.getDesktop().open(new File(path));
                     }
                 } else if (os.contains("mac")) {
-                    String path = System.getProperty("user.home") + "/Library/Application\" Support/minecraft/mods";
+                    String path = System.getProperty("user.home") + "/Library/Application Support/minecraft/mods";
                     new File(path).mkdirs();
                     ProcessBuilder pb = new ProcessBuilder("open", path);
                     Process process = pb.start();
