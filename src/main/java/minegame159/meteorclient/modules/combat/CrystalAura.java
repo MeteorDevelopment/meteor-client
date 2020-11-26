@@ -258,7 +258,6 @@ public class CrystalAura extends ToggleModule {
     private Vec3d pos;
     private double lastDamage = 0;
     private boolean shouldFacePlace = false;
-    private boolean shouldPlace = false;
     private EndCrystalEntity heldCrystal = null;
     private LivingEntity target;
     private boolean locked = false;
@@ -304,7 +303,13 @@ public class CrystalAura extends ToggleModule {
         }
 
         delayLeft --;
-        if (!surroundBreak.get() && locked){
+        if (target == null) {
+            heldCrystal = null;
+            locked = false;
+        }
+        if (locked && heldCrystal != null && ((!surroundBreak.get()
+                && target.getBlockPos().getSquaredDistance(new Vec3i(heldCrystal.getX(), heldCrystal.getY(), heldCrystal.getZ())) == 4d) || (!surroundHold.get()
+                && target.getBlockPos().getSquaredDistance(new Vec3i(heldCrystal.getX(), heldCrystal.getY(), heldCrystal.getZ())) == 2d))){
             heldCrystal = null;
             locked = false;
         }
@@ -332,8 +337,10 @@ public class CrystalAura extends ToggleModule {
                 == HitResult.Type.MISS) locked = false;
         if (heldCrystal == null) locked = false;
         if (locked) return;
+
         hitCrystal();
-        if (!smartDelay.get() && delayLeft > 0) return;
+
+        if (!smartDelay.get() && delayLeft > 0 && ((!surroundHold.get() && (target != null && (!surroundBreak.get() || !isSurrounded(target)))) || heldCrystal != null)) return;
         if (!autoSwitch.get() && mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL) return;
         if (place.get()) {
             findTarget();
@@ -341,17 +348,14 @@ public class CrystalAura extends ToggleModule {
             if (surroundHold.get() && heldCrystal == null){
                 bestBlock = findOpen(target);
                 if (bestBlock != null){
-                    if (autoSwitch.get()) doSwitch();
-                    bestDamage = DamageCalcUtils.crystalDamage(target, bestBlock.add(0, 1, 0));
-                    heldCrystal = new EndCrystalEntity(mc.world, bestBlock.x, bestBlock.y + 1, bestBlock.z);
-                    locked = true;
-                    if (!smartDelay.get()) {
-                        delayLeft = delay.get();
-                    }else if (smartDelay.get()) {
-                        lastDamage = bestDamage;
-                        if (delayLeft <= 0) delayLeft = 10;
-                    }
-                    placeBlock(bestBlock, getHand());
+                    doHeldCrystal();
+                    return;
+                }
+            }
+            if (surroundBreak.get() && heldCrystal == null && isSurrounded(target)){
+                bestBlock = findOpenSurround(target);
+                if (bestBlock != null) {
+                    doHeldCrystal();
                     return;
                 }
             }
@@ -370,7 +374,7 @@ public class CrystalAura extends ToggleModule {
                     }
                 }
             }
-            if (bestBlock != null && (bestDamage >= minDamage.get() || shouldFacePlace || shouldPlace)) {
+            if (bestBlock != null && (bestDamage >= minDamage.get() || shouldFacePlace)) {
                 if (autoSwitch.get()) doSwitch();
                 if (!smartDelay.get()) {
                     delayLeft = delay.get();
@@ -466,6 +470,20 @@ public class CrystalAura extends ToggleModule {
         }
     }
 
+    private void doHeldCrystal(){
+        if (autoSwitch.get()) doSwitch();
+        bestDamage = DamageCalcUtils.crystalDamage(target, bestBlock.add(0, 1, 0));
+        heldCrystal = new EndCrystalEntity(mc.world, bestBlock.x, bestBlock.y + 1, bestBlock.z);
+        locked = true;
+        if (!smartDelay.get()) {
+            delayLeft = delay.get();
+        } else {
+            lastDamage = bestDamage;
+            if (delayLeft <= 0) delayLeft = 10;
+        }
+        placeBlock(bestBlock, getHand());
+    }
+
     private void placeBlock(Vec3d block, Hand hand){
         assert mc.player != null;
         assert mc.interactionManager != null;
@@ -495,29 +513,16 @@ public class CrystalAura extends ToggleModule {
         bestBlock = null;
         bestDamage = 0;
         playerPos = mc.player.getBlockPos();
-        boolean valid = isSurrounded(target);
         for(double i = playerPos.getX() - placeRange.get(); i < playerPos.getX() + placeRange.get(); i++){
             for(double j = playerPos.getZ() - placeRange.get(); j < playerPos.getZ() + placeRange.get(); j++){
                 for(double k = playerPos.getY() - 3; k < playerPos.getY() + 3; k++){
-                    pos = new Vec3d(i, k, j);
+                    pos = new Vec3d(Math.floor(i), Math.floor(k), Math.floor(j));
                     if (bestBlock == null) bestBlock = pos;
-                    if(isValid(pos) && (DamageCalcUtils.crystalDamage(mc.player, new Vec3d(Math.floor(pos.x), Math.floor(pos.y), Math.floor(pos.z)).add(0.5, 1, 0.5)) < maxDamage.get()
+                    if(isValid(pos) && (DamageCalcUtils.crystalDamage(mc.player, pos.add(0.5, 1, 0.5)) < maxDamage.get()
                             || mode.get() == Mode.suicide)){
                         if (!strict.get() || isEmpty(new BlockPos(pos.add(0, 2, 0)))) {
-                            if (surroundBreak.get() && heldCrystal == null && valid
-                                    && target.getBlockPos().getY() == k + 1
-                                    && (Math.pow((target.getBlockPos().getX() - i), 2) + Math.pow((target.getBlockPos().getZ() - j), 2)) == 4d
-                                    && mc.world.raycast(new RaycastContext(target.getPos(), pos.add(0, 1, 0), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, target)).getType()
-                                    != HitResult.Type.MISS){
-                                bestBlock = new Vec3d(Math.floor(pos.x), Math.floor(pos.y), Math.floor(pos.z));
-                                bestDamage = DamageCalcUtils.crystalDamage(target, bestBlock.add(0.5, 1, 0.5));
-                                shouldPlace = true;
-                                heldCrystal = new EndCrystalEntity(mc.world, Math.floor(i), Math.floor(k) + 1, Math.floor(j));
-                                locked = true;
-                                return;
-                            }
-                            if (bestDamage < DamageCalcUtils.crystalDamage(target, new Vec3d(Math.floor(pos.x), Math.floor(pos.y), Math.floor(pos.z)).add(0.5, 1, 0.5))) {
-                                bestBlock = new Vec3d(Math.floor(pos.x), Math.floor(pos.y), Math.floor(pos.z));
+                            if (bestDamage < DamageCalcUtils.crystalDamage(target, pos.add(0.5, 1, 0.5))) {
+                                bestBlock = pos;
                                 bestDamage = DamageCalcUtils.crystalDamage(target, bestBlock.add(0.5, 1, 0.5));
                             }
                         }
@@ -533,17 +538,49 @@ public class CrystalAura extends ToggleModule {
         int x = 0;
         int z = 0;
         if (isValid(target.getPos().add(1, -1, 0))
-                && Math.sqrt(mc.player.getBlockPos().getSquaredDistance(new Vec3i(target.getBlockPos().getX() + 1, target.getBlockPos().getY(), target.getBlockPos().getZ()))) < placeRange.get()){
+                && Math.sqrt(mc.player.getBlockPos().getSquaredDistance(new Vec3i(target.getBlockPos().getX() + 1, target.getBlockPos().getY() - 1, target.getBlockPos().getZ()))) < placeRange.get()){
             x = 1;
         } else if (isValid(target.getPos().add(-1, -1, 0))
-                && Math.sqrt(mc.player.getBlockPos().getSquaredDistance(new Vec3i(target.getBlockPos().getX() -1, target.getBlockPos().getY(), target.getBlockPos().getZ()))) < placeRange.get()){
+                && Math.sqrt(mc.player.getBlockPos().getSquaredDistance(new Vec3i(target.getBlockPos().getX() -1, target.getBlockPos().getY() - 1, target.getBlockPos().getZ()))) < placeRange.get()){
             x = -1;
         } else if (isValid(target.getPos().add(0, -1, -1))
-                && Math.sqrt(mc.player.getBlockPos().getSquaredDistance(new Vec3i(target.getBlockPos().getX(), target.getBlockPos().getY(), target.getBlockPos().getZ() + 1))) < placeRange.get()){
+                && Math.sqrt(mc.player.getBlockPos().getSquaredDistance(new Vec3i(target.getBlockPos().getX(), target.getBlockPos().getY() - 1, target.getBlockPos().getZ() + 1))) < placeRange.get()){
             z = 1;
         } else if (isValid(target.getPos().add(0, -1, -1))
-                && Math.sqrt(mc.player.getBlockPos().getSquaredDistance(new Vec3i(target.getBlockPos().getX(), target.getBlockPos().getY(), target.getBlockPos().getZ() - 1))) < placeRange.get()){
+                && Math.sqrt(mc.player.getBlockPos().getSquaredDistance(new Vec3i(target.getBlockPos().getX(), target.getBlockPos().getY() - 1, target.getBlockPos().getZ() - 1))) < placeRange.get()){
             z = -1;
+        }
+        if (x != 0 || z != 0) {
+            return new Vec3d(target.getBlockPos().getX() + 0.5 + x, target.getBlockPos().getY() - 1, target.getBlockPos().getZ() + 0.5 + z);
+        }
+        return null;
+    }
+
+    private Vec3d findOpenSurround(LivingEntity target){
+        assert mc.player != null;
+        assert mc.world != null;
+        int x = 0;
+        int z = 0;
+        if (isValid(target.getPos().add(2, -1, 0))
+                && Math.sqrt(mc.player.getBlockPos().getSquaredDistance(new Vec3i(target.getBlockPos().getX() + 2, target.getBlockPos().getY() - 1, target.getBlockPos().getZ()))) < placeRange.get()
+                && mc.world.raycast(new RaycastContext(target.getPos(), target.getPos().add(2, -1, 0), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, target)).getType()
+                != HitResult.Type.MISS){
+            x = 2;
+        } else if (isValid(target.getPos().add(-2, -1, 0))
+                && Math.sqrt(mc.player.getBlockPos().getSquaredDistance(new Vec3i(target.getBlockPos().getX() -2, target.getBlockPos().getY() - 1, target.getBlockPos().getZ()))) < placeRange.get()
+                && mc.world.raycast(new RaycastContext(target.getPos(), target.getPos().add(-2, -1, 0), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, target)).getType()
+                != HitResult.Type.MISS){
+            x = -2;
+        } else if (isValid(target.getPos().add(0, -1, -2))
+                && Math.sqrt(mc.player.getBlockPos().getSquaredDistance(new Vec3i(target.getBlockPos().getX(), target.getBlockPos().getY() - 1, target.getBlockPos().getZ() + 2))) < placeRange.get()
+                && mc.world.raycast(new RaycastContext(target.getPos(), target.getPos().add(0, -1, 2), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, target)).getType()
+                != HitResult.Type.MISS){
+            z = 2;
+        } else if (isValid(target.getPos().add(0, -1, -2))
+                && Math.sqrt(mc.player.getBlockPos().getSquaredDistance(new Vec3i(target.getBlockPos().getX(), target.getBlockPos().getY() - 1, target.getBlockPos().getZ() - 2))) < placeRange.get()
+                && mc.world.raycast(new RaycastContext(target.getPos(), target.getPos().add(0, -1, -2), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, target)).getType()
+                != HitResult.Type.MISS){
+            z = -2;
         }
         if (x != 0 || z != 0) {
             return new Vec3d(target.getBlockPos().getX() + 0.5 + x, target.getBlockPos().getY() - 1, target.getBlockPos().getZ() + 0.5 + z);
