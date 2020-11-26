@@ -268,6 +268,9 @@ public class CrystalAura extends ToggleModule {
     @Override
     public void onActivate() {
         preSlot = -1;
+        delayLeft = 0;
+        heldCrystal = null;
+        locked = false;
     }
 
     @Override
@@ -346,18 +349,28 @@ public class CrystalAura extends ToggleModule {
             findTarget();
             if (target == null) return;
             if (surroundHold.get() && heldCrystal == null){
-                bestBlock = findOpen(target);
-                if (bestBlock != null){
-                    doHeldCrystal();
-                    return;
+                int slot = InvUtils.findItemWithCount(Items.END_CRYSTAL).slot;
+                if ((slot == -1 || slot > 9) && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL) {
+                    bestBlock = findOpen(target);
+                    if (bestBlock != null) {
+                        doHeldCrystal();
+                        return;
+                    }
                 }
             }
             if (surroundBreak.get() && heldCrystal == null && isSurrounded(target)){
-                bestBlock = findOpenSurround(target);
-                if (bestBlock != null) {
-                    doHeldCrystal();
-                    return;
+                int slot = InvUtils.findItemWithCount(Items.END_CRYSTAL).slot;
+                if ((slot == -1 || slot > 9) && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL) {
+                    bestBlock = findOpenSurround(target);
+                    if (bestBlock != null) {
+                        doHeldCrystal();
+                        return;
+                    }
                 }
+            }
+            int slot = InvUtils.findItemWithCount(Items.END_CRYSTAL).slot;
+            if (slot == -1 || slot > 9) {
+                return;
             }
             findValidBlocks(target);
             if (bestBlock == null) return;
@@ -376,6 +389,7 @@ public class CrystalAura extends ToggleModule {
             }
             if (bestBlock != null && (bestDamage >= minDamage.get() || shouldFacePlace)) {
                 if (autoSwitch.get()) doSwitch();
+                if (mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL) return;
                 if (!smartDelay.get()) {
                     delayLeft = delay.get();
                     placeBlock(bestBlock, getHand());
@@ -461,7 +475,7 @@ public class CrystalAura extends ToggleModule {
 
     private void doSwitch(){
         assert mc.player != null;
-        if (mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL || mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL) {
+        if (mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL) {
             int slot = InvUtils.findItemWithCount(Items.END_CRYSTAL).slot;
             if (slot != -1 && slot < 9) {
                 preSlot = mc.player.inventory.selectedSlot;
@@ -471,7 +485,9 @@ public class CrystalAura extends ToggleModule {
     }
 
     private void doHeldCrystal(){
+        assert mc.player != null;
         if (autoSwitch.get()) doSwitch();
+        if (mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL) return;
         bestDamage = DamageCalcUtils.crystalDamage(target, bestBlock.add(0, 1, 0));
         heldCrystal = new EndCrystalEntity(mc.world, bestBlock.x, bestBlock.y + 1, bestBlock.z);
         locked = true;
