@@ -168,6 +168,10 @@ task generatePacketUtils() {
 
 jar {
 	from "LICENSE"
+
+	manifest {
+		attributes("Main-Class": "minegame159.meteorclient.Main")
+	}
 }
 
 remapJar {
