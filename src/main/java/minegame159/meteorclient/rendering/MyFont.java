@@ -110,7 +110,7 @@ public class MyFont {
         return getWidth(string, string.length());
     }
 
-    public int getHeight() {
+    public double getHeight() {
         return height;
     }
 
