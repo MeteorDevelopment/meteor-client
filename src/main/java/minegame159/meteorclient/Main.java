@@ -36,12 +36,18 @@ public class Main {
             try {
                 if (os.contains("win")) {
                     if (Desktop.getDesktop().isSupported(Desktop.Action.OPEN)) {
-                        Desktop.getDesktop().open(new File(System.getenv("AppData") + "/.minecraft/mods"));
+                        String path = System.getenv("AppData") + "/.minecraft/mods";
+                        new File(path).mkdirs();
+                        Desktop.getDesktop().open(new File(path));
                     }
                 } else if (os.contains("mac")) {
-                    Runtime.getRuntime().exec("open " + System.getProperty("user.home") + "/Library/Application Support/minecraft");
+                    String path = System.getProperty("user.home") + "/Library/Application Support/minecraft";
+                    new File(path).mkdirs();
+                    Runtime.getRuntime().exec("open \"" + path + "\"");
                 } else if (os.contains("nix") || os.contains("nux")) {
-                    Runtime.getRuntime().exec("xdg-open " + System.getProperty("user.home") + "/.minecraft");
+                    String path = System.getProperty("user.home") + "/.minecraft";
+                    new File(path).mkdirs();
+                    Runtime.getRuntime().exec("xdg-open \"" + path + "\"");
                 }
             } catch (IOException e) {
                 e.printStackTrace();
