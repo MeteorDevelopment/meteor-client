@@ -17,6 +17,7 @@ import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.KeyAction;
+import minegame159.meteorclient.utils.Utils;
 
 public class AirJump extends ToggleModule {
     public AirJump() {
@@ -43,7 +44,7 @@ public class AirJump extends ToggleModule {
 
     @EventHandler
     private final Listener<KeyEvent> onKey = new Listener<>(event -> {
-        if (ModuleManager.INSTANCE.isActive(Freecam.class)) return;
+        if (ModuleManager.INSTANCE.isActive(Freecam.class) || mc.currentScreen != null) return;
         if ((event.action == KeyAction.Press || (event.action == KeyAction.Repeat && onHold.get())) && mc.options.keyJump.matchesKey(event.key, 0)) {
             mc.player.jump();
             level = mc.player.getBlockPos().getY();
