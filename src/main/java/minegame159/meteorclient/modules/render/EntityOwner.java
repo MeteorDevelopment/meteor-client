@@ -8,10 +8,10 @@ package minegame159.meteorclient.modules.render;
 import com.google.common.reflect.TypeToken;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.RenderEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.rendering.Fonts;
 import minegame159.meteorclient.rendering.Matrices;
 import minegame159.meteorclient.rendering.ShapeBuilder;
 import minegame159.meteorclient.settings.DoubleSetting;
@@ -75,9 +75,9 @@ public class EntityOwner extends ToggleModule {
         Camera camera = mc.gameRenderer.getCamera();
 
         // Compute scale
-        double scale = 0.025;
+        double scale = 0.025 * this.scale.get();
         double dist = Utils.distanceToCamera(entity);
-        if (dist > 10) scale *= dist / 10 * this.scale.get();
+        if (dist > 8) scale *= dist / 8;
 
         // Setup the rotation
         Matrices.push();
@@ -90,13 +90,15 @@ public class EntityOwner extends ToggleModule {
         Matrices.scale(-scale, -scale, scale);
 
         // Render background
-        double i = MeteorClient.FONT_2X.getStringWidth(name) / 2.0;
+        double ii = Fonts.get(2).getWidth(name) / 2.0;
+        double i = ii * 0.25;
         ShapeBuilder.begin(null, GL11.GL_TRIANGLES, VertexFormats.POSITION_COLOR);
-        ShapeBuilder.quad(-i - 1, -1, 0, -i - 1, 8, 0, i + 1, 8, 0, i + 1, -1, 0, BACKGROUND);
+        ShapeBuilder.quad(-i - 1, 0, 0, -i - 1, 8, 0, i + 1, 8, 0, i + 1, 0, 0, BACKGROUND);
         ShapeBuilder.end();
 
         // Render name text
-        MeteorClient.FONT_2X.renderString(name, -i, 0, TEXT);
+        Matrices.scale(0.25, 0.25, 1);
+        Fonts.get(2).render(name, -ii, 0, TEXT);
 
         Matrices.pop();
     }
