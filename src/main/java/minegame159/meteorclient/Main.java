@@ -41,9 +41,10 @@ public class Main {
                         Desktop.getDesktop().open(new File(path));
                     }
                 } else if (os.contains("mac")) {
-                    String path = System.getProperty("user.home") + "/Library/Application Support/minecraft";
+                    String path = System.getProperty("user.home") + "/Library/Application\" Support/minecraft/mods";
                     new File(path).mkdirs();
-                    Runtime.getRuntime().exec("open \"" + path + "\"");
+                    ProcessBuilder pb = new ProcessBuilder("open", path);
+                    Process process = pb.start();
                 } else if (os.contains("nix") || os.contains("nux")) {
                     String path = System.getProperty("user.home") + "/.minecraft";
                     new File(path).mkdirs();
