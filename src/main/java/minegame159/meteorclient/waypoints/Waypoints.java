@@ -13,6 +13,7 @@ import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.events.GameDisconnectedEvent;
 import minegame159.meteorclient.events.GameJoinedEvent;
 import minegame159.meteorclient.events.RenderEvent;
+import minegame159.meteorclient.rendering.Fonts;
 import minegame159.meteorclient.rendering.Matrices;
 import minegame159.meteorclient.rendering.ShapeBuilder;
 import minegame159.meteorclient.utils.*;
@@ -85,7 +86,7 @@ public class Waypoints extends Savable<Waypoints> implements Listenable, Iterabl
             double dist = Utils.distanceToCamera(waypoint.x, waypoint.y, waypoint.z);
             if (dist > waypoint.maxVisibleDistance) continue;
             double scale = 0.04;
-            if(dist > 15) scale *= dist / 15;
+            if(dist > 10) scale *= dist / 10;
 
             double a = 1;
             if (dist < 10) {
@@ -137,20 +138,23 @@ public class Waypoints extends Savable<Waypoints> implements Listenable, Iterabl
             String distText = Math.round(dist) + " blocks";
 
             // Render background
-            double i = MeteorClient.FONT_2X.getStringWidth(waypoint.name) / 2.0;
-            double i2 = MeteorClient.FONT_2X.getStringWidth(distText) / 2.0;
+            double ii = Fonts.get(2).getWidth(waypoint.name) / 2.0;
+            double i = ii * 0.25;
+            double ii2 = Fonts.get(2).getWidth(distText) / 2.0;
+            double i2 = ii2 * 0.25;
             ShapeBuilder.begin(null, GL11.GL_TRIANGLES, VertexFormats.POSITION_COLOR);
-            ShapeBuilder.quad(-i - 1, -1 - MeteorClient.FONT_2X.getHeight(), 0, -i - 1, 8 - MeteorClient.FONT_2X.getHeight(), 0, i + 1, 8 - MeteorClient.FONT_2X.getHeight(), 0, i + 1, -1 - MeteorClient.FONT_2X.getHeight(), 0, BACKGROUND);
-            ShapeBuilder.quad(-i2 - 1, -1, 0, -i2 - 1, 8, 0, i2 + 1, 8, 0, i2 + 1, -1, 0, BACKGROUND);
+            ShapeBuilder.quad(-i - 1, -Fonts.get(2).getHeight() * 0.25 + 1, 0, -i - 1, 9 - Fonts.get(2).getHeight() * 0.25, 0, i + 1, 9 - Fonts.get(2).getHeight() * 0.25, 0, i + 1, -Fonts.get(2).getHeight() * 0.25 + 1, 0, BACKGROUND);
+            ShapeBuilder.quad(-i2 - 1, 0, 0, -i2 - 1, 8, 0, i2 + 1, 8, 0, i2 + 1, 0, 0, BACKGROUND);
             ShapeBuilder.end();
 
             waypoint.renderIcon(-8, 9, 0, a, 16);
 
             // Render name text
-            MeteorClient.FONT_2X.begin();
-            MeteorClient.FONT_2X.renderString(waypoint.name, -i, -MeteorClient.FONT_2X.getHeight(), TEXT);
-            MeteorClient.FONT_2X.renderString(distText, -i2, 0, TEXT);
-            MeteorClient.FONT_2X.end();
+            Matrices.scale(0.25, 0.25, 0.25);
+            Fonts.get(2).begin();
+            Fonts.get(2).render(waypoint.name, -ii, -Fonts.get(2).getHeight() + 1, TEXT);
+            Fonts.get(2).render(distText, -ii2, 0, TEXT);
+            Fonts.get(2).end();
 
             Matrices.pop();
 
