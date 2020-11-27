@@ -120,7 +120,7 @@ public class AutoAnvil extends ToggleModule {
             mc.player.inventory.selectedSlot = anvilSlot;
             BlockPos targetPos = target.getBlockPos().up();
 
-            PlayerUtils.placeBlock(targetPos.add(0, height.get(), 0));
+            PlayerUtils.placeBlock(targetPos.add(0, height.get(), 0), Hand.MAIN_HAND);
 
             mc.player.inventory.selectedSlot = prevSlot;
         }

@@ -26,6 +26,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
+import net.minecraft.util.Hand;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.world.RaycastContext;
 
@@ -125,7 +126,7 @@ public class SmartSurround extends ToggleModule {
     });
 
     private void placeObi(int x, int z, Entity crystal) {
-        PlayerUtils.placeBlock(crystal.getBlockPos().add(x, -1, z));
+        PlayerUtils.placeBlock(crystal.getBlockPos().add(x, -1, z), Hand.MAIN_HAND);
     }
 
     private int findObiInHotbar() {
