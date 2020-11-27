@@ -161,8 +161,8 @@ public class AutoTrap extends ToggleModule {
                     break;
                 case None:
             }
-            if (turnOff.get()) toggle();
             mc.player.inventory.selectedSlot = prevSlot;
+            if (turnOff.get()) toggle();
         }
     });
 }

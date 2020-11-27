@@ -115,14 +115,14 @@ public class Auto32K extends ToggleModule {
 
                 if (bestBlock != null) {
                     mc.player.inventory.selectedSlot = hopperSlot;
-                    while (!PlayerUtils.placeBlock(bestBlock)) {
+                    while (!PlayerUtils.placeBlock(bestBlock, Hand.MAIN_HAND)) {
                         if(sortedIterator.hasNext()) {
                             bestBlock = sortedIterator.next().up();
                         }else break;
                     }
                     mc.player.setSneaking(true);
                     mc.player.inventory.selectedSlot = shulkerSlot;
-                    if (!PlayerUtils.placeBlock(bestBlock.up())) {
+                    if (!PlayerUtils.placeBlock(bestBlock.up(), Hand.MAIN_HAND)) {
                         Utils.sendMessage("#redFailed to place.");
                         this.toggle();
                         return;
@@ -142,7 +142,7 @@ public class Auto32K extends ToggleModule {
                     bestBlock = findValidBlocksDispenser();
                     mc.player.inventory.selectedSlot = hopperSlot;
                     if(bestBlock == null) return;
-                    if (!PlayerUtils.placeBlock(bestBlock.add(x, 0, z))) {
+                    if (!PlayerUtils.placeBlock(bestBlock.add(x, 0, z), Hand.MAIN_HAND)) {
                         Utils.sendMessage("#redFailed to place");
                         this.toggle();
                         return;

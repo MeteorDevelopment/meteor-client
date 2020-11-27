@@ -21,6 +21,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 
 public class HoleFiller extends ToggleModule {
@@ -76,7 +77,7 @@ public class HoleFiller extends ToggleModule {
             if (left != Blocks.BEDROCK && left != Blocks.OBSIDIAN) return;
             add(1, 0, 0);
 
-            if (PlayerUtils.placeBlock(blockPos, findSlot())) BlockIterator.disableCurrent();
+            if (PlayerUtils.placeBlock(blockPos, findSlot(), Hand.MAIN_HAND)) BlockIterator.disableCurrent();
         });
     });
 

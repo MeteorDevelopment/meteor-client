@@ -16,6 +16,7 @@ import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.PlayerUtils;
 import net.minecraft.block.Blocks;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 
 public class SelfTrap extends ToggleModule {
@@ -65,7 +66,7 @@ public class SelfTrap extends ToggleModule {
         mc.player.inventory.selectedSlot = obsidianSlot;
         BlockPos targetPos = mc.player.getBlockPos().up(2);
 
-        PlayerUtils.placeBlock(targetPos);
+        PlayerUtils.placeBlock(targetPos, Hand.MAIN_HAND);
 
         if (turnOff.get()) toggle();
         mc.player.inventory.selectedSlot = prevSlot;

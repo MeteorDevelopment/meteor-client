@@ -20,6 +20,7 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 
@@ -142,7 +143,7 @@ public class Surround extends ToggleModule {
         boolean placed = !blockState.getMaterial().isReplaceable();
 
         if (!placed && findSlot()) {
-            placed = PlayerUtils.placeBlock(blockPos);
+            placed = PlayerUtils.placeBlock(blockPos, Hand.MAIN_HAND);
             resetSlot();
 
             boolean isObby = mc.world.getBlockState(blockPos).getBlock() == Blocks.OBSIDIAN;
