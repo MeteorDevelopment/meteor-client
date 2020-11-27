@@ -9,6 +9,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.slot.SlotActionType;
+import net.minecraft.util.Hand;
 
 import java.util.function.Predicate;
 
@@ -20,6 +21,12 @@ public class InvUtils {
 
     public static void clickSlot(int slot, int button, SlotActionType action) {
         mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, slot, button, action, mc.player);
+    }
+
+    public static Hand getHand (Item item) {
+        Hand hand = Hand.MAIN_HAND;
+        if (mc.player.getOffHandStack().getItem() == item) hand = Hand.OFF_HAND;
+        return hand;
     }
 
     public static FindItemResult findItemWithCount(Item item) {
