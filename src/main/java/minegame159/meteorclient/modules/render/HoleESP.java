@@ -24,9 +24,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class HoleESP extends ToggleModule {
+
+    public enum Mode {
+        Flat,
+        Box,
+        BoxBelow
+    }
+
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgColors = settings.createGroup("Colors");
-    
+
+    private final Setting<Mode> renderMode = sgGeneral.add(new EnumSetting.Builder<Mode>()
+            .name("render-mode")
+            .description("Rendering mode.")
+            .defaultValue(Mode.Flat)
+            .build()
+    );
+
     private final Setting<Integer> horizontalRadius = sgGeneral.add(new IntSetting.Builder()
             .name("horizontal-radius")
             .description("Horizontal radius in which to search for holes.")
@@ -45,18 +59,18 @@ public class HoleESP extends ToggleModule {
             .build()
     );
 
-    private final Setting<Boolean> renderBox = sgGeneral.add(new BoolSetting.Builder()
-            .name("render-box")
-            .description("Renders box instead of a quad.")
-            .defaultValue(false)
-            .build()
-    );
-
     private final Setting<Integer> holeHeight = sgGeneral.add(new IntSetting.Builder()
             .name("hole-height")
             .description("Minimum hole height required to be rendered.")
             .defaultValue(3)
             .min(1)
+            .build()
+    );
+
+    private final Setting<Boolean> fill = sgGeneral.add(new BoolSetting.Builder()
+            .name("fill")
+            .description("Fill the shapes rendered.")
+            .defaultValue(true)
             .build()
     );
 
@@ -146,11 +160,23 @@ public class HoleESP extends ToggleModule {
             int y = hole.blockPos.getY();
             int z = hole.blockPos.getZ();
 
-            if (renderBox.get()) {
-                ShapeBuilder.blockSides(x, y - 1, z, hole.colorSides, null);
-                ShapeBuilder.blockEdges(x, y - 1, z, hole.colorLines, null);
-            } else {
-                ShapeBuilder.quadWithLines(x, y, z, hole.colorSides, hole.colorLines);
+            switch (renderMode.get()) {
+                case Flat:
+                    if (fill.get()) ShapeBuilder.quadWithLines(x, y, z, hole.colorSides, hole.colorLines);
+                    else ShapeBuilder.emptyQuadWithLines(x, y, z, hole.colorLines);
+                    break;
+                case Box:
+                    if (fill.get()) {
+                        ShapeBuilder.blockSides(x, y, z, hole.colorSides, null);
+                    }
+                    ShapeBuilder.blockEdges(x, y, z, hole.colorLines, null);
+                    break;
+                case BoxBelow:
+                    if (fill.get()) {
+                        ShapeBuilder.blockSides(x, y - 1, z, hole.colorSides, null);
+                    }
+                    ShapeBuilder.blockEdges(x, y - 1, z, hole.colorLines, null);
+                    break;
             }
         }
     });
