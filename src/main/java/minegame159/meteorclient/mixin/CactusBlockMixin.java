@@ -7,7 +7,9 @@ package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.player.AntiCactus;
-import net.minecraft.block.*;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.CactusBlock;
+import net.minecraft.block.ShapeContext;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
