@@ -100,13 +100,13 @@ public class Freecam extends ToggleModule {
 
     @EventHandler
     private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+        if (mc.currentScreen != null) return;
+
         Vec3d forward = Vec3d.fromPolar(0, getYaw(1 / 20f));
         Vec3d right = Vec3d.fromPolar(0, getYaw(1 / 20f) + 90);
         double velX = 0;
         double velY = 0;
         double velZ = 0;
-
-        if (mc.options.keyForward.isPressed()) System.out.println("OMG");
 
         double s = 0.5;
         if (mc.options.keySprint.isPressed()) s = 1;
