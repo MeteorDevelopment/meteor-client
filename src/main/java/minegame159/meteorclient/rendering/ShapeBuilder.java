@@ -177,4 +177,13 @@ public class ShapeBuilder {
     public static void quadWithLines(double x, double y, double z, Color sideColor, Color lineColor) {
         quadWithLines(x, y, z, 1, 1, sideColor, lineColor);
     }
+    public static void emptyQuadWithLines(double x, double y, double z, double width, double height, Color lineColor) {
+        line(x, y, z, x, y, z + height, lineColor);
+        line(x, y, z + height, x + width, y, z + height, lineColor);
+        line(x + width, y, z + height, x + width, y, z, lineColor);
+        line(x, y, z, x + width, y, z, lineColor);
+    }
+    public static void emptyQuadWithLines(double x, double y, double z, Color lineColor) {
+        emptyQuadWithLines(x, y, z, 1, 1, lineColor);
+    }
 }
