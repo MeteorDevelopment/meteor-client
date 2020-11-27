@@ -19,19 +19,19 @@ public class PlayerUtils {
     private static final MinecraftClient mc = MinecraftClient.getInstance();
     private static final Vec3d hitPos = new Vec3d(0, 0, 0);
 
-    public static boolean placeBlock(BlockPos blockPos, int slot) {
+    public static boolean placeBlock(BlockPos blockPos, int slot, Hand hand) {
         if (slot == -1) return false;
 
         int preSlot = mc.player.inventory.selectedSlot;
         mc.player.inventory.selectedSlot = slot;
 
-        boolean a = placeBlock(blockPos);
+        boolean a = placeBlock(blockPos, hand);
 
         mc.player.inventory.selectedSlot = preSlot;
         return a;
     }
 
-    public static boolean placeBlock(BlockPos blockPos) {
+    public static boolean placeBlock(BlockPos blockPos, Hand hand) {
         // Check if current block is replaceable
         if (!mc.world.getBlockState(blockPos).getMaterial().isReplaceable()) return false;
 
@@ -50,8 +50,8 @@ public class PlayerUtils {
             ((IVec3d) hitPos).set(neighbor.getX() + 0.5 + side2.getVector().getX() * 0.5, neighbor.getY() + 0.5 + side2.getVector().getY() * 0.5, neighbor.getZ() + 0.5 + side2.getVector().getZ() * 0.5);
 
             // Place block
-            mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(hitPos, side2, neighbor, false));
-            mc.player.swingHand(Hand.MAIN_HAND);
+            mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(hitPos, side2, neighbor, false));
+            mc.player.swingHand(hand);
 
             return true;
         }
@@ -59,8 +59,8 @@ public class PlayerUtils {
         // Air place if no neighbour was found
         ((IVec3d) hitPos).set(blockPos);
 
-        mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(hitPos, Direction.UP, blockPos, false));
-        mc.player.swingHand(Hand.MAIN_HAND);
+        mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(hitPos, Direction.UP, blockPos, false));
+        mc.player.swingHand(hand);
 
         return true;
     }
