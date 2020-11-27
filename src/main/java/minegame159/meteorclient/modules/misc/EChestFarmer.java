@@ -25,6 +25,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.Items;
+import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
@@ -104,7 +105,7 @@ public class EChestFarmer extends ToggleModule {
                 } else if (mc.world.getBlockState(pos.up()).getBlock() == Blocks.AIR) {
                     if (mc.player.inventory.selectedSlot != itemResult.slot)
                     mc.player.inventory.selectedSlot = itemResult.slot;
-                    PlayerUtils.placeBlock(pos.up());
+                    PlayerUtils.placeBlock(pos.up(), Hand.MAIN_HAND);
                 }
 
             }

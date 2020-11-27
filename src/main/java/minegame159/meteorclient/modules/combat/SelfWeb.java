@@ -16,6 +16,7 @@ import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.PlayerUtils;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 
 public class SelfWeb extends ToggleModule {
@@ -25,6 +26,13 @@ public class SelfWeb extends ToggleModule {
             .name("doubles")
             .description("Places in your upper hitbox as well.")
             .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> turnOff = sgGeneral.add(new BoolSetting.Builder()
+            .name("turn-off")
+            .description("Turns off after placing.")
+            .defaultValue(true)
             .build()
     );
 
@@ -49,9 +57,10 @@ public class SelfWeb extends ToggleModule {
         mc.player.inventory.selectedSlot = webSlot;
         BlockPos playerPos = mc.player.getBlockPos();
 
-        PlayerUtils.placeBlock(playerPos);
-        if (doubles.get()) PlayerUtils.placeBlock(playerPos.add(0, 1, 0));
+        PlayerUtils.placeBlock(playerPos, Hand.MAIN_HAND);
+        if (doubles.get()) PlayerUtils.placeBlock(playerPos.add(0, 1, 0), Hand.MAIN_HAND);
 
         mc.player.inventory.selectedSlot = prevSlot;
+        if (turnOff.get()) toggle();
     });
 }

@@ -17,6 +17,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.FallingBlock;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.shape.VoxelShapes;
 
@@ -136,7 +137,7 @@ public class Scaffold extends ToggleModule {
             Utils.place(slotBlockState, setPos(0, -1, 0), swingHand.get(), false, false);
             if (mc.player.input.sneaking) this.lastWasSneaking = false;
         } else {*/
-        PlayerUtils.placeBlock(mc.player.getBlockPos().down());
+        PlayerUtils.placeBlock(mc.player.getBlockPos().down(), Hand.MAIN_HAND);
         if (mc.player.input.sneaking) this.lastWasSneaking = false;
         //}
 
@@ -148,33 +149,33 @@ public class Scaffold extends ToggleModule {
             // Forward
             for (int j = 0; j < count; j++) {
                 if (!findBlock()) return;
-                PlayerUtils.placeBlock(setPos(j - countHalf, -1, i));
+                PlayerUtils.placeBlock(setPos(j - countHalf, -1, i), Hand.MAIN_HAND);
             }
             // Backward
             for (int j = 0; j < count; j++) {
                 if (!findBlock()) return;
-                PlayerUtils.placeBlock(setPos(j - countHalf, -1, -i));
+                PlayerUtils.placeBlock(setPos(j - countHalf, -1, -i), Hand.MAIN_HAND);
             }
             // Right
             for (int j = 0; j < count; j++) {
                 if (!findBlock()) return;
-                PlayerUtils.placeBlock(setPos(i, -1, j - countHalf));
+                PlayerUtils.placeBlock(setPos(i, -1, j - countHalf), Hand.MAIN_HAND);
             }
             // Left
             for (int j = 0; j < count; j++) {
                 if (!findBlock()) return;
-                PlayerUtils.placeBlock(setPos(-i, -1, j - countHalf));
+                PlayerUtils.placeBlock(setPos(-i, -1, j - countHalf), Hand.MAIN_HAND);
             }
 
             // Diagonals
             if (!findBlock()) return;
-            PlayerUtils.placeBlock(setPos(-i, -1, i));
+            PlayerUtils.placeBlock(setPos(-i, -1, i), Hand.MAIN_HAND);
             if (!findBlock()) return;
-            PlayerUtils.placeBlock(setPos(i, -1, i));
+            PlayerUtils.placeBlock(setPos(i, -1, i), Hand.MAIN_HAND);
             if (!findBlock()) return;
-            PlayerUtils.placeBlock(setPos(-i, -1, -i));
+            PlayerUtils.placeBlock(setPos(-i, -1, -i), Hand.MAIN_HAND);
             if (!findBlock()) return;
-            PlayerUtils.placeBlock(setPos(i, -1, -i));
+            PlayerUtils.placeBlock(setPos(i, -1, -i), Hand.MAIN_HAND);
         }
 
         // Change back to previous slot

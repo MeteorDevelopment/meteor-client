@@ -17,6 +17,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.Hand;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -73,7 +74,7 @@ public class LiquidFiller extends ToggleModule {
 
             PlaceIn placeIn = placeInLiquids.get();
             if (placeIn == PlaceIn.Both || (placeIn == PlaceIn.Lava && liquid == Blocks.LAVA) || (placeIn == PlaceIn.Water && liquid == Blocks.WATER)) {
-                if (PlayerUtils.placeBlock(blockPos, findSlot())) BlockIterator.disableCurrent();
+                if (PlayerUtils.placeBlock(blockPos, findSlot(), Hand.MAIN_HAND)) BlockIterator.disableCurrent();
             }
         }
     }));
