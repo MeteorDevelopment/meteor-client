@@ -10,7 +10,7 @@ import me.zero.alpine.listener.Listenable;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.EventStore;
-import minegame159.meteorclient.events.GameDisconnectedEvent;
+import minegame159.meteorclient.events.GameLeftEvent;
 import minegame159.meteorclient.events.GameJoinedEvent;
 import minegame159.meteorclient.events.RenderEvent;
 import minegame159.meteorclient.rendering.Fonts;
@@ -62,7 +62,7 @@ public class Waypoints extends Savable<Waypoints> implements Listenable, Iterabl
     private final Listener<GameJoinedEvent> onGameJoined = new Listener<>(event -> load());
 
     @EventHandler
-    private final Listener<GameDisconnectedEvent> onGameDisconnected = new Listener<>(event -> {
+    private final Listener<GameLeftEvent> onGameDisconnected = new Listener<>(event -> {
         save();
         waypoints.clear();
     });

@@ -25,7 +25,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.Packet;
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
 import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
-import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
@@ -48,7 +47,7 @@ public class EventStore {
     private static final PostTickEvent postTickEvent = new PostTickEvent();
     private static final TookDamageEvent tookDamageEvent = new TookDamageEvent();
     private static final GameJoinedEvent gameJoinedEvent = new GameJoinedEvent();
-    private static final GameDisconnectedEvent gameDisconnectedEvent = new GameDisconnectedEvent();
+    private static final GameLeftEvent gameLeftEvent = new GameLeftEvent();
     private static final MiddleMouseButtonEvent middleMouseButtonEvent = new MiddleMouseButtonEvent();
     private static final FriendListChangedEvent friendListChangedEvent = new FriendListChangedEvent();
     private static final MacroListChangedEvent macroListChangedEvent = new MacroListChangedEvent();
@@ -159,9 +158,8 @@ public class EventStore {
         return gameJoinedEvent;
     }
 
-    public static GameDisconnectedEvent gameDisconnectedEvent(Text disconnectReason) {
-        gameDisconnectedEvent.disconnectReason = disconnectReason;
-        return gameDisconnectedEvent;
+    public static GameLeftEvent gameLeftEvent() {
+        return gameLeftEvent;
     }
 
     public static MiddleMouseButtonEvent middleMouseButtonEvent() {

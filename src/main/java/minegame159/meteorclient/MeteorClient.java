@@ -113,7 +113,9 @@ public class MeteorClient implements ClientModInitializer, Listenable {
             screenToOpen = null;
         }
 
-        mc.player.getActiveStatusEffects().values().removeIf(statusEffectInstance -> statusEffectInstance.getDuration() <= 0);
+        if (Utils.canUpdate()) {
+            mc.player.getActiveStatusEffects().values().removeIf(statusEffectInstance -> statusEffectInstance.getDuration() <= 0);
+        }
     });
 
     @EventHandler

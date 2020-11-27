@@ -15,7 +15,6 @@ import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.player.AutoEat;
 import minegame159.meteorclient.modules.player.AutoGap;
 import minegame159.meteorclient.utils.OnlinePlayers;
-import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.Mouse;
 import net.minecraft.client.gui.screen.Screen;
@@ -68,20 +67,21 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
     private void onPreTick(CallbackInfo info) {
         OnlinePlayers.update();
 
-        if (Utils.canUpdate()) {
-            getProfiler().push("meteor-client_pre_update");
-            MeteorClient.EVENT_BUS.post(EventStore.preTickEvent());
-            getProfiler().pop();
-        }
+        getProfiler().push("meteor-client_pre_update");
+        MeteorClient.EVENT_BUS.post(EventStore.preTickEvent());
+        getProfiler().pop();
     }
 
     @Inject(at = @At("TAIL"), method = "tick")
     private void onTick(CallbackInfo info) {
-        if (Utils.canUpdate()) {
-            getProfiler().push("meteor-client_post_update");
-            MeteorClient.EVENT_BUS.post(EventStore.postTickEvent());
-            getProfiler().pop();
-        }
+        getProfiler().push("meteor-client_post_update");
+        MeteorClient.EVENT_BUS.post(EventStore.postTickEvent());
+        getProfiler().pop();
+    }
+    
+    @Inject(method = "disconnect(Lnet/minecraft/client/gui/screen/Screen;)V", at = @At("HEAD"))
+    private void onDisconnect(Screen screen, CallbackInfo info) {
+        if (world != null) MeteorClient.EVENT_BUS.post(EventStore.gameLeftEvent());
     }
 
     @Inject(at = @At("HEAD"), method = "stop")
