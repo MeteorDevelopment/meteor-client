@@ -350,7 +350,7 @@ public class CrystalAura extends ToggleModule {
             if (target == null) return;
             if (surroundHold.get() && heldCrystal == null){
                 int slot = InvUtils.findItemWithCount(Items.END_CRYSTAL).slot;
-                if ((slot == -1 || slot > 9) && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL) {
+                if ((slot != -1 && slot < 9) || mc.player.getOffHandStack().getItem() == Items.END_CRYSTAL) {
                     bestBlock = findOpen(target);
                     if (bestBlock != null) {
                         doHeldCrystal();
@@ -360,7 +360,7 @@ public class CrystalAura extends ToggleModule {
             }
             if (surroundBreak.get() && heldCrystal == null && isSurrounded(target)){
                 int slot = InvUtils.findItemWithCount(Items.END_CRYSTAL).slot;
-                if ((slot == -1 || slot > 9) && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL) {
+                if ((slot != -1 && slot < 9) || mc.player.getOffHandStack().getItem() == Items.END_CRYSTAL) {
                     bestBlock = findOpenSurround(target);
                     if (bestBlock != null) {
                         doHeldCrystal();
@@ -369,7 +369,7 @@ public class CrystalAura extends ToggleModule {
                 }
             }
             int slot = InvUtils.findItemWithCount(Items.END_CRYSTAL).slot;
-            if (slot == -1 || slot > 9) {
+            if ((slot == -1 || slot > 9) && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL) {
                 return;
             }
             findValidBlocks(target);
