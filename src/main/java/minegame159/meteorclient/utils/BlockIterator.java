@@ -31,6 +31,7 @@ public class BlockIterator {
     }
 
     private static final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+        if (!Utils.canUpdate()) return;
         MinecraftClient mc = MinecraftClient.getInstance();
 
         int px = (int) mc.player.getX();

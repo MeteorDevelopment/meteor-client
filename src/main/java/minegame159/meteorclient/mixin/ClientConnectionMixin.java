@@ -26,7 +26,7 @@ public class ClientConnectionMixin {
     private void onDisconnect(Text disconnectReason, CallbackInfo info) {
         if (!MeteorClient.IS_DISCONNECTING) {
             MeteorClient.IS_DISCONNECTING = true;
-            MeteorClient.EVENT_BUS.post(EventStore.gameDisconnectedEvent(disconnectReason));
+            //MeteorClient.EVENT_BUS.post(EventStore.gameDisconnectedEvent(disconnectReason));
         }
     }
 

@@ -12,7 +12,7 @@ import me.zero.alpine.listener.Listenable;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.EventStore;
-import minegame159.meteorclient.events.GameDisconnectedEvent;
+import minegame159.meteorclient.events.GameLeftEvent;
 import minegame159.meteorclient.events.GameJoinedEvent;
 import minegame159.meteorclient.events.KeyEvent;
 import minegame159.meteorclient.modules.combat.*;
@@ -190,7 +190,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
     });
 
     @EventHandler
-    private final Listener<GameDisconnectedEvent> onGameDisconnected = new Listener<>(event -> {
+    private final Listener<GameLeftEvent> onGameLeft = new Listener<>(event -> {
         synchronized (active) {
             for (ToggleModule module : active) {
                 MeteorClient.EVENT_BUS.unsubscribe(module);

@@ -100,6 +100,8 @@ public class DiscordPresence extends ToggleModule {
 
     @EventHandler
     private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+        if (!Utils.canUpdate()) return;
+
         if (ready) {
             ticks++;
 
