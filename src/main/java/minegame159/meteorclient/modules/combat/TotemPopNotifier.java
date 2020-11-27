@@ -7,10 +7,14 @@ package minegame159.meteorclient.modules.combat;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
+import minegame159.meteorclient.events.GameJoinedEvent;
 import minegame159.meteorclient.events.PostTickEvent;
 import minegame159.meteorclient.events.packets.ReceivePacketEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.settings.BoolSetting;
+import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.Chat;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -21,6 +25,16 @@ import java.util.Map;
 import java.util.UUID;
 
 public class TotemPopNotifier extends ToggleModule {
+
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+
+    private final Setting<Boolean> announce = sgGeneral.add(new BoolSetting.Builder()
+            .name("announce-in-chat")
+            .description("Sends a chat message rather than a clientside message.")
+            .defaultValue(false)
+            .build()
+    );
+
     private final Map<UUID, Integer> totemPops = new HashMap<>();
 
     public TotemPopNotifier() {
@@ -31,6 +45,11 @@ public class TotemPopNotifier extends ToggleModule {
     public void onActivate() {
         totemPops.clear();
     }
+
+    @EventHandler
+    private final Listener<GameJoinedEvent> onGameJoin = new Listener<>(event -> {
+        totemPops.clear();
+    });
 
     @EventHandler
     private final Listener<ReceivePacketEvent> onReceivePacket = new Listener<>(event -> {
@@ -46,8 +65,8 @@ public class TotemPopNotifier extends ToggleModule {
             int pops = totemPops.getOrDefault(entity.getUuid(), 0);
             pops++;
             totemPops.put(entity.getUuid(), pops);
-
-            Chat.info("(highlight)%s (default)popped (highlight)%d (default)%s.", entity.getName().getString(), pops, pops == 1 ? "totem" : "totems");
+            if (announce.get()) mc.player.sendChatMessage(entity.getName().getString() + " popped " + pops + " " + (pops == 1 ? "totem" : "totems" + "."));
+            else Chat.info("(highlight)%s (default)popped (highlight)%d (default)%s.", entity.getName().getString(), pops, pops == 1 ? "totem" : "totems");
         }
     });
 
@@ -59,8 +78,8 @@ public class TotemPopNotifier extends ToggleModule {
 
                 if (player.deathTime > 0 || player.getHealth() <= 0) {
                     int pops = totemPops.remove(player.getUuid());
-
-                    Chat.info("(highlight)%s (default)died after popping (highlight)%d (default)%s.", player.getName().getString(), pops, pops == 1 ? "totem" : "totems");
+                    if (announce.get()) mc.player.sendChatMessage(player.getName().getString() + " died after popping " + pops + " " + (pops == 1 ? "totem" : "totems" + "."));
+                    else Chat.info("(highlight)%s (default)died after popping (highlight)%d (default)%s.", player.getName().getString(), pops, pops == 1 ? "totem" : "totems");
                 }
             }
         }
