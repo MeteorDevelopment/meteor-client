@@ -17,7 +17,6 @@ import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.KeyAction;
-import minegame159.meteorclient.utils.Utils;
 
 public class AirJump extends ToggleModule {
     public AirJump() {

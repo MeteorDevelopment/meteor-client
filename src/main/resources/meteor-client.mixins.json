@@ -51,6 +51,7 @@
     "HeldItemRendererAccessor",
     "HoeItemAccessor",
     "HorseBaseEntityMixin",
+    "IdentifierAccessor",
     "InGameHudMixin",
     "InGameOverlayRendererMixin",
     "ItemStackMixin",
@@ -80,15 +81,14 @@
     "SignEditScreenMixin",
     "SlimeBlockMixin",
     "SoundSystemMixin",
+    "SplashTextResourceSupplierMixin",
     "StatusEffectInstanceMixin",
     "TerrainRenderContextMixin",
     "TextHandlerMixin",
     "TitleScreenMixin",
     "Vec3dMixin",
     "WorldRendererAccessor",
-    "WorldRendererMixin",
-    "SplashTextResourceSupplierMixin",
-    "IdentifierAccessor"
+    "WorldRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1
