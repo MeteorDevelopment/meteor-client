@@ -34,7 +34,7 @@ public class Rotation extends ToggleModule {
     );
 
     private final Setting<Boolean> yawAutoAngle = sgYaw.add(new BoolSetting.Builder()
-            .name("yaw-auuto-angle")
+            .name("yaw-auto-angle")
             .description("Automatically uses the best angle.")
             .defaultValue(true)
             .build()
