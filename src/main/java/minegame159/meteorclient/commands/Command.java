@@ -5,6 +5,7 @@
 
 package minegame159.meteorclient.commands;
 
+import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.client.MinecraftClient;
 
 public abstract class Command {
@@ -19,5 +20,5 @@ public abstract class Command {
         MC = MinecraftClient.getInstance();
     }
 
-    public abstract void run(String[] args);
+    abstract void registerTo(CommandDispatcher<CommandSource> dispatcher);
 }

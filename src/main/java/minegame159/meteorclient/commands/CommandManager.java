@@ -5,11 +5,13 @@
 
 package minegame159.meteorclient.commands;
 
+import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.ParseResults;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import minegame159.meteorclient.commands.commands.*;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.text.Text;
 
 public class CommandManager {
     private static final CommandDispatcher<CommandSource> dispatcher = new CommandDispatcher<>();
@@ -38,23 +40,31 @@ public class CommandManager {
         addCommand(new Peek());
     }
 
-    public static Command get(String name) {
-        for (Command command : commands) {
-            if (command.name.equalsIgnoreCase(name)) return command;
-        }
-
-        return null;
+    public static void dispatch(String message) throws CommandSyntaxException {
+        dispatch(message, new ChatCommandSource(MinecraftClient.getInstance().player));
     }
 
-    public static void forEach(Consumer<Command> consumer) {
-        commands.forEach(consumer);
-    }
-
-    public static int getCount() {
-        return commands.size();
+    public static void dispatch(String message, CommandSource source) throws CommandSyntaxException {
+        ParseResults<CommandSource> results = dispatcher.parse(message, source);
+        // `results` carries information about whether or not the command failed to parse, which path was took, etc.
+        // it might be useful to inspect later, before executing.
+        CommandManager.dispatcher.execute(results);
     }
 
     private static void addCommand(Command command) {
-        commands.add(command);
+        command.registerTo(dispatcher);
+    }
+
+    private final static class ChatCommandSource implements CommandSource {
+        private final ClientPlayerEntity player;
+
+        public ChatCommandSource(ClientPlayerEntity player) {
+            this.player = player;
+        }
+
+        @Override
+        public void respond(Text response) {
+            this.player.sendMessage(response, false);
+        }
     }
 }

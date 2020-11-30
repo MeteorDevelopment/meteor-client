@@ -5,8 +5,10 @@
 
 package minegame159.meteorclient.mixin;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import minegame159.meteorclient.Config;
 import minegame159.meteorclient.MeteorClient;
+import minegame159.meteorclient.commands.CommandManager;
 import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.events.SendMessageEvent;
 import minegame159.meteorclient.modules.ModuleManager;
@@ -51,7 +53,11 @@ public abstract class ClientPlayerEntityMixin {
         }
 
         if (msg.startsWith(Config.INSTANCE.getPrefix())) {
-            CommandDispatcher.run(msg.substring(Config.INSTANCE.getPrefix().length()));
+            try {
+                CommandManager.dispatch(msg.substring(Config.INSTANCE.getPrefix().length()));
+            } catch (CommandSyntaxException ignored) {
+                // TODO: Handle this?
+            }
             info.cancel();
         }
     }
