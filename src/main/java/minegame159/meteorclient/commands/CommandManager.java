@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class CommandManager {
-    private static final List<Command> commands = new ArrayList<>();
+    private static final CommandDispatcher<CommandSource> dispatcher = new CommandDispatcher<>();
 
     public static void init() {
         addCommand(new Bind());
