@@ -45,7 +45,7 @@ public class Friend extends Command {
                             }
 
                             return SINGLE_SUCCESS;
-                        }))
+                        })))
                 .then(literal("remove").then(argument("friend", FriendArgumentType.friend())
                         .executes(context -> {
                             minegame159.meteorclient.friends.Friend friend =
@@ -66,7 +66,7 @@ public class Friend extends Command {
                     }
 
                     return SINGLE_SUCCESS;
-                })));
+                }));
     }
 
     private static class FriendArgumentType implements ArgumentType<minegame159.meteorclient.friends.Friend> {
