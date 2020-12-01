@@ -7,6 +7,7 @@ package minegame159.meteorclient.commands.commands;
 
 //Created by squidoodly 01/07/2020
 
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.commands.Command;
@@ -28,25 +29,25 @@ public class Ignore extends Command {
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
-        builder.executes(context -> {
-            Chat.info("Ignoring (highlight)%d (default)people:", ignoredPlayers.size());
-            for (String player : ignoredPlayers) {
-                Chat.info("- (highlight)%s", player);
-            }
-
-            return SINGLE_SUCCESS;
-        }).then(literal("username").executes(context -> {
+        builder.then(argument("username", StringArgumentType.string()).executes(context -> {
             String username = context.getArgument("username", String.class);
 
             if (ignoredPlayers.remove(username)) {
                 Chat.info("Removed (highlight)%s (default)from list of ignored people.", username);
             } else {
                 ignoredPlayers.add(username);
-                Chat.info("Added (highlight)%s (default) to list of ignored people.", username);
+                Chat.info("Added (highlight)%s (default)to list of ignored people.", username);
             }
 
             return SINGLE_SUCCESS;
-        }));
+        })).executes(context -> {
+            Chat.info("Ignoring (highlight)%d (default)people:", ignoredPlayers.size());
+            for (String player : ignoredPlayers) {
+                Chat.info("- (highlight)%s", player);
+            }
+
+            return SINGLE_SUCCESS;
+        });
     }
 
     public static void load() {

@@ -36,7 +36,7 @@ public class Drop extends Command {
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
-        builder.then(literal("hand").executes(context -> drop(player -> player.dropSelectedItem(true)))
+        builder.then(literal("hand").executes(context -> drop(player -> player.dropSelectedItem(true))))
                 .then(literal("offhand").executes(context -> drop(player -> InvUtils.clickSlot(InvUtils.invIndexToSlotId(InvUtils.OFFHAND_SLOT), 1, SlotActionType.THROW))))
                 .then(literal("hotbar").executes(context -> drop(player -> {
                     for (int i = 0; i < 9; i++) {
@@ -63,7 +63,7 @@ public class Drop extends Command {
                         if (itemStack.getItem() == item)
                             InvUtils.clickSlot(InvUtils.invIndexToSlotId(i), 1, SlotActionType.THROW);
                     }
-                }))));
+                })));
     }
 
     private int drop(PlayerConsumer consumer) throws CommandSyntaxException {
