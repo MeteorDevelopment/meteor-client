@@ -15,6 +15,7 @@ import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.movement.NoSlow;
 import minegame159.meteorclient.modules.movement.Scaffold;
 import minegame159.meteorclient.modules.player.Portals;
+import minegame159.meteorclient.utils.Chat;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
@@ -55,8 +56,8 @@ public abstract class ClientPlayerEntityMixin {
         if (msg.startsWith(Config.INSTANCE.getPrefix())) {
             try {
                 CommandManager.dispatch(msg.substring(Config.INSTANCE.getPrefix().length()));
-            } catch (CommandSyntaxException ignored) {
-                // TODO: Handle this?
+            } catch (CommandSyntaxException e) {
+                Chat.error(e.getMessage());
             }
             info.cancel();
         }
