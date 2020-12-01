@@ -5,9 +5,12 @@
 
 package minegame159.meteorclient.mixin;
 
+import io.netty.channel.ChannelHandlerContext;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.events.packets.ReceivePacketEvent;
+import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.misc.AntiPacketKick;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.Packet;
 import net.minecraft.network.listener.PacketListener;
@@ -18,6 +21,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.io.IOException;
 import java.net.InetAddress;
 
 @Mixin(ClientConnection.class)
@@ -42,4 +46,11 @@ public class ClientConnectionMixin {
     private static void onConnect(InetAddress address, int port, boolean shouldUseNativeTransport, CallbackInfoReturnable<ClientConnection> info) {
         MeteorClient.EVENT_BUS.post(EventStore.connectToServerEvent());
     }
+
+    @Inject(method = "exceptionCaught", at = @At("HEAD"), cancellable = true)
+    private void exceptionCaught(ChannelHandlerContext context, Throwable throwable, CallbackInfo ci) {
+        if (throwable instanceof IOException && ModuleManager.INSTANCE.isActive(AntiPacketKick.class)) ci.cancel();
+        return;
+    }
+    //Thanks to 086 for this beauty <3
 }
