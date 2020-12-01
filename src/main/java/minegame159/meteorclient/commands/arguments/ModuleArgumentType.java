@@ -32,7 +32,7 @@ public class ModuleArgumentType implements ArgumentType<Module> {
 
     @Override
     public Module parse(StringReader reader) throws CommandSyntaxException {
-        String argument = reader.readUnquotedString();
+        String argument = reader.readString();
         Module module = ModuleManager.INSTANCE.get(argument);
 
         if (module == null) throw NO_SUCH_MODULE.create(argument);
