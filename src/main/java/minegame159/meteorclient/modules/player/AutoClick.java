@@ -29,16 +29,16 @@ public class AutoClick extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
 
-    private final Setting<minegame159.meteorclient.modules.player.AutoClick.Mode> mode = sgGeneral.add(new EnumSetting.Builder<minegame159.meteorclient.modules.player.AutoClick.Mode>()
+    private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("mode")
-            .description("How it right clicks.")
-            .defaultValue(minegame159.meteorclient.modules.player.AutoClick.Mode.Press)
-            .build()
+            .description("How it clicks.")
+            .defaultValue(Mode.Press)
+            .build() 
     );
 
     private final Setting<Button> button = sgGeneral.add(new EnumSetting.Builder<Button>()
             .name("Button")
-            .description("What-button-to-press")
+            .description("Which-button-to-press")
             .defaultValue(Button.Right)
             .build()
     );
