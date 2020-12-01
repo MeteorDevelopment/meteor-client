@@ -7,10 +7,10 @@ package minegame159.meteorclient.commands.commands;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import minegame159.meteorclient.commands.Command;
-import minegame159.meteorclient.commands.CommandSource;
 import minegame159.meteorclient.commands.arguments.ModuleArgumentType;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.Setting;
+import net.minecraft.command.CommandSource;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 

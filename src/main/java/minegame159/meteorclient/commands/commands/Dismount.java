@@ -7,7 +7,7 @@ package minegame159.meteorclient.commands.commands;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import minegame159.meteorclient.commands.Command;
-import minegame159.meteorclient.commands.CommandSource;
+import net.minecraft.command.CommandSource;
 import net.minecraft.network.packet.c2s.play.PlayerInputC2SPacket;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
