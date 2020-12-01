@@ -10,7 +10,7 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.DecoderException;
 import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.modules.misc.AntiChunkBan;
+import minegame159.meteorclient.modules.misc.AntiPacketKick;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.PacketInflater;
 import org.spongepowered.asm.mixin.Final;
@@ -32,7 +32,7 @@ public class PacketInflaterMixin {
 
     @Inject(method = "decode", at = @At("HEAD"), cancellable = true)
     private void onDecode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, List<Object> list, CallbackInfo info) throws DataFormatException {
-        if (ModuleManager.INSTANCE.isActive(AntiChunkBan.class)) info.cancel();
+        if (ModuleManager.INSTANCE.isActive(AntiPacketKick.class)) info.cancel();
         else return;
 
         if (byteBuf.readableBytes() != 0) {
