@@ -13,9 +13,9 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import minegame159.meteorclient.commands.Command;
-import minegame159.meteorclient.commands.CommandSource;
 import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.utils.Chat;
+import net.minecraft.command.CommandSource;
 
 import java.util.Arrays;
 import java.util.Collection;

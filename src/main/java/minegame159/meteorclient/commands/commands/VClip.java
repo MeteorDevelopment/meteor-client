@@ -8,10 +8,10 @@ package minegame159.meteorclient.commands.commands;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import minegame159.meteorclient.commands.Command;
-import minegame159.meteorclient.commands.CommandSource;
 import minegame159.meteorclient.utils.Chat;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.command.CommandSource;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
