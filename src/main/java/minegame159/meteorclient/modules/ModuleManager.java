@@ -379,7 +379,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new MessageAura());
         addModule(new Nuker());
         addModule(new SoundBlocker());
-        addModule(new AntiChunkBan());
+        addModule(new AntiPacketKick());
         addModule(new Announcer());
         addModule(new BetterChat());
         addModule(new FancyChat());
