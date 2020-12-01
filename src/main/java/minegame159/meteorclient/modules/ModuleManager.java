@@ -300,6 +300,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new EndermanLook());
         addModule(new NoBreakDelay());
         addModule(new AntiCactus());
+        addModule(new FakePlayer());
     }
 
     private void initMovement() {
