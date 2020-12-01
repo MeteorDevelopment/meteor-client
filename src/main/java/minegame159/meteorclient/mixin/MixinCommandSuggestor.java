@@ -29,13 +29,13 @@ public abstract class MixinCommandSuggestor {
 
     @Shadow @Final private MinecraftClient client;
 
-    @Shadow private CommandSuggestor.SuggestionWindow window;
-
     @Shadow private boolean completingSuggestions;
 
     @Shadow private CompletableFuture<Suggestions> pendingSuggestions;
 
     @Shadow protected abstract void show();
+
+    @Shadow private CommandSuggestor.SuggestionWindow window;
 
     @Inject(method = "refresh",
             at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/StringReader;canRead()Z"),
@@ -43,33 +43,27 @@ public abstract class MixinCommandSuggestor {
             locals = LocalCapture.CAPTURE_FAILHARD)
     public void onRefresh(CallbackInfo ci, String string, StringReader reader) {
         String prefix = Config.INSTANCE.getPrefix();
+        int length = prefix.length();
+        if (reader.canRead(length) && reader.getString().startsWith(prefix, reader.getCursor())) {
+            reader.setCursor(reader.getCursor() + length);
+            assert this.client.player != null;
+            // Pretty much copy&paste from the refresh method
+            CommandDispatcher<CommandSource> commandDispatcher = CommandManager.getDispatcher();
+            if (this.parse == null) {
+                this.parse = commandDispatcher.parse(reader, CommandManager.getCommandSource());
+            }
 
-        // Assuming the prefix can be more than one character, return if the first n characters of prefix do not
-        // match the input.
-        if (!reader.canRead(prefix.length())) return;
-        while (prefix.length() > 0) {
-            if (reader.read() != prefix.charAt(0)) return;
-            prefix = prefix.substring(1);
+            int cursor = textField.getCursor();
+            if (cursor >= 1 && (this.window == null || !this.completingSuggestions)) {
+                this.pendingSuggestions = commandDispatcher.getCompletionSuggestions(this.parse, cursor);
+                this.pendingSuggestions.thenRun(() -> {
+                    if (this.pendingSuggestions.isDone()) {
+                        this.show();
+                    }
+                });
+            }
+            ci.cancel();
         }
-
-        assert this.client.player != null;
-        // Pretty much copy&paste from the refresh method
-        CommandDispatcher<CommandSource> commandDispatcher = CommandManager.getDispatcher();
-        if (this.parse == null) {
-            this.parse = commandDispatcher.parse(reader, CommandManager.getCommandSource());
-        }
-
-        int cursor = textField.getCursor();
-        if (cursor >= 1 && !this.completingSuggestions) {
-            this.pendingSuggestions = commandDispatcher.getCompletionSuggestions(this.parse, cursor);
-            this.pendingSuggestions.thenRun(() -> {
-                if (this.pendingSuggestions.isDone()) {
-                    this.show();
-                }
-            });
-        }
-
-        ci.cancel();
     }
 
 }
