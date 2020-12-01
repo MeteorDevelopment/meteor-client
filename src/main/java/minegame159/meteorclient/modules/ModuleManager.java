@@ -301,6 +301,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new NoBreakDelay());
         addModule(new AntiCactus());
         addModule(new FakePlayer());
+        addModule(new NameProtect());
     }
 
     private void initMovement() {
