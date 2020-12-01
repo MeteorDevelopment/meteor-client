@@ -11,6 +11,8 @@ import minegame159.meteorclient.commands.CommandSource;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
 
+import java.util.ArrayList;
+
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
 public class Panic extends Command {
@@ -21,7 +23,7 @@ public class Panic extends Command {
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.executes(context -> {
-            ModuleManager.INSTANCE.getActive().forEach(ToggleModule::toggle);
+            new ArrayList<>(ModuleManager.INSTANCE.getActive()).forEach(ToggleModule::toggle);
 
             return SINGLE_SUCCESS;
         });
