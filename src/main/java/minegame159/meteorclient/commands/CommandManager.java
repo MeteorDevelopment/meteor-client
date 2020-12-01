@@ -19,7 +19,6 @@ public class CommandManager {
     public static void init() {
         addCommand(new Bind());
         addCommand(new ClearChat());
-        addCommand(new Commands());
         addCommand(new Modules());
         addCommand(new ResetBind());
         addCommand(new Settings());
