@@ -1,3 +1,8 @@
+/*
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
+ * Copyright (c) 2020 Meteor Development.
+ */
+
 package minegame159.meteorclient.modules.player;
 
 import com.google.common.collect.Lists;
@@ -47,9 +52,11 @@ public class FakePlayer extends ToggleModule {
     }
 
     public void clearFakePlayers() {
-        for (FakePlayerEntity player : players) {
-            player.despawn();
+        if (isActive()) {
+            for (FakePlayerEntity player : players) {
+                player.despawn();
+            }
+            players.clear();
         }
-        players.clear();
     }
 }
