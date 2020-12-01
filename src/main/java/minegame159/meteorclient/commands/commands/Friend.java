@@ -5,9 +5,14 @@
 
 package minegame159.meteorclient.commands.commands;
 
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import minegame159.meteorclient.commands.Command;
+import minegame159.meteorclient.commands.CommandSource;
 import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.utils.Chat;
+
+import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
 public class Friend extends Command {
     public Friend() {
@@ -15,67 +20,41 @@ public class Friend extends Command {
     }
 
     @Override
-    public void run(String[] args) {
-        if (args.length == 0) {
-            sendErrorWrongSubcommand();
-            return;
-        }
+    public void build(LiteralArgumentBuilder<CommandSource> builder) {
+        builder.then(literal("add")
+                .then(argument("friend", StringArgumentType.greedyString())
+                        .executes(context -> {
+                            // TODO: Friend argument
+                            String friend = context.getArgument("friend", String.class);
+                            if (FriendManager.INSTANCE.add(new minegame159.meteorclient.friends.Friend(friend))) {
+                                Chat.info("Added (highlight)%s (default)to friends.", friend);
+                            } else {
+                                Chat.error("That person is already your friend.");
+                            }
 
-        switch (args[0].toLowerCase()) {
-            case "add": {
-                if (args.length < 2) {
-                    sendErrorEnterName();
-                    return;
-                }
+                            return SINGLE_SUCCESS;
+                        }))
+                .then(literal("remove").then(argument("friend", StringArgumentType.greedyString())
+                        .executes(context -> {
+                            // TODO: Friend argument
+                            String friend = context.getArgument("friend", String.class);
+                            if (FriendManager.INSTANCE.remove(new minegame159.meteorclient.friends.Friend(friend))) {
+                                Chat.info("Removed (highlight)%s (default)from friends.", friend);
+                            } else {
+                                Chat.error("That person is not your friend.");
+                            }
 
-                String name = "";
-                for (int i = 1; i < args.length; i++) {
-                    if (i > 1) name += " ";
-                    name += args[i];
-                }
+                            return SINGLE_SUCCESS;
+                        })))
+                .then(literal("list").executes(context -> {
+                    Chat.info("You have (highlight)%d (default)friends:", FriendManager.INSTANCE.count());
 
-                if (FriendManager.INSTANCE.add(new minegame159.meteorclient.friends.Friend(name))) {
-                    Chat.info("Added (highlight)%s (default)to friends.", name);
-                }
+                    for (minegame159.meteorclient.friends.Friend friend : FriendManager.INSTANCE) {
+                        Chat.info(" - (highlight)%s", friend.name);
+                    }
 
-                break;
-            }
-            case "remove": {
-                if (args.length < 2) {
-                    sendErrorEnterName();
-                    return;
-                }
-
-                String name = "";
-                for (int i = 1; i < args.length; i++) {
-                    if (i > 1) name += " ";
-                    name += args[i];
-                }
-
-                if (FriendManager.INSTANCE.remove(new minegame159.meteorclient.friends.Friend(name))) {
-                    Chat.info("Removed (highlight)%s (default)from friends.", name);
-                }
-
-                break;
-            }
-            case "list": {
-                Chat.info("You have (highlight)%d (default)friends:", FriendManager.INSTANCE.count());
-
-                for (minegame159.meteorclient.friends.Friend friend : FriendManager.INSTANCE) {
-                    Chat.info(" - (highlight)%s", friend.name);
-                }
-
-                break;
-            }
-            default: sendErrorWrongSubcommand();
-        }
+                    return SINGLE_SUCCESS;
+                })));
     }
 
-    private void sendErrorWrongSubcommand() {
-        Chat.error("Wrong sub-command. Use (highlight)add(default), (highlight)remove (default)or (highlight)list(default).");
-    }
-
-    private void sendErrorEnterName() {
-        Chat.error("Enter name of your friend.");
-    }
 }
