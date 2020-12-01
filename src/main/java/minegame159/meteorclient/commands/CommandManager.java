@@ -38,6 +38,7 @@ public class CommandManager {
         addCommand(new Friend());
         addCommand(new ResetGui());
         addCommand(new Peek());
+        addCommand(new FakePlayerCommand());
     }
 
     public static void dispatch(String message) throws CommandSyntaxException {
