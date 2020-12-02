@@ -602,22 +602,22 @@ public class CrystalAura extends ToggleModule {
         assert mc.world != null;
         int x = 0;
         int z = 0;
-        if (isValid(target.getPos().add(2, -1, 0))
+        if (isValid(target.getPos().add(2, -1, 0)) && mc.world.getBlockState(target.getBlockPos().add(1, 0, 0)).getBlock() != Blocks.BEDROCK
                 && Math.sqrt(mc.player.getBlockPos().getSquaredDistance(new Vec3i(target.getBlockPos().getX() + 2, target.getBlockPos().getY() - 1, target.getBlockPos().getZ()))) < placeRange.get()
                 && mc.world.raycast(new RaycastContext(target.getPos(), target.getPos().add(2, -1, 0), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, target)).getType()
                 != HitResult.Type.MISS){
             x = 2;
-        } else if (isValid(target.getPos().add(-2, -1, 0))
+        } else if (isValid(target.getPos().add(-2, -1, 0)) && mc.world.getBlockState(target.getBlockPos().add(-1, 0, 0)).getBlock() != Blocks.BEDROCK
                 && Math.sqrt(mc.player.getBlockPos().getSquaredDistance(new Vec3i(target.getBlockPos().getX() -2, target.getBlockPos().getY() - 1, target.getBlockPos().getZ()))) < placeRange.get()
                 && mc.world.raycast(new RaycastContext(target.getPos(), target.getPos().add(-2, -1, 0), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, target)).getType()
                 != HitResult.Type.MISS){
             x = -2;
-        } else if (isValid(target.getPos().add(0, -1, -2))
+        } else if (isValid(target.getPos().add(0, -1, -2)) && mc.world.getBlockState(target.getBlockPos().add(0, 0, 1)).getBlock() != Blocks.BEDROCK
                 && Math.sqrt(mc.player.getBlockPos().getSquaredDistance(new Vec3i(target.getBlockPos().getX(), target.getBlockPos().getY() - 1, target.getBlockPos().getZ() + 2))) < placeRange.get()
                 && mc.world.raycast(new RaycastContext(target.getPos(), target.getPos().add(0, -1, 2), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, target)).getType()
                 != HitResult.Type.MISS){
             z = 2;
-        } else if (isValid(target.getPos().add(0, -1, -2))
+        } else if (isValid(target.getPos().add(0, -1, -2)) && mc.world.getBlockState(target.getBlockPos().add(0, 0, -1)).getBlock() != Blocks.BEDROCK
                 && Math.sqrt(mc.player.getBlockPos().getSquaredDistance(new Vec3i(target.getBlockPos().getX(), target.getBlockPos().getY() - 1, target.getBlockPos().getZ() - 2))) < placeRange.get()
                 && mc.world.raycast(new RaycastContext(target.getPos(), target.getPos().add(0, -1, -2), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, target)).getType()
                 != HitResult.Type.MISS){
