@@ -5,12 +5,14 @@
 
 package minegame159.meteorclient.modules;
 
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.serialization.Lifecycle;
 import me.zero.alpine.event.EventPriority;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listenable;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.MeteorClient;
+import minegame159.meteorclient.commands.CommandManager;
 import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.events.GameLeftEvent;
 import minegame159.meteorclient.events.GameJoinedEvent;
@@ -26,6 +28,7 @@ import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.*;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.command.CommandSource;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -238,6 +241,8 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
     private void addModule(Module module) {
         modules.put(module.getClass(), module);
         getGroup(module.category).add(module);
+
+        CommandManager.getDispatcher().register(module.buildCommand());
     }
 
     private void initCombat() {

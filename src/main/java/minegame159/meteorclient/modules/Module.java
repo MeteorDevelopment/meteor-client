@@ -5,6 +5,8 @@
 
 package minegame159.meteorclient.modules;
 
+import com.mojang.brigadier.Command;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import me.zero.alpine.listener.Listenable;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.EventStore;
@@ -16,6 +18,7 @@ import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.ISerializable;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.command.CommandSource;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 
@@ -63,6 +66,21 @@ public abstract class Module implements Listenable, ISerializable<Module> {
     }
     public void doAction() {
         doAction(true);
+    }
+
+    public LiteralArgumentBuilder<CommandSource> buildCommand() {
+        LiteralArgumentBuilder<CommandSource> builder = null;
+
+        if (this instanceof ToggleModule) {
+            builder = LiteralArgumentBuilder.literal(name);
+
+            builder.executes(context -> {
+                ((ToggleModule) this).toggle();
+                return Command.SINGLE_SUCCESS;
+            });
+        }
+
+        return builder;
     }
 
     @Override
