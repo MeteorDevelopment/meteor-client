@@ -559,7 +559,7 @@ public class CrystalAura extends ToggleModule {
                 for(double k = playerPos.getY() - 3; k < playerPos.getY() + 3; k++){
                     pos = new Vec3d(Math.floor(i), Math.floor(k), Math.floor(j));
                     if (bestBlock == null) bestBlock = pos;
-                    if(isValid(pos) && (DamageCalcUtils.crystalDamage(mc.player, pos.add(0.5, 1, 0.5)) < maxDamage.get()
+                    if(isValid(new BlockPos(pos)) && (DamageCalcUtils.crystalDamage(mc.player, pos.add(0.5, 1, 0.5)) < maxDamage.get()
                             || mode.get() == Mode.suicide)){
                         if (!strict.get() || isEmpty(new BlockPos(pos.add(0, 2, 0)))) {
                             if (bestDamage < DamageCalcUtils.crystalDamage(target, pos.add(0.5, 1, 0.5))) {
@@ -578,16 +578,16 @@ public class CrystalAura extends ToggleModule {
         assert mc.player != null;
         int x = 0;
         int z = 0;
-        if (isValid(target.getPos().add(1, -1, 0))
+        if (isValid(target.getBlockPos().add(1, -1, 0))
                 && Math.sqrt(mc.player.getBlockPos().getSquaredDistance(new Vec3i(target.getBlockPos().getX() + 1, target.getBlockPos().getY() - 1, target.getBlockPos().getZ()))) < placeRange.get()){
             x = 1;
-        } else if (isValid(target.getPos().add(-1, -1, 0))
+        } else if (isValid(target.getBlockPos().add(-1, -1, 0))
                 && Math.sqrt(mc.player.getBlockPos().getSquaredDistance(new Vec3i(target.getBlockPos().getX() -1, target.getBlockPos().getY() - 1, target.getBlockPos().getZ()))) < placeRange.get()){
             x = -1;
-        } else if (isValid(target.getPos().add(0, -1, -1))
+        } else if (isValid(target.getBlockPos().add(0, -1, -1))
                 && Math.sqrt(mc.player.getBlockPos().getSquaredDistance(new Vec3i(target.getBlockPos().getX(), target.getBlockPos().getY() - 1, target.getBlockPos().getZ() + 1))) < placeRange.get()){
             z = 1;
-        } else if (isValid(target.getPos().add(0, -1, -1))
+        } else if (isValid(target.getBlockPos().add(0, -1, -1))
                 && Math.sqrt(mc.player.getBlockPos().getSquaredDistance(new Vec3i(target.getBlockPos().getX(), target.getBlockPos().getY() - 1, target.getBlockPos().getZ() - 1))) < placeRange.get()){
             z = -1;
         }
@@ -600,27 +600,16 @@ public class CrystalAura extends ToggleModule {
     private Vec3d findOpenSurround(LivingEntity target){
         assert mc.player != null;
         assert mc.world != null;
+
         int x = 0;
         int z = 0;
-        if (isValid(target.getPos().add(2, -1, 0)) && mc.world.getBlockState(target.getBlockPos().add(1, 0, 0)).getBlock() != Blocks.BEDROCK
-                && Math.sqrt(mc.player.getBlockPos().getSquaredDistance(new Vec3i(target.getBlockPos().getX() + 2, target.getBlockPos().getY() - 1, target.getBlockPos().getZ()))) < placeRange.get()
-                && mc.world.raycast(new RaycastContext(target.getPos(), target.getPos().add(2, -1, 0), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, target)).getType()
-                != HitResult.Type.MISS){
+        if (validSurroundBreak(target, 2, 0)){
             x = 2;
-        } else if (isValid(target.getPos().add(-2, -1, 0)) && mc.world.getBlockState(target.getBlockPos().add(-1, 0, 0)).getBlock() != Blocks.BEDROCK
-                && Math.sqrt(mc.player.getBlockPos().getSquaredDistance(new Vec3i(target.getBlockPos().getX() -2, target.getBlockPos().getY() - 1, target.getBlockPos().getZ()))) < placeRange.get()
-                && mc.world.raycast(new RaycastContext(target.getPos(), target.getPos().add(-2, -1, 0), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, target)).getType()
-                != HitResult.Type.MISS){
+        } else if (validSurroundBreak(target, -2, 0)){
             x = -2;
-        } else if (isValid(target.getPos().add(0, -1, -2)) && mc.world.getBlockState(target.getBlockPos().add(0, 0, 1)).getBlock() != Blocks.BEDROCK
-                && Math.sqrt(mc.player.getBlockPos().getSquaredDistance(new Vec3i(target.getBlockPos().getX(), target.getBlockPos().getY() - 1, target.getBlockPos().getZ() + 2))) < placeRange.get()
-                && mc.world.raycast(new RaycastContext(target.getPos(), target.getPos().add(0, -1, 2), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, target)).getType()
-                != HitResult.Type.MISS){
+        } else if (validSurroundBreak(target, 0, 2)){
             z = 2;
-        } else if (isValid(target.getPos().add(0, -1, -2)) && mc.world.getBlockState(target.getBlockPos().add(0, 0, -1)).getBlock() != Blocks.BEDROCK
-                && Math.sqrt(mc.player.getBlockPos().getSquaredDistance(new Vec3i(target.getBlockPos().getX(), target.getBlockPos().getY() - 1, target.getBlockPos().getZ() - 2))) < placeRange.get()
-                && mc.world.raycast(new RaycastContext(target.getPos(), target.getPos().add(0, -1, -2), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, target)).getType()
-                != HitResult.Type.MISS){
+        } else if (validSurroundBreak(target, 0, -2)){
             z = -2;
         }
         if (x != 0 || z != 0) {
@@ -629,11 +618,23 @@ public class CrystalAura extends ToggleModule {
         return null;
     }
 
-    private boolean isValid(Vec3d vec3d){
+    private boolean isValid(BlockPos blockPos){
         assert mc.world != null;
-        return (mc.world.getBlockState(new BlockPos(vec3d)).getBlock() == Blocks.BEDROCK
-                || mc.world.getBlockState(new BlockPos(vec3d)).getBlock() == Blocks.OBSIDIAN)
-                && isEmpty(new BlockPos(vec3d.add(0, 1, 0)));
+        return ((mc.world.getBlockState(blockPos).getBlock() == Blocks.BEDROCK
+                || mc.world.getBlockState(blockPos).getBlock() == Blocks.OBSIDIAN)
+                && isEmpty(blockPos.add(0, 1, 0)));
+    }
+
+    private boolean validSurroundBreak(LivingEntity target, int x, int z) {
+        assert mc.world != null;
+        assert mc.player != null;
+        Vec3d crystalPos = new Vec3d(target.getBlockPos().getX() + 0.5, target.getBlockPos().getY(), target.getBlockPos().getZ() + 0.5);
+        return isValid(target.getBlockPos().add(x, -1, z)) && mc.world.getBlockState(target.getBlockPos().add(x/2, 0, z/2)).getBlock() != Blocks.BEDROCK
+                && (!(breakMode.get() == Mode.safe) || (getTotalHealth(mc.player) - DamageCalcUtils.crystalDamage(mc.player, crystalPos.add(x, 0, z)) > minHealth.get()
+                && DamageCalcUtils.crystalDamage(mc.player, crystalPos.add(x, 0, z)) < maxDamage.get()))
+                && Math.sqrt(mc.player.getBlockPos().getSquaredDistance(new Vec3i(target.getBlockPos().getX() + x, target.getBlockPos().getY() - 1, target.getBlockPos().getZ() + z))) < placeRange.get()
+                && mc.world.raycast(new RaycastContext(target.getPos(), target.getPos().add(x, 0, z), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, target)).getType()
+                != HitResult.Type.MISS;
     }
 
     private float getTotalHealth(PlayerEntity target) {
@@ -642,7 +643,7 @@ public class CrystalAura extends ToggleModule {
 
     private boolean isEmpty(BlockPos pos) {
         assert mc.world != null;
-        return mc.world.isAir(pos) && mc.world.getOtherEntities(null, new Box(pos.getX(), pos.getY(), pos.getZ(), pos.getX() + 1.0D, pos.getY() + 2.0D, pos.getZ() + 1.0D)).isEmpty();
+        return mc.world.getBlockState(pos).isAir() && mc.world.getOtherEntities(null, new Box(pos.getX(), pos.getY(), pos.getZ(), pos.getX() + 1.0D, pos.getY() + 2.0D, pos.getZ() + 1.0D)).isEmpty();
     }
 
     private class RenderBlock {
