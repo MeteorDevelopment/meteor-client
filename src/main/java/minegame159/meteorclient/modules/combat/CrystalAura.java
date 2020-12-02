@@ -360,7 +360,7 @@ public class CrystalAura extends ToggleModule {
         if (target != null && heldCrystal != null && placeDelayLeft <= 0 && mc.world.raycast(new RaycastContext(target.getPos(), heldCrystal.getPos(), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, target)).getType()
                 == HitResult.Type.MISS) locked = false;
         if (heldCrystal == null) locked = false;
-        if (locked) return;
+        if (locked && !facePlace.get()) return;
 
         if (breakDelayLeft <= 0) {
             hitCrystal();
@@ -410,7 +410,7 @@ public class CrystalAura extends ToggleModule {
                     }
                 }
             }
-            if (bestBlock != null && (bestDamage >= minDamage.get() || shouldFacePlace)) {
+            if (bestBlock != null && ((bestDamage >= minDamage.get() && !locked) || shouldFacePlace)) {
                 if (autoSwitch.get()) doSwitch();
                 if (mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL) return;
                 if (!smartDelay.get()) {
