@@ -13,7 +13,7 @@ import minegame159.meteorclient.modules.ToggleModule;
 
 public class AntiFire extends ToggleModule {
     public AntiFire() {
-        super(Category.Player, "anti-fire", "Removes fire.");
+        super(Category.Player, "anti-fire", "Attempts to remove fire.");
     }
 
     @EventHandler
