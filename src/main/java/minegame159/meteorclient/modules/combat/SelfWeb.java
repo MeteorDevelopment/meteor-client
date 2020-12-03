@@ -27,7 +27,7 @@ public class SelfWeb extends ToggleModule {
 
     private final Setting<Boolean> doubles = sgGeneral.add(new BoolSetting.Builder()
             .name("doubles")
-            .description("Places in your upper hitbox as well.")
+            .description("If it places cobwebs in the upper hitbox aswell.")
             .defaultValue(false)
             .build()
     );
@@ -41,13 +41,13 @@ public class SelfWeb extends ToggleModule {
 
     private final Setting<Boolean> lookDown = sgGeneral.add(new BoolSetting.Builder()
             .name("look-down")
-            .description("Makes you look down when placing webs.")
+            .description("Forces you to look down when placing cobwebs.")
             .defaultValue(true)
             .build()
     );
 
     public SelfWeb() {
-        super(Category.Combat, "self-web", "Automatically places webs at your feet.");
+        super(Category.Combat, "self-web", "Automatically places cobwebs on your yourself.");
     }
 
     @EventHandler
