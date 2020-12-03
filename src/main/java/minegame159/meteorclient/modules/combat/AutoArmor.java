@@ -56,28 +56,28 @@ public class AutoArmor extends ToggleModule {
 
     private final Setting<Prot> mode = sgGeneral.add(new EnumSetting.Builder<Prot>()
             .name("prioritize")
-            .description("Which protection to prioritize.")
+            .description("Which type of protection to prioritize.")
             .defaultValue(Prot.Protection)
             .build()
     );
 
     private final Setting<Boolean> pauseInInventory = sgGeneral.add(new BoolSetting.Builder()
             .name("pause-in-inventory")
-            .description("Stops moving armour when you are in an inventory")
+            .description("Stops moving armor when you are in an inventory.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> bProtLegs = sgGeneral.add(new BoolSetting.Builder()
             .name("blast-protection-leggings")
-            .description("Prioritizes blast protection on leggings")
+            .description("Prioritizes blast protection on leggings.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> preferMending = sgGeneral.add(new BoolSetting.Builder()
             .name("prefer-mending")
-            .description("Prefers to equip mending than non mending.")
+            .description("Prioritizes mending over non-mending.")
             .defaultValue(true)
             .build()
     );
@@ -101,14 +101,14 @@ public class AutoArmor extends ToggleModule {
 
     private final Setting<Boolean> banBinding = sgGeneral.add(new BoolSetting.Builder()
             .name("ban-binding")
-            .description("Stops you from putting on any item with Curse of Binding")
+            .description("Blocks you from equpping any item with Curse of Binding.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> antiBreak = sgGeneral.add(new BoolSetting.Builder()
             .name("anti-break")
-            .description("Tries to stop your armor getting broken.")
+            .description("Attempts to stop your armor from getting broken.")
             .defaultValue(true)
             .build()
     );
@@ -125,14 +125,14 @@ public class AutoArmor extends ToggleModule {
 
     private final Setting<Boolean> pause = sgGeneral.add(new BoolSetting.Builder()
             .name("pause-between-pieces")
-            .description("Pauses between each individual piece being moved.(helps prevent desync)")
+            .description("Pauses between each individual piece being moved. (Helps prevent de-sync.)")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
             .name("delay")
-            .description("The delay between pieces being moved.(helps prevent desync)")
+            .description("The delay between pieces being moved. (Helps prevent de-sync.)")
             .defaultValue(1)
             .min(0)
             .max(20)
@@ -142,7 +142,7 @@ public class AutoArmor extends ToggleModule {
 
     private final Setting<Boolean> boomSwitch = sgGeneral.add(new BoolSetting.Builder()
             .name("switch-for-explosion")
-            .description("Switches to Blast Protection automatically if you're going to get hit by an explosion")
+            .description("Switches to Blast Protection automatically if you're going to get hit by an explosion.")
             .defaultValue(false)
             .build()
     );
