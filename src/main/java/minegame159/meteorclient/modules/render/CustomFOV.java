@@ -52,7 +52,7 @@ public class CustomFOV extends ToggleModule {
     }
 
     public CustomFOV() {
-        super(Category.Render, "custom-fov", "Changes your fov.");
+        super(Category.Render, "custom-fov", "Changes your FOV.");
     }
 
 }
