@@ -28,7 +28,7 @@ public class AutoWeb extends ToggleModule {
 
     private final Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()
             .name("range")
-            .description("How far away it will place webs.")
+            .description("How far away it will place cobwebs.")
             .defaultValue(4)
             .min(0)
             .build()
@@ -36,13 +36,13 @@ public class AutoWeb extends ToggleModule {
 
     private final Setting<Boolean> doubles = sgGeneral.add(new BoolSetting.Builder()
             .name("doubles")
-            .description("Places in the targets upper hitbox as well.")
+            .description("If it places in the targets upper hitbox aswell.")
             .defaultValue(false)
             .build()
     );
 
     public AutoWeb() {
-        super(Category.Combat, "auto-web", "Automatically places webs at your enemies feet.");
+        super(Category.Combat, "auto-web", "Automatically places cobwebs on your enemies.");
     }
 
     private PlayerEntity target = null;
