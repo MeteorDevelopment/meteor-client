@@ -22,7 +22,7 @@ public class BowSpam extends ToggleModule {
 
     private final Setting<Integer> charge = sgGeneral.add(new IntSetting.Builder()
             .name("charge")
-            .description("How much to charge the bow in ticks. (0-20)")
+            .description("How much to charge the bow in ticks.")
             .defaultValue(5)
             .min(5)
             .max(20)
@@ -33,7 +33,7 @@ public class BowSpam extends ToggleModule {
 
     private final Setting<Boolean> onlyWhenHoldingRightClick = sgGeneral.add(new BoolSetting.Builder()
             .name("only-when-holding-right-click")
-            .description("Works only when holding right click.")
+            .description("If it only functions whilst holding right click.")
             .defaultValue(false)
             .build()
     );
