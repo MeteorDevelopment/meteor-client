@@ -44,7 +44,7 @@ public class Auto32K extends ToggleModule {
         Dispenser
     }
 
-    public Auto32K(){super(Category.Combat, "auto32k", "Does 32k PvP for you.");}
+    public Auto32K(){super(Category.Combat, "auto32k", "Completes 32k PvP for you.");}
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
@@ -73,14 +73,14 @@ public class Auto32K extends ToggleModule {
 
     private final Setting<List<Block>> throwawayItems = sgGeneral.add(new BlockListSetting.Builder()
             .name("throwaway-blocks")
-            .description("Acceptable blocks to use to fill the hopper")
+            .description("Acceptable blocks to use to fill the hopper.")
             .defaultValue(setDefaultBlocks())
             .build()
     );
 
     private final Setting<Boolean> autoMove = sgGeneral.add(new BoolSetting.Builder()
             .name("auto-move")
-            .description("Moves the sword for you")
+            .description("Moves the sword for you.")
             .defaultValue(true)
             .build()
     );
@@ -143,7 +143,7 @@ public class Auto32K extends ToggleModule {
                     mc.player.inventory.selectedSlot = hopperSlot;
                     if(bestBlock == null) return;
                     if (!PlayerUtils.placeBlock(bestBlock.add(x, 0, z), Hand.MAIN_HAND)) {
-                        Utils.sendMessage("#redFailed to place");
+                        Utils.sendMessage("#redFailed to place.");
                         this.toggle();
                         return;
                     }
