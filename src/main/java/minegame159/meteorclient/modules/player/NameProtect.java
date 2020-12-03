@@ -33,13 +33,14 @@ public class NameProtect extends ToggleModule {
         username = mc.getSession().getUsername();
     }
 
-    public String hideName(String string) {
+    public String replaceName(String string) {
         if (string.contains(username) && name.get().length() > 0 && isActive()) {
-            return name.get();
+            return string.replace(username, name.get());
         } else return string;
     }
 
-    public String getName() {
-        return name.get();
+    public String getName(String original) {
+        if (name.get().length() > 0 && isActive()) return name.get();
+        else return original;
     }
 }
