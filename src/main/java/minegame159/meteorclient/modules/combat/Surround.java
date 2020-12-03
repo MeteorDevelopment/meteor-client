@@ -36,7 +36,7 @@ public class Surround extends ToggleModule {
     
     private final Setting<Boolean> onlyOnGround = sgGeneral.add(new BoolSetting.Builder()
             .name("only-on-ground")
-            .description("Works only when you standing on ground.")
+            .description("Works only when you are standing on the ground.")
             .defaultValue(true)
             .build()
     );
@@ -50,7 +50,7 @@ public class Surround extends ToggleModule {
 
     private final Setting<Boolean> turnOff = sgGeneral.add(new BoolSetting.Builder()
             .name("turn-off")
-            .description("Turns off when placed.")
+            .description("Disables when placed.")
             .defaultValue(false)
             .build()
     );
@@ -74,7 +74,7 @@ public class Surround extends ToggleModule {
     private boolean return_;
 
     public Surround() {
-        super(Category.Combat, "surround", "Surrounds you with obsidian (or other blocks) to take less damage.");
+        super(Category.Combat, "surround", "Surrounds you with blocks to take less damage.");
     }
 
     @Override
