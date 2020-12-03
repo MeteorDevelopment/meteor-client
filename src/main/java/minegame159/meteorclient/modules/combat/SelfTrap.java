@@ -54,7 +54,7 @@ public class SelfTrap extends ToggleModule {
 
         if (obsidianSlot == -1 && selfToggle.get()) {
             if (!sentMessage) {
-                Chat.warning(this, "No obsidian found… disabling.");
+                Chat.warning(this, "No obsidian found, disabling.");
                 sentMessage = true;
             }
 
