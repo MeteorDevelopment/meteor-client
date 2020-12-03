@@ -61,7 +61,7 @@ public class AnchorAura extends ToggleModule {
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("place-mode")
-            .description("The way anchors are placed")
+            .description("The way anchors are placed.")
             .defaultValue(Mode.safe)
             .build()
     );
@@ -96,28 +96,28 @@ public class AnchorAura extends ToggleModule {
 
     private final Setting<Double> minDamage = sgPlace.add(new DoubleSetting.Builder()
             .name("min-damage")
-            .description("The minimum damage the anchor will place")
+            .description("The minimum damage the anchor will place.")
             .defaultValue(5.5)
             .build()
     );
 
     private final Setting<Double> maxDamage = sgPlace.add(new DoubleSetting.Builder()
             .name("max-damage")
-            .description("The maximum self-damage allowed")
+            .description("The maximum self-damage allowed.")
             .defaultValue(3)
             .build()
     );
 
     private final Setting<Double> minHealth = sgPlace.add(new DoubleSetting.Builder()
             .name("min-health")
-            .description("The minimum health you have to be for it to place")
+            .description("The minimum health you have to be at for it to place.")
             .defaultValue(15)
             .build()
     );
 
     private final Setting<Boolean> place = sgGeneral.add(new BoolSetting.Builder()
             .name("place")
-            .description("Allow it to place anchors")
+            .description("Allow it to place anchors.")
             .defaultValue(true)
             .build()
     );
@@ -147,7 +147,7 @@ public class AnchorAura extends ToggleModule {
             .build()
     );
 
-    public AnchorAura() {super(Category.Combat, "anchor-aura", "Places and explodes respawn anchors for you,");}
+    public AnchorAura() {super(Category.Combat, "anchor-aura", "Places and explodes respawn anchors for you.");}
 
     private int delayLeft = delay.get();
     private int preSlot;
@@ -165,7 +165,7 @@ public class AnchorAura extends ToggleModule {
         assert mc.world != null;
         delayLeft --;
         if (mc.world.getDimension().isRespawnAnchorWorking()) {
-            Chat.info(this, "You are not in the Overworld. (highlight)Disabling(default)!");
+            Chat.info(this, "You are not in the overworld. (highlight)Disabling(default)!");
             this.toggle();
             return;
         }
