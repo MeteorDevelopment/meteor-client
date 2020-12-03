@@ -63,7 +63,7 @@ public class KillAura extends ToggleModule {
     // General
     private final Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()
             .name("range")
-            .description("Attack range.")
+            .description("Modifies your reach.")
             .defaultValue(5.5)
             .min(0.0)
             .build()
@@ -79,7 +79,7 @@ public class KillAura extends ToggleModule {
 
     private final Setting<Boolean> onlyOnGround = sgGeneral.add(new BoolSetting.Builder()
             .name("only-on-ground")
-            .description("Only attacks players that are on the ground (useful to bypass anti-cheats)")
+            .description("Only attacks players that are on the ground. (Useful to bypass anti-cheats.)")
             .defaultValue(false)
             .build()
     );
@@ -100,7 +100,7 @@ public class KillAura extends ToggleModule {
 
     private final Setting<Integer> hitChance = sgGeneral.add(new IntSetting.Builder()
             .name("hit-chance")
-            .description("The probability of your hits counting")
+            .description("The probability of your hits counting.")
             .defaultValue(100)
             .min(0)
             .max(100)
@@ -145,28 +145,28 @@ public class KillAura extends ToggleModule {
 
     private final Setting<Boolean> instaKill = sgGeneral.add(new BoolSetting.Builder()
             .name("insta-kill")
-            .description("If your sharpness is enough to kill then just swing")
+            .description("If your weapon is enough to instantly kill then just swing.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> pauseOnCombat = sgGeneral.add(new BoolSetting.Builder()
             .name("pause-on-combat")
-            .description("Pauses baritone when you get near a target")
+            .description("Pauses Kill Aura when a target is nearby.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> oneTickDelay = sgDelay.add(new BoolSetting.Builder()
             .name("one-tick-delay")
-            .description("Adds one tick delay.")
+            .description("Adds a one tick delay.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<OnlyWhen> itemOnly = sgGeneral.add(new EnumSetting.Builder<OnlyWhen>()
             .name("Item-only")
-            .description("Only hits an entity when the specified item is in your hand. (or any item)")
+            .description("Only hits an entity when the specified item is in your hand. (Or any item.)")
             .defaultValue(OnlyWhen.Any)
             .build()
     );
@@ -181,7 +181,7 @@ public class KillAura extends ToggleModule {
 
     private final Setting<Integer> hitDelay = sgDelay.add(new IntSetting.Builder()
             .name("hit-delay")
-                .description("Hit delay in ticks. 20 ticks = 1 second.")
+                .description("Hit delay in ticks. (20 ticks = 1 second.)")
                 .defaultValue(0)
                 .min(0)
                 .sliderMax(60)
