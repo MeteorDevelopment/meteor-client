@@ -5,6 +5,7 @@
 
 package minegame159.meteorclient.commands.commands;
 
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import minegame159.meteorclient.commands.Command;
 import minegame159.meteorclient.modules.ModuleManager;
@@ -17,22 +18,27 @@ import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
 public class FakePlayerCommand extends Command {
     public FakePlayerCommand(){
-        super("fakeplayer", "Enchants the currently held item with almost every enchantment (must be in creative)");
+        super("fakeplayer", "Used to manage Fakeplayers in the world through chat commands.");
     }
 
     public static final MinecraftClient mc = MinecraftClient.getInstance();
+    public static FakePlayer fakePlayer = ModuleManager.INSTANCE.get(FakePlayer.class);
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.executes(context -> {
-            if (!ModuleManager.INSTANCE.get(FakePlayer.class).isActive()) Chat.error("The FakePlayer module must be enabled to use this command.");
+            if (!fakePlayer.isActive()) Chat.error("The FakePlayer module must be enabled to use this command.");
             else Chat.error("Please enter an argument.");
             return SINGLE_SUCCESS;
         }).then(literal("spawn").executes(context -> {
-            ModuleManager.INSTANCE.get(FakePlayer.class).spawnFakePlayer();
+            fakePlayer.spawnFakePlayer(fakePlayer.getName(), fakePlayer.copyInv(), fakePlayer.setGlowing(), fakePlayer.getHealth());
             return SINGLE_SUCCESS;
-        })).then(literal("clear").executes(context -> {
-            ModuleManager.INSTANCE.get(FakePlayer.class).clearFakePlayers();
+        })).then(literal("remove").then(argument("id", IntegerArgumentType.integer()).executes(context -> {
+            int id = context.getArgument("id", Integer.class);
+            fakePlayer.removeFakePlayer(id);
+            return SINGLE_SUCCESS;
+        }))).then(literal("clear").executes(context -> {
+            fakePlayer.clearFakePlayers(true);
             return SINGLE_SUCCESS;
         }));
     }
