@@ -68,7 +68,7 @@ public class CrystalAura extends ToggleModule {
 
     private final Setting<Double> targetRange = sgGeneral.add(new DoubleSetting.Builder()
             .name("target-range")
-            .description("The radius players get targeted.")
+            .description("The radius players get targetted.")
             .defaultValue(7)
             .min(0)
             .sliderMax(10)
@@ -77,7 +77,7 @@ public class CrystalAura extends ToggleModule {
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("place-mode")
-            .description("The way crystals are placed")
+            .description("The way crystals are placed.")
             .defaultValue(Mode.safe)
             .build()
     );
@@ -91,7 +91,7 @@ public class CrystalAura extends ToggleModule {
 
     private final Setting<List<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
             .name("entities")
-            .description("Entities to attack.")
+            .description("The entities to attack.")
             .defaultValue(getDefault())
             .onlyAttackable()
             .build()
@@ -113,14 +113,14 @@ public class CrystalAura extends ToggleModule {
 
     private final Setting<Double> minDamage = sgPlace.add(new DoubleSetting.Builder()
             .name("min-damage")
-            .description("The minimum damage the crystal will place")
+            .description("The minimum damage the crystal will place.")
             .defaultValue(5.5)
             .build()
     );
 
     private final Setting<Double> maxDamage = sgPlace.add(new DoubleSetting.Builder()
             .name("max-damage")
-            .description("The maximum self-damage allowed")
+            .description("The maximum self-damage allowed.")
             .defaultValue(3)
             .build()
     );
@@ -134,28 +134,28 @@ public class CrystalAura extends ToggleModule {
 
     private final Setting<Double> minHealth = sgPlace.add(new DoubleSetting.Builder()
             .name("min-health")
-            .description("The minimum health you have to be for it to place")
+            .description("The minimum health you have to be at for it to place.")
             .defaultValue(15)
             .build()
     );
 
     private final Setting<Boolean> ignoreWalls = sgGeneral.add(new BoolSetting.Builder()
             .name("ignore-walls")
-            .description("Attack through walls")
+            .description("Attack through walls.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> place = sgGeneral.add(new BoolSetting.Builder()
             .name("place")
-            .description("Allow it to place crystals")
+            .description("Allow it to place crystals.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Integer> breakDelay = sgGeneral.add(new IntSetting.Builder()
             .name("break-delay")
-            .description("Delay ticks between breaking.")
+            .description("Delay in ticks between breaking.")
             .defaultValue(2)
             .min(0)
             .sliderMax(10)
@@ -164,7 +164,7 @@ public class CrystalAura extends ToggleModule {
 
     private final Setting<Integer> placeDelay = sgGeneral.add(new IntSetting.Builder()
             .name("place-delay")
-            .description("Delay ticks between placements.")
+            .description("Delay in ticks between placements.")
             .defaultValue(2)
             .min(0)
             .sliderMax(10)
@@ -173,7 +173,7 @@ public class CrystalAura extends ToggleModule {
 
     private final Setting<Boolean> smartDelay = sgGeneral.add(new BoolSetting.Builder()
             .name("smart-delay")
-            .description("Reduces crystal consumption when doing large amounts of damage.(Can tank performance on lower end PCs)")
+            .description("Reduces crystal consumption when doing large amounts of damage. (Can tank performance on lower end computers.)")
             .defaultValue(true)
             .build()
     );
@@ -194,14 +194,14 @@ public class CrystalAura extends ToggleModule {
 
     private final Setting<Boolean> facePlace = sgGeneral.add(new BoolSetting.Builder()
             .name("face-place")
-            .description("Will face place when target is below a certain health or their armour is low.")
+            .description("Will face place when target is below a certain health or their armor is low.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Double> facePlaceHealth = sgGeneral.add(new DoubleSetting.Builder()
             .name("face-place-health")
-            .description("The health required to face place")
+            .description("The health required to face place.")
             .defaultValue(5)
             .min(1)
             .max(20)
@@ -210,7 +210,7 @@ public class CrystalAura extends ToggleModule {
 
     private final Setting<Double> facePlaceDurability = sgGeneral.add(new DoubleSetting.Builder()
             .name("face-place-durability")
-            .description("The durability required to face place (in percent)")
+            .description("The durability in percentages required to face place.")
             .defaultValue(2)
             .min(1)
             .max(100)
@@ -220,7 +220,7 @@ public class CrystalAura extends ToggleModule {
 
     private final Setting<Boolean> spamFacePlace = sgGeneral.add(new BoolSetting.Builder()
             .name("spam-face-place")
-            .description("Places faster when someone is below the face place health (requires smart delay)")
+            .description("Places faster when someone is below the face place health. (Requires smart delay to function.)")
             .defaultValue(false)
             .build()
     );
@@ -236,14 +236,14 @@ public class CrystalAura extends ToggleModule {
 
     private final Setting<Boolean> antiWeakness = sgGeneral.add(new BoolSetting.Builder()
             .name("anti-weakness")
-            .description("Switches to tools when you have weakness")
+            .description("Switches to tools when you have weakness.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> noSwing = sgGeneral.add(new BoolSetting.Builder()
             .name("no-swing")
-            .description("Stops your hand swinging.")
+            .description("Blocks your hand from swinging.")
             .defaultValue(false)
             .build()
     );
@@ -265,7 +265,7 @@ public class CrystalAura extends ToggleModule {
     private final Color sideColor = new Color();
 
     public CrystalAura() {
-        super(Category.Combat, "crystal-aura", "Places and breaks end crystals automatically");
+        super(Category.Combat, "crystal-aura", "Places and breaks end crystals automatically.");
     }
 
     private int preSlot;
