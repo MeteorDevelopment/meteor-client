@@ -44,21 +44,21 @@ public class AutoGap extends ToggleModule {
 
     private final Setting<Boolean> preferEgap = sgGeneral.add(new BoolSetting.Builder()
             .name("prefer-egap")
-            .description("Prefers to eat egapps over regular gapples")
+            .description("Prefers to eat enchanted golden apples over regular golden apples.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> preferAutoEat = sgGeneral.add(new BoolSetting.Builder()
             .name("prefer-auto-eat")
-            .description("Whether to use auto-eat or this in the event of a conflict")
+            .description("Whether to use Auto Eat or this in the event of a conflict.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> disableAuras = sgGeneral.add(new BoolSetting.Builder()
             .name("disable-auras")
-            .description("disable all auras")
+            .description("Disable all auras.")
             .defaultValue(false)
             .build()
     );
