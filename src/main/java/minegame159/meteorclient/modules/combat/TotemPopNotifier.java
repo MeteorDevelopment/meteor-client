@@ -30,7 +30,7 @@ public class TotemPopNotifier extends ToggleModule {
 
     private final Setting<Boolean> announce = sgGeneral.add(new BoolSetting.Builder()
             .name("announce-in-chat")
-            .description("Sends a chat message rather than a clientside message.")
+            .description("Sends a chat message rather than a client-side message.")
             .defaultValue(false)
             .build()
     );
@@ -38,7 +38,7 @@ public class TotemPopNotifier extends ToggleModule {
     private final Map<UUID, Integer> totemPops = new HashMap<>();
 
     public TotemPopNotifier() {
-        super(Category.Combat, "totem-pop-notifier", "Send chat message when someone pops a totem or dies.");
+        super(Category.Combat, "totem-pop-notifier", "Sends a message when someone pops a totem or dies.");
     }
 
     @Override
