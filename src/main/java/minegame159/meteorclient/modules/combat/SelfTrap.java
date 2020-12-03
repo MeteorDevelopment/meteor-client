@@ -39,7 +39,7 @@ public class SelfTrap extends ToggleModule {
 
     private final Setting<Boolean> lookUp = sgGeneral.add(new BoolSetting.Builder()
             .name("look-up")
-            .description("Makes you look up when placing the anvil")
+            .description("Makes you look up when placing the obsidian.")
             .defaultValue(true)
             .build()
     );
