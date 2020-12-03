@@ -30,7 +30,7 @@ public class BlockSelection extends ToggleModule {
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("mode")
-            .description("Rendering mode")
+            .description("Rendering mode.")
             .defaultValue(Mode.Lines)
             .build()
     );
