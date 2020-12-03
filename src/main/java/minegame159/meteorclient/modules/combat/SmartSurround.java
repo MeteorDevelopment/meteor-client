@@ -35,7 +35,7 @@ public class SmartSurround extends ToggleModule {
 
     private final Setting<Boolean> onlyObsidian = sgGeneral.add(new BoolSetting.Builder()
             .name("only-obsidian")
-            .description("Only uses Obsidian")
+            .description("Only uses obsidian.")
             .defaultValue(false)
             .build());
 
@@ -56,7 +56,7 @@ public class SmartSurround extends ToggleModule {
     private Entity crystal;
 
     public SmartSurround(){
-        super(Category.Combat, "smart-surround", "Tries to save you from crystals automatically.");
+        super(Category.Combat, "smart-surround", "Attempts to save you from crystals automatically.");
     }
 
     @EventHandler
@@ -68,7 +68,7 @@ public class SmartSurround extends ToggleModule {
                 slot = findObiInHotbar();
 
                 if (slot == -1 && onlyObsidian.get()) {
-                    Chat.warning(this, "No Obsidian in hotbar. Disabling!");
+                    Chat.warning(this, "No obsidian in hotbar. Disabling!");
                     return;
                 }
 
