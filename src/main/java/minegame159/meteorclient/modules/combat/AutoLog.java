@@ -53,27 +53,27 @@ public class AutoLog extends ToggleModule {
 
     private final Setting<Boolean> onlyTrusted = sgGeneral.add(new BoolSetting.Builder()
             .name("only-trusted")
-            .description("Disconnects when non-trusted player appears in your render distance.")
+            .description("Disconnects when a non-trusted player appears in your render distance.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> instantDeath = sgGeneral.add(new BoolSetting.Builder()
             .name("32k")
-            .description("Logs out out if someone near you can insta kill you")
+            .description("Disconnects when someone nearby can one-hit kill you.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> crystalLog = sgGeneral.add(new BoolSetting.Builder()
             .name("crystal-log")
-            .description("Log you out when there is a crystal nearby.")
+            .description("Disconnects when there is a crystal nearby.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Integer> range = sgGeneral.add(new IntSetting.Builder()
-            .name("range").description("How close a crystal has to be to log.")
+            .name("range").description("How close a crystal has to be to disconnect.")
             .defaultValue(4)
             .min(1)
             .max(10)
@@ -102,7 +102,7 @@ public class AutoLog extends ToggleModule {
         for (Entity entity : mc.world.getEntities()) {
             if(entity instanceof PlayerEntity && entity.getUuid() != mc.player.getUuid()) {
                 if (onlyTrusted.get() && entity != mc.player && !FriendManager.INSTANCE.isTrusted((PlayerEntity) entity)) {
-                        mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(new LiteralText("Non-trusted player appeared in your render distance")));
+                        mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(new LiteralText("A non-trusted player appeared in your render distance.")));
                         break;
                 }
                 if (mc.player.distanceTo(entity) < 8 && instantDeath.get() && DamageCalcUtils.getSwordDamage((PlayerEntity) entity, true)
@@ -112,7 +112,7 @@ public class AutoLog extends ToggleModule {
                 }
             }
             if (entity instanceof EndCrystalEntity && mc.player.distanceTo(entity) < range.get() && crystalLog.get()) {
-                mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(new LiteralText("Crystal within specified range.")));
+                mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(new LiteralText("A crystal was within specified range.")));
             }
         }
     });
