@@ -26,12 +26,12 @@ public class AutoCity extends ToggleModule {
         BlockPos mineTarget = CityUtils.getTargetBlock();
 
         if (target == null || mineTarget == null) {
-            Chat.error(this, "No target block found… disabling.");
+            Chat.error(this, "No target block found, disabling.");
         } else {
             Chat.info(this, "Attempting to city " + target.getGameProfile().getName());
 
             if (MathHelper.sqrt(mc.player.squaredDistanceTo(mineTarget.getX(), mineTarget.getY(), mineTarget.getZ())) > mc.interactionManager.getReachDistance()) {
-                Chat.error(this, "Target block out of reach… disabling.");
+                Chat.error(this, "Target block out of reach, disabling.");
                 toggle();
                 return;
             }
@@ -46,7 +46,7 @@ public class AutoCity extends ToggleModule {
                 }
             }
             if (pickSlot == -1) {
-                Chat.error(this, "No pick found… disabling.");
+                Chat.error(this, "No pickaxe found, disabling.");
                 toggle();
                 return;
             }
