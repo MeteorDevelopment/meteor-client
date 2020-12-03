@@ -45,7 +45,7 @@ public class BedAura extends ToggleModule {
     }
 
     public BedAura(){
-        super(Category.Combat, "bed-aura", "Automatically places and blows up beds in the nether");
+        super(Category.Combat, "bed-aura", "Automatically places and blows up beds.");
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -71,7 +71,7 @@ public class BedAura extends ToggleModule {
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("place-mode")
-            .description("The way beds are placed")
+            .description("The way beds are placed.")
             .defaultValue(Mode.safe)
             .build()
     );
@@ -85,21 +85,21 @@ public class BedAura extends ToggleModule {
 
     private final Setting<Mode> clickMode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("break-mode")
-            .description("The way the beds are broken")
+            .description("The way the beds are broken.")
             .defaultValue(Mode.safe)
             .build()
     );
 
     private final Setting<Boolean> autoSwitch = sgGeneral.add(new BoolSetting.Builder()
             .name("auto-switch")
-            .description("Switches to bed automatically")
+            .description("Switches to a bed automatically.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> switchBack = sgGeneral.add(new BoolSetting.Builder()
             .name("switch-back")
-            .description("Switches back to the previous slot after auto switching.")
+            .description("Switches back to the previous slot after auto-switching.")
             .defaultValue(false)
             .build()
     );
@@ -145,28 +145,28 @@ public class BedAura extends ToggleModule {
 
     private final Setting<Double> minDamage = sgPlace.add(new DoubleSetting.Builder()
             .name("min-damage")
-            .description("The minimum damage the beds will place")
+            .description("The minimum damage the beds will place.")
             .defaultValue(5.5)
             .build()
     );
 
     private final Setting<Double> maxDamage = sgPlace.add(new DoubleSetting.Builder()
             .name("max-damage")
-            .description("The maximum self-damage allowed")
+            .description("The maximum self-damage allowed.")
             .defaultValue(3)
             .build()
     );
 
     private final Setting<Double> minHealth = sgPlace.add(new DoubleSetting.Builder()
             .name("min-health")
-            .description("The minimum health you have to be for it to place")
+            .description("The minimum health you have to be for it to place.")
             .defaultValue(15)
             .build()
     );
 
     private final Setting<Boolean> place = sgGeneral.add(new BoolSetting.Builder()
             .name("place")
-            .description("Allow it to place beds")
+            .description("Allow it to place beds.")
             .defaultValue(true)
             .build()
     );
