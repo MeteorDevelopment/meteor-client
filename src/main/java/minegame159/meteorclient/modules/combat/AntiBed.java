@@ -52,7 +52,7 @@ public class AntiBed extends ToggleModule {
             .build()
     );
 
-    public AntiBed(){super(Category.Combat, "anti-bed", "Stops people placing beds in blocks you are standing");}
+    public AntiBed(){super(Category.Combat, "anti-bed", "Stops people placing beds in blocks you are standing.");}
 
     private int place = -1;
     private boolean closeScreen = false;
