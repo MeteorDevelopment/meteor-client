@@ -16,6 +16,7 @@ import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.PlayerUtils;
 import net.minecraft.block.Blocks;
+import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 
@@ -33,6 +34,13 @@ public class SelfTrap extends ToggleModule {
             .name("self-toggle")
             .description("Toggles when you run out of obsidian.")
             .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> lookUp = sgGeneral.add(new BoolSetting.Builder()
+            .name("look-up")
+            .description("Makes you look up when placing the anvil")
+            .defaultValue(true)
             .build()
     );
 
@@ -67,6 +75,10 @@ public class SelfTrap extends ToggleModule {
         BlockPos targetPos = mc.player.getBlockPos().up(2);
 
         PlayerUtils.placeBlock(targetPos, Hand.MAIN_HAND);
+
+        if (lookUp.get()) {
+            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(mc.player.yaw, -90, mc.player.isOnGround()));
+        }
 
         if (turnOff.get()) toggle();
         mc.player.inventory.selectedSlot = prevSlot;
