@@ -28,7 +28,7 @@ public class Freecam extends ToggleModule {
     
     private final Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
             .name("speed")
-            .description("Speed")
+            .description("Set the speed to move whilst in freecam.")
             .defaultValue(1.0)
             .min(0.0)
             .build()
@@ -43,7 +43,7 @@ public class Freecam extends ToggleModule {
 
     private final Setting<Boolean> renderHands = sgGeneral.add(new BoolSetting.Builder()
             .name("render-hands")
-            .description("Render hands when in freecam.")
+            .description("Render hands whilst in freecam.")
             .defaultValue(true)
             .build()
     );
@@ -57,7 +57,7 @@ public class Freecam extends ToggleModule {
     private boolean forward, backward, right, left, up, down;
 
     public Freecam() {
-        super(Category.Render, "freecam", "You know what it does.");
+        super(Category.Render, "freecam", "Allows the player to observe outside their body.");
     }
 
     @Override
