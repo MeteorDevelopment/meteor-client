@@ -16,8 +16,11 @@ import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.PlayerUtils;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
+import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.Hand;
+import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 
 public class SelfWeb extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -32,6 +35,13 @@ public class SelfWeb extends ToggleModule {
     private final Setting<Boolean> turnOff = sgGeneral.add(new BoolSetting.Builder()
             .name("turn-off")
             .description("Turns off after placing.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Boolean> lookDown = sgGeneral.add(new BoolSetting.Builder()
+            .name("look-down")
+            .description("Makes you look down when throwing bottles")
             .defaultValue(true)
             .build()
     );
@@ -57,8 +67,12 @@ public class SelfWeb extends ToggleModule {
         mc.player.inventory.selectedSlot = webSlot;
         BlockPos playerPos = mc.player.getBlockPos();
 
-        PlayerUtils.placeBlock(playerPos, Hand.MAIN_HAND);
-        if (doubles.get()) PlayerUtils.placeBlock(playerPos.add(0, 1, 0), Hand.MAIN_HAND);
+        if (lookDown.get()) {
+            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(mc.player.yaw, 90, mc.player.isOnGround()));
+        }
+        mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.DOWN, playerPos, true));
+
+        if (doubles.get()) mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.DOWN, playerPos.add(0 ,1,0), true));
 
         mc.player.inventory.selectedSlot = prevSlot;
         if (turnOff.get()) toggle();
