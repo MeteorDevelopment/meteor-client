@@ -41,7 +41,7 @@ public class SelfWeb extends ToggleModule {
 
     private final Setting<Boolean> lookDown = sgGeneral.add(new BoolSetting.Builder()
             .name("look-down")
-            .description("Makes you look down when throwing bottles")
+            .description("Makes you look down when placing webs.")
             .defaultValue(true)
             .build()
     );
