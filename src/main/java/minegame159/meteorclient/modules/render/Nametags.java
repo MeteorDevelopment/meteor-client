@@ -17,11 +17,13 @@ import minegame159.meteorclient.mixininterface.IBakedQuad;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.player.FakePlayer;
 import minegame159.meteorclient.modules.player.NameProtect;
 import minegame159.meteorclient.rendering.Matrices;
 import minegame159.meteorclient.rendering.ShapeBuilder;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Color;
+import minegame159.meteorclient.utils.FakePlayerEntity;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.client.render.Camera;
@@ -200,8 +202,10 @@ public class Nametags extends ToggleModule {
         int health = Math.round(entity.getHealth() + absorption);
         double healthPercentage = health / (entity.getMaxHealth() + absorption);
 
-        if (entity.getUuid() == mc.player.getUuid() && ModuleManager.INSTANCE.get(NameProtect.class).isActive()) {
-            name = ModuleManager.INSTANCE.get(NameProtect.class).getName();
+        if (entity == mc.player && ModuleManager.INSTANCE.get(NameProtect.class).isActive()) {
+            name = ModuleManager.INSTANCE.get(NameProtect.class).getName(entity.getGameProfile().getName());
+        } else if (ModuleManager.INSTANCE.get(FakePlayer.class).isActive() && entity instanceof FakePlayerEntity && ModuleManager.INSTANCE.get(FakePlayer.class).showID()) {
+            name = entity.getGameProfile().getName() + " [" + ModuleManager.INSTANCE.get(FakePlayer.class).getID((FakePlayerEntity) entity) + "]";
         } else name = entity.getGameProfile().getName();
 
         String healthText = " " + health;
