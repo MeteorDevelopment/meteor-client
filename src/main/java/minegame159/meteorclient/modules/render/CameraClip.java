@@ -10,6 +10,6 @@ import minegame159.meteorclient.modules.ToggleModule;
 
 public class CameraClip extends ToggleModule {
     public CameraClip() {
-        super(Category.Render, "camera-clip", "Allows your 3rd person camera to move through blocks..");
+        super(Category.Render, "camera-clip", "Allows your 3rd person camera to move through blocks.");
     }
 }
