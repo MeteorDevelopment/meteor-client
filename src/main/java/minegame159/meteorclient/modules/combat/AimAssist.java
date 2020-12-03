@@ -47,7 +47,7 @@ public class AimAssist extends ToggleModule {
     // General
     private final Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()
             .name("range")
-            .description("Aim range.")
+            .description("Modifies reach.")
             .defaultValue(5)
             .min(0)
             .build()
