@@ -5,28 +5,82 @@
 
 package minegame159.meteorclient.modules.player;
 
-import com.google.common.collect.Lists;
 import minegame159.meteorclient.gui.widgets.WButton;
 import minegame159.meteorclient.gui.widgets.WLabel;
 import minegame159.meteorclient.gui.widgets.WTable;
 import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.FakePlayerEntity;
+import net.minecraft.util.Pair;
 
-import java.util.List;
+import java.util.ArrayList;
 
 public class FakePlayer extends ToggleModule {
+
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+
+    private final Setting<String> name = sgGeneral.add(new StringSetting.Builder()
+            .name("name")
+            .description("Fakeplayer's name.")
+            .defaultValue("MeteorOnCrack")
+            .build()
+    );
+
+    private final Setting<Boolean> copyInv = sgGeneral.add(new BoolSetting.Builder()
+            .name("copy-inv")
+            .description("Copies your inventory to the Fakeplayer.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Boolean> glowing = sgGeneral.add(new BoolSetting.Builder()
+            .name("glowing")
+            .description("Makes the FakePlayer have the glowing effect.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Integer> health = sgGeneral.add(new IntSetting.Builder()
+            .name("health")
+            .description("Fakeplayer's health.")
+            .defaultValue(20)
+            .min(1)
+            .sliderMax(100)
+            .build()
+    );
+
+    private final Setting<Boolean> idInNametag = sgGeneral.add(new BoolSetting.Builder()
+            .name("id-in-nametag")
+            .description("Renders the Fakeplayer's ID in its nametag.")
+            .defaultValue(true)
+            .build()
+    );
 
     public FakePlayer() {
         super(Category.Player, "fake-player", "Spawns a clientside fake player.");
     }
 
-    private final List<FakePlayerEntity> players = Lists.newArrayList();
+    public static ArrayList<Pair<FakePlayerEntity, Integer>> players = new ArrayList<Pair<FakePlayerEntity, Integer>>();
+    private int ID;
+
+    public ArrayList<Pair<FakePlayerEntity, Integer>> getPlayers() {
+        if (!players.isEmpty()) {
+            return players;
+        } else return null;
+    }
+
+    @Override
+    public void onActivate() {
+        ID = 0;
+    }
 
     @Override
     public void onDeactivate() {
-        clearFakePlayers();
+        ID = 0;
+        clearFakePlayers(false);
     }
 
     @Override
@@ -34,29 +88,96 @@ public class FakePlayer extends ToggleModule {
         WTable table = new WTable();
 
         WButton spawn = table.add(new WButton("Spawn")).getWidget();
-        spawn.action = () -> spawnFakePlayer();
-        table.add(new WLabel("Spawns a FakePlayer."));
+        spawn.action = () -> spawnFakePlayer(name.get(), copyInv.get(), glowing.get(), health.get().floatValue());
 
         WButton clear = table.add(new WButton("Clear")).getWidget();
-        clear.action = () -> clearFakePlayers();
-        table.add(new WLabel("Clears FakePlayers from the world."));
+        clear.action = () -> clearFakePlayers(true);
 
         return table;
     }
 
-    public void spawnFakePlayer() {
+    public void spawnFakePlayer(String name, boolean copyInv, boolean glowing, float health) {
         if (isActive()) {
-            FakePlayerEntity fakeFlayer = new FakePlayerEntity();
-            players.add(fakeFlayer);
+            FakePlayerEntity fakePlayer = new FakePlayerEntity(name, copyInv, glowing, health);
+            Chat.info(this, "Spawned a fakeplayer with the id of (highlight)" + ID);
+            players.add(new Pair<>(fakePlayer, ID));
+            int idlog = new Pair<>(fakePlayer, ID).getRight();
+            System.out.println(idlog);
+            ID++;
         }
     }
 
-    public void clearFakePlayers() {
+    public void removeFakePlayer(int id) {
         if (isActive()) {
-            for (FakePlayerEntity player : players) {
-                player.despawn();
+            if (players.isEmpty()) {
+                Chat.info(this, "No active fakeplayers to remove!");
+                return;
             }
-            players.clear();
+            for (Pair<FakePlayerEntity, Integer> player : players) {
+                if (player.getRight() == id) {
+                    player.getLeft().despawn();
+                    Chat.info(this, "Removed a fakeplayer with the id of (highlight)" + id);
+                }
+            }
         }
+    }
+
+    public void clearFakePlayers( boolean shouldCheckActive) {
+        if (shouldCheckActive && isActive()) {
+            if (players.isEmpty()) {
+                Chat.info(this, "No active fakeplayers to remove!");
+                return;
+            } else {
+                for (Pair<FakePlayerEntity, Integer> player : players) {
+                    player.getLeft().despawn();
+                    Chat.info(this, "Removed a fakeplayer with the id of (highlight)" + player.getRight());
+                }
+
+            }
+        } else if (!shouldCheckActive) {
+            for (Pair<FakePlayerEntity, Integer> player : players) {
+                player.getLeft().despawn();
+                Chat.info(this, "Removed a fakeplayer with the id of (highlight)" + player.getRight());
+            }
+        }
+        players.clear();
+    }
+
+    public ArrayList<Pair<FakePlayerEntity, Integer>> getFakePlayerEntities() {
+        if (!players.isEmpty()) {
+            return players;
+        } else return null;
+    }
+
+    public String getName() {
+        return name.get();
+    }
+
+    public int getID(FakePlayerEntity entity) {
+        int id = -1;
+
+        if (!players.isEmpty()) {
+            for (Pair<FakePlayerEntity, Integer> player : players) {
+                if (player.getLeft() == entity) id = player.getRight();
+            }
+        }
+
+        return id;
+    }
+
+    public boolean showID() {
+        return idInNametag.get();
+    }
+
+    public boolean copyInv() {
+        return copyInv.get();
+    }
+
+    public boolean setGlowing() {
+        return glowing.get();
+    }
+
+    public float getHealth() {
+        return health.get().floatValue();
     }
 }
