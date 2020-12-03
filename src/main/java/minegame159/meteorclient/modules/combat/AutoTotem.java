@@ -42,28 +42,28 @@ public class AutoTotem extends ToggleModule {
 
     private final Setting<Boolean> smart = sgGeneral.add(new BoolSetting.Builder()
             .name("smart")
-            .description("Only switches to totem when in danger of dying")
+            .description("Only switches to totem when in risk of death.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> fallback = sgGeneral.add(new BoolSetting.Builder()
             .name("fallback")
-            .description("Enables offhand extra when you are out of totems.")
+            .description("Enables Offhand Extra when you are out of totems.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> inventorySwitch = sgGeneral.add(new BoolSetting.Builder()
             .name("inventory")
-            .description("Switches totems while you are in your inventory")
+            .description("Switches totems whilst you are in an inventory.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Integer> health = sgGeneral.add(new IntSetting.Builder()
             .name("health")
-            .description("The health smart totem activates")
+            .description("The health at which Auto Totem activates.")
             .defaultValue(10)
             .min(0)
             .sliderMax(20)
