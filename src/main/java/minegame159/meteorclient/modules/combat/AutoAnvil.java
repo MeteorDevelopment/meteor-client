@@ -31,7 +31,7 @@ public class AutoAnvil extends ToggleModule {
 
     private final Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()
             .name("range")
-            .description("How far can the players be.")
+            .description("Modifies reach.")
             .defaultValue(4)
             .min(0)
             .build()
