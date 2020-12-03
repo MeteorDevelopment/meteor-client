@@ -38,7 +38,7 @@ public class AutoClick extends ToggleModule {
 
     private final Setting<Button> button = sgGeneral.add(new EnumSetting.Builder<Button>()
             .name("Button")
-            .description("Which button to press")
+            .description("Which button to press.")
             .defaultValue(Button.Right)
             .build()
     );
