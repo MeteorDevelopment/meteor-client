@@ -41,7 +41,7 @@ public class EntityOwner extends ToggleModule {
 
     private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
             .name("scale")
-            .description("Scale.")
+            .description("Scale at which it renders.")
             .defaultValue(1)
             .min(0)
             .build()
