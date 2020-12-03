@@ -5,6 +5,7 @@
 
 package minegame159.meteorclient.utils;
 
+import com.mojang.authlib.GameProfile;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.OtherClientPlayerEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -19,20 +20,19 @@ public class FakePlayerEntity extends OtherClientPlayerEntity {
     private final ClientPlayerEntity player = mc.player;
     private final ClientWorld world = mc.world;
 
-    public FakePlayerEntity() {
-        super(mc.world, mc.player.getGameProfile());
-        copyPositionAndRotation(player);
+    public FakePlayerEntity(String name, boolean copyInv, boolean glowing, float health) {
+        super(mc.world, new GameProfile(mc.player.getUuid(), name));
 
-        copyInventory();
+        copyPositionAndRotation(player);
         copyPlayerModel(player, this);
         copyRotation();
         resetCapeMovement();
+        setHealth(health);
+
+        if (copyInv) inventory.clone(mc.player.inventory);
+        if (glowing) setGlowing(true);
 
         spawn();
-    }
-
-    private void copyInventory() {
-        inventory.clone(player.inventory);
     }
 
     private void copyPlayerModel(Entity from, Entity to) {
