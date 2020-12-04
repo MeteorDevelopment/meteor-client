@@ -30,14 +30,14 @@ public class NoFall extends ToggleModule {
         BeforeDamage
     }
     public NoFall() {
-        super(Category.Movement, "no-fall", "Protects you from fall damage.");
+        super(Category.Movement, "no-fall", "Prevents fall damage.");
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Boolean> elytra = sgGeneral.add(new BoolSetting.Builder()
             .name("elytra compatibility")
-            .description("Stops this from working when using elytra.")
+            .description("Prevents fall damage from elytra.")
             .defaultValue(true)
             .build()
     );
@@ -53,14 +53,14 @@ public class NoFall extends ToggleModule {
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("mode")
-            .description("The way you are saved from fall damage.")
+            .description("The way fall damage is prevented.")
             .defaultValue(Mode.Packet)
             .build()
     );
 
     private final Setting<PlaceMode> placeMode = sgGeneral.add(new EnumSetting.Builder<PlaceMode>()
             .name("place-mode")
-            .description("Whether place mode places before you die or before you take damage")
+            .description("Whether place mode places before you die or before you take damage.")
             .defaultValue(PlaceMode.BeforeDeath)
             .build()
     );
