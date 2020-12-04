@@ -25,7 +25,7 @@ public class AutoJump extends ToggleModule {
 
     private final Setting<JumpIf> jumpIf = sgGeneral.add(new EnumSetting.Builder<JumpIf>()
             .name("jump-if")
-            .description("Jump if.")
+            .description("Control the way it jumps.")
             .defaultValue(JumpIf.Always)
             .build()
     );
