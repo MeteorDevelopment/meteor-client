@@ -17,7 +17,7 @@ public class NoMiningTrace extends ToggleModule {
 
     private final Setting<Boolean> onlyWhenHoldingPickaxe = sgGeneral.add(new BoolSetting.Builder()
             .name("only-when-holding-pickaxe")
-            .description("Only work when holding a pickaxe.")
+            .description("Only function whilst holding a pickaxe.")
             .defaultValue(true)
             .build()
     );
