@@ -24,14 +24,14 @@ public class OffHandCrash extends ToggleModule {
 
     private final Setting<Boolean> doCrash = sgGeneral.add(new BoolSetting.Builder()
             .name("do-crash")
-            .description("Sends x number of offhand swap sound packets to the server per tick.")
+            .description("Sends a number of offhand swap sound packets to the server per tick.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Integer> speed = sgGeneral.add(new IntSetting.Builder()
             .name("speed")
-            .description("How many swaps per tick. 20 ticks = 1 second.")
+            .description("How many swaps per tick. (20 ticks = 1 second.)")
             .defaultValue(2000)
             .min(1)
             .sliderMax(10000)
