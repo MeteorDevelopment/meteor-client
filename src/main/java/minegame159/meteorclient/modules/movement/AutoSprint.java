@@ -18,8 +18,8 @@ public class AutoSprint extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Boolean> permanent = sgGeneral.add(new BoolSetting.Builder()
-            .name("permanent"
-            ).description("Keeps you sprinting even when you aren't moving.")
+            .name("permanent")
+	    .description("Forces you to sprint even when you aren't moving.")
             .defaultValue(true)
             .build()
     );
