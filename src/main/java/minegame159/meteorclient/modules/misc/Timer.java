@@ -25,7 +25,7 @@ public class Timer extends ToggleModule {
     );
 
     public Timer() {
-        super(Category.Misc, "timer", "Changes speed of everything. WARNING: Lowering it will slow down your game dramatically.");
+        super(Category.Misc, "timer", "Changes the speed of your game. WARNING: Lowering it will slow down your game dramatically.");
     }
 
     public double getMultiplier() {
