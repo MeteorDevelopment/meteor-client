@@ -38,7 +38,7 @@ public class MiddleClickExtra extends ToggleModule {
     }
 
     public MiddleClickExtra(){
-        super(Category.Player, "middle-click-extra", "Lets you use items on middle click (works at the same time as Middle Click Friend).");
+        super(Category.Player, "middle-click-extra", "Allows you to use items on middle click. (Compatible with Middle Click Friend.)");
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -52,7 +52,7 @@ public class MiddleClickExtra extends ToggleModule {
 
     private final Setting<Boolean> notify = sgGeneral.add(new BoolSetting.Builder()
             .name("notify")
-            .description("Notify you when you don't have the selected item in your hotbar")
+            .description("Notify you when you don't have the selected item in your hotbar.")
             .defaultValue(true)
             .build()
     );
