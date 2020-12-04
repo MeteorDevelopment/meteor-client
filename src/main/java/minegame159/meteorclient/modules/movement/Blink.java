@@ -18,7 +18,7 @@ import java.util.List;
 
 public class Blink extends ToggleModule {
     public Blink() {
-        super(Category.Movement, "blink", "Suspends all motion updates while enabled.");
+        super(Category.Movement, "blink", "Suspends all motion updates whilst enabled.");
     }
 
     private final List<PlayerMoveC2SPacket> packets = new ArrayList<>();
