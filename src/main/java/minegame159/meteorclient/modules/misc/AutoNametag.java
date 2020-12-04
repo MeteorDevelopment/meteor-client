@@ -42,7 +42,7 @@ public class AutoNametag extends ToggleModule {
     );
 
     public AutoNametag() {
-        super(Category.Misc, "auto-nametag", "Automatically uses nametags in hotbar on unnamed entites. WARNING: will name all entities in specified distance.");
+        super(Category.Misc, "auto-nametag", "Automatically uses nametags in hotbar on unnamed entites. WARNING: Will name ALL entities in a specified distance.");
     }
 
     @EventHandler
