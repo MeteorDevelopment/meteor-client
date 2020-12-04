@@ -33,7 +33,7 @@ public class BetterChat extends ToggleModule {
 
     private final Setting<Boolean> ignoreEnabled = sgIgnore.add(new BoolSetting.Builder()
             .name("ignore-enabled")
-            .description("Ignores player defined by .ignore command.")
+            .description("Ignores player defined by the ignore command.")
             .defaultValue(true)
             .build()
     );
@@ -69,7 +69,7 @@ public class BetterChat extends ToggleModule {
 
     private final Setting<Boolean> longerChatEnabled = sgLongerChat.add(new BoolSetting.Builder()
             .name("longer-chat-enabled")
-            .description("Makes chat longer.")
+            .description("Forces chat to be longer.")
             .defaultValue(true)
             .build()
     );
@@ -96,7 +96,7 @@ public class BetterChat extends ToggleModule {
     private boolean skipMessage;
 
     public BetterChat() {
-        super(Category.Misc, "better-chat", "Improves chat in many ways.");
+        super(Category.Misc, "better-chat", "Improves chat.");
     }
 
     public boolean onMsg(String message, int messageId, int timestamp, List<ChatHudLine<Text>> messages, List<ChatHudLine<OrderedText>> visibleMessages) {
