@@ -34,7 +34,7 @@ public class AutoReplenish extends ToggleModule {
 
     private final Setting<Integer> amount = sgGeneral.add(new IntSetting.Builder()
             .name("amount")
-            .description("The amount this actives at")
+            .description("The amount this activates at.")
             .defaultValue(8)
             .min(1)
             .sliderMax(63)
@@ -43,21 +43,21 @@ public class AutoReplenish extends ToggleModule {
 
     private final Setting<Boolean> offhand = sgGeneral.add(new BoolSetting.Builder()
             .name("offhand")
-            .description("Whether to re-fill your offhand")
+            .description("Whether to re-fill your offhand.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> alert = sgGeneral.add(new BoolSetting.Builder()
             .name("alert")
-            .description("Send messages in chat when you run out of items")
+            .description("Send messages in chat when you run out of items.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> unstackable = sgGeneral.add(new BoolSetting.Builder()
             .name("unstackable")
-            .description("Replenishes unstackable items (only works for main hand and offhand)")
+            .description("Replenishes unstackable items. (Only works for main hand and offhand.)")
             .defaultValue(true)
             .build()
     );
@@ -71,21 +71,21 @@ public class AutoReplenish extends ToggleModule {
 
     private final Setting<List<Item>> excludedItems = sgGeneral.add(new ItemListSetting.Builder()
             .name("excluded-items")
-            .description("Items to not replenish.")
+            .description("Items not to replenish.")
             .defaultValue(new ArrayList<>(0))
             .build()
     );
 
     private final Setting<Boolean> workInCont = sgGeneral.add(new BoolSetting.Builder()
             .name("work-in-containers")
-            .description("Allows this to work while you are in containers.")
+            .description("Allows this to work whilst you are in inventories.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> workInInv = sgGeneral.add(new BoolSetting.Builder()
             .name("work-in-inv")
-            .description("Allows this to work in you inventory.")
+            .description("Allows this to work in your inventory.")
             .defaultValue(true)
             .build()
     );
@@ -96,7 +96,7 @@ public class AutoReplenish extends ToggleModule {
     private int lastSlot;
 
     public AutoReplenish(){
-        super(Category.Player, "auto-replenish", "Automatically fills your hotbar and offhand items");
+        super(Category.Player, "auto-replenish", "Automatically fills your hotbar and offhand items.");
     }
 
     @Override
@@ -217,7 +217,7 @@ public class AutoReplenish extends ToggleModule {
 
         if(slot == -1 && !items.contains(item)){
             if(alert.get()) {
-                Chat.warning(this, "You are out of (highlight)%s(default). Cannot refill.", item.toString());
+                Chat.warning(this, "You are out of (highlight)%s(default). Cannot replenish.", item.toString());
             }
 
             items.add(item);
