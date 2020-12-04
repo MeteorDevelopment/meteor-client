@@ -24,13 +24,13 @@ public class PotionSpoof extends ToggleModule {
 
     private final Setting<Object2IntMap<StatusEffect>> potions = sgGeneral.add(new StatusEffectSetting.Builder()
             .name("potions")
-            .description("Potions to add.")
+            .description("Potion effects to give to the player.")
             .defaultValue(Utils.createStatusEffectMap())
             .build()
     );
 
     public PotionSpoof() {
-        super(Category.Player, "potion-spoof", "Adds you potion effects.");
+        super(Category.Player, "potion-spoof", "Spoof potion effects.");
     }
 
     @EventHandler
