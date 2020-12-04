@@ -53,7 +53,7 @@ public class Scaffold extends ToggleModule {
 
     private final Setting<List<Block>> blackList = sg.add(new BlockListSetting.Builder()
             .name("blacklist")
-            .description("Stops you from placing certain blocks as scaffold.")
+            .description("Prevents placing certain blocks for scaffolding.")
             .defaultValue(new ArrayList<>())
             .build()
     );
