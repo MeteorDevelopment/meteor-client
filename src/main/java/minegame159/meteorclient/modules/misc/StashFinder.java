@@ -70,7 +70,7 @@ public class StashFinder extends ToggleModule {
 
     private final Setting<Boolean> sendNotifications = sgGeneral.add(new BoolSetting.Builder()
             .name("send-notifications")
-            .description("Send minecraft notifications when new stashes are found.")
+            .description("Send a notification when new stashes are found.")
             .defaultValue(true)
             .build()
     );
