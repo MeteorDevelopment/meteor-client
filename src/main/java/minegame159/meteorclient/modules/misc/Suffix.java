@@ -39,7 +39,7 @@ public class Suffix extends ToggleModule {
 
     private final Setting<Boolean> smallCaps = sgGeneral.add(new BoolSetting.Builder()
             .name("small-caps")
-            .description("Uses small font.")
+            .description("Uses the small caps Unicode font.")
             .defaultValue(true)
             .build()
     );
