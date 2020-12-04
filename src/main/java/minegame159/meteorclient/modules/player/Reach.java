@@ -16,7 +16,7 @@ public class Reach extends ToggleModule {
 
     private final Setting<Double> reach = sg.add(new DoubleSetting.Builder()
             .name("reach")
-            .description("Reach.")
+            .description("Set how far the player can interact.")
             .defaultValue(5)
             .min(0)
             .sliderMax(6)
