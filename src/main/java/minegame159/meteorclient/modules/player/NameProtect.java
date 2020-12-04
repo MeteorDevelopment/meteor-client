@@ -17,7 +17,7 @@ public class NameProtect extends ToggleModule {
 
     private final Setting<String> name = sgGeneral.add(new StringSetting.Builder()
             .name("name")
-            .description("Name to replace with")
+            .description("Name to replace with your current one.")
             .defaultValue("seasnail")
             .build()
     );
