@@ -43,7 +43,7 @@ public class AutoMountBypassDupe extends ToggleModule {
 
     private final Setting<Boolean> shulkersOnly = sgGeneral.add(new BoolSetting.Builder()
             .name("shulker-only")
-            .description("Only moves shulker boxes into the inventory")
+            .description("Only moves shulker boxes into your inventory.")
             .defaultValue(true)
             .build());
 
@@ -56,7 +56,7 @@ public class AutoMountBypassDupe extends ToggleModule {
 
     private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
             .name("delay")
-            .description("Time in ticks between actions. 20 ticks = 1 second.")
+            .description("Time in ticks between actions. (20 ticks = 1 second.)")
             .defaultValue(4)
             .min(0)
             .build()
@@ -71,7 +71,7 @@ public class AutoMountBypassDupe extends ToggleModule {
     private int timer;
 
     public AutoMountBypassDupe() {
-        super(Category.Misc, "auto-mount-bypass-dupe", "Does the mount bypass dupe for you. Disable with esc.");
+        super(Category.Misc, "auto-mount-bypass-dupe", "Performs the mount bypass dupe for you. Disable with esc.");
     }
 
     @Override
@@ -126,7 +126,7 @@ public class AutoMountBypassDupe extends ToggleModule {
                 if (slot != -1 && slot < 9) {
                     mc.player.inventory.selectedSlot  = slot;
                  } else {
-                    Chat.warning(this, "Cannot find chest in your hotbar. Disabling!");
+                    Chat.warning(this, "Cannot find a chest in your hotbar. Disabling!");
                     this.toggle();
                 }
             }
