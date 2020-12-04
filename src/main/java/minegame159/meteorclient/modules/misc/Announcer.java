@@ -121,7 +121,7 @@ public class Announcer extends ToggleModule {
         private boolean first;
 
         Moving() {
-            super("Moving", "moving-enabled", "Send msg how much you moved.");
+            super("Moving", "moving-enabled", "Send a message how many blocks you have moved.");
         }
 
         @Override
@@ -179,7 +179,7 @@ public class Announcer extends ToggleModule {
         private double notBrokenTimer;
 
         Mining() {
-            super("Mining", "mining-enabled", "Send msg how much blocks you mined.");
+            super("Mining", "mining-enabled", "Send a message how many blocks you have mined.");
         }
 
         @Override
@@ -232,7 +232,7 @@ public class Announcer extends ToggleModule {
         private double notPlacedTimer;
 
         Placing() {
-            super("Placing", "placing-enabled", "Send msg how much blocks you placed.");
+            super("Placing", "placing-enabled", "Send a message how many blocks you have placed.");
         }
 
         @Override
@@ -283,7 +283,7 @@ public class Announcer extends ToggleModule {
         private double notDroppedTimer;
 
         DropItems() {
-            super("Drop Items", "drop-items-enabled", "Send msg how much items you dropped.");
+            super("Drop Items", "drop-items-enabled", "Send a message how many items you have dropped.");
         }
 
         @Override
@@ -334,7 +334,7 @@ public class Announcer extends ToggleModule {
         private double notPickedUpTimer;
 
         PickItems() {
-            super("Pick Items", "pick-items-enabled", "Send msg how much items you pick up.");
+            super("Pick Items", "pick-items-enabled", "Sends a message when many items you have picked up.");
         }
 
         @Override
@@ -381,7 +381,7 @@ public class Announcer extends ToggleModule {
         );
 
         public OpenContainer() {
-            super("Open Container", "open-container-enabled", "Sends msg when you oopen containers.");
+            super("Open Container", "open-container-enabled", "Sends a message when you open containers.");
         }
 
         @Override
