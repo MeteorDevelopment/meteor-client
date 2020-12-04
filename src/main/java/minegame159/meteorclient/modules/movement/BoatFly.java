@@ -38,7 +38,7 @@ public class BoatFly extends ToggleModule {
 
     private final Setting<Boolean> slowFalling = sgGeneral.add(new BoolSetting.Builder()
             .name("slow-falling")
-            .description("Makes you fall slower.")
+            .description("Forces you to fall slower.")
             .defaultValue(true)
             .build()
     );
