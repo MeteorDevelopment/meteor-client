@@ -48,7 +48,6 @@
     "GameRendererMixin",
     "GenericContainerScreenMixin",
     "HandledScreenMixin",
-    "HeldItemRendererAccessor",
     "HoeItemAccessor",
     "HorseBaseEntityMixin",
     "IdentifierAccessor",
