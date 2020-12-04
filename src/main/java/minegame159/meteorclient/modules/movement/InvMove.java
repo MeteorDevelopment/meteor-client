@@ -53,21 +53,21 @@ public class InvMove extends ToggleModule {
 
     private final Setting<Boolean> arrowsRotate = sgGeneral.add(new BoolSetting.Builder()
             .name("arrows-rotate")
-            .description("Allows you to use arrow keys to rotate.")
+            .description("Allows you to use the arrow keys to rotate.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Double> rotateSpeed = sgGeneral.add(new DoubleSetting.Builder()
             .name("rotate-speed")
-            .description("Rotation speed.")
+            .description("The speed at which it will rotate.")
             .defaultValue(4)
             .min(0)
             .build()
     );
 
     public InvMove() {
-        super(Category.Movement, "inv-move", "Allows you to move while in guis.");
+        super(Category.Movement, "inv-move", "Allows you to move whilst inside of GUIs.");
     }
 
     @EventHandler
