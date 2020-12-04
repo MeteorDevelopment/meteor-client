@@ -34,13 +34,13 @@ public class AutoShearer extends ToggleModule {
 
     private final Setting<Boolean> preserveBrokenShears = sgGeneral.add(new BoolSetting.Builder()
             .name("preserve-broken-shears")
-            .description("Will not break shears.")
+            .description("Attempts to avoid breaking shears.")
             .defaultValue(false)
             .build()
     );
 
     public AutoShearer() {
-        super(Category.Misc, "auto-shearer", "Automatically shears sheeps.");
+        super(Category.Misc, "auto-shearer", "Automatically shears sheep.");
     }
 
     @EventHandler
