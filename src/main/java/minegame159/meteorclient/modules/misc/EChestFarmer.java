@@ -35,7 +35,7 @@ public class EChestFarmer extends ToggleModule {
     private static final BlockState ENDER_CHEST = Blocks.ENDER_CHEST.getDefaultState();
 
     public EChestFarmer(){
-        super(Category.Misc, "EChest-farmer", "Places and mines EChests where you are looking.");
+        super(Category.Misc, "EChest-farmer", "Places and mines ender chests where you are looking.");
     }
 
     private final SettingGroup sgGeneral  = settings.getDefaultGroup();
@@ -62,7 +62,7 @@ public class EChestFarmer extends ToggleModule {
 
     private final Setting<Boolean> disableOnAmount = sgGeneral.add(new BoolSetting.Builder()
             .name("disable-on-completion")
-            .description("Whether to disable once you reach target stacks")
+            .description("Whether to disable once you reach the target.")
             .defaultValue(true)
             .build()
     );
