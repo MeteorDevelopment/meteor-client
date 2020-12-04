@@ -31,14 +31,14 @@ public class Flight extends ToggleModule {
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("mode")
-            .description("Mode.")
+            .description("Control the way to fly.")
             .defaultValue(Mode.Abilities)
             .build()
     );
 
     private final Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
             .name("speed")
-            .description("Speed.")
+            .description("Control the speed.")
             .defaultValue(0.1)
             .min(0.0)
             .build()
