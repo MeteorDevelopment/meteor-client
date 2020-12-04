@@ -39,7 +39,7 @@ public class AutoReconnect extends ToggleModule {
     private ServerInfo lastServerInfo;
 
     public AutoReconnect() {
-        super(Category.Misc, "auto-reconnect", "Automatically reconnects when kicked from server.");
+        super(Category.Misc, "auto-reconnect", "Automatically reconnects when you are kicked from the server.");
         MeteorClient.EVENT_BUS.subscribe(new Listener<ConnectToServerEvent>(event -> {
             lastServerInfo = mc.isInSingleplayer() ? null : mc.getCurrentServerEntry();
         }));
