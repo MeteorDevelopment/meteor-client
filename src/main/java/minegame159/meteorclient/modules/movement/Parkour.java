@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 
 public class Parkour extends ToggleModule {
     public Parkour() {
-        super(Category.Movement, "parkour", "Automatically jumps at the edges of blocks.");
+        super(Category.Movement, "parkour", "Automatically jumps on the edges of blocks.");
     }
 
     @EventHandler
