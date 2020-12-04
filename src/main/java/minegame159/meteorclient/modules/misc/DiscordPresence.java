@@ -47,7 +47,7 @@ public class DiscordPresence extends ToggleModule {
 
     private final Setting<Boolean> displayName = sgGeneral.add(new BoolSetting.Builder()
             .name("display-name")
-            .description("Displays your name in discord rpc.")
+            .description("Displays your name in Discord.")
             .defaultValue(true)
             .onChanged(booleanSetting -> updateDetails())
             .build()
@@ -68,7 +68,7 @@ public class DiscordPresence extends ToggleModule {
     private SmallImage currentSmallImage;
 
     public DiscordPresence() {
-        super(Category.Misc, "discord-presence", "That stuff you see in discord");
+        super(Category.Misc, "discord-presence", "That stuff you see in Discord.");
     }
 
     @Override
@@ -126,8 +126,8 @@ public class DiscordPresence extends ToggleModule {
 
     private String getText() {
         if (mc.isInSingleplayer()) {
-            if (displayName.get()) return getName() + " || SinglePlayer";
-            else return "SinglePlayer";
+            if (displayName.get()) return getName() + " || Singleplayer";
+            else return "Singleplayer";
         }
 
         if (displayName.get() && displayServer.get()) return getName() + " || " + getServer();
