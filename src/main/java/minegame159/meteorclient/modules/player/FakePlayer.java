@@ -24,28 +24,28 @@ public class FakePlayer extends ToggleModule {
 
     private final Setting<String> name = sgGeneral.add(new StringSetting.Builder()
             .name("name")
-            .description("Fakeplayer's name.")
+            .description("The name of the fake player.")
             .defaultValue("MeteorOnCrack")
             .build()
     );
 
     private final Setting<Boolean> copyInv = sgGeneral.add(new BoolSetting.Builder()
             .name("copy-inv")
-            .description("Copies your inventory to the Fakeplayer.")
+            .description("Copies your inventory to the fake player.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> glowing = sgGeneral.add(new BoolSetting.Builder()
             .name("glowing")
-            .description("Makes the FakePlayer have the glowing effect.")
+            .description("Forces the fake player have the glowing effect.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Integer> health = sgGeneral.add(new IntSetting.Builder()
             .name("health")
-            .description("Fakeplayer's health.")
+            .description("Set the health of the fake player.")
             .defaultValue(20)
             .min(1)
             .sliderMax(100)
@@ -54,7 +54,7 @@ public class FakePlayer extends ToggleModule {
 
     private final Setting<Boolean> idInNametag = sgGeneral.add(new BoolSetting.Builder()
             .name("id-in-nametag")
-            .description("Renders the Fakeplayer's ID in its nametag.")
+            .description("Renders the fake player's ID in it's nametag.")
             .defaultValue(true)
             .build()
     );
@@ -99,7 +99,7 @@ public class FakePlayer extends ToggleModule {
     public void spawnFakePlayer(String name, boolean copyInv, boolean glowing, float health) {
         if (isActive()) {
             FakePlayerEntity fakePlayer = new FakePlayerEntity(name, copyInv, glowing, health);
-            Chat.info(this, "Spawned a fakeplayer with the id of (highlight)" + ID);
+            Chat.info(this, "Spawned a fake player with the ID of (highlight)" + ID);
             players.add(new Pair<>(fakePlayer, ID));
             int idlog = new Pair<>(fakePlayer, ID).getRight();
             System.out.println(idlog);
@@ -110,13 +110,13 @@ public class FakePlayer extends ToggleModule {
     public void removeFakePlayer(int id) {
         if (isActive()) {
             if (players.isEmpty()) {
-                Chat.info(this, "No active fakeplayers to remove!");
+                Chat.info(this, "No active fake players to remove!");
                 return;
             }
             for (Pair<FakePlayerEntity, Integer> player : players) {
                 if (player.getRight() == id) {
                     player.getLeft().despawn();
-                    Chat.info(this, "Removed a fakeplayer with the id of (highlight)" + id);
+                    Chat.info(this, "Removed a fake player with the ID of (highlight)" + id);
                 }
             }
         }
@@ -125,19 +125,19 @@ public class FakePlayer extends ToggleModule {
     public void clearFakePlayers( boolean shouldCheckActive) {
         if (shouldCheckActive && isActive()) {
             if (players.isEmpty()) {
-                Chat.info(this, "No active fakeplayers to remove!");
+                Chat.info(this, "No active fake players to remove!");
                 return;
             } else {
                 for (Pair<FakePlayerEntity, Integer> player : players) {
                     player.getLeft().despawn();
-                    Chat.info(this, "Removed a fakeplayer with the id of (highlight)" + player.getRight());
+                    Chat.info(this, "Removed a fake player with the ID of (highlight)" + player.getRight());
                 }
 
             }
         } else if (!shouldCheckActive) {
             for (Pair<FakePlayerEntity, Integer> player : players) {
                 player.getLeft().despawn();
-                Chat.info(this, "Removed a fakeplayer with the id of (highlight)" + player.getRight());
+                Chat.info(this, "Removed a fake player with the ID of (highlight)" + player.getRight());
             }
         }
         players.clear();
