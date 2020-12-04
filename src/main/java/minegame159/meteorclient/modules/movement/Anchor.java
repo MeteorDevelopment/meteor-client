@@ -25,7 +25,7 @@ public class Anchor extends ToggleModule {
 
     private final Setting<Integer> maxHeight = sgGeneral.add(new IntSetting.Builder()
             .name("max-height")
-            .description("Max height.")
+            .description("Maximum height.")
             .defaultValue(10)
             .min(0)
             .max(255)
@@ -35,7 +35,7 @@ public class Anchor extends ToggleModule {
 
     private final Setting<Integer> minPitch = sgGeneral.add(new IntSetting.Builder()
             .name("min-pitch")
-            .description("Minimum pitch at which anchor will work. (90 - -90)")
+            .description("Minimum pitch at which anchor will work. (90 to -90.)")
             .defaultValue(-90)
             .min(-90)
             .max(90)
