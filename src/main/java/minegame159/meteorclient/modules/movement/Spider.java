@@ -20,7 +20,7 @@ public class Spider extends ToggleModule {
     
     private final Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
             .name("speed")
-            .description("Speed.")
+            .description("Speed on which you can climb.")
             .defaultValue(0.2)
             .min(0.0)
             .build()
