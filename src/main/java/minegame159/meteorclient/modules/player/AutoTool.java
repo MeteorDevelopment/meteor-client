@@ -68,20 +68,20 @@ public class AutoTool extends ToggleModule {
 
     private final Setting<Boolean> enderChestOnlyWithSilkTouch = sgGeneral.add(new BoolSetting.Builder()
             .name("ender-chest-only-with-silk-touch")
-            .description("Mine ender chest only with silk touch.")
+            .description("Mine ender chests only with silk touch.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> antiBreak = sgGeneral.add(new BoolSetting.Builder()
             .name("anti-break")
-            .description("Stops you from breaking your weapon.")
+            .description("Stops you from breaking your tool.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<materialPreference> material = sgGeneral.add(new EnumSetting.Builder<materialPreference>().name("material-preference")
-            .description("How the AntiBreak decides what to replace your tool with")
+            .description("How the anti break decides what to replace your tool with.")
             .defaultValue(materialPreference.Best)
             .build()
     );
