@@ -16,28 +16,28 @@ public class NoSlow extends ToggleModule {
 
     private final Setting<Boolean> items = sgGeneral.add(new BoolSetting.Builder()
             .name("items")
-            .description("No slow from using items.")
+            .description("No slowdown from using items.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> web = sgGeneral.add(new BoolSetting.Builder()
             .name("web")
-            .description("No slow from cob webs.")
+            .description("No slowdown from cobwebs.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> soulSand = sgGeneral.add(new BoolSetting.Builder()
             .name("soul-sand")
-            .description("No slow from soul sand.")
+            .description("No slowdown from soul sand.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> slimeBlock = sgGeneral.add(new BoolSetting.Builder()
             .name("slime-block")
-            .description("No slow from slime blocks.")
+            .description("No slowdown from slime blocks.")
             .defaultValue(true)
             .build()
     );
