@@ -27,7 +27,7 @@ public class EndermanLook extends ToggleModule {
     }
 
     public EndermanLook() {
-        super(Category.Player, "enderman-look", "Prevents endermen from getting angry at you");
+        super(Category.Player, "enderman-look", "Attempts to prevent endermen from becoming aggressive towards you.");
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
