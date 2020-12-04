@@ -28,17 +28,17 @@ public class DeathPosition extends ToggleModule {
 
     private final Setting<Boolean> createWaypoint = sgGeneral.add(new BoolSetting.Builder()
             .name("create-waypoint")
-            .description("Creates waypoint when you die.")
+            .description("Creates a waypoint when you die.")
             .defaultValue(true)
             .build()
     );
 
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
 
-    private final WLabel label = new WLabel("No latest death");
+    private final WLabel label = new WLabel("No latest death.");
 
     public DeathPosition() {
-        super(Category.Player, "death-position", "Sends to your chat where you died.");
+        super(Category.Player, "death-position", "Sends a chat message at your death location.");
     }
 
     @EventHandler
