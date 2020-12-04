@@ -29,21 +29,21 @@ public class FastUse extends ToggleModule {
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("mode")
-            .description("Which items to fastplace.")
+            .description("Control the base mode.")
             .defaultValue(Mode.All)
             .build()
     );
 
     private final Setting<Boolean> exp = sgGeneral.add(new BoolSetting.Builder()
             .name("xp")
-            .description("Fast places XP bottles if Mode is \"OnlySome\".")
+            .description("Only throws XP bottles if the mode is \"OnlySome\".")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> blocks = sgGeneral.add(new BoolSetting.Builder()
             .name("blocks")
-            .description("Fast places blocks if Mode is \"OnlySome\".")
+            .description("Only places blocks if the mode is \"OnlySome\".")
             .defaultValue(false)
             .build()
     );
