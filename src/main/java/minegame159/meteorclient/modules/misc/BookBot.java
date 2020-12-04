@@ -42,7 +42,7 @@ public class BookBot extends ToggleModule {
     public enum Mode{ //Edna Mode
         File,
         Random,
-        Ascii
+        ASCII
     }
     //Didn't add it to the module list cuz I didn't know if it was gonna work.
     public BookBot(){
@@ -54,13 +54,13 @@ public class BookBot extends ToggleModule {
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>() //WEEEEEEEEEEEEEEEEEEEE (Wanted to add a comment on everything but nothing to say so fuck you.)
             .name("mode")
             .description("The mode of the book bot.")
-            .defaultValue(Mode.Ascii)
+            .defaultValue(Mode.ASCII)
             .build()
     );
     //Idk how to add the name into the book so you're gonna have to do it or tell me.
     private final Setting<String> name = sgGeneral.add(new StringSetting.Builder()
             .name("name")
-            .description("The name you want to give the books")
+            .description("The name to give the book.")
             .defaultValue("Meteor on Crack!") //METEOR ON CRACK!!!
             .build()
     );
@@ -84,14 +84,14 @@ public class BookBot extends ToggleModule {
 
     private final Setting<Integer> noOfBooks = sgGeneral.add(new IntSetting.Builder()
             .name("no-of-books")
-            .description("The number of books to make(or until the file runs out)")
+            .description("The number of books to make. (Or until the file ends.)")
             .defaultValue(1)
             .build()
     );
 
     private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
             .name("delay")
-            .description("The delay between writing books(in ms)")
+            .description("The delay between writing books. (In milliseconds.)")
             .defaultValue(300)
             .min(75)
             .sliderMin(75)
@@ -165,7 +165,7 @@ public class BookBot extends ToggleModule {
             stream = charGenerator.limit(23000).iterator();
             firstChar = true;
             writeBook();
-        }else if(mode.get() == Mode.Ascii){
+        }else if(mode.get() == Mode.ASCII){
             //Generates a random stream of integers??
             IntStream charGenerator = RANDOM.ints(0x20, 0x7f);
             stream = charGenerator.limit(35000).iterator();
