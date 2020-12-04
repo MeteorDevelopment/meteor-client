@@ -90,7 +90,8 @@
     "Vec3dMixin",
     "WorldRendererAccessor",
     "WorldRendererMixin",
-    "TextVisitFactoryMixin"
+    "TextVisitFactoryMixin",
+    "HeldItemRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

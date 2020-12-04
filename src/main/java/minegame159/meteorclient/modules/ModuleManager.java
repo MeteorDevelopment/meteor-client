@@ -359,6 +359,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new BlockSelection());
         addModule(new CustomFOV());
         addModule(new HandView());
+        addModule(new Time());
     }
 
     private void initMisc() {
