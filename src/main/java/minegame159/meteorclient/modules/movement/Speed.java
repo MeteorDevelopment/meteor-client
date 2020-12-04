@@ -27,7 +27,7 @@ public class Speed extends ToggleModule {
     
     private final Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
             .name("speed")
-            .description("How fast you want to go in blocks per second.")
+            .description("How fast the player moves in blocks per second.")
             .defaultValue(5.6)
             .min(0)
             .sliderMax(50)
@@ -43,7 +43,7 @@ public class Speed extends ToggleModule {
 
     private final Setting<Boolean> inWater = sgGeneral.add(new BoolSetting.Builder()
             .name("in-water")
-            .description("Use speed when in water.")
+            .description("Use speed whilst inside water.")
             .defaultValue(false)
             .build()
     );
@@ -57,7 +57,7 @@ public class Speed extends ToggleModule {
 
     private final Setting<Boolean> applySpeedPotions = sgGeneral.add(new BoolSetting.Builder()
             .name("apply-speed-potions")
-            .description("Apply speed potion effect.")
+            .description("Apply the speed effect.")
             .defaultValue(true)
             .build()
     );
