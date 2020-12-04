@@ -92,12 +92,16 @@ public class HoleFiller extends ToggleModule {
         for (int i = 0; i < 9; i++) {
             ItemStack itemStack = mc.player.inventory.getStack(i);
 
-            if (mode.get() == PlaceMode.Obsidian) {
-                if (itemStack.getItem() == Items.OBSIDIAN || itemStack.getItem() == Items.CRYING_OBSIDIAN) return i;
-            } else if (mode.get() == PlaceMode.Cobweb) {
-                if (itemStack.getItem() == Items.COBWEB) return i;
-            } else {
-                if (itemStack.getItem() instanceof BlockItem && ((BlockItem) itemStack.getItem()).getBlock().getDefaultState().isFullCube(mc.world, blockPos)) return i;
+            switch (mode.get()) {
+                case Obsidian:
+                    if (itemStack.getItem() == Items.OBSIDIAN || itemStack.getItem() == Items.CRYING_OBSIDIAN) return i;
+                    break;
+                case Cobweb:
+                    if (itemStack.getItem() == Items.COBWEB) return i;
+                    break;
+                case Any:
+                    if (itemStack.getItem() instanceof BlockItem && ((BlockItem) itemStack.getItem()).getBlock().getDefaultState().isFullCube(mc.world, blockPos)) return i;
+                    break;
             }
         }
 
