@@ -30,7 +30,8 @@ public class MessageAura extends ToggleModule {
     private final Setting<String> message = sgGeneral.add(new StringSetting.Builder()
             .name("message")
             .description("The message sent to players.")
-            .defaultValue("Meteor on Crack!").build()
+            .defaultValue("Meteor on Crack!")
+            .build()
     );
 
     private final Setting<Boolean> ignoreFriends = sgGeneral.add(new BoolSetting.Builder()
