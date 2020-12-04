@@ -39,13 +39,13 @@ public class ChestSwap extends ToggleModule {
 
     private final Setting<Boolean> stayOn = sgGeneral.add(new BoolSetting.Builder()
             .name("stay-on")
-            .description("Stays on and activates when you turn it off too.")
+            .description("Continues to work even when you turn it off.");
             .defaultValue(false)
             .build()
     );
 
     public ChestSwap() {
-        super(Category.Player, "chest-swap", "Swaps between chestplate and elytra.");
+        super(Category.Player, "chest-swap", "Swap between a chestplate and an elytra.");
     }
 
     @Override
