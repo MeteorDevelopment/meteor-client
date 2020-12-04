@@ -47,21 +47,21 @@ public class ElytraPlus extends ToggleModule {
     
     private final Setting<Boolean> autoTakeOff = sgGeneral.add(new BoolSetting.Builder()
             .name("auto-take-off")
-            .description("Automatically takes off when you hold jump without needing to double jump.")
+            .description("Automatically takes off when you hold jump without requiring to double jump.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> replace = sgGeneral.add(new BoolSetting.Builder()
             .name("elytra-replace")
-            .description("Replaces your broken elytra with new ones")
+            .description("Replaces your broken elytra with a new one.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Integer> replaceDurability = sgGeneral.add(new IntSetting.Builder()
             .name("replace-durability")
-            .description("The durability to replace your elytra at")
+            .description("The durability to replace your elytra at.")
             .defaultValue(2)
             .min(1)
             .max(Items.ELYTRA.getMaxDamage() - 1)
@@ -71,7 +71,7 @@ public class ElytraPlus extends ToggleModule {
 
     private final Setting<Double> fallMultiplier = sgGeneral.add(new DoubleSetting.Builder()
             .name("fall-multiplier")
-            .description("Controls how fast will you go down naturally.")
+            .description("Controls how fast will you move down naturally.")
             .defaultValue(0.01)
             .min(0)
             .build()
@@ -79,7 +79,7 @@ public class ElytraPlus extends ToggleModule {
 
     private final Setting<Double> horizontalSpeed = sgGeneral.add(new DoubleSetting.Builder()
             .name("horizontal-speed")
-            .description("How fast will you go forward and backward.")
+            .description("How fast you move forwards and backwards.")
             .defaultValue(1)
             .min(0)
             .build()
@@ -87,7 +87,7 @@ public class ElytraPlus extends ToggleModule {
 
     private final Setting<Double> verticalSpeed = sgGeneral.add(new DoubleSetting.Builder()
             .name("vertical-speed")
-            .description("How fast will u go up and down.")
+            .description("How fast you move upwards and downwards.")
             .defaultValue(1)
             .min(0)
             .build()
@@ -102,14 +102,14 @@ public class ElytraPlus extends ToggleModule {
 
     private final Setting<Boolean> dontGoIntoUnloadedChunks = sgGeneral.add(new BoolSetting.Builder()
             .name("don't-go-into-unloaded-chunks")
-            .description("Don't go into unloaded chunks.")
+            .description("Blocks you from entering unloaded chunks.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> chestSwap = sgGeneral.add(new BoolSetting.Builder()
             .name("chest-swap")
-            .description("Enables ChestSwap when toggling this module.")
+            .description("Enables Chest Swap when toggling this option.")
             .defaultValue(true)
             .build()
     );
