@@ -308,6 +308,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new AntiCactus());
         addModule(new FakePlayer());
         addModule(new NameProtect());
+        addModule(new InfinityMiner());
     }
 
     private void initMovement() {
