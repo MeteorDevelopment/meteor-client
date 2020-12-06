@@ -27,8 +27,8 @@ public abstract class HeldItemRendererMixin {
         if (!module.isActive()) return;
         GlStateManager.scaled(module.scaleX(), module.scaleY(), module.scaleZ());
         GlStateManager.translated(module.posX(), module.posY(), module.posZ());
-        GlStateManager.rotatef((module.rotationX() * 360.0f), 1.0f, 0.0f, 0.0f);
-        GlStateManager.rotatef((module.rotationY() * 360.0f), 0.0f, 1.0f, 0.0f);
+        GlStateManager.rotatef((module.rotationY() * 360.0f), 1.0f, 0.0f, 0.0f);
+        GlStateManager.rotatef(-(module.rotationX() * 360.0f), 0.0f, 1.0f, 0.0f);
         GlStateManager.rotatef((module.rotationZ() * 360.0f), 0.0f, 0.0f, 1.0f);
     }
 }
