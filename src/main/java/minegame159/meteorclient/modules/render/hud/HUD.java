@@ -219,6 +219,7 @@ public class HUD extends ToggleModule {
         topLeft.add(new BreakingBlockHud(this));
         topLeft.add(new LookingAtHud(this));
         topLeft.add(moduleInfoHud);
+        topLeft.add(new InfiniteMineHud(this));
 
         // Top Center
         HudModuleLayer topCenter = new HudModuleLayer(RENDERER, modules, AlignmentX.Center, AlignmentY.Top, 0, 2);
