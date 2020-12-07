@@ -186,7 +186,8 @@ public class InfinityMiner extends ToggleModule {
                     this.toggle();
                 } else if (isTool() && getCurrentDamage() <= durabilityThreshold.get()) currentMode = Mode.REPAIR;
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
     });
 
     @SuppressWarnings("unused")
@@ -231,7 +232,12 @@ public class InfinityMiner extends ToggleModule {
     }
 
     private Boolean isInventoryFull() {
-        return mc.player != null && mc.player.inventory.getEmptySlot() == -1;
+        if (mc.player == null) return false;
+        if (mc.player.inventory.getEmptySlot() != -1) return false;
+        for (int i = 0; i < mc.player.inventory.size(); i++)
+            if (mc.player.inventory.getStack(i).getItem() == targetBlock.get().asItem() &&
+                    mc.player.inventory.getStack(i).getCount() < targetBlock.get().asItem().getMaxCount()) return false;
+        return true;
     }
 
     private List<ToggleModule> getToggleModules() {

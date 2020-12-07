@@ -7,6 +7,7 @@ package minegame159.meteorclient.modules.movement;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
+import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.PlayerMoveEvent;
 import minegame159.meteorclient.events.PostTickEvent;
 import minegame159.meteorclient.mixininterface.IKeyBinding;
@@ -34,6 +35,12 @@ public class ElytraPlus extends ToggleModule {
         Packet
     }
 
+    public enum ChestSwapMode {
+        Always,
+        Never,
+        WaitForGround
+    }
+
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgAutopilot = settings.createGroup("Autopilot");
 
@@ -44,7 +51,7 @@ public class ElytraPlus extends ToggleModule {
             .defaultValue(Mode.Normal)
             .build()
     );
-    
+
     private final Setting<Boolean> autoTakeOff = sgGeneral.add(new BoolSetting.Builder()
             .name("auto-take-off")
             .description("Automatically takes off when you hold jump without needing to double jump.")
@@ -107,10 +114,10 @@ public class ElytraPlus extends ToggleModule {
             .build()
     );
 
-    private final Setting<Boolean> chestSwap = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<ChestSwapMode> chestSwap = sgGeneral.add(new EnumSetting.Builder<ChestSwapMode>()
             .name("chest-swap")
             .description("Enables ChestSwap when toggling this module.")
-            .defaultValue(true)
+            .defaultValue(ChestSwapMode.Never)
             .build()
     );
 
@@ -154,8 +161,7 @@ public class ElytraPlus extends ToggleModule {
     public void onActivate() {
         lastJumpPressed = false;
         jumpTimer = 0;
-
-        if (chestSwap.get() && mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() != Items.ELYTRA) {
+        if ((chestSwap.get() == ChestSwapMode.Always || chestSwap.get() == ChestSwapMode.WaitForGround) && mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() != Items.ELYTRA) {
             ModuleManager.INSTANCE.get(ChestSwap.class).swap();
         }
     }
@@ -164,9 +170,10 @@ public class ElytraPlus extends ToggleModule {
     public void onDeactivate() {
         if (autopilotEnabled.get()) ((IKeyBinding) mc.options.keyForward).setPressed(false);
 
-        if (chestSwap.get() && mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() == Items.ELYTRA) {
+        if (chestSwap.get() == ChestSwapMode.Always && mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() == Items.ELYTRA) {
             ModuleManager.INSTANCE.get(ChestSwap.class).swap();
-        }
+        } else if (chestSwap.get() == ChestSwapMode.WaitForGround)
+            enableGroundListener();
     }
 
     @EventHandler
@@ -218,9 +225,9 @@ public class ElytraPlus extends ToggleModule {
 
             fireworkTimer--;
         }
-        if(replace.get()){
-            if(mc.player.inventory.getArmorStack(2).getItem() == Items.ELYTRA){
-                if(mc.player.inventory.getArmorStack(2).getMaxDamage() - mc.player.inventory.getArmorStack(2).getDamage() <= replaceDurability.get()){
+        if (replace.get()) {
+            if (mc.player.inventory.getArmorStack(2).getItem() == Items.ELYTRA) {
+                if (mc.player.inventory.getArmorStack(2).getMaxDamage() - mc.player.inventory.getArmorStack(2).getDamage() <= replaceDurability.get()) {
                     int slot = -1;
                     for (int i = 9; i < 45; i++) {
                         ItemStack stack = mc.player.inventory.getStack(i);
@@ -228,7 +235,7 @@ public class ElytraPlus extends ToggleModule {
                             slot = i;
                         }
                     }
-                    if(slot != -1){
+                    if (slot != -1) {
                         InvUtils.clickSlot(slot, 0, SlotActionType.PICKUP);
                         InvUtils.clickSlot(6, 0, SlotActionType.PICKUP);
                         InvUtils.clickSlot(slot, 0, SlotActionType.PICKUP);
@@ -241,10 +248,10 @@ public class ElytraPlus extends ToggleModule {
 
             if (mc.options.keyForward.isPressed()) {
                 vec3d.add(0, 0, horizontalSpeed.get());
-                vec3d.rotateY(-(float)Math.toRadians(mc.player.yaw));
+                vec3d.rotateY(-(float) Math.toRadians(mc.player.yaw));
             } else if (mc.options.keyBack.isPressed()) {
-                vec3d.add( 0, 0, horizontalSpeed.get());
-                vec3d.rotateY((float)Math.toRadians(mc.player.yaw));
+                vec3d.add(0, 0, horizontalSpeed.get());
+                vec3d.rotateY((float) Math.toRadians(mc.player.yaw));
             }
 
             if (mc.options.keyJump.isPressed()) {
@@ -352,4 +359,22 @@ public class ElytraPlus extends ToggleModule {
 
         lastJumpPressed = jumpPressed;
     }
+
+    private final Listener<PlayerMoveEvent> chestSwapGroundListener = new Listener<>(event -> {
+        if (mc.player != null && mc.player.isOnGround()) {
+            if (mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() == Items.ELYTRA) {
+                ModuleManager.INSTANCE.get(ChestSwap.class).swap();
+                disableGroundListener();
+            }
+        }
+    });
+
+    protected void enableGroundListener() {
+        MeteorClient.EVENT_BUS.subscribe(chestSwapGroundListener);
+    }
+
+    protected void disableGroundListener() {
+        MeteorClient.EVENT_BUS.unsubscribe(chestSwapGroundListener);
+    }
+
 }
