@@ -360,7 +360,7 @@ public class ElytraPlus extends ToggleModule {
         lastJumpPressed = jumpPressed;
     }
 
-    private final Listener<PlayerMoveEvent> groundListener = new Listener<>(event -> {
+    private final Listener<PlayerMoveEvent> chestSwapGroundListener = new Listener<>(event -> {
         if (mc.player != null && mc.player.isOnGround()) {
             if (mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() == Items.ELYTRA) {
                 ModuleManager.INSTANCE.get(ChestSwap.class).swap();
@@ -369,11 +369,12 @@ public class ElytraPlus extends ToggleModule {
         }
     });
 
-    private void enableGroundListener() {
-        MeteorClient.EVENT_BUS.subscribe(groundListener);
+    protected void enableGroundListener() {
+        MeteorClient.EVENT_BUS.subscribe(chestSwapGroundListener);
     }
 
-    private void disableGroundListener() { MeteorClient.EVENT_BUS.unsubscribe(groundListener);
+    protected void disableGroundListener() {
+        MeteorClient.EVENT_BUS.unsubscribe(chestSwapGroundListener);
     }
 
 }
