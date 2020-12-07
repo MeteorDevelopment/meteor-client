@@ -86,7 +86,7 @@ public class InfinityMiner extends ToggleModule {
     private int playerY;
     private int playerZ;
     private final HashMap<String, Boolean> originalSettings = new HashMap<>();
-    private Boolean BLOCKER = false;
+    private volatile Boolean BLOCKER = false;
 
     public enum Mode {
         TARGET,
