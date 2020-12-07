@@ -271,7 +271,6 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new HoleFiller());
         addModule(new SelfAnvil());
         addModule(new AntiAutoAnvil());
-        addModule(new CityEsp());
         addModule(new AutoCity());
     }
 
@@ -362,6 +361,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new HandView());
         addModule(new Time());
         addModule(new VoidESP());
+        addModule(new CityEsp());
     }
 
     private void initMisc() {
