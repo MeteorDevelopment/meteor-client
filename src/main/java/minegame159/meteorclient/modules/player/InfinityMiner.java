@@ -6,6 +6,8 @@
 package minegame159.meteorclient.modules.player;
 
 import baritone.api.BaritoneAPI;
+import baritone.api.pathing.goals.GoalBlock;
+import com.google.common.collect.Lists;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.ActiveModulesChangedEvent;
@@ -21,12 +23,14 @@ import minegame159.meteorclient.modules.movement.Jesus;
 import minegame159.meteorclient.modules.movement.NoFall;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.MeteorExecutor;
+import net.minecraft.block.Block;
+import net.minecraft.block.Blocks;
 import net.minecraft.item.ToolItem;
 import net.minecraft.network.packet.s2c.play.DisconnectS2CPacket;
 import net.minecraft.text.LiteralText;
-import java.util.ArrayList;
-import java.util.Arrays;
+
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * @author Inclement
@@ -34,28 +38,34 @@ import java.util.HashMap;
  * InfinityMiner is a module which alternates between mining a target block, and a repair block.
  * This allows the user to mine indefinitely, provided they have the mending enchantment.
  */
-
 public class InfinityMiner extends ToggleModule {
+    public enum Mode {
+        TARGET,
+        REPAIR,
+        STILL,
+        HOME
+    }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgAutoToggles = settings.createGroup("Auto Toggles");
     private final SettingGroup sgExtras = settings.createGroup("Extras");
 
-    private final Setting<String> targetBlock = sgGeneral.add(new StringSetting.Builder()
-            .name("Target Block")
-            .description("The Target Block to Mine")
-            .defaultValue("ancient_debris")
+    private final Setting<Block> targetBlock = sgGeneral.add(new BlockSetting.Builder()
+            .name("target-block")
+            .description("The target block to mine.")
+            .defaultValue(Blocks.ANCIENT_DEBRIS)
             .build()
     );
 
-    private final Setting<String> repairBlock = sgGeneral.add(new StringSetting.Builder()
-            .name("Repair Block")
-            .description("The Block Mined to Repair Your Pickaxe")
-            .defaultValue("nether_quartz_ore")
+    private final Setting<Block> repairBlock = sgGeneral.add(new BlockSetting.Builder()
+            .name("repair-block")
+            .description("The block mined to repair your pickaxe.")
+            .defaultValue(Blocks.NETHER_QUARTZ_ORE)
             .build()
     );
+
     private final Setting<Double> durabilityThreshold = sgGeneral.add(new DoubleSetting.Builder()
-            .name("Durability Threshold")
+            .name("durability-threshold")
             .description("The durability at which to start repairing as a percent of maximum durability.")
             .defaultValue(.15)
             .max(.95)
@@ -65,19 +75,19 @@ public class InfinityMiner extends ToggleModule {
             .build());
 
     private final Setting<Boolean> smartModuleToggle = sgAutoToggles.add(new BoolSetting.Builder()
-            .name("Smart Module Toggle")
-            .description("Automatically enable helpful modules")
+            .name("smart-module-toggle")
+            .description("Automatically enable helpful modules.")
             .defaultValue(true)
             .build());
 
     private final Setting<Boolean> autoWalkHome = sgExtras.add(new BoolSetting.Builder()
-            .name("Walk Home")
+            .name("walk-home")
             .description("When your inventory is full, walk home.")
             .defaultValue(false)
             .build());
 
     private final Setting<Boolean> autoLogOut = sgExtras.add(new BoolSetting.Builder()
-            .name("Log Out")
+            .name("log-out")
             .description("Log out when inventory is full. Will walk home first if enabled.")
             .defaultValue(false)
             .build());
@@ -87,7 +97,6 @@ public class InfinityMiner extends ToggleModule {
         super(Category.Player, "infinity-miner", "Mine forever");
     }
 
-    private final String BARITONE_MINE = "mine ";
     private Mode currentMode = Mode.STILL;
     private Mode secondaryMode;
     private boolean baritoneRunning = false;
@@ -96,13 +105,6 @@ public class InfinityMiner extends ToggleModule {
     private int playerZ;
     private final HashMap<String, Boolean> originalSettings = new HashMap<>();
     private volatile Boolean BLOCKER = false;
-
-    public enum Mode {
-        TARGET,
-        REPAIR,
-        STILL,
-        HOME
-    }
 
     @Override
     public void onActivate() {
@@ -184,8 +186,7 @@ public class InfinityMiner extends ToggleModule {
                     this.toggle();
                 } else if (isTool() && getCurrentDamage() <= durabilityThreshold.get()) currentMode = Mode.REPAIR;
             }
-        } catch (Exception ignored) {
-        }
+        } catch (Exception ignored) {}
     });
 
     @SuppressWarnings("unused")
@@ -200,7 +201,7 @@ public class InfinityMiner extends ToggleModule {
 
     private void baritoneRequestMineTargetBlock() {
         try {
-            BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute(BARITONE_MINE + targetBlock.get());
+            BaritoneAPI.getProvider().getPrimaryBaritone().getMineProcess().mine(targetBlock.get());
             baritoneRunning = true;
         } catch (Exception ignored) {
         }
@@ -208,14 +209,14 @@ public class InfinityMiner extends ToggleModule {
 
     private void baritoneRequestMineRepairBlock() {
         try {
-            BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute(BARITONE_MINE + repairBlock.get());
+            BaritoneAPI.getProvider().getPrimaryBaritone().getMineProcess().mine(repairBlock.get());
             baritoneRunning = true;
         } catch (Exception ignored) {
         }
     }
 
     private synchronized void baritoneRequestStop() {
-        BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("stop");
+        BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
         baritoneRunning = false;
         currentMode = Mode.STILL;
     }
@@ -225,18 +226,16 @@ public class InfinityMiner extends ToggleModule {
             baritoneRequestStop();
             secondaryMode = Mode.HOME;
             currentMode = Mode.HOME;
-            String BARITONE_GOTO = "goto ";
-            BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute(BARITONE_GOTO + playerX + " " + playerY + " " + playerZ);
+            BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalBlock(playerX, playerY, playerZ));
         }
     }
-
 
     private Boolean isInventoryFull() {
         return mc.player != null && mc.player.inventory.getEmptySlot() == -1;
     }
 
-    private ArrayList<ToggleModule> getToggleModules() {
-        return new ArrayList<>(Arrays.asList(
+    private List<ToggleModule> getToggleModules() {
+        return Lists.newArrayList(
                 ModuleManager.INSTANCE.get(Jesus.class),
                 ModuleManager.INSTANCE.get(NoBreakDelay.class),
                 ModuleManager.INSTANCE.get(AntiHunger.class),
@@ -245,7 +244,8 @@ public class InfinityMiner extends ToggleModule {
                 ModuleManager.INSTANCE.get(AutoLog.class),
                 ModuleManager.INSTANCE.get(AutoTool.class),
                 ModuleManager.INSTANCE.get(AutoDrop.class),
-                ModuleManager.INSTANCE.get(InvMove.class)));
+                ModuleManager.INSTANCE.get(InvMove.class)
+        );
     }
 
     private void requestLogout(Mode mode) {
@@ -272,11 +272,11 @@ public class InfinityMiner extends ToggleModule {
     });
 
 
-    public Enum<Mode> getMode() {
+    public Mode getMode() {
         return currentMode;
     }
 
-    public String getCurrentTarget() {
+    public Block getCurrentTarget() {
         return (currentMode == Mode.REPAIR) ? repairBlock.get() : targetBlock.get();
     }
 
@@ -291,5 +291,4 @@ public class InfinityMiner extends ToggleModule {
     private int getCurrentDamage() {
         return (mc.player != null) ? mc.player.getMainHandStack().getItem().getMaxDamage() - mc.player.getMainHandStack().getDamage() : -1;
     }
-
 }
