@@ -8,7 +8,10 @@ package minegame159.meteorclient.modules.player;
 import baritone.api.BaritoneAPI;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.*;
+import minegame159.meteorclient.events.ActiveModulesChangedEvent;
+import minegame159.meteorclient.events.GameJoinedEvent;
+import minegame159.meteorclient.events.GameLeftEvent;
+import minegame159.meteorclient.events.PostTickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
@@ -19,6 +22,8 @@ import minegame159.meteorclient.modules.movement.NoFall;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.MeteorExecutor;
 import net.minecraft.item.ToolItem;
+import net.minecraft.network.packet.s2c.play.DisconnectS2CPacket;
+import net.minecraft.text.LiteralText;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,6 +31,7 @@ import java.util.HashMap;
 
 /**
  * @author Inclement
+ * @version 1.1
  * InfinityMiner is a module which alternates between mining a target block, and a repair block.
  * This allows the user to mine indefinitely, provided they have the mending enchantment.
  */
@@ -48,14 +54,14 @@ public class InfinityMiner extends ToggleModule {
             .defaultValue("nether_quartz_ore")
             .build()
     );
-    private final Setting<Integer> durabilityThreshold = sgGeneral.add(new IntSetting.Builder()
+    private final Setting<Double> durabilityThreshold = sgGeneral.add(new DoubleSetting.Builder()
             .name("Durability Threshold")
-            .description("The durability at which to start repairing.")
-            .defaultValue(150)
-            .max(500)
-            .min(50)
-            .sliderMin(50)
-            .sliderMax(500)
+            .description("The durability at which to start repairing as a percent of maximum durability.")
+            .defaultValue(.15)
+            .max(.95)
+            .min(.05)
+            .sliderMin(.05)
+            .sliderMax(.95)
             .build());
 
     private final Setting<Boolean> smartModuleToggle = sgAutoToggles.add(new BoolSetting.Builder()
@@ -67,6 +73,12 @@ public class InfinityMiner extends ToggleModule {
     private final Setting<Boolean> autoWalkHome = sgExtras.add(new BoolSetting.Builder()
             .name("Walk Home")
             .description("When your inventory is full, walk home.")
+            .defaultValue(false)
+            .build());
+
+    private final Setting<Boolean> autoLogOut = sgExtras.add(new BoolSetting.Builder()
+            .name("Log Out")
+            .description("Log out when inventory is full. Will walk home first if enabled.")
             .defaultValue(false)
             .build());
 
@@ -84,7 +96,6 @@ public class InfinityMiner extends ToggleModule {
     private int playerZ;
     private final HashMap<String, Boolean> originalSettings = new HashMap<>();
     private volatile Boolean BLOCKER = false;
-    private volatile Boolean MINING_BLOCKER = false;
 
     public enum Mode {
         TARGET,
@@ -107,7 +118,7 @@ public class InfinityMiner extends ToggleModule {
             });
         }
         BaritoneAPI.getSettings().mineScanDroppedItems.value = false;
-        if (mc.player != null && autoWalkHome.get()) {
+        if (mc.player != null) {
             playerX = (int) mc.player.getX();
             playerY = (int) mc.player.getY();
             playerZ = (int) mc.player.getZ();
@@ -147,7 +158,10 @@ public class InfinityMiner extends ToggleModule {
                 else baritoneRequestMineTargetBlock();
             } else if (autoWalkHome.get() && isInventoryFull() && secondaryMode != Mode.HOME)
                 baritoneRequestPathHome();
-            else if (currentMode == Mode.REPAIR) {
+            else if (!autoWalkHome.get() && isInventoryFull() && autoLogOut.get()) {
+                this.toggle();
+                requestLogout(currentMode);
+            } else if (currentMode == Mode.REPAIR) {
                 int REPAIR_BUFFER = 15;
                 if (isTool() && getCurrentDamage() >= mc.player.getMainHandStack().getMaxDamage() - REPAIR_BUFFER) {
                     if (secondaryMode != Mode.HOME) {
@@ -159,12 +173,17 @@ public class InfinityMiner extends ToggleModule {
                     }
                 }
             } else if (currentMode == Mode.TARGET) {
-                if (isTool() && getCurrentDamage() <= durabilityThreshold.get()) {
+                if (isTool() && getCurrentDamage() <= durabilityThreshold.get() * mc.player.getMainHandStack().getMaxDamage()) {
                     currentMode = Mode.REPAIR;
                     baritoneRequestMineRepairBlock();
                 } else if (autoWalkHome.get() && isInventoryFull()) baritoneRequestPathHome();
-            } else if (currentMode == Mode.HOME)
-                if (isTool() && getCurrentDamage() <= durabilityThreshold.get()) currentMode = Mode.REPAIR;
+                else if (!autoWalkHome.get() && isInventoryFull() && autoWalkHome.get()) requestLogout(currentMode);
+            } else if (currentMode == Mode.HOME) {
+                if (Math.abs(mc.player.getY() - playerY) <= .5 && Math.abs(mc.player.getX() - playerX) <= .5 && Math.abs(mc.player.getZ() - playerZ) <= .5) {
+                    if (autoLogOut.get()) requestLogout(currentMode);
+                    this.toggle();
+                } else if (isTool() && getCurrentDamage() <= durabilityThreshold.get()) currentMode = Mode.REPAIR;
+            }
         } catch (Exception ignored) {
         }
     });
@@ -193,7 +212,6 @@ public class InfinityMiner extends ToggleModule {
             baritoneRunning = true;
         } catch (Exception ignored) {
         }
-
     }
 
     private synchronized void baritoneRequestStop() {
@@ -228,6 +246,15 @@ public class InfinityMiner extends ToggleModule {
                 ModuleManager.INSTANCE.get(AutoTool.class),
                 ModuleManager.INSTANCE.get(AutoDrop.class),
                 ModuleManager.INSTANCE.get(InvMove.class)));
+    }
+
+    private void requestLogout(Mode mode) {
+        if (mc.player != null) {
+            if (mode == Mode.HOME)
+                mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(new LiteralText("Infinity Miner: Inventory is Full and You Are Home")));
+            else
+                mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(new LiteralText("Infinity Miner: Inventory is Full")));
+        }
     }
 
     @SuppressWarnings("unused")
