@@ -19,7 +19,6 @@ import minegame159.meteorclient.modules.player.ChestSwap;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.InvUtils;
-import minegame159.meteorclient.utils.MeteorExecutor;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.ElytraItem;
@@ -29,7 +28,6 @@ import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.math.Vec3d;
-import sun.net.www.MeteredStream;
 
 public class ElytraPlus extends ToggleModule {
     public enum Mode {
@@ -155,8 +153,6 @@ public class ElytraPlus extends ToggleModule {
 
     private boolean lastForwardPressed;
 
-    private final ChestSwapGroundListener chestSwapGroundListener = new ChestSwapGroundListener();
-
     public ElytraPlus() {
         super(Category.Movement, "Elytra+", "Makes elytra better.");
     }
@@ -177,7 +173,7 @@ public class ElytraPlus extends ToggleModule {
         if (chestSwap.get() == ChestSwapMode.Always && mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() == Items.ELYTRA) {
             ModuleManager.INSTANCE.get(ChestSwap.class).swap();
         } else if (chestSwap.get() == ChestSwapMode.WaitForGround)
-            chestSwapGroundListener.enabled();
+            enableGroundListener();
     }
 
     @EventHandler
@@ -364,21 +360,20 @@ public class ElytraPlus extends ToggleModule {
         lastJumpPressed = jumpPressed;
     }
 
-    private class ChestSwapGroundListener {
-
-       private final Listener<PlayerMoveEvent> groundListener = new Listener<>(event -> {
-            if (mc.player != null && mc.player.isOnGround()) {
-                if (mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() == Items.ELYTRA) {
-                    ModuleManager.INSTANCE.get(ChestSwap.class).swap();
-                    disable();
-                }
+    private final Listener<PlayerMoveEvent> groundListener = new Listener<>(event -> {
+        if (mc.player != null && mc.player.isOnGround()) {
+            if (mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() == Items.ELYTRA) {
+                ModuleManager.INSTANCE.get(ChestSwap.class).swap();
+                disableGroundListener();
             }
-        });
-        protected void enabled() {
-            MeteorClient.EVENT_BUS.subscribe(groundListener);
         }
-        protected void disable(){
-            MeteorClient.EVENT_BUS.unsubscribe(groundListener);
-        }
+    });
+
+    private void enableGroundListener() {
+        MeteorClient.EVENT_BUS.subscribe(groundListener);
     }
+
+    private void disableGroundListener() { MeteorClient.EVENT_BUS.unsubscribe(groundListener);
+    }
+
 }
