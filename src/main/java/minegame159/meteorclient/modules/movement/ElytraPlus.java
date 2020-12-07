@@ -29,6 +29,7 @@ import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.math.Vec3d;
+import sun.net.www.MeteredStream;
 
 public class ElytraPlus extends ToggleModule {
     public enum Mode {
@@ -365,20 +366,19 @@ public class ElytraPlus extends ToggleModule {
 
     private class ChestSwapGroundListener {
 
-        protected volatile ChestSwapMode currentMode;
-
-        public ChestSwapGroundListener() {
-            MeteorClient.EVENT_BUS.subscribe(new Listener<PlayerMoveEvent>(event -> {
-                if (currentMode != null && currentMode == ChestSwapMode.WaitForGround && mc.player != null && mc.player.isOnGround()) {
-                    if (mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() == Items.ELYTRA) {
-                        ModuleManager.INSTANCE.get(ChestSwap.class).swap();
-                        currentMode = null;
-                    }
+       private final Listener<PlayerMoveEvent> groundListener = new Listener<>(event -> {
+            if (mc.player != null && mc.player.isOnGround()) {
+                if (mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() == Items.ELYTRA) {
+                    ModuleManager.INSTANCE.get(ChestSwap.class).swap();
+                    disable();
                 }
-            }));
-        }
+            }
+        });
         protected void enabled() {
-            currentMode = ChestSwapMode.WaitForGround;
+            MeteorClient.EVENT_BUS.subscribe(groundListener);
+        }
+        protected void disable(){
+            MeteorClient.EVENT_BUS.unsubscribe(groundListener);
         }
     }
 }
