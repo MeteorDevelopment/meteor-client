@@ -8,6 +8,7 @@ package minegame159.meteorclient.modules.player;
 import baritone.api.BaritoneAPI;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
+import minegame159.meteorclient.events.ActiveModulesChangedEvent;
 import minegame159.meteorclient.events.GameJoinedEvent;
 import minegame159.meteorclient.events.GameLeftEvent;
 import minegame159.meteorclient.events.PostTickEvent;
@@ -15,13 +16,22 @@ import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.modules.combat.AutoLog;
-import minegame159.meteorclient.modules.movement.AutoWalk;
+import minegame159.meteorclient.modules.movement.InvMove;
+import minegame159.meteorclient.modules.movement.Jesus;
 import minegame159.meteorclient.modules.movement.NoFall;
 import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.MeteorExecutor;
 import net.minecraft.item.ToolItem;
+import net.minecraft.network.packet.s2c.play.DisconnectS2CPacket;
+import net.minecraft.text.LiteralText;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 
 /**
  * @author Inclement
+ * @version 1.1
  * InfinityMiner is a module which alternates between mining a target block, and a repair block.
  * This allows the user to mine indefinitely, provided they have the mending enchantment.
  */
@@ -44,25 +54,19 @@ public class InfinityMiner extends ToggleModule {
             .defaultValue("nether_quartz_ore")
             .build()
     );
-    private final Setting<Integer> durabilityThreshold = sgGeneral.add(new IntSetting.Builder()
+    private final Setting<Double> durabilityThreshold = sgGeneral.add(new DoubleSetting.Builder()
             .name("Durability Threshold")
-            .description("The durability at which to start repairing.")
-            .defaultValue(150)
-            .max(500)
-            .min(50)
-            .sliderMin(50)
-            .sliderMax(500)
+            .description("The durability at which to start repairing as a percent of maximum durability.")
+            .defaultValue(.15)
+            .max(.95)
+            .min(.05)
+            .sliderMin(.05)
+            .sliderMax(.95)
             .build());
 
-    private final Setting<Boolean> autoToggleAutoLog = sgAutoToggles.add(new BoolSetting.Builder()
-            .name("Toggle AutoLog")
-            .description("Ensure AutoLog is enabled")
-            .defaultValue(true)
-            .build());
-
-    private final Setting<Boolean> autoToggleNoBreakDelay = sgAutoToggles.add(new BoolSetting.Builder()
-            .name("Toggle NoBreakDelay")
-            .description("Ensure NoBreakDelay is enabled")
+    private final Setting<Boolean> smartModuleToggle = sgAutoToggles.add(new BoolSetting.Builder()
+            .name("Smart Module Toggle")
+            .description("Automatically enable helpful modules")
             .defaultValue(true)
             .build());
 
@@ -72,17 +76,17 @@ public class InfinityMiner extends ToggleModule {
             .defaultValue(false)
             .build());
 
+    private final Setting<Boolean> autoLogOut = sgExtras.add(new BoolSetting.Builder()
+            .name("Log Out")
+            .description("Log out when inventory is full. Will walk home first if enabled.")
+            .defaultValue(false)
+            .build());
+
 
     public InfinityMiner() {
-        super(Category.Player, "Infinity Miner", "Mine forever");
+        super(Category.Player, "infinity-miner", "Mine forever");
     }
 
-    private boolean noFallWasActive;
-    private boolean autoEatWasActive;
-    private boolean autoToolWasActive;
-    private boolean autoLogWasActive;
-    private boolean noBreakDelayWasActive;
-    private boolean baritoneSetting;
     private final String BARITONE_MINE = "mine ";
     private Mode currentMode = Mode.STILL;
     private Mode secondaryMode;
@@ -90,6 +94,8 @@ public class InfinityMiner extends ToggleModule {
     private int playerX;
     private int playerY;
     private int playerZ;
+    private final HashMap<String, Boolean> originalSettings = new HashMap<>();
+    private volatile Boolean BLOCKER = false;
 
     public enum Mode {
         TARGET,
@@ -100,65 +106,36 @@ public class InfinityMiner extends ToggleModule {
 
     @Override
     public void onActivate() {
-        baritoneSetting = BaritoneAPI.getSettings().mineScanDroppedItems.value;
-        if (baritoneSetting) BaritoneAPI.getSettings().mineScanDroppedItems.value = false;
+        if (smartModuleToggle.get()) {
+            BLOCKER = true;
+            MeteorExecutor.execute(() -> { //fixes pause issue caused by too many modules being toggled
+                BaritoneAPI.getSettings().mineScanDroppedItems.value = false;
+                for (ToggleModule module : getToggleModules()) {
+                    originalSettings.put(module.name, module.isActive());
+                    if (!module.isActive()) module.toggle();
+                }
+                BLOCKER = false;
+            });
+        }
         BaritoneAPI.getSettings().mineScanDroppedItems.value = false;
-        NoFall noFall = ModuleManager.INSTANCE.get(NoFall.class);
-        noFallWasActive = noFall.isActive();
-        if (!noFall.isActive()) noFall.toggle();
-
-        AutoEat autoEat = ModuleManager.INSTANCE.get(AutoEat.class);
-        autoEatWasActive = autoEat.isActive();
-        if (!autoEat.isActive()) autoEat.toggle();
-
-        AutoTool autoTool = ModuleManager.INSTANCE.get(AutoTool.class);
-        autoToolWasActive = autoTool.isActive();
-        if (!autoTool.isActive()) autoTool.toggle();
-
-        if (autoToggleAutoLog.get()) {
-            AutoLog autoLog = ModuleManager.INSTANCE.get(AutoLog.class);
-            autoLogWasActive = autoLog.isActive();
-            if (!autoLog.isActive()) autoLog.toggle();
-        }
-
-        if (autoToggleNoBreakDelay.get()) {
-            NoBreakDelay noBreakDelay = ModuleManager.INSTANCE.get(NoBreakDelay.class);
-            noBreakDelayWasActive = noBreakDelay.isActive();
-            if (!noBreakDelay.isActive()) noBreakDelay.toggle();
-        }
-        AutoWalk autoWalk = ModuleManager.INSTANCE.get(AutoWalk.class);
-        if (autoWalk.isActive()) autoWalk.toggle();
-
-        if (mc.player != null && autoWalkHome.get()) {
+        if (mc.player != null) {
             playerX = (int) mc.player.getX();
             playerY = (int) mc.player.getY();
             playerZ = (int) mc.player.getZ();
         }
-
-        if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing())
-            BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
     }
 
     @Override
     public void onDeactivate() {
-        NoFall noFall = ModuleManager.INSTANCE.get(NoFall.class);
-        if (!noFallWasActive && noFall.isActive()) noFall.toggle();
-
-        AutoEat autoEat = ModuleManager.INSTANCE.get(AutoEat.class);
-        if (!autoEatWasActive && autoEat.isActive()) autoEat.toggle();
-
-        AutoTool autoTool = ModuleManager.INSTANCE.get(AutoTool.class);
-        if (!autoToolWasActive && autoTool.isActive()) autoTool.toggle();
-
-        if (autoToggleAutoLog.get()) {
-            AutoLog autoLog = ModuleManager.INSTANCE.get(AutoLog.class);
-            if (!autoLogWasActive && autoLog.isActive()) autoLog.toggle();
-        }
-        BaritoneAPI.getSettings().mineScanDroppedItems.value = baritoneSetting;
-
-        if (autoToggleNoBreakDelay.get()) {
-            NoBreakDelay noBreakDelay = ModuleManager.INSTANCE.get(NoBreakDelay.class);
-            if (!noBreakDelayWasActive && noBreakDelay.isActive()) noBreakDelay.toggle();
+        if (smartModuleToggle.get()) {
+            BLOCKER = true;
+            MeteorExecutor.execute(() -> {
+                for (ToggleModule module : getToggleModules()) {
+                    if (originalSettings.get(module.name) != module.isActive()) module.toggle();
+                }
+                originalSettings.clear();
+                BLOCKER = false;
+            });
         }
         baritoneRequestStop();
         baritoneRunning = false;
@@ -181,7 +158,10 @@ public class InfinityMiner extends ToggleModule {
                 else baritoneRequestMineTargetBlock();
             } else if (autoWalkHome.get() && isInventoryFull() && secondaryMode != Mode.HOME)
                 baritoneRequestPathHome();
-            else if (currentMode == Mode.REPAIR) {
+            else if (!autoWalkHome.get() && isInventoryFull() && autoLogOut.get()) {
+                this.toggle();
+                requestLogout(currentMode);
+            } else if (currentMode == Mode.REPAIR) {
                 int REPAIR_BUFFER = 15;
                 if (isTool() && getCurrentDamage() >= mc.player.getMainHandStack().getMaxDamage() - REPAIR_BUFFER) {
                     if (secondaryMode != Mode.HOME) {
@@ -193,29 +173,48 @@ public class InfinityMiner extends ToggleModule {
                     }
                 }
             } else if (currentMode == Mode.TARGET) {
-                if (isTool() && getCurrentDamage() <= durabilityThreshold.get()) {
+                if (isTool() && getCurrentDamage() <= durabilityThreshold.get() * mc.player.getMainHandStack().getMaxDamage()) {
                     currentMode = Mode.REPAIR;
                     baritoneRequestMineRepairBlock();
                 } else if (autoWalkHome.get() && isInventoryFull()) baritoneRequestPathHome();
-            } else if (currentMode == Mode.HOME)
-                if (isTool() && getCurrentDamage() <= durabilityThreshold.get()) currentMode = Mode.REPAIR;
+                else if (!autoWalkHome.get() && isInventoryFull() && autoWalkHome.get()) requestLogout(currentMode);
+            } else if (currentMode == Mode.HOME) {
+                if (Math.abs(mc.player.getY() - playerY) <= .5 && Math.abs(mc.player.getX() - playerX) <= .5 && Math.abs(mc.player.getZ() - playerZ) <= .5) {
+                    if (autoLogOut.get()) requestLogout(currentMode);
+                    this.toggle();
+                } else if (isTool() && getCurrentDamage() <= durabilityThreshold.get()) currentMode = Mode.REPAIR;
+            }
         } catch (Exception ignored) {
         }
     });
 
+    @SuppressWarnings("unused")
+    @EventHandler
+    private final Listener<ActiveModulesChangedEvent> moduleChange = new Listener<>(event -> {
+        if (!BLOCKER) {
+            for (ToggleModule module : getToggleModules()) {
+                if (!module.isActive()) originalSettings.remove(module.name);
+            }
+        }
+    });
+
     private void baritoneRequestMineTargetBlock() {
-        BaritoneAPI.getSettings().mineScanDroppedItems.value = true;
-        BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute(BARITONE_MINE + targetBlock.get());
-        baritoneRunning = true;
+        try {
+            BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute(BARITONE_MINE + targetBlock.get());
+            baritoneRunning = true;
+        } catch (Exception ignored) {
+        }
     }
 
     private void baritoneRequestMineRepairBlock() {
-        BaritoneAPI.getSettings().mineScanDroppedItems.value = false;
-        BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute(BARITONE_MINE + repairBlock.get());
-        baritoneRunning = true;
+        try {
+            BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute(BARITONE_MINE + repairBlock.get());
+            baritoneRunning = true;
+        } catch (Exception ignored) {
+        }
     }
 
-    private void baritoneRequestStop() {
+    private synchronized void baritoneRequestStop() {
         BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("stop");
         baritoneRunning = false;
         currentMode = Mode.STILL;
@@ -231,8 +230,31 @@ public class InfinityMiner extends ToggleModule {
         }
     }
 
+
     private Boolean isInventoryFull() {
         return mc.player != null && mc.player.inventory.getEmptySlot() == -1;
+    }
+
+    private ArrayList<ToggleModule> getToggleModules() {
+        return new ArrayList<>(Arrays.asList(
+                ModuleManager.INSTANCE.get(Jesus.class),
+                ModuleManager.INSTANCE.get(NoBreakDelay.class),
+                ModuleManager.INSTANCE.get(AntiHunger.class),
+                ModuleManager.INSTANCE.get(AutoEat.class),
+                ModuleManager.INSTANCE.get(NoFall.class),
+                ModuleManager.INSTANCE.get(AutoLog.class),
+                ModuleManager.INSTANCE.get(AutoTool.class),
+                ModuleManager.INSTANCE.get(AutoDrop.class),
+                ModuleManager.INSTANCE.get(InvMove.class)));
+    }
+
+    private void requestLogout(Mode mode) {
+        if (mc.player != null) {
+            if (mode == Mode.HOME)
+                mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(new LiteralText("Infinity Miner: Inventory is Full and You Are Home")));
+            else
+                mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(new LiteralText("Infinity Miner: Inventory is Full")));
+        }
     }
 
     @SuppressWarnings("unused")
@@ -249,6 +271,7 @@ public class InfinityMiner extends ToggleModule {
         if (this.isActive()) this.toggle();
     });
 
+
     public Enum<Mode> getMode() {
         return currentMode;
     }
@@ -261,13 +284,12 @@ public class InfinityMiner extends ToggleModule {
         return new int[]{playerX, playerY, playerX};
     }
 
-    public boolean isTool() {
+    private boolean isTool() {
         return mc.player != null && mc.player.getMainHandStack() != null && mc.player.getMainHandStack().getItem() instanceof ToolItem;
     }
 
-    public int getCurrentDamage() {
+    private int getCurrentDamage() {
         return (mc.player != null) ? mc.player.getMainHandStack().getItem().getMaxDamage() - mc.player.getMainHandStack().getDamage() : -1;
     }
-
 
 }
