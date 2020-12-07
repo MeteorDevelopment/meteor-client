@@ -6,7 +6,6 @@
 package minegame159.meteorclient.utils;
 
 import minegame159.meteorclient.friends.FriendManager;
-import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;

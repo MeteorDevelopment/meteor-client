@@ -11,7 +11,10 @@ import minegame159.meteorclient.events.PostTickEvent;
 import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
-import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.settings.EnumSetting;
+import minegame159.meteorclient.settings.IntSetting;
+import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.Utils;
 
 public class AutoClick extends ToggleModule {
