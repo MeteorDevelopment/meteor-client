@@ -24,7 +24,6 @@ import minegame159.meteorclient.utils.MeteorExecutor;
 import net.minecraft.item.ToolItem;
 import net.minecraft.network.packet.s2c.play.DisconnectS2CPacket;
 import net.minecraft.text.LiteralText;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -35,6 +34,7 @@ import java.util.HashMap;
  * InfinityMiner is a module which alternates between mining a target block, and a repair block.
  * This allows the user to mine indefinitely, provided they have the mending enchantment.
  */
+
 public class InfinityMiner extends ToggleModule {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
