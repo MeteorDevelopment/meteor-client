@@ -6,19 +6,31 @@
 package minegame159.meteorclient.modules.player;
 
 import baritone.api.BaritoneAPI;
+import com.sun.org.apache.xpath.internal.operations.Bool;
+import com.sun.org.apache.xpath.internal.operations.Mod;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
+import minegame159.meteorclient.events.ActiveModulesChangedEvent;
 import minegame159.meteorclient.events.GameJoinedEvent;
 import minegame159.meteorclient.events.GameLeftEvent;
 import minegame159.meteorclient.events.PostTickEvent;
 import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.modules.combat.AutoLog;
 import minegame159.meteorclient.modules.movement.AutoWalk;
+import minegame159.meteorclient.modules.movement.InvMove;
+import minegame159.meteorclient.modules.movement.Jesus;
 import minegame159.meteorclient.modules.movement.NoFall;
 import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.MeteorExecutor;
 import net.minecraft.item.ToolItem;
+import org.graalvm.compiler.api.replacements.Snippet;
+
+import java.lang.reflect.Array;
+import java.util.*;
+import java.util.stream.Stream;
 
 /**
  * @author Inclement
@@ -54,15 +66,9 @@ public class InfinityMiner extends ToggleModule {
             .sliderMax(500)
             .build());
 
-    private final Setting<Boolean> autoToggleAutoLog = sgAutoToggles.add(new BoolSetting.Builder()
-            .name("Toggle AutoLog")
-            .description("Ensure AutoLog is enabled")
-            .defaultValue(true)
-            .build());
-
-    private final Setting<Boolean> autoToggleNoBreakDelay = sgAutoToggles.add(new BoolSetting.Builder()
-            .name("Toggle NoBreakDelay")
-            .description("Ensure NoBreakDelay is enabled")
+    private final Setting<Boolean> smartModuleToggle = sgAutoToggles.add(new BoolSetting.Builder()
+            .name("Smart Module Toggle")
+            .description("Automatically enable helpful modules")
             .defaultValue(true)
             .build());
 
@@ -74,15 +80,9 @@ public class InfinityMiner extends ToggleModule {
 
 
     public InfinityMiner() {
-        super(Category.Player, "Infinity Miner", "Mine forever");
+        super(Category.Player, "infinity-miner", "Mine forever");
     }
 
-    private boolean noFallWasActive;
-    private boolean autoEatWasActive;
-    private boolean autoToolWasActive;
-    private boolean autoLogWasActive;
-    private boolean noBreakDelayWasActive;
-    private boolean baritoneSetting;
     private final String BARITONE_MINE = "mine ";
     private Mode currentMode = Mode.STILL;
     private Mode secondaryMode;
@@ -90,6 +90,8 @@ public class InfinityMiner extends ToggleModule {
     private int playerX;
     private int playerY;
     private int playerZ;
+    private final HashMap<String, Boolean> originalSettings = new HashMap<>();
+    private Boolean BLOCKER = false;
 
     public enum Mode {
         TARGET,
@@ -100,65 +102,35 @@ public class InfinityMiner extends ToggleModule {
 
     @Override
     public void onActivate() {
-        baritoneSetting = BaritoneAPI.getSettings().mineScanDroppedItems.value;
-        if (baritoneSetting) BaritoneAPI.getSettings().mineScanDroppedItems.value = false;
-        BaritoneAPI.getSettings().mineScanDroppedItems.value = false;
-        NoFall noFall = ModuleManager.INSTANCE.get(NoFall.class);
-        noFallWasActive = noFall.isActive();
-        if (!noFall.isActive()) noFall.toggle();
-
-        AutoEat autoEat = ModuleManager.INSTANCE.get(AutoEat.class);
-        autoEatWasActive = autoEat.isActive();
-        if (!autoEat.isActive()) autoEat.toggle();
-
-        AutoTool autoTool = ModuleManager.INSTANCE.get(AutoTool.class);
-        autoToolWasActive = autoTool.isActive();
-        if (!autoTool.isActive()) autoTool.toggle();
-
-        if (autoToggleAutoLog.get()) {
-            AutoLog autoLog = ModuleManager.INSTANCE.get(AutoLog.class);
-            autoLogWasActive = autoLog.isActive();
-            if (!autoLog.isActive()) autoLog.toggle();
+        if (smartModuleToggle.get()) {
+            BLOCKER = true;
+            MeteorExecutor.execute(() -> { //fixes pause issue caused by too many modules being toggled
+                BaritoneAPI.getSettings().mineScanDroppedItems.value = false;
+                for (ToggleModule module : getToggleModules()) {
+                    originalSettings.put(module.name, module.isActive());
+                    if (!module.isActive()) module.toggle();
+                }
+                BLOCKER = false;
+            });
         }
-
-        if (autoToggleNoBreakDelay.get()) {
-            NoBreakDelay noBreakDelay = ModuleManager.INSTANCE.get(NoBreakDelay.class);
-            noBreakDelayWasActive = noBreakDelay.isActive();
-            if (!noBreakDelay.isActive()) noBreakDelay.toggle();
-        }
-        AutoWalk autoWalk = ModuleManager.INSTANCE.get(AutoWalk.class);
-        if (autoWalk.isActive()) autoWalk.toggle();
-
         if (mc.player != null && autoWalkHome.get()) {
             playerX = (int) mc.player.getX();
             playerY = (int) mc.player.getY();
             playerZ = (int) mc.player.getZ();
         }
-
-        if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing())
-            BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
     }
 
     @Override
     public void onDeactivate() {
-        NoFall noFall = ModuleManager.INSTANCE.get(NoFall.class);
-        if (!noFallWasActive && noFall.isActive()) noFall.toggle();
-
-        AutoEat autoEat = ModuleManager.INSTANCE.get(AutoEat.class);
-        if (!autoEatWasActive && autoEat.isActive()) autoEat.toggle();
-
-        AutoTool autoTool = ModuleManager.INSTANCE.get(AutoTool.class);
-        if (!autoToolWasActive && autoTool.isActive()) autoTool.toggle();
-
-        if (autoToggleAutoLog.get()) {
-            AutoLog autoLog = ModuleManager.INSTANCE.get(AutoLog.class);
-            if (!autoLogWasActive && autoLog.isActive()) autoLog.toggle();
-        }
-        BaritoneAPI.getSettings().mineScanDroppedItems.value = baritoneSetting;
-
-        if (autoToggleNoBreakDelay.get()) {
-            NoBreakDelay noBreakDelay = ModuleManager.INSTANCE.get(NoBreakDelay.class);
-            if (!noBreakDelayWasActive && noBreakDelay.isActive()) noBreakDelay.toggle();
+        if (smartModuleToggle.get()) {
+            BLOCKER = true;
+            MeteorExecutor.execute(() -> {
+                for (ToggleModule module : getToggleModules()) {
+                    if (originalSettings.get(module.name) != module.isActive()) module.toggle();
+                }
+                originalSettings.clear();
+                BLOCKER = false;
+            });
         }
         baritoneRequestStop();
         baritoneRunning = false;
@@ -203,6 +175,16 @@ public class InfinityMiner extends ToggleModule {
         }
     });
 
+    @SuppressWarnings("unused")
+    @EventHandler
+    private final Listener<ActiveModulesChangedEvent> moduleChange = new Listener<>(event -> {
+        if (!BLOCKER) {
+            for (ToggleModule module : getToggleModules()) {
+                if (!module.isActive()) originalSettings.remove(module.name);
+            }
+        }
+    });
+
     private void baritoneRequestMineTargetBlock() {
         BaritoneAPI.getSettings().mineScanDroppedItems.value = true;
         BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute(BARITONE_MINE + targetBlock.get());
@@ -215,7 +197,7 @@ public class InfinityMiner extends ToggleModule {
         baritoneRunning = true;
     }
 
-    private void baritoneRequestStop() {
+    private synchronized void baritoneRequestStop() {
         BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("stop");
         baritoneRunning = false;
         currentMode = Mode.STILL;
@@ -231,8 +213,22 @@ public class InfinityMiner extends ToggleModule {
         }
     }
 
+
     private Boolean isInventoryFull() {
         return mc.player != null && mc.player.inventory.getEmptySlot() == -1;
+    }
+
+    private ArrayList<ToggleModule> getToggleModules() {
+        return new ArrayList<>(Arrays.asList(
+                ModuleManager.INSTANCE.get(Jesus.class),
+                ModuleManager.INSTANCE.get(NoBreakDelay.class),
+                ModuleManager.INSTANCE.get(AntiHunger.class),
+                ModuleManager.INSTANCE.get(AutoEat.class),
+                ModuleManager.INSTANCE.get(NoFall.class),
+                ModuleManager.INSTANCE.get(AutoLog.class),
+                ModuleManager.INSTANCE.get(AutoTool.class),
+                ModuleManager.INSTANCE.get(AutoDrop.class),
+                ModuleManager.INSTANCE.get(InvMove.class)));
     }
 
     @SuppressWarnings("unused")
@@ -268,6 +264,5 @@ public class InfinityMiner extends ToggleModule {
     public int getCurrentDamage() {
         return (mc.player != null) ? mc.player.getMainHandStack().getItem().getMaxDamage() - mc.player.getMainHandStack().getDamage() : -1;
     }
-
 
 }
