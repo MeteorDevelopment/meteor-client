@@ -46,4 +46,8 @@ public class WItem extends WWidget {
             GlStateManager.popMatrix();
         });
     }
+
+    public void set(ItemStack itemStack) {
+        this.itemStack = itemStack;
+    }
 }
