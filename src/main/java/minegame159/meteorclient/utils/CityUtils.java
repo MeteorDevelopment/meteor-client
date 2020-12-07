@@ -6,6 +6,7 @@
 package minegame159.meteorclient.utils;
 
 import minegame159.meteorclient.friends.FriendManager;
+import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
@@ -54,13 +55,13 @@ public class CityUtils {
         return target;
     }
 
-    public static ArrayList<BlockPos> getTargetSurround() {
+    public static ArrayList<BlockPos> getTargetSurround(PlayerEntity player) {
         ArrayList<BlockPos> positions = new ArrayList<>();
         boolean isAir = false;
 
         for (int i = 0; i < 4; ++i) {
-            if (getPlayerTarget() == null) continue;
-            BlockPos obbySurround = getSurround(getPlayerTarget(), surround[i]);
+            if (player == null) continue;
+            BlockPos obbySurround = getSurround(player, surround[i]);
             if (obbySurround == null) continue;
             assert mc.world != null;
             if (mc.world.getBlockState(obbySurround) == null) continue;
@@ -76,11 +77,16 @@ public class CityUtils {
 
     public static BlockPos getTargetBlock() {
         BlockPos finalPos = null;
+        boolean cancel = false;
 
-        ArrayList<BlockPos> positions = getTargetSurround();
+        ArrayList<BlockPos> positions = getTargetSurround(getPlayerTarget());
+        ArrayList<BlockPos> myPositions = getTargetSurround(mc.player);
+
         if (positions == null) return null;
 
         for (BlockPos pos : positions) {
+
+            if (myPositions != null && !myPositions.isEmpty() && myPositions.contains(pos)) cancel = true;
 
             assert mc.world != null;
             if (mc.world.getBlockState(pos.down(1)).getBlock() != Blocks.OBSIDIAN && mc.world.getBlockState(pos.down(1)).getBlock() != Blocks.BEDROCK) continue;
@@ -96,7 +102,8 @@ public class CityUtils {
             }
         }
 
-        return finalPos;
+        if (!cancel) return finalPos;
+        else return null;
     }
 
     public static BlockPos getSurround(Entity entity, BlockPos toAdd) {
