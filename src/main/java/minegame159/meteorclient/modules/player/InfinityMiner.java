@@ -8,10 +8,7 @@ package minegame159.meteorclient.modules.player;
 import baritone.api.BaritoneAPI;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.ActiveModulesChangedEvent;
-import minegame159.meteorclient.events.GameJoinedEvent;
-import minegame159.meteorclient.events.GameLeftEvent;
-import minegame159.meteorclient.events.PostTickEvent;
+import minegame159.meteorclient.events.*;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
@@ -87,6 +84,7 @@ public class InfinityMiner extends ToggleModule {
     private int playerZ;
     private final HashMap<String, Boolean> originalSettings = new HashMap<>();
     private volatile Boolean BLOCKER = false;
+    private volatile Boolean MINING_BLOCKER = false;
 
     public enum Mode {
         TARGET,
@@ -108,6 +106,7 @@ public class InfinityMiner extends ToggleModule {
                 BLOCKER = false;
             });
         }
+        BaritoneAPI.getSettings().mineScanDroppedItems.value = false;
         if (mc.player != null && autoWalkHome.get()) {
             playerX = (int) mc.player.getX();
             playerY = (int) mc.player.getY();
@@ -181,15 +180,20 @@ public class InfinityMiner extends ToggleModule {
     });
 
     private void baritoneRequestMineTargetBlock() {
-        BaritoneAPI.getSettings().mineScanDroppedItems.value = true;
-        BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute(BARITONE_MINE + targetBlock.get());
-        baritoneRunning = true;
+        try {
+            BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute(BARITONE_MINE + targetBlock.get());
+            baritoneRunning = true;
+        } catch (Exception ignored) {
+        }
     }
 
     private void baritoneRequestMineRepairBlock() {
-        BaritoneAPI.getSettings().mineScanDroppedItems.value = false;
-        BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute(BARITONE_MINE + repairBlock.get());
-        baritoneRunning = true;
+        try {
+            BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute(BARITONE_MINE + repairBlock.get());
+            baritoneRunning = true;
+        } catch (Exception ignored) {
+        }
+
     }
 
     private synchronized void baritoneRequestStop() {
@@ -240,6 +244,7 @@ public class InfinityMiner extends ToggleModule {
         if (this.isActive()) this.toggle();
     });
 
+
     public Enum<Mode> getMode() {
         return currentMode;
     }
@@ -252,11 +257,11 @@ public class InfinityMiner extends ToggleModule {
         return new int[]{playerX, playerY, playerX};
     }
 
-    public boolean isTool() {
+    private boolean isTool() {
         return mc.player != null && mc.player.getMainHandStack() != null && mc.player.getMainHandStack().getItem() instanceof ToolItem;
     }
 
-    public int getCurrentDamage() {
+    private int getCurrentDamage() {
         return (mc.player != null) ? mc.player.getMainHandStack().getItem().getMaxDamage() - mc.player.getMainHandStack().getDamage() : -1;
     }
 
