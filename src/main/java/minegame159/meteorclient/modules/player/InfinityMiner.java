@@ -6,8 +6,6 @@
 package minegame159.meteorclient.modules.player;
 
 import baritone.api.BaritoneAPI;
-import com.sun.org.apache.xpath.internal.operations.Bool;
-import com.sun.org.apache.xpath.internal.operations.Mod;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.ActiveModulesChangedEvent;
@@ -15,22 +13,19 @@ import minegame159.meteorclient.events.GameJoinedEvent;
 import minegame159.meteorclient.events.GameLeftEvent;
 import minegame159.meteorclient.events.PostTickEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.modules.combat.AutoLog;
-import minegame159.meteorclient.modules.movement.AutoWalk;
 import minegame159.meteorclient.modules.movement.InvMove;
 import minegame159.meteorclient.modules.movement.Jesus;
 import minegame159.meteorclient.modules.movement.NoFall;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.MeteorExecutor;
 import net.minecraft.item.ToolItem;
-import org.graalvm.compiler.api.replacements.Snippet;
 
-import java.lang.reflect.Array;
-import java.util.*;
-import java.util.stream.Stream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 
 /**
  * @author Inclement
