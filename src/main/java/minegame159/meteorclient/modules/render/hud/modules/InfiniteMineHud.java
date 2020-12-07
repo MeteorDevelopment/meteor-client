@@ -5,8 +5,6 @@ import minegame159.meteorclient.modules.player.InfinityMiner;
 import minegame159.meteorclient.modules.render.hud.HUD;
 import net.minecraft.block.Block;
 
-import java.util.Arrays;
-
 public class InfiniteMineHud extends DoubleTextHudModule {
     public InfiniteMineHud(HUD hud) {
         super(hud, "infmine", "Details Regarding Infinity Mine", "Infinity Mine: ");

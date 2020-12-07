@@ -7,10 +7,10 @@ package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.player.NameProtect;
+import net.minecraft.client.font.TextVisitFactory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
-import net.minecraft.client.font.TextVisitFactory;
 
 @Mixin(TextVisitFactory.class)
 public abstract class TextVisitFactoryMixin {
