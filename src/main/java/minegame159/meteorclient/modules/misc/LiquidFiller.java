@@ -33,7 +33,7 @@ public class LiquidFiller extends ToggleModule {
 
     private final Setting<Integer> horizontalRadius = sgGeneral.add(new IntSetting.Builder()
             .name("horizontal-radius")
-            .description("Horizontal radius in which to search for holes.")
+            .description("Horizontal radius in which to search for liquids.")
             .defaultValue(4)
             .min(0)
             .sliderMax(6)
@@ -42,7 +42,7 @@ public class LiquidFiller extends ToggleModule {
 
     private final Setting<Integer> verticalRadius = sgGeneral.add(new IntSetting.Builder()
             .name("vertical-radius")
-            .description("Vertical radius in which to search for holes.")
+            .description("Vertical radius in which to search for liquids.")
             .defaultValue(4)
             .min(0)
             .sliderMax(6)

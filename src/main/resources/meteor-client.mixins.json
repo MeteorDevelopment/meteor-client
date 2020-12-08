@@ -48,7 +48,6 @@
     "GameRendererMixin",
     "GenericContainerScreenMixin",
     "HandledScreenMixin",
-    "HeldItemRendererAccessor",
     "HoeItemAccessor",
     "HorseBaseEntityMixin",
     "IdentifierAccessor",
@@ -90,7 +89,8 @@
     "Vec3dMixin",
     "WorldRendererAccessor",
     "WorldRendererMixin",
-    "TextVisitFactoryMixin"
+    "TextVisitFactoryMixin",
+    "HeldItemRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

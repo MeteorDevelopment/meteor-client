@@ -33,17 +33,17 @@ public class WItem extends WWidget {
             DiffuseLighting.enable();
             GlStateManager.enableDepthTest();
 
-            Window window = MinecraftClient.getInstance().getWindow();
-            double s = window.getScaleFactor();
-            double ss = Math.max(1, s - 1);
-
-            double sg = GuiConfig.INSTANCE.guiScale;
+            double s = GuiConfig.INSTANCE.guiScale - 1;
 
             GlStateManager.pushMatrix();
-            GlStateManager.translated(-x * ss * sg, -y * ss * sg, 0);
-            GlStateManager.scaled(1 + sg, 1 + sg, 1);
-            MinecraftClient.getInstance().getItemRenderer().renderGuiItemIcon(itemStack, (int) x, (int) y);
+            GlStateManager.scaled(2 + s, 2 + s, 1);
+            GlStateManager.translated(x / (2 + s), y / (2 + s), 0);
+            MinecraftClient.getInstance().getItemRenderer().renderGuiItemIcon(itemStack, 0, 0);
             GlStateManager.popMatrix();
         });
+    }
+
+    public void set(ItemStack itemStack) {
+        this.itemStack = itemStack;
     }
 }

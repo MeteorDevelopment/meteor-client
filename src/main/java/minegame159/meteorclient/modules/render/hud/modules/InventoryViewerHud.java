@@ -39,9 +39,7 @@ public class InventoryViewerHud extends HudModule {
 
     @Override
     public void update(HudRenderer renderer) {
-        double a = hud.invViewerBackground() == Background.Flat || hud.invViewerBackground() == Background.None ? 12 : 0;
-
-        box.setSize(176 * hud.invViewerScale() - a, 67 * hud.invViewerScale() - a);
+        box.setSize(176 * hud.invViewerScale(), 67 * hud.invViewerScale());
     }
 
     @Override
@@ -58,12 +56,9 @@ public class InventoryViewerHud extends HudModule {
             RenderSystem.pushMatrix();
             RenderSystem.scaled(hud.invViewerScale(), hud.invViewerScale(), 1);
 
-            double a = hud.invViewerBackground() != Background.Flat && hud.invViewerBackground() != Background.None ? 8 : 0;
-            double b = hud.invViewerBackground() != Background.Flat && hud.invViewerBackground() != Background.None ? 7 : 0;
-
             for (int row = 0; row < 3; row++) {
                 for (int i = 0; i < 9; i++) {
-                    drawItem(mc.player.inventory.getStack(9 + row * 9 + i), (int) (x / hud.invViewerScale() + a + i * 18), (int) (y / hud.invViewerScale() + b + row * 18));
+                    drawItem(mc.player.inventory.getStack(9 + row * 9 + i), (int) (x / hud.invViewerScale() + 8 + i * 18), (int) (y / hud.invViewerScale() + 7 + row * 18));
                 }
             }
 

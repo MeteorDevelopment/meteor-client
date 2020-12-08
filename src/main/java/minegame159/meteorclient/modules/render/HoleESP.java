@@ -67,12 +67,13 @@ public class HoleESP extends ToggleModule {
             .build()
     );
 
-    private final Setting<Boolean> fill = sgGeneral.add(new BoolSetting.Builder()
-            .name("fill")
-            .description("Fill the shapes rendered.")
+    private final Setting<Boolean> ignoreOwn = sgColors.add(new BoolSetting.Builder()
+            .name("ignore-own")
+            .description("Ignores the hole you are standing in when rendering.")
             .defaultValue(true)
             .build()
     );
+
 
     private final Setting<Color> allBedrock = sgColors.add(new ColorSetting.Builder()
             .name("all-bedrock")
@@ -95,6 +96,13 @@ public class HoleESP extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> fill = sgColors.add(new BoolSetting.Builder()
+            .name("fill")
+            .description("Fill the shapes rendered.")
+            .defaultValue(true)
+            .build()
+    );
+
     private final Pool<Hole> holePool = new Pool<>(Hole::new);
     private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
     private final List<Hole> holes = new ArrayList<>();
@@ -112,6 +120,7 @@ public class HoleESP extends ToggleModule {
             blockPos.set(blockPos1);
 
             if (!checkHeight()) return;
+            if (ignoreOwn.get() && (mc.player.getBlockPos().equals(blockPos))) return;
 
             Block bottom = mc.world.getBlockState(add(0, -1, 0)).getBlock();
             if (bottom != Blocks.BEDROCK && bottom != Blocks.OBSIDIAN) return;
