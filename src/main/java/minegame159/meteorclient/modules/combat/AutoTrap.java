@@ -98,30 +98,30 @@ public class AutoTrap extends ToggleModule {
                 case Full:
                     int blocksPlaced = 0;
                     if(mc.world.getBlockState(targetPosUp.add(0, 1, 0)).getMaterial().isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(target.getPos(), Direction.UP, targetPosUp.add(0, 1, 0), false));
+                        mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, targetPosUp.add(0, 1, 0), false));
                         blocksPlaced++;
                     }
                     if(mc.world.getBlockState(targetPosUp.add(1, 0, 0)).getMaterial().isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(target.getPos(), Direction.UP, targetPosUp.add(1, 0, 0), false));
+                        mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, targetPosUp.add(1, 0, 0), false));
                         blocksPlaced++;
                     }
                     if(mc.world.getBlockState(targetPosUp.add(-1, 0, 0)).getMaterial().isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(target.getPos(), Direction.UP, targetPosUp.add(-1, 0, 0), false));
+                        mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, targetPosUp.add(-1, 0, 0), false));
                         blocksPlaced++;
                     }
                     if(mc.world.getBlockState(targetPosUp.add(0, 0, 1)).getMaterial().isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(target.getPos(), Direction.UP, targetPosUp.add(0, 0, 1), false));
+                        mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, targetPosUp.add(0, 0, 1), false));
                         blocksPlaced++;
                     }
                     if(mc.world.getBlockState(targetPosUp.add(0, 0, -1)).getMaterial().isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(target.getPos(), Direction.UP, targetPosUp.add(0, 0, -1), false));
+                        mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, targetPosUp.add(0, 0, -1), false));
                         blocksPlaced++;
                     }
                     if (blocksPlaced >= 1) mc.player.swingHand(Hand.MAIN_HAND);
                     break;
                 case Top:
                     if(mc.world.getBlockState(targetPosUp.add(0, 1, 0)).getMaterial().isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(target.getPos().add(0, 1, 0), Direction.UP, targetPosUp.add(0, 1, 0), false));
+                        mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos().add(0, 1, 0), Direction.UP, targetPosUp.add(0, 1, 0), false));
                         mc.player.swingHand(Hand.MAIN_HAND);
                     }
                     break;
@@ -132,30 +132,30 @@ public class AutoTrap extends ToggleModule {
                 case Platform:
                     int blocksPlaced = 0;
                     if(mc.world.getBlockState(targetPos.add(0, -1, 0)).getMaterial().isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(target.getPos().add(0, -1, 0), Direction.DOWN, targetPos.add(0, -1, 0), false));
+                        mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.DOWN, targetPos.add(0, -1, 0), false));
                         blocksPlaced++;
                     }
                     if(mc.world.getBlockState(targetPos.add(1, -1, 0)).getMaterial().isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(target.getPos().add(1, -1, 0), Direction.DOWN, targetPos.add(1, -1, 0), false));
+                        mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.DOWN, targetPos.add(1, -1, 0), false));
                         blocksPlaced++;
                     }
                     if(mc.world.getBlockState(targetPos.add(-1, -1, 0)).getMaterial().isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(target.getPos().add(-1, -1, 0), Direction.DOWN, targetPos.add(-1, -1, 0), false));
+                        mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.DOWN, targetPos.add(-1, -1, 0), false));
                         blocksPlaced++;
                     }
                     if(mc.world.getBlockState(targetPos.add(0, -1, 1)).getMaterial().isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(target.getPos().add(0, -1, 1), Direction.DOWN, targetPos.add(0, -1, 1), false));
+                        mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.DOWN, targetPos.add(0, -1, 1), false));
                         blocksPlaced++;
                     }
                     if(mc.world.getBlockState(targetPos.add(0, -1, -1)).getMaterial().isReplaceable()){
-                        mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(target.getPos().add(0, -1, -1), Direction.DOWN, targetPos.add(0, -1, -1), false));
+                        mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.DOWN, targetPos.add(0, -1, -1), false));
                         blocksPlaced++;
                     }
                     if (blocksPlaced >= 1) mc.player.swingHand(Hand.MAIN_HAND);
                     break;
                 case Single:
                     if (mc.world.getBlockState(targetPos.add(0, -1, 0)).isAir()) {
-                        mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(target.getPos().add( 0, -1, 0), Direction.DOWN, targetPos.add(0, -1, 0), true));
+                        mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.DOWN, targetPos.add(0, -1, 0), true));
                         mc.player.swingHand(Hand.MAIN_HAND);
                     }
                     break;
