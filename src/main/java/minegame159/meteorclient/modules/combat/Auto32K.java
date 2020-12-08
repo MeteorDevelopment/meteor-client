@@ -30,7 +30,6 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -128,7 +127,7 @@ public class Auto32K extends ToggleModule {
                         return;
                     }
                     mc.player.setSneaking(false);
-                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(bestBlock.up().getX(), bestBlock.up().getY(), bestBlock.up().getZ()), mc.player.getHorizontalFacing(), bestBlock.up(), false));
+                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), mc.player.getHorizontalFacing(), bestBlock.up(), false));
                     phase = 8;
                 }
             } else if (mode.get() == Mode.Dispenser) {
@@ -161,10 +160,10 @@ public class Auto32K extends ToggleModule {
                     }
                     phase += 1;
                 } else if (phase == 2) {
-                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(bestBlock.getX(), bestBlock.getY(), bestBlock.getZ()), Direction.UP, bestBlock, false));
+                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, bestBlock, false));
                     phase += 1;
                 } else if (phase == 3) {
-                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(bestBlock.up().getX(), bestBlock.up().getY(), bestBlock.up().getZ()), mc.player.getHorizontalFacing().getOpposite(), bestBlock.up(), false));
+                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), mc.player.getHorizontalFacing().getOpposite(), bestBlock.up(), false));
                     phase += 1;
                 }else if (phase == 4 && mc.currentScreen instanceof Generic3x3ContainerScreen) {
                     mc.player.getSpeed();
@@ -177,11 +176,11 @@ public class Auto32K extends ToggleModule {
                 }else if (phase == 6) {
                     mc.player.inventory.selectedSlot = redstoneSlot;
                     mc.player.setSneaking(true);
-                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(bestBlock.up().getX(), bestBlock.up().getY(), bestBlock.up().getZ()), mc.player.getHorizontalFacing().getOpposite(), bestBlock.up(2), false));
+                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), mc.player.getHorizontalFacing().getOpposite(), bestBlock.up(2), false));
                     mc.player.setSneaking(false);
                     phase += 1;
                 }else if (phase == 7){
-                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(bestBlock.up().getX(), bestBlock.up().getY(), bestBlock.up().getZ()), mc.player.getHorizontalFacing().getOpposite(), bestBlock.add(x, 0, z), false));
+                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), mc.player.getHorizontalFacing().getOpposite(), bestBlock.add(x, 0, z), false));
                     phase += 1;
                 }
             }

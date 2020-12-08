@@ -530,11 +530,11 @@ public class CrystalAura extends ToggleModule {
         assert mc.interactionManager != null;
         float yaw = mc.player.yaw;
         float pitch = mc.player.pitch;
-        Vec3d vec1 = block.add(0.5, 0.5, 0.5);
+        Vec3d vec1 = block.add(0.5, 1.5, 0.5);
         PlayerMoveC2SPacket.LookOnly packet = new PlayerMoveC2SPacket.LookOnly(Utils.getNeededYaw(vec1), Utils.getNeededPitch(vec1), mc.player.isOnGround());
         mc.player.networkHandler.sendPacket(packet);
 
-        mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(block, Direction.UP, new BlockPos(block), false));
+        mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(mc.player.getPos(), Direction.UP, new BlockPos(block), false));
         if (!noSwing.get()) mc.player.swingHand(hand);
         packet = new PlayerMoveC2SPacket.LookOnly(yaw, pitch, mc.player.isOnGround());
         mc.player.networkHandler.sendPacket(packet);
