@@ -8,6 +8,10 @@ parameters:
     type: string
     default: 0.3.7
 
+general:
+  branches:
+    - master
+
 jobs:
   build:
     docker:

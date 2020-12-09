@@ -15,7 +15,8 @@ import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.FakePlayerEntity;
 import net.minecraft.util.Pair;
 
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class FakePlayer extends ToggleModule {
 
@@ -58,14 +59,21 @@ public class FakePlayer extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> chatInfo = sgGeneral.add(new BoolSetting.Builder()
+            .name("chat-info")
+            .description("Tells you when a player is added or removed.")
+            .defaultValue(false)
+            .build()
+    );
+
     public FakePlayer() {
         super(Category.Player, "fake-player", "Spawns a clientside fake player.");
     }
 
-    public static ArrayList<Pair<FakePlayerEntity, Integer>> players = new ArrayList<Pair<FakePlayerEntity, Integer>>();
+    public static Map<FakePlayerEntity, Integer> players = new HashMap<>();
     private int ID;
 
-    public ArrayList<Pair<FakePlayerEntity, Integer>> getPlayers() {
+    public Map<FakePlayerEntity, Integer> getPlayers() {
         if (!players.isEmpty()) {
             return players;
         } else return null;
@@ -98,8 +106,8 @@ public class FakePlayer extends ToggleModule {
     public void spawnFakePlayer(String name, boolean copyInv, boolean glowing, float health) {
         if (isActive()) {
             FakePlayerEntity fakePlayer = new FakePlayerEntity(name, copyInv, glowing, health);
-            Chat.info(this, "Spawned a fake player with the ID of (highlight)" + ID);
-            players.add(new Pair<>(fakePlayer, ID));
+            if (chatInfo.get()) Chat.info(this, "Spawned a fake player");
+            players.put(fakePlayer, ID);
             int idlog = new Pair<>(fakePlayer, ID).getRight();
             System.out.println(idlog);
             ID++;
@@ -109,13 +117,13 @@ public class FakePlayer extends ToggleModule {
     public void removeFakePlayer(int id) {
         if (isActive()) {
             if (players.isEmpty()) {
-                Chat.info(this, "No active fake players to remove!");
+                if (chatInfo.get()) Chat.info(this, "No active fake players to remove!");
                 return;
             }
-            for (Pair<FakePlayerEntity, Integer> player : players) {
-                if (player.getRight() == id) {
-                    player.getLeft().despawn();
-                    Chat.info(this, "Removed a fake player with the ID of (highlight)" + id);
+            for (Map.Entry<FakePlayerEntity, Integer> player : players.entrySet()) {
+                if (player.getValue() == id) {
+                    player.getKey().despawn();
+                    if (chatInfo.get()) Chat.info(this, "Removed a fakeplayer with the ID of (highlight)" + id);
                 }
             }
         }
@@ -124,28 +132,22 @@ public class FakePlayer extends ToggleModule {
     public void clearFakePlayers( boolean shouldCheckActive) {
         if (shouldCheckActive && isActive()) {
             if (players.isEmpty()) {
-                Chat.info(this, "No active fake players to remove!");
+                if (chatInfo.get()) Chat.info(this, "No active fake players to remove!");
                 return;
             } else {
-                for (Pair<FakePlayerEntity, Integer> player : players) {
-                    player.getLeft().despawn();
-                    Chat.info(this, "Removed a fake player with the ID of (highlight)" + player.getRight());
+                for (Map.Entry<FakePlayerEntity, Integer> player : players.entrySet()) {
+                    player.getKey().despawn();
                 }
+                if (chatInfo.get()) Chat.info(this, "Removed all fake players.");
 
             }
         } else if (!shouldCheckActive) {
-            for (Pair<FakePlayerEntity, Integer> player : players) {
-                player.getLeft().despawn();
-                Chat.info(this, "Removed a fake player with the ID of (highlight)" + player.getRight());
+            for (Map.Entry<FakePlayerEntity, Integer> player : players.entrySet()) {
+                player.getKey().despawn();
             }
+            if (chatInfo.get()) Chat.info(this, "Removed all fake players.");
         }
         players.clear();
-    }
-
-    public ArrayList<Pair<FakePlayerEntity, Integer>> getFakePlayerEntities() {
-        if (!players.isEmpty()) {
-            return players;
-        } else return null;
     }
 
     public String getName() {
@@ -156,8 +158,8 @@ public class FakePlayer extends ToggleModule {
         int id = -1;
 
         if (!players.isEmpty()) {
-            for (Pair<FakePlayerEntity, Integer> player : players) {
-                if (player.getLeft() == entity) id = player.getRight();
+            for (Map.Entry<FakePlayerEntity, Integer> player : players.entrySet()) {
+                if (player.getKey() == entity) id = player.getValue();
             }
         }
 

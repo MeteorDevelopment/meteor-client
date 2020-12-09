@@ -7,6 +7,7 @@ package minegame159.meteorclient.modules.combat;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
+import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.PostTickEvent;
 import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.modules.Category;
@@ -81,6 +82,12 @@ public class AutoLog extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> smartToggle = sgGeneral.add(new BoolSetting.Builder()
+            .name("smart-toggle")
+            .description("Disable Auto Log on low health logout, re-enable once healed.")
+            .defaultValue(false)
+            .build());
+
     public AutoLog() {
         super(Category.Combat, "auto-log", "Automatically disconnects when low on health.");
     }
@@ -93,6 +100,10 @@ public class AutoLog extends ToggleModule {
         }
         if (mc.player.getHealth() <= health.get()) {
             mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(new LiteralText("Health was lower than " + health.get())));
+            if(smartToggle.get()) {
+                this.toggle();
+                enableHealthListener();
+            }
         }
 
         if(smart.get() && mc.player.getHealth() + mc.player.getAbsorptionAmount() - getHealthReduction() < health.get()){
@@ -148,4 +159,25 @@ public class AutoLog extends ToggleModule {
         }
         return damageTaken;
     }
+
+    private final Listener<PostTickEvent> healthListener = new Listener<>(event -> {
+        if(this.isActive()){
+            disableHealthListener();
+        }
+       else if(mc.player != null && mc.world != null && !mc.player.isDead()){
+           if(mc.player.getHealth() >= health.get()){
+               this.toggle();
+               disableHealthListener();
+           }
+       }
+    });
+
+    private void enableHealthListener(){
+        MeteorClient.EVENT_BUS.subscribe(healthListener);
+    }
+    private void disableHealthListener(){
+        MeteorClient.EVENT_BUS.unsubscribe(healthListener);
+    }
+
+
 }

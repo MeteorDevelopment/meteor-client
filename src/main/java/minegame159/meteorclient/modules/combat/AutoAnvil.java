@@ -112,7 +112,7 @@ public class AutoAnvil extends ToggleModule {
                 mc.player.inventory.selectedSlot = buttonSlot;
                 BlockPos targetPos = target.getBlockPos();
                 if (mc.world.getBlockState(targetPos.add(0, 0, 0)).isAir()) {
-                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(target.getPos(), Direction.DOWN, target.getBlockPos(), true));
+                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.DOWN, target.getBlockPos(), true));
                     mc.player.swingHand(Hand.MAIN_HAND);
                 }
             }

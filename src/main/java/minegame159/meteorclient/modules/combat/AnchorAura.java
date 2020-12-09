@@ -212,9 +212,9 @@ public class AnchorAura extends ToggleModule {
                     mc.player.inventory.selectedSlot = glowSlot;
                     mc.player.setSneaking(false);
                     ((IKeyBinding) mc.options.keySneak).setPressed(false);
-                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(pos, Direction.UP, bestBlock, false));
+                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, bestBlock, false));
                     mc.player.inventory.selectedSlot = nonGlowSlot;
-                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(pos, Direction.UP, bestBlock, false));
+                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, bestBlock, false));
                     mc.player.inventory.selectedSlot = preSlot;
                     return;
                 }
@@ -224,7 +224,6 @@ public class AnchorAura extends ToggleModule {
         if (place.get()) {
             findValidBlocks(target);
             if (bestBlock != null) {
-                Vec3d pos = new Vec3d(bestBlock.getX() + 0.5D, bestBlock.getY() + 0.5D, bestBlock.getZ() + 0.5D);
                 if (bestDamage > minDamage.get()) {
                     if (autoSwitch.get() && mc.player.getMainHandStack().getItem() != Items.RESPAWN_ANCHOR) {
                         int slot = InvUtils.findItemWithCount(Items.RESPAWN_ANCHOR).slot;
@@ -236,10 +235,10 @@ public class AnchorAura extends ToggleModule {
                     if (mc.player.getMainHandStack().getItem() != Items.RESPAWN_ANCHOR && mc.player.getOffHandStack().getItem() != Items.RESPAWN_ANCHOR) return;
                     if (!smartDelay.get()) {
                         delayLeft = delay.get();
-                        mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(pos, Direction.UP, bestBlock, false));
+                        mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, bestBlock, false));
                     } else if (smartDelay.get() && (delayLeft <= 0 || bestDamage - lastDamage > healthDifference.get())){
                         lastDamage = bestDamage;
-                        mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(pos, Direction.UP, bestBlock, false));
+                        mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, bestBlock, false));
                         if (delayLeft <= 0) delayLeft = 10;
                     }
                 }
