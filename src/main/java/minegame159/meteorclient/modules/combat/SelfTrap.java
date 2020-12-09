@@ -37,8 +37,8 @@ public class SelfTrap extends ToggleModule {
             .build()
     );
 
-    private final Setting<Boolean> lookUp = sgGeneral.add(new BoolSetting.Builder()
-            .name("look-up")
+    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
+            .name("rotate")
             .description("Makes you look up when placing the obsidian.")
             .defaultValue(true)
             .build()
@@ -76,7 +76,7 @@ public class SelfTrap extends ToggleModule {
 
         PlayerUtils.placeBlock(targetPos, Hand.MAIN_HAND);
 
-        if (lookUp.get()) {
+        if (rotate.get()) {
             mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(mc.player.yaw, -90, mc.player.isOnGround()));
         }
 
