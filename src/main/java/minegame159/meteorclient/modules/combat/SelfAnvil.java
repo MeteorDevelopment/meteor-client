@@ -25,8 +25,8 @@ import net.minecraft.util.math.BlockPos;
 public class SelfAnvil extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<Boolean> lookUp = sgGeneral.add(new BoolSetting.Builder()
-            .name("look-up")
+    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
+            .name("Rotate")
             .description("Makes you look up when placing the anvil.")
             .defaultValue(true)
             .build()
@@ -56,7 +56,7 @@ public class SelfAnvil extends ToggleModule {
 
         PlayerUtils.placeBlock(playerPos.add(0, 2, 0), Hand.MAIN_HAND);
 
-        if (lookUp.get()) {
+        if (rotate.get()) {
             mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(mc.player.yaw, -90, mc.player.isOnGround()));
         }
 
