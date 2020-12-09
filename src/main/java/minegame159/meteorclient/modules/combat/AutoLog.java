@@ -86,7 +86,8 @@ public class AutoLog extends ToggleModule {
             .name("smart-toggle")
             .description("Disable Auto Log on low health logout, re-enable once healed.")
             .defaultValue(false)
-            .build());
+            .build()
+    );
 
     public AutoLog() {
         super(Category.Combat, "auto-log", "Automatically disconnects when low on health.");
@@ -99,7 +100,7 @@ public class AutoLog extends ToggleModule {
             return;
         }
         if (mc.player.getHealth() <= health.get()) {
-            mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(new LiteralText("Health was lower than " + health.get())));
+            mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(new LiteralText("[AutoLog] Health was lower than " + health.get() + ".")));
             if(smartToggle.get()) {
                 this.toggle();
                 enableHealthListener();
@@ -107,23 +108,23 @@ public class AutoLog extends ToggleModule {
         }
 
         if(smart.get() && mc.player.getHealth() + mc.player.getAbsorptionAmount() - getHealthReduction() < health.get()){
-            mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(new LiteralText("Health was going to be lower than " + health.get())));
+            mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(new LiteralText("[AutoLog] Health was going to be lower than " + health.get() + ".")));
         }
 
         for (Entity entity : mc.world.getEntities()) {
             if(entity instanceof PlayerEntity && entity.getUuid() != mc.player.getUuid()) {
                 if (onlyTrusted.get() && entity != mc.player && !FriendManager.INSTANCE.isTrusted((PlayerEntity) entity)) {
-                        mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(new LiteralText("Non-trusted player appeared in your render distance")));
+                        mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(new LiteralText("[AutoLog] A non-trusted player appeared in your render distance.")));
                         break;
                 }
                 if (mc.player.distanceTo(entity) < 8 && instantDeath.get() && DamageCalcUtils.getSwordDamage((PlayerEntity) entity, true)
                         > mc.player.getHealth() + mc.player.getAbsorptionAmount()) {
-                    mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(new LiteralText("Anti-32k measures.")));
+                    mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(new LiteralText("[AutoLog] Anti-32k measures.")));
                     break;
                 }
             }
             if (entity instanceof EndCrystalEntity && mc.player.distanceTo(entity) < range.get() && crystalLog.get()) {
-                mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(new LiteralText("Crystal within specified range.")));
+                mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(new LiteralText("[AutoLog] End Crystal appeared within specified range.")));
             }
         }
     });
