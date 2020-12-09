@@ -71,7 +71,7 @@ public class ModuleListSetting extends Setting<List<ToggleModule>> {
 
     @Override
     public CompoundTag toTag() {
-        CompoundTag tag = new CompoundTag();
+        CompoundTag tag = saveGeneral();
 
         ListTag modulesTag = new ListTag();
         for (ToggleModule module : get()) modulesTag.add(StringTag.of(module.name));
