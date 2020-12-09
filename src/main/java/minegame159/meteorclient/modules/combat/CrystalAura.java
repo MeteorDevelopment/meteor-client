@@ -47,6 +47,7 @@ public class CrystalAura extends ToggleModule {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgPlace = settings.createGroup("Place");
+    private final SettingGroup sgRender = settings.createGroup("Render");
 
     private final Setting<Double> placeRange = sgGeneral.add(new DoubleSetting.Builder()
             .name("place-range")
@@ -248,17 +249,33 @@ public class CrystalAura extends ToggleModule {
             .build()
     );
 
-    private final Setting<Boolean> render = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
             .name("render")
             .description("Render a box where it is placing a crystal.")
             .defaultValue(true)
             .build()
     );
 
-    private final Setting<Color> renderColor = sgGeneral.add(new ColorSetting.Builder()
+    private final Setting<Color> renderColor = sgRender.add(new ColorSetting.Builder()
             .name("render-color")
             .description("Render color.")
-            .defaultValue(new Color(25, 225, 225))
+            .defaultValue(new Color(255, 255, 255, 75))
+            .build()
+    );
+
+    private final Setting<Color> outlineColor = sgRender.add(new ColorSetting.Builder()
+            .name("outline-color")
+            .description("Outline color.")
+            .defaultValue(new Color(255, 255, 255, 255))
+            .build()
+    );
+
+    private final Setting<Integer> renderTimer = sgRender.add(new IntSetting.Builder()
+            .name("Timer")
+            .description("Time between changing block render.")
+            .defaultValue(0)
+            .min(0)
+            .sliderMax(10)
             .build()
     );
 
@@ -654,7 +671,7 @@ public class CrystalAura extends ToggleModule {
             x = MathHelper.floor(pos.getX());
             y = MathHelper.floor(pos.getY());
             z = MathHelper.floor(pos.getZ());
-            timer = 4;
+            timer = renderTimer.get();
         }
 
         public boolean shouldRemove() {
@@ -664,8 +681,8 @@ public class CrystalAura extends ToggleModule {
         }
 
         public void render() {
-            ShapeBuilder.boxSides(x, y, z, x+1, y+1, z+1, sideColor);
-            ShapeBuilder.boxEdges(x, y, z, x+1, y+1, z+1, renderColor.get());
+            ShapeBuilder.boxSides(x, y, z, x+1, y+1, z+1, renderColor.get());
+            ShapeBuilder.boxEdges(x, y, z, x+1, y+1, z+1, outlineColor.get());
         }
     }
 
