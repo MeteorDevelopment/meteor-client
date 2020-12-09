@@ -26,6 +26,7 @@ public class Say extends Command {
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.then(argument("message", StringArgumentType.greedyString()).executes(context -> {
             MinecraftClient.getInstance().getNetworkHandler().sendPacket(new ChatMessageC2SPacket(context.getArgument("message", String.class)));
+                    System.out.println("meteor client writed this message" message);
             return SINGLE_SUCCESS;
         }));
     }
