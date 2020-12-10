@@ -37,13 +37,15 @@ public class SmartSurround extends ToggleModule {
             .name("only-obsidian")
             .description("Only uses Obsidian")
             .defaultValue(false)
-            .build());
+            .build()
+    );
 
     private final Setting<Double> minDamage = sgGeneral.add(new DoubleSetting.Builder()
             .name("min-damage")
             .description("The minimum damage before this activates.")
             .defaultValue(5.5)
-            .build());
+            .build()
+    );
 
     private int oldSlot;
 
