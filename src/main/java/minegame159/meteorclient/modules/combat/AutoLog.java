@@ -109,7 +109,7 @@ public class AutoLog extends ToggleModule {
         if (mc.player.getHealth() <= health.get()) {
             mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(new LiteralText("[AutoLog] Health was lower than " + health.get() + ".")));
             if(smartToggle.get()) {
-                    this.toggle();
+                this.toggle();
                 enableHealthListener();
             }
         }
