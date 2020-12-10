@@ -33,7 +33,8 @@ import java.util.Iterator;
 import java.util.stream.Collectors;
 
 public class AnchorAura extends ToggleModule {
-    public enum Mode{
+
+    public enum Mode {
         safe,
         suicide
     }
