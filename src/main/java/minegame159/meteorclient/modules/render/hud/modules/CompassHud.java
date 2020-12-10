@@ -33,7 +33,7 @@ public class CompassHud extends HudModule {
         int y = box.getY();
 
         for (Direction dir : Direction.values()) {
-            renderer.text(hud.compassMode() == Mode.Axis ? dir.getAlternate() : dir.name(), (x + (box.width / 2)) + getX(getPosOnCompass(dir)), (y + (box.height / 2)) + getY(getPosOnCompass(dir)), (dir == Direction.N) ? RED : WHITE);
+            renderer.text(hud.compassMode() == Mode.Axis ? dir.getAlternate() : dir.name(), (x + (box.width / 2.0)) + getX(getPosOnCompass(dir)), (y + (box.height / 2.0)) + getY(getPosOnCompass(dir)), (dir == Direction.N) ? RED : WHITE);
         }
     }
 
@@ -42,10 +42,12 @@ public class CompassHud extends HudModule {
     }
 
     private double getY(double rad) {
+        if (mc.player == null) return 0;
         return Math.cos(rad) * Math.sin(Math.toRadians(MathHelper.clamp(mc.player.pitch + 30.0f, -90.0f, 90.0f))) * (hud.compassScale() * 40);
     }
 
     private static double getPosOnCompass(Direction dir) {
+        if (mc.player == null) return 0;
         return Math.toRadians(MathHelper.wrapDegrees(mc.player.yaw)) + dir.ordinal() * 1.5707963267948966;
     }
 
