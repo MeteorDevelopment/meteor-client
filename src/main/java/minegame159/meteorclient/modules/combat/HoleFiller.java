@@ -10,7 +10,7 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.PreTickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
-import minegame159.meteorclient.settings.BoolSetting;
+import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
@@ -25,6 +25,13 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 
 public class HoleFiller extends ToggleModule {
+
+    public enum PlaceMode {
+        Obsidian,
+        Cobweb,
+        Any
+    }
+
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Integer> horizontalRadius = sgGeneral.add(new IntSetting.Builder()
@@ -45,17 +52,17 @@ public class HoleFiller extends ToggleModule {
             .build()
     );
 
-    private final Setting<Boolean> onlyObsidian = sgGeneral.add(new BoolSetting.Builder()
-            .name("only-obsidian")
-            .description("Only uses obsidian.")
-            .defaultValue(false)
+    private final Setting<HoleFiller.PlaceMode> mode = sgGeneral.add(new EnumSetting.Builder<HoleFiller.PlaceMode>()
+            .name("block")
+            .description("What blocks to use to fill safe holes.")
+            .defaultValue(PlaceMode.Obsidian)
             .build()
     );
 
     private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
 
     public HoleFiller() {
-        super(Category.Combat, "hole-filler", "Places blocks in holes.");
+        super(Category.Combat, "hole-filler", "Fills safes holes.");
     }
 
     @EventHandler
@@ -85,10 +92,16 @@ public class HoleFiller extends ToggleModule {
         for (int i = 0; i < 9; i++) {
             ItemStack itemStack = mc.player.inventory.getStack(i);
 
-            if (onlyObsidian.get()) {
-                if (itemStack.getItem() == Items.OBSIDIAN || itemStack.getItem() == Items.CRYING_OBSIDIAN) return i;
-            } else {
-                if (itemStack.getItem() instanceof BlockItem && ((BlockItem) itemStack.getItem()).getBlock().getDefaultState().isFullCube(mc.world, blockPos)) return i;
+            switch (mode.get()) {
+                case Obsidian:
+                    if (itemStack.getItem() == Items.OBSIDIAN || itemStack.getItem() == Items.CRYING_OBSIDIAN) return i;
+                    break;
+                case Cobweb:
+                    if (itemStack.getItem() == Items.COBWEB) return i;
+                    break;
+                case Any:
+                    if (itemStack.getItem() instanceof BlockItem && ((BlockItem) itemStack.getItem()).getBlock().getDefaultState().isFullCube(mc.world, blockPos)) return i;
+                    break;
             }
         }
 

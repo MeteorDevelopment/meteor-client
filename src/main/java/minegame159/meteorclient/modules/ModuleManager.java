@@ -11,9 +11,10 @@ import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listenable;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.MeteorClient;
+import minegame159.meteorclient.commands.CommandManager;
 import minegame159.meteorclient.events.EventStore;
-import minegame159.meteorclient.events.GameLeftEvent;
 import minegame159.meteorclient.events.GameJoinedEvent;
+import minegame159.meteorclient.events.GameLeftEvent;
 import minegame159.meteorclient.events.KeyEvent;
 import minegame159.meteorclient.modules.combat.*;
 import minegame159.meteorclient.modules.misc.Timer;
@@ -238,6 +239,8 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
     private void addModule(Module module) {
         modules.put(module.getClass(), module);
         getGroup(module.category).add(module);
+
+        CommandManager.getDispatcher().register(module.buildCommand());
     }
 
     private void initCombat() {
@@ -267,6 +270,8 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new AutoWeb());
         addModule(new HoleFiller());
         addModule(new SelfAnvil());
+        addModule(new AntiAutoAnvil());
+        addModule(new AutoCity());
     }
 
     private void initPlayer() {
@@ -285,7 +290,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new XpBottleThrower());
         addModule(new MiddleClickExtra());
         addModule(new AutoDrop());
-        addModule(new AutoRightClick());
+        addModule(new AutoClick());
         addModule(new Portals());
         addModule(new Reach());
         addModule(new PotionSpoof());
@@ -300,6 +305,9 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new EndermanLook());
         addModule(new NoBreakDelay());
         addModule(new AntiCactus());
+        addModule(new FakePlayer());
+        addModule(new NameProtect());
+        addModule(new InfinityMiner());
     }
 
     private void initMovement() {
@@ -351,6 +359,9 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new BlockSelection());
         addModule(new CustomFOV());
         addModule(new HandView());
+        addModule(new Time());
+        addModule(new VoidESP());
+        addModule(new CityEsp());
     }
 
     private void initMisc() {
@@ -378,7 +389,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new MessageAura());
         addModule(new Nuker());
         addModule(new SoundBlocker());
-        addModule(new AntiChunkBan());
+        addModule(new AntiPacketKick());
         addModule(new Announcer());
         addModule(new BetterChat());
         addModule(new FancyChat());

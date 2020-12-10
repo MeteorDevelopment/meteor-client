@@ -48,7 +48,6 @@
     "GameRendererMixin",
     "GenericContainerScreenMixin",
     "HandledScreenMixin",
-    "HeldItemRendererAccessor",
     "HoeItemAccessor",
     "HorseBaseEntityMixin",
     "IdentifierAccessor",
@@ -66,6 +65,7 @@
     "MinecraftClientMixin",
     "MinecraftServerMixin",
     "MiningToolItemMixin",
+    "MixinCommandSuggestor",
     "MouseMixin",
     "MultiplayerScreenMixin",
     "PacketInflaterMixin",
@@ -88,7 +88,9 @@
     "TitleScreenMixin",
     "Vec3dMixin",
     "WorldRendererAccessor",
-    "WorldRendererMixin"
+    "WorldRendererMixin",
+    "TextVisitFactoryMixin",
+    "HeldItemRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

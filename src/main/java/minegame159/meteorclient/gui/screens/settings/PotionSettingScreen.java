@@ -6,10 +6,7 @@
 package minegame159.meteorclient.gui.screens.settings;
 
 import minegame159.meteorclient.gui.screens.WindowScreen;
-import minegame159.meteorclient.gui.widgets.WButton;
-import minegame159.meteorclient.gui.widgets.WItemWithLabel;
-import minegame159.meteorclient.gui.widgets.WTable;
-import minegame159.meteorclient.gui.widgets.WTextBox;
+import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.settings.PotionSetting;
 import minegame159.meteorclient.utils.MyPotion;
 import org.apache.commons.lang3.StringUtils;
@@ -56,6 +53,7 @@ public class PotionSettingScreen extends WindowScreen {
                 setting.set(potion);
                 onClose();
             };
+            table.add(new WHorizontalSeparator());
         }
     }
 }

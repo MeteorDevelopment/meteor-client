@@ -6,6 +6,8 @@
 package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.accounts.gui.AccountsScreen;
+import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.player.NameProtect;
 import minegame159.meteorclient.utils.Color;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
@@ -47,6 +49,6 @@ public class MultiplayerScreenMixin extends Screen {
     @Inject(method = "render", at = @At("TAIL"))
     private void onRender(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo info) {
         textRenderer.drawWithShadow(matrices, loggedInAs, 3, 3, textColor1);
-        textRenderer.drawWithShadow(matrices, client.getSession().getUsername(), 3 + loggedInAsLength, 3, textColor2);
+        textRenderer.drawWithShadow(matrices, ModuleManager.INSTANCE.get(NameProtect.class).getName(client.getSession().getUsername()), 3 + loggedInAsLength, 3, textColor2);
     }
 }

@@ -6,7 +6,11 @@ orbs:
 parameters:
   version:
     type: string
-    default: 0.3.7
+    default: 0.3.8
+
+general:
+  branches:
+    - master
 
 jobs:
   build:

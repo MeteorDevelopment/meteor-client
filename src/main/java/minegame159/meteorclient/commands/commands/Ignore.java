@@ -7,34 +7,47 @@ package minegame159.meteorclient.commands.commands;
 
 //Created by squidoodly 01/07/2020
 
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.commands.Command;
 import minegame159.meteorclient.utils.Chat;
+import net.minecraft.command.CommandSource;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
+
 public class Ignore extends Command {
-    public Ignore(){super("ignore", "Lets you ignore messages from specific players.");}
+    public Ignore() {
+        super("ignore", "Lets you ignore messages from specific players.");
+    }
 
     public static List<String> ignoredPlayers = new ArrayList<>();
 
     @Override
-    public void run(String[] args) {
-        if (args.length == 0) {
+    public void build(LiteralArgumentBuilder<CommandSource> builder) {
+        builder.then(argument("username", StringArgumentType.string()).executes(context -> {
+            String username = context.getArgument("username", String.class);
+
+            if (ignoredPlayers.remove(username)) {
+                Chat.info("Removed (highlight)%s (default)from list of ignored people.", username);
+            } else {
+                ignoredPlayers.add(username);
+                Chat.info("Added (highlight)%s (default)to list of ignored people.", username);
+            }
+
+            return SINGLE_SUCCESS;
+        })).executes(context -> {
             Chat.info("Ignoring (highlight)%d (default)people:", ignoredPlayers.size());
             for (String player : ignoredPlayers) {
                 Chat.info("- (highlight)%s", player);
             }
-        } else {
-            if (ignoredPlayers.remove(args[0])) {
-                Chat.info("Removed (highlight)%s (default)from list of ignored people.", args[0]);
-            } else {
-                ignoredPlayers.add(args[0]);
-                Chat.info("Added (highlight)%s (default) to list of ignored people.", args[0]);
-            }
-        }
+
+            return SINGLE_SUCCESS;
+        });
     }
 
     public static void load() {
@@ -56,7 +69,7 @@ public class Ignore extends Command {
     public static void save() {
         try {
             BufferedWriter writer = new BufferedWriter(new FileWriter(new File(MeteorClient.FOLDER, "ignored_players.txt")));
-            for (String name: Ignore.ignoredPlayers) {
+            for (String name : Ignore.ignoredPlayers) {
                 writer.write(name);
                 writer.write(" OwO\n");
             }

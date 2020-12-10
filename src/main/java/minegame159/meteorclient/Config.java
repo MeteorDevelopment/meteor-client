@@ -23,7 +23,7 @@ import java.util.Map;
 public class Config extends Savable<Config> {
     public static Config INSTANCE;
 
-    public final Version version = new Version("0.3.7");
+    public final Version version = new Version("0.3.8");
     public String devBuild;
     private String prefix = ".";
     public GuiConfig guiConfig = new GuiConfig();

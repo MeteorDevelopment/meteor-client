@@ -5,15 +5,17 @@
 
 package minegame159.meteorclient.mixin;
 
-import minegame159.meteorclient.CommandDispatcher;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import minegame159.meteorclient.Config;
 import minegame159.meteorclient.MeteorClient;
+import minegame159.meteorclient.commands.CommandManager;
 import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.events.SendMessageEvent;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.movement.NoSlow;
 import minegame159.meteorclient.modules.movement.Scaffold;
 import minegame159.meteorclient.modules.player.Portals;
+import minegame159.meteorclient.utils.Chat;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
@@ -52,7 +54,11 @@ public abstract class ClientPlayerEntityMixin {
         }
 
         if (msg.startsWith(Config.INSTANCE.getPrefix())) {
-            CommandDispatcher.run(msg.substring(Config.INSTANCE.getPrefix().length()));
+            try {
+                CommandManager.dispatch(msg.substring(Config.INSTANCE.getPrefix().length()));
+            } catch (CommandSyntaxException e) {
+                Chat.error(e.getMessage());
+            }
             info.cancel();
         }
     }

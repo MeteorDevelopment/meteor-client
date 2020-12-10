@@ -37,6 +37,8 @@ public class HUD extends ToggleModule {
     private final SettingGroup sgPlayerModel = settings.createGroup("Player Model");
     private final SettingGroup sgArmor = settings.createGroup("Armor");
     private final SettingGroup sgModuleInfo = settings.createGroup("Module Info");
+    private final SettingGroup sgCompass = settings.createGroup("Compass");
+
 
     private final ActiveModulesHud activeModulesHud = new ActiveModulesHud(this);
     private final ModuleInfoHud moduleInfoHud = new ModuleInfoHud(this);
@@ -184,6 +186,24 @@ public class HUD extends ToggleModule {
             .build()
     );
 
+    //Compass
+
+    private final Setting<CompassHud.Mode> compassMode = sgCompass.add(new EnumSetting.Builder<CompassHud.Mode>()
+            .name("inventory-viewer-background")
+            .description("Background of inventory viewer.")
+            .defaultValue(CompassHud.Mode.Pole)
+            .build()
+    );
+
+    private final Setting<Double> compassScale = sgCompass.add(new DoubleSetting.Builder()
+            .name("compass-scale")
+            .description("Scale of compass.")
+            .defaultValue(1)
+            .sliderMin(2)
+            .sliderMax(4)
+            .build()
+    );
+
     public final List<HudModule> modules = new ArrayList<>();
 
     public HUD() {
@@ -219,6 +239,7 @@ public class HUD extends ToggleModule {
         topLeft.add(new BreakingBlockHud(this));
         topLeft.add(new LookingAtHud(this));
         topLeft.add(moduleInfoHud);
+        topLeft.add(new InfiniteMineHud(this));
 
         // Top Center
         HudModuleLayer topCenter = new HudModuleLayer(RENDERER, modules, AlignmentX.Center, AlignmentY.Top, 0, 2);
@@ -237,6 +258,7 @@ public class HUD extends ToggleModule {
         // Bottom Center
         HudModuleLayer bottomCenter = new HudModuleLayer(RENDERER, modules, AlignmentX.Center, AlignmentY.Bottom, 48, 64);
         bottomCenter.add(new ArmorHud(this));
+        bottomCenter.add(new CompassHud(this));
 
         // Bottom Right
         HudModuleLayer bottomRight = new HudModuleLayer(RENDERER, modules, AlignmentX.Right, AlignmentY.Bottom, 2, 2);
@@ -367,5 +389,12 @@ public class HUD extends ToggleModule {
     }
     public Color moduleInfoOffColor() {
         return moduleInfoOffColor.get();
+    }
+
+    public double compassScale() {
+        return compassScale.get();
+    }
+    public CompassHud.Mode compassMode() {
+        return compassMode.get();
     }
 }

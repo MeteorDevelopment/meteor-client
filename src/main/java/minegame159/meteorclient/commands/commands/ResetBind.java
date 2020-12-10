@@ -5,10 +5,14 @@
 
 package minegame159.meteorclient.commands.commands;
 
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import minegame159.meteorclient.commands.Command;
+import minegame159.meteorclient.commands.arguments.ModuleArgumentType;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.utils.Chat;
-import minegame159.meteorclient.utils.Utils;
+import net.minecraft.command.CommandSource;
+
+import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
 public class ResetBind extends Command {
     public ResetBind() {
@@ -16,11 +20,15 @@ public class ResetBind extends Command {
     }
 
     @Override
-    public void run(String[] args) {
-        Module module = Utils.tryToGetModule(args);
-        if (module == null) return;
+    public void build(LiteralArgumentBuilder<CommandSource> builder) {
+        builder.then(argument("module", ModuleArgumentType.module())
+                .executes(context -> {
+                    Module module = context.getArgument("module", Module.class);
 
-        Chat.info("Bind has been reset.");
-        module.setKey(-1);
+                    module.setKey(-1);
+                    Chat.info("Bind has been reset.");
+
+                    return SINGLE_SUCCESS;
+                }));
     }
 }

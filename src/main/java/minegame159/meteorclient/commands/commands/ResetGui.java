@@ -5,9 +5,13 @@
 
 package minegame159.meteorclient.commands.commands;
 
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import minegame159.meteorclient.Config;
 import minegame159.meteorclient.commands.Command;
 import minegame159.meteorclient.utils.Chat;
+import net.minecraft.command.CommandSource;
+
+import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
 public class ResetGui extends Command {
     public ResetGui() {
@@ -15,8 +19,12 @@ public class ResetGui extends Command {
     }
 
     @Override
-    public void run(String[] args) {
-        Config.INSTANCE.guiConfig.clearWindowConfigs();
-        Chat.info("Gui positions has been reset.");
+    public void build(LiteralArgumentBuilder<CommandSource> builder) {
+        builder.executes(context -> {
+            Config.INSTANCE.guiConfig.clearWindowConfigs();
+            Chat.info("Gui positions has been reset.");
+
+            return SINGLE_SUCCESS;
+        });
     }
 }

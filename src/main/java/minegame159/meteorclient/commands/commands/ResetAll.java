@@ -5,11 +5,13 @@
 
 package minegame159.meteorclient.commands.commands;
 
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import minegame159.meteorclient.commands.Command;
-import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.settings.SettingGroup;
+import net.minecraft.command.CommandSource;
+
+import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
 public class ResetAll extends Command {
     public ResetAll() {
@@ -17,11 +19,11 @@ public class ResetAll extends Command {
     }
 
     @Override
-    public void run(String[] args) {
-        for (Module module : ModuleManager.INSTANCE.getAll()) {
-            for (SettingGroup sg : module.settings) {
-                for (Setting<?> setting : sg) setting.reset();
-            }
-        }
+    public void build(LiteralArgumentBuilder<CommandSource> builder) {
+        builder.executes(context -> {
+            ModuleManager.INSTANCE.getAll().forEach(module -> module.settings.forEach(group -> group.forEach(Setting::reset)));
+
+            return SINGLE_SUCCESS;
+        });
     }
 }
