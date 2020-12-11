@@ -21,6 +21,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MovementType;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.vehicle.BoatEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.Packet;
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
@@ -70,6 +71,7 @@ public class EventStore {
     private static final DropItemsEvent dropItemsEvent = new DropItemsEvent();
     private static final PickItemsEvent pickItemsEvent = new PickItemsEvent();
     private static final ConnectToServerEvent connectToServerEvent = new ConnectToServerEvent();
+    private static final BoatMoveEvent boatMoveEvent = new BoatMoveEvent();
 
     public static PlaySoundPacketEvent playSoundPacketEvent(PlaySoundS2CPacket packet) {
         playSoundPacketEvent.packet = packet;
@@ -275,5 +277,10 @@ public class EventStore {
 
     public static ConnectToServerEvent connectToServerEvent() {
         return connectToServerEvent;
+    }
+
+    public static BoatMoveEvent boatMoveEvent(BoatEntity entity) {
+        boatMoveEvent.boat = entity;
+        return boatMoveEvent;
     }
 }
