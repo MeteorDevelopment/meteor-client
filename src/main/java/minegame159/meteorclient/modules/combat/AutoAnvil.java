@@ -13,6 +13,7 @@ import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.PlayerUtils;
 import net.minecraft.client.gui.screen.ingame.AnvilScreen;
 import net.minecraft.entity.player.PlayerEntity;
@@ -55,6 +56,13 @@ public class AutoAnvil extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> toggleOnBreak = sgGeneral.add(new BoolSetting.Builder()
+            .name("toggle-on-break")
+            .description("Toggles when the targets helmet slot is empty.")
+            .defaultValue(false)
+            .build()
+    );
+
     public AutoAnvil() {
         super(Category.Combat, "auto-anvil", "Automatically places anvils above players.");
     }
@@ -68,6 +76,29 @@ public class AutoAnvil extends ToggleModule {
 
     @EventHandler
     private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+
+        if (target != null) {
+            if (mc.player.distanceTo(target) > range.get() || !target.isAlive()) target = null;
+            if (mc.player.currentScreenHandler instanceof AnvilScreenHandler) mc.player.closeScreen();
+        }
+
+        for (PlayerEntity player : mc.world.getPlayers()) {
+            if (player == mc.player || !FriendManager.INSTANCE.attack(player) || !player.isAlive() || mc.player.distanceTo(player) > range.get()) continue;
+
+            if (target == null) {
+                target = player;
+            } else if (mc.player.distanceTo(target) > mc.player.distanceTo(player)) {
+                target = player;
+            }
+        }
+
+        if (isActive() && toggleOnBreak.get() && target != null && target.inventory.getArmorStack(3).isEmpty()) {
+            Chat.info(this, "Target head slot is empty… Disabling.");
+            toggle();
+        }
+
+
+
         int anvilSlot = -1;
         for (int i = 0; i < 9; i++) {
             Item item = mc.player.inventory.getStack(i).getItem();
@@ -90,20 +121,7 @@ public class AutoAnvil extends ToggleModule {
         }
         if (buttonSlot == -1) return;
 
-        if (target != null) {
-            if (mc.player.distanceTo(target) > range.get() || !target.isAlive()) target = null;
-            if (mc.player.currentScreenHandler instanceof AnvilScreenHandler) mc.player.closeScreen();
-        }
 
-        for (PlayerEntity player : mc.world.getPlayers()) {
-            if (player == mc.player || !FriendManager.INSTANCE.attack(player) || !player.isAlive() || mc.player.distanceTo(player) > range.get()) continue;
-
-            if (target == null) {
-                target = player;
-            } else if (mc.player.distanceTo(target) > mc.player.distanceTo(player)) {
-                target = player;
-            }
-        }
 
         if (target != null) {
             int prevSlot = mc.player.inventory.selectedSlot;
