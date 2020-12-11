@@ -61,14 +61,14 @@ public class AutoLog extends ToggleModule {
 
     private final Setting<Boolean> instantDeath = sgGeneral.add(new BoolSetting.Builder()
             .name("32k")
-            .description("Logs out out if someone near you can insta kill you")
+            .description("Logs you out if someone near you can insta-kill you")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> crystalLog = sgGeneral.add(new BoolSetting.Builder()
             .name("crystal-log")
-            .description("Log you out when there is a crystal nearby.")
+            .description("Logs you out when there is a crystal nearby.")
             .defaultValue(false)
             .build()
     );
@@ -97,7 +97,7 @@ public class AutoLog extends ToggleModule {
     );
 
     public AutoLog() {
-        super(Category.Combat, "auto-log", "Automatically disconnects when low on health.");
+        super(Category.Combat, "auto-log", "Automatically disconnects you when requirements are met.");
     }
 
     @EventHandler
