@@ -90,7 +90,8 @@
     "WorldRendererAccessor",
     "WorldRendererMixin",
     "TextVisitFactoryMixin",
-    "HeldItemRendererMixin"
+    "HeldItemRendererMixin",
+    "BoatEntityMixin"
   ],
   "injectors": {
     "defaultRequire": 1
