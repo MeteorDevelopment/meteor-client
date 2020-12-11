@@ -134,7 +134,7 @@ public class AutoLog extends ToggleModule {
                 }
             }
             if (entity instanceof EndCrystalEntity && mc.player.distanceTo(entity) < range.get() && crystalLog.get()) {
-                mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(new LiteralText("[AutoLog] An end appeared within the specified range.")));
+                mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(new LiteralText("[AutoLog] An end crystal appeared within the specified range.")));
                 if (toggleOff.get()) this.toggle();
             }
         }
