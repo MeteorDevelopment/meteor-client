@@ -38,8 +38,8 @@ public class SelfWeb extends ToggleModule {
             .build()
     );
 
-    private final Setting<Boolean> lookDown = sgGeneral.add(new BoolSetting.Builder()
-            .name("look-down")
+    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
+            .name("rotate")
             .description("Forces you to look down when placing cobwebs.")
             .defaultValue(true)
             .build()
@@ -66,7 +66,7 @@ public class SelfWeb extends ToggleModule {
         mc.player.inventory.selectedSlot = webSlot;
         BlockPos playerPos = mc.player.getBlockPos();
 
-        if (lookDown.get()) {
+        if (rotate.get()) {
             mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(mc.player.yaw, 90, mc.player.isOnGround()));
         }
         mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.DOWN, playerPos, true));
