@@ -28,6 +28,12 @@ public class Vec3dMixin implements IVec3d {
     }
 
     @Override
+    public void set(double x, double z) {
+        this.x = x;
+        this.z = z;
+    }
+
+    @Override
     public void setY(double y) {
         this.y = y;
     }

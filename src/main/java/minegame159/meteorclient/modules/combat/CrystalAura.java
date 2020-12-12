@@ -90,6 +90,13 @@ public class CrystalAura extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> support = sgGeneral.add(new BoolSetting.Builder()
+            .name("support")
+            .description("Places a block under the best place the put a crystal")
+            .defaultValue(false)
+            .build()
+    );
+
     private final Setting<List<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
             .name("entities")
             .description("The entities to attack.")
@@ -297,6 +304,8 @@ public class CrystalAura extends ToggleModule {
     private EndCrystalEntity heldCrystal = null;
     private LivingEntity target;
     private boolean locked = false;
+    private boolean canSupport;
+    private int supportSlot = 0;
 
     private final Pool<RenderBlock> renderBlockPool = new Pool<>(RenderBlock::new);
     private final List<RenderBlock> renderBlocks = new ArrayList<>();
@@ -545,6 +554,8 @@ public class CrystalAura extends ToggleModule {
     private void placeBlock(Vec3d block, Hand hand){
         assert mc.player != null;
         assert mc.interactionManager != null;
+        assert mc.world != null;
+        if (mc.world.isAir(new BlockPos(block)))PlayerUtils.placeBlock(new BlockPos(block), supportSlot, getHand());
         float yaw = mc.player.yaw;
         float pitch = mc.player.pitch;
         Vec3d vec1 = block.add(0.5, 1.5, 0.5);
@@ -571,11 +582,24 @@ public class CrystalAura extends ToggleModule {
         bestBlock = null;
         bestDamage = 0;
         playerPos = mc.player.getBlockPos();
+        canSupport = false;
+        if (support.get()){
+            for (int i = 0; i < 9; i++){
+                if (mc.player.inventory.getStack(i).getItem() == Items.OBSIDIAN){
+                    canSupport = true;
+                    supportSlot = i;
+                    break;
+                }
+            }
+        }
         for(double i = playerPos.getX() - placeRange.get(); i < playerPos.getX() + placeRange.get(); i++){
             for(double j = playerPos.getZ() - placeRange.get(); j < playerPos.getZ() + placeRange.get(); j++){
                 for(double k = playerPos.getY() - 3; k < playerPos.getY() + 3; k++){
                     pos = new Vec3d(Math.floor(i), Math.floor(k), Math.floor(j));
-                    if (bestBlock == null) bestBlock = pos;
+                    if (bestBlock == null) {
+                        bestBlock = pos;
+                        continue;
+                    }
                     if(isValid(new BlockPos(pos)) && (DamageCalcUtils.crystalDamage(mc.player, pos.add(0.5, 1, 0.5)) < maxDamage.get()
                             || mode.get() == Mode.suicide)){
                         if (!strict.get() || isEmpty(new BlockPos(pos.add(0, 2, 0)))) {
@@ -637,8 +661,8 @@ public class CrystalAura extends ToggleModule {
 
     private boolean isValid(BlockPos blockPos){
         assert mc.world != null;
-        return ((mc.world.getBlockState(blockPos).getBlock() == Blocks.BEDROCK
-                || mc.world.getBlockState(blockPos).getBlock() == Blocks.OBSIDIAN)
+        return (((canSupport && isEmpty(blockPos) && blockPos.getY() < target.getBlockPos().getY()) || (mc.world.getBlockState(blockPos).getBlock() == Blocks.BEDROCK
+                || mc.world.getBlockState(blockPos).getBlock() == Blocks.OBSIDIAN))
                 && isEmpty(blockPos.add(0, 1, 0)));
     }
 

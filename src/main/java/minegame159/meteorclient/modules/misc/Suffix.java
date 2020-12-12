@@ -33,7 +33,7 @@ public class Suffix extends ToggleModule {
     private final Setting<String> text = sgGeneral.add(new StringSetting.Builder()
             .name("text")
             .description("Text to add.")
-            .defaultValue(" meteor on crack")
+            .defaultValue(" | Meteor on Crack!")
             .build()
     );
 

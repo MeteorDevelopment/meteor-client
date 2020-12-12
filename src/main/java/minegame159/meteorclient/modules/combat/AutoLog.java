@@ -97,7 +97,7 @@ public class AutoLog extends ToggleModule {
     );
 
     public AutoLog() {
-        super(Category.Combat, "auto-log", "Automatically disconnects when low on health.");
+        super(Category.Combat, "auto-log", "Automatically disconnects you when requirements are met.");
     }
 
     @EventHandler

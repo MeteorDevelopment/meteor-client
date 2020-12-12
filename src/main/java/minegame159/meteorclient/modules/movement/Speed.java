@@ -5,11 +5,9 @@
 
 package minegame159.meteorclient.modules.movement;
 
-import baritone.api.BaritoneAPI;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.PlayerMoveEvent;
-import minegame159.meteorclient.mixininterface.ILookBehavior;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
@@ -18,6 +16,7 @@ import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.utils.PlayerUtils;
 import net.minecraft.entity.MovementType;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.util.math.Vec3d;
@@ -73,47 +72,9 @@ public class Speed extends ToggleModule {
         if (onlyOnGround.get() && !mc.player.isOnGround()) return;
         if (!inWater.get() && mc.player.isTouchingWater()) return;
 
-        float yaw = mc.player.yaw;
-        if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing()) {
-            if (((ILookBehavior) BaritoneAPI.getProvider().getPrimaryBaritone().getLookBehavior()).getTarget() != null) {
-                yaw = ((ILookBehavior) BaritoneAPI.getProvider().getPrimaryBaritone().getLookBehavior()).getTarget().getYaw();
-            }
-        }
-
-        Vec3d forward = Vec3d.fromPolar(0, yaw);
-        Vec3d right = Vec3d.fromPolar(0, yaw + 90);
-        double velX = 0;
-        double velZ = 0;
-
-        boolean a = false;
-        if (mc.player.input.pressingForward) {
-            velX += forward.x / 20 * speed.get();
-            velZ += forward.z / 20 * speed.get();
-            a = true;
-        }
-        if (mc.player.input.pressingBack) {
-            velX -= forward.x / 20 * speed.get();
-            velZ -= forward.z / 20 * speed.get();
-            a = true;
-        }
-
-        boolean b = false;
-        if (mc.player.input.pressingRight) {
-            velX += right.x / 20 * speed.get();
-            velZ += right.z / 20 * speed.get();
-            b = true;
-        }
-        if (mc.player.input.pressingLeft) {
-            velX -= right.x / 20 * speed.get();
-            velZ -= right.z / 20 * speed.get();
-            b = true;
-        }
-
-        if (a && b) {
-            double diagonal = 1 / Math.sqrt(2);
-            velX *= diagonal;
-            velZ *= diagonal;
-        }
+        Vec3d vel = PlayerUtils.getHorizontalVelocity(speed.get());
+        double velX = vel.getX();
+        double velZ = vel.getZ();
 
         if (applySpeedPotions.get() && mc.player.hasStatusEffect(StatusEffects.SPEED)) {
             double value = (mc.player.getStatusEffect(StatusEffects.SPEED).getAmplifier() + 1) * 0.205;
