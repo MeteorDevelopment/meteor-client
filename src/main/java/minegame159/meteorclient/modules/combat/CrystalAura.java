@@ -388,6 +388,7 @@ public class CrystalAura extends ToggleModule {
         if (heldCrystal == null) locked = false;
         if (locked && !facePlace.get()) return;
 
+        findTarget();
         if (breakDelayLeft <= 0) {
             hitCrystal();
         }
@@ -395,7 +396,6 @@ public class CrystalAura extends ToggleModule {
         if (!smartDelay.get() && placeDelayLeft > 0 && ((!surroundHold.get() && (target != null && (!surroundBreak.get() || !isSurrounded(target)))) || heldCrystal != null)) return;
         if (!autoSwitch.get() && mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL) return;
         if (place.get()) {
-            findTarget();
             if (target == null) return;
             if (surroundHold.get() && heldCrystal == null){
                 int slot = InvUtils.findItemWithCount(Items.END_CRYSTAL).slot;
@@ -479,7 +479,7 @@ public class CrystalAura extends ToggleModule {
                 .filter(entity -> !(breakMode.get() == Mode.safe)
                         || (getTotalHealth(mc.player) - DamageCalcUtils.crystalDamage(mc.player, entity.getPos()) > minHealth.get()
                         && DamageCalcUtils.crystalDamage(mc.player, entity.getPos()) < maxDamage.get()))
-                .min(Comparator.comparingDouble(o -> o.distanceTo(mc.player)))
+                .max(Comparator.comparingDouble(o -> DamageCalcUtils.crystalDamage(target, o.getPos())))
                 .ifPresent(entity -> {
                     int preSlot = mc.player.inventory.selectedSlot;
                     if (mc.player.getActiveStatusEffects().containsKey(StatusEffects.WEAKNESS) && antiWeakness.get()) {

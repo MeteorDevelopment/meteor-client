@@ -6,15 +6,19 @@
 package minegame159.meteorclient.modules.movement;
 
 import baritone.api.BaritoneAPI;
+import com.google.common.collect.Streams;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.PostTickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
-import minegame159.meteorclient.settings.DoubleSetting;
-import minegame159.meteorclient.settings.EnumSetting;
-import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.DamageCalcUtils;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.decoration.EndCrystalEntity;
+
+import java.util.Comparator;
+import java.util.Optional;
 
 public class Step extends ToggleModule {
     public enum ActiveWhen {
@@ -40,6 +44,22 @@ public class Step extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> safeStep = sgGeneral.add(new BoolSetting.Builder()
+            .name("safe-step")
+            .description("Doesn't let you step out of a hole if you are low on health or there is a crystal nearby.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Integer> stepHealth = sgGeneral.add(new IntSetting.Builder()
+            .name("step-health")
+            .description("The health you stop being able to step at.")
+            .defaultValue(5)
+            .min(1)
+            .max(36)
+            .build()
+    );
+
     private float prevStepHeight;
     private boolean prevBaritoneAssumeStep;
 
@@ -49,6 +69,7 @@ public class Step extends ToggleModule {
 
     @Override
     public void onActivate() {
+        assert mc.player != null;
         prevStepHeight = mc.player.stepHeight;
 
         prevBaritoneAssumeStep = BaritoneAPI.getSettings().assumeStep.value;
@@ -57,16 +78,38 @@ public class Step extends ToggleModule {
 
     @EventHandler
     private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+        assert mc.player != null;
         boolean work = (activeWhen.get() == ActiveWhen.Always) || (activeWhen.get() == ActiveWhen.Sneaking && mc.player.isSneaking()) || (activeWhen.get() == ActiveWhen.NotSneaking && !mc.player.isSneaking());
-
-        if (work) mc.player.stepHeight = height.get().floatValue();
-        else mc.player.stepHeight = prevStepHeight;
+        mc.player.setBoundingBox(mc.player.getBoundingBox().offset(0, 1, 0));
+        if (work && (!safeStep.get() || (getHealth() > stepHealth.get() && getHealth() - getExplosionDamage() > stepHealth.get()))){
+            mc.player.stepHeight = height.get().floatValue();
+        } else {
+            mc.player.stepHeight = prevStepHeight;
+        }
+        mc.player.setBoundingBox(mc.player.getBoundingBox().offset(0, -1, 0));
     });
 
     @Override
     public void onDeactivate() {
+        assert mc.player != null;
         mc.player.stepHeight = prevStepHeight;
 
         BaritoneAPI.getSettings().assumeStep.value = prevBaritoneAssumeStep;
+    }
+
+    private float getHealth(){
+        assert mc.player != null;
+        return mc.player.getHealth() + mc.player.getAbsorptionAmount();
+    }
+
+    private double getExplosionDamage(){
+        assert mc.player != null;
+        assert mc.world != null;
+        Optional<EndCrystalEntity> crystal = Streams.stream(mc.world.getEntities())
+                .filter(entity -> entity instanceof EndCrystalEntity)
+                .filter(Entity::isAlive)
+                .max(Comparator.comparingDouble(o -> DamageCalcUtils.crystalDamage(mc.player, o.getPos())))
+                .map(entity -> (EndCrystalEntity) entity);
+        return crystal.map(endCrystalEntity -> DamageCalcUtils.crystalDamage(mc.player, endCrystalEntity.getPos())).orElse(0.0);
     }
 }
