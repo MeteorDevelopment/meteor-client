@@ -69,6 +69,13 @@ public class OffhandExtra extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> hotBar = sgGeneral.add(new BoolSetting.Builder()
+            .name("search-hotbar")
+            .description("Whether to take items out of your hotbar or not.")
+            .defaultValue(false)
+            .build()
+    );
+
     public OffhandExtra() {
         super(Category.Combat, "offhand-extra", "Allows you to use items in your offhand. Requires AutoTotem to be on smart mode.");
     }
@@ -79,6 +86,7 @@ public class OffhandExtra extends ToggleModule {
 
     @Override
     public void onDeactivate() {
+        assert mc.player != null;
         if (ModuleManager.INSTANCE.get(AutoTotem.class).isActive()) {
             InvUtils.FindItemResult result = InvUtils.findItemWithCount(Items.TOTEM_OF_UNDYING);
             boolean empty = mc.player.getOffHandStack().isEmpty();
@@ -92,13 +100,14 @@ public class OffhandExtra extends ToggleModule {
 
     @EventHandler
     private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+        assert mc.player != null;
         if (mc.currentScreen != null && mc.player.inventory.size() < 44) return;
         if (!mc.player.isUsingItem()) isClicking = false;
         if (ModuleManager.INSTANCE.get(AutoTotem.class).getLocked()) return;
         if ((Asimov.get() || noTotems) && !(mc.currentScreen instanceof HandledScreen<?>)) {
             Item item = getItem();
-            InvUtils.FindItemResult result = InvUtils.findItemWithCount(item);
-            if (result.slot == -1 && mc.player.getOffHandStack().getItem() != getItem()) {
+            int result = findSlot(item);
+            if (result == -1 && mc.player.getOffHandStack().getItem() != getItem()) {
                 if (!sentMessage) {
                     Chat.warning(this, "None of the chosen item found.");
                     sentMessage = true;
@@ -108,9 +117,9 @@ public class OffhandExtra extends ToggleModule {
             }
             boolean empty = mc.player.getOffHandStack().isEmpty();
             if (mc.player.getOffHandStack().getItem() != item && replace.get()) {
-                InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
+                InvUtils.clickSlot(InvUtils.invIndexToSlotId(result), 0, SlotActionType.PICKUP);
                 InvUtils.clickSlot(InvUtils.OFFHAND_SLOT, 0, SlotActionType.PICKUP);
-                if (!empty) InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
+                if (!empty) InvUtils.clickSlot(InvUtils.invIndexToSlotId(result), 0, SlotActionType.PICKUP);
                 sentMessage = false;
             }
         } else if (!Asimov.get() && !isClicking && mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING) {
@@ -127,13 +136,14 @@ public class OffhandExtra extends ToggleModule {
 
     @EventHandler
     private final Listener<RightClickEvent> onRightClick = new Listener<>(event -> {
+        assert mc.player != null;
         if (ModuleManager.INSTANCE.get(AutoTotem.class).getLocked() || !canMove()) return;
         if ((mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING || (mc.player.getHealth() + mc.player.getAbsorptionAmount() > health.get())
                && (mc.player.getOffHandStack().getItem() != getItem()) && !(mc.currentScreen instanceof HandledScreen<?>))) {
             isClicking = true;
             Item item = getItem();
-            InvUtils.FindItemResult result = InvUtils.findItemWithCount(item);
-            if (result.slot == -1 && mc.player.getOffHandStack().getItem() != getItem()) {
+            int result = findSlot(item);
+            if (result == -1 && mc.player.getOffHandStack().getItem() != getItem()) {
                 if (!sentMessage) {
                     Chat.warning(this, "None of the chosen item found.");
                     sentMessage = true;
@@ -143,9 +153,9 @@ public class OffhandExtra extends ToggleModule {
             }
             boolean empty = mc.player.getOffHandStack().isEmpty();
             if (mc.player.getOffHandStack().getItem() != item && mc.player.getMainHandStack().getItem() != item && replace.get()) {
-                InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
+                InvUtils.clickSlot(InvUtils.invIndexToSlotId(result), 0, SlotActionType.PICKUP);
                 InvUtils.clickSlot(InvUtils.OFFHAND_SLOT, 0, SlotActionType.PICKUP);
-                if (!empty) InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
+                if (!empty) InvUtils.clickSlot(InvUtils.invIndexToSlotId(result), 0, SlotActionType.PICKUP);
                 sentMessage = false;
             }
         }
@@ -172,9 +182,24 @@ public class OffhandExtra extends ToggleModule {
     public boolean getMessageSent(){return sentMessage;}
 
     private boolean canMove(){
+        assert mc.player != null;
         return mc.player.getMainHandStack().getItem() != Items.BOW
                 && mc.player.getMainHandStack().getItem() != Items.TRIDENT
                 && mc.player.getMainHandStack().getItem() != Items.CROSSBOW;
+    }
+
+    private int findSlot(Item item){
+        assert mc.player != null;
+        if (hotBar.get()){
+            return InvUtils.findItemWithCount(item).slot;
+        } else {
+            for (int i = 9; i < mc.player.inventory.size(); i++){
+                if (mc.player.inventory.getStack(i).getItem() == item){
+                    return i;
+                }
+            }
+            return -1;
+        }
     }
 
 }
