@@ -17,9 +17,11 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MovementType;
 import net.minecraft.util.math.Vec3d;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -28,6 +30,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(Entity.class)
 public abstract class EntityMixin {
+    @Shadow public boolean inanimate;
+
     @Redirect(method = "setVelocityClient", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;setVelocity(DDD)V"))
     private void setVelocityClientEntiySetVelocityProxy(Entity entity, double x, double y, double z) {
         if ((Object) this != MinecraftClient.getInstance().player) {
@@ -52,9 +56,11 @@ public abstract class EntityMixin {
 
     @Inject(method = "move", at = @At("HEAD"))
     private void onMove(MovementType type, Vec3d movement, CallbackInfo info) {
-        if ((Object) this != MinecraftClient.getInstance().player) return;
-
-        MeteorClient.EVENT_BUS.post(EventStore.playerMoveEvent(type, movement));
+        if ((Object) this == MinecraftClient.getInstance().player) {
+            MeteorClient.EVENT_BUS.post(EventStore.playerMoveEvent(type, movement));
+        } else if ((Object) this instanceof LivingEntity) {
+            MeteorClient.EVENT_BUS.post(EventStore.livingEntityMoveEvent((LivingEntity) (Object) this, movement));
+        }
     }
 
     @Inject(method = "getTeamColorValue", at = @At("HEAD"), cancellable = true)

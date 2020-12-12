@@ -72,6 +72,7 @@ public class EventStore {
     private static final PickItemsEvent pickItemsEvent = new PickItemsEvent();
     private static final ConnectToServerEvent connectToServerEvent = new ConnectToServerEvent();
     private static final BoatMoveEvent boatMoveEvent = new BoatMoveEvent();
+    private static final LivingEntityMoveEvent livingEntityMoveEvent = new LivingEntityMoveEvent();
 
     public static PlaySoundPacketEvent playSoundPacketEvent(PlaySoundS2CPacket packet) {
         playSoundPacketEvent.packet = packet;
@@ -282,5 +283,11 @@ public class EventStore {
     public static BoatMoveEvent boatMoveEvent(BoatEntity entity) {
         boatMoveEvent.boat = entity;
         return boatMoveEvent;
+    }
+
+    public static LivingEntityMoveEvent livingEntityMoveEvent(LivingEntity entity, Vec3d movement) {
+        livingEntityMoveEvent.entity = entity;
+        livingEntityMoveEvent.movement = movement;
+        return livingEntityMoveEvent;
     }
 }
