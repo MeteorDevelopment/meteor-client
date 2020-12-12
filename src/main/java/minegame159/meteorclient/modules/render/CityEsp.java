@@ -31,17 +31,17 @@ public class CityEsp extends ToggleModule {
             .build()
     );
 
-    private final Setting<Color> color = sgGeneral.add(new ColorSetting.Builder()
-            .name("color")
+    private final Setting<Color> fillColor = sgGeneral.add(new ColorSetting.Builder()
+            .name("fill-color")
             .description("Color that the city block renders.")
-            .defaultValue(new Color(225, 0, 0))
+            .defaultValue(new Color(225, 0, 0, 75))
             .build()
     );
 
-    private final Setting<Boolean> fill = sgGeneral.add(new BoolSetting.Builder()
-            .name("fill")
-            .description("Fill the shapes rendered.")
-            .defaultValue(true)
+    private final Setting<Color> outlineColor = sgGeneral.add(new ColorSetting.Builder()
+            .name("outline-color")
+            .description("Outline color that the city block renders.")
+            .defaultValue(new Color(225, 0, 0, 255))
             .build()
     );
 
@@ -60,9 +60,7 @@ public class CityEsp extends ToggleModule {
         int y = targetBlock.getY();
         int z = targetBlock.getZ();
 
-        if (fill.get()) {
-            ShapeBuilder.blockSides(x, y, z, color.get(), null);
-        }
-        ShapeBuilder.blockEdges(x, y, z, color.get(), null);
+        ShapeBuilder.blockSides(x, y, z, fillColor.get(), null);
+        ShapeBuilder.blockEdges(x, y, z, outlineColor.get(), null);
     });
 }
