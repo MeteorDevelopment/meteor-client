@@ -20,20 +20,8 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.shape.VoxelShape;
 
 public class BlockSelection extends ToggleModule {
-    public enum Mode {
-        Lines,
-        Sides,
-        Both
-    }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-
-    private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
-            .name("mode")
-            .description("Rendering mode")
-            .defaultValue(Mode.Lines)
-            .build()
-    );
 
     private final Setting<Boolean> advanced = sgGeneral.add(new BoolSetting.Builder()
             .name("advanced")
@@ -42,17 +30,24 @@ public class BlockSelection extends ToggleModule {
             .build()
     );
 
-    private final Setting<Color> color = sgGeneral.add(new ColorSetting.Builder()
-            .name("color")
-            .description("Color.")
-            .defaultValue(new Color(255, 255, 255))
+    private final Setting<Color> fillColor = sgGeneral.add(new ColorSetting.Builder()
+            .name("fill-color")
+            .description("Fill color.")
+            .defaultValue(new Color(255, 255, 255, 0))
+            .build()
+    );
+
+    private final Setting<Color> outlineColor = sgGeneral.add(new ColorSetting.Builder()
+            .name("outline-color")
+            .description("Outline color.")
+            .defaultValue(new Color(255, 255, 255, 255))
             .build()
     );
 
     private final Color sideColor = new Color();
 
     public BlockSelection() {
-        super(Category.Render, "block-selection", "Modifies your block selection outline.");
+        super(Category.Render, "block-selection", "Modifies your block selection render.");
     }
 
     @EventHandler
@@ -67,27 +62,12 @@ public class BlockSelection extends ToggleModule {
 
         if (advanced.get()) {
             shape.forEachBox((minX, d, e, f, g, h) -> {
-                if (mode.get() == Mode.Lines || mode.get() == Mode.Both) {
-                    ShapeBuilder.boxEdges(pos.getX() + minX, pos.getY() + d, pos.getZ() + e, pos.getX() + f, pos.getY() + g, pos.getZ() + h, color.get());
-                }
-                if (mode.get() == Mode.Sides || mode.get() == Mode.Both) {
-                    setSideColor();
-                    ShapeBuilder.boxSides(pos.getX() + minX, pos.getY() + d, pos.getZ() + e, pos.getX() + f, pos.getY() + g, pos.getZ() + h, sideColor);
-                }
+                ShapeBuilder.boxEdges(pos.getX() + minX, pos.getY() + d, pos.getZ() + e, pos.getX() + f, pos.getY() + g, pos.getZ() + h, outlineColor.get());
+                ShapeBuilder.boxSides(pos.getX() + minX, pos.getY() + d, pos.getZ() + e, pos.getX() + f, pos.getY() + g, pos.getZ() + h, fillColor.get());
             });
         } else {
-            if (mode.get() == Mode.Lines || mode.get() == Mode.Both) {
-                ShapeBuilder.boxEdges(pos.getX() + box.minX, pos.getY() + box.minY, pos.getZ() + box.minZ, pos.getX() + box.maxX, pos.getY() + box.maxY, pos.getZ() + box.maxZ, color.get());
-            }
-            if (mode.get() == Mode.Sides || mode.get() == Mode.Both) {
-                setSideColor();
-                ShapeBuilder.boxSides(pos.getX() + box.minX, pos.getY() + box.minY, pos.getZ() + box.minZ, pos.getX() + box.maxX, pos.getY() + box.maxY, pos.getZ() + box.maxZ, sideColor);
-            }
+            ShapeBuilder.boxEdges(pos.getX() + box.minX, pos.getY() + box.minY, pos.getZ() + box.minZ, pos.getX() + box.maxX, pos.getY() + box.maxY, pos.getZ() + box.maxZ, outlineColor.get());
+            ShapeBuilder.boxSides(pos.getX() + box.minX, pos.getY() + box.minY, pos.getZ() + box.minZ, pos.getX() + box.maxX, pos.getY() + box.maxY, pos.getZ() + box.maxZ, fillColor.get());
         }
     });
-
-    private void setSideColor() {
-        sideColor.set(color.get());
-        sideColor.a = 30;
-    }
 }
