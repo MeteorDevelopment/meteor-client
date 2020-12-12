@@ -13,7 +13,6 @@ import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.FakePlayerEntity;
-import net.minecraft.util.Pair;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -108,8 +107,6 @@ public class FakePlayer extends ToggleModule {
             FakePlayerEntity fakePlayer = new FakePlayerEntity(name, copyInv, glowing, health);
             if (chatInfo.get()) Chat.info(this, "Spawned a fakeplayer");
             players.put(fakePlayer, ID);
-            int idlog = new Pair<>(fakePlayer, ID).getRight();
-            System.out.println(idlog);
             ID++;
         }
     }
