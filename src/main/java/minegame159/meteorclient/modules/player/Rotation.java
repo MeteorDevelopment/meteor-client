@@ -8,14 +8,28 @@ package minegame159.meteorclient.modules.player;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.PostTickEvent;
+import minegame159.meteorclient.events.packets.SendPacketEvent;
+import minegame159.meteorclient.mixininterface.IPlayerMoveC2SPacket;
 import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
+import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 
 public class Rotation extends ToggleModule {
+
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+
+    private final Setting<Boolean> noRotate = sgGeneral.add(new BoolSetting.Builder()
+            .name("anti-rotate")
+            .description("Attempts to block server to client rotations.")
+            .defaultValue(true)
+            .build()
+    );
+
     // Yaw
     private final SettingGroup sgYaw = settings.createGroup("Yaw");
 
@@ -79,6 +93,15 @@ public class Rotation extends ToggleModule {
         // Pitch
         if (pitchEnabled.get()) {
             mc.player.pitch = pitchAngle.get().floatValue();
+        }
+    });
+
+    @EventHandler
+    private final Listener<SendPacketEvent> onSendPacket = new Listener<>(event -> {
+        if (noRotate.get() && event.packet instanceof PlayerMoveC2SPacket && !ModuleManager.INSTANCE.get(XpBottleThrower.class).isActive()) {
+            IPlayerMoveC2SPacket packet = (IPlayerMoveC2SPacket) event.packet;
+            packet.setPitch(mc.player.getPitch(0));
+            packet.setYaw(mc.player.getYaw(1));
         }
     });
 
