@@ -337,6 +337,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new Anchor());
         addModule(new ClickTP());
         addModule(new EntitySpeed());
+        addModule(new ReverseStep());
     }
 
     private void initRender() {
