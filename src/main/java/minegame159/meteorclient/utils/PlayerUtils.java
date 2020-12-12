@@ -112,7 +112,7 @@ public class PlayerUtils {
             velZ *= diagonal;
         }
 
-        ((IVec3d) horizontalVelocity).set(velX, velZ);
+        ((IVec3d) horizontalVelocity).setXZ(velX, velZ);
         return horizontalVelocity;
     }
 }
