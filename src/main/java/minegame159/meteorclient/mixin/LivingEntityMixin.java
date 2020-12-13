@@ -6,6 +6,7 @@
 package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.MeteorClient;
+import minegame159.meteorclient.events.CanWalkOnFluidEvent;
 import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.movement.AntiLevitation;
@@ -17,6 +18,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.fluid.Fluid;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -46,6 +48,12 @@ public abstract class LivingEntityMixin extends Entity {
         if (ModuleManager.INSTANCE.isActive(HighJump.class)) {
             info.setReturnValue(0.42f * ModuleManager.INSTANCE.get(HighJump.class).getMultiplier());
         }
+    }
+
+    @Inject(method = "canWalkOnFluid", at = @At("HEAD"), cancellable = true)
+    private void onCanWalkOnFluid(Fluid fluid, CallbackInfoReturnable<Boolean> info) {
+        CanWalkOnFluidEvent event = MeteorClient.postEvent(EventStore.canWalkOnFluidEvent((LivingEntity) (Object) this, fluid));
+        if (event.walkOnFluid) info.setReturnValue(true);
     }
 
     @Redirect(method = "travel", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;hasStatusEffect(Lnet/minecraft/entity/effect/StatusEffect;)Z"))

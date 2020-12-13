@@ -22,6 +22,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MovementType;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.vehicle.BoatEntity;
+import net.minecraft.fluid.Fluid;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.Packet;
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
@@ -73,6 +74,8 @@ public class EventStore {
     private static final ConnectToServerEvent connectToServerEvent = new ConnectToServerEvent();
     private static final BoatMoveEvent boatMoveEvent = new BoatMoveEvent();
     private static final LivingEntityMoveEvent livingEntityMoveEvent = new LivingEntityMoveEvent();
+    private static final CanWalkOnFluidEvent canWalkOnFluidEvent = new CanWalkOnFluidEvent();
+    private static final FluidCollisionShapeEvent fluidCollisionShapeEvent = new FluidCollisionShapeEvent();
 
     public static PlaySoundPacketEvent playSoundPacketEvent(PlaySoundS2CPacket packet) {
         playSoundPacketEvent.packet = packet;
@@ -289,5 +292,18 @@ public class EventStore {
         livingEntityMoveEvent.entity = entity;
         livingEntityMoveEvent.movement = movement;
         return livingEntityMoveEvent;
+    }
+
+    public static CanWalkOnFluidEvent canWalkOnFluidEvent(LivingEntity entity, Fluid fluid) {
+        canWalkOnFluidEvent.entity = entity;
+        canWalkOnFluidEvent.fluid = fluid;
+        canWalkOnFluidEvent.walkOnFluid = false;
+        return canWalkOnFluidEvent;
+    }
+
+    public static FluidCollisionShapeEvent fluidCollisionShapeEvent(BlockState state) {
+        fluidCollisionShapeEvent.state = state;
+        fluidCollisionShapeEvent.shape = null;
+        return fluidCollisionShapeEvent;
     }
 }
