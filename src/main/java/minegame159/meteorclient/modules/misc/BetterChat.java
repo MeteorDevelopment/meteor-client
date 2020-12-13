@@ -11,7 +11,7 @@ import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.Config;
 import minegame159.meteorclient.commands.commands.Ignore;
-import minegame159.meteorclient.events.SendMessageEvent;
+import minegame159.meteorclient.events.entity.player.SendMessageEvent;
 import minegame159.meteorclient.friends.Friend;
 import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.mixininterface.IChatHudLine;

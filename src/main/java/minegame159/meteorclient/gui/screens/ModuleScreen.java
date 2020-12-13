@@ -7,7 +7,7 @@ package minegame159.meteorclient.gui.screens;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.ModuleBindChangedEvent;
+import minegame159.meteorclient.events.meteor.ModuleBindChangedEvent;
 import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;

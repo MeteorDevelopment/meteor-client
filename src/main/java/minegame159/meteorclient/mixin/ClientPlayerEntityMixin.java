@@ -10,7 +10,7 @@ import minegame159.meteorclient.Config;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.commands.CommandManager;
 import minegame159.meteorclient.events.EventStore;
-import minegame159.meteorclient.events.SendMessageEvent;
+import minegame159.meteorclient.events.entity.player.SendMessageEvent;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.movement.NoSlow;
 import minegame159.meteorclient.modules.movement.Scaffold;

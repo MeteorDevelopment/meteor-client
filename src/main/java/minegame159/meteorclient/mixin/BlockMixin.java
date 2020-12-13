@@ -6,10 +6,8 @@
 package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.DrawSideEvent;
+import minegame159.meteorclient.events.render.DrawSideEvent;
 import minegame159.meteorclient.events.EventStore;
-import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.modules.render.XRay;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;

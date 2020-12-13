@@ -7,7 +7,7 @@ package minegame159.meteorclient.gui.screens.topbar;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.WaypointListChangedEvent;
+import minegame159.meteorclient.events.meteor.WaypointListChangedEvent;
 import minegame159.meteorclient.gui.widgets.WButton;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.waypoints.Waypoint;

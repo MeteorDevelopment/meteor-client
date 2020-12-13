@@ -5,10 +5,22 @@
 
 package minegame159.meteorclient.events;
 
+import minegame159.meteorclient.events.entity.*;
+import minegame159.meteorclient.events.entity.player.*;
+import minegame159.meteorclient.events.game.GameJoinedEvent;
+import minegame159.meteorclient.events.game.GameLeftEvent;
+import minegame159.meteorclient.events.game.GetTooltipEvent;
+import minegame159.meteorclient.events.game.OpenScreenEvent;
+import minegame159.meteorclient.events.meteor.*;
 import minegame159.meteorclient.events.packets.ContainerSlotUpdateEvent;
 import minegame159.meteorclient.events.packets.PlaySoundPacketEvent;
 import minegame159.meteorclient.events.packets.ReceivePacketEvent;
 import minegame159.meteorclient.events.packets.SendPacketEvent;
+import minegame159.meteorclient.events.render.DrawSideEvent;
+import minegame159.meteorclient.events.render.Render2DEvent;
+import minegame159.meteorclient.events.render.RenderBlockEntityEvent;
+import minegame159.meteorclient.events.render.RenderEvent;
+import minegame159.meteorclient.events.world.*;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.utils.KeyAction;

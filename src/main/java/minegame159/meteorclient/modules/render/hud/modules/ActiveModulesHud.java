@@ -7,8 +7,8 @@ package minegame159.meteorclient.modules.render.hud.modules;
 
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.ActiveModulesChangedEvent;
-import minegame159.meteorclient.events.ModuleVisibilityChangedEvent;
+import minegame159.meteorclient.events.meteor.ActiveModulesChangedEvent;
+import minegame159.meteorclient.events.meteor.ModuleVisibilityChangedEvent;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.modules.render.hud.HUD;

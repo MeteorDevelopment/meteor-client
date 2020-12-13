@@ -8,7 +8,7 @@ package minegame159.meteorclient.macros;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listenable;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.KeyEvent;
+import minegame159.meteorclient.events.meteor.KeyEvent;
 import minegame159.meteorclient.utils.ISerializable;
 import minegame159.meteorclient.utils.KeyAction;
 import minegame159.meteorclient.utils.NbtUtils;

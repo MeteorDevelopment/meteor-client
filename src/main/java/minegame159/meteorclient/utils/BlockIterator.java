@@ -7,7 +7,7 @@ package minegame159.meteorclient.utils;
 
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.PostTickEvent;
+import minegame159.meteorclient.events.world.PostTickEvent;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.math.BlockPos;

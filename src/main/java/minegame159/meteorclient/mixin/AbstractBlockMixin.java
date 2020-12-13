@@ -1,7 +1,7 @@
 package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.AmbientOcclusionEvent;
+import minegame159.meteorclient.events.world.AmbientOcclusionEvent;
 import minegame159.meteorclient.events.EventStore;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.BlockState;

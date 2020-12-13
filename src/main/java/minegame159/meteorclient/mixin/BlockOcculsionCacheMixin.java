@@ -7,7 +7,7 @@ package minegame159.meteorclient.mixin;
 
 import me.jellysquid.mods.sodium.client.render.occlusion.BlockOcclusionCache;
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.DrawSideEvent;
+import minegame159.meteorclient.events.render.DrawSideEvent;
 import minegame159.meteorclient.events.EventStore;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;

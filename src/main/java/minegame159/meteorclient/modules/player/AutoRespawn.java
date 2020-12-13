@@ -7,7 +7,7 @@ package minegame159.meteorclient.modules.player;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.OpenScreenEvent;
+import minegame159.meteorclient.events.game.OpenScreenEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import net.minecraft.client.gui.screen.DeathScreen;

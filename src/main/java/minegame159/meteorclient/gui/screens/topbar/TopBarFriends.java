@@ -7,7 +7,7 @@ package minegame159.meteorclient.gui.screens.topbar;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.FriendListChangedEvent;
+import minegame159.meteorclient.events.meteor.FriendListChangedEvent;
 import minegame159.meteorclient.friends.EditFriendScreen;
 import minegame159.meteorclient.friends.Friend;
 import minegame159.meteorclient.friends.FriendManager;
