@@ -6,6 +6,7 @@
 package minegame159.meteorclient.utils;
 
 import minegame159.meteorclient.friends.FriendManager;
+import minegame159.meteorclient.mixin.AbstractBlockAccessor;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
@@ -64,7 +65,7 @@ public class CityUtils {
             if (obbySurround == null) continue;
             assert mc.world != null;
             if (mc.world.getBlockState(obbySurround) == null) continue;
-            if (mc.world.getBlockState(obbySurround).getBlock() == Blocks.AIR) isAir = true;
+            if (!((AbstractBlockAccessor) mc.world.getBlockState(obbySurround).getBlock()).isCollidable()) isAir = true;
             if (!(mc.world.getBlockState(obbySurround).getBlock() == Blocks.OBSIDIAN)) continue;
             positions.add(obbySurround);
         }
