@@ -21,9 +21,7 @@ import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.Input;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.gui.screen.ChatScreen;
-import net.minecraft.client.gui.screen.ingame.AnvilScreen;
-import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
-import net.minecraft.client.gui.screen.ingame.SignEditScreen;
+import net.minecraft.client.gui.screen.ingame.*;
 import net.minecraft.item.ItemGroup;
 import org.lwjgl.glfw.GLFW;
 
@@ -120,6 +118,6 @@ public class InvMove extends ToggleModule {
     }
 
     private boolean skip() {
-        return mc.currentScreen == null || ModuleManager.INSTANCE.isActive(Freecam.class) || (mc.currentScreen instanceof CreativeInventoryScreen && ((ICreativeInventoryScreen) mc.currentScreen).getSelectedTab() == ItemGroup.SEARCH.getIndex()) || mc.currentScreen instanceof WidgetScreen || mc.currentScreen instanceof ChatScreen || mc.currentScreen instanceof SignEditScreen || mc.currentScreen instanceof AnvilScreen;
+        return mc.currentScreen == null || ModuleManager.INSTANCE.isActive(Freecam.class) || (mc.currentScreen instanceof CreativeInventoryScreen && ((ICreativeInventoryScreen) mc.currentScreen).getSelectedTab() == ItemGroup.SEARCH.getIndex()) || mc.currentScreen instanceof WidgetScreen || mc.currentScreen instanceof ChatScreen || mc.currentScreen instanceof SignEditScreen || mc.currentScreen instanceof AnvilScreen || mc.currentScreen instanceof AbstractCommandBlockScreen || mc.currentScreen instanceof StructureBlockScreen;
     }
 }
