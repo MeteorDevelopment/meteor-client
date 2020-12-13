@@ -51,9 +51,13 @@ public class Trajectories extends ToggleModule {
 
     @EventHandler
     private final Listener<RenderEvent> onRender = new Listener<>(event -> {
-        if (!Utils.isThrowable(mc.player.getMainHandStack().getItem())) return;
+        Item item = mc.player.getMainHandStack().getItem();
+        if (!Utils.isThrowable(item)) {
+            item = mc.player.getOffHandStack().getItem();
+            if (!Utils.isThrowable(item)) return;
+        }
 
-        calculatePath(event.tickDelta);
+        calculatePath(event.tickDelta, item);
 
         Vec3d lastPoint = null;
         for (Vec3d point : path) {
@@ -70,12 +74,10 @@ public class Trajectories extends ToggleModule {
         }
     });
 
-    private void calculatePath(float tickDelta) {
+    private void calculatePath(float tickDelta, Item item) {
         // Clear path and target
         for (Vec3d point : path) vec3ds.free(point);
         path.clear();
-
-        Item item = mc.player.getMainHandStack().getItem();
 
         // Calculate starting position
         double x = mc.player.lastRenderX + (mc.player.getX() - mc.player.lastRenderX) * tickDelta - Math.cos(Math.toRadians(mc.player.yaw)) * 0.16;
