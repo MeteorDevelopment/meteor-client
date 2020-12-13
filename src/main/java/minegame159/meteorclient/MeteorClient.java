@@ -129,4 +129,9 @@ public class MeteorClient implements ClientModInitializer, Listenable {
         KeyBinding shulkerPeek = KeyBinds.SHULKER_PEEK;
         ((IKeyBinding) shulkerPeek).setPressed(shulkerPeek.matchesKey(event.key, 0) && event.action != KeyAction.Release);
     });
+
+    public static <T> T postEvent(T event) {
+        EVENT_BUS.post(event);
+        return event;
+    }
 }
