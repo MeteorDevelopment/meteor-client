@@ -318,7 +318,7 @@ public class Utils {
     }
 
     public static boolean canUpdate() {
-        return mc.world != null || mc.player != null;
+        return mc != null && (mc.world != null || mc.player != null);
     }
 
     public static int random(int min, int max) {
