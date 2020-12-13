@@ -7,9 +7,7 @@ package minegame159.meteorclient.modules.render;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.KeyEvent;
-import minegame159.meteorclient.events.OpenScreenEvent;
-import minegame159.meteorclient.events.PostTickEvent;
+import minegame159.meteorclient.events.*;
 import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
@@ -174,6 +172,9 @@ public class Freecam extends ToggleModule {
 
         if (cancel) event.cancel();
     });
+
+    @EventHandler
+    private final Listener<ChunkOcclusionEvent> onChunkOcclusion = new Listener<>(Cancellable::cancel);
 
     public void changeLookDirection(double deltaX, double deltaY) {
         prevYaw = yaw;

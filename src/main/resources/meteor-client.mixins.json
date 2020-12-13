@@ -12,7 +12,7 @@
     "BackgroundRendererMixin",
     "BakedQuadMixin",
     "BlockEntityRenderDispatcherMixin",
-    "BlockEntityTypeMixin",
+    "BlockEntityTypeAccessor",
     "BlockHitResultMixin",
     "BlockItemMixin",
     "BlockMixin",
@@ -92,7 +92,8 @@
     "TextVisitFactoryMixin",
     "HeldItemRendererMixin",
     "BoatEntityMixin",
-    "AbstractBlockAccessor"
+    "AbstractBlockAccessor",
+    "AbstractBlockMixin"
   ],
   "injectors": {
     "defaultRequire": 1

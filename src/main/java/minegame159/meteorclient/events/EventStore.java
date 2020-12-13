@@ -15,6 +15,7 @@ import minegame159.meteorclient.utils.KeyAction;
 import minegame159.meteorclient.utils.Pool;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.sound.SoundInstance;
 import net.minecraft.entity.Entity;
@@ -27,10 +28,13 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.Packet;
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
 import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.chunk.WorldChunk;
+
+import java.util.List;
 
 public class EventStore {
     private static final PlaySoundPacketEvent playSoundPacketEvent = new PlaySoundPacketEvent();
@@ -76,6 +80,13 @@ public class EventStore {
     private static final LivingEntityMoveEvent livingEntityMoveEvent = new LivingEntityMoveEvent();
     private static final CanWalkOnFluidEvent canWalkOnFluidEvent = new CanWalkOnFluidEvent();
     private static final FluidCollisionShapeEvent fluidCollisionShapeEvent = new FluidCollisionShapeEvent();
+    private static final RenderBlockEntityEvent renderBlockEntityEvent = new RenderBlockEntityEvent();
+    private static final AmbientOcclusionEvent ambientOcclusionEvent = new AmbientOcclusionEvent();
+    private static final DrawSideEvent drawSideEvent = new DrawSideEvent();
+    private static final GetTooltipEvent getTooltipEvent = new GetTooltipEvent();
+    private static final JumpVelocityMultiplierEvent jumpVelocityMultiplierEvent = new JumpVelocityMultiplierEvent();
+    private static final ClipAtLedgeEvent clipAtLedgeEvent = new ClipAtLedgeEvent();
+    private static final ChunkOcclusionEvent chunkOcclusionEvent = new ChunkOcclusionEvent();
 
     public static PlaySoundPacketEvent playSoundPacketEvent(PlaySoundS2CPacket packet) {
         playSoundPacketEvent.packet = packet;
@@ -305,5 +316,43 @@ public class EventStore {
         fluidCollisionShapeEvent.state = state;
         fluidCollisionShapeEvent.shape = null;
         return fluidCollisionShapeEvent;
+    }
+
+    public static RenderBlockEntityEvent renderBlockEntityEvent(BlockEntity blockEntity) {
+        renderBlockEntityEvent.setCancelled(false);
+        renderBlockEntityEvent.blockEntity = blockEntity;
+        return renderBlockEntityEvent;
+    }
+
+    public static AmbientOcclusionEvent ambientOcclusionEvent() {
+        ambientOcclusionEvent.lightLevel = -1;
+        return ambientOcclusionEvent;
+    }
+
+    public static DrawSideEvent drawSideEvent(BlockState state) {
+        drawSideEvent.reset();
+        drawSideEvent.state = state;
+        return drawSideEvent;
+    }
+
+    public static GetTooltipEvent getTooltipEvent(ItemStack itemStack, List<Text> list) {
+        getTooltipEvent.itemStack = itemStack;
+        getTooltipEvent.list = list;
+        return getTooltipEvent;
+    }
+
+    public static JumpVelocityMultiplierEvent jumpVelocityMultiplierEvent() {
+        jumpVelocityMultiplierEvent.multiplier = 1;
+        return jumpVelocityMultiplierEvent;
+    }
+
+    public static ClipAtLedgeEvent clipAtLedgeEvent() {
+        clipAtLedgeEvent.reset();
+        return clipAtLedgeEvent;
+    }
+
+    public static ChunkOcclusionEvent chunkOcclusionEvent() {
+        chunkOcclusionEvent.setCancelled(false);
+        return chunkOcclusionEvent;
     }
 }

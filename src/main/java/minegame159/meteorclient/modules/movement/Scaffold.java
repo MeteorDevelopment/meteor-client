@@ -7,6 +7,7 @@ package minegame159.meteorclient.modules.movement;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
+import minegame159.meteorclient.events.ClipAtLedgeEvent;
 import minegame159.meteorclient.events.PostTickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
@@ -180,6 +181,16 @@ public class Scaffold extends ToggleModule {
 
         // Change back to previous slot
         mc.player.inventory.selectedSlot = prevSelectedSlot;
+    });
+
+    @EventHandler
+    private final Listener<ClipAtLedgeEvent> onClipAtLedge = new Listener<>(event -> {
+        if (mc.player.input.sneaking) {
+            event.setClip(false);
+            return;
+        }
+
+        if (safeWalk.get()) event.setClip(true);
     });
 
     private boolean findBlock() {

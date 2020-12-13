@@ -5,9 +5,9 @@
 
 package minegame159.meteorclient.mixin;
 
-import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.modules.render.Freecam;
-import minegame159.meteorclient.modules.render.XRay;
+import minegame159.meteorclient.MeteorClient;
+import minegame159.meteorclient.events.ChunkOcclusionEvent;
+import minegame159.meteorclient.events.EventStore;
 import net.minecraft.client.render.chunk.ChunkOcclusionDataBuilder;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.asm.mixin.Mixin;
@@ -19,8 +19,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class ChunkOcclusionDataBuilderMixin {
     @Inject(method = "markClosed", at = @At("HEAD"), cancellable = true)
     private void onMarkClosed(BlockPos pos, CallbackInfo info) {
-        if (ModuleManager.INSTANCE.isActive(XRay.class) || ModuleManager.INSTANCE.isActive(Freecam.class)) {
-            info.cancel();
-        }
+        ChunkOcclusionEvent event = MeteorClient.postEvent(EventStore.chunkOcclusionEvent());
+        if (event.isCancelled()) info.cancel();
     }
 }

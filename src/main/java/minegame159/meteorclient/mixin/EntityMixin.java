@@ -7,6 +7,7 @@ package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.EventStore;
+import minegame159.meteorclient.events.JumpVelocityMultiplierEvent;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.movement.NoSlow;
 import minegame159.meteorclient.modules.movement.Velocity;
@@ -19,8 +20,11 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MovementType;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -30,7 +34,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(Entity.class)
 public abstract class EntityMixin {
-    @Shadow public boolean inanimate;
+    @Shadow public World world;
+
+    @Shadow public abstract BlockPos getBlockPos();
+
+    @Shadow protected abstract BlockPos getVelocityAffectingPos();
 
     @Redirect(method = "setVelocityClient", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;setVelocity(DDD)V"))
     private void setVelocityClientEntiySetVelocityProxy(Entity entity, double x, double y, double z) {
@@ -44,6 +52,18 @@ public abstract class EntityMixin {
         //System.out.println(x + ", " + y + ", " + z);
         //System.out.println((x * velocity.getHorizontal()) + ", " + (y * velocity.getVertical()) + ", " + (z * velocity.getHorizontal()));
         entity.setVelocity(entity.getVelocity().x + x * velocity.getHorizontal(), entity.getVelocity().y + y * velocity.getVertical(), entity.getVelocity().z + z * velocity.getHorizontal());
+    }
+
+    @Inject(method = "getJumpVelocityMultiplier", at = @At("HEAD"), cancellable = true)
+    private void onGetJumpVelocityMultiplier(CallbackInfoReturnable<Float> info) {
+        if ((Object) this == MinecraftClient.getInstance().player) {
+            float f = world.getBlockState(getBlockPos()).getBlock().getJumpVelocityMultiplier();
+            float g = world.getBlockState(getVelocityAffectingPos()).getBlock().getJumpVelocityMultiplier();
+            float a = f == 1.0D ? g : f;
+
+            JumpVelocityMultiplierEvent event = MeteorClient.postEvent(EventStore.jumpVelocityMultiplierEvent());
+            info.setReturnValue(a * event.multiplier);
+        }
     }
 
     @Redirect(method = "addVelocity", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/Vec3d;add(DDD)Lnet/minecraft/util/math/Vec3d;"))
