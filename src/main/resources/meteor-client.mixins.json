@@ -91,7 +91,8 @@
     "WorldRendererMixin",
     "TextVisitFactoryMixin",
     "HeldItemRendererMixin",
-    "BoatEntityMixin"
+    "BoatEntityMixin",
+    "AbstractBlockAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

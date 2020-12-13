@@ -9,6 +9,7 @@ import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.PreTickEvent;
 import minegame159.meteorclient.events.RenderEvent;
+import minegame159.meteorclient.mixin.AbstractBlockAccessor;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.rendering.ShapeBuilder;
@@ -24,7 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class HoleESP extends ToggleModule {
-
     public enum Mode {
         Flat,
         Box,
@@ -152,10 +152,10 @@ public class HoleESP extends ToggleModule {
     });
 
     private boolean checkHeight() {
-        if (!mc.world.getBlockState(blockPos).getMaterial().isReplaceable()) return false;
+        if (((AbstractBlockAccessor) mc.world.getBlockState(blockPos).getBlock()).isCollidable()) return false;
 
         for (int i = 0; i < holeHeight.get() - 1; i++) {
-            if (!mc.world.getBlockState(add(0, 1, 0)).getMaterial().isReplaceable()) return false;
+            if (((AbstractBlockAccessor) mc.world.getBlockState(add(0, 1, 0)).getBlock()).isCollidable()) return false;
         }
 
         add(0, -holeHeight.get() + 1, 0);
