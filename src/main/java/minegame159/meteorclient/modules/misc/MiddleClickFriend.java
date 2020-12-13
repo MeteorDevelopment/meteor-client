@@ -7,7 +7,7 @@ package minegame159.meteorclient.modules.misc;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.MiddleMouseButtonEvent;
+import minegame159.meteorclient.events.meteor.MiddleMouseButtonEvent;
 import minegame159.meteorclient.friends.Friend;
 import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.modules.Category;

@@ -7,8 +7,8 @@ package minegame159.meteorclient.modules.render;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.PostTickEvent;
-import minegame159.meteorclient.events.RenderEvent;
+import minegame159.meteorclient.events.world.PostTickEvent;
+import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.rendering.ShapeBuilder;

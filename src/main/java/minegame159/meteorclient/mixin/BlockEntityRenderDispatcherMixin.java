@@ -7,7 +7,7 @@ package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.EventStore;
-import minegame159.meteorclient.events.RenderBlockEntityEvent;
+import minegame159.meteorclient.events.render.RenderBlockEntityEvent;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.block.entity.BlockEntityRenderDispatcher;

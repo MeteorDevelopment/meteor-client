@@ -7,7 +7,7 @@ package minegame159.meteorclient.rendering;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import minegame159.meteorclient.events.RenderEvent;
+import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.mixininterface.IBufferBuilder;
 import minegame159.meteorclient.utils.Color;
 import net.minecraft.client.render.BufferBuilder;

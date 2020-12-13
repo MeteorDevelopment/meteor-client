@@ -7,7 +7,7 @@ package minegame159.meteorclient.modules.misc;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.GetTooltipEvent;
+import minegame159.meteorclient.events.game.GetTooltipEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;

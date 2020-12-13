@@ -6,9 +6,9 @@
 package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.AttackEntityEvent;
+import minegame159.meteorclient.events.entity.player.AttackEntityEvent;
 import minegame159.meteorclient.events.EventStore;
-import minegame159.meteorclient.events.StartBreakingBlockEvent;
+import minegame159.meteorclient.events.entity.player.StartBreakingBlockEvent;
 import minegame159.meteorclient.mixininterface.IClientPlayerInteractionManager;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.misc.Nuker;

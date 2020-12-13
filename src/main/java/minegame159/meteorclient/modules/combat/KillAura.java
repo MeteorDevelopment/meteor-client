@@ -14,7 +14,7 @@ import baritone.api.BaritoneAPI;
 import com.google.common.collect.Streams;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.PostTickEvent;
+import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;

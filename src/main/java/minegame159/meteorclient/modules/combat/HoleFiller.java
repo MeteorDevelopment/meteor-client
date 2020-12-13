@@ -7,7 +7,7 @@ package minegame159.meteorclient.modules.combat;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.PreTickEvent;
+import minegame159.meteorclient.events.world.PreTickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.EnumSetting;

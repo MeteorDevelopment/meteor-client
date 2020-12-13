@@ -7,8 +7,8 @@ package minegame159.meteorclient.utils;
 
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.BlockActivateEvent;
-import minegame159.meteorclient.events.OpenScreenEvent;
+import minegame159.meteorclient.events.world.BlockActivateEvent;
+import minegame159.meteorclient.events.game.OpenScreenEvent;
 import net.minecraft.block.EnderChestBlock;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;

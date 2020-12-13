@@ -9,7 +9,7 @@ import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.accounts.Account;
 import minegame159.meteorclient.accounts.AccountManager;
-import minegame159.meteorclient.events.AccountListChangedEvent;
+import minegame159.meteorclient.events.meteor.AccountListChangedEvent;
 import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.gui.screens.WindowScreen;
 import minegame159.meteorclient.gui.widgets.WButton;

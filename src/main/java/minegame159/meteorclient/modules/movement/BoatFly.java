@@ -7,7 +7,7 @@ package minegame159.meteorclient.modules.movement;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.BoatMoveEvent;
+import minegame159.meteorclient.events.entity.BoatMoveEvent;
 import minegame159.meteorclient.events.packets.ReceivePacketEvent;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;

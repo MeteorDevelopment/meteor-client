@@ -6,7 +6,7 @@
 package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.ClipAtLedgeEvent;
+import minegame159.meteorclient.events.entity.player.ClipAtLedgeEvent;
 import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.mixininterface.IPlayerEntity;
 import net.minecraft.entity.ItemEntity;

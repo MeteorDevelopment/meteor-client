@@ -7,7 +7,7 @@ package minegame159.meteorclient.modules.player;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.TookDamageEvent;
+import minegame159.meteorclient.events.entity.TookDamageEvent;
 import minegame159.meteorclient.gui.widgets.WLabel;
 import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.modules.Category;

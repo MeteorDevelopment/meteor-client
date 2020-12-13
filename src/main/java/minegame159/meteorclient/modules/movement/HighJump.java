@@ -7,7 +7,7 @@ package minegame159.meteorclient.modules.movement;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.JumpVelocityMultiplierEvent;
+import minegame159.meteorclient.events.entity.player.JumpVelocityMultiplierEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.DoubleSetting;

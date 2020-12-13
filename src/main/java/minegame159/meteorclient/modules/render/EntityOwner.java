@@ -8,7 +8,7 @@ package minegame159.meteorclient.modules.render;
 import com.google.common.reflect.TypeToken;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.RenderEvent;
+import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.rendering.Fonts;

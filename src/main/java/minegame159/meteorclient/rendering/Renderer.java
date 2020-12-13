@@ -5,7 +5,7 @@
 
 package minegame159.meteorclient.rendering;
 
-import minegame159.meteorclient.events.RenderEvent;
+import minegame159.meteorclient.events.render.RenderEvent;
 import net.minecraft.client.render.VertexFormats;
 import org.lwjgl.opengl.GL11;
 

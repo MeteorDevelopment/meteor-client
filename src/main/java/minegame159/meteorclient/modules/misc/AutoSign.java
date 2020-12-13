@@ -7,7 +7,7 @@ package minegame159.meteorclient.modules.misc;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.OpenScreenEvent;
+import minegame159.meteorclient.events.game.OpenScreenEvent;
 import minegame159.meteorclient.events.packets.SendPacketEvent;
 import minegame159.meteorclient.mixininterface.ISignEditScreen;
 import minegame159.meteorclient.modules.Category;

@@ -8,7 +8,7 @@ package minegame159.meteorclient.mixin;
 import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.EventStore;
-import minegame159.meteorclient.events.RenderEvent;
+import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.misc.UnfocusedCPU;

@@ -7,7 +7,7 @@ package minegame159.meteorclient.modules.render.hud;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.Render2DEvent;
+import minegame159.meteorclient.events.render.Render2DEvent;
 import minegame159.meteorclient.gui.widgets.WButton;
 import minegame159.meteorclient.gui.widgets.WLabel;
 import minegame159.meteorclient.gui.widgets.WTable;
