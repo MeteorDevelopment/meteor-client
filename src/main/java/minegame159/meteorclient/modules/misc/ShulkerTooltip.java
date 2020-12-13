@@ -5,11 +5,33 @@
 
 package minegame159.meteorclient.modules.misc;
 
+import me.zero.alpine.listener.EventHandler;
+import me.zero.alpine.listener.Listener;
+import minegame159.meteorclient.events.GetTooltipEvent;
 import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.utils.KeyBinds;
+import minegame159.meteorclient.utils.Utils;
+import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.minecraft.inventory.Inventories;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
+import net.minecraft.util.Formatting;
+import net.minecraft.util.Pair;
+import net.minecraft.util.collection.DefaultedList;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ShulkerTooltip extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -26,7 +48,78 @@ public class ShulkerTooltip extends ToggleModule {
         super(Category.Misc, "shulker-tooltip", "Better shulker item tooltip.");
     }
 
-    public int lines() {
-        return lines.get();
-    }
+    @EventHandler
+    private final Listener<GetTooltipEvent> onGetTooltip = new Listener<>(event -> {
+        if (!Utils.isShulker(event.itemStack.getItem())) return;
+
+        CompoundTag compoundTag = event.itemStack.getSubTag("BlockEntityTag");
+        if (compoundTag != null) {
+            if (compoundTag.contains("Items", 9)) {
+                DefaultedList<ItemStack> itemStacks = DefaultedList.ofSize(27, ItemStack.EMPTY);
+                Inventories.fromTag(compoundTag, itemStacks);
+                int totalItemStacks = 0;
+                int displaysItemStacks = 0;
+
+                if (ModuleManager.INSTANCE.get(ShulkerTooltip.class).isActive()) {
+                    Map<Text, Integer> itemCounts = new HashMap<>();
+                    for (ItemStack itemStack : itemStacks) {
+                        if (!itemStack.isEmpty()) {
+                            Text name = itemStack.getName();
+                            int itemCount = itemCounts.computeIfAbsent(name, item -> 0);
+                            itemCount += itemStack.getCount();
+                            itemCounts.put(name, itemCount);
+                        }
+                    }
+
+                    totalItemStacks = itemCounts.size();
+
+                    List<Pair<Text, Integer>> items = new ArrayList<>(5);
+                    for (int i = 0; i < lines.get(); i++) {
+                        if (itemCounts.size() == 0) break;
+
+                        Text bestItem = null;
+                        int mostItem = 0;
+
+                        for (Text a : itemCounts.keySet()) {
+                            int b = itemCounts.get(a);
+                            if (b > mostItem) {
+                                mostItem = b;
+                                bestItem = a;
+                            }
+                        }
+
+                        items.add(new Pair<>(bestItem, mostItem));
+                        itemCounts.remove(bestItem);
+                    }
+
+                    for (Pair<Text, Integer> itemCount : items) {
+                        displaysItemStacks++;
+                        MutableText text = itemCount.getLeft().copy();
+                        text.append(" x").append(String.valueOf(itemCount.getRight()));
+                        event.list.add(text);
+                    }
+                } else {
+                    for (ItemStack itemStack : itemStacks) {
+                        if (!itemStack.isEmpty()) {
+                            totalItemStacks++;
+
+                            if (displaysItemStacks <= 4) {
+                                displaysItemStacks++;
+                                MutableText text = itemStack.getName().copy();
+                                text.append(" x").append(String.valueOf(itemStack.getCount()));
+                                event.list.add(text);
+                            }
+                        }
+                    }
+                }
+
+                if (totalItemStacks - displaysItemStacks > 0) {
+                    event.list.add((new TranslatableText("container.shulkerBox.more", totalItemStacks - displaysItemStacks)).formatted(Formatting.ITALIC));
+                }
+
+                event.list.add(new LiteralText(""));
+                event.list.add(new LiteralText("Press " + Formatting.YELLOW + Utils.getKeyName(KeyBindingHelper.getBoundKeyOf(KeyBinds.SHULKER_PEEK).getCode()) + Formatting.RESET + " to peek"));
+            }
+        }
+    });
 }

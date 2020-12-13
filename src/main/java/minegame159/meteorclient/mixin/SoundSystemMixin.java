@@ -19,9 +19,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class SoundSystemMixin {
     @Inject(method = "play(Lnet/minecraft/client/sound/SoundInstance;)V", at = @At("HEAD"), cancellable = true)
     private void onPlay(SoundInstance soundInstance, CallbackInfo info) {
-        PlaySoundEvent event = EventStore.playSoundEvent(soundInstance);
-        MeteorClient.EVENT_BUS.post(event);
-
+        PlaySoundEvent event = MeteorClient.postEvent(EventStore.playSoundEvent(soundInstance));
         if (event.isCancelled()) info.cancel();
     }
 }

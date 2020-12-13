@@ -43,13 +43,6 @@ public abstract class LivingEntityMixin extends Entity {
         if (Utils.canUpdate()) MeteorClient.EVENT_BUS.post(EventStore.tookDamageEvent((LivingEntity) (Object) this, source));
     }
 
-    @Inject(method = "getJumpVelocity", at = @At("HEAD"), cancellable = true)
-    private void onGetJumpVelocity(CallbackInfoReturnable<Float> info) {
-        if (ModuleManager.INSTANCE.isActive(HighJump.class)) {
-            info.setReturnValue(0.42f * ModuleManager.INSTANCE.get(HighJump.class).getMultiplier());
-        }
-    }
-
     @Inject(method = "canWalkOnFluid", at = @At("HEAD"), cancellable = true)
     private void onCanWalkOnFluid(Fluid fluid, CallbackInfoReturnable<Boolean> info) {
         CanWalkOnFluidEvent event = MeteorClient.postEvent(EventStore.canWalkOnFluidEvent((LivingEntity) (Object) this, fluid));

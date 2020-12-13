@@ -5,6 +5,9 @@
 
 package minegame159.meteorclient.modules.movement;
 
+import me.zero.alpine.listener.EventHandler;
+import me.zero.alpine.listener.Listener;
+import minegame159.meteorclient.events.JumpVelocityMultiplierEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.DoubleSetting;
@@ -26,7 +29,8 @@ public class HighJump extends ToggleModule {
         super(Category.Movement, "high-jump", "Jump higher.");
     }
 
-    public float getMultiplier() {
-        return multiplier.get().floatValue();
-    }
+    @EventHandler
+    private final Listener<JumpVelocityMultiplierEvent> onJumpVelocityMultiplier = new Listener<>(event -> {
+        event.multiplier *= multiplier.get();
+    });
 }

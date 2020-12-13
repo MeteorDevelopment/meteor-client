@@ -5,13 +5,18 @@
 
 package minegame159.meteorclient.modules.render;
 
+import me.zero.alpine.listener.EventHandler;
+import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.MeteorClient;
+import minegame159.meteorclient.events.*;
+import minegame159.meteorclient.mixin.BlockEntityTypeAccessor;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BlockListSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.utils.Utils;
 import net.minecraft.block.Block;
 
 import java.util.ArrayList;
@@ -52,6 +57,31 @@ public class XRay extends ToggleModule {
 
         if (!MeteorClient.IS_DISCONNECTING) mc.worldRenderer.reload();
     }
+
+    @EventHandler
+    private final Listener<RenderBlockEntityEvent> onRenderBlockEntity = new Listener<>(event -> {
+        if (!Utils.blockRenderingBlockEntitiesInXray) return;
+
+        for (Block block : ((BlockEntityTypeAccessor) event.blockEntity.getType()).getBlocks()) {
+            if (isBlocked(block)) {
+                event.cancel();
+                break;
+            }
+        }
+    });
+
+    @EventHandler
+    private final Listener<DrawSideEvent> onDrawSide = new Listener<>(event -> {
+        event.setDraw(!isBlocked(event.state.getBlock()));
+    });
+
+    @EventHandler
+    private final Listener<ChunkOcclusionEvent> onChunkOcclusion = new Listener<>(Cancellable::cancel);
+
+    @EventHandler
+    private final Listener<AmbientOcclusionEvent> onAmbientOcclusion = new Listener<>(event -> {
+        event.lightLevel = 1;
+    });
 
     public boolean isBlocked(Block block) {
         return isActive() && !blocks.get().contains(block);

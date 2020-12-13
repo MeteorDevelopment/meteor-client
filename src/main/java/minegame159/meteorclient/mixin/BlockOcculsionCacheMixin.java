@@ -6,8 +6,9 @@
 package minegame159.meteorclient.mixin;
 
 import me.jellysquid.mods.sodium.client.render.occlusion.BlockOcclusionCache;
-import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.modules.render.XRay;
+import minegame159.meteorclient.MeteorClient;
+import minegame159.meteorclient.events.DrawSideEvent;
+import minegame159.meteorclient.events.EventStore;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -21,10 +22,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class BlockOcculsionCacheMixin {
     @Inject(at = @At("HEAD"), method = "shouldDrawSide", cancellable = true)
     private void shouldDrawSide(BlockState selfState, BlockView view, BlockPos pos, Direction facing, CallbackInfoReturnable<Boolean> info) {
-        XRay xray = ModuleManager.INSTANCE.get(XRay.class);
-
-        if (xray.isActive()) {
-            info.setReturnValue(!xray.isBlocked(selfState.getBlock()));
-        }
+        DrawSideEvent event = MeteorClient.postEvent(EventStore.drawSideEvent(selfState));
+        if (event.isSet()) info.setReturnValue(event.getDraw());
     }
 }
