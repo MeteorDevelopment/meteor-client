@@ -389,6 +389,7 @@ public class CrystalAura extends ToggleModule {
         if (locked && !facePlace.get()) return;
 
         findTarget();
+        if (target == null) return;
         if (breakDelayLeft <= 0) {
             hitCrystal();
         }
