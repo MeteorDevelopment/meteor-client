@@ -1,11 +1,10 @@
 package minegame159.meteorclient.commands.commands;
 
-import baritone.api.BaritoneAPI;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import minegame159.meteorclient.commands.Command;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.combat.Swarm;
-import net.minecraft.block.Block;
+import minegame159.meteorclient.utils.Chat;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.BlockStateArgument;
 import net.minecraft.command.argument.BlockStateArgumentType;
@@ -24,20 +23,17 @@ public class SwarmMine extends Command {
                 .then(argument("block", BlockStateArgumentType.blockState())
                         .executes(context -> {
                             try {
-                                Block block = context.getArgument("block", BlockStateArgument.class).getBlockState().getBlock();
                                 Swarm swarm = ModuleManager.INSTANCE.get(Swarm.class);
                                 if (swarm.isActive()) {
-                                    if (block != null) {
-                                        if (swarm.currentMode.get() == Swarm.Mode.QUEEN && swarm.server != null)
-                                            swarm.server.sendMessage(context.getInput());
-                                        if (swarm.currentMode.get() != Swarm.Mode.QUEEN) {
-                                            swarm.currentTaskSetting.set(Swarm.CurrentTask.BARITONE);
-                                            BaritoneAPI.getProvider().getPrimaryBaritone().getMineProcess().mine(block);
-                                        }
-                                    }
+                                    if (swarm.currentMode.get() == Swarm.Mode.QUEEN && swarm.server != null)
+                                        swarm.server.sendMessage(context.getInput());
+                                    if (swarm.currentMode.get() != Swarm.Mode.QUEEN) {
+                                        swarm.currentTaskSetting.set(Swarm.CurrentTask.BARITONE);
+                                        swarm.targetBlock = context.getArgument("block",BlockStateArgument.class).getBlockState();
+                                    } else Chat.info("Null block");
                                 }
-                            } catch (Exception ignored){
-
+                            } catch (Exception e) {
+                                Chat.info("Error in baritone command. " + e.getClass().getSimpleName());
                             }
                             return SINGLE_SUCCESS;
                         })
