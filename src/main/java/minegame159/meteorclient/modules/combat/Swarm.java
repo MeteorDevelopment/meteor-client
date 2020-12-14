@@ -1,53 +1,27 @@
 package minegame159.meteorclient.modules.combat;
 
 import baritone.api.BaritoneAPI;
-import baritone.api.IBaritone;
-import baritone.api.pathing.goals.GoalXZ;
-import com.mojang.brigadier.arguments.ArgumentType;
-import com.mojang.brigadier.arguments.BoolArgumentType;
-import com.mojang.brigadier.arguments.IntegerArgumentType;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import jdk.nashorn.internal.ir.Block;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.commands.CommandManager;
-import minegame159.meteorclient.events.entity.player.PlayerMoveEvent;
 import minegame159.meteorclient.events.world.PostTickEvent;
-import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.modules.misc.Timer;
-import minegame159.meteorclient.modules.movement.Step;
 import minegame159.meteorclient.modules.player.InfinityMiner;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.MeteorExecutor;
 import minegame159.meteorclient.utils.PathFinder;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.argument.BlockStateArgument;
-import net.minecraft.command.argument.BlockStateArgumentType;
-import net.minecraft.command.argument.EntityAnchorArgumentType;
-import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
-
-import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
 
 /**
@@ -110,6 +84,7 @@ public class Swarm extends ToggleModule {
     public Entity targetEntity;
     public PathFinder pathFinder = new PathFinder();
     //public final PathFinder pathFinder = new PathFinder();
+    public BlockState targetBlock;
 
 
     @Override
@@ -119,7 +94,6 @@ public class Swarm extends ToggleModule {
     }
 
     public void closeAllServerConnections() {
-        Chat.info("Closing Server Connections");
         if (server != null) {
             server.interrupt();
             server.close();
@@ -153,6 +127,7 @@ public class Swarm extends ToggleModule {
 
                 }
             }
+            mine();
         } catch (Exception ignored) {
         }
     });
@@ -193,6 +168,15 @@ public class Swarm extends ToggleModule {
         }
     }
 
+    public void mine(){
+        if(targetBlock != null) {
+            if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing())
+                BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
+            BaritoneAPI.getProvider().getPrimaryBaritone().getMineProcess().mine(targetBlock.getBlock());
+            targetBlock = null;
+        }
+    }
+
     public class SwarmClient extends Thread {
 
         public Socket socket;
@@ -211,9 +195,11 @@ public class Swarm extends ToggleModule {
                 while(socket == null && !isInterrupted()) {
                     try {
                         socket = new Socket(ipAddress, serverPort.get());
-                        Thread.sleep(2000);
                     }catch (Exception ignored){
-                        Chat.info("Server Not Found. Retrying in 2 seconds.");
+                        Chat.info("Server Not Found. Retrying in 5 seconds.");
+                    }
+                    if(socket == null){
+                        Thread.sleep(5000);
                     }
                 }
                 if(socket != null) {
@@ -225,8 +211,8 @@ public class Swarm extends ToggleModule {
                             String read;
                             read = dataInputStream.readUTF();
                             if (!read.equals("")) {
-                                execute(read);
                                 Chat.info("New Command: " + read);
+                                execute(read);
                             }
                         }
                     }
