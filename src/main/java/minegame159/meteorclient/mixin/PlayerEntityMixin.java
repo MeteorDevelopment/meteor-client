@@ -9,6 +9,9 @@ import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.entity.player.ClipAtLedgeEvent;
 import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.mixininterface.IPlayerEntity;
+import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.player.SpeedMine;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -39,5 +42,13 @@ public class PlayerEntityMixin implements IPlayerEntity {
     @Override
     public void setInventory(PlayerInventory inventory) {
         this.inventory = inventory;
+    }
+
+    @Inject(method = "getBlockBreakingSpeed", at = @At(value = "RETURN"), cancellable = true)
+    public void onGetBlockBreakingSpeed(BlockState block, CallbackInfoReturnable<Float> cir) {
+        SpeedMine module = ModuleManager.INSTANCE.get(SpeedMine.class);
+        if (!module.isActive() || module.mode.get() != SpeedMine.Mode.Normal)
+            return;
+        cir.setReturnValue((float) (cir.getReturnValue() * module.modifier.get()));
     }
 }
