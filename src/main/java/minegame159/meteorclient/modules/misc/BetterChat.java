@@ -86,6 +86,8 @@ public class BetterChat extends ToggleModule {
             .build()
     );
 
+    // Prefix
+
     private final SettingGroup sgPrefix = settings.createGroup("Prefix");
 
     private final Setting<Boolean> prefixEnabled = sgPrefix.add(new BoolSetting.Builder()
@@ -116,6 +118,8 @@ public class BetterChat extends ToggleModule {
             .build()
     );
 
+    // Suffix
+
     private final SettingGroup sgSuffix = settings.createGroup("Suffix");
 
     private final Setting<Boolean> suffixEnabled = sgSuffix.add(new BoolSetting.Builder()
@@ -144,6 +148,17 @@ public class BetterChat extends ToggleModule {
             .name("random")
             .description("Example: <msg> (538)")
             .defaultValue(false)
+            .build()
+    );
+
+    // Annoy
+
+    private final SettingGroup sgAnnoy = settings.createGroup("Annoy");
+
+    private final Setting<Boolean> annoyEnabled = sgAnnoy.add(new BoolSetting.Builder()
+            .name("annoy-enabled")
+            .description("Enables Annoy.")
+            .defaultValue(true)
             .build()
     );
 
@@ -181,13 +196,6 @@ public class BetterChat extends ToggleModule {
         return antiSpamEnabled.get() && antiSpamOnMsg(message, messageId, timestamp, messages, visibleMessages);
         //return friendColorEnabled.get() && friendColorOnMsg(message);
     }
-
-    @EventHandler
-    private final Listener<SendMessageEvent> onSendMessage = new Listener<>(event -> {
-        if (!event.msg.startsWith(Config.INSTANCE.getPrefix() + "b")) {
-            event.msg = getPrefix() + event.msg + getSuffix();
-        }
-    });
 
     // IGNORE
 
@@ -344,4 +352,24 @@ public class BetterChat extends ToggleModule {
 
         return text;
     }
+
+    // Annoy
+
+    public boolean isAnnoy() { return annoyEnabled.get(); }
+
+    @EventHandler
+    private final Listener<SendMessageEvent> onSendMessage = new Listener<>(event -> {
+        StringBuilder sb = new StringBuilder(event.msg.length());
+
+        boolean upperCase = true;
+        for (int cp : event.msg.codePoints().toArray()) {
+            if (upperCase) sb.appendCodePoint(Character.toUpperCase(cp));
+            else sb.appendCodePoint(Character.toLowerCase(cp));
+
+            upperCase = !upperCase;
+        }
+
+        event.msg = sb.toString();
+    });
 }
+

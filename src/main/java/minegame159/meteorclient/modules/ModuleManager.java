@@ -379,7 +379,6 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new StashFinder());
         addModule(new AutoBrewer());
         addModule(new AutoSmelter());
-        addModule(new Annoy());
         addModule(new Spam());
         addModule(new UnfocusedCPU());
         addModule(new ItemByteSize());
