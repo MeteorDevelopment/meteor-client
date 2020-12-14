@@ -44,7 +44,7 @@ public class FakePlayer extends ToggleModule {
 
     private final Setting<Integer> health = sgGeneral.add(new IntSetting.Builder()
             .name("health")
-            .description("The FakePlayer's health.")
+            .description("The FakePlayer's default health.")
             .defaultValue(20)
             .min(1)
             .sliderMax(100)
