@@ -23,14 +23,14 @@ public class FakePlayer extends ToggleModule {
 
     private final Setting<String> name = sgGeneral.add(new StringSetting.Builder()
             .name("name")
-            .description("Fakeplayer's name.")
+            .description("The name of the FakePlayer.")
             .defaultValue("MeteorOnCrack")
             .build()
     );
 
     private final Setting<Boolean> copyInv = sgGeneral.add(new BoolSetting.Builder()
             .name("copy-inv")
-            .description("Copies your inventory to the Fakeplayer.")
+            .description("Copies your inventory to the FakePlayer.")
             .defaultValue(true)
             .build()
     );
@@ -44,7 +44,7 @@ public class FakePlayer extends ToggleModule {
 
     private final Setting<Integer> health = sgGeneral.add(new IntSetting.Builder()
             .name("health")
-            .description("Fakeplayer's health.")
+            .description("The FakePlayer's health.")
             .defaultValue(20)
             .min(1)
             .sliderMax(100)
@@ -53,7 +53,7 @@ public class FakePlayer extends ToggleModule {
 
     private final Setting<Boolean> idInNametag = sgGeneral.add(new BoolSetting.Builder()
             .name("id-in-nametag")
-            .description("Renders the Fakeplayer's ID in its nametag.")
+            .description("Renders the FakePlayer's ID in its nametag.")
             .defaultValue(true)
             .build()
     );
