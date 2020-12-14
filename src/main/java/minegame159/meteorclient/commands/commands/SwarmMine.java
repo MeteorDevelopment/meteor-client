@@ -14,24 +14,30 @@ import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
 public class SwarmMine extends Command {
 
-    public SwarmMine(){
-        super("s","(highlight)mine <playername>(default) - Baritone Mine A Block");
+    public SwarmMine() {
+        super("s", "(highlight)mine <playername>(default) - Baritone Mine A Block");
     }
+
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.then(literal("mine")
                 .then(argument("block", BlockStateArgumentType.blockState())
                         .executes(context -> {
-                            String raw = context.getInput();
-                            Block block = context.getArgument("block", BlockStateArgument.class).getBlockState().getBlock();
-                            Swarm swarm = ModuleManager.INSTANCE.get(Swarm.class);
-                            if(swarm.isActive()) {
-                                if (swarm.currentMode.get() == Swarm.Mode.QUEEN && swarm.server != null)
-                                    swarm.server.sendMessage(raw);
-                                if (swarm.currentMode.get() != Swarm.Mode.QUEEN && block != null) {
-                                    swarm.currentTaskSetting.set(Swarm.CurrentTask.BARITONE);
-                                    BaritoneAPI.getProvider().getPrimaryBaritone().getMineProcess().mine(block);
+                            try {
+                                Block block = context.getArgument("block", BlockStateArgument.class).getBlockState().getBlock();
+                                Swarm swarm = ModuleManager.INSTANCE.get(Swarm.class);
+                                if (swarm.isActive()) {
+                                    if (block != null) {
+                                        if (swarm.currentMode.get() == Swarm.Mode.QUEEN && swarm.server != null)
+                                            swarm.server.sendMessage(context.getInput());
+                                        if (swarm.currentMode.get() != Swarm.Mode.QUEEN) {
+                                            swarm.currentTaskSetting.set(Swarm.CurrentTask.BARITONE);
+                                            BaritoneAPI.getProvider().getPrimaryBaritone().getMineProcess().mine(block);
+                                        }
+                                    }
                                 }
+                            } catch (Exception ignored){
+
                             }
                             return SINGLE_SUCCESS;
                         })
