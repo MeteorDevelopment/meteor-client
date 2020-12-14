@@ -9,8 +9,8 @@ package minegame159.meteorclient.modules.combat;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.events.entity.player.RightClickEvent;
+import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
@@ -18,6 +18,7 @@ import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.InvUtils;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.screen.slot.SlotActionType;
@@ -101,7 +102,7 @@ public class OffhandExtra extends ToggleModule {
     @EventHandler
     private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
         assert mc.player != null;
-        if (mc.currentScreen != null && mc.player.inventory.size() < 44) return;
+        if (!(mc.currentScreen instanceof InventoryScreen)) return;
         if (!mc.player.isUsingItem()) isClicking = false;
         if (ModuleManager.INSTANCE.get(AutoTotem.class).getLocked()) return;
         if ((Asimov.get() || noTotems) && !(mc.currentScreen instanceof HandledScreen<?>)) {
