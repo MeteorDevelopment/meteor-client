@@ -78,29 +78,33 @@ public class Swarm extends ToggleModule {
             .description("The current mode to operate in.")
             .defaultValue(Mode.IDLE)
             .build());
+  
     public final Setting<CurrentTask> currentTaskSetting = sgGeneral.add(new EnumSetting.Builder<CurrentTask>()
             .name("current-task")
             .description("The current task.")
             .defaultValue(CurrentTask.IDLE)
             .build());
 
-    public final Setting<String> targetString = sgGeneral.add(new StringSetting.Builder()
+    private final Setting<String> targetString = sgGeneral.add(new StringSetting.Builder()
             .name("target")
             .description("Player Name to Target")
             .defaultValue("Sheep")
             .onChanged(string -> resetTarget())
             .build());
-    public final Setting<String> ipAddress = sgGeneral.add(new StringSetting.Builder()
+  
+    private final Setting<String> ipAddress = sgGeneral.add(new StringSetting.Builder()
             .name("ip-address")
             .description("Server ip address")
             .defaultValue("localhost")
             .build());
-    public final Setting<Integer> serverPort = sgGeneral.add(new IntSetting.Builder()
+  
+    private final Setting<Integer> serverPort = sgGeneral.add(new IntSetting.Builder()
+
             .name("Port")
             .description("The port for which to run the server on.")
             .defaultValue(7777)
             .build());
-
+  
     public SwarmServer server;
     public SwarmClient client;
     public PlayerEntity QUEEN = null;
@@ -108,6 +112,7 @@ public class Swarm extends ToggleModule {
     public Entity targetEntity;
     public PathFinder pathFinder = new PathFinder();
     //public final PathFinder pathFinder = new PathFinder();
+
 
     @Override
     public void onDeactivate() {
@@ -149,7 +154,7 @@ public class Swarm extends ToggleModule {
         }
     });
 
-    public void resetTarget() {
+    private void resetTarget() {
         targetEntity = null;
     }
 
@@ -160,6 +165,7 @@ public class Swarm extends ToggleModule {
             ModuleManager.INSTANCE.get(InfinityMiner.class).toggle();
         if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing())
             BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
+
         resetTarget();
     }
 
@@ -177,7 +183,6 @@ public class Swarm extends ToggleModule {
         }
         return length * 20;
     }
-
 
     public void startClient() {
         if (client == null) {
@@ -363,7 +368,6 @@ public class Swarm extends ToggleModule {
             CommandManager.dispatch(s);
         } catch (CommandSyntaxException ignored) {
         }
-    }
 
     public static String strip(String s) {
         StringBuilder sb = new StringBuilder(s);
