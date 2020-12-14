@@ -93,7 +93,8 @@
     "HeldItemRendererMixin",
     "BoatEntityMixin",
     "AbstractBlockAccessor",
-    "AbstractBlockMixin"
+    "AbstractBlockMixin",
+    "ClientPlayerInteractionManagerInvoker"
   ],
   "injectors": {
     "defaultRequire": 1
