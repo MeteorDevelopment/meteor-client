@@ -272,6 +272,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new SelfAnvil());
         addModule(new AntiAutoAnvil());
         addModule(new AutoCity());
+        addModule(new Swarm());
     }
 
     private void initPlayer() {
