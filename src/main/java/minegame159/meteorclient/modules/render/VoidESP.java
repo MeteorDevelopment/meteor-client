@@ -96,7 +96,6 @@ public class VoidESP extends ToggleModule {
                             ++blocksFromTop;
 
                     if (blocksFromTop >= holeHeight) voidHoles.add(topBlockPos);
-
                 }
             }
         }
