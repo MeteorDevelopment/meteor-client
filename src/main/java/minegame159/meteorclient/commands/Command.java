@@ -17,7 +17,6 @@ public abstract class Command {
 
     public final String name;
     public final String description;
-    public String example;
 
     public Command(String name, String description) {
         this.name = name;
