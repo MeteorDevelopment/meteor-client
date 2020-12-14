@@ -104,6 +104,7 @@ public class FakePlayer extends ToggleModule {
 
     public void spawnFakePlayer(String name, boolean copyInv, boolean glowing, float health) {
         if (isActive()) {
+            if (mc.world == null) return;
             FakePlayerEntity fakePlayer = new FakePlayerEntity(name, copyInv, glowing, health);
             if (chatInfo.get()) Chat.info(this, "Spawned a fakeplayer");
             players.put(fakePlayer, ID);
