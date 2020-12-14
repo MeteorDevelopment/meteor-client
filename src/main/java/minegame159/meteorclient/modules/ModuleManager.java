@@ -305,6 +305,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new ChestSwap());
         addModule(new NoMiningTrace());
         addModule(new EndermanLook());
+        addModule(new SpeedMine());
         addModule(new NoBreakDelay());
         addModule(new AntiCactus());
         addModule(new FakePlayer());
