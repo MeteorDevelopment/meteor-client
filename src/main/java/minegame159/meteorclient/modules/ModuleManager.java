@@ -13,9 +13,9 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.commands.CommandManager;
 import minegame159.meteorclient.events.EventStore;
-import minegame159.meteorclient.events.game.GameJoinedEvent;
-import minegame159.meteorclient.events.game.GameLeftEvent;
-import minegame159.meteorclient.events.meteor.KeyEvent;
+import minegame159.meteorclient.events.GameJoinedEvent;
+import minegame159.meteorclient.events.GameLeftEvent;
+import minegame159.meteorclient.events.KeyEvent;
 import minegame159.meteorclient.modules.combat.*;
 import minegame159.meteorclient.modules.misc.Timer;
 import minegame159.meteorclient.modules.misc.*;
@@ -273,6 +273,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new AntiAutoAnvil());
         addModule(new AutoCity());
         addModule(new Swarm());
+        addModule(new Quiver());
     }
 
     private void initPlayer() {
