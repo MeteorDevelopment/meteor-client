@@ -10,6 +10,6 @@ import minegame159.meteorclient.modules.ToggleModule;
 
 public class AntiPacketKick extends ToggleModule {
     public AntiPacketKick() {
-        super(Category.Misc, "anti-chunk-ban", "Prevents you from getting kicked by huge packets.");
+        super(Category.Misc, "anti-packet-kick", "Prevents you from getting kicked by huge packets.");
     }
 }
