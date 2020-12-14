@@ -60,7 +60,6 @@ public class Quiver extends ToggleModule {
     private ArrowType shootingArrow;
 
     private int prevSlot;
-    private int bowSlot;
 
     private int strengthSlot;
     private int speedSlot;
@@ -90,7 +89,7 @@ public class Quiver extends ToggleModule {
         strengthSlot = -1;
         speedSlot = -1;
 
-        bowSlot = findBow();
+        int bowSlot = findBow();
 
         if (bowSlot == -1) {
             Chat.warning(this, "No bow found… disabling.");
@@ -118,7 +117,7 @@ public class Quiver extends ToggleModule {
             return;
         }
 
-        if (bowSlot != -1 && arrowsToShoot > 0) shouldShoot = true;
+        shouldShoot = true;
 
         if (!foundSpeed) shotSpeed = true;
         if (!foundStrength) shotStrength = true;
@@ -227,10 +226,9 @@ public class Quiver extends ToggleModule {
 
     private int findBow() {
         int slot = -1;
+        assert mc.player != null;
 
-        if (mc.player.inventory.getMainHandStack().getItem() != Items.BOW) {
-            for (int i = 0; i < 8; i++) if (mc.player.inventory.getStack(i).getItem() == Items.BOW) slot = i;
-        } else slot = mc.player.inventory.selectedSlot;
+        for (int i = 0; i < 9; i++) if (mc.player.inventory.getStack(i).getItem() == Items.BOW) slot = i;
 
         return slot;
     }

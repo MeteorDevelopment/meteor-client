@@ -99,7 +99,8 @@ public class Rotation extends ToggleModule {
 
     @EventHandler
     private final Listener<SendPacketEvent> onSendPacket = new Listener<>(event -> {
-        if (noRotate.get() && event.packet instanceof PlayerMoveC2SPacket && (!ModuleManager.INSTANCE.get(XpBottleThrower.class).isActive() || !ModuleManager.INSTANCE.get(Quiver.class).isActive())) {
+        if (noRotate.get() && event.packet instanceof PlayerMoveC2SPacket) {
+            if (ModuleManager.INSTANCE.get(XpBottleThrower.class).isActive() || ModuleManager.INSTANCE.get(Quiver.class).isActive()) return;
             IPlayerMoveC2SPacket packet = (IPlayerMoveC2SPacket) event.packet;
             packet.setPitch(mc.player.getPitch(0));
             packet.setYaw(mc.player.getYaw(1));
