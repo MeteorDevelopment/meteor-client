@@ -10,8 +10,8 @@ import me.zero.alpine.event.EventPriority;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.entity.EntityRemovedEvent;
-import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.events.render.RenderEvent;
+import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
@@ -556,7 +556,7 @@ public class CrystalAura extends ToggleModule {
         assert mc.player != null;
         assert mc.interactionManager != null;
         assert mc.world != null;
-        if (mc.world.isAir(new BlockPos(block)))PlayerUtils.placeBlock(new BlockPos(block), supportSlot, getHand());
+        if (mc.world.isAir(new BlockPos(block)))PlayerUtils.placeBlock(new BlockPos(block), supportSlot, Hand.MAIN_HAND);
         float yaw = mc.player.yaw;
         float pitch = mc.player.pitch;
         Vec3d vec1 = block.add(0.5, 1.5, 0.5);
