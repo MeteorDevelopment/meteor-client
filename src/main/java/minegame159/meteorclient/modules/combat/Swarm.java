@@ -107,8 +107,6 @@ public class Swarm extends ToggleModule {
 
     public SwarmServer server;
     public SwarmClient client;
-    public PlayerEntity QUEEN = null;
-    public static boolean COMMANDS_REGISTERED = false;
     public Entity targetEntity;
     public PathFinder pathFinder = new PathFinder();
     //public final PathFinder pathFinder = new PathFinder();
@@ -142,12 +140,17 @@ public class Swarm extends ToggleModule {
                 try {
                     if (server == null)
                         server = new SwarmServer(serverPort.get());
-                    if (QUEEN != mc.world.getPlayerByUuid(mc.player.getUuid())) {
-                        QUEEN = mc.world.getPlayerByUuid(mc.player.getUuid());
-                    }
                 } catch (IOException e) {
                     currentMode.set(Mode.IDLE);
                     closeAllServerConnections();
+                }
+            }
+            else if(currentMode.get() == Mode.SLAVE){
+                try{
+                    if(client == null)
+                        startClient();
+                }catch (Exception ignored){
+
                 }
             }
         } catch (Exception ignored) {
@@ -205,24 +208,33 @@ public class Swarm extends ToggleModule {
             InputStream inputStream;
             DataInputStream dataInputStream;
             try {
-                socket = new Socket(ipAddress, serverPort.get());
-                inputStream = socket.getInputStream();
-                dataInputStream = new DataInputStream(inputStream);
-                Chat.info("New Socket");
-                while (!isInterrupted()) {
-                    if (socket != null) {
-                        String read;
-                        read = dataInputStream.readUTF();
-                        if (!read.equals("")) {
-                            execute(read);
-                            Chat.info("New Command: " + read);
-                        }
+                while(socket == null && !isInterrupted()) {
+                    try {
+                        socket = new Socket(ipAddress, serverPort.get());
+                        Thread.sleep(2000);
+                    }catch (Exception ignored){
+                        Chat.info("Server Not Found. Retrying in 2 seconds.");
                     }
                 }
-                dataInputStream.close();
-                inputStream.close();
+                if(socket != null) {
+                    inputStream = socket.getInputStream();
+                    dataInputStream = new DataInputStream(inputStream);
+                    Chat.info("New Socket");
+                    while (!isInterrupted()) {
+                        if (socket != null) {
+                            String read;
+                            read = dataInputStream.readUTF();
+                            if (!read.equals("")) {
+                                execute(read);
+                                Chat.info("New Command: " + read);
+                            }
+                        }
+                    }
+                    dataInputStream.close();
+                    inputStream.close();
+                }
             } catch (Exception e) {
-                Chat.error("Error in connection to server.");
+                Chat.info("Error in connection to server");
                 disconnect();
                 client = null;
             } finally {
@@ -241,7 +253,6 @@ public class Swarm extends ToggleModule {
                 try {
                     socket.close();
                 } catch (IOException e) {
-                    Chat.error("Error disconnecting client.");
                 }
             }
         }
