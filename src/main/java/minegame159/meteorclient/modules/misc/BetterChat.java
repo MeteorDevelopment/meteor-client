@@ -31,17 +31,18 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class BetterChat extends ToggleModule {
-    // Ignore
-    private final SettingGroup sgIgnore = settings.createGroup("Ignore");
+    // Annoy
+    private final SettingGroup sgAnnoy = settings.createGroup("Annoy");
 
-    private final Setting<Boolean> ignoreEnabled = sgIgnore.add(new BoolSetting.Builder()
-            .name("ignore-enabled")
-            .description("Ignores player defined by .ignore command.")
+    private final Setting<Boolean> annoyEnabled = sgAnnoy.add(new BoolSetting.Builder()
+            .name("annoy-enabled")
+            .description("Enables Annoy.")
             .defaultValue(true)
             .build()
     );
 
     // Anti Spam
+
     private final SettingGroup sgAntiSpam = settings.createGroup("Anti Spam");
 
     private final Setting<Boolean> antiSpamEnabled = sgAntiSpam.add(new BoolSetting.Builder()
@@ -67,7 +68,20 @@ public class BetterChat extends ToggleModule {
             .build()
     );
 
+
+    // Ignore
+
+    private final SettingGroup sgIgnore = settings.createGroup("Ignore");
+
+    private final Setting<Boolean> ignoreEnabled = sgIgnore.add(new BoolSetting.Builder()
+            .name("ignore-enabled")
+            .description("Ignores player defined by .ignore command.")
+            .defaultValue(true)
+            .build()
+    );
+
     // Longer Chat
+
     private final SettingGroup sgLongerChat = settings.createGroup("Longer Chat");
 
     private final Setting<Boolean> longerChatEnabled = sgLongerChat.add(new BoolSetting.Builder()
@@ -151,17 +165,6 @@ public class BetterChat extends ToggleModule {
             .build()
     );
 
-    // Annoy
-
-    private final SettingGroup sgAnnoy = settings.createGroup("Annoy");
-
-    private final Setting<Boolean> annoyEnabled = sgAnnoy.add(new BoolSetting.Builder()
-            .name("annoy-enabled")
-            .description("Enables Annoy.")
-            .defaultValue(true)
-            .build()
-    );
-
     // Friend Color
     /*private final SettingGroup sgFriendColor = settings.createGroup("Friend Color");
 
@@ -197,17 +200,26 @@ public class BetterChat extends ToggleModule {
         //return friendColorEnabled.get() && friendColorOnMsg(message);
     }
 
-    // IGNORE
+    // ANNOY
 
-    private boolean ignoreOnMsg(String message) {
-        for (String name : Ignore.ignoredPlayers) {
-            if (message.contains("<" + name + ">")) {
-                return true;
-            }
+    public boolean isAnnoy() {
+        return annoyEnabled.get();
+    }
+
+    @EventHandler
+    private final Listener<SendMessageEvent> onSendMessage = new Listener<>(event -> {
+        StringBuilder sb = new StringBuilder(event.msg.length());
+
+        boolean upperCase = true;
+        for (int cp : event.msg.codePoints().toArray()) {
+            if (upperCase) sb.appendCodePoint(Character.toUpperCase(cp));
+            else sb.appendCodePoint(Character.toLowerCase(cp));
+
+            upperCase = !upperCase;
         }
 
-        return false;
-    }
+        event.msg = sb.toString();
+    });
 
     // ANTI SPAM
 
@@ -265,6 +277,18 @@ public class BetterChat extends ToggleModule {
 
             return false;
         }
+    }
+
+    // IGNORE
+
+    private boolean ignoreOnMsg(String message) {
+        for (String name : Ignore.ignoredPlayers) {
+            if (message.contains("<" + name + ">")) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     // LONGER CHAT
@@ -352,24 +376,5 @@ public class BetterChat extends ToggleModule {
 
         return text;
     }
-
-    // Annoy
-
-    public boolean isAnnoy() { return annoyEnabled.get(); }
-
-    @EventHandler
-    private final Listener<SendMessageEvent> onSendMessage = new Listener<>(event -> {
-        StringBuilder sb = new StringBuilder(event.msg.length());
-
-        boolean upperCase = true;
-        for (int cp : event.msg.codePoints().toArray()) {
-            if (upperCase) sb.appendCodePoint(Character.toUpperCase(cp));
-            else sb.appendCodePoint(Character.toLowerCase(cp));
-
-            upperCase = !upperCase;
-        }
-
-        event.msg = sb.toString();
-    });
 }
 
