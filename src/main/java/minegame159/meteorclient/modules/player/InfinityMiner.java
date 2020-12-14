@@ -111,7 +111,6 @@ public class InfinityMiner extends ToggleModule {
         if (smartModuleToggle.get()) {
             BLOCKER = true;
             MeteorExecutor.execute(() -> { //fixes pause issue caused by too many modules being toggled
-                BaritoneAPI.getSettings().mineScanDroppedItems.value = false;
                 for (ToggleModule module : getToggleModules()) {
                     originalSettings.put(module.name, module.isActive());
                     if (!module.isActive()) module.toggle();
@@ -119,7 +118,6 @@ public class InfinityMiner extends ToggleModule {
                 BLOCKER = false;
             });
         }
-        BaritoneAPI.getSettings().mineScanDroppedItems.value = false;
         if (mc.player != null) {
             playerX = (int) mc.player.getX();
             playerY = (int) mc.player.getY();
@@ -139,6 +137,8 @@ public class InfinityMiner extends ToggleModule {
                 BLOCKER = false;
             });
         }
+        if (!BaritoneAPI.getSettings().mineScanDroppedItems.value)
+            BaritoneAPI.getSettings().mineScanDroppedItems.value = true;
         baritoneRequestStop();
         baritoneRunning = false;
         currentMode = Mode.STILL;
@@ -165,6 +165,8 @@ public class InfinityMiner extends ToggleModule {
                 requestLogout(currentMode);
             } else if (currentMode == Mode.REPAIR) {
                 int REPAIR_BUFFER = 15;
+                if (BaritoneAPI.getSettings().mineScanDroppedItems.value)
+                    BaritoneAPI.getSettings().mineScanDroppedItems.value = false;
                 if (isTool() && getCurrentDamage() >= mc.player.getMainHandStack().getMaxDamage() - REPAIR_BUFFER) {
                     if (secondaryMode != Mode.HOME) {
                         currentMode = Mode.TARGET;
@@ -175,6 +177,8 @@ public class InfinityMiner extends ToggleModule {
                     }
                 }
             } else if (currentMode == Mode.TARGET) {
+                if (!BaritoneAPI.getSettings().mineScanDroppedItems.value)
+                    BaritoneAPI.getSettings().mineScanDroppedItems.value = true;
                 if (isTool() && getCurrentDamage() <= durabilityThreshold.get() * mc.player.getMainHandStack().getMaxDamage()) {
                     currentMode = Mode.REPAIR;
                     baritoneRequestMineRepairBlock();
@@ -267,6 +271,8 @@ public class InfinityMiner extends ToggleModule {
     @EventHandler
     private final Listener<GameLeftEvent> onGameDisconnect = new Listener<>(event -> {
         baritoneRequestStop();
+        if (!BaritoneAPI.getSettings().mineScanDroppedItems.value)
+            BaritoneAPI.getSettings().mineScanDroppedItems.value = true;
         if (this.isActive()) this.toggle();
     });
 
@@ -274,6 +280,8 @@ public class InfinityMiner extends ToggleModule {
     @EventHandler
     private final Listener<GameJoinedEvent> onGameJoin = new Listener<>(event -> {
         baritoneRequestStop();
+        if (!BaritoneAPI.getSettings().mineScanDroppedItems.value)
+            BaritoneAPI.getSettings().mineScanDroppedItems.value = true;
         if (this.isActive()) this.toggle();
     });
 
