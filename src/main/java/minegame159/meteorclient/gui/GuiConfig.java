@@ -19,6 +19,7 @@ public class GuiConfig implements ISerializable<GuiConfig> {
     public double scrollSensitivity = 1;
 
     public AlignmentX moduleNameAlignment = AlignmentX.Center;
+    public double moduleNameAlignmentPadding = 7;
 
     public Color text = new Color(255, 255, 255);
     public Color windowHeaderText = new Color(255, 255, 255);
