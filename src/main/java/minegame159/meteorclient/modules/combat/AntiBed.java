@@ -40,7 +40,7 @@ public class AntiBed extends ToggleModule {
 
     private final Setting<Boolean> autoCenter = sgGeneral.add(new BoolSetting.Builder()
             .name("auto-center")
-            .description("Moves you to the center of blocks when needed.")
+            .description("Moves you to the center of blocks.")
             .defaultValue(true)
             .build()
     );
@@ -52,7 +52,7 @@ public class AntiBed extends ToggleModule {
             .build()
     );
 
-    public AntiBed(){super(Category.Combat, "anti-bed", "Stops people placing beds in blocks you are standing");}
+    public AntiBed(){super(Category.Combat, "anti-bed", "Prevents people from placing beds where you are standing.");}
 
     private int place = -1;
     private boolean closeScreen = false;

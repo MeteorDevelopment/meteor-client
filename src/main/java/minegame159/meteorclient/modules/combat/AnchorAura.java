@@ -53,7 +53,7 @@ public class AnchorAura extends ToggleModule {
 
     private final Setting<Double> breakRange = sgGeneral.add(new DoubleSetting.Builder()
             .name("break-range")
-            .description("The distance in a single direction the anchors get set off.")
+            .description("The distance in a single direction the anchors get broken.")
             .defaultValue(3)
             .min(0)
             .sliderMax(5)
@@ -62,7 +62,7 @@ public class AnchorAura extends ToggleModule {
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("place-mode")
-            .description("The way anchors are placed")
+            .description("The way anchors are placed.")
             .defaultValue(Mode.safe)
             .build()
     );
@@ -76,14 +76,14 @@ public class AnchorAura extends ToggleModule {
 
     private final Setting<Mode> breakMode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("break-mode")
-            .description("The way anchors are set off.")
+            .description("The way anchors are broken.")
             .defaultValue(Mode.safe)
             .build()
     );
 
     private final Setting<Boolean> autoSwitch = sgGeneral.add(new BoolSetting.Builder()
             .name("auto-switch")
-            .description("Switches to anchors for you.")
+            .description("Switches to anchors automatically.")
             .defaultValue(false)
             .build()
     );
@@ -97,28 +97,28 @@ public class AnchorAura extends ToggleModule {
 
     private final Setting<Double> minDamage = sgPlace.add(new DoubleSetting.Builder()
             .name("min-damage")
-            .description("The minimum damage the anchor will place")
+            .description("The minimum damage the anchor will place.")
             .defaultValue(5.5)
             .build()
     );
 
     private final Setting<Double> maxDamage = sgPlace.add(new DoubleSetting.Builder()
             .name("max-damage")
-            .description("The maximum self-damage allowed")
+            .description("The maximum self-damage allowed.")
             .defaultValue(3)
             .build()
     );
 
     private final Setting<Double> minHealth = sgPlace.add(new DoubleSetting.Builder()
             .name("min-health")
-            .description("The minimum health you have to be for it to place")
+            .description("The minimum health you have to be for it to place.")
             .defaultValue(15)
             .build()
     );
 
     private final Setting<Boolean> place = sgGeneral.add(new BoolSetting.Builder()
             .name("place")
-            .description("Allow it to place anchors")
+            .description("Enables or disables the ability to place anchors.")
             .defaultValue(true)
             .build()
     );
