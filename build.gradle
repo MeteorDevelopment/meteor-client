@@ -47,6 +47,7 @@ dependencies {
 	dependency "com.github.ZeroMemes:Alpine:1.9"
 	dependency "com.github.Vatuu:discord-rpc:1.6.2"
 	dependency "com.g00fy2:versioncompare:1.3.4"
+	dependency "org.joml:joml:1.9.25"
 }
 
 shadowJar {
@@ -177,4 +178,19 @@ jar {
 remapJar {
 	dependsOn shadowJar
 	input.set(shadowJar.archiveFile)
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            artifact ("${project.buildDir.absolutePath}/libs/${archivesBaseName}-${project.version}.jar") {
+                classifier null
+                builtBy remapJar
+            }
+
+            artifact(sourcesJar) {
+                builtBy remapSourcesJar
+            }
+        }
+    }
 }
