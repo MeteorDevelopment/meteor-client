@@ -50,21 +50,21 @@ public class InfinityMiner extends ToggleModule {
     private final SettingGroup sgAutoToggles = settings.createGroup("Auto Toggles");
     private final SettingGroup sgExtras = settings.createGroup("Extras");
 
-    private final Setting<Block> targetBlock = sgGeneral.add(new BlockSetting.Builder()
+    public final Setting<Block> targetBlock = sgGeneral.add(new BlockSetting.Builder()
             .name("target-block")
             .description("The target block to mine.")
             .defaultValue(Blocks.ANCIENT_DEBRIS)
             .build()
     );
 
-    private final Setting<Block> repairBlock = sgGeneral.add(new BlockSetting.Builder()
+    public final Setting<Block> repairBlock = sgGeneral.add(new BlockSetting.Builder()
             .name("repair-block")
             .description("The block mined to repair your pickaxe.")
             .defaultValue(Blocks.NETHER_QUARTZ_ORE)
             .build()
     );
 
-    private final Setting<Double> durabilityThreshold = sgGeneral.add(new DoubleSetting.Builder()
+    public final Setting<Double> durabilityThreshold = sgGeneral.add(new DoubleSetting.Builder()
             .name("durability-threshold")
             .description("The durability at which to start repairing as a percent of maximum durability.")
             .defaultValue(.15)
@@ -74,19 +74,19 @@ public class InfinityMiner extends ToggleModule {
             .sliderMax(.95)
             .build());
 
-    private final Setting<Boolean> smartModuleToggle = sgAutoToggles.add(new BoolSetting.Builder()
+    public final Setting<Boolean> smartModuleToggle = sgAutoToggles.add(new BoolSetting.Builder()
             .name("smart-module-toggle")
             .description("Automatically enable helpful modules.")
             .defaultValue(true)
             .build());
 
-    private final Setting<Boolean> autoWalkHome = sgExtras.add(new BoolSetting.Builder()
+    public final Setting<Boolean> autoWalkHome = sgExtras.add(new BoolSetting.Builder()
             .name("walk-home")
             .description("When your inventory is full, walk home.")
             .defaultValue(false)
             .build());
 
-    private final Setting<Boolean> autoLogOut = sgExtras.add(new BoolSetting.Builder()
+    public final Setting<Boolean> autoLogOut = sgExtras.add(new BoolSetting.Builder()
             .name("log-out")
             .description("Log out when inventory is full. Will walk home first if enabled.")
             .defaultValue(false)
@@ -111,7 +111,6 @@ public class InfinityMiner extends ToggleModule {
         if (smartModuleToggle.get()) {
             BLOCKER = true;
             MeteorExecutor.execute(() -> { //fixes pause issue caused by too many modules being toggled
-                BaritoneAPI.getSettings().mineScanDroppedItems.value = false;
                 for (ToggleModule module : getToggleModules()) {
                     originalSettings.put(module.name, module.isActive());
                     if (!module.isActive()) module.toggle();
@@ -119,7 +118,6 @@ public class InfinityMiner extends ToggleModule {
                 BLOCKER = false;
             });
         }
-        BaritoneAPI.getSettings().mineScanDroppedItems.value = false;
         if (mc.player != null) {
             playerX = (int) mc.player.getX();
             playerY = (int) mc.player.getY();
@@ -139,6 +137,8 @@ public class InfinityMiner extends ToggleModule {
                 BLOCKER = false;
             });
         }
+        if (!BaritoneAPI.getSettings().mineScanDroppedItems.value)
+            BaritoneAPI.getSettings().mineScanDroppedItems.value = true;
         baritoneRequestStop();
         baritoneRunning = false;
         currentMode = Mode.STILL;
@@ -165,6 +165,8 @@ public class InfinityMiner extends ToggleModule {
                 requestLogout(currentMode);
             } else if (currentMode == Mode.REPAIR) {
                 int REPAIR_BUFFER = 15;
+                if (BaritoneAPI.getSettings().mineScanDroppedItems.value)
+                    BaritoneAPI.getSettings().mineScanDroppedItems.value = false;
                 if (isTool() && getCurrentDamage() >= mc.player.getMainHandStack().getMaxDamage() - REPAIR_BUFFER) {
                     if (secondaryMode != Mode.HOME) {
                         currentMode = Mode.TARGET;
@@ -175,6 +177,8 @@ public class InfinityMiner extends ToggleModule {
                     }
                 }
             } else if (currentMode == Mode.TARGET) {
+                if (!BaritoneAPI.getSettings().mineScanDroppedItems.value)
+                    BaritoneAPI.getSettings().mineScanDroppedItems.value = true;
                 if (isTool() && getCurrentDamage() <= durabilityThreshold.get() * mc.player.getMainHandStack().getMaxDamage()) {
                     currentMode = Mode.REPAIR;
                     baritoneRequestMineRepairBlock();
@@ -267,6 +271,8 @@ public class InfinityMiner extends ToggleModule {
     @EventHandler
     private final Listener<GameLeftEvent> onGameDisconnect = new Listener<>(event -> {
         baritoneRequestStop();
+        if (!BaritoneAPI.getSettings().mineScanDroppedItems.value)
+            BaritoneAPI.getSettings().mineScanDroppedItems.value = true;
         if (this.isActive()) this.toggle();
     });
 
@@ -274,6 +280,8 @@ public class InfinityMiner extends ToggleModule {
     @EventHandler
     private final Listener<GameJoinedEvent> onGameJoin = new Listener<>(event -> {
         baritoneRequestStop();
+        if (!BaritoneAPI.getSettings().mineScanDroppedItems.value)
+            BaritoneAPI.getSettings().mineScanDroppedItems.value = true;
         if (this.isActive()) this.toggle();
     });
 

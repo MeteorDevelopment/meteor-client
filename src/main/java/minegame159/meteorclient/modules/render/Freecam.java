@@ -8,6 +8,8 @@ package minegame159.meteorclient.modules.render;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.*;
+import minegame159.meteorclient.events.entity.TookDamageEvent;
+import minegame159.meteorclient.events.game.GameLeftEvent;
 import minegame159.meteorclient.events.meteor.KeyEvent;
 import minegame159.meteorclient.events.world.ChunkOcclusionEvent;
 import minegame159.meteorclient.events.game.OpenScreenEvent;
@@ -16,23 +18,42 @@ import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
-import minegame159.meteorclient.settings.BoolSetting;
-import minegame159.meteorclient.settings.DoubleSetting;
-import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.KeyAction;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 
 public class Freecam extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    
+
     private final Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
             .name("speed")
             .description("Speed")
             .defaultValue(1.0)
             .min(0.0)
+            .build()
+    );
+
+    public enum AutoDisableEvent {
+        None,
+        OnDamage,
+        OnDeath
+    }
+
+    private final Setting<AutoDisableEvent> autoDisableOnDamage = sgGeneral.add(new EnumSetting.Builder<AutoDisableEvent>()
+            .name("auto-disable-on-damage")
+            .description("Disables freecam on took damage or on death.")
+            .defaultValue(AutoDisableEvent.OnDamage)
+            .build()
+    );
+
+    private final Setting<Boolean> autoDisableOnLog = sgGeneral.add(new BoolSetting.Builder()
+            .name("auto-disable-on-log")
+            .description("Disables freecam on logout.")
+            .defaultValue(true)
             .build()
     );
 
@@ -179,6 +200,23 @@ public class Freecam extends ToggleModule {
 
     @EventHandler
     private final Listener<ChunkOcclusionEvent> onChunkOcclusion = new Listener<>(Cancellable::cancel);
+
+    @EventHandler
+    private final Listener<TookDamageEvent> onTookDamage = new Listener<>(event -> {
+        if (event.entity.getUuid() == null) return;
+        if (!event.entity.getUuid().equals(mc.player.getUuid())) return;
+        if ((autoDisableOnDamage.get() == AutoDisableEvent.OnDamage) || (autoDisableOnDamage.get() == AutoDisableEvent.OnDeath && event.entity.getHealth() <= 0)) {
+            toggle();
+            Chat.info(this, "Auto toggled %s(default).", isActive() ? Formatting.GREEN + "on" : Formatting.RED + "off");
+        }
+    });
+
+    @EventHandler
+    private final Listener<GameLeftEvent> onGameLeft = new Listener<>(event -> {
+        if (!autoDisableOnLog.get()) return;
+
+        toggle();
+    });
 
     public void changeLookDirection(double deltaX, double deltaY) {
         prevYaw = yaw;

@@ -13,6 +13,7 @@ import minegame159.meteorclient.mixininterface.IPlayerMoveC2SPacket;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.combat.Quiver;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -98,7 +99,8 @@ public class Rotation extends ToggleModule {
 
     @EventHandler
     private final Listener<SendPacketEvent> onSendPacket = new Listener<>(event -> {
-        if (noRotate.get() && event.packet instanceof PlayerMoveC2SPacket && !ModuleManager.INSTANCE.get(XpBottleThrower.class).isActive()) {
+        if (noRotate.get() && event.packet instanceof PlayerMoveC2SPacket) {
+            if (ModuleManager.INSTANCE.get(XpBottleThrower.class).isActive() || ModuleManager.INSTANCE.get(Quiver.class).isActive()) return;
             IPlayerMoveC2SPacket packet = (IPlayerMoveC2SPacket) event.packet;
             packet.setPitch(mc.player.getPitch(0));
             packet.setYaw(mc.player.getYaw(1));

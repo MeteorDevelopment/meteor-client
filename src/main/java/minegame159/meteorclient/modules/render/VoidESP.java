@@ -9,6 +9,8 @@ import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.rendering.ShapeBuilder;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Color;
+import minegame159.meteorclient.utils.Dimension;
+import minegame159.meteorclient.utils.Utils;
 import net.minecraft.block.Blocks;
 import net.minecraft.util.math.BlockPos;
 
@@ -18,50 +20,42 @@ import java.util.List;
 public class VoidESP extends ToggleModule {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgColors = settings.createGroup("Colors");
+    private final SettingGroup sgRender = settings.createGroup("Colors");
 
 
     private final Setting<Integer> horizontalRadius = sgGeneral.add(new IntSetting.Builder()
             .name("horizontal-radius")
             .description("Horizontal radius in which to search for holes.")
-            .defaultValue(10)
+            .defaultValue(64)
             .min(0)
-            .sliderMax(32)
-            .build()
-    );
-
-    private final Setting<Integer> verticalRadius = sgGeneral.add(new IntSetting.Builder()
-            .name("vertical-radius")
-            .description("Vertical radius in which to search for holes.")
-            .defaultValue(32)
-            .min(0)
-            .sliderMax(255)
+            .sliderMax(256)
             .build()
     );
 
     private final Setting<Integer> holeHeight = sgGeneral.add(new IntSetting.Builder()
             .name("hole-height")
             .description("Minimum hole height required to be rendered.")
-            .defaultValue(5)
+            .defaultValue(1)  // if we already have one hole in bedrock layer, there is already something interesting
             .min(1)
+            .sliderMax(5)     // no sense to check more then 5
             .build()
     );
 
-    private final Setting<Boolean> fill = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> fill = sgRender.add(new BoolSetting.Builder()
             .name("fill")
             .description("Fill the shapes rendered.")
             .defaultValue(true)
             .build()
     );
 
-    private final Setting<Color> fillColor = sgColors.add(new ColorSetting.Builder()
+    private final Setting<Color> fillColor = sgRender.add(new ColorSetting.Builder()
             .name("fill-color")
             .description("Color to fill holes in the void.")
             .defaultValue(new Color(225, 25, 25))
             .build()
     );
 
-    private final Setting<Color> lineColor = sgColors.add(new ColorSetting.Builder()
+    private final Setting<Color> lineColor = sgRender.add(new ColorSetting.Builder()
             .name("line-color")
             .description("Color to draw lines of holes in the void.")
             .defaultValue(new Color(225, 25, 25))
@@ -70,27 +64,38 @@ public class VoidESP extends ToggleModule {
 
 
     public VoidESP() {
-        super(Category.Render, "void-esp", "Renders holes in bedrock at the bottom of the world.");
+        super(Category.Render, "void-esp", "Renders holes in bedrock layers.");
     }
 
-    public List<BlockPos> voidHoles = new ArrayList<>();
+    private List<BlockPos> voidHoles = new ArrayList<>();
 
-    public void getHoles(int range) {
+    private void getHoles(int searchRange, int holeHeight) {
         voidHoles.clear();
-        BlockPos player = mc.player.getBlockPos();
-        for (int y = -Math.min(verticalRadius.get(), player.getY()); y < Math.min(verticalRadius.get(), 255 - player.getY()); ++y) {
-            for (int x = -range; x < range; ++x) {
-                for (int z = -range; z < range; ++z) {
-                    BlockPos pos = player.add(x, y, z);
-                    if ((mc.world.getBlockState(pos).getBlock() == Blocks.AIR) && (pos.getY() == 0)) {
-                        if (holeHeight.get() > 1) {
-                            int positive = 0;
-                            for (int i = 1; i < holeHeight.get(); i++) {
-                                if (mc.world.getBlockState(pos.add(0, i, 0)).getBlock() != Blocks.BEDROCK) positive++;
-                            }
-                            if (positive == holeHeight.get() -1) voidHoles.add(pos);
-                        } else voidHoles.add(pos);
-                    }
+
+        BlockPos playerPos = mc.player.getBlockPos();
+        int playerY = playerPos.getY();
+
+        for (int x = -searchRange; x < searchRange; ++x) {
+            for (int z = -searchRange; z < searchRange; ++z) {
+                BlockPos bottomBlockPos = playerPos.add(x, -playerY, z);
+
+                int blocksFromBottom = 0;
+                for (int i = 0; i < holeHeight; ++i)
+                    if (mc.world.getBlockState(bottomBlockPos.add(0, i, 0)).getBlock() != Blocks.BEDROCK)
+                        ++blocksFromBottom;
+
+                if (blocksFromBottom >= holeHeight) voidHoles.add(bottomBlockPos);
+
+                // checking nether roof
+                if (Utils.getDimension() == Dimension.Nether) {
+                    BlockPos topBlockPos = playerPos.add(x, 127 - playerY, z);
+
+                    int blocksFromTop = 0;
+                    for (int i = 0; i < holeHeight; ++i)
+                        if (mc.world.getBlockState(bottomBlockPos.add(0, 127 - i, 0)).getBlock() != Blocks.BEDROCK)
+                            ++blocksFromTop;
+
+                    if (blocksFromTop >= holeHeight) voidHoles.add(topBlockPos);
                 }
             }
         }
@@ -98,7 +103,7 @@ public class VoidESP extends ToggleModule {
 
     @EventHandler
     private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
-        getHoles(horizontalRadius.get().intValue());
+        getHoles(horizontalRadius.get().intValue(), holeHeight.get().intValue());
     });
 
     @EventHandler
