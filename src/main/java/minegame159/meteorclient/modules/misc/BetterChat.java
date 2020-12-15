@@ -31,16 +31,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class BetterChat extends ToggleModule {
-    // Annoy
-    private final SettingGroup sgAnnoy = settings.createGroup("Annoy");
-
-    private final Setting<Boolean> annoyEnabled = sgAnnoy.add(new BoolSetting.Builder()
-            .name("annoy-enabled")
-            .description("Enables Annoy.")
-            .defaultValue(true)
-            .build()
-    );
-
     // Anti Spam
 
     private final SettingGroup sgAntiSpam = settings.createGroup("Anti Spam");
@@ -200,25 +190,11 @@ public class BetterChat extends ToggleModule {
         //return friendColorEnabled.get() && friendColorOnMsg(message);
     }
 
-    // ANNOY
-
-    public boolean isAnnoy() {
-        return annoyEnabled.get();
-    }
-
     @EventHandler
     private final Listener<SendMessageEvent> onSendMessage = new Listener<>(event -> {
-        StringBuilder sb = new StringBuilder(event.msg.length());
-
-        boolean upperCase = true;
-        for (int cp : event.msg.codePoints().toArray()) {
-            if (upperCase) sb.appendCodePoint(Character.toUpperCase(cp));
-            else sb.appendCodePoint(Character.toLowerCase(cp));
-
-            upperCase = !upperCase;
+        if (!event.msg.startsWith(Config.INSTANCE.getPrefix() + "b")) {
+            event.msg = getPrefix() + event.msg + getSuffix();
         }
-
-        event.msg = sb.toString();
     });
 
     // ANTI SPAM
