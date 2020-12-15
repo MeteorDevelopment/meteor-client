@@ -43,7 +43,7 @@ public class Auto32K extends ToggleModule {
         Dispenser
     }
 
-    public Auto32K(){super(Category.Combat, "auto32k", "Automatically 32ks other players.");}
+    public Auto32K(){super(Category.Combat, "auto32k", "Automatically attacks other players with a 32k.");}
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 

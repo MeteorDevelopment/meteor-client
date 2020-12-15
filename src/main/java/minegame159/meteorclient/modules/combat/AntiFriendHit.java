@@ -18,7 +18,7 @@ import net.minecraft.entity.player.PlayerEntity;
 
 public class AntiFriendHit extends ToggleModule {
     public AntiFriendHit() {
-        super(Category.Combat, "anti-friend-hit", "Cancels out attacks that would hit friends.");
+        super(Category.Combat, "anti-friend-hit", "Cancels attacks that would hit friends.");
     }
 
     @EventHandler

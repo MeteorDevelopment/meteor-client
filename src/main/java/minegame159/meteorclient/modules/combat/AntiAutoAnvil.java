@@ -19,13 +19,13 @@ public class AntiAutoAnvil extends ToggleModule {
 
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
             .name("rotate")
-            .description("Forces you to look up when placing obsidian above you.")
+            .description("Forces you to rotate upwards when placing obsidian above you.")
             .defaultValue(true)
             .build()
     );
 
     public AntiAutoAnvil(){
-        super(Category.Combat, "anti-auto-anvil", "Automatically prevents Auto Anvil by placing obsidian above you..");
+        super(Category.Combat, "anti-auto-anvil", "Automatically prevents Auto Anvil by placing obsidian above you.");
     }
 
     @EventHandler

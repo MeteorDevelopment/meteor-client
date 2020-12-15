@@ -118,14 +118,14 @@ public class AnchorAura extends ToggleModule {
 
     private final Setting<Boolean> place = sgGeneral.add(new BoolSetting.Builder()
             .name("place")
-            .description("Enables or disables the ability to place anchors.")
+            .description("Allows Anchor Aura to place anchors.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
             .name("delay")
-            .description("Delay ticks between placements.")
+            .description("The amount of delay in ticks for placement.")
             .defaultValue(2)
             .min(0)
             .max(10)

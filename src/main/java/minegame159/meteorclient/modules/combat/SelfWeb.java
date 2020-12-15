@@ -26,27 +26,27 @@ public class SelfWeb extends ToggleModule {
 
     private final Setting<Boolean> doubles = sgGeneral.add(new BoolSetting.Builder()
             .name("doubles")
-            .description("Places in your upper hitbox as well.")
+            .description("Places webs in your upper hitbox as well.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> turnOff = sgGeneral.add(new BoolSetting.Builder()
             .name("turn-off")
-            .description("Turns off after placing.")
+            .description("Toggles off after placing the webs.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
             .name("rotate")
-            .description("Makes you look down when placing webs.")
+            .description("Forces you to rotate downwards when placing webs.")
             .defaultValue(true)
             .build()
     );
 
     public SelfWeb() {
-        super(Category.Combat, "self-web", "Automatically places webs at your feet.");
+        super(Category.Combat, "self-web", "Automatically places webs on you.");
     }
 
     @EventHandler

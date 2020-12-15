@@ -40,14 +40,14 @@ public class AntiBed extends ToggleModule {
 
     private final Setting<Boolean> autoCenter = sgGeneral.add(new BoolSetting.Builder()
             .name("auto-center")
-            .description("Moves you to the center of blocks.")
+            .description("Teleports you to the center of blocks.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> onlyOnGround = sgGeneral.add(new BoolSetting.Builder()
             .name("only-on-ground")
-            .description("Only works you are on the ground.")
+            .description("Only works you are standing on a block.")
             .defaultValue(true)
             .build()
     );

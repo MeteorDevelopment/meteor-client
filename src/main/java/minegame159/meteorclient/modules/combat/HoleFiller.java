@@ -54,7 +54,7 @@ public class HoleFiller extends ToggleModule {
 
     private final Setting<HoleFiller.PlaceMode> mode = sgGeneral.add(new EnumSetting.Builder<HoleFiller.PlaceMode>()
             .name("block")
-            .description("What blocks to use to fill safe holes.")
+            .description("What kind of blocks you use to fill holes with.")
             .defaultValue(PlaceMode.Obsidian)
             .build()
     );
@@ -62,7 +62,7 @@ public class HoleFiller extends ToggleModule {
     private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
 
     public HoleFiller() {
-        super(Category.Combat, "hole-filler", "Fills safes holes.");
+        super(Category.Combat, "hole-filler", "Fills holes with specified blocks.");
     }
 
     @EventHandler

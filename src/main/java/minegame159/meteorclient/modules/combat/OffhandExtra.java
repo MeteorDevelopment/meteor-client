@@ -34,28 +34,28 @@ public class OffhandExtra extends ToggleModule {
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("Mode")
-            .description("Changes which item goes in your offhand")
+            .description("Changes what type of item that will go into your offhand.")
             .defaultValue(Mode.Enchanted_Golden_Apple)
             .build()
     );
 
     private final Setting<Boolean> replace = sgGeneral.add(new BoolSetting.Builder()
             .name("replace")
-            .description("Replace your offhand or wait for it to be empty")
+            .description("Replaces your offhand, or waits until your offhand is empty.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> Asimov = sgGeneral.add(new BoolSetting.Builder()
             .name("Asimov")
-            .description("Always holds the item in your offhand")
+            .description("Always holds the item specified in your offhand.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Integer> health = sgGeneral.add(new IntSetting.Builder()
             .name("health")
-            .description("The health this stops working.")
+            .description("The health at which this stops working.")
             .defaultValue(10)
             .min(0)
             .sliderMax(20)
@@ -64,7 +64,7 @@ public class OffhandExtra extends ToggleModule {
 
     private final Setting<Boolean> selfToggle = sgGeneral.add(new BoolSetting.Builder()
             .name("self-toggle")
-            .description("Toggles when you run out of the item you chose")
+            .description("Toggles when you run out of the item you choose.")
             .defaultValue(false)
             .build()
     );
@@ -77,7 +77,7 @@ public class OffhandExtra extends ToggleModule {
     );
 
     public OffhandExtra() {
-        super(Category.Combat, "offhand-extra", "Allows you to use items in your offhand. Requires AutoTotem to be on smart mode.");
+        super(Category.Combat, "offhand-extra", "Allows you to use specified items in your offhand. Requires AutoTotem to be on smart mode.");
     }
 
     private boolean isClicking = false;
