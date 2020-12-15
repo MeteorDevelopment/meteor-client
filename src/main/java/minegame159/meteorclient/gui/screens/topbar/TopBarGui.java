@@ -59,6 +59,17 @@ public class TopBarGui extends TopBarWindowScreen {
                 .build()
         );
 
+        sg.add(new DoubleSetting.Builder()
+                .name("module-name-alignment-padding")
+                .description("The padding of the module names in the Click GUI.")
+                .defaultValue(7)
+                .min(0)
+                .max(20)
+                .onChanged(aDouble -> GuiConfig.INSTANCE.moduleNameAlignmentPadding = aDouble)
+                .onModuleActivated(doubleSetting -> doubleSetting.set(GuiConfig.INSTANCE.moduleNameAlignmentPadding))
+                .build()
+        );
+
         sg.add(new ColorSetting.Builder()
                 .name("text")
                 .description("Text color.")
