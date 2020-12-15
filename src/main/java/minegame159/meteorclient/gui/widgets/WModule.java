@@ -86,8 +86,18 @@ public class WModule extends WPressable {
         }
 
         double nameX = x;
-        if (GuiConfig.INSTANCE.moduleNameAlignment == AlignmentX.Center) nameX += + width / 2 - titleWidth / 2;
-        else if (GuiConfig.INSTANCE.moduleNameAlignment == AlignmentX.Right) nameX += width - titleWidth;
+
+        switch (GuiConfig.INSTANCE.moduleNameAlignment) {
+            case Left:
+                nameX += GuiConfig.INSTANCE.moduleNameAlignmentPadding;
+                break;
+            case Center:
+                nameX += + width / 2 - titleWidth / 2;
+                break;
+            case Right:
+                nameX = (nameX + width - titleWidth) - GuiConfig.INSTANCE.moduleNameAlignmentPadding;
+                break;
+        }
 
         renderer.text(module.title, nameX, y + 4, false, GuiConfig.INSTANCE.text);
     }
