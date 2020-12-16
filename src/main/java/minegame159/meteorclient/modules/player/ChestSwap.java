@@ -32,20 +32,20 @@ public class ChestSwap extends ToggleModule {
 
     private final Setting<Chestplate> chestplate = sgGeneral.add(new EnumSetting.Builder<Chestplate>()
             .name("chestplate")
-            .description("Which chestplate to switch to.")
+            .description("Which type of chestplate to swap to.")
             .defaultValue(Chestplate.PreferNetherite)
             .build()
     );
 
     private final Setting<Boolean> stayOn = sgGeneral.add(new BoolSetting.Builder()
             .name("stay-on")
-            .description("Stays on and activates when you turn it off too.")
+            .description("Stays on and activates when you turn it off.")
             .defaultValue(false)
             .build()
     );
 
     public ChestSwap() {
-        super(Category.Player, "chest-swap", "Swaps between chestplate and elytra.");
+        super(Category.Player, "chest-swap", "Swaps between a chestplate and an elytra.");
     }
 
     @Override

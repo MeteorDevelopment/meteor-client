@@ -54,40 +54,40 @@ public class AutoTool extends ToggleModule {
 
     private final Setting<Prefer> prefer = sgGeneral.add(new EnumSetting.Builder<Prefer>()
             .name("prefer")
-            .description("Prefer silk touch, fortune or none.")
+            .description("Either to prefer Silk Touch, Fortune, or none.")
             .defaultValue(Prefer.Fortune)
             .build()
     );
 
     private final Setting<Boolean> preferMending = sgGeneral.add(new BoolSetting.Builder()
             .name("prefer-mending")
-            .description("Prefers mending.")
+            .description("Whether or not to prefer the Mending enchantment.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> enderChestOnlyWithSilkTouch = sgGeneral.add(new BoolSetting.Builder()
             .name("ender-chest-only-with-silk-touch")
-            .description("Mine ender chest only with silk touch.")
+            .description("Mines Ender Chests only with the Silk Touch enchantment.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> antiBreak = sgGeneral.add(new BoolSetting.Builder()
             .name("anti-break")
-            .description("Stops you from breaking your weapon.")
+            .description("Stops you from breaking your tool.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<materialPreference> material = sgGeneral.add(new EnumSetting.Builder<materialPreference>().name("material-preference")
-            .description("How the AntiBreak decides what to replace your tool with")
+            .description("How the Anti-Break decides what to replenish your tool with.")
             .defaultValue(materialPreference.Best)
             .build()
     );
 
     public AutoTool() {
-        super(Category.Player, "auto-tool", "Automatically switches to the most effective tool when breaking blocks.");
+        super(Category.Player, "auto-tool", "Automatically switches to the most effective tool when performing an action.");
     }
 
     private BlockState blockState = null;

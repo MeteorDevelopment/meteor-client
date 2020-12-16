@@ -30,8 +30,8 @@ public class SpeedMine extends ToggleModule {
     );
     public final Setting<Double> modifier = sgGeneral.add(new DoubleSetting.Builder()
             .name("modifier")
-            .description("Speed modifier (only normal mode!). An additional value of 0.2 is equivalent to one haste level (1.2 = haste 1).")
-            .defaultValue(1.6D)
+            .description("Mining speed modifier. An additional value of 0.2 is equivalent to one haste level (1.2 = haste 1).")
+            .defaultValue(1.4D)
             .min(0D)
             .sliderMin(1D)
             .sliderMax(10D)
@@ -39,7 +39,7 @@ public class SpeedMine extends ToggleModule {
     );
 
     public SpeedMine() {
-        super(Category.Player, "speed-mine", "Lets you break blocks faster.");
+        super(Category.Player, "speed-mine", "Allows you to quickly mine blocks.");
     }
 
     @EventHandler

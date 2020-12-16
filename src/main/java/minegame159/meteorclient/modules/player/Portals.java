@@ -10,6 +10,6 @@ import minegame159.meteorclient.modules.ToggleModule;
 
 public class Portals extends ToggleModule {
     public Portals() {
-        super(Category.Player, "portals", "Allows you to use guis while in portal.");
+        super(Category.Player, "portals", "Allows you to use GUIs normally whilst in portals.");
     }
 }

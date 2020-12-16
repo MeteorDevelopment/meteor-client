@@ -34,13 +34,13 @@ public class AutoDrop extends ToggleModule {
 
     private final Setting<Boolean> excludeHotbar = sgGeneral.add(new BoolSetting.Builder()
             .name("exclude-hotbar")
-            .description("Doesn't drop items from hotbar.")
+            .description("Whether or not to drop items from your hotbar.")
             .defaultValue(false)
             .build()
     );
 
     public AutoDrop() {
-        super(Category.Player, "auto-drop", "Automatically drops selected items.");
+        super(Category.Player, "auto-drop", "Automatically drops specified items.");
     }
 
     @EventHandler

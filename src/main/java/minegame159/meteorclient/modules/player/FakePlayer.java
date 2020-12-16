@@ -23,28 +23,28 @@ public class FakePlayer extends ToggleModule {
 
     private final Setting<String> name = sgGeneral.add(new StringSetting.Builder()
             .name("name")
-            .description("The name of the FakePlayer.")
+            .description("The name of the fake player.")
             .defaultValue("MeteorOnCrack")
             .build()
     );
 
     private final Setting<Boolean> copyInv = sgGeneral.add(new BoolSetting.Builder()
             .name("copy-inv")
-            .description("Copies your inventory to the FakePlayer.")
+            .description("Copies your exact inventory to the fake player.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> glowing = sgGeneral.add(new BoolSetting.Builder()
             .name("glowing")
-            .description("Makes the FakePlayer have the glowing effect.")
+            .description("Grants the fake player a glowing effect.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Integer> health = sgGeneral.add(new IntSetting.Builder()
             .name("health")
-            .description("The FakePlayer's default health.")
+            .description("The fake player's default health.")
             .defaultValue(20)
             .min(1)
             .sliderMax(100)
@@ -53,20 +53,20 @@ public class FakePlayer extends ToggleModule {
 
     private final Setting<Boolean> idInNametag = sgGeneral.add(new BoolSetting.Builder()
             .name("id-in-nametag")
-            .description("Renders the FakePlayer's ID in its nametag.")
+            .description("Displays the fake player's ID in its nametag.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> chatInfo = sgGeneral.add(new BoolSetting.Builder()
             .name("chat-info")
-            .description("Tells you when a player is added or removed.")
+            .description("Informs you when a fake player has been spawned or removed.")
             .defaultValue(false)
             .build()
     );
 
     public FakePlayer() {
-        super(Category.Player, "fake-player", "Spawns a clientside fake player.");
+        super(Category.Player, "fake-player", "Spawns a client-side fake player for testing usages.");
     }
 
     public static Map<FakePlayerEntity, Integer> players = new HashMap<>();
@@ -115,13 +115,13 @@ public class FakePlayer extends ToggleModule {
     public void removeFakePlayer(int id) {
         if (isActive()) {
             if (players.isEmpty()) {
-                if (chatInfo.get()) Chat.info(this, "No active fakeplayers to remove!");
+                if (chatInfo.get()) Chat.info(this, "There are no active fake players to remove!");
                 return;
             }
             for (Map.Entry<FakePlayerEntity, Integer> player : players.entrySet()) {
                 if (player.getValue() == id) {
                     player.getKey().despawn();
-                    if (chatInfo.get()) Chat.info(this, "Removed a fakeplayer with the id of (highlight)" + id);
+                    if (chatInfo.get()) Chat.info(this, "Removed fake player with ID (highlight)" + id);
                 }
             }
         }
@@ -130,20 +130,20 @@ public class FakePlayer extends ToggleModule {
     public void clearFakePlayers( boolean shouldCheckActive) {
         if (shouldCheckActive && isActive()) {
             if (players.isEmpty()) {
-                if (chatInfo.get()) Chat.info(this, "No active fakeplayers to remove!");
+                if (chatInfo.get()) Chat.info(this, "There are no active fake players to remove!");
                 return;
             } else {
                 for (Map.Entry<FakePlayerEntity, Integer> player : players.entrySet()) {
                     player.getKey().despawn();
                 }
-                if (chatInfo.get()) Chat.info(this, "Removed all fakeplayers.");
+                if (chatInfo.get()) Chat.info(this, "Removed all fake players.");
 
             }
         } else if (!shouldCheckActive) {
             for (Map.Entry<FakePlayerEntity, Integer> player : players.entrySet()) {
                 player.getKey().despawn();
             }
-            if (chatInfo.get()) Chat.info(this, "Removed all fakeplayers.");
+            if (chatInfo.get()) Chat.info(this, "Removed all fake players.");
         }
         players.clear();
     }
