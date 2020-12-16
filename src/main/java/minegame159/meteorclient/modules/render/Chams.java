@@ -27,7 +27,7 @@ public class Chams extends ToggleModule {
     );
 
     public Chams() {
-        super(Category.Render, "chams", "Renders entities through blocks.");
+        super(Category.Render, "chams", "Renders entities through walls.");
     }
 
     public boolean shouldRender(Entity entity) {

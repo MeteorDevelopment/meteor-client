@@ -11,7 +11,7 @@ import net.minecraft.client.MinecraftClient;
 
 public class FpsHud extends DoubleTextHudModule {
     public FpsHud(HUD hud) {
-        super(hud, "fps", "Displays your fps.", "Fps: ");
+        super(hud, "fps", "Displays your FPS.", "Fps: ");
     }
 
     @Override

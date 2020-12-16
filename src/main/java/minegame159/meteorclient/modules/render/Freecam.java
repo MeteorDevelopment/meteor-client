@@ -31,7 +31,7 @@ public class Freecam extends ToggleModule {
 
     private final Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
             .name("speed")
-            .description("Speed")
+            .description("Your speed")
             .defaultValue(1.0)
             .min(0.0)
             .build()
@@ -45,14 +45,14 @@ public class Freecam extends ToggleModule {
 
     private final Setting<AutoDisableEvent> autoDisableOnDamage = sgGeneral.add(new EnumSetting.Builder<AutoDisableEvent>()
             .name("auto-disable-on-damage")
-            .description("Disables freecam on took damage or on death.")
+            .description("Disables Freecam when you take damage or die.")
             .defaultValue(AutoDisableEvent.OnDamage)
             .build()
     );
 
     private final Setting<Boolean> autoDisableOnLog = sgGeneral.add(new BoolSetting.Builder()
             .name("auto-disable-on-log")
-            .description("Disables freecam on logout.")
+            .description("Disables Freecam when you disconnect from a server.")
             .defaultValue(true)
             .build()
     );
@@ -66,7 +66,7 @@ public class Freecam extends ToggleModule {
 
     private final Setting<Boolean> renderHands = sgGeneral.add(new BoolSetting.Builder()
             .name("render-hands")
-            .description("Render hands when in freecam.")
+            .description("Whether or not to render hands in Freecam.")
             .defaultValue(true)
             .build()
     );
@@ -80,7 +80,7 @@ public class Freecam extends ToggleModule {
     private boolean forward, backward, right, left, up, down;
 
     public Freecam() {
-        super(Category.Render, "freecam", "You know what it does.");
+        super(Category.Render, "freecam", "Makes you fly out of your body.");
     }
 
     @Override

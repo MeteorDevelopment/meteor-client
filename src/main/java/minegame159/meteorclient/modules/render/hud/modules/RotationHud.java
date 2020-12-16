@@ -12,7 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 
 public class RotationHud extends DoubleTextHudModule {
     public RotationHud(HUD hud) {
-        super(hud, "rotation", "Displays your rotation", "invalid ");
+        super(hud, "rotation", "Displays your rotation.", "invalid ");
     }
 
     @Override

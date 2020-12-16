@@ -34,56 +34,56 @@ public class StorageESP extends ToggleModule {
 
     private final Setting<List<BlockEntityType<?>>> storageBlocks = sgGeneral.add(new StorageBlockListSetting.Builder()
             .name("storage-blocks")
-            .description("Select storage blocks to display.")
+            .description("Select the storage blocks to display.")
             .defaultValue(Arrays.asList(StorageBlockListSetting.STORAGE_BLOCKS))
             .build()
     );
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("mode")
-            .description("Rendering mode.")
+            .description("The rendering mode.")
             .defaultValue(Mode.Both)
             .build()
     );
 
     private final Setting<Color> chest = sgGeneral.add(new ColorSetting.Builder()
             .name("chest")
-            .description("Color of chests.")
+            .description("The color of chests.")
             .defaultValue(new Color(255, 160, 0, 255))
             .build()
     );
 
     private final Setting<Color> barrel = sgGeneral.add(new ColorSetting.Builder()
             .name("barrel")
-            .description("Color of barrels.")
+            .description("The color of barrels.")
             .defaultValue(new Color(255, 160, 0, 255))
             .build()
     );
 
     private final Setting<Color> shulker = sgGeneral.add(new ColorSetting.Builder()
             .name("shulker")
-            .description("Color of shulkers.")
+            .description("The color of Shulker Boxes.")
             .defaultValue(new Color(255, 160, 0, 255))
             .build()
     );
 
     private final Setting<Color> enderChest = sgGeneral.add(new ColorSetting.Builder()
             .name("ender-chest")
-            .description("Color of ender chests.")
+            .description("The color of Ender Chests.")
             .defaultValue(new Color(120, 0, 255, 255))
             .build()
     );
 
     private final Setting<Color> other = sgGeneral.add(new ColorSetting.Builder()
             .name("other")
-            .description("Color of furnaces, dispenders, droppers and hoppers.")
+            .description("The color of furnaces, dispenders, droppers and hoppers.")
             .defaultValue(new Color(140, 140, 140, 255))
             .build()
     );
 
     private final Setting<Double> fadeDistance = sgGeneral.add(new DoubleSetting.Builder()
             .name("fade-distance")
-            .description("At which distance the color will fade out.")
+            .description("The distance at which the color will fade.")
             .defaultValue(6)
             .min(0)
             .sliderMax(12)
@@ -96,7 +96,7 @@ public class StorageESP extends ToggleModule {
     private int count;
 
     public StorageESP() {
-        super(Category.Render, "storage-esp", "Shows storage blocks.");
+        super(Category.Render, "storage-esp", "Renders all specified storage blocks.");
     }
 
     private void getTileEntityColor(BlockEntity blockEntity) {
