@@ -105,69 +105,6 @@ public class Swarm extends ToggleModule {
     //public final PathFinder pathFinder = new PathFinder();
     public BlockState targetBlock;
 
-
-    public boolean isClientNull() {
-        return client == null;
-
-    }
-
-    public void closeClient() {
-        if (!isClientNull()) {
-            client.interrupt();
-            client.disconnect();
-            client = null;
-        }
-    }
-
-    public boolean isServerNull() {
-        return client == null;
-    }
-
-    public void closeServer() {
-        if (!isClientNull()) {
-            server.interrupt();
-            server.close();
-            server = null;
-        }
-    }
-
-
-    @Override
-    public void onActivate() {
-        if (currentMode.get() == Mode.QUEEN && server == null) {
-            server = new SwarmServer();
-        } else if (currentMode.get() == Mode.SLAVE && client == null) {
-            client = new SwarmClient();
-        }
-    }
-
-    @Override
-    public void onDeactivate() {
-        closeAllServerConnections();
-        resetTarget();
-    }
-
-    public void closeClient() {
-        if (!isClientNull()) {
-            client.interrupt();
-            client.disconnect();
-            client = null;
-        }
-    }
-
-    public boolean isServerNull() {
-        return client == null;
-    }
-
-    public void closeServer() {
-        if (!isClientNull()) {
-            server.interrupt();
-            server.close();
-            server = null;
-        }
-    }
-
-
     @Override
     public void onActivate() {
         if (currentMode.get() == Mode.QUEEN && server == null) {
