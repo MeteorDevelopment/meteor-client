@@ -17,7 +17,6 @@ import minegame159.meteorclient.modules.player.Reach;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import org.objectweb.asm.Opcodes;
@@ -53,11 +52,6 @@ public abstract class ClientPlayerInteractionManagerMixin implements IClientPlay
         MeteorClient.EVENT_BUS.post(event);
 
         if (event.isCancelled()) info.cancel();
-    }
-
-    @Inject(method = "updateBlockBreakingProgress", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;getEntityId()I", ordinal = 0))
-    private void onPlayerDamageBlock(BlockPos pos, Direction direction, CallbackInfoReturnable<Boolean> cir) {
-        MeteorClient.postEvent(EventStore.blockBreakingProgressEvent(pos, direction));
     }
 
     @Inject(method = "getReachDistance", at = @At("HEAD"), cancellable = true)
