@@ -41,7 +41,7 @@ public class CommandManager {
         addCommand(new FakePlayerCommand());
         addCommand(new SwarmCloseConnections());
         addCommand(new SwarmEscape());
-        //addCommand(new SwarmFollow());
+        addCommand(new SwarmFollow());
         addCommand(new SwarmGoto());
         addCommand(new SwarmInfinityMiner());
         addCommand(new SwarmMine());
@@ -50,6 +50,7 @@ public class CommandManager {
         addCommand(new SwarmStop());
         //addCommand(new SwarmTarget());
         addCommand(new SwarmScatter());
+        addCommand(new SwarmModuleToggle());
     }
 
     public static void dispatch(String message) throws CommandSyntaxException {

@@ -2,7 +2,6 @@ package minegame159.meteorclient.modules.combat;
 
 import baritone.api.BaritoneAPI;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import jdk.nashorn.internal.ir.Block;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.commands.CommandManager;
@@ -51,6 +50,27 @@ public class Swarm extends ToggleModule {
             .name("current-mode")
             .description("The current mode to operate in.")
             .defaultValue(Mode.IDLE)
+            .onChanged(mode -> {
+                try {
+                    if (mode == Mode.QUEEN) {
+                        if (!isClientNull())
+                            closeClient();
+                        if (isServerNull()) {
+                            startServer();
+                        }
+                    } else if (mode == Mode.SLAVE) {
+                        if (!isServerNull())
+                            closeServer();
+                        if (isClientNull()) {
+                            startClient();
+                        }
+                    } else if (mode == Mode.IDLE) {
+                        resetTarget();
+                        BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
+                    }
+                } catch (Exception ignored) {
+                }
+            })
             .build());
 
     public final Setting<CurrentTask> currentTaskSetting = sgGeneral.add(new EnumSetting.Builder<CurrentTask>()
@@ -87,6 +107,40 @@ public class Swarm extends ToggleModule {
     public BlockState targetBlock;
 
 
+    public boolean isClientNull() {
+        return client == null;
+    }
+
+    public void closeClient() {
+        if (!isClientNull()) {
+            client.interrupt();
+            client.disconnect();
+            client = null;
+        }
+    }
+
+    public boolean isServerNull() {
+        return client == null;
+    }
+
+    public void closeServer() {
+        if (!isClientNull()) {
+            server.interrupt();
+            server.close();
+            server = null;
+        }
+    }
+
+
+    @Override
+    public void onActivate() {
+        if (currentMode.get() == Mode.QUEEN && server == null) {
+            server = new SwarmServer();
+        } else if (currentMode.get() == Mode.SLAVE && client == null) {
+            client = new SwarmClient();
+        }
+    }
+
     @Override
     public void onDeactivate() {
         closeAllServerConnections();
@@ -109,27 +163,7 @@ public class Swarm extends ToggleModule {
     @SuppressWarnings("unused")
     @EventHandler
     private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
-        try {
-            if (currentMode.get() == Mode.QUEEN) {
-                try {
-                    if (server == null)
-                        server = new SwarmServer(serverPort.get());
-                } catch (IOException e) {
-                    currentMode.set(Mode.IDLE);
-                    closeAllServerConnections();
-                }
-            }
-            else if(currentMode.get() == Mode.SLAVE){
-                try{
-                    if(client == null)
-                        startClient();
-                }catch (Exception ignored){
-
-                }
-            }
-            mine();
-        } catch (Exception ignored) {
-        }
+        mine();
     });
 
     public void resetTarget() {
@@ -168,8 +202,14 @@ public class Swarm extends ToggleModule {
         }
     }
 
-    public void mine(){
-        if(targetBlock != null) {
+    public void startServer() {
+        if (server == null) {
+            server = new SwarmServer();
+        }
+    }
+
+    public void mine() {
+        if (targetBlock != null) {
             if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing())
                 BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
             BaritoneAPI.getProvider().getPrimaryBaritone().getMineProcess().mine(targetBlock.getBlock());
@@ -192,17 +232,18 @@ public class Swarm extends ToggleModule {
             InputStream inputStream;
             DataInputStream dataInputStream;
             try {
-                while(socket == null && !isInterrupted()) {
+                while (socket == null && !isInterrupted()) {
                     try {
-                        socket = new Socket(ipAddress, serverPort.get());
-                    }catch (Exception ignored){
+                        if (!server.isAlive())
+                            socket = new Socket(ipAddress, serverPort.get());
+                    } catch (Exception ignored) {
                         Chat.info("Server Not Found. Retrying in 5 seconds.");
                     }
-                    if(socket == null){
+                    if (socket == null) {
                         Thread.sleep(5000);
                     }
                 }
-                if(socket != null) {
+                if (socket != null) {
                     inputStream = socket.getInputStream();
                     dataInputStream = new DataInputStream(inputStream);
                     Chat.info("New Socket");
@@ -245,14 +286,22 @@ public class Swarm extends ToggleModule {
     }
 
     public class SwarmServer extends Thread {
-        final private ServerSocket serverSocket;
+        private ServerSocket serverSocket;
         public int MAX_CLIENTS = 25;
         final private SubServer[] clientConnections = new SubServer[MAX_CLIENTS];
+        private int port = serverPort.get();
 
-        public SwarmServer(int port) throws IOException {
-            this.serverSocket = new ServerSocket(port);
-            Chat.info("Swarm Server: New Server Opened On Port " + serverPort.get());
-            start();
+        public SwarmServer() {
+            try {
+                while (serverSocket == null) {
+                    if (client == null)
+                        this.serverSocket = new ServerSocket(port);
+                }
+                Chat.info("Swarm Server: New Server Opened On Port " + serverPort.get());
+                start();
+            } catch (Exception ignored) {
+
+            }
         }
 
         @Override
@@ -308,7 +357,6 @@ public class Swarm extends ToggleModule {
                     for (SubServer clientConnection : clientConnections) {
                         if (clientConnection != null) {
                             clientConnection.messageToSend = s;
-                            Chat.info("writing command: " + s);
                         }
                     }
                 } catch (Exception ignored) {
@@ -351,7 +399,6 @@ public class Swarm extends ToggleModule {
 
         public void close() {
             try {
-                Chat.info("Closing client connection");
                 interrupt();
                 this.connection.close();
             } catch (Exception ignored) {
