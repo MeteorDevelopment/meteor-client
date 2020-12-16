@@ -5,6 +5,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.commands.CommandManager;
+import minegame159.meteorclient.events.game.GameJoinedEvent;
+import minegame159.meteorclient.events.game.GameLeftEvent;
 import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
@@ -52,21 +54,18 @@ public class Swarm extends ToggleModule {
             .defaultValue(Mode.IDLE)
             .onChanged(mode -> {
                 try {
-                    if (mode == Mode.QUEEN) {
-                        if (!isClientNull())
-                            closeClient();
-                        if (isServerNull()) {
+                    if (this.isActive()) {
+                        if (mode == Mode.QUEEN) {
+                            closeAllServerConnections();
                             startServer();
-                        }
-                    } else if (mode == Mode.SLAVE) {
-                        if (!isServerNull())
-                            closeServer();
-                        if (isClientNull()) {
+                        } else if (mode == Mode.SLAVE) {
+                            closeAllServerConnections();
                             startClient();
+                        } else if (mode == Mode.IDLE) {
+                            resetTarget();
+                            BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
                         }
-                    } else if (mode == Mode.IDLE) {
-                        resetTarget();
-                        BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
+
                     }
                 } catch (Exception ignored) {
                 }
@@ -109,6 +108,43 @@ public class Swarm extends ToggleModule {
 
     public boolean isClientNull() {
         return client == null;
+
+    }
+
+    public void closeClient() {
+        if (!isClientNull()) {
+            client.interrupt();
+            client.disconnect();
+            client = null;
+        }
+    }
+
+    public boolean isServerNull() {
+        return client == null;
+    }
+
+    public void closeServer() {
+        if (!isClientNull()) {
+            server.interrupt();
+            server.close();
+            server = null;
+        }
+    }
+
+
+    @Override
+    public void onActivate() {
+        if (currentMode.get() == Mode.QUEEN && server == null) {
+            server = new SwarmServer();
+        } else if (currentMode.get() == Mode.SLAVE && client == null) {
+            client = new SwarmClient();
+        }
+    }
+
+    @Override
+    public void onDeactivate() {
+        closeAllServerConnections();
+        resetTarget();
     }
 
     public void closeClient() {
@@ -148,17 +184,23 @@ public class Swarm extends ToggleModule {
     }
 
     public void closeAllServerConnections() {
-        if (server != null) {
-            server.interrupt();
-            server.close();
-            server = null;
-        }
-        if (client != null) {
-            client.interrupt();
-            client.disconnect();
-            client = null;
+        try {
+            if (server != null) {
+                server.interrupt();
+                server.close();
+                server.serverSocket.close();
+                server = null;
+            }
+            if (client != null) {
+                client.interrupt();
+                client.disconnect();
+                client.socket.close();
+                client = null;
+            }
+        } catch (Exception ignored) {
         }
     }
+
 
     @SuppressWarnings("unused")
     @EventHandler
@@ -234,8 +276,7 @@ public class Swarm extends ToggleModule {
             try {
                 while (socket == null && !isInterrupted()) {
                     try {
-                        if (!server.isAlive())
-                            socket = new Socket(ipAddress, serverPort.get());
+                        socket = new Socket(ipAddress, serverPort.get());
                     } catch (Exception ignored) {
                         Chat.info("Server Not Found. Retrying in 5 seconds.");
                     }
@@ -279,7 +320,7 @@ public class Swarm extends ToggleModule {
             if (socket != null) {
                 try {
                     socket.close();
-                } catch (IOException e) {
+                } catch (IOException ignored) {
                 }
             }
         }
@@ -293,10 +334,8 @@ public class Swarm extends ToggleModule {
 
         public SwarmServer() {
             try {
-                while (serverSocket == null) {
-                    if (client == null)
-                        this.serverSocket = new ServerSocket(port);
-                }
+                int port = serverPort.get();
+                this.serverSocket = new ServerSocket(port);
                 Chat.info("Swarm Server: New Server Opened On Port " + serverPort.get());
                 start();
             } catch (Exception ignored) {
@@ -413,5 +452,17 @@ public class Swarm extends ToggleModule {
         } catch (CommandSyntaxException ignored) {
         }
     }
+
+    @EventHandler
+    private final Listener<GameLeftEvent> gameLeftEventListener = new Listener<>(event -> {
+        closeAllServerConnections();
+        this.toggle();
+    });
+
+    @EventHandler
+    private final Listener<GameJoinedEvent> gameJoinedEventListener = new Listener<>(event -> {
+        closeAllServerConnections();
+        this.toggle();
+    });
 
 }
