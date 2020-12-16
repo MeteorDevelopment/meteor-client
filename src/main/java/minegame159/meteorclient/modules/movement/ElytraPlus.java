@@ -61,14 +61,14 @@ public class ElytraPlus extends ToggleModule {
 
     private final Setting<Boolean> replace = sgGeneral.add(new BoolSetting.Builder()
             .name("elytra-replace")
-            .description("Replaces your broken elytra with new ones")
+            .description("Replaces broken elytra with a new elytra.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Integer> replaceDurability = sgGeneral.add(new IntSetting.Builder()
             .name("replace-durability")
-            .description("The durability to replace your elytra at")
+            .description("The durability threshold your elytra will be replaced at.")
             .defaultValue(2)
             .min(1)
             .max(Items.ELYTRA.getMaxDamage() - 1)
@@ -86,7 +86,7 @@ public class ElytraPlus extends ToggleModule {
 
     private final Setting<Double> horizontalSpeed = sgGeneral.add(new DoubleSetting.Builder()
             .name("horizontal-speed")
-            .description("How fast will you go forward and backward.")
+            .description("How fast you go forward and backward.")
             .defaultValue(1)
             .min(0)
             .build()
@@ -94,7 +94,7 @@ public class ElytraPlus extends ToggleModule {
 
     private final Setting<Double> verticalSpeed = sgGeneral.add(new DoubleSetting.Builder()
             .name("vertical-speed")
-            .description("How fast will u go up and down.")
+            .description("How fast you go up and down.")
             .defaultValue(1)
             .min(0)
             .build()
@@ -109,7 +109,7 @@ public class ElytraPlus extends ToggleModule {
 
     private final Setting<Boolean> dontGoIntoUnloadedChunks = sgGeneral.add(new BoolSetting.Builder()
             .name("don't-go-into-unloaded-chunks")
-            .description("Don't go into unloaded chunks.")
+            .description("Stops you from going into unloaded chunks.")
             .defaultValue(true)
             .build()
     );
@@ -134,7 +134,7 @@ public class ElytraPlus extends ToggleModule {
 
     private final Setting<Double> autopilotMinimumHeight = sgAutopilot.add(new DoubleSetting.Builder()
             .name("minimum-height")
-            .description("Autopilot minimum height.")
+            .description("The minimum height for autopilot.")
             .defaultValue(160)
             .min(0)
             .sliderMax(260)
@@ -154,7 +154,7 @@ public class ElytraPlus extends ToggleModule {
     private boolean lastForwardPressed;
 
     public ElytraPlus() {
-        super(Category.Movement, "Elytra+", "Makes elytra better.");
+        super(Category.Movement, "Elytra+", "Gives you more control over your elytra.");
     }
 
     @Override

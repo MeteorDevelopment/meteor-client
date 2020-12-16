@@ -26,7 +26,7 @@ public class HighJump extends ToggleModule {
     );
 
     public HighJump() {
-        super(Category.Movement, "high-jump", "Jump higher.");
+        super(Category.Movement, "high-jump", "Makes you jump higher than normal.");
     }
 
     @EventHandler

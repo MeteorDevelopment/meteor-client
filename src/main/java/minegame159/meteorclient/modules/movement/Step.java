@@ -39,7 +39,7 @@ public class Step extends ToggleModule {
 
     private final Setting<ActiveWhen> activeWhen = sgGeneral.add(new EnumSetting.Builder<ActiveWhen>()
             .name("active-when")
-            .description("Step active when.")
+            .description("Step is active when you meet these requirements.")
             .defaultValue(ActiveWhen.Always)
             .build()
     );
@@ -64,7 +64,7 @@ public class Step extends ToggleModule {
     private boolean prevBaritoneAssumeStep;
 
     public Step() {
-        super(Category.Movement, "step", "Allows you to step up full blocks.");
+        super(Category.Movement, "step", "Allows you to walk up full blocks normally.");
     }
 
     @Override

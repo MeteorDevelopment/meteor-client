@@ -31,14 +31,14 @@ public class Flight extends ToggleModule {
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("mode")
-            .description("Mode.")
+            .description("The mode for Flight.")
             .defaultValue(Mode.Abilities)
             .build()
     );
 
     private final Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
             .name("speed")
-            .description("Speed.")
+            .description("How fast you go while flying.")
             .defaultValue(0.1)
             .min(0.0)
             .build()
@@ -49,7 +49,7 @@ public class Flight extends ToggleModule {
     }
 
     public Flight() {
-        super(Category.Movement, "flight", "FLYYYY! You will take fall damage so enable no fall.");
+        super(Category.Movement, "flight", "FLYYYY! No Fall is recommended with this module.");
     }
 
     @Override

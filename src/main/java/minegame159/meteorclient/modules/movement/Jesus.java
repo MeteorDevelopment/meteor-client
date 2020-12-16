@@ -38,14 +38,14 @@ public class Jesus extends ToggleModule {
 
     private final Setting<Boolean> walkOnWater = sgGeneral.add(new BoolSetting.Builder()
             .name("walk-on-water")
-            .description("Walk on water.")
+            .description("Lets you walk on water.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> walkOnLava = sgGeneral.add(new BoolSetting.Builder()
             .name("walk-on-lava")
-            .description("Walk on lava.")
+            .description("Lets you walk on lava.")
             .defaultValue(true)
             .build()
     );
@@ -59,7 +59,7 @@ public class Jesus extends ToggleModule {
     private boolean preBaritoneAssumeWalkOnLava;
 
     public Jesus() {
-        super(Category.Movement, "jesus", "Walk on water, be like jesus.");
+        super(Category.Movement, "jesus", "Walk on water, be like Jesus.");
     }
 
     @Override

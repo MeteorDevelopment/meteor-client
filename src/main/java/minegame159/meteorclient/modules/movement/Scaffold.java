@@ -30,21 +30,21 @@ public class Scaffold extends ToggleModule {
 
     private final Setting<Boolean> safeWalk = sg.add(new BoolSetting.Builder()
             .name("safe-walk")
-            .description("Safe walk.")
+            .description("Whether or not to toggle Safe Walk when using Scaffold.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> fastTower = sg.add(new BoolSetting.Builder()
             .name("fast-tower")
-            .description("To the sky.")
+            .description("Whether or not to tower up faster.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Integer> radius = sg.add(new IntSetting.Builder()
             .name("radius")
-            .description("Radius.")
+            .description("Radius of your scaffold.")
             .defaultValue(1)
             .min(1)
             .sliderMin(1)
@@ -54,7 +54,7 @@ public class Scaffold extends ToggleModule {
 
     private final Setting<List<Block>> blackList = sg.add(new BlockListSetting.Builder()
             .name("blacklist")
-            .description("Stops you from placing certain blocks as scaffold.")
+            .description("Blacklists certain blocks from being used to Scaffold.")
             .defaultValue(new ArrayList<>())
             .build()
     );
@@ -74,7 +74,7 @@ public class Scaffold extends ToggleModule {
     private double lastSneakingY;
 
     public Scaffold() {
-        super(Category.Movement, "scaffold", "Places blocks under you.");
+        super(Category.Movement, "scaffold", "Automatically places blocks under you.");
     }
 
     @Override

@@ -27,7 +27,7 @@ public class Spider extends ToggleModule {
     );
 
     public Spider() {
-        super(Category.Movement, "spider", "Allows you to climb walls.");
+        super(Category.Movement, "spider", "Allows you to climb walls like a spider.");
     }
 
     @EventHandler

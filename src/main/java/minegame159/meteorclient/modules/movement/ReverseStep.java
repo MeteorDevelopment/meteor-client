@@ -30,7 +30,7 @@ public class ReverseStep extends ToggleModule {
 
     private final Setting<Double> fallDistance = sgGeneral.add(new DoubleSetting.Builder()
             .name("fall-distance")
-            .description("Maximum fall distance to activate at.")
+            .description("The maximum fall distance this setting will activate at.")
             .defaultValue(3)
             .min(0)
             .sliderMax(10)
@@ -38,7 +38,7 @@ public class ReverseStep extends ToggleModule {
     );
 
     public ReverseStep() {
-        super(Category.Movement, "reverse-step", "Makes you step down blocks faster");
+        super(Category.Movement, "reverse-step", "Allows you to fall down blocks at a greater speed.");
     }
 
     @EventHandler
