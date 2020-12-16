@@ -43,7 +43,7 @@ public class BoatFly extends ToggleModule {
 
     private final Setting<Double> fallSpeed = sgGeneral.add(new DoubleSetting.Builder()
             .name("fall-speed")
-            .description("Fall speed in blocks per second.")
+            .description("How fast you fall in blocks per second.")
             .defaultValue(0.1)
             .min(0)
             .build()

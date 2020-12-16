@@ -25,7 +25,7 @@ public class Anchor extends ToggleModule {
 
     private final Setting<Integer> maxHeight = sgGeneral.add(new IntSetting.Builder()
             .name("max-height")
-            .description("Max height.")
+            .description("The maximum height Anchor will work at.")
             .defaultValue(10)
             .min(0)
             .max(255)
@@ -52,7 +52,7 @@ public class Anchor extends ToggleModule {
     public double deltaX, deltaZ;
 
     public Anchor() {
-        super(Category.Movement, "anchor", "Helps you get into holes.");
+        super(Category.Movement, "anchor", "Helps you get into holes by stopping your movement completely over a hole.");
     }
 
     @Override

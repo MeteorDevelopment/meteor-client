@@ -35,7 +35,7 @@ public class Speed extends ToggleModule {
 
     private final Setting<Boolean> onlyOnGround = sgGeneral.add(new BoolSetting.Builder()
             .name("only-on-ground")
-            .description("Use speed only when on ground.")
+            .description("Use speed only when standing on a block.")
             .defaultValue(false)
             .build()
     );
@@ -56,7 +56,7 @@ public class Speed extends ToggleModule {
 
     private final Setting<Boolean> applySpeedPotions = sgGeneral.add(new BoolSetting.Builder()
             .name("apply-speed-potions")
-            .description("Apply speed potion effect.")
+            .description("Apply the speed effect via potions.")
             .defaultValue(true)
             .build()
     );
