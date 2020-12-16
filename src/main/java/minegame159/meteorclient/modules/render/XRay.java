@@ -42,7 +42,7 @@ public class XRay extends ToggleModule {
     private boolean fullBrightWasActive = false;
 
     public XRay() {
-        super(Category.Render, "xray", "See only specified blocks.");
+        super(Category.Render, "xray", "Only renders specified blocks. Good for mining.");
     }
 
     @Override

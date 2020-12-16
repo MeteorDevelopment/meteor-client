@@ -19,7 +19,7 @@ public class CustomFOV extends ToggleModule {
 
     private final Setting<Integer> fov = sgGeneral.add(new IntSetting.Builder()
             .name("fov")
-            .description("Custom FOV.")
+            .description("Your custom FOV.")
             .defaultValue(100)
             .sliderMin(1)
             .sliderMax(179)
@@ -52,7 +52,7 @@ public class CustomFOV extends ToggleModule {
     }
 
     public CustomFOV() {
-        super(Category.Render, "custom-fov", "Changes your fov.");
+        super(Category.Render, "custom-fov", "Makes your FOV more customizable.");
     }
 
 }

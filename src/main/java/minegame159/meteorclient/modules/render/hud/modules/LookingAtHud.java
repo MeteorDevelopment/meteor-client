@@ -13,7 +13,7 @@ import net.minecraft.util.hit.HitResult;
 
 public class LookingAtHud extends DoubleTextHudModule {
     public LookingAtHud(HUD hud) {
-        super(hud, "looking-at", "Displays what entity/block you are looking at.", "Looking At: ");
+        super(hud, "looking-at", "Displays what entity or block you are looking at.", "Looking At: ");
     }
 
     @Override

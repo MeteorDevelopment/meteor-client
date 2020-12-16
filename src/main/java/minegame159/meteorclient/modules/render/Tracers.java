@@ -56,7 +56,7 @@ public class Tracers extends ToggleModule {
 
     private final Setting<Boolean> storage = sgGeneral.add(new BoolSetting.Builder()
             .name("storage")
-            .description("Display storage blocks.")
+            .description("Displays storage blocks.")
             .defaultValue(false)
             .build()
     );
@@ -72,7 +72,7 @@ public class Tracers extends ToggleModule {
 
     private final Setting<Mode> mode = sgAppearance.add(new EnumSetting.Builder<Mode>()
             .name("mode")
-            .description("Rendering mode.")
+            .description("The rendering mode.")
             .defaultValue(Mode.Simple)
             .build()
     );
@@ -81,49 +81,49 @@ public class Tracers extends ToggleModule {
 
     private final Setting<Color> playersColor = sgColors.add(new ColorSetting.Builder()
             .name("players-colors")
-            .description("Players color.")
+            .description("The player's color.")
             .defaultValue(new Color(205, 205, 205, 127))
             .build()
     );
 
     private final Setting<Color> animalsColor = sgColors.add(new ColorSetting.Builder()
             .name("animals-color")
-            .description("Animals color.")
+            .description("The animal's color.")
             .defaultValue(new Color(145, 255, 145, 127))
             .build()
     );
 
     private final Setting<Color> waterAnimalsColor = sgColors.add(new ColorSetting.Builder()
             .name("water-animals-color")
-            .description("Water animals color.")
+            .description("The water animal's color.")
             .defaultValue(new Color(145, 145, 255, 127))
             .build()
     );
 
     private final Setting<Color> monstersColor = sgColors.add(new ColorSetting.Builder()
             .name("monsters-color")
-            .description("Monsters color.")
+            .description("The monster's color.")
             .defaultValue(new Color(255, 145, 145, 127))
             .build()
     );
 
     private final Setting<Color> ambientColor = sgColors.add(new ColorSetting.Builder()
             .name("ambient-color")
-            .description("Ambient color.")
+            .description("The ambient color.")
             .defaultValue(new Color(75, 75, 75, 127))
             .build()
     );
 
     private final Setting<Color> miscColor = sgColors.add(new ColorSetting.Builder()
             .name("misc-color")
-            .description("Misc color.")
+            .description("The misc color.")
             .defaultValue(new Color(145, 145, 145, 127))
             .build()
     );
 
     private final Setting<Color> storageColor = sgColors.add(new ColorSetting.Builder()
             .name("storage-color")
-            .description("Storage color.")
+            .description("The storage color.")
             .defaultValue(new Color(255, 160, 0, 127))
             .build()
     );
@@ -132,7 +132,7 @@ public class Tracers extends ToggleModule {
     private int count;
 
     public Tracers() {
-        super(Category.Render, "tracers", "Displays lines to entities.");
+        super(Category.Render, "tracers", "Displays tracer lines to specified entities.");
     }
 
     private void render(Entity entity, Color color, RenderEvent event) {

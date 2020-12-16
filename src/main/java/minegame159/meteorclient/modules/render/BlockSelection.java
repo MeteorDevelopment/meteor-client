@@ -25,21 +25,21 @@ public class BlockSelection extends ToggleModule {
 
     private final Setting<Boolean> advanced = sgGeneral.add(new BoolSetting.Builder()
             .name("advanced")
-            .description("Shows more advanced outline.")
+            .description("Shows a more advanced outline.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Color> fillColor = sgGeneral.add(new ColorSetting.Builder()
             .name("fill-color")
-            .description("Fill color.")
+            .description("The fill color.")
             .defaultValue(new Color(255, 255, 255, 0))
             .build()
     );
 
     private final Setting<Color> outlineColor = sgGeneral.add(new ColorSetting.Builder()
             .name("outline-color")
-            .description("Outline color.")
+            .description("The outline color.")
             .defaultValue(new Color(255, 255, 255, 255))
             .build()
     );

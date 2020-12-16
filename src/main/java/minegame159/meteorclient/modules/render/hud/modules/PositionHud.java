@@ -20,7 +20,7 @@ public class PositionHud extends HudModule {
     private String right2;
 
     public PositionHud(HUD hud) {
-        super(hud, "coords", "Displays your position.");
+        super(hud, "coords", "Displays your coordinates in the world.");
     }
 
     @Override
