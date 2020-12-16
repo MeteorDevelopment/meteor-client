@@ -5,7 +5,7 @@
 
 package minegame159.meteorclient.modules.combat;
 
-/**
+/*
  * Updated by squidoodly 14/07/2020
  * Updated by Sigha 16/10/2020 (ty seasnail & MineGame159 for help)
 */
@@ -63,7 +63,7 @@ public class KillAura extends ToggleModule {
     // General
     private final Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()
             .name("range")
-            .description("Attack range.")
+            .description("The maximum range the entity can be to attack it.")
             .defaultValue(5.5)
             .min(0.0)
             .build()
@@ -79,28 +79,28 @@ public class KillAura extends ToggleModule {
 
     private final Setting<Boolean> onlyOnGround = sgGeneral.add(new BoolSetting.Builder()
             .name("only-on-ground")
-            .description("Only attacks players that are on the ground (useful to bypass anti-cheats)")
+            .description("Only attacks players that are on the ground. This is useful to bypass anticheats.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> nametagged = sgGeneral.add(new BoolSetting.Builder()
             .name("nametagged")
-            .description("Hit nametagged mobs.")
+            .description("Whether or not to attack mobs with a name tag.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> babies = sgGeneral.add(new BoolSetting.Builder()
             .name("babies")
-            .description("Hit baby animals.")
+            .description("Whether or not to attack baby variants of the entity.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Integer> hitChance = sgGeneral.add(new IntSetting.Builder()
             .name("hit-chance")
-            .description("The probability of your hits counting")
+            .description("The probability of your hits landing.")
             .defaultValue(100)
             .min(0)
             .max(100)
@@ -110,14 +110,14 @@ public class KillAura extends ToggleModule {
 
     private final Setting<Boolean> friends = sgGeneral.add(new BoolSetting.Builder()
             .name("friends")
-            .description("Attack friends, useful only if attack players is on.")
+            .description("Whether or not to attack friends. Useful if you select players to attack.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> ignoreWalls = sgGeneral.add(new BoolSetting.Builder()
             .name("ignore-walls")
-            .description("Attack through walls.")
+            .description("Whether or not to ignore walls when attacking.")
             .defaultValue(true)
             .build()
     );
@@ -131,28 +131,28 @@ public class KillAura extends ToggleModule {
 
     private final Setting<Priority> priority = sgGeneral.add(new EnumSetting.Builder<Priority>()
             .name("priority")
-            .description("What entities to target.")
+            .description("What type of entities to target.")
             .defaultValue(Priority.LowestHealth)
             .build()
     );
 
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
             .name("rotate")
-            .description("Rotates you towards the target.")
+            .description("Automatically rotates you towards the target when attacking.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> instaKill = sgGeneral.add(new BoolSetting.Builder()
             .name("insta-kill")
-            .description("If your sharpness is enough to kill then just swing")
+            .description("If you can instantly kill them, then attack.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> pauseOnCombat = sgGeneral.add(new BoolSetting.Builder()
             .name("pause-on-combat")
-            .description("Pauses baritone when you get near a target")
+            .description("Freezes Baritone temporarily until you are finished attacking the entity.")
             .defaultValue(false)
             .build()
     );
@@ -165,8 +165,8 @@ public class KillAura extends ToggleModule {
     );
 
     private final Setting<OnlyWhen> itemOnly = sgGeneral.add(new EnumSetting.Builder<OnlyWhen>()
-            .name("Item-only")
-            .description("Only hits an entity when the specified item is in your hand. (or any item)")
+            .name("item-only")
+            .description("Only attacks an entity when a specified item is in your hand.")
             .defaultValue(OnlyWhen.Any)
             .build()
     );
@@ -181,7 +181,7 @@ public class KillAura extends ToggleModule {
 
     private final Setting<Integer> hitDelay = sgDelay.add(new IntSetting.Builder()
             .name("hit-delay")
-                .description("Hit delay in ticks. 20 ticks = 1 second.")
+                .description("How fast you hit the entity in ticks. 20 ticks are equal to a second.")
                 .defaultValue(0)
                 .min(0)
                 .sliderMax(60)

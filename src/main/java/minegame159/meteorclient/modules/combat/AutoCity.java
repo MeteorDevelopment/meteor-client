@@ -16,7 +16,7 @@ import net.minecraft.util.math.MathHelper;
 public class AutoCity extends ToggleModule {
 
     public AutoCity() {
-        super(Category.Combat, "auto-city", "Automatically mines a targets closest valid city block.");
+        super(Category.Combat, "auto-city", "Automatically cities a target by mining the nearest obsidian next to them.");
     }
 
     @Override

@@ -65,6 +65,7 @@ public class Swarm extends ToggleModule {
                             resetTarget();
                             BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
                         }
+
                     }
                 } catch (Exception ignored) {
                 }
@@ -107,6 +108,43 @@ public class Swarm extends ToggleModule {
 
     public boolean isClientNull() {
         return client == null;
+
+    }
+
+    public void closeClient() {
+        if (!isClientNull()) {
+            client.interrupt();
+            client.disconnect();
+            client = null;
+        }
+    }
+
+    public boolean isServerNull() {
+        return client == null;
+    }
+
+    public void closeServer() {
+        if (!isClientNull()) {
+            server.interrupt();
+            server.close();
+            server = null;
+        }
+    }
+
+
+    @Override
+    public void onActivate() {
+        if (currentMode.get() == Mode.QUEEN && server == null) {
+            server = new SwarmServer();
+        } else if (currentMode.get() == Mode.SLAVE && client == null) {
+            client = new SwarmClient();
+        }
+    }
+
+    @Override
+    public void onDeactivate() {
+        closeAllServerConnections();
+        resetTarget();
     }
 
     public void closeClient() {
@@ -162,6 +200,7 @@ public class Swarm extends ToggleModule {
         } catch (Exception ignored) {
         }
     }
+
 
     @SuppressWarnings("unused")
     @EventHandler
@@ -291,6 +330,7 @@ public class Swarm extends ToggleModule {
         private ServerSocket serverSocket;
         public int MAX_CLIENTS = 25;
         final private SubServer[] clientConnections = new SubServer[MAX_CLIENTS];
+        private int port = serverPort.get();
 
         public SwarmServer() {
             try {
