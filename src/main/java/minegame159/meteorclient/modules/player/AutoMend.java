@@ -33,27 +33,27 @@ public class AutoMend extends ToggleModule {
     
     private final Setting<Boolean> swords = sgGeneral.add(new BoolSetting.Builder()
             .name("swords")
-            .description("Move swords.")
+            .description("Moves swords.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> armourSlots = sgGeneral.add(new BoolSetting.Builder()
             .name("use-armour-slots")
-            .description("Whether to use armour slots to mend items faster")
+            .description("Whether or not to use armor slots to mend items quicker.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> removeFinished = sgGeneral.add(new BoolSetting.Builder()
             .name("remove-finished")
-            .description("If there are no items to replace but space in your inventory, the items will be moved out of active slots")
+            .description("The items will be moved out of active slots if there are no items to replace, but space in your inventory.")
             .defaultValue(true)
             .build()
     );
 
     public AutoMend() {
-        super(Category.Player, "auto-mend", "Automatically replaces equipped items and items in offhand with mending when fully repaired.");
+        super(Category.Player, "auto-mend", "Automatically replaces equipped items and items in your offhand with Mending when fully repaired.");
     }
 
     private void replaceItem(boolean offhandEmpty) {

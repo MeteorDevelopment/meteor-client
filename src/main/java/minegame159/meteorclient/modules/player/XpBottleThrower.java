@@ -23,13 +23,13 @@ public class XpBottleThrower extends ToggleModule {
 
     private final Setting<Boolean> lookDown = sgGeneral.add(new BoolSetting.Builder()
             .name("look-down")
-            .description("Makes you look down when throwing bottles")
+            .description("Forces you to rotate downwards when throwing bottles.")
             .defaultValue(true)
             .build()
     );
 
     public XpBottleThrower() {
-        super(Category.Player, "xp-bottle-thrower", "Automatically throws xp bottles in your hotbar.");
+        super(Category.Player, "xp-bottle-thrower", "Automatically throws XP bottles in your hotbar.");
     }
 
     @EventHandler

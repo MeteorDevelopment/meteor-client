@@ -17,16 +17,16 @@ public class NameProtect extends ToggleModule {
 
     private final Setting<String> name = sgGeneral.add(new StringSetting.Builder()
             .name("name")
-            .description("Name to replace with")
-            .defaultValue("seasnail")
+            .description("Name to be replaced with.")
+            .defaultValue("squidoodly")
             .build()
     );
 
     public NameProtect() {
-        super(Category.Player, "name-protect", "Hides your name clientside.");
+        super(Category.Player, "name-protect", "Hides your name client-side.");
     }
 
-    private String username = "if you see this something is wrong";
+    private String username = "If you see this, something is wrong.";
 
     @Override
     public void onActivate() {

@@ -24,7 +24,7 @@ import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
 import net.minecraft.util.Hand;
 
 public class AutoMount extends ToggleModule {
-    public AutoMount(){super(Category.Player, "auto-mount", "Mounts entities for you.");}
+    public AutoMount(){super(Category.Player, "auto-mount", "Automatically mounts entities.");}
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
@@ -39,7 +39,7 @@ public class AutoMount extends ToggleModule {
 
     private final Setting<Boolean> checkSaddle = sgGeneral.add(new BoolSetting.Builder()
             .name("check-saddle")
-            .description("Check if the entity has a saddle before mounting")
+            .description("Checks if the entity contains a saddle before mounting.")
             .defaultValue(false)
             .build()
     );

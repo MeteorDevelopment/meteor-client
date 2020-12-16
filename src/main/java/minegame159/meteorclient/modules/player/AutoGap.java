@@ -32,33 +32,33 @@ public class AutoGap extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     public AutoGap(){
-        super(Category.Player, "auto-gap", "Automatically eats gapples and egaps if their effects run out.");
+        super(Category.Player, "auto-gap", "Automatically eats Gaps or E-Gaps if its effects wear out.");
     }
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("mode")
-            .description("Determines when you eat the gapple.")
+            .description("Determines when you eat the Gap.")
             .defaultValue(Mode.Regeneration)
             .build()
     );
 
     private final Setting<Boolean> preferEgap = sgGeneral.add(new BoolSetting.Builder()
             .name("prefer-egap")
-            .description("Prefers to eat egapps over regular gapples")
+            .description("Prefers to eat E-Gaps over Gaps.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> preferAutoEat = sgGeneral.add(new BoolSetting.Builder()
             .name("prefer-auto-eat")
-            .description("Whether to use auto-eat or this in the event of a conflict")
+            .description("Whether or not to prefer Auto Eat or Auto Gap in case of a conflict.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> disableAuras = sgGeneral.add(new BoolSetting.Builder()
             .name("disable-auras")
-            .description("disable all auras")
+            .description("Disable all auras when using this module.")
             .defaultValue(false)
             .build()
     );

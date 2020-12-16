@@ -19,7 +19,7 @@ public class MountBypass extends ToggleModule {
     private boolean dontCancel;
 
     public MountBypass() {
-        super(Category.Player, "mount-bypass", "Allows you to bypass illegal stacks and put chests on donkeys.");
+        super(Category.Player, "mount-bypass", "Allows you to bypass the IllegalStacks plugin and put chests on entities.");
     }
 
     @EventHandler

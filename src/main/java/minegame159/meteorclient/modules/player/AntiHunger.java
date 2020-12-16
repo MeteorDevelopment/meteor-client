@@ -23,14 +23,14 @@ public class AntiHunger extends ToggleModule {
 
     private final Setting<Boolean> sprint = sgGeneral.add(new BoolSetting.Builder()
             .name("sprint")
-            .description("Spoof's sprinting packets.")
+            .description("Spoofs sprinting packets.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> onGround = sgGeneral.add(new BoolSetting.Builder()
             .name("on-ground")
-            .description("Spoof's onGround flag.")
+            .description("Spoofs the onGround flag.")
             .defaultValue(true)
             .build()
     );
@@ -40,7 +40,7 @@ public class AntiHunger extends ToggleModule {
     private boolean ignorePacket;
 
     public AntiHunger() {
-        super(Category.Player, "anti-hunger", "Reduces hunger consumption.");
+        super(Category.Player, "anti-hunger", "Reduces (does NOT remove) hunger consumption.");
     }
 
     @Override

@@ -76,25 +76,25 @@ public class InfinityMiner extends ToggleModule {
 
     public final Setting<Boolean> smartModuleToggle = sgAutoToggles.add(new BoolSetting.Builder()
             .name("smart-module-toggle")
-            .description("Automatically enable helpful modules.")
+            .description("Will automatically enable helpful modules.")
             .defaultValue(true)
             .build());
 
     public final Setting<Boolean> autoWalkHome = sgExtras.add(new BoolSetting.Builder()
             .name("walk-home")
-            .description("When your inventory is full, walk home.")
+            .description("Will walk 'home' when your inventory is full.")
             .defaultValue(false)
             .build());
 
     public final Setting<Boolean> autoLogOut = sgExtras.add(new BoolSetting.Builder()
             .name("log-out")
-            .description("Log out when inventory is full. Will walk home first if enabled.")
+            .description("Logs out when your inventory is full. Will walk home FIRST if walk home is enabled.")
             .defaultValue(false)
             .build());
 
 
     public InfinityMiner() {
-        super(Category.Player, "infinity-miner", "Mine forever");
+        super(Category.Player, "infinity-miner", "Mine forever.");
     }
 
     private Mode currentMode = Mode.STILL;
