@@ -27,7 +27,7 @@ public class FastLadder extends ToggleModule {
     );
 
     public FastLadder() {
-        super(Category.Movement, "fast-ladder", "Climb ladders faster.");
+        super(Category.Movement, "fast-ladder", "Makes you climb ladders faster.");
     }
 
     @EventHandler
