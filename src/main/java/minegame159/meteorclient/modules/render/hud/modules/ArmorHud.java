@@ -21,7 +21,7 @@ public class ArmorHud extends HudModule {
     }
 
     public ArmorHud(HUD hud) {
-        super(hud, "armor", "Displays your armor.");
+        super(hud, "armor", "Displays information about your armor.");
     }
 
     @Override

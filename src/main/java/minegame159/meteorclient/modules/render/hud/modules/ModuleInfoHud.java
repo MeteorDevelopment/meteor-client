@@ -17,7 +17,7 @@ public class ModuleInfoHud extends HudModule {
     private boolean update = true;
 
     public ModuleInfoHud(HUD hud) {
-        super(hud, "module-info", "Displays if selected modules are active.");
+        super(hud, "module-info", "Displays if selected modules are enabled or disabled.");
 
         MeteorClient.EVENT_BUS.subscribe(new Listener<ActiveModulesChangedEvent>(event -> update = true));
     }

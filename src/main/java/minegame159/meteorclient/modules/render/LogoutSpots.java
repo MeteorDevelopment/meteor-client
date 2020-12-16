@@ -48,7 +48,7 @@ public class LogoutSpots extends ToggleModule {
 
     private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
             .name("scale")
-            .description("Scale.")
+            .description("The scale.")
             .defaultValue(1)
             .min(0)
             .build()
@@ -56,7 +56,7 @@ public class LogoutSpots extends ToggleModule {
 
     private final Setting<Color> lineColor = sgGeneral.add(new ColorSetting.Builder()
             .name("color")
-            .description("Color.")
+            .description("The color.")
             .defaultValue(new Color(255, 0, 255))
             .onChanged(color1 -> {
                 sideColor.set(color1);
@@ -75,7 +75,7 @@ public class LogoutSpots extends ToggleModule {
     private Dimension lastDimension;
 
     public LogoutSpots() {
-        super(Category.Render, "logout-spots", "Displays players logout position.");
+        super(Category.Render, "logout-spots", "Displays a box where another player has logged out at.");
         lineColor.changed();
     }
 

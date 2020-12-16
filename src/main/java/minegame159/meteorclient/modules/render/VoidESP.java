@@ -34,37 +34,37 @@ public class VoidESP extends ToggleModule {
 
     private final Setting<Integer> holeHeight = sgGeneral.add(new IntSetting.Builder()
             .name("hole-height")
-            .description("Minimum hole height required to be rendered.")
-            .defaultValue(1)  // if we already have one hole in bedrock layer, there is already something interesting
+            .description("The minimum hole height to be rendered.")
+            .defaultValue(1)  // If we already have one hole in the bedrock layer, there is already something interesting.
             .min(1)
-            .sliderMax(5)     // no sense to check more then 5
+            .sliderMax(5)     // There is no sense to check more than 5.
             .build()
     );
 
     private final Setting<Boolean> fill = sgRender.add(new BoolSetting.Builder()
             .name("fill")
-            .description("Fill the shapes rendered.")
+            .description("Fills the shapes rendered.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Color> fillColor = sgRender.add(new ColorSetting.Builder()
             .name("fill-color")
-            .description("Color to fill holes in the void.")
+            .description("The color that fills holes in the void.")
             .defaultValue(new Color(225, 25, 25))
             .build()
     );
 
     private final Setting<Color> lineColor = sgRender.add(new ColorSetting.Builder()
             .name("line-color")
-            .description("Color to draw lines of holes in the void.")
+            .description("The color to draw lines of holes to the void.")
             .defaultValue(new Color(225, 25, 25))
             .build()
     );
 
 
     public VoidESP() {
-        super(Category.Render, "void-esp", "Renders holes in bedrock layers.");
+        super(Category.Render, "void-esp", "Renders holes in bedrock layers that lead to the void.");
     }
 
     private List<BlockPos> voidHoles = new ArrayList<>();

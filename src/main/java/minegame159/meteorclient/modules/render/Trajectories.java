@@ -33,7 +33,7 @@ public class Trajectories extends ToggleModule {
     
     private final Setting<Color> color = sgGeneral.add(new ColorSetting.Builder()
             .name("color")
-            .description("Color.")
+            .description("The color.")
             .defaultValue(new Color(255, 150, 0))
             .build()
     );
@@ -46,7 +46,7 @@ public class Trajectories extends ToggleModule {
     private final Color hitQuadColor = new Color();
 
     public Trajectories() {
-        super(Category.Render, "trajectories", "Displays trajectory of held items.");
+        super(Category.Render, "trajectories", "Predicts the trajectory of throwable items.");
     }
 
     @EventHandler

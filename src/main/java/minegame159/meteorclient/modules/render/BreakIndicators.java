@@ -25,7 +25,7 @@ public class BreakIndicators extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     public final Setting<Boolean> multiple = sgGeneral.add(new BoolSetting.Builder()
             .name("multiple")
-            .description("Renders block breaking from other players too.")
+            .description("Renders block breaking from other players as well.")
             .defaultValue(true)
             .build()
     );
@@ -46,13 +46,13 @@ public class BreakIndicators extends ToggleModule {
     private final SettingGroup sgColors = settings.createGroup("Colors");
     private final Setting<Color> gradientColor1 = sgColors.add(new ColorSetting.Builder()
             .name("gradient-color-1")
-            .description("Color for non-broken block.")
+            .description("The color for the non-broken block.")
             .defaultValue(new Color(25, 252, 25, 100))
             .build()
     );
     private final Setting<Color> gradientColor2 = sgColors.add(new ColorSetting.Builder()
             .name("gradient-color-2")
-            .description("Color for fully-broken block.")
+            .description("The color for the fully-broken block.")
             .defaultValue(new Color(255, 25, 25, 100))
             .build()
     );

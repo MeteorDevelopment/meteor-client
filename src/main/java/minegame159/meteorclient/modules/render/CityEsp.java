@@ -24,7 +24,7 @@ public class CityEsp extends ToggleModule {
 
     private final Setting<Integer> range = sgGeneral.add(new IntSetting.Builder()
             .name("range")
-            .description("How far away the city block will render.")
+            .description("The maximum range a city-able block will render.")
             .defaultValue(5)
             .min(0)
             .sliderMax(20)
@@ -33,20 +33,20 @@ public class CityEsp extends ToggleModule {
 
     private final Setting<Color> fillColor = sgGeneral.add(new ColorSetting.Builder()
             .name("fill-color")
-            .description("Color that the city block renders.")
+            .description("The fill color the city block will render as.")
             .defaultValue(new Color(225, 0, 0, 75))
             .build()
     );
 
     private final Setting<Color> outlineColor = sgGeneral.add(new ColorSetting.Builder()
             .name("outline-color")
-            .description("Outline color that the city block renders.")
+            .description("The outline color the city block will render as.")
             .defaultValue(new Color(225, 0, 0, 255))
             .build()
     );
 
     public CityEsp() {
-        super(Category.Combat, "city-esp", "Displays blocks which can be broken in order to city someone.");
+        super(Category.Combat, "city-esp", "Displays blocks that can be broken in order to city another player.");
     }
 
     @EventHandler

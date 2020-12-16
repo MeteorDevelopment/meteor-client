@@ -7,7 +7,7 @@ import net.minecraft.block.Block;
 
 public class InfiniteMineHud extends DoubleTextHudModule {
     public InfiniteMineHud(HUD hud) {
-        super(hud, "infmine", "Details Regarding Infinity Mine", "Infinity Mine: ");
+        super(hud, "infmine", "Displays details regarding Infinity Mine.", "Infinity Mine: ");
     }
 
     @Override
