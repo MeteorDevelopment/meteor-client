@@ -35,7 +35,7 @@ public class SmartSurround extends ToggleModule {
 
     private final Setting<Boolean> onlyObsidian = sgGeneral.add(new BoolSetting.Builder()
             .name("only-obsidian")
-            .description("Only uses Obsidian")
+            .description("Only whitelists obsidian to be used.")
             .defaultValue(false)
             .build()
     );

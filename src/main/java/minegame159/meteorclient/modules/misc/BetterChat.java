@@ -31,17 +31,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class BetterChat extends ToggleModule {
-    // Ignore
-    private final SettingGroup sgIgnore = settings.createGroup("Ignore");
-
-    private final Setting<Boolean> ignoreEnabled = sgIgnore.add(new BoolSetting.Builder()
-            .name("ignore-enabled")
-            .description("Ignores player defined by .ignore command.")
-            .defaultValue(true)
-            .build()
-    );
-
     // Anti Spam
+
     private final SettingGroup sgAntiSpam = settings.createGroup("Anti Spam");
 
     private final Setting<Boolean> antiSpamEnabled = sgAntiSpam.add(new BoolSetting.Builder()
@@ -67,7 +58,20 @@ public class BetterChat extends ToggleModule {
             .build()
     );
 
+
+    // Ignore
+
+    private final SettingGroup sgIgnore = settings.createGroup("Ignore");
+
+    private final Setting<Boolean> ignoreEnabled = sgIgnore.add(new BoolSetting.Builder()
+            .name("ignore-enabled")
+            .description("Ignores player defined by .ignore command.")
+            .defaultValue(true)
+            .build()
+    );
+
     // Longer Chat
+
     private final SettingGroup sgLongerChat = settings.createGroup("Longer Chat");
 
     private final Setting<Boolean> longerChatEnabled = sgLongerChat.add(new BoolSetting.Builder()
@@ -85,6 +89,8 @@ public class BetterChat extends ToggleModule {
             .sliderMax(1000)
             .build()
     );
+
+    // Prefix
 
     private final SettingGroup sgPrefix = settings.createGroup("Prefix");
 
@@ -115,6 +121,8 @@ public class BetterChat extends ToggleModule {
             .defaultValue(false)
             .build()
     );
+
+    // Suffix
 
     private final SettingGroup sgSuffix = settings.createGroup("Suffix");
 
@@ -189,18 +197,6 @@ public class BetterChat extends ToggleModule {
         }
     });
 
-    // IGNORE
-
-    private boolean ignoreOnMsg(String message) {
-        for (String name : Ignore.ignoredPlayers) {
-            if (message.contains("<" + name + ">")) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     // ANTI SPAM
 
     private boolean antiSpamOnMsg(String message, int messageId, int timestamp, List<ChatHudLine<Text>> messages, List<ChatHudLine<OrderedText>> visibleMessages) {
@@ -257,6 +253,18 @@ public class BetterChat extends ToggleModule {
 
             return false;
         }
+    }
+
+    // IGNORE
+
+    private boolean ignoreOnMsg(String message) {
+        for (String name : Ignore.ignoredPlayers) {
+            if (message.contains("<" + name + ">")) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     // LONGER CHAT
@@ -345,3 +353,4 @@ public class BetterChat extends ToggleModule {
         return text;
     }
 }
+

@@ -32,7 +32,7 @@ public class AutoAnvil extends ToggleModule {
 
     private final Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()
             .name("range")
-            .description("How far can the players be.")
+            .description("How far away the target can be to be affected.")
             .defaultValue(4)
             .min(0)
             .build()
@@ -58,13 +58,13 @@ public class AutoAnvil extends ToggleModule {
 
     private final Setting<Boolean> toggleOnBreak = sgGeneral.add(new BoolSetting.Builder()
             .name("toggle-on-break")
-            .description("Toggles when the targets helmet slot is empty.")
+            .description("Toggles off when the target's helmet slot is empty.")
             .defaultValue(false)
             .build()
     );
 
     public AutoAnvil() {
-        super(Category.Combat, "auto-anvil", "Automatically places anvils above players.");
+        super(Category.Combat, "auto-anvil", "Automatically places anvils above players to destroy helmets.");
     }
 
     private PlayerEntity target = null;

@@ -37,7 +37,7 @@ public class AutoLog extends ToggleModule {
     
     private final Setting<Integer> health = sgGeneral.add(new IntSetting.Builder()
             .name("health")
-            .description("Disconnects when health is lower or equal to this value.")
+            .description("Automatically disconnects when health is lower or equal to this value.")
             .defaultValue(6)
             .min(0)
             .max(20)
@@ -47,34 +47,34 @@ public class AutoLog extends ToggleModule {
 
     private final Setting<Boolean> smart = sgGeneral.add(new BoolSetting.Builder()
             .name("smart")
-            .description("Disconnects when you are about to take too much damage.")
+            .description("Disconnects when you're about to take enough damage to kill you.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> onlyTrusted = sgGeneral.add(new BoolSetting.Builder()
             .name("only-trusted")
-            .description("Disconnects when non-trusted player appears in your render distance.")
+            .description("Disconnects when a player not on your friends list appears in render distance.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> instantDeath = sgGeneral.add(new BoolSetting.Builder()
             .name("32k")
-            .description("Logs you out if someone near you can insta-kill you")
+            .description("Disconnects when a player near you can instantly kill you.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> crystalLog = sgGeneral.add(new BoolSetting.Builder()
             .name("crystal-log")
-            .description("Logs you out when there is a crystal nearby.")
+            .description("Disconnects when a crystal appears near you.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Integer> range = sgGeneral.add(new IntSetting.Builder()
-            .name("range").description("How close a crystal has to be to log.")
+            .name("range").description("How close a crystal has to be to you before you disconnect.")
             .defaultValue(4)
             .min(1)
             .max(10)
@@ -84,20 +84,20 @@ public class AutoLog extends ToggleModule {
 
     private final Setting<Boolean> smartToggle = sgGeneral.add(new BoolSetting.Builder()
             .name("smart-toggle")
-            .description("Disables AutoLog on low health logout, re-enables once healed.")
+            .description("Disables Auto Log after a low-health logout. WILL re-enable once you heal.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> toggleOff = sgGeneral.add(new BoolSetting.Builder()
             .name("toggle-off")
-            .description("Disables AutoLog once used.")
+            .description("Disables Auto Log after usage.")
             .defaultValue(true)
             .build()
     );
 
     public AutoLog() {
-        super(Category.Combat, "auto-log", "Automatically disconnects you when requirements are met.");
+        super(Category.Combat, "auto-log", "Automatically disconnects you when certain requirements are met.");
     }
 
     @EventHandler

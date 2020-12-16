@@ -32,21 +32,21 @@ public class TotemPopNotifier extends ToggleModule {
 
     private final Setting<Boolean> announce = sgGeneral.add(new BoolSetting.Builder()
             .name("announce-in-chat")
-            .description("Sends a chat message rather than a clientside message.")
+            .description("Sends a chat message for everyone to see instead of a client-side message.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> ignoreOwn = sgGeneral.add(new BoolSetting.Builder()
             .name("ignore-own")
-            .description("Doesn't announce your own pops.")
+            .description("Doesn't announce your own totem pops.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> ignoreFriend = sgGeneral.add(new BoolSetting.Builder()
             .name("ignore-friend")
-            .description("Doesn't announce your friends pops.")
+            .description("Doesn't announce your friend's pops.")
             .defaultValue(true)
             .build()
     );
@@ -68,7 +68,7 @@ public class TotemPopNotifier extends ToggleModule {
     private final Map<UUID, Integer> totemPops = new HashMap<>();
 
     public TotemPopNotifier() {
-        super(Category.Combat, "totem-pop-notifier", "Send chat message when someone pops a totem or dies.");
+        super(Category.Combat, "totem-pop-notifier", "Sends a chat message when a player either pops a totem or dies.");
     }
 
     @Override

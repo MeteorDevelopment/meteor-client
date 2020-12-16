@@ -371,6 +371,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
     private void initMisc() {
         addModule(new AutoSign());
         addModule(new AutoReconnect());
+        addModule(new Annoy());
         addModule(new ShulkerTooltip());
         addModule(new AutoShearer());
         addModule(new AutoNametag());
@@ -381,7 +382,6 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new StashFinder());
         addModule(new AutoBrewer());
         addModule(new AutoSmelter());
-        addModule(new Annoy());
         addModule(new Spam());
         addModule(new UnfocusedCPU());
         addModule(new ItemByteSize());

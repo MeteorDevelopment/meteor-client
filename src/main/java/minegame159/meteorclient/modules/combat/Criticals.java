@@ -34,13 +34,13 @@ public class Criticals extends ToggleModule {
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("mode")
-            .description("Mode.")
+            .description("The type of way Criticals will work.")
             .defaultValue(Mode.Packet)
             .build()
     );
 
     public Criticals() {
-        super(Category.Combat, "criticals", "Critical attacks.");
+        super(Category.Combat, "criticals", "Performs critical attacks when you hit your target.");
     }
 
     private boolean wasNoFallActive;

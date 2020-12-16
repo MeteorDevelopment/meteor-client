@@ -25,21 +25,21 @@ public class SelfTrap extends ToggleModule {
 
     private final Setting<Boolean> turnOff = sgGeneral.add(new BoolSetting.Builder()
             .name("turn-off")
-            .description("Toggles when one placed.")
+            .description("Toggles off once the blocks are placed.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> selfToggle = sgGeneral.add(new BoolSetting.Builder()
             .name("self-toggle")
-            .description("Toggles when you run out of obsidian.")
+            .description("Toggles off when you run out of obsidian.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
             .name("rotate")
-            .description("Makes you look up when placing the obsidian.")
+            .description("Forces you to rotate upwards when placing the obsidian.")
             .defaultValue(true)
             .build()
     );

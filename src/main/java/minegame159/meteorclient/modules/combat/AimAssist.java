@@ -62,7 +62,7 @@ public class AimAssist extends ToggleModule {
 
     private final Setting<Boolean> friends = sgGeneral.add(new BoolSetting.Builder()
             .name("friends")
-            .description("Aim at friends, useful only if attack players is on.")
+            .description("Aim at friends, only useful if attack players is on.")
             .defaultValue(false)
             .build()
     );
