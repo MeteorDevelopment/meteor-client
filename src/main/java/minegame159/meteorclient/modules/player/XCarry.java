@@ -17,7 +17,7 @@ public class XCarry extends ToggleModule {
     private boolean invOpened;
 
     public XCarry() {
-        super(Category.Player, "XCarry", "Allows you to store items in your crafting grid.");
+        super(Category.Player, "XCarry", "Allows you to store four extra items in your crafting grid.");
     }
 
     @Override

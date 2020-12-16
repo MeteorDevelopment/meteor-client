@@ -38,7 +38,7 @@ public class MiddleClickExtra extends ToggleModule {
     }
 
     public MiddleClickExtra(){
-        super(Category.Player, "middle-click-extra", "Lets you use items on middle click (works at the same time as Middle Click Friend).");
+        super(Category.Player, "middle-click-extra", "Lets you use items when you middle click. Works the same as Middle Click Friend.");
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -52,10 +52,12 @@ public class MiddleClickExtra extends ToggleModule {
 
     private final Setting<Boolean> notify = sgGeneral.add(new BoolSetting.Builder()
             .name("notify")
-            .description("Notify you when you don't have the selected item in your hotbar")
+            .description("Notifies you when you do not have the specified item in your hotbar.")
             .defaultValue(true)
             .build()
     );
+
+    // Item specification errors.
 
     private boolean wasUsing = false;
     private int preSlot;
@@ -73,7 +75,7 @@ public class MiddleClickExtra extends ToggleModule {
                     mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
                     mc.player.inventory.selectedSlot = preSlot;
                 } else if (notify.get()) {
-                    Chat.error(this, "Unable to find selected item.");
+                    Chat.error(this, "Unable to find specified item.");
                 }
                 break;
             }case Gap: {
@@ -85,7 +87,7 @@ public class MiddleClickExtra extends ToggleModule {
                     ((IKeyBinding) mc.options.keyUse).setPressed(true);
                     wasUsing = true;
                 } else if(notify.get()) {
-                    Chat.error(this, "Unable to find selected item.");
+                    Chat.error(this, "Unable to find specified item.");
                 }
                 break;
             }case EGap:{
@@ -109,7 +111,7 @@ public class MiddleClickExtra extends ToggleModule {
                     preCount = result.count;
                     wasUsing = true;
                 } else if(notify.get()) {
-                    Chat.error(this, "Unable to find selected item.");
+                    Chat.error(this, "Unable to find specified item.");
                 }
                 break;
             }case Rod: {
@@ -119,7 +121,7 @@ public class MiddleClickExtra extends ToggleModule {
                     mc.player.inventory.selectedSlot = result.slot;
                     mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
                 } else if (notify.get()) {
-                    Chat.error(this, "Unable to find selected item.");
+                    Chat.error(this, "Unable to find specified item.");
                 }
                 break;
             }

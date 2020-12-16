@@ -59,7 +59,7 @@ public class AutoEat extends ToggleModule {
 
     private final Setting<Boolean> disableAuras = sgGeneral.add(new BoolSetting.Builder()
             .name("disable-auras")
-            .description("disable all auras")
+            .description("Disable all auras when using this module.")
             .defaultValue(false)
             .build()
     );
@@ -74,7 +74,7 @@ public class AutoEat extends ToggleModule {
 
     private final Setting<Integer> minHunger = sgHunger.add(new IntSetting.Builder()
             .name("hunger")
-            .description("The hunger you eat at.")
+            .description("The level of hunger you eat at.")
             .defaultValue(17)
             .min(1)
             .max(19)

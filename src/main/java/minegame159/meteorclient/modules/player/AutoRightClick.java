@@ -23,14 +23,14 @@ public class AutoRightClick extends ToggleModule {
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("mode")
-            .description("How it right clicks.")
+            .description("The method of right clicking.")
             .defaultValue(Mode.Press)
             .build()
     );
     
     private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
             .name("delay")
-            .description("Delay between clicks in ticks.")
+            .description("The delay between clicks in ticks.")
             .defaultValue(2)
             .min(0)
             .sliderMax(60)
@@ -39,7 +39,7 @@ public class AutoRightClick extends ToggleModule {
 
     private final Setting<Boolean> onlyWhenHoldingUse = sgGeneral.add(new BoolSetting.Builder()
             .name("only-when-holding-use")
-            .description("Only when holding right click.")
+            .description("Will work only when holding right click.")
             .defaultValue(false)
             .build()
     );

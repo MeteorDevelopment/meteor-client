@@ -30,7 +30,7 @@ public class PotionSpoof extends ToggleModule {
     );
 
     public PotionSpoof() {
-        super(Category.Player, "potion-spoof", "Adds you potion effects.");
+        super(Category.Player, "potion-spoof", "Spoofs specified potion effects for you. SOME effects DO NOT work.");
     }
 
     @EventHandler

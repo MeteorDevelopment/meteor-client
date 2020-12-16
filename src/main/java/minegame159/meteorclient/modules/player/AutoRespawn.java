@@ -14,7 +14,7 @@ import net.minecraft.client.gui.screen.DeathScreen;
 
 public class AutoRespawn extends ToggleModule {
     public AutoRespawn() {
-        super(Category.Player, "auto-respawn", "Automatically respawns.");
+        super(Category.Player, "auto-respawn", "Automatically respawns after death.");
     }
 
     @EventHandler

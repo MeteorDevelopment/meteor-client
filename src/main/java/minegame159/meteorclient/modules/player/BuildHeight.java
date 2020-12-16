@@ -16,7 +16,7 @@ import net.minecraft.util.math.Direction;
 
 public class BuildHeight extends ToggleModule {
     public BuildHeight() {
-        super(Category.Player, "build-height", "Lets you interact with blocks at build limit.");
+        super(Category.Player, "build-height", "Lets your interact with objects at the build limit.");
     }
 
     @EventHandler
