@@ -37,7 +37,7 @@ public class Velocity extends ToggleModule {
     );
 
     public Velocity() {
-        super(Category.Movement, "velocity", "Prevents you from getting pushed by mobs, taking damage, etc.");
+        super(Category.Movement, "velocity", "Prevents you from being moved by external forces.");
     }
 
     public double getHorizontal() {

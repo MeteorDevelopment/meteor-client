@@ -30,7 +30,7 @@ public class NoFall extends ToggleModule {
         BeforeDamage
     }
     public NoFall() {
-        super(Category.Movement, "no-fall", "Protects you from fall damage.");
+        super(Category.Movement, "no-fall", "Prevents you from taking fall damage.");
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -44,7 +44,7 @@ public class NoFall extends ToggleModule {
 
     private final Setting<Double> height = sgGeneral.add(new DoubleSetting.Builder()
             .name("height")
-            .description("How high you have to be off the ground for this to toggle.")
+            .description("How high you have to be off the ground for this to toggle on.")
             .defaultValue(0.5)
             .min(0.1)
             .sliderMax(1)
@@ -60,7 +60,7 @@ public class NoFall extends ToggleModule {
 
     private final Setting<PlaceMode> placeMode = sgGeneral.add(new EnumSetting.Builder<PlaceMode>()
             .name("place-mode")
-            .description("Whether place mode places before you die or before you take damage")
+            .description("Whether place mode places before you die or before you take damage.")
             .defaultValue(PlaceMode.BeforeDeath)
             .build()
     );

@@ -26,13 +26,13 @@ public class ClickTP extends ToggleModule {
 
     private final Setting<Double> maxDistance = sgGeneral.add(new DoubleSetting.Builder()
             .name("max-distance")
-            .description("Maximum distance.")
+            .description("The maximum distance you can teleport.")
             .defaultValue(5)
             .build()
     );
 
     public ClickTP() {
-        super(Category.Movement, "click-tP", "Teleports you to the block you are looking at.");
+        super(Category.Movement, "click-tP", "Teleports you to the block you click on.");
     }
 
     @EventHandler

@@ -20,21 +20,21 @@ import minegame159.meteorclient.utils.KeyAction;
 
 public class AirJump extends ToggleModule {
     public AirJump() {
-        super(Category.Movement, "air-jump", "Lets you jump in air.");
+        super(Category.Movement, "air-jump", "Lets you jump in the air.");
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Boolean> maintainY = sgGeneral.add(new BoolSetting.Builder()
             .name("maintain-level")
-            .description("Maintains your Y level")
+            .description("Maintains your current Y level")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> onHold = sgGeneral.add(new BoolSetting.Builder()
             .name("on-hold")
-            .description("Whether to jump when you hold jump as well as when you press.")
+            .description("Whether or not to air jump if you hold down the space bar.")
             .defaultValue(true)
             .build()
     );
