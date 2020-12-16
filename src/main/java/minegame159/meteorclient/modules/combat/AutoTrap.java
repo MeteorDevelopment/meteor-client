@@ -53,13 +53,13 @@ public class AutoTrap extends ToggleModule {
 
     private final Setting<Boolean> turnOff = sgGeneral.add(new BoolSetting.Builder()
             .name("turn-off")
-            .description("Turns off when placed.")
+            .description("Turns off after placing.")
             .defaultValue(false)
             .build()
     );
 
     public AutoTrap(){
-        super(Category.Combat, "auto-trap", "Traps people in an obsidian cage.");
+        super(Category.Combat, "auto-trap", "Traps people in an obsidian box to prevent them from moving.");
     }
 
     private PlayerEntity target = null;

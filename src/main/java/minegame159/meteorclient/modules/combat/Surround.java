@@ -29,35 +29,35 @@ public class Surround extends ToggleModule {
 
     private final Setting<Boolean> doubleHeight = sgGeneral.add(new BoolSetting.Builder()
             .name("double-height")
-            .description("Places obsidian around your head.")
+            .description("Places obsidian on top of the original surround blocks to prevent people from face-placing you.")
             .defaultValue(false)
             .build()
     );
     
     private final Setting<Boolean> onlyOnGround = sgGeneral.add(new BoolSetting.Builder()
             .name("only-on-ground")
-            .description("Works only when you standing on ground.")
+            .description("Works only when you standing on blocks.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> onlyWhenSneaking = sgGeneral.add(new BoolSetting.Builder()
             .name("only-when-sneaking")
-            .description("Places blocks only when sneaking.")
+            .description("Places blocks only after sneaking.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> turnOff = sgGeneral.add(new BoolSetting.Builder()
             .name("turn-off")
-            .description("Turns off when placed.")
+            .description("Toggles off when all blocks are placed.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> center = sgGeneral.add(new BoolSetting.Builder()
             .name("center")
-            .description("Moves you to the center of the block.")
+            .description("Teleports you to the center of the block.")
             .defaultValue(true)
             .build()
     );
@@ -74,7 +74,7 @@ public class Surround extends ToggleModule {
     private boolean return_;
 
     public Surround() {
-        super(Category.Combat, "surround", "Surrounds you with obsidian (or other blocks) to take less damage.");
+        super(Category.Combat, "surround", "Surrounds you in blocks to prevent you from taking lots of damage.");
     }
 
     @Override

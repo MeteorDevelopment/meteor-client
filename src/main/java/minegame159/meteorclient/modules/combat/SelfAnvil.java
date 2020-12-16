@@ -27,13 +27,13 @@ public class SelfAnvil extends ToggleModule {
 
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
             .name("Rotate")
-            .description("Makes you look up when placing the anvil.")
+            .description("Forces you to rotate upwards when placing the anvil.")
             .defaultValue(true)
             .build()
     );
 
     public SelfAnvil() {
-        super(Category.Combat, "self-anvil", "Automatically places an anvil to fill your hole.");
+        super(Category.Combat, "self-anvil", "Automatically places an anvil on you to prevent other players from going into your hole.");
     }
 
     @EventHandler

@@ -25,28 +25,28 @@ public class AutoWeapon extends ToggleModule {
     }
 
     public AutoWeapon(){
-        super(Category.Combat, "auto-weapon", "Finds the best weapon in your hotbar.");
+        super(Category.Combat, "auto-weapon", "Finds the best weapon to use in your hotbar.");
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Weapon> weapon = sgGeneral.add(new EnumSetting.Builder<Weapon>()
             .name("Weapon")
-            .description("Which weapon to use for AutoWeapon")
+            .description("What type of weapon to use.")
             .defaultValue(Weapon.Sword)
             .build()
     );
 
     private final Setting<Integer> threshold = sgGeneral.add(new IntSetting.Builder()
             .name("threshold")
-            .description("If the non-prefered weapon does this much damage more then it will chose that over the prefered")
+            .description("If the non-preferred weapon produces this much damage this will favor it over your preferred weapon.")
             .defaultValue(4)
             .build()
     );
 
     private final Setting<Boolean> antiBreak = sgGeneral.add(new BoolSetting.Builder()
             .name("anti-break")
-            .description("Stops you from breaking your weapon.")
+            .description("Prevents you from breaking your weapon.")
             .defaultValue(false)
             .build()
     );

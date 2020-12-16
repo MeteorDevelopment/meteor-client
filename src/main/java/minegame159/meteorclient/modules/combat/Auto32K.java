@@ -43,13 +43,13 @@ public class Auto32K extends ToggleModule {
         Dispenser
     }
 
-    public Auto32K(){super(Category.Combat, "auto32k", "Does 32k PvP for you.");}
+    public Auto32K(){super(Category.Combat, "auto32k", "Automatically attacks other players with a 32k.");}
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("mode")
-            .description("The bypass used.")
+            .description("The bypass mode used.")
             .defaultValue(Mode.Dispenser
             ).build()
     );
@@ -65,21 +65,21 @@ public class Auto32K extends ToggleModule {
 
     private final Setting<Boolean> fillHopper = sgGeneral.add(new BoolSetting.Builder()
             .name("fill-hopper")
-            .description("Fills all but one slot of the hopper.")
+            .description("Fills all slots of the hopper except one for the 32k.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<List<Block>> throwawayItems = sgGeneral.add(new BlockListSetting.Builder()
             .name("throwaway-blocks")
-            .description("Acceptable blocks to use to fill the hopper")
+            .description("Whitelisted blocks to use to fill the hopper.")
             .defaultValue(setDefaultBlocks())
             .build()
     );
 
     private final Setting<Boolean> autoMove = sgGeneral.add(new BoolSetting.Builder()
             .name("auto-move")
-            .description("Moves the sword for you")
+            .description("Moves the sword for you.")
             .defaultValue(true)
             .build()
     );
@@ -142,7 +142,7 @@ public class Auto32K extends ToggleModule {
                     mc.player.inventory.selectedSlot = hopperSlot;
                     if(bestBlock == null) return;
                     if (!PlayerUtils.placeBlock(bestBlock.add(x, 0, z), Hand.MAIN_HAND)) {
-                        Utils.sendMessage("#redFailed to place");
+                        Utils.sendMessage("#redFailed to place.");
                         this.toggle();
                         return;
                     }

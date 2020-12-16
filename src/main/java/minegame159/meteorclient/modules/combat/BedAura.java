@@ -44,7 +44,7 @@ public class BedAura extends ToggleModule {
     }
 
     public BedAura(){
-        super(Category.Combat, "bed-aura", "Automatically places and blows up beds in the nether");
+        super(Category.Combat, "bed-aura", "Automatically places and explodes beds in the Nether and End.");
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -70,7 +70,7 @@ public class BedAura extends ToggleModule {
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("place-mode")
-            .description("The way beds are placed")
+            .description("How beds get placed.")
             .defaultValue(Mode.safe)
             .build()
     );
@@ -84,14 +84,14 @@ public class BedAura extends ToggleModule {
 
     private final Setting<Mode> clickMode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("break-mode")
-            .description("The way the beds are broken")
+            .description("How beds are broken.")
             .defaultValue(Mode.safe)
             .build()
     );
 
     private final Setting<Boolean> autoSwitch = sgGeneral.add(new BoolSetting.Builder()
             .name("auto-switch")
-            .description("Switches to bed automatically")
+            .description("Switches to a bed automatically.")
             .defaultValue(false)
             .build()
     );
@@ -112,7 +112,7 @@ public class BedAura extends ToggleModule {
 
     private final Setting<Integer> autoMoveSlot = sgGeneral.add(new IntSetting.Builder()
             .name("auto-move-slot")
-            .description("The slot auto-move moves beds to.")
+            .description("The slot Auto Move moves beds to.")
             .defaultValue(8)
             .min(0)
             .max(8)
@@ -130,7 +130,7 @@ public class BedAura extends ToggleModule {
 
     private final Setting<Boolean> smartDelay = sgGeneral.add(new BoolSetting.Builder()
             .name("smart-delay")
-            .description("Reduces crystal consumption when doing large amounts of damage.")
+            .description("Reduces bed consumption when doing large amounts of damage.")
             .defaultValue(true)
             .build()
     );
@@ -153,35 +153,35 @@ public class BedAura extends ToggleModule {
 
     private final Setting<Double> minDamage = sgPlace.add(new DoubleSetting.Builder()
             .name("min-damage")
-            .description("The minimum damage the beds will place")
+            .description("The minimum damage the beds will place.")
             .defaultValue(5.5)
             .build()
     );
 
     private final Setting<Double> maxDamage = sgPlace.add(new DoubleSetting.Builder()
             .name("max-damage")
-            .description("The maximum self-damage allowed")
+            .description("The maximum self-damage allowed.")
             .defaultValue(3)
             .build()
     );
 
     private final Setting<Double> minHealth = sgPlace.add(new DoubleSetting.Builder()
             .name("min-health")
-            .description("The minimum health you have to be for it to place")
+            .description("The minimum health you have to be for it to place.")
             .defaultValue(15)
             .build()
     );
 
     private final Setting<Boolean> place = sgGeneral.add(new BoolSetting.Builder()
             .name("place")
-            .description("Allow it to place beds")
+            .description("Allows Bed Aura to place beds.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> calcDamage = sgGeneral.add(new BoolSetting.Builder()
             .name("damage-calc")
-            .description("Whether to calculate damage (true) or just place on the head of the target(false).")
+            .description("Whether to calculate damage (true) or just place on the head of the target (false).")
             .defaultValue(false)
             .build()
     );
