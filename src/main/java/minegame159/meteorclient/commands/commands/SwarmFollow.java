@@ -6,7 +6,6 @@ import minegame159.meteorclient.commands.Command;
 import minegame159.meteorclient.commands.arguments.PlayerArgumentType;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.combat.Swarm;
-import minegame159.meteorclient.utils.Chat;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.player.PlayerEntity;
@@ -24,7 +23,7 @@ public class SwarmFollow extends Command {
         builder.then(literal("follow").executes(context -> {
                     Swarm swarm = ModuleManager.INSTANCE.get(Swarm.class);
                     if (swarm.currentMode.get() == Swarm.Mode.QUEEN && swarm.server != null && MinecraftClient.getInstance().player != null) {
-                        swarm.server.sendMessage(context.getInput() + " " + MinecraftClient.getInstance().player.getDisplayName());
+                        swarm.server.sendMessage(context.getInput() + " " + MinecraftClient.getInstance().player.getDisplayName().getString());
                     }
                     return SINGLE_SUCCESS;
                 }).then(argument("name", PlayerArgumentType.player()).executes(context -> {
