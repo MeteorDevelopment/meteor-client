@@ -16,7 +16,7 @@ public class Reach extends ToggleModule {
 
     private final Setting<Double> reach = sg.add(new DoubleSetting.Builder()
             .name("reach")
-            .description("Reach.")
+            .description("Your reach.")
             .defaultValue(5)
             .min(0)
             .sliderMax(6)
@@ -24,7 +24,7 @@ public class Reach extends ToggleModule {
     );
 
     public Reach() {
-        super(Category.Player, "reach", "Modifies your reach.");
+        super(Category.Player, "reach", "Gives you super long arms.");
     }
 
     public float getReach() {

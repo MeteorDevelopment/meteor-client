@@ -10,6 +10,6 @@ import minegame159.meteorclient.modules.ToggleModule;
 
 public class NoBreakDelay extends ToggleModule {
     public NoBreakDelay() {
-        super(Category.Player, "no-break-delay", "Removes the delay between breaking blocks.");
+        super(Category.Player, "no-break-delay", "Completely removes the delay between breaking blocks.");
     }
 }

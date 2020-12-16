@@ -34,21 +34,21 @@ public class AutoClick extends ToggleModule {
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("mode")
-            .description("How it clicks.")
+            .description("The method of clicking.")
             .defaultValue(Mode.Press)
             .build() 
     );
 
     private final Setting<Button> button = sgGeneral.add(new EnumSetting.Builder<Button>()
             .name("Button")
-            .description("Which button to press")
+            .description("Which button to press.")
             .defaultValue(Button.Right)
             .build()
     );
 
     private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
             .name("delay")
-            .description("Delay between clicks in ticks.")
+            .description("The amount of delay between clicks in ticks.")
             .defaultValue(2)
             .min(0)
             .sliderMax(60)
