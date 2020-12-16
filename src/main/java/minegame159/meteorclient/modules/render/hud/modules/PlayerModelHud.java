@@ -15,7 +15,7 @@ import org.lwjgl.opengl.GL11;
 
 public class PlayerModelHud extends HudModule {
     public PlayerModelHud(HUD hud) {
-        super(hud, "player-model", "Displays your player model.");
+        super(hud, "player-model", "Displays a model of your player.");
     }
 
     @Override

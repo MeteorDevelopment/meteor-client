@@ -22,7 +22,7 @@ public class Time extends ToggleModule {
 
     private final Setting<Double> time = sgDefault.add(new DoubleSetting.Builder()
             .name("time")
-            .description("The custom time.")
+            .description("The specified time to be set.")
             .defaultValue(0)
             .sliderMin(-20000)
             .sliderMax(20000)
@@ -30,7 +30,7 @@ public class Time extends ToggleModule {
     );
 
     public Time() {
-        super(Category.Render, "time", "Sets the clientside time of day");
+        super(Category.Render, "time", "Makes you able to set a custom time.");
     }
 
     long oldTime;

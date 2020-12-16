@@ -62,14 +62,14 @@ public class Search extends ToggleModule {
 
     private final Setting<Color> color = sgGeneral.add(new ColorSetting.Builder()
             .name("color")
-            .description("Color.")
+            .description("The color.")
             .defaultValue(new Color(0, 255, 200))
             .build()
     );
 
     private final Setting<Boolean> fullBlock = sgGeneral.add(new BoolSetting.Builder()
             .name("full-block")
-            .description("Outlines are rendered as full blocks.")
+            .description("If outlines will be rendered as full blocks.")
             .defaultValue(false)
             .build()
     );
@@ -77,14 +77,14 @@ public class Search extends ToggleModule {
     // Tracers
     private final Setting<Boolean> tracersEnabled = sgTracers.add(new BoolSetting.Builder()
             .name("tracers-enabled")
-            .description("Draw lines to the blocks.")
+            .description("Draws lines to the blocks.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Color> tracersColor = sgTracers.add(new ColorSetting.Builder()
             .name("tracers-color")
-            .description("Tracers color.")
+            .description("The color of the tracers.")
             .defaultValue(new Color(225, 225, 225))
             .build()
     );

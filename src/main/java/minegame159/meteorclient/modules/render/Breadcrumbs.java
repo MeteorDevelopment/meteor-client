@@ -25,14 +25,14 @@ public class Breadcrumbs extends ToggleModule {
 
     private final Setting<Color> color = sgGeneral.add(new ColorSetting.Builder()
             .name("color")
-            .description("Color of the line.")
+            .description("The color of the Breadcrumbs line.")
             .defaultValue(new Color(225, 25, 25))
             .build()
     );
 
     private final Setting<Integer> maxSections = sgGeneral.add(new IntSetting.Builder()
             .name("max-sections")
-            .description("Maximum number of sections.")
+            .description("The maximum number of sections.")
             .defaultValue(1000)
             .min(0)
             .sliderMax(5000)
@@ -41,7 +41,7 @@ public class Breadcrumbs extends ToggleModule {
 
     private final Setting<Double> sectionLength = sgGeneral.add(new DoubleSetting.Builder()
             .name("section-length")
-            .description("Section length, 1 is equal to 1 block.")
+            .description("The section length in blocks.")
             .defaultValue(0.5)
             .min(0)
             .sliderMin(0)
@@ -57,7 +57,7 @@ public class Breadcrumbs extends ToggleModule {
     private DimensionType lastDimension;
 
     public Breadcrumbs() {
-        super(Category.Render, "breadcrumbs", "Displays a line where you walked.");
+        super(Category.Render, "breadcrumbs", "Displays a trail behind where you have walked.");
     }
 
     @Override

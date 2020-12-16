@@ -10,7 +10,7 @@ import minegame159.meteorclient.modules.render.hud.HUD;
 
 public class WatermarkHud extends DoubleTextHudModule {
     public WatermarkHud(HUD hud) {
-        super(hud, "watermark", "Displays a meteor watermark.", "Meteor Client ");
+        super(hud, "watermark", "Displays a Meteor Client watermark.", "Meteor Client ");
     }
 
     @Override

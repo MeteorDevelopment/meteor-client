@@ -18,7 +18,7 @@ public class LagNotifierHud extends DoubleTextHudModule {
     private static final Color YELLOW = new Color(255, 255, 5);
 
     public LagNotifierHud(HUD hud) {
-        super(hud, "lag-notifier", "Displays if the server is lagging.", "Time since last tick ");
+        super(hud, "lag-notifier", "Displays if the server is lagging in ticks.", "Time since last tick ");
     }
 
     @Override

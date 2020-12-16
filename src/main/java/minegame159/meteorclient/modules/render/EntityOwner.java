@@ -41,7 +41,7 @@ public class EntityOwner extends ToggleModule {
 
     private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
             .name("scale")
-            .description("Scale.")
+            .description("The scale of the text.")
             .defaultValue(1)
             .min(0)
             .build()
@@ -50,7 +50,7 @@ public class EntityOwner extends ToggleModule {
     private final Map<UUID, String> uuidToName = new HashMap<>();
 
     public EntityOwner() {
-        super(Category.Render, "entity-owner", "Displays name of the player that owns that entity.");
+        super(Category.Render, "entity-owner", "Displays the name of the player who owns the entity you're looking at.");
     }
 
     @Override
@@ -104,15 +104,15 @@ public class EntityOwner extends ToggleModule {
     }
 
     private String getOwnerName(UUID uuid) {
-        // Get name if owner is online
+        // Gets name if owner is online
         PlayerEntity player = mc.world.getPlayerByUuid(uuid);
         if (player != null) return player.getGameProfile().getName();
 
-        // Check cache
+        // Checks cache
         String name = uuidToName.get(uuid);
         if (name != null) return name;
 
-        // Make http request to mojang api
+        // Makes attp h request to Mojang API
         MeteorExecutor.execute(() -> {
             if (isActive()) {
                 List<UuidNameHistoryResponseItem> response = HttpUtils.get("https://api.mojang.com/user/profiles/" + uuid.toString().replace("-", "") + "/names", RESPONSE_TYPE);

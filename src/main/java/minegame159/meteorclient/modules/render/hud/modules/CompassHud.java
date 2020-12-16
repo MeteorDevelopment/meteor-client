@@ -16,7 +16,7 @@ public class CompassHud extends HudModule {
     public static MinecraftClient mc = MinecraftClient.getInstance();
 
     public CompassHud(HUD hud) {
-        super(hud, "compass", "Displays your rotation as a 3d compass.");
+        super(hud, "compass", "Displays your rotation as a 3D compass.");
     }
 
     @Override

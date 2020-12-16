@@ -36,7 +36,7 @@ public class HoleESP extends ToggleModule {
 
     private final Setting<Mode> renderMode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("render-mode")
-            .description("Rendering mode.")
+            .description("The rendering mode.")
             .defaultValue(Mode.Flat)
             .build()
     );
@@ -69,7 +69,7 @@ public class HoleESP extends ToggleModule {
 
     private final Setting<Boolean> ignoreOwn = sgColors.add(new BoolSetting.Builder()
             .name("ignore-own")
-            .description("Ignores the hole you are standing in when rendering.")
+            .description("Ignores rendering the hole you are currently standing in.")
             .defaultValue(true)
             .build()
     );
@@ -98,7 +98,7 @@ public class HoleESP extends ToggleModule {
 
     private final Setting<Boolean> fill = sgColors.add(new BoolSetting.Builder()
             .name("fill")
-            .description("Fill the shapes rendered.")
+            .description("Fills the shapes rendered.")
             .defaultValue(true)
             .build()
     );
@@ -108,7 +108,7 @@ public class HoleESP extends ToggleModule {
     private final List<Hole> holes = new ArrayList<>();
 
     public HoleESP() {
-        super(Category.Render, "hole-esp", "Displays holes that you can be in so you don't take explosion damage.");
+        super(Category.Render, "hole-esp", "Displays safe holes that you will take less damage in.");
     }
 
     @EventHandler
