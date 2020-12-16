@@ -84,7 +84,6 @@ public class EventStore {
     private static final PlaySoundEvent playSoundEvent = new PlaySoundEvent();
     private static final WaypointListChangedEvent waypointListChangedEvent = new WaypointListChangedEvent();
     private static final BreakBlockEvent breakBlockEvent = new BreakBlockEvent();
-    private static final BlockBreakingProgressEvent blockBreakingProgressEvent = new BlockBreakingProgressEvent();
     private static final PlaceBlockEvent placeBlockEvent = new PlaceBlockEvent();
     private static final DropItemsEvent dropItemsEvent = new DropItemsEvent();
     private static final PickItemsEvent pickItemsEvent = new PickItemsEvent();
@@ -284,12 +283,6 @@ public class EventStore {
     public static BreakBlockEvent breakBlockEvent(BlockPos blockPos) {
         breakBlockEvent.blockPos = blockPos;
         return breakBlockEvent;
-    }
-
-    public static BlockBreakingProgressEvent blockBreakingProgressEvent(BlockPos pos, Direction direction) {
-        blockBreakingProgressEvent.blockPos = pos;
-        blockBreakingProgressEvent.direction = direction;
-        return blockBreakingProgressEvent;
     }
 
     public static PlaceBlockEvent placeBlockEvent(BlockPos blockPos, Block block) {
