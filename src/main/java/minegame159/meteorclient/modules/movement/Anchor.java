@@ -8,6 +8,7 @@ package minegame159.meteorclient.modules.movement;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.world.PostTickEvent;
+import minegame159.meteorclient.events.world.PreTickEvent;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
@@ -42,6 +43,13 @@ public class Anchor extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> cancelMove = sgGeneral.add(new BoolSetting.Builder()
+            .name("cancel-jump-in-hole")
+            .description("Stops you from jumping when anchor is active and min pitch is met.")
+            .defaultValue(false)
+            .build()
+    );
+
     private final Setting<Boolean> pull = sgGeneral.add(new BoolSetting.Builder()
             .name("pull")
             .description("Whether to pull you faster into the hole.")
@@ -60,7 +68,10 @@ public class Anchor extends ToggleModule {
 
     private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
     private boolean wasInHole;
+    private boolean foundHole;
     private int holeX, holeZ;
+
+    public boolean cancelJump;
 
     public boolean controlMovement;
     public double deltaX, deltaZ;
@@ -76,7 +87,12 @@ public class Anchor extends ToggleModule {
     }
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private final Listener<PreTickEvent> onPreTick = new Listener<>(event -> {
+        cancelJump = foundHole && cancelMove.get() && mc.player.pitch >= minPitch.get();
+    });
+
+    @EventHandler
+    private final Listener<PostTickEvent> onPostTick = new Listener<>(event -> {
         controlMovement = false;
 
         int x = MathHelper.floor(mc.player.getX());
@@ -95,7 +111,7 @@ public class Anchor extends ToggleModule {
 
         if (mc.player.pitch < minPitch.get()) return;
 
-        boolean foundHole = false;
+        foundHole = false;
         double holeX = 0;
         double holeZ = 0;
 
