@@ -63,13 +63,14 @@ public class MeshBuilder {
         buffer.next();
     }
 
-    public void end(boolean texture) {
+    public void end(boolean texture,boolean depthTest) {
         GL11.glPushMatrix();
         RenderSystem.multMatrix(Matrices.getTop());
 
         RenderSystem.enableBlend();
         RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA);
-        RenderSystem.disableDepthTest();
+        if (depthTest) RenderSystem.enableDepthTest();
+        else RenderSystem.disableDepthTest();
         RenderSystem.disableAlphaTest();
         if (texture) RenderSystem.enableTexture();
         else RenderSystem.disableTexture();
@@ -89,6 +90,10 @@ public class MeshBuilder {
         GL11.glDisable(GL11.GL_LINE_SMOOTH);
 
         GL11.glPopMatrix();
+    }
+
+    public void end(boolean textures) {
+        end(textures, false);
     }
 
     public boolean isBuilding() {
