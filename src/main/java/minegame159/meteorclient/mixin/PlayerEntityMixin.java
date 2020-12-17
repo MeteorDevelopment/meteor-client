@@ -10,6 +10,7 @@ import minegame159.meteorclient.events.entity.player.ClipAtLedgeEvent;
 import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.mixininterface.IPlayerEntity;
 import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.movement.Anchor;
 import minegame159.meteorclient.modules.player.SpeedMine;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.ItemEntity;
@@ -22,6 +23,7 @@ import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(PlayerEntity.class)
@@ -50,5 +52,11 @@ public class PlayerEntityMixin implements IPlayerEntity {
         if (!module.isActive() || module.mode.get() != SpeedMine.Mode.Normal)
             return;
         cir.setReturnValue((float) (cir.getReturnValue() * module.modifier.get()));
+    }
+
+    @Inject(method = "jump", at = @At("HEAD"), cancellable = true)
+    public void dontJump(CallbackInfo info) {
+        Anchor module = ModuleManager.INSTANCE.get(Anchor.class);
+        if (module.isActive() && module.cancelJump) info.cancel();
     }
 }
