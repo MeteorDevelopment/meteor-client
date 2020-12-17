@@ -35,7 +35,7 @@ public class EChestFarmer extends ToggleModule {
     private static final BlockState ENDER_CHEST = Blocks.ENDER_CHEST.getDefaultState();
 
     public EChestFarmer(){
-        super(Category.Misc, "EChest-farmer", "Places and mines EChests where you are looking.");
+        super(Category.Misc, "EChest-farmer", "Places and mines Ender Chests where you're looking.");
     }
 
     private final SettingGroup sgGeneral  = settings.getDefaultGroup();
@@ -52,7 +52,7 @@ public class EChestFarmer extends ToggleModule {
 
     private final Setting<Integer> lowerAmount = sgGeneral.add(new IntSetting.Builder()
             .name("lower-amount")
-            .description("The amount before this turns on again.")
+            .description("The specified amount before this module toggles on again.")
             .defaultValue(8)
             .min(0)
             .max(64)
@@ -62,7 +62,7 @@ public class EChestFarmer extends ToggleModule {
 
     private final Setting<Boolean> disableOnAmount = sgGeneral.add(new BoolSetting.Builder()
             .name("disable-on-completion")
-            .description("Whether to disable once you reach target stacks")
+            .description("Whether or not to disable when you reach your desired amount of stacks of obsidian.")
             .defaultValue(true)
             .build()
     );

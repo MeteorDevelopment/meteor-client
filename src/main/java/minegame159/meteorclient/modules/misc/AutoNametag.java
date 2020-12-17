@@ -35,14 +35,14 @@ public class AutoNametag extends ToggleModule {
     
     private final Setting<Double> distance = sgGeneral.add(new DoubleSetting.Builder()
             .name("distance")
-            .description("Maximum distance.")
+            .description("The maximum distance a nametagged entity can be to be nametagged.")
             .min(0.0)
             .defaultValue(5.0)
             .build()
     );
 
     public AutoNametag() {
-        super(Category.Misc, "auto-nametag", "Automatically uses nametags in hotbar on unnamed entites. WARNING: will name all entities in specified distance.");
+        super(Category.Misc, "auto-nametag", "Automatically uses nametags on entities without a nametag. WILL nametag ALL entities in the specified distance.");
     }
 
     @EventHandler

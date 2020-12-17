@@ -15,7 +15,7 @@ public class BypassDeathScreen extends ToggleModule {
     public boolean shouldBypass = false;
 
     public BypassDeathScreen(){
-        super(Category.Misc, "bypass-death-screen", "Let's you spy on people");
+        super(Category.Misc, "bypass-death-screen", "Lets you spy on people after death.");
     }
 
     @Override

@@ -37,14 +37,14 @@ public class BetterChat extends ToggleModule {
 
     private final Setting<Boolean> antiSpamEnabled = sgAntiSpam.add(new BoolSetting.Builder()
             .name("anti-spam-enabled")
-            .description("Enables anti spam.")
+            .description("Enables the anti-spam.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Integer> antiSpamDepth = sgAntiSpam.add(new IntSetting.Builder()
             .name("anti-spam-depth")
-            .description("How many messages to check for duplicates.")
+            .description("How many chat messages to check for duplicate messages.")
             .defaultValue(4)
             .min(1)
             .sliderMin(1)
@@ -53,7 +53,7 @@ public class BetterChat extends ToggleModule {
 
     private final Setting<Boolean> antiSpamMoveToBottom = sgAntiSpam.add(new BoolSetting.Builder()
             .name("anti-spam-move-to-bottom")
-            .description("Move duplicate messages to bottom.")
+            .description("Moves any duplicate messages to the bottom of the chat.")
             .defaultValue(true)
             .build()
     );
@@ -65,7 +65,7 @@ public class BetterChat extends ToggleModule {
 
     private final Setting<Boolean> ignoreEnabled = sgIgnore.add(new BoolSetting.Builder()
             .name("ignore-enabled")
-            .description("Ignores player defined by .ignore command.")
+            .description("Ignores player defined by the .ignore command.")
             .defaultValue(true)
             .build()
     );
@@ -76,14 +76,14 @@ public class BetterChat extends ToggleModule {
 
     private final Setting<Boolean> longerChatEnabled = sgLongerChat.add(new BoolSetting.Builder()
             .name("longer-chat-enabled")
-            .description("Makes chat longer.")
+            .description("Extends chat length.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Integer> longerChatLines = sgLongerChat.add(new IntSetting.Builder()
             .name("longer-chat-lines")
-            .description("Chat lines.")
+            .description("The amount of extra chat lines.")
             .defaultValue(1000)
             .min(100)
             .sliderMax(1000)
@@ -96,21 +96,21 @@ public class BetterChat extends ToggleModule {
 
     private final Setting<Boolean> prefixEnabled = sgPrefix.add(new BoolSetting.Builder()
             .name("prefix-enabled")
-            .description("Enables prefix.")
+            .description("Enables a prefix.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<String> prefixText = sgPrefix.add(new StringSetting.Builder()
             .name("text")
-            .description("Text to add.")
+            .description("The text to add as your prefix.")
             .defaultValue("> ")
             .build()
     );
 
     private final Setting<Boolean> prefixSmallCaps = sgPrefix.add(new BoolSetting.Builder()
             .name("small-caps")
-            .description("Uses small font.")
+            .description("Uses a small font.")
             .defaultValue(false)
             .build()
     );
@@ -128,7 +128,7 @@ public class BetterChat extends ToggleModule {
 
     private final Setting<Boolean> suffixEnabled = sgSuffix.add(new BoolSetting.Builder()
             .name("suffix-enabled")
-            .description("Enables suffix.")
+            .description("Enables a suffix.")
             .defaultValue(true)
             .build()
     );
@@ -136,14 +136,14 @@ public class BetterChat extends ToggleModule {
 
     private final Setting<String> suffixText = sgSuffix.add(new StringSetting.Builder()
             .name("text")
-            .description("Text to add.")
+            .description("The text to add as your suffix.")
             .defaultValue(" | Meteor on Crack!")
             .build()
     );
 
     private final Setting<Boolean> suffixSmallCaps = sgSuffix.add(new BoolSetting.Builder()
             .name("small-caps")
-            .description("Uses small font.")
+            .description("Uses a small font.")
             .defaultValue(true)
             .build()
     );
@@ -179,7 +179,7 @@ public class BetterChat extends ToggleModule {
 
 
     public BetterChat() {
-        super(Category.Misc, "better-chat", "Improves chat in many ways.");
+        super(Category.Misc, "better-chat", "Improves your chat experience in various ways.");
     }
 
     public boolean onMsg(String message, int messageId, int timestamp, List<ChatHudLine<Text>> messages, List<ChatHudLine<OrderedText>> visibleMessages) {

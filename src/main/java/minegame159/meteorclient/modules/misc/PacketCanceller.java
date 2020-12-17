@@ -46,7 +46,7 @@ public class PacketCanceller extends ToggleModule {
     );
 
     public PacketCanceller() {
-        super(Category.Misc, "packet-canceller", "Allows you to cancel packets.");
+        super(Category.Misc, "packet-canceller", "Allows you to cancel certain packets.");
     }
 
     @EventHandler

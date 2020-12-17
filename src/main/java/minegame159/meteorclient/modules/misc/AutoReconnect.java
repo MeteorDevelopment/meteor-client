@@ -30,7 +30,7 @@ public class AutoReconnect extends ToggleModule {
     
     private final Setting<Double> time = sgGeneral.add(new DoubleSetting.Builder()
             .name("time")
-            .description("Time to wait before connecting.")
+            .description("The amount of time to wait before reconnecting to the server.")
             .defaultValue(2.0)
             .min(0.0)
             .build()
@@ -39,7 +39,7 @@ public class AutoReconnect extends ToggleModule {
     private ServerInfo lastServerInfo;
 
     public AutoReconnect() {
-        super(Category.Misc, "auto-reconnect", "Automatically reconnects when kicked from server.");
+        super(Category.Misc, "auto-reconnect", "Automatically reconnects when disconnected from a server.");
         MeteorClient.EVENT_BUS.subscribe(new Listener<ConnectToServerEvent>(event -> {
             lastServerInfo = mc.isInSingleplayer() ? null : mc.getCurrentServerEntry();
         }));
