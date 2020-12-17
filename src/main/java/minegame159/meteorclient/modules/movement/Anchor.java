@@ -11,9 +11,7 @@ import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
-import minegame159.meteorclient.settings.IntSetting;
-import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
@@ -41,6 +39,22 @@ public class Anchor extends ToggleModule {
             .max(90)
             .sliderMin(-90)
             .sliderMax(90)
+            .build()
+    );
+
+    private final Setting<Boolean> pull = sgGeneral.add(new BoolSetting.Builder()
+            .name("pull")
+            .description("Whether to pull you faster into the hole.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Double> pullSpeed = sgGeneral.add(new DoubleSetting.Builder()
+            .name("pull-speed")
+            .description("How fast to pull towards the hole in blocks per second.")
+            .defaultValue(0.3)
+            .min(0)
+            .sliderMax(5)
             .build()
     );
 
@@ -102,7 +116,7 @@ public class Anchor extends ToggleModule {
             deltaX = Utils.clamp(holeX - mc.player.getX(), -0.05, 0.05);
             deltaZ = Utils.clamp(holeZ - mc.player.getZ(), -0.05, 0.05);
 
-            ((IVec3d) mc.player.getVelocity()).set(deltaX, mc.player.getVelocity().y, deltaZ);
+            ((IVec3d) mc.player.getVelocity()).set(deltaX, mc.player.getVelocity().y - (pull.get() ? pullSpeed.get() : 0), deltaZ);
         }
     });
 
