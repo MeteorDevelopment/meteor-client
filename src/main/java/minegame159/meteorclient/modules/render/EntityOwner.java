@@ -104,7 +104,7 @@ public class EntityOwner extends ToggleModule {
     }
 
     private String getOwnerName(UUID uuid) {
-        // Gets name if owner is online
+        // Gets name if owner is online.
         PlayerEntity player = mc.world.getPlayerByUuid(uuid);
         if (player != null) return player.getGameProfile().getName();
 
@@ -112,8 +112,7 @@ public class EntityOwner extends ToggleModule {
         String name = uuidToName.get(uuid);
         if (name != null) return name;
 
-        // Makes a HTTP request to Mojang API
-        // Fixed HTTP typo Monkeygame.
+        // Makes a HTTP request to Mojang API. Fucking fixed typo Monkeygame.
         MeteorExecutor.execute(() -> {
             if (isActive()) {
                 List<UuidNameHistoryResponseItem> response = HttpUtils.get("https://api.mojang.com/user/profiles/" + uuid.toString().replace("-", "") + "/names", RESPONSE_TYPE);
