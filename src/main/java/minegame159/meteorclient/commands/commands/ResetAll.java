@@ -15,7 +15,7 @@ import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
 public class ResetAll extends Command {
     public ResetAll() {
-        super("reset-all", "Resets all modules oldsettings.");
+        super("reset-all", "Reset's to all module's old settings.");
     }
 
     @Override

@@ -31,7 +31,7 @@ public class Drop extends Command {
             new DynamicCommandExceptionType(o -> new LiteralText("No such item " + o + "!"));
 
     public Drop() {
-        super("drop", "Drops things.");
+        super("drop", "Automatically drops specified items.");
     }
 
     @Override

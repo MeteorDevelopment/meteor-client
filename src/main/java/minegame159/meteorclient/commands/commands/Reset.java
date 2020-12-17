@@ -16,7 +16,7 @@ import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
 public class Reset extends Command {
     public Reset() {
-        super("reset", "Resets module's oldsettings.");
+        super("reset", "Resets to the module's old settings.");
     }
 
     @Override

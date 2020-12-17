@@ -16,7 +16,7 @@ import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
 public class ResetBind extends Command {
     public ResetBind() {
-        super("reset-bind", "Resets modules bind.");
+        super("reset-bind", "Resets a module keybind.");
     }
 
     @Override
@@ -26,7 +26,7 @@ public class ResetBind extends Command {
                     Module module = context.getArgument("module", Module.class);
 
                     module.setKey(-1);
-                    Chat.info("Bind has been reset.");
+                    Chat.info("This bind has been reset.");
 
                     return SINGLE_SUCCESS;
                 }));
