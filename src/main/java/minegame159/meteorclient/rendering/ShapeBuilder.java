@@ -22,13 +22,13 @@ public class ShapeBuilder {
         Matrices.push();
     }
 
-    public static void end(boolean texture) {
-        triangles.end(texture);
+    public static void end(boolean texture, boolean depthTest) {
+        triangles.end(texture, depthTest);
         triangles = Renderer.TRIANGLES;
         Matrices.pop();
     }
     public static void end() {
-        end(false);
+        end(false, false);
     }
 
     // Quad
