@@ -20,7 +20,7 @@ public class AutoSign extends ToggleModule {
     private String[] text;
 
     public AutoSign() {
-        super(Category.Misc, "auto-sign", "Automatically writes signs. When enabled first sign's text will be used.");
+        super(Category.Misc, "auto-sign", "Automatically writes signs. The first sign's text will be used.");
     }
 
     @Override

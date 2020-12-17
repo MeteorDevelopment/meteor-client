@@ -43,7 +43,7 @@ public class Nuker extends ToggleModule {
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("mode")
-            .description("Which blocks to break.")
+            .description("The way the blocks are broken.")
             .defaultValue(Mode.All)
             .build()
     );
@@ -57,21 +57,21 @@ public class Nuker extends ToggleModule {
 
     private final Setting<List<Block>> selectedBlocks = sgGeneral.add(new BlockListSetting.Builder()
             .name("selected-blocks")
-            .description("Which blocks to mine when only selected is true.")
+            .description("The certain type of blocks you want to mine.")
             .defaultValue(new ArrayList<>(0))
             .build()
     );
 
     private final Setting<Boolean> onlySelected = sgGeneral.add(new BoolSetting.Builder()
             .name("only-selected")
-            .description("Only mines selected blocks.")
+            .description("Only mines your selected blocks.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()
             .name("range")
-            .description("Break range.")
+            .description("The break range.")
             .defaultValue(5)
             .min(0)
             .build()
@@ -79,14 +79,14 @@ public class Nuker extends ToggleModule {
 
     private final Setting<SortMode> sortMode = sgGeneral.add(new EnumSetting.Builder<SortMode>()
             .name("sort-mode")
-            .description("Which blocks to mine first.")
+            .description("The blocks you want to mine first.")
             .defaultValue(SortMode.Closest)
             .build()
     );
 
     private final Setting<Boolean> noParticles = sgGeneral.add(new BoolSetting.Builder()
             .name("no-particles")
-            .description("Disables block break particles.")
+            .description("Disables all block breaking particles.")
             .defaultValue(false)
             .build()
     );
@@ -98,7 +98,7 @@ public class Nuker extends ToggleModule {
     private boolean hasLastBlockPos;
 
     public Nuker() {
-        super(Category.Misc, "nuker", "Breaks blocks around you.");
+        super(Category.Misc, "nuker", "Breaks a large amount of specified blocks around you.");
     }
 
     @Override

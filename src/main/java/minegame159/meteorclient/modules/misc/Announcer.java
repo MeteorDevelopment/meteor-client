@@ -35,7 +35,7 @@ public class Announcer extends ToggleModule {
     };
 
     public Announcer() {
-        super(Category.Misc, "announcer", "Announces events into chat.");
+        super(Category.Misc, "announcer", "Announces specified actions into chat.");
     }
 
     @Override
@@ -100,14 +100,14 @@ public class Announcer extends ToggleModule {
     private class Moving extends Feature {
         private final Setting<String> msg = sg.add(new StringSetting.Builder()
                 .name("moving-msg")
-                .description("Moving message.")
+                .description("The chat message for moving a certain amount of blocks.")
                 .defaultValue("I just moved {dist} blocks!")
                 .build()
         );
 
         private final Setting<Double> delay = sg.add(new DoubleSetting.Builder()
                 .name("moving-delay")
-                .description("Moving delay between messages in seconds.")
+                .description("The amount of delay between moving messages in seconds.")
                 .defaultValue(10)
                 .sliderMax(60)
                 .build()
@@ -115,7 +115,7 @@ public class Announcer extends ToggleModule {
 
         private final Setting<Double> minDist = sg.add(new DoubleSetting.Builder()
                 .name("moving-min-dist")
-                .description("Moving minimum distance.")
+                .description("The minimum distance for a moving message to send into chat.")
                 .defaultValue(10)
                 .sliderMax(100)
                 .build()
@@ -174,7 +174,7 @@ public class Announcer extends ToggleModule {
     private class Mining extends Feature {
         private final Setting<String> msg = sg.add(new StringSetting.Builder()
                 .name("mining-msg")
-                .description("Mining message.")
+                .description("The chat message for mining blocks.")
                 .defaultValue("I just mined {count} {block}!")
                 .build()
         );
@@ -227,7 +227,7 @@ public class Announcer extends ToggleModule {
     private class Placing extends Feature {
         private final Setting<String> msg = sg.add(new StringSetting.Builder()
                 .name("placing-msg")
-                .description("Placing message.")
+                .description("The chat message for placing blocks.")
                 .defaultValue("I just placed {count} {block}!")
                 .build()
         );
@@ -278,7 +278,7 @@ public class Announcer extends ToggleModule {
     private class DropItems extends Feature {
         private final Setting<String> msg = sg.add(new StringSetting.Builder()
                 .name("drop-items-msg")
-                .description("Drop items message.")
+                .description("The chat message for dropping items.")
                 .defaultValue("I just dropped {count} {item}!")
                 .build()
         );
@@ -329,7 +329,7 @@ public class Announcer extends ToggleModule {
     private class PickItems extends Feature {
         private final Setting<String> msg = sg.add(new StringSetting.Builder()
                 .name("pick-items-msg")
-                .description("Pick items message.")
+                .description("The chat message for picking up items.")
                 .defaultValue("I just picked up {count} {item}!")
                 .build()
         );
@@ -380,7 +380,7 @@ public class Announcer extends ToggleModule {
     private class OpenContainer extends Feature {
         private final Setting<String> msg = sg.add(new StringSetting.Builder()
                 .name("open-container-msg")
-                .description("Open container message.")
+                .description("The chat message for opening a container.")
                 .defaultValue("I just opened {name}!")
                 .build()
         );

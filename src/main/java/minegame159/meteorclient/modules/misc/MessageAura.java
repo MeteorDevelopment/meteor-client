@@ -22,20 +22,20 @@ import net.minecraft.entity.player.PlayerEntity;
 
 public class MessageAura extends ToggleModule {
     public MessageAura() {
-        super(Category.Misc, "message-aura", "Sends a message to every player when they enter render distance.");
+        super(Category.Misc, "message-aura", "Sends a specified message to any player that enters render distance.");
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<String> message = sgGeneral.add(new StringSetting.Builder()
             .name("message")
-            .description("The message sent to players.")
+            .description("The specified message sent to the player.")
             .defaultValue("Meteor on Crack!").build()
     );
 
     private final Setting<Boolean> ignoreFriends = sgGeneral.add(new BoolSetting.Builder()
             .name("ignore-friends")
-            .description("Doesn't send messages to friends.")
+            .description("Will not send any messages to people friended.")
             .defaultValue(false)
             .build()
     );

@@ -26,7 +26,7 @@ public class AutoShearer extends ToggleModule {
     
     private final Setting<Double> distance = sgGeneral.add(new DoubleSetting.Builder()
             .name("distance")
-            .description("Maximum distance.")
+            .description("The maximum distance the sheep have to be to be sheared.")
             .min(0.0)
             .defaultValue(5.0)
             .build()
@@ -34,13 +34,13 @@ public class AutoShearer extends ToggleModule {
 
     private final Setting<Boolean> preserveBrokenShears = sgGeneral.add(new BoolSetting.Builder()
             .name("preserve-broken-shears")
-            .description("Will not break shears.")
+            .description("Prevents shears from being broken.")
             .defaultValue(false)
             .build()
     );
 
     public AutoShearer() {
-        super(Category.Misc, "auto-shearer", "Automatically shears sheeps.");
+        super(Category.Misc, "auto-shearer", "Automatically shears sheep.");
     }
 
     @EventHandler
