@@ -34,20 +34,20 @@ public class EntityLogger extends ToggleModule {
 
     private final Setting<Boolean> playerNames = sgGeneral.add(new BoolSetting.Builder()
             .name("player-names")
-            .description("Show player names.")
+            .description("Shows the player's name.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> friends = sgGeneral.add(new BoolSetting.Builder()
             .name("friends")
-            .description("Log friends.")
+            .description("Logs friends.")
             .defaultValue(true)
             .build()
     );
 
     public EntityLogger() {
-        super(Category.Misc, "entity-logger", "Sends chat message when selected entities appear.");
+        super(Category.Misc, "entity-logger", "Sends a client-side chat alert if a specified entity appears in render distance.");
     }
 
     @EventHandler
@@ -63,7 +63,7 @@ public class EntityLogger extends ToggleModule {
             if (playerNames.get() && event.entity instanceof PlayerEntity) name = ((PlayerEntity) event.entity).getGameProfile().getName() + " (Player)";
             else name = event.entity.getType().getName().getString();
 
-            Chat.info(this, "(highlight)%s (default)spawned at (highlight)%.0f(default), (highlight)%.0f(default), (highlight)%.0f(default).", name, event.entity.getX(), event.entity.getY(), event.entity.getZ());
+            Chat.info(this, "(highlight)%s (default)has spawned at (highlight)%.0f(default), (highlight)%.0f(default), (highlight)%.0f(default).", name, event.entity.getX(), event.entity.getY(), event.entity.getZ());
         }
     });
 }

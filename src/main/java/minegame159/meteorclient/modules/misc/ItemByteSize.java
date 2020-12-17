@@ -31,20 +31,20 @@ public class ItemByteSize extends ToggleModule {
 
     private final Setting<Boolean> useKbIfBigEnoughEnabled = sgUseKbIfBigEnough.add(new BoolSetting.Builder()
             .name("use-kb-if-big-enough-enabled")
-            .description("Uses kilobytes instead of bytes if the item is larger than 1 kb.")
+            .description("Uses KB instead of bytes if your item's size is larger or equal to 1KB.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Mode> mode = sgUseKbIfBigEnough.add(new EnumSetting.Builder<Mode>()
             .name("mode")
-            .description("Standard 1 kb = 1000 b, True 1 kb = 1024 b.")
+            .description("Uses the standard mode (1KB to 1000b) OR true mode (1KB to 1024b).")
             .defaultValue(Mode.True)
             .build()
     );
 
     public ItemByteSize() {
-        super(Category.Misc, "item-byte-size", "Displays item's size in bytes in tooltip.");
+        super(Category.Misc, "item-byte-size", "Displays an item's size in bytes in the tooltip.");
     }
 
     @EventHandler

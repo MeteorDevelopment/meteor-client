@@ -51,14 +51,14 @@ public class LiquidFiller extends ToggleModule {
 
     private final Setting<List<Block>> whitelist = sgGeneral.add(new BlockListSetting.Builder()
             .name("block-whitelist")
-            .description("Select which blocks it will use to place.")
+            .description("The allowed blocks that it will use to fill up the liquid.")
             .defaultValue(new ArrayList<>())
             .build()
     );
 
     private final Setting<PlaceIn> placeInLiquids = sgGeneral.add(new EnumSetting.Builder<PlaceIn>()
             .name("place-in")
-            .description("Which liquids to place in.")
+            .description("What type of liquids to place in.")
             .defaultValue(PlaceIn.Lava)
             .build()
     );
