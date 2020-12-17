@@ -24,7 +24,7 @@ public class Enchant extends Command {
             new SimpleCommandExceptionType(new LiteralText("You must be in creative mode to use this."));
 
     public Enchant() {
-        super("enchant", "Enchants the currently held item with almost every enchantment (must be in creative)");
+        super("enchant", "Enchants the item in your main hand with almost every enchant. REQUIRES Creative mode.");
     }
 
     private final MinecraftClient mc = MinecraftClient.getInstance();

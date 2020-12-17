@@ -29,7 +29,7 @@ public class Peek extends Command {
             new SimpleCommandExceptionType(new LiteralText("You must be holding a shulker box."));
 
     public Peek() {
-        super("peek", "Lets you see whats inside shulker boxes.");
+        super("peek", "Lets you see what's inside shulker boxes.");
     }
 
     @Override
