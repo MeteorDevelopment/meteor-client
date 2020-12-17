@@ -29,7 +29,7 @@ public class SoundBlocker extends ToggleModule {
     );
 
     public SoundBlocker() {
-        super(Category.Misc, "sound-blocker", "Blocks selected sounds.");
+        super(Category.Misc, "sound-blocker", "Cancels out selected sounds.");
     }
 
     @EventHandler

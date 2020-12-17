@@ -29,7 +29,7 @@ public class Spam extends ToggleModule {
 
     private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
             .name("delay")
-            .description("How much ticks to wait between messages. 20 ticks = 1 second.")
+            .description("The delay between specified messages in ticks.")
             .defaultValue(20)
             .min(0)
             .sliderMax(100)
@@ -38,7 +38,7 @@ public class Spam extends ToggleModule {
 
     private final Setting<Boolean> random = sgGeneral.add(new BoolSetting.Builder()
             .name("random")
-            .description("Selects random message.")
+            .description("Selects a random message from your spam message list.")
             .defaultValue(false)
             .build()
     );
@@ -48,7 +48,7 @@ public class Spam extends ToggleModule {
     private int messageI;
 
     public Spam() {
-        super(Category.Misc, "spam", "Spams message in chat.");
+        super(Category.Misc, "spam", "Spams specified messages in chat.");
     }
 
     @Override

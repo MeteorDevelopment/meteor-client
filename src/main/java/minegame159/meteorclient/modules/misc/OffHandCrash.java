@@ -24,14 +24,14 @@ public class OffHandCrash extends ToggleModule {
 
     private final Setting<Boolean> doCrash = sgGeneral.add(new BoolSetting.Builder()
             .name("do-crash")
-            .description("Sends x number of offhand swap sound packets to the server per tick.")
+            .description("Sends X number of offhand swap sound packets to the server per tick.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Integer> speed = sgGeneral.add(new IntSetting.Builder()
             .name("speed")
-            .description("How many swaps per tick. 20 ticks = 1 second.")
+            .description("The amount of swaps measured in ticks.")
             .defaultValue(2000)
             .min(1)
             .sliderMax(10000)
@@ -40,13 +40,13 @@ public class OffHandCrash extends ToggleModule {
 
     private final Setting<Boolean> antiCrash = sgGeneral.add(new BoolSetting.Builder()
             .name("anti-crash")
-            .description("Prevents you from crashing as a result of offhand swapping.")
+            .description("Attempts to prevent you from crashing yourself.")
             .defaultValue(true)
             .build()
     );
 
     public OffHandCrash() {
-        super(Category.Misc, "offhand-crash", "Swaps your hand and offhand items very fast which can crash other players around you.");
+        super(Category.Misc, "offhand-crash", "An exploit that can crash other players by swapping back and forth between your main hand and offhand..");
     }
 
 

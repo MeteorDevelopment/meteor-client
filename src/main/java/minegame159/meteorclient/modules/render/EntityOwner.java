@@ -112,7 +112,8 @@ public class EntityOwner extends ToggleModule {
         String name = uuidToName.get(uuid);
         if (name != null) return name;
 
-        // Makes attp h request to Mojang API
+        // Makes a HTTP request to Mojang API
+        // Fixed HTTP typo Monkeygame.
         MeteorExecutor.execute(() -> {
             if (isActive()) {
                 List<UuidNameHistoryResponseItem> response = HttpUtils.get("https://api.mojang.com/user/profiles/" + uuid.toString().replace("-", "") + "/names", RESPONSE_TYPE);

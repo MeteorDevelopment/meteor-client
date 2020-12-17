@@ -16,7 +16,7 @@ import net.minecraft.entity.player.PlayerEntity;
 
 public class MiddleClickFriend extends ToggleModule {
     public MiddleClickFriend() {
-        super(Category.Misc, "middle-click-friend", "Adds/removes player as friend.");
+        super(Category.Misc, "middle-click-friend", "Adds or removes a player as a friend via middle click.");
     }
 
     @EventHandler

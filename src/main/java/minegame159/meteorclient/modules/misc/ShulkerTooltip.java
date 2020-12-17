@@ -38,14 +38,14 @@ public class ShulkerTooltip extends ToggleModule {
     
     private final Setting<Integer> lines = sgGeneral.add(new IntSetting.Builder()
             .name("lines")
-            .description("Number of lines.")
+            .description("The number of lines.")
             .defaultValue(8)
             .min(0)
             .build()
     );
 
     public ShulkerTooltip() {
-        super(Category.Misc, "shulker-tooltip", "Better shulker item tooltip.");
+        super(Category.Misc, "shulker-tooltip", "Improves Shulker Box previews.");
     }
 
     @EventHandler

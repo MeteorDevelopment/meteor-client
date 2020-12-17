@@ -47,7 +47,7 @@ public class DiscordPresence extends ToggleModule {
 
     private final Setting<Boolean> displayName = sgGeneral.add(new BoolSetting.Builder()
             .name("display-name")
-            .description("Displays your name in discord rpc.")
+            .description("Displays your name on a Discord RPC.")
             .defaultValue(true)
             .onChanged(booleanSetting -> updateDetails())
             .build()
@@ -55,7 +55,7 @@ public class DiscordPresence extends ToggleModule {
 
     private final Setting<Boolean> displayServer = sgGeneral.add(new BoolSetting.Builder()
             .name("display-server")
-            .description("Displays the server you are in.")
+            .description("Displays the server you are currently on.")
             .defaultValue(true)
             .onChanged(booleanSetting -> updateDetails())
             .build()
@@ -68,7 +68,7 @@ public class DiscordPresence extends ToggleModule {
     private SmallImage currentSmallImage;
 
     public DiscordPresence() {
-        super(Category.Misc, "discord-presence", "That stuff you see in discord");
+        super(Category.Misc, "discord-presence", "Displays a RPC for you on Discord to show that you're playing Meteor Client!");
     }
 
     @Override

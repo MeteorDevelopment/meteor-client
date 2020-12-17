@@ -46,3 +46,4 @@ public class FancyChat extends ToggleModule {
         return output;
     }
 }
+// FANCY

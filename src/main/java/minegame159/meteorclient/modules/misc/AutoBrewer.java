@@ -33,14 +33,14 @@ public class AutoBrewer extends ToggleModule {
 
     private final Setting<MyPotion> potion = sgGeneral.add(new PotionSetting.Builder()
             .name("potion")
-            .description("Potion to brew.")
+            .description("The type of potion to brew.")
             .defaultValue(MyPotion.Strength)
             .build()
     );
 
     private final Setting<Modifier> modifier = sgGeneral.add(new EnumSetting.Builder<Modifier>()
             .name("modifier")
-            .description("Modifier.")
+            .description("The modifier for the specified potion.")
             .defaultValue(Modifier.None).build()
     );
 
@@ -49,7 +49,7 @@ public class AutoBrewer extends ToggleModule {
     private int timer;
 
     public AutoBrewer() {
-        super(Category.Misc, "auto-brewer", "Automatically brews potions.");
+        super(Category.Misc, "auto-brewer", "Automatically brews specified potions.");
     }
 
     @Override
@@ -64,7 +64,7 @@ public class AutoBrewer extends ToggleModule {
     public void tick(BrewingStandScreenHandler c) {
         timer++;
 
-        // When brewing stand is opened
+        // When the brewing stand is opened.
         if (!first) {
             first = true;
 
@@ -72,32 +72,32 @@ public class AutoBrewer extends ToggleModule {
             timer = 0;
         }
 
-        // Wait for brewing to complete
+        // Wait for the brewing to complete.
         if (c.getBrewTime() != 0 || timer < 5) return;
 
         if (ingredientI == -2) {
-            // Take bottles
+            // Take the bottles.
             if (takePotions(c)) return;
             ingredientI++;
             timer = 0;
         } else if (ingredientI == -1) {
-            // Insert water bottles
+            // Insert water bottles into the brewing stand.
             if (insertWaterBottles(c)) return;
             ingredientI++;
             timer = 0;
         } else if (ingredientI < potion.get().ingredients.length) {
-            // Check fuel and insert ingredient
+            // Check for fuel for the brew and add the ingredient.
             if (checkFuel(c)) return;
             if (insertIngredient(c, potion.get().ingredients[ingredientI])) return;
             ingredientI++;
             timer = 0;
         } else if (ingredientI == potion.get().ingredients.length) {
-            // Apply modifier
+            // Apply the potion modifier.
             if (applyModifier(c)) return;
             ingredientI++;
             timer = 0;
         } else {
-            // Reset loop
+            // Reset the loop.
             ingredientI = -2;
             timer = 0;
         }
@@ -119,7 +119,7 @@ public class AutoBrewer extends ToggleModule {
             }
 
             if (slot == -1) {
-                Chat.warning(this, "Disabled because you don't have any %s left in your inventory.", item.getName().getString());
+                Chat.warning(this, "You do not have any %s left in your inventory... disabling.", item.getName().getString());
                 toggle();
                 return true;
             }
@@ -141,7 +141,7 @@ public class AutoBrewer extends ToggleModule {
         }
 
         if (slot == -1) {
-            Chat.warning(this, "Disabled because you don't have any %s left in your inventory.", ingredient.getName().getString());
+            Chat.warning(this, "You do not have any %s left in your inventory... disabling.", ingredient.getName().getString());
             toggle();
             return true;
         }
@@ -163,7 +163,7 @@ public class AutoBrewer extends ToggleModule {
             }
 
             if (slot == -1) {
-                Chat.warning(this, "Disabled because you don't have any blaze powder (as fuel) left in your inventory.");
+                Chat.warning(this, "You do not have a sufficient amount of blaze powder to use as fuel for the brew... disabling.");
                 toggle();
                 return true;
             }
@@ -195,7 +195,7 @@ public class AutoBrewer extends ToggleModule {
             }
 
             if (slot == -1) {
-                Chat.warning(this, "Disabled because you don't have any water bottles left in your inventory.");
+                Chat.warning(this, "You do not have a sufficient amount of water bottles to complete this brew... disabling.");
                 toggle();
                 return true;
             }
@@ -212,7 +212,7 @@ public class AutoBrewer extends ToggleModule {
             InvUtils.clickSlot(i, 0, SlotActionType.QUICK_MOVE);
 
             if (!c.slots.get(i).getStack().isEmpty()) {
-                Chat.warning(this, "Disabled because your inventory is full.");
+                Chat.warning(this, "You do not have a sufficient amount of inventory space... disabling.");
                 toggle();
                 return true;
             }
