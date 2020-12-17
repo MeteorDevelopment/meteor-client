@@ -312,7 +312,7 @@ public class Nametags extends ToggleModule {
                 itemX += armorWidths[i] + itemSpacing;
             }
             mc.getTextureManager().bindTexture(PlayerScreenHandler.BLOCK_ATLAS_TEXTURE);
-            ShapeBuilder.end(true);
+            ShapeBuilder.end(true, false);
 
             // Durability
             if (isDamaged) {

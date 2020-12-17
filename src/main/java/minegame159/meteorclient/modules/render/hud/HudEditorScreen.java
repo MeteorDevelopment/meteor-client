@@ -187,7 +187,7 @@ public class HudEditorScreen extends Screen {
             }
         }
 
-        ShapeBuilder.end(false);
+        ShapeBuilder.end(false, false);
         Utils.scaledProjection();
     }
 
