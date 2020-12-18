@@ -101,6 +101,15 @@ public class CrystalAura extends ToggleModule {
             .build()
     );
 
+    private final Setting<Integer> supportDelay = sgGeneral.add(new IntSetting.Builder()
+            .name("support-delay")
+            .description("The delay between support blocks being placed.")
+            .defaultValue(5)
+            .min(0)
+            .sliderMax(10)
+            .build()
+    );
+
     private final Setting<Boolean> multiTarget = sgGeneral.add(new BoolSetting.Builder()
             .name("multi-targeting")
             .description("Will calculate damage for all entities and pick a block based on target mode.")
@@ -333,6 +342,7 @@ public class CrystalAura extends ToggleModule {
     private boolean locked = false;
     private boolean canSupport;
     private int supportSlot = 0;
+    private int supportDelayLeft = supportDelay.get();
     private final Map<EndCrystalEntity, List<Double>> crystalMap = new HashMap<>();
     private final List<Double> crystalList = new ArrayList<>();
     private EndCrystalEntity bestBreak = null;
@@ -383,6 +393,7 @@ public class CrystalAura extends ToggleModule {
 
         placeDelayLeft --;
         breakDelayLeft --;
+        supportDelayLeft --;
         if (target == null) {
             heldCrystal = null;
             locked = false;
@@ -657,7 +668,10 @@ public class CrystalAura extends ToggleModule {
         assert mc.player != null;
         assert mc.interactionManager != null;
         assert mc.world != null;
-        if (mc.world.isAir(new BlockPos(block)))PlayerUtils.placeBlock(new BlockPos(block), supportSlot, Hand.MAIN_HAND);
+        if (mc.world.isAir(new BlockPos(block))) {
+            PlayerUtils.placeBlock(new BlockPos(block), supportSlot, Hand.MAIN_HAND);
+            supportDelayLeft = supportDelay.get();
+        }
         float yaw = mc.player.yaw;
         float pitch = mc.player.pitch;
         Vec3d vec1 = block.add(0.5, 1.5, 0.5);
@@ -790,7 +804,7 @@ public class CrystalAura extends ToggleModule {
 
     private boolean isValid(BlockPos blockPos){
         assert mc.world != null;
-        return (((canSupport && isEmpty(blockPos) && blockPos.getY() < target.getBlockPos().getY()) || (mc.world.getBlockState(blockPos).getBlock() == Blocks.BEDROCK
+        return (((canSupport && isEmpty(blockPos) && blockPos.getY() - target.getBlockPos().getY() == -1 && supportDelayLeft <= 0) || (mc.world.getBlockState(blockPos).getBlock() == Blocks.BEDROCK
                 || mc.world.getBlockState(blockPos).getBlock() == Blocks.OBSIDIAN))
                 && isEmpty(blockPos.add(0, 1, 0)));
     }
