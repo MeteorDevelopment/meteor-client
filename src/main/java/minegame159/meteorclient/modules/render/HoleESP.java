@@ -28,7 +28,8 @@ public class HoleESP extends ToggleModule {
     public enum Mode {
         Flat,
         Box,
-        BoxBelow
+        BoxBelow,
+        Glow
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -63,6 +64,14 @@ public class HoleESP extends ToggleModule {
             .name("hole-height")
             .description("Minimum hole height required to be rendered.")
             .defaultValue(3)
+            .min(1)
+            .build()
+    );
+
+    private final Setting<Double> glowHeight = sgGeneral.add(new DoubleSetting.Builder()
+            .name("glow-height")
+            .description("The height of the glow when Glow mode is active")
+            .defaultValue(1.5)
             .min(1)
             .build()
     );
@@ -106,6 +115,7 @@ public class HoleESP extends ToggleModule {
     private final Pool<Hole> holePool = new Pool<>(Hole::new);
     private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
     private final List<Hole> holes = new ArrayList<>();
+    private final Color transparent = new Color(0, 0, 0, 0);
 
     public HoleESP() {
         super(Category.Render, "hole-esp", "Displays safe holes that you will take less damage in.");
@@ -186,6 +196,9 @@ public class HoleESP extends ToggleModule {
                     }
                     ShapeBuilder.blockEdges(x, y - 1, z, hole.colorLines, null);
                     break;
+                case Glow:
+                    ShapeBuilder.emptyQuadWithLines(x, y, z, hole.colorLines); //Don't depth test this
+                    ShapeBuilder.gradientBoxSides(x, y, glowHeight.get(), z, hole.colorSides, transparent, null); //Add depth test just to this method if possible
             }
         }
     });
