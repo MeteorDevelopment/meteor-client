@@ -22,13 +22,13 @@ public class ShapeBuilder {
         Matrices.push();
     }
 
-    public static void end(boolean texture) {
-        triangles.end(texture);
+    public static void end(boolean texture, boolean depthTest) {
+        triangles.end(texture, depthTest);
         triangles = Renderer.TRIANGLES;
         Matrices.pop();
     }
     public static void end() {
-        end(false);
+        end(false, false);
     }
 
     // Quad
@@ -185,5 +185,26 @@ public class ShapeBuilder {
     }
     public static void emptyQuadWithLines(double x, double y, double z, Color lineColor) {
         emptyQuadWithLines(x, y, z, 1, 1, lineColor);
+    }
+
+    public static void gradientQuad(double x1, double y1, double z1, double x2, double y2, double z2, double x3, double y3, double z3, double x4, double y4, double z4, Color startColor, Color endColor) {
+        triangles.pos(x1, y1, z1).color(startColor).endVertex();
+        triangles.pos(x2, y2, z2).color(endColor).endVertex();
+        triangles.pos(x3, y3, z3).color(endColor).endVertex();
+
+        triangles.pos(x1, y1, z1).color(startColor).endVertex();
+        triangles.pos(x3, y3, z3).color(endColor).endVertex();
+        triangles.pos(x4, y4, z4).color(startColor).endVertex();
+    }
+
+    public static void gradientBoxSides(double x1, double y1, double z1, double x2, double y2, double z2, Color startColor, Color endColor, Direction excludeDir) {
+        if (excludeDir != Direction.NORTH) gradientQuad(x1, y1, z1, x1, y2, z1, x2, y2, z1, x2, y1, z1, startColor, endColor); // Front
+        if (excludeDir != Direction.SOUTH) gradientQuad(x1, y1, z2, x1, y2, z2, x2, y2, z2, x2, y1, z2, startColor, endColor); // Back
+        if (excludeDir != Direction.WEST) gradientQuad(x1, y1, z1, x1, y2, z1, x1, y2, z2, x1, y1, z2, startColor, endColor); // Left
+        if (excludeDir != Direction.EAST) gradientQuad(x2, y1, z1, x2, y2, z1, x2, y2, z2, x2, y1, z2, startColor, endColor); // Right
+    }
+
+    public static void gradientBoxSides(double x, double y, double y2, double z, Color startColor, Color endColor, Direction excludeDir) {
+        gradientBoxSides(x, y, z, x + 1, y + y2, z + 1, startColor, endColor, excludeDir);
     }
 }
