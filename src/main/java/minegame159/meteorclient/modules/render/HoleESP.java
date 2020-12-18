@@ -7,11 +7,12 @@ package minegame159.meteorclient.modules.render;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.world.PreTickEvent;
 import minegame159.meteorclient.events.render.RenderEvent;
+import minegame159.meteorclient.events.world.PreTickEvent;
 import minegame159.meteorclient.mixin.AbstractBlockAccessor;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.rendering.MeshBuilder;
 import minegame159.meteorclient.rendering.ShapeBuilder;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.BlockIterator;
@@ -19,7 +20,9 @@ import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.Pool;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
+import net.minecraft.client.render.VertexFormats;
 import net.minecraft.util.math.BlockPos;
+import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,13 +35,15 @@ public class HoleESP extends ToggleModule {
         Glow
     }
 
+    private static final MeshBuilder MESH_BUILDER = new MeshBuilder(1024);
+
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgColors = settings.createGroup("Colors");
 
     private final Setting<Mode> renderMode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("render-mode")
             .description("The rendering mode.")
-            .defaultValue(Mode.Flat)
+            .defaultValue(Mode.Glow)
             .build()
     );
 
@@ -71,7 +76,7 @@ public class HoleESP extends ToggleModule {
     private final Setting<Double> glowHeight = sgGeneral.add(new DoubleSetting.Builder()
             .name("glow-height")
             .description("The height of the glow when Glow mode is active")
-            .defaultValue(1.5)
+            .defaultValue(3)
             .min(1)
             .build()
     );
@@ -174,6 +179,10 @@ public class HoleESP extends ToggleModule {
 
     @EventHandler
     private final Listener<RenderEvent> onRender = new Listener<>(event -> {
+        if (renderMode.get() == Mode.Glow) {
+            MESH_BUILDER.begin(event, GL11.GL_TRIANGLES, VertexFormats.POSITION_COLOR);
+        }
+
         for (Hole hole : holes) {
             int x = hole.blockPos.getX();
             int y = hole.blockPos.getY();
@@ -197,9 +206,18 @@ public class HoleESP extends ToggleModule {
                     ShapeBuilder.blockEdges(x, y - 1, z, hole.colorLines, null);
                     break;
                 case Glow:
-                    ShapeBuilder.emptyQuadWithLines(x, y, z, hole.colorLines); //Don't depth test this
-                    ShapeBuilder.gradientBoxSides(x, y, glowHeight.get(), z, hole.colorSides, transparent, null); //Add depth test just to this method if possible
+                    ShapeBuilder.emptyQuadWithLines(x, y, z, hole.colorLines);
+
+                    MeshBuilder mb = ShapeBuilder.triangles;
+                    ShapeBuilder.triangles = MESH_BUILDER;
+                    ShapeBuilder.gradientBoxSides(x, y, glowHeight.get(), z, hole.colorSides, transparent, null);
+                    ShapeBuilder.triangles = mb;
+                    break;
             }
+        }
+
+        if (renderMode.get() == Mode.Glow) {
+            MESH_BUILDER.end(false, true);
         }
     });
 
@@ -207,6 +225,7 @@ public class HoleESP extends ToggleModule {
         blockPos.setX(blockPos.getX() + x);
         blockPos.setY(blockPos.getY() + y);
         blockPos.setZ(blockPos.getZ() + z);
+
         return blockPos;
     }
 
@@ -217,10 +236,12 @@ public class HoleESP extends ToggleModule {
 
         public Hole set(BlockPos blockPos, Color color) {
             this.blockPos.set(blockPos);
+
             colorLines.set(color);
             colorSides.set(color);
             colorSides.a -= 175;
             colorSides.validate();
+
             return this;
         }
     }
