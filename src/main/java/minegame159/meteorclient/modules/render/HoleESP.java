@@ -12,8 +12,10 @@ import minegame159.meteorclient.events.world.PreTickEvent;
 import minegame159.meteorclient.mixin.AbstractBlockAccessor;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.rendering.DrawMode;
 import minegame159.meteorclient.rendering.MeshBuilder;
-import minegame159.meteorclient.rendering.ShapeBuilder;
+import minegame159.meteorclient.rendering.Renderer;
+import minegame159.meteorclient.rendering.ShapeMode;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.BlockIterator;
 import minegame159.meteorclient.utils.Color;
@@ -22,7 +24,6 @@ import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.util.math.BlockPos;
-import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +36,12 @@ public class HoleESP extends ToggleModule {
         Glow
     }
 
-    private static final MeshBuilder MESH_BUILDER = new MeshBuilder(1024);
+    private static final MeshBuilder MB;
+
+    static {
+        MB = new MeshBuilder(1024);
+        MB.depthTest = true;
+    }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgColors = settings.createGroup("Colors");
@@ -44,6 +50,13 @@ public class HoleESP extends ToggleModule {
             .name("render-mode")
             .description("The rendering mode.")
             .defaultValue(Mode.Glow)
+            .build()
+    );
+
+    private final Setting<ShapeMode> shapeMode = sgGeneral.add(new EnumSetting.Builder<ShapeMode>()
+            .name("shape-mode")
+            .description("How the shapes are rendered.")
+            .defaultValue(ShapeMode.Lines)
             .build()
     );
 
@@ -110,13 +123,6 @@ public class HoleESP extends ToggleModule {
             .build()
     );
 
-    private final Setting<Boolean> fill = sgColors.add(new BoolSetting.Builder()
-            .name("fill")
-            .description("Fills the shapes rendered.")
-            .defaultValue(true)
-            .build()
-    );
-
     private final Pool<Hole> holePool = new Pool<>(Hole::new);
     private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
     private final List<Hole> holes = new ArrayList<>();
@@ -180,7 +186,7 @@ public class HoleESP extends ToggleModule {
     @EventHandler
     private final Listener<RenderEvent> onRender = new Listener<>(event -> {
         if (renderMode.get() == Mode.Glow) {
-            MESH_BUILDER.begin(event, GL11.GL_TRIANGLES, VertexFormats.POSITION_COLOR);
+            MB.begin(event, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
         }
 
         for (Hole hole : holes) {
@@ -190,34 +196,23 @@ public class HoleESP extends ToggleModule {
 
             switch (renderMode.get()) {
                 case Flat:
-                    if (fill.get()) ShapeBuilder.quadWithLines(x, y, z, hole.colorSides, hole.colorLines);
-                    else ShapeBuilder.emptyQuadWithLines(x, y, z, hole.colorLines);
+                    Renderer.quadWithLinesHorizontal(Renderer.NORMAL, Renderer.LINES, x, y, z, 1, hole.colorSides, hole.colorLines, shapeMode.get());
                     break;
                 case Box:
-                    if (fill.get()) {
-                        ShapeBuilder.blockSides(x, y, z, hole.colorSides, null);
-                    }
-                    ShapeBuilder.blockEdges(x, y, z, hole.colorLines, null);
+                    Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x, y, z, 1, hole.colorSides, hole.colorLines, shapeMode.get(), 0);
                     break;
                 case BoxBelow:
-                    if (fill.get()) {
-                        ShapeBuilder.blockSides(x, y - 1, z, hole.colorSides, null);
-                    }
-                    ShapeBuilder.blockEdges(x, y - 1, z, hole.colorLines, null);
+                    Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x, y - 1, z, 1, hole.colorSides, hole.colorLines, shapeMode.get(), 0);
                     break;
                 case Glow:
-                    ShapeBuilder.emptyQuadWithLines(x, y, z, hole.colorLines);
-
-                    MeshBuilder mb = ShapeBuilder.triangles;
-                    ShapeBuilder.triangles = MESH_BUILDER;
-                    ShapeBuilder.gradientBoxSides(x, y, glowHeight.get(), z, hole.colorSides, transparent, null);
-                    ShapeBuilder.triangles = mb;
+                    Renderer.quadWithLinesHorizontal(Renderer.NORMAL, Renderer.LINES, x, y, z, 1, hole.colorSides, hole.colorLines, shapeMode.get());
+                    MB.gradientBoxSides(x, y, z, x + 1, y + glowHeight.get(), z + 1, hole.colorSides, transparent);
                     break;
             }
         }
 
         if (renderMode.get() == Mode.Glow) {
-            MESH_BUILDER.end(false, true);
+            MB.end();
         }
     });
 

@@ -13,9 +13,10 @@ import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.events.game.GameJoinedEvent;
 import minegame159.meteorclient.events.game.GameLeftEvent;
 import minegame159.meteorclient.events.render.RenderEvent;
+import minegame159.meteorclient.rendering.DrawMode;
 import minegame159.meteorclient.rendering.Fonts;
 import minegame159.meteorclient.rendering.Matrices;
-import minegame159.meteorclient.rendering.ShapeBuilder;
+import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.utils.*;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.Camera;
@@ -24,7 +25,6 @@ import net.minecraft.client.texture.AbstractTexture;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.NativeImageBackedTexture;
 import net.minecraft.nbt.CompoundTag;
-import org.lwjgl.opengl.GL11;
 
 import java.io.*;
 import java.util.*;
@@ -142,10 +142,10 @@ public class Waypoints extends Savable<Waypoints> implements Listenable, Iterabl
             double i = ii * 0.25;
             double ii2 = Fonts.get(2).getWidth(distText) / 2.0;
             double i2 = ii2 * 0.25;
-            ShapeBuilder.begin(null, GL11.GL_TRIANGLES, VertexFormats.POSITION_COLOR);
-            ShapeBuilder.quad(-i - 1, -Fonts.get(2).getHeight() * 0.25 + 1, 0, -i - 1, 9 - Fonts.get(2).getHeight() * 0.25, 0, i + 1, 9 - Fonts.get(2).getHeight() * 0.25, 0, i + 1, -Fonts.get(2).getHeight() * 0.25 + 1, 0, BACKGROUND);
-            ShapeBuilder.quad(-i2 - 1, 0, 0, -i2 - 1, 8, 0, i2 + 1, 8, 0, i2 + 1, 0, 0, BACKGROUND);
-            ShapeBuilder.end();
+            Renderer.NORMAL.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
+            Renderer.NORMAL.quad(-i - 1, -Fonts.get(2).getHeight() * 0.25 + 1, 0, -i - 1, 9 - Fonts.get(2).getHeight() * 0.25, 0, i + 1, 9 - Fonts.get(2).getHeight() * 0.25, 0, i + 1, -Fonts.get(2).getHeight() * 0.25 + 1, 0, BACKGROUND);
+            Renderer.NORMAL.quad(-i2 - 1, 0, 0, -i2 - 1, 8, 0, i2 + 1, 8, 0, i2 + 1, 0, 0, BACKGROUND);
+            Renderer.NORMAL.end();
 
             waypoint.renderIcon(-8, 9, 0, a, 16);
 

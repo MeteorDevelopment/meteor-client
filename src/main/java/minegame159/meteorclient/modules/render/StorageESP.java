@@ -10,26 +10,21 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
-import minegame159.meteorclient.rendering.ShapeBuilder;
+import minegame159.meteorclient.rendering.Renderer;
+import minegame159.meteorclient.rendering.ShapeMode;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Color;
+import minegame159.meteorclient.utils.Dir;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.ChestBlock;
 import net.minecraft.block.entity.*;
 import net.minecraft.block.enums.ChestType;
-import net.minecraft.util.math.Direction;
 
 import java.util.Arrays;
 import java.util.List;
 
 public class StorageESP extends ToggleModule {
-    public enum Mode {
-        Lines,
-        Sides,
-        Both
-    }
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<List<BlockEntityType<?>>> storageBlocks = sgGeneral.add(new StorageBlockListSetting.Builder()
@@ -39,10 +34,10 @@ public class StorageESP extends ToggleModule {
             .build()
     );
 
-    private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
-            .name("mode")
-            .description("The rendering mode.")
-            .defaultValue(Mode.Both)
+    private final Setting<ShapeMode> shapeMode = sgGeneral.add(new EnumSetting.Builder<ShapeMode>()
+            .name("shape-mode")
+            .description("How the shapes are rendered.")
+            .defaultValue(ShapeMode.Both)
             .build()
     );
 
@@ -113,7 +108,7 @@ public class StorageESP extends ToggleModule {
 
         render = true;
 
-        if (mode.get() == Mode.Sides || mode.get() == Mode.Both) {
+        if (shapeMode.get() == ShapeMode.Sides || shapeMode.get() == ShapeMode.Both) {
             sideColor.set(lineColor);
             sideColor.a -= 225;
             if (sideColor.a < 0) sideColor.a = 0;
@@ -138,23 +133,23 @@ public class StorageESP extends ToggleModule {
                 double y2 = blockEntity.getPos().getY() + 1;
                 double z2 = blockEntity.getPos().getZ() + 1;
 
-                Direction excludeDir = null;
+                int excludeDir = 0;
                 if (blockEntity instanceof ChestBlockEntity) {
                     BlockState state = mc.world.getBlockState(blockEntity.getPos());
                     if ((state.getBlock() == Blocks.CHEST || state.getBlock() == Blocks.TRAPPED_CHEST) && state.get(ChestBlock.CHEST_TYPE) != ChestType.SINGLE) {
-                        excludeDir = ChestBlock.getFacing(state);
+                        excludeDir = Dir.get(ChestBlock.getFacing(state));
                     }
                 }
 
                 if (blockEntity instanceof ChestBlockEntity || blockEntity instanceof EnderChestBlockEntity) {
                     double a = 1.0 / 16.0;
 
-                    if (excludeDir != Direction.WEST) x1 += a;
-                    if (excludeDir != Direction.NORTH) z1 += a;
+                    if (Dir.is(excludeDir, Dir.WEST)) x1 += a;
+                    if (Dir.is(excludeDir, Dir.NORTH)) z1 += a;
 
-                    if (excludeDir != Direction.EAST) x2 -= a;
+                    if (Dir.is(excludeDir, Dir.EAST)) x2 -= a;
                     y2 -= a * 2;
-                    if (excludeDir != Direction.SOUTH) z2 -= a;
+                    if (Dir.is(excludeDir, Dir.SOUTH)) z2 -= a;
                 }
 
                 double dist = mc.player.squaredDistanceTo(blockEntity.getPos().getX() + 1, blockEntity.getPos().getY() + 1, blockEntity.getPos().getZ() + 1);
@@ -168,12 +163,7 @@ public class StorageESP extends ToggleModule {
                 sideColor.a *= a;
 
                 if (a >= 0.075) {
-                    if (mode.get() == Mode.Lines) ShapeBuilder.boxEdges(x1, y1, z1, x2, y2, z2, lineColor, excludeDir);
-                    else if (mode.get() == Mode.Sides) ShapeBuilder.boxSides(x1, y1, z1, x2, y2, z2, sideColor, excludeDir);
-                    else {
-                        ShapeBuilder.boxEdges(x1, y1, z1, x2, y2, z2, lineColor, excludeDir);
-                        ShapeBuilder.boxSides(x1, y1, z1, x2, y2, z2, sideColor, excludeDir);
-                    }
+                    Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x1, y1, z1, x2, y2, z2, sideColor, lineColor, shapeMode.get(), excludeDir);
                 }
 
                 lineColor.a = prevLineA;

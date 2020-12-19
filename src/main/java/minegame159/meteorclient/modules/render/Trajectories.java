@@ -11,8 +11,10 @@ import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
-import minegame159.meteorclient.rendering.ShapeBuilder;
+import minegame159.meteorclient.rendering.Renderer;
+import minegame159.meteorclient.rendering.ShapeMode;
 import minegame159.meteorclient.settings.ColorSetting;
+import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.Color;
@@ -30,10 +32,24 @@ import java.util.List;
 
 public class Trajectories extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+
+    private final Setting<ShapeMode> shapeMode = sgGeneral.add(new EnumSetting.Builder<ShapeMode>()
+            .name("shape-mode")
+            .description("How the shapes are rendered.")
+            .defaultValue(ShapeMode.Both)
+            .build()
+    );
+
+    private final Setting<Color> sideColor = sgGeneral.add(new ColorSetting.Builder()
+            .name("side-color")
+            .description("The side color.")
+            .defaultValue(new Color(255, 150, 0, 35))
+            .build()
+    );
     
-    private final Setting<Color> color = sgGeneral.add(new ColorSetting.Builder()
-            .name("color")
-            .description("The color.")
+    private final Setting<Color> lineColor = sgGeneral.add(new ColorSetting.Builder()
+            .name("line-color")
+            .description("The line color.")
             .defaultValue(new Color(255, 150, 0))
             .build()
     );
@@ -43,7 +59,6 @@ public class Trajectories extends ToggleModule {
 
     private boolean hitQuad, hitQuadHorizontal;
     private double hitQuadX1, hitQuadY1, hitQuadZ1, hitQuadX2, hitQuadY2, hitQuadZ2;
-    private final Color hitQuadColor = new Color();
 
     public Trajectories() {
         super(Category.Render, "trajectories", "Predicts the trajectory of throwable items.");
@@ -61,16 +76,13 @@ public class Trajectories extends ToggleModule {
 
         Vec3d lastPoint = null;
         for (Vec3d point : path) {
-            if (lastPoint != null) ShapeBuilder.line(lastPoint.x, lastPoint.y, lastPoint.z, point.x, point.y, point.z, color.get());
+            if (lastPoint != null) Renderer.LINES.line(lastPoint.x, lastPoint.y, lastPoint.z, point.x, point.y, point.z, lineColor.get());
             lastPoint = point;
         }
 
         if (hitQuad) {
-            hitQuadColor.set(color.get());
-            hitQuadColor.a = 35;
-
-            if (hitQuadHorizontal) ShapeBuilder.quadWithLines(hitQuadX1, hitQuadY1, hitQuadZ1, 0.5, 0.5, hitQuadColor, color.get());
-            else ShapeBuilder.quadWithLinesVertical(hitQuadX1, hitQuadY1, hitQuadZ1, hitQuadX2, hitQuadY2, hitQuadZ2, hitQuadColor, color.get());
+            if (hitQuadHorizontal) Renderer.quadWithLinesHorizontal(Renderer.NORMAL, Renderer.LINES, hitQuadX1, hitQuadY1, hitQuadZ1, 0.5, sideColor.get(), lineColor.get(), shapeMode.get());
+            else Renderer.quadWithLinesVertical(Renderer.NORMAL, Renderer.LINES, hitQuadX1, hitQuadY1, hitQuadZ1, hitQuadX2, hitQuadY2, hitQuadZ2, sideColor.get(), lineColor.get(), shapeMode.get());
         }
     });
 

@@ -55,6 +55,15 @@ public class Color implements ISerializable<Color> {
         this.a = color.getAlpha();
     }
 
+    public void set(int r, int g, int b, int a) {
+        this.r = r;
+        this.g = g;
+        this.b = b;
+        this.a = a;
+
+        validate();
+    }
+
     public void set(Color value) {
         r = value.r;
         g = value.g;

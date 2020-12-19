@@ -11,7 +11,6 @@ import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.texture.AbstractTexture;
 import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.GL11;
 import org.lwjgl.stb.STBTTFontinfo;
 import org.lwjgl.stb.STBTTPackContext;
 import org.lwjgl.stb.STBTTPackedchar;
@@ -91,6 +90,8 @@ public class MyFont {
                     packedChar.xadvance()
             );
         }
+
+        mb.texture = true;
     }
 
     public double getWidth(String string, int length) {
@@ -117,7 +118,7 @@ public class MyFont {
     public void begin(double scale) {
         this.mScale = scale;
 
-        mb.begin(GL11.GL_TRIANGLES, VertexFormats.POSITION_COLOR_TEXTURE);
+        mb.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR_TEXTURE);
     }
     public void begin() {
         begin(1);
@@ -129,7 +130,7 @@ public class MyFont {
 
     public void end() {
         texture.bindTexture();
-        mb.end(true);
+        mb.end();
     }
 
     public void render(String string, double x, double y, Color color) {
