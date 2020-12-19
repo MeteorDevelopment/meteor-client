@@ -7,15 +7,15 @@ package minegame159.meteorclient.modules.combat;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.game.OpenScreenEvent;
 import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.player.FakePlayer;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Chat;
+import minegame159.meteorclient.utils.FakePlayerEntity;
 import minegame159.meteorclient.utils.PlayerUtils;
-import net.minecraft.client.gui.screen.ingame.AnvilScreen;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
@@ -85,10 +85,16 @@ public class AutoAnvil extends ToggleModule {
         for (PlayerEntity player : mc.world.getPlayers()) {
             if (player == mc.player || !FriendManager.INSTANCE.attack(player) || !player.isAlive() || mc.player.distanceTo(player) > range.get()) continue;
 
-            if (target == null) {
-                target = player;
-            } else if (mc.player.distanceTo(target) > mc.player.distanceTo(player)) {
-                target = player;
+            if (target == null) target = player;
+            else if (mc.player.distanceTo(target) > mc.player.distanceTo(player)) target = player;
+        }
+
+        if (target == null) {
+            for (FakePlayerEntity player : FakePlayer.players.keySet()) {
+                if (!FriendManager.INSTANCE.attack(player) || !player.isAlive() || mc.player.distanceTo(player) > range.get()) continue;
+
+                if (target == null) target = player;
+                else if (mc.player.distanceTo(target) > mc.player.distanceTo(player)) target = player;
             }
         }
 
@@ -96,8 +102,6 @@ public class AutoAnvil extends ToggleModule {
             Chat.info(this, "Target head slot is empty… Disabling.");
             toggle();
         }
-
-
 
         int anvilSlot = -1;
         for (int i = 0; i < 9; i++) {
@@ -114,7 +118,7 @@ public class AutoAnvil extends ToggleModule {
         for (int i = 0; i < 9; i++) {
             Item item = mc.player.inventory.getStack(i).getItem();
 
-            if (item == Items.ACACIA_BUTTON || item == Items.OAK_BUTTON || item == Items.STONE_BUTTON || item == Items.SPRUCE_BUTTON || item == Items.BIRCH_BUTTON || item == Items.BIRCH_BUTTON || item == Items.JUNGLE_BUTTON || item == Items.DARK_OAK_BUTTON || item == Items.CRIMSON_BUTTON || item == Items.WARPED_BUTTON || item == Items.POLISHED_BLACKSTONE_BUTTON) {
+            if (item == Items.ACACIA_BUTTON || item == Items.OAK_BUTTON || item == Items.STONE_BUTTON || item == Items.SPRUCE_BUTTON || item == Items.BIRCH_BUTTON || item == Items.JUNGLE_BUTTON || item == Items.DARK_OAK_BUTTON || item == Items.CRIMSON_BUTTON || item == Items.WARPED_BUTTON || item == Items.POLISHED_BLACKSTONE_BUTTON) {
                 buttonSlot = i;
                 break;
             }
@@ -142,10 +146,5 @@ public class AutoAnvil extends ToggleModule {
 
             mc.player.inventory.selectedSlot = prevSlot;
         }
-    });
-
-    @EventHandler
-    private final Listener<OpenScreenEvent> onOpenScreen = new Listener<>(event -> {
-        if (target != null && event.screen instanceof AnvilScreen) event.cancel();
     });
 }
