@@ -10,7 +10,8 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
-import minegame159.meteorclient.rendering.ShapeBuilder;
+import minegame159.meteorclient.rendering.Renderer;
+import minegame159.meteorclient.rendering.ShapeMode;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.CityUtils;
 import minegame159.meteorclient.utils.Color;
@@ -19,8 +20,10 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 
 public class CityEsp extends ToggleModule {
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgRender = settings.createGroup("Render");
+
+    // General
 
     private final Setting<Integer> range = sgGeneral.add(new IntSetting.Builder()
             .name("range")
@@ -31,16 +34,25 @@ public class CityEsp extends ToggleModule {
             .build()
     );
 
-    private final Setting<Color> fillColor = sgGeneral.add(new ColorSetting.Builder()
+    // Render
+
+    private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
+            .name("shape-mode")
+            .description("How the shapes are rendered.")
+            .defaultValue(ShapeMode.Both)
+            .build()
+    );
+
+    private final Setting<Color> sideColor = sgRender.add(new ColorSetting.Builder()
             .name("fill-color")
             .description("The fill color the city block will render as.")
             .defaultValue(new Color(225, 0, 0, 75))
             .build()
     );
 
-    private final Setting<Color> outlineColor = sgGeneral.add(new ColorSetting.Builder()
+    private final Setting<Color> lineColor = sgRender.add(new ColorSetting.Builder()
             .name("outline-color")
-            .description("The outline color the city block will render as.")
+            .description("The line color the city block will render as.")
             .defaultValue(new Color(225, 0, 0, 255))
             .build()
     );
@@ -60,7 +72,6 @@ public class CityEsp extends ToggleModule {
         int y = targetBlock.getY();
         int z = targetBlock.getZ();
 
-        ShapeBuilder.blockSides(x, y, z, fillColor.get(), null);
-        ShapeBuilder.blockEdges(x, y, z, outlineColor.get(), null);
+        Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x, y, z, 1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
     });
 }

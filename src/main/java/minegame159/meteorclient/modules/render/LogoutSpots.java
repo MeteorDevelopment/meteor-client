@@ -10,16 +10,15 @@ import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.entity.EntityAddedEvent;
-import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.events.render.RenderEvent;
+import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.rendering.DrawMode;
 import minegame159.meteorclient.rendering.Matrices;
-import minegame159.meteorclient.rendering.ShapeBuilder;
-import minegame159.meteorclient.settings.ColorSetting;
-import minegame159.meteorclient.settings.DoubleSetting;
-import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.rendering.Renderer;
+import minegame159.meteorclient.rendering.ShapeMode;
+import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.Dimension;
 import minegame159.meteorclient.utils.Utils;
@@ -29,7 +28,6 @@ import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
-import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,8 +41,9 @@ public class LogoutSpots extends ToggleModule {
     private static final Color RED = new Color(225, 25, 25);
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    
-    private final Color sideColor = new Color();
+    private final SettingGroup sgRender = settings.getDefaultGroup();
+
+    // General
 
     private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
             .name("scale")
@@ -54,15 +53,26 @@ public class LogoutSpots extends ToggleModule {
             .build()
     );
 
-    private final Setting<Color> lineColor = sgGeneral.add(new ColorSetting.Builder()
-            .name("color")
-            .description("The color.")
+    // Render
+
+    private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
+            .name("shape-mode")
+            .description("How the shapes are rendered.")
+            .defaultValue(ShapeMode.Both)
+            .build()
+    );
+
+    private final Setting<Color> sideColor = sgRender.add(new ColorSetting.Builder()
+            .name("side-color")
+            .description("The side color.")
+            .defaultValue(new Color(255, 0, 255, 55))
+            .build()
+    );
+
+    private final Setting<Color> lineColor = sgRender.add(new ColorSetting.Builder()
+            .name("line-color")
+            .description("The line color.")
             .defaultValue(new Color(255, 0, 255))
-            .onChanged(color1 -> {
-                sideColor.set(color1);
-                sideColor.a -= 200;
-                sideColor.validate();
-            })
             .build()
     );
 
@@ -208,7 +218,7 @@ public class LogoutSpots extends ToggleModule {
             double healthPercentage = (double) health / maxHealth;
 
             // Render quad
-            ShapeBuilder.quadWithLines(x, y, z, width, height, sideColor, lineColor.get());
+            Renderer.quadWithLinesHorizontal(Renderer.NORMAL, Renderer.LINES, x, y, z, width, sideColor.get(), lineColor.get(), shapeMode.get());
 
             // Get health color
             Color healthColor;
@@ -225,9 +235,9 @@ public class LogoutSpots extends ToggleModule {
 
             // Render background
             double i = MeteorClient.FONT_2X.getStringWidth(name) / 2.0 + MeteorClient.FONT_2X.getStringWidth(healthText) / 2.0;
-            ShapeBuilder.begin(null, GL11.GL_TRIANGLES, VertexFormats.POSITION_COLOR);
-            ShapeBuilder.quad(-i - 1, -1, 0, -i - 1, 8, 0, i + 1, 8, 0, i + 1, -1, 0, BACKGROUND);
-            ShapeBuilder.end();
+            Renderer.NORMAL.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
+            Renderer.NORMAL.quad(-i - 1, -1, 0, -i - 1, 8, 0, i + 1, 8, 0, i + 1, -1, 0, BACKGROUND);
+            Renderer.NORMAL.end();
 
             // Render name and health texts
             MeteorClient.FONT_2X.begin();

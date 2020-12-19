@@ -7,11 +7,11 @@ package minegame159.meteorclient.modules.render.hud.modules;
 
 import minegame159.meteorclient.modules.render.hud.HUD;
 import minegame159.meteorclient.modules.render.hud.HudRenderer;
-import minegame159.meteorclient.rendering.ShapeBuilder;
+import minegame159.meteorclient.rendering.DrawMode;
+import minegame159.meteorclient.rendering.Renderer;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.client.render.VertexFormats;
-import org.lwjgl.opengl.GL11;
 
 public class PlayerModelHud extends HudModule {
     public PlayerModelHud(HUD hud) {
@@ -31,9 +31,9 @@ public class PlayerModelHud extends HudModule {
         int y = box.getY();
 
         if (hud.playerModelBackground()) {
-            ShapeBuilder.begin(null, GL11.GL_TRIANGLES, VertexFormats.POSITION_COLOR);
-            ShapeBuilder.quad(x, y, box.width, box.height, hud.playerModelColor());
-            ShapeBuilder.end();
+            Renderer.NORMAL.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
+            Renderer.NORMAL.quad(x, y, box.width, box.height, hud.playerModelColor());
+            Renderer.NORMAL.end();
         }
 
         if (mc.player != null) {

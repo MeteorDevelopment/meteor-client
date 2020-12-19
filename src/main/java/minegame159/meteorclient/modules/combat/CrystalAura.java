@@ -15,7 +15,8 @@ import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
-import minegame159.meteorclient.rendering.ShapeBuilder;
+import minegame159.meteorclient.rendering.Renderer;
+import minegame159.meteorclient.rendering.ShapeMode;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.*;
 import net.minecraft.block.Blocks;
@@ -292,6 +293,8 @@ public class CrystalAura extends ToggleModule {
             .build()
     );
 
+    // Render
+
     private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
             .name("render")
             .description("Render the block under where it is placing a crystal.")
@@ -299,16 +302,23 @@ public class CrystalAura extends ToggleModule {
             .build()
     );
 
-    private final Setting<Color> renderColor = sgRender.add(new ColorSetting.Builder()
-            .name("render-color")
-            .description("The render color.")
+    private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
+            .name("shape-mode")
+            .description("How the shapes are rendered.")
+            .defaultValue(ShapeMode.Lines)
+            .build()
+    );
+
+    private final Setting<Color> sideColor = sgRender.add(new ColorSetting.Builder()
+            .name("side-color")
+            .description("The side color.")
             .defaultValue(new Color(255, 255, 255, 75))
             .build()
     );
 
-    private final Setting<Color> outlineColor = sgRender.add(new ColorSetting.Builder()
-            .name("outline-color")
-            .description("The outline color.")
+    private final Setting<Color> lineColor = sgRender.add(new ColorSetting.Builder()
+            .name("line-color")
+            .description("The line color.")
             .defaultValue(new Color(255, 255, 255, 255))
             .build()
     );
@@ -321,8 +331,6 @@ public class CrystalAura extends ToggleModule {
             .sliderMax(10)
             .build()
     );
-
-    private final Color sideColor = new Color();
 
     public CrystalAura() {
         super(Category.Combat, "crystal-aura", "Automatically places and breaks crystals to damage other players.");
@@ -503,9 +511,6 @@ public class CrystalAura extends ToggleModule {
     @EventHandler
     private final Listener<RenderEvent> onRender = new Listener<>(event -> {
         if (render.get()) {
-            sideColor.set(renderColor.get());
-            sideColor.a = 45;
-
             for (RenderBlock renderBlock : renderBlocks) {
                 renderBlock.render();
             }
@@ -848,8 +853,7 @@ public class CrystalAura extends ToggleModule {
         }
 
         public void render() {
-            ShapeBuilder.boxSides(x, y, z, x+1, y+1, z+1, renderColor.get());
-            ShapeBuilder.boxEdges(x, y, z, x+1, y+1, z+1, outlineColor.get());
+            Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x, y, z, 1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
         }
     }
 

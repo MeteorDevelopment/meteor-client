@@ -9,6 +9,7 @@ import it.unimi.dsi.fastutil.Stack;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import minegame159.meteorclient.gui.GuiConfig;
 import minegame159.meteorclient.gui.widgets.WWidget;
+import minegame159.meteorclient.rendering.DrawMode;
 import minegame159.meteorclient.rendering.Fonts;
 import minegame159.meteorclient.rendering.MeshBuilder;
 import minegame159.meteorclient.rendering.MyFont;
@@ -43,8 +44,12 @@ public class GuiRenderer {
 
     private MyFont font;
 
+    public GuiRenderer() {
+        mb.texture = true;
+    }
+
     public void begin(boolean root) {
-        mb.begin(GL11.GL_TRIANGLES, VertexFormats.POSITION_COLOR_TEXTURE);
+        mb.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR_TEXTURE);
 
         if (root) {
             Window window = MinecraftClient.getInstance().getWindow();
@@ -65,7 +70,7 @@ public class GuiRenderer {
         }
 
         MinecraftClient.getInstance().getTextureManager().bindTexture(TEXTURE);
-        mb.end(true);
+        mb.end();
 
         if (root && tooltipWidth > 0) {
             text(tooltip, mouseX + 8 + 4, mouseY + 8 + 4, false, GuiConfig.INSTANCE.text);
@@ -231,7 +236,7 @@ public class GuiRenderer {
 
     public void texture(double x, double y, double width, double height, double rotation, AbstractTexture texture) {
         post(() -> {
-            mb.begin(GL_TRIANGLES, VertexFormats.POSITION_COLOR_TEXTURE);
+            mb.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR_TEXTURE);
 
             mb.pos(x, y, 0).color(WHITE).texture(0, 0).endVertex();
             mb.pos(x + width, y, 0).color(WHITE).texture(1, 0).endVertex();
@@ -245,7 +250,7 @@ public class GuiRenderer {
             GL11.glTranslated(x + width / 2, y + height / 2, 0);
             GL11.glRotated(rotation, 0, 0, 1);
             GL11.glTranslated(-x - width / 2, -y - height / 2, 0);
-            mb.end(true);
+            mb.end();
             GL11.glPopMatrix();
         });
     }

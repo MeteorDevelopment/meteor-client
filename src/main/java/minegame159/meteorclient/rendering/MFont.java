@@ -10,7 +10,6 @@ import net.minecraft.client.texture.AbstractTexture;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.NativeImageBackedTexture;
 import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.GL11;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -33,6 +32,7 @@ public class MFont {
 
     public MFont(Font font, boolean antiAlias, boolean fractionalMetrics) {
         texture = setupTexture(font, antiAlias, fractionalMetrics, this.charData);
+        mb.texture = true;
     }
 
     private AbstractTexture setupTexture(Font font, boolean antiAlias, boolean fractionalMetrics, CharData[] chars) {
@@ -103,7 +103,7 @@ public class MFont {
     }
 
     public void begin() {
-        mb.begin(GL11.GL_TRIANGLES, VertexFormats.POSITION_TEXTURE_COLOR);
+        mb.begin(null, DrawMode.Triangles, VertexFormats.POSITION_TEXTURE_COLOR);
     }
 
     public boolean isBuilding() {
@@ -112,7 +112,7 @@ public class MFont {
 
     public void end() {
         texture.bindTexture();
-        mb.end(true);
+        mb.end();
     }
 
     public double renderString(String string, double x, double y, minegame159.meteorclient.utils.Color color) {
@@ -175,12 +175,7 @@ public class MFont {
             double texWidth = (double) srcWidth / IMG_SIZE;
             double texHeight = (double) srcHeight / IMG_SIZE;
 
-            MeshBuilder preMb = ShapeBuilder.triangles;
-            ShapeBuilder.triangles = mb;
-
-            ShapeBuilder.texQuad(x / 2, y / 2, srcWidth / 2.0 * scale, srcHeight / 2.0 * scale, texX, texY, texWidth, texHeight, color, color, color, color);
-
-            ShapeBuilder.triangles = preMb;
+            mb.texQuad(x / 2, y / 2, srcWidth / 2.0 * scale, srcHeight / 2.0 * scale, texX, texY, texWidth, texHeight, color, color, color, color);
         }
     }
 }

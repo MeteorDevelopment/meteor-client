@@ -8,15 +8,15 @@ package minegame159.meteorclient.modules.render.hud.modules;
 import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.modules.render.hud.HUD;
 import minegame159.meteorclient.modules.render.hud.HudRenderer;
+import minegame159.meteorclient.rendering.DrawMode;
 import minegame159.meteorclient.rendering.Matrices;
-import minegame159.meteorclient.rendering.ShapeBuilder;
+import minegame159.meteorclient.rendering.Renderer;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
-import org.lwjgl.opengl.GL11;
 
 public class InventoryViewerHud extends HudModule {
     public enum Background {
@@ -99,9 +99,9 @@ public class InventoryViewerHud extends HudModule {
                 DrawableHelper.drawTexture(Matrices.getMatrixStack(), x, y, 0, 0, 0, box.width,  box.height, box.height, box.width);
                 break;
             case Flat:
-                ShapeBuilder.begin(null, GL11.GL_TRIANGLES, VertexFormats.POSITION_COLOR);
-                ShapeBuilder.quad(x, y, box.width, box.height, hud.invViewerColor());
-                ShapeBuilder.end();
+                Renderer.NORMAL.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
+                Renderer.NORMAL.quad(x, y, box.width, box.height, hud.invViewerColor());
+                Renderer.NORMAL.end();
                 break;
         }
     }

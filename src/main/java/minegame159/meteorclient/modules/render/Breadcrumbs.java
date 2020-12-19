@@ -7,11 +7,11 @@ package minegame159.meteorclient.modules.render;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.events.render.RenderEvent;
+import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
-import minegame159.meteorclient.rendering.ShapeBuilder;
+import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.Pool;
@@ -122,7 +122,7 @@ public class Breadcrumbs extends ToggleModule {
         }
 
         public void render() {
-            ShapeBuilder.line(x1, y1, z1, x2, y2, z2, color.get());
+            Renderer.LINES.line(x1, y1, z1, x2, y2, z2, color.get());
         }
     }
 }

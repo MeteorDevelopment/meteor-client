@@ -2,11 +2,12 @@ package minegame159.meteorclient.modules.render;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.events.render.RenderEvent;
+import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
-import minegame159.meteorclient.rendering.ShapeBuilder;
+import minegame159.meteorclient.rendering.Renderer;
+import minegame159.meteorclient.rendering.ShapeMode;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.Dimension;
@@ -18,10 +19,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class VoidESP extends ToggleModule {
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgRender = settings.createGroup("Colors");
 
+    // General
 
     private final Setting<Integer> horizontalRadius = sgGeneral.add(new IntSetting.Builder()
             .name("horizontal-radius")
@@ -41,14 +42,16 @@ public class VoidESP extends ToggleModule {
             .build()
     );
 
-    private final Setting<Boolean> fill = sgRender.add(new BoolSetting.Builder()
-            .name("fill")
-            .description("Fills the shapes rendered.")
-            .defaultValue(true)
+    // Render
+
+    private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
+            .name("shape-mode")
+            .description("How the shapes are rendered.")
+            .defaultValue(ShapeMode.Sides)
             .build()
     );
 
-    private final Setting<Color> fillColor = sgRender.add(new ColorSetting.Builder()
+    private final Setting<Color> sideColor = sgRender.add(new ColorSetting.Builder()
             .name("fill-color")
             .description("The color that fills holes in the void.")
             .defaultValue(new Color(225, 25, 25))
@@ -58,16 +61,15 @@ public class VoidESP extends ToggleModule {
     private final Setting<Color> lineColor = sgRender.add(new ColorSetting.Builder()
             .name("line-color")
             .description("The color to draw lines of holes to the void.")
-            .defaultValue(new Color(225, 25, 25))
+            .defaultValue(new Color(225, 25, 255))
             .build()
     );
-
 
     public VoidESP() {
         super(Category.Render, "void-esp", "Renders holes in bedrock layers that lead to the void.");
     }
 
-    private List<BlockPos> voidHoles = new ArrayList<>();
+    private final List<BlockPos> voidHoles = new ArrayList<>();
 
     private void getHoles(int searchRange, int holeHeight) {
         voidHoles.clear();
@@ -103,7 +105,7 @@ public class VoidESP extends ToggleModule {
 
     @EventHandler
     private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
-        getHoles(horizontalRadius.get().intValue(), holeHeight.get().intValue());
+        getHoles(horizontalRadius.get(), holeHeight.get());
     });
 
     @EventHandler
@@ -112,10 +114,8 @@ public class VoidESP extends ToggleModule {
             int x = voidHole.getX();
             int y = voidHole.getY();
             int z = voidHole.getZ();
-            if (fill.get()) {
-                ShapeBuilder.blockSides(x, y, z, fillColor.get(), null);
-            }
-            ShapeBuilder.blockEdges(x, y, z, lineColor.get(), null);
+
+            Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x, y, z, 1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
         }
     });
 }
