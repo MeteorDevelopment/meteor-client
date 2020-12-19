@@ -11,10 +11,12 @@ import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.player.FakePlayer;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.utils.FakePlayerEntity;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Hand;
@@ -62,15 +64,10 @@ public class AutoTrap extends ToggleModule {
         super(Category.Combat, "auto-trap", "Traps people in an obsidian box to prevent them from moving.");
     }
 
-    private PlayerEntity target = null;
-    private BlockPos targetPosUp;
-    private BlockPos targetPos;
-    private int obsidianSlot;
-    private int prevSlot;
     @EventHandler
     private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
-        obsidianSlot = -1;
-        target = null;
+        int obsidianSlot = -1;
+        PlayerEntity target = null;
         for(int i = 0; i < 9; i++){
             if (mc.player.inventory.getStack(i).getItem() == Blocks.OBSIDIAN.asItem()){
                 obsidianSlot = i;
@@ -78,6 +75,7 @@ public class AutoTrap extends ToggleModule {
             }
         }
         if (obsidianSlot == -1) return;
+
         for(PlayerEntity player : mc.world.getPlayers()){
             if (player == mc.player || !FriendManager.INSTANCE.attack(player)) continue;
             if (target == null){
@@ -86,12 +84,26 @@ public class AutoTrap extends ToggleModule {
                 target = player;
             }
         }
+
+        if (target == null) {
+            for (FakePlayerEntity fakeTarget : FakePlayer.players.keySet()) {
+                if (fakeTarget.getHealth() <= 0 || !FriendManager.INSTANCE.attack(fakeTarget) || !fakeTarget.isAlive()) continue;
+
+                if (target == null) {
+                    target = fakeTarget;
+                    continue;
+                }
+
+                if (mc.player.distanceTo(fakeTarget) < mc.player.distanceTo(target)) target = fakeTarget;
+            }
+        }
+
         if (target == null) return;
         if (mc.player.distanceTo(target) < 4){
-            prevSlot = mc.player.inventory.selectedSlot;
+            int prevSlot = mc.player.inventory.selectedSlot;
             mc.player.inventory.selectedSlot = obsidianSlot;
-            targetPosUp = target.getBlockPos().up();
-            targetPos = target.getBlockPos();
+            BlockPos targetPosUp = target.getBlockPos().up();
+            BlockPos targetPos = target.getBlockPos();
 
             //PLACEMENT
             switch(topPlacement.get()) {
