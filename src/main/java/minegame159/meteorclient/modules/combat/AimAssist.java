@@ -47,7 +47,7 @@ public class AimAssist extends ToggleModule {
     // General
     private final Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()
             .name("range")
-            .description("Aim range.")
+            .description("How far away the entity has to be to be targetted.")
             .defaultValue(5)
             .min(0)
             .build()
@@ -62,14 +62,14 @@ public class AimAssist extends ToggleModule {
 
     private final Setting<Boolean> friends = sgGeneral.add(new BoolSetting.Builder()
             .name("friends")
-            .description("Aim at friends, only useful if attack players is on.")
+            .description("Whether or not to aim at friends. Works if you have selected players as an entity to attack.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> ignoreWalls = sgGeneral.add(new BoolSetting.Builder()
             .name("ignore-walls")
-            .description("Aim through walls.")
+            .description("Whether or not to ignore aiming through walls.")
             .defaultValue(false)
             .build()
     );
@@ -83,7 +83,7 @@ public class AimAssist extends ToggleModule {
 
     private final Setting<Target> target = sgGeneral.add(new EnumSetting.Builder<Target>()
             .name("target")
-            .description("Where to aim.")
+            .description("Which body part to aim at.")
             .defaultValue(Target.Body)
             .build()
     );
