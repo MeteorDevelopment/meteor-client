@@ -9,6 +9,7 @@ package minegame159.meteorclient.utils;
 //Updated by squidoodly 19/06/2020
 //Updated by squidoodly 24/07/2020
 
+import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
@@ -20,6 +21,7 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Items;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.explosion.Explosion;
@@ -77,6 +79,14 @@ public class DamageCalcUtils {
         damage  = blastProtReduction(player, damage, new Explosion(mc.world, null, bed.x, bed.y, bed.z, 5f, true, Explosion.DestructionType.DESTROY));
 
         if(damage < 0) damage = 0;
+        return damage;
+    }
+
+    public static double anchorDamage(LivingEntity player, Vec3d anchor){
+        assert mc.world != null;
+        mc.world.removeBlock(new BlockPos( anchor), false);
+        double damage = bedDamage(player, anchor);
+        mc.world.setBlockState(new BlockPos(anchor), Blocks.RESPAWN_ANCHOR.getDefaultState());
         return damage;
     }
 
