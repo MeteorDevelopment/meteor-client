@@ -35,7 +35,7 @@ public class Quiver extends ToggleModule {
 
     private final Setting<Integer> charge = sgGeneral.add(new IntSetting.Builder()
             .name("charge")
-            .description("How long to charge the bow in ticks. (0-20)")
+            .description("The amount of delay for bow charging in ticks.")
             .defaultValue(6)
             .min(5)
             .max(20)
@@ -46,7 +46,7 @@ public class Quiver extends ToggleModule {
 
     private final Setting<Boolean> checkEffects = sgGeneral.add(new BoolSetting.Builder()
             .name("check-effects")
-            .description("Won't shoot yourself with effects you already have active.")
+            .description("Won't shoot you with effects you already have active.")
             .defaultValue(true)
             .build()
     );
@@ -151,14 +151,14 @@ public class Quiver extends ToggleModule {
             if (!shooting && !shotStrength && foundStrength) {
                 shoot(strengthSlot);
                 shootingArrow = ArrowType.Strength;
-                Chat.info(this, "Quivering strength arrow.");
+                Chat.info(this, "Quivering a strength arrow.");
                 shotStrength = true;
             }
 
             if (!shooting && !shotSpeed && foundSpeed && shotStrength) {
                 shoot(speedSlot);
                 shootingArrow = ArrowType.Speed;
-                Chat.info(this, "Quivering speed arrow.");
+                Chat.info(this, "Quivering a speed arrow.");
                 shotSpeed = true;
             }
 

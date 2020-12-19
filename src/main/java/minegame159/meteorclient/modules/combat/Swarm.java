@@ -80,14 +80,14 @@ public class Swarm extends ToggleModule {
 
     private final Setting<String> targetString = sgGeneral.add(new StringSetting.Builder()
             .name("target")
-            .description("Player Name to Target")
+            .description("The player name to target.")
             .defaultValue("Sheep")
             .onChanged(string -> resetTarget())
             .build());
 
     private final Setting<String> ipAddress = sgGeneral.add(new StringSetting.Builder()
             .name("ip-address")
-            .description("Server ip address")
+            .description("The server's IP Address.")
             .defaultValue("localhost")
             .build());
 
@@ -215,7 +215,7 @@ public class Swarm extends ToggleModule {
                     try {
                         socket = new Socket(ipAddress, serverPort.get());
                     } catch (Exception ignored) {
-                        Chat.info("Server Not Found. Retrying in 5 seconds.");
+                        Chat.info("Server not found. Retrying in 5 seconds.");
                     }
                     if (socket == null) {
                         Thread.sleep(5000);
@@ -239,7 +239,7 @@ public class Swarm extends ToggleModule {
                     inputStream.close();
                 }
             } catch (Exception e) {
-                Chat.info("Error in connection to server");
+                Chat.info("There is in error in your connection to the server.");
                 disconnect();
                 client = null;
             } finally {
@@ -247,7 +247,7 @@ public class Swarm extends ToggleModule {
                     try {
                         socket.close();
                     } catch (Exception e) {
-                        Chat.error("Error in connection to server");
+                        Chat.error("There is in error in your connection to the server.");
                     }
                 }
             }
@@ -284,7 +284,7 @@ public class Swarm extends ToggleModule {
         public void run() {
             try {
                 while (!this.isInterrupted()) {
-                    Chat.info("Swarm Server: Listening for incoming connections");
+                    Chat.info("Swarm Server: Listening for incoming connections.");
                     Socket connection = this.serverSocket.accept();
                     assignConnectionToSubServer(connection);
                 }
@@ -296,7 +296,7 @@ public class Swarm extends ToggleModule {
             for (int i = 0; i < clientConnections.length; i++) {
                 if (this.clientConnections[i] == null) {
                     this.clientConnections[i] = new SubServer(connection);
-                    Chat.info("Swarm Server: New Slave Connected");
+                    Chat.info("Swarm Server: New Slave Connected.");
                     break;
                 }
             }
@@ -312,7 +312,7 @@ public class Swarm extends ToggleModule {
                 }
                 serverSocket.close();
             } catch (Exception e) {
-                Chat.info("Server Closed");
+                Chat.info("Server closed.");
             }
         }
 
@@ -369,7 +369,7 @@ public class Swarm extends ToggleModule {
                 outputStream.close();
                 dataOutputStream.close();
             } catch (Exception e) {
-                Chat.info("Error in Subsystem");
+                Chat.info("Error in subsystem.");
             }
         }
 
@@ -403,3 +403,4 @@ public class Swarm extends ToggleModule {
     });
 
 }
+// I love Riveranda, poggers server owner.

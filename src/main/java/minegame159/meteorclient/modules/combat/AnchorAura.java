@@ -44,7 +44,7 @@ public class AnchorAura extends ToggleModule {
 
     private final Setting<Double> placeRange = sgGeneral.add(new DoubleSetting.Builder()
             .name("place-range")
-            .description("The radius anchors are placed.")
+            .description("The radius in which the anchors are placed in.")
             .defaultValue(3)
             .min(0)
             .sliderMax(5)
@@ -53,7 +53,7 @@ public class AnchorAura extends ToggleModule {
 
     private final Setting<Double> breakRange = sgGeneral.add(new DoubleSetting.Builder()
             .name("break-range")
-            .description("The radius anchors are broken.")
+            .description("The radius in which the anchors are broken in.")
             .defaultValue(3)
             .min(0)
             .sliderMax(5)
@@ -62,7 +62,7 @@ public class AnchorAura extends ToggleModule {
 
     private final Setting<Double> targetRange = sgGeneral.add(new DoubleSetting.Builder()
             .name("target-range")
-            .description("The radius players get targeted.")
+            .description("The radius in which players get targeted.")
             .defaultValue(3)
             .min(0)
             .sliderMax(5)
@@ -123,7 +123,7 @@ public class AnchorAura extends ToggleModule {
             .build()
     );
 
-    public AnchorAura() {super(Category.Combat, "anchor-aura", "Places and explodes respawn anchors for you,");}
+    public AnchorAura() {super(Category.Combat, "anchor-aura", "Automatically places and breaks Anchors to harm entities.");}
 
     private int placeDelayLeft = placeDelay.get();
     private int breakDelayLeft = breakDelay.get();
