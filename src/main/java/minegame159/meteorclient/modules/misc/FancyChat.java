@@ -25,7 +25,7 @@ public class FancyChat extends ToggleModule {
     private final StringBuilder sb = new StringBuilder();
 
     public FancyChat() {
-        super(Category.Misc, "FancyChat", "Make your chat messages fancy!");
+        super(Category.Misc, "fancy-chat", "Make your chat messages fancy!");
     }
     @EventHandler
     private final Listener<SendMessageEvent> onSendMessage = new Listener<>(event -> {

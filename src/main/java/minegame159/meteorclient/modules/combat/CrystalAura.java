@@ -47,7 +47,7 @@ public class CrystalAura extends ToggleModule {
     }
     public enum TargetMode{
         Most_Damage,
-        Highest_x_damages
+        Highest_x_Damages
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -74,7 +74,7 @@ public class CrystalAura extends ToggleModule {
 
     private final Setting<Double> targetRange = sgGeneral.add(new DoubleSetting.Builder()
             .name("target-range")
-            .description("The maximum range players have to be in to target them.")
+            .description("The maximum range the entity can be to be targetted.")
             .defaultValue(7)
             .min(0)
             .sliderMax(10)
@@ -97,7 +97,7 @@ public class CrystalAura extends ToggleModule {
 
     private final Setting<Boolean> support = sgGeneral.add(new BoolSetting.Builder()
             .name("support")
-            .description("Places a block in the air and crystals on it. Helps with killing players using elytras.")
+            .description("Places a block in the air and crystals on it. Helps with killing players that are flying.")
             .defaultValue(false)
             .build()
     );
@@ -121,13 +121,13 @@ public class CrystalAura extends ToggleModule {
     private final Setting<TargetMode> targetMode = sgGeneral.add(new EnumSetting.Builder<TargetMode>()
             .name("target-mode")
             .description("The way how to you do target multiple targets.")
-            .defaultValue(TargetMode.Highest_x_damages)
+            .defaultValue(TargetMode.Highest_x_Damages)
             .build()
     );
 
     private final Setting<Integer> numberOfDamages = sgGeneral.add(new IntSetting.Builder()
             .name("number-of-damages")
-            .description("The number to replace 'x' with in Highest_x_damages.")
+            .description("The number to replace 'x' with in Highest_x_Damages.")
             .defaultValue(3)
             .min(2)
             .sliderMax(10)
@@ -297,7 +297,7 @@ public class CrystalAura extends ToggleModule {
 
     private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
             .name("render")
-            .description("Render the block under where it is placing a crystal.")
+            .description("Renders the block under where it is placing a crystal.")
             .defaultValue(true)
             .build()
     );
@@ -325,7 +325,7 @@ public class CrystalAura extends ToggleModule {
 
     private final Setting<Integer> renderTimer = sgRender.add(new IntSetting.Builder()
             .name("Timer")
-            .description("Time between changing block render.")
+            .description("The amount of time between changing the block render.")
             .defaultValue(0)
             .min(0)
             .sliderMax(10)
@@ -570,7 +570,7 @@ public class CrystalAura extends ToggleModule {
     private EndCrystalEntity findBestCrystal(Map<EndCrystalEntity, List<Double>> map){
         bestDamage = 0;
         double currentDamage = 0;
-        if (targetMode.get() == TargetMode.Highest_x_damages){
+        if (targetMode.get() == TargetMode.Highest_x_Damages){
             for (Map.Entry<EndCrystalEntity, List<Double>> entry : map.entrySet()){
                 for (int i = 0; i < entry.getValue().size() && i < numberOfDamages.get(); i++){
                     currentDamage += entry.getValue().get(i);
