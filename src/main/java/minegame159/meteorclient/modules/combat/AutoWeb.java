@@ -11,10 +11,12 @@ import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.player.FakePlayer;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.utils.FakePlayerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
@@ -71,6 +73,19 @@ public class AutoWeb extends ToggleModule {
                 target = player;
             } else if (mc.player.distanceTo(target) > mc.player.distanceTo(player)) {
                 target = player;
+            }
+        }
+
+        if (target == null) {
+            for (FakePlayerEntity fakeTarget : FakePlayer.players.keySet()) {
+                if (fakeTarget.getHealth() <= 0 || !FriendManager.INSTANCE.attack(fakeTarget) || !fakeTarget.isAlive()) continue;
+
+                if (target == null) {
+                    target = fakeTarget;
+                    continue;
+                }
+
+                if (mc.player.distanceTo(fakeTarget) < mc.player.distanceTo(target)) target = fakeTarget;
             }
         }
 

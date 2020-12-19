@@ -7,6 +7,7 @@ package minegame159.meteorclient.utils;
 
 import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.mixin.AbstractBlockAccessor;
+import minegame159.meteorclient.modules.player.FakePlayer;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
@@ -43,16 +44,23 @@ public class CityUtils {
                 closestTarget = target;
             }
         }
+
+        if (closestTarget == null) {
+            for (FakePlayerEntity target : FakePlayer.players.keySet()) {
+                if (target.getHealth() <= 0 || !FriendManager.INSTANCE.attack(target) || !target.isAlive()) continue;
+
+                if (closestTarget == null) {
+                    closestTarget = target;
+                    continue;
+                }
+
+                if (mc.player.distanceTo(target) < mc.player.distanceTo(closestTarget)) {
+                    closestTarget = target;
+                }
+            }
+        }
+
         return closestTarget;
-    }
-
-    public static Entity getTarget() {
-        Entity target;
-
-        if (getPlayerTarget() == null) return null;
-        else target = getPlayerTarget();
-
-        return target;
     }
 
     public static ArrayList<BlockPos> getTargetSurround(PlayerEntity player) {
