@@ -12,7 +12,8 @@ import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
-import minegame159.meteorclient.rendering.ShapeBuilder;
+import minegame159.meteorclient.rendering.Renderer;
+import minegame159.meteorclient.rendering.ShapeMode;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Color;
 import net.minecraft.entity.Entity;
@@ -26,22 +27,22 @@ import java.util.List;
 public class ESP extends ToggleModule {
     private static final Color WHITE = new Color(255, 255, 255);
 
-    public enum Mode {
-        Lines,
-        Sides,
-        Both,
-        Outline
-    }
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgColors = settings.createGroup("Colors");
 
     // General
 
-    private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
-            .name("mode")
-            .description("The rendering mode.")
-            .defaultValue(Mode.Outline)
+    private final Setting<ShapeMode> shapeMode = sgGeneral.add(new EnumSetting.Builder<ShapeMode>()
+            .name("shape-mode")
+            .description("How the shapes are rendered.")
+            .defaultValue(ShapeMode.Both)
+            .build()
+    );
+
+    private final Setting<Boolean> outline = sgGeneral.add(new BoolSetting.Builder()
+            .name("outline")
+            .description("Renders an outline around the entities.")
+            .defaultValue(true)
             .build()
     );
 
@@ -136,24 +137,8 @@ public class ESP extends ToggleModule {
             double y = (entity.getY() - entity.prevY) * event.tickDelta;
             double z = (entity.getZ() - entity.prevZ) * event.tickDelta;
 
-            switch (mode.get()) {
-                case Lines: {
-                    Box box = entity.getBoundingBox();
-                    ShapeBuilder.boxEdges(x + box.minX, y + box.minY, z + box.minZ, x + box.maxX, y + box.maxY, z + box.maxZ, lineColor);
-                    break;
-                }
-                case Sides: {
-                    Box box = entity.getBoundingBox();
-                    ShapeBuilder.boxSides(x + box.minX, y + box.minY, z + box.minZ, x + box.maxX, y + box.maxY, z + box.maxZ, sideColor);
-                    break;
-                }
-                case Both: {
-                    Box box = entity.getBoundingBox();
-                    ShapeBuilder.boxEdges(x + box.minX, y + box.minY, z + box.minZ, x + box.maxX, y + box.maxY, z + box.maxZ, lineColor);
-                    ShapeBuilder.boxSides(x + box.minX, y + box.minY, z + box.minZ, x + box.maxX, y + box.maxY, z + box.maxZ, sideColor);
-                    break;
-                }
-            }
+            Box box = entity.getBoundingBox();
+            Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x + box.minX, y + box.minY, z + box.minZ, x + box.maxX, y + box.maxY, z + box.maxZ, sideColor, lineColor, shapeMode.get(), 0);
         }
 
         lineColor.a = prevLineA;
@@ -168,10 +153,7 @@ public class ESP extends ToggleModule {
             if ((!ModuleManager.INSTANCE.isActive(Freecam.class) && entity == mc.player) || !entities.get().contains(entity.getType())) continue;
             count++;
 
-            if (mode.get() == Mode.Outline) {
-                continue;
-            }
-
+            if (outline.get()) continue;
             render(event, entity, getColor(entity));
         }
     });
@@ -213,6 +195,6 @@ public class ESP extends ToggleModule {
     }
 
     public boolean isOutline() {
-        return mode.get() == Mode.Outline;
+        return outline.get();
     }
 }

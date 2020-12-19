@@ -8,7 +8,8 @@ package minegame159.meteorclient.modules.render.hud;
 import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.render.hud.modules.HudModule;
-import minegame159.meteorclient.rendering.ShapeBuilder;
+import minegame159.meteorclient.rendering.DrawMode;
+import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
@@ -17,7 +18,6 @@ import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.LiteralText;
 import org.lwjgl.glfw.GLFW;
-import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -158,7 +158,7 @@ public class HudEditorScreen extends Screen {
         }
 
         Utils.unscaledProjection();
-        ShapeBuilder.begin(null, GL11.GL_TRIANGLES, VertexFormats.POSITION_COLOR);
+        Renderer.NORMAL.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
 
         for (HudModule module : hud.modules) {
             if (module.active) continue;
@@ -187,7 +187,7 @@ public class HudEditorScreen extends Screen {
             }
         }
 
-        ShapeBuilder.end(false, false);
+        Renderer.NORMAL.end();
         Utils.scaledProjection();
     }
 
@@ -196,11 +196,11 @@ public class HudEditorScreen extends Screen {
     }
 
     private void renderQuad(double x, double y, double w, double h, Color bgColor, Color olColor) {
-        ShapeBuilder.quad(x, y, w, h, bgColor);
-        ShapeBuilder.quad(x - 1, y - 1, w + 2, 1, olColor);
-        ShapeBuilder.quad(x - 1, y + h - 1, w + 2, 1, olColor);
-        ShapeBuilder.quad(x - 1, y, 1, h, olColor);
-        ShapeBuilder.quad(x + w, y, 1, h, olColor);
+        Renderer.NORMAL.quad(x, y, w, h, bgColor);
+        Renderer.NORMAL.quad(x - 1, y - 1, w + 2, 1, olColor);
+        Renderer.NORMAL.quad(x - 1, y + h - 1, w + 2, 1, olColor);
+        Renderer.NORMAL.quad(x - 1, y, 1, h, olColor);
+        Renderer.NORMAL.quad(x + w, y, 1, h, olColor);
     }
 
     @Override

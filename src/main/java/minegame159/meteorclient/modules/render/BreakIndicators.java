@@ -6,11 +6,9 @@ import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.mixininterface.IClientPlayerInteractionManager;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
-import minegame159.meteorclient.rendering.ShapeBuilder;
-import minegame159.meteorclient.settings.BoolSetting;
-import minegame159.meteorclient.settings.ColorSetting;
-import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.rendering.Renderer;
+import minegame159.meteorclient.rendering.ShapeMode;
+import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Color;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.render.BlockBreakingInfo;
@@ -23,18 +21,24 @@ import java.util.Map;
 
 public class BreakIndicators extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgRender = settings.createGroup("Render");
+
+    // General
+
     public final Setting<Boolean> multiple = sgGeneral.add(new BoolSetting.Builder()
             .name("multiple")
             .description("Renders block breaking from other players as well.")
             .defaultValue(true)
             .build()
     );
+
     public final Setting<Boolean> hideVanillaIndicators = sgGeneral.add(new BoolSetting.Builder()
             .name("hide-vanilla-indicators")
             .description("Hides the vanilla (or resource-pack) break indicators.")
             .defaultValue(true)
             .build()
     );
+
     private final Setting<Boolean> smoothAnim = sgGeneral.add(new BoolSetting.Builder()
             .name("smooth-animation")
             .description("Renders a smooth animation at block you break by yourself.")
@@ -42,22 +46,47 @@ public class BreakIndicators extends ToggleModule {
             .build()
     );
 
+    // Render
 
-    private final SettingGroup sgColors = settings.createGroup("Colors");
-    private final Setting<Color> gradientColor1 = sgColors.add(new ColorSetting.Builder()
-            .name("gradient-color-1")
-            .description("The color for the non-broken block.")
+    private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
+            .name("shape-mode")
+            .description("How the shapes are rendered.")
+            .defaultValue(ShapeMode.Both)
+            .build()
+    );
+
+    private final Setting<Color> gradientColor1Sides = sgRender.add(new ColorSetting.Builder()
+            .name("gradient-color-1-sides")
+            .description("The side color for the non-broken block.")
+            .defaultValue(new Color(25, 252, 25, 25))
+            .build()
+    );
+
+    private final Setting<Color> gradientColor1Lines = sgRender.add(new ColorSetting.Builder()
+            .name("gradient-color-1-lines")
+            .description("The line color for the non-broken block.")
             .defaultValue(new Color(25, 252, 25, 100))
             .build()
     );
-    private final Setting<Color> gradientColor2 = sgColors.add(new ColorSetting.Builder()
-            .name("gradient-color-2")
-            .description("The color for the fully-broken block.")
+
+    private final Setting<Color> gradientColor2Sides = sgRender.add(new ColorSetting.Builder()
+            .name("gradient-color-2-sides")
+            .description("The side color for the fully-broken block.")
+            .defaultValue(new Color(255, 25, 25, 100))
+            .build()
+    );
+
+    private final Setting<Color> gradientColor2Lines = sgRender.add(new ColorSetting.Builder()
+            .name("gradient-color-2-lines")
+            .description("The line color for the fully-broken block.")
             .defaultValue(new Color(255, 25, 25, 100))
             .build()
     );
 
     public final Map<Integer, BlockBreakingInfo> blocks = new HashMap<>();
+
+    private final Color cSides = new Color();
+    private final Color cLines = new Color();
 
     public BreakIndicators() {
         super(Category.Render, "break-indicators", "Renders the progress of a block being broken.");
@@ -72,13 +101,15 @@ public class BreakIndicators extends ToggleModule {
     private final Listener<RenderEvent> onRender = new Listener<>(event -> {
         IClientPlayerInteractionManager iam;
         boolean smooth;
+
         if (smoothAnim.get()) {
             iam = (IClientPlayerInteractionManager) mc.interactionManager;
             BlockPos pos = iam.getCurrentBreakingBlockPos();
             smooth = pos != null && iam.getBreakingProgress() > 0;
 
-            if(smooth && blocks.values().stream().noneMatch(info -> info.getPos().equals(pos)))
+            if (smooth && blocks.values().stream().noneMatch(info -> info.getPos().equals(pos))) {
                 blocks.put(mc.player.getEntityId(), new BlockBreakingInfo(mc.player.getEntityId(), pos));
+            }
         } else {
             iam = null;
             smooth = false;
@@ -90,8 +121,7 @@ public class BreakIndicators extends ToggleModule {
 
             BlockState state = mc.world.getBlockState(pos);
             VoxelShape shape = state.getOutlineShape(mc.world, pos);
-            if (shape.isEmpty())
-                return;
+            if (shape.isEmpty()) return;
             Box orig = shape.getBoundingBox();
             Box box = orig;
 
@@ -120,20 +150,28 @@ public class BreakIndicators extends ToggleModule {
             double y2 = pos.getY() + box.maxY + yShrink;
             double z2 = pos.getZ() + box.maxZ + zShrink;
 
-            Color c1 = gradientColor1.get();
-            Color c2 = gradientColor2.get();
+            // Gradient
+            Color c1Sides = gradientColor1Sides.get();
+            Color c2Sides = gradientColor2Sides.get();
 
-            // gradient
-            Color c = new Color(
-                    (int) Math.round(c1.r + (c2.r - c1.r) * progress),
-                    (int) Math.round(c1.g + (c2.g - c1.g) * progress),
-                    (int) Math.round(c1.b + (c2.b - c1.b) * progress),
-                    (int) Math.round(c1.a + (c2.a - c1.a) * progress)
+            cSides.set(
+                    (int) Math.round(c1Sides.r + (c2Sides.r - c1Sides.r) * progress),
+                    (int) Math.round(c1Sides.g + (c2Sides.g - c1Sides.g) * progress),
+                    (int) Math.round(c1Sides.b + (c2Sides.b - c1Sides.b) * progress),
+                    (int) Math.round(c1Sides.a + (c2Sides.a - c1Sides.a) * progress)
             );
-            Color edgesC = new Color(c);
-            edgesC.a = (int) Math.min(edgesC.a * 1.5, 255d);
-            ShapeBuilder.boxEdges(x1, y1, z1, x2, y2, z2,edgesC);
-            ShapeBuilder.boxSides(x1, y1, z1, x2, y2, z2,c);
+
+            Color c1Lines = gradientColor1Lines.get();
+            Color c2Lines = gradientColor2Lines.get();
+
+            cLines.set(
+                    (int) Math.round(c1Lines.r + (c2Lines.r - c1Lines.r) * progress),
+                    (int) Math.round(c1Lines.g + (c2Lines.g - c1Lines.g) * progress),
+                    (int) Math.round(c1Lines.b + (c2Lines.b - c1Lines.b) * progress),
+                    (int) Math.round(c1Lines.a + (c2Lines.a - c1Lines.a) * progress)
+            );
+
+            Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x1, y1, z1, x2, y2, z2, cSides, cLines, shapeMode.get(), 0);
         });
     });
 }

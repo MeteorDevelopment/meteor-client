@@ -19,8 +19,9 @@ import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.modules.player.FakePlayer;
 import minegame159.meteorclient.modules.player.NameProtect;
+import minegame159.meteorclient.rendering.DrawMode;
 import minegame159.meteorclient.rendering.Matrices;
-import minegame159.meteorclient.rendering.ShapeBuilder;
+import minegame159.meteorclient.rendering.MeshBuilder;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.FakePlayerEntity;
@@ -39,7 +40,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.screen.PlayerScreenHandler;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
-import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -51,6 +51,8 @@ public class Nametags extends ToggleModule {
         ABOVE,
         ON_TOP
     }
+
+    private static final MeshBuilder MB = new MeshBuilder(2048);
 
     private static final Color BACKGROUND = new Color(0, 0, 0, 75);
     private static final Color WHITE = new Color(255, 255, 255);
@@ -271,15 +273,17 @@ public class Nametags extends ToggleModule {
         double heightUp = armorHeight;
 
         // Render background
-        ShapeBuilder.begin(null, GL11.GL_TRIANGLES, VertexFormats.POSITION_COLOR);
-        ShapeBuilder.quad(-widthHalf - 1, -1, 0, -widthHalf - 1, heightDown, 0, widthHalf + 1, heightDown, 0, widthHalf + 1, -1, 0, BACKGROUND);
-        ShapeBuilder.end();
+        MB.texture = false;
+        MB.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
+        MB.quad(-widthHalf - 1, -1, 0, -widthHalf - 1, heightDown, 0, widthHalf + 1, heightDown, 0, widthHalf + 1, -1, 0, BACKGROUND);
+        MB.end();
 
         // Render armor
         double itemSpacing = (width - armorWidth) / 4;
         if (hasArmor) {
             double itemX = -widthHalf;
-            ShapeBuilder.begin(null, GL11.GL_TRIANGLES, VertexFormats.POSITION_TEXTURE_COLOR);
+            MB.texture = true;
+            MB.begin(null, DrawMode.Triangles, VertexFormats.POSITION_TEXTURE_COLOR);
 
             boolean isDamaged = false;
 
@@ -303,7 +307,7 @@ public class Nametags extends ToggleModule {
                     itemX += (armorWidths[i] - 16) / 2;
                     double addY = (armorHeight - 16) / 2;
 
-                    ShapeBuilder.texQuad(itemX, -heightUp + addY, 16, 16, sprite.getMinU(), sprite.getMinV(), sprite.getMaxU() - sprite.getMinU(), sprite.getMaxV() - sprite.getMinV(), WHITE, WHITE, WHITE, WHITE);
+                    MB.texQuad(itemX, -heightUp + addY, 16, 16, sprite.getMinU(), sprite.getMinV(), sprite.getMaxU() - sprite.getMinU(), sprite.getMaxV() - sprite.getMinV(), WHITE, WHITE, WHITE, WHITE);
 
                     itemX = preItemX;
                     WHITE.r = WHITE.g = WHITE.b = 255;
@@ -312,12 +316,13 @@ public class Nametags extends ToggleModule {
                 itemX += armorWidths[i] + itemSpacing;
             }
             mc.getTextureManager().bindTexture(PlayerScreenHandler.BLOCK_ATLAS_TEXTURE);
-            ShapeBuilder.end(true, false);
+            MB.end();
 
             // Durability
             if (isDamaged) {
                 itemX = -widthHalf;
-                ShapeBuilder.begin(null, GL11.GL_TRIANGLES, VertexFormats.POSITION_COLOR);
+                MB.texture = false;
+                MB.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
 
                 for (int i = 0; i < 4; i++) {
                     ItemStack itemStack = entity.inventory.armor.get(i);
@@ -334,12 +339,12 @@ public class Nametags extends ToggleModule {
                     double addY = (armorHeight - 16) / 2;
 
                     WHITE.r = WHITE.g = WHITE.b = 0;
-                    ShapeBuilder.quad(itemX + 2, -heightUp + 13 + addY, 0, itemX + 2 + 13, -heightUp + 13 + addY, 0, itemX + 2 + 13, -heightUp + 2 + 13 + addY, 0, itemX + 2, -heightUp + 2 + 13 + addY, 0, WHITE);
+                    MB.quad(itemX + 2, -heightUp + 13 + addY, 0, itemX + 2 + 13, -heightUp + 13 + addY, 0, itemX + 2 + 13, -heightUp + 2 + 13 + addY, 0, itemX + 2, -heightUp + 2 + 13 + addY, 0, WHITE);
 
                     WHITE.r = k >> 16 & 255;
                     WHITE.g = k >> 8 & 255;
                     WHITE.b = k & 255;
-                    ShapeBuilder.quad(itemX + 2, -heightUp + 13 + addY, 0, itemX + 2 + j, -heightUp + 13 + addY, 0, itemX + 2 + j, -heightUp + 1 + 13 + addY, 0, itemX + 2, -heightUp + 1 + 13 + addY, 0, WHITE);
+                    MB.quad(itemX + 2, -heightUp + 13 + addY, 0, itemX + 2 + j, -heightUp + 13 + addY, 0, itemX + 2 + j, -heightUp + 1 + 13 + addY, 0, itemX + 2, -heightUp + 1 + 13 + addY, 0, WHITE);
 
                     WHITE.r = WHITE.g = WHITE.b = 255;
                     itemX = preItemX;
@@ -347,7 +352,7 @@ public class Nametags extends ToggleModule {
                     itemX += armorWidths[i] + itemSpacing;
                 }
 
-                ShapeBuilder.end();
+                MB.end();
             }
         }
 
