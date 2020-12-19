@@ -32,7 +32,7 @@ public class TotemPopNotifier extends ToggleModule {
 
     private final Setting<Boolean> announce = sgGeneral.add(new BoolSetting.Builder()
             .name("announce-in-chat")
-            .description("Sends a chat message for everyone to see instead of a client-side message.")
+            .description("Sends a chat message for everyone to see instead of a client-side alert.")
             .defaultValue(false)
             .build()
     );
@@ -46,21 +46,21 @@ public class TotemPopNotifier extends ToggleModule {
 
     private final Setting<Boolean> ignoreFriend = sgGeneral.add(new BoolSetting.Builder()
             .name("ignore-friend")
-            .description("Doesn't announce your friend's pops.")
+            .description("Doesn't announce your friend's totem pops.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<String> popMessage = sgGeneral.add(new StringSetting.Builder()
             .name("pop-message")
-            .description("Chat message to send on pop.")
+            .description("Chat alert to send when a player pops.")
             .defaultValue("EZ pops. {player} just popped {pops} {totems}. Meteor on Crack!")
             .build()
     );
 
     private final Setting<String> deathMessage = sgGeneral.add(new StringSetting.Builder()
             .name("death-message")
-            .description("Chat message to send on death.")
+            .description("Chat alert to send on a player's death.")
             .defaultValue("EZZZ. {player} just died after popping {pops} {totems}. Meteor on Crack!")
             .build()
     );
