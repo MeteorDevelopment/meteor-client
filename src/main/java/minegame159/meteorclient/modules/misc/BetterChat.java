@@ -165,6 +165,24 @@ public class BetterChat extends ToggleModule {
             .build()
     );*/
 
+    private final SettingGroup sgAnnoy = settings.createGroup("Annoy");
+
+    private final Setting<Boolean> annoyEnabled = sgAnnoy.add(new BoolSetting.Builder()
+            .name("annoy-enabled")
+            .description("Makes your messages aNnOyInG.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final SettingGroup sgFancyChat = settings.createGroup("Fancy Chat");
+
+    private final Setting<Boolean> fancyEnabled = sgFancyChat.add(new BoolSetting.Builder()
+            .name("fancy-chat-enabled")
+            .description("Makes your messages fancy!.")
+            .defaultValue(false)
+            .build()
+    );
+
     private boolean skipMessage;
 
     private static final Char2CharMap SMALL_CAPS = new Char2CharArrayMap();
@@ -192,9 +210,24 @@ public class BetterChat extends ToggleModule {
 
     @EventHandler
     private final Listener<SendMessageEvent> onSendMessage = new Listener<>(event -> {
-        if (!event.msg.startsWith(Config.INSTANCE.getPrefix() + "b")) {
-            event.msg = getPrefix() + event.msg + getSuffix();
+
+        String message = event.msg;
+
+        if (annoyEnabled.get()) {
+            StringBuilder sb = new StringBuilder(message.length());
+            boolean upperCase = true;
+            for (int cp : message.codePoints().toArray()) {
+                if (upperCase) sb.appendCodePoint(Character.toUpperCase(cp));
+                else sb.appendCodePoint(Character.toLowerCase(cp));
+                upperCase = !upperCase;
+            }
+            message = sb.toString();
         }
+
+        if (fancyEnabled.get()) message = changeMessage(message);
+
+        if (!event.msg.startsWith(Config.INSTANCE.getPrefix() + "b")) event.msg = getPrefix() + message + getSuffix();
+        else event.msg = message;
     });
 
     // ANTI SPAM
@@ -351,6 +384,22 @@ public class BetterChat extends ToggleModule {
         } else text = "";
 
         return text;
+    }
+
+    //FANCY CHAT
+
+    private String changeMessage(String changeFrom) {
+        String output = changeFrom;
+        sb.setLength(0);
+
+        for (char ch : output.toCharArray()) {
+            if (SMALL_CAPS.containsKey(ch)) sb.append(SMALL_CAPS.get(ch));
+            else sb.append(ch);
+        }
+
+        output = sb.toString();
+
+        return output;
     }
 }
 
