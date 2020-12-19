@@ -178,7 +178,7 @@ public class BetterChat extends ToggleModule {
 
     private final Setting<Boolean> fancyEnabled = sgFancyChat.add(new BoolSetting.Builder()
             .name("fancy-chat-enabled")
-            .description("Makes your messages fancy!.")
+            .description("Makes your messages fancy!")
             .defaultValue(false)
             .build()
     );
