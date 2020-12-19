@@ -18,7 +18,7 @@ public class FancyChat extends ToggleModule {
     
     static {
         String[] a = "abcdefghijklmnopqrstuvwxyz".split("");
-        String[] b = "ᴀʙᴄᴅᴇꜰɢʜɪᴊᴋʟᴍɴᴏᴩqʀꜱᴛᴜᴠᴡxyᴢ".split("");
+        String[] b = "ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ".split("");
         for (int i = 0; i < a.length; i++) SMALL_CAPS.put(a[i].charAt(0), b[i].charAt(0));
     }
 
