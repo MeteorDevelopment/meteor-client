@@ -29,6 +29,7 @@ public class Config extends Savable<Config> {
     public GuiConfig guiConfig = new GuiConfig();
 
     public boolean chatCommandsInfo = true;
+    public boolean deleteChatCommandsInfo = true;
 
     private Map<Category, Color> categoryColors = new HashMap<>();
 
@@ -65,6 +66,7 @@ public class Config extends Savable<Config> {
         tag.put("categoryColors", NbtUtils.mapToTag(categoryColors));
         tag.put("guiConfig", guiConfig.toTag());
         tag.putBoolean("chatCommandsInfo", chatCommandsInfo);
+        tag.putBoolean("deleteChatCommandsInfo", deleteChatCommandsInfo);
 
         return tag;
     }
@@ -75,6 +77,7 @@ public class Config extends Savable<Config> {
         categoryColors = NbtUtils.mapFromTag(tag.getCompound("categoryColors"), Category::valueOf, tag1 -> new Color().fromTag((CompoundTag) tag1));
         guiConfig.fromTag(tag.getCompound("guiConfig"));
         chatCommandsInfo = !tag.contains("chatCommandsInfo") || tag.getBoolean("chatCommandsInfo");
+        deleteChatCommandsInfo = !tag.contains("deleteChatCommandsInfo") || tag.getBoolean("deleteChatCommandsInfo");
 
         // In 0.2.9 the default font was changed, detect when people load up 0.2.9 for the first time
         Version lastVer = new Version(tag.getString("version"));
