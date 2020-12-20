@@ -51,7 +51,7 @@ public class HoleESP extends ToggleModule {
     private final Setting<Mode> renderMode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("render-mode")
             .description("The rendering mode.")
-            .defaultValue(Mode.ReverseGlow)
+            .defaultValue(Mode.Glow)
             .build()
     );
 
