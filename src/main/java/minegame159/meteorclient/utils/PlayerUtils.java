@@ -25,6 +25,7 @@ public class PlayerUtils {
     private static final Vec3d horizontalVelocity = new Vec3d(0, 0, 0);
 
     public static boolean placeBlock(BlockPos blockPos, int slot, Hand hand) {
+        assert mc.player != null;
         if (slot == -1) return false;
 
         int preSlot = mc.player.inventory.selectedSlot;
@@ -37,6 +38,10 @@ public class PlayerUtils {
     }
 
     public static boolean placeBlock(BlockPos blockPos, Hand hand) {
+        assert mc.world != null;
+        assert  mc.interactionManager != null;
+        assert mc.player != null;
+        if (blockPos == null) return false;
         // Check if current block is replaceable
         if (!mc.world.getBlockState(blockPos).getMaterial().isReplaceable()) return false;
 
