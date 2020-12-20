@@ -153,6 +153,11 @@ public class MeshBuilder {
         pos(x2, y2, z2).color(color).endVertex();
     }
 
+    public void gradientLine(double x1, double y1, double z1, double x2, double y2, double z2, Color startColor, Color endColor) {
+        pos(x1, y1, z1).color(startColor).endVertex();
+        pos(x2, y2, z2).color(endColor).endVertex();
+    }
+
     public void boxEdges(double x1, double y1, double z1, double x2, double y2, double z2, Color color, int excludeDir) {
         if (Dir.is(excludeDir, Dir.WEST) && Dir.is(excludeDir, Dir.NORTH)) line(x1, y1, z1, x1, y2, z1, color);
         if (Dir.is(excludeDir, Dir.WEST) && Dir.is(excludeDir, Dir.SOUTH)) line(x1, y1, z2, x1, y2, z2, color);

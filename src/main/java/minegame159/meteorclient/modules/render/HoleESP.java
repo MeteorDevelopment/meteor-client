@@ -33,14 +33,16 @@ public class HoleESP extends ToggleModule {
         Flat,
         Box,
         BoxBelow,
-        Glow
+        Glow,
+        ReverseGlow
     }
 
     private static final MeshBuilder MB;
+    private static final MeshBuilder _MB;
 
     static {
         MB = new MeshBuilder(1024);
-        MB.depthTest = true;
+        _MB = new MeshBuilder(1024);
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -49,7 +51,7 @@ public class HoleESP extends ToggleModule {
     private final Setting<Mode> renderMode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("render-mode")
             .description("The rendering mode.")
-            .defaultValue(Mode.Glow)
+            .defaultValue(Mode.ReverseGlow)
             .build()
     );
 
@@ -89,8 +91,15 @@ public class HoleESP extends ToggleModule {
     private final Setting<Double> glowHeight = sgGeneral.add(new DoubleSetting.Builder()
             .name("glow-height")
             .description("The height of the glow when Glow mode is active")
-            .defaultValue(3)
-            .min(1)
+            .defaultValue(1)
+            .min(0)
+            .build()
+    );
+
+    private final Setting<Boolean> depthTest = sgColors.add(new BoolSetting.Builder()
+            .name("glow-depth-test")
+            .description("Checks if there is things rendering in front of the glow.")
+            .defaultValue(false)
             .build()
     );
 
@@ -100,7 +109,6 @@ public class HoleESP extends ToggleModule {
             .defaultValue(true)
             .build()
     );
-
 
     private final Setting<Color> allBedrock = sgColors.add(new ColorSetting.Builder()
             .name("all-bedrock")
@@ -185,8 +193,11 @@ public class HoleESP extends ToggleModule {
 
     @EventHandler
     private final Listener<RenderEvent> onRender = new Listener<>(event -> {
-        if (renderMode.get() == Mode.Glow) {
+        if (renderMode.get() == Mode.Glow || renderMode.get() == Mode.ReverseGlow) {
+            MB.depthTest = depthTest.get();
+            _MB.depthTest = depthTest.get();
             MB.begin(event, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
+            _MB.begin(event, DrawMode.Lines, VertexFormats.POSITION_COLOR);
         }
 
         for (Hole hole : holes) {
@@ -207,12 +218,19 @@ public class HoleESP extends ToggleModule {
                 case Glow:
                     Renderer.quadWithLinesHorizontal(Renderer.NORMAL, Renderer.LINES, x, y, z, 1, hole.colorSides, hole.colorLines, shapeMode.get());
                     MB.gradientBoxSides(x, y, z, x + 1, y + glowHeight.get(), z + 1, hole.colorSides, transparent);
+                    gradientBoxVertical(x, y, z, glowHeight.get(), hole.colorLines, transparent, false);
+                    break;
+                case ReverseGlow:
+                    Renderer.quadWithLinesHorizontal(Renderer.NORMAL, Renderer.LINES, x, y + glowHeight.get(), z, 1, hole.colorSides, hole.colorLines, shapeMode.get());
+                    MB.gradientBoxSides(x, y, z, x + 1, y + glowHeight.get(), z + 1, transparent, hole.colorSides);
+                    gradientBoxVertical(x, y, z, glowHeight.get(), hole.colorLines, transparent, true);
                     break;
             }
         }
 
-        if (renderMode.get() == Mode.Glow) {
+        if (renderMode.get() == Mode.ReverseGlow || renderMode.get() == Mode.Glow) {
             MB.end();
+            _MB.end();
         }
     });
 
@@ -238,6 +256,21 @@ public class HoleESP extends ToggleModule {
             colorSides.validate();
 
             return this;
+        }
+    }
+
+    private void gradientBoxVertical(double x, double y, double z, double height, Color startColor, Color endColor, boolean reverse) {
+        if (!reverse) {
+            _MB.gradientLine(x, y, z, x, y + height, z, startColor, endColor);
+            _MB.gradientLine(x + 1, y, z, x + 1, y + height, z, startColor, endColor);
+            _MB.gradientLine(x, y, z + 1, x, y + height, z + 1, startColor, endColor);
+            _MB.gradientLine(x + 1, y, z + 1, x + 1, y + height, z + 1, startColor, endColor);
+        }
+        else {
+            _MB.gradientLine(x, y + height, z, x, y, z, startColor, endColor);
+            _MB.gradientLine(x + 1, y + height, z, x + 1, y, z, startColor, endColor);
+            _MB.gradientLine(x, y + height, z + 1, x, y, z + 1, startColor, endColor);
+            _MB.gradientLine(x + 1, y + height, z + 1, x + 1, y, z + 1, startColor, endColor);
         }
     }
 }
