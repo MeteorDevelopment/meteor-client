@@ -89,7 +89,7 @@ public class TotemPopNotifier extends ToggleModule {
         if (p.getStatus() != 35) return;
 
         Entity entity = p.getEntity(mc.world);
-        if (entity == null || entity.equals(mc.player) || !FriendManager.INSTANCE.attack((PlayerEntity) entity)) return;
+        if (entity == null || (entity.equals(mc.player) && ignoreOwn.get()) || (!FriendManager.INSTANCE.attack((PlayerEntity) entity) && ignoreFriend.get())) return;
 
         synchronized (totemPops) {
             int pops = totemPops.getOrDefault(entity.getUuid(), 0);
