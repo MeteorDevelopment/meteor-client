@@ -41,6 +41,15 @@ public class TopBarConfig extends TopBarWindowScreen {
                 .build()
         );
 
+        sgGeneral.add(new BoolSetting.Builder()
+                .name("delete-chat-commands-info")
+                .description("Delete previous chat messages.")
+                .defaultValue(true)
+                .onChanged(aBoolean -> Config.INSTANCE.deleteChatCommandsInfo = aBoolean)
+                .onModuleActivated(booleanSetting -> booleanSetting.set(Config.INSTANCE.deleteChatCommandsInfo))
+                .build()
+        );
+
         for (Category category : ModuleManager.CATEGORIES) {
             sgCategoryColors.add(new ColorSetting.Builder()
                     .name(category.toString().toLowerCase() + "-color")
