@@ -14,10 +14,7 @@ import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
-import minegame159.meteorclient.rendering.DrawMode;
-import minegame159.meteorclient.rendering.Matrices;
-import minegame159.meteorclient.rendering.Renderer;
-import minegame159.meteorclient.rendering.ShapeMode;
+import minegame159.meteorclient.rendering.*;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.Dimension;
@@ -34,6 +31,8 @@ import java.util.List;
 import java.util.UUID;
 
 public class LogoutSpots extends ToggleModule {
+    private static final MeshBuilder MB = new MeshBuilder(64);
+
     private static final Color BACKGROUND = new Color(0, 0, 0, 75);
     private static final Color TEXT = new Color(255, 255, 255);
     private static final Color GREEN = new Color(25, 225, 25);
@@ -235,9 +234,9 @@ public class LogoutSpots extends ToggleModule {
 
             // Render background
             double i = MeteorClient.FONT_2X.getStringWidth(name) / 2.0 + MeteorClient.FONT_2X.getStringWidth(healthText) / 2.0;
-            Renderer.NORMAL.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
-            Renderer.NORMAL.quad(-i - 1, -1, 0, -i - 1, 8, 0, i + 1, 8, 0, i + 1, -1, 0, BACKGROUND);
-            Renderer.NORMAL.end();
+            MB.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
+            MB.quad(-i - 1, -1, 0, -i - 1, 8, 0, i + 1, 8, 0, i + 1, -1, 0, BACKGROUND);
+            MB.end();
 
             // Render name and health texts
             MeteorClient.FONT_2X.begin();
