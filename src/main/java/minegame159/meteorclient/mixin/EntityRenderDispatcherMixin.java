@@ -12,6 +12,7 @@ import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.ExperienceOrbEntity;
 import net.minecraft.entity.FallingBlockEntity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.decoration.ArmorStandEntity;
@@ -29,7 +30,7 @@ public class EntityRenderDispatcherMixin {
 
         if ((noRender.noItems() && entity instanceof ItemEntity) ||
                 (noRender.noFallingBlocks() && entity instanceof FallingBlockEntity) ||
-                (noRender.noArmorStands() && entity instanceof ArmorStandEntity)
+                (noRender.noArmorStands() && entity instanceof ArmorStandEntity) || ( noRender.noXpOrbs() && entity instanceof ExperienceOrbEntity)
         ) {
             info.cancel();
             return;

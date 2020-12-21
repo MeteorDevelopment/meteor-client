@@ -181,6 +181,14 @@ public class NoRender extends ToggleModule {
             .defaultValue(false)
             .build()
     );
+
+    private final Setting<Boolean> noXpOrbs = sgGeneral.add(new BoolSetting.Builder()
+            .name("no-xp-orbs")
+            .description("Disables rendering of experience orb entities.")
+            .defaultValue(false)
+            .build()
+    );
+
     public NoRender() {
         super(Category.Render, "no-render", "Disables certain animations or overlays from rendering.");
     }
@@ -279,5 +287,9 @@ public class NoRender extends ToggleModule {
 
     public boolean noGuiBackground() {
         return isActive() && noGuiBackground.get();
+    }
+
+    public boolean noXpOrbs() {
+        return isActive() && noXpOrbs.get();
     }
 }
