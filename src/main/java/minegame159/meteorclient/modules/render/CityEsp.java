@@ -34,6 +34,13 @@ public class CityEsp extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> checkBelow = sgGeneral.add(new BoolSetting.Builder()
+            .name("check-below")
+            .description("Checks if there is an obsidian/bedrock block below the surround block for you to place crystals on.")
+            .defaultValue(true)
+            .build()
+    );
+
     // Render
 
     private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
@@ -64,7 +71,7 @@ public class CityEsp extends ToggleModule {
     @EventHandler
     private final Listener<RenderEvent> onRender = new Listener<>(event -> {
         PlayerEntity target = CityUtils.getPlayerTarget();
-        BlockPos targetBlock = CityUtils.getTargetBlock();
+        BlockPos targetBlock = CityUtils.getTargetBlock(checkBelow.get());
 
         if (target == null || targetBlock == null || MathHelper.sqrt(mc.player.squaredDistanceTo(targetBlock.getX(), targetBlock.getY(), targetBlock.getZ())) > range.get()) return;
 

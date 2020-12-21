@@ -83,7 +83,7 @@ public class CityUtils {
     }
 
 
-    public static BlockPos getTargetBlock() {
+    public static BlockPos getTargetBlock(boolean checkBelow) {
         BlockPos finalPos = null;
         boolean cancel = false;
 
@@ -97,7 +97,7 @@ public class CityUtils {
             if (myPositions != null && !myPositions.isEmpty() && myPositions.contains(pos)) cancel = true;
 
             assert mc.world != null;
-            if (mc.world.getBlockState(pos.down(1)).getBlock() != Blocks.OBSIDIAN && mc.world.getBlockState(pos.down(1)).getBlock() != Blocks.BEDROCK) continue;
+            if (checkBelow && mc.world.getBlockState(pos.down(1)).getBlock() != Blocks.OBSIDIAN && mc.world.getBlockState(pos.down(1)).getBlock() != Blocks.BEDROCK) continue;
 
             if (finalPos == null) {
                 finalPos = pos;
