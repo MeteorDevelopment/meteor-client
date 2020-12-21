@@ -3,7 +3,6 @@ package minegame159.meteorclient.modules.render.hud.modules;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.player.InfinityMiner;
 import minegame159.meteorclient.modules.render.hud.HUD;
-import net.minecraft.block.Block;
 
 public class InfiniteMineHud extends DoubleTextHudModule {
     public InfiniteMineHud(HUD hud) {

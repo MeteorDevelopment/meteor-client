@@ -267,7 +267,7 @@ public class Swarm extends ToggleModule {
         private ServerSocket serverSocket;
         public int MAX_CLIENTS = 25;
         final private SubServer[] clientConnections = new SubServer[MAX_CLIENTS];
-        private int port = serverPort.get();
+        private final int port = serverPort.get();
 
         public SwarmServer() {
             try {

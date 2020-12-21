@@ -8,7 +8,7 @@ package minegame159.meteorclient.modules.render;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.*;
+import minegame159.meteorclient.events.Cancellable;
 import minegame159.meteorclient.events.render.DrawSideEvent;
 import minegame159.meteorclient.events.render.RenderBlockEntityEvent;
 import minegame159.meteorclient.events.world.AmbientOcclusionEvent;
@@ -75,17 +75,13 @@ public class XRay extends ToggleModule {
     });
 
     @EventHandler
-    private final Listener<DrawSideEvent> onDrawSide = new Listener<>(event -> {
-        event.setDraw(!isBlocked(event.state.getBlock()));
-    });
+    private final Listener<DrawSideEvent> onDrawSide = new Listener<>(event -> event.setDraw(!isBlocked(event.state.getBlock())));
 
     @EventHandler
     private final Listener<ChunkOcclusionEvent> onChunkOcclusion = new Listener<>(Cancellable::cancel);
 
     @EventHandler
-    private final Listener<AmbientOcclusionEvent> onAmbientOcclusion = new Listener<>(event -> {
-        event.lightLevel = 1;
-    });
+    private final Listener<AmbientOcclusionEvent> onAmbientOcclusion = new Listener<>(event -> event.lightLevel = 1);
 
     public boolean isBlocked(Block block) {
         return isActive() && !blocks.get().contains(block);

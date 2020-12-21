@@ -82,9 +82,7 @@ public class PathFinder {
     public boolean isAirAbove(BlockPos blockPos) {
         if (!getBlockStateAtPos(blockPos.getX(), blockPos.getY(), blockPos.getZ()).isAir())
             return false;
-        if (!getBlockStateAtPos(blockPos.getX(), blockPos.getY() + 1, blockPos.getZ()).isAir())
-            return false;
-        return true;
+        return getBlockStateAtPos(blockPos.getX(), blockPos.getY() + 1, blockPos.getZ()).isAir();
     }
 
     public Vec3d getNextStraightPos() {

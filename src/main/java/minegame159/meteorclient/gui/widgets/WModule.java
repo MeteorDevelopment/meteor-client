@@ -9,7 +9,6 @@ import minegame159.meteorclient.gui.GuiConfig;
 import minegame159.meteorclient.gui.renderer.GuiRenderer;
 import minegame159.meteorclient.gui.renderer.Region;
 import minegame159.meteorclient.modules.ToggleModule;
-import minegame159.meteorclient.utils.AlignmentX;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import org.lwjgl.glfw.GLFW;

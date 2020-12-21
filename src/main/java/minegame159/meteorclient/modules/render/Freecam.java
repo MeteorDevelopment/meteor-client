@@ -7,12 +7,12 @@ package minegame159.meteorclient.modules.render;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.*;
+import minegame159.meteorclient.events.Cancellable;
 import minegame159.meteorclient.events.entity.TookDamageEvent;
 import minegame159.meteorclient.events.game.GameLeftEvent;
+import minegame159.meteorclient.events.game.OpenScreenEvent;
 import minegame159.meteorclient.events.meteor.KeyEvent;
 import minegame159.meteorclient.events.world.ChunkOcclusionEvent;
-import minegame159.meteorclient.events.game.OpenScreenEvent;
 import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.mixininterface.IVec3d;
