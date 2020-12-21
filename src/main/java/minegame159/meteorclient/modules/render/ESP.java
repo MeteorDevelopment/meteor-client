@@ -32,17 +32,24 @@ public class ESP extends ToggleModule {
 
     // General
 
-    private final Setting<ShapeMode> shapeMode = sgGeneral.add(new EnumSetting.Builder<ShapeMode>()
-            .name("shape-mode")
-            .description("How the shapes are rendered.")
-            .defaultValue(ShapeMode.Both)
-            .build()
-    );
-
     private final Setting<Boolean> outline = sgGeneral.add(new BoolSetting.Builder()
             .name("outline")
             .description("Renders an outline around the entities.")
             .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Boolean> box = sgGeneral.add(new BoolSetting.Builder()
+            .name("box")
+            .description("Renders a box around the entities.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<ShapeMode> shapeMode = sgGeneral.add(new EnumSetting.Builder<ShapeMode>()
+            .name("box-mode")
+            .description("How the shapes are rendered.")
+            .defaultValue(ShapeMode.Both)
             .build()
     );
 
@@ -147,13 +154,13 @@ public class ESP extends ToggleModule {
 
     @EventHandler
     private final Listener<RenderEvent> onRender = new Listener<>(event -> {
+        if (!box.get()) return;
+
         count = 0;
 
         for (Entity entity : mc.world.getEntities()) {
             if ((!ModuleManager.INSTANCE.isActive(Freecam.class) && entity == mc.player) || !entities.get().contains(entity.getType())) continue;
             count++;
-
-            if (outline.get()) continue;
             render(event, entity, getColor(entity));
         }
     });
