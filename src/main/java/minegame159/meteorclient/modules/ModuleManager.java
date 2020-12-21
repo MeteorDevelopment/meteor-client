@@ -41,7 +41,7 @@ import java.io.File;
 import java.util.*;
 
 public class ModuleManager extends Savable<ModuleManager> implements Listenable {
-    public static final Category[] CATEGORIES = { Category.Combat, Category.Player, Category.Movement, Category.Render, Category.Misc };
+    public static final Category[] CATEGORIES = {Category.Combat, Category.Player, Category.Movement, Category.Render, Category.Misc};
     public static ModuleManager INSTANCE;
     public static final ModuleRegistry REGISTRY = new ModuleRegistry();
 
@@ -310,6 +310,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new FakePlayer());
         addModule(new NameProtect());
         addModule(new InfinityMiner());
+        addModule(new AntiAfk());
     }
 
     private void initMovement() {
