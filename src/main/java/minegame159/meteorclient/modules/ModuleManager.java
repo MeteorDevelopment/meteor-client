@@ -274,6 +274,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new AutoCity());
         addModule(new Swarm());
         addModule(new Quiver());
+        addModule(new VisualRange());
     }
 
     private void initPlayer() {
