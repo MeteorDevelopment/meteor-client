@@ -37,7 +37,7 @@ public class EntityRenderDispatcherMixin {
         }
 
         if (ModuleManager.INSTANCE.get(Chams.class).shouldRender(entity)) {
-            GL11.glEnable(32823);
+            GL11.glEnable(GL11.GL_POLYGON_OFFSET_FILL);
             GL11.glPolygonOffset(1.0f, -1000000.0f);
         }
     }
@@ -46,7 +46,7 @@ public class EntityRenderDispatcherMixin {
     private <E extends Entity> void onRenderTail(E entity, double x, double y, double z, float yaw, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, CallbackInfo info) {
         if (ModuleManager.INSTANCE.get(Chams.class).shouldRender(entity)) {
             GL11.glPolygonOffset(1.0f, 1000000.0f);
-            GL11.glDisable(32823);
+            GL11.glDisable(GL11.GL_POLYGON_OFFSET_FILL);
         }
     }
 }
