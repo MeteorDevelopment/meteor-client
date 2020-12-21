@@ -51,7 +51,6 @@ public class CommandManager {
         //addCommand(new SwarmTarget());
         addCommand(new SwarmScatter());
         addCommand(new SwarmModuleToggle());
-        addCommand(new Test());
     }
 
     public static void dispatch(String message) throws CommandSyntaxException {
