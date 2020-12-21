@@ -37,7 +37,7 @@ public class MeshBuilder {
             offsetZ = 0;
         }
 
-        buffer.begin(drawMode.toOpenGl(), format);
+        if (!buffer.isBuilding()) buffer.begin(drawMode.toOpenGl(), format);
     }
 
     public void end() {
@@ -58,8 +58,10 @@ public class MeshBuilder {
         RenderSystem.color4f(1, 1, 1, 1);
         GlStateManager.shadeModel(GL_SMOOTH);
 
-        buffer.end();
-        BufferRenderer.draw(buffer);
+        if (buffer.isBuilding()) buffer.end();
+        try {
+            BufferRenderer.draw(buffer);
+        } catch (Exception ignored){}
 
         RenderSystem.enableAlphaTest();
         RenderSystem.enableDepthTest();
