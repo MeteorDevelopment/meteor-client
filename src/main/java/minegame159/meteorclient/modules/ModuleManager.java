@@ -274,7 +274,6 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new AutoCity());
         addModule(new Swarm());
         addModule(new Quiver());
-        addModule(new VisualRange());
     }
 
     private void initPlayer() {
@@ -400,6 +399,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new BetterChat());
         addModule(new OffHandCrash());
         addModule(new LiquidFiller());
+        addModule(new VisualRange());
     }
 
     public static class ModuleRegistry extends Registry<ToggleModule> {
