@@ -6,8 +6,8 @@
 package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.entity.player.CanWalkOnFluidEvent;
 import minegame159.meteorclient.events.EventStore;
+import minegame159.meteorclient.events.entity.player.CanWalkOnFluidEvent;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.movement.AntiLevitation;
 import minegame159.meteorclient.utils.Utils;

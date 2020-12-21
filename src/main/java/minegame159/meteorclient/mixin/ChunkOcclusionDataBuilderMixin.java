@@ -6,8 +6,8 @@
 package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.world.ChunkOcclusionEvent;
 import minegame159.meteorclient.events.EventStore;
+import minegame159.meteorclient.events.world.ChunkOcclusionEvent;
 import net.minecraft.client.render.chunk.ChunkOcclusionDataBuilder;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.asm.mixin.Mixin;

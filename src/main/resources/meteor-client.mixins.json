@@ -3,6 +3,8 @@
   "package": "minegame159.meteorclient.mixin",
   "compatibilityLevel": "JAVA_8",
   "client": [
+    "AbstractBlockAccessor",
+    "AbstractBlockMixin",
     "AbstractButtonWidgetMixin",
     "AbstractClientPlayerEntityMixin",
     "AbstractFurnaceScreenHandlerMixin",
@@ -17,6 +19,7 @@
     "BlockItemMixin",
     "BlockMixin",
     "BlockStateMixin",
+    "BoatEntityMixin",
     "BookEditScreenMixin",
     "BookScreenMixin",
     "BossBarHudMixin",
@@ -48,6 +51,7 @@
     "GameRendererMixin",
     "GenericContainerScreenMixin",
     "HandledScreenMixin",
+    "HeldItemRendererMixin",
     "HoeItemAccessor",
     "HorseBaseEntityMixin",
     "IdentifierAccessor",
@@ -85,15 +89,11 @@
     "StatusEffectInstanceMixin",
     "TerrainRenderContextMixin",
     "TextHandlerMixin",
+    "TextVisitFactoryMixin",
     "TitleScreenMixin",
     "Vec3dMixin",
     "WorldRendererAccessor",
-    "WorldRendererMixin",
-    "TextVisitFactoryMixin",
-    "HeldItemRendererMixin",
-    "BoatEntityMixin",
-    "AbstractBlockAccessor",
-    "AbstractBlockMixin"
+    "WorldRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

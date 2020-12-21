@@ -5,13 +5,8 @@
 
 package minegame159.meteorclient.mixin;
 
-import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.modules.render.BlockSelection;
-import minegame159.meteorclient.modules.render.ESP;
-import minegame159.meteorclient.modules.render.Freecam;
-import minegame159.meteorclient.modules.render.NoRender;
-import minegame159.meteorclient.modules.render.BreakIndicators;
+import minegame159.meteorclient.modules.render.*;
 import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.Outlines;
 import minegame159.meteorclient.utils.Utils;
@@ -33,7 +28,6 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import javax.annotation.Nullable;
-import java.util.SortedSet;
 
 @Mixin(WorldRenderer.class)
 public abstract class WorldRendererMixin {
