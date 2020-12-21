@@ -312,6 +312,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new NameProtect());
         addModule(new InfinityMiner());
         addModule(new AntiAfk());
+        addModule(new NoInteract());
     }
 
     private void initMovement() {
