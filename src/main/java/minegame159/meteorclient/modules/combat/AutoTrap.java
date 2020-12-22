@@ -27,29 +27,29 @@ import net.minecraft.util.math.Direction;
 public class AutoTrap extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    public enum topMode {
+    public enum TopMode {
         Full,
         Top,
         None
     }
 
-    public enum bottomMode {
+    public enum BottomMode {
         Single,
         Platform,
         None
     }
 
-    private final Setting<topMode> topPlacement = sgGeneral.add(new EnumSetting.Builder<topMode>()
+    private final Setting<TopMode> topPlacement = sgGeneral.add(new EnumSetting.Builder<TopMode>()
             .name("top-mode")
             .description("Which blocks to place on the top half of the target.")
-            .defaultValue(topMode.Full)
+            .defaultValue(TopMode.Full)
             .build()
     );
 
-    private final Setting<bottomMode> bottomPlacement = sgGeneral.add(new EnumSetting.Builder<bottomMode>()
+    private final Setting<BottomMode> bottomPlacement = sgGeneral.add(new EnumSetting.Builder<BottomMode>()
             .name("bottom-mode")
             .description("Which blocks to place on the bottom half of the target.")
-            .defaultValue(bottomMode.Single)
+            .defaultValue(BottomMode.Single)
             .build()
     );
 
