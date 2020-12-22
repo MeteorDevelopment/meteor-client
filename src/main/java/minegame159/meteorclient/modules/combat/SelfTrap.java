@@ -11,44 +11,56 @@ import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BoolSetting;
+import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.utils.Chat;
-import minegame159.meteorclient.utils.PlayerUtils;
 import net.minecraft.block.Blocks;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.Hand;
+import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 
 public class SelfTrap extends ToggleModule {
-    private final SettingGroup sgGeneral = settings.getDefaultGroup();
-
-    private final Setting<Boolean> turnOff = sgGeneral.add(new BoolSetting.Builder()
-            .name("turn-off")
-            .description("Toggles off once the blocks are placed.")
-            .defaultValue(false)
-            .build()
-    );
-
-    private final Setting<Boolean> selfToggle = sgGeneral.add(new BoolSetting.Builder()
-            .name("self-toggle")
-            .description("Toggles off when you run out of obsidian.")
-            .defaultValue(false)
-            .build()
-    );
-
-    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
-            .name("rotate")
-            .description("Forces you to rotate upwards when placing the obsidian.")
-            .defaultValue(true)
-            .build()
-    );
 
     public SelfTrap(){
         super(Category.Combat, "self-trap", "Places obsidian above your head.");
     }
 
-    private boolean sentMessage = false;
+    public enum TopMode {
+        AntiFacePlace,
+        Full,
+        Top,
+        None
+    }
+
+    public enum BottomMode {
+        Single,
+        None
+    }
+
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+
+
+    private final Setting<TopMode> topPlacement = sgGeneral.add(new EnumSetting.Builder<TopMode>()
+            .name("top-mode")
+            .description("Which positions to place on your top half.")
+            .defaultValue(TopMode.AntiFacePlace)
+            .build()
+    );
+
+    private final Setting<BottomMode> bottomPlacement = sgGeneral.add(new EnumSetting.Builder<BottomMode>()
+            .name("bottom-mode")
+            .description("Which positions to place on your bottom half.")
+            .defaultValue(BottomMode.None)
+            .build()
+    );
+
+    private final Setting<Boolean> turnOff = sgGeneral.add(new BoolSetting.Builder()
+            .name("turn-off")
+            .description("Turns off after placing.")
+            .defaultValue(true)
+            .build()
+    );
 
     @EventHandler
     private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
@@ -59,28 +71,78 @@ public class SelfTrap extends ToggleModule {
                 break;
             }
         }
-
-        if (obsidianSlot == -1 && selfToggle.get()) {
-            if (!sentMessage) {
-                Chat.warning(this, "No obsidian found… disabling.");
-                sentMessage = true;
-            }
-
-            this.toggle();
-            return;
-        } else if (obsidianSlot == -1) return;
+        if (obsidianSlot == -1) return;
 
         int prevSlot = mc.player.inventory.selectedSlot;
         mc.player.inventory.selectedSlot = obsidianSlot;
-        BlockPos targetPos = mc.player.getBlockPos().up(2);
+        BlockPos targetPosUp = mc.player.getBlockPos().up();
+        BlockPos targetPos = mc.player.getBlockPos();
 
-        PlayerUtils.placeBlock(targetPos, Hand.MAIN_HAND);
-
-        if (rotate.get()) {
-            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(mc.player.yaw, -90, mc.player.isOnGround()));
+        //PLACEMENT
+        switch(topPlacement.get()) {
+            case Full:
+                int blocksPlaced = 0;
+                if(mc.world.getBlockState(targetPosUp.add(0, 1, 0)).getMaterial().isReplaceable()){
+                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, targetPosUp.add(0, 1, 0), false));
+                    blocksPlaced++;
+                }
+                if(mc.world.getBlockState(targetPosUp.add(1, 0, 0)).getMaterial().isReplaceable()){
+                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, targetPosUp.add(1, 0, 0), false));
+                    blocksPlaced++;
+                }
+                if(mc.world.getBlockState(targetPosUp.add(-1, 0, 0)).getMaterial().isReplaceable()){
+                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, targetPosUp.add(-1, 0, 0), false));
+                    blocksPlaced++;
+                }
+                if(mc.world.getBlockState(targetPosUp.add(0, 0, 1)).getMaterial().isReplaceable()){
+                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, targetPosUp.add(0, 0, 1), false));
+                    blocksPlaced++;
+                }
+                if(mc.world.getBlockState(targetPosUp.add(0, 0, -1)).getMaterial().isReplaceable()){
+                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, targetPosUp.add(0, 0, -1), false));
+                    blocksPlaced++;
+                }
+                if (blocksPlaced >= 1) mc.player.swingHand(Hand.MAIN_HAND);
+                break;
+            case AntiFacePlace:
+                int _blocksPlaced = 0;
+                if(mc.world.getBlockState(targetPosUp.add(1, 0, 0)).getMaterial().isReplaceable()){
+                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, targetPosUp.add(1, 0, 0), false));
+                    _blocksPlaced++;
+                }
+                if(mc.world.getBlockState(targetPosUp.add(-1, 0, 0)).getMaterial().isReplaceable()){
+                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, targetPosUp.add(-1, 0, 0), false));
+                    _blocksPlaced++;
+                }
+                if(mc.world.getBlockState(targetPosUp.add(0, 0, 1)).getMaterial().isReplaceable()){
+                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, targetPosUp.add(0, 0, 1), false));
+                    _blocksPlaced++;
+                }
+                if(mc.world.getBlockState(targetPosUp.add(0, 0, -1)).getMaterial().isReplaceable()){
+                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, targetPosUp.add(0, 0, -1), false));
+                    _blocksPlaced++;
+                }
+                if (_blocksPlaced >= 1) mc.player.swingHand(Hand.MAIN_HAND);
+                break;
+            case Top:
+                if(mc.world.getBlockState(targetPosUp.add(0, 1, 0)).getMaterial().isReplaceable()){
+                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos().add(0, 1, 0), Direction.UP, targetPosUp.add(0, 1, 0), false));
+                    mc.player.swingHand(Hand.MAIN_HAND);
+                }
+                break;
+            case None:
         }
 
-        if (turnOff.get()) toggle();
+        switch(bottomPlacement.get()) {
+            case Single:
+                if (mc.world.getBlockState(targetPos.add(0, -1, 0)).isAir()) {
+                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.DOWN, targetPos.add(0, -1, 0), true));
+                    mc.player.swingHand(Hand.MAIN_HAND);
+                }
+                break;
+            case None:
+        }
         mc.player.inventory.selectedSlot = prevSlot;
+        if (turnOff.get()) toggle();
     });
 }
