@@ -15,17 +15,23 @@ import minegame159.meteorclient.mixininterface.IClientPlayerInteractionManager;
 import minegame159.meteorclient.mixininterface.ITextHandler;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.misc.AutoReconnect;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.InvUtils;
+import minegame159.meteorclient.utils.Utils;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.client.network.ServerInfo;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.packet.c2s.play.BookUpdateC2SPacket;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.Style;
 
+import java.awt.*;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -34,20 +40,20 @@ import java.util.PrimitiveIterator;
 import java.util.Random;
 import java.util.stream.IntStream;
 
-// FUCK YOU GHOST TYPES
-// agreed fuck that guy.
+//FUCK YOU GHOST TYPES
 
 public class BookBot extends ToggleModule {
     private static final int LINE_WIDTH = 113;
 
-    public enum Mode{ // Edna Mode
+    public enum Mode{ //Edna Mode
         File,
         Random,
-        Ascii
+        Ascii,
+        Dupe
     }
     //Didn't add it to the module list cuz I didn't know if it was gonna work.
     public BookBot(){
-        super(Category.Misc, "book-bot", "Writes an amount of books full of characters or from a file."); //Grammar who? / too ez.
+        super(Category.Misc, "book-bot", "Writes books full of characters or from a file."); //Grammar who?
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();//Obligatory comment.
@@ -61,14 +67,14 @@ public class BookBot extends ToggleModule {
     //Idk how to add the name into the book so you're gonna have to do it or tell me.
     private final Setting<String> name = sgGeneral.add(new StringSetting.Builder()
             .name("name")
-            .description("The name you want to give your books.")
-            .defaultValue("Meteor on Crack!") //METEOR ON CRACK!!! / based.
+            .description("The name you want to give the books")
+            .defaultValue("UWU!")
             .build()
     );
 
     private final Setting<String> fileName = sgGeneral.add(new StringSetting.Builder()
             .name("file-name")
-            .description("The name of the text file (.txt NEEDED)") //Some retard will do it without and complain like a tard.
+            .description("The name of the text file (.txt included)") //Some retard will do it without and complain like a tard.
             .defaultValue("book.txt")
             .build()
     );
@@ -79,20 +85,20 @@ public class BookBot extends ToggleModule {
             .defaultValue(100)
             .min(1)
             .max(100)
-            .sliderMax(100) // Max number of pages possible.
+            .sliderMax(100) //Max number of pages possible.
             .build()
     );
 
     private final Setting<Integer> noOfBooks = sgGeneral.add(new IntSetting.Builder()
             .name("no-of-books")
-            .description("The number of books to make (or until the file runs out).")
+            .description("The number of books to make(or until the file runs out)")
             .defaultValue(1)
             .build()
     );
 
     private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
             .name("delay")
-            .description("The amount of delay between writing books in milliseconds.")
+            .description("The delay between writing books(in ms)")
             .defaultValue(300)
             .min(75)
             .sliderMin(75)
@@ -123,25 +129,25 @@ public class BookBot extends ToggleModule {
 
     @Override
     public void onDeactivate() {
-        // Reset everything for next time. Don't know if it's needed but we're gonna do it anyway.
+        //Reset everything for next time. Don't know if it's needed but we're gonna do it anyway.
         booksLeft = 0;
         pages = new ListTag();
     }
 
     @EventHandler
     private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
-        // Make sure we aren't in the inventory.
+        //Make sure we aren't in the inventory.
         if(mc.currentScreen instanceof HandledScreen<?>) return;
-        // If there are no books left to write we are done.
+        //If there are no books left to write we are done.
         if(booksLeft <= 0){
             toggle();
             return;
         }
         //If the player isn't holding a book
         if(mc.player.getMainHandStack().getItem() != Items.WRITABLE_BOOK){
-            // Find one
+            //Find one
             InvUtils.FindItemResult itemResult = InvUtils.findItemWithCount(Items.WRITABLE_BOOK);
-            // If it's in their hotbar then just switch to it (no need to switch back later)
+            //If it's in their hotbar then just switch to it (no need to switch back later)
             if (itemResult.slot <= 8 && itemResult.slot != -1) {
                 mc.player.inventory.selectedSlot = itemResult.slot;
                 ((IClientPlayerInteractionManager) mc.interactionManager).syncSelectedSlot2();
@@ -149,8 +155,8 @@ public class BookBot extends ToggleModule {
                 InvUtils.clickSlot(InvUtils.invIndexToSlotId(itemResult.slot), 0, SlotActionType.PICKUP);
                 InvUtils.clickSlot(InvUtils.invIndexToSlotId(mc.player.inventory.selectedSlot), 0, SlotActionType.PICKUP);
                 InvUtils.clickSlot(InvUtils.invIndexToSlotId(itemResult.slot), 0, SlotActionType.PICKUP);
-            } else { // Otherwise we are out and we can just wait for more books.
-                // I'm always waiting. Watching. Get more books. I dare you. :))))
+            } else { //Otherwise we are out and we can just wait for more books.
+                //I'm always waiting. Watching. Get more books. I dare you. :))))
                 return;
             }
         }
@@ -161,13 +167,13 @@ public class BookBot extends ToggleModule {
             return;
         }
         if(mode.get() == Mode.Random){
-            // Generates a random stream of integers??
+            //Generates a random stream of integers??
             IntStream charGenerator = RANDOM.ints(0x80, 0x10ffff - 0x800).map(i -> i < 0xd800 ? i : i + 0x800);
             stream = charGenerator.limit(23000).iterator();
             firstChar = true;
             writeBook();
         }else if(mode.get() == Mode.Ascii){
-            // Generates a random stream of integers??
+            //Generates a random stream of integers??
             IntStream charGenerator = RANDOM.ints(0x20, 0x7f);
             stream = charGenerator.limit(35000).iterator();
             firstChar = true;
@@ -177,31 +183,31 @@ public class BookBot extends ToggleModule {
                 //Fetch the file and initialise the IntList
                 File file = new File(MeteorClient.FOLDER, fileName.get());
 
-                // Check to see if the file exists.
+                //Check if the file exists.
                 if (!file.exists()) {
-                    Chat.error(this, "The file you specified doesn't exist in the meteor folder."); // You dumb bitch.
+                    Chat.error(this, "The file you specified doesn't exist in the meteor folder."); //You dumb bitch.
                     return;
                 }
 
-                // ry to read the file.
+                //Try to read the file
                 try {
                     //Create the reader
                     BufferedReader reader = new BufferedReader(new FileReader(file));
 
-                    // Read all the text into a string.
+                    // Read all the text into a string
                     StringBuilder sb = new StringBuilder();
                     String line;
                     while ((line = reader.readLine()) != null) sb.append(line).append('\n');
 
-                    // Write it to the book.
+                    // Write it to the book
                     reader.close();
                     firstTime = false;
                     fileString = sb.toString();
                     stream = fileString.chars().iterator();
                     firstChar = true;
                     writeBook();
-                } catch (IOException ignored) { //EZ ignore. > 1 blocked message.
-                    // If it fails then send a message.
+                } catch (IOException ignored) { //EZ ignore. > 1 blocked message
+                    //If it fails then send a message
                     Chat.error(this, "Failed to read the file.");
                     //When you try your best but you don't succeed.
                 }
@@ -213,9 +219,37 @@ public class BookBot extends ToggleModule {
                     writeBook();
                 }
             }
+        }else if (mode.get() == Mode.Dupe){
+            writeDupeBook();
+            toggle();
         }
     });
+    private static final String str1;
+    private static final String str2 = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 
+    private void writeDupeBook() {
+        pages.clear();
+
+        if (firstChar) {
+            readChar();
+            firstChar = false;
+        }
+        pages.addTag(0, (Tag)StringTag.of(BookBot.str1));
+        for (int i = 1; i < 38; ++i) {
+            pages.addTag(i, (Tag)StringTag.of(str2));
+        }
+        mc.player.getMainHandStack().putSubTag("pages", (Tag)pages);
+        mc.player.networkHandler.sendPacket(new BookUpdateC2SPacket(mc.player.getMainHandStack(), true, mc.player.inventory.selectedSlot));
+
+    }
+
+        static {
+        final StringBuilder stringBuilder = new StringBuilder();
+        for (int i = 0; i < 21845; ++i) {
+            stringBuilder.append('\u0800');
+        }
+        str1 = stringBuilder.toString();
+    }
     private void writeBook() {
         pages.clear();
 
@@ -262,7 +296,7 @@ public class BookBot extends ToggleModule {
         }
 
         mc.player.getMainHandStack().putSubTag("pages", pages);
-        mc.player.getMainHandStack().putSubTag("author", StringTag.of("squidoodly"));
+        mc.player.getMainHandStack().putSubTag("author", StringTag.of("Meteor Client"));
         mc.player.getMainHandStack().putSubTag("title", StringTag.of(name.get()));
         mc.player.networkHandler.sendPacket(new BookUpdateC2SPacket(mc.player.getMainHandStack(), true, mc.player.inventory.selectedSlot));
         booksLeft--;
@@ -278,4 +312,3 @@ public class BookBot extends ToggleModule {
         return true;
     }
 } //IT TOOK ME 30 FUCKING MINUTES TO COMMENT THIS. I WANT TO DIE. SEND HELP. CODING METEOR IS BECOMING AN ADDICTION. PLEASE. CAN SOMEONE HEAR ME? ANYONE?
-// this is a r/squidoodly moment.
