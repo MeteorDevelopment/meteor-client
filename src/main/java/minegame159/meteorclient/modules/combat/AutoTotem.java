@@ -27,7 +27,6 @@ import minegame159.meteorclient.utils.Utils;
 import net.minecraft.block.entity.BedBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.decoration.EndCrystalEntity;
@@ -69,8 +68,7 @@ public class AutoTotem extends ToggleModule {
             .sliderMax(20)
             .build()
     );
-    
-    private int totemCount;
+
     private String totemCountString = "0";
 
     private final MinecraftClient mc = MinecraftClient.getInstance();
@@ -88,57 +86,33 @@ public class AutoTotem extends ToggleModule {
 
     @EventHandler
     private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
-        if (mc.currentScreen instanceof HandledScreen<?> && (!(mc.currentScreen instanceof InventoryScreen) || !inventorySwitch.get())) return;
-        if (mc.currentScreen != null && mc.player.inventory.size() < 44) return;
+        assert mc.player != null;
+        if (mc.currentScreen instanceof InventoryScreen && !inventorySwitch.get()) return;
+        if (mc.currentScreen != null && !(mc.currentScreen instanceof InventoryScreen)) return;
 
-        int preTotemCount = totemCount;
         InvUtils.FindItemResult result = InvUtils.findItemWithCount(Items.TOTEM_OF_UNDYING);
 
-        if (result.count <= 0
-                && mc.player.inventory.getCursorStack().getItem() != Items.TOTEM_OF_UNDYING
-                && mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING
-                && fallback.get()) {
-            if (!ModuleManager.INSTANCE.get(OffhandExtra.class).isActive()
-                    && !ModuleManager.INSTANCE.get(OffhandExtra.class).getMessageSent())
+        if (getTotemCount(result) <= 0 && fallback.get()) {
+            if (!ModuleManager.INSTANCE.get(OffhandExtra.class).isActive())
                 ModuleManager.INSTANCE.get(OffhandExtra.class).toggle();
 
             ModuleManager.INSTANCE.get(OffhandExtra.class).setTotems(true);
             return;
-        } else if (result.count > 0 && ModuleManager.INSTANCE.get(OffhandExtra.class).isActive()) {
+        } else if (getTotemCount(result) > 0 && ModuleManager.INSTANCE.get(OffhandExtra.class).isActive()) {
             ModuleManager.INSTANCE.get(OffhandExtra.class).setTotems(false);
         }
 
-        if (result.found() && mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING && !smart.get()) {
+        if (getTotemCount(result) > 0 && (mc.player.getOffHandStack().isEmpty()
+                || (mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING && !smart.get())
+                || (getHealth() < health.get() || ((mc.player.getHealth() + mc.player.getAbsorptionAmount()) - getHealthReduction()) < health.get()))) {
             locked = true;
-            if(mc.player.inventory.getCursorStack().getItem() != Items.TOTEM_OF_UNDYING) {
-                InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
-            }
-            InvUtils.clickSlot(InvUtils.OFFHAND_SLOT, 0, SlotActionType.PICKUP);
-            InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
-        }else if(result.found() && mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING && smart.get() &&
-                ((mc.player.getHealth() + mc.player.getAbsorptionAmount()) < health.get() || ((mc.player.getHealth() + mc.player.getAbsorptionAmount()) - getHealthReduction()) < health.get())){
-            locked = true;
-            if(mc.player.inventory.getCursorStack().getItem() != Items.TOTEM_OF_UNDYING) {
-                InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
-            }
-            InvUtils.clickSlot(InvUtils.OFFHAND_SLOT, 0, SlotActionType.PICKUP);
-            InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
-        }else if (result.found() && mc.player.getOffHandStack().isEmpty()) {
-            if(mc.player.inventory.getCursorStack().getItem() != Items.TOTEM_OF_UNDYING) {
-                InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
-            }
-            InvUtils.clickSlot(InvUtils.OFFHAND_SLOT, 0, SlotActionType.PICKUP);
-            InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
-        }
-        if(smart.get() && ((mc.player.getHealth() + mc.player.getAbsorptionAmount()) > health.get()
+            moveTotem(result);
+        } else if(smart.get() && ((mc.player.getHealth() + mc.player.getAbsorptionAmount()) > health.get()
                 && (((mc.player.getHealth() + mc.player.getAbsorptionAmount()) - getHealthReduction()) > health.get()))){
             locked = false;
         }
 
-        if (result.count != preTotemCount) {
-            totemCountString = Integer.toString(result.count);
-            totemCount = result.count;
-        }
+        totemCountString = Integer.toString(getTotemCount(result));
     });
 
     @Override
@@ -146,7 +120,27 @@ public class AutoTotem extends ToggleModule {
         return totemCountString;
     }
 
+    private void moveTotem(InvUtils.FindItemResult result){
+        assert mc.player != null;
+        boolean empty = mc.player.getOffHandStack().isEmpty();
+        if(mc.player.inventory.getCursorStack().getItem() != Items.TOTEM_OF_UNDYING) {
+            InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
+        }
+        InvUtils.clickSlot(InvUtils.OFFHAND_SLOT, 0, SlotActionType.PICKUP);
+        if (!empty) InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
+    }
+
+    public int getTotemCount(InvUtils.FindItemResult result) {
+        assert mc.player != null;
+        int count = 0;
+        if (mc.player.inventory.getCursorStack().getItem() == Items.TOTEM_OF_UNDYING) count++;
+        if (mc.player.getOffHandStack().getItem() == Items.TOTEM_OF_UNDYING) count++;
+        return count + result.count;
+    }
+
     private double getHealthReduction(){
+        assert mc.world != null;
+        assert mc.player != null;
         double damageTaken = 0;
         for(Entity entity : mc.world.getEntities()){
             if(entity instanceof EndCrystalEntity && damageTaken < DamageCalcUtils.crystalDamage(mc.player, entity.getPos())){
@@ -173,6 +167,11 @@ public class AutoTotem extends ToggleModule {
             }
         }
         return damageTaken;
+    }
+
+    private double getHealth(){
+        assert mc.player != null;
+        return mc.player.getHealth() + mc.player.getAbsorptionAmount();
     }
 
     public boolean getLocked(){
