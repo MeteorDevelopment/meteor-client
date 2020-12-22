@@ -343,7 +343,9 @@ public class Utils {
     }
 
     public static void leftClick() {
+        mc.options.keyAttack.setPressed(true);
         ((IMinecraftClient) mc).leftClick();
+        mc.options.keyAttack.setPressed(false);
     }
     public static void rightClick() {
         ((IMinecraftClient) mc).rightClick();
