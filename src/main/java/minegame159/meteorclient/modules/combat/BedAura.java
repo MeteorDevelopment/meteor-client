@@ -20,6 +20,7 @@ import minegame159.meteorclient.utils.*;
 import net.minecraft.block.entity.BedBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BedItem;
 import net.minecraft.item.ItemStack;
@@ -203,6 +204,9 @@ public class BedAura extends ToggleModule {
 
     @EventHandler
     private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+        assert mc.player != null;
+        assert mc.world != null;
+        assert mc.interactionManager != null;
         delayLeft --;
         preSlot = -1;
         if (mc.player.getHealth() + mc.player.getAbsorptionAmount() <= minHealth.get() && mode.get() != Mode.suicide) return;
@@ -226,7 +230,7 @@ public class BedAura extends ToggleModule {
         } catch (ConcurrentModificationException ignored) {
             return;
         }
-        if (place.get() && (!(mc.player.getMainHandStack().getItem() instanceof BedItem)
+        if ((!(mc.player.getMainHandStack().getItem() instanceof BedItem)
                 && !(mc.player.getOffHandStack().getItem() instanceof BedItem)) && !autoSwitch.get() && !autoMove.get()) return;
         if (place.get()) {
             boolean doMove = true;
@@ -317,6 +321,8 @@ public class BedAura extends ToggleModule {
     });
 
     private void placeBlock(){
+        assert mc.player != null;
+        assert mc.interactionManager != null;
         bestBlockPos = new BlockPos(bestBlock.x, bestBlock.y, bestBlock.z);
         Hand hand = Hand.MAIN_HAND;
         if (!(mc.player.getMainHandStack().getItem() instanceof BedItem) && mc.player.getOffHandStack().getItem() instanceof BedItem) {
@@ -354,29 +360,34 @@ public class BedAura extends ToggleModule {
         for(double i = playerPos.getX() - placeRange.get(); i < playerPos.getX() + placeRange.get(); i++){
             for(double j = playerPos.getZ() - placeRange.get(); j < playerPos.getZ() + placeRange.get(); j++){
                 for(double k = playerPos.getY() - 3; k < playerPos.getY() + 3; k++) {
-                    pos = new BlockPos(i, j, k);
+                    pos = new BlockPos(i, k, j);
                     vecPos = new Vec3d(Math.floor(i), Math.floor(k), Math.floor(j));
                     posUp = pos.add(0, 1, 0);
                     if (bestBlock == null) bestBlock = vecPos;
                     if (isValid(posUp)) {
                         if (airPlace.get() || !mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
-                            if (bestDamage < DamageCalcUtils.bedDamage(target, vecPos.add(0.5, 1.5, 0.5))
+                            if (bestDamage < getBestDamage(target, vecPos.add(0.5, 1.5, 0.5))
                                     && (DamageCalcUtils.bedDamage(mc.player, vecPos.add(0.5, 1.5, 0.5)) < minDamage.get() || mode.get() == Mode.suicide)) {
                                 bestBlock = vecPos;
-                                bestDamage = DamageCalcUtils.bedDamage(target, bestBlock.add(0.5, 1.5, 0.5));
+                                bestDamage = getBestDamage(target, bestBlock.add(0.5, 1.5, 0.5));
                             }
                         }
                     }
                 }
             }
         }
-        if (bestBlock == null) return;
-        double north, east, south, west;
-        bestBlockPos = new BlockPos(bestBlock.x, bestBlock.y, bestBlock.z);
-        east = DamageCalcUtils.bedDamage(target, bestBlock.add(1.5, 1.5, 0.5));
-        west = DamageCalcUtils.bedDamage(target, bestBlock.add(-1.5, 1.5, 0.5));
-        south = DamageCalcUtils.bedDamage(target, bestBlock.add(0.5, 1.5, 1.5));
-        north = DamageCalcUtils.bedDamage(target, bestBlock.add(0.5, 1.5, -1.5));
+        if (bestDamage >= minDamage.get()) bestBlockPos = new BlockPos(bestBlock.x, bestBlock.y, bestBlock.z);
+        else bestBlock = null;
+
+    }
+
+    private double getBestDamage(LivingEntity target, Vec3d bestBlock){
+        double north, east, south, west, bestDamage;
+        east = DamageCalcUtils.bedDamage(target, bestBlock.add(1, 0, 0));
+        west = DamageCalcUtils.bedDamage(target, bestBlock.add(-1, 0, 0));
+        south = DamageCalcUtils.bedDamage(target, bestBlock.add(0, 0, 1));
+        north = DamageCalcUtils.bedDamage(target, bestBlock.add(0, 0, -1));
+        bestDamage = DamageCalcUtils.bedDamage(target, bestBlock);
 
         if ((east > north) && (east > south) && (east > west)) {
             direction = 0;
@@ -387,7 +398,8 @@ public class BedAura extends ToggleModule {
         } else if ((west > north) && (west > south) && (east < west)) {
             direction = 3;
         }
-        bestDamage = Math.max(bestDamage, Math.max(north, Math.max(east, Math.max(south, west))));
+
+        return Math.max(bestDamage, Math.max(north, Math.max(east, Math.max(south, west))));
     }
 
     private void findFacePlace(PlayerEntity target) {
@@ -426,6 +438,22 @@ public class BedAura extends ToggleModule {
                 bestBlock = new Vec3d(target.getBlockPos().getX() + 0.5, target.getBlockPos().getY() + 1, target.getBlockPos().getZ() - 0.5);
                 direction = 2;
                 bypassCheck = true;
+            } else if (isValidHalf(target.getBlockPos().add(1, 2, 0))) {
+                bestBlock = new Vec3d(target.getBlockPos().getX() + 1.5, target.getBlockPos().getY() + 2, target.getBlockPos().getZ() + 0.5);
+                direction = 3;
+                bypassCheck = true;
+            } else if (isValidHalf(target.getBlockPos().add(-1, 2, 0))) {
+                bestBlock = new Vec3d(target.getBlockPos().getX() - 0.5, target.getBlockPos().getY() + 2, target.getBlockPos().getZ() + 0.5);
+                direction = 0;
+                bypassCheck = true;
+            } else if (isValidHalf(target.getBlockPos().add(0, 2, 1))) {
+                bestBlock = new Vec3d(target.getBlockPos().getX() + 0.5, target.getBlockPos().getY() + 2, target.getBlockPos().getZ() + 1.5);
+                direction = 1;
+                bypassCheck = true;
+            } else if (isValidHalf(target.getBlockPos().add(0, 2, -1))) {
+                bestBlock = new Vec3d(target.getBlockPos().getX() + 0.5, target.getBlockPos().getY() + 2, target.getBlockPos().getZ() - 0.5);
+                direction = 2;
+                bypassCheck = true;
             }
         }
     }
@@ -436,6 +464,7 @@ public class BedAura extends ToggleModule {
     }
 
     private boolean isValid(BlockPos posUp) {
+        assert mc.world != null;
         return (mc.world.getBlockState(posUp).getMaterial().isReplaceable())
                 && mc.world.getOtherEntities(null, new Box(posUp.getX(), posUp.getY(), posUp.getZ(), posUp.getX() + 1.0D, posUp.getY() + 1.0D, posUp.getZ() + 1.0D)).isEmpty()
                 && (mc.world.getBlockState(new BlockPos(posUp).add(1, 0, 0)).getMaterial().isReplaceable() || mc.world.getBlockState(posUp.add(-1, 0, 0)).getMaterial().isReplaceable()
