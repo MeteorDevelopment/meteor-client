@@ -58,6 +58,8 @@ public class MacroManager extends Savable<MacroManager> implements Iterable<Macr
 
     @Override
     public MacroManager fromTag(CompoundTag tag) {
+        for (Macro macro : macros) MeteorClient.EVENT_BUS.unsubscribe(macro);
+
         macros = NbtUtils.listFromTag(tag.getList("macros", 10), tag1 -> new Macro().fromTag((CompoundTag) tag1));
 
         for (Macro macro : macros) MeteorClient.EVENT_BUS.subscribe(macro);
