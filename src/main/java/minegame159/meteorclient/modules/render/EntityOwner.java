@@ -14,7 +14,7 @@ import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.rendering.DrawMode;
 import minegame159.meteorclient.rendering.Fonts;
 import minegame159.meteorclient.rendering.Matrices;
-import minegame159.meteorclient.rendering.Renderer;
+import minegame159.meteorclient.rendering.MeshBuilder;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
@@ -33,6 +33,8 @@ import java.util.Map;
 import java.util.UUID;
 
 public class EntityOwner extends ToggleModule {
+    private static final MeshBuilder MB = new MeshBuilder(128);
+
     private static final Color BACKGROUND = new Color(0, 0, 0, 75);
     private static final Color TEXT = new Color(255, 255, 255);
     private static final Type RESPONSE_TYPE = new TypeToken<List<UuidNameHistoryResponseItem>>() {}.getType();
@@ -92,9 +94,9 @@ public class EntityOwner extends ToggleModule {
         // Render background
         double ii = Fonts.get(2).getWidth(name) / 2.0;
         double i = ii * 0.25;
-        Renderer.NORMAL.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
-        Renderer.NORMAL.quad(-i - 1, 0, 0, -i - 1, 8, 0, i + 1, 8, 0, i + 1, 0, 0, BACKGROUND);
-        Renderer.NORMAL.end();
+        MB.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
+        MB.quad(-i - 1, 0, 0, -i - 1, 8, 0, i + 1, 8, 0, i + 1, 0, 0, BACKGROUND);
+        MB.end();
 
         // Render name text
         Matrices.scale(0.25, 0.25, 1);

@@ -16,7 +16,7 @@ import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.rendering.DrawMode;
 import minegame159.meteorclient.rendering.Fonts;
 import minegame159.meteorclient.rendering.Matrices;
-import minegame159.meteorclient.rendering.Renderer;
+import minegame159.meteorclient.rendering.MeshBuilder;
 import minegame159.meteorclient.utils.*;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.Camera;
@@ -34,6 +34,8 @@ public class Waypoints extends Savable<Waypoints> implements Listenable, Iterabl
     public static final Waypoints INSTANCE = new Waypoints();
 
     private static final String[] BUILTIN_ICONS = { "Square", "Circle", "Triangle", "Star", "Diamond" };
+
+    private static final MeshBuilder MB = new MeshBuilder(128);
 
     private static final Color BACKGROUND = new Color(0, 0, 0, 75);
     private static final Color TEXT = new Color(255, 255, 255);
@@ -142,10 +144,10 @@ public class Waypoints extends Savable<Waypoints> implements Listenable, Iterabl
             double i = ii * 0.25;
             double ii2 = Fonts.get(2).getWidth(distText) / 2.0;
             double i2 = ii2 * 0.25;
-            Renderer.NORMAL.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
-            Renderer.NORMAL.quad(-i - 1, -Fonts.get(2).getHeight() * 0.25 + 1, 0, -i - 1, 9 - Fonts.get(2).getHeight() * 0.25, 0, i + 1, 9 - Fonts.get(2).getHeight() * 0.25, 0, i + 1, -Fonts.get(2).getHeight() * 0.25 + 1, 0, BACKGROUND);
-            Renderer.NORMAL.quad(-i2 - 1, 0, 0, -i2 - 1, 8, 0, i2 + 1, 8, 0, i2 + 1, 0, 0, BACKGROUND);
-            Renderer.NORMAL.end();
+            MB.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
+            MB.quad(-i - 1, -Fonts.get(2).getHeight() * 0.25 + 1, 0, -i - 1, 9 - Fonts.get(2).getHeight() * 0.25, 0, i + 1, 9 - Fonts.get(2).getHeight() * 0.25, 0, i + 1, -Fonts.get(2).getHeight() * 0.25 + 1, 0, BACKGROUND);
+            MB.quad(-i2 - 1, 0, 0, -i2 - 1, 8, 0, i2 + 1, 8, 0, i2 + 1, 0, 0, BACKGROUND);
+            MB.end();
 
             waypoint.renderIcon(-8, 9, 0, a, 16);
 
