@@ -134,7 +134,7 @@ public class OffhandExtra extends ToggleModule {
         if (mc.player.getMainHandStack().getItem() instanceof SwordItem && sword.get()) currentMode = Mode.Enchanted_Golden_Apple;
         else if (mc.player.getMainHandStack().getItem() instanceof EnchantedGoldenAppleItem && offhandCrystal.get()) currentMode = Mode.End_Crystal;
 
-        if ((asimov.get() || noTotems) && !(mc.currentScreen instanceof HandledScreen<?>)) {
+        if (asimov.get() || noTotems) {
             Item item = getItem();
             int result = findSlot(item);
             if (result == -1 && mc.player.getOffHandStack().getItem() != getItem()) {
