@@ -134,7 +134,7 @@ public class OffhandExtra extends ToggleModule {
         if (mc.player.getMainHandStack().getItem() instanceof SwordItem && sword.get()) currentMode = Mode.Enchanted_Golden_Apple;
         else if (mc.player.getMainHandStack().getItem() instanceof EnchantedGoldenAppleItem && offhandCrystal.get()) currentMode = Mode.End_Crystal;
 
-        if (asimov.get() || noTotems) {
+        if ((asimov.get() || noTotems) && mc.player.getOffHandStack().getItem() != getItem()) {
             Item item = getItem();
             int result = findSlot(item);
             if (result == -1 && mc.player.getOffHandStack().getItem() != getItem()) {
@@ -166,6 +166,9 @@ public class OffhandExtra extends ToggleModule {
         if (ModuleManager.INSTANCE.get(AutoTotem.class).getLocked() || !canMove()) return;
         if ((mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING || (mc.player.getHealth() + mc.player.getAbsorptionAmount() > health.get())
                && (mc.player.getOffHandStack().getItem() != getItem()) && !(mc.currentScreen instanceof HandledScreen<?>))) {
+            if (mc.player.getMainHandStack().getItem() instanceof SwordItem && sword.get()) currentMode = Mode.Enchanted_Golden_Apple;
+            else if (mc.player.getMainHandStack().getItem() instanceof EnchantedGoldenAppleItem && offhandCrystal.get()) currentMode = Mode.End_Crystal;
+            if (mc.player.getOffHandStack().getItem() == getItem()) return;
             isClicking = true;
             Item item = getItem();
             int result = findSlot(item);
