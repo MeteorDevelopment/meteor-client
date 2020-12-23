@@ -60,9 +60,13 @@ public class PlayerUtils {
             ((IVec3d) hitPos).set(neighbor.getX() + 0.5 + side2.getVector().getX() * 0.5, neighbor.getY() + 0.5 + side2.getVector().getY() * 0.5, neighbor.getZ() + 0.5 + side2.getVector().getZ() * 0.5);
 
             // Place block
+            boolean wasSneaking = mc.player.input.sneaking;
+            mc.player.input.sneaking = false;
+
             mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(hitPos, side2, neighbor, false));
             mc.player.swingHand(hand);
 
+            mc.player.input.sneaking = wasSneaking;
             return true;
         }
 
