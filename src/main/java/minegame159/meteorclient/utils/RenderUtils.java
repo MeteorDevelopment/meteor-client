@@ -15,17 +15,11 @@ public class RenderUtils {
     private static final MinecraftClient mc = MinecraftClient.getInstance();
 
     //Items
-    public static void drawItem(ItemStack itemStack, int x, int y) {
+    public static void drawItem(ItemStack itemStack, int x, int y, boolean count) {
         mc.getItemRenderer().renderGuiItemIcon(itemStack, x, y);
+        if (count) mc.getItemRenderer().renderGuiItemOverlay(mc.textRenderer, itemStack, x, y, null);
         RenderSystem.enableBlend();
     }
-
-    public static void drawItemWithCount(ItemStack itemStack, int x, int y) {
-        mc.getItemRenderer().renderGuiItemIcon(itemStack, x, y);
-        mc.getItemRenderer().renderGuiItemOverlay(mc.textRenderer, itemStack, x, y, null);
-        RenderSystem.enableBlend();
-    }
-
 
     //Tracers
     public enum TracerTarget {
