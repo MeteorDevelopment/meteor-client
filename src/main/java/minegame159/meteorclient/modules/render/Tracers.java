@@ -13,9 +13,9 @@ import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
-import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Color;
+import minegame159.meteorclient.utils.RenderUtils;
 import net.minecraft.block.entity.BarrelBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.ChestBlockEntity;
@@ -23,23 +23,11 @@ import net.minecraft.block.entity.ShulkerBoxBlockEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class Tracers extends ToggleModule {
-    public enum Target {
-        Head,
-        Body,
-        Feet
-    }
-
-    public enum Mode {
-        Simple,
-        Stem
-    }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgAppearance = settings.createGroup("Appearance");
@@ -63,17 +51,17 @@ public class Tracers extends ToggleModule {
 
     // Appearance
 
-    private final Setting<Target> target = sgAppearance.add(new EnumSetting.Builder<Target>()
+    private final Setting<RenderUtils.TracerTarget> target = sgAppearance.add(new EnumSetting.Builder<RenderUtils.TracerTarget>()
             .name("target")
             .description("Which body part to target.")
-            .defaultValue(Target.Body)
+            .defaultValue(RenderUtils.TracerTarget.Body)
             .build()
     );
 
-    private final Setting<Mode> mode = sgAppearance.add(new EnumSetting.Builder<Mode>()
-            .name("mode")
-            .description("The rendering mode.")
-            .defaultValue(Mode.Simple)
+    private final Setting<Boolean> stem = sgAppearance.add(new BoolSetting.Builder()
+            .name("stem")
+            .description("Draw a line through the center of the tracer target.")
+            .defaultValue(true)
             .build()
     );
 
@@ -128,44 +116,15 @@ public class Tracers extends ToggleModule {
             .build()
     );
 
-    private Vec3d vec1;
     private int count;
 
     public Tracers() {
         super(Category.Render, "tracers", "Displays tracer lines to specified entities.");
     }
 
-    private void render(Entity entity, Color color, RenderEvent event) {
-        double x = entity.prevX + (entity.getX() - entity.prevX) * event.tickDelta;
-        double y = entity.prevY + (entity.getY() - entity.prevY) * event.tickDelta;
-        double z = entity.prevZ + (entity.getZ() - entity.prevZ) * event.tickDelta;
-
-        double height = entity.getBoundingBox().maxY - entity.getBoundingBox().minY;
-
-        if (target.get() == Target.Head) y += height;
-        else if (target.get() == Target.Body) y += height / 2;
-
-        Renderer.LINES.line(vec1.x - (mc.gameRenderer.getCamera().getPos().x - event.offsetX), vec1.y - (mc.gameRenderer.getCamera().getPos().y - event.offsetY), vec1.z - (mc.gameRenderer.getCamera().getPos().z - event.offsetZ), x, y, z, color);
-        if (mode.get() == Mode.Stem) Renderer.LINES.line(x, entity.getY(), z, x, entity.getY() + height, z, color);
-
-        count++;
-    }
-
-    private void render(BlockEntity blockEntity, RenderEvent event) {
-        BlockPos pos = blockEntity.getPos();
-        Renderer.LINES.line(vec1.x - (mc.gameRenderer.getCamera().getPos().x - event.offsetX), vec1.y - (mc.gameRenderer.getCamera().getPos().y - event.offsetY), vec1.z - (mc.gameRenderer.getCamera().getPos().z - event.offsetZ), pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5f, storageColor.get());
-
-        count++;
-    }
-
     @EventHandler
     private final Listener<RenderEvent> onRender = new Listener<>(event -> {
         count = 0;
-
-        vec1 = new Vec3d(0, 0, 1)
-                .rotateX(-(float) Math.toRadians(mc.gameRenderer.getCamera().getPitch()))
-                .rotateY(-(float) Math.toRadians(mc.gameRenderer.getCamera().getYaw()))
-                .add(mc.gameRenderer.getCamera().getPos());
 
         for (Entity entity : mc.world.getEntities()) {
             if ((!ModuleManager.INSTANCE.isActive(Freecam.class) && entity == mc.player) || !entities.get().contains(entity.getType())) continue;
@@ -175,14 +134,14 @@ public class Tracers extends ToggleModule {
                 Friend friend = FriendManager.INSTANCE.get(((PlayerEntity) entity).getGameProfile().getName());
                 if (friend != null) color = friend.color;
 
-                if (friend == null || friend.showInTracers) render(entity, color, event);
+                if (friend == null || friend.showInTracers) RenderUtils.drawTracerToEntity(entity, color, event, target.get(), stem.get()); count++; break;
             } else {
                 switch (entity.getType().getSpawnGroup()) {
-                    case CREATURE:       render(entity, animalsColor.get(), event); break;
-                    case WATER_CREATURE: render(entity, waterAnimalsColor.get(), event); break;
-                    case MONSTER:        render(entity, monstersColor.get(), event); break;
-                    case AMBIENT:        render(entity, ambientColor.get(), event); break;
-                    case MISC:           render(entity, miscColor.get(), event); break;
+                    case CREATURE:       RenderUtils.drawTracerToEntity(entity, animalsColor.get(), event, target.get(), stem.get()); count++; break;
+                    case WATER_CREATURE:       RenderUtils.drawTracerToEntity(entity, waterAnimalsColor.get(), event, target.get(), stem.get()); count++; break;
+                    case MONSTER:       RenderUtils.drawTracerToEntity(entity, monstersColor.get(), event, target.get(), stem.get()); count++; break;
+                    case AMBIENT:       RenderUtils.drawTracerToEntity(entity, ambientColor.get(), event, target.get(), stem.get()); count++; break;
+                    case MISC:       RenderUtils.drawTracerToEntity(entity, miscColor.get(), event, target.get(), stem.get()); count++; break;
                 }
             }
         }
@@ -192,7 +151,8 @@ public class Tracers extends ToggleModule {
                 if (blockEntity.isRemoved()) continue;
 
                 if (blockEntity instanceof ChestBlockEntity || blockEntity instanceof BarrelBlockEntity || blockEntity instanceof ShulkerBoxBlockEntity) {
-                    render(blockEntity, event);
+                    RenderUtils.drawTracerToBlockEntity(blockEntity, storageColor.get(), event);
+                    count++;
                 }
             }
         }
