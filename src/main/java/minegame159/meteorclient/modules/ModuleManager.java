@@ -369,12 +369,12 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new Time());
         addModule(new VoidESP());
         addModule(new CityEsp());
+        addModule(new ShulkerPeek());
     }
 
     private void initMisc() {
         addModule(new AutoSign());
         addModule(new AutoReconnect());
-        addModule(new ShulkerTooltip());
         addModule(new AutoShearer());
         addModule(new AutoNametag());
         addModule(new BookBot());

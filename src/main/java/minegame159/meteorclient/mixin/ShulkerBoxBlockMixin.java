@@ -6,7 +6,7 @@
 package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.modules.misc.ShulkerTooltip;
+import minegame159.meteorclient.modules.render.ShulkerPeek;
 import net.minecraft.block.ShulkerBoxBlock;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.item.ItemStack;
@@ -23,6 +23,6 @@ import java.util.List;
 public class ShulkerBoxBlockMixin {
     @Inject(method = "appendTooltip", at = @At("HEAD"), cancellable = true)
     private void onAppendTooltip(ItemStack stack, BlockView view, List<Text> tooltip, TooltipContext options, CallbackInfo info) {
-        if (ModuleManager.INSTANCE != null && ModuleManager.INSTANCE.isActive(ShulkerTooltip.class)) info.cancel();
+        if (ModuleManager.INSTANCE != null && ModuleManager.INSTANCE.isActive(ShulkerPeek.class)) info.cancel();
     }
 }

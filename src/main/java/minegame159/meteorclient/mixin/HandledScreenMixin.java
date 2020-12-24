@@ -8,6 +8,7 @@ package minegame159.meteorclient.mixin;
 import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.misc.EChestPreview;
+import minegame159.meteorclient.modules.render.ShulkerPeek;
 import minegame159.meteorclient.utils.EChestMemory;
 import minegame159.meteorclient.utils.KeyBinds;
 import minegame159.meteorclient.utils.Utils;
@@ -58,7 +59,9 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
     private void onRender(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo info) {
         if (focusedSlot != null && !focusedSlot.getStack().isEmpty()) {
             // Shulker Preview
-            if (Utils.isShulker(focusedSlot.getStack().getItem()) && KeyBinds.SHULKER_PEEK.isPressed()) {
+            if (Utils.isShulker(focusedSlot.getStack().getItem()) && (KeyBinds.SHULKER_PEEK.isPressed()
+                    || (ModuleManager.INSTANCE.isActive(ShulkerPeek.class)
+                    && ModuleManager.INSTANCE.get(ShulkerPeek.class).mode.get() == ShulkerPeek.Mode.peak))) {
                 CompoundTag compoundTag = focusedSlot.getStack().getSubTag("BlockEntityTag");
                 if (compoundTag != null) {
                     if (compoundTag.contains("Items", 9)) {
@@ -80,7 +83,10 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
     @Inject(method = "drawMouseoverTooltip", at = @At("HEAD"), cancellable = true)
     private void onDrawMouseoverTooltip(MatrixStack matrices, int x, int y, CallbackInfo info) {
         if (focusedSlot != null && !focusedSlot.getStack().isEmpty()) {
-            if (Utils.isShulker(focusedSlot.getStack().getItem()) && KeyBinds.SHULKER_PEEK.isPressed()) info.cancel();
+            if (Utils.isShulker(focusedSlot.getStack().getItem()) && ((KeyBinds.SHULKER_PEEK.isPressed()
+                    && ModuleManager.INSTANCE.get(ShulkerPeek.class).mode.get() == ShulkerPeek.Mode.tooltip))
+                    || (ModuleManager.INSTANCE.isActive(ShulkerPeek.class)
+                    && ModuleManager.INSTANCE.get(ShulkerPeek.class).mode.get() == ShulkerPeek.Mode.peak)) info.cancel();
             else if (focusedSlot.getStack().getItem() == Items.ENDER_CHEST && ModuleManager.INSTANCE.isActive(EChestPreview.class)) info.cancel();
         }
     }
