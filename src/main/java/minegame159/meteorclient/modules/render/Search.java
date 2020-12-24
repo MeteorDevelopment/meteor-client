@@ -18,16 +18,12 @@ import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.Color;
-import minegame159.meteorclient.utils.MeteorExecutor;
-import minegame159.meteorclient.utils.Pool;
-import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.*;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.Heightmap;
 import net.minecraft.world.chunk.Chunk;
@@ -100,7 +96,6 @@ public class Search extends ToggleModule {
     private final LongList toUpdate = new LongArrayList();
 
     private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
-    private Vec3d vec1 = new Vec3d(0, 0, 0);
 
     private DimensionType lastDimension;
 
@@ -195,10 +190,6 @@ public class Search extends ToggleModule {
 
     @EventHandler
     private final Listener<RenderEvent> onRender = new Listener<>(event -> {
-        vec1 = new Vec3d(0, 0, 1)
-                .rotateX(-(float) Math.toRadians(mc.cameraEntity.pitch))
-                .rotateY(-(float) Math.toRadians(mc.cameraEntity.yaw))
-                .add(mc.cameraEntity.getPos());
 
         synchronized (chunks) {
             toRemove.clear();
@@ -434,7 +425,7 @@ public class Search extends ToggleModule {
 
             // Tracers
             if (tracersEnabled.get()) {
-                Renderer.LINES.line(vec1.x - (mc.cameraEntity.getX() - event.offsetX), vec1.y - (mc.cameraEntity.getY() - event.offsetY), vec1.z - (mc.cameraEntity.getZ() - event.offsetZ), x + 0.5, y + 0.5, z + 0.5f, tracersColor.get());
+                RenderUtils.drawTracerToBlockPos(new BlockPos(x, y , z), tracersColor.get(), event);
             }
         }
 
