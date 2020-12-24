@@ -3,7 +3,9 @@
  * Copyright (c) 2020 Meteor Development.
  */
 
-package minegame159.meteorclient.modules.misc;
+package minegame159.meteorclient.modules.render;
+
+//Created by squidoodly 24/12/2020
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
@@ -11,6 +13,7 @@ import minegame159.meteorclient.events.game.GetTooltipEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
@@ -33,23 +36,36 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ShulkerTooltip extends ToggleModule {
+public class ShulkerPeek extends ToggleModule {
+    public enum Mode{
+        tooltip,
+        peak
+    }
+
+    public ShulkerPeek(){
+        super(Category.Render, "shulker-peek", "Lets you see what is inside shulkers.");
+    }
+
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    
+
+    public final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
+            .name("mode")
+            .description("The way to display the shulker info.")
+            .defaultValue(Mode.peak)
+            .build()
+    );
+
     private final Setting<Integer> lines = sgGeneral.add(new IntSetting.Builder()
             .name("lines")
-            .description("The number of lines.")
+            .description("The number of lines to show in the tooltip mode.")
             .defaultValue(8)
             .min(0)
             .build()
     );
 
-    public ShulkerTooltip() {
-        super(Category.Misc, "shulker-tooltip", "Improves Shulker Box previews.");
-    }
-
     @EventHandler
     private final Listener<GetTooltipEvent> onGetTooltip = new Listener<>(event -> {
+        if (mode.get() != Mode.tooltip) return;
         if (!Utils.isShulker(event.itemStack.getItem())) return;
 
         CompoundTag compoundTag = event.itemStack.getSubTag("BlockEntityTag");
@@ -60,7 +76,7 @@ public class ShulkerTooltip extends ToggleModule {
                 int totalItemStacks = 0;
                 int displaysItemStacks = 0;
 
-                if (ModuleManager.INSTANCE.get(ShulkerTooltip.class).isActive()) {
+                if (ModuleManager.INSTANCE.get(this.getClass()).isActive()) {
                     Map<Text, Integer> itemCounts = new HashMap<>();
                     for (ItemStack itemStack : itemStacks) {
                         if (!itemStack.isEmpty()) {
