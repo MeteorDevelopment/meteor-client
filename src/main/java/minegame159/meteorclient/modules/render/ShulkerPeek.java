@@ -37,9 +37,14 @@ import java.util.List;
 import java.util.Map;
 
 public class ShulkerPeek extends ToggleModule {
-    public enum Mode{
-        tooltip,
-        peak
+    public enum Mode {
+        Tooltip,
+        Always
+    }
+
+    public enum BackgroundMode {
+        Light,
+        Dark
     }
 
     public ShulkerPeek(){
@@ -51,7 +56,14 @@ public class ShulkerPeek extends ToggleModule {
     public final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("mode")
             .description("The way to display the shulker info.")
-            .defaultValue(Mode.peak)
+            .defaultValue(Mode.Always)
+            .build()
+    );
+
+    public final Setting<BackgroundMode> bgMode = sgGeneral.add(new EnumSetting.Builder<BackgroundMode>()
+            .name("background-mode")
+            .description("The background of the tooltip.")
+            .defaultValue(BackgroundMode.Light)
             .build()
     );
 
@@ -65,7 +77,7 @@ public class ShulkerPeek extends ToggleModule {
 
     @EventHandler
     private final Listener<GetTooltipEvent> onGetTooltip = new Listener<>(event -> {
-        if (mode.get() != Mode.tooltip) return;
+        if (mode.get() != Mode.Tooltip) return;
         if (!Utils.isShulker(event.itemStack.getItem())) return;
 
         CompoundTag compoundTag = event.itemStack.getSubTag("BlockEntityTag");
