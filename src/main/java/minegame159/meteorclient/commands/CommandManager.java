@@ -48,7 +48,6 @@ public class CommandManager {
         addCommand(new SwarmRelease());
         addCommand(new SwarmSlave());
         addCommand(new SwarmStop());
-        //addCommand(new SwarmTarget());
         addCommand(new SwarmScatter());
         addCommand(new SwarmModuleToggle());
     }
