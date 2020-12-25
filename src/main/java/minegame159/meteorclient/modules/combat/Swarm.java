@@ -8,18 +8,18 @@ import minegame159.meteorclient.commands.CommandManager;
 import minegame159.meteorclient.events.game.GameJoinedEvent;
 import minegame159.meteorclient.events.game.GameLeftEvent;
 import minegame159.meteorclient.events.world.PostTickEvent;
+import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
-import minegame159.meteorclient.modules.misc.Timer;
 import minegame159.meteorclient.modules.player.InfinityMiner;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.MeteorExecutor;
-import minegame159.meteorclient.utils.PathFinder;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 
+import javax.annotation.Nonnull;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -78,13 +78,6 @@ public class Swarm extends ToggleModule {
             .defaultValue(CurrentTask.IDLE)
             .build());
 
-    private final Setting<String> targetString = sgGeneral.add(new StringSetting.Builder()
-            .name("target")
-            .description("The player name to target.")
-            .defaultValue("Sheep")
-            .onChanged(string -> resetTarget())
-            .build());
-
     private final Setting<String> ipAddress = sgGeneral.add(new StringSetting.Builder()
             .name("ip-address")
             .description("The server's IP Address.")
@@ -92,17 +85,16 @@ public class Swarm extends ToggleModule {
             .build());
 
     private final Setting<Integer> serverPort = sgGeneral.add(new IntSetting.Builder()
-
             .name("Port")
             .description("The port for which to run the server on.")
             .defaultValue(7777)
+            .sliderMin(1)
+            .sliderMax(65535)
             .build());
 
     public SwarmServer server;
     public SwarmClient client;
     public Entity targetEntity;
-    public PathFinder pathFinder = new PathFinder();
-    //public final PathFinder pathFinder = new PathFinder();
     public BlockState targetBlock;
 
     @Override
@@ -118,6 +110,12 @@ public class Swarm extends ToggleModule {
     public void onDeactivate() {
         closeAllServerConnections();
         resetTarget();
+    }
+
+    @Override
+    public WWidget getWidget() {
+
+        return null;
     }
 
     public void closeAllServerConnections() {
@@ -141,9 +139,7 @@ public class Swarm extends ToggleModule {
 
     @SuppressWarnings("unused")
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
-        mine();
-    });
+    private final Listener<PostTickEvent> onTick = new Listener<>(event -> mine());
 
     public void resetTarget() {
         targetEntity = null;
@@ -158,21 +154,6 @@ public class Swarm extends ToggleModule {
             BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
 
         resetTarget();
-    }
-
-
-    private double getEntitySpeed(Entity entity) {
-        if (entity == null) {
-            return 0.0;
-        }
-        double tX = Math.abs(entity.getX() - entity.prevX);
-        double tZ = Math.abs(entity.getZ() - entity.prevZ);
-        //double tY = Math.abs(entity.getY() - entity.prevY);
-        double length = Math.sqrt(tX * tX + tZ * tZ);
-        if (ModuleManager.INSTANCE.get(Timer.class).isActive()) {
-            length *= ModuleManager.INSTANCE.get(Timer.class).getMultiplier();
-        }
-        return length * 20;
     }
 
     public void startClient() {
@@ -265,9 +246,8 @@ public class Swarm extends ToggleModule {
 
     public class SwarmServer extends Thread {
         private ServerSocket serverSocket;
-        public int MAX_CLIENTS = 25;
+        public final static int MAX_CLIENTS = 50;
         final private SubServer[] clientConnections = new SubServer[MAX_CLIENTS];
-        private final int port = serverPort.get();
 
         public SwarmServer() {
             try {
@@ -283,8 +263,8 @@ public class Swarm extends ToggleModule {
         @Override
         public void run() {
             try {
+                Chat.info("Swarm Server: Listening for incoming connections.");
                 while (!this.isInterrupted()) {
-                    Chat.info("Swarm Server: Listening for incoming connections.");
                     Socket connection = this.serverSocket.accept();
                     assignConnectionToSubServer(connection);
                 }
@@ -327,7 +307,7 @@ public class Swarm extends ToggleModule {
             }
         }
 
-        public void sendMessage(String s) {
+        public void sendMessage(@Nonnull String s) {
             MeteorExecutor.execute(() -> {
                 try {
                     for (SubServer clientConnection : clientConnections) {
@@ -347,7 +327,7 @@ public class Swarm extends ToggleModule {
         final private Socket connection;
         private volatile String messageToSend;
 
-        public SubServer(Socket connection) {
+        public SubServer(@Nonnull Socket connection) {
             this.connection = connection;
             start();
         }
@@ -382,20 +362,21 @@ public class Swarm extends ToggleModule {
         }
     }
 
-    public void execute(String s) {
-        if (mc.player == null || mc.world == null) return;
+    public void execute(@Nonnull String s) {
         try {
             CommandManager.dispatch(s);
         } catch (CommandSyntaxException ignored) {
         }
     }
 
+    @SuppressWarnings("unused")
     @EventHandler
     private final Listener<GameLeftEvent> gameLeftEventListener = new Listener<>(event -> {
         closeAllServerConnections();
         this.toggle();
     });
 
+    @SuppressWarnings("unused")
     @EventHandler
     private final Listener<GameJoinedEvent> gameJoinedEventListener = new Listener<>(event -> {
         closeAllServerConnections();
@@ -403,4 +384,3 @@ public class Swarm extends ToggleModule {
     });
 
 }
-// I love Riveranda, poggers server owner.
