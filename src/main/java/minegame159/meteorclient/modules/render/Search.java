@@ -424,9 +424,7 @@ public class Search extends ToggleModule {
             }
 
             // Tracers
-            if (tracersEnabled.get()) {
-                RenderUtils.drawTracerToBlockPos(new BlockPos(x, y , z), tracersColor.get(), event);
-            }
+            if (tracersEnabled.get()) RenderUtils.drawTracerToPos(new BlockPos(x, y, z), tracersColor.get(), event);
         }
 
         public boolean equals(BlockPos blockPos) {

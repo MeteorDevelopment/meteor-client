@@ -134,14 +134,14 @@ public class Tracers extends ToggleModule {
                 Friend friend = FriendManager.INSTANCE.get(((PlayerEntity) entity).getGameProfile().getName());
                 if (friend != null) color = friend.color;
 
-                if (friend == null || friend.showInTracers) RenderUtils.drawTracerToEntity(entity, color, event, target.get(), stem.get()); count++; break;
+                if (friend == null || friend.showInTracers) RenderUtils.drawTracerToEntity(event, entity, color, target.get(), stem.get()); count++;
             } else {
                 switch (entity.getType().getSpawnGroup()) {
-                    case CREATURE:       RenderUtils.drawTracerToEntity(entity, animalsColor.get(), event, target.get(), stem.get()); count++; break;
-                    case WATER_CREATURE:       RenderUtils.drawTracerToEntity(entity, waterAnimalsColor.get(), event, target.get(), stem.get()); count++; break;
-                    case MONSTER:       RenderUtils.drawTracerToEntity(entity, monstersColor.get(), event, target.get(), stem.get()); count++; break;
-                    case AMBIENT:       RenderUtils.drawTracerToEntity(entity, ambientColor.get(), event, target.get(), stem.get()); count++; break;
-                    case MISC:       RenderUtils.drawTracerToEntity(entity, miscColor.get(), event, target.get(), stem.get()); count++; break;
+                    case CREATURE: RenderUtils.drawTracerToEntity(event, entity, animalsColor.get(), target.get(), stem.get()); count++; break;
+                    case WATER_CREATURE: RenderUtils.drawTracerToEntity(event, entity, waterAnimalsColor.get(), target.get(), stem.get()); count++; break;
+                    case MONSTER: RenderUtils.drawTracerToEntity(event, entity, monstersColor.get(), target.get(), stem.get()); count++; break;
+                    case AMBIENT: RenderUtils.drawTracerToEntity(event, entity, ambientColor.get(), target.get(), stem.get()); count++; break;
+                    case MISC: RenderUtils.drawTracerToEntity(event, entity, miscColor.get(), target.get(), stem.get()); count++; break;
                 }
             }
         }
