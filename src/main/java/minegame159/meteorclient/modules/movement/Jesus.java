@@ -50,6 +50,13 @@ public class Jesus extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> disableOnSneak = sgGeneral.add(new BoolSetting.Builder()
+            .name("disable-on-sneak")
+            .description("Let you go under water when sneak key is pressed.")
+            .defaultValue(true)
+            .build()
+    );
+
     private int tickTimer = 10;
     private int packetTimer = 0;
 
@@ -79,7 +86,7 @@ public class Jesus extends ToggleModule {
 
     @EventHandler
     private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
-        if (mc.options.keySneak.isPressed()) return;
+        if (mc.options.keySneak.isPressed() && disableOnSneak.get()) return;
         if (mc.player.isTouchingWater() && !walkOnWater.get()) return;
         if (mc.player.isInLava() && !walkOnLava.get()) return;
 
@@ -102,7 +109,7 @@ public class Jesus extends ToggleModule {
     @EventHandler
     private final Listener<CanWalkOnFluidEvent> onCanWalkOnFluid = new Listener<>(event -> {
         if (event.entity != mc.player) return;
-        if (mc.options.keySneak.isPressed()) return;
+        if (mc.options.keySneak.isPressed() && disableOnSneak.get()) return;
 
         if ((event.fluid == Fluids.WATER || event.fluid == Fluids.FLOWING_WATER) && walkOnWater.get()) event.walkOnFluid = true;
         else if ((event.fluid == Fluids.LAVA || event.fluid == Fluids.FLOWING_LAVA) && walkOnLava.get()) event.walkOnFluid = true;
@@ -110,7 +117,7 @@ public class Jesus extends ToggleModule {
 
     @EventHandler
     private final Listener<FluidCollisionShapeEvent> onFluidCollisionShape = new Listener<>(event -> {
-        if (!mc.options.keySneak.isPressed() && mc.player.fallDistance <= 3) {
+        if (!(mc.options.keySneak.isPressed() && disableOnSneak.get()) && mc.player.fallDistance <= 3) {
             if (event.state.getMaterial() == Material.WATER && !mc.player.isTouchingWater() && walkOnWater.get()) event.shape = VoxelShapes.fullCube();
             else if (event.state.getMaterial() == Material.LAVA && !mc.player.isInLava() && walkOnLava.get()) event.shape = VoxelShapes.fullCube();
         }
@@ -119,7 +126,7 @@ public class Jesus extends ToggleModule {
     @EventHandler
     private final Listener<SendPacketEvent> onSendPacket = new Listener<>(event -> {
         if (!(event.packet instanceof PlayerMoveC2SPacket)) return;
-        if (mc.options.keySneak.isPressed()) return;
+        if (mc.options.keySneak.isPressed() && disableOnSneak.get()) return;
         if (mc.player.isTouchingWater() && !walkOnWater.get()) return;
         if (mc.player.isInLava() && !walkOnLava.get()) return;
 
