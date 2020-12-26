@@ -102,6 +102,7 @@ public class Jesus extends ToggleModule {
     @EventHandler
     private final Listener<CanWalkOnFluidEvent> onCanWalkOnFluid = new Listener<>(event -> {
         if (event.entity != mc.player) return;
+        if (mc.options.keySneak.isPressed()) return;
 
         if ((event.fluid == Fluids.WATER || event.fluid == Fluids.FLOWING_WATER) && walkOnWater.get()) event.walkOnFluid = true;
         else if ((event.fluid == Fluids.LAVA || event.fluid == Fluids.FLOWING_LAVA) && walkOnLava.get()) event.walkOnFluid = true;
@@ -118,6 +119,7 @@ public class Jesus extends ToggleModule {
     @EventHandler
     private final Listener<SendPacketEvent> onSendPacket = new Listener<>(event -> {
         if (!(event.packet instanceof PlayerMoveC2SPacket)) return;
+        if (mc.options.keySneak.isPressed()) return;
         if (mc.player.isTouchingWater() && !walkOnWater.get()) return;
         if (mc.player.isInLava() && !walkOnLava.get()) return;
 
