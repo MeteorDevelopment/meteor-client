@@ -16,7 +16,6 @@ public class WProfiles extends WWindow {
 
         action = () -> {
             GuiConfig.INSTANCE.getWindowConfig(type).setPos(x, y);
-            TopBarModules.MOVED = true;
         };
 
         initWidgets();

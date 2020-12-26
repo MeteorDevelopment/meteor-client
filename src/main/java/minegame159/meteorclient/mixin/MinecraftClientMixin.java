@@ -84,11 +84,6 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
         if (world != null) MeteorClient.EVENT_BUS.post(EventStore.gameLeftEvent());
     }
 
-    @Inject(at = @At("HEAD"), method = "stop")
-    private void onStop(CallbackInfo info) {
-        MeteorClient.INSTANCE.stop();
-    }
-
     @Inject(method = "openScreen", at = @At("HEAD"), cancellable = true)
     private void onOpenScreen(Screen screen, CallbackInfo info) {
         if (screen instanceof WidgetScreen) screen.mouseMoved(mouse.getX() * window.getScaleFactor(), mouse.getY() * window.getScaleFactor());
