@@ -14,7 +14,6 @@ import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.utils.RenderUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
-import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.util.Identifier;
 
@@ -52,16 +51,11 @@ public class InventoryViewerHud extends HudModule {
         drawBackground(x, y);
 
         if (mc.player != null) {
-            DiffuseLighting.enable();
-            RenderSystem.pushMatrix();
-            RenderSystem.scaled(hud.invViewerScale(), hud.invViewerScale(), 1);
             for (int row = 0; row < 3; row++) {
                 for (int i = 0; i < 9; i++) {
-                    RenderUtils.drawItem(mc.player.inventory.getStack(9 + row * 9 + i), (int) (x / hud.invViewerScale() + 8 + i * 18), (int) (y / hud.invViewerScale() + 7 + row * 18), true);
+                    RenderUtils.drawItem(mc.player.inventory.getStack(9 + row * 9 + i), (int) (x / hud.invViewerScale() + 8 + i * 18), (int) (y / hud.invViewerScale() + 7 + row * 18), hud.invViewerScale(), true);
                 }
             }
-            RenderSystem.popMatrix();
-            DiffuseLighting.disable();
         }
     }
 
