@@ -12,6 +12,7 @@ import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.Dimension;
 import minegame159.meteorclient.utils.Utils;
+import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.util.math.BlockPos;
 
@@ -23,6 +24,13 @@ public class VoidESP extends ToggleModule {
     private final SettingGroup sgRender = settings.createGroup("Colors");
 
     // General
+
+    private final Setting<Boolean> airOnly = sgGeneral.add(new BoolSetting.Builder()
+            .name("air-only")
+            .description("Checks bedrock only for air blocks.")
+            .defaultValue(false)
+            .build()
+    );
 
     private final Setting<Integer> horizontalRadius = sgGeneral.add(new IntSetting.Builder()
             .name("horizontal-radius")
@@ -47,7 +55,7 @@ public class VoidESP extends ToggleModule {
     private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
             .name("shape-mode")
             .description("How the shapes are rendered.")
-            .defaultValue(ShapeMode.Sides)
+            .defaultValue(ShapeMode.Both)
             .build()
     );
 
@@ -73,6 +81,7 @@ public class VoidESP extends ToggleModule {
 
     private void getHoles(int searchRange, int holeHeight) {
         voidHoles.clear();
+        if (Utils.getDimension() == Dimension.End) return;
 
         BlockPos playerPos = mc.player.getBlockPos();
         int playerY = playerPos.getY();
@@ -83,7 +92,7 @@ public class VoidESP extends ToggleModule {
 
                 int blocksFromBottom = 0;
                 for (int i = 0; i < holeHeight; ++i)
-                    if (mc.world.getBlockState(bottomBlockPos.add(0, i, 0)).getBlock() != Blocks.BEDROCK)
+                    if (isBlockMatching(mc.world.getBlockState(bottomBlockPos.add(0, i, 0)).getBlock()))
                         ++blocksFromBottom;
 
                 if (blocksFromBottom >= holeHeight) voidHoles.add(bottomBlockPos);
@@ -94,13 +103,19 @@ public class VoidESP extends ToggleModule {
 
                     int blocksFromTop = 0;
                     for (int i = 0; i < holeHeight; ++i)
-                        if (mc.world.getBlockState(bottomBlockPos.add(0, 127 - i, 0)).getBlock() != Blocks.BEDROCK)
+                        if (isBlockMatching(mc.world.getBlockState(bottomBlockPos.add(0, 127 - i, 0)).getBlock()))
                             ++blocksFromTop;
 
                     if (blocksFromTop >= holeHeight) voidHoles.add(topBlockPos);
                 }
             }
         }
+    }
+
+    private boolean isBlockMatching(Block block) {
+        if (airOnly.get())
+            return block == Blocks.AIR;
+        return block != Blocks.BEDROCK;
     }
 
     @EventHandler
