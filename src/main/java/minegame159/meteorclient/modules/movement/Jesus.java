@@ -67,8 +67,8 @@ public class Jesus extends ToggleModule {
         preBaritoneAssumeWalkOnWater = BaritoneAPI.getSettings().assumeWalkOnWater.value;
         preBaritoneAssumeWalkOnLava = BaritoneAPI.getSettings().assumeWalkOnLava.value;
 
-        BaritoneAPI.getSettings().assumeWalkOnWater.value = true;
-        BaritoneAPI.getSettings().assumeWalkOnLava.value = true;
+        BaritoneAPI.getSettings().assumeWalkOnWater.value = walkOnWater.get();
+        BaritoneAPI.getSettings().assumeWalkOnLava.value = walkOnLava.get();
     }
 
     @Override
