@@ -173,8 +173,6 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
                 if (module.getKey() == event.key && (event.action == KeyAction.Press || module.toggleOnKeyRelease)) {
                     module.doAction();
                     if (module instanceof ToggleModule) ((ToggleModule) module).sendToggledMsg();
-
-                    save();
                 }
             }
         }

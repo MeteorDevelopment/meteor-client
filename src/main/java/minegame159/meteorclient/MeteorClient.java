@@ -13,6 +13,7 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.accounts.AccountManager;
 import minegame159.meteorclient.commands.CommandManager;
 import minegame159.meteorclient.commands.commands.Ignore;
+import minegame159.meteorclient.events.game.GameLeftEvent;
 import minegame159.meteorclient.events.meteor.KeyEvent;
 import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.friends.FriendManager;
@@ -76,6 +77,11 @@ public class MeteorClient implements ClientModInitializer, Listenable {
         Waypoints.loadIcons();
 
         EVENT_BUS.subscribe(this);
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            save();
+            OnlinePlayers.leave();
+        }));
     }
 
     public void load() {
@@ -89,7 +95,9 @@ public class MeteorClient implements ClientModInitializer, Listenable {
         AccountManager.INSTANCE.load();
     }
 
-    public void stop() {
+    public void save() {
+        System.out.println("[Meteor] Saving");
+
         Config.INSTANCE.save();
         ModuleManager.INSTANCE.save();
         FriendManager.INSTANCE.save();
@@ -97,12 +105,14 @@ public class MeteorClient implements ClientModInitializer, Listenable {
         AccountManager.INSTANCE.save();
 
         Ignore.save();
-        OnlinePlayers.leave();
     }
 
     private void openClickGui() {
         mc.openScreen(new TopBarModules());
     }
+
+    @EventHandler
+    private final Listener<GameLeftEvent> onGameLeft = new Listener<>(event -> save());
 
     @EventHandler
     private final Listener<PostTickEvent> onTick = new Listener<>(event -> {

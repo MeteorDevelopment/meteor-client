@@ -49,6 +49,7 @@ public class ProfileUtils {
     }
 
     public static void load(String profile) {
+        MeteorClient.INSTANCE.save();
         ModuleManager.INSTANCE.disableAll();
 
         File folder = new File(FOLDER, profile);

@@ -6,7 +6,6 @@
 package minegame159.meteorclient.gui.widgets;
 
 import minegame159.meteorclient.gui.GuiConfig;
-import minegame159.meteorclient.gui.screens.topbar.TopBarModules;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
@@ -23,7 +22,6 @@ public class WModuleSearch extends WWindow {
 
         action = () -> {
             GuiConfig.INSTANCE.getWindowConfig(type).setPos(x, y);
-            TopBarModules.MOVED = true;
         };
 
         initWidgets(true);

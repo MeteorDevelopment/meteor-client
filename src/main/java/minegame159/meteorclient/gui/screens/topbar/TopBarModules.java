@@ -5,7 +5,6 @@
 
 package minegame159.meteorclient.gui.screens.topbar;
 
-import minegame159.meteorclient.Config;
 import minegame159.meteorclient.gui.GuiConfig;
 import minegame159.meteorclient.gui.renderer.GuiRenderer;
 import minegame159.meteorclient.gui.widgets.*;
@@ -14,15 +13,11 @@ import minegame159.meteorclient.modules.ModuleManager;
 import net.minecraft.client.MinecraftClient;
 
 public class TopBarModules extends TopBarScreen {
-    public static boolean MOVED;
-
     public TopBarModules() {
         super(TopBarType.Modules);
 
         addTopBar();
         initWidgets();
-
-        MOVED = false;
     }
 
     private void initWidgets() {
@@ -91,17 +86,5 @@ public class TopBarModules extends TopBarScreen {
                 cell.alignWidget();
             }
         }
-    }
-
-    @Override
-    public void onClose() {
-        ModuleManager.INSTANCE.save();
-
-        if (MOVED) {
-            Config.INSTANCE.save();
-            MOVED = false;
-        }
-
-        super.onClose();
     }
 }
