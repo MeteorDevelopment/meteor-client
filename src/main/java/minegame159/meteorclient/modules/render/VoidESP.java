@@ -73,6 +73,7 @@ public class VoidESP extends ToggleModule {
 
     private void getHoles(int searchRange, int holeHeight) {
         voidHoles.clear();
+        if (Utils.getDimension() == Dimension.End) return;
 
         BlockPos playerPos = mc.player.getBlockPos();
         int playerY = playerPos.getY();
