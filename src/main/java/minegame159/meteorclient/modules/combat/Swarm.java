@@ -29,9 +29,10 @@ import java.net.Socket;
  * @author Inclemental
  * Special thanks to Eli for lending me the test account. Love you bud.
  */
+
 public class Swarm extends ToggleModule {
     public Swarm() {
-        super(Category.Combat, "Swarm-Beta", "I Am... The Swarm.");
+        super(Category.Combat, "Swarm", "I Am... The Swarm.");
     }
 
     public enum Mode {
@@ -220,7 +221,7 @@ public class Swarm extends ToggleModule {
                     inputStream.close();
                 }
             } catch (Exception e) {
-                Chat.info("There is in error in your connection to the server.");
+                Chat.error("There is in error in your connection to the server.");
                 disconnect();
                 client = null;
             } finally {
@@ -307,7 +308,7 @@ public class Swarm extends ToggleModule {
             }
         }
 
-        public void sendMessage(@Nonnull String s) {
+        public synchronized void sendMessage(@Nonnull String s) {
             MeteorExecutor.execute(() -> {
                 try {
                     for (SubServer clientConnection : clientConnections) {
