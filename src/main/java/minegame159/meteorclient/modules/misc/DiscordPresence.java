@@ -27,7 +27,7 @@ public class DiscordPresence extends ToggleModule {
 
     private final Setting<String> line1 = sgGeneral.add(new StringSetting.Builder()
             .name("line-1")
-            .description("The text it displays on line 1 of the RPC.")
+            .description("The text to display on line 1 of the RPC.")
             .defaultValue("{player} || {server}")
             .onChanged(booleanSetting -> updateDetails())
             .build()
@@ -35,14 +35,14 @@ public class DiscordPresence extends ToggleModule {
 
     private final Setting<String> line2 = sgGeneral.add(new StringSetting.Builder()
             .name("line-2")
-            .description("The text it displays on line 2 of the RPC.")
+            .description("The text to display on line 2 of the RPC.")
             .defaultValue("Meteor on Crack!")
             .onChanged(booleanSetting -> updateDetails())
             .build()
     );
 
     public DiscordPresence() {
-        super(Category.Misc, "discord-presence", "Displays a RPC for you on Discord to show that you're playing Meteor Client!");
+        super(Category.Misc, "discord-presence", "Displays an RPC for you on Discord to show that you're playing on Meteor!");
     }
 
     private static final DiscordRichPresence rpc = new DiscordRichPresence();

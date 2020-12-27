@@ -18,6 +18,7 @@ import net.minecraft.entity.player.PlayerEntity;
 public class VisualRange extends ToggleModule {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgPrivateMessage = settings.createGroup("Private Messages");
 
     private final Setting<Boolean> ignoreFriends = sgGeneral.add(new BoolSetting.Builder()
             .name("ignore-friends")
@@ -47,6 +48,20 @@ public class VisualRange extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> sendPrivateMessage = sgPrivateMessage.add(new BoolSetting.Builder()
+            .name("send-private-message")
+            .description("Sends a message to the player.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<String> privateMessageValue = sgPrivateMessage.add(new StringSetting.Builder()
+            .name("private-message")
+            .description("The message to send to the player.")
+            .defaultValue("Meteor on Crack!")
+            .build()
+    );
+
 
     public VisualRange() {
         super(Category.Misc, "visual-range", "Notifies you when a player enters/leaves your visual range.");
@@ -58,6 +73,8 @@ public class VisualRange extends ToggleModule {
 
         String enter = enterMessage.get().replace("{player}", ((PlayerEntity) event.entity).getGameProfile().getName());
         Chat.info(this, enter);
+
+        if (sendPrivateMessage.get()) mc.player.sendChatMessage("/msg " + ((PlayerEntity) event.entity).getGameProfile().getName() + " " + privateMessageValue.get());
     });
 
     @EventHandler

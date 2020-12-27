@@ -403,7 +403,6 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new EntityLogger());
         addModule(new EChestPreview());
         addModule(new Timer());
-        addModule(new MessageAura());
         addModule(new Nuker());
         addModule(new SoundBlocker());
         addModule(new AntiPacketKick());
