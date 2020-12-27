@@ -12,10 +12,7 @@ import minegame159.meteorclient.events.game.GameLeftEvent;
 import minegame159.meteorclient.events.game.GetTooltipEvent;
 import minegame159.meteorclient.events.game.OpenScreenEvent;
 import minegame159.meteorclient.events.meteor.*;
-import minegame159.meteorclient.events.packets.ContainerSlotUpdateEvent;
-import minegame159.meteorclient.events.packets.PlaySoundPacketEvent;
-import minegame159.meteorclient.events.packets.ReceivePacketEvent;
-import minegame159.meteorclient.events.packets.SendPacketEvent;
+import minegame159.meteorclient.events.packets.*;
 import minegame159.meteorclient.events.render.DrawSideEvent;
 import minegame159.meteorclient.events.render.Render2DEvent;
 import minegame159.meteorclient.events.render.RenderBlockEntityEvent;
@@ -99,6 +96,7 @@ public class EventStore {
     private static final JumpVelocityMultiplierEvent jumpVelocityMultiplierEvent = new JumpVelocityMultiplierEvent();
     private static final ClipAtLedgeEvent clipAtLedgeEvent = new ClipAtLedgeEvent();
     private static final ChunkOcclusionEvent chunkOcclusionEvent = new ChunkOcclusionEvent();
+    private static final PacketSentEvent packetSentEvent = new PacketSentEvent();
 
     public static PlaySoundPacketEvent playSoundPacketEvent(PlaySoundS2CPacket packet) {
         playSoundPacketEvent.packet = packet;
@@ -366,5 +364,10 @@ public class EventStore {
     public static ChunkOcclusionEvent chunkOcclusionEvent() {
         chunkOcclusionEvent.setCancelled(false);
         return chunkOcclusionEvent;
+    }
+
+    public static PacketSentEvent packetSentEvent(Packet<?> packet) {
+        packetSentEvent.packet = packet;
+        return packetSentEvent;
     }
 }

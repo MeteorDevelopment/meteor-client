@@ -38,10 +38,15 @@ public abstract class ClientPlayNetworkHandlerMixin {
     }
 
     @Inject(at = @At("HEAD"), method = "sendPacket", cancellable = true)
-    public void onSendPacket(Packet packet, CallbackInfo info) {
+    private void onSendPacketHead(Packet<?> packet, CallbackInfo info) {
         SendPacketEvent event = EventStore.sendPacketEvent(packet);
         MeteorClient.EVENT_BUS.post(event);
         if (event.isCancelled()) info.cancel();
+    }
+
+    @Inject(method = "sendPacket", at = @At("TAIL"))
+    private void onSendPacketTail(Packet<?> packet, CallbackInfo info) {
+        MeteorClient.EVENT_BUS.post(EventStore.packetSentEvent(packet));
     }
 
     @Inject(at = @At("HEAD"), method = "onPlaySound")
