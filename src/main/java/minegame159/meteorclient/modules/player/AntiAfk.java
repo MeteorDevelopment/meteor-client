@@ -13,7 +13,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.util.Hand;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,6 +61,16 @@ public class AntiAfk extends ToggleModule {
             .defaultValue(false)
             .build());
 
+    private final Setting<Boolean> strafe = sgActions.add(new BoolSetting.Builder()
+            .name("strafe")
+            .description("Strafe right and left")
+            .defaultValue(false)
+            .onChanged(aBoolean -> {
+                strafeTimer = 0;
+                direction = false;
+            })
+            .build());
+
     // Messages
     private final Setting<Boolean> sendMessages = sgMessages.add(new BoolSetting.Builder()
             .name("send-messages")
@@ -89,14 +98,17 @@ public class AntiAfk extends ToggleModule {
     private final List<String> messages = new ArrayList<>();
     private int timer;
     private int messageI;
+    private int strafeTimer = 0;
+    private boolean direction = false;
 
-    Random random = new Random();
+    private final Random random = new Random();
 
+    @SuppressWarnings("unused")
     @EventHandler
     private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
         if (mc.player != null && mc.world != null) {
             if (spin.get())
-                mc.player.yaw = (mc.player.yaw == 360 || mc.player.yaw > 360) ? 0 : mc.player.yaw + random.nextInt(spinSpeed.get()) + 1;
+                mc.player.yaw = (mc.player.yaw >= 360) ? 0 : mc.player.yaw + random.nextInt(spinSpeed.get()) + 1;
             if (jump.get() && mc.options.keyJump.isPressed())
                 ((IKeyBinding) mc.options.keyJump).setPressed(false);
             else if (jump.get() && random.nextInt(99) + 1 == 50)
@@ -129,8 +141,18 @@ public class AntiAfk extends ToggleModule {
                 } else {
                     timer--;
                 }
+
+            if (strafe.get() && strafeTimer == 20) {
+                ((IKeyBinding) mc.options.keyLeft).setPressed(!direction);
+                ((IKeyBinding) mc.options.keyRight).setPressed(direction);
+                direction = !direction;
+                strafeTimer = 0;
+            } else
+                strafeTimer++;
+
         }
     });
+
     @Override
     public WWidget getWidget() {
         messages.removeIf(String::isEmpty);
