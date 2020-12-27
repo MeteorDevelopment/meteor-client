@@ -15,6 +15,7 @@ import minegame159.meteorclient.commands.CommandManager;
 import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.events.game.GameJoinedEvent;
 import minegame159.meteorclient.events.game.GameLeftEvent;
+import minegame159.meteorclient.events.game.OpenScreenEvent;
 import minegame159.meteorclient.events.meteor.KeyEvent;
 import minegame159.meteorclient.modules.combat.*;
 import minegame159.meteorclient.modules.misc.Timer;
@@ -173,6 +174,19 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
                 if (module.getKey() == event.key && (event.action == KeyAction.Press || module.toggleOnKeyRelease)) {
                     module.doAction();
                     if (module instanceof ToggleModule) ((ToggleModule) module).sendToggledMsg();
+                }
+            }
+        }
+    }, EventPriority.HIGHEST + 1);
+
+    @EventHandler
+    private final Listener<OpenScreenEvent> onOpenScreen = new Listener<>(event -> {
+        for (Module module : modules.values()) {
+            if (module.toggleOnKeyRelease && module instanceof ToggleModule) {
+                ToggleModule toggleModule = (ToggleModule) module;
+                if (toggleModule.isActive()) {
+                    toggleModule.toggle();
+                    toggleModule.sendToggledMsg();
                 }
             }
         }
