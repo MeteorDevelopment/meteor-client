@@ -50,8 +50,8 @@ public class Auto32K extends ToggleModule {
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("mode")
             .description("The bypass mode used.")
-            .defaultValue(Mode.Dispenser
-            ).build()
+            .defaultValue(Mode.Dispenser)
+            .build()
     );
 
     private final Setting<Double> placeRange = sgGeneral.add(new DoubleSetting.Builder()

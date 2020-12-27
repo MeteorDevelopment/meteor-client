@@ -14,10 +14,7 @@ import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.modules.render.Freecam;
-import minegame159.meteorclient.settings.BoolSetting;
-import minegame159.meteorclient.settings.DoubleSetting;
-import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Input;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.gui.screen.ChatScreen;
@@ -25,8 +22,22 @@ import net.minecraft.client.gui.screen.ingame.*;
 import net.minecraft.item.ItemGroup;
 import org.lwjgl.glfw.GLFW;
 
-public class InvMove extends ToggleModule {
+public class GuiMove extends ToggleModule {
+
+    public enum Screens {
+        Gui,
+        Inventory,
+        Both
+    }
+
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+
+    private final Setting<Screens> screens = sgGeneral.add(new EnumSetting.Builder<Screens>()
+            .name("screens")
+            .description("Which screens to move in.")
+            .defaultValue(Screens.Inventory)
+            .build()
+    );
 
     private final Setting<Boolean> sneak = sgGeneral.add(new BoolSetting.Builder()
             .name("sneak")
@@ -64,13 +75,25 @@ public class InvMove extends ToggleModule {
             .build()
     );
 
-    public InvMove() {
-        super(Category.Movement, "inv-move", "Allows you to perform various actions while in GUIs.");
+    public GuiMove() {
+        super(Category.Movement, "gui-move", "Allows you to perform various actions while in GUIs.");
     }
 
     @EventHandler
     private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
-        if (!skip()) tickSneakJumpAndSprint();
+        if (!skip()) {
+            switch (screens.get()) {
+                case Gui:
+                    if (mc.currentScreen instanceof WidgetScreen) tickSneakJumpAndSprint();
+                    break;
+                case Inventory:
+                    if (!(mc.currentScreen instanceof WidgetScreen)) tickSneakJumpAndSprint();
+                    break;
+                case Both:
+                    tickSneakJumpAndSprint();
+                    break;
+            }
+        }
     });
 
     public void tick() {
@@ -118,6 +141,6 @@ public class InvMove extends ToggleModule {
     }
 
     private boolean skip() {
-        return mc.currentScreen == null || ModuleManager.INSTANCE.isActive(Freecam.class) || (mc.currentScreen instanceof CreativeInventoryScreen && ((ICreativeInventoryScreen) mc.currentScreen).getSelectedTab() == ItemGroup.SEARCH.getIndex()) || mc.currentScreen instanceof WidgetScreen || mc.currentScreen instanceof ChatScreen || mc.currentScreen instanceof SignEditScreen || mc.currentScreen instanceof AnvilScreen || mc.currentScreen instanceof AbstractCommandBlockScreen || mc.currentScreen instanceof StructureBlockScreen;
+        return mc.currentScreen == null || ModuleManager.INSTANCE.isActive(Freecam.class) || (mc.currentScreen instanceof CreativeInventoryScreen && ((ICreativeInventoryScreen) mc.currentScreen).getSelectedTab() == ItemGroup.SEARCH.getIndex()) || mc.currentScreen instanceof ChatScreen || mc.currentScreen instanceof SignEditScreen || mc.currentScreen instanceof AnvilScreen || mc.currentScreen instanceof AbstractCommandBlockScreen || mc.currentScreen instanceof StructureBlockScreen;
     }
 }
