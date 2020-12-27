@@ -20,6 +20,13 @@ public class VisualRange extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgPrivateMessage = settings.createGroup("Private Messages");
 
+    private final Setting<Boolean> sendClientMessage = sgGeneral.add(new BoolSetting.Builder()
+            .name("send-client-message")
+            .description("Sends a client side message notifying you.")
+            .defaultValue(true)
+            .build()
+    );
+
     private final Setting<Boolean> ignoreFriends = sgGeneral.add(new BoolSetting.Builder()
             .name("ignore-friends")
             .description("Ignores friends.")
@@ -72,7 +79,7 @@ public class VisualRange extends ToggleModule {
         if (event.entity.equals(mc.player) || !(event.entity instanceof PlayerEntity) || !FriendManager.INSTANCE.attack((PlayerEntity) event.entity) && ignoreFriends.get() || (event.entity instanceof FakePlayerEntity && ignoreFakes.get())) return;
 
         String enter = enterMessage.get().replace("{player}", ((PlayerEntity) event.entity).getGameProfile().getName());
-        Chat.info(this, enter);
+        if (sendClientMessage.get()) Chat.info(this, enter);
 
         if (sendPrivateMessage.get()) mc.player.sendChatMessage("/msg " + ((PlayerEntity) event.entity).getGameProfile().getName() + " " + privateMessageValue.get());
     });
