@@ -49,7 +49,7 @@ dependencies {
 	dependency "com.g00fy2:versioncompare:1.3.4"
 	dependency "org.joml:joml:1.9.25"
 
-	compile 'club.minnced:java-discord-rpc:2.0.1'
+	shadow "club.minnced:java-discord-rpc:2.0.2"
 }
 
 shadowJar {
