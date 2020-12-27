@@ -22,7 +22,6 @@ import minegame159.meteorclient.modules.movement.InvMove;
 import minegame159.meteorclient.modules.movement.Jesus;
 import minegame159.meteorclient.modules.movement.NoFall;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.MeteorExecutor;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.ToolItem;
@@ -34,9 +33,6 @@ import java.util.List;
 
 /**
  * @author Inclement
- * @version 1.1
- * InfinityMiner is a module which alternates between mining a target block, and a repair block.
- * This allows the user to mine indefinitely, provided they have the mending enchantment.
  */
 public class InfinityMiner extends ToggleModule {
     public enum Mode {
@@ -110,13 +106,11 @@ public class InfinityMiner extends ToggleModule {
     public void onActivate() {
         if (smartModuleToggle.get()) {
             BLOCKER = true;
-            MeteorExecutor.execute(() -> { //fixes pause issue caused by too many modules being toggled
-                for (ToggleModule module : getToggleModules()) {
-                    originalSettings.put(module.name, module.isActive());
-                    if (!module.isActive()) module.toggle();
-                }
-                BLOCKER = false;
-            });
+            for (ToggleModule module : getToggleModules()) {
+                originalSettings.put(module.name, module.isActive());
+                if (!module.isActive()) module.toggle();
+            }
+            BLOCKER = false;
         }
         if (mc.player != null) {
             playerX = (int) mc.player.getX();
@@ -129,13 +123,11 @@ public class InfinityMiner extends ToggleModule {
     public void onDeactivate() {
         if (smartModuleToggle.get()) {
             BLOCKER = true;
-            MeteorExecutor.execute(() -> {
-                for (ToggleModule module : getToggleModules()) {
-                    if (originalSettings.get(module.name) != module.isActive()) module.toggle();
-                }
-                originalSettings.clear();
-                BLOCKER = false;
-            });
+            for (ToggleModule module : getToggleModules()) {
+                if (originalSettings.get(module.name) != module.isActive()) module.toggle();
+            }
+            originalSettings.clear();
+            BLOCKER = false;
         }
         if (!BaritoneAPI.getSettings().mineScanDroppedItems.value)
             BaritoneAPI.getSettings().mineScanDroppedItems.value = true;
@@ -220,7 +212,7 @@ public class InfinityMiner extends ToggleModule {
         }
     }
 
-    private synchronized void baritoneRequestStop() {
+    private void baritoneRequestStop() {
         BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
         baritoneRunning = false;
         currentMode = Mode.STILL;
