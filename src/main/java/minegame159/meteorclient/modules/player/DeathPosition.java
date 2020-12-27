@@ -99,7 +99,7 @@ public class DeathPosition extends ToggleModule {
 
     private void path() {
         if (deathPos.isEmpty() && mc.player != null) {
-            Chat.info("No last known death position.");
+            Chat.info("No latest death.");
         } else {
             double x = deathPos.get("x"), z = deathPos.get("z");
             if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing())
