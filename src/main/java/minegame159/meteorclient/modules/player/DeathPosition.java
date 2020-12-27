@@ -5,10 +5,14 @@
 
 package minegame159.meteorclient.modules.player;
 
+import baritone.api.BaritoneAPI;
+import baritone.api.pathing.goals.GoalXZ;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.entity.TookDamageEvent;
+import minegame159.meteorclient.gui.widgets.WButton;
 import minegame159.meteorclient.gui.widgets.WLabel;
+import minegame159.meteorclient.gui.widgets.WTable;
 import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
@@ -22,6 +26,8 @@ import minegame159.meteorclient.waypoints.Waypoints;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 public class DeathPosition extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -41,9 +47,15 @@ public class DeathPosition extends ToggleModule {
         super(Category.Player, "death-position", "Sends you the exact position where you have died in chat.");
     }
 
+    private final Map<String, Double> deathPos = new HashMap<>();
+
+    @SuppressWarnings("unused")
     @EventHandler
     private final Listener<TookDamageEvent> onTookDamage = new Listener<>(event -> {
+        if(mc.player == null) return;
         if (event.entity.getUuid() != null && event.entity.getUuid().equals(mc.player.getUuid()) && event.entity.getHealth() <= 0) {
+            deathPos.put("x", mc.player.getX());
+            deathPos.put("z", mc.player.getZ());
             label.setText(String.format("Latest death: %.1f, %.1f, %.1f", mc.player.getX(), mc.player.getY(), mc.player.getZ()));
 
             String time = dateFormat.format(new Date());
@@ -60,9 +72,15 @@ public class DeathPosition extends ToggleModule {
                 waypoint.maxVisibleDistance = Integer.MAX_VALUE;
 
                 switch (Utils.getDimension()) {
-                    case Overworld: waypoint.overworld = true; break;
-                    case Nether:    waypoint.nether = true; break;
-                    case End:       waypoint.end = true; break;
+                    case Overworld:
+                        waypoint.overworld = true;
+                        break;
+                    case Nether:
+                        waypoint.nether = true;
+                        break;
+                    case End:
+                        waypoint.end = true;
+                        break;
                 }
 
                 Waypoints.INSTANCE.add(waypoint);
@@ -72,6 +90,22 @@ public class DeathPosition extends ToggleModule {
 
     @Override
     public WWidget getWidget() {
-        return label;
+        WTable table = new WTable();
+        table.add(label);
+        WButton path = new WButton("Path");
+        table.add(path);
+        path.action = this::path;
+        return table;
+    }
+
+    private void path() {
+        if (deathPos.isEmpty() && mc.player != null) {
+            Chat.info("No latest death.");
+        } else {
+            double x = deathPos.get("x"), z = deathPos.get("z");
+            if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing())
+                BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
+            BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalXZ((int) x, (int) z));
+        }
     }
 }
