@@ -6,7 +6,6 @@
 package minegame159.meteorclient.modules.player;
 
 import baritone.api.BaritoneAPI;
-import baritone.api.pathing.goals.Goal;
 import baritone.api.pathing.goals.GoalXZ;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
@@ -50,8 +49,10 @@ public class DeathPosition extends ToggleModule {
 
     private final Map<String, Double> deathPos = new HashMap<>();
 
+    @SuppressWarnings("unused")
     @EventHandler
     private final Listener<TookDamageEvent> onTookDamage = new Listener<>(event -> {
+        if(mc.player == null) return;
         if (event.entity.getUuid() != null && event.entity.getUuid().equals(mc.player.getUuid()) && event.entity.getHealth() <= 0) {
             deathPos.put("x", mc.player.getX());
             deathPos.put("z", mc.player.getZ());
