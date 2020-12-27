@@ -317,6 +317,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new AutoWalk());
         addModule(new Blink());
         addModule(new FastLadder());
+        addModule(new NoClip());
         addModule(new NoFall());
         addModule(new Spider());
         addModule(new AutoJump());
