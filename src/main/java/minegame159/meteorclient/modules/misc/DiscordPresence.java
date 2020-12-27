@@ -60,8 +60,8 @@ public class DiscordPresence extends ToggleModule {
         rpc.startTimestamp = System.currentTimeMillis() / 1000L;
         rpc.largeImageKey = "meteor_client";
         rpc.largeImageText = "Meteor Client v" + Config.INSTANCE.version;
-        rpc.state = getLine2();
-        rpc.details = getLine1();
+        rpc.details = getLine(line1);
+        rpc.state = getLine(line2);
         currentSmallImage = SmallImage.MineGame;
 
         instance.Discord_UpdatePresence(rpc);
@@ -87,14 +87,13 @@ public class DiscordPresence extends ToggleModule {
         }
 
         instance.Discord_RunCallbacks();
+
+        updateDetails();
     });
 
-    private String getLine1() {
-        return line1.get().replace("{player}", getName()).replace("{server}", getServer());
-    }
-
-    private String getLine2() {
-        return line2.get().replace("{player}", getName()).replace("{server}", getServer());
+    private String getLine(Setting<String> line) {
+        if (line.get().length() > 0) return line.get().replace("{player}", getName()).replace("{server}", getServer());
+        else return null;
     }
 
     private String getServer(){
@@ -108,8 +107,8 @@ public class DiscordPresence extends ToggleModule {
 
     private void updateDetails() {
         if (isActive()) {
-            rpc.state = getLine2();
-            rpc.details = getLine1();
+            rpc.details = getLine(line1);
+            rpc.state = getLine(line2);
             instance.Discord_UpdatePresence(rpc);
         }
     }
