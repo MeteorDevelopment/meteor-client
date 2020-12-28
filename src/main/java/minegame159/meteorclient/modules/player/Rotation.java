@@ -7,37 +7,29 @@ package minegame159.meteorclient.modules.player;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.packets.SendPacketEvent;
 import minegame159.meteorclient.events.world.PostTickEvent;
-import minegame159.meteorclient.mixininterface.IPlayerMoveC2SPacket;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
-import minegame159.meteorclient.modules.combat.Quiver;
-import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.DoubleSetting;
+import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 
 public class Rotation extends ToggleModule {
 
-    private final SettingGroup sgGeneral = settings.getDefaultGroup();
-
-    private final Setting<Boolean> noRotate = sgGeneral.add(new BoolSetting.Builder()
-            .name("anti-rotate")
-            .description("Attempts to block server to client rotations.")
-            .defaultValue(true)
-            .build()
-    );
+    public enum LockMode {
+        Smart,
+        Simple,
+        None
+    }
 
     // Yaw
     private final SettingGroup sgYaw = settings.createGroup("Yaw");
 
-    private final Setting<Boolean> yawEnabled = sgYaw.add(new BoolSetting.Builder()
-            .name("yaw-enabled")
-            .description("Locks your yaw.")
-            .defaultValue(true)
+    private final Setting<LockMode> yawLockMode = sgYaw.add(new EnumSetting.Builder<LockMode>()
+            .name("yaw-lock-mode")
+            .description("The way in which your yaw is locked.")
+            .defaultValue(LockMode.Simple)
             .build()
     );
 
@@ -45,23 +37,18 @@ public class Rotation extends ToggleModule {
             .name("yaw-angle")
             .description("Yaw angle in degrees.")
             .defaultValue(0)
-            .build()
-    );
-
-    private final Setting<Boolean> yawAutoAngle = sgYaw.add(new BoolSetting.Builder()
-            .name("yaw-auto-angle")
-            .description("Automatically uses the best angle.")
-            .defaultValue(true)
+            .sliderMax(360)
+            .max(360)
             .build()
     );
 
     // Pitch
     private final SettingGroup sgPitch = settings.createGroup("Pitch");
 
-    private final Setting<Boolean> pitchEnabled = sgPitch.add(new BoolSetting.Builder()
-            .name("pitch-enabled")
-            .description("Locks your pitch.")
-            .defaultValue(true)
+    private final Setting<LockMode> pitchLockMode = sgPitch.add(new EnumSetting.Builder<LockMode>()
+            .name("pitch-lock-mode")
+            .description("The way in which your pitch is locked.")
+            .defaultValue(LockMode.Simple)
             .build()
     );
 
@@ -71,11 +58,13 @@ public class Rotation extends ToggleModule {
             .defaultValue(0)
             .min(-90)
             .max(90)
+            .sliderMin(-90)
+            .sliderMax(90)
             .build()
     );
 
     public Rotation() {
-        super(Category.Player, "rotation", "Allows you to lock your yaw and pitch.");
+        super(Category.Player, "rotation", "Changes/locks your yaw and pitch.");
     }
 
     @Override
@@ -85,29 +74,36 @@ public class Rotation extends ToggleModule {
 
     @EventHandler
     private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
-        // Yaw
-        if (yawEnabled.get()) {
-            if (yawAutoAngle.get()) mc.player.yaw = getYawDirection();
-            else mc.player.yaw = yawAngle.get().floatValue();
+        switch (yawLockMode.get()) {
+            case Simple:
+                setYawAngle(yawAngle.get().floatValue());
+                break;
+            case Smart:
+                setYawAngle(getSmartYawDirection());
+                break;
         }
 
-        // Pitch
-        if (pitchEnabled.get()) {
-            mc.player.pitch = pitchAngle.get().floatValue();
-        }
-    });
-
-    @EventHandler
-    private final Listener<SendPacketEvent> onSendPacket = new Listener<>(event -> {
-        if (noRotate.get() && event.packet instanceof PlayerMoveC2SPacket) {
-            if (ModuleManager.INSTANCE.get(XpBottleThrower.class).isActive() || ModuleManager.INSTANCE.get(Quiver.class).isActive()) return;
-            IPlayerMoveC2SPacket packet = (IPlayerMoveC2SPacket) event.packet;
-            packet.setPitch(mc.player.getPitch(0));
-            packet.setYaw(mc.player.getYaw(1));
+        switch (pitchLockMode.get()) {
+            case Simple:
+                mc.player.pitch = pitchAngle.get().floatValue();
+                break;
+            case Smart:
+                mc.player.pitch = getSmartPitchDirection();
+                break;
         }
     });
 
-    private float getYawDirection() {
+    private float getSmartYawDirection() {
         return Math.round((mc.player.yaw + 1f) / 45f) * 45f;
+    }
+
+    private float getSmartPitchDirection() {
+        return Math.round((mc.player.pitch + 1f) / 30f) * 30f;
+    }
+
+    private void setYawAngle(float yawAngle) {
+        mc.player.yaw = yawAngle;
+        mc.player.headYaw = yawAngle;
+        mc.player.bodyYaw = yawAngle;
     }
 }
