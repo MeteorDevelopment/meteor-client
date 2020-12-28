@@ -289,6 +289,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
     }
 
     private void initPlayer() {
+        addModule(new AntiRespawnLose());
         addModule(new AutoFish());
         addModule(new DeathPosition());
         addModule(new FastUse());
