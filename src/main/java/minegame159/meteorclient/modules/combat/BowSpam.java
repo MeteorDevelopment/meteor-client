@@ -15,6 +15,7 @@ import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.utils.InvUtils;
 import net.minecraft.item.Items;
 
 public class BowSpam extends ToggleModule {
@@ -58,6 +59,9 @@ public class BowSpam extends ToggleModule {
 
     @EventHandler
     private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+        assert mc.player != null;
+        assert mc.interactionManager != null;
+        if (InvUtils.findItemWithCount(Items.ARROW).slot == -1) return;
         if (!onlyWhenHoldingRightClick.get() || mc.options.keyUse.isPressed()) {
             boolean isBow = mc.player.getMainHandStack().getItem() == Items.BOW;
             if (!isBow && wasBow) setPressed(false);
