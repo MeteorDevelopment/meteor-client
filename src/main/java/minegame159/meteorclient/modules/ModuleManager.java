@@ -413,6 +413,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new OffHandCrash());
         addModule(new LiquidFiller());
         addModule(new VisualRange());
+        addModule(new AutoBreed());
     }
 
     public static class ModuleRegistry extends Registry<ToggleModule> {
