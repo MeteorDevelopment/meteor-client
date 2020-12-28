@@ -23,6 +23,9 @@
   "entrypoints": {
     "client": [
       "minegame159.meteorclient.MeteorClient"
+    ],
+    "modmenu": [
+      "minegame159.meteorclient.ModMenuCompat"
     ]
   },
   "mixins": [
