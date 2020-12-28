@@ -106,7 +106,7 @@ public class DiscordPresence extends ToggleModule {
     }
 
     private void updateDetails() {
-        if (isActive()) {
+        if (isActive() && mc.player != null && mc.world != null) {
             rpc.details = getLine(line1);
             rpc.state = getLine(line2);
             instance.Discord_UpdatePresence(rpc);
