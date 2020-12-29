@@ -26,7 +26,6 @@ public class SwarmEscape extends Command {
                             if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing())
                                 BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
                             swarm.currentMode.set(Swarm.Mode.IDLE);
-                            swarm.currentTaskSetting.set(Swarm.CurrentTask.IDLE);
                             ModuleManager.INSTANCE.get(Swarm.class).toggle();
                         } else {
                             Chat.info("Swarm: You are the queen.");
