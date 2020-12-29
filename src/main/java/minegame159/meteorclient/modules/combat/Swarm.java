@@ -8,6 +8,8 @@ import minegame159.meteorclient.commands.CommandManager;
 import minegame159.meteorclient.events.game.GameJoinedEvent;
 import minegame159.meteorclient.events.game.GameLeftEvent;
 import minegame159.meteorclient.events.world.PostTickEvent;
+import minegame159.meteorclient.gui.widgets.WButton;
+import minegame159.meteorclient.gui.widgets.WTable;
 import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
@@ -53,24 +55,6 @@ public class Swarm extends ToggleModule {
             .name("current-mode")
             .description("The current mode to operate in.")
             .defaultValue(Mode.IDLE)
-            .onChanged(mode -> {
-                try {
-                    if (this.isActive()) {
-                        if (mode == Mode.QUEEN) {
-                            closeAllServerConnections();
-                            startServer();
-                        } else if (mode == Mode.SLAVE) {
-                            closeAllServerConnections();
-                            startClient();
-                        } else if (mode == Mode.IDLE) {
-                            resetTarget();
-                            BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
-                        }
-
-                    }
-                } catch (Exception ignored) {
-                }
-            })
             .build());
 
     public final Setting<CurrentTask> currentTaskSetting = sgGeneral.add(new EnumSetting.Builder<CurrentTask>()
@@ -92,6 +76,7 @@ public class Swarm extends ToggleModule {
             .sliderMin(1)
             .sliderMax(65535)
             .build());
+
 
     public SwarmServer server;
     public SwarmClient client;
@@ -115,8 +100,33 @@ public class Swarm extends ToggleModule {
 
     @Override
     public WWidget getWidget() {
+        WTable table = new WTable();
+        WButton runServer = new WButton("Run Server(Q)");
+        runServer.action = this::runServer;
+        table.add(runServer);
+        WButton connect = new WButton("Connect(S)");
+        connect.action = this::runClient;
+        table.add(connect);
+        WButton reset = new WButton("Reset");
+        reset.action = () -> {
+            closeAllServerConnections();
+            currentMode.set(Mode.IDLE);
+            currentTaskSetting.set(CurrentTask.IDLE);
+        };
+        table.add(reset);
+        return table;
+    }
 
-        return null;
+    private void runServer() {
+        currentMode.set(Mode.QUEEN);
+        closeAllServerConnections();
+        startServer();
+    }
+
+    private void runClient() {
+        currentMode.set(Mode.SLAVE);
+        closeAllServerConnections();
+        startClient();
     }
 
     public void closeAllServerConnections() {
@@ -139,8 +149,10 @@ public class Swarm extends ToggleModule {
 
 
     @SuppressWarnings("unused")
-    @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> mine());
+    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+        if (targetBlock != null)
+            mine();
+    });
 
     public void resetTarget() {
         targetEntity = null;
@@ -170,12 +182,11 @@ public class Swarm extends ToggleModule {
     }
 
     public void mine() {
-        if (targetBlock != null) {
-            if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing())
-                BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
-            BaritoneAPI.getProvider().getPrimaryBaritone().getMineProcess().mine(targetBlock.getBlock());
-            targetBlock = null;
-        }
+        if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing())
+            BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
+        BaritoneAPI.getProvider().getPrimaryBaritone().getMineProcess().mine(targetBlock.getBlock());
+        targetBlock = null;
+
     }
 
     public class SwarmClient extends Thread {
