@@ -108,6 +108,7 @@ public class Swarm extends ToggleModule {
         table.add(connect);
         WButton reset = new WButton("Reset");
         reset.action = () -> {
+            Chat.info("Swarm: Closing all connections.");
             closeAllServerConnections();
             currentMode.set(Mode.IDLE);
             currentTaskSetting.set(CurrentTask.IDLE);
@@ -117,17 +118,17 @@ public class Swarm extends ToggleModule {
     }
 
     public void runServer() {
-        currentMode.set(Mode.QUEEN);
-        closeAllServerConnections();
         if (server == null) {
+            currentMode.set(Mode.QUEEN);
+            closeAllServerConnections();
             server = new SwarmServer();
         }
     }
 
     public void runClient() {
-        currentMode.set(Mode.SLAVE);
-        closeAllServerConnections();
         if (client == null) {
+            currentMode.set(Mode.SLAVE);
+            closeAllServerConnections();
             client = new SwarmClient();
         }
     }
