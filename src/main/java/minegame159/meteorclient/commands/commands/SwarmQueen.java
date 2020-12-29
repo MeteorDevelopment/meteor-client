@@ -8,20 +8,20 @@ import net.minecraft.command.CommandSource;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
-public class SwarmSlave extends Command {
+public class SwarmQueen extends Command {
 
-    public SwarmSlave() {
-        super("s", "(highlight)slave (default)- Slave this account to the Queen.");
+    public SwarmQueen() {
+        super("s", "(highlight)queen (default)- Start a new swarm as the queen.");
     }
 
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
-        builder.then(literal("slave").executes(context -> {
+        builder.then(literal("queen").executes(context -> {
                     Swarm swarm = ModuleManager.INSTANCE.get(Swarm.class);
                     if (swarm.isActive()) {
-                        if (swarm.client == null)
-                            swarm.runClient();
+                        if (swarm.server == null)
+                            swarm.runServer();
                     }
                     return SINGLE_SUCCESS;
                 })

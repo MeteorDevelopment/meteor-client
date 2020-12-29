@@ -26,7 +26,6 @@ public class SwarmCloseConnections extends Command {
                             swarm.currentTaskSetting.set(Swarm.CurrentTask.IDLE);
                             if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing())
                                 BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
-                            swarm.resetTarget();
                             if (ModuleManager.INSTANCE.get(Swarm.class).isActive())
                                 ModuleManager.INSTANCE.get(Swarm.class).toggle();
                         }

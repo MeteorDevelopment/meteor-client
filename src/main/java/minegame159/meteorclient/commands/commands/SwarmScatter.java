@@ -35,7 +35,6 @@ public class SwarmScatter extends Command {
             double x = mc.player.getX() + r * Math.cos(a);
             double z = mc.player.getZ() + r * Math.sin(a);
             swarm.currentTaskSetting.set(Swarm.CurrentTask.BARITONE);
-            swarm.resetTarget();
             if(BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing())
                 BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
             BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalXZ((int)x,(int)z));
