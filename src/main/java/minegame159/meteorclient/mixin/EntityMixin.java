@@ -99,6 +99,6 @@ public abstract class EntityMixin {
 
     @Inject(method = "isInvisibleTo(Lnet/minecraft/entity/player/PlayerEntity;)Z", at = @At("HEAD"), cancellable = true)
     private void isInvisibleToCanceller(PlayerEntity player, CallbackInfoReturnable<Boolean> info) {
-        if (ModuleManager.INSTANCE.get(ESP.class).isActive() && ModuleManager.INSTANCE.get(ESP.class).ignoreInvis.get()) info.setReturnValue(false);
+        if (ModuleManager.INSTANCE.get(ESP.class).isActive() && ModuleManager.INSTANCE.get(ESP.class).showInvis.get()) info.setReturnValue(false);
     }
 }
