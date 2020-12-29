@@ -48,11 +48,12 @@ public class DeathPosition extends ToggleModule {
     }
 
     private final Map<String, Double> deathPos = new HashMap<>();
+    private Waypoint waypoint;
 
     @SuppressWarnings("unused")
     @EventHandler
     private final Listener<TookDamageEvent> onTookDamage = new Listener<>(event -> {
-        if(mc.player == null) return;
+        if (mc.player == null) return;
         if (event.entity.getUuid() != null && event.entity.getUuid().equals(mc.player.getUuid()) && event.entity.getHealth() <= 0) {
             deathPos.put("x", mc.player.getX());
             deathPos.put("z", mc.player.getZ());
@@ -63,7 +64,7 @@ public class DeathPosition extends ToggleModule {
 
             // Create waypoint
             if (createWaypoint.get()) {
-                Waypoint waypoint = new Waypoint();
+                waypoint = new Waypoint();
                 waypoint.name = "Death " + time;
 
                 waypoint.x = (int) mc.player.getX();
@@ -95,6 +96,9 @@ public class DeathPosition extends ToggleModule {
         WButton path = new WButton("Path");
         table.add(path);
         path.action = this::path;
+        WButton clear = new WButton("Clear");
+        table.add(clear);
+        clear.action = this::clear;
         return table;
     }
 
@@ -107,5 +111,10 @@ public class DeathPosition extends ToggleModule {
                 BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
             BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalXZ((int) x, (int) z));
         }
+    }
+
+    private void clear() {
+        Waypoints.INSTANCE.remove(waypoint);
+        label.setText("No latest Death.");
     }
 }
