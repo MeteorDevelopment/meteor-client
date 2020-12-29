@@ -20,6 +20,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MovementType;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -93,5 +94,11 @@ public abstract class EntityMixin {
     private Block getVelocityMultiplierGetBlockProxy(BlockState blockState) {
         if (blockState.getBlock() == Blocks.SOUL_SAND && ModuleManager.INSTANCE.get(NoSlow.class).soulSand()) return Blocks.STONE;
         return blockState.getBlock();
+    }
+
+
+    @Inject(method = "isInvisibleTo(Lnet/minecraft/entity/player/PlayerEntity;)Z", at = @At("HEAD"), cancellable = true)
+    private void isInvisibleToCanceller(PlayerEntity player, CallbackInfoReturnable<Boolean> info) {
+        if (ModuleManager.INSTANCE.get(ESP.class).isActive() && ModuleManager.INSTANCE.get(ESP.class).ignoreInvis.get()) info.setReturnValue(false);
     }
 }
