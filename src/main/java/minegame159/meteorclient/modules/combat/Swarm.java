@@ -66,9 +66,6 @@ public class Swarm extends ToggleModule {
             .defaultValue(Mode.IDLE)
             .build());
 
-
-
-
     public SwarmServer server;
     public SwarmClient client;
     public BlockState targetBlock;
@@ -141,11 +138,11 @@ public class Swarm extends ToggleModule {
     }
 
     @SuppressWarnings("unused")
+    @EventHandler
     private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
         if (targetBlock != null)
             mine();
     });
-
 
     public void idle() {
         currentMode.set(Mode.IDLE);
