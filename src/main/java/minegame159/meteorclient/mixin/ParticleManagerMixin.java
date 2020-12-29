@@ -5,31 +5,30 @@
 
 package minegame159.meteorclient.mixin;
 
+import minegame159.meteorclient.MeteorClient;
+import minegame159.meteorclient.events.EventStore;
+import minegame159.meteorclient.events.world.ParticleEvent;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.misc.Nuker;
 import minegame159.meteorclient.modules.render.NoRender;
 import net.minecraft.block.BlockState;
-import net.minecraft.client.particle.*;
+import net.minecraft.client.particle.Particle;
+import net.minecraft.client.particle.ParticleManager;
+import net.minecraft.particle.ParticleEffect;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ParticleManager.class)
 public class ParticleManagerMixin {
-    @Inject(method = "addParticle(Lnet/minecraft/client/particle/Particle;)V", at = @At("HEAD"), cancellable = true)
-    private void onAddParticle(Particle particle, CallbackInfo info) {
-        NoRender noRender = ModuleManager.INSTANCE.get(NoRender.class);
-
-        if (noRender.noBubbles() && (particle instanceof BubbleColumnUpParticle || particle instanceof BubblePopParticle || particle instanceof WaterBubbleParticle)) {
-            info.cancel();
-        } else if (noRender.noExplosion() && (particle instanceof ExplosionSmokeParticle || particle instanceof ExplosionLargeParticle || particle instanceof ExplosionEmitterParticle)) {
-            info.cancel();
-        } else if (noRender.noTotemParticles() && particle instanceof TotemParticle) {
-            info.cancel();
-        }
+    @Inject(method = "addParticle(Lnet/minecraft/particle/ParticleEffect;DDDDDD)Lnet/minecraft/client/particle/Particle;", at = @At("HEAD"), cancellable = true)
+    private void onAddParticle(ParticleEffect parameters, double x, double y, double z, double velocityX, double velocityY, double velocityZ, CallbackInfoReturnable<Particle> info) {
+        ParticleEvent event = MeteorClient.postEvent(EventStore.particleEvent(parameters));
+        if (event.isCancelled()) info.cancel();
     }
 
     @Inject(method = "addBlockBreakParticles", at = @At("HEAD"), cancellable = true)
