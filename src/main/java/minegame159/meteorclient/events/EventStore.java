@@ -37,6 +37,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.Packet;
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
 import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
+import net.minecraft.particle.ParticleEffect;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -97,6 +98,7 @@ public class EventStore {
     private static final ClipAtLedgeEvent clipAtLedgeEvent = new ClipAtLedgeEvent();
     private static final ChunkOcclusionEvent chunkOcclusionEvent = new ChunkOcclusionEvent();
     private static final PacketSentEvent packetSentEvent = new PacketSentEvent();
+    private static final ParticleEvent particleEvent = new ParticleEvent();
 
     public static PlaySoundPacketEvent playSoundPacketEvent(PlaySoundS2CPacket packet) {
         playSoundPacketEvent.packet = packet;
@@ -369,5 +371,11 @@ public class EventStore {
     public static PacketSentEvent packetSentEvent(Packet<?> packet) {
         packetSentEvent.packet = packet;
         return packetSentEvent;
+    }
+
+    public static ParticleEvent particleEvent(ParticleEffect particle) {
+        particleEvent.setCancelled(false);
+        particleEvent.particle = particle;
+        return particleEvent;
     }
 }
