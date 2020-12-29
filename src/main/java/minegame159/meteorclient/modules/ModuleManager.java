@@ -384,6 +384,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new VoidESP());
         addModule(new CityEsp());
         addModule(new ShulkerPeek());
+        addModule(new ParticleBlocker());
     }
 
     private void initMisc() {
