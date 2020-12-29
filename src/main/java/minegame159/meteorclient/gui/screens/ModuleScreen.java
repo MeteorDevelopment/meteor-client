@@ -96,9 +96,9 @@ public class ModuleScreen extends WindowScreen {
             };
 
             //   Visible
-            bottomTable.add(new WLabel("Visible: ")).fillX().right().getWidget().tooltip = "Visible in HUD.";
+            bottomTable.add(new WLabel("Visible: ")).fillX().right().getWidget().tooltip = "Shows the module in the array list.";
             WCheckbox visibleCheckbox = bottomTable.add(new WCheckbox(((ToggleModule) module).isVisible())).getWidget();
-            visibleCheckbox.tooltip = "Visible in HUD.";
+            visibleCheckbox.tooltip = "Shows the module in the array list.";
             visibleCheckbox.action = () -> {
                 if (((ToggleModule) module).isVisible() != visibleCheckbox.checked) ((ToggleModule) module).setVisible(visibleCheckbox.checked);
             };
