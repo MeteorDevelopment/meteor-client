@@ -65,7 +65,7 @@ public class CityEsp extends ToggleModule {
     );
 
     public CityEsp() {
-        super(Category.Combat, "city-esp", "Displays blocks that can be broken in order to city another player.");
+        super(Category.Render, "city-esp", "Displays blocks that can be broken in order to city another player.");
     }
 
     @EventHandler
