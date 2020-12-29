@@ -19,7 +19,7 @@ public class SwarmRelease extends Command {
         builder.then(literal("release").executes(context -> {
                     Swarm swarm = ModuleManager.INSTANCE.get(Swarm.class);
                     if (swarm.isActive()) {
-                        if (swarm.currentMode.get() == Swarm.Mode.QUEEN && swarm.server != null) {
+                        if (swarm.currentMode == Swarm.Mode.QUEEN && swarm.server != null) {
                             swarm.server.sendMessage("s stop");
                             swarm.server.closeAllClients();
                         }

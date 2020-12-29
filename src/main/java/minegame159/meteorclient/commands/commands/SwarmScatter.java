@@ -44,7 +44,7 @@ public class SwarmScatter extends Command {
         builder.then(literal("scatter").executes(context -> {
             Swarm swarm = ModuleManager.INSTANCE.get(Swarm.class);
             if(swarm.isActive()){
-                if(swarm.currentMode.get() == Swarm.Mode.QUEEN && swarm.server != null){
+                if(swarm.currentMode == Swarm.Mode.QUEEN && swarm.server != null){
                     swarm.server.sendMessage(context.getInput());
                 }
                 else{
@@ -55,7 +55,7 @@ public class SwarmScatter extends Command {
         }).then(argument("radius", IntegerArgumentType.integer()).executes(context -> {
             Swarm swarm = ModuleManager.INSTANCE.get(Swarm.class);
             if(swarm.isActive()){
-                if(swarm.currentMode.get() == Swarm.Mode.QUEEN && swarm.server != null){
+                if(swarm.currentMode == Swarm.Mode.QUEEN && swarm.server != null){
                     swarm.server.sendMessage(context.getInput());
                 }
                 else{

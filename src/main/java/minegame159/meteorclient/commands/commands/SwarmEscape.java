@@ -21,11 +21,11 @@ public class SwarmEscape extends Command {
         builder.then(literal("escape").executes(context -> {
                     Swarm swarm = ModuleManager.INSTANCE.get(Swarm.class);
                     if (swarm.isActive()) {
-                        if (swarm.currentMode.get() != Swarm.Mode.QUEEN) {
+                        if (swarm.currentMode != Swarm.Mode.QUEEN) {
                             swarm.closeAllServerConnections();
                             if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing())
                                 BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
-                            swarm.currentMode.set(Swarm.Mode.IDLE);
+                            swarm.currentMode = Swarm.Mode.IDLE;
                             ModuleManager.INSTANCE.get(Swarm.class).toggle();
                         } else {
                             Chat.info("Swarm: You are the queen.");

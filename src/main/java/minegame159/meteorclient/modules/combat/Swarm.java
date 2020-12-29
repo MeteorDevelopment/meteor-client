@@ -9,13 +9,17 @@ import minegame159.meteorclient.events.game.GameJoinedEvent;
 import minegame159.meteorclient.events.game.GameLeftEvent;
 import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.gui.widgets.WButton;
+import minegame159.meteorclient.gui.widgets.WLabel;
 import minegame159.meteorclient.gui.widgets.WTable;
 import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.modules.player.InfinityMiner;
-import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.settings.IntSetting;
+import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.settings.StringSetting;
 import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.MeteorExecutor;
 import net.minecraft.block.BlockState;
@@ -58,35 +62,30 @@ public class Swarm extends ToggleModule {
             .sliderMax(65535)
             .build());
 
-    private final SettingGroup sgModes = settings.createGroup("Modes");
-
-    public final Setting<Mode> currentMode = sgModes.add(new EnumSetting.Builder<Mode>()
-            .name("current-mode")
-            .description("The current mode to operate in. No need to change.")
-            .defaultValue(Mode.IDLE)
-            .build());
-
     public SwarmServer server;
     public SwarmClient client;
     public BlockState targetBlock;
+    public Mode currentMode = Mode.IDLE;
+    private WLabel label;
 
     @Override
     public void onActivate() {
-        if (currentMode.get() == Mode.QUEEN && server == null) {
-            server = new SwarmServer();
-        } else if (currentMode.get() == Mode.SLAVE && client == null) {
-            client = new SwarmClient();
-        }
+        currentMode = Mode.IDLE;
+        closeAllServerConnections();
     }
 
     @Override
     public void onDeactivate() {
+        currentMode = Mode.IDLE;
         closeAllServerConnections();
     }
 
     @Override
     public WWidget getWidget() {
         WTable table = new WTable();
+        label = new WLabel("");
+        table.add(label);
+        setLabel();
         WButton runServer = new WButton("Run Server(Q)");
         runServer.action = this::runServer;
         table.add(runServer);
@@ -97,7 +96,8 @@ public class Swarm extends ToggleModule {
         reset.action = () -> {
             Chat.info("Swarm: Closing all connections.");
             closeAllServerConnections();
-            currentMode.set(Mode.IDLE);
+            currentMode = Mode.IDLE;
+            setLabel();
         };
         table.add(reset);
         return table;
@@ -105,7 +105,8 @@ public class Swarm extends ToggleModule {
 
     public void runServer() {
         if (server == null) {
-            currentMode.set(Mode.QUEEN);
+            currentMode = Mode.QUEEN;
+            setLabel();
             closeAllServerConnections();
             server = new SwarmServer();
         }
@@ -113,7 +114,8 @@ public class Swarm extends ToggleModule {
 
     public void runClient() {
         if (client == null) {
-            currentMode.set(Mode.SLAVE);
+            currentMode = Mode.SLAVE;
+            setLabel();
             closeAllServerConnections();
             client = new SwarmClient();
         }
@@ -137,6 +139,11 @@ public class Swarm extends ToggleModule {
         }
     }
 
+    private void setLabel() {
+        if (currentMode != null)
+            label.setText("Current Mode: " + currentMode);
+    }
+
     @SuppressWarnings("unused")
     @EventHandler
     private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
@@ -145,7 +152,7 @@ public class Swarm extends ToggleModule {
     });
 
     public void idle() {
-        currentMode.set(Mode.IDLE);
+        currentMode = Mode.IDLE;
         if (ModuleManager.INSTANCE.get(InfinityMiner.class).isActive())
             ModuleManager.INSTANCE.get(InfinityMiner.class).toggle();
         if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing())
