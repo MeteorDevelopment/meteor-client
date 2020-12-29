@@ -28,13 +28,11 @@ public class SwarmScatter extends Command {
     public void scatter(int radius){
         MinecraftClient mc = MinecraftClient.getInstance();
         if(mc.player != null) {
-            Swarm swarm = ModuleManager.INSTANCE.get(Swarm.class);
             Random random = new Random();
             double a = random.nextDouble() * 2 * Math.PI;
             double r = radius * Math.sqrt(random.nextDouble());
             double x = mc.player.getX() + r * Math.cos(a);
             double z = mc.player.getZ() + r * Math.sin(a);
-            swarm.currentTaskSetting.set(Swarm.CurrentTask.BARITONE);
             if(BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing())
                 BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
             BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalXZ((int)x,(int)z));

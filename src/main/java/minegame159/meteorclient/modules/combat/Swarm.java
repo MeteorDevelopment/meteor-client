@@ -42,12 +42,6 @@ public class Swarm extends ToggleModule {
         IDLE
     }
 
-    public enum CurrentTask {
-        COMBAT,
-        BARITONE,
-        IDLE
-    }
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<String> ipAddress = sgGeneral.add(new StringSetting.Builder()
@@ -72,11 +66,7 @@ public class Swarm extends ToggleModule {
             .defaultValue(Mode.IDLE)
             .build());
 
-    public final Setting<CurrentTask> currentTaskSetting = sgModes.add(new EnumSetting.Builder<CurrentTask>()
-            .name("current-task")
-            .description("The current task. No need to change.")
-            .defaultValue(CurrentTask.IDLE)
-            .build());
+
 
 
     public SwarmServer server;
@@ -111,7 +101,6 @@ public class Swarm extends ToggleModule {
             Chat.info("Swarm: Closing all connections.");
             closeAllServerConnections();
             currentMode.set(Mode.IDLE);
-            currentTaskSetting.set(CurrentTask.IDLE);
         };
         table.add(reset);
         return table;
@@ -160,7 +149,6 @@ public class Swarm extends ToggleModule {
 
     public void idle() {
         currentMode.set(Mode.IDLE);
-        currentTaskSetting.set(CurrentTask.IDLE);
         if (ModuleManager.INSTANCE.get(InfinityMiner.class).isActive())
             ModuleManager.INSTANCE.get(InfinityMiner.class).toggle();
         if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing())
@@ -168,6 +156,7 @@ public class Swarm extends ToggleModule {
     }
 
     public void mine() {
+        Chat.info("Swarm: Starting Mining Job.");
         if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing())
             BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
         BaritoneAPI.getProvider().getPrimaryBaritone().getMineProcess().mine(targetBlock.getBlock());
