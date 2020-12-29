@@ -19,7 +19,6 @@ import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.MeteorExecutor;
 import net.minecraft.block.BlockState;
-import net.minecraft.entity.Entity;
 
 import javax.annotation.Nonnull;
 import java.io.*;
@@ -51,36 +50,37 @@ public class Swarm extends ToggleModule {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    public final Setting<Mode> currentMode = sgGeneral.add(new EnumSetting.Builder<Mode>()
-            .name("current-mode")
-            .description("The current mode to operate in.")
-            .defaultValue(Mode.IDLE)
-            .build());
-
-    public final Setting<CurrentTask> currentTaskSetting = sgGeneral.add(new EnumSetting.Builder<CurrentTask>()
-            .name("current-task")
-            .description("The current task.")
-            .defaultValue(CurrentTask.IDLE)
-            .build());
-
     private final Setting<String> ipAddress = sgGeneral.add(new StringSetting.Builder()
             .name("ip-address")
-            .description("The server's IP Address.")
+            .description("Ip address of the Queen.")
             .defaultValue("localhost")
             .build());
 
     private final Setting<Integer> serverPort = sgGeneral.add(new IntSetting.Builder()
             .name("Port")
-            .description("The port for which to run the server on.")
+            .description("The port used for connections.")
             .defaultValue(7777)
             .sliderMin(1)
             .sliderMax(65535)
             .build());
 
+    private final SettingGroup sgModes = settings.createGroup("Modes");
+
+    public final Setting<Mode> currentMode = sgModes.add(new EnumSetting.Builder<Mode>()
+            .name("current-mode")
+            .description("The current mode to operate in. No need to change.")
+            .defaultValue(Mode.IDLE)
+            .build());
+
+    public final Setting<CurrentTask> currentTaskSetting = sgModes.add(new EnumSetting.Builder<CurrentTask>()
+            .name("current-task")
+            .description("The current task. No need to change.")
+            .defaultValue(CurrentTask.IDLE)
+            .build());
+
 
     public SwarmServer server;
     public SwarmClient client;
-    public Entity targetEntity;
     public BlockState targetBlock;
 
     @Override
@@ -95,7 +95,6 @@ public class Swarm extends ToggleModule {
     @Override
     public void onDeactivate() {
         closeAllServerConnections();
-        resetTarget();
     }
 
     @Override
@@ -117,16 +116,20 @@ public class Swarm extends ToggleModule {
         return table;
     }
 
-    private void runServer() {
+    public void runServer() {
         currentMode.set(Mode.QUEEN);
         closeAllServerConnections();
-        startServer();
+        if (server == null) {
+            server = new SwarmServer();
+        }
     }
 
-    private void runClient() {
+    public void runClient() {
         currentMode.set(Mode.SLAVE);
         closeAllServerConnections();
-        startClient();
+        if (client == null) {
+            client = new SwarmClient();
+        }
     }
 
     public void closeAllServerConnections() {
@@ -147,16 +150,12 @@ public class Swarm extends ToggleModule {
         }
     }
 
-
     @SuppressWarnings("unused")
     private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
         if (targetBlock != null)
             mine();
     });
 
-    public void resetTarget() {
-        targetEntity = null;
-    }
 
     public void idle() {
         currentMode.set(Mode.IDLE);
@@ -165,20 +164,6 @@ public class Swarm extends ToggleModule {
             ModuleManager.INSTANCE.get(InfinityMiner.class).toggle();
         if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing())
             BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
-
-        resetTarget();
-    }
-
-    public void startClient() {
-        if (client == null) {
-            client = new SwarmClient();
-        }
-    }
-
-    public void startServer() {
-        if (server == null) {
-            server = new SwarmServer();
-        }
     }
 
     public void mine() {
