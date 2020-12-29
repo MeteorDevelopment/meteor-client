@@ -25,10 +25,9 @@ public class SwarmMine extends Command {
                             try {
                                 Swarm swarm = ModuleManager.INSTANCE.get(Swarm.class);
                                 if (swarm.isActive()) {
-                                    if (swarm.currentMode.get() == Swarm.Mode.QUEEN && swarm.server != null)
+                                    if (swarm.currentMode == Swarm.Mode.QUEEN && swarm.server != null)
                                         swarm.server.sendMessage(context.getInput());
-                                    if (swarm.currentMode.get() != Swarm.Mode.QUEEN) {
-                                        swarm.currentTaskSetting.set(Swarm.CurrentTask.BARITONE);
+                                    if (swarm.currentMode != Swarm.Mode.QUEEN) {
                                         swarm.targetBlock = context.getArgument("block",BlockStateArgument.class).getBlockState();
                                     } else Chat.info("Null block");
                                 }

@@ -8,24 +8,24 @@ import net.minecraft.command.CommandSource;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
-public class SwarmRelease extends Command {
+public class SwarmQueen extends Command {
 
-    public SwarmRelease() {
-        super("s", "(highlight)release(default) - Release your bots.");
+    public SwarmQueen() {
+        super("s", "(highlight)queen (default)- Start a new swarm as the queen.");
     }
+
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
-        builder.then(literal("release").executes(context -> {
+        builder.then(literal("queen").executes(context -> {
                     Swarm swarm = ModuleManager.INSTANCE.get(Swarm.class);
                     if (swarm.isActive()) {
-                        if (swarm.currentMode == Swarm.Mode.QUEEN && swarm.server != null) {
-                            swarm.server.sendMessage("s stop");
-                            swarm.server.closeAllClients();
-                        }
+                        if (swarm.server == null)
+                            swarm.runServer();
                     }
                     return SINGLE_SUCCESS;
                 })
+
         );
     }
 }

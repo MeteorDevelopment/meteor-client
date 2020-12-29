@@ -8,16 +8,21 @@ import minegame159.meteorclient.commands.CommandManager;
 import minegame159.meteorclient.events.game.GameJoinedEvent;
 import minegame159.meteorclient.events.game.GameLeftEvent;
 import minegame159.meteorclient.events.world.PostTickEvent;
+import minegame159.meteorclient.gui.widgets.WButton;
+import minegame159.meteorclient.gui.widgets.WLabel;
+import minegame159.meteorclient.gui.widgets.WTable;
 import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.modules.player.InfinityMiner;
-import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.settings.IntSetting;
+import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.settings.StringSetting;
 import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.MeteorExecutor;
 import net.minecraft.block.BlockState;
-import net.minecraft.entity.Entity;
 
 import javax.annotation.Nonnull;
 import java.io.*;
@@ -41,53 +46,17 @@ public class Swarm extends ToggleModule {
         IDLE
     }
 
-    public enum CurrentTask {
-        COMBAT,
-        BARITONE,
-        IDLE
-    }
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-
-    public final Setting<Mode> currentMode = sgGeneral.add(new EnumSetting.Builder<Mode>()
-            .name("current-mode")
-            .description("The current mode to operate in.")
-            .defaultValue(Mode.IDLE)
-            .onChanged(mode -> {
-                try {
-                    if (this.isActive()) {
-                        if (mode == Mode.QUEEN) {
-                            closeAllServerConnections();
-                            startServer();
-                        } else if (mode == Mode.SLAVE) {
-                            closeAllServerConnections();
-                            startClient();
-                        } else if (mode == Mode.IDLE) {
-                            resetTarget();
-                            BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
-                        }
-
-                    }
-                } catch (Exception ignored) {
-                }
-            })
-            .build());
-
-    public final Setting<CurrentTask> currentTaskSetting = sgGeneral.add(new EnumSetting.Builder<CurrentTask>()
-            .name("current-task")
-            .description("The current task.")
-            .defaultValue(CurrentTask.IDLE)
-            .build());
 
     private final Setting<String> ipAddress = sgGeneral.add(new StringSetting.Builder()
             .name("ip-address")
-            .description("The server's IP Address.")
+            .description("Ip address of the Queen.")
             .defaultValue("localhost")
             .build());
 
     private final Setting<Integer> serverPort = sgGeneral.add(new IntSetting.Builder()
             .name("Port")
-            .description("The port for which to run the server on.")
+            .description("The port used for connections.")
             .defaultValue(7777)
             .sliderMin(1)
             .sliderMax(65535)
@@ -95,28 +64,61 @@ public class Swarm extends ToggleModule {
 
     public SwarmServer server;
     public SwarmClient client;
-    public Entity targetEntity;
     public BlockState targetBlock;
+    public Mode currentMode = Mode.IDLE;
+    private WLabel label;
 
     @Override
     public void onActivate() {
-        if (currentMode.get() == Mode.QUEEN && server == null) {
-            server = new SwarmServer();
-        } else if (currentMode.get() == Mode.SLAVE && client == null) {
-            client = new SwarmClient();
-        }
+        currentMode = Mode.IDLE;
+        closeAllServerConnections();
     }
 
     @Override
     public void onDeactivate() {
+        currentMode = Mode.IDLE;
         closeAllServerConnections();
-        resetTarget();
     }
 
     @Override
     public WWidget getWidget() {
+        WTable table = new WTable();
+        label = new WLabel("");
+        table.add(label);
+        setLabel();
+        WButton runServer = new WButton("Run Server(Q)");
+        runServer.action = this::runServer;
+        table.add(runServer);
+        WButton connect = new WButton("Connect(S)");
+        connect.action = this::runClient;
+        table.add(connect);
+        WButton reset = new WButton("Reset");
+        reset.action = () -> {
+            Chat.info("Swarm: Closing all connections.");
+            closeAllServerConnections();
+            currentMode = Mode.IDLE;
+            setLabel();
+        };
+        table.add(reset);
+        return table;
+    }
 
-        return null;
+    public void runServer() {
+        if (server == null) {
+            currentMode = Mode.QUEEN;
+            setLabel();
+            closeAllServerConnections();
+            server = new SwarmServer();
+        }
+    }
+
+    public void runClient() {
+        if (client == null) {
+            currentMode = Mode.SLAVE;
+            setLabel();
+            closeAllServerConnections();
+            client = new SwarmClient();
+        }
     }
 
     public void closeAllServerConnections() {
@@ -137,45 +139,33 @@ public class Swarm extends ToggleModule {
         }
     }
 
+    private void setLabel() {
+        if (currentMode != null)
+            label.setText("Current Mode: " + currentMode);
+    }
 
     @SuppressWarnings("unused")
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> mine());
-
-    public void resetTarget() {
-        targetEntity = null;
-    }
+    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+        if (targetBlock != null)
+            mine();
+    });
 
     public void idle() {
-        currentMode.set(Mode.IDLE);
-        currentTaskSetting.set(CurrentTask.IDLE);
+        currentMode = Mode.IDLE;
         if (ModuleManager.INSTANCE.get(InfinityMiner.class).isActive())
             ModuleManager.INSTANCE.get(InfinityMiner.class).toggle();
         if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing())
             BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
-
-        resetTarget();
-    }
-
-    public void startClient() {
-        if (client == null) {
-            client = new SwarmClient();
-        }
-    }
-
-    public void startServer() {
-        if (server == null) {
-            server = new SwarmServer();
-        }
     }
 
     public void mine() {
-        if (targetBlock != null) {
-            if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing())
-                BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
-            BaritoneAPI.getProvider().getPrimaryBaritone().getMineProcess().mine(targetBlock.getBlock());
-            targetBlock = null;
-        }
+        Chat.info("Swarm: Starting Mining Job.");
+        if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing())
+            BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
+        BaritoneAPI.getProvider().getPrimaryBaritone().getMineProcess().mine(targetBlock.getBlock());
+        targetBlock = null;
+
     }
 
     public class SwarmClient extends Thread {

@@ -25,9 +25,9 @@ public class SwarmGoto extends Command {
                                     int z = context.getArgument("z", Integer.class);
                                     Swarm swarm = ModuleManager.INSTANCE.get(Swarm.class);
                                     if (swarm.isActive()) {
-                                        if (swarm.currentMode.get() == Swarm.Mode.QUEEN && swarm.server != null) {
+                                        if (swarm.currentMode == Swarm.Mode.QUEEN && swarm.server != null) {
                                             swarm.server.sendMessage(context.getInput());
-                                        } else if (swarm.currentMode.get() != Swarm.Mode.QUEEN) {
+                                        } else if (swarm.currentMode != Swarm.Mode.QUEEN) {
                                             BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalXZ(x, z));
                                         }
                                     }

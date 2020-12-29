@@ -22,11 +22,9 @@ public class SwarmCloseConnections extends Command {
                         Swarm swarm = ModuleManager.INSTANCE.get(Swarm.class);
                         if(swarm.isActive()) {
                             swarm.closeAllServerConnections();
-                            swarm.currentMode.set(Swarm.Mode.IDLE);
-                            swarm.currentTaskSetting.set(Swarm.CurrentTask.IDLE);
+                            swarm.currentMode = Swarm.Mode.IDLE;
                             if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing())
                                 BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
-                            swarm.resetTarget();
                             if (ModuleManager.INSTANCE.get(Swarm.class).isActive())
                                 ModuleManager.INSTANCE.get(Swarm.class).toggle();
                         }

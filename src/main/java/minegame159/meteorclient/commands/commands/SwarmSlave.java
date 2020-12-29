@@ -20,8 +20,8 @@ public class SwarmSlave extends Command {
         builder.then(literal("slave").executes(context -> {
                     Swarm swarm = ModuleManager.INSTANCE.get(Swarm.class);
                     if (swarm.isActive()) {
-                        if (swarm.currentMode.get() != Swarm.Mode.QUEEN && swarm.client == null)
-                            swarm.startClient();
+                        if (swarm.client == null)
+                            swarm.runClient();
                     }
                     return SINGLE_SUCCESS;
                 })
