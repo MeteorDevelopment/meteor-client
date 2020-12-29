@@ -32,7 +32,7 @@ public class ClickTP extends ToggleModule {
     );
 
     public ClickTP() {
-        super(Category.Movement, "click-tP", "Teleports you to the block you click on.");
+        super(Category.Movement, "click-tp", "Teleports you to the block you click on.");
     }
 
     @EventHandler
