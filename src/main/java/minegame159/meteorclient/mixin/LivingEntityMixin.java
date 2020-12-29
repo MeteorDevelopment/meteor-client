@@ -10,6 +10,7 @@ import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.events.entity.player.CanWalkOnFluidEvent;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.movement.AntiLevitation;
+import minegame159.meteorclient.modules.render.NoRender;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -18,11 +19,13 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.fluid.Fluid;
+import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(LivingEntity.class)
@@ -59,5 +62,11 @@ public abstract class LivingEntityMixin extends Entity {
             return !ModuleManager.INSTANCE.get(AntiLevitation.class).isApplyGravity();
         }
         return self.hasNoGravity();
+    }
+
+    @Inject(method = "spawnItemParticles", at = @At("HEAD"), cancellable = true)
+    private void spawnItemParticles(ItemStack stack, int count, CallbackInfo info) {
+        NoRender noRender = ModuleManager.INSTANCE.get(NoRender.class);
+        if (noRender.noEatParticles() && stack.isFood()) info.cancel();
     }
 }

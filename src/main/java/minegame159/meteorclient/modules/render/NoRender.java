@@ -14,13 +14,6 @@ import minegame159.meteorclient.settings.SettingGroup;
 public class NoRender extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<Boolean> noBubbles = sgGeneral.add(new BoolSetting.Builder()
-            .name("no-bubbles")
-            .description("Disables the rendering of bubbles in water.")
-            .defaultValue(true)
-            .build()
-    );
-
     private final Setting<Boolean> noHurtCam = sgGeneral.add(new BoolSetting.Builder()
             .name("no-hurt-cam")
             .description("Disables the hurt camera effect.")
@@ -91,23 +84,9 @@ public class NoRender extends ToggleModule {
             .build()
     );
 
-    private final Setting<Boolean> noExplosion = sgGeneral.add(new BoolSetting.Builder()
-            .name("no-explosion")
-            .description("Disables all explosion particles.")
-            .defaultValue(true)
-            .build()
-    );
-
     private final Setting<Boolean> noTotemAnimation = sgGeneral.add(new BoolSetting.Builder()
             .name("no-totem-animation")
             .description("Disables the totem animation on your screen when popping a totem.")
-            .defaultValue(true)
-            .build()
-    );
-
-    private final Setting<Boolean> noTotemParitcles = sgGeneral.add(new BoolSetting.Builder()
-            .name("no-totem-particles")
-            .description("Disables all totem particles.")
             .defaultValue(true)
             .build()
     );
@@ -189,12 +168,15 @@ public class NoRender extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> noEatParticles = sgGeneral.add(new BoolSetting.Builder()
+            .name("no-eating-particles")
+            .description("Disables rendering of eating particles.")
+            .defaultValue(false)
+            .build()
+    );
+
     public NoRender() {
         super(Category.Render, "no-render", "Disables certain animations or overlays from rendering.");
-    }
-
-    public boolean noBubbles() {
-        return isActive() && noBubbles.get();
     }
 
     public boolean noHurtCam() {
@@ -237,16 +219,8 @@ public class NoRender extends ToggleModule {
         return isActive() && noFog.get();
     }
 
-    public boolean noExplosion() {
-        return isActive() && noExplosion.get();
-    }
-
     public boolean noTotemAnimation() {
         return isActive() && noTotemAnimation.get();
-    }
-
-    public boolean noTotemParticles() {
-        return isActive() && noTotemParitcles.get();
     }
 
     public boolean noArmor() {
@@ -291,5 +265,9 @@ public class NoRender extends ToggleModule {
 
     public boolean noXpOrbs() {
         return isActive() && noXpOrbs.get();
+    }
+
+    public boolean noEatParticles() {
+        return isActive() && noEatParticles.get();
     }
 }
