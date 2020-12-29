@@ -60,9 +60,9 @@ public class ESP extends ToggleModule {
             .build()
     );
 
-    public final Setting<Boolean> ignoreInvis = sgGeneral.add(new BoolSetting.Builder()
-            .name("show-invisible-entities")
-            .description("Ignores the invisibility effects of all entities.")
+    public final Setting<Boolean> showInvis = sgGeneral.add(new BoolSetting.Builder()
+            .name("show-invisible")
+            .description("Shows invisibility entities.")
             .defaultValue(true)
             .build()
     );
