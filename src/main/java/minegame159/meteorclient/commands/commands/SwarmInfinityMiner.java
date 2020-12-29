@@ -31,7 +31,7 @@ public class SwarmInfinityMiner extends Command {
         builder.then(literal("im").executes(context -> {
                     Swarm swarm = ModuleManager.INSTANCE.get(Swarm.class);
                     if (swarm.isActive()) {
-                        if (swarm.currentMode.get() == Swarm.Mode.QUEEN) {
+                        if (swarm.currentMode == Swarm.Mode.QUEEN) {
                             swarm.server.sendMessage(context.getInput());
                         } else {
                             runInfinityMiner();
@@ -41,7 +41,7 @@ public class SwarmInfinityMiner extends Command {
                 }).then(argument("target", BlockStateArgumentType.blockState()).executes(context -> {
                     Swarm swarm = ModuleManager.INSTANCE.get(Swarm.class);
                     if (swarm.isActive()) {
-                        if (swarm.currentMode.get() == Swarm.Mode.QUEEN) {
+                        if (swarm.currentMode == Swarm.Mode.QUEEN) {
                             swarm.server.sendMessage(context.getInput());
                         } else {
                             ModuleManager.INSTANCE.get(InfinityMiner.class).targetBlock.set(context.getArgument("target", BlockStateArgument.class).getBlockState().getBlock());
@@ -52,7 +52,7 @@ public class SwarmInfinityMiner extends Command {
                 }).then(argument("repair", BlockStateArgumentType.blockState()).executes(context -> {
                     Swarm swarm = ModuleManager.INSTANCE.get(Swarm.class);
                     if (swarm.isActive()) {
-                        if (swarm.currentMode.get() == Swarm.Mode.QUEEN) {
+                        if (swarm.currentMode == Swarm.Mode.QUEEN) {
                             swarm.server.sendMessage(context.getInput());
                         } else {
                             ModuleManager.INSTANCE.get(InfinityMiner.class).targetBlock.set(context.getArgument("target", BlockStateArgument.class).getBlockState().getBlock());
@@ -65,7 +65,7 @@ public class SwarmInfinityMiner extends Command {
                         .then(literal("logout").then(argument("autologout", BoolArgumentType.bool()).executes(context -> {
                             Swarm swarm = ModuleManager.INSTANCE.get(Swarm.class);
                             if (swarm.isActive()) {
-                                if (swarm.currentMode.get() == Swarm.Mode.QUEEN) {
+                                if (swarm.currentMode == Swarm.Mode.QUEEN) {
                                     swarm.server.sendMessage(context.getInput());
                                 } else {
                                     boolean bool = context.getArgument("autologout", Boolean.class);
@@ -78,7 +78,7 @@ public class SwarmInfinityMiner extends Command {
                         .then(literal("walkhome").then(argument("walkhome", BoolArgumentType.bool()).executes(context -> {
                             Swarm swarm = ModuleManager.INSTANCE.get(Swarm.class);
                             if (swarm.isActive()) {
-                                if (swarm.currentMode.get() == Swarm.Mode.QUEEN) {
+                                if (swarm.currentMode == Swarm.Mode.QUEEN) {
                                     swarm.server.sendMessage(context.getInput());
                                 } else {
                                     boolean bool = context.getArgument("walkhome", Boolean.class);
