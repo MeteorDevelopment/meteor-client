@@ -325,6 +325,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new AntiAfk());
         addModule(new NoInteract());
         addModule(new NoRotate());
+        addModule(new Trail());
     }
 
     private void initMovement() {
