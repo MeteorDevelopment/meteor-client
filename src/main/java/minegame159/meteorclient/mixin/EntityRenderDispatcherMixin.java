@@ -36,17 +36,28 @@ public class EntityRenderDispatcherMixin {
             return;
         }
 
-        if (ModuleManager.INSTANCE.get(Chams.class).shouldRender(entity)) {
-            GL11.glEnable(GL11.GL_POLYGON_OFFSET_FILL);
-            GL11.glPolygonOffset(1.0f, -1000000.0f);
+        Chams chams = ModuleManager.INSTANCE.get(Chams.class);
+
+        if (!chams.shouldRender(entity) || !chams.isActive()) return;
+
+        if (chams.throughWalls.get()) {
+//            GL11.glEnable(GL11.GL_POLYGON_OFFSET_FILL);
+//            GL11.glPolygonOffset(1.0f, -1000000.0f);
+            GL11.glDepthRange(0.0, 0.01);
         }
     }
 
     @Inject(method = "render", at = @At("TAIL"), cancellable = true)
     private <E extends Entity> void onRenderTail(E entity, double x, double y, double z, float yaw, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, CallbackInfo info) {
-        if (ModuleManager.INSTANCE.get(Chams.class).shouldRender(entity)) {
-            GL11.glPolygonOffset(1.0f, 1000000.0f);
-            GL11.glDisable(GL11.GL_POLYGON_OFFSET_FILL);
+
+        Chams chams = ModuleManager.INSTANCE.get(Chams.class);
+
+        if (!chams.shouldRender(entity) || !chams.isActive()) return;
+
+        if (chams.throughWalls.get()) {
+//            GL11.glEnable(GL11.GL_POLYGON_OFFSET_FILL);
+//            GL11.glPolygonOffset(1.0f, -1000000.0f);
+            GL11.glDepthRange(0.0, 1.0);
         }
     }
 }
