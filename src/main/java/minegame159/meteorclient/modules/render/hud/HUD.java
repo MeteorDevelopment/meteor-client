@@ -117,7 +117,6 @@ public class HUD extends ToggleModule {
             .description("Scale of player model.")
             .defaultValue(2)
             .min(1)
-            .max(4)
             .sliderMin(1)
             .sliderMax(4)
             .build()
