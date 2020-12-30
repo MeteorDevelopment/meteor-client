@@ -8,8 +8,6 @@ package minegame159.meteorclient.modules.combat;
 import baritone.api.BaritoneAPI;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.packets.PacketSentEvent;
-import minegame159.meteorclient.events.packets.SendPacketEvent;
 import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.events.world.PreTickEvent;
 import minegame159.meteorclient.friends.FriendManager;
@@ -195,7 +193,7 @@ public class KillAura extends ToggleModule {
         entity = null;
     });
 
-    @EventHandler
+    /*@EventHandler
     private final Listener<SendPacketEvent> onSendPacket = new Listener<>(event -> {
         if (movePacket != null) return;
 
@@ -217,9 +215,9 @@ public class KillAura extends ToggleModule {
 
             rotatePacket();
         }
-    });
+    });*/
 
-    @EventHandler
+    /*@EventHandler
     private final Listener<PacketSentEvent> onPacketSent = new Listener<>(event -> {
         if (event.packet == movePacket) attack();
     });
@@ -233,12 +231,19 @@ public class KillAura extends ToggleModule {
                     mc.player.isOnGround()
             ));
         }
-    });
+    });*/
 
-    private void rotatePacket() {
+    @EventHandler
+    private final Listener<PostTickEvent> onPostTick = new Listener<>(event -> {
         findEntity();
         if (entity == null) return;
 
+        movePacket = new PlayerMoveC2SPacket.LookOnly(0, 0, mc.player.isOnGround());
+        rotatePacket();
+        attack();
+    });
+
+    private void rotatePacket() {
         ((IVec3d) vec1).set(mc.player.getX(), mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()), mc.player.getZ());
         ((IVec3d) vec2).set(entity.getX(), entity.getY() + entity.getHeight() / 2, entity.getZ());
 
