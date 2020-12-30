@@ -45,10 +45,13 @@ public abstract class ClientPlayerEntityMixin {
             SendMessageEvent event = EventStore.sendMessageEvent(msg);
             MeteorClient.EVENT_BUS.post(event);
 
-            ignoreChatMessage = true;
-            sendChatMessage(event.msg);
-            ignoreChatMessage = false;
+            if (!event.isCancelled()) {
+                ignoreChatMessage = true;
+                sendChatMessage(event.msg);
+                ignoreChatMessage = false;
+            }
 
+            event.setCancelled(false);
             info.cancel();
             return;
         }
