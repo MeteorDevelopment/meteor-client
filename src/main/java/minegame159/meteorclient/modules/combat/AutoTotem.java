@@ -104,7 +104,8 @@ public class AutoTotem extends ToggleModule {
 
         if (getTotemCount(result) > 0 && (mc.player.getOffHandStack().isEmpty()
                 || (mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING && !smart.get())
-                || (getHealth() < health.get() || ((mc.player.getHealth() + mc.player.getAbsorptionAmount()) - getHealthReduction()) < health.get()))) {
+                || ((getHealth() < health.get() || ((mc.player.getHealth() + mc.player.getAbsorptionAmount()) - getHealthReduction()) < health.get())
+                && mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING))) {
             locked = true;
             moveTotem(result);
         } else if(smart.get() && ((mc.player.getHealth() + mc.player.getAbsorptionAmount()) > health.get()
