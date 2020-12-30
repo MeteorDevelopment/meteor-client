@@ -112,6 +112,31 @@ public class HUD extends ToggleModule {
     );
 
     // Player Model
+    private final Setting<Double> playerModelScale = sgPlayerModel.add(new DoubleSetting.Builder()
+            .name("player-model-scale")
+            .description("Scale of player model.")
+            .defaultValue(2)
+            .min(1)
+            .max(4)
+            .sliderMin(1)
+            .sliderMax(4)
+            .build()
+    );
+
+    private final Setting<Boolean> copyYaw = sgPlayerModel.add(new BoolSetting.Builder()
+            .name("copy-yaw")
+            .description("Makes the player model's yaw equal to yours.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Boolean> copyPitch = sgPlayerModel.add(new BoolSetting.Builder()
+            .name("copy-pitch")
+            .description("Makes the player model's pitch equal to yours.")
+            .defaultValue(true)
+            .build()
+    );
+
     private final Setting<Boolean> playerModelBackground = sgPlayerModel.add(new BoolSetting.Builder()
             .name("player-model-background")
             .description("Displays a background behind the player model.")
@@ -123,17 +148,6 @@ public class HUD extends ToggleModule {
             .name("player-model-background-color")
             .description("Color of background.")
             .defaultValue(new Color(0, 0, 0, 64))
-            .build()
-    );
-
-    private final Setting<Double> playerModelScale = sgPlayerModel.add(new DoubleSetting.Builder()
-            .name("player-model-scale")
-            .description("Scale of player model.")
-            .defaultValue(2)
-            .min(1)
-            .max(4)
-            .sliderMin(1)
-            .sliderMax(4)
             .build()
     );
 
@@ -361,15 +375,22 @@ public class HUD extends ToggleModule {
         return invViewerScale.get();
     }
 
+    public double playerModelScale() {
+        return playerModelScale.get();
+    }
+    public boolean playerModelCopyYaw() {
+        return copyYaw.get();
+    }
+    public boolean playerModelCopyPitch() {
+        return copyPitch.get();
+    }
     public boolean playerModelBackground() {
         return playerModelBackground.get();
     }
     public Color playerModelColor() {
         return playerModelColor.get();
     }
-    public double playerModelScale() {
-        return playerModelScale.get();
-    }
+
 
     public boolean armorFlip() {
         return armorFlip.get();
