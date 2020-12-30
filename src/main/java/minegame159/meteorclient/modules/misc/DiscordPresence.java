@@ -59,7 +59,11 @@ public class DiscordPresence extends ToggleModule {
 
         rpc.startTimestamp = System.currentTimeMillis() / 1000L;
         rpc.largeImageKey = "meteor_client";
-        rpc.largeImageText = "Meteor Client v" + Config.INSTANCE.version;
+
+        String largeText = "Meteor Client " + Config.INSTANCE.version.getOriginalString();
+        if (!Config.INSTANCE.devBuild.isEmpty()) largeText += " Dev Build: " + Config.INSTANCE.devBuild;
+
+        rpc.largeImageText = largeText;
         rpc.details = getLine(line1);
         rpc.state = getLine(line2);
         currentSmallImage = SmallImage.MineGame;

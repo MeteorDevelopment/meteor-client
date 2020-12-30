@@ -78,7 +78,7 @@ public class Criticals extends ToggleModule {
             if (sendTimer <= 0) {
                 sendPackets = false;
 
-                if (attackPacket == null) return;
+                if (attackPacket == null || swingPacket == null) return;
                 mc.getNetworkHandler().sendPacket(attackPacket);
                 mc.getNetworkHandler().sendPacket(swingPacket);
 
