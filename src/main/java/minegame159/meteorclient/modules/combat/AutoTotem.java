@@ -7,6 +7,7 @@ package minegame159.meteorclient.modules.combat;
 
 //Updated by squidoodly 24/04/2020
 //Updated by squidoodly 19/06/2020
+//Updated by squidoodly 30/12/2020
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
@@ -92,25 +93,22 @@ public class AutoTotem extends ToggleModule {
 
         InvUtils.FindItemResult result = InvUtils.findItemWithCount(Items.TOTEM_OF_UNDYING);
 
-        if (getTotemCount(result) <= 0 && fallback.get()) {
-            if (!ModuleManager.INSTANCE.get(OffhandExtra.class).isActive())
+        if (getTotemCount(result) <= 0) {
+            if (!ModuleManager.INSTANCE.get(OffhandExtra.class).isActive() && fallback.get()) {
                 ModuleManager.INSTANCE.get(OffhandExtra.class).toggle();
+            }
 
             ModuleManager.INSTANCE.get(OffhandExtra.class).setTotems(true);
-            return;
-        } else if (getTotemCount(result) > 0 && ModuleManager.INSTANCE.get(OffhandExtra.class).isActive()) {
+        } else if (getTotemCount(result) > 0) {
             ModuleManager.INSTANCE.get(OffhandExtra.class).setTotems(false);
-        }
 
-        if (getTotemCount(result) > 0 && (mc.player.getOffHandStack().isEmpty()
-                || (mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING && !smart.get())
-                || ((getHealth() < health.get() || ((mc.player.getHealth() + mc.player.getAbsorptionAmount()) - getHealthReduction()) < health.get())
-                && mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING))) {
-            locked = true;
-            moveTotem(result);
-        } else if(smart.get() && ((mc.player.getHealth() + mc.player.getAbsorptionAmount()) > health.get()
-                && (((mc.player.getHealth() + mc.player.getAbsorptionAmount()) - getHealthReduction()) > health.get()))){
-            locked = false;
+            if (mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING && (!smart.get()
+                    || isLow())) {
+                locked = true;
+                moveTotem(result);
+            } else if (smart.get() && !isLow()) {
+                locked = false;
+            }
         }
 
         totemCountString = Integer.toString(getTotemCount(result));
@@ -177,6 +175,10 @@ public class AutoTotem extends ToggleModule {
 
     public boolean getLocked(){
         return locked;
+    }
+
+    private boolean isLow(){
+        return getHealth() < health.get() || (getHealth() - getHealthReduction()) < health.get();
     }
 
 }
