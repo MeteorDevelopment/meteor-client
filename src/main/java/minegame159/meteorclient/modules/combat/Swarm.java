@@ -9,7 +9,10 @@ import minegame159.meteorclient.events.game.GameJoinedEvent;
 import minegame159.meteorclient.events.game.GameLeftEvent;
 import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.gui.screens.WindowScreen;
-import minegame159.meteorclient.gui.widgets.*;
+import minegame159.meteorclient.gui.widgets.WButton;
+import minegame159.meteorclient.gui.widgets.WLabel;
+import minegame159.meteorclient.gui.widgets.WTable;
+import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
@@ -27,6 +30,9 @@ import javax.annotation.Nonnull;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 
 /**
@@ -383,18 +389,9 @@ public class Swarm extends ToggleModule {
         this.toggle();
     });
 
-
-    enum currentScreen {
-        INTRO,
-        CONFIG,
-        QUEEN,
-        SLAVE
-    }
-
     private class SwarmHelpScreen extends WindowScreen {
 
-        private currentScreen currentScreen = Swarm.currentScreen.CONFIG;
-        private final WLabel textBox;
+        private final WTable textTable;
         private final WButton introButton;
         private final WButton ipConfigButton;
         private final WButton queenButton;
@@ -402,30 +399,28 @@ public class Swarm extends ToggleModule {
 
         public SwarmHelpScreen() {
             super("Swarm Help", true);
-            textBox = new WLabel(swarmGuideIntro);
-            textBox.shadow = true;
-            textBox.maxWidth = textBox.maxWidth * .75;
+            textTable = new WTable();
             introButton = new WButton("(1)Introduction");
             introButton.action = () -> {
-                currentScreen = Swarm.currentScreen.INTRO;
+                buildTextTable(swarmGuideIntro);
                 initWidgets();
             };
             ipConfigButton = new WButton("(2)Configuration");
             ipConfigButton.action = () -> {
-                currentScreen = Swarm.currentScreen.CONFIG;
+                buildTextTable(swarmGuideConfig);
                 initWidgets();
             };
             queenButton = new WButton("(3)Queen");
             queenButton.action = () -> {
-                currentScreen = Swarm.currentScreen.QUEEN;
+                buildTextTable(swarmGuideQueen);
                 initWidgets();
             };
             slaveButton = new WButton("(4)Slave");
             slaveButton.action = () -> {
-                currentScreen = Swarm.currentScreen.SLAVE;
+                buildTextTable(swarmGuideSlave);
                 initWidgets();
             };
-
+            buildTextTable(swarmGuideIntro);
             initWidgets();
         }
 
@@ -438,21 +433,52 @@ public class Swarm extends ToggleModule {
             table.add(slaveButton);
             add(table);
             row();
-            add(textBox).getWidget();
+            add(textTable);
             row();
+        }
+
+        private void buildTextTable(List<String> text) {
+            textTable.clear();
+            for(String s : text){
+                textTable.add(new WLabel(s));
+                textTable.row();
+            }
         }
 
 
     }
 
-    private final static String swarmGuideIntro = "Swarm at its heart is a command tunnel which allows a controlling account, referred to" +
-            " as the queen account, to control other accounts by means of a background server. By default, it" +
-            " is configured to work with multiple instances of Minecraft running on the same computer," +
-            " however with some additional configuration it will work across your local network. For" +
-            " functionality over the broader internet you will need to perform a port forward for your queen" +
-            " instance.  All swarm commands are proceded by \\“.s\\”. ";
-    private final static String swarmGuideConfig = "Bacon";
-    private final static String swarmGuideQueen = "";
-    private final static String swarmGuideSlave = "";
+    private final static List<String> swarmGuideIntro = Arrays.asList(
+            "     Swarm at its heart is a command tunnel which allows a controlling account, referred to",
+            " as the queen account, to control other accounts by means of a background server. By default, it",
+            " is configured to work with multiple instances of Minecraft running on the same computer,",
+            " however with some additional configuration it will work across your local network. For",
+            " functionality over the broader internet you will need to perform a port forward for your queen",
+            " instance.  All swarm commands are proceeded by '.s'.");
+    private final static List<String> swarmGuideConfig = Arrays.asList(
+            "LocalHost Connections:",
+            "If the Queen and Slave accounts are all being run on the same computer, there is no need to change anything",
+            "here if the configured port is not being used for anything else.",
+            "Local Connections:",
+            "If the Queen and Slave accounts are not on the same computer, but on the same wifi/ethernet network",
+            "you will need to change the ip-address on each Slave client to the ipv4/6 address of the computer the",
+            "queen instance is running on. To find your ipv4 address on windows, open cmd and enter the command ipconfig.",
+            "Broad-Internet Connections:",
+            "If you are attempting to make a connection over the broader internet a port forward will be required on the",
+            "queen account. I will not cover how to perform a port forward, look it up. You will need administrator access",
+            "to your router. Route all traffic through your configured port to the ipv4 address of the computer which is",
+            "hosting the queen account. After you have successfully port-forwarded on the queen instance, change the ip",
+            "address of the slave accounts to the public-ip address of the queen account. To find your public-ip address",
+            "just google “what is my ip”. NEVER SHARE YOUR PUBLIC IP WITH ANYONE YOU DO NOT TRUST. Assuming you setup",
+            "everything correctly, you may now proceed as usual."
+    );
+    private final static List<String> swarmGuideQueen = Arrays.asList(
+            "Pick an instance of Minecraft to be your queen account. Ensure the swarm module is enabled. Then click the",
+            "button labeled “Run Server(Q)” under the Swarm config menu. You may also enter the command “.s queen.");
+    private final static List<String> swarmGuideSlave = Arrays.asList(
+            "For each slave account, assuming you correctly configured the ip and port",
+            "in Step 1 simply press the button labeled “Connect (S)”, or enter the command “.s slave”. "
+
+    );
 
 }
