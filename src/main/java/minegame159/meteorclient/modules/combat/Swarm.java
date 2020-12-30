@@ -8,10 +8,8 @@ import minegame159.meteorclient.commands.CommandManager;
 import minegame159.meteorclient.events.game.GameJoinedEvent;
 import minegame159.meteorclient.events.game.GameLeftEvent;
 import minegame159.meteorclient.events.world.PostTickEvent;
-import minegame159.meteorclient.gui.widgets.WButton;
-import minegame159.meteorclient.gui.widgets.WLabel;
-import minegame159.meteorclient.gui.widgets.WTable;
-import minegame159.meteorclient.gui.widgets.WWidget;
+import minegame159.meteorclient.gui.screens.WindowScreen;
+import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
@@ -23,6 +21,7 @@ import minegame159.meteorclient.settings.StringSetting;
 import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.MeteorExecutor;
 import net.minecraft.block.BlockState;
+import net.minecraft.client.MinecraftClient;
 
 import javax.annotation.Nonnull;
 import java.io.*;
@@ -86,12 +85,14 @@ public class Swarm extends ToggleModule {
         label = new WLabel("");
         table.add(label);
         setLabel();
+        table.row();
+        WTable table2 = new WTable();
         WButton runServer = new WButton("Run Server(Q)");
         runServer.action = this::runServer;
-        table.add(runServer);
+        table2.add(runServer);
         WButton connect = new WButton("Connect(S)");
         connect.action = this::runClient;
-        table.add(connect);
+        table2.add(connect);
         WButton reset = new WButton("Reset");
         reset.action = () -> {
             Chat.info("Swarm: Closing all connections.");
@@ -99,7 +100,15 @@ public class Swarm extends ToggleModule {
             currentMode = Mode.IDLE;
             setLabel();
         };
-        table.add(reset);
+        table2.add(reset);
+        table.add(table2);
+        table.row();
+        WButton guide = new WButton("Guide");
+        guide.action = () -> {
+            MinecraftClient.getInstance().openScreen(new SwarmHelpScreen());
+        };
+        table.add(guide);
+        table.row();
         return table;
     }
 
@@ -373,5 +382,77 @@ public class Swarm extends ToggleModule {
         closeAllServerConnections();
         this.toggle();
     });
+
+
+    enum currentScreen {
+        INTRO,
+        CONFIG,
+        QUEEN,
+        SLAVE
+    }
+
+    private class SwarmHelpScreen extends WindowScreen {
+
+        private currentScreen currentScreen = Swarm.currentScreen.CONFIG;
+        private final WLabel textBox;
+        private final WButton introButton;
+        private final WButton ipConfigButton;
+        private final WButton queenButton;
+        private final WButton slaveButton;
+
+        public SwarmHelpScreen() {
+            super("Swarm Help", true);
+            textBox = new WLabel(swarmGuideIntro);
+            textBox.shadow = true;
+            textBox.maxWidth = textBox.maxWidth * .75;
+            introButton = new WButton("(1)Introduction");
+            introButton.action = () -> {
+                currentScreen = Swarm.currentScreen.INTRO;
+                initWidgets();
+            };
+            ipConfigButton = new WButton("(2)Configuration");
+            ipConfigButton.action = () -> {
+                currentScreen = Swarm.currentScreen.CONFIG;
+                initWidgets();
+            };
+            queenButton = new WButton("(3)Queen");
+            queenButton.action = () -> {
+                currentScreen = Swarm.currentScreen.QUEEN;
+                initWidgets();
+            };
+            slaveButton = new WButton("(4)Slave");
+            slaveButton.action = () -> {
+                currentScreen = Swarm.currentScreen.SLAVE;
+                initWidgets();
+            };
+
+            initWidgets();
+        }
+
+        private void initWidgets() {
+            clear();
+            WTable table = new WTable();
+            table.add(introButton);
+            table.add(ipConfigButton);
+            table.add(queenButton);
+            table.add(slaveButton);
+            add(table);
+            row();
+            add(textBox).getWidget();
+            row();
+        }
+
+
+    }
+
+    private final static String swarmGuideIntro = "Swarm at its heart is a command tunnel which allows a controlling account, referred to" +
+            " as the queen account, to control other accounts by means of a background server. By default, it" +
+            " is configured to work with multiple instances of Minecraft running on the same computer," +
+            " however with some additional configuration it will work across your local network. For" +
+            " functionality over the broader internet you will need to perform a port forward for your queen" +
+            " instance.  All swarm commands are proceded by \\“.s\\”. ";
+    private final static String swarmGuideConfig = "Bacon";
+    private final static String swarmGuideQueen = "";
+    private final static String swarmGuideSlave = "";
 
 }
