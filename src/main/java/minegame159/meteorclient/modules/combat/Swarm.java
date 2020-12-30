@@ -30,7 +30,6 @@ import javax.annotation.Nonnull;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -110,9 +109,7 @@ public class Swarm extends ToggleModule {
         table.add(table2);
         table.row();
         WButton guide = new WButton("Guide");
-        guide.action = () -> {
-            MinecraftClient.getInstance().openScreen(new SwarmHelpScreen());
-        };
+        guide.action = () -> MinecraftClient.getInstance().openScreen(new SwarmHelpScreen());
         table.add(guide);
         table.row();
         return table;
@@ -389,7 +386,7 @@ public class Swarm extends ToggleModule {
         this.toggle();
     });
 
-    private class SwarmHelpScreen extends WindowScreen {
+    private static class SwarmHelpScreen extends WindowScreen {
 
         private final WTable textTable;
         private final WButton introButton;
@@ -446,6 +443,7 @@ public class Swarm extends ToggleModule {
         }
     }
 
+    //I know its ugly, I don't care.
     private final static List<String> swarmGuideIntro = Arrays.asList(
             "Welcome to Swarm!",
             "",
@@ -453,9 +451,12 @@ public class Swarm extends ToggleModule {
             "to as the queen account, to control other accounts by means of a background server.",
             "",
             "By default, Swarm is configured to work with multiple instances of Minecraft running on the",
-            "same computer however with some additional configuration it will work across your local network.",
+            "same computer however with some additional configuration it will work across your local network",
+            "or the broader internet.",
             "",
-            "All swarm commands are proceeded by '.s'.");
+            "All swarm commands are proceeded by '.s'"
+    );
+
     private final static List<String> swarmGuideConfig = Arrays.asList(
             "LocalHost Connections:",
             " If the Queen and Slave accounts are all being run on the same computer, there is no need to change anything",
@@ -472,19 +473,22 @@ public class Swarm extends ToggleModule {
             " to your router. Route all traffic through your configured port to the ipv4 address of the computer which is",
             " hosting the queen account. After you have successfully port-forwarded on the queen instance, change the ip",
             " address of the slave accounts to the public-ip address of the queen account. To find your public-ip address",
-            " just google “what is my ip”. NEVER SHARE YOUR PUBLIC IP WITH ANYONE YOU DO NOT TRUST. Assuming you setup",
+            " just google 'what is my ip'. NEVER SHARE YOUR PUBLIC IP WITH ANYONE YOU DO NOT TRUST. Assuming you setup",
             " everything correctly, you may now proceed as usual."
     );
+
     private final static List<String> swarmGuideQueen = Arrays.asList(
             "Setting up the Queen:",
             " Pick an instance of Minecraft to be your queen account.",
             " Ensure the swarm module is enabled.",
-            " Then click the, button labeled Run Server(Q) under the Swarm config menu.",
-            " You may also enter the command .s queen.");
+            " Then click the, button labeled 'Run Server(Q)' under the Swarm config menu.",
+            " You may also enter the command .s queen."
+    );
+
     private final static List<String> swarmGuideSlave = Arrays.asList(
             "Connecting your Slaves:",
             " For each slave account, assuming you correctly configured the ip and port",
-            " in Step 1 simply press the button labeled Connect (S), or enter the command .s slave."
+            " in Step 1 simply press the button labeled 'Connect (S)', or enter the command '.s slave'"
     );
 
 }
