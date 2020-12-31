@@ -10,6 +10,7 @@ import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.rendering.ShapeMode;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.render.color.Color;
+import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.render.BlockBreakingInfo;
 import net.minecraft.util.math.BlockPos;
@@ -55,31 +56,31 @@ public class BreakIndicators extends ToggleModule {
             .build()
     );
 
-    private final Setting<Color> gradientColor1Sides = sgRender.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> gradientColor1Sides = sgRender.add(new ColorSetting.Builder()
             .name("gradient-color-1-sides")
             .description("The side color for the non-broken block.")
-            .defaultValue(new Color(25, 252, 25, 25))
+            .defaultValue(new SettingColor(25, 252, 25, 25))
             .build()
     );
 
-    private final Setting<Color> gradientColor1Lines = sgRender.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> gradientColor1Lines = sgRender.add(new ColorSetting.Builder()
             .name("gradient-color-1-lines")
             .description("The line color for the non-broken block.")
-            .defaultValue(new Color(25, 252, 25, 100))
+            .defaultValue(new SettingColor(25, 252, 25, 100))
             .build()
     );
 
-    private final Setting<Color> gradientColor2Sides = sgRender.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> gradientColor2Sides = sgRender.add(new ColorSetting.Builder()
             .name("gradient-color-2-sides")
             .description("The side color for the fully-broken block.")
-            .defaultValue(new Color(255, 25, 25, 100))
+            .defaultValue(new SettingColor(255, 25, 25, 100))
             .build()
     );
 
-    private final Setting<Color> gradientColor2Lines = sgRender.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> gradientColor2Lines = sgRender.add(new ColorSetting.Builder()
             .name("gradient-color-2-lines")
             .description("The line color for the fully-broken block.")
-            .defaultValue(new Color(255, 25, 25, 100))
+            .defaultValue(new SettingColor(255, 25, 25, 100))
             .build()
     );
 

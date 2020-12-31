@@ -18,6 +18,7 @@ import minegame159.meteorclient.rendering.*;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.render.color.Color;
+import minegame159.meteorclient.utils.render.color.SettingColor;
 import minegame159.meteorclient.utils.world.Dimension;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.client.render.Camera;
@@ -61,17 +62,17 @@ public class LogoutSpots extends ToggleModule {
             .build()
     );
 
-    private final Setting<Color> sideColor = sgRender.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()
             .name("side-color")
             .description("The side color.")
-            .defaultValue(new Color(255, 0, 255, 55))
+            .defaultValue(new SettingColor(255, 0, 255, 55))
             .build()
     );
 
-    private final Setting<Color> lineColor = sgRender.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> lineColor = sgRender.add(new ColorSetting.Builder()
             .name("line-color")
             .description("The line color.")
-            .defaultValue(new Color(255, 0, 255))
+            .defaultValue(new SettingColor(255, 0, 255))
             .build()
     );
 

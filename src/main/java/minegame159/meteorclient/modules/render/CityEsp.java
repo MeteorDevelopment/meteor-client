@@ -14,7 +14,7 @@ import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.rendering.ShapeMode;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.player.CityUtils;
-import minegame159.meteorclient.utils.render.color.Color;
+import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -50,17 +50,17 @@ public class CityEsp extends ToggleModule {
             .build()
     );
 
-    private final Setting<Color> sideColor = sgRender.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()
             .name("fill-color")
             .description("The fill color the city block will render as.")
-            .defaultValue(new Color(225, 0, 0, 75))
+            .defaultValue(new SettingColor(225, 0, 0, 75))
             .build()
     );
 
-    private final Setting<Color> lineColor = sgRender.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> lineColor = sgRender.add(new ColorSetting.Builder()
             .name("outline-color")
             .description("The line color the city block will render as.")
-            .defaultValue(new Color(225, 0, 0, 255))
+            .defaultValue(new SettingColor(225, 0, 0, 255))
             .build()
     );
 

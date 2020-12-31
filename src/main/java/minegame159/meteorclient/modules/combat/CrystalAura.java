@@ -24,6 +24,7 @@ import minegame159.meteorclient.utils.player.DamageCalcUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.player.PlayerUtils;
 import minegame159.meteorclient.utils.render.color.Color;
+import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -313,17 +314,17 @@ public class CrystalAura extends ToggleModule {
             .build()
     );
 
-    private final Setting<Color> sideColor = sgRender.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()
             .name("side-color")
             .description("The side color.")
-            .defaultValue(new Color(255, 255, 255, 75))
+            .defaultValue(new SettingColor(255, 255, 255, 75))
             .build()
     );
 
-    private final Setting<Color> lineColor = sgRender.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> lineColor = sgRender.add(new ColorSetting.Builder()
             .name("line-color")
             .description("The line color.")
-            .defaultValue(new Color(255, 255, 255, 255))
+            .defaultValue(new SettingColor(255, 255, 255, 255))
             .build()
     );
 

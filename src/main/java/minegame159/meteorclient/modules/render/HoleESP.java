@@ -17,6 +17,7 @@ import minegame159.meteorclient.rendering.MeshBuilder;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.rendering.ShapeMode;
 import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.render.color.SettingColor;
 import minegame159.meteorclient.utils.misc.Pool;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.world.BlockIterator;
@@ -110,24 +111,24 @@ public class HoleESP extends ToggleModule {
             .build()
     );
 
-    private final Setting<Color> allBedrock = sgColors.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> allBedrock = sgColors.add(new ColorSetting.Builder()
             .name("all-bedrock")
             .description("All blocks are bedrock.")
-            .defaultValue(new Color(25, 225, 25))
+            .defaultValue(new SettingColor(25, 225, 25))
             .build()
     );
 
-    private final Setting<Color> someObsidian = sgColors.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> someObsidian = sgColors.add(new ColorSetting.Builder()
             .name("some-obsidian")
             .description("Some blocks are obsidian.")
-            .defaultValue(new Color(225, 145, 25))
+            .defaultValue(new SettingColor(225, 145, 25))
             .build()
     );
 
-    private final Setting<Color> allObsidian = sgColors.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> allObsidian = sgColors.add(new ColorSetting.Builder()
             .name("all-obsidian")
             .description("All blocks are obsidian.")
-            .defaultValue(new Color(225, 25, 25))
+            .defaultValue(new SettingColor(225, 25, 25))
             .build()
     );
 

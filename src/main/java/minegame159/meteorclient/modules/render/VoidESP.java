@@ -10,7 +10,7 @@ import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.rendering.ShapeMode;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
-import minegame159.meteorclient.utils.render.color.Color;
+import minegame159.meteorclient.utils.render.color.SettingColor;
 import minegame159.meteorclient.utils.world.Dimension;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
@@ -59,17 +59,17 @@ public class VoidESP extends ToggleModule {
             .build()
     );
 
-    private final Setting<Color> sideColor = sgRender.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()
             .name("fill-color")
             .description("The color that fills holes in the void.")
-            .defaultValue(new Color(225, 25, 25))
+            .defaultValue(new SettingColor(225, 25, 25))
             .build()
     );
 
-    private final Setting<Color> lineColor = sgRender.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> lineColor = sgRender.add(new ColorSetting.Builder()
             .name("line-color")
             .description("The color to draw lines of holes to the void.")
-            .defaultValue(new Color(225, 25, 255))
+            .defaultValue(new SettingColor(225, 25, 255))
             .build()
     );
 

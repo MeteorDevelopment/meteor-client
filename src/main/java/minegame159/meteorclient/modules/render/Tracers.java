@@ -16,6 +16,7 @@ import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.render.RenderUtils;
 import minegame159.meteorclient.utils.render.color.Color;
+import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.block.entity.BarrelBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.ChestBlockEntity;
@@ -67,52 +68,52 @@ public class Tracers extends ToggleModule {
 
     // Colors
 
-    private final Setting<Color> playersColor = sgColors.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> playersColor = sgColors.add(new ColorSetting.Builder()
             .name("players-colors")
             .description("The player's color.")
-            .defaultValue(new Color(205, 205, 205, 127))
+            .defaultValue(new SettingColor(205, 205, 205, 127))
             .build()
     );
 
-    private final Setting<Color> animalsColor = sgColors.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> animalsColor = sgColors.add(new ColorSetting.Builder()
             .name("animals-color")
             .description("The animal's color.")
-            .defaultValue(new Color(145, 255, 145, 127))
+            .defaultValue(new SettingColor(145, 255, 145, 127))
             .build()
     );
 
-    private final Setting<Color> waterAnimalsColor = sgColors.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> waterAnimalsColor = sgColors.add(new ColorSetting.Builder()
             .name("water-animals-color")
             .description("The water animal's color.")
-            .defaultValue(new Color(145, 145, 255, 127))
+            .defaultValue(new SettingColor(145, 145, 255, 127))
             .build()
     );
 
-    private final Setting<Color> monstersColor = sgColors.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> monstersColor = sgColors.add(new ColorSetting.Builder()
             .name("monsters-color")
             .description("The monster's color.")
-            .defaultValue(new Color(255, 145, 145, 127))
+            .defaultValue(new SettingColor(255, 145, 145, 127))
             .build()
     );
 
-    private final Setting<Color> ambientColor = sgColors.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> ambientColor = sgColors.add(new ColorSetting.Builder()
             .name("ambient-color")
             .description("The ambient color.")
-            .defaultValue(new Color(75, 75, 75, 127))
+            .defaultValue(new SettingColor(75, 75, 75, 127))
             .build()
     );
 
-    private final Setting<Color> miscColor = sgColors.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> miscColor = sgColors.add(new ColorSetting.Builder()
             .name("misc-color")
             .description("The misc color.")
-            .defaultValue(new Color(145, 145, 145, 127))
+            .defaultValue(new SettingColor(145, 145, 145, 127))
             .build()
     );
 
-    private final Setting<Color> storageColor = sgColors.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> storageColor = sgColors.add(new ColorSetting.Builder()
             .name("storage-color")
             .description("The storage color.")
-            .defaultValue(new Color(255, 160, 0, 127))
+            .defaultValue(new SettingColor(255, 160, 0, 127))
             .build()
     );
 
