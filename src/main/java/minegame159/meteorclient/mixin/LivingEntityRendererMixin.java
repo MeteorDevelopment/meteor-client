@@ -36,6 +36,6 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
 
     @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/entity/model/EntityModel;render(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumer;IIFFFF)V"))
     private void redirectRender(EntityModel<LivingEntity> model, MatrixStack matrices, VertexConsumer vertices, int light, int overlay, float red, float green, float blue, float alpha, LivingEntity entity) {
-        if (!ModuleManager.INSTANCE.get(Chams.class).renderChams(model,matrices, vertices, light, overlay, red, green, blue, alpha, entity)) model.render(matrices, vertices, light, overlay, red, green, blue, alpha);
+        if (!ModuleManager.INSTANCE.get(Chams.class).renderChams(model,matrices, vertices, light, overlay, entity)) model.render(matrices, vertices, light, overlay, red, green, blue, alpha);
     }
 }
