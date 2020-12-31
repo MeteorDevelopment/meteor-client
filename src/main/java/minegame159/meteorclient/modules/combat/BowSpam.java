@@ -23,7 +23,7 @@ public class BowSpam extends ToggleModule {
 
     private final Setting<Integer> charge = sgGeneral.add(new IntSetting.Builder()
             .name("charge")
-            .description("How much to charge the bow before releasing in ticks.")
+            .description("How long to charge the bow before releasing in ticks.")
             .defaultValue(5)
             .min(5)
             .max(20)

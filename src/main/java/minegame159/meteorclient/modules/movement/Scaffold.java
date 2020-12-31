@@ -29,7 +29,7 @@ public class Scaffold extends ToggleModule {
     private final SettingGroup sg = settings.getDefaultGroup();
 
     private final Setting<Boolean> safeWalk = sg.add(new BoolSetting.Builder()
-            .name("safe-walk")
+            .name("Safe-walk")
             .description("Whether or not to toggle Safe Walk when using Scaffold.")
             .defaultValue(true)
             .build()
