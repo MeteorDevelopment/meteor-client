@@ -28,7 +28,7 @@ public class SettingColor extends Color {
     public void update() {
         if (rainbowSpeed > 0) {
             java.awt.Color.RGBtoHSB(r, g, b, hsb);
-            int c = java.awt.Color.HSBtoRGB(hsb[0] + (float) rainbowSpeed, hsb[1], hsb[2]);
+            int c = java.awt.Color.HSBtoRGB(hsb[0] + (float) rainbowSpeed, 1, 1);
 
             r = Color.toRGBAR(c);
             g = Color.toRGBAG(c);
