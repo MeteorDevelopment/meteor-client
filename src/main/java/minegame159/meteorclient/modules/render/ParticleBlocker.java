@@ -30,6 +30,6 @@ public class ParticleBlocker extends ToggleModule {
 
     @EventHandler
     private final Listener<ParticleEvent> onRenderParticle = new Listener<>(event -> {
-        if (particles.get().contains(event.particle)) event.cancel();
+        if (event.particle != null && particles.get().contains(event.particle)) event.cancel();
     });
 }
