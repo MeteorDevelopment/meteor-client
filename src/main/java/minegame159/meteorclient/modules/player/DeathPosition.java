@@ -19,8 +19,8 @@ import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.player.Chat;
 import minegame159.meteorclient.waypoints.Waypoint;
 import minegame159.meteorclient.waypoints.Waypoints;
 

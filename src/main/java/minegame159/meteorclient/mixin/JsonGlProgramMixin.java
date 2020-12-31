@@ -5,7 +5,7 @@
 
 package minegame159.meteorclient.mixin;
 
-import minegame159.meteorclient.utils.Outlines;
+import minegame159.meteorclient.utils.render.Outlines;
 import net.minecraft.client.gl.JsonGlProgram;
 import net.minecraft.util.Identifier;
 import org.spongepowered.asm.mixin.Mixin;

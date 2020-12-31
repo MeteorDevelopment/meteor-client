@@ -5,8 +5,8 @@
 
 package minegame159.meteorclient.friends;
 
-import minegame159.meteorclient.utils.Color;
-import minegame159.meteorclient.utils.ISerializable;
+import minegame159.meteorclient.utils.misc.ISerializable;
+import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundTag;
 

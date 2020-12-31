@@ -21,7 +21,7 @@ import java.nio.ByteBuffer;
 
 public class MFont {
     private static final int IMG_SIZE = 512;
-    private static final minegame159.meteorclient.utils.Color SHADOW_COLOR = new minegame159.meteorclient.utils.Color(60, 60, 60, 180);
+    private static final minegame159.meteorclient.utils.render.color.Color SHADOW_COLOR = new minegame159.meteorclient.utils.render.color.Color(60, 60, 60, 180);
 
     private final MeshBuilder mb = new MeshBuilder(16384);
     private final AbstractTexture texture;
@@ -115,7 +115,7 @@ public class MFont {
         mb.end();
     }
 
-    public double renderString(String string, double x, double y, minegame159.meteorclient.utils.Color color) {
+    public double renderString(String string, double x, double y, minegame159.meteorclient.utils.render.color.Color color) {
         boolean wasBuilding = isBuilding();
         if (!isBuilding()) begin();
 
@@ -138,7 +138,7 @@ public class MFont {
         return x / 2;
     }
 
-    public double renderStringWithShadow(String string, double x, double y, minegame159.meteorclient.utils.Color color) {
+    public double renderStringWithShadow(String string, double x, double y, minegame159.meteorclient.utils.render.color.Color color) {
         boolean wasBuilding = isBuilding();
         if (!isBuilding()) begin();
 
@@ -169,7 +169,7 @@ public class MFont {
         public int srcWidth;
         public int srcHeight;
 
-        public void render(MeshBuilder mb, double x, double y, minegame159.meteorclient.utils.Color color) {
+        public void render(MeshBuilder mb, double x, double y, minegame159.meteorclient.utils.render.color.Color color) {
             double texX = (double) srcX / IMG_SIZE;
             double texY = (double) srcY / IMG_SIZE;
             double texWidth = (double) srcWidth / IMG_SIZE;

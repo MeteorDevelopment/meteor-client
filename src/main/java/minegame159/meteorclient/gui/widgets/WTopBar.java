@@ -10,7 +10,7 @@ import minegame159.meteorclient.gui.renderer.GuiRenderer;
 import minegame159.meteorclient.gui.renderer.Region;
 import minegame159.meteorclient.gui.screens.topbar.TopBarScreen;
 import minegame159.meteorclient.gui.screens.topbar.TopBarType;
-import minegame159.meteorclient.utils.Color;
+import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import org.lwjgl.glfw.GLFW;

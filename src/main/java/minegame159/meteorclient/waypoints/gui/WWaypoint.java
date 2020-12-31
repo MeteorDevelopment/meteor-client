@@ -6,9 +6,9 @@
 package minegame159.meteorclient.waypoints.gui;
 
 import minegame159.meteorclient.gui.widgets.*;
-import minegame159.meteorclient.utils.Color;
-import minegame159.meteorclient.utils.Dimension;
 import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.render.color.Color;
+import minegame159.meteorclient.utils.world.Dimension;
 import minegame159.meteorclient.waypoints.Waypoint;
 import minegame159.meteorclient.waypoints.Waypoints;
 import net.minecraft.client.MinecraftClient;

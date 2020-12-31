@@ -14,7 +14,7 @@ import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.ItemListSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.utils.InvUtils;
+import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.item.Item;
 import net.minecraft.screen.slot.SlotActionType;

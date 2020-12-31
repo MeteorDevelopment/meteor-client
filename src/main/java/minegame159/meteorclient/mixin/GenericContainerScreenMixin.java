@@ -5,7 +5,7 @@
 
 package minegame159.meteorclient.mixin;
 
-import minegame159.meteorclient.utils.InvUtils;
+import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;

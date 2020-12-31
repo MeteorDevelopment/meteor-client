@@ -7,8 +7,8 @@ package minegame159.meteorclient.waypoints;
 
 import minegame159.meteorclient.rendering.DrawMode;
 import minegame159.meteorclient.rendering.MeshBuilder;
-import minegame159.meteorclient.utils.Color;
-import minegame159.meteorclient.utils.ISerializable;
+import minegame159.meteorclient.utils.misc.ISerializable;
+import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.nbt.CompoundTag;
 

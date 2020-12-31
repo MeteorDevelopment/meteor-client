@@ -5,9 +5,9 @@
 
 package minegame159.meteorclient.accounts;
 
-import minegame159.meteorclient.utils.ByteTexture;
-import minegame159.meteorclient.utils.ISerializable;
-import minegame159.meteorclient.utils.NbtException;
+import minegame159.meteorclient.utils.misc.ISerializable;
+import minegame159.meteorclient.utils.misc.NbtException;
+import minegame159.meteorclient.utils.render.ByteTexture;
 import net.minecraft.nbt.CompoundTag;
 
 import javax.imageio.ImageIO;

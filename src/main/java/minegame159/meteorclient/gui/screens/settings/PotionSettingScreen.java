@@ -8,7 +8,7 @@ package minegame159.meteorclient.gui.screens.settings;
 import minegame159.meteorclient.gui.screens.WindowScreen;
 import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.settings.PotionSetting;
-import minegame159.meteorclient.utils.MyPotion;
+import minegame159.meteorclient.utils.misc.MyPotion;
 import org.apache.commons.lang3.StringUtils;
 
 public class PotionSettingScreen extends WindowScreen {

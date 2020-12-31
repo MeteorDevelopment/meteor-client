@@ -10,10 +10,10 @@ import minegame159.meteorclient.accounts.types.CrackedAccount;
 import minegame159.meteorclient.accounts.types.PremiumAccount;
 import minegame159.meteorclient.accounts.types.TheAlteningAccount;
 import minegame159.meteorclient.events.EventStore;
-import minegame159.meteorclient.utils.MeteorExecutor;
-import minegame159.meteorclient.utils.NbtException;
-import minegame159.meteorclient.utils.NbtUtils;
-import minegame159.meteorclient.utils.Savable;
+import minegame159.meteorclient.utils.files.Savable;
+import minegame159.meteorclient.utils.misc.NbtException;
+import minegame159.meteorclient.utils.misc.NbtUtils;
+import minegame159.meteorclient.utils.network.MeteorExecutor;
 import net.minecraft.nbt.CompoundTag;
 
 import java.io.File;

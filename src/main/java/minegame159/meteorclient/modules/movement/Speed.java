@@ -14,7 +14,7 @@ import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.PlayerUtils;
+import minegame159.meteorclient.utils.player.PlayerUtils;
 import net.minecraft.entity.MovementType;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.util.math.Vec3d;

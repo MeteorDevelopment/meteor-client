@@ -14,7 +14,7 @@ import minegame159.meteorclient.mixininterface.IMinecraftClient;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.player.AutoEat;
 import minegame159.meteorclient.modules.player.AutoGap;
-import minegame159.meteorclient.utils.OnlinePlayers;
+import minegame159.meteorclient.utils.network.OnlinePlayers;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.Mouse;
 import net.minecraft.client.gui.screen.Screen;

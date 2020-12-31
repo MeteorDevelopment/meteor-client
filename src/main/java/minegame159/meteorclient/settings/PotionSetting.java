@@ -8,7 +8,7 @@ package minegame159.meteorclient.settings;
 import minegame159.meteorclient.gui.screens.settings.PotionSettingScreen;
 import minegame159.meteorclient.gui.widgets.WButton;
 import minegame159.meteorclient.gui.widgets.WItemWithLabel;
-import minegame159.meteorclient.utils.MyPotion;
+import minegame159.meteorclient.utils.misc.MyPotion;
 import net.minecraft.client.MinecraftClient;
 
 import java.util.function.Consumer;

@@ -5,10 +5,10 @@
 
 package minegame159.meteorclient.modules.render.hud;
 
-import minegame159.meteorclient.utils.AlignmentX;
-import minegame159.meteorclient.utils.AlignmentY;
-import minegame159.meteorclient.utils.ISerializable;
 import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.misc.ISerializable;
+import minegame159.meteorclient.utils.render.AlignmentX;
+import minegame159.meteorclient.utils.render.AlignmentY;
 import net.minecraft.nbt.CompoundTag;
 
 public class BoundingBox implements ISerializable<BoundingBox> {

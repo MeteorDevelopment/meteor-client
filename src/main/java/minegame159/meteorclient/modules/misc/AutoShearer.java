@@ -14,7 +14,7 @@ import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.utils.InvUtils;
+import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.SheepEntity;
 import net.minecraft.item.Items;
