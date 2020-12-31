@@ -399,9 +399,10 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new HandView());
         addModule(new Time());
         addModule(new VoidESP());
-        addModule(new CityEsp());
+        addModule(new CityESP());
         addModule(new ShulkerPeek());
         addModule(new ParticleBlocker());
+        addModule(new UnfocusedCPU());
     }
 
     private void initMisc() {
@@ -417,7 +418,6 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new AutoBrewer());
         addModule(new AutoSmelter());
         addModule(new Spam());
-        addModule(new UnfocusedCPU());
         addModule(new ItemByteSize());
         addModule(new PacketCanceller());
         addModule(new EntityLogger());

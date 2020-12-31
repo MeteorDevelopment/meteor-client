@@ -52,7 +52,7 @@ public class Jesus extends ToggleModule {
 
     private final Setting<Boolean> disableOnSneak = sgGeneral.add(new BoolSetting.Builder()
             .name("disable-on-sneak")
-            .description("Let you go under water when sneak key is pressed.")
+            .description("Let you go under the liquid when your sneak key is held.")
             .defaultValue(true)
             .build()
     );
@@ -66,7 +66,7 @@ public class Jesus extends ToggleModule {
     private boolean preBaritoneAssumeWalkOnLava;
 
     public Jesus() {
-        super(Category.Movement, "jesus", "Walk on water, be like Jesus.");
+        super(Category.Movement, "jesus", "Walk on water, be like Jesus (also works on lava).");
     }
 
     @Override

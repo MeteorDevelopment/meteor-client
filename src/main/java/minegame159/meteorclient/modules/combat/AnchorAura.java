@@ -35,8 +35,8 @@ import java.util.Optional;
 public class AnchorAura extends ToggleModule {
 
     public enum Mode {
-        safe,
-        suicide
+        Safe,
+        Suicide
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -72,14 +72,14 @@ public class AnchorAura extends ToggleModule {
     private final Setting<Mode> placeMode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("place-mode")
             .description("The way anchors are placed.")
-            .defaultValue(Mode.safe)
+            .defaultValue(Mode.Safe)
             .build()
     );
 
     private final Setting<Mode> breakMode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("break-mode")
             .description("The way anchors are broken.")
-            .defaultValue(Mode.safe)
+            .defaultValue(Mode.Safe)
             .build()
     );
 
@@ -144,7 +144,7 @@ public class AnchorAura extends ToggleModule {
             this.toggle();
             return;
         }
-        if (getTotalHealth(mc.player) <= minHealth.get() && placeMode.get() != Mode.suicide && breakMode.get() != Mode.suicide) return;
+        if (getTotalHealth(mc.player) <= minHealth.get() && placeMode.get() != Mode.Suicide && breakMode.get() != Mode.Suicide) return;
 
         findTarget();
 
@@ -239,12 +239,12 @@ public class AnchorAura extends ToggleModule {
 
     private boolean getDamagePlace(BlockPos pos){
         assert mc.player != null;
-        return placeMode.get() == Mode.suicide || DamageCalcUtils.bedDamage(mc.player, new Vec3d(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5)) <= maxDamage.get();
+        return placeMode.get() == Mode.Suicide || DamageCalcUtils.bedDamage(mc.player, new Vec3d(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5)) <= maxDamage.get();
     }
 
     private boolean getDamageBreak(BlockPos pos){
         assert mc.player != null;
-        return breakMode.get() == Mode.suicide || DamageCalcUtils.anchorDamage(mc.player, new Vec3d(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5)) <= maxDamage.get();
+        return breakMode.get() == Mode.Suicide || DamageCalcUtils.anchorDamage(mc.player, new Vec3d(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5)) <= maxDamage.get();
     }
 
     private void findTarget(){

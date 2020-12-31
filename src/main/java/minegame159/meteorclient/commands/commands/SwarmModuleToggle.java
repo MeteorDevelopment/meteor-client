@@ -23,7 +23,7 @@ public class SwarmModuleToggle extends Command {
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.then(literal("module").then(argument("m", ModuleArgumentType.module()).then(argument("bool", BoolArgumentType.bool()).executes(context -> {
             Swarm swarm = ModuleManager.INSTANCE.get(Swarm.class);
-            if (swarm.currentMode == Swarm.Mode.QUEEN && swarm.server != null) {
+            if (swarm.currentMode == Swarm.Mode.Queen && swarm.server != null) {
                 swarm.server.sendMessage(context.getInput());
             } else {
                 ToggleModule module = (ToggleModule) context.getArgument("m", Module.class);

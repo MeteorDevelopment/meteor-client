@@ -36,7 +36,7 @@ public class AimAssist extends ToggleModule {
     }
 
     public enum Target {
-        Eyes,
+        Head,
         Body,
         Feet
     }
@@ -176,7 +176,7 @@ public class AimAssist extends ToggleModule {
 
     private void setVec3dToTargetPoint(Vec3d vec3d, Entity entity) {
         switch (target.get()) {
-            case Eyes: ((IVec3d) vec3d).set(entity.getX(), entity.getY() + entity.getEyeHeight(entity.getPose()), entity.getZ()); break;
+            case Head: ((IVec3d) vec3d).set(entity.getX(), entity.getY() + entity.getEyeHeight(entity.getPose()), entity.getZ()); break;
             case Body: ((IVec3d) vec3d).set(entity.getX(), entity.getY() + entity.getEyeHeight(entity.getPose()) / 2, entity.getZ()); break;
             case Feet: ((IVec3d) vec3d).set(entity.getX(), entity.getY(), entity.getZ()); break;
         }

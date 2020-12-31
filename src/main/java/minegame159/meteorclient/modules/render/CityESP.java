@@ -19,7 +19,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 
-public class CityEsp extends ToggleModule {
+public class CityESP extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgRender = settings.createGroup("Render");
 
@@ -64,7 +64,7 @@ public class CityEsp extends ToggleModule {
             .build()
     );
 
-    public CityEsp() {
+    public CityESP() {
         super(Category.Render, "city-esp", "Displays blocks that can be broken in order to city another player.");
     }
 
