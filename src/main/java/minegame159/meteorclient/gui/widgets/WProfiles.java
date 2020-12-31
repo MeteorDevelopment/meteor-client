@@ -6,8 +6,7 @@
 package minegame159.meteorclient.gui.widgets;
 
 import minegame159.meteorclient.gui.GuiConfig;
-import minegame159.meteorclient.gui.screens.topbar.TopBarModules;
-import minegame159.meteorclient.utils.ProfileUtils;
+import minegame159.meteorclient.utils.files.ProfileUtils;
 
 public class WProfiles extends WWindow {
     public WProfiles() {

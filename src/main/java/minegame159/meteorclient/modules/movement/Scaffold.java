@@ -12,7 +12,7 @@ import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.PlayerUtils;
+import minegame159.meteorclient.utils.player.PlayerUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.FallingBlock;

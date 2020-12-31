@@ -11,7 +11,7 @@ import minegame159.meteorclient.gui.widgets.WLabel;
 import minegame159.meteorclient.gui.widgets.WSection;
 import minegame159.meteorclient.gui.widgets.WTextBox;
 import minegame159.meteorclient.settings.EntityTypeListSetting;
-import minegame159.meteorclient.utils.EntityUtils;
+import minegame159.meteorclient.utils.entity.EntityUtils;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.entity.EntityType;
 import net.minecraft.util.Pair;

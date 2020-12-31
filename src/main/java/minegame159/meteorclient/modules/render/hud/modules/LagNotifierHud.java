@@ -7,8 +7,8 @@ package minegame159.meteorclient.modules.render.hud.modules;
 
 import minegame159.meteorclient.modules.render.hud.HUD;
 import minegame159.meteorclient.modules.render.hud.HudEditorScreen;
-import minegame159.meteorclient.utils.Color;
-import minegame159.meteorclient.utils.TickRate;
+import minegame159.meteorclient.utils.render.color.Color;
+import minegame159.meteorclient.utils.world.TickRate;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 

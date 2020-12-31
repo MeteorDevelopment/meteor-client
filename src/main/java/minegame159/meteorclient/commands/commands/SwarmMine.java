@@ -4,7 +4,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import minegame159.meteorclient.commands.Command;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.combat.Swarm;
-import minegame159.meteorclient.utils.Chat;
+import minegame159.meteorclient.utils.player.Chat;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.BlockStateArgument;
 import net.minecraft.command.argument.BlockStateArgumentType;

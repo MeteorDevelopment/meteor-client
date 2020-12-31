@@ -11,7 +11,7 @@ import minegame159.meteorclient.gui.renderer.Region;
 import minegame159.meteorclient.gui.screens.WindowScreen;
 import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.utils.Color;
+import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.Utils;
 
 public class ColorSettingScreen extends WindowScreen {

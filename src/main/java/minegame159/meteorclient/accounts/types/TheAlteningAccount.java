@@ -14,7 +14,7 @@ import com.mojang.authlib.yggdrasil.YggdrasilMinecraftSessionService;
 import com.mojang.authlib.yggdrasil.YggdrasilUserAuthentication;
 import minegame159.meteorclient.accounts.*;
 import minegame159.meteorclient.mixininterface.IMinecraftClient;
-import minegame159.meteorclient.utils.HttpUtils;
+import minegame159.meteorclient.utils.network.HttpUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.Session;
 

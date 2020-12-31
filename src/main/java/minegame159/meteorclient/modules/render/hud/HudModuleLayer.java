@@ -6,8 +6,8 @@
 package minegame159.meteorclient.modules.render.hud;
 
 import minegame159.meteorclient.modules.render.hud.modules.HudModule;
-import minegame159.meteorclient.utils.AlignmentX;
-import minegame159.meteorclient.utils.AlignmentY;
+import minegame159.meteorclient.utils.render.AlignmentX;
+import minegame159.meteorclient.utils.render.AlignmentY;
 
 import java.util.List;
 

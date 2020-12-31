@@ -16,7 +16,7 @@ import minegame159.meteorclient.modules.render.Freecam;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.utils.KeyAction;
+import minegame159.meteorclient.utils.misc.input.KeyAction;
 
 public class AirJump extends ToggleModule {
     public AirJump() {

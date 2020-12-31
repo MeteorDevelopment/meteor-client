@@ -7,7 +7,7 @@ package minegame159.meteorclient.modules.render.hud.modules;
 
 import minegame159.meteorclient.modules.render.hud.HUD;
 import minegame159.meteorclient.modules.render.hud.HudRenderer;
-import minegame159.meteorclient.utils.Color;
+import minegame159.meteorclient.utils.render.color.Color;
 
 public abstract class DoubleTextHudModule extends HudModule {
     protected Color rightColor;

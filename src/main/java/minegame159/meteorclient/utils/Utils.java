@@ -12,6 +12,8 @@ import minegame159.meteorclient.mixininterface.IMinecraftClient;
 import minegame159.meteorclient.mixininterface.IMinecraftServer;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.utils.player.Chat;
+import minegame159.meteorclient.utils.world.Dimension;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ServerInfo;
 import net.minecraft.client.options.ServerList;

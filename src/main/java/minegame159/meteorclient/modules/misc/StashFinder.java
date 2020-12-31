@@ -20,7 +20,7 @@ import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.Chat;
+import minegame159.meteorclient.utils.player.Chat;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.block.entity.*;
 import net.minecraft.client.toast.Toast;

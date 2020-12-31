@@ -7,7 +7,7 @@ package minegame159.meteorclient.settings;
 
 import minegame159.meteorclient.gui.screens.settings.EntityTypeListSettingScreen;
 import minegame159.meteorclient.gui.widgets.WButton;
-import minegame159.meteorclient.utils.EntityUtils;
+import minegame159.meteorclient.utils.entity.EntityUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.EntityType;
 import net.minecraft.nbt.CompoundTag;

@@ -15,7 +15,7 @@ import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.movement.NoSlow;
 import minegame159.meteorclient.modules.movement.Scaffold;
 import minegame159.meteorclient.modules.player.Portals;
-import minegame159.meteorclient.utils.Chat;
+import minegame159.meteorclient.utils.player.Chat;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
