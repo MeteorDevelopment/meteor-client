@@ -22,14 +22,14 @@ public class SwarmFollow extends Command {
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.then(literal("follow").executes(context -> {
                     Swarm swarm = ModuleManager.INSTANCE.get(Swarm.class);
-                    if (swarm.currentMode == Swarm.Mode.QUEEN && swarm.server != null && MinecraftClient.getInstance().player != null) {
+                    if (swarm.currentMode == Swarm.Mode.Queen && swarm.server != null && MinecraftClient.getInstance().player != null) {
                         swarm.server.sendMessage(context.getInput() + " " + MinecraftClient.getInstance().player.getDisplayName().getString());
                     }
                     return SINGLE_SUCCESS;
                 }).then(argument("name", PlayerArgumentType.player()).executes(context -> {
                     PlayerEntity playerEntity = context.getArgument("name", PlayerEntity.class);
                     Swarm swarm = ModuleManager.INSTANCE.get(Swarm.class);
-                    if (swarm.currentMode == Swarm.Mode.QUEEN && swarm.server != null) {
+                    if (swarm.currentMode == Swarm.Mode.Queen && swarm.server != null) {
                         swarm.server.sendMessage(context.getInput());
                     } else {
                         if (playerEntity != null) {

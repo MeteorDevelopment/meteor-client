@@ -15,14 +15,14 @@ public class InfiniteMineHud extends DoubleTextHudModule {
         if (!infinityMiner.isActive()) return "Disabled";
 
         switch (infinityMiner.getMode()) {
-            case HOME:
+            case Home:
                 int[] coords = infinityMiner.getHomeCoords();
                 return "Heading Home: " + coords[0] + " " + coords[1] + " " + coords[2];
-            case TARGET:
+            case Target:
                 return "Mining: " + infinityMiner.getCurrentTarget().getName().getString();
-            case REPAIR:
+            case Repair:
                 return "Repair-Mining: " + infinityMiner.getCurrentTarget().getName().getString();
-            case STILL:
+            case Still:
                 return "Resting";
             default:
                 return "";

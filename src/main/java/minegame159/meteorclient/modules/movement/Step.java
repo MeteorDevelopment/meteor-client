@@ -45,7 +45,7 @@ public class Step extends ToggleModule {
     );
 
     private final Setting<Boolean> safeStep = sgGeneral.add(new BoolSetting.Builder()
-            .name("safe-step")
+            .name("Safe-step")
             .description("Doesn't let you step out of a hole if you are low on health or there is a crystal nearby.")
             .defaultValue(false)
             .build()

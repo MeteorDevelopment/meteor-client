@@ -11,7 +11,7 @@ import net.minecraft.client.gui.screen.ingame.HandledScreen;
 public class NoInteract extends ToggleModule {
 
     public NoInteract() {
-        super(Category.Player, "no-interact", "Blocks interactions with certain types of inputs");
+        super(Category.Player, "no-interact", "Blocks interactions with certain types of inputs.");
     }
 
     @EventHandler
