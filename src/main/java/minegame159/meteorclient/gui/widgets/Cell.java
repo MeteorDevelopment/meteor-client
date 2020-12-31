@@ -5,8 +5,8 @@
 
 package minegame159.meteorclient.gui.widgets;
 
-import minegame159.meteorclient.utils.AlignmentX;
-import minegame159.meteorclient.utils.AlignmentY;
+import minegame159.meteorclient.utils.render.AlignmentX;
+import minegame159.meteorclient.utils.render.AlignmentY;
 
 public class Cell<T extends WWidget> {
     T widget;

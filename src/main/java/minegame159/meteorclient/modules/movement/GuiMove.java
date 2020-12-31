@@ -15,7 +15,7 @@ import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.modules.render.Freecam;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.Input;
+import minegame159.meteorclient.utils.misc.input.Input;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.ingame.*;

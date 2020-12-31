@@ -14,7 +14,7 @@ import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.gui.screens.WindowScreen;
 import minegame159.meteorclient.gui.widgets.WButton;
 import minegame159.meteorclient.gui.widgets.WTable;
-import minegame159.meteorclient.utils.MeteorExecutor;
+import minegame159.meteorclient.utils.network.MeteorExecutor;
 import net.minecraft.client.MinecraftClient;
 
 public class AccountsScreen extends WindowScreen {

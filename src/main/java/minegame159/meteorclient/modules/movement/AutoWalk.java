@@ -15,7 +15,7 @@ import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.utils.GoalDirection;
+import minegame159.meteorclient.utils.world.GoalDirection;
 
 public class AutoWalk extends ToggleModule {
     public enum Mode {

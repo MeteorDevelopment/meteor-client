@@ -6,7 +6,7 @@
 package minegame159.meteorclient.events.meteor;
 
 import minegame159.meteorclient.events.Cancellable;
-import minegame159.meteorclient.utils.KeyAction;
+import minegame159.meteorclient.utils.misc.input.KeyAction;
 
 public class KeyEvent extends Cancellable {
     public int key;

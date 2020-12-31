@@ -9,7 +9,7 @@ import minegame159.meteorclient.Config;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.Color;
+import minegame159.meteorclient.utils.render.color.Color;
 
 public class TopBarConfig extends TopBarWindowScreen {
     public TopBarConfig() {

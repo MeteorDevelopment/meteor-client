@@ -8,7 +8,7 @@ package minegame159.meteorclient.mixin;
 import minegame159.meteorclient.accounts.gui.AccountsScreen;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.player.NameProtect;
-import minegame159.meteorclient.utils.Color;
+import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;

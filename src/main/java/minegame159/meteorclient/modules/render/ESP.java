@@ -8,25 +8,22 @@ package minegame159.meteorclient.modules.render;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.render.RenderEvent;
-import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.rendering.ShapeMode;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.Color;
+import minegame159.meteorclient.utils.render.color.Color;
+import minegame159.meteorclient.utils.render.color.ColorUtil;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.Box;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ESP extends ToggleModule {
-    private static final Color WHITE = new Color(255, 255, 255);
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgColors = settings.createGroup("Colors");
 
@@ -178,17 +175,7 @@ public class ESP extends ToggleModule {
     }
 
     public Color getColor(Entity entity) {
-        if (entity instanceof PlayerEntity) return FriendManager.INSTANCE.getColor((PlayerEntity) entity, playersColor.get());
-
-        switch (entity.getType().getSpawnGroup()) {
-            case CREATURE:       return animalsColor.get();
-            case WATER_CREATURE: return waterAnimalsColor.get();
-            case MONSTER:        return monstersColor.get();
-            case AMBIENT:        return ambientColor.get();
-            case MISC:           return miscColor.get();
-        }
-
-        return WHITE;
+        return ColorUtil.getEntityColor(entity, playersColor.get(), animalsColor.get(), waterAnimalsColor.get(), monstersColor.get(), ambientColor.get(), miscColor.get());
     }
 
     public Color getOutlineColor(Entity entity) {

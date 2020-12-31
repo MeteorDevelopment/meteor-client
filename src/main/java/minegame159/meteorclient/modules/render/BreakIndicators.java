@@ -9,7 +9,7 @@ import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.rendering.ShapeMode;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.Color;
+import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.render.BlockBreakingInfo;
 import net.minecraft.util.math.BlockPos;

@@ -6,8 +6,8 @@
 package minegame159.meteorclient.settings;
 
 import minegame159.meteorclient.gui.widgets.WTable;
-import minegame159.meteorclient.utils.ISerializable;
-import minegame159.meteorclient.utils.NbtUtils;
+import minegame159.meteorclient.utils.misc.ISerializable;
+import minegame159.meteorclient.utils.misc.NbtUtils;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;

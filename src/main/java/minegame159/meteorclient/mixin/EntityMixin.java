@@ -12,7 +12,7 @@ import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.movement.NoSlow;
 import minegame159.meteorclient.modules.movement.Velocity;
 import minegame159.meteorclient.modules.render.ESP;
-import minegame159.meteorclient.utils.Outlines;
+import minegame159.meteorclient.utils.render.Outlines;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;

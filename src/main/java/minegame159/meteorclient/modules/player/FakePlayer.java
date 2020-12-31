@@ -11,8 +11,8 @@ import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.Chat;
-import minegame159.meteorclient.utils.FakePlayerEntity;
+import minegame159.meteorclient.utils.player.Chat;
+import minegame159.meteorclient.utils.entity.FakePlayerEntity;
 
 import java.util.HashMap;
 import java.util.Map;

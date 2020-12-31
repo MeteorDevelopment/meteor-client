@@ -8,8 +8,8 @@ package minegame159.meteorclient.gui.screens.topbar;
 import minegame159.meteorclient.gui.GuiConfig;
 import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.AlignmentX;
-import minegame159.meteorclient.utils.Color;
+import minegame159.meteorclient.utils.render.AlignmentX;
+import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.client.MinecraftClient;
 
 public class TopBarGui extends TopBarWindowScreen {

@@ -17,7 +17,7 @@ import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.PacketBoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.utils.PacketUtils;
+import minegame159.meteorclient.utils.network.PacketUtils;
 import net.minecraft.network.Packet;
 
 public class PacketCanceller extends ToggleModule {

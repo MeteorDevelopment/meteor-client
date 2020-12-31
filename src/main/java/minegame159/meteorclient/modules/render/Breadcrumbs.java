@@ -13,8 +13,8 @@ import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.Color;
-import minegame159.meteorclient.utils.Pool;
+import minegame159.meteorclient.utils.render.color.Color;
+import minegame159.meteorclient.utils.misc.Pool;
 import net.minecraft.world.dimension.DimensionType;
 
 import java.util.ArrayDeque;

@@ -6,7 +6,7 @@
 package minegame159.meteorclient.settings;
 
 import minegame159.meteorclient.gui.widgets.WWidget;
-import minegame159.meteorclient.utils.ISerializable;
+import minegame159.meteorclient.utils.misc.ISerializable;
 import net.minecraft.nbt.CompoundTag;
 import org.apache.commons.lang3.StringUtils;
 

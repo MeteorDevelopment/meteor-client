@@ -6,7 +6,11 @@
 package minegame159.meteorclient.gui;
 
 import minegame159.meteorclient.Config;
-import minegame159.meteorclient.utils.*;
+import minegame159.meteorclient.utils.misc.ISerializable;
+import minegame159.meteorclient.utils.misc.NbtUtils;
+import minegame159.meteorclient.utils.misc.Vector2;
+import minegame159.meteorclient.utils.render.color.Color;
+import minegame159.meteorclient.utils.render.AlignmentX;
 import net.minecraft.nbt.CompoundTag;
 
 import java.util.HashMap;

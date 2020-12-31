@@ -9,7 +9,7 @@ import it.unimi.dsi.fastutil.objects.Object2BooleanArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import minegame159.meteorclient.gui.screens.settings.PacketBoolSettingScreen;
 import minegame159.meteorclient.gui.widgets.WButton;
-import minegame159.meteorclient.utils.PacketUtils;
+import minegame159.meteorclient.utils.network.PacketUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Packet;

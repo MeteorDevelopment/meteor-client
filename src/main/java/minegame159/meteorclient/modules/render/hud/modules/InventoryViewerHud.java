@@ -11,7 +11,7 @@ import minegame159.meteorclient.modules.render.hud.HudRenderer;
 import minegame159.meteorclient.rendering.DrawMode;
 import minegame159.meteorclient.rendering.Matrices;
 import minegame159.meteorclient.rendering.Renderer;
-import minegame159.meteorclient.utils.RenderUtils;
+import minegame159.meteorclient.utils.render.RenderUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.render.VertexFormats;

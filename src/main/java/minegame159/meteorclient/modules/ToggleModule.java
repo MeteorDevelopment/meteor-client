@@ -10,7 +10,7 @@ import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.utils.Chat;
+import minegame159.meteorclient.utils.player.Chat;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Formatting;
