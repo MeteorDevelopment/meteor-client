@@ -9,7 +9,7 @@ import minegame159.meteorclient.Config;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.render.color.Color;
+import minegame159.meteorclient.utils.render.color.SettingColor;
 
 public class TopBarConfig extends TopBarWindowScreen {
     public TopBarConfig() {
@@ -54,11 +54,11 @@ public class TopBarConfig extends TopBarWindowScreen {
             sgCategoryColors.add(new ColorSetting.Builder()
                     .name(category.toString().toLowerCase() + "-color")
                     .description(category.toString() + " color.")
-                    .defaultValue(new Color(0, 0, 0, 0))
+                    .defaultValue(new SettingColor(0, 0, 0, 0))
                     .onChanged(color1 -> Config.INSTANCE.setCategoryColor(category, color1))
                     .onModuleActivated(colorSetting -> {
-                        Color color = Config.INSTANCE.getCategoryColor(category);
-                        if (color == null) color = new Color(0, 0, 0, 0);
+                        SettingColor color = Config.INSTANCE.getCategoryColor(category);
+                        if (color == null) color = new SettingColor(0, 0, 0, 0);
                         colorSetting.set(color);
                     })
                     .build()

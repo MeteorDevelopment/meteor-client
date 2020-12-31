@@ -32,6 +32,7 @@ import minegame159.meteorclient.utils.network.Capes;
 import minegame159.meteorclient.utils.network.MeteorExecutor;
 import minegame159.meteorclient.utils.network.OnlinePlayers;
 import minegame159.meteorclient.utils.player.EChestMemory;
+import minegame159.meteorclient.utils.render.color.RainbowColorManager;
 import minegame159.meteorclient.utils.world.BlockIterator;
 import minegame159.meteorclient.waypoints.Waypoints;
 import net.fabricmc.api.ClientModInitializer;
@@ -79,6 +80,7 @@ public class MeteorClient implements ClientModInitializer, Listenable {
         EChestMemory.init();
         Capes.init();
         BlockIterator.init();
+        RainbowColorManager.init();
 
         load();
         Ignore.load();

@@ -13,7 +13,7 @@ import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.rendering.ShapeMode;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.render.color.Color;
+import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
@@ -37,17 +37,17 @@ public class BlockSelection extends ToggleModule {
             .build()
     );
 
-    private final Setting<Color> sideColor = sgGeneral.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> sideColor = sgGeneral.add(new ColorSetting.Builder()
             .name("side-color")
             .description("The side color.")
-            .defaultValue(new Color(255, 255, 255, 50))
+            .defaultValue(new SettingColor(255, 255, 255, 50))
             .build()
     );
 
-    private final Setting<Color> lineColor = sgGeneral.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> lineColor = sgGeneral.add(new ColorSetting.Builder()
             .name("line-color")
             .description("The line color.")
-            .defaultValue(new Color(255, 255, 255, 255))
+            .defaultValue(new SettingColor(255, 255, 255, 255))
             .build()
     );
 

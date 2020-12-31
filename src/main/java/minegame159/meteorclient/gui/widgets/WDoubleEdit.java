@@ -11,9 +11,9 @@ public class WDoubleEdit extends WTable {
     private final WDoubleTextBox textBox;
     private WSlider slider;
 
-    public WDoubleEdit(double value, double sliderMin, double sliderMax, boolean noSlider) {
-        textBox = add(new WDoubleTextBox(value, 60)).getWidget();
-        if (!noSlider) slider = add(new WSlider(value, sliderMin, sliderMax, 200)).fillX().expandX().getWidget();
+    public WDoubleEdit(double value, double sliderMin, double sliderMax, int decimalPlaces, boolean noSlider, double sliderWidth) {
+        textBox = add(new WDoubleTextBox(value, 60, decimalPlaces)).getWidget();
+        if (!noSlider) slider = add(new WSlider(value, sliderMin, sliderMax, sliderWidth)).fillX().expandX().getWidget();
 
         textBox.action = () -> {
             if (slider != null) slider.value = textBox.getValue();
@@ -29,7 +29,7 @@ public class WDoubleEdit extends WTable {
     }
 
     public WDoubleEdit(double value, double sliderMin, double sliderMax) {
-        this(value, sliderMin, sliderMax, false);
+        this(value, sliderMin, sliderMax, 2, false, 200);
     }
 
     public double get() {

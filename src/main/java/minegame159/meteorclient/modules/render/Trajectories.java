@@ -17,9 +17,9 @@ import minegame159.meteorclient.settings.ColorSetting;
 import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.utils.render.color.SettingColor;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.Pool;
-import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.item.*;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
@@ -40,17 +40,17 @@ public class Trajectories extends ToggleModule {
             .build()
     );
 
-    private final Setting<Color> sideColor = sgGeneral.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> sideColor = sgGeneral.add(new ColorSetting.Builder()
             .name("side-color")
             .description("The side color.")
-            .defaultValue(new Color(255, 150, 0, 35))
+            .defaultValue(new SettingColor(255, 150, 0, 35))
             .build()
     );
     
-    private final Setting<Color> lineColor = sgGeneral.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> lineColor = sgGeneral.add(new ColorSetting.Builder()
             .name("line-color")
             .description("The line color.")
-            .defaultValue(new Color(255, 150, 0))
+            .defaultValue(new SettingColor(255, 150, 0))
             .build()
     );
 

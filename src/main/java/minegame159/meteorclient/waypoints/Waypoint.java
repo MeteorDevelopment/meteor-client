@@ -8,7 +8,7 @@ package minegame159.meteorclient.waypoints;
 import minegame159.meteorclient.rendering.DrawMode;
 import minegame159.meteorclient.rendering.MeshBuilder;
 import minegame159.meteorclient.utils.misc.ISerializable;
-import minegame159.meteorclient.utils.render.color.Color;
+import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.nbt.CompoundTag;
 
@@ -22,7 +22,7 @@ public class Waypoint implements ISerializable<Waypoint> {
 
     public String name = "Meteor on Crack!";
     public String icon = "Square";
-    public Color color = new Color(225, 25, 25);
+    public SettingColor color = new SettingColor(225, 25, 25);
 
     public int x, y, z;
 

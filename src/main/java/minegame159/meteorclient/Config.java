@@ -12,7 +12,7 @@ import minegame159.meteorclient.rendering.Fonts;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.files.Savable;
 import minegame159.meteorclient.utils.misc.NbtUtils;
-import minegame159.meteorclient.utils.render.color.Color;
+import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.nbt.CompoundTag;
 
@@ -31,7 +31,7 @@ public class Config extends Savable<Config> {
     public boolean chatCommandsInfo = true;
     public boolean deleteChatCommandsInfo = true;
 
-    private Map<Category, Color> categoryColors = new HashMap<>();
+    public Map<Category, SettingColor> categoryColors = new HashMap<>();
 
     public Config() {
         super(new File(MeteorClient.FOLDER, "config.nbt"));
@@ -48,12 +48,12 @@ public class Config extends Savable<Config> {
         return prefix;
     }
 
-    public void setCategoryColor(Category category, Color color) {
+    public void setCategoryColor(Category category, SettingColor color) {
         categoryColors.put(category, color);
         save();
     }
 
-    public Color getCategoryColor(Category category) {
+    public SettingColor getCategoryColor(Category category) {
         return categoryColors.get(category);
     }
 
@@ -74,7 +74,7 @@ public class Config extends Savable<Config> {
     @Override
     public Config fromTag(CompoundTag tag) {
         prefix = tag.getString("prefix");
-        categoryColors = NbtUtils.mapFromTag(tag.getCompound("categoryColors"), Category::valueOf, tag1 -> new Color().fromTag((CompoundTag) tag1));
+        categoryColors = NbtUtils.mapFromTag(tag.getCompound("categoryColors"), Category::valueOf, tag1 -> new SettingColor().fromTag((CompoundTag) tag1));
         guiConfig.fromTag(tag.getCompound("guiConfig"));
         chatCommandsInfo = !tag.contains("chatCommandsInfo") || tag.getBoolean("chatCommandsInfo");
         deleteChatCommandsInfo = !tag.contains("deleteChatCommandsInfo") || tag.getBoolean("deleteChatCommandsInfo");

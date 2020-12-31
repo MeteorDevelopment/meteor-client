@@ -24,8 +24,11 @@ import minegame159.meteorclient.modules.movement.*;
 import minegame159.meteorclient.modules.player.*;
 import minegame159.meteorclient.modules.render.*;
 import minegame159.meteorclient.modules.render.hud.HUD;
+import minegame159.meteorclient.settings.ColorSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.utils.render.color.RainbowColorManager;
+import minegame159.meteorclient.utils.render.color.SettingColor;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.files.Savable;
 import minegame159.meteorclient.utils.misc.input.Input;
@@ -257,6 +260,16 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         getGroup(module.category).add(module);
 
         CommandManager.getDispatcher().register(module.buildCommand());
+
+        for (SettingGroup group : module.settings) {
+            for (Setting<?> setting : group) {
+                if (module instanceof ToggleModule) setting.module = (ToggleModule) module;
+
+                if (setting instanceof ColorSetting) {
+                    RainbowColorManager.addColorSetting((Setting<SettingColor>) setting);
+                }
+            }
+        }
     }
 
     private void initCombat() {

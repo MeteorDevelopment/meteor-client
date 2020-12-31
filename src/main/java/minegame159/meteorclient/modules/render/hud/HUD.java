@@ -21,6 +21,7 @@ import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.render.AlignmentX;
 import minegame159.meteorclient.utils.render.AlignmentY;
 import minegame159.meteorclient.utils.render.color.Color;
+import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -55,24 +56,24 @@ public class HUD extends ToggleModule {
             .build()
     );
 
-    private final Setting<Color> primaryColor = sgGeneral.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> primaryColor = sgGeneral.add(new ColorSetting.Builder()
             .name("primary-color")
             .description("Primary color of text.")
-            .defaultValue(new Color(255, 255, 255))
+            .defaultValue(new SettingColor(255, 255, 255))
             .build()
     );
 
-    private final Setting<Color> secondaryColor = sgGeneral.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> secondaryColor = sgGeneral.add(new ColorSetting.Builder()
             .name("secondary-color")
             .description("Secondary color of text.")
-            .defaultValue(new Color(175, 175, 175))
+            .defaultValue(new SettingColor(175, 175, 175))
             .build()
     );
 
-    private final Setting<Color> welcomeColor = sgGeneral.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> welcomeColor = sgGeneral.add(new ColorSetting.Builder()
             .name("welcome-color")
             .description("Color of welcome text.")
-            .defaultValue(new Color(120, 43, 153))
+            .defaultValue(new SettingColor(120, 43, 153))
             .build()
     );
 
@@ -93,10 +94,10 @@ public class HUD extends ToggleModule {
             .build()
     );
 
-    private final Setting<Color> invViewerColor = sgInvViewer.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> invViewerColor = sgInvViewer.add(new ColorSetting.Builder()
             .name("flat-mode-color")
             .description("Color of background on Flat mode.")
-            .defaultValue(new Color(0, 0, 0, 64))
+            .defaultValue(new SettingColor(0, 0, 0, 64))
             .build()
     );
 
@@ -143,10 +144,10 @@ public class HUD extends ToggleModule {
             .build()
     );
 
-    private final Setting<Color> playerModelColor = sgPlayerModel.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> playerModelColor = sgPlayerModel.add(new ColorSetting.Builder()
             .name("player-model-background-color")
             .description("Color of background.")
-            .defaultValue(new Color(0, 0, 0, 64))
+            .defaultValue(new SettingColor(0, 0, 0, 64))
             .build()
     );
 
@@ -185,17 +186,17 @@ public class HUD extends ToggleModule {
             .build()
     );
 
-    private final Setting<Color> moduleInfoOnColor = sgModuleInfo.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> moduleInfoOnColor = sgModuleInfo.add(new ColorSetting.Builder()
             .name("module-info-on-color")
             .description("Color when module is on.")
-            .defaultValue(new Color(25, 225, 25))
+            .defaultValue(new SettingColor(25, 225, 25))
             .build()
     );
 
-    private final Setting<Color> moduleInfoOffColor = sgModuleInfo.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> moduleInfoOffColor = sgModuleInfo.add(new ColorSetting.Builder()
             .name("module-info-off-color")
             .description("Color when module is off.")
-            .defaultValue(new Color(225, 25, 25))
+            .defaultValue(new SettingColor(225, 25, 25))
             .build()
     );
 
