@@ -38,7 +38,7 @@ public class EntityRenderDispatcherMixin {
 
         Chams chams = ModuleManager.INSTANCE.get(Chams.class);
 
-        if (!chams.shouldRender(entity) || !chams.isActive()) return;
+        if (chams.ignoreRender(entity) || !chams.isActive()) return;
 
         if (chams.throughWalls.get()) {
 //            GL11.glEnable(GL11.GL_POLYGON_OFFSET_FILL);
@@ -52,7 +52,7 @@ public class EntityRenderDispatcherMixin {
 
         Chams chams = ModuleManager.INSTANCE.get(Chams.class);
 
-        if (!chams.shouldRender(entity) || !chams.isActive()) return;
+        if (chams.ignoreRender(entity) || !chams.isActive()) return;
 
         if (chams.throughWalls.get()) {
 //            GL11.glEnable(GL11.GL_POLYGON_OFFSET_FILL);
