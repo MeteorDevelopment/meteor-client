@@ -5,9 +5,9 @@
 
 package minegame159.meteorclient.rendering;
 
+import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.render.ByteTexture;
 import minegame159.meteorclient.utils.render.color.Color;
-import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.texture.AbstractTexture;
 import org.lwjgl.BufferUtils;

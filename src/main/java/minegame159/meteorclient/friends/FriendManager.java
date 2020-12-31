@@ -7,9 +7,9 @@ package minegame159.meteorclient.friends;
 
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.EventStore;
-import minegame159.meteorclient.utils.render.color.Color;
-import minegame159.meteorclient.utils.misc.NbtUtils;
 import minegame159.meteorclient.utils.files.Savable;
+import minegame159.meteorclient.utils.misc.NbtUtils;
+import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;

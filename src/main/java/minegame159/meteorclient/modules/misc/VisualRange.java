@@ -11,8 +11,8 @@ import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.settings.StringSetting;
-import minegame159.meteorclient.utils.player.Chat;
 import minegame159.meteorclient.utils.entity.FakePlayerEntity;
+import minegame159.meteorclient.utils.player.Chat;
 import net.minecraft.entity.player.PlayerEntity;
 
 public class VisualRange extends ToggleModule {

@@ -21,8 +21,8 @@ import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.settings.StringSetting;
-import minegame159.meteorclient.utils.player.Chat;
 import minegame159.meteorclient.utils.network.MeteorExecutor;
+import minegame159.meteorclient.utils.player.Chat;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 
