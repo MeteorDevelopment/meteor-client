@@ -24,7 +24,7 @@ import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.misc.DiscordPresence;
 import minegame159.meteorclient.rendering.Fonts;
 import minegame159.meteorclient.rendering.MFont;
-import minegame159.meteorclient.utils.*;
+import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.entity.EntityUtils;
 import minegame159.meteorclient.utils.misc.input.KeyAction;
 import minegame159.meteorclient.utils.misc.input.KeyBinds;

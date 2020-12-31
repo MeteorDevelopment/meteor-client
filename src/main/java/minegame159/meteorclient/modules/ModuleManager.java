@@ -26,7 +26,7 @@ import minegame159.meteorclient.modules.render.*;
 import minegame159.meteorclient.modules.render.hud.HUD;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.utils.*;
+import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.files.Savable;
 import minegame159.meteorclient.utils.misc.input.Input;
 import minegame159.meteorclient.utils.misc.input.KeyAction;

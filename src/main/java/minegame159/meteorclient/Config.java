@@ -9,10 +9,10 @@ import com.g00fy2.versioncompare.Version;
 import minegame159.meteorclient.gui.GuiConfig;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.rendering.Fonts;
-import minegame159.meteorclient.utils.render.color.Color;
-import minegame159.meteorclient.utils.misc.NbtUtils;
-import minegame159.meteorclient.utils.files.Savable;
 import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.files.Savable;
+import minegame159.meteorclient.utils.misc.NbtUtils;
+import minegame159.meteorclient.utils.render.color.Color;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.nbt.CompoundTag;
 

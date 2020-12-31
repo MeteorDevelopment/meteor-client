@@ -7,8 +7,8 @@ package minegame159.meteorclient.macros;
 
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.EventStore;
-import minegame159.meteorclient.utils.misc.NbtUtils;
 import minegame159.meteorclient.utils.files.Savable;
+import minegame159.meteorclient.utils.misc.NbtUtils;
 import net.minecraft.nbt.CompoundTag;
 
 import java.io.File;

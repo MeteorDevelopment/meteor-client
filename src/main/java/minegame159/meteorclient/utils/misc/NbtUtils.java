@@ -5,7 +5,6 @@
 
 package minegame159.meteorclient.utils.misc;
 
-import minegame159.meteorclient.utils.misc.ISerializable;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;

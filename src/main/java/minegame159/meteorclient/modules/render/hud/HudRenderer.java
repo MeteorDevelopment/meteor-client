@@ -7,8 +7,8 @@ package minegame159.meteorclient.modules.render.hud;
 
 import minegame159.meteorclient.rendering.Fonts;
 import minegame159.meteorclient.rendering.MyFont;
-import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.render.color.Color;
 
 public class HudRenderer {
     private MyFont font;
