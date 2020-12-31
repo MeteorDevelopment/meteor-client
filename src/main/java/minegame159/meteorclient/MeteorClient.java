@@ -32,8 +32,12 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.options.KeyBinding;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
+import net.minecraft.util.Formatting;
 
 import java.io.File;
+import java.time.LocalDateTime;
 
 public class MeteorClient implements ClientModInitializer, Listenable {
     public static MeteorClient INSTANCE;
@@ -114,6 +118,7 @@ public class MeteorClient implements ClientModInitializer, Listenable {
     @EventHandler
     private final Listener<GameLeftEvent> onGameLeft = new Listener<>(event -> save());
 
+    private boolean done = false;
     @EventHandler
     private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
         Capes.tick();
@@ -125,6 +130,15 @@ public class MeteorClient implements ClientModInitializer, Listenable {
 
         if (Utils.canUpdate()) {
             mc.player.getActiveStatusEffects().values().removeIf(statusEffectInstance -> statusEffectInstance.getDuration() <= 0);
+        }
+
+        if (mc.world != null && mc.player != null && !done) {
+            LocalDateTime date1 = LocalDateTime.now();
+            if (date1.isAfter(LocalDateTime.of(2021, 1, 1, 0, 0, 0)) && date1.isBefore(LocalDateTime.of(2021, 1, 1, 1, 0, 0))) {
+                done = true;
+                Chat.info("%s%sH%sa%sp%sp%sy %sN%se%sw %sY%se%sa%sr%s!", Formatting.UNDERLINE, Formatting.DARK_RED, Formatting.RED, Formatting.GOLD, Formatting.YELLOW, Formatting.GREEN, Formatting.DARK_GREEN, Formatting.AQUA, Formatting.DARK_AQUA, Formatting.BLUE, Formatting.DARK_PURPLE, Formatting.LIGHT_PURPLE, Formatting.WHITE, Formatting.BLACK);
+                mc.world.playSound(mc.player.getBlockPos(), SoundEvents.ENTITY_PLAYER_LEVELUP, SoundCategory.PLAYERS, 1f, 1f, false);
+            }
         }
     });
 
