@@ -44,8 +44,8 @@ import java.util.stream.Collectors;
 
 public class BedAura extends ToggleModule {
     public enum Mode{
-        safe,
-        suicide
+        Safe,
+        Suicide
     }
 
     public BedAura(){
@@ -76,7 +76,7 @@ public class BedAura extends ToggleModule {
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("place-mode")
             .description("How beds get placed.")
-            .defaultValue(Mode.safe)
+            .defaultValue(Mode.Safe)
             .build()
     );
 
@@ -90,7 +90,7 @@ public class BedAura extends ToggleModule {
     private final Setting<Mode> clickMode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("break-mode")
             .description("How beds are broken.")
-            .defaultValue(Mode.safe)
+            .defaultValue(Mode.Safe)
             .build()
     );
 
@@ -213,7 +213,7 @@ public class BedAura extends ToggleModule {
         assert mc.interactionManager != null;
         delayLeft --;
         preSlot = -1;
-        if (mc.player.getHealth() + mc.player.getAbsorptionAmount() <= minHealth.get() && mode.get() != Mode.suicide) return;
+        if (mc.player.getHealth() + mc.player.getAbsorptionAmount() <= minHealth.get() && mode.get() != Mode.Suicide) return;
         if (selfToggle.get() && mc.world.getDimension().isBedWorking()) {
             Chat.warning(this, "You are in the overworld. Disabling!");
             this.toggle();
@@ -224,7 +224,7 @@ public class BedAura extends ToggleModule {
                 if (entity instanceof BedBlockEntity && Utils.distance(entity.getPos().getX(), entity.getPos().getY(), entity.getPos().getZ(), mc.player.getX(), mc.player.getY(), mc.player.getZ()) <= breakRange.get()) {
                     currentDamage = DamageCalcUtils.bedDamage(mc.player, Utils.vec3d(entity.getPos()));
                     if (currentDamage < maxDamage.get()
-                            || (mc.player.getHealth() + mc.player.getAbsorptionAmount() - currentDamage) < minHealth.get() || clickMode.get().equals(Mode.suicide)) {
+                            || (mc.player.getHealth() + mc.player.getAbsorptionAmount() - currentDamage) < minHealth.get() || clickMode.get().equals(Mode.Suicide)) {
                         mc.player.setSneaking(false);
                         mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, entity.getPos(), false));
                     }
@@ -371,7 +371,7 @@ public class BedAura extends ToggleModule {
                     if (isValid(posUp)) {
                         if (airPlace.get() || !mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
                             if (bestDamage < getBestDamage(target, vecPos.add(0.5, 1.5, 0.5))
-                                    && (DamageCalcUtils.bedDamage(mc.player, vecPos.add(0.5, 1.5, 0.5)) < minDamage.get() || mode.get() == Mode.suicide)) {
+                                    && (DamageCalcUtils.bedDamage(mc.player, vecPos.add(0.5, 1.5, 0.5)) < minDamage.get() || mode.get() == Mode.Suicide)) {
                                 bestBlock = vecPos;
                                 bestDamage = getBestDamage(target, bestBlock.add(0.5, 1.5, 0.5));
                             }

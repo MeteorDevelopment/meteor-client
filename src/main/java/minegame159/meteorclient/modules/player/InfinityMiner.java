@@ -36,10 +36,10 @@ import java.util.List;
  */
 public class InfinityMiner extends ToggleModule {
     public enum Mode {
-        TARGET,
-        REPAIR,
-        STILL,
-        HOME
+        Target,
+        Repair,
+        Still,
+        Home
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -90,10 +90,10 @@ public class InfinityMiner extends ToggleModule {
 
 
     public InfinityMiner() {
-        super(Category.Player, "infinity-miner", "Mine forever.");
+        super(Category.Player, "infinity-miner", "Allows you to essentially mine forever.");
     }
 
-    private Mode currentMode = Mode.STILL;
+    private Mode currentMode = Mode.Still;
     private Mode secondaryMode;
     private boolean baritoneRunning = false;
     private int playerX;
@@ -133,7 +133,7 @@ public class InfinityMiner extends ToggleModule {
             BaritoneAPI.getSettings().mineScanDroppedItems.value = true;
         baritoneRequestStop();
         baritoneRunning = false;
-        currentMode = Mode.STILL;
+        currentMode = Mode.Still;
         secondaryMode = null;
     }
 
@@ -142,45 +142,45 @@ public class InfinityMiner extends ToggleModule {
     private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
         try {
             if (mc.player == null) return;
-            if (!baritoneRunning && currentMode == Mode.STILL) {
-                if (autoWalkHome.get() && isInventoryFull() && secondaryMode != Mode.HOME) {
+            if (!baritoneRunning && currentMode == Mode.Still) {
+                if (autoWalkHome.get() && isInventoryFull() && secondaryMode != Mode.Home) {
                     baritoneRequestPathHome();
                     return;
                 }
-                currentMode = (isTool() && getCurrentDamage() <= durabilityThreshold.get()) ? Mode.REPAIR : Mode.TARGET;
-                if (currentMode == Mode.REPAIR) baritoneRequestMineRepairBlock();
+                currentMode = (isTool() && getCurrentDamage() <= durabilityThreshold.get()) ? Mode.Repair : Mode.Target;
+                if (currentMode == Mode.Repair) baritoneRequestMineRepairBlock();
                 else baritoneRequestMineTargetBlock();
-            } else if (autoWalkHome.get() && isInventoryFull() && secondaryMode != Mode.HOME)
+            } else if (autoWalkHome.get() && isInventoryFull() && secondaryMode != Mode.Home)
                 baritoneRequestPathHome();
             else if (!autoWalkHome.get() && isInventoryFull() && autoLogOut.get()) {
                 this.toggle();
                 requestLogout(currentMode);
-            } else if (currentMode == Mode.REPAIR) {
+            } else if (currentMode == Mode.Repair) {
                 int REPAIR_BUFFER = 15;
                 if (BaritoneAPI.getSettings().mineScanDroppedItems.value)
                     BaritoneAPI.getSettings().mineScanDroppedItems.value = false;
                 if (isTool() && getCurrentDamage() >= mc.player.getMainHandStack().getMaxDamage() - REPAIR_BUFFER) {
-                    if (secondaryMode != Mode.HOME) {
-                        currentMode = Mode.TARGET;
+                    if (secondaryMode != Mode.Home) {
+                        currentMode = Mode.Target;
                         baritoneRequestMineTargetBlock();
                     } else {
-                        currentMode = Mode.HOME;
+                        currentMode = Mode.Home;
                         baritoneRequestPathHome();
                     }
                 }
-            } else if (currentMode == Mode.TARGET) {
+            } else if (currentMode == Mode.Target) {
                 if (!BaritoneAPI.getSettings().mineScanDroppedItems.value)
                     BaritoneAPI.getSettings().mineScanDroppedItems.value = true;
                 if (isTool() && getCurrentDamage() <= durabilityThreshold.get() * mc.player.getMainHandStack().getMaxDamage()) {
-                    currentMode = Mode.REPAIR;
+                    currentMode = Mode.Repair;
                     baritoneRequestMineRepairBlock();
                 } else if (autoWalkHome.get() && isInventoryFull()) baritoneRequestPathHome();
                 else if (!autoWalkHome.get() && isInventoryFull() && autoWalkHome.get()) requestLogout(currentMode);
-            } else if (currentMode == Mode.HOME) {
+            } else if (currentMode == Mode.Home) {
                 if (Math.abs(mc.player.getY() - playerY) <= .5 && Math.abs(mc.player.getX() - playerX) <= .5 && Math.abs(mc.player.getZ() - playerZ) <= .5) {
                     if (autoLogOut.get()) requestLogout(currentMode);
                     this.toggle();
-                } else if (isTool() && getCurrentDamage() <= durabilityThreshold.get()) currentMode = Mode.REPAIR;
+                } else if (isTool() && getCurrentDamage() <= durabilityThreshold.get()) currentMode = Mode.Repair;
             }
         } catch (Exception ignored) {
         }
@@ -215,14 +215,14 @@ public class InfinityMiner extends ToggleModule {
     private void baritoneRequestStop() {
         BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
         baritoneRunning = false;
-        currentMode = Mode.STILL;
+        currentMode = Mode.Still;
     }
 
     private void baritoneRequestPathHome() {
         if (autoWalkHome.get()) {
             baritoneRequestStop();
-            secondaryMode = Mode.HOME;
-            currentMode = Mode.HOME;
+            secondaryMode = Mode.Home;
+            currentMode = Mode.Home;
             BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalBlock(playerX, playerY, playerZ));
         }
     }
@@ -252,7 +252,7 @@ public class InfinityMiner extends ToggleModule {
 
     private void requestLogout(Mode mode) {
         if (mc.player != null) {
-            if (mode == Mode.HOME)
+            if (mode == Mode.Home)
                 mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(new LiteralText("Infinity Miner: Inventory is Full and You Are Home")));
             else
                 mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(new LiteralText("Infinity Miner: Inventory is Full")));
@@ -283,7 +283,7 @@ public class InfinityMiner extends ToggleModule {
     }
 
     public Block getCurrentTarget() {
-        return (currentMode == Mode.REPAIR) ? repairBlock.get() : targetBlock.get();
+        return (currentMode == Mode.Repair) ? repairBlock.get() : targetBlock.get();
     }
 
     public int[] getHomeCoords() {

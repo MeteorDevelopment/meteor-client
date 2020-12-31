@@ -23,7 +23,6 @@ import minegame159.meteorclient.utils.misc.Pool;
 import minegame159.meteorclient.utils.player.DamageCalcUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.player.PlayerUtils;
-import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
@@ -42,17 +41,18 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.*;
 import net.minecraft.world.RaycastContext;
+import minegame159.meteorclient.utils.render.color.Color;
 
 import java.util.*;
 
 public class CrystalAura extends ToggleModule {
     public enum Mode{
-        safe,
-        suicide
+        Safe,
+        Suicide
     }
     public enum TargetMode{
-        Most_Damage,
-        Highest_x_Damages
+        MostDamage,
+        HighestXDamages
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -89,14 +89,14 @@ public class CrystalAura extends ToggleModule {
     private final Setting<Mode> placeMode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("place-mode")
             .description("The type of placement mode for crystals.")
-            .defaultValue(Mode.safe)
+            .defaultValue(Mode.Safe)
             .build()
     );
 
     private final Setting<Mode> breakMode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("break-mode")
             .description("The type of break mode for crystals.")
-            .defaultValue(Mode.safe)
+            .defaultValue(Mode.Safe)
             .build()
     );
 
@@ -126,13 +126,13 @@ public class CrystalAura extends ToggleModule {
     private final Setting<TargetMode> targetMode = sgGeneral.add(new EnumSetting.Builder<TargetMode>()
             .name("target-mode")
             .description("The way how to you do target multiple targets.")
-            .defaultValue(TargetMode.Highest_x_Damages)
+            .defaultValue(TargetMode.HighestXDamages)
             .build()
     );
 
     private final Setting<Integer> numberOfDamages = sgGeneral.add(new IntSetting.Builder()
             .name("number-of-damages")
-            .description("The number to replace 'x' with in Highest_x_Damages.")
+            .description("The number to replace 'x' with in HighestXDamages.")
             .defaultValue(3)
             .min(2)
             .sliderMax(10)
@@ -437,7 +437,7 @@ public class CrystalAura extends ToggleModule {
             }
         }
         shouldFacePlace = false;
-        if (getTotalHealth(mc.player) <= minHealth.get() && placeMode.get() != Mode.suicide) return;
+        if (getTotalHealth(mc.player) <= minHealth.get() && placeMode.get() != Mode.Suicide) return;
         if (target != null && heldCrystal != null && placeDelayLeft <= 0 && mc.world.raycast(new RaycastContext(target.getPos(), heldCrystal.getPos(), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, target)).getType()
                 == HitResult.Type.MISS) locked = false;
         if (heldCrystal == null) locked = false;
@@ -535,7 +535,7 @@ public class CrystalAura extends ToggleModule {
                 .filter(Entity::isAlive)
                 .filter(entity -> shouldBreak((EndCrystalEntity) entity))
                 .filter(entity -> ignoreWalls.get() || mc.player.canSee(entity))
-                .filter(entity -> !(breakMode.get() == Mode.safe)
+                .filter(entity -> !(breakMode.get() == Mode.Safe)
                         || (getTotalHealth(mc.player) - DamageCalcUtils.crystalDamage(mc.player, entity.getPos()) > minHealth.get()
                         && DamageCalcUtils.crystalDamage(mc.player, entity.getPos()) < maxDamage.get()))
                 .max(Comparator.comparingDouble(o -> DamageCalcUtils.crystalDamage(target, o.getPos())))
@@ -553,7 +553,7 @@ public class CrystalAura extends ToggleModule {
                 .filter(Entity::isAlive)
                 .filter(entity -> shouldBreak((EndCrystalEntity) entity))
                 .filter(entity -> ignoreWalls.get() || mc.player.canSee(entity))
-                .filter(entity -> !(breakMode.get() == Mode.safe)
+                .filter(entity -> !(breakMode.get() == Mode.Safe)
                         || (getTotalHealth(mc.player) - DamageCalcUtils.crystalDamage(mc.player, entity.getPos()) > minHealth.get()
                         && DamageCalcUtils.crystalDamage(mc.player, entity.getPos()) < maxDamage.get()))
                 .forEach(entity -> {
@@ -579,7 +579,7 @@ public class CrystalAura extends ToggleModule {
     private EndCrystalEntity findBestCrystal(Map<EndCrystalEntity, List<Double>> map){
         bestDamage = 0;
         double currentDamage = 0;
-        if (targetMode.get() == TargetMode.Highest_x_Damages){
+        if (targetMode.get() == TargetMode.HighestXDamages){
             for (Map.Entry<EndCrystalEntity, List<Double>> entry : map.entrySet()){
                 for (int i = 0; i < entry.getValue().size() && i < numberOfDamages.get(); i++){
                     currentDamage += entry.getValue().get(i);
@@ -590,7 +590,7 @@ public class CrystalAura extends ToggleModule {
                 }
                 currentDamage = 0;
             }
-        } else if (targetMode.get() == TargetMode.Most_Damage){
+        } else if (targetMode.get() == TargetMode.MostDamage){
             for (Map.Entry<EndCrystalEntity, List<Double>> entry : map.entrySet()){
                 for (int i = 0; i < entry.getValue().size(); i++){
                     currentDamage += entry.getValue().get(i);
@@ -734,7 +734,7 @@ public class CrystalAura extends ToggleModule {
                         continue;
                     }
                     if(isValid(new BlockPos(pos)) && (DamageCalcUtils.crystalDamage(mc.player, pos.add(0.5, 1, 0.5)) < maxDamage.get()
-                            || placeMode.get() == Mode.suicide)){
+                            || placeMode.get() == Mode.Suicide)){
                         if (!strict.get() || isEmpty(new BlockPos(pos.add(0, 2, 0)))) {
                             if (!multiTarget.get()) {
                                 if (bestDamage < DamageCalcUtils.crystalDamage(target, pos.add(0.5, 1, 0.5))) {
@@ -793,7 +793,7 @@ public class CrystalAura extends ToggleModule {
 
     private boolean getDamagePlace(BlockPos pos){
         assert mc.player != null;
-        return placeMode.get() == Mode.suicide || DamageCalcUtils.crystalDamage(mc.player, new Vec3d(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5)) <= maxDamage.get();
+        return placeMode.get() == Mode.Suicide || DamageCalcUtils.crystalDamage(mc.player, new Vec3d(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5)) <= maxDamage.get();
     }
 
     private Vec3d findOpen(LivingEntity target){
@@ -852,7 +852,7 @@ public class CrystalAura extends ToggleModule {
         assert mc.player != null;
         Vec3d crystalPos = new Vec3d(target.getBlockPos().getX() + 0.5, target.getBlockPos().getY(), target.getBlockPos().getZ() + 0.5);
         return isValid(target.getBlockPos().add(x, -1, z)) && mc.world.getBlockState(target.getBlockPos().add(x/2, 0, z/2)).getBlock() != Blocks.BEDROCK
-                && (!(breakMode.get() == Mode.safe) || (getTotalHealth(mc.player) - DamageCalcUtils.crystalDamage(mc.player, crystalPos.add(x, 0, z)) > minHealth.get()
+                && (!(breakMode.get() == Mode.Safe) || (getTotalHealth(mc.player) - DamageCalcUtils.crystalDamage(mc.player, crystalPos.add(x, 0, z)) > minHealth.get()
                 && DamageCalcUtils.crystalDamage(mc.player, crystalPos.add(x, 0, z)) < maxDamage.get()))
                 && Math.sqrt(mc.player.getBlockPos().getSquaredDistance(new Vec3i(target.getBlockPos().getX() + x, target.getBlockPos().getY() - 1, target.getBlockPos().getZ() + z))) < placeRange.get()
                 && mc.world.raycast(new RaycastContext(target.getPos(), target.getPos().add(x, 0, z), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, target)).getType()

@@ -45,7 +45,7 @@ public class MiddleClickExtra extends ToggleModule {
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("mode")
-            .description("What to do when you middle click.")
+            .description("Which item to use when you middle click.")
             .defaultValue(Mode.Pearl)
             .build()
     );
