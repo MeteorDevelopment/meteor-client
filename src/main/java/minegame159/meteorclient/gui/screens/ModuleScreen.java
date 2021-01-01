@@ -60,12 +60,12 @@ public class ModuleScreen extends WindowScreen {
             // Bind
             WTable bindList = add(new WTable()).fillX().expandX().getWidget();
             bindLabel = bindList.add(new WLabel(getBindLabelText())).getWidget();
-            bindList.add(new WButton("Set bind.")).getWidget().action = () -> {
+            bindList.add(new WButton("Set bind")).getWidget().action = () -> {
                 ModuleManager.INSTANCE.setModuleToBind(module);
                 canResetBind = false;
-                bindLabel.setText("Bind: press any key.");
+                bindLabel.setText("Bind: press any key");
             };
-            bindList.add(new WButton("Reset bind.")).getWidget().action = () -> {
+            bindList.add(new WButton("Reset bind")).getWidget().action = () -> {
                 if (canResetBind) {
                     module.setKey(-1);
                     bindLabel.setText(getBindLabelText());
