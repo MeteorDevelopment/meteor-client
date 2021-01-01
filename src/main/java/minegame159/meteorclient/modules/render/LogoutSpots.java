@@ -89,7 +89,7 @@ public class LogoutSpots extends ToggleModule {
     );
 
     private final Setting<SettingColor> nameBackgroundColor = sgRender.add(new ColorSetting.Builder()
-            .name("name-backgroun-color")
+            .name("name-background-color")
             .description("The name background color.")
             .defaultValue(new SettingColor(0, 0, 0, 75))
             .build()
