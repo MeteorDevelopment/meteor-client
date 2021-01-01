@@ -54,7 +54,7 @@ public class Swarm extends ToggleModule {
 
     private final Setting<String> ipAddress = sgGeneral.add(new StringSetting.Builder()
             .name("ip-address")
-            .description("Ip address of the Queen.")
+            .description("The IP address of the Queen.")
             .defaultValue("localhost")
             .build());
 
@@ -92,10 +92,10 @@ public class Swarm extends ToggleModule {
         setLabel();
         table.row();
         WTable table2 = new WTable();
-        WButton runServer = new WButton("Run Server(Q)");
+        WButton runServer = new WButton("Run Server (Q)");
         runServer.action = this::runServer;
         table2.add(runServer);
-        WButton connect = new WButton("Connect(S)");
+        WButton connect = new WButton("Connect (S)");
         connect.action = this::runClient;
         table2.add(connect);
         WButton reset = new WButton("Reset");
@@ -172,7 +172,7 @@ public class Swarm extends ToggleModule {
     }
 
     public void mine() {
-        Chat.info("Swarm: Starting Mining Job.");
+        Chat.info("Swarm: Starting mining job.");
         if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing())
             BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
         BaritoneAPI.getProvider().getPrimaryBaritone().getMineProcess().mine(targetBlock.getBlock());
@@ -199,7 +199,7 @@ public class Swarm extends ToggleModule {
                     try {
                         socket = new Socket(ipAddress, serverPort.get());
                     } catch (Exception ignored) {
-                        Chat.info("Server not found. Retrying in 5 seconds.");
+                        Chat.info("Server not found. Attempting to reconnect in 5 seconds.");
                     }
                     if (socket == null) {
                         Thread.sleep(5000);
@@ -223,7 +223,7 @@ public class Swarm extends ToggleModule {
                     inputStream.close();
                 }
             } catch (Exception e) {
-                Chat.error("There is in error in your connection to the server.");
+                Chat.error("There is an error in your connection to the server.");
                 disconnect();
                 client = null;
             } finally {
@@ -231,7 +231,7 @@ public class Swarm extends ToggleModule {
                     try {
                         socket.close();
                     } catch (Exception e) {
-                        Chat.error("There is in error in your connection to the server.");
+                        Chat.error("There is an error in your connection to the server.");
                     }
                 }
             }
@@ -279,7 +279,7 @@ public class Swarm extends ToggleModule {
             for (int i = 0; i < clientConnections.length; i++) {
                 if (this.clientConnections[i] == null) {
                     this.clientConnections[i] = new SubServer(connection);
-                    Chat.info("Swarm Server: New Slave Connected.");
+                    Chat.info("Swarm Server: New slave connected.");
                     break;
                 }
             }
@@ -397,22 +397,22 @@ public class Swarm extends ToggleModule {
         public SwarmHelpScreen() {
             super("Swarm Help", true);
             textTable = new WTable();
-            introButton = new WButton("(1)Introduction");
+            introButton = new WButton("(1) Introduction");
             introButton.action = () -> {
                 buildTextTable(swarmGuideIntro);
                 initWidgets();
             };
-            ipConfigButton = new WButton("(2)Configuration");
+            ipConfigButton = new WButton("(2) Configuration");
             ipConfigButton.action = () -> {
                 buildTextTable(swarmGuideConfig);
                 initWidgets();
             };
-            queenButton = new WButton("(3)Queen");
+            queenButton = new WButton("(3) Queen");
             queenButton.action = () -> {
                 buildTextTable(swarmGuideQueen);
                 initWidgets();
             };
-            slaveButton = new WButton("(4)Slave");
+            slaveButton = new WButton("(4) Slave");
             slaveButton.action = () -> {
                 buildTextTable(swarmGuideSlave);
                 initWidgets();
@@ -454,23 +454,23 @@ public class Swarm extends ToggleModule {
             "same computer however with some additional configuration it will work across your local network",
             "or the broader internet.",
             "",
-            "All swarm commands are proceeded by '.s'"
+            "All swarm commands should be proceeded by '.s'"
     );
 
     private final static List<String> swarmGuideConfig = Arrays.asList(
-            "LocalHost Connections:",
+            "Localhost Connections:",
             " If the Queen and Slave accounts are all being run on the same computer, there is no need to change anything",
             " here if the configured port is not being used for anything else.",
             "",
             "Local Connections:",
-            " If the Queen and Slave accounts are not on the same computer, but on the same wifi/ethernet network",
-            " you will need to change the ip-address on each Slave client to the ipv4/6 address of the computer the",
-            " queen instance is running on. To find your ipv4 address on windows, open cmd and enter the command ipconfig.",
+            " If the Queen and Slave accounts are not on the same computer, but on the same WiFi/Ethernet network,",
+            " you will need to change the ip-address on each Slave client to the IPv4/6 address of the computer the",
+            " Queen instance is running on. To find your IPv4 address on Windows, open CMD and enter the command ipconfig.",
             "",
             "Broad-Internet Connections:",
             " If you are attempting to make a connection over the broader internet a port forward will be required on the",
             " queen account. I will not cover how to perform a port forward, look it up. You will need administrator access",
-            " to your router. Route all traffic through your configured port to the ipv4 address of the computer which is",
+            " to your router. Route all traffic through your configured port to the IPv4 address of the computer which is",
             " hosting the queen account. After you have successfully port-forwarded on the queen instance, change the ip",
             " address of the slave accounts to the public-ip address of the queen account. To find your public-ip address",
             " just google 'what is my ip'. NEVER SHARE YOUR PUBLIC IP WITH ANYONE YOU DO NOT TRUST. Assuming you setup",
@@ -486,7 +486,7 @@ public class Swarm extends ToggleModule {
     );
 
     private final static List<String> swarmGuideSlave = Arrays.asList(
-            "Connecting your Slaves:",
+            "Connecting your slaves:",
             " For each slave account, assuming you correctly configured the ip and port",
             " in Step 1 simply press the button labeled 'Connect (S)', or enter the command '.s slave'"
     );

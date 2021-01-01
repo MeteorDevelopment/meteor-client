@@ -28,7 +28,7 @@ public class AutoMount extends ToggleModule {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<Boolean> donkeys  = sgGeneral.add(new BoolSetting.Builder().name("donkey").description("DoNkE").defaultValue(false).build());
+    private final Setting<Boolean> donkeys  = sgGeneral.add(new BoolSetting.Builder().name("donkey").description("Donkey").defaultValue(false).build());
     private final Setting<Boolean> llamas  = sgGeneral.add(new BoolSetting.Builder().name("llama").description("Llama").defaultValue(false).build());
     private final Setting<Boolean> boats  = sgGeneral.add(new BoolSetting.Builder().name("boat").description("Boat").defaultValue(false).build());
     private final Setting<Boolean> minecarts  = sgGeneral.add(new BoolSetting.Builder().name("minecart").description("Minecart").defaultValue(false).build());

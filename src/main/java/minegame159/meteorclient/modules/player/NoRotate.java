@@ -19,7 +19,7 @@ public class NoRotate extends ToggleModule {
     @EventHandler
     private final Listener<SendPacketEvent> onSendPacket = new Listener<>(event -> {
         if (event.packet instanceof PlayerMoveC2SPacket) {
-            if (ModuleManager.INSTANCE.get(XpBottleThrower.class).isActive() || ModuleManager.INSTANCE.get(Quiver.class).isActive()) return;
+            if (ModuleManager.INSTANCE.get(EXPThrower.class).isActive() || ModuleManager.INSTANCE.get(Quiver.class).isActive()) return;
             ((IPlayerMoveC2SPacket) event.packet).setPitch(mc.player.getPitch(0));
             ((IPlayerMoveC2SPacket) event.packet).setYaw(mc.player.getYaw(1));
         }
