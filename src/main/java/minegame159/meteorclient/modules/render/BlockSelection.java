@@ -25,7 +25,7 @@ public class BlockSelection extends ToggleModule {
 
     private final Setting<Boolean> advanced = sgGeneral.add(new BoolSetting.Builder()
             .name("advanced")
-            .description("Shows a more advanced outline.")
+            .description("Shows a more advanced outline on different types of shape blocks.")
             .defaultValue(true)
             .build()
     );
