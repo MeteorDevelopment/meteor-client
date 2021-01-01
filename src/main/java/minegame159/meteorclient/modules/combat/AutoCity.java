@@ -38,7 +38,7 @@ public class AutoCity extends ToggleModule {
     private final Setting<Boolean> chatInfo = sgGeneral.add(new BoolSetting.Builder()
             .name("chat-info")
             .description("Sends you information about the module.")
-            .defaultValue(false)
+            .defaultValue(true)
             .build()
     );
 
