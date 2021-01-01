@@ -49,7 +49,7 @@ public class FastUse extends ToggleModule {
     );
 
     public FastUse() {
-        super(Category.Player, "fast-use", "Uses items extremely quickly.");
+        super(Category.Player, "fast-use", "Allows you to use items at very high speeds.");
     }
 
     @EventHandler

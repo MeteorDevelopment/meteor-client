@@ -17,7 +17,7 @@ import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.Hand;
 
-public class XpBottleThrower extends ToggleModule {
+public class EXPThrower extends ToggleModule {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
@@ -28,8 +28,8 @@ public class XpBottleThrower extends ToggleModule {
             .build()
     );
 
-    public XpBottleThrower() {
-        super(Category.Player, "xp-bottle-thrower", "Automatically throws XP bottles in your hotbar.");
+    public EXPThrower() {
+        super(Category.Player, "exp-thrower", "Automatically throws XP bottles in your hotbar.");
     }
 
     @EventHandler
