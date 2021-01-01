@@ -52,7 +52,7 @@ public class Jesus extends ToggleModule {
 
     private final Setting<Boolean> disableOnSneak = sgGeneral.add(new BoolSetting.Builder()
             .name("disable-on-sneak")
-            .description("Let you go under the liquid when your sneak key is held.")
+            .description("Lets you go under the liquid when your sneak key is held.")
             .defaultValue(true)
             .build()
     );
