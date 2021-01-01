@@ -10,6 +10,6 @@ import minegame159.meteorclient.modules.ToggleModule;
 
 public class UnfocusedCPU extends ToggleModule {
     public UnfocusedCPU() {
-        super(Category.Misc, "unfocused-CPU", "Will not render anything when your Minecraft window is not focused.");
+        super(Category.Render, "unfocused-CPU", "Will not render anything when your Minecraft window is not focused.");
     }
 }
