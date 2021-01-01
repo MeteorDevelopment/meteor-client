@@ -27,7 +27,7 @@ public class Trigger extends ToggleModule {
     );
 
     public Trigger() {
-        super(Category.Combat, "trigger", "Automatically attacks when you look at entities.");
+        super(Category.Combat, "trigger", "Automatically swings when you look at entities.");
     }
 
     @EventHandler

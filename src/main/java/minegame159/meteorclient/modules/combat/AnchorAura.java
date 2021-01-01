@@ -140,7 +140,7 @@ public class AnchorAura extends ToggleModule {
         placeDelayLeft --;
         breakDelayLeft --;
         if (mc.world.getDimension().isRespawnAnchorWorking()) {
-            Chat.info(this, "You are not in the Overworld. (highlight)Disabling(default)!");
+            Chat.info(this, "You are not in the Overworld... (highlight)disabling(default)!");
             this.toggle();
             return;
         }

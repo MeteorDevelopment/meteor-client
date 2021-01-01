@@ -27,14 +27,14 @@ public class Trail extends ToggleModule {
 
     private final Setting<Boolean> pause = sgGeneral.add(new BoolSetting.Builder()
             .name("pause-when-stationary")
-            .description("Won't add particles when you aren't moving.")
+            .description("Whether or not to add particles when you are not moving.")
             .defaultValue(true)
             .build()
     );
 
 
     public Trail() {
-        super(Category.Render, "trail", "Renders a trail behind your player");
+        super(Category.Render, "trail", "Renders a trail behind your player.");
     }
 
     @EventHandler

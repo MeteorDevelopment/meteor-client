@@ -17,7 +17,7 @@ import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.Utils;
 
-public class AutoClick extends ToggleModule {
+public class AutoClicker extends ToggleModule {
 
     public enum Mode {
         Hold,
@@ -57,7 +57,7 @@ public class AutoClick extends ToggleModule {
 
     private int timer;
 
-    public AutoClick() {
+    public AutoClicker() {
         super(Category.Player, "auto-click", "Automatically clicks.");
     }
 
