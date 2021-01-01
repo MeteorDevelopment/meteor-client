@@ -215,7 +215,7 @@ public class BedAura extends ToggleModule {
         preSlot = -1;
         if (mc.player.getHealth() + mc.player.getAbsorptionAmount() <= minHealth.get() && mode.get() != Mode.Suicide) return;
         if (selfToggle.get() && mc.world.getDimension().isBedWorking()) {
-            Chat.warning(this, "You are in the Overworld.. (highlight)disabling(default)!");
+            Chat.warning(this, "You are in the Overworld... (highlight)disabling(default)!");
             this.toggle();
             return;
         }
