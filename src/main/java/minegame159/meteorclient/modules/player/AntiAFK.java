@@ -24,7 +24,7 @@ import java.util.Random;
 public class AntiAFK extends ToggleModule {
 
     public AntiAFK() {
-        super(Category.Player, "Anti-Afk", "Performs different actions to prevent getting kicked for AFK.");
+        super(Category.Player, "anti-afk", "Performs different actions to prevent getting kicked for AFK.");
     }
 
     private final SettingGroup sgActions = settings.createGroup("Actions");
