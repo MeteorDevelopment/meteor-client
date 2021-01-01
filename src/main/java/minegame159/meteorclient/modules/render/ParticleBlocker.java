@@ -25,7 +25,7 @@ public class ParticleBlocker extends ToggleModule {
     );
 
     public ParticleBlocker() {
-        super(Category.Render, "particle-blocker", "Stops selected particles from rendering");
+        super(Category.Render, "particle-blocker", "Stops specified particles from rendering.");
     }
 
     @EventHandler
