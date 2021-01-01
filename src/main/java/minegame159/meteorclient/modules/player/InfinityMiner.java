@@ -34,6 +34,7 @@ import java.util.List;
 /**
  * @author Inclement
  */
+
 public class InfinityMiner extends ToggleModule {
     public enum Mode {
         Target,

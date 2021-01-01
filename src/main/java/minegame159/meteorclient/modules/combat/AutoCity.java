@@ -23,7 +23,7 @@ public class AutoCity extends ToggleModule {
 
     private final Setting<Boolean> checkBelow = sgGeneral.add(new BoolSetting.Builder()
             .name("check-below")
-            .description("Checks if there is an obsidian/bedrock block below the surround block for you to place crystals on.")
+            .description("Checks if there is obsidian or bedrock below the surround block for you to place crystals on.")
             .defaultValue(true)
             .build()
     );

@@ -18,7 +18,7 @@ import minegame159.meteorclient.events.game.GameLeftEvent;
 import minegame159.meteorclient.events.game.OpenScreenEvent;
 import minegame159.meteorclient.events.meteor.KeyEvent;
 import minegame159.meteorclient.modules.combat.*;
-import minegame159.meteorclient.modules.misc.Timer;
+import minegame159.meteorclient.modules.movement.Timer;
 import minegame159.meteorclient.modules.misc.*;
 import minegame159.meteorclient.modules.movement.*;
 import minegame159.meteorclient.modules.player.*;
@@ -339,7 +339,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new FakePlayer());
         addModule(new NameProtect());
         addModule(new InfinityMiner());
-        addModule(new AntiAfk());
+        addModule(new AntiAFK());
         addModule(new NoInteract());
         addModule(new NoRotate());
         addModule(new Trail());
@@ -373,6 +373,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new ClickTP());
         addModule(new EntitySpeed());
         addModule(new ReverseStep());
+        addModule(new Timer());
     }
 
     private void initRender() {
@@ -422,14 +423,13 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new PacketCanceller());
         addModule(new EntityLogger());
         addModule(new EChestPreview());
-        addModule(new Timer());
         addModule(new MessageAura());
         addModule(new Nuker());
         addModule(new SoundBlocker());
         addModule(new AntiPacketKick());
         addModule(new Announcer());
         addModule(new BetterChat());
-        addModule(new OffHandCrash());
+        addModule(new OffhandCrash());
         addModule(new LiquidFiller());
         addModule(new VisualRange());
         addModule(new AutoBreed());

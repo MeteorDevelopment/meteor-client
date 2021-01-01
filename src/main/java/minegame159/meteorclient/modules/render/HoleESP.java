@@ -49,6 +49,8 @@ public class HoleESP extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgColors = settings.createGroup("Colors");
 
+    // General
+
     private final Setting<Mode> renderMode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("render-mode")
             .description("The rendering mode.")
@@ -96,6 +98,8 @@ public class HoleESP extends ToggleModule {
             .min(0)
             .build()
     );
+
+    // Colors
 
     private final Setting<Boolean> depthTest = sgColors.add(new BoolSetting.Builder()
             .name("glow-depth-test")
