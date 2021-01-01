@@ -35,6 +35,13 @@ public class AutoCity extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> chatInfo = sgGeneral.add(new BoolSetting.Builder()
+            .name("chat-info")
+            .description("Sends you information about the module.")
+            .defaultValue(false)
+            .build()
+    );
+
     public AutoCity() {
         super(Category.Combat, "auto-city", "Automatically cities a target by mining the nearest obsidian next to them.");
     }
@@ -46,12 +53,12 @@ public class AutoCity extends ToggleModule {
         BlockPos mineTarget = CityUtils.getTargetBlock(checkBelow.get());
 
         if (target == null || mineTarget == null) {
-            Chat.error(this, "No target block found… disabling.");
+            if (chatInfo.get()) Chat.error(this, "No target block found… disabling.");
         } else {
-            Chat.info(this, "Attempting to city " + target.getGameProfile().getName());
+            if (chatInfo.get()) Chat.info(this, "Attempting to city " + target.getGameProfile().getName());
 
             if (MathHelper.sqrt(mc.player.squaredDistanceTo(mineTarget.getX(), mineTarget.getY(), mineTarget.getZ())) > mc.interactionManager.getReachDistance()) {
-                Chat.error(this, "Target block out of reach… disabling.");
+                if (chatInfo.get()) Chat.error(this, "Target block out of reach… disabling.");
                 toggle();
                 return;
             }
@@ -67,7 +74,7 @@ public class AutoCity extends ToggleModule {
             }
 
             if (pickSlot == -1) {
-                Chat.error(this, "No pick found… disabling.");
+                if (chatInfo.get()) Chat.error(this, "No pick found… disabling.");
                 toggle();
                 return;
             }
@@ -84,7 +91,7 @@ public class AutoCity extends ToggleModule {
 
             if (support.get() && obbySlot != -1 && mc.world.getBlockState(mineTarget.down(1)).isAir()) {
                 PlayerUtils.placeBlock(mineTarget.down(1), obbySlot, Hand.MAIN_HAND);
-            } else if (support.get() && obbySlot == -1) Chat.warning(this, "No obsidian found for support, mining anyway.");
+            } else if (support.get() && obbySlot == -1) if (chatInfo.get()) Chat.warning(this, "No obsidian found for support, mining anyway.");
 
             mc.player.inventory.selectedSlot = pickSlot;
 

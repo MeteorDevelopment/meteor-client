@@ -51,6 +51,13 @@ public class Quiver extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> chatInfo = sgGeneral.add(new BoolSetting.Builder()
+            .name("chat-info")
+            .description("Sends you information about the module.")
+            .defaultValue(false)
+            .build()
+    );
+
     public Quiver() {
         super(Category.Combat, "quiver", "Automatically shoots positive effect arrows at you.");
     }
@@ -92,7 +99,7 @@ public class Quiver extends ToggleModule {
         int bowSlot = findBow();
 
         if (bowSlot == -1) {
-            Chat.warning(this, "No bow found… disabling.");
+            if (chatInfo.get()) Chat.error(this, "No bow found… disabling.");
             toggle();
             return;
         } else mc.player.inventory.selectedSlot = bowSlot;
@@ -112,7 +119,7 @@ public class Quiver extends ToggleModule {
         if (speedSlot != -1) arrowsToShoot++;
 
         if (arrowsToShoot == 0) {
-            Chat.warning(this, "No appropriate arrows found… disabling.");
+            if (chatInfo.get()) Chat.error(this, "No appropriate arrows found… disabling.");
             toggle();
             return;
         }
@@ -142,7 +149,7 @@ public class Quiver extends ToggleModule {
         }
 
         if (shotStrength && shotSpeed && canStop) {
-            Chat.info(this, "Quiver complete… disabling.");
+            if (chatInfo.get()) Chat.info(this, "Quiver complete… disabling.");
             toggle();
             return;
         }
@@ -151,14 +158,14 @@ public class Quiver extends ToggleModule {
             if (!shooting && !shotStrength && foundStrength) {
                 shoot(strengthSlot);
                 shootingArrow = ArrowType.Strength;
-                Chat.info(this, "Quivering a strength arrow.");
+                if (chatInfo.get()) Chat.info(this, "Quivering a strength arrow.");
                 shotStrength = true;
             }
 
             if (!shooting && !shotSpeed && foundSpeed && shotStrength) {
                 shoot(speedSlot);
                 shootingArrow = ArrowType.Speed;
-                Chat.info(this, "Quivering a speed arrow.");
+                if (chatInfo.get()) Chat.info(this, "Quivering a speed arrow.");
                 shotSpeed = true;
             }
 
