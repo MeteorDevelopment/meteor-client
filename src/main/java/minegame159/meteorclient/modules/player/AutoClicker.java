@@ -58,7 +58,7 @@ public class AutoClicker extends ToggleModule {
     private int timer;
 
     public AutoClicker() {
-        super(Category.Player, "auto-click", "Automatically clicks.");
+        super(Category.Player, "auto-clicker", "Automatically clicks.");
     }
 
     @Override
