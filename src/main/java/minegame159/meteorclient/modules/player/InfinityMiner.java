@@ -18,7 +18,7 @@ import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.modules.combat.AutoLog;
-import minegame159.meteorclient.modules.movement.GuiMove;
+import minegame159.meteorclient.modules.movement.GUIMove;
 import minegame159.meteorclient.modules.movement.Jesus;
 import minegame159.meteorclient.modules.movement.NoFall;
 import minegame159.meteorclient.settings.*;
@@ -247,7 +247,7 @@ public class InfinityMiner extends ToggleModule {
                 ModuleManager.INSTANCE.get(AutoLog.class),
                 ModuleManager.INSTANCE.get(AutoTool.class),
                 ModuleManager.INSTANCE.get(AutoDrop.class),
-                ModuleManager.INSTANCE.get(GuiMove.class)
+                ModuleManager.INSTANCE.get(GUIMove.class)
         );
     }
 
