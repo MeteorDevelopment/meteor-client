@@ -9,16 +9,16 @@ import minegame159.meteorclient.gui.screens.settings.ColorSettingScreen;
 import minegame159.meteorclient.gui.widgets.WButton;
 import minegame159.meteorclient.gui.widgets.WQuad;
 import minegame159.meteorclient.gui.widgets.WTable;
-import minegame159.meteorclient.utils.render.color.Color;
+import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.nbt.CompoundTag;
 
 import java.util.function.Consumer;
 
-public class ColorSetting extends Setting<Color> {
+public class ColorSetting extends Setting<SettingColor> {
     private final WQuad quad;
 
-    public ColorSetting(String name, String description, Color defaultValue, Consumer<Color> onChanged, Consumer<Setting<Color>> onModuleActivated) {
+    public ColorSetting(String name, String description, SettingColor defaultValue, Consumer<SettingColor> onChanged, Consumer<Setting<SettingColor>> onModuleActivated) {
         super(name, description, defaultValue, onChanged, onModuleActivated);
 
         widget = new WTable();
@@ -27,16 +27,16 @@ public class ColorSetting extends Setting<Color> {
         WButton button = widget.add(new WButton(WButton.ButtonRegion.Edit)).getWidget();
         button.action = () -> {
             ColorSettingScreen colorSettingScreen = new ColorSettingScreen(this);
-            colorSettingScreen.action = () -> quad.color.set(get());
+            colorSettingScreen.action = () -> quad.color = get();
             MinecraftClient.getInstance().openScreen(colorSettingScreen);
         };
     }
 
     @Override
-    protected Color parseImpl(String str) {
+    protected SettingColor parseImpl(String str) {
         try {
             String[] strs = str.split(" ");
-            return new Color(Integer.parseInt(strs[0]), Integer.parseInt(strs[1]), Integer.parseInt(strs[2]), Integer.parseInt(strs[3]));
+            return new SettingColor(Integer.parseInt(strs[0]), Integer.parseInt(strs[1]), Integer.parseInt(strs[2]), Integer.parseInt(strs[3]));
         } catch (IndexOutOfBoundsException | NumberFormatException ignored) {
             return null;
         }
@@ -44,7 +44,7 @@ public class ColorSetting extends Setting<Color> {
 
     @Override
     public void reset(boolean callbacks) {
-        value = new Color(defaultValue);
+        value = new SettingColor(defaultValue);
         if (callbacks) {
             resetWidget();
             changed();
@@ -53,11 +53,11 @@ public class ColorSetting extends Setting<Color> {
 
     @Override
     public void resetWidget() {
-        quad.color.set(get());
+        quad.color = get();
     }
 
     @Override
-    protected boolean isValueValid(Color value) {
+    protected boolean isValueValid(SettingColor value) {
         value.validate();
         return true;
     }
@@ -75,7 +75,7 @@ public class ColorSetting extends Setting<Color> {
     }
 
     @Override
-    public Color fromTag(CompoundTag tag) {
+    public SettingColor fromTag(CompoundTag tag) {
         get().fromTag(tag.getCompound("value"));
 
         changed();
@@ -84,9 +84,9 @@ public class ColorSetting extends Setting<Color> {
 
     public static class Builder {
         private String name = "undefined", description = "";
-        private Color defaultValue;
-        private Consumer<Color> onChanged;
-        private Consumer<Setting<Color>> onModuleActivated;
+        private SettingColor defaultValue;
+        private Consumer<SettingColor> onChanged;
+        private Consumer<Setting<SettingColor>> onModuleActivated;
 
         public Builder name(String name) {
             this.name = name;
@@ -98,17 +98,17 @@ public class ColorSetting extends Setting<Color> {
             return this;
         }
 
-        public Builder defaultValue(Color defaultValue) {
+        public Builder defaultValue(SettingColor defaultValue) {
             this.defaultValue = defaultValue;
             return this;
         }
 
-        public Builder onChanged(Consumer<Color> onChanged) {
+        public Builder onChanged(Consumer<SettingColor> onChanged) {
             this.onChanged = onChanged;
             return this;
         }
 
-        public Builder onModuleActivated(Consumer<Setting<Color>> onModuleActivated) {
+        public Builder onModuleActivated(Consumer<Setting<SettingColor>> onModuleActivated) {
             this.onModuleActivated = onModuleActivated;
             return this;
         }

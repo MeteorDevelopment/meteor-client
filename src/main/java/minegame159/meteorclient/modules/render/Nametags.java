@@ -26,6 +26,7 @@ import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.entity.FakePlayerEntity;
 import minegame159.meteorclient.utils.render.color.Color;
+import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.VertexFormats;
@@ -121,45 +122,45 @@ public class Nametags extends ToggleModule {
             .build()
     );
 
-    private final Setting<Color> normalName = sgColors.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> normalName = sgColors.add(new ColorSetting.Builder()
             .name("normal-color")
             .description("The color of people not in your Friends List.")
-            .defaultValue(new Color(255, 255, 255))
+            .defaultValue(new SettingColor(255, 255, 255))
             .build()
     );
 
-    private final Setting<Color> pingColor = sgColors.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> pingColor = sgColors.add(new ColorSetting.Builder()
             .name("ping-color")
             .description("The color of the ping text.")
-            .defaultValue(new Color(150, 150, 150))
+            .defaultValue(new SettingColor(150, 150, 150))
             .build()
     );
 
-    private final Setting<Color> healthStage1 = sgColors.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> healthStage1 = sgColors.add(new ColorSetting.Builder()
             .name("health-stage-1")
             .description("The color if a player is full health.")
-            .defaultValue(new Color(25, 252, 25))
+            .defaultValue(new SettingColor(25, 252, 25))
             .build()
     );
 
-    private final Setting<Color> healthStage2 = sgColors.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> healthStage2 = sgColors.add(new ColorSetting.Builder()
             .name("health-stage-2")
             .description("The color if a player is at two-thirds health.")
-            .defaultValue(new Color(255, 105, 25))
+            .defaultValue(new SettingColor(255, 105, 25))
             .build()
     );
 
-    private final Setting<Color> healthStage3 = sgColors.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> healthStage3 = sgColors.add(new ColorSetting.Builder()
             .name("health-stage-3")
             .description("The color of a player if they are at one-third health.")
-            .defaultValue(new Color(255, 25, 25))
+            .defaultValue(new SettingColor(255, 25, 25))
             .build()
     );
 
-    private final Setting<Color> enchantmentTextColor = sgColors.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> enchantmentTextColor = sgColors.add(new ColorSetting.Builder()
             .name("enchantment-text-color")
             .description("The color of the enchantment text.")
-            .defaultValue(new Color(255, 255, 255))
+            .defaultValue(new SettingColor(255, 255, 255))
             .build()
     );
 

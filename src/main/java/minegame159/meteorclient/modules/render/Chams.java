@@ -8,6 +8,7 @@ package minegame159.meteorclient.modules.render;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.render.color.SettingColor;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.render.color.ColorUtil;
 import net.minecraft.client.render.VertexConsumer;
@@ -48,45 +49,45 @@ public class Chams extends ToggleModule {
 
     private final SettingGroup sgColors = settings.createGroup("Colors");
 
-    private final Setting<Color> playersColor = sgColors.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> playersColor = sgColors.add(new ColorSetting.Builder()
             .name("players-color")
             .description("The other player's color.")
-            .defaultValue(new Color(255, 255, 255))
+            .defaultValue(new SettingColor(255, 255, 255))
             .build()
     );
 
-    private final Setting<Color> animalsColor = sgColors.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> animalsColor = sgColors.add(new ColorSetting.Builder()
             .name("animals-color")
             .description("The animal's color.")
-            .defaultValue(new Color(25, 255, 25, 255))
+            .defaultValue(new SettingColor(25, 255, 25, 255))
             .build()
     );
 
-    private final Setting<Color> waterAnimalsColor = sgColors.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> waterAnimalsColor = sgColors.add(new ColorSetting.Builder()
             .name("water-animals-color")
             .description("The water animal's color.")
-            .defaultValue(new Color(25, 25, 255, 255))
+            .defaultValue(new SettingColor(25, 25, 255, 255))
             .build()
     );
 
-    private final Setting<Color> monstersColor = sgColors.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> monstersColor = sgColors.add(new ColorSetting.Builder()
             .name("monsters-color")
             .description("The monster's color.")
-            .defaultValue(new Color(255, 25, 25, 255))
+            .defaultValue(new SettingColor(255, 25, 25, 255))
             .build()
     );
 
-    private final Setting<Color> ambientColor = sgColors.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> ambientColor = sgColors.add(new ColorSetting.Builder()
             .name("ambient-color")
             .description("The ambient's color.")
-            .defaultValue(new Color(25, 25, 25, 255))
+            .defaultValue(new SettingColor(25, 25, 25, 255))
             .build()
     );
 
-    private final Setting<Color> miscColor = sgColors.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> miscColor = sgColors.add(new ColorSetting.Builder()
             .name("misc-color")
             .description("The misc color.")
-            .defaultValue(new Color(175, 175, 175, 255))
+            .defaultValue(new SettingColor(175, 175, 175, 255))
             .build()
     );
 

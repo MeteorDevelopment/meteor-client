@@ -7,6 +7,7 @@ package minegame159.meteorclient.gui.screens.topbar;
 
 import baritone.api.BaritoneAPI;
 import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.render.color.SettingColor;
 
 import java.awt.*;
 import java.lang.reflect.Field;
@@ -85,9 +86,9 @@ public class TopBarBaritone extends TopBarWindowScreen {
                     sgColor.add(new ColorSetting.Builder()
                             .name(setting.getName())
                             .description(setting.getName())
-                            .defaultValue(new minegame159.meteorclient.utils.render.color.Color(c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha()))
+                            .defaultValue(new SettingColor(c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha()))
                             .onChanged(color -> setting.value = new Color(color.r, color.g, color.b, color.a))
-                            .onModuleActivated(colorSetting -> colorSetting.set(new minegame159.meteorclient.utils.render.color.Color(c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha())))
+                            .onModuleActivated(colorSetting -> colorSetting.set(new SettingColor(c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha())))
                             .build()
                     );
                 }

@@ -19,7 +19,7 @@ public class SwarmStop extends Command {
         builder.then(literal("stop").executes(context -> {
             Swarm swarm = ModuleManager.INSTANCE.get(Swarm.class);
             if(swarm.isActive()) {
-                if (swarm.currentMode == Swarm.Mode.QUEEN && swarm.server != null) {
+                if (swarm.currentMode == Swarm.Mode.Queen && swarm.server != null) {
                     swarm.server.sendMessage(context.getInput());
                 } else {
                     swarm.idle();

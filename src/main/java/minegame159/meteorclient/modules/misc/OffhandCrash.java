@@ -19,7 +19,7 @@ import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 
-public class OffHandCrash extends ToggleModule {
+public class OffhandCrash extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Boolean> doCrash = sgGeneral.add(new BoolSetting.Builder()
@@ -45,7 +45,7 @@ public class OffHandCrash extends ToggleModule {
             .build()
     );
 
-    public OffHandCrash() {
+    public OffhandCrash() {
         super(Category.Misc, "offhand-crash", "An exploit that can crash other players by swapping back and forth between your main hand and offhand..");
     }
 

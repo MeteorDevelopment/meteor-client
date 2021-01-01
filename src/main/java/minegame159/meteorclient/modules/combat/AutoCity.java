@@ -23,7 +23,7 @@ public class AutoCity extends ToggleModule {
 
     private final Setting<Boolean> checkBelow = sgGeneral.add(new BoolSetting.Builder()
             .name("check-below")
-            .description("Checks if there is an obsidian/bedrock block below the surround block for you to place crystals on.")
+            .description("Checks if there is obsidian or bedrock below the surround block for you to place crystals on.")
             .defaultValue(true)
             .build()
     );
@@ -31,6 +31,13 @@ public class AutoCity extends ToggleModule {
     private final Setting<Boolean> support = sgGeneral.add(new BoolSetting.Builder()
             .name("support")
             .description("If there is no block below a city block it will place one before mining.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Boolean> chatInfo = sgGeneral.add(new BoolSetting.Builder()
+            .name("chat-info")
+            .description("Sends you information about the module.")
             .defaultValue(true)
             .build()
     );
@@ -46,12 +53,12 @@ public class AutoCity extends ToggleModule {
         BlockPos mineTarget = CityUtils.getTargetBlock(checkBelow.get());
 
         if (target == null || mineTarget == null) {
-            Chat.error(this, "No target block found… disabling.");
+            if (chatInfo.get()) Chat.error(this, "No target block found… disabling.");
         } else {
-            Chat.info(this, "Attempting to city " + target.getGameProfile().getName());
+            if (chatInfo.get()) Chat.info(this, "Attempting to city " + target.getGameProfile().getName());
 
             if (MathHelper.sqrt(mc.player.squaredDistanceTo(mineTarget.getX(), mineTarget.getY(), mineTarget.getZ())) > mc.interactionManager.getReachDistance()) {
-                Chat.error(this, "Target block out of reach… disabling.");
+                if (chatInfo.get()) Chat.error(this, "Target block out of reach… disabling.");
                 toggle();
                 return;
             }
@@ -67,7 +74,7 @@ public class AutoCity extends ToggleModule {
             }
 
             if (pickSlot == -1) {
-                Chat.error(this, "No pick found… disabling.");
+                if (chatInfo.get()) Chat.error(this, "No pick found… disabling.");
                 toggle();
                 return;
             }
@@ -84,7 +91,7 @@ public class AutoCity extends ToggleModule {
 
             if (support.get() && obbySlot != -1 && mc.world.getBlockState(mineTarget.down(1)).isAir()) {
                 PlayerUtils.placeBlock(mineTarget.down(1), obbySlot, Hand.MAIN_HAND);
-            } else if (support.get() && obbySlot == -1) Chat.warning(this, "No obsidian found for support, mining anyway.");
+            } else if (support.get() && obbySlot == -1) if (chatInfo.get()) Chat.warning(this, "No obsidian found for support, mining anyway.");
 
             mc.player.inventory.selectedSlot = pickSlot;
 

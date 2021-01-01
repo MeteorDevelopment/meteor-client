@@ -13,6 +13,7 @@ import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.rendering.ShapeMode;
 import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.render.color.SettingColor;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.world.Dir;
 import net.minecraft.block.BlockState;
@@ -41,38 +42,38 @@ public class StorageESP extends ToggleModule {
             .build()
     );
 
-    private final Setting<Color> chest = sgGeneral.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> chest = sgGeneral.add(new ColorSetting.Builder()
             .name("chest")
             .description("The color of chests.")
-            .defaultValue(new Color(255, 160, 0, 255))
+            .defaultValue(new SettingColor(255, 160, 0, 255))
             .build()
     );
 
-    private final Setting<Color> barrel = sgGeneral.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> barrel = sgGeneral.add(new ColorSetting.Builder()
             .name("barrel")
             .description("The color of barrels.")
-            .defaultValue(new Color(255, 160, 0, 255))
+            .defaultValue(new SettingColor(255, 160, 0, 255))
             .build()
     );
 
-    private final Setting<Color> shulker = sgGeneral.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> shulker = sgGeneral.add(new ColorSetting.Builder()
             .name("shulker")
             .description("The color of Shulker Boxes.")
-            .defaultValue(new Color(255, 160, 0, 255))
+            .defaultValue(new SettingColor(255, 160, 0, 255))
             .build()
     );
 
-    private final Setting<Color> enderChest = sgGeneral.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> enderChest = sgGeneral.add(new ColorSetting.Builder()
             .name("ender-chest")
             .description("The color of Ender Chests.")
-            .defaultValue(new Color(120, 0, 255, 255))
+            .defaultValue(new SettingColor(120, 0, 255, 255))
             .build()
     );
 
-    private final Setting<Color> other = sgGeneral.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> other = sgGeneral.add(new ColorSetting.Builder()
             .name("other")
             .description("The color of furnaces, dispenders, droppers and hoppers.")
-            .defaultValue(new Color(140, 140, 140, 255))
+            .defaultValue(new SettingColor(140, 140, 140, 255))
             .build()
     );
 

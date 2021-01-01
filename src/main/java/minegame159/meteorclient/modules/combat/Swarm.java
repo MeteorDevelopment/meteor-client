@@ -45,9 +45,9 @@ public class Swarm extends ToggleModule {
     }
 
     public enum Mode {
-        QUEEN,
-        SLAVE,
-        IDLE
+        Queen,
+        Slave,
+        Idle
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -69,18 +69,18 @@ public class Swarm extends ToggleModule {
     public SwarmServer server;
     public SwarmClient client;
     public BlockState targetBlock;
-    public Mode currentMode = Mode.IDLE;
+    public Mode currentMode = Mode.Idle;
     private WLabel label;
 
     @Override
     public void onActivate() {
-        currentMode = Mode.IDLE;
+        currentMode = Mode.Idle;
         closeAllServerConnections();
     }
 
     @Override
     public void onDeactivate() {
-        currentMode = Mode.IDLE;
+        currentMode = Mode.Idle;
         closeAllServerConnections();
     }
 
@@ -102,7 +102,7 @@ public class Swarm extends ToggleModule {
         reset.action = () -> {
             Chat.info("Swarm: Closing all connections.");
             closeAllServerConnections();
-            currentMode = Mode.IDLE;
+            currentMode = Mode.Idle;
             setLabel();
         };
         table2.add(reset);
@@ -117,7 +117,7 @@ public class Swarm extends ToggleModule {
 
     public void runServer() {
         if (server == null) {
-            currentMode = Mode.QUEEN;
+            currentMode = Mode.Queen;
             setLabel();
             closeAllServerConnections();
             server = new SwarmServer();
@@ -126,7 +126,7 @@ public class Swarm extends ToggleModule {
 
     public void runClient() {
         if (client == null) {
-            currentMode = Mode.SLAVE;
+            currentMode = Mode.Slave;
             setLabel();
             closeAllServerConnections();
             client = new SwarmClient();
@@ -164,7 +164,7 @@ public class Swarm extends ToggleModule {
     });
 
     public void idle() {
-        currentMode = Mode.IDLE;
+        currentMode = Mode.Idle;
         if (ModuleManager.INSTANCE.get(InfinityMiner.class).isActive())
             ModuleManager.INSTANCE.get(InfinityMiner.class).toggle();
         if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing())

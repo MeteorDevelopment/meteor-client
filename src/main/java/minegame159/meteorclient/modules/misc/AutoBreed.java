@@ -31,7 +31,7 @@ public class AutoBreed extends ToggleModule {
 
     private final Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()
             .name("range")
-            .description("The range to search for and breed animals.")
+            .description("How far away the animals can be to be bred.")
             .min(0)
             .defaultValue(4.5)
             .build()
@@ -46,7 +46,7 @@ public class AutoBreed extends ToggleModule {
 
     private final Setting<Boolean> ignoreBabies = sgGeneral.add(new BoolSetting.Builder()
             .name("ignore-babies")
-            .description("Whether or not to ignore babies when feeding.")
+            .description("Whether or not to ignore the baby variants of the specified entity.")
             .defaultValue(true)
             .build()
     );
@@ -54,7 +54,7 @@ public class AutoBreed extends ToggleModule {
     private final List<Entity> animalsFed = new ArrayList<>();
 
     public AutoBreed() {
-        super(Category.Misc, "auto-breed", "Automatically breeds animals.");
+        super(Category.Misc, "auto-breed", "Automatically breeds specified animals.");
     }
 
     @Override

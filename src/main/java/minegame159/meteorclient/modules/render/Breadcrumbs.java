@@ -13,8 +13,8 @@ import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.render.color.SettingColor;
 import minegame159.meteorclient.utils.misc.Pool;
-import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.world.dimension.DimensionType;
 
 import java.util.ArrayDeque;
@@ -23,10 +23,10 @@ import java.util.Queue;
 public class Breadcrumbs extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<Color> color = sgGeneral.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> color = sgGeneral.add(new ColorSetting.Builder()
             .name("color")
             .description("The color of the Breadcrumbs line.")
-            .defaultValue(new Color(225, 25, 25))
+            .defaultValue(new SettingColor(225, 25, 25))
             .build()
     );
 

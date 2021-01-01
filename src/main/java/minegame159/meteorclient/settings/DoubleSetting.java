@@ -18,7 +18,7 @@ public class DoubleSetting extends Setting<Double> {
         this.min = min;
         this.max = max;
 
-        widget = new WDoubleEdit(get(), sliderMin != null ? sliderMin : 0, sliderMax != null ? sliderMax : 10, noSlider);
+        widget = new WDoubleEdit(get(), sliderMin != null ? sliderMin : 0, sliderMax != null ? sliderMax : 10, 2, noSlider, 200);
         ((WDoubleEdit) widget).action = () -> {
             if (!set(((WDoubleEdit) widget).get())) ((WDoubleEdit) widget).set(get());
         };

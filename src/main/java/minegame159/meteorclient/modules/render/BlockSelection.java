@@ -13,7 +13,7 @@ import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.rendering.ShapeMode;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.render.color.Color;
+import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
@@ -25,7 +25,7 @@ public class BlockSelection extends ToggleModule {
 
     private final Setting<Boolean> advanced = sgGeneral.add(new BoolSetting.Builder()
             .name("advanced")
-            .description("Shows a more advanced outline.")
+            .description("Shows a more advanced outline on different types of shape blocks.")
             .defaultValue(true)
             .build()
     );
@@ -37,22 +37,22 @@ public class BlockSelection extends ToggleModule {
             .build()
     );
 
-    private final Setting<Color> sideColor = sgGeneral.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> sideColor = sgGeneral.add(new ColorSetting.Builder()
             .name("side-color")
             .description("The side color.")
-            .defaultValue(new Color(255, 255, 255, 50))
+            .defaultValue(new SettingColor(255, 255, 255, 50))
             .build()
     );
 
-    private final Setting<Color> lineColor = sgGeneral.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> lineColor = sgGeneral.add(new ColorSetting.Builder()
             .name("line-color")
             .description("The line color.")
-            .defaultValue(new Color(255, 255, 255, 255))
+            .defaultValue(new SettingColor(255, 255, 255, 255))
             .build()
     );
 
     public BlockSelection() {
-        super(Category.Render, "block-selection", "Modifies your block selection render.");
+        super(Category.Render, "block-selection", "Modifies how your block selection is rendered.");
     }
 
     @EventHandler
@@ -76,6 +76,6 @@ public class BlockSelection extends ToggleModule {
     });
 
     private void render(BlockPos pos, Box box) {
-        Renderer.boxWithLines(Renderer.NORMAL, Renderer. LINES, pos.getX() + box.minX, pos.getY() + box.minY, pos.getZ() + box.minZ, pos.getX() + box.maxX, pos.getY() + box.maxY, pos.getZ() + box.maxZ, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+        Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, pos.getX() + box.minX, pos.getY() + box.minY, pos.getZ() + box.minZ, pos.getX() + box.maxX, pos.getY() + box.maxY, pos.getZ() + box.maxZ, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
     }
 }

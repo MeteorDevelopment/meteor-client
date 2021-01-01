@@ -41,10 +41,10 @@ public class DeathPosition extends ToggleModule {
 
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
 
-    private final WLabel label = new WLabel("No latest death.");
+    private final WLabel label = new WLabel("You have no latest death.");
 
     public DeathPosition() {
-        super(Category.Player, "death-position", "Sends you the exact position where you have died in chat.");
+        super(Category.Player, "death-position", "Sends you the coordinates to your latest death.");
     }
 
     private final Map<String, Double> deathPos = new HashMap<>();

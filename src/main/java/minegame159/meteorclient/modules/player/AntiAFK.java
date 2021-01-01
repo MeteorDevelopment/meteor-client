@@ -21,9 +21,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class AntiAfk extends ToggleModule {
+public class AntiAFK extends ToggleModule {
 
-    public AntiAfk() {
+    public AntiAFK() {
         super(Category.Player, "Anti-Afk", "Performs different actions to prevent getting kicked for AFK.");
     }
 

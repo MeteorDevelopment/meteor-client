@@ -25,11 +25,11 @@ public class ParticleBlocker extends ToggleModule {
     );
 
     public ParticleBlocker() {
-        super(Category.Render, "particle-blocker", "Stops selected particles from rendering");
+        super(Category.Render, "particle-blocker", "Stops specified particles from rendering.");
     }
 
     @EventHandler
     private final Listener<ParticleEvent> onRenderParticle = new Listener<>(event -> {
-        if (particles.get().contains(event.particle)) event.cancel();
+        if (event.particle != null && particles.get().contains(event.particle)) event.cancel();
     });
 }

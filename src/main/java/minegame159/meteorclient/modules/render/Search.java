@@ -22,7 +22,7 @@ import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.Pool;
 import minegame159.meteorclient.utils.network.MeteorExecutor;
 import minegame159.meteorclient.utils.render.RenderUtils;
-import minegame159.meteorclient.utils.render.color.Color;
+import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
@@ -64,10 +64,10 @@ public class Search extends ToggleModule {
 
     // Render
 
-    private final Setting<Color> color = sgRender.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> color = sgRender.add(new ColorSetting.Builder()
             .name("color")
             .description("The color.")
-            .defaultValue(new Color(0, 255, 200))
+            .defaultValue(new SettingColor(0, 255, 200))
             .build()
     );
 
@@ -87,10 +87,10 @@ public class Search extends ToggleModule {
             .build()
     );
 
-    private final Setting<Color> tracersColor = sgTracers.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> tracersColor = sgTracers.add(new ColorSetting.Builder()
             .name("tracers-color")
             .description("The color of the tracers.")
-            .defaultValue(new Color(225, 225, 225))
+            .defaultValue(new SettingColor(225, 225, 225))
             .build()
     );
 

@@ -86,14 +86,14 @@ public class KillAura extends ToggleModule {
 
     private final Setting<Boolean> ignoreWalls = sgGeneral.add(new BoolSetting.Builder()
             .name("ignore-walls")
-            .description("Whether or not to ignore walls when attacking.")
+            .description("Whether or not to attack the entity through a wall.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> friends = sgGeneral.add(new BoolSetting.Builder()
             .name("friends")
-            .description("Whether or not to attack friends. Useful if you select players to attack.")
+            .description("Whether or not to attack friends. Useful if you select players selected.")
             .defaultValue(false)
             .build()
     );
@@ -140,7 +140,7 @@ public class KillAura extends ToggleModule {
 
     private final Setting<Integer> hitDelay = sgDelay.add(new IntSetting.Builder()
             .name("hit-delay")
-            .description("How fast you hit the entity in ticks. 20 ticks are equal to a second.")
+            .description("How fast you hit the entity in ticks.")
             .defaultValue(0)
             .min(0)
             .sliderMax(60)
@@ -151,14 +151,14 @@ public class KillAura extends ToggleModule {
 
     private final Setting<Boolean> randomDelayEnabled = sgRandomDelay.add(new BoolSetting.Builder()
             .name("random-delay-enabled")
-            .description("Adds a random delay to hits to try and bypass anti-cheats.")
+            .description("Adds a random delay between hits to attempt to bypass anti-cheats.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Integer> randomDelayMax = sgRandomDelay.add(new IntSetting.Builder()
             .name("random-delay-max")
-            .description("Maximum random value for random delay.")
+            .description("The maximum value for random delay.")
             .defaultValue(4)
             .min(0)
             .sliderMax(20)
@@ -176,7 +176,7 @@ public class KillAura extends ToggleModule {
     private final Vec3d vec2 = new Vec3d(0, 0, 0);
 
     public KillAura() {
-        super(Category.Combat, "kill-aura", "Attacks entities around you.");
+        super(Category.Combat, "kill-aura", "Attacks specified entities around you.");
     }
 
     @Override
