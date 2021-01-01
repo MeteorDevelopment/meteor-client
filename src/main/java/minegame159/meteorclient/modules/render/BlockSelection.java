@@ -52,7 +52,7 @@ public class BlockSelection extends ToggleModule {
     );
 
     public BlockSelection() {
-        super(Category.Render, "block-selection", "Modifies your block selection render.");
+        super(Category.Render, "block-selection", "Modifies how your block selection is rendered.");
     }
 
     @EventHandler

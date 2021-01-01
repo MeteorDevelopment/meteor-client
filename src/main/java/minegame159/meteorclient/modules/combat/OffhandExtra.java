@@ -28,10 +28,10 @@ import net.minecraft.screen.slot.SlotActionType;
 
 public class OffhandExtra extends ToggleModule {
     public enum Mode{
-        Enchanted_Golden_Apple,
-        Golden_Apple,
-        Exp_Bottle,
-        End_Crystal,
+        EGap,
+        Gap,
+        EXP,
+        Crystal,
     }
     
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -39,7 +39,7 @@ public class OffhandExtra extends ToggleModule {
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("mode")
             .description("Changes what item that will go into your offhand.")
-            .defaultValue(Mode.Enchanted_Golden_Apple)
+            .defaultValue(Mode.EGap)
             .onChanged(mode -> currentMode = mode)
             .build()
     );
@@ -131,8 +131,8 @@ public class OffhandExtra extends ToggleModule {
         if (!mc.player.isUsingItem()) isClicking = false;
         if (ModuleManager.INSTANCE.get(AutoTotem.class).getLocked()) return;
 
-        if (mc.player.getMainHandStack().getItem() instanceof SwordItem && sword.get()) currentMode = Mode.Enchanted_Golden_Apple;
-        else if (mc.player.getMainHandStack().getItem() instanceof EnchantedGoldenAppleItem && offhandCrystal.get()) currentMode = Mode.End_Crystal;
+        if (mc.player.getMainHandStack().getItem() instanceof SwordItem && sword.get()) currentMode = Mode.EGap;
+        else if (mc.player.getMainHandStack().getItem() instanceof EnchantedGoldenAppleItem && offhandCrystal.get()) currentMode = Mode.Crystal;
 
         if ((asimov.get() || noTotems) && mc.player.getOffHandStack().getItem() != getItem()) {
             Item item = getItem();
@@ -166,8 +166,8 @@ public class OffhandExtra extends ToggleModule {
         if (ModuleManager.INSTANCE.get(AutoTotem.class).getLocked() || !canMove()) return;
         if ((mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING || (mc.player.getHealth() + mc.player.getAbsorptionAmount() > health.get())
                && (mc.player.getOffHandStack().getItem() != getItem()) && !(mc.currentScreen instanceof HandledScreen<?>))) {
-            if (mc.player.getMainHandStack().getItem() instanceof SwordItem && sword.get()) currentMode = Mode.Enchanted_Golden_Apple;
-            else if (mc.player.getMainHandStack().getItem() instanceof EnchantedGoldenAppleItem && offhandCrystal.get()) currentMode = Mode.End_Crystal;
+            if (mc.player.getMainHandStack().getItem() instanceof SwordItem && sword.get()) currentMode = Mode.EGap;
+            else if (mc.player.getMainHandStack().getItem() instanceof EnchantedGoldenAppleItem && offhandCrystal.get()) currentMode = Mode.Crystal;
             if (mc.player.getOffHandStack().getItem() == getItem()) return;
             isClicking = true;
             Item item = getItem();
@@ -189,13 +189,13 @@ public class OffhandExtra extends ToggleModule {
 
     private Item getItem(){
         Item item = Items.TOTEM_OF_UNDYING;
-        if (currentMode == Mode.Enchanted_Golden_Apple) {
+        if (currentMode == Mode.EGap) {
             item = Items.ENCHANTED_GOLDEN_APPLE;
-        } else if (currentMode == Mode.Golden_Apple) {
+        } else if (currentMode == Mode.Gap) {
             item = Items.GOLDEN_APPLE;
-        } else if (currentMode == Mode.End_Crystal) {
+        } else if (currentMode == Mode.Crystal) {
             item = Items.END_CRYSTAL;
-        } else if (currentMode == Mode.Exp_Bottle) {
+        } else if (currentMode == Mode.EXP) {
             item = Items.EXPERIENCE_BOTTLE;
         }
         return item;

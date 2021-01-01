@@ -24,7 +24,8 @@ import java.io.IOException;
 
 public class ItemByteSize extends ToggleModule {
     public enum Mode {
-        Standard, True
+        Standard,
+        True
     }
 
     private final SettingGroup sgUseKbIfBigEnough = settings.createGroup("Use KB if big enough");

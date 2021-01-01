@@ -17,7 +17,7 @@ public class NewUpdateScreen extends WindowScreen {
     public NewUpdateScreen(Version latestVer) {
         super("New Update", true);
 
-        add(new WLabel("New version of Meteor has been released."));
+        add(new WLabel("A new version of Meteor has been released."));
         row();
 
         add(new WHorizontalSeparator());

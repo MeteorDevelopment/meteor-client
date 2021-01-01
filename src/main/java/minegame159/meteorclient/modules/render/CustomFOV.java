@@ -15,7 +15,7 @@ import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 
 public class CustomFOV extends ToggleModule {
-    private final SettingGroup sgGeneral = settings.createGroup("General");
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Integer> fov = sgGeneral.add(new IntSetting.Builder()
             .name("fov")
@@ -52,7 +52,7 @@ public class CustomFOV extends ToggleModule {
     }
 
     public CustomFOV() {
-        super(Category.Render, "custom-fov", "Makes your FOV more customizable.");
+        super(Category.Render, "custom-fov", "Grants more customizability to your FOV.");
     }
 
 }

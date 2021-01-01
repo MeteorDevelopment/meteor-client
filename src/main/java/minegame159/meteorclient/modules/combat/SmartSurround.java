@@ -58,7 +58,7 @@ public class SmartSurround extends ToggleModule {
     private Entity crystal;
 
     public SmartSurround(){
-        super(Category.Combat, "smart-surround", "Tries to save you from crystals automatically.");
+        super(Category.Combat, "smart-surround", "Attempts to save you from crystals automatically.");
     }
 
     @EventHandler
