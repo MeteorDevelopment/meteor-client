@@ -34,14 +34,12 @@ import java.util.UUID;
 public class LogoutSpots extends ToggleModule {
     private static final MeshBuilder MB = new MeshBuilder(64);
 
-    private static final Color BACKGROUND = new Color(0, 0, 0, 75);
-    private static final Color TEXT = new Color(255, 255, 255);
     private static final Color GREEN = new Color(25, 225, 25);
     private static final Color ORANGE = new Color(225, 105, 25);
     private static final Color RED = new Color(225, 25, 25);
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgRender = settings.getDefaultGroup();
+    private final SettingGroup sgRender = settings.createGroup("Render");
 
     // General
 
@@ -50,6 +48,13 @@ public class LogoutSpots extends ToggleModule {
             .description("The scale.")
             .defaultValue(1)
             .min(0)
+            .build()
+    );
+
+    private final Setting<Boolean> fullHeight = sgGeneral.add(new BoolSetting.Builder()
+            .name("full-height")
+            .description("Displays the height as the player's full height.")
+            .defaultValue(true)
             .build()
     );
 
@@ -73,6 +78,20 @@ public class LogoutSpots extends ToggleModule {
             .name("line-color")
             .description("The line color.")
             .defaultValue(new SettingColor(255, 0, 255))
+            .build()
+    );
+
+    private final Setting<SettingColor> nameColor = sgRender.add(new ColorSetting.Builder()
+            .name("name-color")
+            .description("The name color.")
+            .defaultValue(new SettingColor(255, 255, 255))
+            .build()
+    );
+
+    private final Setting<SettingColor> nameBackgroundColor = sgRender.add(new ColorSetting.Builder()
+            .name("name-background-color")
+            .description("The name background color.")
+            .defaultValue(new SettingColor(0, 0, 0, 75))
             .build()
     );
 
@@ -181,7 +200,7 @@ public class LogoutSpots extends ToggleModule {
 
     private class Entry {
         public final double x, y, z;
-        public final double width, height;
+        public final double xWidth, zWidth, height;
 
         public final UUID uuid;
         public final String name;
@@ -193,8 +212,9 @@ public class LogoutSpots extends ToggleModule {
             y = entity.getY();
             z = entity.getZ();
 
-            width = entity.getBoundingBox().getXLength();
-            height = entity.getBoundingBox().getZLength();
+            xWidth = entity.getBoundingBox().getXLength();
+            zWidth = entity.getBoundingBox().getZLength();
+            height = entity.getBoundingBox().getYLength();
 
             uuid = entity.getUuid();
             name = entity.getGameProfile().getName();
@@ -218,7 +238,8 @@ public class LogoutSpots extends ToggleModule {
             double healthPercentage = (double) health / maxHealth;
 
             // Render quad
-            Renderer.quadWithLinesHorizontal(Renderer.NORMAL, Renderer.LINES, x, y, z, width, sideColor.get(), lineColor.get(), shapeMode.get());
+            if (fullHeight.get()) Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x, y, z, x + xWidth, y + height, z + zWidth, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            else Renderer.quadWithLinesHorizontal(Renderer.NORMAL, Renderer.LINES, x, y, z, xWidth, sideColor.get(), lineColor.get(), shapeMode.get());
 
             // Get health color
             Color healthColor;
@@ -228,7 +249,7 @@ public class LogoutSpots extends ToggleModule {
 
             // Setup the rotation
             Matrices.push();
-            Matrices.translate(x + width / 2 - event.offsetX, y + 0.5 - event.offsetY, z + height / 2 - event.offsetZ);
+            Matrices.translate(x + xWidth / 2 - event.offsetX, y + (fullHeight.get() ? (height + 0.5) : 0.5)  - event.offsetY, z + zWidth / 2 - event.offsetZ);
             Matrices.rotate(-camera.getYaw(), 0, 1, 0);
             Matrices.rotate(camera.getPitch(), 1, 0, 0);
             Matrices.scale(-scale, -scale, scale);
@@ -236,12 +257,12 @@ public class LogoutSpots extends ToggleModule {
             // Render background
             double i = MeteorClient.FONT_2X.getStringWidth(name) / 2.0 + MeteorClient.FONT_2X.getStringWidth(healthText) / 2.0;
             MB.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
-            MB.quad(-i - 1, -1, 0, -i - 1, 8, 0, i + 1, 8, 0, i + 1, -1, 0, BACKGROUND);
+            MB.quad(-i - 1, -1, 0, -i - 1, 8, 0, i + 1, 8, 0, i + 1, -1, 0, nameBackgroundColor.get());
             MB.end();
 
             // Render name and health texts
             MeteorClient.FONT_2X.begin();
-            double hX = MeteorClient.FONT_2X.renderString(name, -i, 0, TEXT);
+            double hX = MeteorClient.FONT_2X.renderString(name, -i, 0, nameColor.get());
             MeteorClient.FONT_2X.renderString(healthText, hX, 0, healthColor);
             MeteorClient.FONT_2X.end();
 
