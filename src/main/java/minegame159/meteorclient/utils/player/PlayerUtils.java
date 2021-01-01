@@ -8,8 +8,7 @@ package minegame159.meteorclient.utils.player;
 import baritone.api.BaritoneAPI;
 import minegame159.meteorclient.mixininterface.ILookBehavior;
 import minegame159.meteorclient.mixininterface.IVec3d;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.ShapeContext;
+import net.minecraft.block.*;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -54,7 +53,7 @@ public class PlayerUtils {
             Direction side2 = side.getOpposite();
 
             // Check if neighbour isn't empty
-            if (mc.world.getBlockState(neighbor).isAir()) continue;
+            if (mc.world.getBlockState(neighbor).isAir() || isBlockClickable(mc.world.getBlockState(neighbor).getBlock())) continue;
 
             // Calculate hit pos
             ((IVec3d) hitPos).set(neighbor.getX() + 0.5 + side2.getVector().getX() * 0.5, neighbor.getY() + 0.5 + side2.getVector().getY() * 0.5, neighbor.getZ() + 0.5 + side2.getVector().getZ() * 0.5);
@@ -123,5 +122,21 @@ public class PlayerUtils {
 
         ((IVec3d) horizontalVelocity).setXZ(velX, velZ);
         return horizontalVelocity;
+    }
+
+    private static boolean isBlockClickable(Block block) {
+        boolean clickable = false;
+
+        if (block instanceof CraftingTableBlock
+                || block instanceof AnvilBlock
+                || block instanceof AbstractButtonBlock
+                || block instanceof AbstractPressurePlateBlock
+                || block instanceof BlockWithEntity
+                || block instanceof FenceGateBlock
+                || block instanceof DoorBlock
+                || block instanceof TrapdoorBlock
+        ) clickable = true;
+
+        return clickable;
     }
 }
