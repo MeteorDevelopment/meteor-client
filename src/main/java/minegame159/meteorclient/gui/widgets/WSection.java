@@ -8,6 +8,7 @@ package minegame159.meteorclient.gui.widgets;
 import minegame159.meteorclient.gui.GuiConfig;
 import minegame159.meteorclient.gui.renderer.GuiRenderer;
 import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.misc.CursorStyle;
 
 import java.util.List;
 
@@ -183,6 +184,13 @@ public class WSection extends WTable {
             }
 
             return mouseOver;
+        }
+
+        @Override
+        protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
+            if (mouseOver) renderer.setCursorStyle(CursorStyle.Click);
+
+            super.onRender(renderer, mouseX, mouseY, delta);
         }
     }
 }

@@ -6,13 +6,12 @@
 package minegame159.meteorclient.gui.widgets;
 
 import minegame159.meteorclient.gui.renderer.GuiRenderer;
+import minegame159.meteorclient.utils.misc.CursorStyle;
 
 public abstract class WPressable extends WWidget {
     public Runnable action;
 
     protected boolean pressed;
-
-    private boolean runAction;
 
     @Override
     protected boolean onMouseClicked(boolean used, int button) {
@@ -41,6 +40,8 @@ public abstract class WPressable extends WWidget {
 
     @Override
     public void render(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
+        if (mouseOver) renderer.setCursorStyle(CursorStyle.Click);
+
         super.render(renderer, mouseX, mouseY, delta);
     }
 }
