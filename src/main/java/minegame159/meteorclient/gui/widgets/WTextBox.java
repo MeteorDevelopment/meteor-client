@@ -11,6 +11,7 @@ import minegame159.meteorclient.gui.GuiConfig;
 import minegame159.meteorclient.gui.GuiKeyEvents;
 import minegame159.meteorclient.gui.renderer.GuiRenderer;
 import minegame159.meteorclient.gui.renderer.Region;
+import minegame159.meteorclient.utils.misc.CursorStyle;
 import net.minecraft.client.MinecraftClient;
 import org.lwjgl.glfw.GLFW;
 
@@ -258,6 +259,8 @@ public class WTextBox extends WWidget {
 
     @Override
     protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
+        if (mouseOver) renderer.setCursorStyle(CursorStyle.Type);
+
         renderer.background(this, false, false);
 
         if (cursorTimer >= 1) {

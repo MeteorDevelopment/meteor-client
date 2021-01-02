@@ -13,7 +13,9 @@ import minegame159.meteorclient.rendering.DrawMode;
 import minegame159.meteorclient.rendering.Fonts;
 import minegame159.meteorclient.rendering.MeshBuilder;
 import minegame159.meteorclient.rendering.MyFont;
+import minegame159.meteorclient.utils.misc.CursorStyle;
 import minegame159.meteorclient.utils.misc.Pool;
+import minegame159.meteorclient.utils.misc.input.Input;
 import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.VertexFormats;
@@ -43,6 +45,7 @@ public class GuiRenderer {
     public String tooltip;
 
     private MyFont font;
+    private CursorStyle cursorStyle;
 
     public GuiRenderer() {
         mb.texture = true;
@@ -54,6 +57,8 @@ public class GuiRenderer {
         if (root) {
             Window window = MinecraftClient.getInstance().getWindow();
             beginScissor(0, 0, window.getFramebufferWidth(), window.getFramebufferHeight(), false);
+
+            cursorStyle = CursorStyle.Default;
         }
     }
     public void begin() {
@@ -100,10 +105,17 @@ public class GuiRenderer {
         this.font.end();
         texts.clear();
 
-        if (root) endScissor();
+        if (root) {
+            endScissor();
+            Input.setCursorStyle(cursorStyle);
+        }
     }
     public void end() {
         end(false);
+    }
+
+    public void setCursorStyle(CursorStyle style) {
+        cursorStyle = style;
     }
 
     public void beginScissor(double x, double y, double width, double height, boolean changeGlState) {
