@@ -25,7 +25,7 @@ import net.minecraft.item.Items;
 
 public class AutoGap extends ToggleModule {
     public enum Mode{
-        Fire_Resistance,
+        FireResistance,
         Regeneration,
         Constant
     }
@@ -115,7 +115,7 @@ public class AutoGap extends ToggleModule {
                 mc.player.inventory.selectedSlot = prevSlot;
             }
         } else {
-            if(mode.get() == Mode.Fire_Resistance && mc.player.getActiveStatusEffects().containsKey(StatusEffects.FIRE_RESISTANCE)) return;
+            if(mode.get() == Mode.FireResistance && mc.player.getActiveStatusEffects().containsKey(StatusEffects.FIRE_RESISTANCE)) return;
             int gappleSlot = -1;
             int egapSlot = -1;
             for(int i = 0; i < 9; i++){
@@ -126,7 +126,7 @@ public class AutoGap extends ToggleModule {
                 }
             }
             if (wasThis) {
-                if ((mode.get() == Mode.Fire_Resistance || preferEgap.get()) && egapSlot != -1) {
+                if ((mode.get() == Mode.FireResistance || preferEgap.get()) && egapSlot != -1) {
                     mc.player.inventory.selectedSlot = egapSlot;
                 } else if (gappleSlot != -1) {
                     mc.player.inventory.selectedSlot = gappleSlot;
@@ -135,7 +135,7 @@ public class AutoGap extends ToggleModule {
                 }
                 ((IKeyBinding) mc.options.keyUse).setPressed(true);
             } else {
-                if ((mode.get() == Mode.Fire_Resistance || preferEgap.get()) && egapSlot != -1) {
+                if ((mode.get() == Mode.FireResistance || preferEgap.get()) && egapSlot != -1) {
                     prevSlot = mc.player.inventory.selectedSlot;
                     mc.player.inventory.selectedSlot = egapSlot;
                 } else if (gappleSlot != -1) {

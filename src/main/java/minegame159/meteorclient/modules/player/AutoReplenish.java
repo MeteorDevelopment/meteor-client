@@ -90,6 +90,13 @@ public class AutoReplenish extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> pauseInInventory = sgGeneral.add(new BoolSetting.Builder()
+            .name("pause-in-inventory")
+            .description("Stops replenishing items when you are currently in your inventory.")
+            .defaultValue(true)
+            .build()
+    );
+
     private final List<Item> items = new ArrayList<>();
 
     private Item lastMainHand, lastOffHand;
@@ -118,6 +125,7 @@ public class AutoReplenish extends ToggleModule {
         } else if (!workInCont.get() && workInInv.get()) {
             if (mc.currentScreen instanceof HandledScreen<?> && !(mc.currentScreen instanceof InventoryScreen)) return;
         }
+        if (pauseInInventory.get() && mc.currentScreen instanceof InventoryScreen) return;
 
         // Hotbar, stackable items
         for (int i = 0; i < 9; i++) {
