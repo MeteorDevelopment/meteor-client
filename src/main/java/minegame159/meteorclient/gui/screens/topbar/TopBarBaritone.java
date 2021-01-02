@@ -6,6 +6,7 @@
 package minegame159.meteorclient.gui.screens.topbar;
 
 import baritone.api.BaritoneAPI;
+import baritone.api.utils.SettingsUtil;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 
@@ -98,5 +99,10 @@ public class TopBarBaritone extends TopBarWindowScreen {
         }
 
         add(s.createTable()).fillX().expandX();
+    }
+
+    @Override
+    public void onClose() {
+        SettingsUtil.save(BaritoneAPI.getSettings());
     }
 }
