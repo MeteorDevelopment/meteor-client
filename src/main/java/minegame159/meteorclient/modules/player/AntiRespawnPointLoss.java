@@ -22,7 +22,7 @@ public class AntiRespawnLose extends ToggleModule {
 
 
     public AntiRespawnLose() {
-        super(Category.Player, "anti-respawn-lose", "Prevents you from lose you respawn point.");
+        super(Category.Player, "anti-respawn-point-loss", "Protects the player from losing the respawn point.");
     }
 
     @EventHandler
