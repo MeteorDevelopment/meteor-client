@@ -37,7 +37,11 @@ public class AntiRespawnLose extends ToggleModule {
         boolean BlockIsBed = mc.world.getBlockState(blockPos).getBlock() instanceof BedBlock;
         boolean BlockIsAnchor = mc.world.getBlockState(blockPos).getBlock().equals(Blocks.RESPAWN_ANCHOR);
 
-        if((BlockIsBed && IsOverWorld)||(BlockIsAnchor && IsNetherWorld)) event.cancel();
+        if((BlockIsBed && IsOverWorld)||(BlockIsAnchor && IsNetherWorld)) {
+            mc.player.networkHandler.sendPacket(new BlockUpdateS2CPacket(mc.world, blockPos));
+            mc.player.networkHandler.sendPacket(new BlockUpdateS2CPacket(mc.world, blockPos.offset(((PlayerInteractBlockC2SPacket) event.packet).getBlockHitResult().getSide())));
+            event.cancel();
+        }
 
     });
 
