@@ -14,7 +14,7 @@ import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.player.Chat;
 import minegame159.meteorclient.utils.player.InvUtils;
@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @InvUtils.Priority(priority = 1)
-public class OffhandExtra extends ToggleModule {
+public class OffhandExtra extends Module {
     public enum Mode{
         EGap,
         Gap,

@@ -15,7 +15,7 @@ import minegame159.meteorclient.gui.widgets.WTable;
 import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.player.InfinityMiner;
 import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -39,7 +39,7 @@ import java.util.List;
  * Special thanks to Eli for lending me the test account. Love you bud.
  */
 
-public class Swarm extends ToggleModule {
+public class Swarm extends Module {
     public Swarm() {
         super(Category.Combat, "Swarm", "I Am... The Swarm.");
     }

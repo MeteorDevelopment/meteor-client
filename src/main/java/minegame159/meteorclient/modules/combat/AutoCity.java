@@ -1,7 +1,7 @@
 package minegame159.meteorclient.modules.combat;
 
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
@@ -17,7 +17,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 
-public class AutoCity extends ToggleModule {
+public class AutoCity extends Module {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 

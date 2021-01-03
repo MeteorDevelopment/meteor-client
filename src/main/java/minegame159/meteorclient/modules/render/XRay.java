@@ -16,7 +16,7 @@ import minegame159.meteorclient.events.world.ChunkOcclusionEvent;
 import minegame159.meteorclient.mixin.BlockEntityTypeAccessor;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BlockListSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
@@ -26,7 +26,7 @@ import net.minecraft.block.Block;
 import java.util.ArrayList;
 import java.util.List;
 
-public class XRay extends ToggleModule {
+public class XRay extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     
     private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()

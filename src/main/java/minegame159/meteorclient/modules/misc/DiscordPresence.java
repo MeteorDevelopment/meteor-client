@@ -15,13 +15,13 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.Config;
 import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.settings.StringSetting;
 import minegame159.meteorclient.utils.Utils;
 
-public class DiscordPresence extends ToggleModule {
+public class DiscordPresence extends Module {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 

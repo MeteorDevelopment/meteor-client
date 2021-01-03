@@ -9,7 +9,7 @@ import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.rendering.ShapeMode;
 import minegame159.meteorclient.settings.*;
@@ -25,7 +25,7 @@ import net.minecraft.block.enums.ChestType;
 import java.util.Arrays;
 import java.util.List;
 
-public class StorageESP extends ToggleModule {
+public class StorageESP extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<List<BlockEntityType<?>>> storageBlocks = sgGeneral.add(new StorageBlockListSetting.Builder()

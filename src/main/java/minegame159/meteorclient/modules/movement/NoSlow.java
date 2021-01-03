@@ -6,12 +6,12 @@
 package minegame159.meteorclient.modules.movement;
 
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 
-public class NoSlow extends ToggleModule {
+public class NoSlow extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Boolean> items = sgGeneral.add(new BoolSetting.Builder()

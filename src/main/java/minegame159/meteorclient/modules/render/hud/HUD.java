@@ -14,7 +14,7 @@ import minegame159.meteorclient.gui.widgets.WTable;
 import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.combat.*;
 import minegame159.meteorclient.modules.render.hud.modules.*;
 import minegame159.meteorclient.settings.*;
@@ -29,7 +29,7 @@ import net.minecraft.nbt.Tag;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HUD extends ToggleModule {
+public class HUD extends Module {
     private static final HudRenderer RENDERER = new HudRenderer();
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -178,7 +178,7 @@ public class HUD extends ToggleModule {
     );
 
     // Module Info
-    private final Setting<List<ToggleModule>> moduleInfoModules = sgModuleInfo.add(new ModuleListSetting.Builder()
+    private final Setting<List<Module>> moduleInfoModules = sgModuleInfo.add(new ModuleListSetting.Builder()
             .name("module-info-modules")
             .description("Which modules to display")
             .defaultValue(moduleInfoModulesDefaultValue())
@@ -226,8 +226,8 @@ public class HUD extends ToggleModule {
         init();
     }
 
-    private static List<ToggleModule> moduleInfoModulesDefaultValue() {
-        List<ToggleModule> modules = new ArrayList<>();
+    private static List<Module> moduleInfoModulesDefaultValue() {
+        List<Module> modules = new ArrayList<>();
         modules.add(ModuleManager.INSTANCE.get(KillAura.class));
         modules.add(ModuleManager.INSTANCE.get(CrystalAura.class));
         modules.add(ModuleManager.INSTANCE.get(AnchorAura.class));
@@ -325,7 +325,7 @@ public class HUD extends ToggleModule {
     }
 
     @Override
-    public ToggleModule fromTag(CompoundTag tag) {
+    public Module fromTag(CompoundTag tag) {
         if (tag.contains("modules")) {
             ListTag modulesTag = tag.getList("modules", 10);
 
@@ -402,7 +402,7 @@ public class HUD extends ToggleModule {
         return armorScale.get();
     }
 
-    public List<ToggleModule> moduleInfoModules() {
+    public List<Module> moduleInfoModules() {
         return moduleInfoModules.get();
     }
     public Color moduleInfoOnColor() {

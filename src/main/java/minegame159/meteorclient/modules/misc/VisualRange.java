@@ -6,7 +6,7 @@ import minegame159.meteorclient.events.entity.EntityAddedEvent;
 import minegame159.meteorclient.events.entity.EntityRemovedEvent;
 import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
@@ -15,7 +15,7 @@ import minegame159.meteorclient.utils.entity.FakePlayerEntity;
 import minegame159.meteorclient.utils.player.Chat;
 import net.minecraft.entity.player.PlayerEntity;
 
-public class VisualRange extends ToggleModule {
+public class VisualRange extends Module {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 

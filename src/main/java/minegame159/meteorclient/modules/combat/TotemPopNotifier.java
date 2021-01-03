@@ -12,7 +12,7 @@ import minegame159.meteorclient.events.packets.ReceivePacketEvent;
 import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
@@ -26,7 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class TotemPopNotifier extends ToggleModule {
+public class TotemPopNotifier extends Module {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 

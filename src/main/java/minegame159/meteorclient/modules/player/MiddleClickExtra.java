@@ -13,7 +13,7 @@ import minegame159.meteorclient.events.meteor.MiddleMouseButtonEvent;
 import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -24,7 +24,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.util.Hand;
 
-public class MiddleClickExtra extends ToggleModule {
+public class MiddleClickExtra extends Module {
     public enum Mode{
         Pearl(Items.ENDER_PEARL),
         Bow(Items.ARROW),

@@ -16,7 +16,7 @@ import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.mixininterface.IBakedQuad;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.player.FakePlayer;
 import minegame159.meteorclient.modules.player.NameProtect;
 import minegame159.meteorclient.rendering.DrawMode;
@@ -47,7 +47,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Nametags extends ToggleModule {
+public class Nametags extends Module {
     public enum Position {
         ABOVE,
         ON_TOP

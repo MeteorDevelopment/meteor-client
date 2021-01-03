@@ -9,9 +9,8 @@ import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.meteor.ModuleBindChangedEvent;
 import minegame159.meteorclient.gui.widgets.*;
-import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 
@@ -51,58 +50,56 @@ public class ModuleScreen extends WindowScreen {
             row();
         }
 
-        if (module instanceof ToggleModule) {
-            if (customWidget != null || module.settings.sizeGroups() > 0) {
-                row();
-                add(new WHorizontalSeparator());
-            }
-
-            // Bind
-            WTable bindList = add(new WTable()).fillX().expandX().getWidget();
-            bindLabel = bindList.add(new WLabel(getBindLabelText())).getWidget();
-            bindList.add(new WButton("Set bind")).getWidget().action = () -> {
-                ModuleManager.INSTANCE.setModuleToBind(module);
-                canResetBind = false;
-                bindLabel.setText("Bind: press any key");
-            };
-            bindList.add(new WButton("Reset bind")).getWidget().action = () -> {
-                if (canResetBind) {
-                    module.setKey(-1);
-                    bindLabel.setText(getBindLabelText());
-                }
-            };
+        if (customWidget != null || module.settings.sizeGroups() > 0) {
             row();
-
-            // Toggle on key release
-            WTable tokrTable = add(new WTable()).fillX().expandX().getWidget();
-            tokrTable.add(new WLabel("Toggle on key release:"));
-            WCheckbox toggleOnKeyRelease = tokrTable.add(new WCheckbox(module.toggleOnKeyRelease)).getWidget();
-            toggleOnKeyRelease.action = () -> {
-                module.toggleOnKeyRelease = toggleOnKeyRelease.checked;
-                ModuleManager.INSTANCE.save();
-            };
-            row();
-
             add(new WHorizontalSeparator());
-
-            // Bottom
-            WTable bottomTable = add(new WTable()).fillX().expandX().getWidget();
-
-            //   Active
-            bottomTable.add(new WLabel("Active:"));
-            WCheckbox active = bottomTable.add(new WCheckbox(((ToggleModule) module).isActive())).getWidget();
-            active.action = () -> {
-                if (((ToggleModule) module).isActive() != active.checked) ((ToggleModule) module).toggle(MinecraftClient.getInstance().world != null);
-            };
-
-            //   Visible
-            bottomTable.add(new WLabel("Visible: ")).fillX().right().getWidget().tooltip = "Shows the module in the array list.";
-            WCheckbox visibleCheckbox = bottomTable.add(new WCheckbox(((ToggleModule) module).isVisible())).getWidget();
-            visibleCheckbox.tooltip = "Shows the module in the array list.";
-            visibleCheckbox.action = () -> {
-                if (((ToggleModule) module).isVisible() != visibleCheckbox.checked) ((ToggleModule) module).setVisible(visibleCheckbox.checked);
-            };
         }
+
+        // Bind
+        WTable bindList = add(new WTable()).fillX().expandX().getWidget();
+        bindLabel = bindList.add(new WLabel(getBindLabelText())).getWidget();
+        bindList.add(new WButton("Set bind")).getWidget().action = () -> {
+            ModuleManager.INSTANCE.setModuleToBind(module);
+            canResetBind = false;
+            bindLabel.setText("Bind: press any key");
+        };
+        bindList.add(new WButton("Reset bind")).getWidget().action = () -> {
+            if (canResetBind) {
+                module.setKey(-1);
+                bindLabel.setText(getBindLabelText());
+            }
+        };
+        row();
+
+        // Toggle on key release
+        WTable tokrTable = add(new WTable()).fillX().expandX().getWidget();
+        tokrTable.add(new WLabel("Toggle on key release:"));
+        WCheckbox toggleOnKeyRelease = tokrTable.add(new WCheckbox(module.toggleOnKeyRelease)).getWidget();
+        toggleOnKeyRelease.action = () -> {
+            module.toggleOnKeyRelease = toggleOnKeyRelease.checked;
+            ModuleManager.INSTANCE.save();
+        };
+        row();
+
+        add(new WHorizontalSeparator());
+
+        // Bottom
+        WTable bottomTable = add(new WTable()).fillX().expandX().getWidget();
+
+        //   Active
+        bottomTable.add(new WLabel("Active:"));
+        WCheckbox active = bottomTable.add(new WCheckbox(module.isActive())).getWidget();
+        active.action = () -> {
+            if (module.isActive() != active.checked) module.toggle(MinecraftClient.getInstance().world != null);
+        };
+
+        //   Visible
+        bottomTable.add(new WLabel("Visible: ")).fillX().right().getWidget().tooltip = "Shows the module in the array list.";
+        WCheckbox visibleCheckbox = bottomTable.add(new WCheckbox(module.isVisible())).getWidget();
+        visibleCheckbox.tooltip = "Shows the module in the array list.";
+        visibleCheckbox.action = () -> {
+            if (module.isVisible() != visibleCheckbox.checked) module.setVisible(visibleCheckbox.checked);
+        };
     }
 
     @EventHandler

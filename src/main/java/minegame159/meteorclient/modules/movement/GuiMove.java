@@ -12,7 +12,7 @@ import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.mixininterface.ICreativeInventoryScreen;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.render.Freecam;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
@@ -22,7 +22,7 @@ import net.minecraft.client.gui.screen.ingame.*;
 import net.minecraft.item.ItemGroup;
 import org.lwjgl.glfw.GLFW;
 
-public class GuiMove extends ToggleModule {
+public class GuiMove extends Module {
 
     public enum Screens {
         Gui,

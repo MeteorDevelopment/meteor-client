@@ -19,7 +19,6 @@ import minegame159.meteorclient.events.render.RenderBlockEntityEvent;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.events.world.*;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.utils.misc.Pool;
 import minegame159.meteorclient.utils.misc.input.KeyAction;
 import net.minecraft.block.Block;
@@ -143,7 +142,7 @@ public class EventStore {
         return moduleBindChangedEvent;
     }
 
-    public static ModuleVisibilityChangedEvent moduleVisibilityChangedEvent(ToggleModule module) {
+    public static ModuleVisibilityChangedEvent moduleVisibilityChangedEvent(Module module) {
         moduleVisibilityChangedEvent.module = module;
         return moduleVisibilityChangedEvent;
     }

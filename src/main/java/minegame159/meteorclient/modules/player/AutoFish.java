@@ -11,14 +11,14 @@ import minegame159.meteorclient.events.meteor.KeyEvent;
 import minegame159.meteorclient.events.packets.PlaySoundPacketEvent;
 import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.entity.projectile.FishingBobberEntity;
 import net.minecraft.item.FishingRodItem;
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
 
-public class AutoFish extends ToggleModule {
+public class AutoFish extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgSplashRangeDetection = settings.createGroup("Splash Sound Range Detection");
 

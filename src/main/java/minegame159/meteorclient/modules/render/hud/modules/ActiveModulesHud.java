@@ -10,7 +10,7 @@ import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.meteor.ActiveModulesChangedEvent;
 import minegame159.meteorclient.events.meteor.ModuleVisibilityChangedEvent;
 import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.render.hud.HUD;
 import minegame159.meteorclient.modules.render.hud.HudRenderer;
 
@@ -23,7 +23,7 @@ public class ActiveModulesHud extends HudModule {
         BySmallest
     }
 
-    private final List<ToggleModule> modules = new ArrayList<>();
+    private final List<Module> modules = new ArrayList<>();
     private boolean update = true;
 
     public ActiveModulesHud(HUD hud) {
@@ -48,7 +48,7 @@ public class ActiveModulesHud extends HudModule {
         update = false;
         modules.clear();
 
-        for (ToggleModule module : ModuleManager.INSTANCE.getActive()) {
+        for (Module module : ModuleManager.INSTANCE.getActive()) {
             if (module.isVisible()) modules.add(module);
         }
 
@@ -71,7 +71,7 @@ public class ActiveModulesHud extends HudModule {
         double height = 0;
 
         for (int i = 0; i < modules.size(); i++) {
-            ToggleModule module = modules.get(i);
+            Module module = modules.get(i);
 
             width = Math.max(width, getModuleWidth(renderer, module));
             height += renderer.textHeight();
@@ -91,14 +91,14 @@ public class ActiveModulesHud extends HudModule {
             return;
         }
 
-        for (ToggleModule module : modules) {
+        for (Module module : modules) {
             renderModule(renderer, module, x + box.alignX(getModuleWidth(renderer, module)), y);
 
             y += 2 + renderer.textHeight();
         }
     }
 
-    private void renderModule(HudRenderer renderer, ToggleModule module, double x, double y) {
+    private void renderModule(HudRenderer renderer, Module module, double x, double y) {
         renderer.text(module.title, x, y, module.color);
 
         String info = module.getInfoString();
@@ -107,7 +107,7 @@ public class ActiveModulesHud extends HudModule {
         }
     }
 
-    private double getModuleWidth(HudRenderer renderer, ToggleModule module) {
+    private double getModuleWidth(HudRenderer renderer, Module module) {
         String info = module.getInfoString();
         double width = renderer.textWidth(module.title);
         if (info != null) width += renderer.textWidth(" ") + renderer.textWidth(info);

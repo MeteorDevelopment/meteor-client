@@ -5,7 +5,7 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.mixininterface.IStatusEffectInstance;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -14,7 +14,7 @@ import net.minecraft.entity.effect.StatusEffectInstance;
 
 import static net.minecraft.entity.effect.StatusEffects.HASTE;
 
-public class SpeedMine extends ToggleModule {
+public class SpeedMine extends Module {
 
     public enum Mode {
         Normal,

@@ -7,9 +7,8 @@ package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.Config;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import net.minecraft.util.crash.CrashReport;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -35,7 +34,7 @@ public class CrashReportMixin {
                 List<Module> modules = ModuleManager.INSTANCE.getGroup(category);
                 boolean active = false;
                 for (Module module : modules) {
-                    if (module instanceof ToggleModule && ((ToggleModule) module).isActive()) {
+                    if (module instanceof Module && ((Module) module).isActive()) {
                         active = true;
                         break;
                     }
@@ -46,7 +45,7 @@ public class CrashReportMixin {
                     sb.append("[").append(category).append("]:").append("\n");
 
                     for (Module module : modules) {
-                        if (module instanceof ToggleModule && ((ToggleModule) module).isActive()) {
+                        if (module instanceof Module && ((Module) module).isActive()) {
                             sb.append(module.title).append(" (").append(module.name).append(")\n");
                         }
                     }

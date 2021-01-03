@@ -57,7 +57,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
     private final Map<Class<? extends Module>, Module> modules = new HashMap<>();
     private final Map<Category, List<Module>> groups = new HashMap<>();
 
-    private final List<ToggleModule> active = new ArrayList<>();
+    private final List<Module> active = new ArrayList<>();
     private Module moduleToBind;
 
     public boolean onKeyOnlyBinding = false;
@@ -92,8 +92,8 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         return null;
     }
 
-    public boolean isActive(Class<? extends ToggleModule> klass) {
-        ToggleModule module = get(klass);
+    public boolean isActive(Class<? extends Module> klass) {
+        Module module = get(klass);
         return module != null && module.isActive();
     }
 
@@ -105,7 +105,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         return modules.values();
     }
 
-    public List<ToggleModule> getActive() {
+    public List<Module> getActive() {
         synchronized (active) {
             return active;
         }
@@ -146,7 +146,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         return modules;
     }
 
-    void addActive(ToggleModule module) {
+    void addActive(Module module) {
         synchronized (active) {
             if (!active.contains(module)) {
                 active.add(module);
@@ -155,7 +155,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         }
     }
 
-    void removeActive(ToggleModule module) {
+    void removeActive(Module module) {
         synchronized (active) {
             if (active.remove(module)) {
                 MeteorClient.EVENT_BUS.post(EventStore.activeModulesChangedEvent());
@@ -181,7 +181,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
             for (Module module : modules.values()) {
                 if (module.getKey() == event.key && (event.action == KeyAction.Press || module.toggleOnKeyRelease)) {
                     module.doAction();
-                    if (module instanceof ToggleModule) ((ToggleModule) module).sendToggledMsg();
+                    module.sendToggledMsg();
                 }
             }
         }
@@ -190,11 +190,10 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
     @EventHandler
     private final Listener<OpenScreenEvent> onOpenScreen = new Listener<>(event -> {
         for (Module module : modules.values()) {
-            if (module.toggleOnKeyRelease && module instanceof ToggleModule) {
-                ToggleModule toggleModule = (ToggleModule) module;
-                if (toggleModule.isActive()) {
-                    toggleModule.toggle();
-                    toggleModule.sendToggledMsg();
+            if (module.toggleOnKeyRelease) {
+                if (module.isActive()) {
+                    module.toggle();
+                    module.sendToggledMsg();
                 }
             }
         }
@@ -203,7 +202,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
     @EventHandler
     private final Listener<GameJoinedEvent> onGameJoined = new Listener<>(event -> {
         synchronized (active) {
-            for (ToggleModule module : active) {
+            for (Module module : active) {
                 MeteorClient.EVENT_BUS.subscribe(module);
                 module.onActivate();
             }
@@ -214,7 +213,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
     @EventHandler
     private final Listener<GameLeftEvent> onGameLeft = new Listener<>(event -> {
         synchronized (active) {
-            for (ToggleModule module : active) {
+            for (Module module : active) {
                 MeteorClient.EVENT_BUS.unsubscribe(module);
                 module.onDeactivate();
             }
@@ -223,7 +222,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
 
     public void disableAll() {
         synchronized (active) {
-            for (ToggleModule module : active.toArray(new ToggleModule[0])) {
+            for (Module module : active.toArray(new Module[0])) {
                 module.toggle();
             }
         }
@@ -265,7 +264,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
 
         for (SettingGroup group : module.settings) {
             for (Setting<?> setting : group) {
-                if (module instanceof ToggleModule) setting.module = (ToggleModule) module;
+                setting.module = module;
 
                 if (setting instanceof ColorSetting) {
                     RainbowColorManager.addColorSetting((Setting<SettingColor>) setting);
@@ -437,41 +436,41 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new AutoBreed());
     }
 
-    public static class ModuleRegistry extends Registry<ToggleModule> {
+    public static class ModuleRegistry extends Registry<Module> {
         public ModuleRegistry() {
             super(RegistryKey.ofRegistry(new Identifier("meteor-client", "modules")), Lifecycle.stable());
         }
 
         @Nullable
         @Override
-        public Identifier getId(ToggleModule entry) {
+        public Identifier getId(Module entry) {
             return null;
         }
 
         @Override
-        public Optional<RegistryKey<ToggleModule>> getKey(ToggleModule entry) {
+        public Optional<RegistryKey<Module>> getKey(Module entry) {
             return Optional.empty();
         }
 
         @Override
-        public int getRawId(@Nullable ToggleModule entry) {
+        public int getRawId(@Nullable Module entry) {
             return 0;
         }
 
         @Nullable
         @Override
-        public ToggleModule get(@Nullable RegistryKey<ToggleModule> key) {
+        public Module get(@Nullable RegistryKey<Module> key) {
             return null;
         }
 
         @Nullable
         @Override
-        public ToggleModule get(@Nullable Identifier id) {
+        public Module get(@Nullable Identifier id) {
             return null;
         }
 
         @Override
-        protected Lifecycle getEntryLifecycle(ToggleModule object) {
+        protected Lifecycle getEntryLifecycle(Module object) {
             return null;
         }
 
@@ -486,7 +485,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         }
 
         @Override
-        public Set<Map.Entry<RegistryKey<ToggleModule>, ToggleModule>> getEntries() {
+        public Set<Map.Entry<RegistryKey<Module>, Module>> getEntries() {
             return null;
         }
 
@@ -497,16 +496,16 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
 
         @Nullable
         @Override
-        public ToggleModule get(int index) {
+        public Module get(int index) {
             return null;
         }
 
         @Override
-        public Iterator<ToggleModule> iterator() {
+        public Iterator<Module> iterator() {
             return new ToggleModuleIterator();
         }
 
-        private static class ToggleModuleIterator implements Iterator<ToggleModule> {
+        private static class ToggleModuleIterator implements Iterator<Module> {
             private final Iterator<Module> iterator = ModuleManager.INSTANCE.getAll().iterator();
 
             @Override
@@ -515,8 +514,8 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
             }
 
             @Override
-            public ToggleModule next() {
-                return (ToggleModule) iterator.next();
+            public Module next() {
+                return iterator.next();
             }
         }
     }

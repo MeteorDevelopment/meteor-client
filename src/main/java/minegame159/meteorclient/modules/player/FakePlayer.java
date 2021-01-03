@@ -9,7 +9,7 @@ import minegame159.meteorclient.gui.widgets.WButton;
 import minegame159.meteorclient.gui.widgets.WTable;
 import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.entity.FakePlayerEntity;
 import minegame159.meteorclient.utils.player.Chat;
@@ -17,7 +17,7 @@ import minegame159.meteorclient.utils.player.Chat;
 import java.util.HashMap;
 import java.util.Map;
 
-public class FakePlayer extends ToggleModule {
+public class FakePlayer extends Module {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 

@@ -8,7 +8,6 @@ package minegame159.meteorclient.gui.widgets;
 import minegame159.meteorclient.gui.GuiConfig;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.modules.ToggleModule;
 import net.minecraft.util.Pair;
 
 import java.util.List;
@@ -20,9 +19,7 @@ public class WModuleSearch extends WWindow {
         super("Search", GuiConfig.INSTANCE.getWindowConfig(GuiConfig.WindowType.Search).isExpanded(), true);
         type = GuiConfig.WindowType.Search;
 
-        action = () -> {
-            GuiConfig.INSTANCE.getWindowConfig(type).setPos(x, y);
-        };
+        action = () -> GuiConfig.INSTANCE.getWindowConfig(type).setPos(x, y);
 
         initWidgets(true);
     }
@@ -48,9 +45,7 @@ public class WModuleSearch extends WWindow {
                 row();
 
                 for (Pair<Module, Integer> pair : modules) {
-                    if (!(pair.getLeft() instanceof ToggleModule)) continue;
-
-                    section.add(new WModule((ToggleModule) pair.getLeft())).fillX().expandX().space(0);
+                    section.add(new WModule(pair.getLeft())).fillX().expandX().space(0);
                     section.row();
                 }
             }
@@ -62,9 +57,7 @@ public class WModuleSearch extends WWindow {
                 row();
 
                 for (Pair<Module, Integer> pair : modules) {
-                    if (!(pair.getLeft() instanceof ToggleModule)) continue;
-
-                    section.add(new WModule((ToggleModule) pair.getLeft())).fillX().expandX().space(0);
+                    section.add(new WModule(pair.getLeft())).fillX().expandX().space(0);
                     section.row();
                 }
             }

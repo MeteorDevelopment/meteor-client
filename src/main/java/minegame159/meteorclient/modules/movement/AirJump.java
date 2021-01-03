@@ -11,14 +11,14 @@ import minegame159.meteorclient.events.meteor.KeyEvent;
 import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.render.Freecam;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.misc.input.KeyAction;
 
-public class AirJump extends ToggleModule {
+public class AirJump extends Module {
     public AirJump() {
         super(Category.Movement, "air-jump", "Lets you jump in the air.");
     }

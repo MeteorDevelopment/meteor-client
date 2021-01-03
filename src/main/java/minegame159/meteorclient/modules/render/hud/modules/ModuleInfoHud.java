@@ -9,7 +9,7 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.meteor.ActiveModulesChangedEvent;
 import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.render.hud.HUD;
 import minegame159.meteorclient.modules.render.hud.HudRenderer;
 
@@ -40,7 +40,7 @@ public class ModuleInfoHud extends HudModule {
         double height = 0;
 
         int i = 0;
-        for (ToggleModule module : hud.moduleInfoModules()) {
+        for (Module module : hud.moduleInfoModules()) {
             width = Math.max(width, getModuleWidth(renderer, module));
             height += renderer.textHeight();
             if (i > 0) height += 2;
@@ -61,19 +61,19 @@ public class ModuleInfoHud extends HudModule {
             return;
         }
 
-        for (ToggleModule module : hud.moduleInfoModules()) {
+        for (Module module : hud.moduleInfoModules()) {
             renderModule(renderer, module, x + box.alignX(getModuleWidth(renderer, module)), y);
 
             y += 2 + renderer.textHeight();
         }
     }
 
-    private void renderModule(HudRenderer renderer, ToggleModule module, double x, double y) {
+    private void renderModule(HudRenderer renderer, Module module, double x, double y) {
         renderer.text(module.title, x, y, hud.primaryColor());
         renderer.text(module.isActive() ? " ON" : " OFF", x + renderer.textWidth(module.title), y, module.isActive() ? hud.moduleInfoOnColor() : hud.moduleInfoOffColor());
     }
 
-    private double getModuleWidth(HudRenderer renderer, ToggleModule module) {
+    private double getModuleWidth(HudRenderer renderer, Module module) {
         double w = renderer.textWidth(module.title);
 
         if (module.isActive()) w += renderer.textWidth(" ON");

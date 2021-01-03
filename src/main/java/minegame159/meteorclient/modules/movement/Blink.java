@@ -10,13 +10,13 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.packets.SendPacketEvent;
 import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class Blink extends ToggleModule {
+public class Blink extends Module {
     public Blink() {
         super(Category.Movement, "blink", "Allows you to essentially teleport while suspending motion updates.");
     }

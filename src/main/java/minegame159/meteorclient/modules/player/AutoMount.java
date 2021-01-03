@@ -11,7 +11,7 @@ import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
@@ -23,7 +23,7 @@ import net.minecraft.entity.vehicle.MinecartEntity;
 import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
 import net.minecraft.util.Hand;
 
-public class AutoMount extends ToggleModule {
+public class AutoMount extends Module {
     public AutoMount(){super(Category.Player, "auto-mount", "Automatically mounts entities.");}
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();

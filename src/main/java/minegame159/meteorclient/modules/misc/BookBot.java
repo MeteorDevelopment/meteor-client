@@ -14,7 +14,7 @@ import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.mixininterface.IClientPlayerInteractionManager;
 import minegame159.meteorclient.mixininterface.ITextHandler;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.player.Chat;
 import minegame159.meteorclient.utils.player.InvUtils;
@@ -37,7 +37,7 @@ import java.util.stream.IntStream;
 // FUCK YOU GHOST TYPES
 // agreed fuck that guy.
 
-public class BookBot extends ToggleModule {
+public class BookBot extends Module {
     private static final int LINE_WIDTH = 113;
 
     public enum Mode{ // Edna Mode

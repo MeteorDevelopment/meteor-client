@@ -10,7 +10,7 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.render.color.SettingColor;
@@ -20,7 +20,7 @@ import net.minecraft.world.dimension.DimensionType;
 import java.util.ArrayDeque;
 import java.util.Queue;
 
-public class Breadcrumbs extends ToggleModule {
+public class Breadcrumbs extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<SettingColor> color = sgGeneral.add(new ColorSetting.Builder()

@@ -15,7 +15,7 @@ import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.movement.NoFall;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.IntSetting;
@@ -40,7 +40,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @InvUtils.Priority(priority = Integer.MAX_VALUE)
-public class AutoTotem extends ToggleModule {
+public class AutoTotem extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Boolean> smart = sgGeneral.add(new BoolSetting.Builder()

@@ -5,8 +5,8 @@
 
 package minegame159.meteorclient.events.meteor;
 
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 
 public class ModuleVisibilityChangedEvent {
-    public ToggleModule module;
+    public Module module;
 }
