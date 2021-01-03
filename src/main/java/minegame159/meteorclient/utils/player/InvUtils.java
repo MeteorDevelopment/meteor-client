@@ -5,7 +5,6 @@
 
 package minegame159.meteorclient.utils.player;
 
-import javafx.util.Pair;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listenable;
 import me.zero.alpine.listener.Listener;
@@ -16,6 +15,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.Hand;
+import net.minecraft.util.Pair;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -35,16 +35,20 @@ public class InvUtils implements Listenable {
     private static final Map<Class<? extends ToggleModule>, Integer> cooldown = new HashMap<>();
 
     public static void clickSlot(int slot, int button, SlotActionType action) {
+        assert mc.interactionManager != null;
+        assert mc.player != null;
         mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, slot, button, action, mc.player);
     }
 
     public static Hand getHand (Item item) {
+        assert mc.player != null;
         Hand hand = Hand.MAIN_HAND;
         if (mc.player.getOffHandStack().getItem() == item) hand = Hand.OFF_HAND;
         return hand;
     }
 
     public static FindItemResult findItemWithCount(Item item) {
+        assert mc.player != null;
         findItemResult.slot = -1;
         findItemResult.count = 0;
 
@@ -61,6 +65,7 @@ public class InvUtils implements Listenable {
     }
 
     public static int findItem(Item item, Predicate<ItemStack> isGood) {
+        assert mc.player != null;
         for (int i = 0; i < mc.player.inventory.size(); i++) {
             ItemStack itemStack = mc.player.inventory.getStack(i);
             if (itemStack.getItem() == item && isGood.test(itemStack)) return i;
@@ -70,6 +75,7 @@ public class InvUtils implements Listenable {
     }
 
     public static int findItemInHotbar(Item item, Predicate<ItemStack> isGood) {
+        assert mc.player != null;
         for (int i = 0; i < 9; i++) {
             ItemStack itemStack = mc.player.inventory.getStack(i);
             if (itemStack.getItem() == item && isGood.test(itemStack)) return i;
@@ -99,9 +105,9 @@ public class InvUtils implements Listenable {
         }
         if (currentQueue.isEmpty() && !moveQueue.isEmpty()) {
             Pair<Class<? extends ToggleModule>, List<Integer>> pair = moveQueue.remove();
-            Collections.reverse(pair.getValue());
-            currentQueue.addAll(pair.getValue());
-            currentModule = pair.getKey();
+            Collections.reverse(pair.getRight());
+            currentQueue.addAll(pair.getRight());
+            currentModule = pair.getLeft();
         } else if (!currentQueue.isEmpty()) {
             currentQueue.forEach(slot -> clickSlot(invIndexToSlotId(slot), 0, SlotActionType.PICKUP));
             currentQueue.clear();
