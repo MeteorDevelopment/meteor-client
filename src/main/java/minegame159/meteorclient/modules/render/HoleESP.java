@@ -11,7 +11,7 @@ import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.events.world.PreTickEvent;
 import minegame159.meteorclient.mixin.AbstractBlockAccessor;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.rendering.DrawMode;
 import minegame159.meteorclient.rendering.MeshBuilder;
 import minegame159.meteorclient.rendering.Renderer;
@@ -29,7 +29,7 @@ import net.minecraft.util.math.BlockPos;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HoleESP extends ToggleModule {
+public class HoleESP extends Module {
     public enum Mode {
         Flat,
         Box,

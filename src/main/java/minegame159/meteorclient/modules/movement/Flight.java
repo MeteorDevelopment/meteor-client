@@ -12,7 +12,7 @@ import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.events.world.PreTickEvent;
 import minegame159.meteorclient.mixininterface.IPlayerMoveC2SPacket;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -21,7 +21,7 @@ import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.util.math.Vec3d;
 
-public class Flight extends ToggleModule {
+public class Flight extends Module {
     public enum Mode {
         Abilities,
         Velocity

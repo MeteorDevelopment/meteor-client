@@ -12,7 +12,7 @@ import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.movement.NoFall;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.IntSetting;
@@ -32,7 +32,7 @@ import net.minecraft.text.LiteralText;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
-public class AutoLog extends ToggleModule {
+public class AutoLog extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     
     private final Setting<Integer> health = sgGeneral.add(new IntSetting.Builder()

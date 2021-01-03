@@ -10,7 +10,7 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.entity.player.ClipAtLedgeEvent;
 import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.player.PlayerUtils;
 import net.minecraft.block.Block;
@@ -25,7 +25,7 @@ import net.minecraft.util.shape.VoxelShapes;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Scaffold extends ToggleModule {
+public class Scaffold extends Module {
     private final SettingGroup sg = settings.getDefaultGroup();
 
     private final Setting<Boolean> safeWalk = sg.add(new BoolSetting.Builder()

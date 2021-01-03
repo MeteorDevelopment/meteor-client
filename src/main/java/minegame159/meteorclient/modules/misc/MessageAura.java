@@ -13,14 +13,14 @@ import minegame159.meteorclient.events.entity.EntityAddedEvent;
 import minegame159.meteorclient.friends.Friend;
 import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.settings.StringSetting;
 import net.minecraft.entity.player.PlayerEntity;
 
-public class MessageAura extends ToggleModule {
+public class MessageAura extends Module {
     public MessageAura() {
         super(Category.Misc, "message-aura", "Sends a specified message to any player that enters render distance.");
     }

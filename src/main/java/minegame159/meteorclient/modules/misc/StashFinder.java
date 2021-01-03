@@ -18,7 +18,7 @@ import minegame159.meteorclient.events.world.ChunkDataEvent;
 import minegame159.meteorclient.gui.screens.StashFinderChunkScreen;
 import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.player.Chat;
@@ -33,7 +33,7 @@ import net.minecraft.util.math.ChunkPos;
 import java.io.*;
 import java.util.*;
 
-public class StashFinder extends ToggleModule {
+public class StashFinder extends Module {
 
     public enum Mode {
         Chat,

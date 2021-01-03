@@ -9,9 +9,9 @@ import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 
-public class FullBright extends ToggleModule {
+public class FullBright extends Module {
 
     public FullBright() {
         super(Category.Render, "full-bright", "No more darkness.");

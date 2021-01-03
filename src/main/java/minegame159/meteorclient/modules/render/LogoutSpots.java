@@ -13,7 +13,7 @@ import minegame159.meteorclient.events.entity.EntityAddedEvent;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.rendering.*;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
@@ -31,7 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class LogoutSpots extends ToggleModule {
+public class LogoutSpots extends Module {
     private static final MeshBuilder MB = new MeshBuilder(64);
 
     private static final Color GREEN = new Color(25, 225, 25);

@@ -9,7 +9,7 @@ import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listenable;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.world.PreTickEvent;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -29,10 +29,10 @@ public class InvUtils implements Listenable {
     private static final MinecraftClient mc = MinecraftClient.getInstance();
 
     private static final FindItemResult findItemResult = new FindItemResult();
-    private static final Deque<Pair<Class<? extends ToggleModule>, List<Integer>>> moveQueue = new ArrayDeque<>();
+    private static final Deque<Pair<Class<? extends Module>, List<Integer>>> moveQueue = new ArrayDeque<>();
     private static final Queue<Integer> currentQueue = new PriorityQueue<>();
-    private static Class<? extends ToggleModule> currentModule;
-    private static final Map<Class<? extends ToggleModule>, Integer> cooldown = new HashMap<>();
+    private static Class<? extends Module> currentModule;
+    private static final Map<Class<? extends Module>, Integer> cooldown = new HashMap<>();
 
     public static void clickSlot(int slot, int button, SlotActionType action) {
         assert mc.interactionManager != null;
@@ -99,12 +99,12 @@ public class InvUtils implements Listenable {
 
     @EventHandler
     private final Listener<PreTickEvent> onTick = new Listener<>(event -> {
-        for (Class<? extends ToggleModule> klass : cooldown.keySet()){
+        for (Class<? extends Module> klass : cooldown.keySet()){
             cooldown.replace(klass, cooldown.get(klass) - 1);
             if (cooldown.get(klass) <= 0) cooldown.remove(klass);
         }
         if (currentQueue.isEmpty() && !moveQueue.isEmpty()) {
-            Pair<Class<? extends ToggleModule>, List<Integer>> pair = moveQueue.remove();
+            Pair<Class<? extends Module>, List<Integer>> pair = moveQueue.remove();
             Collections.reverse(pair.getRight());
             currentQueue.addAll(pair.getRight());
             currentModule = pair.getLeft();
@@ -114,7 +114,7 @@ public class InvUtils implements Listenable {
         }
     });
 
-    public static void addSlots(List<Integer> slots, Class<? extends ToggleModule> klass){
+    public static void addSlots(List<Integer> slots, Class<? extends Module> klass){
         Collections.reverse(slots);
         if (cooldown.containsKey(klass))return;
         if (canMove(klass)){
@@ -126,11 +126,11 @@ public class InvUtils implements Listenable {
         cooldown.put(klass, 3);
     }
 
-    public static boolean canMove(Class<? extends ToggleModule> klass){
+    public static boolean canMove(Class<? extends Module> klass){
         return getPrio(currentModule) < getPrio(klass);
     }
 
-    private static int getPrio(Class<? extends ToggleModule> klass){
+    private static int getPrio(Class<? extends Module> klass){
         if (klass == null) return -1;
         return klass.getAnnotation(Priority.class).priority();
     }

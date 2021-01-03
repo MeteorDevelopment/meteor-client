@@ -6,7 +6,7 @@ import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class AntiAFK extends ToggleModule {
+public class AntiAFK extends Module {
 
     public AntiAFK() {
         super(Category.Player, "anti-afk", "Performs different actions to prevent getting kicked for AFK.");
@@ -211,7 +211,7 @@ public class AntiAFK extends ToggleModule {
     }
 
     @Override
-    public ToggleModule fromTag(CompoundTag tag) {
+    public Module fromTag(CompoundTag tag) {
         messages.clear();
 
         if (tag.contains("messages")) {

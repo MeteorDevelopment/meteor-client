@@ -12,7 +12,7 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.combat.AutoArmor;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -28,7 +28,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.SwordItem;
 import net.minecraft.screen.slot.SlotActionType;
 
-public class AutoMend extends ToggleModule {
+public class AutoMend extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     
     private final Setting<Boolean> swords = sgGeneral.add(new BoolSetting.Builder()

@@ -11,7 +11,7 @@ import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.player.DamageCalcUtils;
 import net.minecraft.entity.Entity;
@@ -20,7 +20,7 @@ import net.minecraft.entity.decoration.EndCrystalEntity;
 import java.util.Comparator;
 import java.util.Optional;
 
-public class Step extends ToggleModule {
+public class Step extends Module {
     public enum ActiveWhen {
         Always,
         Sneaking,

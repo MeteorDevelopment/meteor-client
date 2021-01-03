@@ -10,10 +10,10 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.packets.SendPacketEvent;
 import minegame159.meteorclient.mixininterface.ICloseHandledScreenC2SPacket;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket;
 
-public class XCarry extends ToggleModule {
+public class XCarry extends Module {
     private boolean invOpened;
 
     public XCarry() {

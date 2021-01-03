@@ -6,9 +6,9 @@
 package minegame159.meteorclient.modules.misc;
 
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 
-public class EChestPreview extends ToggleModule {
+public class EChestPreview extends Module {
     public EChestPreview() {
         super(Category.Misc, "EChest-preview", "Stores what's inside your Ender Chests and displays when you hover over it.");
     }

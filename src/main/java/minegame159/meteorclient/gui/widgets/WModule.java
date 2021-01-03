@@ -8,13 +8,13 @@ package minegame159.meteorclient.gui.widgets;
 import minegame159.meteorclient.gui.GuiConfig;
 import minegame159.meteorclient.gui.renderer.GuiRenderer;
 import minegame159.meteorclient.gui.renderer.Region;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import org.lwjgl.glfw.GLFW;
 
 public class WModule extends WPressable {
-    private final ToggleModule module;
+    private final Module module;
     private double titleWidth;
 
     private double animationProgress1;
@@ -23,7 +23,7 @@ public class WModule extends WPressable {
     private double animationProgress2;
     private double animationMultiplier2;
 
-    public WModule(ToggleModule module) {
+    public WModule(Module module) {
         this.module = module;
         this.tooltip = module.description;
 

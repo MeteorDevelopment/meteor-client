@@ -6,12 +6,12 @@
 package minegame159.meteorclient.modules.movement;
 
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 
-public class Velocity extends ToggleModule {
+public class Velocity extends Module {
     private final SettingGroup sg = settings.getDefaultGroup();
 
     private final Setting<Double> horizontal = sg.add(new DoubleSetting.Builder()

@@ -13,14 +13,14 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.packets.ReceivePacketEvent;
 import minegame159.meteorclient.events.packets.SendPacketEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.PacketBoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.network.PacketUtils;
 import net.minecraft.network.Packet;
 
-public class PacketCanceller extends ToggleModule {
+public class PacketCanceller extends Module {
     public static Object2BooleanMap<Class<? extends Packet<?>>> S2C_PACKETS = new Object2BooleanArrayMap<>();
     public static Object2BooleanMap<Class<? extends Packet<?>>> C2S_PACKETS = new Object2BooleanArrayMap<>();
     

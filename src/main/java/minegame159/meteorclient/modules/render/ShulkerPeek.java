@@ -12,7 +12,7 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.game.GetTooltipEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -36,7 +36,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ShulkerPeek extends ToggleModule {
+public class ShulkerPeek extends Module {
     public enum Mode {
         Tooltip,
         Always

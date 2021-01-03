@@ -7,7 +7,7 @@ package minegame159.meteorclient.modules.player;
 
 import minegame159.meteorclient.Config;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -20,7 +20,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.screen.slot.SlotActionType;
 
-public class ChestSwap extends ToggleModule {
+public class ChestSwap extends Module {
     public enum Chestplate {
         Diamond,
         Netherite,

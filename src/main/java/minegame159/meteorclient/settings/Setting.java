@@ -6,7 +6,7 @@
 package minegame159.meteorclient.settings;
 
 import minegame159.meteorclient.gui.widgets.WWidget;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.utils.misc.ISerializable;
 import net.minecraft.nbt.CompoundTag;
 import org.apache.commons.lang3.StringUtils;
@@ -27,7 +27,7 @@ public abstract class Setting<T> implements ISerializable<T> {
     public final Consumer<Setting<T>> onModuleActivated;
     public WWidget widget;
 
-    public ToggleModule module;
+    public Module module;
 
     public Setting(String name, String description, T defaultValue, Consumer<T> onChanged, Consumer<Setting<T>> onModuleActivated) {
         this.name = name;

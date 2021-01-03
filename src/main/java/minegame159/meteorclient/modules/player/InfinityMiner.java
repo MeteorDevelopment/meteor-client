@@ -16,7 +16,7 @@ import minegame159.meteorclient.events.meteor.ActiveModulesChangedEvent;
 import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.combat.AutoLog;
 import minegame159.meteorclient.modules.movement.GuiMove;
 import minegame159.meteorclient.modules.movement.Jesus;
@@ -35,7 +35,7 @@ import java.util.List;
  * @author Inclement
  */
 
-public class InfinityMiner extends ToggleModule {
+public class InfinityMiner extends Module {
     public enum Mode {
         Target,
         Repair,
@@ -107,7 +107,7 @@ public class InfinityMiner extends ToggleModule {
     public void onActivate() {
         if (smartModuleToggle.get()) {
             BLOCKER = true;
-            for (ToggleModule module : getToggleModules()) {
+            for (Module module : getToggleModules()) {
                 originalSettings.put(module.name, module.isActive());
                 if (!module.isActive()) module.toggle();
             }
@@ -124,7 +124,7 @@ public class InfinityMiner extends ToggleModule {
     public void onDeactivate() {
         if (smartModuleToggle.get()) {
             BLOCKER = true;
-            for (ToggleModule module : getToggleModules()) {
+            for (Module module : getToggleModules()) {
                 if (originalSettings.get(module.name) != module.isActive()) module.toggle();
             }
             originalSettings.clear();
@@ -191,7 +191,7 @@ public class InfinityMiner extends ToggleModule {
     @EventHandler
     private final Listener<ActiveModulesChangedEvent> moduleChange = new Listener<>(event -> {
         if (!BLOCKER) {
-            for (ToggleModule module : getToggleModules()) {
+            for (Module module : getToggleModules()) {
                 if (!module.isActive()) originalSettings.remove(module.name);
             }
         }
@@ -237,7 +237,7 @@ public class InfinityMiner extends ToggleModule {
         return true;
     }
 
-    private List<ToggleModule> getToggleModules() {
+    private List<Module> getToggleModules() {
         return Lists.newArrayList(
                 ModuleManager.INSTANCE.get(Jesus.class),
                 ModuleManager.INSTANCE.get(NoBreakDelay.class),

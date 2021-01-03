@@ -11,7 +11,7 @@ import minegame159.meteorclient.events.entity.BoatMoveEvent;
 import minegame159.meteorclient.events.packets.ReceivePacketEvent;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -20,7 +20,7 @@ import minegame159.meteorclient.utils.player.PlayerUtils;
 import net.minecraft.network.packet.s2c.play.VehicleMoveS2CPacket;
 import net.minecraft.util.math.Vec3d;
 
-public class BoatFly extends ToggleModule {
+public class BoatFly extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     
     private final Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()

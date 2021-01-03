@@ -10,11 +10,11 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.packets.SendPacketEvent;
 import minegame159.meteorclient.mixininterface.IBlockHitResult;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
 import net.minecraft.util.math.Direction;
 
-public class BuildHeight extends ToggleModule {
+public class BuildHeight extends Module {
     public BuildHeight() {
         super(Category.Player, "build-height", "Lets your interact with objects at the build limit.");
     }

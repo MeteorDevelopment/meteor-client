@@ -10,7 +10,7 @@ import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.rendering.DrawMode;
 import minegame159.meteorclient.rendering.Fonts;
 import minegame159.meteorclient.rendering.Matrices;
@@ -36,7 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-public class EntityOwner extends ToggleModule {
+public class EntityOwner extends Module {
     private static final MeshBuilder MB = new MeshBuilder(128);
 
     private static final Color BACKGROUND = new Color(0, 0, 0, 75);

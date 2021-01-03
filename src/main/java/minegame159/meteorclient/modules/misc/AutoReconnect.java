@@ -13,7 +13,7 @@ import minegame159.meteorclient.events.world.ConnectToServerEvent;
 import minegame159.meteorclient.mixininterface.IAbstractButtonWidget;
 import minegame159.meteorclient.mixininterface.IDisconnectedScreen;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
@@ -25,7 +25,7 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.network.ServerInfo;
 import net.minecraft.text.LiteralText;
 
-public class AutoReconnect extends ToggleModule {
+public class AutoReconnect extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     
     private final Setting<Double> time = sgGeneral.add(new DoubleSetting.Builder()

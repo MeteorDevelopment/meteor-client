@@ -13,7 +13,7 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.player.FakePlayer;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
@@ -42,7 +42,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class BedAura extends ToggleModule {
+public class BedAura extends Module {
     public enum Mode{
         Safe,
         Suicide

@@ -13,7 +13,7 @@ import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.combat.CrystalAura;
 import minegame159.meteorclient.modules.combat.KillAura;
 import minegame159.meteorclient.settings.BoolSetting;
@@ -23,7 +23,7 @@ import minegame159.meteorclient.settings.SettingGroup;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.Items;
 
-public class AutoGap extends ToggleModule {
+public class AutoGap extends Module {
     public enum Mode{
         Fire_Resistance,
         Regeneration,

@@ -5,7 +5,7 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.mixininterface.IClientPlayerInteractionManager;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.rendering.ShapeMode;
 import minegame159.meteorclient.settings.*;
@@ -20,7 +20,7 @@ import net.minecraft.util.shape.VoxelShape;
 import java.util.HashMap;
 import java.util.Map;
 
-public class BreakIndicators extends ToggleModule {
+public class BreakIndicators extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgRender = settings.createGroup("Render");
 

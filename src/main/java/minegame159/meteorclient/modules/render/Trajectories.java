@@ -10,7 +10,7 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.rendering.ShapeMode;
 import minegame159.meteorclient.settings.ColorSetting;
@@ -30,7 +30,7 @@ import net.minecraft.world.RaycastContext;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Trajectories extends ToggleModule {
+public class Trajectories extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<ShapeMode> shapeMode = sgGeneral.add(new EnumSetting.Builder<ShapeMode>()

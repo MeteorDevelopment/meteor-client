@@ -17,7 +17,7 @@ import minegame159.meteorclient.mixin.HoeItemAccessor;
 import minegame159.meteorclient.mixin.PickaxeItemAccessor;
 import minegame159.meteorclient.mixin.ShovelItemAccessor;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -35,7 +35,7 @@ import net.minecraft.screen.slot.SlotActionType;
 import java.util.HashSet;
 import java.util.Set;
 
-public class AutoTool extends ToggleModule {
+public class AutoTool extends Module {
     private static final Set<Material> EMPTY_MATERIALS = new HashSet<>(0);
     private static final Set<Block> EMPTY_BLOCKS = new HashSet<>(0);
 

@@ -6,11 +6,11 @@ import minegame159.meteorclient.events.packets.SendPacketEvent;
 import minegame159.meteorclient.mixininterface.IPlayerMoveC2SPacket;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.combat.Quiver;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 
-public class NoRotate extends ToggleModule {
+public class NoRotate extends Module {
 
     public NoRotate() {
         super(Category.Player, "no-rotate", "Attempts to block rotations sent from server to client");

@@ -12,7 +12,7 @@ import minegame159.meteorclient.friends.Friend;
 import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.render.RenderUtils;
 import minegame159.meteorclient.utils.render.color.Color;
@@ -28,7 +28,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Tracers extends ToggleModule {
+public class Tracers extends Module {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgAppearance = settings.createGroup("Appearance");

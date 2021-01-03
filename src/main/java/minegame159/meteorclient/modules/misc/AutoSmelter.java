@@ -7,13 +7,13 @@ package minegame159.meteorclient.modules.misc;
 
 import minegame159.meteorclient.mixininterface.IAbstractFurnaceScreenHandler;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.utils.player.Chat;
 import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.screen.AbstractFurnaceScreenHandler;
 import net.minecraft.screen.slot.SlotActionType;
 
-public class AutoSmelter extends ToggleModule {
+public class AutoSmelter extends Module {
     private int step;
     private boolean first;
     private int timer;

@@ -6,7 +6,7 @@
 package minegame159.meteorclient.modules.render;
 
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import minegame159.meteorclient.utils.render.color.Color;
@@ -21,7 +21,7 @@ import net.minecraft.entity.LivingEntity;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Chams extends ToggleModule {
+public class Chams extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     
     private final Setting<List<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()

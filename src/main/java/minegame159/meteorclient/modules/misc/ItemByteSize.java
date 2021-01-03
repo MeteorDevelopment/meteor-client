@@ -10,7 +10,7 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.game.GetTooltipEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -22,7 +22,7 @@ import net.minecraft.util.Formatting;
 
 import java.io.IOException;
 
-public class ItemByteSize extends ToggleModule {
+public class ItemByteSize extends Module {
     public enum Mode {
         Standard,
         True

@@ -9,7 +9,7 @@ import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -21,7 +21,7 @@ import net.minecraft.item.Items;
 import net.minecraft.item.ShearsItem;
 import net.minecraft.util.Hand;
 
-public class AutoShearer extends ToggleModule {
+public class AutoShearer extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     
     private final Setting<Double> distance = sgGeneral.add(new DoubleSetting.Builder()

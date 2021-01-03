@@ -16,13 +16,13 @@ import minegame159.meteorclient.events.entity.player.PlaceBlockEvent;
 import minegame159.meteorclient.events.game.OpenScreenEvent;
 import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import net.minecraft.block.Block;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.item.Item;
 
-public class Announcer extends ToggleModule {
+public class Announcer extends Module {
     private static final double TICK = 1.0 / 20.0;
 
     private final Feature[] features = {

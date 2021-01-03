@@ -11,7 +11,7 @@ import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.events.world.PreTickEvent;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.block.Block;
@@ -19,7 +19,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 
-public class Anchor extends ToggleModule {
+public class Anchor extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Integer> maxHeight = sgGeneral.add(new IntSetting.Builder()

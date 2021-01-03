@@ -14,7 +14,7 @@ import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.player.Chat;
 import minegame159.meteorclient.utils.player.DamageCalcUtils;
@@ -32,7 +32,7 @@ import net.minecraft.util.math.Vec3d;
 import java.util.Comparator;
 import java.util.Optional;
 
-public class AnchorAura extends ToggleModule {
+public class AnchorAura extends Module {
 
     public enum Mode {
         Safe,

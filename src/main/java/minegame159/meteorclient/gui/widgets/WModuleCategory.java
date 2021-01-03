@@ -7,9 +7,8 @@ package minegame159.meteorclient.gui.widgets;
 
 import minegame159.meteorclient.gui.GuiConfig;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 
 public class WModuleCategory extends WWindow {
     public WModuleCategory(Category category) {
@@ -22,9 +21,7 @@ public class WModuleCategory extends WWindow {
         getDefaultCell().space(0);
 
         for (Module module : ModuleManager.INSTANCE.getGroup(category)) {
-            if (!(module instanceof ToggleModule)) continue;
-
-            add(new WModule((ToggleModule) module)).fillX().expandX();
+            add(new WModule(module)).fillX().expandX();
             row();
         }
     }

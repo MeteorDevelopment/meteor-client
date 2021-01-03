@@ -9,7 +9,7 @@ import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.world.PlaySoundEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.settings.SoundEventListSetting;
@@ -18,7 +18,7 @@ import net.minecraft.sound.SoundEvent;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SoundBlocker extends ToggleModule {
+public class SoundBlocker extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<List<SoundEvent>> sounds = sgGeneral.add(new SoundEventListSetting.Builder()

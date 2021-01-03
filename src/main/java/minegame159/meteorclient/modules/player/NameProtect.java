@@ -6,12 +6,12 @@
 package minegame159.meteorclient.modules.player;
 
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.settings.StringSetting;
 
-public class NameProtect extends ToggleModule {
+public class NameProtect extends Module {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 

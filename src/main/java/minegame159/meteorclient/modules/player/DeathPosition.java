@@ -15,7 +15,7 @@ import minegame159.meteorclient.gui.widgets.WLabel;
 import minegame159.meteorclient.gui.widgets.WTable;
 import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
@@ -29,7 +29,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DeathPosition extends ToggleModule {
+public class DeathPosition extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Boolean> createWaypoint = sgGeneral.add(new BoolSetting.Builder()

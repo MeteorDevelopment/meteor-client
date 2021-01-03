@@ -16,7 +16,7 @@ import minegame159.meteorclient.friends.Friend;
 import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.mixininterface.IChatHudLine;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.gui.hud.ChatHudLine;
@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class BetterChat extends ToggleModule {
+public class BetterChat extends Module {
     // Anti Spam
 
     private final SettingGroup sgAntiSpam = settings.createGroup("Anti Spam");

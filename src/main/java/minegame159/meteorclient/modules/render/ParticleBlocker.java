@@ -4,7 +4,7 @@ import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.world.ParticleEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.ParticleEffectListSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
@@ -13,7 +13,7 @@ import net.minecraft.particle.ParticleEffect;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ParticleBlocker extends ToggleModule {
+public class ParticleBlocker extends Module {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 

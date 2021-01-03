@@ -15,7 +15,7 @@ import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.events.world.ChunkDataEvent;
 import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
@@ -36,7 +36,7 @@ import net.minecraft.world.dimension.DimensionType;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Search extends ToggleModule {
+public class Search extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgRender = settings.createGroup("Render");
     private final SettingGroup sgTracers = settings.createGroup("Tracers");
