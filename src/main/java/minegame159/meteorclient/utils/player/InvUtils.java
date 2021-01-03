@@ -5,19 +5,34 @@
 
 package minegame159.meteorclient.utils.player;
 
+import javafx.util.Pair;
+import me.zero.alpine.listener.EventHandler;
+import me.zero.alpine.listener.Listenable;
+import me.zero.alpine.listener.Listener;
+import minegame159.meteorclient.events.world.PreTickEvent;
+import minegame159.meteorclient.modules.ToggleModule;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.Hand;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.util.*;
 import java.util.function.Predicate;
 
-public class InvUtils {
+public class InvUtils implements Listenable {
     public static final int OFFHAND_SLOT = 45;
     private static final MinecraftClient mc = MinecraftClient.getInstance();
 
     private static final FindItemResult findItemResult = new FindItemResult();
+    private static final Deque<Pair<Class<? extends ToggleModule>, List<Integer>>> moveQueue = new ArrayDeque<>();
+    private static final Queue<Integer> currentQueue = new PriorityQueue<>();
+    private static Class<? extends ToggleModule> currentModule;
+    private static final Map<Class<? extends ToggleModule>, Integer> cooldown = new HashMap<>();
 
     public static void clickSlot(int slot, int button, SlotActionType action) {
         mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, slot, button, action, mc.player);
@@ -74,5 +89,49 @@ public class InvUtils {
         public boolean found() {
             return slot != -1;
         }
+    }
+
+    @EventHandler
+    private final Listener<PreTickEvent> onTick = new Listener<>(event -> {
+        for (Class<? extends ToggleModule> klass : cooldown.keySet()){
+            cooldown.replace(klass, cooldown.get(klass) - 1);
+            if (cooldown.get(klass) <= 0) cooldown.remove(klass);
+        }
+        if (currentQueue.isEmpty() && !moveQueue.isEmpty()) {
+            Pair<Class<? extends ToggleModule>, List<Integer>> pair = moveQueue.remove();
+            Collections.reverse(pair.getValue());
+            currentQueue.addAll(pair.getValue());
+            currentModule = pair.getKey();
+        } else if (!currentQueue.isEmpty()) {
+            currentQueue.forEach(slot -> clickSlot(invIndexToSlotId(slot), 0, SlotActionType.PICKUP));
+            currentQueue.clear();
+        }
+    });
+
+    public static void addSlots(List<Integer> slots, Class<? extends ToggleModule> klass){
+        Collections.reverse(slots);
+        if (cooldown.containsKey(klass))return;
+        if (canMove(klass)){
+            moveQueue.addFirst(new Pair<>(klass, slots));
+            currentModule = klass;
+        } else {
+            moveQueue.add(new Pair<>(klass, slots));
+        }
+        cooldown.put(klass, 3);
+    }
+
+    public static boolean canMove(Class<? extends ToggleModule> klass){
+        return getPrio(currentModule) < getPrio(klass);
+    }
+
+    private static int getPrio(Class<? extends ToggleModule> klass){
+        if (klass == null) return -1;
+        return klass.getAnnotation(Priority.class).priority();
+    }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.TYPE)
+    public @interface Priority{
+        int priority() default -1;
     }
 }

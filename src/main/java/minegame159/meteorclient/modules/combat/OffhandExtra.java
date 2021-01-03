@@ -26,6 +26,10 @@ import net.minecraft.item.Items;
 import net.minecraft.item.SwordItem;
 import net.minecraft.screen.slot.SlotActionType;
 
+import java.util.ArrayList;
+import java.util.List;
+
+@InvUtils.Priority(priority = 1)
 public class OffhandExtra extends ToggleModule {
     public enum Mode{
         EGap,
@@ -135,9 +139,18 @@ public class OffhandExtra extends ToggleModule {
         else if (mc.player.getMainHandStack().getItem() instanceof EnchantedGoldenAppleItem && offhandCrystal.get()) currentMode = Mode.Crystal;
 
         if ((asimov.get() || noTotems) && mc.player.getOffHandStack().getItem() != getItem()) {
-            Item item = getItem();
-            int result = findSlot(item);
+            int result = findSlot(getItem());
             if (result == -1 && mc.player.getOffHandStack().getItem() != getItem()) {
+                if (currentMode != mode.get()){
+                    currentMode = mode.get();
+                    if (mc.player.getOffHandStack().getItem() != getItem()) {
+                        result = findSlot(getItem());
+                        if (result != -1) {
+                            doMove(result);
+                            return;
+                        }
+                    }
+                }
                 if (!sentMessage) {
                     Chat.warning(this, "None of the chosen item found.");
                     sentMessage = true;
@@ -145,7 +158,7 @@ public class OffhandExtra extends ToggleModule {
                 if (selfToggle.get()) this.toggle();
                 return;
             }
-            if (mc.player.getOffHandStack().getItem() != item && replace.get()) {
+            if (mc.player.getOffHandStack().getItem() != getItem() && replace.get()) {
                 doMove(result);
                 sentMessage = false;
             }
@@ -213,25 +226,28 @@ public class OffhandExtra extends ToggleModule {
     }
 
     private void doMove(int slot){
-        assert  mc.player != null;
+        assert mc.player != null;
         boolean empty = mc.player.getOffHandStack().isEmpty();
-        InvUtils.clickSlot(InvUtils.invIndexToSlotId(slot), 0, SlotActionType.PICKUP);
-        InvUtils.clickSlot(InvUtils.OFFHAND_SLOT, 0, SlotActionType.PICKUP);
-        if (!empty) InvUtils.clickSlot(InvUtils.invIndexToSlotId(slot), 0, SlotActionType.PICKUP);
+        List<Integer> slots = new ArrayList<>();
+        if(mc.player.inventory.getCursorStack().getItem() != Items.TOTEM_OF_UNDYING) {
+            slots.add(slot);
+        }
+        slots.add(InvUtils.OFFHAND_SLOT);
+        if (!empty) slots.add(slot);
+        InvUtils.addSlots(slots, this.getClass());
     }
 
     private int findSlot(Item item){
         assert mc.player != null;
+        for (int i = 9; i < mc.player.inventory.size(); i++){
+            if (mc.player.inventory.getStack(i).getItem() == item){
+                return i;
+            }
+        }
         if (hotBar.get()){
             return InvUtils.findItemWithCount(item).slot;
-        } else {
-            for (int i = 9; i < mc.player.inventory.size(); i++){
-                if (mc.player.inventory.getStack(i).getItem() == item){
-                    return i;
-                }
-            }
-            return -1;
         }
+        return -1;
     }
 
 }
