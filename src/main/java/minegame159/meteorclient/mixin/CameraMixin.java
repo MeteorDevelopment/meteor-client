@@ -5,7 +5,6 @@
 
 package minegame159.meteorclient.mixin;
 
-import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.render.CameraClip;
 import minegame159.meteorclient.modules.render.Freecam;
@@ -22,11 +21,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(Camera.class)
 public abstract class CameraMixin {
-    @Shadow private Vec3d pos;
-
     @Shadow private boolean thirdPerson;
 
     @Shadow protected abstract void setRotation(float yaw, float pitch);
+
+    @Shadow protected abstract void setPos(double x, double y, double z);
 
     @Inject(method = "clipToSpace", at = @At("HEAD"), cancellable = true)
     private void onClipToSpace(double desiredCameraDistance, CallbackInfoReturnable<Double> info) {
@@ -40,7 +39,7 @@ public abstract class CameraMixin {
         Freecam freecam = ModuleManager.INSTANCE.get(Freecam.class);
 
         if (freecam.isActive()) {
-            ((IVec3d) pos).set(freecam.getX(tickDelta), freecam.getY(tickDelta), freecam.getZ(tickDelta));
+            setPos(freecam.getX(tickDelta), freecam.getY(tickDelta), freecam.getZ(tickDelta));
             setRotation(freecam.getYaw(tickDelta), freecam.getPitch(tickDelta));
             this.thirdPerson = true;
         }
