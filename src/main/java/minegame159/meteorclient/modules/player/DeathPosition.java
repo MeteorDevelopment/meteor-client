@@ -106,10 +106,12 @@ public class DeathPosition extends ToggleModule {
         if (deathPos.isEmpty() && mc.player != null) {
             Chat.info("No latest death.");
         } else {
-            double x = deathPos.get("x"), z = deathPos.get("z");
-            if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing())
-                BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
-            BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalXZ((int) x, (int) z));
+            if (mc.world != null) {
+                double x = deathPos.get("x"), z = deathPos.get("z");
+                if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing())
+                    BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
+                BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalXZ((int) x, (int) z));
+            }
         }
     }
 
