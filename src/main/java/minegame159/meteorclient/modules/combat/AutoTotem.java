@@ -34,9 +34,12 @@ import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Items;
 import net.minecraft.item.SwordItem;
-import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.math.Vec3d;
 
+import java.util.ArrayList;
+import java.util.List;
+
+@InvUtils.Priority(priority = Integer.MAX_VALUE)
 public class AutoTotem extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
@@ -122,17 +125,18 @@ public class AutoTotem extends ToggleModule {
     private void moveTotem(InvUtils.FindItemResult result){
         assert mc.player != null;
         boolean empty = mc.player.getOffHandStack().isEmpty();
+        List<Integer> slots = new ArrayList<>();
         if(mc.player.inventory.getCursorStack().getItem() != Items.TOTEM_OF_UNDYING) {
-            InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
+            slots.add(result.slot);
         }
-        InvUtils.clickSlot(InvUtils.OFFHAND_SLOT, 0, SlotActionType.PICKUP);
-        if (!empty) InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
+        slots.add(InvUtils.OFFHAND_SLOT);
+        if (!empty) slots.add(result.slot);
+        InvUtils.addSlots(slots, this.getClass());
     }
 
     public int getTotemCount(InvUtils.FindItemResult result) {
         assert mc.player != null;
         int count = 0;
-        if (mc.player.inventory.getCursorStack().getItem() == Items.TOTEM_OF_UNDYING) count++;
         if (mc.player.getOffHandStack().getItem() == Items.TOTEM_OF_UNDYING) count++;
         return count + result.count;
     }
