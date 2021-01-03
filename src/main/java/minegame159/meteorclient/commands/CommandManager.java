@@ -21,12 +21,10 @@ public class CommandManager {
         addCommand(new Bind());
         addCommand(new ClearChat());
         addCommand(new Modules());
-        addCommand(new ResetBind());
         addCommand(new Settings());
         addCommand(new Enchant());
         addCommand(new Reset());
         addCommand(new Panic());
-        addCommand(new ResetAll());
         addCommand(new Baritone());
         addCommand(new Reload());
         addCommand(new Dismount());
@@ -36,7 +34,6 @@ public class CommandManager {
         addCommand(new HClip());
         addCommand(new VClip());
         addCommand(new Friend());
-        addCommand(new ResetGui());
         addCommand(new Peek());
         addCommand(new FakePlayerCommand());
         addCommand(new SwarmCloseConnections());
