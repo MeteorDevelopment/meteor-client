@@ -91,8 +91,7 @@ public class Step extends ToggleModule {
 
     @Override
     public void onDeactivate() {
-        assert mc.player != null;
-        mc.player.stepHeight = prevStepHeight;
+        if (mc.player != null) mc.player.stepHeight = prevStepHeight;
 
         BaritoneAPI.getSettings().assumeStep.value = prevBaritoneAssumeStep;
     }
