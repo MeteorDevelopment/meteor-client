@@ -13,8 +13,8 @@ import minegame159.meteorclient.events.entity.player.RightClickEvent;
 import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.player.Chat;
 import minegame159.meteorclient.utils.player.InvUtils;
@@ -24,7 +24,6 @@ import net.minecraft.item.EnchantedGoldenAppleItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.item.SwordItem;
-import net.minecraft.screen.slot.SlotActionType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -116,13 +115,10 @@ public class OffhandExtra extends Module {
     @Override
     public void onDeactivate() {
         assert mc.player != null;
-        if (ModuleManager.INSTANCE.get(AutoTotem.class).isActive()) {
+        if (ModuleManager.INSTANCE.get(AutoTotem.class).isActive() && mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING) {
             InvUtils.FindItemResult result = InvUtils.findItemWithCount(Items.TOTEM_OF_UNDYING);
-            boolean empty = mc.player.getOffHandStack().isEmpty();
             if (result.slot != -1) {
-                InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
-                InvUtils.clickSlot(InvUtils.OFFHAND_SLOT, 0, SlotActionType.PICKUP);
-                if (!empty) InvUtils.clickSlot(InvUtils.invIndexToSlotId(result.slot), 0, SlotActionType.PICKUP);
+                doMove(result.slot);
             }
         }
     }
