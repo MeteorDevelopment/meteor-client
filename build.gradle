@@ -1,7 +1,7 @@
 import java.util.jar.JarFile
 
 plugins {
-	id 'fabric-loom' version '0.4-SNAPSHOT'
+	id 'fabric-loom' version '0.5-SNAPSHOT'
 	id 'maven-publish'
 	id 'com.github.johnrengelman.shadow' version '6.0.0'
 }
@@ -46,8 +46,8 @@ dependencies {
 	include "com.gitlab.CDAGaming:fabritone:fabritone~1.16.x-Fabric-SNAPSHOT"
 
 	dependency "com.github.ZeroMemes:Alpine:1.9"
-	dependency "com.g00fy2:versioncompare:1.3.4"
-	dependency "org.joml:joml:1.9.25"
+	dependency 'com.g00fy2:versioncompare:1.3.7'
+	dependency "org.joml:joml:1.10.1-SNAPSHOT"
 
 	implementation 'com.github.minndevelopment:java-discordrpc:2.0.2'
 	shadow "club.minnced:java-discord-rpc:2.0.2"
@@ -110,8 +110,8 @@ task generatePacketUtils() {
 		}
 
 		// Generate PacketUtils.java
-		def writer = new File("src/main/java/minegame159/meteorclient/utils/PacketUtils.java").newWriter()
-		writer << "package minegame159.meteorclient.utils;\n\n"
+		def writer = new File("src/main/java/minegame159/meteorclient/utils/network/PacketUtils.java").newWriter()
+		writer << "package minegame159.meteorclient.utils.network;\n\n"
 
 		//   Write imports
 		writer << "import net.minecraft.network.Packet;\n"
