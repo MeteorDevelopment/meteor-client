@@ -123,7 +123,7 @@ public class WSection extends WTable {
             }
         }
 
-        if (widget.parent.parent != null) moveParent(widget.parent, toMove);
+        if (widget.parent.parent != null && !(widget.parent.parent instanceof WWindow)) moveParent(widget.parent, toMove);
     }
 
     private int getCellIndexInParent(WWidget widget) {
