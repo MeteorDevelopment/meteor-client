@@ -25,6 +25,7 @@ public class Rotation extends Module {
 
     // Yaw
     private final SettingGroup sgYaw = settings.createGroup("Yaw");
+    private final SettingGroup sgPitch = settings.createGroup("Pitch");
 
     private final Setting<LockMode> yawLockMode = sgYaw.add(new EnumSetting.Builder<LockMode>()
             .name("yaw-lock-mode")
@@ -43,7 +44,6 @@ public class Rotation extends Module {
     );
 
     // Pitch
-    private final SettingGroup sgPitch = settings.createGroup("Pitch");
 
     private final Setting<LockMode> pitchLockMode = sgPitch.add(new EnumSetting.Builder<LockMode>()
             .name("pitch-lock-mode")

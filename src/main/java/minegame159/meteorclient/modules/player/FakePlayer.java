@@ -53,7 +53,7 @@ public class FakePlayer extends Module {
 
     private final Setting<Boolean> idInNametag = sgGeneral.add(new BoolSetting.Builder()
             .name("id-in-nametag")
-            .description("Displays the fake player's ID in its nametag.")
+            .description("Displays the fake player's ID inside its nametag.")
             .defaultValue(true)
             .build()
     );

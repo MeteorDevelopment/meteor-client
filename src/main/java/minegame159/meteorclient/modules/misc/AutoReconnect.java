@@ -30,7 +30,7 @@ public class AutoReconnect extends Module {
     
     private final Setting<Double> time = sgGeneral.add(new DoubleSetting.Builder()
             .name("time")
-            .description("The amount of time to wait before reconnecting to the server.")
+            .description("The amount of seconds to wait before reconnecting to the server.")
             .defaultValue(2.0)
             .min(0.0)
             .build()

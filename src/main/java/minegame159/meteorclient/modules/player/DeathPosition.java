@@ -41,7 +41,7 @@ public class DeathPosition extends Module {
 
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
 
-    private final WLabel label = new WLabel("You have no latest death.");
+    private final WLabel label = new WLabel("No latest death found.");
 
     public DeathPosition() {
         super(Category.Player, "death-position", "Sends you the coordinates to your latest death.");
@@ -104,7 +104,7 @@ public class DeathPosition extends Module {
 
     private void path() {
         if (deathPos.isEmpty() && mc.player != null) {
-            Chat.info("No latest death.");
+            Chat.info("No latest death found.");
         } else {
             if (mc.world != null) {
                 double x = deathPos.get("x"), z = deathPos.get("z");
@@ -117,6 +117,6 @@ public class DeathPosition extends Module {
 
     private void clear() {
         Waypoints.INSTANCE.remove(waypoint);
-        label.setText("No latest Death.");
+        label.setText("No latest death.");
     }
 }
