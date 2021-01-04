@@ -7,6 +7,7 @@ package minegame159.meteorclient.mixin;
 
 import com.g00fy2.versioncompare.Version;
 import minegame159.meteorclient.Config;
+import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.gui.screens.NewUpdateScreen;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.network.HttpUtils;
@@ -67,7 +68,7 @@ public class TitleScreenMixin extends Screen {
     private void onRenderIdkDude(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo info) {
         if (Utils.firstTimeTitleScreen) {
             Utils.firstTimeTitleScreen = false;
-            System.out.println("Checking latest version of Meteor Client.");
+            MeteorClient.LOG.info("Checking latest version of Meteor Client");
 
             MeteorExecutor.execute(() -> HttpUtils.getLines("http://meteorclient.com:8082/api/version", s -> {
                 Version latestVer = new Version(s);

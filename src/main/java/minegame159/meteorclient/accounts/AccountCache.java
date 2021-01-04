@@ -5,6 +5,7 @@
 
 package minegame159.meteorclient.accounts;
 
+import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.utils.misc.ISerializable;
 import minegame159.meteorclient.utils.misc.NbtException;
 import minegame159.meteorclient.utils.render.ByteTexture;
@@ -77,7 +78,7 @@ public class AccountCache implements ISerializable<AccountCache> {
 
             return true;
         } catch (IOException e) {
-            System.out.println("Failed to read skin url. (" + skinUrl + ")");
+            MeteorClient.LOG.error("Failed to read skin url. (" + skinUrl + ")");
             return false;
         }
     }

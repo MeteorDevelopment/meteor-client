@@ -41,6 +41,8 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.options.KeyBinding;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 
@@ -50,6 +52,7 @@ public class MeteorClient implements ClientModInitializer, Listenable {
     public static MFont FONT_2X;
     public static boolean IS_DISCONNECTING;
     public static final File FOLDER = new File(FabricLoader.getInstance().getGameDir().toString(), "meteor-client");
+    public static final Logger LOG = LogManager.getLogger();
 
     private MinecraftClient mc;
 
@@ -64,7 +67,7 @@ public class MeteorClient implements ClientModInitializer, Listenable {
             return;
         }
 
-        System.out.println("Initializing Meteor Client.");
+        LOG.info("Initializing Meteor Client");
 
         mc = MinecraftClient.getInstance();
         Utils.mc = mc;
@@ -95,6 +98,8 @@ public class MeteorClient implements ClientModInitializer, Listenable {
     }
 
     public void load() {
+        LOG.info("Loading");
+
         if (!ModuleManager.INSTANCE.load()) {
             ModuleManager.INSTANCE.get(DiscordPresence.class).toggle(false);
             Utils.addMeteorPvpToServerList();
@@ -106,7 +111,7 @@ public class MeteorClient implements ClientModInitializer, Listenable {
     }
 
     public void save() {
-        System.out.println("[Meteor] Saving");
+        LOG.info("Saving");
 
         Config.INSTANCE.save();
         ModuleManager.INSTANCE.save();

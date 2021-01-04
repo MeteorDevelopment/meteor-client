@@ -12,6 +12,7 @@ import com.mojang.authlib.exceptions.AuthenticationException;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import com.mojang.authlib.yggdrasil.YggdrasilMinecraftSessionService;
 import com.mojang.authlib.yggdrasil.YggdrasilUserAuthentication;
+import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.accounts.*;
 import minegame159.meteorclient.mixininterface.IMinecraftClient;
 import minegame159.meteorclient.utils.network.HttpUtils;
@@ -78,7 +79,7 @@ public class TheAlteningAccount extends Account<TheAlteningAccount> {
             cache.username = auth.getSelectedProfile().getName();
             return true;
         } catch (AuthenticationException e) {
-            System.out.println("[Meteor] Failed to login with TheAltening.");
+            MeteorClient.LOG.error("Failed to login with TheAltening.");
             return false;
         }
     }

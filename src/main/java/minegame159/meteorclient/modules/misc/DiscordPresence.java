@@ -13,6 +13,7 @@ import club.minnced.discord.rpc.DiscordRichPresence;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.Config;
+import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
@@ -53,7 +54,7 @@ public class DiscordPresence extends Module {
     @Override
     public void onActivate() {
         DiscordEventHandlers eventHandlers = new DiscordEventHandlers();
-        eventHandlers.disconnected = ((var1, var2) -> System.out.println("Discord RPC disconnected, var1: " + var1 + ", var2: " + var2));
+        eventHandlers.disconnected = ((var1, var2) -> MeteorClient.LOG.info("Discord RPC disconnected, var1: " + var1 + ", var2: " + var2));
 
         instance.Discord_Initialize("709793491911180378", eventHandlers, true, null);
 
