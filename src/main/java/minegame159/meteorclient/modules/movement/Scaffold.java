@@ -106,41 +106,8 @@ public class Scaffold extends Module {
         prevSelectedSlot = mc.player.inventory.selectedSlot;
         mc.player.inventory.selectedSlot = slot;
 
-        /*if (!airPlace.get()) {
-            // Check if has solid horizontal neighbour
-            boolean hasNeighbour = true;
-            BlockState neighbourUnder = mc.world.getBlockState(setPos(0, -1 - 1, 0));
-            BlockState neighbourRight = mc.world.getBlockState(setPos(1, -1, 0));
-            BlockState neighbourLeft = mc.world.getBlockState(setPos(-1, -1, 0));
-            BlockState neighbourTop = mc.world.getBlockState(setPos(0, -1, 1));
-            BlockState neighbourBottom = mc.world.getBlockState(setPos(0, -1, -1));
-            if (!isSolid(neighbourUnder) && !isSolid(neighbourRight) && !isSolid(neighbourLeft) && !isSolid(neighbourTop) && !isSolid(neighbourBottom))
-                hasNeighbour = false;
-
-            // No neighbour so player is going diagonally
-            if (!hasNeighbour) {
-                // Place extra block
-                boolean placed = Utils.place(slotBlockState, setPos(1, -1, 0), swingHand.get(), false, true);
-                if (!placed) placed = Utils.place(slotBlockState, setPos(-1, -1, 0), swingHand.get(), false, true);
-                if (!placed) placed = Utils.place(slotBlockState, setPos(0, -1, 1), swingHand.get(), false, true);
-                if (!placed) placed = Utils.place(slotBlockState, setPos(0, -1, -1), swingHand.get(), false, true);
-                if (!placed) placed = Utils.place(slotBlockState, setPos(0, -1 - 1, 0), swingHand.get(), false, true);
-                if (!placed) {
-                    System.err.println("[Meteor]: Scaffold: Failed to place extra block when going diagonally. This shouldn't happen.");
-                    return;
-                }
-
-                // Search for extra block is needed
-                if (!findBlock()) return;
-            }
-
-            // Place block
-            Utils.place(slotBlockState, setPos(0, -1, 0), swingHand.get(), false, false);
-            if (mc.player.input.sneaking) this.lastWasSneaking = false;
-        } else {*/
         PlayerUtils.placeBlock(mc.player.getBlockPos().down(), Hand.MAIN_HAND);
         if (mc.player.input.sneaking) this.lastWasSneaking = false;
-        //}
 
         // Place blocks around if radius is bigger than 1
         for (int i = 1; i < radius.get(); i++) {
