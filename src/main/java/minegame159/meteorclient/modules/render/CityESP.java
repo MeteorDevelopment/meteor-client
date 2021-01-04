@@ -36,7 +36,7 @@ public class CityESP extends Module {
 
     private final Setting<Boolean> checkBelow = sgGeneral.add(new BoolSetting.Builder()
             .name("check-below")
-            .description("Checks if there is an obsidian/bedrock block below the surround block for you to place crystals on.")
+            .description("Checks if there is an obsidian or bedrock below the surrounded block for you to place crystals on.")
             .defaultValue(true)
             .build()
     );

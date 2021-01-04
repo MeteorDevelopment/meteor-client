@@ -48,7 +48,7 @@ public class ShulkerPeek extends Module {
     }
 
     public ShulkerPeek(){
-        super(Category.Render, "shulker-peek", "Lets you see what is inside shulkers.");
+        super(Category.Render, "shulker-peek", "Allows you to see what is inside Shulker Boxes without placing them.");
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();

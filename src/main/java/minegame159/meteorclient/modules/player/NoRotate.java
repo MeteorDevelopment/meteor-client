@@ -13,7 +13,7 @@ import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 public class NoRotate extends Module {
 
     public NoRotate() {
-        super(Category.Player, "no-rotate", "Attempts to block rotations sent from server to client");
+        super(Category.Player, "no-rotate", "Attempts to block rotations sent from server to client.");
     }
 
     @EventHandler
