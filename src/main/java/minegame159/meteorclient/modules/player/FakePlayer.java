@@ -42,8 +42,8 @@ public class FakePlayer extends Module {
             .build()
     );
 
-    private final Setting<Integer> defaultHealth = sgGeneral.add(new IntSetting.Builder()
-            .name("default-health")
+    private final Setting<Integer> health = sgGeneral.add(new IntSetting.Builder()
+            .name("health")
             .description("The fake player's default health.")
             .defaultValue(20)
             .min(1)
@@ -94,7 +94,7 @@ public class FakePlayer extends Module {
         WTable table = new WTable();
 
         WButton spawn = table.add(new WButton("Spawn")).getWidget();
-        spawn.action = () -> spawnFakePlayer(name.get(), copyInv.get(), glowing.get(), defaultHealth.get().floatValue());
+        spawn.action = () -> spawnFakePlayer(name.get(), copyInv.get(), glowing.get(), health.get().floatValue());
 
         WButton clear = table.add(new WButton("Clear")).getWidget();
         clear.action = () -> clearFakePlayers(true);
@@ -176,7 +176,7 @@ public class FakePlayer extends Module {
         return glowing.get();
     }
 
-    public float getDefaultHealth() {
-        return defaultHealth.get().floatValue();
+    public float getHealth() {
+        return health.get().floatValue();
     }
 }
