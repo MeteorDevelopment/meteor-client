@@ -9,6 +9,7 @@ import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.events.world.PreTickEvent;
+import minegame159.meteorclient.mixin.AbstractBlockAccessor;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
@@ -152,6 +153,6 @@ public class Anchor extends Module {
 
     private boolean isAir(int x, int y, int z) {
         blockPos.set(x, y, z);
-        return mc.world.getBlockState(blockPos).isAir();
+        return !((AbstractBlockAccessor)mc.world.getBlockState(blockPos).getBlock()).isCollidable();
     }
 }
