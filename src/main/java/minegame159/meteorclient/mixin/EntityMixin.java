@@ -48,9 +48,6 @@ public abstract class EntityMixin {
         }
 
         Velocity velocity = ModuleManager.INSTANCE.get(Velocity.class);
-        System.out.println(entity.getVelocity());
-        //System.out.println(x + ", " + y + ", " + z);
-        //System.out.println((x * velocity.getHorizontal()) + ", " + (y * velocity.getVertical()) + ", " + (z * velocity.getHorizontal()));
         entity.setVelocity(entity.getVelocity().x + x * velocity.getHorizontal(), entity.getVelocity().y + y * velocity.getVertical(), entity.getVelocity().z + z * velocity.getHorizontal());
     }
 
