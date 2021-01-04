@@ -14,8 +14,8 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.movement.NoFall;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.IntSetting;
@@ -96,13 +96,13 @@ public class AutoTotem extends Module {
 
         InvUtils.FindItemResult result = InvUtils.findItemWithCount(Items.TOTEM_OF_UNDYING);
 
-        if (getTotemCount(result) <= 0) {
+        if (result.count <= 0) {
             if (!ModuleManager.INSTANCE.get(OffhandExtra.class).isActive() && fallback.get()) {
                 ModuleManager.INSTANCE.get(OffhandExtra.class).toggle();
             }
 
             ModuleManager.INSTANCE.get(OffhandExtra.class).setTotems(true);
-        } else if (getTotemCount(result) > 0) {
+        } else {
             ModuleManager.INSTANCE.get(OffhandExtra.class).setTotems(false);
 
             if (mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING && (!smart.get()
@@ -114,7 +114,7 @@ public class AutoTotem extends Module {
             }
         }
 
-        totemCountString = Integer.toString(getTotemCount(result));
+        totemCountString = Integer.toString(result.count);
     });
 
     @Override
@@ -132,13 +132,6 @@ public class AutoTotem extends Module {
         slots.add(InvUtils.OFFHAND_SLOT);
         if (!empty) slots.add(result.slot);
         InvUtils.addSlots(slots, this.getClass());
-    }
-
-    public int getTotemCount(InvUtils.FindItemResult result) {
-        assert mc.player != null;
-        int count = 0;
-        if (mc.player.getOffHandStack().getItem() == Items.TOTEM_OF_UNDYING) count++;
-        return count + result.count;
     }
 
     private double getHealthReduction(){
