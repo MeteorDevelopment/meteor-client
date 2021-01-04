@@ -18,6 +18,9 @@ public class Chat {
     public static void info(int id, Module module, String format, Object... args) {
         sendMsg(id, module, formatMsg(format, Formatting.GRAY, args), Formatting.GRAY);
     }
+    public static void info(Module module, String format, Object... args) {
+        info(0, module, format, args);
+    }
     public static void info(String format, Object... args) {
         info(0, null, format, args);
     }
