@@ -22,6 +22,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 
 public class InvUtils implements Listenable {
@@ -32,7 +33,7 @@ public class InvUtils implements Listenable {
     private static final Deque<Pair<Class<? extends Module>, List<Integer>>> moveQueue = new ArrayDeque<>();
     private static final Queue<Integer> currentQueue = new PriorityQueue<>();
     private static Class<? extends Module> currentModule;
-    private static final Map<Class<? extends Module>, Integer> cooldown = new HashMap<>();
+    private static final Map<Class<? extends Module>, Integer> cooldown = new ConcurrentHashMap<>();
 
     public static void clickSlot(int slot, int button, SlotActionType action) {
         assert mc.interactionManager != null;
