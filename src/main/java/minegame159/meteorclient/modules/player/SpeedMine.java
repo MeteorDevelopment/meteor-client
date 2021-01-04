@@ -18,8 +18,8 @@ public class SpeedMine extends Module {
 
     public enum Mode {
         Normal,
-        Haste_1,
-        Haste_2
+        Haste1,
+        Haste2
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -46,8 +46,8 @@ public class SpeedMine extends Module {
     public final Listener<PostTickEvent> onTick = new Listener<>(e -> {
         Mode mode = this.mode.get();
 
-        if (mode == Mode.Haste_1 || mode == Mode.Haste_2) {
-            int amplifier = mode == Mode.Haste_2 ? 1 : 0;
+        if (mode == Mode.Haste1 || mode == Mode.Haste2) {
+            int amplifier = mode == Mode.Haste2 ? 1 : 0;
             if (mc.player.hasStatusEffect(HASTE)) {
                 StatusEffectInstance effect = mc.player.getStatusEffect(HASTE);
                 ((IStatusEffectInstance) effect).setAmplifier(amplifier);

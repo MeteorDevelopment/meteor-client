@@ -22,7 +22,7 @@ public class FastUse extends Module {
 
     public enum Mode {
         All,
-        OnlySome
+        Some
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -36,14 +36,14 @@ public class FastUse extends Module {
 
     private final Setting<Boolean> exp = sgGeneral.add(new BoolSetting.Builder()
             .name("xp")
-            .description("Fast-throws XP bottles if the mode is \"OnlySome\".")
+            .description("Fast-throws XP bottles if the mode is \"Some\".")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> blocks = sgGeneral.add(new BoolSetting.Builder()
             .name("blocks")
-            .description("Fast-places blocks if the mode is \"OnlySome\".")
+            .description("Fast-places blocks if the mode is \"Some\".")
             .defaultValue(false)
             .build()
     );
@@ -58,7 +58,7 @@ public class FastUse extends Module {
             case All:
                 ((IMinecraftClient) mc).setItemUseCooldown(0);
                 break;
-            case OnlySome:
+            case Some:
                 if (exp.get() && (mc.player.getMainHandStack().getItem() == Items.EXPERIENCE_BOTTLE || mc.player.getOffHandStack().getItem() == Items.EXPERIENCE_BOTTLE)) ((IMinecraftClient) mc).setItemUseCooldown(0);
                 if (blocks.get() && mc.player.getMainHandStack().getItem() instanceof BlockItem || mc.player.getOffHandStack().getItem() instanceof BlockItem) ((IMinecraftClient) mc).setItemUseCooldown(0);
         }

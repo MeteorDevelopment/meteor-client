@@ -31,7 +31,7 @@ public class Freecam extends Module {
 
     private final Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
             .name("speed")
-            .description("Your speed")
+            .description("Your speed in Freecam.")
             .defaultValue(1.0)
             .min(0.0)
             .build()
@@ -45,7 +45,7 @@ public class Freecam extends Module {
 
     private final Setting<AutoDisableEvent> autoDisableOnDamage = sgGeneral.add(new EnumSetting.Builder<AutoDisableEvent>()
             .name("auto-disable-on-damage")
-            .description("Disables Freecam when you take damage or die.")
+            .description("Disables Freecam when you either take damage or die.")
             .defaultValue(AutoDisableEvent.OnDamage)
             .build()
     );
@@ -66,7 +66,7 @@ public class Freecam extends Module {
 
     private final Setting<Boolean> renderHands = sgGeneral.add(new BoolSetting.Builder()
             .name("render-hands")
-            .description("Whether or not to render hands in Freecam.")
+            .description("Whether or not to render your hands in Freecam.")
             .defaultValue(true)
             .build()
     );

@@ -28,21 +28,21 @@ public class BreakIndicators extends Module {
 
     public final Setting<Boolean> multiple = sgGeneral.add(new BoolSetting.Builder()
             .name("multiple")
-            .description("Renders block breaking from other players as well.")
+            .description("Renders block breaking from other players.")
             .defaultValue(true)
             .build()
     );
 
     public final Setting<Boolean> hideVanillaIndicators = sgGeneral.add(new BoolSetting.Builder()
             .name("hide-vanilla-indicators")
-            .description("Hides the vanilla (or resource-pack) break indicators.")
+            .description("Hides the vanilla (or resource pack) break indicators.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> smoothAnim = sgGeneral.add(new BoolSetting.Builder()
             .name("smooth-animation")
-            .description("Renders a smooth animation at block you break by yourself.")
+            .description("Renders a smooth animation at block you break.")
             .defaultValue(true)
             .build()
     );

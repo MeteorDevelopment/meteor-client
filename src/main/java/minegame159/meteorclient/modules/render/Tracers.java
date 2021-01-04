@@ -54,7 +54,7 @@ public class Tracers extends Module {
 
     private final Setting<RenderUtils.TracerTarget> target = sgAppearance.add(new EnumSetting.Builder<RenderUtils.TracerTarget>()
             .name("target")
-            .description("Which body part to target.")
+            .description("What part of the entity to target.")
             .defaultValue(RenderUtils.TracerTarget.Body)
             .build()
     );
