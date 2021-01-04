@@ -256,7 +256,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
 
     // INIT MODULES
 
-    private void addModule(Module module) {
+    public void addModule(Module module) {
         modules.put(module.getClass(), module);
         getGroup(module.category).add(module);
 
