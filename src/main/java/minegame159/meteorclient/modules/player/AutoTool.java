@@ -145,6 +145,8 @@ public class AutoTool extends Module {
         int bestScore = -1;
         int bestSlot = -1;
 
+        if (blockState.getHardness(mc.world, event.blockPos) < 0) return;
+
         for (int i = 0; i < 9; i++) {
             ItemStack itemStack = mc.player.inventory.getStack(i);
             if (!isEffectiveOn(itemStack.getItem(), blockState) || (itemStack.getMaxDamage() - itemStack.getDamage() <= 11)) continue;
