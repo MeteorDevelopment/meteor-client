@@ -164,7 +164,7 @@ public class WWindow extends WTable {
         @Override
         protected boolean onMouseReleased(boolean used, int button) {
             dragging = false;
-            if (!moved) onMouseClicked(false, GLFW.GLFW_MOUSE_BUTTON_RIGHT);
+            if (!moved && button == GLFW.GLFW_MOUSE_BUTTON_LEFT && !triangle.isOver(lastMouseX, lastMouseY)) onMouseClicked(false, GLFW.GLFW_MOUSE_BUTTON_RIGHT);
             return mouseOver && !used;
         }
 
