@@ -13,28 +13,24 @@ import net.minecraft.text.LiteralText;
 import net.minecraft.util.Formatting;
 
 public class Chat {
-    private static final int INFO_ID = 1591;
-    private static final int WARNING_ID = 1592;
-    private static final int ERROR_ID = 1593;
-
     private static final MinecraftClient mc = MinecraftClient.getInstance();
 
-    public static void info(Module module, String format, Object... args) {
-        sendMsg(INFO_ID, module, formatMsg(format, Formatting.GRAY, args), Formatting.GRAY);
+    public static void info(int id, Module module, String format, Object... args) {
+        sendMsg(id, module, formatMsg(format, Formatting.GRAY, args), Formatting.GRAY);
     }
     public static void info(String format, Object... args) {
-        info(null, format, args);
+        info(0, null, format, args);
     }
 
     public static void warning(Module module, String format, Object... args) {
-        sendMsg(WARNING_ID, module, formatMsg(format, Formatting.YELLOW, args), Formatting.YELLOW);
+        sendMsg(0, module, formatMsg(format, Formatting.YELLOW, args), Formatting.YELLOW);
     }
     public static void warning(String format, Object... args) {
         warning(null, format, args);
     }
 
     public static void error(Module module, String format, Object... args) {
-        sendMsg(ERROR_ID, module, formatMsg(format, Formatting.RED, args), Formatting.RED);
+        sendMsg(0, module, formatMsg(format, Formatting.RED, args), Formatting.RED);
     }
     public static void error(String format, Object... args) {
         error(null, format, args);
