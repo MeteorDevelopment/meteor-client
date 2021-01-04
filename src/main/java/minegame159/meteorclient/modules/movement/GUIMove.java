@@ -22,10 +22,10 @@ import net.minecraft.client.gui.screen.ingame.*;
 import net.minecraft.item.ItemGroup;
 import org.lwjgl.glfw.GLFW;
 
-public class GuiMove extends Module {
+public class GUIMove extends Module {
 
     public enum Screens {
-        Gui,
+        GUI,
         Inventory,
         Both
     }
@@ -75,7 +75,7 @@ public class GuiMove extends Module {
             .build()
     );
 
-    public GuiMove() {
+    public GUIMove() {
         super(Category.Movement, "gui-move", "Allows you to perform various actions while in GUIs.");
     }
 
@@ -83,7 +83,7 @@ public class GuiMove extends Module {
     private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
         if (!skip()) {
             switch (screens.get()) {
-                case Gui:
+                case GUI:
                     if (mc.currentScreen instanceof WidgetScreen) tickSneakJumpAndSprint();
                     break;
                 case Inventory:

@@ -24,7 +24,7 @@ import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.Items;
 
 public class AutoGap extends Module {
-    public enum Mode{
+    public enum Mode {
         Fire_Resistance,
         Regeneration,
         Constant

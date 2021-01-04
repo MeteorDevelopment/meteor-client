@@ -24,13 +24,14 @@ import java.util.Random;
 public class AntiAFK extends Module {
 
     public AntiAFK() {
-        super(Category.Player, "anti-afk", "Performs different actions to prevent getting kicked for AFK.");
+        super(Category.Player, "anti-afk", "Performs different actions to prevent getting kicked for AFK reasons.");
     }
 
     private final SettingGroup sgActions = settings.createGroup("Actions");
     private final SettingGroup sgMessages = settings.createGroup("Messages");
 
     // Actions
+
     private final Setting<Boolean> spin = sgActions.add(new BoolSetting.Builder()
             .name("spin")
             .description("Spins.")
@@ -75,6 +76,7 @@ public class AntiAFK extends Module {
             .build());
 
     // Messages
+
     private final Setting<Boolean> sendMessages = sgMessages.add(new BoolSetting.Builder()
             .name("send-messages")
             .description("Sends messages to prevent getting kicked for AFK.")

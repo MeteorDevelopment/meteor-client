@@ -369,7 +369,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new Scaffold());
         addModule(new BoatFly());
         addModule(new NoSlow());
-        addModule(new GuiMove());
+        addModule(new GUIMove());
         addModule(new Anchor());
         addModule(new ClickTP());
         addModule(new EntitySpeed());

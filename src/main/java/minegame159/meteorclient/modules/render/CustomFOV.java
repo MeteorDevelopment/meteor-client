@@ -52,7 +52,7 @@ public class CustomFOV extends Module {
     }
 
     public CustomFOV() {
-        super(Category.Render, "custom-fov", "Grants more customizability to your FOV.");
+        super(Category.Render, "custom-fov", "Allows your FOV to be more customizable.");
     }
 
 }
