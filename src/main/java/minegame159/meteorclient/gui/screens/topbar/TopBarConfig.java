@@ -6,10 +6,10 @@
 package minegame159.meteorclient.gui.screens.topbar;
 
 import minegame159.meteorclient.Config;
-import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.render.color.SettingColor;
+import minegame159.meteorclient.settings.BoolSetting;
+import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.settings.Settings;
+import minegame159.meteorclient.settings.StringSetting;
 
 public class TopBarConfig extends TopBarWindowScreen {
     public TopBarConfig() {
@@ -49,21 +49,6 @@ public class TopBarConfig extends TopBarWindowScreen {
                 .onModuleActivated(booleanSetting -> booleanSetting.set(Config.INSTANCE.deleteChatCommandsInfo))
                 .build()
         );
-
-        for (Category category : ModuleManager.CATEGORIES) {
-            sgCategoryColors.add(new ColorSetting.Builder()
-                    .name(category.toString().toLowerCase() + "-color")
-                    .description(category.toString() + " color.")
-                    .defaultValue(new SettingColor(0, 0, 0, 0))
-                    .onChanged(color1 -> Config.INSTANCE.setCategoryColor(category, color1))
-                    .onModuleActivated(colorSetting -> {
-                        SettingColor color = Config.INSTANCE.getCategoryColor(category);
-                        if (color == null) color = new SettingColor(0, 0, 0, 0);
-                        colorSetting.set(color);
-                    })
-                    .build()
-            );
-        }
 
         add(s.createTable()).fillX().expandX();
     }
