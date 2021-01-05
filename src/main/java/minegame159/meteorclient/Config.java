@@ -7,18 +7,13 @@ package minegame159.meteorclient;
 
 import com.g00fy2.versioncompare.Version;
 import minegame159.meteorclient.gui.GuiConfig;
-import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.rendering.Fonts;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.files.Savable;
-import minegame159.meteorclient.utils.misc.NbtUtils;
-import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.nbt.CompoundTag;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
 
 public class Config extends Savable<Config> {
     public static Config INSTANCE;
@@ -30,8 +25,6 @@ public class Config extends Savable<Config> {
 
     public boolean chatCommandsInfo = true;
     public boolean deleteChatCommandsInfo = true;
-
-    public Map<Category, SettingColor> categoryColors = new HashMap<>();
 
     public Config() {
         super(new File(MeteorClient.FOLDER, "config.nbt"));
@@ -48,22 +41,12 @@ public class Config extends Savable<Config> {
         return prefix;
     }
 
-    public void setCategoryColor(Category category, SettingColor color) {
-        categoryColors.put(category, color);
-        save();
-    }
-
-    public SettingColor getCategoryColor(Category category) {
-        return categoryColors.get(category);
-    }
-
     @Override
     public CompoundTag toTag() {
         CompoundTag tag = new CompoundTag();
 
         tag.putString("version", version.getOriginalString());
         tag.putString("prefix", prefix);
-        tag.put("categoryColors", NbtUtils.mapToTag(categoryColors));
         tag.put("guiConfig", guiConfig.toTag());
         tag.putBoolean("chatCommandsInfo", chatCommandsInfo);
         tag.putBoolean("deleteChatCommandsInfo", deleteChatCommandsInfo);
@@ -74,7 +57,6 @@ public class Config extends Savable<Config> {
     @Override
     public Config fromTag(CompoundTag tag) {
         prefix = tag.getString("prefix");
-        categoryColors = NbtUtils.mapFromTag(tag.getCompound("categoryColors"), Category::valueOf, tag1 -> new SettingColor().fromTag((CompoundTag) tag1));
         guiConfig.fromTag(tag.getCompound("guiConfig"));
         chatCommandsInfo = !tag.contains("chatCommandsInfo") || tag.getBoolean("chatCommandsInfo");
         deleteChatCommandsInfo = !tag.contains("deleteChatCommandsInfo") || tag.getBoolean("deleteChatCommandsInfo");
