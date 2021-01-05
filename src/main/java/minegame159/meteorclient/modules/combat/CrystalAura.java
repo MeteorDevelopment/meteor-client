@@ -41,6 +41,7 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.*;
 import net.minecraft.world.RaycastContext;
+
 import java.util.*;
 
 public class CrystalAura extends Module {
@@ -804,7 +805,7 @@ public class CrystalAura extends Module {
         } else if (isValid(target.getBlockPos().add(-1, -1, 0))
                 && Math.sqrt(mc.player.getBlockPos().getSquaredDistance(new Vec3i(target.getBlockPos().getX() -1, target.getBlockPos().getY() - 1, target.getBlockPos().getZ()))) < placeRange.get()){
             x = -1;
-        } else if (isValid(target.getBlockPos().add(0, -1, -1))
+        } else if (isValid(target.getBlockPos().add(0, -1, 1))
                 && Math.sqrt(mc.player.getBlockPos().getSquaredDistance(new Vec3i(target.getBlockPos().getX(), target.getBlockPos().getY() - 1, target.getBlockPos().getZ() + 1))) < placeRange.get()){
             z = 1;
         } else if (isValid(target.getBlockPos().add(0, -1, -1))
