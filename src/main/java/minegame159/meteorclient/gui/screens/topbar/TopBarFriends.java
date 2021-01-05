@@ -8,11 +8,9 @@ package minegame159.meteorclient.gui.screens.topbar;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.meteor.FriendListChangedEvent;
-import minegame159.meteorclient.friends.EditFriendScreen;
 import minegame159.meteorclient.friends.Friend;
 import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.gui.widgets.*;
-import net.minecraft.client.MinecraftClient;
 
 public class TopBarFriends extends TopBarWindowScreen {
     public TopBarFriends() {
@@ -24,7 +22,7 @@ public class TopBarFriends extends TopBarWindowScreen {
         // Friends
         for (Friend friend : FriendManager.INSTANCE) {
             add(new WLabel(friend.name));
-            add(new WButton(WButton.ButtonRegion.Edit)).getWidget().action = () -> MinecraftClient.getInstance().openScreen(new EditFriendScreen(friend));
+//            add(new WButton(WButton.ButtonRegion.Edit)).getWidget().action = () -> MinecraftClient.getInstance().openScreen(new EditFriendScreen(friend));
 
             WMinus remove = add(new WMinus()).getWidget();
             remove.action = () -> FriendManager.INSTANCE.remove(friend);
