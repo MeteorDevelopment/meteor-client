@@ -21,7 +21,6 @@ public class TopBarConfig extends TopBarWindowScreen {
         Settings s = new Settings();
 
         SettingGroup sgGeneral = s.getDefaultGroup();
-        SettingGroup sgCategoryColors = s.createGroup("Category Colors");
 
         sgGeneral.add(new StringSetting.Builder()
                 .name("prefix")
