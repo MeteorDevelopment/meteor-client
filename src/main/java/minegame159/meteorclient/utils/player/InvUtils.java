@@ -100,6 +100,12 @@ public class InvUtils implements Listenable {
 
     @EventHandler
     private final Listener<PreTickEvent> onTick = new Listener<>(event -> {
+        if (mc.world == null || mc.player == null){
+            cooldown.clear();
+            currentQueue.clear();
+            moveQueue.clear();
+            return;
+        }
         for (Class<? extends Module> klass : cooldown.keySet()){
             cooldown.replace(klass, cooldown.get(klass) - 1);
             if (cooldown.get(klass) <= 0) cooldown.remove(klass);
