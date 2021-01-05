@@ -36,45 +36,40 @@ public class ArmorHud extends HudModule {
         double x = box.getX();
         double y = box.getY();
 
-        int i = hud.armorFlip() ? 3 : 0;
-        while (true) {
-            if (hud.armorFlip()) {
-                if (i < 0) break;
-            } else {
-                if (i > 3) break;
-            }
+        int[] armorSlots = hud.armorFlip()
+                ? new int[]{3, 2, 1, 0}
+                : new int[]{0, 1, 2, 3};
 
-            ItemStack itemStack = getItem(i);
+        for (int index = 0; index < armorSlots.length; index++) {
+            int slot = armorSlots[index];
+            ItemStack itemStack = getItem(slot);
 
             RenderSystem.pushMatrix();
             RenderSystem.scaled(hud.armorScale(), hud.armorScale(), 1);
-            mc.getItemRenderer().renderGuiItemIcon(itemStack, (int) (x / hud.armorScale() + i * 18), (int) (y / hud.armorScale()));
+            mc.getItemRenderer().renderGuiItemIcon(itemStack, (int) (x / hud.armorScale() + index * 18), (int) (y / hud.armorScale()));
 
             if (itemStack.isDamageable()) {
                 switch (hud.armorDurability()) {
                     case Default: {
-                        mc.getItemRenderer().renderGuiItemOverlay(mc.textRenderer, itemStack, (int) (x / hud.armorScale() + i * 18), (int) (y / hud.armorScale()));
+                        mc.getItemRenderer().renderGuiItemOverlay(mc.textRenderer, itemStack, (int) (x / hud.armorScale() + index * 18), (int) (y / hud.armorScale()));
                         break;
                     }
                     case Numbers: {
                         String message = Integer.toString(itemStack.getMaxDamage() - itemStack.getDamage());
                         double messageWidth = renderer.textWidth(message);
-                        renderer.text(message, x + 18 * i * hud.armorScale() + 8 * hud.armorScale() - messageWidth / 2.0, y + (box.height - renderer.textHeight()), hud.primaryColor());
+                        renderer.text(message, x + 18 * index * hud.armorScale() + 8 * hud.armorScale() - messageWidth / 2.0, y + (box.height - renderer.textHeight()), hud.primaryColor());
                         break;
                     }
                     case Percentage: {
                         String message = Integer.toString(Math.round(((itemStack.getMaxDamage() - itemStack.getDamage()) * 100f) / (float) itemStack.getMaxDamage()));
                         double messageWidth = renderer.textWidth(message);
-                        renderer.text(message, x + 18 * i * hud.armorScale() + 8 * hud.armorScale() - messageWidth / 2.0, y + (box.height - renderer.textHeight()), hud.primaryColor());
+                        renderer.text(message, x + 18 * index * hud.armorScale() + 8 * hud.armorScale() - messageWidth / 2.0, y + (box.height - renderer.textHeight()), hud.primaryColor());
                         break;
                     }
                 }
             }
 
             RenderSystem.popMatrix();
-
-            if (hud.armorFlip()) i--;
-            else i++;
         }
     }
 
