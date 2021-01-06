@@ -78,7 +78,7 @@ public class FriendManager extends Savable<FriendManager> implements Iterable<Fr
 
     public boolean isTrusted(PlayerEntity player) {
         Friend friend = get(player);
-        return friend.type == FriendType.Trusted;
+        return friend != null && friend.type == FriendType.Trusted;
     }
 
     public boolean show(PlayerEntity player) {
