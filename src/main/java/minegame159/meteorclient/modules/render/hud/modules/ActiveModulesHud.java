@@ -9,10 +9,11 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.meteor.ActiveModulesChangedEvent;
 import minegame159.meteorclient.events.meteor.ModuleVisibilityChangedEvent;
-import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.render.hud.HUD;
 import minegame159.meteorclient.modules.render.hud.HudRenderer;
+import minegame159.meteorclient.utils.render.color.Color;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,8 +24,17 @@ public class ActiveModulesHud extends HudModule {
         BySmallest
     }
 
+    public enum ColorMode {
+        Flat,
+        Random,
+        Rainbow
+    }
+
     private final List<Module> modules = new ArrayList<>();
     private boolean update = true;
+
+    private final Color rainbow = new Color(255, 255, 255);
+    private double rainbowHue1, rainbowHue2;
 
     public ActiveModulesHud(HUD hud) {
         super(hud, "active-modules", "Displays your active modules.");
@@ -91,6 +101,12 @@ public class ActiveModulesHud extends HudModule {
             return;
         }
 
+        rainbowHue1 += hud.activeModulesRainbowSpeed() * renderer.delta;
+        if (rainbowHue1 > 1) rainbowHue1 -= 1;
+        else if (rainbowHue1 < -1) rainbowHue1 += 1;
+
+        rainbowHue2 = rainbowHue1;
+
         for (Module module : modules) {
             renderModule(renderer, module, x + box.alignX(getModuleWidth(renderer, module)), y);
 
@@ -99,7 +115,22 @@ public class ActiveModulesHud extends HudModule {
     }
 
     private void renderModule(HudRenderer renderer, Module module, double x, double y) {
-        renderer.text(module.title, x, y, module.color);
+        Color color = hud.activeModulesFlatColor();
+        
+        ColorMode colorMode = hud.activeModulesColorMode();
+        if (colorMode == ColorMode.Random) color = module.color;
+        else if (colorMode == ColorMode.Rainbow) {
+            rainbowHue2 += hud.activeModulesRainbowSpread();
+            int c = java.awt.Color.HSBtoRGB((float) rainbowHue2, 1, 1);
+
+            rainbow.r = Color.toRGBAR(c);
+            rainbow.g = Color.toRGBAG(c);
+            rainbow.b = Color.toRGBAB(c);
+
+            color = rainbow;
+        }
+        
+        renderer.text(module.title, x, y, color);
 
         String info = module.getInfoString();
         if (info != null) {

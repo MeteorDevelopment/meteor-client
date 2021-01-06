@@ -154,7 +154,7 @@ public class HudEditorScreen extends Screen {
 
         if (!Utils.canUpdate()) {
             renderBackground(matrices);
-            hud.onRender.invoke(EventStore.render2DEvent(0, 0, 0));
+            hud.onRender.invoke(EventStore.render2DEvent(0, 0, delta));
         }
 
         Utils.unscaledProjection();

@@ -13,12 +13,12 @@ import java.util.function.Consumer;
 public class DoubleSetting extends Setting<Double> {
     private final Double min, max;
 
-    private DoubleSetting(String name, String description, Double defaultValue, Consumer<Double> onChanged, Consumer<Setting<Double>> onModuleActivated, Double min, Double max, Double sliderMin, Double sliderMax, boolean noSlider) {
+    private DoubleSetting(String name, String description, Double defaultValue, Consumer<Double> onChanged, Consumer<Setting<Double>> onModuleActivated, Double min, Double max, Double sliderMin, Double sliderMax, boolean noSlider, int decimalPlaces) {
         super(name, description, defaultValue, onChanged, onModuleActivated);
         this.min = min;
         this.max = max;
 
-        widget = new WDoubleEdit(get(), sliderMin != null ? sliderMin : 0, sliderMax != null ? sliderMax : 10, 2, noSlider, 200);
+        widget = new WDoubleEdit(get(), sliderMin != null ? sliderMin : 0, sliderMax != null ? sliderMax : 10, decimalPlaces, noSlider, 200);
         ((WDoubleEdit) widget).action = () -> {
             if (!set(((WDoubleEdit) widget).get())) ((WDoubleEdit) widget).set(get());
         };
@@ -80,6 +80,7 @@ public class DoubleSetting extends Setting<Double> {
         private Double min, max;
         private Double sliderMin, sliderMax;
         private boolean noSlider;
+        private int decimalPlaces = 2;
 
         public Builder name(String name) {
             this.name = name;
@@ -131,8 +132,13 @@ public class DoubleSetting extends Setting<Double> {
             return this;
         }
 
+        public Builder decimalPlaces(int decimalPlaces) {
+            this.decimalPlaces = decimalPlaces;
+            return this;
+        }
+
         public DoubleSetting build() {
-            return new DoubleSetting(name, description, defaultValue, onChanged, onModuleActivated, min, max, sliderMin, sliderMax, noSlider);
+            return new DoubleSetting(name, description, defaultValue, onChanged, onModuleActivated, min, max, sliderMin, sliderMax, noSlider, decimalPlaces);
         }
     }
 }
