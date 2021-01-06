@@ -5,18 +5,20 @@
 
 package minegame159.meteorclient.modules.render;
 
+import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import minegame159.meteorclient.utils.render.color.Color;
-import minegame159.meteorclient.utils.render.color.ColorUtil;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.entity.model.EntityModel;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -91,8 +93,6 @@ public class Chams extends Module {
             .build()
     );
 
-    private static final Color WHITE = new Color(255, 255, 255);
-
     public Chams() {
         super(Category.Render, "chams", "Renders entities through walls.");
     }
@@ -117,7 +117,17 @@ public class Chams extends Module {
 //        return true;
 //    }
 
-    private Color getColor(Entity entity) {
-        return ColorUtil.getEntityColor(entity, playersColor.get(), animalsColor.get(), waterAnimalsColor.get(), monstersColor.get(), ambientColor.get(), miscColor.get());
+    public Color getColor(Entity entity) {
+        if (entity instanceof PlayerEntity) return FriendManager.INSTANCE.getColor((PlayerEntity) entity, playersColor.get(), true);
+
+        switch (entity.getType().getSpawnGroup()) {
+            case CREATURE:       return animalsColor.get();
+            case WATER_CREATURE: return waterAnimalsColor.get();
+            case MONSTER:        return monstersColor.get();
+            case AMBIENT:        return ambientColor.get();
+            case MISC:           return miscColor.get();
+        }
+
+        return Utils.WHITE;
     }
 }

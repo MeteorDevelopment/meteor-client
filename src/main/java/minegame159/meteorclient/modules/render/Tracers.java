@@ -132,10 +132,10 @@ public class Tracers extends Module {
 
             if (entity instanceof PlayerEntity) {
                 Color color = playersColor.get();
-                Friend friend = FriendManager.INSTANCE.get(((PlayerEntity) entity).getGameProfile().getName());
-                if (friend != null) color = friend.color;
+                Friend friend = FriendManager.INSTANCE.get((PlayerEntity) entity);
+                if (friend != null) color = FriendManager.INSTANCE.getColor((PlayerEntity) entity, playersColor.get(), false);
 
-                if (friend == null || friend.showInTracers) RenderUtils.drawTracerToEntity(event, entity, color, target.get(), stem.get()); count++;
+                if (friend == null || FriendManager.INSTANCE.show((PlayerEntity) entity)) RenderUtils.drawTracerToEntity(event, entity, color, target.get(), stem.get()); count++;
             } else {
                 switch (entity.getType().getSpawnGroup()) {
                     case CREATURE: RenderUtils.drawTracerToEntity(event, entity, animalsColor.get(), target.get(), stem.get()); count++; break;

@@ -13,6 +13,7 @@ import minegame159.meteorclient.mixininterface.IMinecraftServer;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.utils.player.Chat;
+import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.world.Dimension;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ServerInfo;
@@ -54,6 +55,8 @@ public class Utils {
 
     private static final Random random = new Random();
     private static final DecimalFormat df;
+
+    public static final Color WHITE = new Color(255, 255, 255);
 
     static {
         df = new DecimalFormat("0");
