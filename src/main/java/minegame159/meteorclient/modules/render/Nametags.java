@@ -365,7 +365,7 @@ public class Nametags extends Module {
 
         // Render name, health enchant and texts
         MeteorClient.FONT_2X.begin();
-        double hX = MeteorClient.FONT_2X.renderStringWithShadow(name, -widthHalf, 0, FriendManager.INSTANCE.getColor(entity, normalName.get()));
+        double hX = MeteorClient.FONT_2X.renderStringWithShadow(name, -widthHalf, 0, FriendManager.INSTANCE.getColor(entity, normalName.get(), false));
         MeteorClient.FONT_2X.renderStringWithShadow(healthText, hX + (width - nameWidth - healthWidth), 0, healthColor);
         if (displayPing.get()) MeteorClient.FONT_2X.renderStringWithShadow(pingText, hX + 3, 0, pingColor.get());
         double itemX = -widthHalf;
