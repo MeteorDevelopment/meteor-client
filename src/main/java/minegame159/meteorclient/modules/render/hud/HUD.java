@@ -86,6 +86,38 @@ public class HUD extends Module {
             .build()
     );
 
+    private final Setting<ActiveModulesHud.ColorMode> activeModulesColorMode = sgActiveModules.add(new EnumSetting.Builder<ActiveModulesHud.ColorMode>()
+            .name("active-modules-color-mode")
+            .description("What color to use for active modules.")
+            .defaultValue(ActiveModulesHud.ColorMode.Random)
+            .build()
+    );
+
+    private final Setting<SettingColor> activeModulesFlatColor = sgActiveModules.add(new ColorSetting.Builder()
+            .name("active-modules-flat-color")
+            .description("Color for flat color mode.")
+            .defaultValue(new SettingColor(225, 25, 25))
+            .build()
+    );
+
+    private final Setting<Double> activeModulesRainbowSpeed = sgActiveModules.add(new DoubleSetting.Builder()
+            .name("active-modules-rainbow-speed")
+            .description("Rainbow speed of rainbow color mode.")
+            .defaultValue(0.05)
+            .sliderMax(0.1)
+            .decimalPlaces(4)
+            .build()
+    );
+
+    private final Setting<Double> activeModulesRainbowSpread = sgActiveModules.add(new DoubleSetting.Builder()
+            .name("active-modules-rainbow-spread")
+            .description("Rainbow spread of rainbow color mode.")
+            .defaultValue(0.025)
+            .sliderMax(0.05)
+            .decimalPlaces(4)
+            .build()
+    );
+
     // Inventory Viewer
     private final Setting<InventoryViewerHud.Background> invViewerBackground = sgInvViewer.add(new EnumSetting.Builder<InventoryViewerHud.Background>()
             .name("inventory-viewer-background")
@@ -285,7 +317,7 @@ public class HUD extends Module {
     public final Listener<Render2DEvent> onRender = new Listener<>(event -> {
         if (mc.options.debugEnabled) return;
 
-        RENDERER.begin(scale());
+        RENDERER.begin(scale(), event.tickDelta);
 
         for (HudModule module : modules) {
             if (module.active || mc.currentScreen instanceof HudEditorScreen) {
@@ -363,6 +395,18 @@ public class HUD extends Module {
 
     public ActiveModulesHud.Sort activeModulesSort() {
         return activeModulesSort.get();
+    }
+    public ActiveModulesHud.ColorMode activeModulesColorMode() {
+        return activeModulesColorMode.get();
+    }
+    public SettingColor activeModulesFlatColor() {
+        return activeModulesFlatColor.get();
+    }
+    public double activeModulesRainbowSpeed() {
+        return activeModulesRainbowSpeed.get();
+    }
+    public double activeModulesRainbowSpread() {
+        return activeModulesRainbowSpread.get();
     }
 
     public InventoryViewerHud.Background invViewerBackground() {

@@ -14,6 +14,8 @@ public class HudRenderer {
     private MyFont font;
     private double scale;
 
+    public double delta;
+
     public void setScale(double scale) {
         double scaleA = Math.floor(scale * 10) / 10;
 
@@ -29,11 +31,13 @@ public class HudRenderer {
         this.scale = (scale - (((scaleI - 1) * 0.5) + 1)) / scaleA + 1;
     }
 
-    public void begin(double scale) {
+    public void begin(double scale, double tickDelta) {
         setScale(scale);
 
         Utils.unscaledProjection();
         font.begin(this.scale);
+
+        delta = tickDelta;
     }
 
     public void end() {
