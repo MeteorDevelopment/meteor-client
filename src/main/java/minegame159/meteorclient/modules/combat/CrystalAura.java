@@ -534,9 +534,7 @@ public class CrystalAura extends Module {
                 .filter(Entity::isAlive)
                 .filter(entity -> shouldBreak((EndCrystalEntity) entity))
                 .filter(entity -> ignoreWalls.get() || mc.player.canSee(entity))
-                .filter(entity -> !(breakMode.get() == Mode.Safe)
-                        || (getTotalHealth(mc.player) - DamageCalcUtils.crystalDamage(mc.player, entity.getPos()) > minHealth.get()
-                        && DamageCalcUtils.crystalDamage(mc.player, entity.getPos()) < maxDamage.get()))
+                .filter(entity -> isSafe(entity.getPos()))
                 .max(Comparator.comparingDouble(o -> DamageCalcUtils.crystalDamage(target, o.getPos())))
                 .ifPresent(entity -> hitCrystal((EndCrystalEntity) entity));
     }
@@ -552,9 +550,7 @@ public class CrystalAura extends Module {
                 .filter(Entity::isAlive)
                 .filter(entity -> shouldBreak((EndCrystalEntity) entity))
                 .filter(entity -> ignoreWalls.get() || mc.player.canSee(entity))
-                .filter(entity -> !(breakMode.get() == Mode.Safe)
-                        || (getTotalHealth(mc.player) - DamageCalcUtils.crystalDamage(mc.player, entity.getPos()) > minHealth.get()
-                        && DamageCalcUtils.crystalDamage(mc.player, entity.getPos()) < maxDamage.get()))
+                .filter(entity -> !isSafe(entity.getPos()))
                 .forEach(entity -> {
                     for (Entity target : mc.world.getEntities()){
                         if (target != mc.player && entities.get().contains(target.getType()) && mc.player.distanceTo(target) <= targetRange.get()
@@ -851,11 +847,16 @@ public class CrystalAura extends Module {
         assert mc.player != null;
         Vec3d crystalPos = new Vec3d(target.getBlockPos().getX() + 0.5, target.getBlockPos().getY(), target.getBlockPos().getZ() + 0.5);
         return isValid(target.getBlockPos().add(x, -1, z)) && mc.world.getBlockState(target.getBlockPos().add(x/2, 0, z/2)).getBlock() != Blocks.BEDROCK
-                && (!(breakMode.get() == Mode.Safe) || (getTotalHealth(mc.player) - DamageCalcUtils.crystalDamage(mc.player, crystalPos.add(x, 0, z)) > minHealth.get()
-                && DamageCalcUtils.crystalDamage(mc.player, crystalPos.add(x, 0, z)) < maxDamage.get()))
+                && isSafe(crystalPos.add(x, 0, z))
                 && Math.sqrt(mc.player.getBlockPos().getSquaredDistance(new Vec3i(target.getBlockPos().getX() + x, target.getBlockPos().getY() - 1, target.getBlockPos().getZ() + z))) < placeRange.get()
                 && mc.world.raycast(new RaycastContext(target.getPos(), target.getPos().add(x, 0, z), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, target)).getType()
                 != HitResult.Type.MISS;
+    }
+
+    private boolean isSafe(Vec3d crystalPos){
+        assert mc.player != null;
+        return (!(breakMode.get() == Mode.Safe) || (getTotalHealth(mc.player) - DamageCalcUtils.crystalDamage(mc.player, crystalPos) > minHealth.get()
+                && DamageCalcUtils.crystalDamage(mc.player, crystalPos) < maxDamage.get()));
     }
 
     private float getTotalHealth(PlayerEntity target) {
@@ -896,8 +897,9 @@ public class CrystalAura extends Module {
     }
 
     private boolean shouldBreak(EndCrystalEntity entity){
-        return heldCrystal == null || !heldCrystal.getBlockPos().equals(entity.getBlockPos()) || mc.world.raycast(new RaycastContext(target.getPos(), heldCrystal.getPos(), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, target)).getType()
-                == HitResult.Type.MISS;
+        assert mc.world != null;
+        return (heldCrystal == null || (!surroundHold.get() && !surroundBreak.get())) || (placeDelayLeft <= 0 && (!heldCrystal.getBlockPos().equals(entity.getBlockPos()) || mc.world.raycast(new RaycastContext(target.getPos(), heldCrystal.getPos(), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, target)).getType()
+                == HitResult.Type.MISS || (target.distanceTo(heldCrystal) > 1.5 && !isSurrounded(target))));
     }
 
     private boolean isSurrounded(LivingEntity target){
@@ -909,6 +911,7 @@ public class CrystalAura extends Module {
     }
 
     public Hand getHand() {
+        assert mc.player != null;
         Hand hand = Hand.MAIN_HAND;
         if (mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() == Items.END_CRYSTAL) {
             hand = Hand.OFF_HAND;
