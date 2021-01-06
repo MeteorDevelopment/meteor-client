@@ -70,17 +70,8 @@ public class GuiRenderer {
         double mouseY = MinecraftClient.getInstance().mouse.getY();
         double tooltipWidth = tooltip != null ? textWidth(tooltip) : 0;
 
-        if (root && tooltipWidth > 0) {
-            quad(Region.FULL, mouseX + 8, mouseY + 8, tooltipWidth + 8, textHeight() + 8, GuiConfig.INSTANCE.background);
-        }
-
         MinecraftClient.getInstance().getTextureManager().bindTexture(TEXTURE);
         mb.end();
-
-        if (root && tooltipWidth > 0) {
-            text(tooltip, mouseX + 8 + 4, mouseY + 8 + 4, false, GuiConfig.INSTANCE.text);
-            tooltip = null;
-        }
 
         Pair<MyFont, Double> font = Fonts.get(GuiConfig.INSTANCE.guiScale);
         this.font = font.getLeft();
@@ -92,6 +83,8 @@ public class GuiRenderer {
             }
         }
         this.font.end();
+
+        MyFont tooltipFont = this.font;
 
         font = Fonts.get(1.22222222 * GuiConfig.INSTANCE.guiScale);
         this.font = font.getLeft();
@@ -106,6 +99,17 @@ public class GuiRenderer {
         texts.clear();
 
         if (root) {
+            if (tooltipWidth > 0) {
+                mb.texture = false;
+                mb.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
+                mb.quad(mouseX + 8, mouseY + 8, tooltipWidth + 8, textHeight() + 8, GuiConfig.INSTANCE.background);
+                mb.end();
+                mb.texture = true;
+
+                tooltipFont.render(tooltip, mouseX + 8 + 4, mouseY + 8 + 4, GuiConfig.INSTANCE.text);
+                tooltip = null;
+            }
+
             endScissor();
             Input.setCursorStyle(cursorStyle);
         }
