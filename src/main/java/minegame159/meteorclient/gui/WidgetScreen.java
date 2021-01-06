@@ -117,7 +117,7 @@ public abstract class WidgetScreen extends Screen implements Listenable {
     public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
         if (locked) return false;
 
-        if (modifiers == GLFW.GLFW_MOD_CONTROL && keyCode == GLFW.GLFW_KEY_9) {
+        if ((modifiers == GLFW.GLFW_MOD_CONTROL || modifiers == GLFW.GLFW_MOD_SUPER) && keyCode == GLFW.GLFW_KEY_9) {
             renderDebug = !renderDebug;
             return true;
         }
