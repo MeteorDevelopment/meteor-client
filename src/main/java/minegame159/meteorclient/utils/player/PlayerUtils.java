@@ -23,6 +23,10 @@ public class PlayerUtils {
     private static final double diagonal = 1 / Math.sqrt(2);
     private static final Vec3d horizontalVelocity = new Vec3d(0, 0, 0);
 
+    public static boolean placeBlock(BlockPos blockPos, Hand hand) {
+        return placeBlock(blockPos, hand, true);
+    }
+
     public static boolean placeBlock(BlockPos blockPos, int slot, Hand hand) {
         assert mc.player != null;
         if (slot == -1) return false;
@@ -30,13 +34,13 @@ public class PlayerUtils {
         int preSlot = mc.player.inventory.selectedSlot;
         mc.player.inventory.selectedSlot = slot;
 
-        boolean a = placeBlock(blockPos, hand);
+        boolean a = placeBlock(blockPos, hand, true);
 
         mc.player.inventory.selectedSlot = preSlot;
         return a;
     }
 
-    public static boolean placeBlock(BlockPos blockPos, Hand hand) {
+    public static boolean placeBlock(BlockPos blockPos, Hand hand, boolean swing) {
         assert mc.world != null;
         assert  mc.interactionManager != null;
         assert mc.player != null;
@@ -63,7 +67,7 @@ public class PlayerUtils {
             mc.player.input.sneaking = false;
 
             mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(hitPos, side2, neighbor, false));
-            mc.player.swingHand(hand);
+            if (swing) mc.player.swingHand(hand);
 
             mc.player.input.sneaking = wasSneaking;
             return true;
