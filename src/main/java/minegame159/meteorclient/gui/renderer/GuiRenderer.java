@@ -72,27 +72,27 @@ public class GuiRenderer {
         MinecraftClient.getInstance().getTextureManager().bindTexture(TEXTURE);
         mb.end();
 
-        Pair<MyFont, Double> font = Fonts.get(GuiConfig.INSTANCE.guiScale);
-        this.font = font.getLeft();
-        this.font.begin(font.getRight());
+        Pair<MyFont, Double> font;
         for (Text text : texts) {
             if (!text.title) {
+                font = Fonts.get(GuiConfig.INSTANCE.guiScale);
+                this.font = font.getLeft();
+                this.font.begin(font.getRight());
                 text.render();
                 textPool.free(text);
-            }
-        }
-        this.font.end();
-
-        font = Fonts.get(1.22222222 * GuiConfig.INSTANCE.guiScale);
-        this.font = font.getLeft();
-        this.font.begin(font.getRight());
-        for (Text text : texts) {
-            if (text.title) {
+                this.font.end();
+            } else {
+                if(text.text.equals(tooltip)) {
+                    return;
+                }
+                font = Fonts.get(1.22222222 * GuiConfig.INSTANCE.guiScale);
+                this.font = font.getLeft();
+                this.font.begin(font.getRight());
                 text.render();
                 textPool.free(text);
+                this.font.end();
             }
         }
-        this.font.end();
         texts.clear();
 
         if (root) {
