@@ -17,6 +17,7 @@ import minegame159.meteorclient.events.game.GameLeftEvent;
 import minegame159.meteorclient.events.meteor.KeyEvent;
 import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.friends.FriendManager;
+import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.gui.screens.topbar.TopBarModules;
 import minegame159.meteorclient.macros.MacroManager;
 import minegame159.meteorclient.mixininterface.IKeyBinding;
@@ -147,7 +148,7 @@ public class MeteorClient implements ClientModInitializer, Listenable {
     private final Listener<KeyEvent> onKey = new Listener<>(event -> {
         // Click GUI
         if (event.action == KeyAction.Press && event.key == KeyBindingHelper.getBoundKeyOf(KeyBinds.OPEN_CLICK_GUI).getCode()) {
-            if (!Utils.canUpdate() || mc.currentScreen == null) openClickGui();
+            if ((!Utils.canUpdate() && !(mc.currentScreen instanceof WidgetScreen)) || mc.currentScreen == null) openClickGui();
         }
 
         // Shulker Peek
