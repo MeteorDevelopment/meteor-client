@@ -69,18 +69,8 @@ public class GuiRenderer {
         double mouseX = MinecraftClient.getInstance().mouse.getX();
         double mouseY = MinecraftClient.getInstance().mouse.getY();
         double tooltipWidth = tooltip != null ? textWidth(tooltip) : 0;
-
-        if (root && tooltipWidth > 0) {
-            quad(Region.FULL, mouseX + 8, mouseY + 8, tooltipWidth + 8, textHeight() + 8, GuiConfig.INSTANCE.background);
-        }
-
         MinecraftClient.getInstance().getTextureManager().bindTexture(TEXTURE);
         mb.end();
-
-        if (root && tooltipWidth > 0) {
-            text(tooltip, mouseX + 8 + 4, mouseY + 8 + 4, false, GuiConfig.INSTANCE.text);
-            tooltip = null;
-        }
 
         Pair<MyFont, Double> font = Fonts.get(GuiConfig.INSTANCE.guiScale);
         this.font = font.getLeft();
@@ -108,6 +98,32 @@ public class GuiRenderer {
         if (root) {
             endScissor();
             Input.setCursorStyle(cursorStyle);
+        }
+
+        mb.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR_TEXTURE);
+
+        if (root && tooltipWidth > 0) {
+            quad(Region.FULL, mouseX + 8, mouseY + 8, tooltipWidth + 8, textHeight() + 8, GuiConfig.INSTANCE.background);
+        }
+
+        MinecraftClient.getInstance().getTextureManager().bindTexture(TEXTURE);
+        mb.end();
+
+        if (root && tooltipWidth > 0) {
+            text(tooltip, mouseX + 8 + 4, mouseY + 8 + 4, false, GuiConfig.INSTANCE.text);
+
+            font = Fonts.get(GuiConfig.INSTANCE.guiScale);
+            this.font.begin(font.getRight());
+            for (Text text : texts) {
+                if(text.text.equals(tooltip)) {
+                    text.render();
+                    textPool.free(text);
+                }
+            }
+            tooltip = null;
+
+            texts.clear();
+            this.font.end();
         }
     }
     public void end() {
@@ -196,7 +212,7 @@ public class GuiRenderer {
     public void background(WWidget widget, boolean pressed) {
         background(widget, widget.mouseOver, pressed);
     }
-    
+
     public void triangle(double x, double y, double size, double rotation, Color color) {
         double rad = Math.toRadians(rotation);
         double cos = Math.cos(rad);
