@@ -173,7 +173,7 @@ public abstract class Module implements Listenable, ISerializable<Module> {
     }
 
     public void sendToggledMsg() {
-        if (Config.INSTANCE.chatCommandsInfo) Chat.info("Toggled (highlight)%s(default) %s(default).", title, isActive() ? Formatting.GREEN + "on" : Formatting.RED + "off");
+        if (Config.INSTANCE.chatCommandsInfo) Chat.info(159159, null, "Toggled (highlight)%s(default) %s(default).", title, isActive() ? Formatting.GREEN + "on" : Formatting.RED + "off");
     }
 
     public void setKey(int key, boolean postEvent) {
