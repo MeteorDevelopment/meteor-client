@@ -13,6 +13,8 @@ import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
+import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.Hand;
@@ -62,10 +64,13 @@ public class EXPThrower extends Module {
 
         if(autoToggle.get()) {
             int count = 0;
+            int set = 0;
+
             for(int i = 0; i < 4; i++) {
+                if(!mc.player.inventory.armor.get(i).isEmpty() && EnchantmentHelper.getLevel(Enchantments.MENDING, mc.player.inventory.getArmorStack(i)) == 1) set++;
                 if(!mc.player.inventory.armor.get(i).isDamaged()) count++;
             }
-            if(count == 4) toggle();
+            if(count == set && set != 0) toggle();
         }
     });
 }
