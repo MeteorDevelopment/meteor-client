@@ -379,7 +379,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
 
     private void initRender() {
         addModule(new HUD());
-        addModule(new FullBright());
+        addModule(new Fullbright());
         addModule(new StorageESP());
         addModule(new XRay());
         addModule(new ESP());

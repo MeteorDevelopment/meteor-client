@@ -93,14 +93,14 @@ public class AnchorAura extends Module {
 
     private final Setting<Double> minHealth = sgPlace.add(new DoubleSetting.Builder()
             .name("min-health")
-            .description("The minimum health you have to be for this to work.")
+            .description("The minimum health you have to be for Anchors to place.")
             .defaultValue(15)
             .build()
     );
 
     private final Setting<Boolean> place = sgGeneral.add(new BoolSetting.Builder()
             .name("place")
-            .description("Allows Anchor Aura to place anchors.")
+            .description("Allows Anchor Aura to be able to place anchors.")
             .defaultValue(true)
             .build()
     );
@@ -123,7 +123,7 @@ public class AnchorAura extends Module {
             .build()
     );
 
-    public AnchorAura() {super(Category.Combat, "anchor-aura", "Automatically places and breaks Anchors to harm entities.");}
+    public AnchorAura() {super(Category.Combat, "anchor-aura", "Automatically places and breaks Respawn Anchors to harm entities.");}
 
     private int placeDelayLeft = placeDelay.get();
     private int breakDelayLeft = breakDelay.get();
@@ -140,7 +140,7 @@ public class AnchorAura extends Module {
         placeDelayLeft --;
         breakDelayLeft --;
         if (mc.world.getDimension().isRespawnAnchorWorking()) {
-            Chat.info(this, "You are not in the Overworld... (highlight)disabling(default)!");
+            Chat.info(this, "You are in the Nether... (highlight)disabling(default)!");
             this.toggle();
             return;
         }

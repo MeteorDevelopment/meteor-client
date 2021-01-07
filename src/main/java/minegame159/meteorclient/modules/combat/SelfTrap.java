@@ -23,7 +23,7 @@ import net.minecraft.util.math.Direction;
 public class SelfTrap extends Module {
 
     public SelfTrap(){
-        super(Category.Combat, "self-trap", "Places obsidian above your head.");
+        super(Category.Combat, "self-trap", "Places obsidian around your head and upper body.");
     }
 
     public enum TopMode {
@@ -55,9 +55,9 @@ public class SelfTrap extends Module {
             .build()
     );
 
-    private final Setting<Boolean> turnOff = sgGeneral.add(new BoolSetting.Builder()
-            .name("turn-off")
-            .description("Turns off after placing.")
+    private final Setting<Boolean> toggleOff = sgGeneral.add(new BoolSetting.Builder()
+            .name("toggle-off")
+            .description("Toggles off after placing.")
             .defaultValue(true)
             .build()
     );
@@ -143,6 +143,6 @@ public class SelfTrap extends Module {
             case None:
         }
         mc.player.inventory.selectedSlot = prevSlot;
-        if (turnOff.get()) toggle();
+        if (toggleOff.get()) toggle();
     });
 }

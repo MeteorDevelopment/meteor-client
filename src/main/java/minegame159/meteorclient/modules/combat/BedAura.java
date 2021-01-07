@@ -158,7 +158,7 @@ public class BedAura extends Module {
 
     private final Setting<Double> minDamage = sgPlace.add(new DoubleSetting.Builder()
             .name("min-damage")
-            .description("The minimum damage the beds will place.")
+            .description("The minimum damage to the entity the bed will place at.")
             .defaultValue(5.5)
             .build()
     );
@@ -172,7 +172,7 @@ public class BedAura extends Module {
 
     private final Setting<Double> minHealth = sgPlace.add(new DoubleSetting.Builder()
             .name("min-health")
-            .description("The minimum health you have to be for it to place.")
+            .description("The minimum health you have to be for the beds to place.")
             .defaultValue(15)
             .build()
     );

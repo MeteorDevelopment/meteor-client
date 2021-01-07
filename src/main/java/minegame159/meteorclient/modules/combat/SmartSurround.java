@@ -35,14 +35,14 @@ public class SmartSurround extends Module {
 
     private final Setting<Boolean> onlyObsidian = sgGeneral.add(new BoolSetting.Builder()
             .name("only-obsidian")
-            .description("Only whitelists obsidian to be used.")
+            .description("Only allows obsidian to be used.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Double> minDamage = sgGeneral.add(new DoubleSetting.Builder()
             .name("min-damage")
-            .description("The minimum damage before this activates.")
+            .description("The minimum damage before Smart Surround activates.")
             .defaultValue(5.5)
             .build()
     );
@@ -85,7 +85,7 @@ public class SmartSurround extends Module {
                 }
 
                 if (slot == -1) {
-                    Chat.warning(this, "No blocks in hotbar. Disabling!");
+                    Chat.warning(this, "You have no blocks in your hotbar... disabling.");
                     return;
                 }
 

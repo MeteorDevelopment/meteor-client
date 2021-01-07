@@ -101,7 +101,7 @@ public class CrystalAura extends Module {
 
     private final Setting<Boolean> support = sgGeneral.add(new BoolSetting.Builder()
             .name("support")
-            .description("Places a block in the air and crystals on it. Helps with killing players that are flying.")
+            .description("Air-places Obsidian and crystals on it. Helps with killing players that are flying.")
             .defaultValue(false)
             .build()
     );
@@ -117,21 +117,21 @@ public class CrystalAura extends Module {
 
     private final Setting<Boolean> multiTarget = sgGeneral.add(new BoolSetting.Builder()
             .name("multi-targeting")
-            .description("Will calculate damage for all entities and pick a block based on target mode.")
+            .description("Will calculate damage for all entities and pick a block based on the target mode.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<TargetMode> targetMode = sgGeneral.add(new EnumSetting.Builder<TargetMode>()
             .name("target-mode")
-            .description("The way how to you do target multiple targets.")
+            .description("How you prioritize multiple targets.")
             .defaultValue(TargetMode.HighestXDamages)
             .build()
     );
 
     private final Setting<Integer> numberOfDamages = sgGeneral.add(new IntSetting.Builder()
             .name("number-of-damages")
-            .description("The number to replace 'x' with in HighestXDamages.")
+            .description("The number to replace 'X' with in HighestXDamages.")
             .defaultValue(3)
             .min(2)
             .sliderMax(10)
@@ -155,14 +155,14 @@ public class CrystalAura extends Module {
 
     private final Setting<Boolean> spoofChange = sgGeneral.add(new BoolSetting.Builder()
             .name("spoof-change")
-            .description("Spoofs item change to crystal.")
+            .description("Spoofs your item change to a crystal.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Double> minDamage = sgPlace.add(new DoubleSetting.Builder()
             .name("min-damage")
-            .description("The minimum damage the crystal will place.")
+            .description("The minimum damage to the entity the crystal will place at.")
             .defaultValue(5.5)
             .build()
     );
@@ -176,14 +176,13 @@ public class CrystalAura extends Module {
 
     private final Setting<Boolean> strict = sgPlace.add(new BoolSetting.Builder()
             .name("strict")
-            .description("Won't place in one block holes to help compatibility with some servers.")
-            .defaultValue(false)
+            .description("Doesn't place in one block holes to help compatibility with 1.12 servers.")
             .build()
     );
 
     private final Setting<Double> minHealth = sgPlace.add(new DoubleSetting.Builder()
             .name("min-health")
-            .description("The minimum health you have to be for it to place.")
+            .description("The minimum health you have to be for the crystals to place.")
             .defaultValue(15)
             .build()
     );
