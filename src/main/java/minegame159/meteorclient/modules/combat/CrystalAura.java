@@ -115,6 +115,13 @@ public class CrystalAura extends Module {
             .build()
     );
 
+    private final Setting<Boolean> supportBackup = sgGeneral.add(new BoolSetting.Builder()
+            .name("support-backup")
+            .description("Makes it so support only works if there are no other options.")
+            .defaultValue(true)
+            .build()
+    );
+
     private final Setting<Boolean> multiTarget = sgGeneral.add(new BoolSetting.Builder()
             .name("multi-targeting")
             .description("Will calculate damage for all entities and pick a block based on target mode.")
@@ -345,6 +352,8 @@ public class CrystalAura extends Module {
     private int breakDelayLeft = breakDelay.get();
     private Vec3d bestBlock;
     private double bestDamage = 0;
+    private Vec3d bestSupportBlock;
+    private double bestSupportDamage = 0;
     private BlockPos playerPos;
     private Vec3d pos;
     private double lastDamage = 0;
@@ -705,8 +714,10 @@ public class CrystalAura extends Module {
     private void findValidBlocks(LivingEntity target){
         assert mc.player != null;
         assert mc.world != null;
-        bestBlock = null;
+        bestBlock = new Vec3d(0, 0, 0);
         bestDamage = 0;
+        bestSupportBlock = new Vec3d(0, 0, 0);
+        bestSupportDamage = 0;
         playerPos = mc.player.getBlockPos();
         canSupport = false;
         crystalMap.clear();
@@ -724,15 +735,13 @@ public class CrystalAura extends Module {
             for(double j = playerPos.getZ() - placeRange.get(); j < playerPos.getZ() + placeRange.get(); j++){
                 for(double k = playerPos.getY() - 3; k < playerPos.getY() + 3; k++){
                     pos = new Vec3d(Math.floor(i), Math.floor(k), Math.floor(j));
-                    if (bestBlock == null) {
-                        bestBlock = pos;
-                        continue;
-                    }
-                    if(isValid(new BlockPos(pos)) && (DamageCalcUtils.crystalDamage(mc.player, pos.add(0.5, 1, 0.5)) < maxDamage.get()
-                            || placeMode.get() == Mode.Suicide)){
+                    if(isValid(new BlockPos(pos)) && getDamagePlace(new BlockPos(pos))){
                         if (!strict.get() || isEmpty(new BlockPos(pos.add(0, 2, 0)))) {
                             if (!multiTarget.get()) {
-                                if (bestDamage < DamageCalcUtils.crystalDamage(target, pos.add(0.5, 1, 0.5))) {
+                                if (isEmpty(new BlockPos(pos)) && bestSupportDamage < DamageCalcUtils.crystalDamage(target, pos.add(0.5, 1, 0.5))){
+                                    bestSupportBlock = pos;
+                                    bestSupportDamage = DamageCalcUtils.crystalDamage(target, pos.add(0.5, 1, 0.5));
+                                }else if (!isEmpty(new BlockPos(pos)) && bestDamage < DamageCalcUtils.crystalDamage(target, pos.add(0.5, 1, 0.5))) {
                                     bestBlock = pos;
                                     bestDamage = DamageCalcUtils.crystalDamage(target, bestBlock.add(0.5, 1, 0.5));
                                 }
@@ -763,7 +772,10 @@ public class CrystalAura extends Module {
                 bestBlock = null;
             }
         } else {
-            if (DamageCalcUtils.crystalDamage(target, bestBlock.add(0.5, 1, 0.5)) < minDamage.get()) bestBlock = null;
+            if (bestDamage < minDamage.get()) bestBlock = null;
+        }
+        if (support.get() && (bestBlock == null || (bestDamage < bestSupportDamage && !supportBackup.get()))){
+            bestBlock = bestSupportBlock;
         }
     }
 
