@@ -12,6 +12,7 @@ import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.rendering.MeshBuilder;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.rendering.ShapeMode;
 import minegame159.meteorclient.settings.*;
@@ -21,28 +22,30 @@ import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Box;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ESP extends Module {
+    private static final Identifier BOX2D = new Identifier("meteor-client", "box2d.png");
+    private static final MeshBuilder MB = new MeshBuilder(128);
+
+    public enum Mode {
+        Box,
+        Outline
+    }
+
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgColors = settings.createGroup("Colors");
 
     // General
 
-    private final Setting<Boolean> outline = sgGeneral.add(new BoolSetting.Builder()
-            .name("outline")
-            .description("Renders an outline around the entities.")
-            .defaultValue(true)
-            .build()
-    );
-
-    private final Setting<Boolean> box = sgGeneral.add(new BoolSetting.Builder()
-            .name("box")
-            .description("Renders a box around the entities.")
-            .defaultValue(true)
+    private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
+            .name("mode")
+            .description("Rendering mode.")
+            .defaultValue(Mode.Outline)
             .build()
     );
 
@@ -126,6 +129,8 @@ public class ESP extends Module {
 
     public ESP() {
         super(Category.Render, "esp", "Renders entities through walls.");
+
+        MB.texture = true;
     }
 
     private void setSideColor(Color lineColor) {
@@ -161,7 +166,7 @@ public class ESP extends Module {
 
     @EventHandler
     private final Listener<RenderEvent> onRender = new Listener<>(event -> {
-        if (!box.get()) return;
+        if (isOutline()) return;
 
         count = 0;
 
@@ -209,6 +214,6 @@ public class ESP extends Module {
     }
 
     public boolean isOutline() {
-        return outline.get();
+        return mode.get() == Mode.Outline;
     }
 }
