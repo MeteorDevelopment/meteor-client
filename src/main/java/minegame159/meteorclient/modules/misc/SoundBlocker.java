@@ -29,7 +29,7 @@ public class SoundBlocker extends Module {
     );
 
     public SoundBlocker() {
-        super(Category.Misc, "sound-blocker", "Cancels out selected sounds.");
+        super(Category.Misc, "Sound-Blocker", "Cancels out selected sounds.");
     }
 
     @EventHandler

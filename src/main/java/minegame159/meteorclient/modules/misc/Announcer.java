@@ -35,7 +35,7 @@ public class Announcer extends Module {
     };
 
     public Announcer() {
-        super(Category.Misc, "announcer", "Announces specified actions into chat.");
+        super(Category.Misc, "Announcer", "Announces specified actions into chat.");
     }
 
     @Override

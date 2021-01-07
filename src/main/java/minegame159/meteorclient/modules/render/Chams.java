@@ -94,7 +94,7 @@ public class Chams extends Module {
     );
 
     public Chams() {
-        super(Category.Render, "chams", "Renders entities through walls.");
+        super(Category.Render, "Chams", "Renders entities through walls.");
     }
 
     public boolean ignoreRender(Entity entity) {

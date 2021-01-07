@@ -30,6 +30,7 @@ public class PacketMine extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgRender = settings.createGroup("Render");
 
+    // General
     private final Setting<Boolean> oneByOne = sgGeneral.add(new BoolSetting.Builder()
             .name("one-by-one")
             .description("Mines blocks one by one.")
@@ -37,6 +38,7 @@ public class PacketMine extends Module {
             .build()
     );
 
+    // Render
     private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
             .name("render")
             .description("Whether to render blocks being mined.")
@@ -69,7 +71,7 @@ public class PacketMine extends Module {
     private final List<Block> blocks = new ArrayList<>();
 
     public PacketMine() {
-        super(Category.Player, "packet-mine", "Sends packets to mine blocks without the mining animation.");
+        super(Category.Player, "Packet-Mine", "Sends packets to mine blocks without the mining animation.");
     }
 
     @Override

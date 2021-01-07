@@ -30,7 +30,7 @@ public class NoFall extends Module {
         BeforeDamage
     }
     public NoFall() {
-        super(Category.Movement, "no-fall", "Prevents you from taking fall damage.");
+        super(Category.Movement, "No-Fall", "Prevents you from taking fall damage.");
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();

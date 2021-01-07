@@ -98,7 +98,7 @@ public class HandView extends Module {
 
 
     public HandView() {
-        super(Category.Render, "hand-view", "Alters the way items are rendered in your hands.");
+        super(Category.Render, "Hand-View", "Alters the way items are rendered in your hands.");
     }
 
     public float rotationX() {

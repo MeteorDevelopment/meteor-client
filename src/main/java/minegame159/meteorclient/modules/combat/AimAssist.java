@@ -110,7 +110,7 @@ public class AimAssist extends Module {
     private Entity entity;
 
     public AimAssist() {
-        super(Category.Combat, "aim-assist", "Automatically aims at entities.");
+        super(Category.Combat, "Aim-Assist", "Automatically aims at entities.");
     }
 
     @EventHandler

@@ -56,7 +56,7 @@ public class EntityOwner extends Module {
     private final Map<UUID, String> uuidToName = new HashMap<>();
 
     public EntityOwner() {
-        super(Category.Render, "entity-owner", "Displays the name of the player who owns the entity you're looking at.");
+        super(Category.Render, "Entity-Owner", "Displays the name of the player who owns the entity you're looking at.");
     }
 
     @Override

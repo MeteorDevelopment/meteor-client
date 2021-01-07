@@ -30,7 +30,7 @@ public class Time extends Module {
     );
 
     public Time() {
-        super(Category.Render, "time", "Makes you able to set a custom time.");
+        super(Category.Render, "Time", "Makes you able to set a custom time.");
     }
 
     long oldTime;

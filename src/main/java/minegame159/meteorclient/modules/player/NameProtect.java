@@ -23,7 +23,7 @@ public class NameProtect extends Module {
     );
 
     public NameProtect() {
-        super(Category.Player, "name-protect", "Hides your name client-side.");
+        super(Category.Player, "Name-Protect", "Hides your name client-side.");
     }
 
     private String username = "If you see this, something is wrong.";

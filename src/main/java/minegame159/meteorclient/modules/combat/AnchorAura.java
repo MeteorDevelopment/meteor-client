@@ -123,7 +123,7 @@ public class AnchorAura extends Module {
             .build()
     );
 
-    public AnchorAura() {super(Category.Combat, "anchor-aura", "Automatically places and breaks Respawn Anchors to harm entities.");}
+    public AnchorAura() {super(Category.Combat, "Anchor-Aura", "Automatically places and breaks Respawn Anchors to harm entities.");}
 
     private int placeDelayLeft = placeDelay.get();
     private int breakDelayLeft = breakDelay.get();

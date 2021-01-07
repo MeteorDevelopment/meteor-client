@@ -10,6 +10,6 @@ import minegame159.meteorclient.modules.Module;
 
 public class CameraClip extends Module {
     public CameraClip() {
-        super(Category.Render, "camera-clip", "Allows your third person camera to clip through blocks.");
+        super(Category.Render, "Camera-Clip", "Allows your third person camera to clip through blocks.");
     }
 }

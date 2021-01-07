@@ -16,7 +16,7 @@ import net.minecraft.entity.player.PlayerEntity;
 
 public class MiddleClickFriend extends Module {
     public MiddleClickFriend() {
-        super(Category.Misc, "middle-click-friend", "Adds or removes a player as a friend via middle click.");
+        super(Category.Misc, "Middle-Click-Friend", "Adds or removes a player as a friend via middle click.");
     }
 
     @EventHandler

@@ -22,7 +22,7 @@ import net.minecraft.entity.player.PlayerEntity;
 
 public class MessageAura extends Module {
     public MessageAura() {
-        super(Category.Misc, "message-aura", "Sends a specified message to any player that enters render distance.");
+        super(Category.Misc, "Message-Aura", "Sends a specified message to any player that enters render distance.");
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();

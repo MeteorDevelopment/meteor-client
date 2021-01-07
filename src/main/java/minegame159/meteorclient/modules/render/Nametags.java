@@ -49,8 +49,8 @@ import java.util.Map;
 
 public class Nametags extends Module {
     public enum Position {
-        ABOVE,
-        ON_TOP
+        Above,
+        OnTop
     }
 
     private static final MeshBuilder MB = new MeshBuilder(2048);
@@ -60,6 +60,8 @@ public class Nametags extends Module {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgColors = settings.createGroup("Colors");
+
+    // General
 
     private final Setting<Boolean> displayArmor = sgGeneral.add(new BoolSetting.Builder()
             .name("display-armor")
@@ -78,7 +80,7 @@ public class Nametags extends Module {
     private final Setting<Position> displayOnItem = sgGeneral.add(new EnumSetting.Builder<Position>()
             .name("enchantment-position")
             .description("Where the enchantments are rendered.")
-            .defaultValue(Position.ON_TOP)
+            .defaultValue(Position.OnTop)
             .build()
     );
 
@@ -121,6 +123,8 @@ public class Nametags extends Module {
             .defaultValue(true)
             .build()
     );
+
+    // Colors
 
     private final Setting<SettingColor> normalName = sgColors.add(new ColorSetting.Builder()
             .name("normal-color")
@@ -165,7 +169,7 @@ public class Nametags extends Module {
     );
 
     public Nametags() {
-        super(Category.Render, "nametags", "Displays customizable nametags above players.");
+        super(Category.Render, "Nametags", "Displays customizable nametags above players.");
     }
 
     String name;
@@ -386,7 +390,7 @@ public class Nametags extends Module {
                 double aW = armorWidths[i];
                 double enchantY = 0;
                 double addY = (armorHeight - enchantmentsToShow.size() * MeteorClient.FONT_2X.getHeight()) / 2;
-                if (displayOnItem.get() == Position.ABOVE) {
+                if (displayOnItem.get() == Position.Above) {
                     addY -= 16;
                 }
 

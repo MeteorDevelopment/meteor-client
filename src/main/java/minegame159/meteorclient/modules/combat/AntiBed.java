@@ -52,7 +52,7 @@ public class AntiBed extends Module {
             .build()
     );
 
-    public AntiBed(){super(Category.Combat, "anti-bed", "Prevents people from placing beds where you are standing.");}
+    public AntiBed(){super(Category.Combat, "Anti-Bed", "Prevents people from placing beds where you are standing.");}
 
     private int place = -1;
     private boolean closeScreen = false;

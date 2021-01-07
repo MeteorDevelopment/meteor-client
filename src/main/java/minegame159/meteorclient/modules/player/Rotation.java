@@ -23,9 +23,10 @@ public class Rotation extends Module {
         None
     }
 
-    // Yaw
     private final SettingGroup sgYaw = settings.createGroup("Yaw");
     private final SettingGroup sgPitch = settings.createGroup("Pitch");
+
+    // Yaw
 
     private final Setting<LockMode> yawLockMode = sgYaw.add(new EnumSetting.Builder<LockMode>()
             .name("yaw-lock-mode")
@@ -64,7 +65,7 @@ public class Rotation extends Module {
     );
 
     public Rotation() {
-        super(Category.Player, "rotation", "Changes/locks your yaw and pitch.");
+        super(Category.Player, "Rotation", "Changes/locks your yaw and pitch.");
     }
 
     @Override

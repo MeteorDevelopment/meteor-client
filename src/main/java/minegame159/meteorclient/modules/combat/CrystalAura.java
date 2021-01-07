@@ -336,7 +336,7 @@ public class CrystalAura extends Module {
     );
 
     public CrystalAura() {
-        super(Category.Combat, "crystal-aura", "Automatically places and breaks crystals to damage other players.");
+        super(Category.Combat, "Crystal-Aura", "Automatically places and breaks crystals to damage other players.");
     }
 
     private int preSlot;

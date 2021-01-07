@@ -10,6 +10,6 @@ import minegame159.meteorclient.modules.Module;
 
 public class EChestPreview extends Module {
     public EChestPreview() {
-        super(Category.Misc, "EChest-preview", "Stores what's inside your Ender Chests and displays when you hover over it.");
+        super(Category.Misc, "EChest-Preview", "Stores what's inside your Ender Chests and displays when you hover over it.");
     }
 }

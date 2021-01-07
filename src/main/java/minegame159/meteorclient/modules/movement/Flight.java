@@ -49,7 +49,7 @@ public class Flight extends Module {
     }
 
     public Flight() {
-        super(Category.Movement, "flight", "FLYYYY! No Fall is recommended with this module.");
+        super(Category.Movement, "Flight", "FLYYYY! No Fall is recommended with this module.");
     }
 
     @Override

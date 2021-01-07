@@ -78,7 +78,7 @@ public class Anchor extends Module {
     public double deltaX, deltaZ;
 
     public Anchor() {
-        super(Category.Movement, "anchor", "Helps you get into holes by stopping your movement completely over a hole.");
+        super(Category.Movement, "Anchor", "Helps you get into holes by stopping your movement completely over a hole.");
     }
 
     @Override

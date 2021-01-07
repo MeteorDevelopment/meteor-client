@@ -39,7 +39,7 @@ public class AutoReconnect extends Module {
     private ServerInfo lastServerInfo;
 
     public AutoReconnect() {
-        super(Category.Misc, "auto-reconnect", "Automatically reconnects when disconnected from a server.");
+        super(Category.Misc, "Auto-Reconnect", "Automatically reconnects when disconnected from a server.");
         MeteorClient.EVENT_BUS.subscribe(new Listener<ConnectToServerEvent>(event -> {
             lastServerInfo = mc.isInSingleplayer() ? null : mc.getCurrentServerEntry();
         }));

@@ -80,7 +80,7 @@ public class Freecam extends Module {
     private boolean forward, backward, right, left, up, down;
 
     public Freecam() {
-        super(Category.Render, "freecam", "Makes you fly out of your body.");
+        super(Category.Render, "Freecam", "Makes you fly out of your body.");
     }
 
     @Override

@@ -49,7 +49,7 @@ public class VisualRange extends Module {
 
 
     public VisualRange() {
-        super(Category.Misc, "visual-range", "Notifies you when a player enters/leaves your visual range.");
+        super(Category.Misc, "Visual-Range", "Notifies you when a player enters/leaves your visual range.");
     }
 
     @EventHandler

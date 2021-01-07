@@ -62,7 +62,7 @@ public class HoleFiller extends Module {
     private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
 
     public HoleFiller() {
-        super(Category.Combat, "hole-filler", "Fills holes with specified blocks.");
+        super(Category.Combat, "Hole-Filler", "Fills holes with specified blocks.");
     }
 
     @EventHandler

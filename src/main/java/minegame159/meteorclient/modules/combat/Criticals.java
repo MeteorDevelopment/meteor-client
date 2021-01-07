@@ -40,7 +40,7 @@ public class Criticals extends Module {
     );
 
     public Criticals() {
-        super(Category.Combat, "criticals", "Performs critical attacks when you hit your target.");
+        super(Category.Combat, "Criticals", "Performs critical attacks when you hit your target.");
     }
 
     private boolean wasNoFallActive;

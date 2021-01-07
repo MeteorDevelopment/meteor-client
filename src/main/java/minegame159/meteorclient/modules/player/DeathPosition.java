@@ -44,7 +44,7 @@ public class DeathPosition extends Module {
     private final WLabel label = new WLabel("No latest death found.");
 
     public DeathPosition() {
-        super(Category.Player, "death-position", "Sends you the coordinates to your latest death.");
+        super(Category.Player, "Death-Position", "Sends you the coordinates to your latest death.");
     }
 
     private final Map<String, Double> deathPos = new HashMap<>();

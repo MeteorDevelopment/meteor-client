@@ -61,7 +61,7 @@ public class AutoTrap extends Module {
     );
 
     public AutoTrap(){
-        super(Category.Combat, "auto-trap", "Traps people in an obsidian box to prevent them from moving.");
+        super(Category.Combat, "Auto-Trap", "Traps people in an obsidian box to prevent them from moving.");
     }
 
     @EventHandler

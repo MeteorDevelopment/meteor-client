@@ -66,7 +66,7 @@ public class FakePlayer extends Module {
     );
 
     public FakePlayer() {
-        super(Category.Player, "fake-player", "Spawns a client-side fake player for testing usages.");
+        super(Category.Player, "Fake-Player", "Spawns a client-side fake player for testing usages.");
     }
 
     public static Map<FakePlayerEntity, Integer> players = new HashMap<>();

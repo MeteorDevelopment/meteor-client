@@ -71,7 +71,7 @@ public class Nuker extends Module {
 
     private final Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()
             .name("range")
-            .description("The break range.")
+            .description("The break range of the blocks you're nuking.")
             .defaultValue(5)
             .min(0)
             .build()
@@ -98,7 +98,7 @@ public class Nuker extends Module {
     private boolean hasLastBlockPos;
 
     public Nuker() {
-        super(Category.Misc, "nuker", "Breaks a large amount of specified blocks around you.");
+        super(Category.Misc, "Nuker", "Breaks a large amount of specified blocks around you.");
     }
 
     @Override

@@ -91,7 +91,7 @@ public class InfinityMiner extends Module {
 
 
     public InfinityMiner() {
-        super(Category.Player, "infinity-miner", "Allows you to essentially mine forever.");
+        super(Category.Player, "Infinity-Miner", "Allows you to essentially mine forever.");
     }
 
     private Mode currentMode = Mode.Still;

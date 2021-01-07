@@ -125,7 +125,7 @@ public class ESP extends Module {
     private int count;
 
     public ESP() {
-        super(Category.Render, "esp", "Renders entities through walls.");
+        super(Category.Render, "ESP", "Renders entities through walls.");
     }
 
     private void setSideColor(Color lineColor) {

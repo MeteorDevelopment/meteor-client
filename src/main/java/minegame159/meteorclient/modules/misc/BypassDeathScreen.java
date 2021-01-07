@@ -15,7 +15,7 @@ public class BypassDeathScreen extends Module {
     public boolean shouldBypass = false;
 
     public BypassDeathScreen(){
-        super(Category.Misc, "bypass-death-screen", "Lets you spy on people after death.");
+        super(Category.Misc, "Bypass-Death-Screen", "Lets you spy on people after death.");
     }
 
     @Override

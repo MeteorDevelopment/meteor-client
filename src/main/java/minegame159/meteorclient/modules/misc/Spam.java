@@ -48,7 +48,7 @@ public class Spam extends Module {
     private int messageI;
 
     public Spam() {
-        super(Category.Misc, "spam", "Spams specified messages in chat.");
+        super(Category.Misc, "Spam", "Spams specified messages in chat.");
     }
 
     @Override

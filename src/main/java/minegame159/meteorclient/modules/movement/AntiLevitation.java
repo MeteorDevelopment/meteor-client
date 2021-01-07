@@ -22,7 +22,7 @@ public class AntiLevitation extends Module {
     );
 
     public AntiLevitation() {
-        super(Category.Movement, "anti-levitation", "Prevents the levitation effect from working.");
+        super(Category.Movement, "Anti-Levitation", "Prevents the levitation effect from working.");
     }
 
     public boolean isApplyGravity() {

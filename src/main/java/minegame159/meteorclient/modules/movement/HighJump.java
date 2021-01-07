@@ -26,7 +26,7 @@ public class HighJump extends Module {
     );
 
     public HighJump() {
-        super(Category.Movement, "high-jump", "Makes you jump higher than normal.");
+        super(Category.Movement, "High-Jump", "Makes you jump higher than normal.");
     }
 
     @EventHandler

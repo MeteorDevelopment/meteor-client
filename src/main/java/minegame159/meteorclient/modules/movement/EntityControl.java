@@ -17,7 +17,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.HorseBaseEntity;
 
 public class EntityControl extends Module {
-    public EntityControl(){super(Category.Movement, "entity-control", "Lets you control rideable entities without a saddle.");}
+    public EntityControl(){super(Category.Movement, "Entity-Control", "Lets you control rideable entities without a saddle.");}
 
     @Override
     public void onDeactivate() {

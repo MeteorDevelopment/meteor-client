@@ -34,6 +34,23 @@ public class BetterChat extends Module {
     // Anti Spam
 
     private final SettingGroup sgAntiSpam = settings.createGroup("Anti Spam");
+    private final SettingGroup sgIgnore = settings.createGroup("Ignore");
+    private final SettingGroup sgLongerChat = settings.createGroup("Longer Chat");
+    private final SettingGroup sgPrefix = settings.createGroup("Prefix");
+    private final SettingGroup sgSuffix = settings.createGroup("Suffix");
+    private final SettingGroup sgAnnoy = settings.createGroup("Annoy");
+    private final SettingGroup sgFancyChat = settings.createGroup("Fancy Chat");
+
+    // Annoy
+
+    private final Setting<Boolean> annoyEnabled = sgAnnoy.add(new BoolSetting.Builder()
+            .name("annoy-enabled")
+            .description("Makes your messages aNnOyInG.")
+            .defaultValue(false)
+            .build()
+    );
+
+    // Anti Spam
 
     private final Setting<Boolean> antiSpamEnabled = sgAntiSpam.add(new BoolSetting.Builder()
             .name("anti-spam-enabled")
@@ -58,10 +75,16 @@ public class BetterChat extends Module {
             .build()
     );
 
+    // Fancy Chat
+
+    private final Setting<Boolean> fancyEnabled = sgFancyChat.add(new BoolSetting.Builder()
+            .name("fancy-chat-enabled")
+            .description("Makes your messages fancy!")
+            .defaultValue(false)
+            .build()
+    );
 
     // Ignore
-
-    private final SettingGroup sgIgnore = settings.createGroup("Ignore");
 
     private final Setting<Boolean> ignoreEnabled = sgIgnore.add(new BoolSetting.Builder()
             .name("ignore-enabled")
@@ -71,8 +94,6 @@ public class BetterChat extends Module {
     );
 
     // Longer Chat
-
-    private final SettingGroup sgLongerChat = settings.createGroup("Longer Chat");
 
     private final Setting<Boolean> longerChatEnabled = sgLongerChat.add(new BoolSetting.Builder()
             .name("longer-chat-enabled")
@@ -91,8 +112,6 @@ public class BetterChat extends Module {
     );
 
     // Prefix
-
-    private final SettingGroup sgPrefix = settings.createGroup("Prefix");
 
     private final Setting<Boolean> prefixEnabled = sgPrefix.add(new BoolSetting.Builder()
             .name("prefix-enabled")
@@ -123,8 +142,6 @@ public class BetterChat extends Module {
     );
 
     // Suffix
-
-    private final SettingGroup sgSuffix = settings.createGroup("Suffix");
 
     private final Setting<Boolean> suffixEnabled = sgSuffix.add(new BoolSetting.Builder()
             .name("suffix-enabled")
@@ -165,24 +182,6 @@ public class BetterChat extends Module {
             .build()
     );*/
 
-    private final SettingGroup sgAnnoy = settings.createGroup("Annoy");
-
-    private final Setting<Boolean> annoyEnabled = sgAnnoy.add(new BoolSetting.Builder()
-            .name("annoy-enabled")
-            .description("Makes your messages aNnOyInG.")
-            .defaultValue(false)
-            .build()
-    );
-
-    private final SettingGroup sgFancyChat = settings.createGroup("Fancy Chat");
-
-    private final Setting<Boolean> fancyEnabled = sgFancyChat.add(new BoolSetting.Builder()
-            .name("fancy-chat-enabled")
-            .description("Makes your messages fancy!")
-            .defaultValue(false)
-            .build()
-    );
-
     private boolean skipMessage;
 
     private static final Char2CharMap SMALL_CAPS = new Char2CharArrayMap();
@@ -197,7 +196,7 @@ public class BetterChat extends Module {
 
 
     public BetterChat() {
-        super(Category.Misc, "better-chat", "Improves your chat experience in various ways.");
+        super(Category.Misc, "Better-Chat", "Improves your chat experience in various ways.");
     }
 
     public boolean onMsg(String message, int messageId, int timestamp, List<ChatHudLine<Text>> messages, List<ChatHudLine<OrderedText>> visibleMessages) {

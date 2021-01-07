@@ -20,7 +20,7 @@ public class AutoSmelter extends Module {
     private boolean waitingForItemsToSmelt;
 
     public AutoSmelter() {
-        super(Category.Misc, "auto-smelter", "Automatically smelts all items in your inventory that can be smelted.");
+        super(Category.Misc, "Auto-Smelter", "Automatically smelts all items in your inventory that can be smelted.");
     }
 
     @Override

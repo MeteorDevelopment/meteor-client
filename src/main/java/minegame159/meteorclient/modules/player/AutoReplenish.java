@@ -103,7 +103,7 @@ public class AutoReplenish extends Module {
     private int lastSlot;
 
     public AutoReplenish(){
-        super(Category.Player, "auto-replenish", "Automatically refills items in your hotbar, main hand, or offhand.");
+        super(Category.Player, "Auto-Replenish", "Automatically refills items in your hotbar, main hand, or offhand.");
     }
 
     @Override

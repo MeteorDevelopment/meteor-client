@@ -66,7 +66,7 @@ public class Jesus extends Module {
     private boolean preBaritoneAssumeWalkOnLava;
 
     public Jesus() {
-        super(Category.Movement, "jesus", "Walk on water, be like Jesus (also works on lava).");
+        super(Category.Movement, "Jesus", "Walk on water, be like Jesus (also works on lava).");
     }
 
     @Override

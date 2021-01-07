@@ -10,6 +10,6 @@ import minegame159.meteorclient.modules.Module;
 
 public class UnfocusedCPU extends Module {
     public UnfocusedCPU() {
-        super(Category.Render, "unfocused-cpu", "Will not render anything when your Minecraft window is not focused.");
+        super(Category.Render, "Unfocused-CPU", "Will not render anything when your Minecraft window is not focused.");
     }
 }

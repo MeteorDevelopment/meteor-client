@@ -85,7 +85,7 @@ public class StashFinder extends Module {
     public List<Chunk> chunks = new ArrayList<>();
 
     public StashFinder() {
-        super(Category.Misc, "stash-finder", "Searches loaded chunks for storage blocks. Saves to <your minecraft folder>/meteor-client");
+        super(Category.Misc, "Stash-Finder", "Searches loaded chunks for storage blocks. Saves to <your minecraft folder>/meteor-client");
     }
 
     @Override

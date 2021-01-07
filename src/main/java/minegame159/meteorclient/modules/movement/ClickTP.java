@@ -32,7 +32,7 @@ public class ClickTP extends Module {
     );
 
     public ClickTP() {
-        super(Category.Movement, "click-tp", "Teleports you to the block you click on.");
+        super(Category.Movement, "Click-TP", "Teleports you to the block you click on.");
     }
 
     @EventHandler

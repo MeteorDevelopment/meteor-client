@@ -38,7 +38,7 @@ public class MiddleClickExtra extends Module {
     }
 
     public MiddleClickExtra(){
-        super(Category.Player, "middle-click-extra", "Lets you use items when you middle click. Works the same as Middle Click Friend.");
+        super(Category.Player, "Middle-Click-Extra", "Lets you use items when you middle click. Works the same as Middle Click Friend.");
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();

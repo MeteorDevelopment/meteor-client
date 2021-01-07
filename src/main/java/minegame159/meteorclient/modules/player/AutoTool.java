@@ -87,7 +87,7 @@ public class AutoTool extends Module {
     );
 
     public AutoTool() {
-        super(Category.Player, "auto-tool", "Automatically switches to the most effective tool when performing an action.");
+        super(Category.Player, "Auto-Tool", "Automatically switches to the most effective tool when performing an action.");
     }
 
     private BlockState blockState = null;

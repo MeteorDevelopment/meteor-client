@@ -35,7 +35,7 @@ public class EChestFarmer extends Module {
     private static final BlockState ENDER_CHEST = Blocks.ENDER_CHEST.getDefaultState();
 
     public EChestFarmer(){
-        super(Category.Misc, "EChest-farmer", "Places and mines Ender Chests where you're looking.");
+        super(Category.Misc, "EChest-Farmer", "Places and mines Ender Chests where you're looking.");
     }
 
     private final SettingGroup sgGeneral  = settings.getDefaultGroup();

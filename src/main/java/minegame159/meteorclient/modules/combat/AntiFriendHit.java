@@ -18,7 +18,7 @@ import net.minecraft.entity.player.PlayerEntity;
 
 public class AntiFriendHit extends Module {
     public AntiFriendHit() {
-        super(Category.Combat, "anti-friend-hit", "Cancels out attacks that would hit friends.");
+        super(Category.Combat, "Anti-Friend-Hit", "Cancels out attacks that would hit friends.");
     }
 
     @EventHandler

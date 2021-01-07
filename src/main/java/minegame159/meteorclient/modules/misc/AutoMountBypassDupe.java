@@ -71,7 +71,7 @@ public class AutoMountBypassDupe extends Module {
     private int timer;
 
     public AutoMountBypassDupe() {
-        super(Category.Misc, "auto-mount-bypass-dupe", "Does the mount bypass dupe for you. Disable with esc.");
+        super(Category.Misc, "Auto-Mount-Bypass-Dupe", "Does the mount bypass dupe for you. Disable with esc.");
     }
 
     @Override

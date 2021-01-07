@@ -14,7 +14,7 @@ import minegame159.meteorclient.modules.Module;
 public class Fullbright extends Module {
 
     public Fullbright() {
-        super(Category.Render, "fullbright", "No more darkness.");
+        super(Category.Render, "Fullbright", "No more darkness.");
     }
 
     @Override

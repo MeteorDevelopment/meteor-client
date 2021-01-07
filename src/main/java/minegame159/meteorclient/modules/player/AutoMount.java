@@ -24,7 +24,7 @@ import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
 import net.minecraft.util.Hand;
 
 public class AutoMount extends Module {
-    public AutoMount(){super(Category.Player, "auto-mount", "Automatically mounts entities.");}
+    public AutoMount(){super(Category.Player, "Auto-Mount", "Automatically mounts entities.");}
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 

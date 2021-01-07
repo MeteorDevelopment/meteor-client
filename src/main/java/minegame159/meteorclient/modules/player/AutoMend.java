@@ -53,7 +53,7 @@ public class AutoMend extends Module {
     );
 
     public AutoMend() {
-        super(Category.Player, "auto-mend", "Automatically replaces equipped items and items in your offhand with Mending when fully repaired.");
+        super(Category.Player, "Auto-Mend", "Automatically replaces equipped items and items in your offhand with Mending when fully repaired.");
     }
 
     private void replaceItem(boolean offhandEmpty) {

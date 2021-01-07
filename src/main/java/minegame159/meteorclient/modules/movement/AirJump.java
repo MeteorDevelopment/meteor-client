@@ -20,14 +20,14 @@ import minegame159.meteorclient.utils.misc.input.KeyAction;
 
 public class AirJump extends Module {
     public AirJump() {
-        super(Category.Movement, "air-jump", "Lets you jump in the air.");
+        super(Category.Movement, "Air-Jump", "Lets you jump in the air.");
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Boolean> maintainY = sgGeneral.add(new BoolSetting.Builder()
             .name("maintain-level")
-            .description("Maintains your current Y level")
+            .description("Maintains your current Y level.")
             .defaultValue(false)
             .build()
     );

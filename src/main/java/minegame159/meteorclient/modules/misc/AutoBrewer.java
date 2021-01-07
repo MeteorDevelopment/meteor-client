@@ -49,7 +49,7 @@ public class AutoBrewer extends Module {
     private int timer;
 
     public AutoBrewer() {
-        super(Category.Misc, "auto-brewer", "Automatically brews specified potions.");
+        super(Category.Misc, "Auto-Brewer", "Automatically brews specified potions.");
     }
 
     @Override

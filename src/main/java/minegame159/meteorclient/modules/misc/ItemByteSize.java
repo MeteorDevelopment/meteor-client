@@ -28,10 +28,10 @@ public class ItemByteSize extends Module {
         True
     }
 
-    private final SettingGroup sgUseKbIfBigEnough = settings.createGroup("Use KB if big enough");
+    private final SettingGroup sgUseKbIfBigEnough = settings.createGroup("Use KB");
 
     private final Setting<Boolean> useKbIfBigEnoughEnabled = sgUseKbIfBigEnough.add(new BoolSetting.Builder()
-            .name("use-kb-if-big-enough-enabled")
+            .name("use-kb-if-big-enough")
             .description("Uses KB instead of bytes if your item's size is larger or equal to 1KB.")
             .defaultValue(true)
             .build()
@@ -45,7 +45,7 @@ public class ItemByteSize extends Module {
     );
 
     public ItemByteSize() {
-        super(Category.Misc, "item-byte-size", "Displays an item's size in bytes in the tooltip.");
+        super(Category.Misc, "Item-Byte-Size", "Displays an item's size in bytes in the tooltip.");
     }
 
     @EventHandler

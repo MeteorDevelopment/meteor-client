@@ -18,7 +18,7 @@ import java.util.List;
 
 public class Blink extends Module {
     public Blink() {
-        super(Category.Movement, "blink", "Allows you to essentially teleport while suspending motion updates.");
+        super(Category.Movement, "Blink", "Allows you to essentially teleport while suspending motion updates.");
     }
 
     private final List<PlayerMoveC2SPacket> packets = new ArrayList<>();

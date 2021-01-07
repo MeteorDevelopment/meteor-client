@@ -30,7 +30,7 @@ public class PotionSpoof extends Module {
     );
 
     public PotionSpoof() {
-        super(Category.Player, "potion-spoof", "Spoofs specified potion effects for you. SOME effects DO NOT work.");
+        super(Category.Player, "Potion-Spoof", "Spoofs specified potion effects for you. SOME effects DO NOT work.");
     }
 
     @EventHandler

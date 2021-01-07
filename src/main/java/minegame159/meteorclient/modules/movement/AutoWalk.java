@@ -27,7 +27,7 @@ public class AutoWalk extends Module {
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("mode")
-            .description("Walking mode.")
+            .description("The walking mode.")
             .defaultValue(Mode.Smart)
             .onChanged(mode1 -> {
                 if (isActive()) {
@@ -47,7 +47,7 @@ public class AutoWalk extends Module {
     private GoalDirection goal;
 
     public AutoWalk() {
-        super(Category.Movement, "auto-walk", "Automatically walks forward.");
+        super(Category.Movement, "Auto-Walk", "Automatically walks forward.");
     }
 
     @Override

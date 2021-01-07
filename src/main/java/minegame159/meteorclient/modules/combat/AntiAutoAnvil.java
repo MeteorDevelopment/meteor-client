@@ -25,7 +25,7 @@ public class AntiAutoAnvil extends Module {
     );
 
     public AntiAutoAnvil(){
-        super(Category.Combat, "anti-auto-anvil", "Automatically prevents Auto Anvil by placing obsidian above you.");
+        super(Category.Combat, "Anti-Auto-Anvil", "Automatically prevents Auto Anvil by placing obsidian above you.");
     }
 
     @EventHandler

@@ -47,7 +47,7 @@ public class BookBot extends Module {
     }
     //Didn't add it to the module list cuz I didn't know if it was gonna work.
     public BookBot(){
-        super(Category.Misc, "book-bot", "Writes an amount of books full of characters or from a file."); //Grammar who? / too ez.
+        super(Category.Misc, "Book-Bot", "Writes an amount of books full of characters or from a file."); //Grammar who? / too ez.
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();//Obligatory comment.

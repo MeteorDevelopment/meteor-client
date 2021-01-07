@@ -27,7 +27,7 @@ public class Trigger extends Module {
     );
 
     public Trigger() {
-        super(Category.Combat, "trigger", "Automatically swings when you look at entities.");
+        super(Category.Combat, "Trigger", "Automatically swings when you look at entities.");
     }
 
     @EventHandler

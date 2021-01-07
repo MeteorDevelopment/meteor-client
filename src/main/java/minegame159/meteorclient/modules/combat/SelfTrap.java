@@ -23,7 +23,7 @@ import net.minecraft.util.math.Direction;
 public class SelfTrap extends Module {
 
     public SelfTrap(){
-        super(Category.Combat, "self-trap", "Places obsidian around your head and upper body.");
+        super(Category.Combat, "Self-Trap", "Places obsidian around your head and upper body.");
     }
 
     public enum TopMode {

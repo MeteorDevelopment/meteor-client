@@ -105,7 +105,7 @@ public class Speed extends Module {
 
 
     public Speed() {
-        super(Category.Movement, "speed", "Speeeeeed.");
+        super(Category.Movement, "Speed", "Speeeeeed.");
     }
 
     @EventHandler

@@ -142,7 +142,7 @@ public class HoleESP extends Module {
     private final Color transparent = new Color(0, 0, 0, 0);
 
     public HoleESP() {
-        super(Category.Render, "hole-esp", "Displays Safe holes that you will take less damage in.");
+        super(Category.Render, "Hole-ESP", "Displays Safe holes that you will take less damage in.");
     }
 
     @EventHandler

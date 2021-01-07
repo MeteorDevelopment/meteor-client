@@ -50,7 +50,7 @@ public class AutoArmor extends Module {
         }
     }
 
-    public AutoArmor(){super(Category.Combat, "auto-armor", "Automatically manages and equips your armor for you.");}
+    public AutoArmor(){super(Category.Combat, "Auto-Armor", "Automatically manages and equips your armor for you.");}
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 

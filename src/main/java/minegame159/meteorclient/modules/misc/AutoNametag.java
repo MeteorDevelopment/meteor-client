@@ -42,7 +42,7 @@ public class AutoNametag extends Module {
     );
 
     public AutoNametag() {
-        super(Category.Misc, "auto-nametag", "Automatically uses nametags on entities without a nametag. WILL nametag ALL entities in the specified distance.");
+        super(Category.Misc, "Auto-Nametag", "Automatically uses nametags on entities without a nametag. WILL nametag ALL entities in the specified distance.");
     }
 
     @EventHandler

@@ -176,7 +176,7 @@ public class KillAura extends Module {
     private final Vec3d vec2 = new Vec3d(0, 0, 0);
 
     public KillAura() {
-        super(Category.Combat, "kill-aura", "Attacks specified entities around you.");
+        super(Category.Combat, "Kill-Aura", "Attacks specified entities around you.");
     }
 
     @Override

@@ -58,7 +58,7 @@ public class SmartSurround extends Module {
     private Entity crystal;
 
     public SmartSurround(){
-        super(Category.Combat, "smart-surround", "Attempts to save you from crystals automatically.");
+        super(Category.Combat, "Smart-Surround", "Attempts to save you from crystals automatically.");
     }
 
     @EventHandler

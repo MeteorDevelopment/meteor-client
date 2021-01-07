@@ -33,7 +33,7 @@ public class SelfAnvil extends Module {
     );
 
     public SelfAnvil() {
-        super(Category.Combat, "self-anvil", "Automatically places an anvil on you to prevent other players from going into your hole.");
+        super(Category.Combat, "Self-Anvil", "Automatically places an anvil on you to prevent other players from going into your hole.");
     }
 
     @EventHandler

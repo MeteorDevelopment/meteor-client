@@ -90,7 +90,7 @@ public class BreakIndicators extends Module {
     private final Color cLines = new Color();
 
     public BreakIndicators() {
-        super(Category.Render, "break-indicators", "Renders the progress of a block being broken.");
+        super(Category.Render, "Break-Indicators", "Renders the progress of a block being broken.");
     }
 
     @Override

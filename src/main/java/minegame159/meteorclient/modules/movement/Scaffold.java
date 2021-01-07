@@ -74,7 +74,7 @@ public class Scaffold extends Module {
     private double lastSneakingY;
 
     public Scaffold() {
-        super(Category.Movement, "scaffold", "Automatically places blocks under you.");
+        super(Category.Movement, "Scaffold", "Automatically places blocks under you.");
     }
 
     @Override

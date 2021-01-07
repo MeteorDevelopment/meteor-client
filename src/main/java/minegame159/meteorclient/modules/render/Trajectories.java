@@ -61,7 +61,7 @@ public class Trajectories extends Module {
     private double hitQuadX1, hitQuadY1, hitQuadZ1, hitQuadX2, hitQuadY2, hitQuadZ2;
 
     public Trajectories() {
-        super(Category.Render, "trajectories", "Predicts the trajectory of throwable items.");
+        super(Category.Render, "Trajectories", "Predicts the trajectory of throwable items.");
     }
 
     @EventHandler

@@ -49,7 +49,7 @@ public class BedAura extends Module {
     }
 
     public BedAura(){
-        super(Category.Combat, "bed-aura", "Automatically places and explodes beds in the Nether and End.");
+        super(Category.Combat, "Bed-Aura", "Automatically places and explodes beds in the Nether and End.");
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();

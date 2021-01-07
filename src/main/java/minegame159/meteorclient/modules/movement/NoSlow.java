@@ -43,7 +43,7 @@ public class NoSlow extends Module {
     );
 
     public NoSlow() {
-        super(Category.Movement, "no-slow", "Allows you to move normally when using objects that will slow you.");
+        super(Category.Movement, "No-Slow", "Allows you to move normally when using objects that will slow you.");
     }
 
     public boolean items() {

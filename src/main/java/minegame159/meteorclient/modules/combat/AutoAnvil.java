@@ -64,7 +64,7 @@ public class AutoAnvil extends Module {
     );
 
     public AutoAnvil() {
-        super(Category.Combat, "auto-anvil", "Automatically places anvils above players to destroy helmets.");
+        super(Category.Combat, "Auto-Anvil", "Automatically places anvils above players to destroy helmets.");
     }
 
     private PlayerEntity target = null;

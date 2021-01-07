@@ -32,7 +32,7 @@ public class AutoGap extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     public AutoGap(){
-        super(Category.Player, "auto-gap", "Automatically eats Gaps or E-Gaps if its effects wear out.");
+        super(Category.Player, "Auto-Gap", "Automatically eats Gaps or E-Gaps if its effects wear out.");
     }
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()

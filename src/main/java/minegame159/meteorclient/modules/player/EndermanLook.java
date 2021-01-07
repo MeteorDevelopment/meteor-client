@@ -27,7 +27,7 @@ public class EndermanLook extends Module {
     }
 
     public EndermanLook() {
-        super(Category.Player, "enderman-look", "Either looks at all Endermen or prevents you from looking at Endermen.");
+        super(Category.Player, "Enderman-Look", "Either looks at all Endermen or prevents you from looking at Endermen.");
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();

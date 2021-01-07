@@ -176,7 +176,7 @@ public class NoRender extends Module {
     );
 
     public NoRender() {
-        super(Category.Render, "no-render", "Disables certain animations or overlays from rendering.");
+        super(Category.Render, "No-Render", "Disables certain animations or overlays from rendering.");
     }
 
     public boolean noHurtCam() {

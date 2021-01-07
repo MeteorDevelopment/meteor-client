@@ -104,7 +104,7 @@ public class Search extends Module {
     private DimensionType lastDimension;
 
     public Search() {
-        super(Category.Render, "search", "Searches for specified blocks.");
+        super(Category.Render, "Search", "Searches for specified blocks.");
     }
 
     @Override

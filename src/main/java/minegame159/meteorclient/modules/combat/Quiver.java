@@ -59,7 +59,7 @@ public class Quiver extends Module {
     );
 
     public Quiver() {
-        super(Category.Combat, "quiver", "Automatically shoots positive effect arrows at you.");
+        super(Category.Combat, "Quiver", "Automatically shoots positive effect arrows at you.");
     }
 
     private boolean shooting;

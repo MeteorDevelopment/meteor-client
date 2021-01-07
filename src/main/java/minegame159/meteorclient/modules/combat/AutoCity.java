@@ -43,7 +43,7 @@ public class AutoCity extends Module {
     );
 
     public AutoCity() {
-        super(Category.Combat, "auto-city", "Automatically cities a target by mining the nearest obsidian next to them.");
+        super(Category.Combat, "Auto-City", "Automatically cities a target by mining the nearest obsidian next to them.");
     }
 
     @Override

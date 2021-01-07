@@ -68,7 +68,7 @@ public class TotemPopNotifier extends Module {
     private final Map<UUID, Integer> totemPops = new HashMap<>();
 
     public TotemPopNotifier() {
-        super(Category.Combat, "totem-pop-notifier", "Sends a chat message when a player either pops a totem or dies.");
+        super(Category.Combat, "Totem-Pop-Notifier", "Sends a chat message when a player either pops a totem or dies.");
     }
 
     @Override

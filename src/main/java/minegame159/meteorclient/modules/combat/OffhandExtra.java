@@ -99,7 +99,7 @@ public class OffhandExtra extends Module {
     );
 
     public OffhandExtra() {
-        super(Category.Combat, "offhand-extra", "Allows you to use specified items in your offhand. Requires AutoTotem to be on smart mode.");
+        super(Category.Combat, "Offhand-Extra", "Allows you to use specified items in your offhand. Requires AutoTotem to be on smart mode.");
     }
 
     private boolean isClicking = false;

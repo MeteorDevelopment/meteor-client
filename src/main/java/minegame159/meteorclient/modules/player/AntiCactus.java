@@ -10,6 +10,6 @@ import minegame159.meteorclient.modules.Module;
 
 public class AntiCactus extends Module {
     public AntiCactus() {
-        super(Category.Player, "anti-cactus", "Prevents you from taking damage from cacti.");
+        super(Category.Player, "Anti-Cactus", "Prevents you from taking damage from cacti.");
     }
 }

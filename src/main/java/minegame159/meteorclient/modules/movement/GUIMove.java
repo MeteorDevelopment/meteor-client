@@ -76,7 +76,7 @@ public class GUIMove extends Module {
     );
 
     public GUIMove() {
-        super(Category.Movement, "gui-move", "Allows you to perform various actions while in GUIs.");
+        super(Category.Movement, "GUI-Move", "Allows you to perform various actions while in GUIs.");
     }
 
     @EventHandler

@@ -120,7 +120,7 @@ public class Tracers extends Module {
     private int count;
 
     public Tracers() {
-        super(Category.Render, "tracers", "Displays tracer lines to specified entities.");
+        super(Category.Render, "Tracers", "Displays tracer lines to specified entities.");
     }
 
     @EventHandler

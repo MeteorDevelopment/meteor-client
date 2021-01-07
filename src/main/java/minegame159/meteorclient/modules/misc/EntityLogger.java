@@ -47,7 +47,7 @@ public class EntityLogger extends Module {
     );
 
     public EntityLogger() {
-        super(Category.Misc, "entity-logger", "Sends a client-side chat alert if a specified entity appears in render distance.");
+        super(Category.Misc, "Entity-Logger", "Sends a client-side chat alert if a specified entity appears in render distance.");
     }
 
     @EventHandler

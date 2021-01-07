@@ -83,7 +83,7 @@ public class AutoFish extends Module {
     private int autoCastCheckTimer;
 
     public AutoFish() {
-        super(Category.Player, "auto-fish", "Automatically fishes for you.");
+        super(Category.Player, "Auto-Fish", "Automatically fishes for you.");
     }
 
     @Override

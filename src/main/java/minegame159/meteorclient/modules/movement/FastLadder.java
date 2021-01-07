@@ -27,7 +27,7 @@ public class FastLadder extends Module {
     );
 
     public FastLadder() {
-        super(Category.Movement, "fast-ladder", "Makes you climb ladders faster.");
+        super(Category.Movement, "Fast-Ladder", "Makes you climb ladders faster.");
     }
 
     @EventHandler

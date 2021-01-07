@@ -10,6 +10,6 @@ import minegame159.meteorclient.modules.Module;
 
 public class LiquidInteract extends Module {
     public LiquidInteract() {
-        super(Category.Player, "liquid-interact", "Allows you to interact with liquids.");
+        super(Category.Player, "Liquid-Interact", "Allows you to interact with liquids.");
     }
 }

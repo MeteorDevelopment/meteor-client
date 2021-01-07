@@ -38,7 +38,7 @@ public class ReverseStep extends Module {
     );
 
     public ReverseStep() {
-        super(Category.Movement, "reverse-step", "Allows you to fall down blocks at a greater speed.");
+        super(Category.Movement, "Reverse-Step", "Allows you to fall down blocks at a greater speed.");
     }
 
     @EventHandler

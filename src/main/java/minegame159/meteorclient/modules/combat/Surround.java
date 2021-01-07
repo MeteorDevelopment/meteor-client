@@ -74,7 +74,7 @@ public class Surround extends Module {
     private boolean return_;
 
     public Surround() {
-        super(Category.Combat, "surround", "Surrounds you in blocks to prevent you from taking lots of damage.");
+        super(Category.Combat, "Surround", "Surrounds you in blocks to prevent you from taking lots of damage.");
     }
 
     @Override

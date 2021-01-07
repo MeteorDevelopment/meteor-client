@@ -40,7 +40,7 @@ public class AutoShearer extends Module {
     );
 
     public AutoShearer() {
-        super(Category.Misc, "auto-shearer", "Automatically shears sheep.");
+        super(Category.Misc, "Auto-Shearer", "Automatically shears sheep.");
     }
 
     @EventHandler

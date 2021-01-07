@@ -80,7 +80,7 @@ public class AutoTotem extends Module {
     private boolean locked = false;
 
     public AutoTotem() {
-        super(Category.Combat, "auto-totem", "Automatically equips totems in your offhand.");
+        super(Category.Combat, "Auto-Totem", "Automatically equips totems in your offhand.");
     }
 
     @Override
