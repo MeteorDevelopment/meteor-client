@@ -18,11 +18,11 @@ import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.rendering.ShapeMode;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.Pool;
 import minegame159.meteorclient.utils.player.DamageCalcUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.player.PlayerUtils;
+import minegame159.meteorclient.utils.player.RotationUtils;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
@@ -35,7 +35,6 @@ import net.minecraft.item.AxeItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.SwordItem;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
@@ -352,12 +351,7 @@ public class CrystalAura extends Module {
     private int breakDelayLeft = breakDelay.get();
     private Vec3d bestBlock;
     private double bestDamage = 0;
-    private Vec3d bestSupportBlock;
-    private double bestSupportDamage = 0;
-    private BlockPos playerPos;
-    private Vec3d pos;
     private double lastDamage = 0;
-    private boolean shouldFacePlace = false;
     private EndCrystalEntity heldCrystal = null;
     private LivingEntity target;
     private boolean locked = false;
@@ -367,7 +361,6 @@ public class CrystalAura extends Module {
     private final Map<EndCrystalEntity, List<Double>> crystalMap = new HashMap<>();
     private final List<Double> crystalList = new ArrayList<>();
     private EndCrystalEntity bestBreak = null;
-    private BlockPos targetBlockPos;
 
     private final Pool<RenderBlock> renderBlockPool = new Pool<>(RenderBlock::new);
     private final List<RenderBlock> renderBlocks = new ArrayList<>();
@@ -444,7 +437,7 @@ public class CrystalAura extends Module {
                 locked = false;
             }
         }
-        shouldFacePlace = false;
+        boolean shouldFacePlace = false;
         if (getTotalHealth(mc.player) <= minHealth.get() && placeMode.get() != Mode.Suicide) return;
         if (target != null && heldCrystal != null && placeDelayLeft <= 0 && mc.world.raycast(new RaycastContext(target.getPos(), heldCrystal.getPos(), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, target)).getType()
                 == HitResult.Type.MISS) locked = false;
@@ -623,10 +616,7 @@ public class CrystalAura extends Module {
             }
         }
 
-        Vec3d vec1 = entity.getPos();
-        PlayerMoveC2SPacket.LookOnly packet = new PlayerMoveC2SPacket.LookOnly(Utils.getNeededYaw(vec1), Utils.getNeededPitch(vec1), mc.player.isOnGround());
-        mc.player.networkHandler.sendPacket(packet);
-
+        RotationUtils.packetRotate(entity);
         mc.interactionManager.attackEntity(mc.player, entity);
         mc.world.removeEntity(entity.getEntityId());
         if (!noSwing.get()) mc.player.swingHand(getHand());
@@ -693,14 +683,10 @@ public class CrystalAura extends Module {
         }
         float yaw = mc.player.yaw;
         float pitch = mc.player.pitch;
-        Vec3d vec1 = block.add(0.5, 1.5, 0.5);
-        PlayerMoveC2SPacket.LookOnly packet = new PlayerMoveC2SPacket.LookOnly(Utils.getNeededYaw(vec1), Utils.getNeededPitch(vec1), mc.player.isOnGround());
-        mc.player.networkHandler.sendPacket(packet);
-
+        RotationUtils.packetRotate(block.add(0.5, 1.5, 0.5));
         mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(mc.player.getPos(), Direction.UP, new BlockPos(block), false));
         if (!noSwing.get()) mc.player.swingHand(hand);
-        packet = new PlayerMoveC2SPacket.LookOnly(yaw, pitch, mc.player.isOnGround());
-        mc.player.networkHandler.sendPacket(packet);
+        RotationUtils.packetRotate(yaw, pitch);
         mc.player.yaw = yaw;
         mc.player.pitch = pitch;
 
@@ -716,9 +702,9 @@ public class CrystalAura extends Module {
         assert mc.world != null;
         bestBlock = new Vec3d(0, 0, 0);
         bestDamage = 0;
-        bestSupportBlock = new Vec3d(0, 0, 0);
-        bestSupportDamage = 0;
-        playerPos = mc.player.getBlockPos();
+        Vec3d bestSupportBlock = new Vec3d(0, 0, 0);
+        double bestSupportDamage = 0;
+        BlockPos playerPos = mc.player.getBlockPos();
         canSupport = false;
         crystalMap.clear();
         crystalList.clear();
@@ -734,7 +720,7 @@ public class CrystalAura extends Module {
         for(double i = playerPos.getX() - placeRange.get(); i < playerPos.getX() + placeRange.get(); i++){
             for(double j = playerPos.getZ() - placeRange.get(); j < playerPos.getZ() + placeRange.get(); j++){
                 for(double k = playerPos.getY() - 3; k < playerPos.getY() + 3; k++){
-                    pos = new Vec3d(Math.floor(i), Math.floor(k), Math.floor(j));
+                    Vec3d pos = new Vec3d(Math.floor(i), Math.floor(k), Math.floor(j));
                     if(isValid(new BlockPos(pos)) && getDamagePlace(new BlockPos(pos))){
                         if (!strict.get() || isEmpty(new BlockPos(pos.add(0, 2, 0)))) {
                             if (!multiTarget.get()) {
@@ -782,7 +768,7 @@ public class CrystalAura extends Module {
     private void findFacePlace(LivingEntity target){
         assert mc.world != null;
         assert mc.player != null;
-        targetBlockPos = target.getBlockPos();
+        BlockPos targetBlockPos = target.getBlockPos();
         if (mc.world.getBlockState(targetBlockPos.add(1, 1, 0)).isAir() && Math.sqrt(mc.player.getBlockPos().getSquaredDistance(targetBlockPos.add(1, 1, 0))) <= placeRange.get()
                 && getDamagePlace(targetBlockPos.add(1, 1, 0))) {
             bestBlock = target.getPos().add(1, 0, 0);
