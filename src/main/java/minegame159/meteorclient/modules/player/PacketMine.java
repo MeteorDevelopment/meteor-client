@@ -101,7 +101,7 @@ public class PacketMine extends Module {
     @EventHandler
     private final Listener<RenderEvent> onRender = new Listener<>(event -> {
         if (!render.get()) return;
-        for (Block block : blocks) Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, block.blockPos, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+        for (Block block : blocks) block.render();
     });
 
     private class Block {
@@ -116,6 +116,10 @@ public class PacketMine extends Module {
             mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
             mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
             return true;
+        }
+
+        public void render() {
+            Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, blockPos, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
         }
     }
 }
