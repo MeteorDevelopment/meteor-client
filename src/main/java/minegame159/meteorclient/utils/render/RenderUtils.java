@@ -35,12 +35,10 @@ public class RenderUtils {
     }
 
     public static Vec3d getCameraVector() {
-        return new Vec3d(0.0, 0.0, 75)
-                .rotateX(-(float) Math.toRadians(mc.cameraEntity.pitch))
-                .rotateY(-(float) Math.toRadians(mc.cameraEntity.yaw))
-                .add(mc.cameraEntity.getPos())
-                .add(0, mc.cameraEntity.getEyeHeight(mc.cameraEntity.getPose()), 0)
-                ;
+        return new Vec3d(0, 0, 1)
+                .rotateX(-(float) Math.toRadians(mc.gameRenderer.getCamera().getPitch()))
+                .rotateY(-(float) Math.toRadians(mc.gameRenderer.getCamera().getYaw()))
+                .add(mc.gameRenderer.getCamera().getPos());
     }
 
 
@@ -74,3 +72,4 @@ public class RenderUtils {
         drawTracerToPos(blockEntity.getPos(), color, event);
     }
 }
+
