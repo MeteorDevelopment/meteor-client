@@ -31,6 +31,7 @@ public class PacketMine extends Module {
     private final SettingGroup sgRender = settings.createGroup("Render");
 
     // General
+
     private final Setting<Boolean> oneByOne = sgGeneral.add(new BoolSetting.Builder()
             .name("one-by-one")
             .description("Mines blocks one by one.")
@@ -39,6 +40,7 @@ public class PacketMine extends Module {
     );
 
     // Render
+
     private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
             .name("render")
             .description("Whether to render blocks being mined.")
