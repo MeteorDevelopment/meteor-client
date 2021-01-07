@@ -28,6 +28,13 @@ public class EXPThrower extends Module {
             .build()
     );
 
+    private final Setting<Boolean> autoToggle = sgGeneral.add(new BoolSetting.Builder()
+            .name("auto-toggle")
+            .description("Toggles off when your armor is repaired.")
+            .defaultValue(true)
+            .build()
+    );
+
     public EXPThrower() {
         super(Category.Player, "exp-thrower", "Automatically throws XP bottles in your hotbar.");
     }
@@ -51,6 +58,14 @@ public class EXPThrower extends Module {
             mc.player.inventory.selectedSlot = slot;
             mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
             mc.player.inventory.selectedSlot = preSelectedSlot;
+        }
+
+        if(autoToggle.get()) {
+            int count = 0;
+            for(int i = 0; i < 4; i++) {
+                if(!mc.player.inventory.armor.get(i).isDamaged()) count++;
+            }
+            if(count == 4) toggle();
         }
     });
 }
