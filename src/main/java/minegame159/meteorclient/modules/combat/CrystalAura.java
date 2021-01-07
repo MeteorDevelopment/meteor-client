@@ -357,7 +357,7 @@ public class CrystalAura extends Module {
     private double lastDamage = 0;
     private boolean shouldFacePlace = false;
     private EndCrystalEntity heldCrystal = null;
-    public LivingEntity target;
+    private LivingEntity target;
     private boolean locked = false;
     private boolean canSupport;
     private int supportSlot = 0;
