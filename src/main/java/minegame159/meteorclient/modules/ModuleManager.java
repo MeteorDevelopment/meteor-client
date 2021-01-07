@@ -170,7 +170,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         // Check if binding module
         if (event.action == KeyAction.Press && moduleToBind != null) {
             moduleToBind.setKey(event.key);
-            Chat.info(159159, null, "Module (highlight)%s (default)bound to (highlight)%s(default).", moduleToBind.title, Utils.getKeyName(event.key));
+            Chat.info(1591599, null, "Module (highlight)%s (default)bound to (highlight)%s(default).", moduleToBind.title, Utils.getKeyName(event.key));
             moduleToBind = null;
             event.cancel();
             return;
