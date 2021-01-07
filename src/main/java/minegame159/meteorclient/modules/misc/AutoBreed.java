@@ -51,6 +51,13 @@ public class AutoBreed extends Module {
             .build()
     );
 
+    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
+            .name("rotate")
+            .description("Rotations.")
+            .defaultValue(true)
+            .build()
+    );
+
     private final List<Entity> animalsFed = new ArrayList<>();
 
     public AutoBreed() {
@@ -77,7 +84,7 @@ public class AutoBreed extends Module {
                     || !animal.isBreedingItem(hand.get() == Hand.MAIN_HAND ? mc.player.getMainHandStack() : mc.player.getOffHandStack())) continue;
 
             Vec3d animalPos = new Vec3d(animal.getX(), animal.getY() + animal.getHeight() / 2, animal.getZ());
-            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(Utils.getNeededYaw(animalPos), Utils.getNeededPitch(animalPos), mc.player.isOnGround()));
+            if (rotate.get()) Utils.packetRotate(animalPos);
             mc.interactionManager.interactEntity(mc.player, animal, hand.get());
             mc.player.swingHand(hand.get());
             animalsFed.add(animal);

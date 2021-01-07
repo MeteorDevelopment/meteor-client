@@ -13,17 +13,23 @@ import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.player.FakePlayer;
 import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.entity.FakePlayerEntity;
 import minegame159.meteorclient.utils.player.Chat;
 import minegame159.meteorclient.utils.player.PlayerUtils;
+import net.minecraft.block.AbstractButtonBlock;
+import net.minecraft.block.Block;
+import net.minecraft.block.PressurePlateBlock;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.screen.AnvilScreenHandler;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
 
 // Created by Eureka
 
@@ -63,6 +69,20 @@ public class AutoAnvil extends Module {
             .build()
     );
 
+    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
+            .name("rotate")
+            .description("Rotations.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Boolean> chatInfo = sgGeneral.add(new BoolSetting.Builder()
+            .name("chat-info")
+            .description("Sends you information about the module.")
+            .defaultValue(true)
+            .build()
+    );
+
     public AutoAnvil() {
         super(Category.Combat, "auto-anvil", "Automatically places anvils above players to destroy helmets.");
     }
@@ -99,13 +119,14 @@ public class AutoAnvil extends Module {
         }
 
         if (isActive() && toggleOnBreak.get() && target != null && target.inventory.getArmorStack(3).isEmpty()) {
-            Chat.info(this, "Target head slot is empty… Disabling.");
+            if (chatInfo.get()) Chat.error(this, "Target head slot is empty… Disabling.");
             toggle();
         }
 
         int anvilSlot = -1;
         for (int i = 0; i < 9; i++) {
-            Item item = mc.player.inventory.getStack(i).getItem();
+            ItemStack itemStack = mc.player.inventory.getStack(i);
+            Item item = itemStack.getItem();
 
             if (item == Items.ANVIL || item == Items.CHIPPED_ANVIL || item == Items.DAMAGED_ANVIL) {
                 anvilSlot = i;
@@ -116,9 +137,10 @@ public class AutoAnvil extends Module {
 
         int buttonSlot = -1;
         for (int i = 0; i < 9; i++) {
-            Item item = mc.player.inventory.getStack(i).getItem();
-
-            if (item == Items.ACACIA_BUTTON || item == Items.OAK_BUTTON || item == Items.STONE_BUTTON || item == Items.SPRUCE_BUTTON || item == Items.BIRCH_BUTTON || item == Items.JUNGLE_BUTTON || item == Items.DARK_OAK_BUTTON || item == Items.CRIMSON_BUTTON || item == Items.WARPED_BUTTON || item == Items.POLISHED_BLACKSTONE_BUTTON) {
+            ItemStack itemStack = mc.player.inventory.getStack(i);
+            Item item = itemStack.getItem();
+            Block block = Block.getBlockFromItem(item);
+            if (block instanceof PressurePlateBlock || block instanceof AbstractButtonBlock) {
                 buttonSlot = i;
                 break;
             }
@@ -129,6 +151,7 @@ public class AutoAnvil extends Module {
 
         if (target != null) {
             int prevSlot = mc.player.inventory.selectedSlot;
+            Vec3d buttonPos = new Vec3d(target.getX(), target.getY(), target.getZ());
 
             if (placeButton.get()) {
                 mc.player.inventory.selectedSlot = buttonSlot;
@@ -136,11 +159,15 @@ public class AutoAnvil extends Module {
                 if (mc.world.getBlockState(targetPos.add(0, 0, 0)).isAir()) {
                     mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.DOWN, target.getBlockPos(), true));
                     mc.player.swingHand(Hand.MAIN_HAND);
+                    if (rotate.get()) Utils.packetRotate(buttonPos);
                 }
             }
 
             mc.player.inventory.selectedSlot = anvilSlot;
             BlockPos targetPos = target.getBlockPos().up();
+            Vec3d anvilPos = new Vec3d(target.getX(), target.getY() + height.get(), target.getZ());
+
+            if (rotate.get()) Utils.packetRotate(anvilPos);
 
             PlayerUtils.placeBlock(targetPos.add(0, height.get(), 0), Hand.MAIN_HAND);
 

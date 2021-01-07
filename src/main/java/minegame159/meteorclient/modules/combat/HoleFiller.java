@@ -7,14 +7,17 @@ package minegame159.meteorclient.modules.combat;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
+import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.events.world.PreTickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.settings.EnumSetting;
-import minegame159.meteorclient.settings.IntSetting;
-import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.rendering.Renderer;
+import minegame159.meteorclient.rendering.ShapeMode;
+import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.misc.Pool;
 import minegame159.meteorclient.utils.player.PlayerUtils;
+import minegame159.meteorclient.utils.render.color.SettingColor;
 import minegame159.meteorclient.utils.world.BlockIterator;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
@@ -23,6 +26,12 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 public class HoleFiller extends Module {
 
@@ -33,6 +42,7 @@ public class HoleFiller extends Module {
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgRender = settings.createGroup("Render");
 
     private final Setting<Integer> horizontalRadius = sgGeneral.add(new IntSetting.Builder()
             .name("horizontal-radius")
@@ -59,7 +69,56 @@ public class HoleFiller extends Module {
             .build()
     );
 
+    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
+            .name("rotate")
+            .description("Rotations.")
+            .defaultValue(true)
+            .build()
+    );
+
+    // Render
+
+    private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
+            .name("render")
+            .description("Renders an overlay where the holes are being filled.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
+            .name("shape-mode")
+            .description("How the shapes are rendered.")
+            .defaultValue(ShapeMode.Both)
+            .build()
+    );
+
+    private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()
+            .name("side-color")
+            .description("The side color.")
+            .defaultValue(new SettingColor(255, 0, 0, 75))
+            .build()
+    );
+
+    private final Setting<SettingColor> lineColor = sgRender.add(new ColorSetting.Builder()
+            .name("line-color")
+            .description("The line color.")
+            .defaultValue(new SettingColor(255, 0, 0, 255))
+            .build()
+    );
+
+    private final Setting<Integer> renderTimer = sgRender.add(new IntSetting.Builder()
+            .name("Timer")
+            .description("The amount of time between changing the block render.")
+            .defaultValue(0)
+            .min(0)
+            .sliderMax(10)
+            .build()
+    );
+
     private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
+
+    private final Pool<RenderBlock> renderBlockPool = new Pool<>(RenderBlock::new);
+    private final List<RenderBlock> renderBlocks = new ArrayList<>();
 
     public HoleFiller() {
         super(Category.Combat, "hole-filler", "Fills holes with specified blocks.");
@@ -70,7 +129,17 @@ public class HoleFiller extends Module {
         BlockIterator.register(horizontalRadius.get(), verticalRadius.get(), (blockPos1, blockState) -> {
             if (!blockState.getMaterial().isReplaceable()) return;
 
+            for (Iterator<RenderBlock> it = renderBlocks.iterator(); it.hasNext();) {
+                RenderBlock renderBlock = it.next();
+
+                if (renderBlock.shouldRemove()) {
+                    it.remove();
+                    renderBlockPool.free(renderBlock);
+                }
+            }
+
             blockPos.set(blockPos1);
+            Vec3d blockPosition = new Vec3d(blockPos1.getX(), blockPos1.getY(), blockPos1.getZ());
 
             Block bottom = mc.world.getBlockState(add(0, -1, 0)).getBlock();
             if (bottom != Blocks.BEDROCK && bottom != Blocks.OBSIDIAN) return;
@@ -85,7 +154,23 @@ public class HoleFiller extends Module {
             add(1, 0, 0);
 
             if (PlayerUtils.placeBlock(blockPos, findSlot(), Hand.MAIN_HAND)) BlockIterator.disableCurrent();
+            if (rotate.get()) Utils.packetRotate(blockPosition);
+
+            if (render.get()) {
+                RenderBlock renderBlock = renderBlockPool.get();
+                renderBlock.reset(blockPosition);
+                renderBlocks.add(renderBlock);
+            }
         });
+    });
+
+    @EventHandler
+    private final Listener<RenderEvent> onRender = new Listener<>(event -> {
+        if (render.get()) {
+            for (RenderBlock renderBlock : renderBlocks) {
+                renderBlock.render();
+            }
+        }
     });
 
     private int findSlot() {
@@ -113,5 +198,27 @@ public class HoleFiller extends Module {
         blockPos.setY(blockPos.getY() + y);
         blockPos.setZ(blockPos.getZ() + z);
         return blockPos;
+    }
+
+    private class RenderBlock {
+        private int x, y, z;
+        private int timer;
+
+        public void reset(Vec3d pos) {
+            x = MathHelper.floor(pos.getX());
+            y = MathHelper.floor(pos.getY());
+            z = MathHelper.floor(pos.getZ());
+            timer = renderTimer.get();
+        }
+
+        public boolean shouldRemove() {
+            if (timer <= 0) return true;
+            timer--;
+            return false;
+        }
+
+        public void render() {
+            Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x, y, z, 1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+        }
     }
 }

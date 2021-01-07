@@ -47,6 +47,13 @@ public class SmartSurround extends Module {
             .build()
     );
 
+    private final Setting<Boolean> chatInfo = sgGeneral.add(new BoolSetting.Builder()
+            .name("chat-info")
+            .description("Sends you information about the module.")
+            .defaultValue(true)
+            .build()
+    );
+
     private int oldSlot;
 
     private int slot = -1;
@@ -70,7 +77,7 @@ public class SmartSurround extends Module {
                 slot = findObiInHotbar();
 
                 if (slot == -1 && onlyObsidian.get()) {
-                    Chat.warning(this, "No Obsidian in hotbar. Disabling!");
+                    if (chatInfo.get()) Chat.warning(this, "No Obsidian in hotbar. Disabling!");
                     return;
                 }
 
@@ -85,7 +92,7 @@ public class SmartSurround extends Module {
                 }
 
                 if (slot == -1) {
-                    Chat.warning(this, "No blocks in hotbar. Disabling!");
+                    if (chatInfo.get()) Chat.warning(this, "No blocks in hotbar. Disabling!");
                     return;
                 }
 

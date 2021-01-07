@@ -16,6 +16,7 @@ import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.player.Chat;
 import minegame159.meteorclient.utils.player.DamageCalcUtils;
 import minegame159.meteorclient.utils.player.PlayerUtils;
@@ -98,12 +99,6 @@ public class AnchorAura extends Module {
             .build()
     );
 
-    private final Setting<Boolean> place = sgGeneral.add(new BoolSetting.Builder()
-            .name("place")
-            .description("Allows Anchor Aura to place anchors.")
-            .defaultValue(true)
-            .build()
-    );
 
     private final Setting<Integer> placeDelay = sgGeneral.add(new IntSetting.Builder()
             .name("place-delay")
@@ -120,6 +115,27 @@ public class AnchorAura extends Module {
             .defaultValue(2)
             .min(0)
             .max(10)
+            .build()
+    );
+
+    private final Setting<Boolean> place = sgGeneral.add(new BoolSetting.Builder()
+            .name("place")
+            .description("Places anchors.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Boolean> chatInfo = sgGeneral.add(new BoolSetting.Builder()
+            .name("chat-info")
+            .description("Sends you information about the module.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
+            .name("rotate")
+            .description("Rotations.")
+            .defaultValue(true)
             .build()
     );
 
@@ -140,7 +156,7 @@ public class AnchorAura extends Module {
         placeDelayLeft --;
         breakDelayLeft --;
         if (mc.world.getDimension().isRespawnAnchorWorking()) {
-            Chat.info(this, "You are not in the Overworld... (highlight)disabling(default)!");
+            if (chatInfo.get()) Chat.error(this, "You are not in the Overworld... (highlight)disabling(default)!");
             this.toggle();
             return;
         }
@@ -157,9 +173,14 @@ public class AnchorAura extends Module {
             breakDelayLeft = breakDelay.get();
         }
 
-        if (place.get() && placeDelayLeft <= 0) {
-            PlayerUtils.placeBlock(findValidBlock(), anchorSlot, Hand.MAIN_HAND);
-            placeDelayLeft = placeDelay.get();
+        if (place.get()) {
+            if (findValidBlock() != null) {
+                Vec3d blockPosition = new Vec3d(findValidBlock().getX(), findValidBlock().getY(), findValidBlock().getZ());
+
+                PlayerUtils.placeBlock(findValidBlock(), anchorSlot, Hand.MAIN_HAND);
+                if (rotate.get()) Utils.packetRotate(blockPosition);
+                placeDelayLeft = placeDelay.get();
+            }
         }
     });
 
@@ -284,6 +305,7 @@ public class AnchorAura extends Module {
         assert mc.interactionManager != null;
         if (pos == null) return;
         Vec3d vecPos = new Vec3d(pos.getX() + 0.5, pos.getX(), pos.getZ() + 0.5);
+        Vec3d breakPos = new Vec3d(pos.getX(), pos.getY(), pos.getZ());
         if (glowSlot != -1 && nonGlowSlot != -1) {
             mc.player.setSneaking(false);
             ((IKeyBinding) mc.options.keySneak).setPressed(false);
@@ -292,6 +314,7 @@ public class AnchorAura extends Module {
             mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(vecPos, Direction.UP, pos, false));
             mc.player.inventory.selectedSlot = nonGlowSlot;
             mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(vecPos, Direction.UP, pos, false));
+            if (rotate.get()) Utils.packetRotate(breakPos);
             mc.player.swingHand(Hand.MAIN_HAND);
             mc.player.inventory.selectedSlot = preSlot;
         }

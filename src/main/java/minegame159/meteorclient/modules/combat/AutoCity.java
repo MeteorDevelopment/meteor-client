@@ -5,6 +5,7 @@ import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.player.Chat;
 import minegame159.meteorclient.utils.player.CityUtils;
 import minegame159.meteorclient.utils.player.PlayerUtils;
@@ -16,6 +17,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 
 public class AutoCity extends Module {
 
@@ -38,6 +40,13 @@ public class AutoCity extends Module {
     private final Setting<Boolean> chatInfo = sgGeneral.add(new BoolSetting.Builder()
             .name("chat-info")
             .description("Sends you information about the module.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
+            .name("rotate")
+            .description("Rotations.")
             .defaultValue(true)
             .build()
     );
@@ -95,8 +104,11 @@ public class AutoCity extends Module {
 
             mc.player.inventory.selectedSlot = pickSlot;
 
+            Vec3d blockPos = new Vec3d(mineTarget.getX(), mineTarget.getY(), mineTarget.getZ());
+
             mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, mineTarget, Direction.UP));
             mc.player.swingHand(Hand.MAIN_HAND);
+            if (rotate.get()) Utils.packetRotate(blockPos);
             mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, mineTarget, Direction.UP));
         }
         toggle();

@@ -26,6 +26,7 @@ import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.item.*;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
@@ -298,6 +299,10 @@ public class Utils {
         }
 
         return new byte[0];
+    }
+
+    public static void packetRotate(Vec3d vec) {
+        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(getNeededYaw(vec), getNeededPitch(vec), mc.player.isOnGround()));
     }
 
     public static float getNeededYaw(Vec3d vec) {

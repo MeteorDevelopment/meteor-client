@@ -12,6 +12,7 @@ import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.player.PlayerUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -20,6 +21,7 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShapes;
 
 import java.util.ArrayList;
@@ -66,8 +68,23 @@ public class Scaffold extends Module {
             .build()
     );
 
-    private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
+    private final Setting<Boolean> rotate = sg.add(new BoolSetting.Builder()
+            .name("rotate")
+            .description("Rotations.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Boolean> renderSwing = sg.add(new BoolSetting.Builder()
+            .name("render-swing")
+            .description("Will render your swing client-side.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final BlockPos.Mutable blockPos1 = new BlockPos.Mutable();
     private BlockState blockState, slotBlockState;
+
     private int slot, prevSelectedSlot;
 
     private boolean lastWasSneaking;
@@ -106,7 +123,12 @@ public class Scaffold extends Module {
         prevSelectedSlot = mc.player.inventory.selectedSlot;
         mc.player.inventory.selectedSlot = slot;
 
-        PlayerUtils.placeBlock(mc.player.getBlockPos().down(), Hand.MAIN_HAND);
+        BlockPos blockDown = mc.player.getBlockPos().down();
+        blockPos1.set(blockPos1);
+        Vec3d blockPosition = new Vec3d(blockPos1.getX(), blockPos1.getY(), blockPos1.getZ());
+
+        PlayerUtils.placeBlock(blockDown, Hand.MAIN_HAND, renderSwing.get());
+        if (rotate.get()) Utils.packetRotate(blockPosition);
         if (mc.player.input.sneaking) this.lastWasSneaking = false;
 
         // Place blocks around if radius is bigger than 1
@@ -117,33 +139,35 @@ public class Scaffold extends Module {
             // Forward
             for (int j = 0; j < count; j++) {
                 if (!findBlock()) return;
-                PlayerUtils.placeBlock(setPos(j - countHalf, -1, i), Hand.MAIN_HAND);
+                PlayerUtils.placeBlock(setPos(j - countHalf, -1, i), Hand.MAIN_HAND, renderSwing.get());
             }
             // Backward
             for (int j = 0; j < count; j++) {
                 if (!findBlock()) return;
-                PlayerUtils.placeBlock(setPos(j - countHalf, -1, -i), Hand.MAIN_HAND);
+                PlayerUtils.placeBlock(setPos(j - countHalf, -1, -i), Hand.MAIN_HAND, renderSwing.get());
             }
             // Right
             for (int j = 0; j < count; j++) {
                 if (!findBlock()) return;
-                PlayerUtils.placeBlock(setPos(i, -1, j - countHalf), Hand.MAIN_HAND);
+                PlayerUtils.placeBlock(setPos(i, -1, j - countHalf), Hand.MAIN_HAND, renderSwing.get());
             }
             // Left
             for (int j = 0; j < count; j++) {
                 if (!findBlock()) return;
-                PlayerUtils.placeBlock(setPos(-i, -1, j - countHalf), Hand.MAIN_HAND);
+                PlayerUtils.placeBlock(setPos(-i, -1, j - countHalf), Hand.MAIN_HAND, renderSwing.get());
             }
 
             // Diagonals
             if (!findBlock()) return;
-            PlayerUtils.placeBlock(setPos(-i, -1, i), Hand.MAIN_HAND);
+            PlayerUtils.placeBlock(setPos(-i, -1, i), Hand.MAIN_HAND, renderSwing.get());
             if (!findBlock()) return;
-            PlayerUtils.placeBlock(setPos(i, -1, i), Hand.MAIN_HAND);
+            PlayerUtils.placeBlock(setPos(i, -1, i), Hand.MAIN_HAND, renderSwing.get());
             if (!findBlock()) return;
-            PlayerUtils.placeBlock(setPos(-i, -1, -i), Hand.MAIN_HAND);
+            PlayerUtils.placeBlock(setPos(-i, -1, -i), Hand.MAIN_HAND, renderSwing.get());
             if (!findBlock()) return;
-            PlayerUtils.placeBlock(setPos(i, -1, -i), Hand.MAIN_HAND);
+            PlayerUtils.placeBlock(setPos(i, -1, -i), Hand.MAIN_HAND, renderSwing.get());
+
+            if (rotate.get()) Utils.packetRotate(blockPosition);
         }
 
         // Change back to previous slot
@@ -178,11 +202,11 @@ public class Scaffold extends Module {
     }
 
     private BlockPos setPos(int x, int y, int z) {
-        blockPos.set(mc.player.getX(), mc.player.getY(), mc.player.getZ());
-        if (x != 0) blockPos.setX(blockPos.getX() + x);
-        if (y != 0) blockPos.setY(blockPos.getY() + y);
-        if (z != 0) blockPos.setZ(blockPos.getZ() + z);
-        return blockPos;
+        blockPos1.set(mc.player.getX(), mc.player.getY(), mc.player.getZ());
+        if (x != 0) blockPos1.setX(blockPos1.getX() + x);
+        if (y != 0) blockPos1.setY(blockPos1.getY() + y);
+        if (z != 0) blockPos1.setZ(blockPos1.getZ() + z);
+        return blockPos1;
     }
 
     private int findSlot(BlockState blockState) {
@@ -225,4 +249,5 @@ public class Scaffold extends Module {
     public boolean hasSafeWalk() {
         return safeWalk.get();
     }
+
 }

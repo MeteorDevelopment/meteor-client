@@ -13,6 +13,7 @@ import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.player.PlayerUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -23,6 +24,7 @@ import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 
 public class Surround extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -65,6 +67,13 @@ public class Surround extends Module {
     private final Setting<Boolean> disableOnJump = sgGeneral.add(new BoolSetting.Builder()
             .name("disable-on-jump")
             .description("Automatically disables when you jump.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
+            .name("rotate")
+            .description("Rotations.")
             .defaultValue(true)
             .build()
     );
@@ -139,11 +148,13 @@ public class Surround extends Module {
         setBlockPos(x, y, z);
 
         BlockState blockState = mc.world.getBlockState(blockPos);
+        Vec3d blockPosition = new Vec3d(blockPos.getX(), blockPos.getY(), blockPos.getZ());
         boolean wasObby = blockState.getBlock() == Blocks.OBSIDIAN;
         boolean placed = !blockState.getMaterial().isReplaceable();
 
         if (!placed && findSlot()) {
             placed = PlayerUtils.placeBlock(blockPos, Hand.MAIN_HAND);
+            if (rotate.get()) Utils.packetRotate(blockPosition);
             resetSlot();
 
             boolean isObby = mc.world.getBlockState(blockPos).getBlock() == Blocks.OBSIDIAN;

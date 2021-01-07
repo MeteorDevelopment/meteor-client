@@ -28,14 +28,60 @@ public class AutoMount extends Module {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<Boolean> donkeys  = sgGeneral.add(new BoolSetting.Builder().name("donkey").description("Donkey").defaultValue(false).build());
-    private final Setting<Boolean> llamas  = sgGeneral.add(new BoolSetting.Builder().name("llama").description("Llama").defaultValue(false).build());
-    private final Setting<Boolean> boats  = sgGeneral.add(new BoolSetting.Builder().name("boat").description("Boat").defaultValue(false).build());
-    private final Setting<Boolean> minecarts  = sgGeneral.add(new BoolSetting.Builder().name("minecart").description("Minecart").defaultValue(false).build());
-    private final Setting<Boolean> horses  = sgGeneral.add(new BoolSetting.Builder().name("horse").description("Horse").defaultValue(false).build());
-    private final Setting<Boolean> pigs  = sgGeneral.add(new BoolSetting.Builder().name("pig").description("Pig").defaultValue(false).build());
-    private final Setting<Boolean> mules  = sgGeneral.add(new BoolSetting.Builder().name("mule").description("Mule").defaultValue(false).build());
-    private final Setting<Boolean> skeletons  = sgGeneral.add(new BoolSetting.Builder().name("skeleton-horse").description("Skeleton Horse").defaultValue(false).build());
+    private final Setting<Boolean> donkeys  = sgGeneral.add(new BoolSetting.Builder()
+            .name("donkey")
+            .description("Donkey")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> llamas  = sgGeneral.add(new BoolSetting.Builder()
+            .name("llama")
+            .description("Llama")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> boats  = sgGeneral.add(new BoolSetting.Builder()
+            .name("boat")
+            .description("Boat")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> minecarts  = sgGeneral.add(new BoolSetting.Builder()
+            .name("minecart")
+            .description("Minecart")
+            .defaultValue(false)
+            .build());
+
+    private final Setting<Boolean> horses  = sgGeneral.add(new BoolSetting.Builder()
+            .name("horse")
+            .description("Horse")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> pigs  = sgGeneral.add(new BoolSetting.Builder()
+            .name("pig")
+            .description("Pig")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> mules  = sgGeneral.add(new BoolSetting.Builder()
+            .name("mule")
+            .description("Mule")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> skeletons  = sgGeneral.add(new BoolSetting.Builder()
+            .name("skeleton-horse")
+            .description("Skeleton Horse")
+            .defaultValue(false)
+            .build()
+    );
 
     private final Setting<Boolean> checkSaddle = sgGeneral.add(new BoolSetting.Builder()
             .name("check-saddle")
@@ -43,7 +89,6 @@ public class AutoMount extends Module {
             .defaultValue(false)
             .build()
     );
-
 
     @EventHandler
     private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
