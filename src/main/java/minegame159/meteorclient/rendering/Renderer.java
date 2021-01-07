@@ -8,6 +8,7 @@ package minegame159.meteorclient.rendering;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.client.render.VertexFormats;
+import net.minecraft.util.math.BlockPos;
 
 public class Renderer {
     public static final MeshBuilder NORMAL = new MeshBuilder();
@@ -45,6 +46,10 @@ public class Renderer {
 
     public static void boxWithLines(MeshBuilder normal, MeshBuilder lines, double x, double y, double z, double size, Color sideColor, Color lineColor, ShapeMode mode, int excludeDir) {
         boxWithLines(normal, lines, x, y, z, x + size, y + size, z + size, sideColor, lineColor, mode, excludeDir);
+    }
+
+    public static void boxWithLines(MeshBuilder normal, MeshBuilder lines, BlockPos blockPos, Color sideColor, Color lineColor, ShapeMode mode, int excludeDir) {
+        boxWithLines(normal, lines, blockPos.getX(), blockPos.getY(), blockPos.getZ(), blockPos.getX() + 1, blockPos.getY() + 1, blockPos.getZ() + 1, sideColor, lineColor, mode, excludeDir);
     }
 
     public static void quadWithLines(MeshBuilder normal, MeshBuilder lines, double x1, double y1, double z1, double x2, double y2, double z2, double x3, double y3, double z3, double x4, double y4, double z4, Color sideColor, Color lineColor, ShapeMode mode) {
