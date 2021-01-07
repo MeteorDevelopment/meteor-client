@@ -43,15 +43,6 @@ public class AnchorAura extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgPlace = settings.createGroup("Place");
 
-    private final Setting<Double> placeRange = sgGeneral.add(new DoubleSetting.Builder()
-            .name("place-range")
-            .description("The radius in which the anchors are placed in.")
-            .defaultValue(3)
-            .min(0)
-            .sliderMax(5)
-            .build()
-    );
-
     private final Setting<Double> breakRange = sgGeneral.add(new DoubleSetting.Builder()
             .name("break-range")
             .description("The radius in which the anchors are broken in.")
@@ -84,6 +75,21 @@ public class AnchorAura extends Module {
             .build()
     );
 
+    private final Setting<Boolean> place = sgPlace.add(new BoolSetting.Builder()
+            .name("place")
+            .description("Places anchors.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Double> placeRange = sgPlace.add(new DoubleSetting.Builder()
+            .name("place-range")
+            .description("The radius in which the anchors are placed in.")
+            .defaultValue(3)
+            .min(0)
+            .sliderMax(5)
+            .build()
+    );
 
     private final Setting<Double> maxDamage = sgPlace.add(new DoubleSetting.Builder()
             .name("max-damage")
@@ -115,13 +121,6 @@ public class AnchorAura extends Module {
             .defaultValue(2)
             .min(0)
             .max(10)
-            .build()
-    );
-
-    private final Setting<Boolean> place = sgGeneral.add(new BoolSetting.Builder()
-            .name("place")
-            .description("Places anchors.")
-            .defaultValue(true)
             .build()
     );
 

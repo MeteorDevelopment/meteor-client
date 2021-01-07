@@ -106,7 +106,6 @@ public class AutoWeb extends Module {
             Vec3d blockPos2 = new Vec3d(targetPos.getX(), targetPos.getY() + 1, targetPos.getZ());
             int swung = 0;
 
-
             if (mc.world.getBlockState(targetPos).isAir()) {
                 mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.DOWN, targetPos, true));
                 if (rotate.get()) Utils.packetRotate(blockPos);
