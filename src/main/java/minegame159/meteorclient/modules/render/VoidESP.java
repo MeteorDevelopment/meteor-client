@@ -126,11 +126,7 @@ public class VoidESP extends Module {
     @EventHandler
     private final Listener<RenderEvent> onRender = new Listener<>(event -> {
         for (BlockPos voidHole : voidHoles) {
-            int x = voidHole.getX();
-            int y = voidHole.getY();
-            int z = voidHole.getZ();
-
-            Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x, y, z, 1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, voidHole, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
         }
     });
 }
