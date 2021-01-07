@@ -14,6 +14,7 @@ import minegame159.meteorclient.accounts.AccountManager;
 import minegame159.meteorclient.commands.CommandManager;
 import minegame159.meteorclient.commands.commands.Ignore;
 import minegame159.meteorclient.events.game.GameLeftEvent;
+import minegame159.meteorclient.events.meteor.ClientInitialisedEvent;
 import minegame159.meteorclient.events.meteor.KeyEvent;
 import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.friends.FriendManager;
@@ -96,6 +97,7 @@ public class MeteorClient implements ClientModInitializer, Listenable {
             save();
             OnlinePlayers.leave();
         }));
+        EVENT_BUS.post(new ClientInitialisedEvent());
     }
 
     public void load() {
