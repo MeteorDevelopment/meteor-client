@@ -160,6 +160,13 @@ public class CrystalAura extends Module {
             .build()
     );
 
+    private final Setting<Boolean> switchBack = sgGeneral.add(new BoolSetting.Builder()
+            .name("switch-back")
+            .description("Switches back to the previous item when disabling.")
+            .defaultValue(false)
+            .build()
+    );
+
     private final Setting<Boolean> spoofChange = sgGeneral.add(new BoolSetting.Builder()
             .name("spoof-change")
             .description("Spoofs item change to crystal.")
@@ -359,7 +366,7 @@ public class CrystalAura extends Module {
     private double lastDamage = 0;
     private boolean shouldFacePlace = false;
     private EndCrystalEntity heldCrystal = null;
-    private LivingEntity target;
+    public LivingEntity target;
     private boolean locked = false;
     private boolean canSupport;
     private int supportSlot = 0;
@@ -384,7 +391,7 @@ public class CrystalAura extends Module {
     @Override
     public void onDeactivate() {
         assert mc.player != null;
-        if (preSlot != -1) mc.player.inventory.selectedSlot = preSlot;
+        if (switchBack.get()) if (preSlot != -1) mc.player.inventory.selectedSlot = preSlot;
         for (RenderBlock renderBlock : renderBlocks) {
             renderBlockPool.free(renderBlock);
         }
@@ -521,7 +528,7 @@ public class CrystalAura extends Module {
                 }
             }
             if (spoofChange.get() && preSlot != mc.player.inventory.selectedSlot && preSlot != -1)
-                mc.player.inventory.selectedSlot = preSlot;
+                if (switchBack.get()) mc.player.inventory.selectedSlot = preSlot;
         }
     }, EventPriority.HIGH);
 

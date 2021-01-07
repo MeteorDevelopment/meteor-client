@@ -18,10 +18,10 @@ Follow guide at [meteorclient.com](https://meteorclient.com/info).
 - Run `./gradlew build`
 
 ## Dev builds
-You can find dev builts at [circleci](https://app.circleci.com/pipelines/github/MineGame159/meteor-client?branch=master).
+You can find dev builds at [circleci](https://app.circleci.com/pipelines/github/MineGame159/meteor-client?branch=master).
 
 ## Older versions
-If you want to connect to servers that run older version you can download [multiconnect](https://www.curseforge.com/minecraft/mc-mods/multiconnect).
+If you want to connect to servers that run an older version of the game you can download [multiconnect](https://www.curseforge.com/minecraft/mc-mods/multiconnect).
 
 ## Donation
 We would appreciate if you donated to us through [PayPal](https://paypal.me/MineGame159). Include your Discord tag so we can give you donator role and contact you. Minimum for donator role is 5$.

@@ -10,15 +10,20 @@ package minegame159.meteorclient.modules.combat;
 import com.google.common.collect.Streams;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
+import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.rendering.Renderer;
+import minegame159.meteorclient.rendering.ShapeMode;
 import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.misc.Pool;
 import minegame159.meteorclient.utils.player.Chat;
 import minegame159.meteorclient.utils.player.DamageCalcUtils;
 import minegame159.meteorclient.utils.player.PlayerUtils;
+import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -27,10 +32,10 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 
-import java.util.Comparator;
-import java.util.Optional;
+import java.util.*;
 
 public class AnchorAura extends Module {
 
@@ -41,6 +46,7 @@ public class AnchorAura extends Module {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgPlace = settings.createGroup("Place");
+    private final SettingGroup sgRender = settings.createGroup("Render");
 
     private final Setting<Double> placeRange = sgGeneral.add(new DoubleSetting.Builder()
             .name("place-range")
@@ -123,6 +129,48 @@ public class AnchorAura extends Module {
             .build()
     );
 
+    // Render
+
+    private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
+            .name("render")
+            .description("Renders an overlay where respawn anchors are being placed.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
+            .name("shape-mode")
+            .description("How the shapes are rendered.")
+            .defaultValue(ShapeMode.Both)
+            .build()
+    );
+
+    private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()
+            .name("side-color")
+            .description("The side color.")
+            .defaultValue(new SettingColor(255, 0, 0, 75))
+            .build()
+    );
+
+    private final Setting<SettingColor> lineColor = sgRender.add(new ColorSetting.Builder()
+            .name("line-color")
+            .description("The line color.")
+            .defaultValue(new SettingColor(255, 0, 0, 255))
+            .build()
+    );
+
+    private final Setting<Integer> renderTimer = sgRender.add(new IntSetting.Builder()
+            .name("Timer")
+            .description("The amount of time between changing the block render.")
+            .defaultValue(0)
+            .min(0)
+            .sliderMax(10)
+            .build()
+    );
+
+    private final Pool<RenderBlock> renderBlockPool = new Pool<>(RenderBlock::new);
+    private final List<RenderBlock> renderBlocks = new ArrayList<>();
+
     public AnchorAura() {super(Category.Combat, "anchor-aura", "Automatically places and breaks Anchors to harm entities.");}
 
     private int placeDelayLeft = placeDelay.get();
@@ -146,6 +194,15 @@ public class AnchorAura extends Module {
         }
         if (getTotalHealth(mc.player) <= minHealth.get() && placeMode.get() != Mode.Suicide && breakMode.get() != Mode.Suicide) return;
 
+        for (Iterator<RenderBlock> it = renderBlocks.iterator(); it.hasNext();) {
+            RenderBlock renderBlock = it.next();
+
+            if (renderBlock.shouldRemove()) {
+                it.remove();
+                renderBlockPool.free(renderBlock);
+            }
+        }
+
         findTarget();
 
         if (target == null) return;
@@ -160,6 +217,24 @@ public class AnchorAura extends Module {
         if (place.get() && placeDelayLeft <= 0) {
             PlayerUtils.placeBlock(findValidBlock(), anchorSlot, Hand.MAIN_HAND);
             placeDelayLeft = placeDelay.get();
+        }
+
+        if (findAnchors() != null) {
+            if (render.get()) {
+                Vec3d blockPos = new Vec3d(findAnchors().getX(), findAnchors().getY(), findAnchors().getZ());
+                RenderBlock renderBlock = renderBlockPool.get();
+                renderBlock.reset(blockPos);
+                renderBlocks.add(renderBlock);
+            }
+        }
+    });
+
+    @EventHandler
+    private final Listener<RenderEvent> onRender = new Listener<>(event -> {
+        if (render.get()) {
+            for (RenderBlock renderBlock : renderBlocks) {
+                renderBlock.render();
+            }
         }
     });
 
@@ -294,6 +369,28 @@ public class AnchorAura extends Module {
             mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(vecPos, Direction.UP, pos, false));
             mc.player.swingHand(Hand.MAIN_HAND);
             mc.player.inventory.selectedSlot = preSlot;
+        }
+    }
+
+    private class RenderBlock {
+        private int x, y, z;
+        private int timer;
+
+        public void reset(Vec3d pos) {
+            x = MathHelper.floor(pos.getX());
+            y = MathHelper.floor(pos.getY());
+            z = MathHelper.floor(pos.getZ());
+            timer = renderTimer.get();
+        }
+
+        public boolean shouldRemove() {
+            if (timer <= 0) return true;
+            timer--;
+            return false;
+        }
+
+        public void render() {
+            Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x, y, z, 1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
         }
     }
 
