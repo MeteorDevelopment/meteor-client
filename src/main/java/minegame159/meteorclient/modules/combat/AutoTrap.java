@@ -86,7 +86,7 @@ public class AutoTrap extends Module {
 
     private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
             .name("render")
-            .description("Whether to render blocks being mined.")
+            .description("Renders a block overlay where obsidian will be placed.")
             .defaultValue(true)
             .build()
     );
@@ -148,7 +148,6 @@ public class AutoTrap extends Module {
             return;
         }
 
-        placePositions.clear();
         placePositions = getPlacePos(target);
 
         if (delay >= delaySetting.get() && placePositions.size() > 0) {
@@ -171,46 +170,40 @@ public class AutoTrap extends Module {
         for (BlockPos pos : placePositions) Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, pos, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
     });
 
-    private boolean checkReplace(BlockPos pos) {
-        return mc.world.getBlockState(pos).getMaterial().isReplaceable() && mc.world.canPlace(Blocks.OBSIDIAN.getDefaultState(), pos, ShapeContext.absent());
-    }
 
     private List<BlockPos> getPlacePos(PlayerEntity target) {
-        if (!placePositions.isEmpty()) placePositions.clear();
-
+        placePositions.clear();
         BlockPos targetPos = target.getBlockPos();
 
         switch (topPlacement.get()) {
             case Full:
-                if (checkReplace(targetPos.add(0, 2, 0))) add(targetPos.add(0, 2, 0));
-                if (checkReplace(targetPos.add(1, 1, 0))) add(targetPos.add(1, 1, 0));
-                if (checkReplace(targetPos.add(-1, 1, 0))) add(targetPos.add(-1, 1, 0));
-                if (checkReplace(targetPos.add(0, 1, 1))) add(targetPos.add(0, 1, 1));
-                if (checkReplace(targetPos.add(0, 1, -1))) add(targetPos.add(0, 1, -1));
+                add(targetPos.add(0, 2, 0));
+                add(targetPos.add(1, 1, 0));
+                add(targetPos.add(-1, 1, 0));
+                add(targetPos.add(0, 1, 1));
+                add(targetPos.add(0, 1, -1));
                 break;
             case Top:
-                if (checkReplace(targetPos.add(0, 2, 0))) add(targetPos.add(0, 2, 0));
-                break;
+                add(targetPos.add(0, 2, 0));
         }
 
         switch (bottomPlacement.get()) {
             case Platform:
-                if (checkReplace(targetPos.add(0, -1, 0))) add(targetPos.add(0, -1, 0));
-                if (checkReplace(targetPos.add(1, -1, 0))) add(targetPos.add(1, -1, 0));
-                if (checkReplace(targetPos.add(-1, -1, 0))) add(targetPos.add(0, -1, 0));
-                if (checkReplace(targetPos.add(0, -1, 1))) add(targetPos.add(0, -1, 1));
-                if (checkReplace(targetPos.add(0, -1, -1))) add(targetPos.add(0, -1, -1));
+                add(targetPos.add(0, -1, 0));
+                add(targetPos.add(1, -1, 0));
+                add(targetPos.add(0, -1, 0));
+                add(targetPos.add(0, -1, 1));
+                add(targetPos.add(0, -1, -1));
                 break;
             case Single:
-                if (checkReplace(targetPos.add(0, -1, 0))) add(targetPos.add(0, -1, 0));
-                break;
+                add(targetPos.add(0, -1, 0));
         }
         return placePositions;
     }
 
 
     private void add(BlockPos blockPos) {
-        if (!placePositions.contains(blockPos)) placePositions.add(blockPos);
+        if (!placePositions.contains(blockPos) && mc.world.getBlockState(blockPos).getMaterial().isReplaceable() && mc.world.canPlace(Blocks.OBSIDIAN.getDefaultState(), blockPos, ShapeContext.absent())) placePositions.add(blockPos);
     }
 
     private PlayerEntity findTarget() {
