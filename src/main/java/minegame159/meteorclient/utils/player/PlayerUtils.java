@@ -77,7 +77,7 @@ public class PlayerUtils {
         ((IVec3d) hitPos).set(blockPos);
 
         mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(hitPos, Direction.UP, blockPos, false));
-        mc.player.swingHand(hand);
+        if (swing) mc.player.swingHand(hand);
 
         return true;
     }

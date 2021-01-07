@@ -66,6 +66,13 @@ public class Scaffold extends Module {
             .build()
     );
 
+    private final Setting<Boolean> renderSwing = sg.add(new BoolSetting.Builder()
+            .name("render-swing")
+            .description("Renders your client-side swing.")
+            .defaultValue(true)
+            .build()
+    );
+
     private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
     private BlockState blockState, slotBlockState;
     private int slot, prevSelectedSlot;
@@ -106,7 +113,7 @@ public class Scaffold extends Module {
         prevSelectedSlot = mc.player.inventory.selectedSlot;
         mc.player.inventory.selectedSlot = slot;
 
-        PlayerUtils.placeBlock(mc.player.getBlockPos().down(), Hand.MAIN_HAND);
+        PlayerUtils.placeBlock(mc.player.getBlockPos().down(), Hand.MAIN_HAND, renderSwing.get());
         if (mc.player.input.sneaking) this.lastWasSneaking = false;
 
         // Place blocks around if radius is bigger than 1
@@ -117,33 +124,33 @@ public class Scaffold extends Module {
             // Forward
             for (int j = 0; j < count; j++) {
                 if (!findBlock()) return;
-                PlayerUtils.placeBlock(setPos(j - countHalf, -1, i), Hand.MAIN_HAND);
+                PlayerUtils.placeBlock(setPos(j - countHalf, -1, i), Hand.MAIN_HAND, renderSwing.get());
             }
             // Backward
             for (int j = 0; j < count; j++) {
                 if (!findBlock()) return;
-                PlayerUtils.placeBlock(setPos(j - countHalf, -1, -i), Hand.MAIN_HAND);
+                PlayerUtils.placeBlock(setPos(j - countHalf, -1, -i), Hand.MAIN_HAND, renderSwing.get());
             }
             // Right
             for (int j = 0; j < count; j++) {
                 if (!findBlock()) return;
-                PlayerUtils.placeBlock(setPos(i, -1, j - countHalf), Hand.MAIN_HAND);
+                PlayerUtils.placeBlock(setPos(i, -1, j - countHalf), Hand.MAIN_HAND, renderSwing.get());
             }
             // Left
             for (int j = 0; j < count; j++) {
                 if (!findBlock()) return;
-                PlayerUtils.placeBlock(setPos(-i, -1, j - countHalf), Hand.MAIN_HAND);
+                PlayerUtils.placeBlock(setPos(-i, -1, j - countHalf), Hand.MAIN_HAND, renderSwing.get());
             }
 
             // Diagonals
             if (!findBlock()) return;
-            PlayerUtils.placeBlock(setPos(-i, -1, i), Hand.MAIN_HAND);
+            PlayerUtils.placeBlock(setPos(-i, -1, i), Hand.MAIN_HAND, renderSwing.get());
             if (!findBlock()) return;
-            PlayerUtils.placeBlock(setPos(i, -1, i), Hand.MAIN_HAND);
+            PlayerUtils.placeBlock(setPos(i, -1, i), Hand.MAIN_HAND, renderSwing.get());
             if (!findBlock()) return;
-            PlayerUtils.placeBlock(setPos(-i, -1, -i), Hand.MAIN_HAND);
+            PlayerUtils.placeBlock(setPos(-i, -1, -i), Hand.MAIN_HAND, renderSwing.get());
             if (!findBlock()) return;
-            PlayerUtils.placeBlock(setPos(i, -1, -i), Hand.MAIN_HAND);
+            PlayerUtils.placeBlock(setPos(i, -1, -i), Hand.MAIN_HAND, renderSwing.get());
         }
 
         // Change back to previous slot
