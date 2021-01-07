@@ -13,7 +13,7 @@ import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.combat.AutoArmor;
+import minegame159.meteorclient.modules.violent.AutoArmor;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;

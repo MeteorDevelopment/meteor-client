@@ -15,7 +15,7 @@ import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.combat.*;
+import minegame159.meteorclient.modules.violent.*;
 import minegame159.meteorclient.modules.render.hud.modules.*;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.render.AlignmentX;
@@ -261,10 +261,6 @@ public class HUD extends Module {
     private static List<Module> moduleInfoModulesDefaultValue() {
         List<Module> modules = new ArrayList<>();
         modules.add(ModuleManager.INSTANCE.get(KillAura.class));
-        modules.add(ModuleManager.INSTANCE.get(CrystalAura.class));
-        modules.add(ModuleManager.INSTANCE.get(AnchorAura.class));
-        modules.add(ModuleManager.INSTANCE.get(BedAura.class));
-        modules.add(ModuleManager.INSTANCE.get(Surround.class));
         return modules;
     }
 

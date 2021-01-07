@@ -3,7 +3,7 @@
  * Copyright (c) 2020 Meteor Development.
  */
 
-package minegame159.meteorclient.modules.combat;
+package minegame159.meteorclient.modules.violent;
 
 //Updated by squidoodly 18/07/2020
 
@@ -40,7 +40,7 @@ public class Criticals extends Module {
     );
 
     public Criticals() {
-        super(Category.Combat, "criticals", "Performs critical attacks when you hit your target.");
+        super(Category.Violent, "criticals", "Performs critical attacks when you hit your target.");
     }
 
     private boolean wasNoFallActive;

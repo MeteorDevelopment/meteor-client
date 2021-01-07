@@ -3,7 +3,7 @@
  * Copyright (c) 2020 Meteor Development.
  */
 
-package minegame159.meteorclient.modules.combat;
+package minegame159.meteorclient.modules.violent;
 
 //Created by squidoodly 25/04/2020
 
@@ -99,7 +99,7 @@ public class OffhandExtra extends Module {
     );
 
     public OffhandExtra() {
-        super(Category.Combat, "offhand-extra", "Allows you to use specified items in your offhand. Requires AutoTotem to be on smart mode.");
+        super(Category.Violent, "offhand-extra", "Allows you to use specified items in your offhand. Requires AutoTotem to be on smart mode.");
     }
 
     private boolean isClicking = false;

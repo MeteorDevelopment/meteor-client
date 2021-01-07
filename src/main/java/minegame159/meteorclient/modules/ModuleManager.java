@@ -17,7 +17,7 @@ import minegame159.meteorclient.events.game.GameJoinedEvent;
 import minegame159.meteorclient.events.game.GameLeftEvent;
 import minegame159.meteorclient.events.game.OpenScreenEvent;
 import minegame159.meteorclient.events.meteor.KeyEvent;
-import minegame159.meteorclient.modules.combat.*;
+import minegame159.meteorclient.modules.violent.*;
 import minegame159.meteorclient.modules.misc.*;
 import minegame159.meteorclient.modules.movement.Timer;
 import minegame159.meteorclient.modules.movement.*;
@@ -50,7 +50,7 @@ import java.io.File;
 import java.util.*;
 
 public class ModuleManager extends Savable<ModuleManager> implements Listenable {
-    public static final Category[] CATEGORIES = {Category.Combat, Category.Player, Category.Movement, Category.Render, Category.Misc};
+    public static final Category[] CATEGORIES = {Category.Violent, Category.Player, Category.Movement, Category.Render, Category.Misc};
     public static ModuleManager INSTANCE;
     public static final ModuleRegistry REGISTRY = new ModuleRegistry();
 
@@ -67,7 +67,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
 
         INSTANCE = this;
 
-        initCombat();
+        initViolent();
         initPlayer();
         initMovement();
         initRender();
@@ -273,37 +273,15 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         }
     }
 
-    private void initCombat() {
-        addModule(new Auto32K());
-        addModule(new AntiFriendHit());
+    private void initViolent() {
         addModule(new Criticals());
         addModule(new AutoTotem());
-        addModule(new BedAura());
-        addModule(new AutoWeapon());
         addModule(new AutoLog());
         addModule(new KillAura());
-        addModule(new CrystalAura());
         addModule(new OffhandExtra());
-        addModule(new SmartSurround());
-        addModule(new Surround());
-        addModule(new Trigger());
-        addModule(new AimAssist());
         addModule(new AutoArmor());
-        addModule(new AntiBed());
-        addModule(new AnchorAura());
         addModule(new TotemPopNotifier());
         addModule(new BowSpam());
-        addModule(new AutoTrap());
-        addModule(new AutoAnvil());
-        addModule(new SelfTrap());
-        addModule(new SelfWeb());
-        addModule(new AutoWeb());
-        addModule(new HoleFiller());
-        addModule(new SelfAnvil());
-        addModule(new AntiAutoAnvil());
-        addModule(new AutoCity());
-        addModule(new Swarm());
-        addModule(new Quiver());
     }
 
     private void initPlayer() {

@@ -3,7 +3,7 @@
  * Copyright (c) 2020 Meteor Development.
  */
 
-package minegame159.meteorclient.modules.combat;
+package minegame159.meteorclient.modules.violent;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
@@ -97,7 +97,7 @@ public class AutoLog extends Module {
     );
 
     public AutoLog() {
-        super(Category.Combat, "auto-log", "Automatically disconnects you when certain requirements are met.");
+        super(Category.Violent, "auto-log", "Automatically disconnects you when certain requirements are met.");
     }
 
     @EventHandler

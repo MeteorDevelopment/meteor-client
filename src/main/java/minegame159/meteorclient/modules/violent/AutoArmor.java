@@ -3,7 +3,7 @@
  * Copyright (c) 2020 Meteor Development.
  */
 
-package minegame159.meteorclient.modules.combat;
+package minegame159.meteorclient.modules.violent;
 
 //Rewritten by squidoodly 25/07/2020
 
@@ -50,7 +50,7 @@ public class AutoArmor extends Module {
         }
     }
 
-    public AutoArmor(){super(Category.Combat, "auto-armor", "Automatically manages and equips your armor for you.");}
+    public AutoArmor(){super(Category.Violent, "auto-armor", "Automatically manages and equips your armor for you.");}
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 

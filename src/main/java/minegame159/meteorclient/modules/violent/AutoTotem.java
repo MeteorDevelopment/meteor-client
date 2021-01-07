@@ -3,7 +3,7 @@
  * Copyright (c) 2020 Meteor Development.
  */
 
-package minegame159.meteorclient.modules.combat;
+package minegame159.meteorclient.modules.violent;
 
 //Updated by squidoodly 24/04/2020
 //Updated by squidoodly 19/06/2020
@@ -80,7 +80,7 @@ public class AutoTotem extends Module {
     private boolean locked = false;
 
     public AutoTotem() {
-        super(Category.Combat, "auto-totem", "Automatically equips totems in your offhand.");
+        super(Category.Violent, "auto-totem", "Automatically equips totems in your offhand.");
     }
 
     @Override

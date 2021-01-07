@@ -14,8 +14,7 @@ import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.combat.CrystalAura;
-import minegame159.meteorclient.modules.combat.KillAura;
+import minegame159.meteorclient.modules.violent.KillAura;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -108,10 +107,6 @@ public class AutoGap extends Module {
                     ModuleManager.INSTANCE.get(KillAura.class).toggle();
                     wasKillActive = false;
                 }
-                if(wasCrystalActive){
-                    ModuleManager.INSTANCE.get(CrystalAura.class).toggle();
-                    wasCrystalActive = false;
-                }
                 mc.player.inventory.selectedSlot = prevSlot;
             }
         } else {
@@ -149,9 +144,6 @@ public class AutoGap extends Module {
                     if (ModuleManager.INSTANCE.get(KillAura.class).isActive()) {
                         wasKillActive = true;
                         ModuleManager.INSTANCE.get(KillAura.class).toggle();
-                    }
-                    if (ModuleManager.INSTANCE.get(CrystalAura.class).isActive()) {
-                        wasCrystalActive = true;
                     }
                 }
                 ((IKeyBinding) mc.options.keyUse).setPressed(true);

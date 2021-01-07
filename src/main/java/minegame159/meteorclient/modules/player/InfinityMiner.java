@@ -17,7 +17,7 @@ import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.combat.AutoLog;
+import minegame159.meteorclient.modules.violent.AutoLog;
 import minegame159.meteorclient.modules.movement.GUIMove;
 import minegame159.meteorclient.modules.movement.Jesus;
 import minegame159.meteorclient.modules.movement.NoFall;

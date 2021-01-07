@@ -3,7 +3,7 @@
  * Copyright (c) 2020 Meteor Development.
  */
 
-package minegame159.meteorclient.modules.combat;
+package minegame159.meteorclient.modules.violent;
 
 import baritone.api.BaritoneAPI;
 import me.zero.alpine.listener.EventHandler;
@@ -176,7 +176,7 @@ public class KillAura extends Module {
     private final Vec3d vec2 = new Vec3d(0, 0, 0);
 
     public KillAura() {
-        super(Category.Combat, "kill-aura", "Attacks specified entities around you.");
+        super(Category.Violent, "kill-aura", "Attacks specified entities around you.");
     }
 
     @Override

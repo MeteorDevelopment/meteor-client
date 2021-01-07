@@ -3,7 +3,7 @@
  * Copyright (c) 2020 Meteor Development.
  */
 
-package minegame159.meteorclient.modules.combat;
+package minegame159.meteorclient.modules.violent;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
@@ -68,7 +68,7 @@ public class TotemPopNotifier extends Module {
     private final Map<UUID, Integer> totemPops = new HashMap<>();
 
     public TotemPopNotifier() {
-        super(Category.Combat, "totem-pop-notifier", "Sends a chat message when a player either pops a totem or dies.");
+        super(Category.Violent, "totem-pop-notifier", "Sends a chat message when a player either pops a totem or dies.");
     }
 
     @Override
