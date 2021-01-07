@@ -6,11 +6,10 @@ import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.player.RotationUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.passive.AnimalEntity;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.Vec3d;
 
@@ -76,8 +75,7 @@ public class AutoBreed extends Module {
                     || mc.player.distanceTo(animal) > range.get()
                     || !animal.isBreedingItem(hand.get() == Hand.MAIN_HAND ? mc.player.getMainHandStack() : mc.player.getOffHandStack())) continue;
 
-            Vec3d animalPos = new Vec3d(animal.getX(), animal.getY() + animal.getHeight() / 2, animal.getZ());
-            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(Utils.getNeededYaw(animalPos), Utils.getNeededPitch(animalPos), mc.player.isOnGround()));
+            RotationUtils.packetRotate(new Vec3d(animal.getX(), animal.getY() + animal.getHeight() / 2, animal.getZ()));
             mc.interactionManager.interactEntity(mc.player, animal, hand.get());
             mc.player.swingHand(hand.get());
             animalsFed.add(animal);

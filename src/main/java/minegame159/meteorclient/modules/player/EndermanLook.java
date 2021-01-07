@@ -14,7 +14,7 @@ import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.player.RotationUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.mob.EndermanEntity;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
@@ -91,9 +91,6 @@ public class EndermanLook extends Module {
 
     private void lookAt(Entity ender){
         Vec3d enderVec = new Vec3d(ender.getX(), ender.getEyeY(), ender.getZ());
-        float pitch = Utils.getNeededPitch(enderVec);
-        float yaw = Utils.getNeededYaw(enderVec);
-        PlayerMoveC2SPacket.LookOnly packet = new PlayerMoveC2SPacket.LookOnly(yaw, pitch, mc.player.isOnGround());
-        mc.player.networkHandler.sendPacket(packet);
+        RotationUtils.packetRotate(enderVec);
     }
 }
