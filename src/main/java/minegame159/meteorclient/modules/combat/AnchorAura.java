@@ -124,13 +124,6 @@ public class AnchorAura extends Module {
             .build()
     );
 
-    private final Setting<Boolean> chatInfo = sgGeneral.add(new BoolSetting.Builder()
-            .name("chat-info")
-            .description("Sends you information about the module.")
-            .defaultValue(true)
-            .build()
-    );
-
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
             .name("rotate")
             .description("Rotations.")
@@ -155,7 +148,7 @@ public class AnchorAura extends Module {
         placeDelayLeft --;
         breakDelayLeft --;
         if (mc.world.getDimension().isRespawnAnchorWorking()) {
-            if (chatInfo.get()) Chat.error(this, "You are not in the Overworld... (highlight)disabling(default)!");
+            Chat.error(this, "You are not in the Overworld... (highlight)disabling(default)!");
             this.toggle();
             return;
         }

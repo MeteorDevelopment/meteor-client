@@ -76,13 +76,6 @@ public class AutoAnvil extends Module {
             .build()
     );
 
-    private final Setting<Boolean> chatInfo = sgGeneral.add(new BoolSetting.Builder()
-            .name("chat-info")
-            .description("Sends you information about the module.")
-            .defaultValue(true)
-            .build()
-    );
-
     public AutoAnvil() {
         super(Category.Combat, "auto-anvil", "Automatically places anvils above players to destroy helmets.");
     }
@@ -119,7 +112,7 @@ public class AutoAnvil extends Module {
         }
 
         if (isActive() && toggleOnBreak.get() && target != null && target.inventory.getArmorStack(3).isEmpty()) {
-            if (chatInfo.get()) Chat.error(this, "Target head slot is empty… Disabling.");
+            Chat.info(this, "Target head slot is empty! Disabling.");
             toggle();
         }
 

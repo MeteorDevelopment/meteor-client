@@ -191,13 +191,6 @@ public class BedAura extends Module {
             .build()
     );
 
-    private final Setting<Boolean> chatInfo = sgGeneral.add(new BoolSetting.Builder()
-            .name("chat-info")
-            .description("Sends you information about the module.")
-            .defaultValue(true)
-            .build()
-    );
-
     private int delayLeft = delay.get();
     private Vec3d bestBlock;
     private double bestDamage;
@@ -222,7 +215,7 @@ public class BedAura extends Module {
         preSlot = -1;
         if (mc.player.getHealth() + mc.player.getAbsorptionAmount() <= minHealth.get() && mode.get() != Mode.Suicide) return;
         if (selfToggle.get() && mc.world.getDimension().isBedWorking()) {
-            if (chatInfo.get())Chat.warning(this, "You are in the Overworld... (highlight)disabling(default)!");
+            Chat.warning(this, "You are in the Overworld... (highlight)disabling(default)!");
             this.toggle();
             return;
         }
