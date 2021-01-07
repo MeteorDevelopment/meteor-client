@@ -10,9 +10,9 @@ import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.player.PlayerUtils;
+import minegame159.meteorclient.utils.player.RotationUtils;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.Items;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 
 public class AntiAutoAnvil extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -37,9 +37,7 @@ public class AntiAutoAnvil extends Module {
             if (mc.world.getBlockState(mc.player.getBlockPos().add(0, i, 0)).getBlock() == Blocks.ANVIL
                     && mc.world.getBlockState(mc.player.getBlockPos().add(0, i - 1, 0)).isAir()){
                 int slot = InvUtils.findItemWithCount(Items.OBSIDIAN).slot;
-                if (rotate.get()) {
-                    mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(mc.player.yaw, -90, mc.player.isOnGround()));
-                }
+                if (rotate.get()) RotationUtils.packetRotate(mc.player.yaw, -90);
                 if (slot != 1 && slot < 9) {
                     PlayerUtils.placeBlock(mc.player.getBlockPos().add(0, i - 2, 0), slot, InvUtils.getHand(Items.OBSIDIAN));
                 } else if (mc.player.getOffHandStack().getItem() == Items.OBSIDIAN){
