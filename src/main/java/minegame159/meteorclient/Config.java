@@ -18,7 +18,7 @@ import java.io.File;
 public class Config extends Savable<Config> {
     public static Config INSTANCE;
 
-    public final Version version = new Version("0.3.8");
+    public final Version version = new Version("0.3.9");
     public String devBuild;
     private String prefix = ".";
     public GuiConfig guiConfig = new GuiConfig();
