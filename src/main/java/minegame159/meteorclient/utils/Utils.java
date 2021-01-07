@@ -29,7 +29,6 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.registry.Registry;
 import org.apache.commons.io.output.ByteArrayOutputStream;
@@ -298,20 +297,6 @@ public class Utils {
         }
 
         return new byte[0];
-    }
-
-    public static float getNeededYaw(Vec3d vec) {
-        return mc.player.yaw + MathHelper.wrapDegrees((float) Math.toDegrees(Math.atan2(vec.z - mc.player.getZ(), vec.x - mc.player.getX())) - 90f - mc.player.yaw);
-    }
-
-    public static float getNeededPitch(Vec3d vec) {
-        double diffX = vec.x - mc.player.getX();
-        double diffY = vec.y - (mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()));
-        double diffZ = vec.z - mc.player.getZ();
-
-        double diffXZ = Math.sqrt(diffX * diffX + diffZ * diffZ);
-
-        return mc.player.pitch + MathHelper.wrapDegrees((float) -Math.toDegrees(Math.atan2(diffY, diffXZ)) - mc.player.pitch);
     }
 
     public static double distanceToCamera(double x, double y, double z) {
