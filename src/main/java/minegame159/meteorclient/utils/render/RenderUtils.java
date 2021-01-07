@@ -34,32 +34,40 @@ public class RenderUtils {
         Feet
     }
 
+    public static Vec3d getCameraVector() {
+        return new Vec3d(0.0, 0.0, 75)
+                .rotateX(-(float) Math.toRadians(mc.cameraEntity.pitch))
+                .rotateY(-(float) Math.toRadians(mc.cameraEntity.yaw))
+                .add(mc.cameraEntity.getPos())
+                .add(0, mc.cameraEntity.getEyeHeight(mc.cameraEntity.getPose()), 0)
+                ;
+    }
+
 
     public static void drawTracerToEntity(RenderEvent event, Entity entity, Color color, TracerTarget target, boolean stem) {
         double x = entity.prevX + (entity.getX() - entity.prevX) * event.tickDelta;
         double y = entity.prevY + (entity.getY() - entity.prevY) * event.tickDelta;
         double z = entity.prevZ + (entity.getZ() - entity.prevZ) * event.tickDelta;
 
-        Vec3d vec1 = new Vec3d(0, 0, 1)
-                .rotateX(-(float) Math.toRadians(mc.gameRenderer.getCamera().getPitch()))
-                .rotateY(-(float) Math.toRadians(mc.gameRenderer.getCamera().getYaw()))
-                .add(mc.gameRenderer.getCamera().getPos());
 
         double height = entity.getBoundingBox().maxY - entity.getBoundingBox().minY;
         if (target == TracerTarget.Head) y += height;
         else if (target == TracerTarget.Body) y += height / 2;
 
-        Renderer.LINES.line(vec1.x - (mc.gameRenderer.getCamera().getPos().x - event.offsetX), vec1.y - (mc.gameRenderer.getCamera().getPos().y - event.offsetY), vec1.z - (mc.gameRenderer.getCamera().getPos().z - event.offsetZ), x, y, z, color);
+        drawLine(getCameraVector(), x, y, z, color, event);
         if (stem) Renderer.LINES.line(x, entity.getY(), z, x, entity.getY() + height, z, color);
     }
 
     public static void drawTracerToPos(BlockPos pos, Color color, RenderEvent event) {
-        Vec3d vec1 = new Vec3d(0, 0, 1)
-                .rotateX(-(float) Math.toRadians(mc.gameRenderer.getCamera().getPitch()))
-                .rotateY(-(float) Math.toRadians(mc.gameRenderer.getCamera().getYaw()))
-                .add(mc.gameRenderer.getCamera().getPos());
+        drawLine(getCameraVector(), pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5f, color, event);
+    }
 
-        Renderer.LINES.line(vec1.x - (mc.gameRenderer.getCamera().getPos().x - event.offsetX), vec1.y - (mc.gameRenderer.getCamera().getPos().y - event.offsetY), vec1.z - (mc.gameRenderer.getCamera().getPos().z - event.offsetZ), pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5f, color);
+    public static void drawLine(Vec3d vec, double x2, double y2, double z2, Color color, RenderEvent event) {
+        Renderer.LINES.line(
+                vec.x - (mc.gameRenderer.getCamera().getPos().x - event.offsetX),
+                vec.y - (mc.gameRenderer.getCamera().getPos().y - event.offsetY),
+                vec.z - (mc.gameRenderer.getCamera().getPos().z - event.offsetZ),
+                x2, y2, z2, color);
     }
 
     public static void drawTracerToBlockEntity(BlockEntity blockEntity, Color color, RenderEvent event) {
