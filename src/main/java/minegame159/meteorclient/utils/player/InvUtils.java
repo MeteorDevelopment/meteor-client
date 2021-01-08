@@ -31,7 +31,7 @@ public class InvUtils implements Listenable {
 
     private static final FindItemResult findItemResult = new FindItemResult();
     private static final Deque<Pair<Class<? extends Module>, List<Integer>>> moveQueue = new ArrayDeque<>();
-    private static final Queue<Integer> currentQueue = new PriorityQueue<>();
+    private static final Queue<Integer> currentQueue = new LinkedList<>();
     private static Class<? extends Module> currentModule;
     private static final Map<Class<? extends Module>, Integer> cooldown = new ConcurrentHashMap<>();
 
@@ -116,7 +116,7 @@ public class InvUtils implements Listenable {
             currentQueue.addAll(pair.getRight());
             currentModule = pair.getLeft();
         } else if (!currentQueue.isEmpty()) {
-            currentQueue.forEach(slot -> clickSlot(invIndexToSlotId(slot), 0, SlotActionType.PICKUP));
+            currentQueue.forEach(slot -> clickSlot(slot, 0, SlotActionType.PICKUP));
             currentQueue.clear();
         }
     });
@@ -124,7 +124,7 @@ public class InvUtils implements Listenable {
     public static void addSlots(List<Integer> slots, Class<? extends Module> klass){
         Collections.reverse(slots);
         if (cooldown.containsKey(klass))return;
-        if (canMove(klass)){
+        if (!moveQueue.isEmpty() && canMove(klass)){
             moveQueue.addFirst(new Pair<>(klass, slots));
             currentModule = klass;
         } else {
@@ -134,7 +134,7 @@ public class InvUtils implements Listenable {
     }
 
     public static boolean canMove(Class<? extends Module> klass){
-        return getPrio(currentModule) < getPrio(klass);
+        return getPrio(moveQueue.peek().getLeft()) < getPrio(klass);
     }
 
     private static int getPrio(Class<? extends Module> klass){

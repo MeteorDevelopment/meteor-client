@@ -234,9 +234,10 @@ public class AutoArmor extends Module {
             }
             if (bestSlot > -1) {
                 List<Integer> slots = new ArrayList<>();
-                slots.add(bestSlot);
+                slots.add(InvUtils.invIndexToSlotId(bestSlot));
+                //Work out what slot ID is needed for this to work properly.
                 slots.add(8 - a);
-                slots.add(bestSlot);
+                slots.add(InvUtils.invIndexToSlotId(bestSlot));
                 InvUtils.addSlots(slots, this.getClass());
                 if (pause.get()) break;
             }
