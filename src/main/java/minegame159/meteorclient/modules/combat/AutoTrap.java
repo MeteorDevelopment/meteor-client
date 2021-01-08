@@ -140,9 +140,13 @@ public class AutoTrap extends Module {
             return;
         }
 
-        if (slot == -1) return;
+        if (slot == -1) {
+            placePositions.clear();
+            return;
+        }
 
         if (target == null || mc.player.distanceTo(target) > range.get()) {
+            placePositions.clear();
             target = findTarget();
             placed = false;
             return;
