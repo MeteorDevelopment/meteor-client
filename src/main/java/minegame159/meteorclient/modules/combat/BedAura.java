@@ -29,7 +29,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BedItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
@@ -37,11 +36,10 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 
-import java.util.ConcurrentModificationException;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
+@InvUtils.Priority(priority = 0)
 public class BedAura extends Module {
     public enum Mode{
         Safe,
@@ -255,9 +253,11 @@ public class BedAura extends Module {
                                 slot = i;
                             }
                         }
-                        InvUtils.clickSlot(InvUtils.invIndexToSlotId(autoMoveSlot.get()), 0, SlotActionType.PICKUP);
-                        InvUtils.clickSlot(InvUtils.invIndexToSlotId(slot), 0, SlotActionType.PICKUP);
-                        InvUtils.clickSlot(InvUtils.invIndexToSlotId(autoMoveSlot.get()), 0, SlotActionType.PICKUP);
+                        List<Integer> slots = new ArrayList<>();
+                        slots.add(autoMoveSlot.get());
+                        slots.add(slot);
+                        slots.add(autoMoveSlot.get());
+                        InvUtils.addSlots(slots, this.getClass());
                     }
                 }
                 if (autoSwitch.get()){

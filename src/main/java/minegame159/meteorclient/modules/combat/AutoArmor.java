@@ -11,8 +11,8 @@ import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.player.ChestSwap;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.player.DamageCalcUtils;
@@ -28,7 +28,6 @@ import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
@@ -36,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+@InvUtils.Priority(priority = Integer.MAX_VALUE - 1)
 public class AutoArmor extends Module {
     public enum Prot{
         Protection(Enchantments.PROTECTION),
@@ -233,9 +233,11 @@ public class AutoArmor extends Module {
                 }
             }
             if (bestSlot > -1) {
-                InvUtils.clickSlot(InvUtils.invIndexToSlotId(bestSlot), 0, SlotActionType.PICKUP);
-                InvUtils.clickSlot(8 - a, 0, SlotActionType.PICKUP);
-                InvUtils.clickSlot(InvUtils.invIndexToSlotId(bestSlot), 0, SlotActionType.PICKUP);
+                List<Integer> slots = new ArrayList<>();
+                slots.add(bestSlot);
+                slots.add(8 - a);
+                slots.add(bestSlot);
+                InvUtils.addSlots(slots, this.getClass());
                 if (pause.get()) break;
             }
             mode.set(preMode);
