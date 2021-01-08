@@ -52,6 +52,11 @@ public class CrystalAura extends Module {
         MostDamage,
         HighestXDamages
     }
+    public enum RotationMode{
+        None,
+        Face_Crystal,
+        Return
+    }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgPlace = settings.createGroup("Place");
@@ -300,6 +305,13 @@ public class CrystalAura extends Module {
             .name("no-swing")
             .description("Stops your hand from swinging.")
             .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<RotationMode> rotationMode = sgGeneral.add(new EnumSetting.Builder<RotationMode>()
+            .name("rotation-mode")
+            .description("How to rotate your player server side when you place a crystal")
+            .defaultValue(RotationMode.Face_Crystal)
             .build()
     );
 
@@ -683,12 +695,10 @@ public class CrystalAura extends Module {
         }
         float yaw = mc.player.yaw;
         float pitch = mc.player.pitch;
-        RotationUtils.packetRotate(block.add(0.5, 1.5, 0.5));
+        if (rotationMode.get() == RotationMode.Face_Crystal || rotationMode.get() == RotationMode.Return) RotationUtils.packetRotate(block.add(0.5, 1.5, 0.5));
         mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(mc.player.getPos(), Direction.UP, new BlockPos(block), false));
         if (!noSwing.get()) mc.player.swingHand(hand);
-        RotationUtils.packetRotate(yaw, pitch);
-        mc.player.yaw = yaw;
-        mc.player.pitch = pitch;
+        if (rotationMode.get() == RotationMode.Return)RotationUtils.packetRotate(yaw, pitch);
 
         if (render.get()) {
             RenderBlock renderBlock = renderBlockPool.get();
