@@ -254,9 +254,9 @@ public class BedAura extends Module {
                             }
                         }
                         List<Integer> slots = new ArrayList<>();
-                        slots.add(autoMoveSlot.get());
-                        slots.add(slot);
-                        slots.add(autoMoveSlot.get());
+                        slots.add(InvUtils.invIndexToSlotId(autoMoveSlot.get()));
+                        slots.add(InvUtils.invIndexToSlotId(slot));
+                        slots.add(InvUtils.invIndexToSlotId(autoMoveSlot.get()));
                         InvUtils.addSlots(slots, this.getClass());
                     }
                 }
