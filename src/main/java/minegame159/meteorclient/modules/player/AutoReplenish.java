@@ -23,11 +23,11 @@ import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.screen.slot.SlotActionType;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@InvUtils.Priority(priority = 1)
 public class AutoReplenish extends Module {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -215,9 +215,11 @@ public class AutoReplenish extends Module {
     });
 
     private void moveItems(int from, int to, boolean stackable) {
-        InvUtils.clickSlot(InvUtils.invIndexToSlotId(from), 0, SlotActionType.PICKUP);
-        InvUtils.clickSlot(InvUtils.invIndexToSlotId(to), 0, SlotActionType.PICKUP);
-        if (stackable) InvUtils.clickSlot(InvUtils.invIndexToSlotId(from), 0, SlotActionType.PICKUP);
+        List<Integer> slots = new ArrayList<>();
+        slots.add(from);
+        slots.add(to);
+        if (stackable) slots.add(from);
+        InvUtils.addSlots(slots, this.getClass());
     }
 
     private int findSlot(Item item, int excludeSlot) {

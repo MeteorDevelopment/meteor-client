@@ -18,8 +18,11 @@ import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
-import net.minecraft.screen.slot.SlotActionType;
 
+import java.util.ArrayList;
+import java.util.List;
+
+@InvUtils.Priority(priority = 0)
 public class ChestSwap extends Module {
     public enum Chestplate {
         Diamond,
@@ -131,9 +134,11 @@ public class ChestSwap extends Module {
         int chestSlot = 8 - 2;
         slot = InvUtils.invIndexToSlotId(slot);
 
-        InvUtils.clickSlot(slot, 0, SlotActionType.PICKUP);
-        InvUtils.clickSlot(chestSlot, 0, SlotActionType.PICKUP);
-        InvUtils.clickSlot(slot, 0, SlotActionType.PICKUP);
+        List<Integer> slots = new ArrayList<>();
+        slots.add(slot);
+        slots.add(chestSlot);
+        slots.add(slot);
+        InvUtils.addSlots(slots, this.getClass());
     }
 
     @Override
