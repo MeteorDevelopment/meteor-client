@@ -1,4 +1,4 @@
-package minegame159.meteorclient.commands.commands;
+package minegame159.meteorclient.commands.commands.swarm;
 
 import baritone.api.BaritoneAPI;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -12,7 +12,7 @@ import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 public class SwarmCloseConnections extends Command {
 
     public SwarmCloseConnections(){
-        super("s","(highlight)close(default) - Close all network connections and cancel all tasks.");
+        super("swarm","(highlight)close(default) - Close all network connections and cancel all tasks.");
     }
 
     @Override
