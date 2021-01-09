@@ -11,6 +11,7 @@ import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.packets.SendPacketEvent;
 import minegame159.meteorclient.events.world.PreTickEvent;
+import minegame159.meteorclient.mixininterface.IPlayerMoveC2SPacket;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.ModuleManager;
@@ -99,8 +100,15 @@ public class Criticals extends Module {
         double y = mc.player.getY();
         double z = mc.player.getZ();
 
-        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(x, y + 0.0625, z, false));
-        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(x, y, z, false));
+        PlayerMoveC2SPacket p1 = new PlayerMoveC2SPacket.PositionOnly(x, y + 0.0625, z, false);
+        PlayerMoveC2SPacket p2 = new PlayerMoveC2SPacket.PositionOnly(x, y, z, false);
+
+        //Ignore IntelliJ, it's fucking stupid. This is valid.
+        ((IPlayerMoveC2SPacket) p1).setTag(1337);
+        ((IPlayerMoveC2SPacket) p2).setTag(1337);
+
+        mc.player.networkHandler.sendPacket(p1);
+        mc.player.networkHandler.sendPacket(p2);
 
         onEnd();
     }

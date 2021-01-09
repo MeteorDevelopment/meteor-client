@@ -78,7 +78,9 @@ public class NoFall extends Module {
                     }
                 }
             } else if (mode.get() == Mode.Packet){
-                ((IPlayerMoveC2SPacket) event.packet).setOnGround(true);
+                if(((IPlayerMoveC2SPacket) event.packet).getTag() != 1337) {
+                    ((IPlayerMoveC2SPacket) event.packet).setOnGround(true);
+                }
             } else if ((placeMode.get() == PlaceMode.BeforeDamage && mc.player.fallDistance > 2)
                     || (placeMode.get() == PlaceMode.BeforeDeath && ((mc.player.getHealth() + mc.player.getAbsorptionAmount()) < mc.player.fallDistance))){
                 int slot = -1;
