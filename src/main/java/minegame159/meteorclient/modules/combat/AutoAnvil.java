@@ -17,6 +17,7 @@ import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.entity.FakePlayerEntity;
 import minegame159.meteorclient.utils.player.Chat;
 import minegame159.meteorclient.utils.player.PlayerUtils;
+import minegame159.meteorclient.utils.player.RotationUtils;
 import net.minecraft.block.AbstractButtonBlock;
 import net.minecraft.block.AbstractPressurePlateBlock;
 import net.minecraft.block.AnvilBlock;
@@ -26,6 +27,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 
 // Created by Eureka
@@ -51,6 +53,14 @@ public class AutoAnvil extends Module {
             .sliderMax(10)
             .build()
     );
+
+    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
+            .name("rotate")
+            .description("Automatically rotates to the position before placing anvils.")
+            .defaultValue(true)
+            .build()
+    );
+
 
     private final Setting<Boolean> placeButton = sgGeneral.add(new BoolSetting.Builder()
             .name("place-at-feet")
@@ -138,7 +148,11 @@ public class AutoAnvil extends Module {
 
             mc.player.inventory.selectedSlot = getAnvilSlot();
 
-            PlayerUtils.placeBlock(target.getBlockPos().up().add(0, height.get(), 0), Hand.MAIN_HAND);
+            BlockPos placePos = target.getBlockPos().up().add(0, height.get(), 0);
+
+            if (rotate.get()) RotationUtils.packetRotate(placePos);
+
+            PlayerUtils.placeBlock(placePos, Hand.MAIN_HAND);
 
             mc.player.inventory.selectedSlot = prevSlot;
         } else timer++;
