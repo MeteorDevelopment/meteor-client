@@ -16,10 +16,7 @@ import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.entity.FakePlayerEntity;
 import minegame159.meteorclient.utils.player.Chat;
 import minegame159.meteorclient.utils.player.PlayerUtils;
-import net.minecraft.block.AbstractButtonBlock;
-import net.minecraft.block.AnvilBlock;
-import net.minecraft.block.Block;
-import net.minecraft.block.PressurePlateBlock;
+import net.minecraft.block.*;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
@@ -139,7 +136,7 @@ public class AutoAnvil extends Module {
             Item item = mc.player.inventory.getStack(i).getItem();
             Block block = Block.getBlockFromItem(item);
 
-            if (block instanceof PressurePlateBlock || block instanceof AbstractButtonBlock || item == Items.HEAVY_WEIGHTED_PRESSURE_PLATE || item == Items.LIGHT_WEIGHTED_PRESSURE_PLATE) {
+            if (block instanceof AbstractPressurePlateBlock || block instanceof AbstractButtonBlock) {
                 buttonSlot = i;
                 break;
             }
