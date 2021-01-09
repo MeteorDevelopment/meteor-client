@@ -1,4 +1,4 @@
-package minegame159.meteorclient.commands.commands;
+package minegame159.meteorclient.commands.commands.swarm;
 
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -15,7 +15,7 @@ import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 public class SwarmInfinityMiner extends Command {
 
     public SwarmInfinityMiner() {
-        super("s", "(highlight)im <?TargetBlock> <?RepairBlock>(default) - Start Infinity Miner.");
+        super("swarm", "(highlight)im <?TargetBlock> <?RepairBlock>(default) - Start Infinity Miner.");
     }
 
     public void runInfinityMiner() {

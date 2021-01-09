@@ -1,4 +1,4 @@
-package minegame159.meteorclient.commands.commands;
+package minegame159.meteorclient.commands.commands.swarm;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import minegame159.meteorclient.commands.Command;
@@ -11,7 +11,7 @@ import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 public class SwarmRelease extends Command {
 
     public SwarmRelease() {
-        super("s", "(highlight)release(default) - Release your bots.");
+        super("swarm", "(highlight)release(default) - Release your bots.");
     }
 
     @Override

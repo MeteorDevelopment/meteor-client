@@ -1,4 +1,4 @@
-package minegame159.meteorclient.commands.commands;
+package minegame159.meteorclient.commands.commands.swarm;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import minegame159.meteorclient.commands.Command;
@@ -14,7 +14,7 @@ import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 public class SwarmMine extends Command {
 
     public SwarmMine() {
-        super("s", "(highlight)mine <playername>(default) - Baritone Mine A Block");
+        super("swarm", "(highlight)mine <playername>(default) - Baritone Mine A Block");
     }
 
     @Override

@@ -1,4 +1,4 @@
-package minegame159.meteorclient.commands.commands;
+package minegame159.meteorclient.commands.commands.swarm;
 
 import baritone.api.BaritoneAPI;
 import baritone.api.pathing.goals.GoalXZ;
@@ -14,7 +14,7 @@ import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 public class SwarmGoto extends Command {
 
     public SwarmGoto() {
-        super("s", "(highlight)goto <x> <z>(default) - Path to a destination.");
+        super("swarm", "(highlight)goto <x> <z>(default) - Path to a destination.");
     }
 
     public void build(LiteralArgumentBuilder<CommandSource> builder) {

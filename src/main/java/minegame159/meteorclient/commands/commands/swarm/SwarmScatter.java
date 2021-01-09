@@ -1,4 +1,4 @@
-package minegame159.meteorclient.commands.commands;
+package minegame159.meteorclient.commands.commands.swarm;
 
 import baritone.api.BaritoneAPI;
 import baritone.api.pathing.goals.GoalXZ;
@@ -7,7 +7,6 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import minegame159.meteorclient.commands.Command;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.combat.Swarm;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.CommandSource;
 
 import java.util.Random;
@@ -17,7 +16,7 @@ import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 public class SwarmScatter extends Command {
 
     public SwarmScatter(){
-        super("s","(highlight)scatter - Send them running.");
+        super("swarm","(highlight)scatter - Send them running.");
     }
 
 
@@ -26,7 +25,6 @@ public class SwarmScatter extends Command {
     }
 
     public void scatter(int radius){
-        MinecraftClient mc = MinecraftClient.getInstance();
         if(mc.player != null) {
             Random random = new Random();
             double a = random.nextDouble() * 2 * Math.PI;
