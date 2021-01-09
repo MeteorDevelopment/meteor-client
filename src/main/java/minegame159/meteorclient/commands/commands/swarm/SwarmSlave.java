@@ -1,4 +1,4 @@
-package minegame159.meteorclient.commands.commands;
+package minegame159.meteorclient.commands.commands.swarm;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import minegame159.meteorclient.commands.Command;
@@ -8,20 +8,20 @@ import net.minecraft.command.CommandSource;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
-public class SwarmQueen extends Command {
+public class SwarmSlave extends Command {
 
-    public SwarmQueen() {
-        super("s", "(highlight)queen (default)- Start a new swarm as the queen.");
+    public SwarmSlave() {
+        super("swarm", "(highlight)slave (default)- Slave this account to the Queen.");
     }
 
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
-        builder.then(literal("queen").executes(context -> {
+        builder.then(literal("slave").executes(context -> {
                     Swarm swarm = ModuleManager.INSTANCE.get(Swarm.class);
                     if (swarm.isActive()) {
-                        if (swarm.server == null)
-                            swarm.runServer();
+                        if (swarm.client == null)
+                            swarm.runClient();
                     }
                     return SINGLE_SUCCESS;
                 })

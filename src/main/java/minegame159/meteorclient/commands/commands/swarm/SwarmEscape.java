@@ -1,4 +1,4 @@
-package minegame159.meteorclient.commands.commands;
+package minegame159.meteorclient.commands.commands.swarm;
 
 import baritone.api.BaritoneAPI;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -13,7 +13,7 @@ import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 public class SwarmEscape extends Command {
 
     public SwarmEscape() {
-        super("s", "(highlight)escape(default)- Removes this player from the active swarm.");
+        super("swarm", "(highlight)escape(default)- Removes this player from the active swarm.");
     }
 
     @Override

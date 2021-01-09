@@ -1,4 +1,4 @@
-package minegame159.meteorclient.commands.commands;
+package minegame159.meteorclient.commands.commands.swarm;
 
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -14,7 +14,7 @@ import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 public class SwarmModuleToggle extends Command {
 
     public SwarmModuleToggle() {
-        super("s", "(highlight)module <module> <true/false>(default) - Toggle a module on or off.");
+        super("swarm", "(highlight)module <module> <true/false>(default) - Toggle a module on or off.");
     }
 
 
@@ -25,7 +25,7 @@ public class SwarmModuleToggle extends Command {
             if (swarm.currentMode == Swarm.Mode.Queen && swarm.server != null) {
                 swarm.server.sendMessage(context.getInput());
             } else {
-                Module module = (Module) context.getArgument("m", Module.class);
+                Module module = context.getArgument("m", Module.class);
                 if (module.isActive() != context.getArgument("bool", Boolean.class)) {
                     module.toggle();
                 }

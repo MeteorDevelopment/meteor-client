@@ -1,4 +1,4 @@
-package minegame159.meteorclient.commands.commands;
+package minegame159.meteorclient.commands.commands.swarm;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import minegame159.meteorclient.commands.Command;
@@ -11,7 +11,7 @@ import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 public class SwarmStop extends Command {
 
     public SwarmStop() {
-        super("s","(highlight)stop(default) Stop all current tasks.");
+        super("swarm","(highlight)stop(default) Stop all current tasks.");
     }
 
     @Override
