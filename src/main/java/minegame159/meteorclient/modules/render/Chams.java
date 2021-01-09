@@ -43,7 +43,7 @@ public class Chams extends Module {
     private final Setting<Boolean> colored = sgGeneral.add(new BoolSetting.Builder()
             .name("colored")
             .description("Renders entity models with a custom color.")
-            .defaultValue(true)
+            .defaultValue(false)
             .build()
     );
 
