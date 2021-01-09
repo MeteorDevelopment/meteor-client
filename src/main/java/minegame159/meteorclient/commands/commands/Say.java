@@ -10,7 +10,6 @@ package minegame159.meteorclient.commands.commands;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import minegame159.meteorclient.commands.Command;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.CommandSource;
 import net.minecraft.network.packet.c2s.play.ChatMessageC2SPacket;
 
@@ -25,7 +24,7 @@ public class Say extends Command {
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.then(argument("message", StringArgumentType.greedyString()).executes(context -> {
-            MinecraftClient.getInstance().getNetworkHandler().sendPacket(new ChatMessageC2SPacket(context.getArgument("message", String.class)));
+            mc.getNetworkHandler().sendPacket(new ChatMessageC2SPacket(context.getArgument("message", String.class)));
             return SINGLE_SUCCESS;
         }));
     }

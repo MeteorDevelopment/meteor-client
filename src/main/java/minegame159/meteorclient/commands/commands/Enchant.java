@@ -11,7 +11,6 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import minegame159.meteorclient.commands.Command;
 import minegame159.meteorclient.utils.Utils;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.CommandSource;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.ItemStack;
@@ -26,8 +25,6 @@ public class Enchant extends Command {
     public Enchant() {
         super("enchant", "Enchants the item in your main hand with almost every enchant. REQUIRES Creative mode.");
     }
-
-    private final MinecraftClient mc = MinecraftClient.getInstance();
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
