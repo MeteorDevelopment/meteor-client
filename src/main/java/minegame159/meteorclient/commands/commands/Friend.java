@@ -23,7 +23,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
-import static minegame159.meteorclient.utils.Utils.mc;
 import static net.minecraft.command.CommandSource.suggestMatching;
 
 public class Friend extends Command {

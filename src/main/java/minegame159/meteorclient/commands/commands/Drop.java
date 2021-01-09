@@ -67,7 +67,7 @@ public class Drop extends Command {
     }
 
     private int drop(PlayerConsumer consumer) throws CommandSyntaxException {
-        ClientPlayerEntity player = MC.player;
+        ClientPlayerEntity player = mc.player;
         assert player != null;
 
         if (player.isSpectator()) throw NOT_SPECTATOR.create();
