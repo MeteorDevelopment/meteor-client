@@ -10,35 +10,10 @@ public class FreeRotate extends Module {
         super(Category.Render, "free-rotate", "Allows you to freely rotate your camera in third person.");
     }
 
-    private float cameraYaw;
-    private float cameraPitch;
-
-    @Override
-    public void onDeactivate() {
-        cameraPitch = mc.player.pitch;
-        cameraYaw = mc.player.yaw;
-    }
-
-    @Override
-    public void onActivate() {
-        cameraPitch = mc.player.pitch;
-        cameraYaw = mc.player.yaw;
-    }
+    public float cameraYaw;
+    public float cameraPitch;
 
     public boolean shouldRotate() {
-        return isActive() && mc.options.getPerspective() != Perspective.FIRST_PERSON;
-    }
-
-    public void setRotation(float yaw, float pitch) {
-        cameraYaw = yaw;
-        cameraPitch = pitch;
-    }
-
-    public float getYaw() {
-        return cameraYaw;
-    }
-
-    public float getPitch() {
-        return cameraPitch;
+        return isActive() && mc.options.getPerspective() == Perspective.THIRD_PERSON_BACK;
     }
 }

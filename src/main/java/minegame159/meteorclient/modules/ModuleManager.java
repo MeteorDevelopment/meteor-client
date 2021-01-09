@@ -405,6 +405,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new ShulkerPeek());
         addModule(new ParticleBlocker());
         addModule(new UnfocusedCPU());
+        addModule(new FreeRotate());
     }
 
     private void initMisc() {
