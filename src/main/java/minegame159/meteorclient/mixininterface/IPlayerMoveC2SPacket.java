@@ -10,4 +10,6 @@ public interface IPlayerMoveC2SPacket {
     void setOnGround(boolean onGround);
     void setYaw(float yaw);
     void setPitch(float pitch);
+    int getTag();
+    void setTag(int tag);
 }
