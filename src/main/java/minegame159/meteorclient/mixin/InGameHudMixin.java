@@ -10,7 +10,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.modules.render.BetterCrosshair;
 import minegame159.meteorclient.modules.render.NoRender;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.hud.InGameHud;
