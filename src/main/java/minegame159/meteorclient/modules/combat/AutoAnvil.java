@@ -16,6 +16,10 @@ import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.entity.FakePlayerEntity;
 import minegame159.meteorclient.utils.player.Chat;
 import minegame159.meteorclient.utils.player.PlayerUtils;
+import net.minecraft.block.AbstractButtonBlock;
+import net.minecraft.block.AnvilBlock;
+import net.minecraft.block.Block;
+import net.minecraft.block.PressurePlateBlock;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
@@ -63,11 +67,26 @@ public class AutoAnvil extends Module {
             .build()
     );
 
+    private final Setting<Integer> tickDelay = sgGeneral.add(new IntSetting.Builder()
+            .name("tick-delay")
+            .description("The tick delay in between anvil placement.")
+            .min(0)
+            .defaultValue(0)
+            .max(10)
+            .build()
+    );
+
     public AutoAnvil() {
         super(Category.Combat, "auto-anvil", "Automatically places anvils above players to destroy helmets.");
     }
 
     private PlayerEntity target = null;
+    private int tickDelayLeft = tickDelay.get();
+
+    @Override
+    public void onActivate() {
+        tickDelayLeft = tickDelay.get();
+    }
 
     @Override
     public void onDeactivate() {
@@ -106,8 +125,9 @@ public class AutoAnvil extends Module {
         int anvilSlot = -1;
         for (int i = 0; i < 9; i++) {
             Item item = mc.player.inventory.getStack(i).getItem();
+            Block block = Block.getBlockFromItem(item);
 
-            if (item == Items.ANVIL || item == Items.CHIPPED_ANVIL || item == Items.DAMAGED_ANVIL) {
+            if (block instanceof AnvilBlock) {
                 anvilSlot = i;
                 break;
             }
@@ -117,34 +137,37 @@ public class AutoAnvil extends Module {
         int buttonSlot = -1;
         for (int i = 0; i < 9; i++) {
             Item item = mc.player.inventory.getStack(i).getItem();
+            Block block = Block.getBlockFromItem(item);
 
-            if (item == Items.ACACIA_BUTTON || item == Items.OAK_BUTTON || item == Items.STONE_BUTTON || item == Items.SPRUCE_BUTTON || item == Items.BIRCH_BUTTON || item == Items.JUNGLE_BUTTON || item == Items.DARK_OAK_BUTTON || item == Items.CRIMSON_BUTTON || item == Items.WARPED_BUTTON || item == Items.POLISHED_BLACKSTONE_BUTTON) {
+            if (block instanceof PressurePlateBlock || block instanceof AbstractButtonBlock || item == Items.HEAVY_WEIGHTED_PRESSURE_PLATE || item == Items.LIGHT_WEIGHTED_PRESSURE_PLATE) {
                 buttonSlot = i;
                 break;
             }
         }
         if (buttonSlot == -1) return;
 
+        if (tickDelayLeft <= 0) {
+            tickDelayLeft = tickDelay.get();
+            if (target != null) {
+                int prevSlot = mc.player.inventory.selectedSlot;
 
-
-        if (target != null) {
-            int prevSlot = mc.player.inventory.selectedSlot;
-
-            if (placeButton.get()) {
-                mc.player.inventory.selectedSlot = buttonSlot;
-                BlockPos targetPos = target.getBlockPos();
-                if (mc.world.getBlockState(targetPos.add(0, 0, 0)).isAir()) {
-                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.DOWN, target.getBlockPos(), true));
-                    mc.player.swingHand(Hand.MAIN_HAND);
+                if (placeButton.get()) {
+                    mc.player.inventory.selectedSlot = buttonSlot;
+                    BlockPos targetPos = target.getBlockPos();
+                    if (mc.world.getBlockState(targetPos.add(0, 0, 0)).isAir()) {
+                        mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.DOWN, target.getBlockPos(), true));
+                        mc.player.swingHand(Hand.MAIN_HAND);
+                    }
                 }
+
+                mc.player.inventory.selectedSlot = anvilSlot;
+                BlockPos targetPos = target.getBlockPos().up();
+
+                PlayerUtils.placeBlock(targetPos.add(0, height.get(), 0), Hand.MAIN_HAND);
+
+                mc.player.inventory.selectedSlot = prevSlot;
             }
-
-            mc.player.inventory.selectedSlot = anvilSlot;
-            BlockPos targetPos = target.getBlockPos().up();
-
-            PlayerUtils.placeBlock(targetPos.add(0, height.get(), 0), Hand.MAIN_HAND);
-
-            mc.player.inventory.selectedSlot = prevSlot;
         }
+        tickDelayLeft--;
     });
 }
