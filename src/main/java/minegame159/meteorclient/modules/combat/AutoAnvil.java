@@ -78,11 +78,11 @@ public class AutoAnvil extends Module {
     }
 
     private PlayerEntity target = null;
-    private int tickDelayLeft = tickDelay.get();
+    private int tickDelayLeft;
 
     @Override
     public void onActivate() {
-        tickDelayLeft = tickDelay.get();
+        tickDelayLeft = 0;
     }
 
     @Override
@@ -121,8 +121,7 @@ public class AutoAnvil extends Module {
 
         int anvilSlot = -1;
         for (int i = 0; i < 9; i++) {
-            Item item = mc.player.inventory.getStack(i).getItem();
-            Block block = Block.getBlockFromItem(item);
+            Block block = Block.getBlockFromItem(mc.player.inventory.getStack(i).getItem());
 
             if (block instanceof AnvilBlock) {
                 anvilSlot = i;
@@ -133,8 +132,7 @@ public class AutoAnvil extends Module {
 
         int buttonSlot = -1;
         for (int i = 0; i < 9; i++) {
-            Item item = mc.player.inventory.getStack(i).getItem();
-            Block block = Block.getBlockFromItem(item);
+            Block block = Block.getBlockFromItem(mc.player.inventory.getStack(i).getItem());
 
             if (block instanceof AbstractPressurePlateBlock || block instanceof AbstractButtonBlock) {
                 buttonSlot = i;
