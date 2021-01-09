@@ -54,7 +54,7 @@ public class CrystalAura extends Module {
     }
     public enum RotationMode{
         None,
-        Face_Crystal,
+        FaceCrystal,
         Return
     }
 
@@ -160,6 +160,13 @@ public class CrystalAura extends Module {
     private final Setting<Boolean> autoSwitch = sgGeneral.add(new BoolSetting.Builder()
             .name("auto-switch")
             .description("Automatically switches to crystals for you.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> switchBack = sgGeneral.add(new BoolSetting.Builder()
+            .name("switch-back")
+            .description("Will switch back to the previous item when disabling.")
             .defaultValue(false)
             .build()
     );
@@ -310,8 +317,8 @@ public class CrystalAura extends Module {
 
     private final Setting<RotationMode> rotationMode = sgGeneral.add(new EnumSetting.Builder<RotationMode>()
             .name("rotation-mode")
-            .description("How to rotate your player server side when you place a crystal")
-            .defaultValue(RotationMode.Face_Crystal)
+            .description("Mode to use for server-side rotations.")
+            .defaultValue(RotationMode.FaceCrystal)
             .build()
     );
 
@@ -389,7 +396,7 @@ public class CrystalAura extends Module {
     @Override
     public void onDeactivate() {
         assert mc.player != null;
-        if (preSlot != -1) mc.player.inventory.selectedSlot = preSlot;
+        if (preSlot != -1) if (switchBack.get()) mc.player.inventory.selectedSlot = preSlot;
         for (RenderBlock renderBlock : renderBlocks) {
             renderBlockPool.free(renderBlock);
         }
@@ -526,7 +533,7 @@ public class CrystalAura extends Module {
                 }
             }
             if (spoofChange.get() && preSlot != mc.player.inventory.selectedSlot && preSlot != -1)
-                mc.player.inventory.selectedSlot = preSlot;
+                if (switchBack.get()) mc.player.inventory.selectedSlot = preSlot;
         }
     }, EventPriority.HIGH);
 
@@ -695,10 +702,10 @@ public class CrystalAura extends Module {
         }
         float yaw = mc.player.yaw;
         float pitch = mc.player.pitch;
-        if (rotationMode.get() == RotationMode.Face_Crystal || rotationMode.get() == RotationMode.Return) RotationUtils.packetRotate(block.add(0.5, 1.5, 0.5));
+        if (rotationMode.get() == RotationMode.FaceCrystal || rotationMode.get() == RotationMode.Return) RotationUtils.packetRotate(block.add(0.5, 1.5, 0.5));
         mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(mc.player.getPos(), Direction.UP, new BlockPos(block), false));
         if (!noSwing.get()) mc.player.swingHand(hand);
-        if (rotationMode.get() == RotationMode.Return)RotationUtils.packetRotate(yaw, pitch);
+        if (rotationMode.get() == RotationMode.Return) RotationUtils.packetRotate(yaw, pitch);
 
         if (render.get()) {
             RenderBlock renderBlock = renderBlockPool.get();
