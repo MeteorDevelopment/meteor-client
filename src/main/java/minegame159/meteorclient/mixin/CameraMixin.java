@@ -6,8 +6,8 @@
 package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.modules.render.CameraClip;
 import minegame159.meteorclient.modules.render.FreeRotate;
+import minegame159.meteorclient.modules.render.CameraClip;
 import minegame159.meteorclient.modules.render.Freecam;
 import net.minecraft.client.render.Camera;
 import net.minecraft.entity.Entity;
@@ -54,11 +54,13 @@ public abstract class CameraMixin {
 
     @Inject(method = "update", at = @At(value = "INVOKE", target = "net/minecraft/client/render/Camera.moveBy(DDD)V", ordinal = 0))
     private void perspectiveUpdatePitchYaw(BlockView area, Entity focusedEntity, boolean thirdPerson, boolean inverseView, float tickDelta, CallbackInfo info) {
-        if (ModuleManager.INSTANCE.get(FreeRotate.class).shouldRotate()) ModuleManager.INSTANCE.get(FreeRotate.class).setRotation(yaw, pitch);
+        FreeRotate module = ModuleManager.INSTANCE.get(FreeRotate.class);
+
+        if (module.shouldRotate()) module.setRotation(yaw, pitch);
     }
 
     @ModifyArgs(method = "update", at = @At(value = "INVOKE", target = "net/minecraft/client/render/Camera.setRotation(FF)V", ordinal = 0))
-    private void fixRotation(Args args) {
+    private void perspectiveFixRotation(Args args) {
         FreeRotate module = ModuleManager.INSTANCE.get(FreeRotate.class);
 
         if (module.shouldRotate()) {
