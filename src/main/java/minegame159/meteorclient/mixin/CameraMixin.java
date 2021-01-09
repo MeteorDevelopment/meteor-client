@@ -54,19 +54,19 @@ public abstract class CameraMixin {
 
     @Inject(method = "update", at = @At(value = "INVOKE", target = "net/minecraft/client/render/Camera.moveBy(DDD)V", ordinal = 0))
     private void perspectiveUpdatePitchYaw(BlockView area, Entity focusedEntity, boolean thirdPerson, boolean inverseView, float tickDelta, CallbackInfo info) {
-        FreeRotate module = ModuleManager.INSTANCE.get(FreeRotate.class);
-        if (module.shouldRotate()) {
-            this.pitch = module.cameraPitch;
-            this.yaw = module.cameraYaw;
+        FreeRotate freeRotate = ModuleManager.INSTANCE.get(FreeRotate.class);
+        if (freeRotate.playerMode()) {
+            this.pitch = freeRotate.cameraPitch;
+            this.yaw = freeRotate.cameraYaw;
         }
     }
 
     @ModifyArgs(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/Camera;setRotation(FF)V", ordinal = 0))
     private void perspectiveFixRotation(Args args) {
-        FreeRotate module = ModuleManager.INSTANCE.get(FreeRotate.class);
-        if (module != null && module.shouldRotate()) {
-            args.set(0, module.cameraYaw);
-            args.set(1, module.cameraPitch);
+        FreeRotate freeRotate = ModuleManager.INSTANCE.get(FreeRotate.class);
+        if (freeRotate.isActive()) {
+            args.set(0, freeRotate.cameraYaw);
+            args.set(1, freeRotate.cameraPitch);
         }
     }
 }
