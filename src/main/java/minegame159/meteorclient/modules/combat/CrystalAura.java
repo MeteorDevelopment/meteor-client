@@ -44,144 +44,57 @@ import net.minecraft.world.RaycastContext;
 import java.util.*;
 
 public class CrystalAura extends Module {
-    public enum Mode{
+    public enum Mode {
         Safe,
         Suicide
     }
-    public enum TargetMode{
+
+    public enum TargetMode {
         MostDamage,
         HighestXDamages
     }
-    public enum RotationMode{
+
+    public enum RotationMode {
         None,
-        Face_Crystal,
+        FaceCrystal,
         Return
     }
 
-    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    public enum SwitchMode {
+        Auto,
+        Spoof,
+        None
+    }
+
     private final SettingGroup sgPlace = settings.createGroup("Place");
+    private final SettingGroup sgBreak = settings.createGroup("Break");
+    private final SettingGroup sgTarget = settings.createGroup("Target");
+    private final SettingGroup sgMisc = settings.createGroup("Misc");
     private final SettingGroup sgRender = settings.createGroup("Render");
 
-    private final Setting<Double> placeRange = sgGeneral.add(new DoubleSetting.Builder()
-            .name("place-range")
-            .description("The maximum range that crystals can be to be placed.")
-            .defaultValue(5)
-            .min(0)
-            .sliderMax(7)
-            .build()
-    );
+    //Placement
 
-    private final Setting<Double> breakRange = sgGeneral.add(new DoubleSetting.Builder()
-            .name("break-range")
-            .description("The maximum range that crystals can be to be broken.")
-            .defaultValue(5)
-            .min(0)
-            .sliderMax(7)
-            .build()
-    );
-
-    private final Setting<Double> targetRange = sgGeneral.add(new DoubleSetting.Builder()
-            .name("target-range")
-            .description("The maximum range the entity can be to be targetted.")
-            .defaultValue(7)
-            .min(0)
-            .sliderMax(10)
-            .build()
-    );
-
-    private final Setting<Mode> placeMode = sgGeneral.add(new EnumSetting.Builder<Mode>()
-            .name("place-mode")
-            .description("The type of placement mode for crystals.")
-            .defaultValue(Mode.Safe)
-            .build()
-    );
-
-    private final Setting<Mode> breakMode = sgGeneral.add(new EnumSetting.Builder<Mode>()
-            .name("break-mode")
-            .description("The type of break mode for crystals.")
-            .defaultValue(Mode.Safe)
-            .build()
-    );
-
-    private final Setting<Boolean> support = sgGeneral.add(new BoolSetting.Builder()
-            .name("support")
-            .description("Places a block in the air and crystals on it. Helps with killing players that are flying.")
-            .defaultValue(false)
-            .build()
-    );
-
-    private final Setting<Integer> supportDelay = sgGeneral.add(new IntSetting.Builder()
-            .name("support-delay")
-            .description("The delay between support blocks being placed.")
-            .defaultValue(5)
-            .min(0)
-            .sliderMax(10)
-            .build()
-    );
-
-    private final Setting<Boolean> supportBackup = sgGeneral.add(new BoolSetting.Builder()
-            .name("support-backup")
-            .description("Makes it so support only works if there are no other options.")
+    private final Setting<Boolean> place = sgPlace.add(new BoolSetting.Builder()
+            .name("place")
+            .description("Allows Crystal Aura to place crystals.")
             .defaultValue(true)
             .build()
     );
 
-    private final Setting<Boolean> multiTarget = sgGeneral.add(new BoolSetting.Builder()
-            .name("multi-targeting")
-            .description("Will calculate damage for all entities and pick a block based on target mode.")
-            .defaultValue(false)
+
+    private final Setting<Mode> placeMode = sgPlace.add(new EnumSetting.Builder<Mode>()
+            .name("place-mode")
+            .description("The placement mode for crystals.")
+            .defaultValue(Mode.Safe)
             .build()
     );
 
-    private final Setting<TargetMode> targetMode = sgGeneral.add(new EnumSetting.Builder<TargetMode>()
-            .name("target-mode")
-            .description("The way how to you do target multiple targets.")
-            .defaultValue(TargetMode.HighestXDamages)
-            .build()
-    );
-
-    private final Setting<Integer> numberOfDamages = sgGeneral.add(new IntSetting.Builder()
-            .name("number-of-damages")
-            .description("The number to replace 'x' with in HighestXDamages.")
-            .defaultValue(3)
-            .min(2)
-            .sliderMax(10)
-            .build()
-    );
-
-    private final Setting<List<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
-            .name("entities")
-            .description("The entities to attack.")
-            .defaultValue(getDefault())
-            .onlyAttackable()
-            .build()
-    );
-
-    private final Setting<Boolean> autoSwitch = sgGeneral.add(new BoolSetting.Builder()
-            .name("auto-switch")
-            .description("Automatically switches to crystals for you.")
-            .defaultValue(false)
-            .build()
-    );
-
-    private final Setting<Boolean> spoofChange = sgGeneral.add(new BoolSetting.Builder()
-            .name("spoof-change")
-            .description("Spoofs item change to crystal.")
-            .defaultValue(false)
-            .build()
-    );
-
-    private final Setting<Double> minDamage = sgPlace.add(new DoubleSetting.Builder()
-            .name("min-damage")
-            .description("The minimum damage the crystal will place.")
-            .defaultValue(5.5)
-            .build()
-    );
-
-    private final Setting<Double> maxDamage = sgPlace.add(new DoubleSetting.Builder()
-            .name("max-damage")
-            .description("The maximum self-damage allowed.")
-            .defaultValue(3)
+    private final Setting<Double> placeRange = sgPlace.add(new DoubleSetting.Builder()
+            .name("place-range")
+            .description("The maximum range that crystals can be placed.")
+            .defaultValue(4.5)
+            .min(0)
+            .sliderMax(7)
             .build()
     );
 
@@ -192,6 +105,13 @@ public class CrystalAura extends Module {
             .build()
     );
 
+    private final Setting<Boolean> ignoreWalls = sgPlace.add(new BoolSetting.Builder()
+            .name("ignore-walls")
+            .description("Whether or not to place through walls.")
+            .defaultValue(true)
+            .build()
+    );
+
     private final Setting<Double> minHealth = sgPlace.add(new DoubleSetting.Builder()
             .name("min-health")
             .description("The minimum health you have to be for it to place.")
@@ -199,30 +119,7 @@ public class CrystalAura extends Module {
             .build()
     );
 
-    private final Setting<Boolean> ignoreWalls = sgGeneral.add(new BoolSetting.Builder()
-            .name("ignore-walls")
-            .description("Whether or not to place through walls.")
-            .defaultValue(true)
-            .build()
-    );
-
-    private final Setting<Boolean> place = sgGeneral.add(new BoolSetting.Builder()
-            .name("place")
-            .description("Allows Crystal Aura to place crystals.")
-            .defaultValue(true)
-            .build()
-    );
-
-    private final Setting<Integer> breakDelay = sgGeneral.add(new IntSetting.Builder()
-            .name("break-delay")
-            .description("The amount of delay in ticks before breaking.")
-            .defaultValue(2)
-            .min(0)
-            .sliderMax(10)
-            .build()
-    );
-
-    private final Setting<Integer> placeDelay = sgGeneral.add(new IntSetting.Builder()
+    private final Setting<Integer> placeDelay = sgPlace.add(new IntSetting.Builder()
             .name("place-delay")
             .description("The amount of delay in ticks before placing.")
             .defaultValue(2)
@@ -231,44 +128,37 @@ public class CrystalAura extends Module {
             .build()
     );
 
-    private final Setting<Boolean> smartDelay = sgGeneral.add(new BoolSetting.Builder()
-            .name("smart-delay")
-            .description("Reduces crystal consumption when doing large amounts of damage. (Can tank performance on lower-end PCs)")
-            .defaultValue(true)
-            .build()
-    );
-
-    private final Setting<Boolean> surroundBreak = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> surroundBreak = sgPlace.add(new BoolSetting.Builder()
             .name("surround-break")
             .description("Places a crystal next to a surrounded player and keeps it there so they cannot use Surround again.")
-            .defaultValue(true)
+            .defaultValue(false)
             .build()
     );
 
-    private final Setting<Boolean> surroundHold = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> surroundHold = sgPlace.add(new BoolSetting.Builder()
             .name("surround-hold")
             .description("Places a crystal next to a player so they cannot use Surround.")
-            .defaultValue(true)
+            .defaultValue(false)
             .build()
     );
 
-    private final Setting<Boolean> facePlace = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> facePlace = sgPlace.add(new BoolSetting.Builder()
             .name("face-place")
             .description("Will face-place when target is below a certain health or armor durability threshold.")
             .defaultValue(true)
             .build()
     );
 
-    private final Setting<Double> facePlaceHealth = sgGeneral.add(new DoubleSetting.Builder()
+    private final Setting<Double> facePlaceHealth = sgPlace.add(new DoubleSetting.Builder()
             .name("face-place-health")
             .description("The health required to face-place.")
-            .defaultValue(5)
+            .defaultValue(8)
             .min(1)
-            .max(20)
+            .max(36)
             .build()
     );
 
-    private final Setting<Double> facePlaceDurability = sgGeneral.add(new DoubleSetting.Builder()
+    private final Setting<Double> facePlaceDurability = sgPlace.add(new DoubleSetting.Builder()
             .name("face-place-durability")
             .description("The durability threshold to be able to face-place.")
             .defaultValue(2)
@@ -278,14 +168,14 @@ public class CrystalAura extends Module {
             .build()
     );
 
-    private final Setting<Boolean> spamFacePlace = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> spamFacePlace = sgPlace.add(new BoolSetting.Builder()
             .name("spam-face-place")
             .description("Places faster when someone is below the face place health (Requires Smart Delay).")
             .defaultValue(false)
             .build()
     );
 
-    private final Setting<Double> healthDifference = sgGeneral.add(new DoubleSetting.Builder()
+    private final Setting<Double> healthDifference = sgPlace.add(new DoubleSetting.Builder()
             .name("damage-increase")
             .description("The damage increase for smart delay to work.")
             .defaultValue(5)
@@ -294,26 +184,149 @@ public class CrystalAura extends Module {
             .build()
     );
 
-    private final Setting<Boolean> antiWeakness = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> support = sgPlace.add(new BoolSetting.Builder()
+            .name("support")
+            .description("Places a block in the air and crystals on it. Helps with killing players that are flying.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Integer> supportDelay = sgPlace.add(new IntSetting.Builder()
+            .name("support-delay")
+            .description("The delay between support blocks being placed.")
+            .defaultValue(5)
+            .min(0)
+            .sliderMax(10)
+            .build()
+    );
+
+    private final Setting<Boolean> supportBackup = sgPlace.add(new BoolSetting.Builder()
+            .name("support-backup")
+            .description("Makes it so support only works if there are no other options.")
+            .defaultValue(true)
+            .build()
+    );
+
+    //Breaking
+
+    private final Setting<Mode> breakMode = sgBreak.add(new EnumSetting.Builder<Mode>()
+            .name("break-mode")
+            .description("The type of break mode for crystals.")
+            .defaultValue(Mode.Safe)
+            .build()
+    );
+
+    private final Setting<Double> breakRange = sgBreak.add(new DoubleSetting.Builder()
+            .name("break-range")
+            .description("The maximum range that crystals can be to be broken.")
+            .defaultValue(5)
+            .min(0)
+            .sliderMax(7)
+            .build()
+    );
+
+    private final Setting<Integer> breakDelay = sgBreak.add(new IntSetting.Builder()
+            .name("break-delay")
+            .description("The amount of delay in ticks before breaking.")
+            .defaultValue(1)
+            .min(0)
+            .sliderMax(10)
+            .build()
+    );
+
+    //Targetting
+
+    private final Setting<List<EntityType<?>>> entities = sgTarget.add(new EntityTypeListSetting.Builder()
+            .name("entities")
+            .description("The entities to attack.")
+            .defaultValue(getDefault())
+            .onlyAttackable()
+            .build()
+    );
+
+    private final Setting<Double> targetRange = sgTarget.add(new DoubleSetting.Builder()
+            .name("target-range")
+            .description("The maximum range the entity can be to be targetted.")
+            .defaultValue(7)
+            .min(0)
+            .sliderMax(10)
+            .build()
+    );
+
+    private final Setting<Boolean> multiTarget = sgTarget.add(new BoolSetting.Builder()
+            .name("multi-targeting")
+            .description("Will calculate damage for all entities and pick a block based on target mode.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<TargetMode> targetMode = sgTarget.add(new EnumSetting.Builder<TargetMode>()
+            .name("target-mode")
+            .description("The way how to you do target multiple targets.")
+            .defaultValue(TargetMode.HighestXDamages)
+            .build()
+    );
+
+    private final Setting<Integer> numberOfDamages = sgTarget.add(new IntSetting.Builder()
+            .name("number-of-damages")
+            .description("The number to replace 'x' with in HighestXDamages.")
+            .defaultValue(3)
+            .min(2)
+            .sliderMax(10)
+            .build()
+    );
+
+    //Misc
+
+    private final Setting<Double> minDamage = sgMisc.add(new DoubleSetting.Builder()
+            .name("min-damage")
+            .description("The minimum damage the crystal will place.")
+            .defaultValue(5.5)
+            .build()
+    );
+
+    private final Setting<Double> maxDamage = sgMisc.add(new DoubleSetting.Builder()
+            .name("max-damage")
+            .description("The maximum self-damage allowed.")
+            .defaultValue(3)
+            .build()
+    );
+
+    private final Setting<RotationMode> rotationMode = sgMisc.add(new EnumSetting.Builder<RotationMode>()
+            .name("rotation-mode")
+            .description("How to rotate your player server side when you place a crystal")
+            .defaultValue(RotationMode.FaceCrystal)
+            .build()
+    );
+
+    private final Setting<SwitchMode> switchMode = sgMisc.add(new EnumSetting.Builder<SwitchMode>()
+            .name("switch-mode")
+            .description("How to switch items.")
+            .defaultValue(SwitchMode.Auto)
+            .build()
+    );
+
+    private final Setting<Boolean> smartDelay = sgMisc.add(new BoolSetting.Builder()
+            .name("smart-delay")
+            .description("Reduces crystal consumption when doing large amounts of damage. (Can tank performance on lower-end PCs)")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> antiWeakness = sgMisc.add(new BoolSetting.Builder()
             .name("anti-weakness")
             .description("Switches to tools to break crystals instead of your fist.")
             .defaultValue(true)
             .build()
     );
 
-    private final Setting<Boolean> noSwing = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> noSwing = sgMisc.add(new BoolSetting.Builder()
             .name("no-swing")
             .description("Stops your hand from swinging.")
-            .defaultValue(false)
+            .defaultValue(true)
             .build()
     );
 
-    private final Setting<RotationMode> rotationMode = sgGeneral.add(new EnumSetting.Builder<RotationMode>()
-            .name("rotation-mode")
-            .description("How to rotate your player server side when you place a crystal")
-            .defaultValue(RotationMode.Face_Crystal)
-            .build()
-    );
 
     // Render
 
@@ -467,7 +480,7 @@ public class CrystalAura extends Module {
         }
 
         if (!smartDelay.get() && placeDelayLeft > 0 && ((!surroundHold.get() && (target != null && (!surroundBreak.get() || !isSurrounded(target)))) || heldCrystal != null) && (!spamFacePlace.get())) return;
-        if (!autoSwitch.get() && mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL) return;
+        if (switchMode.get() == SwitchMode.None && mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL) return;
         if (place.get()) {
             if (target == null) return;
             if (surroundHold.get() && heldCrystal == null){
@@ -513,7 +526,7 @@ public class CrystalAura extends Module {
                 }
             }
             if (bestBlock != null && ((bestDamage >= minDamage.get() && !locked) || shouldFacePlace)) {
-                if (autoSwitch.get()) doSwitch();
+                if (switchMode.get() != SwitchMode.None) doSwitch();
                 if (mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL) return;
                 if (!smartDelay.get()) {
                     placeDelayLeft = placeDelay.get();
@@ -525,7 +538,7 @@ public class CrystalAura extends Module {
                     if (placeDelayLeft <= 0) placeDelayLeft = 10;
                 }
             }
-            if (spoofChange.get() && preSlot != mc.player.inventory.selectedSlot && preSlot != -1)
+            if (switchMode.get() == SwitchMode.Spoof && preSlot != mc.player.inventory.selectedSlot && preSlot != -1)
                 mc.player.inventory.selectedSlot = preSlot;
         }
     }, EventPriority.HIGH);
@@ -671,7 +684,7 @@ public class CrystalAura extends Module {
 
     private void doHeldCrystal(){
         assert mc.player != null;
-        if (autoSwitch.get()) doSwitch();
+        if (switchMode.get() != SwitchMode.None) doSwitch();
         if (mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL) return;
         bestDamage = DamageCalcUtils.crystalDamage(target, bestBlock.add(0, 1, 0));
         heldCrystal = new EndCrystalEntity(mc.world, bestBlock.x, bestBlock.y + 1, bestBlock.z);
@@ -695,7 +708,7 @@ public class CrystalAura extends Module {
         }
         float yaw = mc.player.yaw;
         float pitch = mc.player.pitch;
-        if (rotationMode.get() == RotationMode.Face_Crystal || rotationMode.get() == RotationMode.Return) RotationUtils.packetRotate(block.add(0.5, 1.5, 0.5));
+        if (rotationMode.get() == RotationMode.FaceCrystal || rotationMode.get() == RotationMode.Return) RotationUtils.packetRotate(block.add(0.5, 1.5, 0.5));
         mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(mc.player.getPos(), Direction.UP, new BlockPos(block), false));
         if (!noSwing.get()) mc.player.swingHand(hand);
         if (rotationMode.get() == RotationMode.Return)RotationUtils.packetRotate(yaw, pitch);
