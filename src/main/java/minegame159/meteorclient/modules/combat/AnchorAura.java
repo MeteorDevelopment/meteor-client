@@ -76,7 +76,7 @@ public class AnchorAura extends Module {
     private final Setting<PlaceMode> placePositions = sgPlace.add(new EnumSetting.Builder<PlaceMode>()
             .name("placement-positions")
             .description("The places anchors are placed.")
-            .defaultValue(PlaceMode.All)
+            .defaultValue(PlaceMode.AboveAndBelow)
             .build()
     );
 
