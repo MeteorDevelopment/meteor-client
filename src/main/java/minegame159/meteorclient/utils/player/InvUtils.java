@@ -15,14 +15,12 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.Hand;
-import net.minecraft.util.Pair;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 
 public class InvUtils implements Listenable {
@@ -30,10 +28,8 @@ public class InvUtils implements Listenable {
     private static final MinecraftClient mc = MinecraftClient.getInstance();
 
     private static final FindItemResult findItemResult = new FindItemResult();
-    private static final Deque<Pair<Class<? extends Module>, List<Integer>>> moveQueue = new ArrayDeque<>();
+    private static final Deque<CustomPair> moveQueue = new ArrayDeque<>();
     private static final Queue<Integer> currentQueue = new LinkedList<>();
-    private static Class<? extends Module> currentModule;
-    private static final Map<Class<? extends Module>, Integer> cooldown = new ConcurrentHashMap<>();
 
     public static void clickSlot(int slot, int button, SlotActionType action) {
         assert mc.interactionManager != null;
@@ -101,20 +97,13 @@ public class InvUtils implements Listenable {
     @EventHandler
     private final Listener<PreTickEvent> onTick = new Listener<>(event -> {
         if (mc.world == null || mc.player == null){
-            cooldown.clear();
             currentQueue.clear();
             moveQueue.clear();
             return;
         }
-        for (Class<? extends Module> klass : cooldown.keySet()){
-            cooldown.replace(klass, cooldown.get(klass) - 1);
-            if (cooldown.get(klass) <= 0) cooldown.remove(klass);
-        }
         if (currentQueue.isEmpty() && !moveQueue.isEmpty()) {
-            Pair<Class<? extends Module>, List<Integer>> pair = moveQueue.remove();
-            Collections.reverse(pair.getRight());
+            CustomPair pair = moveQueue.remove();
             currentQueue.addAll(pair.getRight());
-            currentModule = pair.getLeft();
         } else if (!currentQueue.isEmpty()) {
             currentQueue.forEach(slot -> clickSlot(slot, 0, SlotActionType.PICKUP));
             currentQueue.clear();
@@ -122,15 +111,12 @@ public class InvUtils implements Listenable {
     });
 
     public static void addSlots(List<Integer> slots, Class<? extends Module> klass){
-        Collections.reverse(slots);
-        if (cooldown.containsKey(klass))return;
+        if (moveQueue.contains(new CustomPair(klass, slots)) || currentQueue.containsAll(slots)) return;
         if (!moveQueue.isEmpty() && canMove(klass)){
-            moveQueue.addFirst(new Pair<>(klass, slots));
-            currentModule = klass;
+            moveQueue.addFirst(new CustomPair(klass, slots));
         } else {
-            moveQueue.add(new Pair<>(klass, slots));
+            moveQueue.add(new CustomPair(klass, slots));
         }
-        cooldown.put(klass, 3);
     }
 
     public static boolean canMove(Class<? extends Module> klass){
