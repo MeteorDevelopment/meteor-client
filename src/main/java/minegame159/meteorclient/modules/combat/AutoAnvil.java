@@ -142,7 +142,6 @@ public class AutoAnvil extends Module {
                 if (getFloorSlot() == -1) return;
                 mc.player.inventory.selectedSlot = getFloorSlot();
 
-                if (rotate.get()) RotationUtils.packetRotate(target.getBlockPos());
                 if (mc.world.getBlockState(target.getBlockPos()).isAir()) mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, target.getBlockPos(), true));
             }
 

@@ -89,8 +89,8 @@ public class HoleFiller extends Module {
             if (left != Blocks.BEDROCK && left != Blocks.OBSIDIAN) return;
             add(1, 0, 0);
 
-            if (PlayerUtils.placeBlock(blockPos, findSlot(), Hand.MAIN_HAND)) BlockIterator.disableCurrent();
             if (rotate.get()) RotationUtils.packetRotate(blockPos1);
+            if (PlayerUtils.placeBlock(blockPos, findSlot(), Hand.MAIN_HAND)) BlockIterator.disableCurrent();
         });
     });
 
