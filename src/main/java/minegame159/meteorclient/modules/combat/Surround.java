@@ -14,6 +14,7 @@ import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.player.PlayerUtils;
+import minegame159.meteorclient.utils.player.RotationUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.BlockItem;
@@ -65,6 +66,13 @@ public class Surround extends Module {
     private final Setting<Boolean> disableOnJump = sgGeneral.add(new BoolSetting.Builder()
             .name("disable-on-jump")
             .description("Automatically disables when you jump.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
+            .name("rotate")
+            .description("Automatically faces to the blocks.")
             .defaultValue(true)
             .build()
     );
@@ -143,6 +151,7 @@ public class Surround extends Module {
         boolean placed = !blockState.getMaterial().isReplaceable();
 
         if (!placed && findSlot()) {
+            if (rotate.get()) RotationUtils.packetRotate(blockPos);
             placed = PlayerUtils.placeBlock(blockPos, Hand.MAIN_HAND);
             resetSlot();
 

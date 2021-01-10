@@ -17,6 +17,7 @@ import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.player.RotationUtils;
 import net.minecraft.block.*;
 import net.minecraft.client.gui.screen.ingame.SignEditScreen;
 import net.minecraft.item.*;
@@ -52,6 +53,13 @@ public class AntiBed extends Module {
             .build()
     );
 
+    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
+            .name("rotate")
+            .description("Automatically faces where the block is placed.")
+            .defaultValue(true)
+            .build()
+    );
+
     public AntiBed(){super(Category.Combat, "anti-bed", "Prevents people from placing beds where you are standing.");}
 
     private int place = -1;
@@ -77,6 +85,7 @@ public class AntiBed extends Module {
             place --;
             mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(Utils.vec3d(mc.player.getBlockPos().up()), Direction.DOWN, mc.player.getBlockPos().up(), mc.player.isOnGround()));
             ((IKeyBinding)mc.options.keySneak).setPressed(false);
+            if (rotate.get()) RotationUtils.packetRotate(mc.player.getBlockPos().up());
             if (selfToggle.get()) this.toggle();
         } else if (place > 0) {
             place --;
@@ -146,6 +155,7 @@ public class AntiBed extends Module {
                 mc.player.setSneaking(true);
                 mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(Utils.vec3d(mc.player.getBlockPos()), Direction.DOWN, mc.player.getBlockPos(), mc.player.isOnGround()));
                 mc.player.setSneaking(sneaking);
+                if (rotate.get()) RotationUtils.packetRotate(mc.player.getBlockPos());
                 mc.player.inventory.selectedSlot = preSlot;
                 place(i);
                 return;
@@ -174,6 +184,7 @@ public class AntiBed extends Module {
         mc.player.setSneaking(true);
         mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(Utils.vec3d(mc.player.getBlockPos().up()), Direction.DOWN, mc.player.getBlockPos().up(), mc.player.isOnGround()));
         mc.player.setSneaking(sneaking);
+        if (rotate.get()) RotationUtils.packetRotate(mc.player.getBlockPos().up());
         mc.player.inventory.selectedSlot = preSlot;
         if (selfToggle.get()) this.toggle();
     }

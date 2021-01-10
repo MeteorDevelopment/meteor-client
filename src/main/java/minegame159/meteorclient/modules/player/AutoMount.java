@@ -15,11 +15,14 @@ import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.utils.player.RotationUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.mob.SkeletonHorseEntity;
 import net.minecraft.entity.passive.*;
 import net.minecraft.entity.vehicle.BoatEntity;
 import net.minecraft.entity.vehicle.MinecartEntity;
+import net.minecraft.item.Item;
+import net.minecraft.item.SpawnEggItem;
 import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
 import net.minecraft.util.Hand;
 
@@ -44,28 +47,44 @@ public class AutoMount extends Module {
             .build()
     );
 
+    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
+            .name("rotate")
+            .description("Faces the entity you mount.")
+            .defaultValue(true)
+            .build()
+    );
 
     @EventHandler
     private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
         if(mc.player.hasVehicle())return;
         for(Entity entity : mc.world.getEntities()){
             if(mc.player.distanceTo(entity) > 4) continue;
+
+            if (mc.player.getMainHandStack().getItem() instanceof SpawnEggItem) return;
             if (donkeys.get() && entity instanceof DonkeyEntity && (!checkSaddle.get() || ((DonkeyEntity) entity).isSaddled())) {
                 mc.player.networkHandler.sendPacket(new PlayerInteractEntityC2SPacket(entity, Hand.MAIN_HAND, mc.player.isSneaking()));
+                if (rotate.get()) RotationUtils.packetRotate(entity);
             } else if (llamas.get() && entity instanceof LlamaEntity) {
                 mc.player.networkHandler.sendPacket(new PlayerInteractEntityC2SPacket(entity, Hand.MAIN_HAND, mc.player.isSneaking()));
+                if (rotate.get()) RotationUtils.packetRotate(entity);
             } else if (boats.get() && entity instanceof BoatEntity) {
                 mc.player.networkHandler.sendPacket(new PlayerInteractEntityC2SPacket(entity, Hand.MAIN_HAND, mc.player.isSneaking()));
+                if (rotate.get()) RotationUtils.packetRotate(entity);
             } else if (minecarts.get() && entity instanceof MinecartEntity) {
                 mc.player.networkHandler.sendPacket(new PlayerInteractEntityC2SPacket(entity, Hand.MAIN_HAND, mc.player.isSneaking()));
+                if (rotate.get()) RotationUtils.packetRotate(entity);
             } else if (horses.get() && entity instanceof HorseEntity && (!checkSaddle.get() || ((HorseEntity) entity).isSaddled())) {
                 mc.player.networkHandler.sendPacket(new PlayerInteractEntityC2SPacket(entity, Hand.MAIN_HAND, mc.player.isSneaking()));
+                if (rotate.get()) RotationUtils.packetRotate(entity);
             } else if (pigs.get() && entity instanceof PigEntity && ((PigEntity) entity).isSaddled()) {
                 mc.player.networkHandler.sendPacket(new PlayerInteractEntityC2SPacket(entity, Hand.MAIN_HAND, mc.player.isSneaking()));
+                if (rotate.get()) RotationUtils.packetRotate(entity);
             } else if (mules.get() && entity instanceof MuleEntity && (!checkSaddle.get() || ((MuleEntity) entity).isSaddled())) {
                 mc.player.networkHandler.sendPacket(new PlayerInteractEntityC2SPacket(entity, Hand.MAIN_HAND, mc.player.isSneaking()));
+                if (rotate.get()) RotationUtils.packetRotate(entity);
             } else if (skeletons.get() && entity instanceof SkeletonHorseEntity && (!checkSaddle.get() || ((SkeletonHorseEntity) entity).isSaddled())) {
                 mc.player.networkHandler.sendPacket(new PlayerInteractEntityC2SPacket(entity, Hand.MAIN_HAND, mc.player.isSneaking()));
+                if (rotate.get()) RotationUtils.packetRotate(entity);
             }
         }
     });
