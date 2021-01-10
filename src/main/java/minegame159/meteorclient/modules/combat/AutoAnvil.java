@@ -54,14 +54,6 @@ public class AutoAnvil extends Module {
             .build()
     );
 
-    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
-            .name("rotate")
-            .description("Automatically rotates to the position before placing anvils.")
-            .defaultValue(true)
-            .build()
-    );
-
-
     private final Setting<Boolean> placeButton = sgGeneral.add(new BoolSetting.Builder()
             .name("place-at-feet")
             .description("Automatically places a button or pressure plate at the targets feet to break the anvils.")
@@ -82,6 +74,13 @@ public class AutoAnvil extends Module {
             .min(0)
             .defaultValue(0)
             .sliderMax(50)
+            .build()
+    );
+
+    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
+            .name("rotate")
+            .description("Automatically rotates towards the position anvils/pressure plates/buttons are placed.")
+            .defaultValue(true)
             .build()
     );
 

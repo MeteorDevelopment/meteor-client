@@ -11,11 +11,11 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.events.world.PreTickEvent;
 import minegame159.meteorclient.friends.FriendManager;
-import minegame159.meteorclient.mixininterface.IPlayerMoveC2SPacket;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.player.RotationUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -23,10 +23,8 @@ import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.AxeItem;
 import net.minecraft.item.SwordItem;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
 
@@ -147,6 +145,13 @@ public class KillAura extends Module {
             .build()
     );
 
+    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
+            .name("rotate")
+            .description("Rotates to the entity you are attacking.")
+            .defaultValue(true)
+            .build()
+    );
+
     // Random hit delay
 
     private final Setting<Boolean> randomDelayEnabled = sgRandomDelay.add(new BoolSetting.Builder()
@@ -165,7 +170,6 @@ public class KillAura extends Module {
             .build()
     );
 
-    private PlayerMoveC2SPacket movePacket;
     private int hitDelayTimer;
     private int randomDelayTimer;
     private LivingEntity entity;
@@ -181,7 +185,6 @@ public class KillAura extends Module {
 
     @Override
     public void onDeactivate() {
-        movePacket = null;
         hitDelayTimer = 0;
         randomDelayTimer = 0;
         entity = null;
@@ -189,7 +192,6 @@ public class KillAura extends Module {
 
     @EventHandler
     private final Listener<PreTickEvent> onPreTick = new Listener<>(event -> {
-        movePacket = null;
         entity = null;
     });
 
@@ -237,26 +239,9 @@ public class KillAura extends Module {
     private final Listener<PostTickEvent> onPostTick = new Listener<>(event -> {
         findEntity();
         if (entity == null) return;
-
-        movePacket = new PlayerMoveC2SPacket.LookOnly(0, 0, mc.player.isOnGround());
-        rotatePacket();
+        if (rotate.get()) RotationUtils.packetRotate(entity);
         attack();
     });
-
-    private void rotatePacket() {
-        ((IVec3d) vec1).set(mc.player.getX(), mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()), mc.player.getZ());
-        ((IVec3d) vec2).set(entity.getX(), entity.getY() + entity.getHeight() / 2, entity.getZ());
-
-        double d = vec2.x - vec1.x;
-        double e = vec2.y - vec1.y;
-        double f = vec2.z - vec1.z;
-        double g = MathHelper.sqrt(d * d + f * f);
-        double yaw = MathHelper.wrapDegrees((float) (MathHelper.atan2(f, d) * 57.2957763671875D) - 90.0F);
-        double pitch = MathHelper.wrapDegrees((float) (-(MathHelper.atan2(e, g) * 57.2957763671875D)));
-
-        ((IPlayerMoveC2SPacket) movePacket).setYaw((float) yaw);
-        ((IPlayerMoveC2SPacket) movePacket).setPitch((float) pitch);
-    }
 
     private void attack() {
         if (entity == null) return;
