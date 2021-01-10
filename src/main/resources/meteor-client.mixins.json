@@ -94,7 +94,8 @@
     "TitleScreenMixin",
     "Vec3dMixin",
     "WorldRendererAccessor",
-    "WorldRendererMixin"
+    "WorldRendererMixin",
+    "FireworksSparkParticleMixin"
   ],
   "injectors": {
     "defaultRequire": 1
