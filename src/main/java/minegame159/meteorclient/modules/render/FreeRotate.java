@@ -1,9 +1,15 @@
 package minegame159.meteorclient.modules.render;
 
+import me.zero.alpine.listener.EventHandler;
+import me.zero.alpine.listener.Listener;
+import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.misc.input.Input;
 import net.minecraft.client.options.Perspective;
+import org.lwjgl.glfw.GLFW;
 
 public class FreeRotate extends Module {
 
@@ -28,12 +34,27 @@ public class FreeRotate extends Module {
             .build()
     );
 
-    public final Setting<Double> sensativity = sgGeneral.add(new DoubleSetting.Builder()
-            .name("camera-sensativity")
-            .description("How fast the camera moves.")
+    public final Setting<Double> sensitivity = sgGeneral.add(new DoubleSetting.Builder()
+            .name("camera-sensitivity")
+            .description("How fast the camera moves in camera mode.")
             .defaultValue(8)
             .min(0)
             .sliderMax(10)
+            .build()
+    );
+
+    public final Setting<Boolean> arrows = sgGeneral.add(new BoolSetting.Builder()
+            .name("arrows-control-opposite")
+            .description("Allows you to control the other entities rotation with the arrow keys.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Double> arrowSpeed = sgGeneral.add(new DoubleSetting.Builder()
+            .name("arrow-speed")
+            .description("Rotation speed with arrow keys.")
+            .defaultValue(4)
+            .min(0)
             .build()
     );
 
@@ -67,4 +88,27 @@ public class FreeRotate extends Module {
     public boolean cameraMode() {
         return isActive() && mc.options.getPerspective() == Perspective.THIRD_PERSON_BACK && mode.get() == Mode.Camera;
     }
+
+    @EventHandler
+    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+        if (arrows.get() && mode.get() == Mode.Player) {
+            switch (mode.get()) {
+                case Player:
+                    if (Input.isPressed(GLFW.GLFW_KEY_RIGHT)) cameraYaw += arrowSpeed.get();
+                    if (Input.isPressed(GLFW.GLFW_KEY_LEFT)) cameraYaw -= arrowSpeed.get();
+                    if (Input.isPressed(GLFW.GLFW_KEY_UP)) cameraPitch -= arrowSpeed.get();
+                    if (Input.isPressed(GLFW.GLFW_KEY_DOWN)) cameraPitch += arrowSpeed.get();
+                    cameraPitch = Utils.clamp(cameraPitch, -90, 90);
+                    break;
+                case Camera:
+                    if (Input.isPressed(GLFW.GLFW_KEY_RIGHT)) mc.player.yaw += arrowSpeed.get();
+                    if (Input.isPressed(GLFW.GLFW_KEY_LEFT)) mc.player.yaw -= arrowSpeed.get();
+                    if (Input.isPressed(GLFW.GLFW_KEY_UP)) mc.player.pitch -= arrowSpeed.get();
+                    if (Input.isPressed(GLFW.GLFW_KEY_DOWN)) mc.player.pitch += arrowSpeed.get();
+                    mc.player.pitch = Utils.clamp(mc.player.pitch, -90, 90);
+                    break;
+            }
+        }
+
+    });
 }

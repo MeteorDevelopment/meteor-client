@@ -44,8 +44,8 @@ public class MouseMixin {
     private void perspectiveUpdatePitchYaw(CallbackInfo info, double adjustedSens, double x, double y, int invert) {
         FreeRotate freeRotate = ModuleManager.INSTANCE.get(FreeRotate.class);
         if (freeRotate.cameraMode()) {
-            freeRotate.cameraYaw += x / freeRotate.sensativity.get().floatValue();
-            freeRotate.cameraPitch += (y * invert) / freeRotate.sensativity.get().floatValue();
+            freeRotate.cameraYaw += x / freeRotate.sensitivity.get().floatValue();
+            freeRotate.cameraPitch += (y * invert) / freeRotate.sensitivity.get().floatValue();
             if (Math.abs(freeRotate.cameraPitch) > 90.0F) freeRotate.cameraPitch = freeRotate.cameraPitch > 0.0F ? 90.0F : -90.0F;
         }
     }
