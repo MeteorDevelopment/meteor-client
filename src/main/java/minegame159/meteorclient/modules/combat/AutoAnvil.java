@@ -79,7 +79,7 @@ public class AutoAnvil extends Module {
 
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
             .name("rotate")
-            .description("Automatically rotates to the position before placing anvils.")
+            .description("Automatically rotates towards the position anvils/pressure plates/buttons are placed.")
             .defaultValue(true)
             .build()
     );
