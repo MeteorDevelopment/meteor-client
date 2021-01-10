@@ -3,7 +3,6 @@ package minegame159.meteorclient.modules.render.hud.modules;
 import minegame159.meteorclient.modules.render.hud.HUD;
 import minegame159.meteorclient.modules.render.hud.HudRenderer;
 import minegame159.meteorclient.utils.render.color.Color;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.math.MathHelper;
 
 public class CompassHud extends HudModule {
@@ -12,8 +11,6 @@ public class CompassHud extends HudModule {
         Axis,
         Pole
     }
-
-    public static MinecraftClient mc = MinecraftClient.getInstance();
 
     public CompassHud(HUD hud) {
         super(hud, "compass", "Displays your rotation as a 3D compass.");
@@ -46,7 +43,7 @@ public class CompassHud extends HudModule {
         return Math.cos(rad) * Math.sin(Math.toRadians(MathHelper.clamp(mc.player.pitch + 30.0f, -90.0f, 90.0f))) * (hud.compassScale() * 40);
     }
 
-    private static double getPosOnCompass(Direction dir) {
+    private double getPosOnCompass(Direction dir) {
         if (mc.player == null) return 0;
         return Math.toRadians(MathHelper.wrapDegrees(mc.player.yaw)) + dir.ordinal() * 1.5707963267948966;
     }
