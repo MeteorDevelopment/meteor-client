@@ -10,11 +10,9 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.world.PreTickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.settings.EnumSetting;
-import minegame159.meteorclient.settings.IntSetting;
-import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.player.PlayerUtils;
+import minegame159.meteorclient.utils.player.RotationUtils;
 import minegame159.meteorclient.utils.world.BlockIterator;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
@@ -59,6 +57,13 @@ public class HoleFiller extends Module {
             .build()
     );
 
+    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
+            .name("rotate")
+            .description("Automatically rotates to the position before placing anvils.")
+            .defaultValue(true)
+            .build()
+    );
+
     private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
 
     public HoleFiller() {
@@ -85,6 +90,7 @@ public class HoleFiller extends Module {
             add(1, 0, 0);
 
             if (PlayerUtils.placeBlock(blockPos, findSlot(), Hand.MAIN_HAND)) BlockIterator.disableCurrent();
+            if (rotate.get()) RotationUtils.packetRotate(blockPos1);
         });
     });
 

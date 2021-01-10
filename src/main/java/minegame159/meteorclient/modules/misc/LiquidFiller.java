@@ -12,6 +12,7 @@ import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.player.PlayerUtils;
+import minegame159.meteorclient.utils.player.RotationUtils;
 import minegame159.meteorclient.utils.world.BlockIterator;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
@@ -63,6 +64,13 @@ public class LiquidFiller extends Module {
             .build()
     );
 
+    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
+            .name("rotate")
+            .description("Automatically faces the blocks being filled with water/lava.")
+            .defaultValue(true)
+            .build()
+    );
+
     public LiquidFiller(){
         super(Category.Misc, "Liquid-Filler", "Places blocks inside of liquid source blocks within range of you.");
     }
@@ -75,6 +83,7 @@ public class LiquidFiller extends Module {
             PlaceIn placeIn = placeInLiquids.get();
             if (placeIn == PlaceIn.Both || (placeIn == PlaceIn.Lava && liquid == Blocks.LAVA) || (placeIn == PlaceIn.Water && liquid == Blocks.WATER)) {
                 if (PlayerUtils.placeBlock(blockPos, findSlot(), Hand.MAIN_HAND)) BlockIterator.disableCurrent();
+                if (rotate.get()) RotationUtils.packetRotate(blockPos);
             }
         }
     }));

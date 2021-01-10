@@ -21,6 +21,7 @@ import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.player.Chat;
 import minegame159.meteorclient.utils.player.DamageCalcUtils;
 import minegame159.meteorclient.utils.player.PlayerUtils;
+import minegame159.meteorclient.utils.player.RotationUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.BlockItem;
@@ -44,6 +45,13 @@ public class SmartSurround extends Module {
             .name("min-damage")
             .description("The minimum damage before this activates.")
             .defaultValue(5.5)
+            .build()
+    );
+
+    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
+            .name("Rotate")
+            .description("Forces you to rotate towards the block being placed.")
+            .defaultValue(true)
             .build()
     );
 
@@ -129,6 +137,7 @@ public class SmartSurround extends Module {
 
     private void placeObi(int x, int z, Entity crystal) {
         PlayerUtils.placeBlock(crystal.getBlockPos().add(x, -1, z), Hand.MAIN_HAND);
+        if (rotate.get()) RotationUtils.packetRotate(crystal.getBlockPos().add(x, -1, z));
     }
 
     private int findObiInHotbar() {

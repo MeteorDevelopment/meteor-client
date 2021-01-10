@@ -23,6 +23,6 @@ public class AntiFriendHit extends Module {
 
     @EventHandler
     private final Listener<AttackEntityEvent> onAttackEntity = new Listener<>(event -> {
-        if (event.entity instanceof PlayerEntity &&  ModuleManager.INSTANCE.get(AntiFriendHit.class).isActive() && !FriendManager.INSTANCE.attack((PlayerEntity) event.entity)) event.cancel();
+        if (event.entity instanceof PlayerEntity && ModuleManager.INSTANCE.get(AntiFriendHit.class).isActive() && !FriendManager.INSTANCE.attack((PlayerEntity) event.entity)) event.cancel();
     });
 }

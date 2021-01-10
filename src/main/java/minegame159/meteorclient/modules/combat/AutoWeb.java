@@ -17,6 +17,7 @@ import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.entity.FakePlayerEntity;
+import minegame159.meteorclient.utils.player.RotationUtils;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
@@ -40,6 +41,13 @@ public class AutoWeb extends Module {
             .name("doubles")
             .description("Places in the target's upper hitbox as well as the lower hitbox.")
             .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
+            .name("rotate")
+            .description("Rotates towards the webs.")
+            .defaultValue(true)
             .build()
     );
 
@@ -96,10 +104,12 @@ public class AutoWeb extends Module {
             int swung = 0;
             if (mc.world.getBlockState(targetPos).isAir()) {
                 mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.DOWN, targetPos, true));
+                if (rotate.get()) RotationUtils.packetRotate(targetPos);
                 swung++;
             }
             if (doubles.get() && mc.world.getBlockState(targetPos.add(0, 1, 0)).isAir()) {
                 mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, targetPos.add(0, 1, 0), true));
+                if (rotate.get()) RotationUtils.packetRotate(targetPos.add(0, 1, 0));
                 swung++;
             }
             if (swung >= 1) mc.player.swingHand(Hand.MAIN_HAND);

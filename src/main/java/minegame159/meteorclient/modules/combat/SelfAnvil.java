@@ -15,6 +15,7 @@ import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.player.PlayerUtils;
+import minegame159.meteorclient.utils.player.RotationUtils;
 import net.minecraft.client.gui.screen.ingame.AnvilScreen;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
@@ -56,9 +57,8 @@ public class SelfAnvil extends Module {
 
         PlayerUtils.placeBlock(playerPos.add(0, 2, 0), Hand.MAIN_HAND);
 
-        if (rotate.get()) {
-            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(mc.player.yaw, -90, mc.player.isOnGround()));
-        }
+        if (rotate.get()) RotationUtils.packetRotate(playerPos.add(0, 2, 0));
+
 
         mc.player.inventory.selectedSlot = prevSlot;
         toggle();

@@ -10,10 +10,8 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.world.PostTickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.settings.DoubleSetting;
-import minegame159.meteorclient.settings.EntityTypeListSetting;
-import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.player.RotationUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.ItemStack;
@@ -38,6 +36,13 @@ public class AutoNametag extends Module {
             .description("The maximum distance a nametagged entity can be to be nametagged.")
             .min(0.0)
             .defaultValue(5.0)
+            .build()
+    );
+
+    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
+            .name("rotate")
+            .description("Automatically faces the mob being nametagged.")
+            .defaultValue(true)
             .build()
     );
 
@@ -74,6 +79,7 @@ public class AutoNametag extends Module {
 
             if (foundNametag) {
                 mc.interactionManager.interactEntity(mc.player, entity, offHand ? Hand.OFF_HAND : Hand.MAIN_HAND);
+                if (rotate.get()) RotationUtils.packetRotate(entity);
                 return;
             }
         }

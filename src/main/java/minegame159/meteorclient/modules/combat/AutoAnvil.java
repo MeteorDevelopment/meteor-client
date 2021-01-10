@@ -54,14 +54,6 @@ public class AutoAnvil extends Module {
             .build()
     );
 
-    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
-            .name("rotate")
-            .description("Automatically rotates to the position before placing anvils.")
-            .defaultValue(true)
-            .build()
-    );
-
-
     private final Setting<Boolean> placeButton = sgGeneral.add(new BoolSetting.Builder()
             .name("place-at-feet")
             .description("Automatically places a button or pressure plate at the targets feet to break the anvils.")
@@ -82,6 +74,13 @@ public class AutoAnvil extends Module {
             .min(0)
             .defaultValue(0)
             .sliderMax(50)
+            .build()
+    );
+
+    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
+            .name("rotate")
+            .description("Automatically rotates to the position before placing anvils.")
+            .defaultValue(true)
             .build()
     );
 
@@ -143,6 +142,7 @@ public class AutoAnvil extends Module {
                 if (getFloorSlot() == -1) return;
                 mc.player.inventory.selectedSlot = getFloorSlot();
 
+                if (rotate.get()) RotationUtils.packetRotate(target.getBlockPos());
                 if (mc.world.getBlockState(target.getBlockPos()).isAir()) mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, target.getBlockPos(), true));
             }
 
