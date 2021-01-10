@@ -95,7 +95,7 @@ public class InvUtils implements Listenable {
     }
 
     @EventHandler
-    private final Listener<PreTickEvent> onTick = new Listener<>(event -> {
+    private static final Listener<PreTickEvent> onTick = new Listener<>(event -> {
         if (mc.world == null || mc.player == null){
             currentQueue.clear();
             moveQueue.clear();
@@ -114,6 +114,7 @@ public class InvUtils implements Listenable {
         if (moveQueue.contains(new CustomPair(klass, slots)) || currentQueue.containsAll(slots)) return;
         if (!moveQueue.isEmpty() && canMove(klass)){
             moveQueue.addFirst(new CustomPair(klass, slots));
+            onTick.invoke(new PreTickEvent());
         } else {
             moveQueue.add(new CustomPair(klass, slots));
         }
