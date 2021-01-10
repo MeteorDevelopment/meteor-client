@@ -210,10 +210,8 @@ public class AnchorAura extends Module {
 
         if (getTotalHealth(mc.player) <= minHealth.get() && placeMode.get() != Mode.Suicide && breakMode.get() != Mode.Suicide) return;
 
-        if (target == null || mc.player.distanceTo(target) > targetRange.get()) {
-            target = findTarget();
-            return;
-        }
+        if (target == null || mc.player.distanceTo(target) > targetRange.get()) target = findTarget();
+        if (target == null) return;
 
         int anchorSlot = InvUtils.findItemInHotbar(Items.RESPAWN_ANCHOR, itemStack -> true);
         int glowSlot = InvUtils.findItemInHotbar(Items.GLOWSTONE, itemStack -> true);
