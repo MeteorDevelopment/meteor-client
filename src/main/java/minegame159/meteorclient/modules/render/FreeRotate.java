@@ -91,24 +91,26 @@ public class FreeRotate extends Module {
 
     @EventHandler
     private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
-        if (arrows.get() && mode.get() == Mode.Player) {
-            switch (mode.get()) {
-                case Player:
-                    if (Input.isPressed(GLFW.GLFW_KEY_RIGHT)) cameraYaw += arrowSpeed.get();
-                    if (Input.isPressed(GLFW.GLFW_KEY_LEFT)) cameraYaw -= arrowSpeed.get();
-                    if (Input.isPressed(GLFW.GLFW_KEY_UP)) cameraPitch -= arrowSpeed.get();
-                    if (Input.isPressed(GLFW.GLFW_KEY_DOWN)) cameraPitch += arrowSpeed.get();
-                    cameraPitch = Utils.clamp(cameraPitch, -90, 90);
-                    break;
-                case Camera:
-                    if (Input.isPressed(GLFW.GLFW_KEY_RIGHT)) mc.player.yaw += arrowSpeed.get();
-                    if (Input.isPressed(GLFW.GLFW_KEY_LEFT)) mc.player.yaw -= arrowSpeed.get();
-                    if (Input.isPressed(GLFW.GLFW_KEY_UP)) mc.player.pitch -= arrowSpeed.get();
-                    if (Input.isPressed(GLFW.GLFW_KEY_DOWN)) mc.player.pitch += arrowSpeed.get();
-                    mc.player.pitch = Utils.clamp(mc.player.pitch, -90, 90);
-                    break;
+        if (arrows.get()) {
+            for (int i = 0; i < (arrowSpeed.get() * 2); i++) {
+                switch (mode.get()) {
+                    case Player:
+                        if (Input.isPressed(GLFW.GLFW_KEY_LEFT)) cameraYaw -= 0.5;
+                        if (Input.isPressed(GLFW.GLFW_KEY_RIGHT)) cameraYaw += 0.5;
+                        if (Input.isPressed(GLFW.GLFW_KEY_UP)) cameraPitch -= 0.5;
+                        if (Input.isPressed(GLFW.GLFW_KEY_DOWN)) cameraPitch += 0.5;
+                        break;
+                    case Camera:
+                        if (Input.isPressed(GLFW.GLFW_KEY_LEFT)) mc.player.yaw -= 0.5;
+                        if (Input.isPressed(GLFW.GLFW_KEY_RIGHT)) mc.player.yaw += 0.5;
+                        if (Input.isPressed(GLFW.GLFW_KEY_UP)) mc.player.pitch -= 0.5;
+                        if (Input.isPressed(GLFW.GLFW_KEY_DOWN)) mc.player.pitch += 0.5;
+                        break;
+                }
             }
         }
 
+        mc.player.pitch = Utils.clamp(mc.player.pitch, -90, 90);
+        cameraPitch = Utils.clamp(cameraPitch, -90, 90);
     });
 }
