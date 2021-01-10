@@ -20,10 +20,7 @@ import minegame159.meteorclient.utils.player.Chat;
 import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
-import net.minecraft.item.EnchantedGoldenAppleItem;
-import net.minecraft.item.Item;
-import net.minecraft.item.Items;
-import net.minecraft.item.SwordItem;
+import net.minecraft.item.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,8 +52,15 @@ public class OffhandExtra extends Module {
     );
 
     private final Setting<Boolean> offhandCrystal = sgGeneral.add(new BoolSetting.Builder()
-            .name("offhand-crystal")
+            .name("offhand-crystal-on-gap")
             .description("Changes the mode to end-crystal if you are holding an enchanted golden apple in your main hand.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> offhandCA = sgGeneral.add(new BoolSetting.Builder()
+            .name("offhand-crystal-on-ca")
+            .description("Changes the mode to end-crystal when crystal aura is on.")
             .defaultValue(false)
             .build()
     );
@@ -132,8 +136,9 @@ public class OffhandExtra extends Module {
         if (!mc.player.isUsingItem()) isClicking = false;
         if (ModuleManager.INSTANCE.get(AutoTotem.class).getLocked()) return;
 
-        if (mc.player.getMainHandStack().getItem() instanceof SwordItem && sword.get()) currentMode = Mode.EGap;
+        if ((mc.player.getMainHandStack().getItem() instanceof SwordItem || mc.player.getMainHandStack().getItem() instanceof AxeItem) && sword.get()) currentMode = Mode.EGap;
         else if (mc.player.getMainHandStack().getItem() instanceof EnchantedGoldenAppleItem && offhandCrystal.get()) currentMode = Mode.Crystal;
+        else if (ModuleManager.INSTANCE.isActive(CrystalAura.class) && offhandCA.get()) currentMode = Mode.Crystal;
 
         if ((asimov.get() || noTotems) && mc.player.getOffHandStack().getItem() != getItem()) {
             int result = findSlot(getItem());
@@ -177,6 +182,7 @@ public class OffhandExtra extends Module {
                && (mc.player.getOffHandStack().getItem() != getItem()) && !(mc.currentScreen instanceof HandledScreen<?>))) {
             if (mc.player.getMainHandStack().getItem() instanceof SwordItem && sword.get()) currentMode = Mode.EGap;
             else if (mc.player.getMainHandStack().getItem() instanceof EnchantedGoldenAppleItem && offhandCrystal.get()) currentMode = Mode.Crystal;
+            else if (ModuleManager.INSTANCE.isActive(CrystalAura.class) && offhandCA.get()) currentMode = Mode.Crystal;
             if (mc.player.getOffHandStack().getItem() == getItem()) return;
             isClicking = true;
             Item item = getItem();
