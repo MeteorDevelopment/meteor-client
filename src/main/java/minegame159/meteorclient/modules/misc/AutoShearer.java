@@ -15,6 +15,7 @@ import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.player.InvUtils;
+import minegame159.meteorclient.utils.player.RotationUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.SheepEntity;
 import net.minecraft.item.Items;
@@ -36,6 +37,13 @@ public class AutoShearer extends Module {
             .name("preserve-broken-shears")
             .description("Prevents shears from being broken.")
             .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
+            .name("rotate")
+            .description("Automatically faces the animal being sheared.")
+            .defaultValue(true)
             .build()
     );
 
@@ -72,6 +80,7 @@ public class AutoShearer extends Module {
             }
 
             if (foundShears) {
+                if (rotate.get()) RotationUtils.packetRotate(entity);
                 mc.interactionManager.interactEntity(mc.player, entity, offHand ? Hand.OFF_HAND : Hand.MAIN_HAND);
                 return;
             }

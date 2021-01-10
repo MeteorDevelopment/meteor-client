@@ -13,6 +13,7 @@ import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.Pool;
+import minegame159.meteorclient.utils.player.RotationUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -88,6 +89,13 @@ public class Nuker extends Module {
             .name("no-particles")
             .description("Disables all block breaking particles.")
             .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
+            .name("rotate")
+            .description("Automatically faces the blocks being mined.")
+            .defaultValue(true)
             .build()
     );
 
@@ -174,6 +182,7 @@ public class Nuker extends Module {
         for (BlockPos.Mutable pos : blocks) {
             if (packetMine.get()) {
                 // Packet mine
+                if (rotate.get()) RotationUtils.packetRotate(pos);
                 mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, pos, Direction.UP));
                 mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, pos, Direction.UP));
             } else {
@@ -181,6 +190,7 @@ public class Nuker extends Module {
                 if (!lastBlockPos.equals(pos)) {
                     // Im not proud of this but it works so shut the fuck up
                     try {
+                        if (rotate.get()) RotationUtils.packetRotate(pos);
                         mc.interactionManager.cancelBlockBreaking();
                         mc.interactionManager.attackBlock(pos, Direction.UP);
                         mc.player.swingHand(Hand.MAIN_HAND);
@@ -189,6 +199,7 @@ public class Nuker extends Module {
 
                 // Break block
                 lastBlockPos.set(pos);
+                if (rotate.get()) RotationUtils.packetRotate(pos);
                 mc.interactionManager.updateBlockBreakingProgress(pos, Direction.UP);
                 mc.player.swingHand(Hand.MAIN_HAND);
 
