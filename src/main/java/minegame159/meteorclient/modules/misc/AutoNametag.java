@@ -78,8 +78,8 @@ public class AutoNametag extends Module {
             }
 
             if (foundNametag) {
-                mc.interactionManager.interactEntity(mc.player, entity, offHand ? Hand.OFF_HAND : Hand.MAIN_HAND);
                 if (rotate.get()) RotationUtils.packetRotate(entity);
+                mc.interactionManager.interactEntity(mc.player, entity, offHand ? Hand.OFF_HAND : Hand.MAIN_HAND);
                 return;
             }
         }

@@ -121,8 +121,8 @@ public class Scaffold extends Module {
         prevSelectedSlot = mc.player.inventory.selectedSlot;
         mc.player.inventory.selectedSlot = slot;
 
-        PlayerUtils.placeBlock(mc.player.getBlockPos().down(), Hand.MAIN_HAND, renderSwing.get());
         if (rotate.get()) RotationUtils.packetRotate(mc.player.getBlockPos().down());
+        PlayerUtils.placeBlock(mc.player.getBlockPos().down(), Hand.MAIN_HAND, renderSwing.get());
         if (mc.player.input.sneaking) this.lastWasSneaking = false;
 
         // Place blocks around if radius is bigger than 1
@@ -160,7 +160,6 @@ public class Scaffold extends Module {
             PlayerUtils.placeBlock(setPos(-i, -1, -i), Hand.MAIN_HAND, renderSwing.get());
             if (!findBlock()) return;
             PlayerUtils.placeBlock(setPos(i, -1, -i), Hand.MAIN_HAND, renderSwing.get());
-            if (rotate.get()) RotationUtils.packetRotate(mc.player.getBlockPos().down());
         }
 
         // Change back to previous slot

@@ -54,10 +54,9 @@ public class SelfAnvil extends Module {
         mc.player.inventory.selectedSlot = anvilSlot;
         BlockPos playerPos = mc.player.getBlockPos();
 
-        PlayerUtils.placeBlock(playerPos.add(0, 2, 0), Hand.MAIN_HAND);
-
         if (rotate.get()) RotationUtils.packetRotate(playerPos.add(0, 2, 0));
 
+        PlayerUtils.placeBlock(playerPos.add(0, 2, 0), Hand.MAIN_HAND);
 
         mc.player.inventory.selectedSlot = prevSlot;
         toggle();

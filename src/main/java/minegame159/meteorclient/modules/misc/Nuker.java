@@ -190,17 +190,17 @@ public class Nuker extends Module {
                 if (!lastBlockPos.equals(pos)) {
                     // Im not proud of this but it works so shut the fuck up
                     try {
+                        if (rotate.get()) RotationUtils.packetRotate(pos);
                         mc.interactionManager.cancelBlockBreaking();
                         mc.interactionManager.attackBlock(pos, Direction.UP);
                         mc.player.swingHand(Hand.MAIN_HAND);
-                        if (rotate.get()) RotationUtils.packetRotate(pos);
                     } catch (Exception ignored) {}
                 }
 
                 // Break block
                 lastBlockPos.set(pos);
-                mc.interactionManager.updateBlockBreakingProgress(pos, Direction.UP);
                 if (rotate.get()) RotationUtils.packetRotate(pos);
+                mc.interactionManager.updateBlockBreakingProgress(pos, Direction.UP);
                 mc.player.swingHand(Hand.MAIN_HAND);
 
                 breaking = true;

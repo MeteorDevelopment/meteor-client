@@ -136,8 +136,8 @@ public class SmartSurround extends Module {
     });
 
     private void placeObi(int x, int z, Entity crystal) {
-        PlayerUtils.placeBlock(crystal.getBlockPos().add(x, -1, z), Hand.MAIN_HAND);
         if (rotate.get()) RotationUtils.packetRotate(crystal.getBlockPos().add(x, -1, z));
+        PlayerUtils.placeBlock(crystal.getBlockPos().add(x, -1, z), Hand.MAIN_HAND);
     }
 
     private int findObiInHotbar() {

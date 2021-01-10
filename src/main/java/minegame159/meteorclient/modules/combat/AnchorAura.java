@@ -56,7 +56,7 @@ public class AnchorAura extends Module {
 
     private final Setting<RotationMode> rotationMode = sgGeneral.add(new EnumSetting.Builder<RotationMode>()
             .name("rotation-mode")
-            .description("The way anchors are placed.")
+            .description("The mode to rotate you server-side.")
             .defaultValue(RotationMode.Place)
             .build()
     );
@@ -171,14 +171,14 @@ public class AnchorAura extends Module {
         findSlots();
 
         if (breakDelayLeft <= 0) {
-            breakAnchor(findAnchors(), glowSlot, anchorSlot);
             if (findAnchors() != null) if (rotationMode.get() == RotationMode.Both || rotationMode.get() == RotationMode.Break) RotationUtils.packetRotate(findAnchors());
+            breakAnchor(findAnchors(), glowSlot, anchorSlot);
             breakDelayLeft = breakDelay.get();
         }
 
         if (place.get() && placeDelayLeft <= 0) {
-            PlayerUtils.placeBlock(findValidBlock(), anchorSlot, Hand.MAIN_HAND);
             if (findValidBlock() != null) if (rotationMode.get() == RotationMode.Both || rotationMode.get() == RotationMode.Place) RotationUtils.packetRotate(findValidBlock());
+            PlayerUtils.placeBlock(findValidBlock(), anchorSlot, Hand.MAIN_HAND);
             placeDelayLeft = placeDelay.get();
         }
     });

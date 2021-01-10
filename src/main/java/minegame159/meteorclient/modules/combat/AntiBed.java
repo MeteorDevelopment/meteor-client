@@ -182,9 +182,9 @@ public class AntiBed extends Module {
         mc.player.inventory.selectedSlot = i;
         boolean sneaking = mc.player.isSneaking();
         mc.player.setSneaking(true);
+        if (rotate.get()) RotationUtils.packetRotate(mc.player.getBlockPos().up());
         mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(Utils.vec3d(mc.player.getBlockPos().up()), Direction.DOWN, mc.player.getBlockPos().up(), mc.player.isOnGround()));
         mc.player.setSneaking(sneaking);
-        if (rotate.get()) RotationUtils.packetRotate(mc.player.getBlockPos().up());
         mc.player.inventory.selectedSlot = preSlot;
         if (selfToggle.get()) this.toggle();
     }
