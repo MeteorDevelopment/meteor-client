@@ -152,7 +152,7 @@ public class KillAura extends Module {
             .build()
     );
 
-    // Random hit delay
+    // Random Delay
 
     private final Setting<Boolean> randomDelayEnabled = sgRandomDelay.add(new BoolSetting.Builder()
             .name("random-delay-enabled")

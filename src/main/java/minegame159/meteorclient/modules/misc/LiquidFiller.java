@@ -72,7 +72,7 @@ public class LiquidFiller extends Module {
     );
 
     public LiquidFiller(){
-        super(Category.Misc, "Liquid-Filler", "Places blocks inside of liquid source blocks within range of you.");
+        super(Category.Misc, "liquid-filler", "Places blocks inside of liquid source blocks within range of you.");
     }
 
     @EventHandler

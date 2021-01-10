@@ -70,7 +70,7 @@ public class AutoAnvil extends Module {
 
     private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
             .name("delay")
-            .description("The delay in between anvil placements.")
+            .description("The delay in between anvil placements in ticks.")
             .min(0)
             .defaultValue(0)
             .sliderMax(50)

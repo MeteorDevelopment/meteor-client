@@ -72,7 +72,7 @@ public class CrystalAura extends Module {
     private final SettingGroup sgMisc = settings.createGroup("Misc");
     private final SettingGroup sgRender = settings.createGroup("Render");
 
-    //Placement
+    // Place
 
     private final Setting<Boolean> place = sgPlace.add(new BoolSetting.Builder()
             .name("place")
@@ -207,7 +207,7 @@ public class CrystalAura extends Module {
             .build()
     );
 
-    //Breaking
+    // Break
 
     private final Setting<Mode> breakMode = sgBreak.add(new EnumSetting.Builder<Mode>()
             .name("break-mode")
@@ -234,7 +234,7 @@ public class CrystalAura extends Module {
             .build()
     );
 
-    //Targetting
+    // Target
 
     private final Setting<List<EntityType<?>>> entities = sgTarget.add(new EntityTypeListSetting.Builder()
             .name("entities")
@@ -276,7 +276,7 @@ public class CrystalAura extends Module {
             .build()
     );
 
-    //Misc
+    // Misc
 
     private final Setting<Double> minDamage = sgMisc.add(new DoubleSetting.Builder()
             .name("min-damage")

@@ -45,6 +45,8 @@ public class AutoTrap extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgRender = settings.createGroup("Render");
 
+    // General
+
     private final Setting<TopMode> topPlacement = sgGeneral.add(new EnumSetting.Builder<TopMode>()
             .name("top-mode")
             .description("Which blocks to place on the top half of the target.")
@@ -83,6 +85,8 @@ public class AutoTrap extends Module {
             .defaultValue(true)
             .build()
     );
+
+    // Render
 
     private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
             .name("render")

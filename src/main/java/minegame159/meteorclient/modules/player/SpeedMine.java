@@ -25,6 +25,7 @@ public class SpeedMine extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     public final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("mode")
+            .description("The mode for mining.")
             .defaultValue(Mode.Normal)
             .build()
     );
@@ -39,7 +40,7 @@ public class SpeedMine extends Module {
     );
 
     public SpeedMine() {
-        super(Category.Player, "speed-mine", "Allows you to quickly mine blocks.");
+        super(Category.Player, "speed-mine", "Allows you to quickly mine blocks via haste modifiers.");
     }
 
     @EventHandler

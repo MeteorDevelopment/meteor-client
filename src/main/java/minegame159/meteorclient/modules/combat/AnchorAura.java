@@ -51,7 +51,7 @@ public class AnchorAura extends Module {
     private final SettingGroup sgPlace = settings.createGroup("Place");
     private final SettingGroup sgBreak = settings.createGroup("Break");
     private final SettingGroup sgDamage = settings.createGroup("Damages");
-    private final SettingGroup sgDelay = settings.createGroup("Delays");
+    private final SettingGroup sgDelay = settings.createGroup("Delay");
     private final SettingGroup sgRange = settings.createGroup("Ranges");
 
     private final Setting<RotationMode> rotationMode = sgGeneral.add(new EnumSetting.Builder<RotationMode>()
@@ -60,6 +60,8 @@ public class AnchorAura extends Module {
             .defaultValue(RotationMode.Place)
             .build()
     );
+
+    // Place
 
     private final Setting<Boolean> place = sgPlace.add(new BoolSetting.Builder()
             .name("place")
@@ -75,12 +77,16 @@ public class AnchorAura extends Module {
             .build()
     );
 
+    // Break
+
     private final Setting<Mode> breakMode = sgBreak.add(new EnumSetting.Builder<Mode>()
             .name("break-mode")
             .description("The way anchors are broken.")
             .defaultValue(Mode.Safe)
             .build()
     );
+
+    // Delay
 
     private final Setting<Integer> placeDelay = sgDelay.add(new IntSetting.Builder()
             .name("place-delay")
@@ -90,6 +96,17 @@ public class AnchorAura extends Module {
             .max(10)
             .build()
     );
+
+    private final Setting<Integer> breakDelay = sgDelay.add(new IntSetting.Builder()
+            .name("break-delay")
+            .description("The amount of delay in ticks for breaking.")
+            .defaultValue(2)
+            .min(0)
+            .max(10)
+            .build()
+    );
+
+    // Range
 
     private final Setting<Double> placeRange = sgRange.add(new DoubleSetting.Builder()
             .name("place-range")
@@ -118,14 +135,7 @@ public class AnchorAura extends Module {
             .build()
     );
 
-    private final Setting<Integer> breakDelay = sgDelay.add(new IntSetting.Builder()
-            .name("break-delay")
-            .description("The amount of delay in ticks for breaking.")
-            .defaultValue(2)
-            .min(0)
-            .max(10)
-            .build()
-    );
+    // Damages
 
     private final Setting<Double> maxDamage = sgDamage.add(new DoubleSetting.Builder()
             .name("max-damage")
@@ -141,7 +151,7 @@ public class AnchorAura extends Module {
             .build()
     );
 
-    public AnchorAura() {super(Category.Combat, "anchor-aura", "Automatically places and breaks Anchors to harm entities.");}
+    public AnchorAura() {super(Category.Combat, "anchor-aura", "Automatically places and breaks Respawn Anchors to harm entities.");}
 
     private int placeDelayLeft = placeDelay.get();
     private int breakDelayLeft = breakDelay.get();

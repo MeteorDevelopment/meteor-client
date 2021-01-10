@@ -46,7 +46,7 @@ public class TotemPopNotifier extends Module {
 
     private final Setting<Boolean> ignoreFriend = sgGeneral.add(new BoolSetting.Builder()
             .name("ignore-friend")
-            .description("Doesn't announce your friend's totem pops.")
+            .description("Doesn't announce your friends' totem pops.")
             .defaultValue(true)
             .build()
     );
@@ -54,7 +54,7 @@ public class TotemPopNotifier extends Module {
     private final Setting<String> popMessage = sgGeneral.add(new StringSetting.Builder()
             .name("pop-message")
             .description("Chat alert to send when a player pops.")
-            .defaultValue("EZ pops. {player} just popped {pops} {totems}. Meteor on Crack!")
+            .defaultValue("EZZZ pops. {player} just popped {pops} {totems}. Meteor on Crack!")
             .build()
     );
 
@@ -68,7 +68,7 @@ public class TotemPopNotifier extends Module {
     private final Map<UUID, Integer> totemPops = new HashMap<>();
 
     public TotemPopNotifier() {
-        super(Category.Combat, "totem-pop-notifier", "Sends a chat message when a player either pops a totem or dies.");
+        super(Category.Combat, "totem-pop-notifier", "Sends a chat/client-side message when a player either pops a totem or dies.");
     }
 
     @Override

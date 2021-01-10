@@ -376,7 +376,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
 
     private void initRender() {
         addModule(new HUD());
-        addModule(new FullBright());
+        addModule(new Fullbright());
         addModule(new StorageESP());
         addModule(new XRay());
         addModule(new ESP());
@@ -403,6 +403,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new ParticleBlocker());
         addModule(new UnfocusedCPU());
         addModule(new FreeRotate());
+        addModule(new EChestPreview());
     }
 
     private void initMisc() {
@@ -421,7 +422,6 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new ItemByteSize());
         addModule(new PacketCanceller());
         addModule(new EntityLogger());
-        addModule(new EChestPreview());
         addModule(new MessageAura());
         addModule(new Nuker());
         addModule(new SoundBlocker());

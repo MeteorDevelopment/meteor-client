@@ -53,6 +53,8 @@ public class BedAura extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgPlace = settings.createGroup("Place");
 
+    // General
+
     private final Setting<Double> placeRange = sgGeneral.add(new DoubleSetting.Builder()
             .name("place-range")
             .description("The distance in a single direction the beds get placed.")
@@ -153,6 +155,8 @@ public class BedAura extends Module {
             .defaultValue(false)
             .build()
     );
+
+    // Place
 
     private final Setting<Double> minDamage = sgPlace.add(new DoubleSetting.Builder()
             .name("min-damage")
