@@ -218,22 +218,32 @@ public class AnchorAura extends Module {
         int anchorSlot = InvUtils.findItemInHotbar(Items.RESPAWN_ANCHOR, itemStack -> true);
         int glowSlot = InvUtils.findItemInHotbar(Items.GLOWSTONE, itemStack -> true);
 
-        if (breakDelayLeft >= breakDelay.get() && findAnchor(target) != null) {
 
-            if (rotationMode.get() == RotationMode.Both || rotationMode.get() == RotationMode.Break) RotationUtils.packetRotate(findAnchor(target));
 
-            breakAnchor(findAnchor(target), glowSlot, anchorSlot);
+        if (breakDelayLeft >= breakDelay.get()) {
 
-            breakDelayLeft = 0;
+            BlockPos breakPos = findAnchor(target);
+
+            if (breakPos != null) {
+                if (rotationMode.get() == RotationMode.Both || rotationMode.get() == RotationMode.Break) RotationUtils.packetRotate(breakPos);
+
+                breakAnchor(breakPos, glowSlot, anchorSlot);
+
+                breakDelayLeft = 0;
+            }
         }
 
-        if (placeDelayLeft >= placeDelay.get() && place.get() && findPlacePos(target) != null) {
+        if (placeDelayLeft >= placeDelay.get() && place.get()) {
 
-            if (rotationMode.get() == RotationMode.Both || rotationMode.get() == RotationMode.Place) RotationUtils.packetRotate(findPlacePos(target));
+            BlockPos placePos = findPlacePos(target);
 
-            PlayerUtils.placeBlock(findPlacePos(target), anchorSlot, Hand.MAIN_HAND);
+            if (placePos != null) {
+                if (rotationMode.get() == RotationMode.Both || rotationMode.get() == RotationMode.Place) RotationUtils.packetRotate(placePos);
 
-            placeDelayLeft = 0;
+                PlayerUtils.placeBlock(placePos, anchorSlot, Hand.MAIN_HAND);
+
+                placeDelayLeft = 0;
+            }
         }
 
         placeDelayLeft++;
