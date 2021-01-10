@@ -72,7 +72,7 @@ public class Surround extends Module {
 
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
             .name("rotate")
-            .description("Automatically faces to the blocks.")
+            .description("Automatically faces towards the obsidian being placed.")
             .defaultValue(true)
             .build()
     );

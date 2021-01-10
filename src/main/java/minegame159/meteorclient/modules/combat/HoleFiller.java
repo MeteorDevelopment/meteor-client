@@ -59,7 +59,7 @@ public class HoleFiller extends Module {
 
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
             .name("rotate")
-            .description("Automatically rotates to the position before placing anvils.")
+            .description("Automatically rotates towards the holes being filled.")
             .defaultValue(true)
             .build()
     );

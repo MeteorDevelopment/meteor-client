@@ -239,7 +239,7 @@ public class KillAura extends Module {
     private final Listener<PostTickEvent> onPostTick = new Listener<>(event -> {
         findEntity();
         if (entity == null) return;
-        if (rotate.get()) RotationUtils.packetRotate(entity);;
+        if (rotate.get()) RotationUtils.packetRotate(entity);
         attack();
     });
 
