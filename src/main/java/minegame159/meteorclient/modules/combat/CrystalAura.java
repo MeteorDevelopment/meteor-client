@@ -641,7 +641,7 @@ public class CrystalAura extends Module {
             }
         }
 
-        RotationUtils.packetRotate(entity);
+        if (rotationMode.get() == RotationMode.FaceCrystal || rotationMode.get() == RotationMode.Return) RotationUtils.packetRotate(entity);
         mc.interactionManager.attackEntity(mc.player, entity);
         mc.world.removeEntity(entity.getEntityId());
         if (!noSwing.get()) mc.player.swingHand(getHand());
