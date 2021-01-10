@@ -12,7 +12,6 @@ import minegame159.meteorclient.rendering.DrawMode;
 import minegame159.meteorclient.rendering.Matrices;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.utils.render.RenderUtils;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.util.Identifier;
@@ -43,8 +42,6 @@ public class InventoryViewerHud extends HudModule {
 
     @Override
     public void render(HudRenderer renderer) {
-        MinecraftClient mc = MinecraftClient.getInstance();
-
         int x = box.getX();
         int y = box.getY();
 
@@ -60,8 +57,6 @@ public class InventoryViewerHud extends HudModule {
     }
 
     private void drawBackground(int x, int y) {
-        MinecraftClient mc = MinecraftClient.getInstance();
-
         switch(hud.invViewerBackground()) {
             case Light:
                 RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);

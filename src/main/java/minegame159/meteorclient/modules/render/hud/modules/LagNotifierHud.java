@@ -29,7 +29,6 @@ public class LagNotifierHud extends DoubleTextHudModule {
             return "4,3";
         }
 
-        MinecraftClient mc = MinecraftClient.getInstance();
         float timeSinceLastTick = TickRate.INSTANCE.getTimeSinceLastTick();
 
         if (timeSinceLastTick > 10) rightColor = RED;

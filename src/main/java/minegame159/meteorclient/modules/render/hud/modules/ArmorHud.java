@@ -8,7 +8,6 @@ package minegame159.meteorclient.modules.render.hud.modules;
 import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.modules.render.hud.HUD;
 import minegame159.meteorclient.modules.render.hud.HudRenderer;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 
@@ -31,8 +30,6 @@ public class ArmorHud extends HudModule {
 
     @Override
     public void render(HudRenderer renderer) {
-        MinecraftClient mc = MinecraftClient.getInstance();
-
         double x = box.getX();
         double y = box.getY();
 
@@ -73,7 +70,6 @@ public class ArmorHud extends HudModule {
     }
 
     private ItemStack getItem(int i) {
-        MinecraftClient mc = MinecraftClient.getInstance();
         if (mc.player == null) {
             switch (i) {
                 default: return Items.DIAMOND_BOOTS.getDefaultStack();

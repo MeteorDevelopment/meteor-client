@@ -9,7 +9,6 @@ import minegame159.meteorclient.modules.render.hud.HUD;
 import minegame159.meteorclient.modules.render.hud.HudRenderer;
 import minegame159.meteorclient.rendering.DrawMode;
 import minegame159.meteorclient.rendering.Renderer;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.util.math.MathHelper;
@@ -26,8 +25,6 @@ public class PlayerModelHud extends HudModule {
 
     @Override
     public void render(HudRenderer renderer) {
-        MinecraftClient mc = MinecraftClient.getInstance();
-
         int x = box.getX();
         int y = box.getY();
 
@@ -38,13 +35,10 @@ public class PlayerModelHud extends HudModule {
         }
 
         if (mc.player != null) {
-            float yaw = hud.playerModelCopyYaw() ? wrapValue(mc.player.prevYaw, mc.player.yaw) : 0.0f;
-            float pitch = hud.playerModelCopyPitch() ? wrapValue(mc.player.prevPitch, mc.player.pitch) : 0.0f;
+            float yaw = hud.playerModelCopyYaw() ? MathHelper.wrapDegrees(mc.player.prevYaw + (mc.player.yaw - mc.player.prevYaw) * mc.getTickDelta()) : 0.0f;
+            float pitch = hud.playerModelCopyPitch() ? mc.player.pitch : 0.0f;
+
             InventoryScreen.drawEntity(x + (int) (25 * hud.playerModelScale()), y + (int) (66 * hud.playerModelScale()), (int) (30 * hud.playerModelScale()), -yaw, -pitch, mc.player);
         }
-    }
-
-    private float wrapValue(float prev, float current) {
-        return MathHelper.wrapDegrees(prev + (current - prev) * MinecraftClient.getInstance().getTickDelta());
     }
 }

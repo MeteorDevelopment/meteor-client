@@ -17,7 +17,6 @@ public class SpeedHud extends DoubleTextHudModule {
 
     @Override
     protected String getRight() {
-        MinecraftClient mc = MinecraftClient.getInstance();
         if (mc.player == null) return "0,0";
 
         double tX = Math.abs(mc.player.getX() - mc.player.prevX);
