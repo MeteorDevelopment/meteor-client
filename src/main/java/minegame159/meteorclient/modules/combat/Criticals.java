@@ -14,9 +14,7 @@ import minegame159.meteorclient.events.world.PreTickEvent;
 import minegame159.meteorclient.mixininterface.IPlayerMoveC2SPacket;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.movement.NoFall;
 import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
@@ -85,8 +83,6 @@ public class Criticals extends Module {
 
                 attackPacket = null;
                 swingPacket = null;
-
-                onEnd();
             } else {
                 sendTimer--;
             }
@@ -94,8 +90,6 @@ public class Criticals extends Module {
     });
 
     private void doPacketMode() {
-        onStart();
-
         double x = mc.player.getX();
         double y = mc.player.getY();
         double z = mc.player.getZ();
@@ -109,14 +103,10 @@ public class Criticals extends Module {
 
         mc.player.networkHandler.sendPacket(p1);
         mc.player.networkHandler.sendPacket(p2);
-
-        onEnd();
     }
 
     private void doJumpMode(SendPacketEvent event) {
         if (!sendPackets) {
-            onStart();
-
             sendPackets = true;
             sendTimer = mode.get() == Mode.Jump ? 6 : 4;
             attackPacket = (PlayerInteractEntityC2SPacket) event.packet;
@@ -132,20 +122,6 @@ public class Criticals extends Module {
             swingPacket = (HandSwingC2SPacket) event.packet;
 
             event.cancel();
-        }
-    }
-
-    private void onStart() {
-        wasNoFallActive = ModuleManager.INSTANCE.get(NoFall.class).isActive();
-
-        if (wasNoFallActive) {
-            ModuleManager.INSTANCE.get(NoFall.class).toggle();
-        }
-    }
-
-    private void onEnd() {
-        if (wasNoFallActive) {
-            ModuleManager.INSTANCE.get(NoFall.class).toggle();
         }
     }
 
