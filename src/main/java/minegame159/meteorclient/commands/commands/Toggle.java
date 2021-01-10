@@ -17,25 +17,23 @@ public class Toggle extends Command {
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
-        builder.then(literal("toggle")
-                .then(argument("module", ModuleArgumentType.module())
+        builder.then(argument("module", ModuleArgumentType.module())
+                .executes(context -> {
+                    Module m = context.getArgument("module", Module.class);
+                    m.toggle();
+                    m.sendToggledMsg();
+                    return SINGLE_SUCCESS;
+                }).then(literal("on")
                         .executes(context -> {
                             Module m = context.getArgument("module", Module.class);
-                            m.toggle();
-                            m.sendToggledMsg();
+                            if (!m.isActive()) m.toggle(); m.sendToggledMsg();
                             return SINGLE_SUCCESS;
-                        }).then(literal("on")
-                                .executes(context -> {
-                                    Module m = context.getArgument("module", Module.class);
-                                    if (!m.isActive()) m.toggle(); m.sendToggledMsg();
-                                    return SINGLE_SUCCESS;
                         })).then(literal("off")
-                                .executes(context -> {
-                                    Module m = context.getArgument("module", Module.class);
-                                    if (m.isActive()) m.toggle(); m.sendToggledMsg();
-                                    return SINGLE_SUCCESS;
-                                })
-                        )
+                        .executes(context -> {
+                            Module m = context.getArgument("module", Module.class);
+                            if (m.isActive()) m.toggle(); m.sendToggledMsg();
+                            return SINGLE_SUCCESS;
+                        })
                 )
         );
     }

@@ -20,7 +20,6 @@ public class CommandManager {
 
     public static void init() {
         addCommand(new ClearChat());
-        addCommand(new Settings());
         addCommand(new Enchant());
         addCommand(new Reset());
         addCommand(new Panic());
