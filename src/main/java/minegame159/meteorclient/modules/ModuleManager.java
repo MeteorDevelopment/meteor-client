@@ -11,7 +11,6 @@ import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listenable;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.commands.CommandManager;
 import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.events.game.GameJoinedEvent;
 import minegame159.meteorclient.events.game.GameLeftEvent;
@@ -259,8 +258,6 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
     public void addModule(Module module) {
         modules.put(module.getClass(), module);
         getGroup(module.category).add(module);
-
-        CommandManager.getDispatcher().register(module.buildCommand());
 
         for (SettingGroup group : module.settings) {
             for (Setting<?> setting : group) {
