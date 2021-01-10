@@ -216,9 +216,9 @@ public class AutoReplenish extends Module {
 
     private void moveItems(int from, int to, boolean stackable) {
         List<Integer> slots = new ArrayList<>();
-        slots.add(from);
-        slots.add(to);
-        if (stackable) slots.add(from);
+        slots.add(InvUtils.invIndexToSlotId(from));
+        slots.add(InvUtils.invIndexToSlotId(to));
+        if (stackable) slots.add(InvUtils.invIndexToSlotId(from));
         InvUtils.addSlots(slots, this.getClass());
     }
 
