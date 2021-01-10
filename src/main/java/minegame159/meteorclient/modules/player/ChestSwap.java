@@ -135,9 +135,9 @@ public class ChestSwap extends Module {
         slot = InvUtils.invIndexToSlotId(slot);
 
         List<Integer> slots = new ArrayList<>();
-        slots.add(slot);
+        slots.add(InvUtils.invIndexToSlotId(slot));
         slots.add(chestSlot);
-        slots.add(slot);
+        slots.add(InvUtils.invIndexToSlotId(slot));
         InvUtils.addSlots(slots, this.getClass());
     }
 
