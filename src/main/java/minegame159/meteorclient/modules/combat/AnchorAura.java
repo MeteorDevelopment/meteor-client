@@ -12,7 +12,6 @@ import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.events.world.PostTickEvent;
-import minegame159.meteorclient.events.world.PreTickEvent;
 import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
@@ -193,13 +192,6 @@ public class AnchorAura extends Module {
         breakDelayLeft = 0;
     }
 
-
-    @EventHandler
-    private final Listener<PreTickEvent> onPreTick = new Listener<>(event -> {
-        mc.player.setSneaking(false);
-        mc.options.keySneak.setPressed(false);
-    });
-
     @EventHandler
     private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
         if (mc.world.getDimension().isRespawnAnchorWorking()) {
@@ -225,6 +217,8 @@ public class AnchorAura extends Module {
             if (breakPos != null) {
                 if (rotationMode.get() == RotationMode.Both || rotationMode.get() == RotationMode.Break) RotationUtils.packetRotate(breakPos);
 
+                mc.player.setSneaking(false);
+                mc.options.keySneak.setPressed(false);
                 breakAnchor(breakPos, glowSlot, anchorSlot);
 
                 breakDelayLeft = 0;
@@ -238,6 +232,8 @@ public class AnchorAura extends Module {
             if (placePos != null) {
                 if (rotationMode.get() == RotationMode.Both || rotationMode.get() == RotationMode.Place) RotationUtils.packetRotate(placePos);
 
+                mc.player.setSneaking(false);
+                mc.options.keySneak.setPressed(false);
                 PlayerUtils.placeBlock(placePos, anchorSlot, Hand.MAIN_HAND);
 
                 placeDelayLeft = 0;
