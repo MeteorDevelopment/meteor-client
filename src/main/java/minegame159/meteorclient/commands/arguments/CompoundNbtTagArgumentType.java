@@ -24,7 +24,16 @@ public class CompoundNbtTagArgumentType implements ArgumentType<CompoundTag> {
             throw EXPECTED_VALUE.createWithContext(reader);
         }
         StringBuilder b = new StringBuilder();
-        while (reader.canRead() && reader.peek() != '}') {
+        int open = 0;
+        while (reader.canRead()) {
+            if (reader.peek() == '{') {
+                open++;
+            }
+            else if (reader.peek() == '}') {
+                open--;
+            }
+            if (open == 0)
+                break;
             b.append(reader.read());
         }
         reader.expect('}');
