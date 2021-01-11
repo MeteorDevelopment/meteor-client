@@ -29,6 +29,7 @@ import net.minecraft.client.texture.AbstractTexture;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.NativeImageBackedTexture;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.math.Vec3d;
 
 import java.io.*;
 import java.util.*;
@@ -81,6 +82,23 @@ public class Waypoints extends Savable<Waypoints> implements Listenable, Iterabl
         return waypoint.end && dimension == Dimension.End;
     }
 
+    public Vec3d getCoords(Waypoint waypoint) {
+
+        double x = waypoint.x;
+        double y = waypoint.y;
+        double z = waypoint.z;
+
+        if (waypoint.actualDimension == Dimension.Overworld && Utils.getDimension() == Dimension.Nether) {
+            x = waypoint.x / 8;
+            z = waypoint.z / 8;
+        } else if (waypoint.actualDimension == Dimension.Nether && Utils.getDimension() == Dimension.Overworld) {
+            x = waypoint.x * 8;
+            z = waypoint.z * 8;
+        }
+
+        return new Vec3d(x, y, z);
+    }
+
     @EventHandler
     private final Listener<RenderEvent> onRender = new Listener<>(event -> {
         for (Waypoint waypoint : this) {
@@ -88,8 +106,12 @@ public class Waypoints extends Savable<Waypoints> implements Listenable, Iterabl
 
             Camera camera = MinecraftClient.getInstance().gameRenderer.getCamera();
 
+            double x = getCoords(waypoint).x;
+            double y = getCoords(waypoint).y;
+            double z = getCoords(waypoint).z;
+
             // Compute scale
-            double dist = Utils.distanceToCamera(waypoint.x, waypoint.y, waypoint.z);
+            double dist = Utils.distanceToCamera(x, y, z);
             if (dist > waypoint.maxVisibleDistance) continue;
             double scale = 0.04;
             if(dist > 10) scale *= dist / 10;
@@ -105,15 +127,11 @@ public class Waypoints extends Savable<Waypoints> implements Listenable, Iterabl
             BACKGROUND.a *= a;
             TEXT.a *= a;
 
-            double x = waypoint.x;
-            double y = waypoint.y;
-            double z = waypoint.z;
-
             double maxViewDist = MinecraftClient.getInstance().options.viewDistance * 16;
             if (dist > maxViewDist) {
-                double dx = waypoint.x - camera.getPos().x;
-                double dy = waypoint.y - camera.getPos().y;
-                double dz = waypoint.z - camera.getPos().z;
+                double dx = x - camera.getPos().x;
+                double dy = y - camera.getPos().y;
+                double dz = z - camera.getPos().z;
 
                 double length = Math.sqrt(dx * dx + dy * dy + dz * dz);
                 dx /= length;
