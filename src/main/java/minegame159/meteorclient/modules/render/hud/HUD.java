@@ -169,6 +169,28 @@ public class HUD extends Module {
             .build()
     );
 
+    private final Setting<Integer> customYaw = sgPlayerModel.add(new IntSetting.Builder()
+            .name("custom-yaw")
+            .description("Custom yaw for when copy yaw is off.")
+            .defaultValue(0)
+            .min(-180)
+            .max(180)
+            .sliderMin(-180)
+            .sliderMax(180)
+            .build()
+    );
+
+    private final Setting<Integer> customPitch = sgPlayerModel.add(new IntSetting.Builder()
+            .name("custom-pitch")
+            .description("Custom pitch for when copy pitch is off.")
+            .defaultValue(0)
+            .min(-180)
+            .max(180)
+            .sliderMin(-180)
+            .sliderMax(180)
+            .build()
+    );
+
     private final Setting<Boolean> playerModelBackground = sgPlayerModel.add(new BoolSetting.Builder()
             .name("player-model-background")
             .description("Displays a background behind the player model.")
@@ -427,6 +449,12 @@ public class HUD extends Module {
     }
     public boolean playerModelCopyPitch() {
         return copyPitch.get();
+    }
+    public int playerModelCustomYaw() {
+        return customYaw.get();
+    }
+    public int playerModelCustomPitch() {
+        return customPitch.get();
     }
     public boolean playerModelBackground() {
         return playerModelBackground.get();

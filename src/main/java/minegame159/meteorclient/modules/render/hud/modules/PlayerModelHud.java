@@ -35,8 +35,8 @@ public class PlayerModelHud extends HudModule {
         }
 
         if (mc.player != null) {
-            float yaw = hud.playerModelCopyYaw() ? MathHelper.wrapDegrees(mc.player.prevYaw + (mc.player.yaw - mc.player.prevYaw) * mc.getTickDelta()) : 0.0f;
-            float pitch = hud.playerModelCopyPitch() ? mc.player.pitch : 0.0f;
+            float yaw = hud.playerModelCopyYaw() ? MathHelper.wrapDegrees(mc.player.prevYaw + (mc.player.yaw - mc.player.prevYaw) * mc.getTickDelta()) : (float) hud.playerModelCustomYaw();
+            float pitch = hud.playerModelCopyPitch() ? mc.player.pitch : (float) hud.playerModelCustomPitch();
 
             InventoryScreen.drawEntity(x + (int) (25 * hud.playerModelScale()), y + (int) (66 * hud.playerModelScale()), (int) (30 * hud.playerModelScale()), -yaw, -pitch, mc.player);
         }

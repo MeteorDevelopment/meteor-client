@@ -79,7 +79,7 @@ public class Freecam extends Module {
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
             .name("rotate")
             .description("Rotates your character to whatever block you are looking at.")
-            .defaultValue(true)
+            .defaultValue(false)
             .build()
     );
 
