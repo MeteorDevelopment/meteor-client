@@ -16,6 +16,7 @@ import minegame159.meteorclient.waypoints.Waypoint;
 import minegame159.meteorclient.waypoints.Waypoints;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 
 public class WWaypoint extends WTable {
     private static final Color WHITE = new Color(255, 255, 255);
@@ -47,9 +48,10 @@ public class WWaypoint extends WTable {
         path.action = () -> {
             if(MinecraftClient.getInstance().player == null || MinecraftClient.getInstance().world == null) return;
             IBaritone baritone = BaritoneAPI.getProvider().getPrimaryBaritone();
-            if (baritone.getPathingBehavior().isPathing())
-                baritone.getPathingBehavior().cancelEverything();
-            baritone.getCustomGoalProcess().setGoalAndPath(new GoalGetToBlock(new BlockPos(waypoint.x, waypoint.y, waypoint.z)));
+            if (baritone.getPathingBehavior().isPathing()) baritone.getPathingBehavior().cancelEverything();
+            Vec3d vec = Waypoints.INSTANCE.getCoords(waypoint);
+            BlockPos pos = new BlockPos(vec.x, vec.y, vec.z);
+            baritone.getCustomGoalProcess().setGoalAndPath(new GoalGetToBlock(pos));
         };
         right.add(path);
     }
