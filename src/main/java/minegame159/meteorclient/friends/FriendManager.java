@@ -6,7 +6,7 @@
 package minegame159.meteorclient.friends;
 
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.EventStore;
+import minegame159.meteorclient.events.meteor.FriendListChangedEvent;
 import minegame159.meteorclient.utils.entity.FriendType;
 import minegame159.meteorclient.utils.files.Savable;
 import minegame159.meteorclient.utils.misc.NbtUtils;
@@ -16,6 +16,7 @@ import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -46,7 +47,7 @@ public class FriendManager extends Savable<FriendManager> implements Iterable<Fr
     public boolean add(Friend friend) {
         if (!friends.contains(friend)) {
             friends.add(friend);
-            MeteorClient.EVENT_BUS.post(EventStore.friendListChangedEvent());
+            MeteorClient.EVENT_BUS.post(FriendListChangedEvent.get());
             save();
             return true;
         }
@@ -76,9 +77,9 @@ public class FriendManager extends Savable<FriendManager> implements Iterable<Fr
         return get(player.getGameProfile().getName());
     }
 
-    public boolean isTrusted(PlayerEntity player) {
+    public boolean notTrusted(PlayerEntity player) {
         Friend friend = get(player);
-        return friend != null && friend.type == FriendType.Trusted;
+        return friend == null || friend.type != FriendType.Trusted;
     }
 
     public boolean show(PlayerEntity player) {
@@ -132,7 +133,7 @@ public class FriendManager extends Savable<FriendManager> implements Iterable<Fr
 
     public boolean remove(Friend friend) {
         if (friends.remove(friend)) {
-            MeteorClient.EVENT_BUS.post(EventStore.friendListChangedEvent());
+            MeteorClient.EVENT_BUS.post(FriendListChangedEvent.get());
             save();
             return true;
         }
@@ -145,7 +146,7 @@ public class FriendManager extends Savable<FriendManager> implements Iterable<Fr
     }
 
     @Override
-    public Iterator<Friend> iterator() {
+    public @NotNull Iterator<Friend> iterator() {
         return friends.iterator();
     }
 

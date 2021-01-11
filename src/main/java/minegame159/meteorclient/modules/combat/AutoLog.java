@@ -8,11 +8,11 @@ package minegame159.meteorclient.modules.combat;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.world.PostTickEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.movement.NoFall;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.IntSetting;
@@ -101,7 +101,7 @@ public class AutoLog extends Module {
     }
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
         if (mc.player.getHealth() <= 0) {
             this.toggle();
             return;
@@ -121,7 +121,7 @@ public class AutoLog extends Module {
 
         for (Entity entity : mc.world.getEntities()) {
             if(entity instanceof PlayerEntity && entity.getUuid() != mc.player.getUuid()) {
-                if (onlyTrusted.get() && entity != mc.player && !FriendManager.INSTANCE.isTrusted((PlayerEntity) entity)) {
+                if (onlyTrusted.get() && entity != mc.player && FriendManager.INSTANCE.notTrusted((PlayerEntity) entity)) {
                         mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(new LiteralText("[AutoLog] A non-trusted player appeared in your render distance.")));
                         if (toggleOff.get()) this.toggle();
                         break;
@@ -146,7 +146,7 @@ public class AutoLog extends Module {
             if(entity instanceof EndCrystalEntity && damageTaken < DamageCalcUtils.crystalDamage(mc.player, entity.getPos())){
                 damageTaken = DamageCalcUtils.crystalDamage(mc.player, entity.getPos());
             }else if(entity instanceof PlayerEntity && damageTaken < DamageCalcUtils.getSwordDamage((PlayerEntity) entity, true)){
-                if(!FriendManager.INSTANCE.isTrusted((PlayerEntity) entity) && mc.player.getPos().distanceTo(entity.getPos()) < 5){
+                if(FriendManager.INSTANCE.notTrusted((PlayerEntity) entity) && mc.player.getPos().distanceTo(entity.getPos()) < 5){
                     if(((PlayerEntity) entity).getActiveItem().getItem() instanceof SwordItem){
                         damageTaken = DamageCalcUtils.getSwordDamage((PlayerEntity) entity, true);
                     }
@@ -172,7 +172,7 @@ public class AutoLog extends Module {
         return damageTaken;
     }
 
-    private final Listener<PostTickEvent> healthListener = new Listener<>(event -> {
+    private final Listener<TickEvent.Post> healthListener = new Listener<>(event -> {
         if(this.isActive()){
             disableHealthListener();
         }

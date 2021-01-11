@@ -52,9 +52,7 @@ public class AutoWeapon extends Module {
     );
 
     @EventHandler
-    private final Listener<AttackEntityEvent> onAttack = new Listener<>(event -> {
-            mc.player.inventory.selectedSlot = getBestWeapon();
-    });
+    private final Listener<AttackEntityEvent> onAttack = new Listener<>(event -> mc.player.inventory.selectedSlot = getBestWeapon());
 
     private int getBestWeapon(){
         int slotS = mc.player.inventory.selectedSlot;

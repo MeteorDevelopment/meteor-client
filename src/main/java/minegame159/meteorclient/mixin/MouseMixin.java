@@ -6,7 +6,8 @@
 package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.EventStore;
+import minegame159.meteorclient.events.entity.player.RightClickEvent;
+import minegame159.meteorclient.events.meteor.MiddleMouseButtonEvent;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.render.FreeRotate;
 import minegame159.meteorclient.modules.render.Freecam;
@@ -25,9 +26,9 @@ public class MouseMixin {
     @Inject(method = "onMouseButton", at = @At("TAIL"))
     private void onMouseButton(long window, int button, int action, int mods, CallbackInfo info) {
         if (button == GLFW.GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW.GLFW_PRESS) {
-            MeteorClient.EVENT_BUS.post(EventStore.middleMouseButtonEvent());
+            MeteorClient.EVENT_BUS.post(MiddleMouseButtonEvent.get());
         }else if((button == GLFW.GLFW_MOUSE_BUTTON_2) && (action == GLFW.GLFW_PRESS)) {
-            MeteorClient.EVENT_BUS.post(EventStore.rightClickEvent());
+            MeteorClient.EVENT_BUS.post(RightClickEvent.get());
         }
     }
 

@@ -6,7 +6,6 @@
 package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.events.render.DrawSideEvent;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
@@ -28,7 +27,7 @@ public abstract class BlockMixin extends AbstractBlock implements ItemConvertibl
 
     @Inject(at = @At("HEAD"), method = "shouldDrawSide", cancellable = true)
     private static void onShouldDrawSide(BlockState state, BlockView view, BlockPos pos, Direction facing, CallbackInfoReturnable<Boolean> info) {
-        DrawSideEvent event = MeteorClient.postEvent(EventStore.drawSideEvent(state));
+        DrawSideEvent event = MeteorClient.postEvent(DrawSideEvent.get(state));
         if (event.isSet()) info.setReturnValue(event.getDraw());
     }
 }

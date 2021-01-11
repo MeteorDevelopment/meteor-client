@@ -2,7 +2,7 @@ package minegame159.meteorclient.modules.player;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.world.PostTickEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixininterface.IStatusEffectInstance;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
@@ -43,7 +43,7 @@ public class SpeedMine extends Module {
     }
 
     @EventHandler
-    public final Listener<PostTickEvent> onTick = new Listener<>(e -> {
+    public final Listener<TickEvent.Post> onTick = new Listener<>(e -> {
         Mode mode = this.mode.get();
 
         if (mode == Mode.Haste1 || mode == Mode.Haste2) {

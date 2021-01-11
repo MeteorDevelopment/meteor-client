@@ -7,7 +7,7 @@ package minegame159.meteorclient.modules.player;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.packets.SendPacketEvent;
+import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.mixininterface.IBlockHitResult;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
@@ -20,7 +20,7 @@ public class BuildHeight extends Module {
     }
 
     @EventHandler
-    private final Listener<SendPacketEvent> onSendPacket = new Listener<>(event -> {
+    private final Listener<PacketEvent.Send> onSendPacket = new Listener<>(event -> {
         if (!(event.packet instanceof PlayerInteractBlockC2SPacket)) return;
 
         PlayerInteractBlockC2SPacket p = (PlayerInteractBlockC2SPacket) event.packet;

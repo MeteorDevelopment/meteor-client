@@ -8,8 +8,8 @@ package minegame159.meteorclient.modules.combat;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.game.GameJoinedEvent;
-import minegame159.meteorclient.events.packets.ReceivePacketEvent;
-import minegame159.meteorclient.events.world.PostTickEvent;
+import minegame159.meteorclient.events.packets.PacketEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
@@ -82,7 +82,7 @@ public class TotemPopNotifier extends Module {
     });
 
     @EventHandler
-    private final Listener<ReceivePacketEvent> onReceivePacket = new Listener<>(event -> {
+    private final Listener<PacketEvent.Receive> onReceivePacket = new Listener<>(event -> {
         if (!(event.packet instanceof EntityStatusS2CPacket)) return;
 
         EntityStatusS2CPacket p = (EntityStatusS2CPacket) event.packet;
@@ -102,7 +102,7 @@ public class TotemPopNotifier extends Module {
     });
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
         synchronized (totemPops) {
             for (PlayerEntity player : mc.world.getPlayers()) {
                 if (!totemPops.containsKey(player.getUuid())) continue;

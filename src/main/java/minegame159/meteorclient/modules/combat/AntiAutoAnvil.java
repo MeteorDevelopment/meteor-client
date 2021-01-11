@@ -2,7 +2,7 @@ package minegame159.meteorclient.modules.combat;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.world.PreTickEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
@@ -29,7 +29,7 @@ public class AntiAutoAnvil extends Module {
     }
 
     @EventHandler
-    private final Listener<PreTickEvent> onTick = new Listener<>(event -> {
+    private final Listener<TickEvent.Pre> onTick = new Listener<>(event -> {
         assert mc.interactionManager != null;
         assert mc.world != null;
         assert mc.player != null;

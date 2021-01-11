@@ -6,8 +6,9 @@
 package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.EventStore;
+import minegame159.meteorclient.events.game.GameLeftEvent;
 import minegame159.meteorclient.events.game.OpenScreenEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.gui.GuiKeyEvents;
 import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.mixininterface.IMinecraftClient;
@@ -68,27 +69,27 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
         OnlinePlayers.update();
 
         getProfiler().push("meteor-client_pre_update");
-        MeteorClient.EVENT_BUS.post(EventStore.preTickEvent());
+        MeteorClient.EVENT_BUS.post(TickEvent.Pre.get());
         getProfiler().pop();
     }
 
     @Inject(at = @At("TAIL"), method = "tick")
     private void onTick(CallbackInfo info) {
         getProfiler().push("meteor-client_post_update");
-        MeteorClient.EVENT_BUS.post(EventStore.postTickEvent());
+        MeteorClient.EVENT_BUS.post(TickEvent.Post.get());
         getProfiler().pop();
     }
     
     @Inject(method = "disconnect(Lnet/minecraft/client/gui/screen/Screen;)V", at = @At("HEAD"))
     private void onDisconnect(Screen screen, CallbackInfo info) {
-        if (world != null) MeteorClient.EVENT_BUS.post(EventStore.gameLeftEvent());
+        if (world != null) MeteorClient.EVENT_BUS.post(GameLeftEvent.get());
     }
 
     @Inject(method = "openScreen", at = @At("HEAD"), cancellable = true)
     private void onOpenScreen(Screen screen, CallbackInfo info) {
         if (screen instanceof WidgetScreen) screen.mouseMoved(mouse.getX() * window.getScaleFactor(), mouse.getY() * window.getScaleFactor());
 
-        OpenScreenEvent event = EventStore.openScreenEvent(screen);
+        OpenScreenEvent event = OpenScreenEvent.get(screen);
         MeteorClient.EVENT_BUS.post(event);
 
         if (event.isCancelled()) {

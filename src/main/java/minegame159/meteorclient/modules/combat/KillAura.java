@@ -8,8 +8,7 @@ package minegame159.meteorclient.modules.combat;
 import baritone.api.BaritoneAPI;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.world.PostTickEvent;
-import minegame159.meteorclient.events.world.PreTickEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
@@ -191,12 +190,10 @@ public class KillAura extends Module {
     }
 
     @EventHandler
-    private final Listener<PreTickEvent> onPreTick = new Listener<>(event -> {
-        entity = null;
-    });
+    private final Listener<TickEvent.Pre> onPreTick = new Listener<>(event -> entity = null);
 
     /*@EventHandler
-    private final Listener<SendPacketEvent> onSendPacket = new Listener<>(event -> {
+    private final Listener<PacketEvent.Send> onSendPacket = new Listener<>(event -> {
         if (movePacket != null) return;
 
         if (event.packet instanceof PlayerMoveC2SPacket.PositionOnly) {
@@ -225,7 +222,7 @@ public class KillAura extends Module {
     });
 
     @EventHandler
-    private final Listener<PostTickEvent> onPostTick = new Listener<>(event -> {
+    private final Listener<TickEvent.Post> onPostTick = new Listener<>(event -> {
         if (movePacket == null) {
             mc.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.LookOnly(
                     mc.player.yaw,
@@ -236,7 +233,7 @@ public class KillAura extends Module {
     });*/
 
     @EventHandler
-    private final Listener<PostTickEvent> onPostTick = new Listener<>(event -> {
+    private final Listener<TickEvent.Post> onPostTick = new Listener<>(event -> {
         findEntity();
         if (entity == null) return;
         if (rotate.get()) RotationUtils.packetRotate(entity);

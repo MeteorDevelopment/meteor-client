@@ -9,8 +9,8 @@ package minegame159.meteorclient.modules.combat;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.packets.SendPacketEvent;
-import minegame159.meteorclient.events.world.PreTickEvent;
+import minegame159.meteorclient.events.packets.PacketEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixininterface.IPlayerMoveC2SPacket;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
@@ -42,8 +42,6 @@ public class Criticals extends Module {
         super(Category.Combat, "criticals", "Performs critical attacks when you hit your target.");
     }
 
-    private boolean wasNoFallActive;
-
     private PlayerInteractEntityC2SPacket attackPacket;
     private HandSwingC2SPacket swingPacket;
     private boolean sendPackets;
@@ -51,7 +49,6 @@ public class Criticals extends Module {
 
     @Override
     public void onActivate() {
-        wasNoFallActive = false;
         attackPacket = null;
         swingPacket = null;
         sendPackets = false;
@@ -59,20 +56,20 @@ public class Criticals extends Module {
     }
 
     @EventHandler
-    private final Listener<SendPacketEvent> onSendPacket = new Listener<>(event -> {
+    private final Listener<PacketEvent.Send> onSendPacket = new Listener<>(event -> {
 
         if (event.packet instanceof PlayerInteractEntityC2SPacket && ((PlayerInteractEntityC2SPacket) event.packet).getType() == PlayerInteractEntityC2SPacket.InteractionType.ATTACK) {
-            if (!shouldDoCriticals()) return;
+            if (skipCrit()) return;
             if (mode.get() == Mode.Packet) doPacketMode();
             else doJumpMode(event);
         } else if (event.packet instanceof HandSwingC2SPacket && mode.get() != Mode.Packet) {
-            if (!shouldDoCriticals()) return;
+            if (skipCrit()) return;
             doJumpModeSwing(event);
         }
     });
 
     @EventHandler
-    private final Listener<PreTickEvent> onTick = new Listener<>(event -> {
+    private final Listener<TickEvent.Pre> onTick = new Listener<>(event -> {
         if (sendPackets) {
             if (sendTimer <= 0) {
                 sendPackets = false;
@@ -105,7 +102,7 @@ public class Criticals extends Module {
         mc.player.networkHandler.sendPacket(p2);
     }
 
-    private void doJumpMode(SendPacketEvent event) {
+    private void doJumpMode(PacketEvent.Send event) {
         if (!sendPackets) {
             sendPackets = true;
             sendTimer = mode.get() == Mode.Jump ? 6 : 4;
@@ -117,7 +114,7 @@ public class Criticals extends Module {
         }
     }
 
-    private void doJumpModeSwing(SendPacketEvent event) {
+    private void doJumpModeSwing(PacketEvent.Send event) {
         if (sendPackets && swingPacket == null) {
             swingPacket = (HandSwingC2SPacket) event.packet;
 
@@ -125,9 +122,9 @@ public class Criticals extends Module {
         }
     }
 
-    private boolean shouldDoCriticals() {
+    private boolean skipCrit() {
         boolean a = !mc.player.isSubmergedInWater() && !mc.player.isInLava() && !mc.player.isClimbing();
-        if (!mc.player.isOnGround()) return false;
-        return a;
+        if (!mc.player.isOnGround()) return true;
+        return !a;
     }
 }

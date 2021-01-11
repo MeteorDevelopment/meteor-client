@@ -6,7 +6,6 @@
 package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.events.world.ParticleEvent;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.misc.Nuker;
@@ -27,7 +26,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class ParticleManagerMixin {
     @Inject(method = "addParticle(Lnet/minecraft/particle/ParticleEffect;DDDDDD)Lnet/minecraft/client/particle/Particle;", at = @At("HEAD"), cancellable = true)
     private void onAddParticle(ParticleEffect parameters, double x, double y, double z, double velocityX, double velocityY, double velocityZ, CallbackInfoReturnable<Particle> info) {
-        ParticleEvent event = MeteorClient.postEvent(EventStore.particleEvent(parameters));
+        ParticleEvent event = MeteorClient.postEvent(ParticleEvent.get(parameters));
         if (event.isCancelled()) info.cancel();
     }
 

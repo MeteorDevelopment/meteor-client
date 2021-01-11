@@ -14,7 +14,7 @@ import minegame159.meteorclient.events.entity.player.BreakBlockEvent;
 import minegame159.meteorclient.events.entity.player.PickItemsEvent;
 import minegame159.meteorclient.events.entity.player.PlaceBlockEvent;
 import minegame159.meteorclient.events.game.OpenScreenEvent;
-import minegame159.meteorclient.events.world.PostTickEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
@@ -58,7 +58,7 @@ public class Announcer extends Module {
     }
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
         for (Feature feature : features) {
             if (feature.isEnabled()) feature.tick();
         }

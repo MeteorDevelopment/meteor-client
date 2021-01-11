@@ -6,5 +6,14 @@
 package minegame159.meteorclient.events.entity.player;
 
 public class SendMessageEvent {
+    private static final SendMessageEvent INSTANCE = new SendMessageEvent();
+
     public String msg;
+
+    public static SendMessageEvent get(String msg) {
+        INSTANCE.msg = msg;
+        return INSTANCE;
+    }
 }
+
+

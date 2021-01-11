@@ -8,7 +8,7 @@ package minegame159.meteorclient.mixin;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.MapCodec;
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.EventStore;
+import minegame159.meteorclient.events.world.BlockActivateEvent;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -28,7 +28,7 @@ public abstract class BlockStateMixin extends AbstractBlock.AbstractBlockState {
 
     @Override
     public ActionResult onUse(World world, PlayerEntity player, Hand hand, BlockHitResult hit) {
-        MeteorClient.EVENT_BUS.post(EventStore.blockActivateEvent((BlockState) (Object) this));
+        MeteorClient.EVENT_BUS.post(BlockActivateEvent.get((BlockState) (Object) this));
         return super.onUse(world, player, hand, hit);
     }
 }

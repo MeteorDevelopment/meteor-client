@@ -2,7 +2,7 @@ package minegame159.meteorclient.modules.player;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.world.PostTickEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.Category;
@@ -110,7 +110,7 @@ public class AntiAFK extends Module {
 
     @SuppressWarnings("unused")
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
         if (mc.player != null && mc.world != null) {
             if (spin.get())
                 mc.player.yaw = (mc.player.yaw >= 360) ? 0 : mc.player.yaw + random.nextInt(spinSpeed.get()) + 1;

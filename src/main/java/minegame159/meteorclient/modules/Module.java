@@ -8,7 +8,8 @@ package minegame159.meteorclient.modules;
 import me.zero.alpine.listener.Listenable;
 import minegame159.meteorclient.Config;
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.EventStore;
+import minegame159.meteorclient.events.meteor.ModuleBindChangedEvent;
+import minegame159.meteorclient.events.meteor.ModuleVisibilityChangedEvent;
 import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.gui.screens.ModuleScreen;
 import minegame159.meteorclient.gui.widgets.WWidget;
@@ -145,7 +146,7 @@ public abstract class Module implements Listenable, ISerializable<Module> {
 
     public void setVisible(boolean visible) {
         this.visible = visible;
-        MeteorClient.EVENT_BUS.post(EventStore.moduleVisibilityChangedEvent(this));
+        MeteorClient.EVENT_BUS.post(ModuleVisibilityChangedEvent.get(this));
     }
 
     public boolean isVisible() {
@@ -162,7 +163,7 @@ public abstract class Module implements Listenable, ISerializable<Module> {
 
     public void setKey(int key, boolean postEvent) {
         this.key = key;
-        if (postEvent) MeteorClient.EVENT_BUS.post(EventStore.moduleBindChangedEvent(this));
+        if (postEvent) MeteorClient.EVENT_BUS.post(ModuleBindChangedEvent.get(this));
     }
     public void setKey(int key) {
         setKey(key, true);

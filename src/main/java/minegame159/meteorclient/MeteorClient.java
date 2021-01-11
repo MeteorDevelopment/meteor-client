@@ -16,7 +16,7 @@ import minegame159.meteorclient.commands.commands.Ignore;
 import minegame159.meteorclient.events.game.GameLeftEvent;
 import minegame159.meteorclient.events.meteor.ClientInitialisedEvent;
 import minegame159.meteorclient.events.meteor.KeyEvent;
-import minegame159.meteorclient.events.world.PostTickEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.gui.screens.topbar.TopBarModules;
@@ -133,7 +133,7 @@ public class MeteorClient implements ClientModInitializer, Listenable {
     private final Listener<GameLeftEvent> onGameLeft = new Listener<>(event -> save());
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
         Capes.tick();
 
         if (screenToOpen != null && mc.currentScreen == null) {
