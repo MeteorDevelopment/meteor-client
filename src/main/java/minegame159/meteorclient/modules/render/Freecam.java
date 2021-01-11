@@ -78,7 +78,7 @@ public class Freecam extends Module {
 
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
             .name("rotate")
-            .description("Rotates your character to whatever block you are looking at.")
+            .description("Rotates your character to whatever block or entity you are looking at.")
             .defaultValue(false)
             .build()
     );
@@ -144,11 +144,6 @@ public class Freecam extends Module {
     private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
         if (mc.currentScreen != null) return;
 
-        if (mc.crosshairTarget instanceof BlockHitResult) {
-            posNormal = (mc.crosshairTarget).getPos();
-            normalPos = ((BlockHitResult) mc.crosshairTarget).getBlockPos();
-        } else posEntity = ((EntityHitResult) mc.crosshairTarget).getEntity().getBlockPos();
-
         Vec3d forward = Vec3d.fromPolar(0, getYaw(1 / 20f));
         Vec3d right = Vec3d.fromPolar(0, getYaw(1 / 20f) + 90);
         double velX = 0;
@@ -157,6 +152,11 @@ public class Freecam extends Module {
 
 
         if (rotate.get()) {
+            if (mc.crosshairTarget instanceof BlockHitResult) {
+                posNormal = (mc.crosshairTarget).getPos();
+                normalPos = ((BlockHitResult) mc.crosshairTarget).getBlockPos();
+            } else posEntity = ((EntityHitResult) mc.crosshairTarget).getEntity().getBlockPos();
+
             if (mc.crosshairTarget instanceof EntityHitResult) RotationUtils.clientRotate(posEntity);
             else if (mc.world.getBlockState(normalPos).getBlock() != Blocks.AIR) RotationUtils.clientRotate(posNormal);
         }
