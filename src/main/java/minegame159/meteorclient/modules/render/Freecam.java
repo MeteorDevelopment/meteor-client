@@ -23,7 +23,6 @@ import minegame159.meteorclient.utils.misc.input.KeyAction;
 import minegame159.meteorclient.utils.player.Chat;
 import minegame159.meteorclient.utils.player.RotationUtils;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.minecraft.block.Blocks;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
@@ -86,10 +85,6 @@ public class Freecam extends Module {
     public final Vec3d pos = new Vec3d(0, 0, 0);
     public final Vec3d prevPos = new Vec3d(0, 0, 0);
 
-    private Vec3d posNormal;
-    private BlockPos normalPos;
-    private BlockPos posEntity;
-
     public float yaw, pitch;
     public float prevYaw, prevPitch;
 
@@ -124,8 +119,6 @@ public class Freecam extends Module {
     @Override
     public void onDeactivate() {
         if (reloadChunks.get()) mc.worldRenderer.reload();
-        if (rotate.get()) mc.player.yaw = prevYaw;
-        if (rotate.get()) mc.player.pitch = prevPitch;
     }
 
     @EventHandler
@@ -152,13 +145,17 @@ public class Freecam extends Module {
 
 
         if (rotate.get()) {
-            if (mc.crosshairTarget instanceof BlockHitResult) {
-                posNormal = (mc.crosshairTarget).getPos();
-                normalPos = ((BlockHitResult) mc.crosshairTarget).getBlockPos();
-            } else posEntity = ((EntityHitResult) mc.crosshairTarget).getEntity().getBlockPos();
+            BlockPos crossHairPos;
+            Vec3d crossHairPosition;
 
-            if (mc.crosshairTarget instanceof EntityHitResult) RotationUtils.clientRotate(posEntity);
-            else if (mc.world.getBlockState(normalPos).getBlock() != Blocks.AIR) RotationUtils.clientRotate(posNormal);
+            if (mc.crosshairTarget instanceof BlockHitResult) {
+                crossHairPosition = ((BlockHitResult) mc.crosshairTarget).getPos();
+                crossHairPos = ((BlockHitResult) mc.crosshairTarget).getBlockPos();
+                if (!mc.world.getBlockState(crossHairPos).isAir()) RotationUtils.clientRotate(crossHairPosition);
+            } else {
+                crossHairPos = ((EntityHitResult) mc.crosshairTarget).getEntity().getBlockPos();
+                RotationUtils.clientRotate(crossHairPos);
+            }
         }
 
         double s = 0.5;
