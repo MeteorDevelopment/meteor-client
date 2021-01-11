@@ -27,6 +27,16 @@ public class RotationUtils {
         mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(yaw, pitch, mc.player.isOnGround()));
     }
 
+    public static void clientRotate(BlockPos blockPos) {
+        mc.player.yaw = getNeededYaw(Utils.vec3d(blockPos));
+        mc.player.pitch = getNeededPitch(Utils.vec3d(blockPos));
+    }
+
+    public static void clientRotate(Vec3d vec) {
+        mc.player.yaw = getNeededYaw(vec);
+        mc.player.pitch = getNeededPitch(vec);
+    }
+
     public static float getNeededYaw(Vec3d vec) {
         return mc.player.yaw + MathHelper.wrapDegrees((float) Math.toDegrees(Math.atan2(vec.z - mc.player.getZ(), vec.x - mc.player.getX())) - 90f - mc.player.yaw);
     }

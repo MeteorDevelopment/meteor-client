@@ -21,8 +21,13 @@ import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.misc.input.KeyAction;
 import minegame159.meteorclient.utils.player.Chat;
+import minegame159.meteorclient.utils.player.RotationUtils;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.minecraft.block.Blocks;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.EntityHitResult;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 
@@ -71,8 +76,19 @@ public class Freecam extends Module {
             .build()
     );
 
+    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
+            .name("rotate")
+            .description("Rotates your character to whatever block you are looking at.")
+            .defaultValue(true)
+            .build()
+    );
+
     public final Vec3d pos = new Vec3d(0, 0, 0);
     public final Vec3d prevPos = new Vec3d(0, 0, 0);
+
+    private Vec3d posNormal;
+    private BlockPos normalPos;
+    private BlockPos posEntity;
 
     public float yaw, pitch;
     public float prevYaw, prevPitch;
@@ -107,6 +123,8 @@ public class Freecam extends Module {
     @Override
     public void onDeactivate() {
         if (reloadChunks.get()) mc.worldRenderer.reload();
+        if (rotate.get()) mc.player.yaw = yaw;
+        if (rotate.get()) mc.player.pitch = pitch;
     }
 
     @EventHandler
@@ -125,11 +143,22 @@ public class Freecam extends Module {
     private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
         if (mc.currentScreen != null) return;
 
+        if (mc.crosshairTarget instanceof BlockHitResult) {
+            posNormal = (mc.crosshairTarget).getPos();
+            normalPos = ((BlockHitResult) mc.crosshairTarget).getBlockPos();
+        } else posEntity = ((EntityHitResult) mc.crosshairTarget).getEntity().getBlockPos();
+
         Vec3d forward = Vec3d.fromPolar(0, getYaw(1 / 20f));
         Vec3d right = Vec3d.fromPolar(0, getYaw(1 / 20f) + 90);
         double velX = 0;
         double velY = 0;
         double velZ = 0;
+
+
+        if (rotate.get()) {
+            if (mc.crosshairTarget instanceof EntityHitResult) RotationUtils.clientRotate(posEntity);
+            else if (mc.world.getBlockState(normalPos).getBlock() != Blocks.AIR) RotationUtils.clientRotate(posNormal);
+        }
 
         double s = 0.5;
         if (mc.options.keySprint.isPressed()) s = 1;
