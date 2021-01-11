@@ -3,6 +3,9 @@ package minegame159.meteorclient.events.render;
 import net.minecraft.block.BlockState;
 
 public class DrawSideEvent {
+
+    private static final DrawSideEvent INSTANCE = new DrawSideEvent();
+
     public BlockState state;
 
     private boolean set, draw;
@@ -21,5 +24,11 @@ public class DrawSideEvent {
     }
     public boolean getDraw() {
         return draw;
+    }
+
+    public static DrawSideEvent get(BlockState state) {
+        INSTANCE.reset();
+        INSTANCE.state = state;
+        return INSTANCE;
     }
 }

@@ -7,7 +7,6 @@ package minegame159.meteorclient.mixin;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.ModuleManager;
@@ -70,7 +69,7 @@ public abstract class GameRendererMixin {
 
         client.getProfiler().push("meteor-client_render");
 
-        RenderEvent event = EventStore.renderEvent(tickDelta, camera.getPos().x, camera.getPos().y, camera.getPos().z);
+        RenderEvent event = RenderEvent.get(tickDelta, camera.getPos().x, camera.getPos().y, camera.getPos().z);
 
         Renderer.begin(event);
         MeteorClient.EVENT_BUS.post(event);

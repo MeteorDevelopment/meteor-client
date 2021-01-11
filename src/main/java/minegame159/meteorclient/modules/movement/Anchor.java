@@ -7,8 +7,7 @@ package minegame159.meteorclient.modules.movement;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.world.PostTickEvent;
-import minegame159.meteorclient.events.world.PreTickEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixin.AbstractBlockAccessor;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
@@ -88,12 +87,10 @@ public class Anchor extends Module {
     }
 
     @EventHandler
-    private final Listener<PreTickEvent> onPreTick = new Listener<>(event -> {
-        cancelJump = foundHole && cancelMove.get() && mc.player.pitch >= minPitch.get();
-    });
+    private final Listener<TickEvent.Pre> onPreTick = new Listener<>(event -> cancelJump = foundHole && cancelMove.get() && mc.player.pitch >= minPitch.get());
 
     @EventHandler
-    private final Listener<PostTickEvent> onPostTick = new Listener<>(event -> {
+    private final Listener<TickEvent.Post> onPostTick = new Listener<>(event -> {
         controlMovement = false;
 
         int x = MathHelper.floor(mc.player.getX());

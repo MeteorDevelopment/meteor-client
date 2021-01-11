@@ -13,10 +13,10 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.game.GameJoinedEvent;
 import minegame159.meteorclient.events.game.GameLeftEvent;
 import minegame159.meteorclient.events.meteor.ActiveModulesChangedEvent;
-import minegame159.meteorclient.events.world.PostTickEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.combat.AutoLog;
 import minegame159.meteorclient.modules.movement.GUIMove;
 import minegame159.meteorclient.modules.movement.Jesus;
@@ -140,7 +140,7 @@ public class InfinityMiner extends Module {
 
     @SuppressWarnings("unused")
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
         try {
             if (mc.player == null) return;
             if (!baritoneRunning && currentMode == Mode.Still) {

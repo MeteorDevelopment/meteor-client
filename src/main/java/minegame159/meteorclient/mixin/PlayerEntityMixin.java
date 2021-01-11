@@ -6,7 +6,7 @@
 package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.EventStore;
+import minegame159.meteorclient.events.entity.DropItemsEvent;
 import minegame159.meteorclient.events.entity.player.ClipAtLedgeEvent;
 import minegame159.meteorclient.mixininterface.IPlayerEntity;
 import minegame159.meteorclient.modules.ModuleManager;
@@ -32,13 +32,13 @@ public class PlayerEntityMixin implements IPlayerEntity {
 
     @Inject(method = "clipAtLedge", at = @At("HEAD"), cancellable = true)
     protected void clipAtLedge(CallbackInfoReturnable<Boolean> info) {
-        ClipAtLedgeEvent event = MeteorClient.postEvent(EventStore.clipAtLedgeEvent());
+        ClipAtLedgeEvent event = MeteorClient.postEvent(ClipAtLedgeEvent.get());
         if (event.isSet()) info.setReturnValue(event.isClip());
     }
 
     @Inject(method = "dropItem(Lnet/minecraft/item/ItemStack;ZZ)Lnet/minecraft/entity/ItemEntity;", at = @At("HEAD"))
     private void onDropItem(ItemStack stack, boolean bl, boolean bl2, CallbackInfoReturnable<ItemEntity> info) {
-        MeteorClient.EVENT_BUS.post(EventStore.dropItemEvent(stack));
+        MeteorClient.EVENT_BUS.post(DropItemsEvent.get(stack));
     }
 
     @Override

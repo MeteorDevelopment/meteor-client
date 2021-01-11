@@ -1,6 +1,8 @@
 package minegame159.meteorclient.events.entity.player;
 
 public class ClipAtLedgeEvent {
+    private static final ClipAtLedgeEvent INSTANCE = new ClipAtLedgeEvent();
+
     private boolean set, clip;
 
     public void reset() {
@@ -17,5 +19,10 @@ public class ClipAtLedgeEvent {
     }
     public boolean isClip() {
         return clip;
+    }
+
+    public static ClipAtLedgeEvent get() {
+        INSTANCE.reset();
+        return INSTANCE;
     }
 }

@@ -6,4 +6,9 @@
 package minegame159.meteorclient.events.meteor;
 
 public class MacroListChangedEvent {
+    private static final MacroListChangedEvent INSTANCE = new MacroListChangedEvent();
+
+    public static MacroListChangedEvent get() {
+        return INSTANCE;
+    }
 }

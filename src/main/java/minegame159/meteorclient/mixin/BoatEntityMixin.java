@@ -1,7 +1,7 @@
 package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.EventStore;
+import minegame159.meteorclient.events.entity.BoatMoveEvent;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.movement.BoatFly;
 import net.minecraft.entity.vehicle.BoatEntity;
@@ -20,7 +20,7 @@ public class BoatEntityMixin {
 
     @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/vehicle/BoatEntity;move(Lnet/minecraft/entity/MovementType;Lnet/minecraft/util/math/Vec3d;)V"))
     private void onTickInvokeMove(CallbackInfo info) {
-        MeteorClient.EVENT_BUS.post(EventStore.boatMoveEvent((BoatEntity) (Object) this));
+        MeteorClient.EVENT_BUS.post(BoatMoveEvent.get((BoatEntity) (Object) this));
     }
 
     @Redirect(method = "updatePaddles", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/vehicle/BoatEntity;pressingLeft:Z"))

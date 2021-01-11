@@ -10,8 +10,7 @@ import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import me.zero.alpine.event.EventPriority;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.packets.ReceivePacketEvent;
-import minegame159.meteorclient.events.packets.SendPacketEvent;
+import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.PacketBoolSetting;
@@ -50,12 +49,12 @@ public class PacketCanceller extends Module {
     }
 
     @EventHandler
-    private final Listener<ReceivePacketEvent> onReceivePacket = new Listener<>(event -> {
+    private final Listener<PacketEvent.Receive> onReceivePacket = new Listener<>(event -> {
         if (s2cPackets.get().getBoolean(event.packet.getClass())) event.cancel();
     }, EventPriority.HIGHEST + 1);
 
     @EventHandler
-    private final Listener<SendPacketEvent> onSendPacket = new Listener<>(event -> {
+    private final Listener<PacketEvent.Send> onSendPacket = new Listener<>(event -> {
         if (c2sPackets.get().getBoolean(event.packet.getClass())) event.cancel();
     }, EventPriority.HIGHEST + 1);
 }

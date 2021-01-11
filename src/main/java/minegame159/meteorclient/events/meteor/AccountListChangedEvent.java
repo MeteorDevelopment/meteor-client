@@ -6,4 +6,9 @@
 package minegame159.meteorclient.events.meteor;
 
 public class AccountListChangedEvent {
+    private static final AccountListChangedEvent INSTANCE = new AccountListChangedEvent();
+
+    public static AccountListChangedEvent get() {
+        return INSTANCE;
+    }
 }

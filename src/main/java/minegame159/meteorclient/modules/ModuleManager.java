@@ -11,10 +11,10 @@ import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listenable;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.events.game.GameJoinedEvent;
 import minegame159.meteorclient.events.game.GameLeftEvent;
 import minegame159.meteorclient.events.game.OpenScreenEvent;
+import minegame159.meteorclient.events.meteor.ActiveModulesChangedEvent;
 import minegame159.meteorclient.events.meteor.KeyEvent;
 import minegame159.meteorclient.modules.combat.*;
 import minegame159.meteorclient.modules.misc.*;
@@ -149,7 +149,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         synchronized (active) {
             if (!active.contains(module)) {
                 active.add(module);
-                MeteorClient.EVENT_BUS.post(EventStore.activeModulesChangedEvent());
+                MeteorClient.EVENT_BUS.post(ActiveModulesChangedEvent.get());
             }
         }
     }
@@ -157,7 +157,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
     void removeActive(Module module) {
         synchronized (active) {
             if (active.remove(module)) {
-                MeteorClient.EVENT_BUS.post(EventStore.activeModulesChangedEvent());
+                MeteorClient.EVENT_BUS.post(ActiveModulesChangedEvent.get());
             }
         }
     }

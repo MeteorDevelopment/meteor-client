@@ -9,9 +9,9 @@ import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listenable;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.EventStore;
 import minegame159.meteorclient.events.game.GameJoinedEvent;
 import minegame159.meteorclient.events.game.GameLeftEvent;
+import minegame159.meteorclient.events.meteor.WaypointListChangedEvent;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.rendering.DrawMode;
 import minegame159.meteorclient.rendering.Fonts;
@@ -54,13 +54,13 @@ public class Waypoints extends Savable<Waypoints> implements Listenable, Iterabl
 
     public void add(Waypoint waypoint) {
         waypoints.add(waypoint);
-        MeteorClient.EVENT_BUS.post(EventStore.waypointListChangedEvent());
+        MeteorClient.EVENT_BUS.post(WaypointListChangedEvent.get());
         save();
     }
 
     public void remove(Waypoint waypoint) {
         if (waypoints.remove(waypoint)) {
-            MeteorClient.EVENT_BUS.post(EventStore.waypointListChangedEvent());
+            MeteorClient.EVENT_BUS.post(WaypointListChangedEvent.get());
             save();
         }
     }

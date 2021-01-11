@@ -6,8 +6,9 @@
 package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.EventStore;
+import minegame159.meteorclient.events.entity.LivingEntityMoveEvent;
 import minegame159.meteorclient.events.entity.player.JumpVelocityMultiplierEvent;
+import minegame159.meteorclient.events.entity.player.PlayerMoveEvent;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.movement.NoSlow;
 import minegame159.meteorclient.modules.movement.Velocity;
@@ -58,7 +59,7 @@ public abstract class EntityMixin {
             float g = world.getBlockState(getVelocityAffectingPos()).getBlock().getJumpVelocityMultiplier();
             float a = f == 1.0D ? g : f;
 
-            JumpVelocityMultiplierEvent event = MeteorClient.postEvent(EventStore.jumpVelocityMultiplierEvent());
+            JumpVelocityMultiplierEvent event = MeteorClient.postEvent(JumpVelocityMultiplierEvent.get());
             info.setReturnValue(a * event.multiplier);
         }
     }
@@ -74,9 +75,9 @@ public abstract class EntityMixin {
     @Inject(method = "move", at = @At("HEAD"))
     private void onMove(MovementType type, Vec3d movement, CallbackInfo info) {
         if ((Object) this == MinecraftClient.getInstance().player) {
-            MeteorClient.EVENT_BUS.post(EventStore.playerMoveEvent(type, movement));
+            MeteorClient.EVENT_BUS.post(PlayerMoveEvent.get(type, movement));
         } else if ((Object) this instanceof LivingEntity) {
-            MeteorClient.EVENT_BUS.post(EventStore.livingEntityMoveEvent((LivingEntity) (Object) this, movement));
+            MeteorClient.EVENT_BUS.post(LivingEntityMoveEvent.get((LivingEntity) (Object) this, movement));
         }
     }
 

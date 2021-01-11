@@ -6,4 +6,9 @@
 package minegame159.meteorclient.events.meteor;
 
 public class WaypointListChangedEvent {
+    private static final WaypointListChangedEvent INSTANCE = new WaypointListChangedEvent();
+
+    public static WaypointListChangedEvent get() {
+        return INSTANCE;
+    }
 }

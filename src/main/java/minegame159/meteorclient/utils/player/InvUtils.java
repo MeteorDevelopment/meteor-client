@@ -8,7 +8,7 @@ package minegame159.meteorclient.utils.player;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listenable;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.world.PreTickEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Module;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.Item;
@@ -61,16 +61,6 @@ public class InvUtils implements Listenable {
         return findItemResult;
     }
 
-    public static int findItem(Item item, Predicate<ItemStack> isGood) {
-        assert mc.player != null;
-        for (int i = 0; i < mc.player.inventory.size(); i++) {
-            ItemStack itemStack = mc.player.inventory.getStack(i);
-            if (itemStack.getItem() == item && isGood.test(itemStack)) return i;
-        }
-
-        return -1;
-    }
-
     public static int findItemInHotbar(Item item, Predicate<ItemStack> isGood) {
         assert mc.player != null;
         for (int i = 0; i < 9; i++) {
@@ -95,7 +85,7 @@ public class InvUtils implements Listenable {
     }
 
     @EventHandler
-    private static final Listener<PreTickEvent> onTick = new Listener<>(event -> {
+    private static final Listener<TickEvent.Pre> onTick = new Listener<>(event -> {
         if (mc.world == null || mc.player == null){
             currentQueue.clear();
             moveQueue.clear();
@@ -114,7 +104,7 @@ public class InvUtils implements Listenable {
         if (moveQueue.contains(new CustomPair(klass, slots)) || currentQueue.containsAll(slots)) return;
         if (!moveQueue.isEmpty() && canMove(klass)){
             moveQueue.addFirst(new CustomPair(klass, slots));
-            onTick.invoke(new PreTickEvent());
+            onTick.invoke(new TickEvent.Pre());
         } else {
             moveQueue.add(new CustomPair(klass, slots));
         }

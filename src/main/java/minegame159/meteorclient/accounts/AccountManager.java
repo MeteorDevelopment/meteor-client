@@ -9,7 +9,7 @@ import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.accounts.types.CrackedAccount;
 import minegame159.meteorclient.accounts.types.PremiumAccount;
 import minegame159.meteorclient.accounts.types.TheAlteningAccount;
-import minegame159.meteorclient.events.EventStore;
+import minegame159.meteorclient.events.meteor.AccountListChangedEvent;
 import minegame159.meteorclient.utils.files.Savable;
 import minegame159.meteorclient.utils.misc.NbtException;
 import minegame159.meteorclient.utils.misc.NbtUtils;
@@ -32,13 +32,13 @@ public class AccountManager extends Savable<AccountManager> implements Iterable<
 
     public void add(Account<?> account) {
         accounts.add(account);
-        MeteorClient.EVENT_BUS.post(EventStore.accountListChangedEvent());
+        MeteorClient.EVENT_BUS.post(AccountListChangedEvent.get());
         save();
     }
 
     public void remove(Account<?> account) {
         if (accounts.remove(account)) {
-            MeteorClient.EVENT_BUS.post(EventStore.accountListChangedEvent());
+            MeteorClient.EVENT_BUS.post(AccountListChangedEvent.get());
             save();
         }
     }

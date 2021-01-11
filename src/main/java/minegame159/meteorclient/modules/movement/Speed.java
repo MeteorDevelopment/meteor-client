@@ -8,11 +8,11 @@ package minegame159.meteorclient.modules.movement;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.entity.player.PlayerMoveEvent;
-import minegame159.meteorclient.events.world.PreTickEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.player.PlayerUtils;
 import net.minecraft.entity.MovementType;
@@ -135,7 +135,7 @@ public class Speed extends Module {
     });
 
     @EventHandler
-    private final Listener<PreTickEvent> onPreTick = new Listener<>(event -> {
+    private final Listener<TickEvent.Pre> onPreTick = new Listener<>(event -> {
         if (jump.get()) {
             if (!mc.player.isOnGround() || mc.player.isSneaking() || !jump()) return;
 

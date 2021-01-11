@@ -6,7 +6,7 @@
 package minegame159.meteorclient.macros;
 
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.EventStore;
+import minegame159.meteorclient.events.meteor.MacroListChangedEvent;
 import minegame159.meteorclient.utils.files.Savable;
 import minegame159.meteorclient.utils.misc.NbtUtils;
 import net.minecraft.nbt.CompoundTag;
@@ -28,7 +28,7 @@ public class MacroManager extends Savable<MacroManager> implements Iterable<Macr
     public void add(Macro macro) {
         macros.add(macro);
         MeteorClient.EVENT_BUS.subscribe(macro);
-        MeteorClient.EVENT_BUS.post(EventStore.macroListChangedEvent());
+        MeteorClient.EVENT_BUS.post(MacroListChangedEvent.get());
         save();
     }
 
@@ -39,7 +39,7 @@ public class MacroManager extends Savable<MacroManager> implements Iterable<Macr
     public void remove(Macro macro) {
         if (macros.remove(macro)) {
             MeteorClient.EVENT_BUS.unsubscribe(macro);
-            MeteorClient.EVENT_BUS.post(EventStore.macroListChangedEvent());
+            MeteorClient.EVENT_BUS.post(MacroListChangedEvent.get());
             save();
         }
     }

@@ -8,7 +8,7 @@ package minegame159.meteorclient.mixin;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.EventStore;
+import minegame159.meteorclient.events.render.Render2DEvent;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.render.NoRender;
 import net.minecraft.client.MinecraftClient;
@@ -44,7 +44,7 @@ public abstract class InGameHudMixin {
         RenderSystem.lineWidth(1);
         GL11.glEnable(GL11.GL_LINE_SMOOTH);
 
-        MeteorClient.EVENT_BUS.post(EventStore.render2DEvent(scaledWidth, scaledHeight, tickDelta));
+        MeteorClient.EVENT_BUS.post(Render2DEvent.get(scaledWidth, scaledHeight, tickDelta));
 
         GL11.glDisable(GL11.GL_LINE_SMOOTH);
         RenderSystem.lineWidth(1);

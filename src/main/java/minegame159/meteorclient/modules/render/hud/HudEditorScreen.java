@@ -5,7 +5,7 @@
 
 package minegame159.meteorclient.modules.render.hud;
 
-import minegame159.meteorclient.events.EventStore;
+import minegame159.meteorclient.events.render.Render2DEvent;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.render.hud.modules.HudModule;
 import minegame159.meteorclient.rendering.DrawMode;
@@ -154,7 +154,7 @@ public class HudEditorScreen extends Screen {
 
         if (!Utils.canUpdate()) {
             renderBackground(matrices);
-            hud.onRender.invoke(EventStore.render2DEvent(0, 0, delta));
+            hud.onRender.invoke(Render2DEvent.get(0, 0, delta));
         }
 
         Utils.unscaledProjection();

@@ -9,9 +9,9 @@ import baritone.api.BaritoneAPI;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.entity.player.CanWalkOnFluidEvent;
-import minegame159.meteorclient.events.packets.SendPacketEvent;
+import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.events.world.FluidCollisionShapeEvent;
-import minegame159.meteorclient.events.world.PostTickEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
@@ -85,7 +85,7 @@ public class Jesus extends Module {
     }
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
         if (mc.options.keySneak.isPressed() && disableOnSneak.get()) return;
         if (mc.player.isTouchingWater() && !walkOnWater.get()) return;
         if (mc.player.isInLava() && !walkOnLava.get()) return;
@@ -124,7 +124,7 @@ public class Jesus extends Module {
     });
 
     @EventHandler
-    private final Listener<SendPacketEvent> onSendPacket = new Listener<>(event -> {
+    private final Listener<PacketEvent.Send> onSendPacket = new Listener<>(event -> {
         if (!(event.packet instanceof PlayerMoveC2SPacket)) return;
         if (mc.options.keySneak.isPressed() && disableOnSneak.get()) return;
         if (mc.player.isTouchingWater() && !walkOnWater.get()) return;

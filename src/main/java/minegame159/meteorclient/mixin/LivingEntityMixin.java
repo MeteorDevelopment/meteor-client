@@ -6,7 +6,8 @@
 package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.EventStore;
+import minegame159.meteorclient.events.entity.DamageEvent;
+import minegame159.meteorclient.events.entity.TookDamageEvent;
 import minegame159.meteorclient.events.entity.player.CanWalkOnFluidEvent;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.movement.AntiLevitation;
@@ -36,17 +37,17 @@ public abstract class LivingEntityMixin extends Entity {
 
     @Inject(method = "damage", at = @At("HEAD"))
     private void onDamageHead(DamageSource source, float amount, CallbackInfoReturnable<Boolean> info) {
-        if (Utils.canUpdate()) MeteorClient.EVENT_BUS.post(EventStore.damageEvent((LivingEntity) (Object) this, source));
+        if (Utils.canUpdate()) MeteorClient.EVENT_BUS.post(DamageEvent.get((LivingEntity) (Object) this, source));
     }
 
     @Inject(method = "damage", at = @At("TAIL"))
     private void onDamageTail(DamageSource source, float amount, CallbackInfoReturnable<Boolean> info) {
-        if (Utils.canUpdate()) MeteorClient.EVENT_BUS.post(EventStore.tookDamageEvent((LivingEntity) (Object) this, source));
+        if (Utils.canUpdate()) MeteorClient.EVENT_BUS.post(TookDamageEvent.get((LivingEntity) (Object) this, source));
     }
 
     @Inject(method = "canWalkOnFluid", at = @At("HEAD"), cancellable = true)
     private void onCanWalkOnFluid(Fluid fluid, CallbackInfoReturnable<Boolean> info) {
-        CanWalkOnFluidEvent event = MeteorClient.postEvent(EventStore.canWalkOnFluidEvent((LivingEntity) (Object) this, fluid));
+        CanWalkOnFluidEvent event = MeteorClient.postEvent(CanWalkOnFluidEvent.get((LivingEntity) (Object) this, fluid));
         if (event.walkOnFluid) info.setReturnValue(true);
     }
 
