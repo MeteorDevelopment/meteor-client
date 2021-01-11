@@ -101,11 +101,12 @@ public class Freecam extends Module {
 
     @Override
     public void onActivate() {
+        yaw = mc.player.yaw;
+        pitch = mc.player.pitch;
+
         ((IVec3d) pos).set(mc.gameRenderer.getCamera().getPos());
         ((IVec3d) prevPos).set(mc.gameRenderer.getCamera().getPos());
 
-        yaw = mc.player.yaw;
-        pitch = mc.player.pitch;
         prevYaw = yaw;
         prevPitch = pitch;
 
@@ -123,8 +124,8 @@ public class Freecam extends Module {
     @Override
     public void onDeactivate() {
         if (reloadChunks.get()) mc.worldRenderer.reload();
-        if (rotate.get()) mc.player.yaw = yaw;
-        if (rotate.get()) mc.player.pitch = pitch;
+        if (rotate.get()) mc.player.yaw = prevYaw;
+        if (rotate.get()) mc.player.pitch = prevPitch;
     }
 
     @EventHandler
