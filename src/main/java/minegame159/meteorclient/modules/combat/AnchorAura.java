@@ -152,10 +152,45 @@ public class AnchorAura extends Module {
             .build()
     );
 
-    private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
-            .name("render")
+    private final Setting<Boolean> renderPlace = sgRender.add(new BoolSetting.Builder()
+            .name("render-place")
             .description("Renders the block where it is placing an anchor.")
             .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()
+            .name("place-side-color")
+            .description("The side color for positions to be placed.")
+            .defaultValue(new SettingColor(255, 0, 0, 75))
+            .build()
+    );
+
+    private final Setting<SettingColor> lineColor = sgRender.add(new ColorSetting.Builder()
+            .name("place-line-color")
+            .description("The line color for positions to be placed.")
+            .defaultValue(new SettingColor(255, 0, 0, 255))
+            .build()
+    );
+
+    private final Setting<Boolean> renderBreak = sgRender.add(new BoolSetting.Builder()
+            .name("render-break")
+            .description("Renders the block where it is breaking an anchor.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<SettingColor> breakSideColor = sgRender.add(new ColorSetting.Builder()
+            .name("break-side-color")
+            .description("The side color for anchors to be broken.")
+            .defaultValue(new SettingColor(255, 0, 0, 75))
+            .build()
+    );
+
+    private final Setting<SettingColor> breakLineColor = sgRender.add(new ColorSetting.Builder()
+            .name("break-line-color")
+            .description("The line color for anchors to be broken.")
+            .defaultValue(new SettingColor(255, 0, 0, 255))
             .build()
     );
 
@@ -163,20 +198,6 @@ public class AnchorAura extends Module {
             .name("shape-mode")
             .description("How the shapes are rendered.")
             .defaultValue(ShapeMode.Both)
-            .build()
-    );
-
-    private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()
-            .name("side-color")
-            .description("The side color.")
-            .defaultValue(new SettingColor(255, 255, 255, 65))
-            .build()
-    );
-
-    private final Setting<SettingColor> lineColor = sgRender.add(new ColorSetting.Builder()
-            .name("line-color")
-            .description("The line color.")
-            .defaultValue(new SettingColor(255, 255, 255, 255))
             .build()
     );
 
@@ -246,7 +267,10 @@ public class AnchorAura extends Module {
 
     @EventHandler
     private final Listener<RenderEvent> onRender = new Listener<>(event -> {
-        if (render.get() && target != null && findPlacePos(target) != null) Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, findPlacePos(target).getX(), findPlacePos(target).getY(), findPlacePos(target).getZ(), 1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+        if (target != null) {
+            if (renderPlace.get() && findPlacePos(target) != null) Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, findPlacePos(target).getX(), findPlacePos(target).getY(), findPlacePos(target).getZ(), 1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            if (renderBreak.get() && findAnchor(target) != null) Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, findAnchor(target).getX(), findAnchor(target).getY(), findAnchor(target).getZ(), 1, breakSideColor.get(), breakLineColor.get(), shapeMode.get(), 0);
+        }
     });
 
     private BlockPos findPlacePos(PlayerEntity target) {
