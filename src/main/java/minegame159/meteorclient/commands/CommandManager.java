@@ -47,6 +47,7 @@ public class CommandManager {
         addCommand(new Clip());
         addCommand(new Bind());
         addCommand(new Toggle());
+        addCommand(new Nbt());
     }
 
     public static void dispatch(String message) throws CommandSyntaxException {
