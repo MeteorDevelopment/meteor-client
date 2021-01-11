@@ -6,8 +6,8 @@
 package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.modules.render.FreeRotate;
 import minegame159.meteorclient.modules.render.CameraClip;
+import minegame159.meteorclient.modules.render.FreeRotate;
 import minegame159.meteorclient.modules.render.Freecam;
 import net.minecraft.client.render.Camera;
 import net.minecraft.entity.Entity;

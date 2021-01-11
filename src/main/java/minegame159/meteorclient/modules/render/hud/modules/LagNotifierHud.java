@@ -10,7 +10,6 @@ import minegame159.meteorclient.modules.render.hud.HudEditorScreen;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.world.TickRate;
-import net.minecraft.client.MinecraftClient;
 
 public class LagNotifierHud extends DoubleTextHudModule {
     private static final Color RED = new Color(225, 45, 45);
