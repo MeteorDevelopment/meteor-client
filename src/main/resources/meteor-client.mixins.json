@@ -48,6 +48,7 @@
     "EntityRenderDispatcherMixin",
     "EntityRendererMixin",
     "ExplosionMixin",
+    "FireworksSparkParticleMixin",
     "FluidBlockMixin",
     "GameRendererMixin",
     "GenericContainerScreenMixin",
@@ -94,8 +95,7 @@
     "TitleScreenMixin",
     "Vec3dMixin",
     "WorldRendererAccessor",
-    "WorldRendererMixin",
-    "FireworksSparkParticleMixin"
+    "WorldRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -7,8 +7,8 @@ package minegame159.meteorclient.settings;
 
 import minegame159.meteorclient.gui.screens.settings.ModuleListSettingScreen;
 import minegame159.meteorclient.gui.widgets.WButton;
-import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.ModuleManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;

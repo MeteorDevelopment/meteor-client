@@ -4,8 +4,8 @@ import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import minegame159.meteorclient.commands.Command;
 import minegame159.meteorclient.commands.arguments.ModuleArgumentType;
-import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.combat.Swarm;
 import net.minecraft.command.CommandSource;
 

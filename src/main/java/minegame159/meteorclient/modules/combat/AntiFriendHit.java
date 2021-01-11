@@ -12,8 +12,8 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.entity.player.AttackEntityEvent;
 import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.ModuleManager;
 import net.minecraft.entity.player.PlayerEntity;
 
 public class AntiFriendHit extends Module {
