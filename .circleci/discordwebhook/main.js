@@ -32,7 +32,7 @@ axios
 
     axios.post(process.env.discord_webhook, {
       username: "Dev Builds",
-      avatar_url: "https://meteorclient.com/icon.png",
+      avatar_url: "http://meteorclient.com:8082/icon.png",
       embeds: [
         {
           title: "meteor client v" + version + " build #" + build,
@@ -40,7 +40,7 @@ axios
           url: "https://meteorclient.com",
           color: success ? 3066993 : 15158332,
           thumbnail: {
-            url: "https://meteorclient.com/icon.png"
+            url: "http://meteorclient.com:8082/icon.png"
           }
         }
       ]
