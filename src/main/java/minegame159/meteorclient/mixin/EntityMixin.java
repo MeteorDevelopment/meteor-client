@@ -10,6 +10,7 @@ import minegame159.meteorclient.events.entity.LivingEntityMoveEvent;
 import minegame159.meteorclient.events.entity.player.JumpVelocityMultiplierEvent;
 import minegame159.meteorclient.events.entity.player.PlayerMoveEvent;
 import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.combat.Hitboxes;
 import minegame159.meteorclient.modules.movement.NoSlow;
 import minegame159.meteorclient.modules.movement.Velocity;
 import minegame159.meteorclient.modules.render.ESP;
@@ -98,5 +99,11 @@ public abstract class EntityMixin {
     @Inject(method = "isInvisibleTo(Lnet/minecraft/entity/player/PlayerEntity;)Z", at = @At("HEAD"), cancellable = true)
     private void isInvisibleToCanceller(PlayerEntity player, CallbackInfoReturnable<Boolean> info) {
         if (ModuleManager.INSTANCE.get(ESP.class).isActive() && ModuleManager.INSTANCE.get(ESP.class).showInvis.get()) info.setReturnValue(false);
+    }
+
+    @Inject(method = "getTargetingMargin", at = @At("HEAD"), cancellable = true)
+    private void onGetTargetingMargin(CallbackInfoReturnable<Float> info) {
+        double v = ModuleManager.INSTANCE.get(Hitboxes.class).getEntityValue((Entity) (Object) this);
+        if (v != 0) info.setReturnValue((float) v);
     }
 }
