@@ -88,6 +88,11 @@ public class MeshBuilder {
         return this;
     }
 
+    public MeshBuilder color(int color) {
+        buffer.color(Color.toRGBAR(color), Color.toRGBAG(color), Color.toRGBAB(color), Color.toRGBAA(color));
+        return this;
+    }
+
     public void endVertex() {
         buffer.next();
     }
