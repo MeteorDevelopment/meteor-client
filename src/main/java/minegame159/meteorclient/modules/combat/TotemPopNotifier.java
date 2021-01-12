@@ -5,6 +5,8 @@
 
 package minegame159.meteorclient.modules.combat;
 
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.game.GameJoinedEvent;
@@ -22,12 +24,10 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.packet.s2c.play.EntityStatusS2CPacket;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Random;
 import java.util.UUID;
 
 public class TotemPopNotifier extends Module {
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Boolean> announce = sgGeneral.add(new BoolSetting.Builder()
@@ -65,7 +65,10 @@ public class TotemPopNotifier extends Module {
             .build()
     );
 
-    private final Map<UUID, Integer> totemPops = new HashMap<>();
+    private final Object2IntMap<UUID> totemPops = new Object2IntOpenHashMap<>();
+    private final Object2IntMap<UUID> chatIds = new Object2IntOpenHashMap<>();
+
+    private final Random random = new Random();
 
     public TotemPopNotifier() {
         super(Category.Combat, "totem-pop-notifier", "Sends a chat message when a player either pops a totem or dies.");
@@ -74,11 +77,13 @@ public class TotemPopNotifier extends Module {
     @Override
     public void onActivate() {
         totemPops.clear();
+        chatIds.clear();
     }
 
     @EventHandler
     private final Listener<GameJoinedEvent> onGameJoin = new Listener<>(event -> {
         totemPops.clear();
+        chatIds.clear();
     });
 
     @EventHandler
@@ -93,11 +98,12 @@ public class TotemPopNotifier extends Module {
 
         synchronized (totemPops) {
             int pops = totemPops.getOrDefault(entity.getUuid(), 0);
-            pops++;
-            totemPops.put(entity.getUuid(), pops);
-            String send = popMessage.get().replace("{player}",entity.getName().getString()).replace("{pops}", String.valueOf(pops)).replace("{totems}", (pops == 1 ? "totem" : "totems"));
-            if (announce.get()) mc.player.sendChatMessage(send);
-            else Chat.info("(highlight)%s (default)popped (highlight)%d (default)%s.", entity.getName().getString(), pops, pops == 1 ? "totem" : "totems");
+            totemPops.put(entity.getUuid(), ++pops);
+
+            String msg = popMessage.get().replace("{player}", entity.getName().getString()).replace("{pops}", String.valueOf(pops)).replace("{totems}", (pops == 1 ? "totem" : "totems"));
+
+            if (announce.get()) mc.player.sendChatMessage(msg);
+            else Chat.info(getChatId(entity), null, "(highlight)%s (default)popped (highlight)%d (default)%s.", entity.getName().getString(), pops, pops == 1 ? "totem" : "totems");
         }
     });
 
@@ -108,12 +114,20 @@ public class TotemPopNotifier extends Module {
                 if (!totemPops.containsKey(player.getUuid())) continue;
 
                 if (player.deathTime > 0 || player.getHealth() <= 0) {
-                    int pops = totemPops.remove(player.getUuid());
-                    String send = deathMessage.get().replace("{player}", player.getName().getString()).replace("{pops}", String.valueOf(pops)).replace("{totems}", (pops == 1 ? "totem" : "totems"));
-                    if (announce.get()) mc.player.sendChatMessage(send);
-                    else Chat.info("(highlight)%s (default)died after popping (highlight)%d (default)%s.", player.getName().getString(), pops, pops == 1 ? "totem" : "totems");
+                    int pops = totemPops.removeInt(player.getUuid());
+
+                    String msg = deathMessage.get().replace("{player}", player.getName().getString()).replace("{pops}", String.valueOf(pops)).replace("{totems}", (pops == 1 ? "totem" : "totems"));
+
+                    if (announce.get()) mc.player.sendChatMessage(msg);
+                    else Chat.info(getChatId(player), null, "(highlight)%s (default)died after popping (highlight)%d (default)%s.", player.getName().getString(), pops, pops == 1 ? "totem" : "totems");
+
+                    chatIds.removeInt(player.getUuid());
                 }
             }
         }
     });
+
+    private int getChatId(Entity entity) {
+        return chatIds.computeIntIfAbsent(entity.getUuid(), value -> random.nextInt());
+    }
 }
