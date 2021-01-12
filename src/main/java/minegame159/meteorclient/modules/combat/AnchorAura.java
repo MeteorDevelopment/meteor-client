@@ -103,14 +103,14 @@ public class AnchorAura extends Module {
 
     private final Setting<Mode> breakMode = sgBreak.add(new EnumSetting.Builder<Mode>()
             .name("break-mode")
-            .description("The way anchors are broken.")
+            .description("The way Anchors are broken.")
             .defaultValue(Mode.Safe)
             .build()
     );
 
     private final Setting<Integer> breakDelay = sgBreak.add(new IntSetting.Builder()
             .name("break-delay")
-            .description("The amount of delay in ticks for breaking.")
+            .description("The amount of delay in ticks for breaking Anchors.")
             .defaultValue(10)
             .min(0)
             .max(10)
@@ -119,7 +119,7 @@ public class AnchorAura extends Module {
 
     private final Setting<Double> breakRange = sgBreak.add(new DoubleSetting.Builder()
             .name("break-range")
-            .description("The radius in which the anchors are broken in.")
+            .description("The radius in which the Anchors are broken in.")
             .defaultValue(3)
             .min(0)
             .sliderMax(5)

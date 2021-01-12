@@ -33,7 +33,7 @@ public class Criticals extends Module {
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("mode")
-            .description("The type of way Criticals will work.")
+            .description("The mode on how Criticals will function.")
             .defaultValue(Mode.Packet)
             .build()
     );

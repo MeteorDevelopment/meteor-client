@@ -74,7 +74,8 @@ public class AutoLog extends Module {
     );
 
     private final Setting<Integer> range = sgGeneral.add(new IntSetting.Builder()
-            .name("range").description("How close a crystal has to be to you before you disconnect.")
+            .name("range")
+            .description("How close a crystal has to be to you before you disconnect.")
             .defaultValue(4)
             .min(1)
             .max(10)

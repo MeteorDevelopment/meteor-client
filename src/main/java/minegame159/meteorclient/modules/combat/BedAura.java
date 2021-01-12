@@ -73,7 +73,7 @@ public class BedAura extends Module {
 
     private final Setting<Double> placeRange = sgPlace.add(new DoubleSetting.Builder()
             .name("place-range")
-            .description("The distance in a single direction the beds get placed.")
+            .description("The radius in which beds can be placed in.")
             .defaultValue(3)
             .min(0)
             .sliderMax(5)
@@ -180,8 +180,8 @@ public class BedAura extends Module {
 
     private final Setting<Boolean> selfToggle = sgMisc.add(new BoolSetting.Builder()
             .name("self-toggle")
-            .description("Toggles this in the Overworld.")
-            .defaultValue(true)
+            .description("Toggles Bed Aura in the Overworld.")
+            .defaultValue(false)
             .build()
     );
 
