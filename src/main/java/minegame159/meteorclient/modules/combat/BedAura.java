@@ -5,8 +5,8 @@
 
 package minegame159.meteorclient.modules.combat;
 
-//Created by squidoodly 03/06/2020
-//Updated by squidoodly 19/06/2020
+// Created by squidoodly 03/06/2020
+// Updated by squidoodly 19/06/2020
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
@@ -50,10 +50,28 @@ public class BedAura extends Module {
         super(Category.Combat, "bed-aura", "Automatically places and explodes beds in the Nether and End.");
     }
 
-    private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgPlace = settings.createGroup("Place");
+    private final SettingGroup sgBreak = settings.createGroup("Break");
+    private final SettingGroup sgSwitch= settings.createGroup("Switch");
+    private final SettingGroup sgMisc = settings.createGroup("Misc");
 
-    private final Setting<Double> placeRange = sgGeneral.add(new DoubleSetting.Builder()
+    // Place
+
+    private final Setting<Boolean> place = sgPlace.add(new BoolSetting.Builder()
+            .name("place")
+            .description("Allows Bed Aura to place beds.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Mode> placeMode = sgPlace.add(new EnumSetting.Builder<Mode>()
+            .name("place-mode")
+            .description("How beds get placed.")
+            .defaultValue(Mode.Safe)
+            .build()
+    );
+
+    private final Setting<Double> placeRange = sgPlace.add(new DoubleSetting.Builder()
             .name("place-range")
             .description("The distance in a single direction the beds get placed.")
             .defaultValue(3)
@@ -62,67 +80,14 @@ public class BedAura extends Module {
             .build()
     );
 
-    private final Setting<Double> breakRange = sgGeneral.add(new DoubleSetting.Builder()
-            .name("break-range")
-            .description("The distance in a single direction the beds get broken.")
-            .defaultValue(3)
-            .min(0)
-            .sliderMax(5)
+    private final Setting<Double> minHealth = sgPlace.add(new DoubleSetting.Builder()
+            .name("min-health")
+            .description("The minimum health you have to be for Bed Aura to place.")
+            .defaultValue(15)
             .build()
     );
 
-    private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
-            .name("place-mode")
-            .description("How beds get placed.")
-            .defaultValue(Mode.Safe)
-            .build()
-    );
-
-    private final Setting<Boolean> selfToggle = sgGeneral.add(new BoolSetting.Builder()
-            .name("self-toggle")
-            .description("Toggles this in the overworld.")
-            .defaultValue(true)
-            .build()
-    );
-
-    private final Setting<Mode> clickMode = sgGeneral.add(new EnumSetting.Builder<Mode>()
-            .name("break-mode")
-            .description("How beds are broken.")
-            .defaultValue(Mode.Safe)
-            .build()
-    );
-
-    private final Setting<Boolean> autoSwitch = sgGeneral.add(new BoolSetting.Builder()
-            .name("auto-switch")
-            .description("Switches to a bed automatically.")
-            .defaultValue(false)
-            .build()
-    );
-
-    private final Setting<Boolean> switchBack = sgGeneral.add(new BoolSetting.Builder()
-            .name("switch-back")
-            .description("Switches back to the previous slot after auto switching.")
-            .defaultValue(false)
-            .build()
-    );
-
-    private final Setting<Boolean> autoMove = sgGeneral.add(new BoolSetting.Builder()
-            .name("auto-move")
-            .description("Moves beds into your last hotbar slot.")
-            .defaultValue(false)
-            .build()
-    );
-
-    private final Setting<Integer> autoMoveSlot = sgGeneral.add(new IntSetting.Builder()
-            .name("auto-move-slot")
-            .description("The slot Auto Move moves beds to.")
-            .defaultValue(8)
-            .min(0)
-            .max(8)
-            .build()
-    );
-
-    private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
+    private final Setting<Integer> delay = sgPlace.add(new IntSetting.Builder()
             .name("delay")
             .description("The delay between placements.")
             .defaultValue(2)
@@ -131,26 +96,19 @@ public class BedAura extends Module {
             .build()
     );
 
-    private final Setting<Boolean> smartDelay = sgGeneral.add(new BoolSetting.Builder()
-            .name("smart-delay")
-            .description("Reduces bed consumption when doing large amounts of damage.")
-            .defaultValue(true)
+    private final Setting<Boolean> airPlace = sgPlace.add(new BoolSetting.Builder()
+            .name("air-place")
+            .description("Places beds in the air if they do more damage.")
+            .defaultValue(false)
             .build()
     );
 
-    private final Setting<Double> healthDifference = sgGeneral.add(new DoubleSetting.Builder()
+    private final Setting<Double> healthDifference = sgPlace.add(new DoubleSetting.Builder()
             .name("damage-increase")
             .description("The damage increase for smart delay to work.")
             .defaultValue(5)
             .min(0)
             .max(20)
-            .build()
-    );
-
-    private final Setting<Boolean> airPlace = sgGeneral.add(new BoolSetting.Builder()
-            .name("air-place")
-            .description("Places beds in the air if they do more damage.")
-            .defaultValue(false)
             .build()
     );
 
@@ -161,31 +119,83 @@ public class BedAura extends Module {
             .build()
     );
 
-    private final Setting<Double> maxDamage = sgPlace.add(new DoubleSetting.Builder()
-            .name("max-damage")
-            .description("The maximum self-damage allowed.")
+    private final Setting<Boolean> calcDamage = sgPlace.add(new BoolSetting.Builder()
+            .name("damage-calc")
+            .description("Whether to calculate damage (true) or just place on the head of the target (false).")
+            .defaultValue(false)
+            .build()
+    );
+
+    // Break
+
+    private final Setting<Mode> breakMode = sgBreak.add(new EnumSetting.Builder<Mode>()
+            .name("break-mode")
+            .description("How beds are broken.")
+            .defaultValue(Mode.Safe)
+            .build()
+    );
+
+    private final Setting<Double> breakRange = sgBreak.add(new DoubleSetting.Builder()
+            .name("break-range")
+            .description("The distance in a single direction the beds get broken.")
             .defaultValue(3)
+            .min(0)
+            .sliderMax(5)
             .build()
     );
 
-    private final Setting<Double> minHealth = sgPlace.add(new DoubleSetting.Builder()
-            .name("min-health")
-            .description("The minimum health you have to be for it to place.")
-            .defaultValue(15)
+    // Switch
+
+    private final Setting<Boolean> autoSwitch = sgSwitch.add(new BoolSetting.Builder()
+            .name("auto-switch")
+            .description("Switches to a bed automatically.")
+            .defaultValue(false)
             .build()
     );
 
-    private final Setting<Boolean> place = sgGeneral.add(new BoolSetting.Builder()
-            .name("place")
-            .description("Allows Bed Aura to place beds.")
+    private final Setting<Boolean> switchBack = sgSwitch.add(new BoolSetting.Builder()
+            .name("switch-back")
+            .description("Switches back to the previous slot after auto switching.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> autoMove = sgSwitch.add(new BoolSetting.Builder()
+            .name("auto-move")
+            .description("Moves beds into your last hotbar slot.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Integer> autoMoveSlot = sgSwitch.add(new IntSetting.Builder()
+            .name("auto-move-slot")
+            .description("The slot Auto Move moves beds to.")
+            .defaultValue(8)
+            .min(0)
+            .max(8)
+            .build()
+    );
+
+    // Misc
+
+    private final Setting<Boolean> selfToggle = sgMisc.add(new BoolSetting.Builder()
+            .name("self-toggle")
+            .description("Toggles this in the Overworld.")
             .defaultValue(true)
             .build()
     );
 
-    private final Setting<Boolean> calcDamage = sgGeneral.add(new BoolSetting.Builder()
-            .name("damage-calc")
-            .description("Whether to calculate damage (true) or just place on the head of the target (false).")
-            .defaultValue(false)
+    private final Setting<Boolean> smartDelay = sgMisc.add(new BoolSetting.Builder()
+            .name("smart-delay")
+            .description("Reduces bed consumption when doing large amounts of damage.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Double> maxDamage = sgPlace.add(new DoubleSetting.Builder()
+            .name("max-damage")
+            .description("The maximum self-damage allowed.")
+            .defaultValue(3)
             .build()
     );
 
@@ -211,7 +221,7 @@ public class BedAura extends Module {
         assert mc.interactionManager != null;
         delayLeft --;
         preSlot = -1;
-        if (mc.player.getHealth() + mc.player.getAbsorptionAmount() <= minHealth.get() && mode.get() != Mode.Suicide) return;
+        if (mc.player.getHealth() + mc.player.getAbsorptionAmount() <= minHealth.get() && placeMode.get() != Mode.Suicide) return;
         if (selfToggle.get() && mc.world.getDimension().isBedWorking()) {
             Chat.warning(this, "You are in the Overworld... (highlight)disabling(default)!");
             this.toggle();
@@ -222,7 +232,7 @@ public class BedAura extends Module {
                 if (entity instanceof BedBlockEntity && Utils.distance(entity.getPos().getX(), entity.getPos().getY(), entity.getPos().getZ(), mc.player.getX(), mc.player.getY(), mc.player.getZ()) <= breakRange.get()) {
                     currentDamage = DamageCalcUtils.bedDamage(mc.player, Utils.vec3d(entity.getPos()));
                     if (currentDamage < maxDamage.get()
-                            || (mc.player.getHealth() + mc.player.getAbsorptionAmount() - currentDamage) < minHealth.get() || clickMode.get().equals(Mode.Suicide)) {
+                            || (mc.player.getHealth() + mc.player.getAbsorptionAmount() - currentDamage) < minHealth.get() || breakMode.get().equals(Mode.Suicide)) {
                         mc.player.setSneaking(false);
                         mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, entity.getPos(), false));
                     }
@@ -371,7 +381,7 @@ public class BedAura extends Module {
                     if (isValid(posUp)) {
                         if (airPlace.get() || !mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
                             if (bestDamage < getBestDamage(target, vecPos.add(0.5, 1.5, 0.5))
-                                    && (DamageCalcUtils.bedDamage(mc.player, vecPos.add(0.5, 1.5, 0.5)) < minDamage.get() || mode.get() == Mode.Suicide)) {
+                                    && (DamageCalcUtils.bedDamage(mc.player, vecPos.add(0.5, 1.5, 0.5)) < minDamage.get() || placeMode.get() == Mode.Suicide)) {
                                 bestBlock = vecPos;
                                 bestDamage = getBestDamage(target, bestBlock.add(0.5, 1.5, 0.5));
                             }
