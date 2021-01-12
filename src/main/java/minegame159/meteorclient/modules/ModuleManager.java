@@ -373,6 +373,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new EntitySpeed());
         addModule(new ReverseStep());
         addModule(new Timer());
+        addModule(new ElytraBoost());
     }
 
     private void initRender() {

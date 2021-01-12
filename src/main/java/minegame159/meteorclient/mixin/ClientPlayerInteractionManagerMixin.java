@@ -8,17 +8,24 @@ package minegame159.meteorclient.mixin;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.entity.player.AttackEntityEvent;
 import minegame159.meteorclient.events.entity.player.BreakBlockEvent;
+import minegame159.meteorclient.events.entity.player.InteractItemEvent;
 import minegame159.meteorclient.events.entity.player.StartBreakingBlockEvent;
 import minegame159.meteorclient.mixininterface.IClientPlayerInteractionManager;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.misc.Nuker;
+import minegame159.meteorclient.modules.movement.ElytraBoost;
 import minegame159.meteorclient.modules.player.NoBreakDelay;
 import minegame159.meteorclient.modules.player.Reach;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.FireworkItem;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.world.World;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -37,6 +44,8 @@ public abstract class ClientPlayerInteractionManagerMixin implements IClientPlay
     @Shadow private float currentBreakingProgress;
 
     @Shadow private BlockPos currentBreakingPos;
+
+    @Shadow public abstract ActionResult interactItem(PlayerEntity player, World world, Hand hand);
 
     @Inject(method = "attackEntity", at = @At("HEAD"), cancellable = true)
     private void onAttackEntity(PlayerEntity player, Entity target, CallbackInfo info) {
@@ -75,6 +84,12 @@ public abstract class ClientPlayerInteractionManagerMixin implements IClientPlay
     @Inject(method = "breakBlock", at = @At("HEAD"))
     private void onBreakBlock(BlockPos blockPos, CallbackInfoReturnable<Boolean> info) {
         MeteorClient.EVENT_BUS.post(BreakBlockEvent.get(blockPos));
+    }
+
+    @Inject(method = "interactItem", at = @At("HEAD"), cancellable = true)
+    private void onInteractItem(PlayerEntity player, World world, Hand hand, CallbackInfoReturnable<ActionResult> info) {
+        InteractItemEvent event = MeteorClient.postEvent(InteractItemEvent.get(hand));
+        if (event.toReturn != null) info.setReturnValue(event.toReturn);
     }
 
     @Override

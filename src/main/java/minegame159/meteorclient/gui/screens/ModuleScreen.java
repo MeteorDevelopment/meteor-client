@@ -17,8 +17,7 @@ import net.minecraft.client.MinecraftClient;
 public class ModuleScreen extends WindowScreen {
     private Module module;
 
-    private WLabel bindLabel;
-    private boolean canResetBind = true;
+    private WKeybind keybind;
 
     public ModuleScreen(Module module) {
         super(module.title, true);
@@ -56,19 +55,9 @@ public class ModuleScreen extends WindowScreen {
         }
 
         // Bind
-        WTable bindList = add(new WTable()).fillX().expandX().getWidget();
-        bindLabel = bindList.add(new WLabel(getBindLabelText())).getWidget();
-        bindList.add(new WButton("Set bind")).getWidget().action = () -> {
-            ModuleManager.INSTANCE.setModuleToBind(module);
-            canResetBind = false;
-            bindLabel.setText("Bind: press any key");
-        };
-        bindList.add(new WButton("Reset bind")).getWidget().action = () -> {
-            if (canResetBind) {
-                module.setKey(-1);
-                bindLabel.setText(getBindLabelText());
-            }
-        };
+        keybind = add(new WKeybind(module.getKey())).getWidget();
+        keybind.actionOnSet = () -> ModuleManager.INSTANCE.setModuleToBind(module);
+        keybind.action = () -> module.setKey(keybind.get());
         row();
 
         // Toggle on key release
@@ -105,12 +94,7 @@ public class ModuleScreen extends WindowScreen {
     @EventHandler
     private final Listener<ModuleBindChangedEvent> onModuleBindChanged = new Listener<>(event -> {
         if (event.module == module) {
-            canResetBind = true;
-            bindLabel.setText(getBindLabelText());
+            keybind.set(event.module.getKey());
         }
     });
-
-    private String getBindLabelText() {
-        return "Bind: " + (module.getKey() == -1 ? "none" :  Utils.getKeyName(module.getKey()));
-    }
 }
