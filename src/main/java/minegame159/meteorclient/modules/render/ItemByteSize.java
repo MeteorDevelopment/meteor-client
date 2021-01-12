@@ -3,7 +3,7 @@
  * Copyright (c) 2020 Meteor Development.
  */
 
-package minegame159.meteorclient.modules.misc;
+package minegame159.meteorclient.modules.render;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
@@ -45,7 +45,7 @@ public class ItemByteSize extends Module {
     );
 
     public ItemByteSize() {
-        super(Category.Misc, "item-byte-size", "Displays an item's size in bytes in the tooltip.");
+        super(Category.Render, "item-byte-size", "Displays an item's size in bytes in the tooltip.");
     }
 
     @EventHandler
