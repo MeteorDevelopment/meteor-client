@@ -91,7 +91,7 @@ public class CrystalAura extends Module {
 
     private final Setting<Double> placeRange = sgPlace.add(new DoubleSetting.Builder()
             .name("place-range")
-            .description("The maximum range that crystals can be placed.")
+            .description("The radius in which crystals can be placed in.")
             .defaultValue(4.5)
             .min(0)
             .sliderMax(7)

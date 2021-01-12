@@ -46,28 +46,28 @@ public class OffhandExtra extends Module {
 
     private final Setting<Boolean> sword = sgGeneral.add(new BoolSetting.Builder()
             .name("sword-gap")
-            .description("Changes the mode to enchanted-golden-apple if you are holding a sword in your main hand.")
+            .description("Changes the mode to EGap if you are holding a sword in your main hand.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> offhandCrystal = sgGeneral.add(new BoolSetting.Builder()
             .name("offhand-crystal-on-gap")
-            .description("Changes the mode to end-crystal if you are holding an enchanted golden apple in your main hand.")
+            .description("Changes the mode to Crystal if you are holding an enchanted golden apple in your main hand.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> offhandCA = sgGeneral.add(new BoolSetting.Builder()
             .name("offhand-crystal-on-ca")
-            .description("Changes the mode to end-crystal when crystal aura is on.")
+            .description("Changes the mode to Crystal when Crystal Aura is on.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> replace = sgGeneral.add(new BoolSetting.Builder()
             .name("replace")
-            .description("Replaces your offhand, or waits until your offhand is empty.")
+            .description("Replaces your offhand or waits until your offhand is empty.")
             .defaultValue(true)
             .build()
     );
@@ -81,7 +81,7 @@ public class OffhandExtra extends Module {
 
     private final Setting<Integer> health = sgGeneral.add(new IntSetting.Builder()
             .name("health")
-            .description("The health at which this stops working.")
+            .description("The health at which Offhand Extra stops working.")
             .defaultValue(10)
             .min(0)
             .sliderMax(20)
@@ -90,7 +90,7 @@ public class OffhandExtra extends Module {
 
     private final Setting<Boolean> selfToggle = sgGeneral.add(new BoolSetting.Builder()
             .name("self-toggle")
-            .description("Toggles when you run out of the item you choose.")
+            .description("Toggles when you run out of the item you chose.")
             .defaultValue(false)
             .build()
     );
@@ -103,7 +103,7 @@ public class OffhandExtra extends Module {
     );
 
     public OffhandExtra() {
-        super(Category.Combat, "offhand-extra", "Allows you to use specified items in your offhand. Requires AutoTotem to be on smart mode.");
+        super(Category.Combat, "offhand-extra", "Allows you to use specified items in your offhand. REQUIRES AutoTotem to be on smart mode.");
     }
 
     private boolean isClicking = false;
