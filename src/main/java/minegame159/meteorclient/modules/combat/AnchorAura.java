@@ -58,6 +58,8 @@ public class AnchorAura extends Module {
     private final SettingGroup sgMisc = settings.createGroup("Misc");
     private final SettingGroup sgRender = settings.createGroup("Render");
 
+    // Place
+
     private final Setting<Boolean> place = sgPlace.add(new BoolSetting.Builder()
             .name("place")
             .description("Allows Anchor Aura to place anchors.")
@@ -97,6 +99,8 @@ public class AnchorAura extends Module {
             .build()
     );
 
+    // Break
+
     private final Setting<Mode> breakMode = sgBreak.add(new EnumSetting.Builder<Mode>()
             .name("break-mode")
             .description("The way anchors are broken.")
@@ -121,6 +125,8 @@ public class AnchorAura extends Module {
             .sliderMax(5)
             .build()
     );
+
+    // Misc
 
     private final Setting<RotationMode> rotationMode = sgMisc.add(new EnumSetting.Builder<RotationMode>()
             .name("rotation-mode")
@@ -151,6 +157,8 @@ public class AnchorAura extends Module {
             .defaultValue(15)
             .build()
     );
+
+    // Render
 
     private final Setting<Boolean> renderPlace = sgRender.add(new BoolSetting.Builder()
             .name("render-place")
@@ -201,7 +209,7 @@ public class AnchorAura extends Module {
             .build()
     );
 
-    public AnchorAura() {super(Category.Combat, "anchor-aura", "Automatically places and breaks Anchors to harm entities.");}
+    public AnchorAura() {super(Category.Combat, "anchor-aura", "Automatically places and breaks Respawn Anchors to harm entities.");}
 
     private int placeDelayLeft;
     private int breakDelayLeft;
@@ -216,7 +224,7 @@ public class AnchorAura extends Module {
     @EventHandler
     private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
         if (mc.world.getDimension().isRespawnAnchorWorking()) {
-            Chat.error(this, "You are not in the Overworld... Disabling!");
+            Chat.error(this, "You are in the Nether... (highlight)disabling(default)!");
             this.toggle();
             return;
         }

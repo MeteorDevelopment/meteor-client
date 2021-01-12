@@ -47,7 +47,7 @@ public class XRay extends Module {
 
     @Override
     public void onActivate() {
-        FullBright fullBright = ModuleManager.INSTANCE.get(FullBright.class);
+        Fullbright fullBright = ModuleManager.INSTANCE.get(Fullbright.class);
         fullBrightWasActive = fullBright.isActive();
         if (!fullBright.isActive()) fullBright.toggle();
 
@@ -56,7 +56,7 @@ public class XRay extends Module {
 
     @Override
     public void onDeactivate() {
-        FullBright fullBright = ModuleManager.INSTANCE.get(FullBright.class);
+        Fullbright fullBright = ModuleManager.INSTANCE.get(Fullbright.class);
         if (!fullBrightWasActive && fullBright.isActive()) fullBright.toggle();
 
         if (!MeteorClient.IS_DISCONNECTING) mc.worldRenderer.reload();
