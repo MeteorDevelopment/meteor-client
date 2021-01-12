@@ -24,7 +24,7 @@ public class AutoCity extends Module {
 
     private final Setting<Boolean> checkBelow = sgGeneral.add(new BoolSetting.Builder()
             .name("check-below")
-            .description("Checks if there is obsidian or bedrock below the surround block for you to place crystals on.")
+            .description("Checks for obsidian or bedrock below the surround block for you to place crystals on.")
             .defaultValue(true)
             .build()
     );
@@ -38,7 +38,7 @@ public class AutoCity extends Module {
 
     private final Setting<Boolean> chatInfo = sgGeneral.add(new BoolSetting.Builder()
             .name("chat-info")
-            .description("Sends you information about the module.")
+            .description("Sends a client-side message if you city a player.")
             .defaultValue(true)
             .build()
     );
