@@ -184,6 +184,14 @@ public class CrystalAura extends Module {
             .build()
     );
 
+    private final Setting<Double> minDamage = sgPlace.add(new DoubleSetting.Builder()
+            .name("min-damage")
+            .description("The minimum damage the crystal will place.")
+            .defaultValue(5.5)
+            .build()
+    );
+
+
     private final Setting<Boolean> support = sgPlace.add(new BoolSetting.Builder()
             .name("support")
             .description("Places a block in the air and crystals on it. Helps with killing players that are flying.")
@@ -278,13 +286,6 @@ public class CrystalAura extends Module {
 
     //Misc
 
-    private final Setting<Double> minDamage = sgMisc.add(new DoubleSetting.Builder()
-            .name("min-damage")
-            .description("The minimum damage the crystal will place.")
-            .defaultValue(5.5)
-            .build()
-    );
-
     private final Setting<Double> maxDamage = sgMisc.add(new DoubleSetting.Builder()
             .name("max-damage")
             .description("The maximum self-damage allowed.")
@@ -294,7 +295,7 @@ public class CrystalAura extends Module {
 
     private final Setting<RotationMode> rotationMode = sgMisc.add(new EnumSetting.Builder<RotationMode>()
             .name("rotation-mode")
-            .description("How to rotate your player server side when you place a crystal")
+            .description("Where to rotate when using Crystal Aura.")
             .defaultValue(RotationMode.FaceCrystal)
             .build()
     );
@@ -359,7 +360,7 @@ public class CrystalAura extends Module {
     );
 
     private final Setting<Integer> renderTimer = sgRender.add(new IntSetting.Builder()
-            .name("Timer")
+            .name("timer")
             .description("The amount of time between changing the block render.")
             .defaultValue(0)
             .min(0)
