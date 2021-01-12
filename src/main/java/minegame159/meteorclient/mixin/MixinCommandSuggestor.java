@@ -40,7 +40,7 @@ public abstract class MixinCommandSuggestor {
     @Inject(method = "refresh",
             at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/StringReader;canRead()Z"),
             cancellable = true,
-            locals = LocalCapture.CAPTURE_FAILHARD, remap = false)
+            locals = LocalCapture.CAPTURE_FAILHARD)
     public void onRefresh(CallbackInfo ci, String string, StringReader reader) {
         String prefix = Config.INSTANCE.getPrefix();
         int length = prefix.length();
