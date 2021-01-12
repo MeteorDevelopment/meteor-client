@@ -242,6 +242,7 @@ public class GuiConfig implements ISerializable<GuiConfig> {
         Movement,
         Render,
         Misc,
+        Creative,
         Setting,
         Profiles,
         Search

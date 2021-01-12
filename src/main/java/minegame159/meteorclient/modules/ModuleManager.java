@@ -17,6 +17,7 @@ import minegame159.meteorclient.events.game.OpenScreenEvent;
 import minegame159.meteorclient.events.meteor.ActiveModulesChangedEvent;
 import minegame159.meteorclient.events.meteor.KeyEvent;
 import minegame159.meteorclient.modules.combat.*;
+import minegame159.meteorclient.modules.creative.*;
 import minegame159.meteorclient.modules.misc.*;
 import minegame159.meteorclient.modules.movement.Timer;
 import minegame159.meteorclient.modules.movement.*;
@@ -49,7 +50,7 @@ import java.io.File;
 import java.util.*;
 
 public class ModuleManager extends Savable<ModuleManager> implements Listenable {
-    public static final Category[] CATEGORIES = {Category.Combat, Category.Player, Category.Movement, Category.Render, Category.Misc};
+    public static final Category[] CATEGORIES = {Category.Combat, Category.Player, Category.Movement, Category.Render, Category.Misc, Category.Creative};
     public static ModuleManager INSTANCE;
     public static final ModuleRegistry REGISTRY = new ModuleRegistry();
 
@@ -71,6 +72,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         initMovement();
         initRender();
         initMisc();
+        initCreative();
 
         for (List<Module> modules : groups.values()) {
             modules.sort(Comparator.comparing(o -> o.title));
@@ -432,6 +434,14 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new LiquidFiller());
         addModule(new VisualRange());
         addModule(new AutoBreed());
+    }
+
+    private void initCreative() {
+        addModule(new KillPotion());
+        addModule(new TrollPotion());
+        addModule(new CrashChest());
+        addModule(new SpawnItems());
+        addModule(new Sword32k());
     }
 
     public static class ModuleRegistry extends Registry<Module> {
