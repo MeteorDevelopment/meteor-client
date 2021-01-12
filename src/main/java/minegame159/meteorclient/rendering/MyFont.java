@@ -133,7 +133,7 @@ public class MyFont {
         mb.end();
     }
 
-    public void render(String string, double x, double y, Color color) {
+    public double render(String string, double x, double y, Color color) {
         boolean wasBuilding = isBuilding();
         if (!isBuilding()) begin();
 
@@ -156,11 +156,18 @@ public class MyFont {
         }
 
         if (!wasBuilding) end();
+        return x;
     }
 
-    public void renderWithShadow(String string, double x, double y, Color color) {
-        render(string, x + 1, y + 1, SHADOW_COLOR);
-        render(string, x, y, color);
+    public double renderWithShadow(String string, double x, double y, Color color) {
+        boolean wasBuilding = isBuilding();
+        if (!isBuilding()) begin();
+
+        double a = render(string, x + 1, y + 1, SHADOW_COLOR);
+        a = Math.max(a, render(string, x, y, color));
+
+        if (!wasBuilding) end();
+        return a;
     }
 
     private static class CharData {
