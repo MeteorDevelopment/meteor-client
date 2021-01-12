@@ -95,6 +95,7 @@ public class InvUtils implements Listenable {
             CustomPair pair = moveQueue.remove();
             currentQueue.addAll(pair.getRight());
         } else if (!currentQueue.isEmpty()) {
+            if (mc.player.currentScreenHandler.getStacks().size() < 45) return;
             currentQueue.forEach(slot -> clickSlot(slot, 0, SlotActionType.PICKUP));
             currentQueue.clear();
         }
