@@ -7,7 +7,7 @@ package minegame159.meteorclient.mixin;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.modules.misc.EChestPreview;
+import minegame159.meteorclient.modules.render.EChestPreview;
 import minegame159.meteorclient.modules.render.ShulkerPeek;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.input.KeyBinds;
