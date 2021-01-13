@@ -82,7 +82,10 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
     
     @Inject(method = "disconnect(Lnet/minecraft/client/gui/screen/Screen;)V", at = @At("HEAD"))
     private void onDisconnect(Screen screen, CallbackInfo info) {
-        if (world != null) MeteorClient.EVENT_BUS.post(GameLeftEvent.get());
+        if (world != null) {
+            MeteorClient.IS_DISCONNECTING = true;
+            MeteorClient.EVENT_BUS.post(GameLeftEvent.get());
+        }
     }
 
     @Inject(method = "openScreen", at = @At("HEAD"), cancellable = true)

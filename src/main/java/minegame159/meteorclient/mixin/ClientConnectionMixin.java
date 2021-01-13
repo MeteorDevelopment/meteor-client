@@ -14,7 +14,6 @@ import minegame159.meteorclient.modules.misc.AntiPacketKick;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.Packet;
 import net.minecraft.network.listener.PacketListener;
-import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -26,13 +25,6 @@ import java.net.InetAddress;
 
 @Mixin(ClientConnection.class)
 public class ClientConnectionMixin {
-    @Inject(method = "disconnect", at = @At("HEAD"))
-    private void onDisconnect(Text disconnectReason, CallbackInfo info) {
-        if (!MeteorClient.IS_DISCONNECTING) {
-            MeteorClient.IS_DISCONNECTING = true;
-        }
-    }
-
     @Inject(method = "handlePacket", at = @At("HEAD"), cancellable = true)
     private static <T extends PacketListener> void onHandlePacket(Packet<T> packet, PacketListener listener, CallbackInfo info) {
         PacketEvent.Receive event = PacketEvent.Receive.get(packet);

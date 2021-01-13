@@ -56,11 +56,16 @@ public class PremiumAccount extends Account<PremiumAccount> {
     public boolean fetchHead() {
         String skinUrl = null;
         ProfileResponse response = HttpUtils.get("https://sessionserver.mojang.com/session/minecraft/profile/" + cache.uuid, ProfileResponse.class);
-        String encodedTexturesJson = response.getTextures();
-        if (encodedTexturesJson != null) {
-            ProfileSkinResponse skin = GSON.fromJson(new String(Base64.getDecoder().decode(encodedTexturesJson), StandardCharsets.UTF_8), ProfileSkinResponse.class);
-            if (skin.textures.SKIN != null) skinUrl = skin.textures.SKIN.url;
+
+        if (response != null) {
+            String encodedTexturesJson = response.getTextures();
+
+            if (encodedTexturesJson != null) {
+                ProfileSkinResponse skin = GSON.fromJson(new String(Base64.getDecoder().decode(encodedTexturesJson), StandardCharsets.UTF_8), ProfileSkinResponse.class);
+                if (skin.textures.SKIN != null) skinUrl = skin.textures.SKIN.url;
+            }
         }
+
         if (skinUrl == null) skinUrl = "https://meteorclient.com/steve.png";
         return cache.makeHead(skinUrl);
     }
