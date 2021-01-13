@@ -5,6 +5,8 @@
 
 package minegame159.meteorclient.modules.render;
 
+import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
+import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.render.RenderEvent;
@@ -24,9 +26,6 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Box;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class ESP extends Module {
     private static final Identifier BOX2D = new Identifier("meteor-client", "box2d.png");
@@ -56,10 +55,10 @@ public class ESP extends Module {
             .build()
     );
 
-    private final Setting<List<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
+    private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
             .name("entites")
             .description("Select specific entities.")
-            .defaultValue(new ArrayList<>(0))
+            .defaultValue(new Object2BooleanOpenHashMap<>(0))
             .build()
     );
 
@@ -171,7 +170,7 @@ public class ESP extends Module {
         count = 0;
 
         for (Entity entity : mc.world.getEntities()) {
-            if ((!ModuleManager.INSTANCE.isActive(Freecam.class) && entity == mc.player) || !entities.get().contains(entity.getType())) continue;
+            if ((!ModuleManager.INSTANCE.isActive(Freecam.class) && entity == mc.player) || !entities.get().getBoolean(entity.getType())) continue;
             count++;
             render(event, entity, getColor(entity));
         }
@@ -183,7 +182,7 @@ public class ESP extends Module {
     }
 
     public Color getOutlineColor(Entity entity) {
-        if (!entities.get().contains(entity.getType())) return null;
+        if (!entities.get().getBoolean(entity.getType())) return null;
         Color color = getColor(entity);
 
         double dist = mc.cameraEntity.squaredDistanceTo(entity.getX() + entity.getWidth() / 2, entity.getY() + entity.getHeight() / 2, entity.getZ() + entity.getWidth() / 2);

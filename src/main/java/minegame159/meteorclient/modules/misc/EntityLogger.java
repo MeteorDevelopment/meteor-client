@@ -5,6 +5,8 @@
 
 package minegame159.meteorclient.modules.misc;
 
+import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
+import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.entity.EntityAddedEvent;
@@ -19,16 +21,13 @@ import minegame159.meteorclient.utils.player.Chat;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class EntityLogger extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<List<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
+    private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
             .name("entites")
             .description("Select specific entities.")
-            .defaultValue(new ArrayList<>(0))
+            .defaultValue(new Object2BooleanOpenHashMap<>(0))
             .build()
     );
 
@@ -54,7 +53,7 @@ public class EntityLogger extends Module {
     private final Listener<EntityAddedEvent> onEntityAdded = new Listener<>(event -> {
         if (event.entity.getUuid().equals(mc.player.getUuid())) return;
 
-        if (entities.get().contains(event.entity.getType())) {
+        if (entities.get().getBoolean(event.entity.getType())) {
             if (event.entity instanceof PlayerEntity) {
                 if (!friends.get() && FriendManager.INSTANCE.get((PlayerEntity) event.entity) != null) return;
             }

@@ -6,6 +6,8 @@
 package minegame159.meteorclient.modules.combat;
 
 import com.google.common.collect.Streams;
+import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
+import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import me.zero.alpine.event.EventPriority;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
@@ -244,7 +246,7 @@ public class CrystalAura extends Module {
 
     //Targetting
 
-    private final Setting<List<EntityType<?>>> entities = sgTarget.add(new EntityTypeListSetting.Builder()
+    private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgTarget.add(new EntityTypeListSetting.Builder()
             .name("entities")
             .description("The entities to attack.")
             .defaultValue(getDefault())
@@ -581,7 +583,7 @@ public class CrystalAura extends Module {
                 .filter(entity -> !isSafe(entity.getPos()))
                 .forEach(entity -> {
                     for (Entity target : mc.world.getEntities()){
-                        if (target != mc.player && entities.get().contains(target.getType()) && mc.player.distanceTo(target) <= targetRange.get()
+                        if (target != mc.player && entities.get().getBoolean(target.getType()) && mc.player.distanceTo(target) <= targetRange.get()
                                 && target.isAlive() && target instanceof LivingEntity
                                 && (!(target instanceof PlayerEntity) || FriendManager.INSTANCE.attack((PlayerEntity) target))){
                             crystalList.add(DamageCalcUtils.crystalDamage((LivingEntity) target, entity.getPos()));
@@ -661,7 +663,7 @@ public class CrystalAura extends Module {
                 .filter(entity -> entity != mc.player)
                 .filter(entity -> !(entity instanceof PlayerEntity) || FriendManager.INSTANCE.attack((PlayerEntity) entity))
                 .filter(entity -> entity instanceof LivingEntity)
-                .filter(entity -> entities.get().contains(entity.getType()))
+                .filter(entity -> entities.get().getBoolean(entity.getType()))
                 .filter(entity -> entity.distanceTo(mc.player) <= targetRange.get() * 2)
                 .min(Comparator.comparingDouble(o -> o.distanceTo(mc.player)))
                 .map(entity -> (LivingEntity) entity);
@@ -757,7 +759,7 @@ public class CrystalAura extends Module {
                                 }
                             } else {
                                 for (Entity entity : mc.world.getEntities()){
-                                    if (entity != mc.player && entities.get().contains(entity.getType()) && mc.player.distanceTo(entity) <= targetRange.get()
+                                    if (entity != mc.player && entities.get().getBoolean(entity.getType()) && mc.player.distanceTo(entity) <= targetRange.get()
                                             && entity.isAlive() && entity instanceof LivingEntity
                                             && (!(entity instanceof PlayerEntity) || FriendManager.INSTANCE.attack((PlayerEntity) entity))){
                                         crystalList.add(DamageCalcUtils.crystalDamage((LivingEntity) entity, pos.add(0.5, 1, 0.5)));
@@ -912,10 +914,10 @@ public class CrystalAura extends Module {
         }
     }
 
-    private List<EntityType<?>> getDefault(){
-        List<EntityType<?>> list = new ArrayList<>();
-        list.add(EntityType.PLAYER);
-        return list;
+    private Object2BooleanMap<EntityType<?>> getDefault(){
+        Object2BooleanMap<EntityType<?>> map = new Object2BooleanOpenHashMap<>();
+        map.put(EntityType.PLAYER, true);
+        return map;
     }
 
     private boolean shouldBreak(EndCrystalEntity entity){

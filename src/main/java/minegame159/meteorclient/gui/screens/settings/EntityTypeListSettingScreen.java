@@ -50,7 +50,9 @@ public class EntityTypeListSettingScreen extends WindowScreen {
 
     private void initWidgets() {
         hasAnimal = hasWaterAnimal = hasMonster = hasAmbient = hasMisc = 0;
-        for (EntityType<?> entityType : setting.get()) {
+        for (EntityType<?> entityType : setting.get().keySet()) {
+            if (!setting.get().getBoolean(entityType)) continue;
+
             if (!setting.onlyAttackable || EntityUtils.isAttackable(entityType)) {
                 switch (entityType.getSpawnGroup()) {
                     case CREATURE:       hasAnimal++; break;
@@ -157,13 +159,10 @@ public class EntityTypeListSettingScreen extends WindowScreen {
 
         for (EntityType<?> entityType : entityTypes) {
             if (checked) {
-                if (!setting.get().contains(entityType)) {
-                    setting.get().add(entityType);
-                    changed = true;
-                }
+                setting.get().put(entityType, true);
+                changed = true;
             } else {
-                if (setting.get().contains(entityType)) {
-                    setting.get().remove(entityType);
+                if (setting.get().removeBoolean(entityType)) {
                     changed = true;
                 }
             }
@@ -178,21 +177,19 @@ public class EntityTypeListSettingScreen extends WindowScreen {
 
     private void addEntityType(WSection table, WCheckbox tableCheckbox, EntityType<?> entityType) {
         table.add(new WLabel(entityType.getName().getString()));
-        WCheckbox a = table.add(new WCheckbox(setting.get().contains(entityType))).fillX().right().getWidget();
+        WCheckbox a = table.add(new WCheckbox(setting.get().getBoolean(entityType))).fillX().right().getWidget();
         a.action = () -> {
             if (a.checked) {
-                if (!setting.get().contains(entityType)) {
-                    setting.get().add(entityType);
-                    switch (entityType.getSpawnGroup()) {
-                        case CREATURE:       if (hasAnimal == 0) tableCheckbox.checked = true; hasAnimal++; break;
-                        case WATER_CREATURE: if (hasWaterAnimal == 0) tableCheckbox.checked = true; hasWaterAnimal++; break;
-                        case MONSTER:        if (hasMonster == 0) tableCheckbox.checked = true; hasMonster++; break;
-                        case AMBIENT:        if (hasAmbient == 0) tableCheckbox.checked = true; hasAmbient++; break;
-                        case MISC:           if (hasMisc == 0) tableCheckbox.checked = true; hasMisc++; break;
-                    }
+                setting.get().put(entityType, true);
+                switch (entityType.getSpawnGroup()) {
+                    case CREATURE:       if (hasAnimal == 0) tableCheckbox.checked = true; hasAnimal++; break;
+                    case WATER_CREATURE: if (hasWaterAnimal == 0) tableCheckbox.checked = true; hasWaterAnimal++; break;
+                    case MONSTER:        if (hasMonster == 0) tableCheckbox.checked = true; hasMonster++; break;
+                    case AMBIENT:        if (hasAmbient == 0) tableCheckbox.checked = true; hasAmbient++; break;
+                    case MISC:           if (hasMisc == 0) tableCheckbox.checked = true; hasMisc++; break;
                 }
             } else {
-                if (setting.get().remove(entityType)) {
+                if (setting.get().removeBoolean(entityType)) {
                     switch (entityType.getSpawnGroup()) {
                         case CREATURE:       hasAnimal--; if (hasAnimal == 0) tableCheckbox.checked = false; break;
                         case WATER_CREATURE: hasWaterAnimal--; if (hasWaterAnimal == 0) tableCheckbox.checked = false; break;
