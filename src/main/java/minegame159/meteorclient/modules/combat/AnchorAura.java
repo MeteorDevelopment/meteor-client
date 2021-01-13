@@ -224,7 +224,7 @@ public class AnchorAura extends Module {
     @EventHandler
     private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
         if (mc.world.getDimension().isRespawnAnchorWorking()) {
-            Chat.error(this, "You are in the Nether... disabling!");
+            Chat.error(this, "You are in the Nether... (highlight)disabling(default)!");
             this.toggle();
             return;
         }
