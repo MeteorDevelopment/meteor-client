@@ -36,6 +36,7 @@ import java.util.List;
  */
 
 public class InfinityMiner extends Module {
+
     public enum Mode {
         Target,
         Repair,
@@ -124,8 +125,13 @@ public class InfinityMiner extends Module {
     public void onDeactivate() {
         if (smartModuleToggle.get()) {
             BLOCKER = true;
-            for (Module module : getToggleModules()) {
-                if (originalSettings.get(module.name) != module.isActive()) module.toggle();
+            try {
+                for (Module module : getToggleModules()) {
+                    if (module != null && originalSettings.get(module.name) != module.isActive()) {
+                        module.toggle();
+                    }
+                }
+            } catch (NullPointerException ignored) {
             }
             originalSettings.clear();
             BLOCKER = false;
@@ -192,7 +198,7 @@ public class InfinityMiner extends Module {
     private final Listener<ActiveModulesChangedEvent> moduleChange = new Listener<>(event -> {
         if (!BLOCKER) {
             for (Module module : getToggleModules()) {
-                if (!module.isActive()) originalSettings.remove(module.name);
+                if (module != null && !module.isActive()) originalSettings.remove(module.name);
             }
         }
     });
