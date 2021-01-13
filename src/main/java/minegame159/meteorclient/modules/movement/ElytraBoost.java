@@ -3,13 +3,10 @@ package minegame159.meteorclient.modules.movement;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.entity.player.InteractItemEvent;
-import minegame159.meteorclient.events.meteor.KeyEvent;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.gui.widgets.WKeybind;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.misc.input.KeyAction;
 import net.minecraft.entity.projectile.FireworkRocketEntity;
 import net.minecraft.item.FireworkItem;
 import net.minecraft.item.ItemStack;
@@ -41,7 +38,7 @@ public class ElytraBoost extends Module {
     private final Setting<Integer> keybind = sgGeneral.add(new KeybindSetting.Builder()
             .name("keybind")
             .description("Keybind to boost.")
-            .defaultValue(-1)
+            .action(this::boost)
             .build()
     );
 
@@ -55,13 +52,6 @@ public class ElytraBoost extends Module {
     public void onDeactivate() {
         fireworks.clear();
     }
-
-    @EventHandler
-    private final Listener<KeyEvent> onKey = new Listener<>(event -> {
-        ((WKeybind) keybind.widget).onKey(event.key);
-
-        if (event.action == KeyAction.Release && event.key == keybind.get()) boost();
-    });
 
     @EventHandler
     private final Listener<InteractItemEvent> onInteractItem = new Listener<>(event -> {

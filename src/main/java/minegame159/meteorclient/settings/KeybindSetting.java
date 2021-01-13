@@ -1,16 +1,26 @@
 package minegame159.meteorclient.settings;
 
+import me.zero.alpine.listener.Listener;
+import minegame159.meteorclient.MeteorClient;
+import minegame159.meteorclient.events.meteor.KeyEvent;
 import minegame159.meteorclient.gui.widgets.WKeybind;
+import minegame159.meteorclient.utils.misc.input.KeyAction;
 import net.minecraft.nbt.CompoundTag;
 
 import java.util.function.Consumer;
 
 public class KeybindSetting extends Setting<Integer> {
-    public KeybindSetting(String name, String description, Integer defaultValue, Consumer<Integer> onChanged, Consumer<Setting<Integer>> onModuleActivated) {
+    public KeybindSetting(String name, String description, Integer defaultValue, Consumer<Integer> onChanged, Consumer<Setting<Integer>> onModuleActivated, Runnable action) {
         super(name, description, defaultValue, onChanged, onModuleActivated);
 
         widget = new WKeybind(get());
         ((WKeybind) widget).action = () -> set(((WKeybind) widget).get());
+
+        MeteorClient.EVENT_BUS.subscribe(new Listener<KeyEvent>(event -> {
+            ((WKeybind) widget).onKey(event.key);
+
+            if (event.action == KeyAction.Release && event.key == get() && module.isActive() && action != null) action.run();
+        }));
     }
 
     @Override
@@ -52,6 +62,7 @@ public class KeybindSetting extends Setting<Integer> {
         private Integer defaultValue = -1;
         private Consumer<Integer> onChanged;
         private Consumer<Setting<Integer>> onModuleActivated;
+        private Runnable action;
 
         public Builder name(String name) {
             this.name = name;
@@ -78,8 +89,13 @@ public class KeybindSetting extends Setting<Integer> {
             return this;
         }
 
+        public Builder action(Runnable action) {
+            this.action = action;
+            return this;
+        }
+
         public KeybindSetting build() {
-            return new KeybindSetting(name, description, defaultValue, onChanged, onModuleActivated);
+            return new KeybindSetting(name, description, defaultValue, onChanged, onModuleActivated, action);
         }
     }
 }
