@@ -66,7 +66,7 @@ public class LiquidFiller extends Module {
 
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
             .name("rotate")
-            .description("Automatically faces the blocks being filled with water/lava.")
+            .description("Faces the blocks filling the water/lava.")
             .defaultValue(true)
             .build()
     );
