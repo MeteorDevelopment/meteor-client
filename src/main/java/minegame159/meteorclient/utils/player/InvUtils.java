@@ -91,13 +91,15 @@ public class InvUtils implements Listenable {
             moveQueue.clear();
             return;
         }
-        if (currentQueue.isEmpty() && !moveQueue.isEmpty()) {
-            CustomPair pair = moveQueue.remove();
-            currentQueue.addAll(pair.getRight());
-        } else if (!currentQueue.isEmpty()) {
-            if (mc.player.currentScreenHandler.getStacks().size() < 45) return;
-            currentQueue.forEach(slot -> clickSlot(slot, 0, SlotActionType.PICKUP));
-            currentQueue.clear();
+        if (!moveQueue.isEmpty()) {
+            if (currentQueue.isEmpty()) {
+                CustomPair pair = moveQueue.remove();
+                currentQueue.addAll(pair.getRight());
+            }
+            if (mc.player.currentScreenHandler.getStacks().size() > 44) {
+                currentQueue.forEach(slot -> clickSlot(slot, 0, SlotActionType.PICKUP));
+                currentQueue.clear();
+            }
         }
     });
 
@@ -105,10 +107,10 @@ public class InvUtils implements Listenable {
         if (moveQueue.contains(new CustomPair(klass, slots)) || currentQueue.containsAll(slots)) return;
         if (!moveQueue.isEmpty() && canMove(klass)){
             moveQueue.addFirst(new CustomPair(klass, slots));
-            onTick.invoke(new TickEvent.Pre());
         } else {
             moveQueue.add(new CustomPair(klass, slots));
         }
+        onTick.invoke(new TickEvent.Pre());
     }
 
     public static boolean canMove(Class<? extends Module> klass){
