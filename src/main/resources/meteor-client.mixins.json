@@ -96,7 +96,8 @@
     "Vec3dMixin",
     "WorldRendererAccessor",
     "WorldRendererMixin",
-    "FireworkRocketEntityMixin"
+    "FireworkRocketEntityMixin",
+    "BoxMixin"
   ],
   "injectors": {
     "defaultRequire": 1
