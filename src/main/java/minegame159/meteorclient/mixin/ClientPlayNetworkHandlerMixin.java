@@ -9,6 +9,7 @@ import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.entity.EntityDestroyEvent;
 import minegame159.meteorclient.events.entity.player.PickItemsEvent;
 import minegame159.meteorclient.events.game.GameJoinedEvent;
+import minegame159.meteorclient.events.game.GameLeftEvent;
 import minegame159.meteorclient.events.packets.ContainerSlotUpdateEvent;
 import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.events.packets.PlaySoundPacketEvent;
@@ -18,6 +19,7 @@ import minegame159.meteorclient.modules.movement.Velocity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.network.Packet;
@@ -36,8 +38,15 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 public abstract class ClientPlayNetworkHandlerMixin {
     @Shadow private MinecraftClient client;
 
+    @Shadow private ClientWorld world;
+
     @Inject(at = @At("TAIL"), method = "onGameJoin")
     private void onGameJoin(GameJoinS2CPacket packet, CallbackInfo info) {
+        if (world != null) {
+            MeteorClient.IS_DISCONNECTING = true;
+            MeteorClient.EVENT_BUS.post(GameLeftEvent.get());
+        }
+
         MeteorClient.IS_DISCONNECTING = false;
         MeteorClient.EVENT_BUS.post(GameJoinedEvent.get());
     }
