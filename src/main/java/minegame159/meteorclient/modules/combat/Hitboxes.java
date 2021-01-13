@@ -1,5 +1,7 @@
 package minegame159.meteorclient.modules.combat;
 
+import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
+import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.DoubleSetting;
@@ -9,16 +11,13 @@ import minegame159.meteorclient.settings.SettingGroup;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class Hitboxes extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<List<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
+    private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
             .name("entities")
             .description("Which entities to target.")
-            .defaultValue(new ArrayList<>(0))
+            .defaultValue(new Object2BooleanOpenHashMap<>(0))
             .build()
     );
 
@@ -35,7 +34,7 @@ public class Hitboxes extends Module {
 
     public double getEntityValue(Entity entity) {
         if (!isActive()) return 0;
-        if (entities.get().contains(entity.getType())) return value.get();
+        if (entities.get().getBoolean(entity.getType())) return value.get();
         return 0;
     }
 }

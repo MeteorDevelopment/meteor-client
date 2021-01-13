@@ -5,6 +5,8 @@
 
 package minegame159.meteorclient.modules.misc;
 
+import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
+import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.world.TickEvent;
@@ -18,16 +20,13 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.NameTagItem;
 import net.minecraft.util.Hand;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class AutoNametag extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<List<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
+    private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
             .name("entities")
             .description("Which entities to nametag.")
-            .defaultValue(new ArrayList<>(0))
+            .defaultValue(new Object2BooleanOpenHashMap<>(0))
             .build()
     );
     
@@ -53,7 +52,7 @@ public class AutoNametag extends Module {
     @EventHandler
     private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
         for (Entity entity : mc.world.getEntities()) {
-            if (!entities.get().contains(entity.getType()) || entity.hasCustomName() || mc.player.distanceTo(entity) > distance.get()) continue;
+            if (!entities.get().getBoolean(entity.getType()) || entity.hasCustomName() || mc.player.distanceTo(entity) > distance.get()) continue;
 
             boolean findNametag = true;
             boolean offHand = false;

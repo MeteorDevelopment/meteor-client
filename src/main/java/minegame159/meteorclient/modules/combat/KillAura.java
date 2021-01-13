@@ -6,6 +6,8 @@
 package minegame159.meteorclient.modules.combat;
 
 import baritone.api.BaritoneAPI;
+import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
+import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.world.TickEvent;
@@ -59,10 +61,10 @@ public class KillAura extends Module {
             .build()
     );
 
-    private final Setting<List<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
+    private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
             .name("entities")
             .description("Entities to attack.")
-            .defaultValue(new ArrayList<>(0))
+            .defaultValue(new Object2BooleanOpenHashMap<>(0))
             .onlyAttackable()
             .build()
     );
@@ -278,7 +280,7 @@ public class KillAura extends Module {
             if (entity == mc.player || entity == mc.cameraEntity) continue;
             if (entity.isDead() || !entity.isAlive()) continue;
             if (entity.distanceTo(mc.player) > range.get()) continue;
-            if (!entities.get().contains(entity.getType())) continue;
+            if (!entities.get().getBoolean(entity.getType())) continue;
             if (!nametagged.get() && entity.hasCustomName()) continue;
             if (!canSeeEntity(entity)) continue;
 

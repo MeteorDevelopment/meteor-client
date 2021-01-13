@@ -5,6 +5,8 @@
 
 package minegame159.meteorclient.modules.render;
 
+import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
+import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
@@ -20,16 +22,13 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class Chams extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     
-    private final Setting<List<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
+    private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
             .name("entities")
             .description("Select entities to show through walls.")
-            .defaultValue(new ArrayList<>(0))
+            .defaultValue(new Object2BooleanOpenHashMap<>(0))
             .build()
     );
 
@@ -98,7 +97,7 @@ public class Chams extends Module {
     }
 
     public boolean ignoreRender(Entity entity) {
-        return !isActive() || !entities.get().contains(entity.getType());
+        return !isActive() || !entities.get().getBoolean(entity.getType());
     }
 
     public boolean renderChams(EntityModel<LivingEntity> model, MatrixStack matrices, VertexConsumer vertices, int light, int overlay, LivingEntity entity) {

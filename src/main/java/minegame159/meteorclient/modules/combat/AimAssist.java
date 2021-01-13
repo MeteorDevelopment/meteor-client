@@ -6,6 +6,8 @@
 package minegame159.meteorclient.modules.combat;
 
 import com.google.common.collect.Streams;
+import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
+import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.render.RenderEvent;
@@ -23,9 +25,6 @@ import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class AimAssist extends Module {
     public enum Priority {
@@ -53,10 +52,10 @@ public class AimAssist extends Module {
             .build()
     );
 
-    private final Setting<List<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
+    private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
             .name("entities")
             .description("Entities to aim at.")
-            .defaultValue(new ArrayList<>(0))
+            .defaultValue(new Object2BooleanOpenHashMap<>(0))
             .build()
     );
 
@@ -183,7 +182,7 @@ public class AimAssist extends Module {
     }
 
     private boolean canAttackEntity(Entity entity) {
-        if (entity == mc.player || !entities.get().contains(entity.getType())) return false;
+        if (entity == mc.player || !entities.get().getBoolean(entity.getType())) return false;
 
         if (entity instanceof PlayerEntity) {
             if (friends.get()) return true;

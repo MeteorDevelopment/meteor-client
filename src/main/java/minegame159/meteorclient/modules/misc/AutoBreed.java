@@ -1,5 +1,7 @@
 package minegame159.meteorclient.modules.misc;
 
+import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
+import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.world.TickEvent;
@@ -20,10 +22,10 @@ public class AutoBreed extends Module {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<List<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
+    private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
             .name("entities")
             .description("Entities to breed.")
-            .defaultValue(new ArrayList<>(0))
+            .defaultValue(new Object2BooleanOpenHashMap<>(0))
             .onlyAttackable()
             .build()
     );
@@ -69,7 +71,7 @@ public class AutoBreed extends Module {
             if (!(entity instanceof AnimalEntity)) continue;
             else animal = (AnimalEntity) entity;
 
-            if (!entities.get().contains(animal.getType())
+            if (!entities.get().getBoolean(animal.getType())
                     || (animal.isBaby() && !ignoreBabies.get())
                     || animalsFed.contains(animal)
                     || mc.player.distanceTo(animal) > range.get()
