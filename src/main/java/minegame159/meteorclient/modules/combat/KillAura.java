@@ -128,6 +128,13 @@ public class KillAura extends Module {
             .build()
     );
 
+    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
+            .name("rotate")
+            .description("Rotates to the entity you are attacking.")
+            .defaultValue(true)
+            .build()
+    );
+
     // Delay
 
     private final Setting<Boolean> smartDelay = sgDelay.add(new BoolSetting.Builder()
@@ -146,14 +153,7 @@ public class KillAura extends Module {
             .build()
     );
 
-    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
-            .name("rotate")
-            .description("Rotates to the entity you are attacking.")
-            .defaultValue(true)
-            .build()
-    );
-
-    // Random hit delay
+    // Random Hit Delay
 
     private final Setting<Boolean> randomDelayEnabled = sgRandomDelay.add(new BoolSetting.Builder()
             .name("random-delay-enabled")

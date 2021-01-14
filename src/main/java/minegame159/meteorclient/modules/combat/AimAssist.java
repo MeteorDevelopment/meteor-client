@@ -41,12 +41,12 @@ public class AimAssist extends Module {
     }
     
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgSpeed = settings.createGroup("Speed");
+    private final SettingGroup sgSpeed = settings.createGroup("Aim Speed");
 
     // General
     private final Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()
             .name("range")
-            .description("How far away the entity has to be to be targetted.")
+            .description("How far away the entity has to be to be targeted.")
             .defaultValue(5)
             .min(0)
             .build()
@@ -89,7 +89,7 @@ public class AimAssist extends Module {
 
     // Speed
     private final Setting<Boolean> speedInstant = sgSpeed.add(new BoolSetting.Builder()
-            .name("speed-instant")
+            .name("instant-look")
             .description("Instantly looks at the entity.")
             .defaultValue(false)
             .build()

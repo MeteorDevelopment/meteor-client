@@ -70,7 +70,7 @@ public class AutoTrap extends Module {
 
     private final Setting<Integer> range = sgGeneral.add(new IntSetting.Builder()
             .name("range")
-            .description("How far away you can target players.")
+            .description("The radius players can be in to be targeted.")
             .defaultValue(5)
             .sliderMin(0)
             .sliderMax(10)
@@ -84,9 +84,11 @@ public class AutoTrap extends Module {
             .build()
     );
 
+    // Render
+
     private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
             .name("render")
-            .description("Renders a block overlay where obsidian will be placed.")
+            .description("Renders a block overlay where the obsidian will be placed.")
             .defaultValue(true)
             .build()
     );

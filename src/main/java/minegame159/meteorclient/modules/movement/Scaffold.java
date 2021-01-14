@@ -30,7 +30,7 @@ public class Scaffold extends Module {
     private final SettingGroup sg = settings.getDefaultGroup();
 
     private final Setting<Boolean> safeWalk = sg.add(new BoolSetting.Builder()
-            .name("Safe-walk")
+            .name("safe-walk")
             .description("Whether or not to toggle Safe Walk when using Scaffold.")
             .defaultValue(true)
             .build()
@@ -38,14 +38,14 @@ public class Scaffold extends Module {
 
     private final Setting<Boolean> fastTower = sg.add(new BoolSetting.Builder()
             .name("fast-tower")
-            .description("Whether or not to tower up faster.")
+            .description("Whether or not to scaffold upwards faster.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Integer> radius = sg.add(new IntSetting.Builder()
             .name("radius")
-            .description("Radius of your scaffold.")
+            .description("The radius of your scaffold.")
             .defaultValue(1)
             .min(1)
             .sliderMin(1)
@@ -55,14 +55,14 @@ public class Scaffold extends Module {
 
     private final Setting<List<Block>> blackList = sg.add(new BlockListSetting.Builder()
             .name("blacklist")
-            .description("Blacklists certain blocks from being used to Scaffold.")
+            .description("Blacklists certain blocks from being used to scaffold.")
             .defaultValue(new ArrayList<>())
             .build()
     );
 
     private final Setting<Boolean> selfToggle = sg.add(new BoolSetting.Builder()
             .name("self-toggle")
-            .description("Toggles when you run out of blocks.")
+            .description("Toggles Scaffold when you run out of blocks.")
             .defaultValue(true)
             .build()
     );
