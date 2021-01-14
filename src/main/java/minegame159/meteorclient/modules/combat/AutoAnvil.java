@@ -106,7 +106,7 @@ public class AutoAnvil extends Module {
     private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
 
         if (isActive() && toggleOnBreak.get() && target != null && target.inventory.getArmorStack(3).isEmpty()) {
-            Chat.info(this, "Target head slot is empty… Disabling.");
+            Chat.info(this, "Target head slot is empty… disabling.");
             toggle();
             return;
         }

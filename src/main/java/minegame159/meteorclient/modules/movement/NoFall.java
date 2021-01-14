@@ -35,9 +35,16 @@ public class NoFall extends Module {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
+    private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
+            .name("mode")
+            .description("The way you are saved from fall damage.")
+            .defaultValue(Mode.Packet)
+            .build()
+    );
+
     private final Setting<Boolean> elytra = sgGeneral.add(new BoolSetting.Builder()
-            .name("elytra compatibility")
-            .description("Stops this from working when using elytra.")
+            .name("elytra-compatibility")
+            .description("Stops No Fall from working when using an elytra.")
             .defaultValue(true)
             .build()
     );
@@ -48,13 +55,6 @@ public class NoFall extends Module {
             .defaultValue(0.5)
             .min(0.1)
             .sliderMax(1)
-            .build()
-    );
-
-    private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
-            .name("mode")
-            .description("The way you are saved from fall damage.")
-            .defaultValue(Mode.Packet)
             .build()
     );
 

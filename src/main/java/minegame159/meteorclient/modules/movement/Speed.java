@@ -33,6 +33,7 @@ public class Speed extends Module {
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgJump = settings.createGroup("Jump");
     
     private final Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
             .name("speed")
@@ -45,33 +46,33 @@ public class Speed extends Module {
 
     private final Setting<Boolean> onlyOnGround = sgGeneral.add(new BoolSetting.Builder()
             .name("only-on-ground")
-            .description("Use speed only when standing on a block.")
+            .description("Uses speed only when standing on a block.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> inWater = sgGeneral.add(new BoolSetting.Builder()
             .name("in-water")
-            .description("Use speed when in water.")
+            .description("Uses speed when in water.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> whenSneaking = sgGeneral.add(new BoolSetting.Builder()
             .name("when-sneaking")
-            .description("Use speed when sneaking.")
+            .description("Uses speed when sneaking.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> applySpeedPotions = sgGeneral.add(new BoolSetting.Builder()
             .name("apply-speed-potions")
-            .description("Apply the speed effect via potions.")
+            .description("Applies the speed effect via potions.")
             .defaultValue(true)
             .build()
     );
 
-    private final SettingGroup sgJump = settings.createGroup("Jump");
+    // Jump
 
     private final Setting<Boolean> jump = sgJump.add(new BoolSetting.Builder()
             .name("jump")

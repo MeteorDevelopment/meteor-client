@@ -52,7 +52,7 @@ public class BedAura extends Module {
 
     private final SettingGroup sgPlace = settings.createGroup("Place");
     private final SettingGroup sgBreak = settings.createGroup("Break");
-    private final SettingGroup sgSwitch= settings.createGroup("Switch");
+    private final SettingGroup sgSwitch = settings.createGroup("Switch");
     private final SettingGroup sgMisc = settings.createGroup("Misc");
 
     // Place
@@ -66,7 +66,7 @@ public class BedAura extends Module {
 
     private final Setting<Mode> placeMode = sgPlace.add(new EnumSetting.Builder<Mode>()
             .name("place-mode")
-            .description("How beds get placed.")
+            .description("How the beds get placed.")
             .defaultValue(Mode.Safe)
             .build()
     );
@@ -138,7 +138,7 @@ public class BedAura extends Module {
     private final Setting<Double> breakRange = sgBreak.add(new DoubleSetting.Builder()
             .name("break-range")
             .description("The distance in a single direction the beds get broken.")
-            .defaultValue(3)
+            .defaultValue(4)
             .min(0)
             .sliderMax(5)
             .build()
