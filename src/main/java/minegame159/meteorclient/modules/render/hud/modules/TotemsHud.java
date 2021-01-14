@@ -1,7 +1,7 @@
 package minegame159.meteorclient.modules.render.hud.modules;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.modules.render.hud.HUD;
+import minegame159.meteorclient.modules.render.hud.HudEditorScreen;
 import minegame159.meteorclient.modules.render.hud.HudRenderer;
 import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.render.RenderUtils;
@@ -23,9 +23,13 @@ public class TotemsHud extends HudModule {
         double x = box.getX();
         double y = box.getY();
 
-        if (InvUtils.findItemWithCount(Items.TOTEM_OF_UNDYING.asItem()).count > 0) {
+        if(mc.player == null || mc.currentScreen instanceof HudEditorScreen) {
 
-            RenderUtils.drawItem(new ItemStack(Items.TOTEM_OF_UNDYING, InvUtils.findItemWithCount(Items.TOTEM_OF_UNDYING.asItem()).count), (int) (x / hud.armorScale()), (int) (y / hud.armorScale()), hud.armorScale(), true);
+            RenderUtils.drawItem(Items.TOTEM_OF_UNDYING.getDefaultStack(), (int) (x / hud.armorScale()), (int) (y / hud.armorScale()), hud.armorScale(), true);
+
+        } else if(InvUtils.findItemWithCount(Items.TOTEM_OF_UNDYING).count > 0) {
+
+            RenderUtils.drawItem(new ItemStack(Items.TOTEM_OF_UNDYING, InvUtils.findItemWithCount(Items.TOTEM_OF_UNDYING).count), (int) (x / hud.armorScale()), (int) (y / hud.armorScale()), hud.armorScale(), true);
 
         }
     }
