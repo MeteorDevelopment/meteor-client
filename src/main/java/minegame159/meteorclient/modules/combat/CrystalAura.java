@@ -76,13 +76,14 @@ public class CrystalAura extends Module {
 
     //Placement
 
-    private final Setting<Boolean> place = sgPlace.add(new BoolSetting.Builder()
-            .name("place")
-            .description("Allows Crystal Aura to place crystals.")
-            .defaultValue(true)
+    private final Setting<Integer> placeDelay = sgPlace.add(new IntSetting.Builder()
+            .name("place-delay")
+            .description("The amount of delay in ticks before placing.")
+            .defaultValue(2)
+            .min(0)
+            .sliderMax(10)
             .build()
     );
-
 
     private final Setting<Mode> placeMode = sgPlace.add(new EnumSetting.Builder<Mode>()
             .name("place-mode")
@@ -100,17 +101,17 @@ public class CrystalAura extends Module {
             .build()
     );
 
-    private final Setting<Boolean> strict = sgPlace.add(new BoolSetting.Builder()
-            .name("strict")
-            .description("Won't place in one block holes to help compatibility with some servers.")
-            .defaultValue(false)
+    private final Setting<Boolean> place = sgPlace.add(new BoolSetting.Builder()
+            .name("place")
+            .description("Allows Crystal Aura to place crystals.")
+            .defaultValue(true)
             .build()
     );
 
-    private final Setting<Boolean> ignoreWalls = sgPlace.add(new BoolSetting.Builder()
-            .name("ignore-walls")
-            .description("Whether or not to place through walls.")
-            .defaultValue(true)
+    private final Setting<Double> minDamage = sgPlace.add(new DoubleSetting.Builder()
+            .name("min-damage")
+            .description("The minimum damage the crystal will place.")
+            .defaultValue(5.5)
             .build()
     );
 
@@ -118,15 +119,6 @@ public class CrystalAura extends Module {
             .name("min-health")
             .description("The minimum health you have to be for it to place.")
             .defaultValue(15)
-            .build()
-    );
-
-    private final Setting<Integer> placeDelay = sgPlace.add(new IntSetting.Builder()
-            .name("place-delay")
-            .description("The amount of delay in ticks before placing.")
-            .defaultValue(2)
-            .min(0)
-            .sliderMax(10)
             .build()
     );
 
@@ -144,10 +136,31 @@ public class CrystalAura extends Module {
             .build()
     );
 
+    private final Setting<Boolean> strict = sgPlace.add(new BoolSetting.Builder()
+            .name("strict")
+            .description("Won't place in one block holes to help compatibility with some servers.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> ignoreWalls = sgPlace.add(new BoolSetting.Builder()
+            .name("ignore-walls")
+            .description("Whether or not to place through walls.")
+            .defaultValue(true)
+            .build()
+    );
+
     private final Setting<Boolean> facePlace = sgPlace.add(new BoolSetting.Builder()
             .name("face-place")
             .description("Will face-place when target is below a certain health or armor durability threshold.")
             .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Boolean> spamFacePlace = sgPlace.add(new BoolSetting.Builder()
+            .name("spam-face-place")
+            .description("Places faster when someone is below the face place health (Requires Smart Delay).")
+            .defaultValue(false)
             .build()
     );
 
@@ -170,43 +183,19 @@ public class CrystalAura extends Module {
             .build()
     );
 
-    private final Setting<Boolean> spamFacePlace = sgPlace.add(new BoolSetting.Builder()
-            .name("spam-face-place")
-            .description("Places faster when someone is below the face place health (Requires Smart Delay).")
-            .defaultValue(false)
-            .build()
-    );
-
-    private final Setting<Double> healthDifference = sgPlace.add(new DoubleSetting.Builder()
-            .name("damage-increase")
-            .description("The damage increase for smart delay to work.")
-            .defaultValue(5)
-            .min(0)
-            .max(20)
-            .build()
-    );
-
-    private final Setting<Double> minDamage = sgPlace.add(new DoubleSetting.Builder()
-            .name("min-damage")
-            .description("The minimum damage the crystal will place.")
-            .defaultValue(5.5)
-            .build()
-    );
-
-
-    private final Setting<Boolean> support = sgPlace.add(new BoolSetting.Builder()
-            .name("support")
-            .description("Places a block in the air and crystals on it. Helps with killing players that are flying.")
-            .defaultValue(false)
-            .build()
-    );
-
     private final Setting<Integer> supportDelay = sgPlace.add(new IntSetting.Builder()
             .name("support-delay")
             .description("The delay between support blocks being placed.")
             .defaultValue(5)
             .min(0)
             .sliderMax(10)
+            .build()
+    );
+
+    private final Setting<Boolean> support = sgPlace.add(new BoolSetting.Builder()
+            .name("support")
+            .description("Places a block in the air and crystals on it. Helps with killing players that are flying.")
+            .defaultValue(false)
             .build()
     );
 
@@ -218,6 +207,15 @@ public class CrystalAura extends Module {
     );
 
     //Breaking
+
+    private final Setting<Integer> breakDelay = sgBreak.add(new IntSetting.Builder()
+            .name("break-delay")
+            .description("The amount of delay in ticks before breaking.")
+            .defaultValue(1)
+            .min(0)
+            .sliderMax(10)
+            .build()
+    );
 
     private final Setting<Mode> breakMode = sgBreak.add(new EnumSetting.Builder<Mode>()
             .name("break-mode")
@@ -232,15 +230,6 @@ public class CrystalAura extends Module {
             .defaultValue(5)
             .min(0)
             .sliderMax(7)
-            .build()
-    );
-
-    private final Setting<Integer> breakDelay = sgBreak.add(new IntSetting.Builder()
-            .name("break-delay")
-            .description("The amount of delay in ticks before breaking.")
-            .defaultValue(1)
-            .min(0)
-            .sliderMax(10)
             .build()
     );
 
@@ -263,16 +252,9 @@ public class CrystalAura extends Module {
             .build()
     );
 
-    private final Setting<Boolean> multiTarget = sgTarget.add(new BoolSetting.Builder()
-            .name("multi-targeting")
-            .description("Will calculate damage for all entities and pick a block based on target mode.")
-            .defaultValue(false)
-            .build()
-    );
-
     private final Setting<TargetMode> targetMode = sgTarget.add(new EnumSetting.Builder<TargetMode>()
             .name("target-mode")
-            .description("The way how to you do target multiple targets.")
+            .description("The way you target multiple targets.")
             .defaultValue(TargetMode.HighestXDamages)
             .build()
     );
@@ -283,6 +265,13 @@ public class CrystalAura extends Module {
             .defaultValue(3)
             .min(2)
             .sliderMax(10)
+            .build()
+    );
+
+    private final Setting<Boolean> multiTarget = sgTarget.add(new BoolSetting.Builder()
+            .name("multi-targeting")
+            .description("Will calculate damage for all entities and pick a block based on target mode.")
+            .defaultValue(false)
             .build()
     );
 
@@ -313,6 +302,15 @@ public class CrystalAura extends Module {
             .name("smart-delay")
             .description("Reduces crystal consumption when doing large amounts of damage. (Can tank performance on lower-end PCs)")
             .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Double> healthDifference = sgMisc.add(new DoubleSetting.Builder()
+            .name("damage-increase")
+            .description("The damage increase for smart delay to work.")
+            .defaultValue(5)
+            .min(0)
+            .max(20)
             .build()
     );
 
