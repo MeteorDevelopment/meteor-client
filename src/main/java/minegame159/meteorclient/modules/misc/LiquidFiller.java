@@ -66,13 +66,13 @@ public class LiquidFiller extends Module {
 
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
             .name("rotate")
-            .description("Automatically faces the blocks being filled with water/lava.")
+            .description("Automatically rotates towards the space targeted for filling.")
             .defaultValue(true)
             .build()
     );
 
     public LiquidFiller(){
-        super(Category.Misc, "Liquid-Filler", "Places blocks inside of liquid source blocks within range of you.");
+        super(Category.Misc, "liquid-filler", "Places blocks inside of liquid source blocks within range of you.");
     }
 
     @EventHandler

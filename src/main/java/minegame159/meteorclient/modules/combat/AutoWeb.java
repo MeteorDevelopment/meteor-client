@@ -39,14 +39,14 @@ public class AutoWeb extends Module {
 
     private final Setting<Boolean> doubles = sgGeneral.add(new BoolSetting.Builder()
             .name("doubles")
-            .description("Places in the target's upper hitbox as well as the lower hitbox.")
+            .description("Places webs in the target's upper hitbox as well as the lower hitbox.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
             .name("rotate")
-            .description("Rotates towards the webs.")
+            .description("Rotates towards the webs when placing.")
             .defaultValue(true)
             .build()
     );

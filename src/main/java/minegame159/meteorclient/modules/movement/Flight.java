@@ -37,7 +37,7 @@ public class Flight extends Module {
 
     private final Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
             .name("speed")
-            .description("How fast you go while flying.")
+            .description("Your speed when flying.")
             .defaultValue(0.1)
             .min(0.0)
             .build()

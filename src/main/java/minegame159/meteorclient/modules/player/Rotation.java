@@ -23,9 +23,11 @@ public class Rotation extends Module {
         None
     }
 
-    // Yaw
+
     private final SettingGroup sgYaw = settings.createGroup("Yaw");
     private final SettingGroup sgPitch = settings.createGroup("Pitch");
+
+    // Yaw
 
     private final Setting<LockMode> yawLockMode = sgYaw.add(new EnumSetting.Builder<LockMode>()
             .name("yaw-lock-mode")

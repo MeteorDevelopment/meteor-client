@@ -23,13 +23,13 @@ public class Hitboxes extends Module {
 
     private final Setting<Double> value = sgGeneral.add(new DoubleSetting.Builder()
             .name("value")
-            .description("How much to expand the hitboxes.")
+            .description("How much to expand the hitbox of the entity.")
             .defaultValue(0.5)
             .build()
     );
 
     public Hitboxes() {
-        super(Category.Combat, "hitboxes", "Expands entity hitboxes.");
+        super(Category.Combat, "hitboxes", "Expands an entity's hitboxes.");
     }
 
     public double getEntityValue(Entity entity) {

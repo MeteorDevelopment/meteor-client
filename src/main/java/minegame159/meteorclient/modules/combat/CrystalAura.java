@@ -244,7 +244,7 @@ public class CrystalAura extends Module {
             .build()
     );
 
-    //Targetting
+    // Targeting
 
     private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgTarget.add(new EntityTypeListSetting.Builder()
             .name("entities")
@@ -256,7 +256,7 @@ public class CrystalAura extends Module {
 
     private final Setting<Double> targetRange = sgTarget.add(new DoubleSetting.Builder()
             .name("target-range")
-            .description("The maximum range the entity can be to be targetted.")
+            .description("The maximum range the entity can be to be targeted.")
             .defaultValue(7)
             .min(0)
             .sliderMax(10)

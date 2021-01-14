@@ -16,7 +16,7 @@ public class AntiLevitation extends Module {
     
     private final Setting<Boolean> applyGravity = sgGeneral.add(new BoolSetting.Builder()
             .name("apply-gravity")
-            .description("Apply gravity.")
+            .description("Applies gravity.")
             .defaultValue(false)
             .build()
     );
