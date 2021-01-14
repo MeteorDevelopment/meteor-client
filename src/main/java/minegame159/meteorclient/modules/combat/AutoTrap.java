@@ -70,7 +70,7 @@ public class AutoTrap extends Module {
 
     private final Setting<Integer> range = sgGeneral.add(new IntSetting.Builder()
             .name("range")
-            .description("The radius players can be in to be targetted.")
+            .description("The radius players can be in to be targeted.")
             .defaultValue(5)
             .sliderMin(0)
             .sliderMax(10)
