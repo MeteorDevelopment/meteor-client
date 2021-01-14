@@ -60,10 +60,12 @@ public class AnchorAura extends Module {
 
     // Place
 
-    private final Setting<Boolean> place = sgPlace.add(new BoolSetting.Builder()
-            .name("place")
-            .description("Allows Anchor Aura to place anchors.")
-            .defaultValue(true)
+    private final Setting<Integer> placeDelay = sgPlace.add(new IntSetting.Builder()
+            .name("place-delay")
+            .description("The amount of delay in ticks for placement.")
+            .defaultValue(2)
+            .min(0)
+            .max(20)
             .build()
     );
 
@@ -71,13 +73,6 @@ public class AnchorAura extends Module {
             .name("place-mode")
             .description("The way anchors are placed.")
             .defaultValue(Mode.Safe)
-            .build()
-    );
-
-    private final Setting<PlaceMode> placePositions = sgPlace.add(new EnumSetting.Builder<PlaceMode>()
-            .name("placement-positions")
-            .description("The places anchors are placed.")
-            .defaultValue(PlaceMode.AboveAndBelow)
             .build()
     );
 
@@ -90,23 +85,21 @@ public class AnchorAura extends Module {
             .build()
     );
 
-    private final Setting<Integer> placeDelay = sgPlace.add(new IntSetting.Builder()
-            .name("place-delay")
-            .description("The amount of delay in ticks for placement.")
-            .defaultValue(2)
-            .min(0)
-            .max(20)
+    private final Setting<PlaceMode> placePositions = sgPlace.add(new EnumSetting.Builder<PlaceMode>()
+            .name("placement-positions")
+            .description("Where the Anchors will be placed on the entity.")
+            .defaultValue(PlaceMode.AboveAndBelow)
+            .build()
+    );
+
+    private final Setting<Boolean> place = sgPlace.add(new BoolSetting.Builder()
+            .name("place")
+            .description("Allows Anchor Aura to place anchors.")
+            .defaultValue(true)
             .build()
     );
 
     // Break
-
-    private final Setting<Mode> breakMode = sgBreak.add(new EnumSetting.Builder<Mode>()
-            .name("break-mode")
-            .description("The way Anchors are broken.")
-            .defaultValue(Mode.Safe)
-            .build()
-    );
 
     private final Setting<Integer> breakDelay = sgBreak.add(new IntSetting.Builder()
             .name("break-delay")
@@ -114,6 +107,13 @@ public class AnchorAura extends Module {
             .defaultValue(10)
             .min(0)
             .max(10)
+            .build()
+    );
+
+    private final Setting<Mode> breakMode = sgBreak.add(new EnumSetting.Builder<Mode>()
+            .name("break-mode")
+            .description("The way Anchors are broken.")
+            .defaultValue(Mode.Safe)
             .build()
     );
 
