@@ -34,28 +34,28 @@ public class AntiBed extends Module {
 
     private final Setting<Boolean> selfToggle = sgGeneral.add(new BoolSetting.Builder()
             .name("self-toggle")
-            .description("Toggles this module when it's finished.")
+            .description("Toggles AntiBed when finished.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> autoCenter = sgGeneral.add(new BoolSetting.Builder()
             .name("auto-center")
-            .description("Teleports you to the center of blocks.")
+            .description("Teleports you to the center of the blocks.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> onlyOnGround = sgGeneral.add(new BoolSetting.Builder()
             .name("only-on-ground")
-            .description("Only works you are standing on a block.")
+            .description("Only toggles Anti Bed when you are standing on a block.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
             .name("rotate")
-            .description("Automatically faces where the block is placed.")
+            .description("Automatically rotates towards where the blocks are placed.")
             .defaultValue(true)
             .build()
     );

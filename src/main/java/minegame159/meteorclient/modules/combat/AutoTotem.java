@@ -59,7 +59,7 @@ public class AutoTotem extends Module {
 
     private final Setting<Boolean> inventorySwitch = sgGeneral.add(new BoolSetting.Builder()
             .name("inventory")
-            .description("Switches your totems while in your inventory.")
+            .description("Whether or not to equip totems while in your inventory.")
             .defaultValue(true)
             .build()
     );

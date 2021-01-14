@@ -13,7 +13,7 @@ import minegame159.meteorclient.modules.Module;
 
 public class SafeWalk extends Module {
     public SafeWalk() {
-        super(Category.Movement, "Safe-walk", "Prevents you from walking off blocks. Useful over a void.");
+        super(Category.Movement, "safe-walk", "Prevents you from walking off blocks. Useful over a void.");
     }
 
     @EventHandler

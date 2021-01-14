@@ -27,7 +27,7 @@ public class AirJump extends Module {
 
     private final Setting<Boolean> maintainY = sgGeneral.add(new BoolSetting.Builder()
             .name("maintain-level")
-            .description("Maintains your current Y level")
+            .description("Maintains your current Y level.")
             .defaultValue(false)
             .build()
     );
