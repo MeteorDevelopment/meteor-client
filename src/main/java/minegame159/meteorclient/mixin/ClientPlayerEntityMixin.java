@@ -41,7 +41,7 @@ public abstract class ClientPlayerEntityMixin {
     private void onSendChatMessage(String msg, CallbackInfo info) {
         if (ignoreChatMessage) return;
 
-        if (!msg.startsWith(Config.INSTANCE.getPrefix()) && !msg.startsWith("/") && msg.startsWith(BaritoneAPI.getSettings().prefix.value)) {
+        if (!msg.startsWith(Config.INSTANCE.getPrefix()) && !msg.startsWith("/") && !msg.startsWith(BaritoneAPI.getSettings().prefix.value)) {
             SendMessageEvent event = SendMessageEvent.get(msg);
             MeteorClient.EVENT_BUS.post(event);
 
