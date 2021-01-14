@@ -229,6 +229,11 @@ public class AnchorAura extends Module {
             return;
         }
 
+        if (!checkItems()) {
+            target = null;
+            return;
+        }
+
         if (getTotalHealth(mc.player) <= minHealth.get() && placeMode.get() != Mode.Suicide && breakMode.get() != Mode.Suicide) return;
 
         if (target == null || mc.player.distanceTo(target) > targetRange.get() || !target.isAlive()) target = findTarget();
@@ -280,6 +285,10 @@ public class AnchorAura extends Module {
             if (renderBreak.get() && findAnchor(target) != null) Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, findAnchor(target).getX(), findAnchor(target).getY(), findAnchor(target).getZ(), 1, breakSideColor.get(), breakLineColor.get(), shapeMode.get(), 0);
         }
     });
+
+    private boolean checkItems() {
+        return InvUtils.findItemInHotbar(Items.RESPAWN_ANCHOR, itemStack -> true) != -1 && InvUtils.findItemInHotbar(Items.GLOWSTONE, itemStack -> true) != -1;
+    }
 
     private BlockPos findPlacePos(PlayerEntity target) {
         BlockPos targetPlacePos = target.getBlockPos();
