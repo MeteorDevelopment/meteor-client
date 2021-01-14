@@ -7,30 +7,24 @@ package minegame159.meteorclient;
 
 import com.g00fy2.versioncompare.Version;
 import minegame159.meteorclient.gui.GuiConfig;
-import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.rendering.Fonts;
-import minegame159.meteorclient.utils.Color;
-import minegame159.meteorclient.utils.NbtUtils;
-import minegame159.meteorclient.utils.Savable;
 import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.files.Savable;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.nbt.CompoundTag;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
 
 public class Config extends Savable<Config> {
     public static Config INSTANCE;
 
-    public final Version version = new Version("0.3.8");
+    public final Version version = new Version("0.3.9");
     public String devBuild;
     private String prefix = ".";
     public GuiConfig guiConfig = new GuiConfig();
 
     public boolean chatCommandsInfo = true;
-
-    private Map<Category, Color> categoryColors = new HashMap<>();
+    public boolean deleteChatCommandsInfo = true;
 
     public Config() {
         super(new File(MeteorClient.FOLDER, "config.nbt"));
@@ -47,24 +41,15 @@ public class Config extends Savable<Config> {
         return prefix;
     }
 
-    public void setCategoryColor(Category category, Color color) {
-        categoryColors.put(category, color);
-        save();
-    }
-
-    public Color getCategoryColor(Category category) {
-        return categoryColors.get(category);
-    }
-
     @Override
     public CompoundTag toTag() {
         CompoundTag tag = new CompoundTag();
 
         tag.putString("version", version.getOriginalString());
         tag.putString("prefix", prefix);
-        tag.put("categoryColors", NbtUtils.mapToTag(categoryColors));
         tag.put("guiConfig", guiConfig.toTag());
         tag.putBoolean("chatCommandsInfo", chatCommandsInfo);
+        tag.putBoolean("deleteChatCommandsInfo", deleteChatCommandsInfo);
 
         return tag;
     }
@@ -72,9 +57,9 @@ public class Config extends Savable<Config> {
     @Override
     public Config fromTag(CompoundTag tag) {
         prefix = tag.getString("prefix");
-        categoryColors = NbtUtils.mapFromTag(tag.getCompound("categoryColors"), Category::valueOf, tag1 -> new Color().fromTag((CompoundTag) tag1));
         guiConfig.fromTag(tag.getCompound("guiConfig"));
         chatCommandsInfo = !tag.contains("chatCommandsInfo") || tag.getBoolean("chatCommandsInfo");
+        deleteChatCommandsInfo = !tag.contains("deleteChatCommandsInfo") || tag.getBoolean("deleteChatCommandsInfo");
 
         // In 0.2.9 the default font was changed, detect when people load up 0.2.9 for the first time
         Version lastVer = new Version(tag.getString("version"));

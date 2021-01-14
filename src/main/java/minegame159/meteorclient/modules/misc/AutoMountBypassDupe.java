@@ -9,18 +9,18 @@ package minegame159.meteorclient.modules.misc;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.PostTickEvent;
-import minegame159.meteorclient.events.packets.SendPacketEvent;
+import minegame159.meteorclient.events.packets.PacketEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.modules.player.MountBypass;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.utils.Chat;
-import minegame159.meteorclient.utils.InvUtils;
+import minegame159.meteorclient.utils.player.Chat;
+import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.block.ShulkerBoxBlock;
 import net.minecraft.client.gui.screen.ingame.HorseScreen;
 import net.minecraft.entity.Entity;
@@ -38,7 +38,7 @@ import org.lwjgl.glfw.GLFW;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AutoMountBypassDupe extends ToggleModule {
+public class AutoMountBypassDupe extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Boolean> shulkersOnly = sgGeneral.add(new BoolSetting.Builder()
@@ -81,14 +81,14 @@ public class AutoMountBypassDupe extends ToggleModule {
 
 
     @EventHandler
-    private final Listener<SendPacketEvent> onSendPacket = new Listener<>(event -> {
+    private final Listener<PacketEvent.Send> onSendPacket = new Listener<>(event -> {
         if (noCancel) return;
 
         ModuleManager.INSTANCE.get(MountBypass.class).onSendPacket(event);
     });
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
         if (GLFW.glfwGetKey(mc.getWindow().getHandle(), GLFW.GLFW_KEY_ESCAPE) == GLFW.GLFW_PRESS) {
             toggle();
             mc.player.closeHandledScreen();

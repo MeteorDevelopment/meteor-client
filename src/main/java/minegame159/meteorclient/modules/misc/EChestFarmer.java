@@ -9,17 +9,17 @@ package minegame159.meteorclient.modules.misc;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.PostTickEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.modules.player.AutoTool;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.utils.InvUtils;
-import minegame159.meteorclient.utils.PlayerUtils;
+import minegame159.meteorclient.utils.player.InvUtils;
+import minegame159.meteorclient.utils.player.PlayerUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -31,11 +31,11 @@ import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 
-public class EChestFarmer extends ToggleModule {
+public class EChestFarmer extends Module {
     private static final BlockState ENDER_CHEST = Blocks.ENDER_CHEST.getDefaultState();
 
     public EChestFarmer(){
-        super(Category.Misc, "EChest-farmer", "Places and mines EChests where you are looking.");
+        super(Category.Misc, "EChest-farmer", "Places and mines Ender Chests where you're looking.");
     }
 
     private final SettingGroup sgGeneral  = settings.getDefaultGroup();
@@ -52,7 +52,7 @@ public class EChestFarmer extends ToggleModule {
 
     private final Setting<Integer> lowerAmount = sgGeneral.add(new IntSetting.Builder()
             .name("lower-amount")
-            .description("The amount before this turns on again.")
+            .description("The specified amount before this module toggles on again.")
             .defaultValue(8)
             .min(0)
             .max(64)
@@ -62,7 +62,7 @@ public class EChestFarmer extends ToggleModule {
 
     private final Setting<Boolean> disableOnAmount = sgGeneral.add(new BoolSetting.Builder()
             .name("disable-on-completion")
-            .description("Whether to disable once you reach target stacks")
+            .description("Whether or not to disable when you reach your desired amount of stacks of obsidian.")
             .defaultValue(true)
             .build()
     );
@@ -71,7 +71,7 @@ public class EChestFarmer extends ToggleModule {
     private int numLeft = Math.floorDiv(amount.get() , 8);
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
         if (lowerAmount.get() < InvUtils.findItemWithCount(Items.OBSIDIAN).count) stop = false;
         if (stop && !disableOnAmount.get()) {
             stop = false;

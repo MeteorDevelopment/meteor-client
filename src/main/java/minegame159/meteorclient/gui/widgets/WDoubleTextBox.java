@@ -10,10 +10,18 @@ import java.util.Locale;
 public class WDoubleTextBox extends WTextBox {
     private double value;
 
-    public WDoubleTextBox(double value, double width) {
+    private final String format;
+
+    public WDoubleTextBox(double value, double width, int decimalPlaces) {
         super("", width);
 
+        format = "%." + decimalPlaces + "f";
+
         setValue(value);
+    }
+
+    public WDoubleTextBox(double value, double width) {
+        this(value, width, 2);
     }
 
     @Override
@@ -46,7 +54,7 @@ public class WDoubleTextBox extends WTextBox {
     public void setValue(double value) {
         if (this.value != value) {
             this.value = value;
-            setText(String.format(Locale.US, "%.2f", value));
+            setText(String.format(Locale.US, format, value));
         }
     }
 }

@@ -8,16 +8,16 @@ package minegame159.meteorclient.modules.movement;
 import baritone.api.BaritoneAPI;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.PostTickEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.utils.GoalDirection;
+import minegame159.meteorclient.utils.world.GoalDirection;
 
-public class AutoWalk extends ToggleModule {
+public class AutoWalk extends Module {
     public enum Mode {
         Simple,
         Smart
@@ -64,7 +64,7 @@ public class AutoWalk extends ToggleModule {
     }
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
         if (mode.get() == Mode.Simple) {
             ((IKeyBinding) mc.options.keyForward).setPressed(true);
         } else {

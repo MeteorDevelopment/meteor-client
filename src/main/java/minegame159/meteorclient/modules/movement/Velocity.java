@@ -6,17 +6,17 @@
 package minegame159.meteorclient.modules.movement;
 
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 
-public class Velocity extends ToggleModule {
+public class Velocity extends Module {
     private final SettingGroup sg = settings.getDefaultGroup();
 
     private final Setting<Double> horizontal = sg.add(new DoubleSetting.Builder()
             .name("horizontal-multiplier")
-            .description("How much velocity to apply horizontally.")
+            .description("How much velocity you will take horizontally.")
             .defaultValue(0)
             .min(0)
             .max(1)
@@ -27,7 +27,7 @@ public class Velocity extends ToggleModule {
 
     private final Setting<Double> vertical = sg.add(new DoubleSetting.Builder()
             .name("vertical-multiplier")
-            .description("How much velocity to apply vertically.")
+            .description("How much velocity you will take vertically.")
             .defaultValue(0)
             .min(0)
             .max(1)
@@ -37,7 +37,7 @@ public class Velocity extends ToggleModule {
     );
 
     public Velocity() {
-        super(Category.Movement, "velocity", "Prevents you from getting pushed by mobs, taking damage, etc.");
+        super(Category.Movement, "velocity", "Prevents you from being moved by external forces.");
     }
 
     public double getHorizontal() {

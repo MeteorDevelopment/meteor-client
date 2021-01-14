@@ -7,12 +7,13 @@ package minegame159.meteorclient.modules.misc;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.PostTickEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.Pool;
 import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.misc.Pool;
+import minegame159.meteorclient.utils.player.RotationUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -26,7 +27,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-public class Nuker extends ToggleModule {
+public class Nuker extends Module {
     public enum Mode {
         All,
         Flatten,
@@ -43,7 +44,7 @@ public class Nuker extends ToggleModule {
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("mode")
-            .description("Which blocks to break.")
+            .description("The way the blocks are broken.")
             .defaultValue(Mode.All)
             .build()
     );
@@ -57,21 +58,21 @@ public class Nuker extends ToggleModule {
 
     private final Setting<List<Block>> selectedBlocks = sgGeneral.add(new BlockListSetting.Builder()
             .name("selected-blocks")
-            .description("Which blocks to mine when only selected is true.")
+            .description("The certain type of blocks you want to mine.")
             .defaultValue(new ArrayList<>(0))
             .build()
     );
 
     private final Setting<Boolean> onlySelected = sgGeneral.add(new BoolSetting.Builder()
             .name("only-selected")
-            .description("Only mines selected blocks.")
+            .description("Only mines your selected blocks.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()
             .name("range")
-            .description("Break range.")
+            .description("The break range.")
             .defaultValue(5)
             .min(0)
             .build()
@@ -79,15 +80,22 @@ public class Nuker extends ToggleModule {
 
     private final Setting<SortMode> sortMode = sgGeneral.add(new EnumSetting.Builder<SortMode>()
             .name("sort-mode")
-            .description("Which blocks to mine first.")
+            .description("The blocks you want to mine first.")
             .defaultValue(SortMode.Closest)
             .build()
     );
 
     private final Setting<Boolean> noParticles = sgGeneral.add(new BoolSetting.Builder()
             .name("no-particles")
-            .description("Disables block break particles.")
+            .description("Disables all block breaking particles.")
             .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
+            .name("rotate")
+            .description("Automatically faces the blocks being mined.")
+            .defaultValue(true)
             .build()
     );
 
@@ -98,7 +106,7 @@ public class Nuker extends ToggleModule {
     private boolean hasLastBlockPos;
 
     public Nuker() {
-        super(Category.Misc, "nuker", "Breaks blocks around you.");
+        super(Category.Misc, "nuker", "Breaks a large amount of specified blocks around you.");
     }
 
     @Override
@@ -108,7 +116,7 @@ public class Nuker extends ToggleModule {
     }
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
         if (hasLastBlockPos && mc.world.getBlockState(lastBlockPos).getBlock() != Blocks.AIR) {
             mc.interactionManager.updateBlockBreakingProgress(lastBlockPos, Direction.UP);
             return;
@@ -174,6 +182,7 @@ public class Nuker extends ToggleModule {
         for (BlockPos.Mutable pos : blocks) {
             if (packetMine.get()) {
                 // Packet mine
+                if (rotate.get()) RotationUtils.packetRotate(pos);
                 mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, pos, Direction.UP));
                 mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, pos, Direction.UP));
             } else {
@@ -181,6 +190,7 @@ public class Nuker extends ToggleModule {
                 if (!lastBlockPos.equals(pos)) {
                     // Im not proud of this but it works so shut the fuck up
                     try {
+                        if (rotate.get()) RotationUtils.packetRotate(pos);
                         mc.interactionManager.cancelBlockBreaking();
                         mc.interactionManager.attackBlock(pos, Direction.UP);
                         mc.player.swingHand(Hand.MAIN_HAND);
@@ -189,6 +199,7 @@ public class Nuker extends ToggleModule {
 
                 // Break block
                 lastBlockPos.set(pos);
+                if (rotate.get()) RotationUtils.packetRotate(pos);
                 mc.interactionManager.updateBlockBreakingProgress(pos, Direction.UP);
                 mc.player.swingHand(Hand.MAIN_HAND);
 

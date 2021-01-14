@@ -7,52 +7,52 @@ package minegame159.meteorclient.modules.render;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.RenderEvent;
+import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
-import minegame159.meteorclient.rendering.ShapeBuilder;
+import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.rendering.Renderer;
+import minegame159.meteorclient.rendering.ShapeMode;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.Color;
+import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.shape.VoxelShape;
 
-public class BlockSelection extends ToggleModule {
-    public enum Mode {
-        Lines,
-        Sides,
-        Both
-    }
-
+public class BlockSelection extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-
-    private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
-            .name("mode")
-            .description("Rendering mode")
-            .defaultValue(Mode.Lines)
-            .build()
-    );
 
     private final Setting<Boolean> advanced = sgGeneral.add(new BoolSetting.Builder()
             .name("advanced")
-            .description("Shows more advanced outline.")
+            .description("Shows a more advanced outline on different types of shape blocks.")
             .defaultValue(true)
             .build()
     );
 
-    private final Setting<Color> color = sgGeneral.add(new ColorSetting.Builder()
-            .name("color")
-            .description("Color.")
-            .defaultValue(new Color(255, 255, 255))
+    private final Setting<ShapeMode> shapeMode = sgGeneral.add(new EnumSetting.Builder<ShapeMode>()
+            .name("shape-mode")
+            .description("How the shapes are rendered.")
+            .defaultValue(ShapeMode.Lines)
             .build()
     );
 
-    private final Color sideColor = new Color();
+    private final Setting<SettingColor> sideColor = sgGeneral.add(new ColorSetting.Builder()
+            .name("side-color")
+            .description("The side color.")
+            .defaultValue(new SettingColor(255, 255, 255, 50))
+            .build()
+    );
+
+    private final Setting<SettingColor> lineColor = sgGeneral.add(new ColorSetting.Builder()
+            .name("line-color")
+            .description("The line color.")
+            .defaultValue(new SettingColor(255, 255, 255, 255))
+            .build()
+    );
 
     public BlockSelection() {
-        super(Category.Render, "block-selection", "Modifies your block selection outline.");
+        super(Category.Render, "block-selection", "Modifies how your block selection is rendered.");
     }
 
     @EventHandler
@@ -62,32 +62,20 @@ public class BlockSelection extends ToggleModule {
         BlockPos pos = ((BlockHitResult) mc.crosshairTarget).getBlockPos();
         BlockState state = mc.world.getBlockState(pos);
         VoxelShape shape = state.getOutlineShape(mc.world, pos);
+
         if (shape.isEmpty()) return;
         Box box = shape.getBoundingBox();
 
         if (advanced.get()) {
-            shape.forEachBox((minX, d, e, f, g, h) -> {
-                if (mode.get() == Mode.Lines || mode.get() == Mode.Both) {
-                    ShapeBuilder.boxEdges(pos.getX() + minX, pos.getY() + d, pos.getZ() + e, pos.getX() + f, pos.getY() + g, pos.getZ() + h, color.get());
-                }
-                if (mode.get() == Mode.Sides || mode.get() == Mode.Both) {
-                    setSideColor();
-                    ShapeBuilder.boxSides(pos.getX() + minX, pos.getY() + d, pos.getZ() + e, pos.getX() + f, pos.getY() + g, pos.getZ() + h, sideColor);
-                }
-            });
+            for (Box b : shape.getBoundingBoxes()) {
+                render(pos, b);
+            }
         } else {
-            if (mode.get() == Mode.Lines || mode.get() == Mode.Both) {
-                ShapeBuilder.boxEdges(pos.getX() + box.minX, pos.getY() + box.minY, pos.getZ() + box.minZ, pos.getX() + box.maxX, pos.getY() + box.maxY, pos.getZ() + box.maxZ, color.get());
-            }
-            if (mode.get() == Mode.Sides || mode.get() == Mode.Both) {
-                setSideColor();
-                ShapeBuilder.boxSides(pos.getX() + box.minX, pos.getY() + box.minY, pos.getZ() + box.minZ, pos.getX() + box.maxX, pos.getY() + box.maxY, pos.getZ() + box.maxZ, sideColor);
-            }
+            render(pos, box);
         }
     });
 
-    private void setSideColor() {
-        sideColor.set(color.get());
-        sideColor.a = 30;
+    private void render(BlockPos pos, Box box) {
+        Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, pos.getX() + box.minX, pos.getY() + box.minY, pos.getZ() + box.minZ, pos.getX() + box.maxX, pos.getY() + box.maxY, pos.getZ() + box.maxZ, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
     }
 }

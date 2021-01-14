@@ -6,9 +6,8 @@
 package minegame159.meteorclient.modules.render.hud.modules;
 
 import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.modules.misc.Timer;
+import minegame159.meteorclient.modules.movement.Timer;
 import minegame159.meteorclient.modules.render.hud.HUD;
-import net.minecraft.client.MinecraftClient;
 
 public class SpeedHud extends DoubleTextHudModule {
     public SpeedHud(HUD hud) {
@@ -17,7 +16,6 @@ public class SpeedHud extends DoubleTextHudModule {
 
     @Override
     protected String getRight() {
-        MinecraftClient mc = MinecraftClient.getInstance();
         if (mc.player == null) return "0,0";
 
         double tX = Math.abs(mc.player.getX() - mc.player.prevX);

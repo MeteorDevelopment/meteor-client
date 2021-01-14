@@ -8,7 +8,8 @@ package minegame159.meteorclient.gui.widgets;
 import minegame159.meteorclient.gui.GuiConfig;
 import minegame159.meteorclient.gui.renderer.GuiRenderer;
 import minegame159.meteorclient.gui.renderer.Region;
-import minegame159.meteorclient.utils.Color;
+import minegame159.meteorclient.utils.misc.CursorStyle;
+import minegame159.meteorclient.utils.render.color.Color;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -135,6 +136,8 @@ public class WDropbox<T extends Enum<?>> extends WWidget {
 
     @Override
     protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
+        if (mouseOver) renderer.setCursorStyle(CursorStyle.Click);
+
         renderer.background(this, mouseOver, false);
 
         if (valueNameWidth == -1) valueNameWidth = renderer.textWidth(valueName);
@@ -189,6 +192,8 @@ public class WDropbox<T extends Enum<?>> extends WWidget {
 
         @Override
         protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
+            if (mouseOver) renderer.setCursorStyle(CursorStyle.Click);
+
             Color color = GuiConfig.INSTANCE.background;
             if (mouseOver || WDropbox.this.value == value) color = GuiConfig.INSTANCE.backgroundHovered;
 

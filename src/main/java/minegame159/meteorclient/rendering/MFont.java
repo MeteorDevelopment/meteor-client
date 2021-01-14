@@ -10,7 +10,6 @@ import net.minecraft.client.texture.AbstractTexture;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.NativeImageBackedTexture;
 import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.GL11;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -22,7 +21,7 @@ import java.nio.ByteBuffer;
 
 public class MFont {
     private static final int IMG_SIZE = 512;
-    private static final minegame159.meteorclient.utils.Color SHADOW_COLOR = new minegame159.meteorclient.utils.Color(60, 60, 60, 180);
+    private static final minegame159.meteorclient.utils.render.color.Color SHADOW_COLOR = new minegame159.meteorclient.utils.render.color.Color(60, 60, 60, 180);
 
     private final MeshBuilder mb = new MeshBuilder(16384);
     private final AbstractTexture texture;
@@ -33,6 +32,7 @@ public class MFont {
 
     public MFont(Font font, boolean antiAlias, boolean fractionalMetrics) {
         texture = setupTexture(font, antiAlias, fractionalMetrics, this.charData);
+        mb.texture = true;
     }
 
     private AbstractTexture setupTexture(Font font, boolean antiAlias, boolean fractionalMetrics, CharData[] chars) {
@@ -103,7 +103,7 @@ public class MFont {
     }
 
     public void begin() {
-        mb.begin(GL11.GL_TRIANGLES, VertexFormats.POSITION_TEXTURE_COLOR);
+        mb.begin(null, DrawMode.Triangles, VertexFormats.POSITION_TEXTURE_COLOR);
     }
 
     public boolean isBuilding() {
@@ -112,10 +112,10 @@ public class MFont {
 
     public void end() {
         texture.bindTexture();
-        mb.end(true);
+        mb.end();
     }
 
-    public double renderString(String string, double x, double y, minegame159.meteorclient.utils.Color color) {
+    public double renderString(String string, double x, double y, minegame159.meteorclient.utils.render.color.Color color) {
         boolean wasBuilding = isBuilding();
         if (!isBuilding()) begin();
 
@@ -138,7 +138,7 @@ public class MFont {
         return x / 2;
     }
 
-    public double renderStringWithShadow(String string, double x, double y, minegame159.meteorclient.utils.Color color) {
+    public double renderStringWithShadow(String string, double x, double y, minegame159.meteorclient.utils.render.color.Color color) {
         boolean wasBuilding = isBuilding();
         if (!isBuilding()) begin();
 
@@ -169,18 +169,13 @@ public class MFont {
         public int srcWidth;
         public int srcHeight;
 
-        public void render(MeshBuilder mb, double x, double y, minegame159.meteorclient.utils.Color color) {
+        public void render(MeshBuilder mb, double x, double y, minegame159.meteorclient.utils.render.color.Color color) {
             double texX = (double) srcX / IMG_SIZE;
             double texY = (double) srcY / IMG_SIZE;
             double texWidth = (double) srcWidth / IMG_SIZE;
             double texHeight = (double) srcHeight / IMG_SIZE;
 
-            MeshBuilder preMb = ShapeBuilder.triangles;
-            ShapeBuilder.triangles = mb;
-
-            ShapeBuilder.texQuad(x / 2, y / 2, srcWidth / 2.0 * scale, srcHeight / 2.0 * scale, texX, texY, texWidth, texHeight, color, color, color, color);
-
-            ShapeBuilder.triangles = preMb;
+            mb.texQuad(x / 2, y / 2, srcWidth / 2.0 * scale, srcHeight / 2.0 * scale, texX, texY, texWidth, texHeight, color, color, color, color);
         }
     }
 }

@@ -13,9 +13,12 @@ import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.accounts.AccountManager;
 import minegame159.meteorclient.commands.CommandManager;
 import minegame159.meteorclient.commands.commands.Ignore;
-import minegame159.meteorclient.events.KeyEvent;
-import minegame159.meteorclient.events.PostTickEvent;
+import minegame159.meteorclient.events.game.GameLeftEvent;
+import minegame159.meteorclient.events.meteor.ClientInitialisedEvent;
+import minegame159.meteorclient.events.meteor.KeyEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.friends.FriendManager;
+import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.gui.screens.topbar.TopBarModules;
 import minegame159.meteorclient.macros.MacroManager;
 import minegame159.meteorclient.mixininterface.IKeyBinding;
@@ -23,7 +26,16 @@ import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.misc.DiscordPresence;
 import minegame159.meteorclient.rendering.Fonts;
 import minegame159.meteorclient.rendering.MFont;
-import minegame159.meteorclient.utils.*;
+import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.entity.EntityUtils;
+import minegame159.meteorclient.utils.misc.input.KeyAction;
+import minegame159.meteorclient.utils.misc.input.KeyBinds;
+import minegame159.meteorclient.utils.network.Capes;
+import minegame159.meteorclient.utils.network.MeteorExecutor;
+import minegame159.meteorclient.utils.network.OnlinePlayers;
+import minegame159.meteorclient.utils.player.EChestMemory;
+import minegame159.meteorclient.utils.render.color.RainbowColorManager;
+import minegame159.meteorclient.utils.world.BlockIterator;
 import minegame159.meteorclient.waypoints.Waypoints;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
@@ -31,6 +43,8 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.options.KeyBinding;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 
@@ -40,6 +54,7 @@ public class MeteorClient implements ClientModInitializer, Listenable {
     public static MFont FONT_2X;
     public static boolean IS_DISCONNECTING;
     public static final File FOLDER = new File(FabricLoader.getInstance().getGameDir().toString(), "meteor-client");
+    public static final Logger LOG = LogManager.getLogger();
 
     private MinecraftClient mc;
 
@@ -54,7 +69,7 @@ public class MeteorClient implements ClientModInitializer, Listenable {
             return;
         }
 
-        System.out.println("Initializing Meteor Client.");
+        LOG.info("Initializing Meteor Client");
 
         mc = MinecraftClient.getInstance();
         Utils.mc = mc;
@@ -70,15 +85,24 @@ public class MeteorClient implements ClientModInitializer, Listenable {
         EChestMemory.init();
         Capes.init();
         BlockIterator.init();
+        RainbowColorManager.init();
 
         load();
         Ignore.load();
         Waypoints.loadIcons();
 
         EVENT_BUS.subscribe(this);
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            save();
+            OnlinePlayers.leave();
+        }));
+        EVENT_BUS.post(new ClientInitialisedEvent());
     }
 
     public void load() {
+        LOG.info("Loading");
+
         if (!ModuleManager.INSTANCE.load()) {
             ModuleManager.INSTANCE.get(DiscordPresence.class).toggle(false);
             Utils.addMeteorPvpToServerList();
@@ -89,7 +113,9 @@ public class MeteorClient implements ClientModInitializer, Listenable {
         AccountManager.INSTANCE.load();
     }
 
-    public void stop() {
+    public void save() {
+        LOG.info("Saving");
+
         Config.INSTANCE.save();
         ModuleManager.INSTANCE.save();
         FriendManager.INSTANCE.save();
@@ -97,7 +123,6 @@ public class MeteorClient implements ClientModInitializer, Listenable {
         AccountManager.INSTANCE.save();
 
         Ignore.save();
-        OnlinePlayers.leave();
     }
 
     private void openClickGui() {
@@ -105,7 +130,10 @@ public class MeteorClient implements ClientModInitializer, Listenable {
     }
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private final Listener<GameLeftEvent> onGameLeft = new Listener<>(event -> save());
+
+    @EventHandler
+    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
         Capes.tick();
 
         if (screenToOpen != null && mc.currentScreen == null) {
@@ -122,11 +150,16 @@ public class MeteorClient implements ClientModInitializer, Listenable {
     private final Listener<KeyEvent> onKey = new Listener<>(event -> {
         // Click GUI
         if (event.action == KeyAction.Press && event.key == KeyBindingHelper.getBoundKeyOf(KeyBinds.OPEN_CLICK_GUI).getCode()) {
-            if (!Utils.canUpdate() || mc.currentScreen == null) openClickGui();
+            if ((!Utils.canUpdate() && !(mc.currentScreen instanceof WidgetScreen)) || mc.currentScreen == null) openClickGui();
         }
 
         // Shulker Peek
         KeyBinding shulkerPeek = KeyBinds.SHULKER_PEEK;
         ((IKeyBinding) shulkerPeek).setPressed(shulkerPeek.matchesKey(event.key, 0) && event.action != KeyAction.Release);
     });
+
+    public static <T> T postEvent(T event) {
+        EVENT_BUS.post(event);
+        return event;
+    }
 }

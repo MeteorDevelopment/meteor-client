@@ -8,14 +8,13 @@ package minegame159.meteorclient.gui.widgets;
 import minegame159.meteorclient.gui.GuiConfig;
 import minegame159.meteorclient.gui.renderer.GuiRenderer;
 import minegame159.meteorclient.gui.renderer.Region;
-import minegame159.meteorclient.modules.ToggleModule;
-import minegame159.meteorclient.utils.AlignmentX;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import org.lwjgl.glfw.GLFW;
 
 public class WModule extends WPressable {
-    private final ToggleModule module;
+    private final Module module;
     private double titleWidth;
 
     private double animationProgress1;
@@ -24,7 +23,7 @@ public class WModule extends WPressable {
     private double animationProgress2;
     private double animationMultiplier2;
 
-    public WModule(ToggleModule module) {
+    public WModule(Module module) {
         this.module = module;
         this.tooltip = module.description;
 
@@ -86,8 +85,18 @@ public class WModule extends WPressable {
         }
 
         double nameX = x;
-        if (GuiConfig.INSTANCE.moduleNameAlignment == AlignmentX.Center) nameX += + width / 2 - titleWidth / 2;
-        else if (GuiConfig.INSTANCE.moduleNameAlignment == AlignmentX.Right) nameX += width - titleWidth;
+
+        switch (GuiConfig.INSTANCE.moduleNameAlignment) {
+            case Left:
+                nameX += GuiConfig.INSTANCE.moduleNameAlignmentPadding;
+                break;
+            case Center:
+                nameX += + width / 2 - titleWidth / 2;
+                break;
+            case Right:
+                nameX = (nameX + width - titleWidth) - GuiConfig.INSTANCE.moduleNameAlignmentPadding;
+                break;
+        }
 
         renderer.text(module.title, nameX, y + 4, false, GuiConfig.INSTANCE.text);
     }

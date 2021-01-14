@@ -5,50 +5,54 @@
 
 package minegame159.meteorclient.modules.misc;
 
+import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
+import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.PostTickEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
-import minegame159.meteorclient.settings.DoubleSetting;
-import minegame159.meteorclient.settings.EntityTypeListSetting;
-import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.player.RotationUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.NameTagItem;
 import net.minecraft.util.Hand;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class AutoNametag extends ToggleModule {
+public class AutoNametag extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<List<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
+    private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
             .name("entities")
             .description("Which entities to nametag.")
-            .defaultValue(new ArrayList<>(0))
+            .defaultValue(new Object2BooleanOpenHashMap<>(0))
             .build()
     );
     
     private final Setting<Double> distance = sgGeneral.add(new DoubleSetting.Builder()
             .name("distance")
-            .description("Maximum distance.")
+            .description("The maximum distance a nametagged entity can be to be nametagged.")
             .min(0.0)
             .defaultValue(5.0)
             .build()
     );
 
+    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
+            .name("rotate")
+            .description("Automatically faces the mob being nametagged.")
+            .defaultValue(true)
+            .build()
+    );
+
     public AutoNametag() {
-        super(Category.Misc, "auto-nametag", "Automatically uses nametags in hotbar on unnamed entites. WARNING: will name all entities in specified distance.");
+        super(Category.Misc, "auto-nametag", "Automatically uses nametags on entities without a nametag. WILL nametag ALL entities in the specified distance.");
     }
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
         for (Entity entity : mc.world.getEntities()) {
-            if (!entities.get().contains(entity.getType()) || entity.hasCustomName() || mc.player.distanceTo(entity) > distance.get()) continue;
+            if (!entities.get().getBoolean(entity.getType()) || entity.hasCustomName() || mc.player.distanceTo(entity) > distance.get()) continue;
 
             boolean findNametag = true;
             boolean offHand = false;
@@ -73,6 +77,7 @@ public class AutoNametag extends ToggleModule {
             }
 
             if (foundNametag) {
+                if (rotate.get()) RotationUtils.packetRotate(entity);
                 mc.interactionManager.interactEntity(mc.player, entity, offHand ? Hand.OFF_HAND : Hand.MAIN_HAND);
                 return;
             }

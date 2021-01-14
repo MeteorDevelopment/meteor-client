@@ -13,7 +13,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.CommandSource;
 
 public abstract class Command {
-    protected static MinecraftClient MC;
+    protected static MinecraftClient mc;
 
     public final String name;
     public final String description;
@@ -21,7 +21,7 @@ public abstract class Command {
     public Command(String name, String description) {
         this.name = name;
         this.description = description;
-        MC = MinecraftClient.getInstance();
+        mc = MinecraftClient.getInstance();
     }
 
     // Helper methods to painlessly infer the CommandSource generic type argument

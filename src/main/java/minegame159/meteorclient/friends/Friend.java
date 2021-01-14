@@ -5,8 +5,8 @@
 
 package minegame159.meteorclient.friends;
 
-import minegame159.meteorclient.utils.Color;
-import minegame159.meteorclient.utils.ISerializable;
+import minegame159.meteorclient.utils.entity.FriendType;
+import minegame159.meteorclient.utils.misc.ISerializable;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundTag;
 
@@ -14,10 +14,7 @@ import java.util.Objects;
 
 public class Friend implements ISerializable<Friend> {
     public String name;
-    public boolean trusted = true;
-    public Color color = new Color(0, 255, 180);
-    public boolean attack = false;
-    public boolean showInTracers = true;
+    public FriendType type = FriendType.Neutral;
 
     public Friend(String name) {
         this.name = name;
@@ -34,24 +31,15 @@ public class Friend implements ISerializable<Friend> {
     @Override
     public CompoundTag toTag() {
         CompoundTag tag = new CompoundTag();
-
         tag.putString("name", name);
-        tag.putBoolean("trusted", trusted);
-        tag.put("color", color.toTag());
-        tag.putBoolean("attack", attack);
-        tag.putBoolean("showInTracers", showInTracers);
-
+        tag.putString("type", type.name());
         return tag;
     }
 
     @Override
     public Friend fromTag(CompoundTag tag) {
         name = tag.getString("name");
-        trusted = tag.getBoolean("trusted");
-        color.fromTag(tag.getCompound("color"));
-        attack = tag.getBoolean("attack");
-        showInTracers = tag.getBoolean("showInTracers");
-
+        if (tag.contains("type")) type = FriendType.valueOf(tag.getString("type"));
         return this;
     }
 

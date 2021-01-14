@@ -7,12 +7,13 @@ package minegame159.meteorclient.modules.render.hud.modules;
 
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.ActiveModulesChangedEvent;
-import minegame159.meteorclient.events.ModuleVisibilityChangedEvent;
+import minegame159.meteorclient.events.meteor.ActiveModulesChangedEvent;
+import minegame159.meteorclient.events.meteor.ModuleVisibilityChangedEvent;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.modules.render.hud.HUD;
 import minegame159.meteorclient.modules.render.hud.HudRenderer;
+import minegame159.meteorclient.utils.render.color.Color;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,8 +24,17 @@ public class ActiveModulesHud extends HudModule {
         BySmallest
     }
 
-    private final List<ToggleModule> modules = new ArrayList<>();
+    public enum ColorMode {
+        Flat,
+        Random,
+        Rainbow
+    }
+
+    private final List<Module> modules = new ArrayList<>();
     private boolean update = true;
+
+    private final Color rainbow = new Color(255, 255, 255);
+    private double rainbowHue1, rainbowHue2;
 
     public ActiveModulesHud(HUD hud) {
         super(hud, "active-modules", "Displays your active modules.");
@@ -48,7 +58,7 @@ public class ActiveModulesHud extends HudModule {
         update = false;
         modules.clear();
 
-        for (ToggleModule module : ModuleManager.INSTANCE.getActive()) {
+        for (Module module : ModuleManager.INSTANCE.getActive()) {
             if (module.isVisible()) modules.add(module);
         }
 
@@ -71,7 +81,7 @@ public class ActiveModulesHud extends HudModule {
         double height = 0;
 
         for (int i = 0; i < modules.size(); i++) {
-            ToggleModule module = modules.get(i);
+            Module module = modules.get(i);
 
             width = Math.max(width, getModuleWidth(renderer, module));
             height += renderer.textHeight();
@@ -91,15 +101,36 @@ public class ActiveModulesHud extends HudModule {
             return;
         }
 
-        for (ToggleModule module : modules) {
+        rainbowHue1 += hud.activeModulesRainbowSpeed() * renderer.delta;
+        if (rainbowHue1 > 1) rainbowHue1 -= 1;
+        else if (rainbowHue1 < -1) rainbowHue1 += 1;
+
+        rainbowHue2 = rainbowHue1;
+
+        for (Module module : modules) {
             renderModule(renderer, module, x + box.alignX(getModuleWidth(renderer, module)), y);
 
             y += 2 + renderer.textHeight();
         }
     }
 
-    private void renderModule(HudRenderer renderer, ToggleModule module, double x, double y) {
-        renderer.text(module.title, x, y, module.color);
+    private void renderModule(HudRenderer renderer, Module module, double x, double y) {
+        Color color = hud.activeModulesFlatColor();
+        
+        ColorMode colorMode = hud.activeModulesColorMode();
+        if (colorMode == ColorMode.Random) color = module.color;
+        else if (colorMode == ColorMode.Rainbow) {
+            rainbowHue2 += hud.activeModulesRainbowSpread();
+            int c = java.awt.Color.HSBtoRGB((float) rainbowHue2, 1, 1);
+
+            rainbow.r = Color.toRGBAR(c);
+            rainbow.g = Color.toRGBAG(c);
+            rainbow.b = Color.toRGBAB(c);
+
+            color = rainbow;
+        }
+        
+        renderer.text(module.title, x, y, color);
 
         String info = module.getInfoString();
         if (info != null) {
@@ -107,7 +138,7 @@ public class ActiveModulesHud extends HudModule {
         }
     }
 
-    private double getModuleWidth(HudRenderer renderer, ToggleModule module) {
+    private double getModuleWidth(HudRenderer renderer, Module module) {
         String info = module.getInfoString();
         double width = renderer.textWidth(module.title);
         if (info != null) width += renderer.textWidth(" ") + renderer.textWidth(info);

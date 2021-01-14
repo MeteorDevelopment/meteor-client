@@ -7,19 +7,19 @@ package minegame159.meteorclient.modules.render;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.PostTickEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 
-public class CustomFOV extends ToggleModule {
-    private final SettingGroup sgGeneral = settings.createGroup("General");
+public class CustomFOV extends Module {
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Integer> fov = sgGeneral.add(new IntSetting.Builder()
             .name("fov")
-            .description("Custom FOV.")
+            .description("Your custom FOV.")
             .defaultValue(100)
             .sliderMin(1)
             .sliderMax(179)
@@ -40,7 +40,7 @@ public class CustomFOV extends ToggleModule {
     }
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
         if (fov.get() != mc.options.fov) {
             getFOV();
         }
@@ -52,7 +52,7 @@ public class CustomFOV extends ToggleModule {
     }
 
     public CustomFOV() {
-        super(Category.Render, "custom-fov", "Changes your fov.");
+        super(Category.Render, "custom-fov", "Allows your FOV to be more customizable.");
     }
 
 }

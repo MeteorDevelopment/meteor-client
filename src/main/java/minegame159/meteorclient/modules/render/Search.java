@@ -10,24 +10,23 @@ import it.unimi.dsi.fastutil.longs.LongArrayList;
 import it.unimi.dsi.fastutil.longs.LongList;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.ChunkDataEvent;
-import minegame159.meteorclient.events.EventStore;
-import minegame159.meteorclient.events.PostTickEvent;
-import minegame159.meteorclient.events.RenderEvent;
+import minegame159.meteorclient.events.render.RenderEvent;
+import minegame159.meteorclient.events.world.ChunkDataEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
-import minegame159.meteorclient.rendering.ShapeBuilder;
+import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.Color;
-import minegame159.meteorclient.utils.MeteorExecutor;
-import minegame159.meteorclient.utils.Pool;
 import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.misc.Pool;
+import minegame159.meteorclient.utils.network.MeteorExecutor;
+import minegame159.meteorclient.utils.render.RenderUtils;
+import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.Heightmap;
 import net.minecraft.world.chunk.Chunk;
@@ -36,13 +35,15 @@ import net.minecraft.world.dimension.DimensionType;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Search extends ToggleModule {
+public class Search extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgRender = settings.createGroup("Render");
     private final SettingGroup sgTracers = settings.createGroup("Tracers");
 
     private final Long2ObjectArrayMap<MyChunk> chunks = new Long2ObjectArrayMap<>();
 
     // General
+
     private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
             .name("blocks")
             .description("Blocks to search for.")
@@ -60,32 +61,35 @@ public class Search extends ToggleModule {
             .build()
     );
 
-    private final Setting<Color> color = sgGeneral.add(new ColorSetting.Builder()
+    // Render
+
+    private final Setting<SettingColor> color = sgRender.add(new ColorSetting.Builder()
             .name("color")
-            .description("Color.")
-            .defaultValue(new Color(0, 255, 200))
+            .description("The color.")
+            .defaultValue(new SettingColor(0, 255, 200))
             .build()
     );
 
-    private final Setting<Boolean> fullBlock = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> fullBlock = sgRender.add(new BoolSetting.Builder()
             .name("full-block")
-            .description("Outlines are rendered as full blocks.")
+            .description("If outlines will be rendered as full blocks.")
             .defaultValue(false)
             .build()
     );
 
     // Tracers
+
     private final Setting<Boolean> tracersEnabled = sgTracers.add(new BoolSetting.Builder()
             .name("tracers-enabled")
-            .description("Draw lines to the blocks.")
+            .description("Draws lines to the blocks.")
             .defaultValue(false)
             .build()
     );
 
-    private final Setting<Color> tracersColor = sgTracers.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> tracersColor = sgTracers.add(new ColorSetting.Builder()
             .name("tracers-color")
-            .description("Tracers color.")
-            .defaultValue(new Color(225, 225, 225))
+            .description("The color of the tracers.")
+            .defaultValue(new SettingColor(225, 225, 225))
             .build()
     );
 
@@ -95,7 +99,6 @@ public class Search extends ToggleModule {
     private final LongList toUpdate = new LongArrayList();
 
     private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
-    private Vec3d vec1 = new Vec3d(0, 0, 0);
 
     private DimensionType lastDimension;
 
@@ -147,7 +150,7 @@ public class Search extends ToggleModule {
                 if (myChunk.blocks.size() > 0) chunks.put(chunk.getPos().toLong(), myChunk);
             }
 
-            if (event != null) EventStore.returnChunkDataEvent(event);
+            if (event != null) ChunkDataEvent.returnChunkDataEvent(event);
         });
     }
 
@@ -169,7 +172,7 @@ public class Search extends ToggleModule {
     }
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
         if (lastDimension != mc.world.getDimension()) {
             synchronized (chunks) {
                 for (MyChunk chunk : chunks.values()) chunk.dispose();
@@ -190,10 +193,6 @@ public class Search extends ToggleModule {
 
     @EventHandler
     private final Listener<RenderEvent> onRender = new Listener<>(event -> {
-        vec1 = new Vec3d(0, 0, 1)
-                .rotateX(-(float) Math.toRadians(mc.cameraEntity.pitch))
-                .rotateY(-(float) Math.toRadians(mc.cameraEntity.yaw))
-                .add(mc.cameraEntity.getPos());
 
         synchronized (chunks) {
             toRemove.clear();
@@ -375,62 +374,60 @@ public class Search extends ToggleModule {
             if (fullCube) {
                 // Vertical, BA_LE
                 if (((neighbours & LE) != LE && (neighbours & BA) != BA) || ((neighbours & LE) == LE && (neighbours & BA) == BA && (neighbours & BA_LE) != BA_LE)) {
-                    ShapeBuilder.line(x1, y1, z1, x1, y2, z1, color.get());
+                    Renderer.LINES.line(x1, y1, z1, x1, y2, z1, color.get());
                 }
                 // Vertical, FO_LE
                 if (((neighbours & LE) != LE && (neighbours & FO) != FO) || ((neighbours & LE) == LE && (neighbours & FO) == FO && (neighbours & FO_LE) != FO_LE)) {
-                    ShapeBuilder.line(x1, y1, z2, x1, y2, z2, color.get());
+                    Renderer.LINES.line(x1, y1, z2, x1, y2, z2, color.get());
                 }
                 // Vertical, BA_RI
                 if (((neighbours & RI) != RI && (neighbours & BA) != BA) || ((neighbours & RI) == RI && (neighbours & BA) == BA && (neighbours & BA_RI) != BA_RI)) {
-                    ShapeBuilder.line(x2, y1, z1, x2, y2, z1, color.get());
+                    Renderer.LINES.line(x2, y1, z1, x2, y2, z1, color.get());
                 }
                 // Vertical, FO_RI
                 if (((neighbours & RI) != RI && (neighbours & FO) != FO) || ((neighbours & RI) == RI && (neighbours & FO) == FO && (neighbours & FO_RI) != FO_RI)) {
-                    ShapeBuilder.line(x2, y1, z2, x2, y2, z2, color.get());
+                    Renderer.LINES.line(x2, y1, z2, x2, y2, z2, color.get());
                 }
 
                 // Horizontal bottom, BA_LE - BA_RI
                 if (((neighbours & BA) != BA && (neighbours & BO) != BO) || ((neighbours & BA) != BA && (neighbours & BO_BA) == BO_BA)) {
-                    ShapeBuilder.line(x1, y1, z1, x2, y1, z1, color.get());
+                    Renderer.LINES.line(x1, y1, z1, x2, y1, z1, color.get());
                 }
                 // Horizontal bottom, FO_LE - FO_RI
                 if (((neighbours & FO) != FO && (neighbours & BO) != BO) || ((neighbours & FO) != FO && (neighbours & BO_FO) == BO_FO)) {
-                    ShapeBuilder.line(x1, y1, z2, x2, y1, z2, color.get());
+                    Renderer.LINES.line(x1, y1, z2, x2, y1, z2, color.get());
                 }
                 // Horizontal top, BA_LE - BA_RI
                 if (((neighbours & BA) != BA && (neighbours & TO) != TO) || ((neighbours & BA) != BA && (neighbours & TO_BA) == TO_BA)) {
-                    ShapeBuilder.line(x1, y2, z1, x2, y2, z1, color.get());
+                    Renderer.LINES.line(x1, y2, z1, x2, y2, z1, color.get());
                 }
                 // Horizontal top, FO_LE - FO_RI
                 if (((neighbours & FO) != FO && (neighbours & TO) != TO) || ((neighbours & FO) != FO && (neighbours & TO_FO) == TO_FO)) {
-                    ShapeBuilder.line(x1, y2, z2, x2, y2, z2, color.get());
+                    Renderer.LINES.line(x1, y2, z2, x2, y2, z2, color.get());
                 }
 
                 // Horizontal bottom, BA_LE - FO_LE
                 if (((neighbours & LE) != LE && (neighbours & BO) != BO) || ((neighbours & LE) != LE && (neighbours & BO_LE) == BO_LE)) {
-                    ShapeBuilder.line(x1, y1, z1, x1, y1, z2, color.get());
+                    Renderer.LINES.line(x1, y1, z1, x1, y1, z2, color.get());
                 }
                 // Horizontal bottom, BA_RI - FO_RI
                 if (((neighbours & RI) != RI && (neighbours & BO) != BO) || ((neighbours & RI) != RI && (neighbours & BO_RI) == BO_RI)) {
-                    ShapeBuilder.line(x2, y1, z1, x2, y1, z2, color.get());
+                    Renderer.LINES.line(x2, y1, z1, x2, y1, z2, color.get());
                 }
                 // Horizontal top, BA_LE - FO_LE
                 if (((neighbours & LE) != LE && (neighbours & TO) != TO) || ((neighbours & LE) != LE && (neighbours & TO_LE) == TO_LE)) {
-                    ShapeBuilder.line(x1, y2, z1, x1, y2, z2, color.get());
+                    Renderer.LINES.line(x1, y2, z1, x1, y2, z2, color.get());
                 }
                 // Horizontal top, BA_RI - FO_RI
                 if (((neighbours & RI) != RI && (neighbours & TO) != TO) || ((neighbours & RI) != RI && (neighbours & TO_RI) == TO_RI)) {
-                    ShapeBuilder.line(x2, y2, z1, x2, y2, z2, color.get());
+                    Renderer.LINES.line(x2, y2, z1, x2, y2, z2, color.get());
                 }
             } else {
-                ShapeBuilder.boxEdges(x1, y1, z1, x2, y2, z2, color.get());
+                Renderer.LINES.boxEdges(x1, y1, z1, x2, y2, z2, color.get(), 0);
             }
 
             // Tracers
-            if (tracersEnabled.get()) {
-                ShapeBuilder.line(vec1.x - (mc.cameraEntity.getX() - event.offsetX), vec1.y - (mc.cameraEntity.getY() - event.offsetY), vec1.z - (mc.cameraEntity.getZ() - event.offsetZ), x + 0.5, y + 0.5, z + 0.5f, tracersColor.get());
-            }
+            if (tracersEnabled.get()) RenderUtils.drawTracerToPos(new BlockPos(x, y, z), tracersColor.get(), event);
         }
 
         public boolean equals(BlockPos blockPos) {

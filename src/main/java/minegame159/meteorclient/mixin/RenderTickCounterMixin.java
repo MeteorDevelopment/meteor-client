@@ -6,7 +6,7 @@
 package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.modules.misc.Timer;
+import minegame159.meteorclient.modules.movement.Timer;
 import net.minecraft.client.render.RenderTickCounter;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;

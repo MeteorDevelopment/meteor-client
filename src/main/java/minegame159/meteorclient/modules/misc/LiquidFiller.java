@@ -7,12 +7,13 @@ package minegame159.meteorclient.modules.misc;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.PreTickEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.BlockIterator;
-import minegame159.meteorclient.utils.PlayerUtils;
+import minegame159.meteorclient.utils.player.PlayerUtils;
+import minegame159.meteorclient.utils.player.RotationUtils;
+import minegame159.meteorclient.utils.world.BlockIterator;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.BlockItem;
@@ -22,7 +23,7 @@ import net.minecraft.util.Hand;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LiquidFiller extends ToggleModule {
+public class LiquidFiller extends Module {
     public enum PlaceIn {
         Lava,
         Water,
@@ -51,29 +52,37 @@ public class LiquidFiller extends ToggleModule {
 
     private final Setting<List<Block>> whitelist = sgGeneral.add(new BlockListSetting.Builder()
             .name("block-whitelist")
-            .description("Select which blocks it will use to place.")
+            .description("The allowed blocks that it will use to fill up the liquid.")
             .defaultValue(new ArrayList<>())
             .build()
     );
 
     private final Setting<PlaceIn> placeInLiquids = sgGeneral.add(new EnumSetting.Builder<PlaceIn>()
             .name("place-in")
-            .description("Which liquids to place in.")
+            .description("What type of liquids to place in.")
             .defaultValue(PlaceIn.Lava)
             .build()
     );
 
+    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
+            .name("rotate")
+            .description("Automatically rotates towards the space targeted for filling.")
+            .defaultValue(true)
+            .build()
+    );
+
     public LiquidFiller(){
-        super(Category.Misc, "Liquid-Filler", "Places blocks inside of liquid source blocks within range of you.");
+        super(Category.Misc, "liquid-filler", "Places blocks inside of liquid source blocks within range of you.");
     }
 
     @EventHandler
-    private final Listener<PreTickEvent> onTick = new Listener<>(event -> BlockIterator.register(horizontalRadius.get(), verticalRadius.get(), (blockPos, blockState) -> {
+    private final Listener<TickEvent.Pre> onTick = new Listener<>(event -> BlockIterator.register(horizontalRadius.get(), verticalRadius.get(), (blockPos, blockState) -> {
         if (blockState.getFluidState().getLevel() == 8 && blockState.getFluidState().isStill()) {
             Block liquid = blockState.getBlock();
 
             PlaceIn placeIn = placeInLiquids.get();
             if (placeIn == PlaceIn.Both || (placeIn == PlaceIn.Lava && liquid == Blocks.LAVA) || (placeIn == PlaceIn.Water && liquid == Blocks.WATER)) {
+                if (rotate.get()) RotationUtils.packetRotate(blockPos);
                 if (PlayerUtils.placeBlock(blockPos, findSlot(), Hand.MAIN_HAND)) BlockIterator.disableCurrent();
             }
         }

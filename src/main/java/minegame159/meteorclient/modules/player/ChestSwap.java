@@ -7,20 +7,23 @@ package minegame159.meteorclient.modules.player;
 
 import minegame159.meteorclient.Config;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.utils.Chat;
-import minegame159.meteorclient.utils.InvUtils;
+import minegame159.meteorclient.utils.player.Chat;
+import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
-import net.minecraft.screen.slot.SlotActionType;
 
-public class ChestSwap extends ToggleModule {
+import java.util.ArrayList;
+import java.util.List;
+
+@InvUtils.Priority(priority = 0)
+public class ChestSwap extends Module {
     public enum Chestplate {
         Diamond,
         Netherite,
@@ -32,20 +35,20 @@ public class ChestSwap extends ToggleModule {
 
     private final Setting<Chestplate> chestplate = sgGeneral.add(new EnumSetting.Builder<Chestplate>()
             .name("chestplate")
-            .description("Which chestplate to switch to.")
+            .description("Which type of chestplate to swap to.")
             .defaultValue(Chestplate.PreferNetherite)
             .build()
     );
 
     private final Setting<Boolean> stayOn = sgGeneral.add(new BoolSetting.Builder()
             .name("stay-on")
-            .description("Stays on and activates when you turn it off too.")
+            .description("Stays on and activates when you turn it off.")
             .defaultValue(false)
             .build()
     );
 
     public ChestSwap() {
-        super(Category.Player, "chest-swap", "Swaps between chestplate and elytra.");
+        super(Category.Player, "chest-swap", "Automatically swaps between a chestplate and an elytra.");
     }
 
     @Override
@@ -131,9 +134,11 @@ public class ChestSwap extends ToggleModule {
         int chestSlot = 8 - 2;
         slot = InvUtils.invIndexToSlotId(slot);
 
-        InvUtils.clickSlot(slot, 0, SlotActionType.PICKUP);
-        InvUtils.clickSlot(chestSlot, 0, SlotActionType.PICKUP);
-        InvUtils.clickSlot(slot, 0, SlotActionType.PICKUP);
+        List<Integer> slots = new ArrayList<>();
+        slots.add(InvUtils.invIndexToSlotId(slot));
+        slots.add(chestSlot);
+        slots.add(InvUtils.invIndexToSlotId(slot));
+        InvUtils.addSlots(slots, this.getClass());
     }
 
     @Override

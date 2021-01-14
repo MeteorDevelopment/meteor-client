@@ -7,15 +7,13 @@ package minegame159.meteorclient.modules.combat;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.PreTickEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
-import minegame159.meteorclient.settings.EnumSetting;
-import minegame159.meteorclient.settings.IntSetting;
-import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.utils.BlockIterator;
-import minegame159.meteorclient.utils.PlayerUtils;
+import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.player.PlayerUtils;
+import minegame159.meteorclient.utils.player.RotationUtils;
+import minegame159.meteorclient.utils.world.BlockIterator;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.BlockItem;
@@ -24,7 +22,7 @@ import net.minecraft.item.Items;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 
-public class HoleFiller extends ToggleModule {
+public class HoleFiller extends Module {
 
     public enum PlaceMode {
         Obsidian,
@@ -54,19 +52,26 @@ public class HoleFiller extends ToggleModule {
 
     private final Setting<HoleFiller.PlaceMode> mode = sgGeneral.add(new EnumSetting.Builder<HoleFiller.PlaceMode>()
             .name("block")
-            .description("What blocks to use to fill safe holes.")
+            .description("What kind of blocks you use to fill holes with.")
             .defaultValue(PlaceMode.Obsidian)
+            .build()
+    );
+
+    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
+            .name("rotate")
+            .description("Automatically rotates towards the holes being filled.")
+            .defaultValue(true)
             .build()
     );
 
     private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
 
     public HoleFiller() {
-        super(Category.Combat, "hole-filler", "Fills safes holes.");
+        super(Category.Combat, "hole-filler", "Fills holes with specified blocks.");
     }
 
     @EventHandler
-    private final Listener<PreTickEvent> onTick = new Listener<>(event -> {
+    private final Listener<TickEvent.Pre> onTick = new Listener<>(event -> {
         BlockIterator.register(horizontalRadius.get(), verticalRadius.get(), (blockPos1, blockState) -> {
             if (!blockState.getMaterial().isReplaceable()) return;
 
@@ -84,6 +89,7 @@ public class HoleFiller extends ToggleModule {
             if (left != Blocks.BEDROCK && left != Blocks.OBSIDIAN) return;
             add(1, 0, 0);
 
+            if (rotate.get()) RotationUtils.packetRotate(blockPos1);
             if (PlayerUtils.placeBlock(blockPos, findSlot(), Hand.MAIN_HAND)) BlockIterator.disableCurrent();
         });
     });

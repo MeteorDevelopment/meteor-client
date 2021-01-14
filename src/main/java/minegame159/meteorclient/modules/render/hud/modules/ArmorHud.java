@@ -8,7 +8,6 @@ package minegame159.meteorclient.modules.render.hud.modules;
 import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.modules.render.hud.HUD;
 import minegame159.meteorclient.modules.render.hud.HudRenderer;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 
@@ -21,7 +20,7 @@ public class ArmorHud extends HudModule {
     }
 
     public ArmorHud(HUD hud) {
-        super(hud, "armor", "Displays your armor.");
+        super(hud, "armor", "Displays information about your armor.");
     }
 
     @Override
@@ -31,41 +30,33 @@ public class ArmorHud extends HudModule {
 
     @Override
     public void render(HudRenderer renderer) {
-        MinecraftClient mc = MinecraftClient.getInstance();
-
         double x = box.getX();
         double y = box.getY();
 
-        int i = hud.armorFlip() ? 3 : 0;
-        while (true) {
-            if (hud.armorFlip()) {
-                if (i < 0) break;
-            } else {
-                if (i > 3) break;
-            }
-
-            ItemStack itemStack = getItem(i);
+        int slot = hud.armorFlip() ? 3 : 0;
+        for (int position = 0; position < 4; position++) {
+            ItemStack itemStack = getItem(slot);
 
             RenderSystem.pushMatrix();
             RenderSystem.scaled(hud.armorScale(), hud.armorScale(), 1);
-            mc.getItemRenderer().renderGuiItemIcon(itemStack, (int) (x / hud.armorScale() + i * 18), (int) (y / hud.armorScale()));
+            mc.getItemRenderer().renderGuiItemIcon(itemStack, (int) (x / hud.armorScale() + position * 18), (int) (y / hud.armorScale()));
 
             if (itemStack.isDamageable()) {
                 switch (hud.armorDurability()) {
                     case Default: {
-                        mc.getItemRenderer().renderGuiItemOverlay(mc.textRenderer, itemStack, (int) (x / hud.armorScale() + i * 18), (int) (y / hud.armorScale()));
+                        mc.getItemRenderer().renderGuiItemOverlay(mc.textRenderer, itemStack, (int) (x / hud.armorScale() + position * 18), (int) (y / hud.armorScale()));
                         break;
                     }
                     case Numbers: {
                         String message = Integer.toString(itemStack.getMaxDamage() - itemStack.getDamage());
                         double messageWidth = renderer.textWidth(message);
-                        renderer.text(message, x + 18 * i * hud.armorScale() + 8 * hud.armorScale() - messageWidth / 2.0, y + (box.height - renderer.textHeight()), hud.primaryColor());
+                        renderer.text(message, x + 18 * position * hud.armorScale() + 8 * hud.armorScale() - messageWidth / 2.0, y + (box.height - renderer.textHeight()), hud.primaryColor());
                         break;
                     }
                     case Percentage: {
                         String message = Integer.toString(Math.round(((itemStack.getMaxDamage() - itemStack.getDamage()) * 100f) / (float) itemStack.getMaxDamage()));
                         double messageWidth = renderer.textWidth(message);
-                        renderer.text(message, x + 18 * i * hud.armorScale() + 8 * hud.armorScale() - messageWidth / 2.0, y + (box.height - renderer.textHeight()), hud.primaryColor());
+                        renderer.text(message, x + 18 * position * hud.armorScale() + 8 * hud.armorScale() - messageWidth / 2.0, y + (box.height - renderer.textHeight()), hud.primaryColor());
                         break;
                     }
                 }
@@ -73,13 +64,12 @@ public class ArmorHud extends HudModule {
 
             RenderSystem.popMatrix();
 
-            if (hud.armorFlip()) i--;
-            else i++;
+            if (hud.armorFlip()) slot--;
+            else slot++;
         }
     }
 
     private ItemStack getItem(int i) {
-        MinecraftClient mc = MinecraftClient.getInstance();
         if (mc.player == null) {
             switch (i) {
                 default: return Items.DIAMOND_BOOTS.getDefaultStack();

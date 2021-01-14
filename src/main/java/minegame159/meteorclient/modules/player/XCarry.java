@@ -7,17 +7,17 @@ package minegame159.meteorclient.modules.player;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.packets.SendPacketEvent;
+import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.mixininterface.ICloseHandledScreenC2SPacket;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket;
 
-public class XCarry extends ToggleModule {
+public class XCarry extends Module {
     private boolean invOpened;
 
     public XCarry() {
-        super(Category.Player, "XCarry", "Allows you to store items in your crafting grid.");
+        super(Category.Player, "XCarry", "Allows you to store four extra items in your crafting grid.");
     }
 
     @Override
@@ -31,7 +31,7 @@ public class XCarry extends ToggleModule {
     }
 
     @EventHandler
-    private final Listener<SendPacketEvent> onSendPacket = new Listener<>(event -> {
+    private final Listener<PacketEvent.Send> onSendPacket = new Listener<>(event -> {
         if (!(event.packet instanceof CloseHandledScreenC2SPacket)) return;
 
         if (((ICloseHandledScreenC2SPacket) event.packet).getSyncId() == mc.player.playerScreenHandler.syncId) {

@@ -7,30 +7,30 @@ package minegame159.meteorclient.modules.player;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.PostTickEvent;
-import minegame159.meteorclient.events.packets.SendPacketEvent;
+import minegame159.meteorclient.events.packets.PacketEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixininterface.IPlayerMoveC2SPacket;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 
-public class AntiHunger extends ToggleModule {
+public class AntiHunger extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Boolean> sprint = sgGeneral.add(new BoolSetting.Builder()
             .name("sprint")
-            .description("Spoof's sprinting packets.")
+            .description("Spoofs sprinting packets.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> onGround = sgGeneral.add(new BoolSetting.Builder()
             .name("on-ground")
-            .description("Spoof's onGround flag.")
+            .description("Spoofs the onGround flag.")
             .defaultValue(true)
             .build()
     );
@@ -40,7 +40,7 @@ public class AntiHunger extends ToggleModule {
     private boolean ignorePacket;
 
     public AntiHunger() {
-        super(Category.Player, "anti-hunger", "Reduces hunger consumption.");
+        super(Category.Player, "anti-hunger", "Reduces (does NOT remove) hunger consumption.");
     }
 
     @Override
@@ -50,7 +50,7 @@ public class AntiHunger extends ToggleModule {
     }
 
     @EventHandler
-    private final Listener<SendPacketEvent> onSendPacket = new Listener<>(event -> {
+    private final Listener<PacketEvent.Send> onSendPacket = new Listener<>(event -> {
         if (ignorePacket) return;
 
         if (event.packet instanceof ClientCommandC2SPacket && sprint.get()) {
@@ -67,7 +67,7 @@ public class AntiHunger extends ToggleModule {
     });
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
         if (mc.player.isOnGround() && !lastOnGround && !sendOnGroundTruePacket) sendOnGroundTruePacket = true;
 
         if (mc.player.isOnGround() && sendOnGroundTruePacket && onGround.get()) {

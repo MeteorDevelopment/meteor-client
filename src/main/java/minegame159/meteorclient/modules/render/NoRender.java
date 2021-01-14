@@ -6,129 +6,108 @@
 package minegame159.meteorclient.modules.render;
 
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 
-public class NoRender extends ToggleModule {
+public class NoRender extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-
-    private final Setting<Boolean> noBubbles = sgGeneral.add(new BoolSetting.Builder()
-            .name("no-bubbles")
-            .description("Disables rendering of bubbles in water.")
-            .defaultValue(true)
-            .build()
-    );
 
     private final Setting<Boolean> noHurtCam = sgGeneral.add(new BoolSetting.Builder()
             .name("no-hurt-cam")
-            .description("Disables hurt camera effect.")
+            .description("Disables the hurt camera effect.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> noWeather = sgGeneral.add(new BoolSetting.Builder()
             .name("no-weather")
-            .description("Disables weather.")
+            .description("Disables the weather.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> noPortalOverlay = sgGeneral.add(new BoolSetting.Builder()
             .name("no-portal-overlay")
-            .description("Disables portal overlay.")
+            .description("Disables all portal overlays.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> noPumpkinOverlay = sgGeneral.add(new BoolSetting.Builder()
             .name("no-pumpkin-overlay")
-            .description("Disables pumpkin overlay.")
+            .description("Disables the pumpkin-head overlay.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> noFireOverlay = sgGeneral.add(new BoolSetting.Builder()
             .name("no-fire-overlay")
-            .description("Disables fire overlay.")
+            .description("Disables the fire overlay.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> noWaterOverlay = sgGeneral.add(new BoolSetting.Builder()
             .name("no-water-overlay")
-            .description("Disables water overlay.")
+            .description("Disables the water overlay.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> noVignette = sgGeneral.add(new BoolSetting.Builder()
             .name("no-vignette")
-            .description("Disables vignette effect.")
+            .description("Disables the vignette effect.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> noBossBar = sgGeneral.add(new BoolSetting.Builder()
             .name("no-boss-bar")
-            .description("Disables boss bars.")
+            .description("Disables all boss bars from rendering.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> noScoreboard = sgGeneral.add(new BoolSetting.Builder()
             .name("no-scoreboard")
-            .description("Disable scoreboard.")
+            .description("Disable the scoreboard from rendering.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> noFog = sgGeneral.add(new BoolSetting.Builder()
             .name("no-fog")
-            .description("Disables fog.")
-            .defaultValue(true)
-            .build()
-    );
-
-    private final Setting<Boolean> noExplosion = sgGeneral.add(new BoolSetting.Builder()
-            .name("no-explosion")
-            .description("Disables explosion particles.")
+            .description("Disables all fog.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> noTotemAnimation = sgGeneral.add(new BoolSetting.Builder()
             .name("no-totem-animation")
-            .description("Disables the totem animation on popping.")
-            .defaultValue(true)
-            .build()
-    );
-
-    private final Setting<Boolean> noTotemParitcles = sgGeneral.add(new BoolSetting.Builder()
-            .name("no-totem-particles")
-            .description("Disables totem particles.")
+            .description("Disables the totem animation on your screen when popping a totem.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> noArmor = sgGeneral.add(new BoolSetting.Builder()
             .name("no-armor")
-            .description("Disables player armor.")
+            .description("Disables all armor from rendering.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> noNausea = sgGeneral.add(new BoolSetting.Builder()
             .name("no-nausea")
-            .description("Disables nausea effect.")
+            .description("Disables the nausea effect.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> noItems = sgGeneral.add(new BoolSetting.Builder()
             .name("no-item")
-            .description("Disables item entities.")
+            .description("Disables all item entities.")
             .defaultValue(false)
             .build()
     );
@@ -142,21 +121,21 @@ public class NoRender extends ToggleModule {
 
     private final Setting<Boolean> noSignText = sgGeneral.add(new BoolSetting.Builder()
             .name("no-sign-text")
-            .description("Disables text on signs.")
+            .description("Disables any text on signs. Useful for screenshots or streams.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> noBlockBreakParticles = sgGeneral.add(new BoolSetting.Builder()
             .name("no-block-break-particles")
-            .description("Disables block break particles.")
+            .description("Disables all block-break particles.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> noFallingBlocks = sgGeneral.add(new BoolSetting.Builder()
             .name("no-falling-blocks")
-            .description("Disables rendering of falling blocks.")
+            .description("Disables rendering of falling blocks. Useful for lag machines.")
             .defaultValue(false)
             .build()
     );
@@ -170,23 +149,48 @@ public class NoRender extends ToggleModule {
 
     private final Setting<Boolean> noArmorStands = sgGeneral.add(new BoolSetting.Builder()
             .name("no-armor-stands")
-            .description("Disables rendering of armor stands.")
+            .description("Disables rendering of armor stands. Useful for lag machines.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> noGuiBackground = sgGeneral.add(new BoolSetting.Builder()
             .name("no-gui-background")
-            .description("Disables rendering of the gui background.")
+            .description("Disables rendering of the dark GUI background.")
             .defaultValue(false)
             .build()
     );
-    public NoRender() {
-        super(Category.Render, "no-render", "Disables some things from rendering.");
-    }
 
-    public boolean noBubbles() {
-        return isActive() && noBubbles.get();
+    private final Setting<Boolean> noXpOrbs = sgGeneral.add(new BoolSetting.Builder()
+            .name("no-xp-orbs")
+            .description("Disables rendering of experience orb entities.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> noEatParticles = sgGeneral.add(new BoolSetting.Builder()
+            .name("no-eating-particles")
+            .description("Disables rendering of eating particles.")
+            .defaultValue(false)
+            .build()
+    );
+    
+    private final Setting<Boolean> noSkylightUpdates = sgGeneral.add(new BoolSetting.Builder()
+            .name("no-skylight-updates")
+            .description("Disables rendering of skylight updates. Useful for lag machines")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> noCrosshair = sgGeneral.add(new BoolSetting.Builder()
+            .name("no-crosshair")
+            .description("Disables rendering of the crosshair.")
+            .defaultValue(false)
+            .build()
+    );
+
+    public NoRender() {
+        super(Category.Render, "no-render", "Disables certain animations or overlays from rendering.");
     }
 
     public boolean noHurtCam() {
@@ -229,16 +233,8 @@ public class NoRender extends ToggleModule {
         return isActive() && noFog.get();
     }
 
-    public boolean noExplosion() {
-        return isActive() && noExplosion.get();
-    }
-
     public boolean noTotemAnimation() {
         return isActive() && noTotemAnimation.get();
-    }
-
-    public boolean noTotemParticles() {
-        return isActive() && noTotemParitcles.get();
     }
 
     public boolean noArmor() {
@@ -279,5 +275,21 @@ public class NoRender extends ToggleModule {
 
     public boolean noGuiBackground() {
         return isActive() && noGuiBackground.get();
+    }
+
+    public boolean noXpOrbs() {
+        return isActive() && noXpOrbs.get();
+    }
+
+    public boolean noEatParticles() {
+        return isActive() && noEatParticles.get();
+    }
+    
+    public boolean noSkylightUpdates() {
+        return isActive() && noSkylightUpdates.get();
+    }
+
+    public boolean noCrosshair() {
+        return isActive() && noCrosshair.get();
     }
 }

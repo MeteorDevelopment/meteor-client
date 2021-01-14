@@ -14,14 +14,14 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.ChunkDataEvent;
+import minegame159.meteorclient.events.world.ChunkDataEvent;
 import minegame159.meteorclient.gui.screens.StashFinderChunkScreen;
 import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.Chat;
 import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.player.Chat;
 import net.minecraft.block.entity.*;
 import net.minecraft.client.toast.Toast;
 import net.minecraft.client.toast.ToastManager;
@@ -33,7 +33,7 @@ import net.minecraft.util.math.ChunkPos;
 import java.io.*;
 import java.util.*;
 
-public class StashFinder extends ToggleModule {
+public class StashFinder extends Module {
 
     public enum Mode {
         Chat,
@@ -46,14 +46,14 @@ public class StashFinder extends ToggleModule {
 
     private final Setting<List<BlockEntityType<?>>> storageBlocks = sgGeneral.add(new StorageBlockListSetting.Builder()
             .name("storage-blocks")
-            .description("Select storage blocks to search for.")
+            .description("Select the storage blocks to search for.")
             .defaultValue(Arrays.asList(StorageBlockListSetting.STORAGE_BLOCKS))
             .build()
     );
 
     private final Setting<Integer> minimumStorageCount = sgGeneral.add(new IntSetting.Builder()
             .name("minimum-storage-cont")
-            .description("Minimum storage block count required to record that chunk.")
+            .description("The minimum amount of storage blocks in a chunk to record the chunk.")
             .defaultValue(4)
             .min(1)
             .build()
@@ -61,7 +61,7 @@ public class StashFinder extends ToggleModule {
     
     private final Setting<Integer> minimumDistance = sgGeneral.add(new IntSetting.Builder()
             .name("minimum-distance")
-            .description("Minimum distance in blocks from spawn required to record that chunk.")
+            .description("The minimum distance you must be from spawn to record a certain chunk.")
             .defaultValue(0)
             .min(0)
             .sliderMax(10000)
@@ -70,7 +70,7 @@ public class StashFinder extends ToggleModule {
 
     private final Setting<Boolean> sendNotifications = sgGeneral.add(new BoolSetting.Builder()
             .name("send-notifications")
-            .description("Send minecraft notifications when new stashes are found.")
+            .description("Sends Minecraft notifications when new stashes are found.")
             .defaultValue(true)
             .build()
     );
@@ -95,7 +95,7 @@ public class StashFinder extends ToggleModule {
 
     @EventHandler
     private final Listener<ChunkDataEvent> onChunkData = new Listener<>(event -> {
-        // Check distance
+        // Check the distance.
         double chunkXAbs = Math.abs(event.chunk.getPos().x * 16);
         double chunkZAbs = Math.abs(event.chunk.getPos().z * 16);
         if (Math.sqrt(chunkXAbs * chunkXAbs + chunkZAbs * chunkZAbs) < minimumDistance.get()) return;

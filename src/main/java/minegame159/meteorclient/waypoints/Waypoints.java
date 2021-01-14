@@ -9,14 +9,19 @@ import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listenable;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.EventStore;
-import minegame159.meteorclient.events.GameJoinedEvent;
-import minegame159.meteorclient.events.GameLeftEvent;
-import minegame159.meteorclient.events.RenderEvent;
+import minegame159.meteorclient.events.game.GameJoinedEvent;
+import minegame159.meteorclient.events.game.GameLeftEvent;
+import minegame159.meteorclient.events.meteor.WaypointListChangedEvent;
+import minegame159.meteorclient.events.render.RenderEvent;
+import minegame159.meteorclient.rendering.DrawMode;
 import minegame159.meteorclient.rendering.Fonts;
 import minegame159.meteorclient.rendering.Matrices;
-import minegame159.meteorclient.rendering.ShapeBuilder;
-import minegame159.meteorclient.utils.*;
+import minegame159.meteorclient.rendering.MeshBuilder;
+import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.files.Savable;
+import minegame159.meteorclient.utils.misc.NbtUtils;
+import minegame159.meteorclient.utils.render.color.Color;
+import minegame159.meteorclient.utils.world.Dimension;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.VertexFormats;
@@ -24,7 +29,7 @@ import net.minecraft.client.texture.AbstractTexture;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.NativeImageBackedTexture;
 import net.minecraft.nbt.CompoundTag;
-import org.lwjgl.opengl.GL11;
+import net.minecraft.util.math.Vec3d;
 
 import java.io.*;
 import java.util.*;
@@ -34,6 +39,8 @@ public class Waypoints extends Savable<Waypoints> implements Listenable, Iterabl
     public static final Waypoints INSTANCE = new Waypoints();
 
     private static final String[] BUILTIN_ICONS = { "Square", "Circle", "Triangle", "Star", "Diamond" };
+
+    private static final MeshBuilder MB = new MeshBuilder(128);
 
     private static final Color BACKGROUND = new Color(0, 0, 0, 75);
     private static final Color TEXT = new Color(255, 255, 255);
@@ -47,13 +54,13 @@ public class Waypoints extends Savable<Waypoints> implements Listenable, Iterabl
 
     public void add(Waypoint waypoint) {
         waypoints.add(waypoint);
-        MeteorClient.EVENT_BUS.post(EventStore.waypointListChangedEvent());
+        MeteorClient.EVENT_BUS.post(WaypointListChangedEvent.get());
         save();
     }
 
     public void remove(Waypoint waypoint) {
         if (waypoints.remove(waypoint)) {
-            MeteorClient.EVENT_BUS.post(EventStore.waypointListChangedEvent());
+            MeteorClient.EVENT_BUS.post(WaypointListChangedEvent.get());
             save();
         }
     }
@@ -75,6 +82,23 @@ public class Waypoints extends Savable<Waypoints> implements Listenable, Iterabl
         return waypoint.end && dimension == Dimension.End;
     }
 
+    public Vec3d getCoords(Waypoint waypoint) {
+
+        double x = waypoint.x;
+        double y = waypoint.y;
+        double z = waypoint.z;
+
+        if (waypoint.actualDimension == Dimension.Overworld && Utils.getDimension() == Dimension.Nether) {
+            x = waypoint.x / 8;
+            z = waypoint.z / 8;
+        } else if (waypoint.actualDimension == Dimension.Nether && Utils.getDimension() == Dimension.Overworld) {
+            x = waypoint.x * 8;
+            z = waypoint.z * 8;
+        }
+
+        return new Vec3d(x, y, z);
+    }
+
     @EventHandler
     private final Listener<RenderEvent> onRender = new Listener<>(event -> {
         for (Waypoint waypoint : this) {
@@ -82,8 +106,12 @@ public class Waypoints extends Savable<Waypoints> implements Listenable, Iterabl
 
             Camera camera = MinecraftClient.getInstance().gameRenderer.getCamera();
 
+            double x = getCoords(waypoint).x;
+            double y = getCoords(waypoint).y;
+            double z = getCoords(waypoint).z;
+
             // Compute scale
-            double dist = Utils.distanceToCamera(waypoint.x, waypoint.y, waypoint.z);
+            double dist = Utils.distanceToCamera(x, y, z);
             if (dist > waypoint.maxVisibleDistance) continue;
             double scale = 0.04;
             if(dist > 10) scale *= dist / 10;
@@ -99,15 +127,11 @@ public class Waypoints extends Savable<Waypoints> implements Listenable, Iterabl
             BACKGROUND.a *= a;
             TEXT.a *= a;
 
-            double x = waypoint.x;
-            double y = waypoint.y;
-            double z = waypoint.z;
-
             double maxViewDist = MinecraftClient.getInstance().options.viewDistance * 16;
             if (dist > maxViewDist) {
-                double dx = waypoint.x - camera.getPos().x;
-                double dy = waypoint.y - camera.getPos().y;
-                double dz = waypoint.z - camera.getPos().z;
+                double dx = x - camera.getPos().x;
+                double dy = y - camera.getPos().y;
+                double dz = z - camera.getPos().z;
 
                 double length = Math.sqrt(dx * dx + dy * dy + dz * dz);
                 dx /= length;
@@ -142,10 +166,10 @@ public class Waypoints extends Savable<Waypoints> implements Listenable, Iterabl
             double i = ii * 0.25;
             double ii2 = Fonts.get(2).getWidth(distText) / 2.0;
             double i2 = ii2 * 0.25;
-            ShapeBuilder.begin(null, GL11.GL_TRIANGLES, VertexFormats.POSITION_COLOR);
-            ShapeBuilder.quad(-i - 1, -Fonts.get(2).getHeight() * 0.25 + 1, 0, -i - 1, 9 - Fonts.get(2).getHeight() * 0.25, 0, i + 1, 9 - Fonts.get(2).getHeight() * 0.25, 0, i + 1, -Fonts.get(2).getHeight() * 0.25 + 1, 0, BACKGROUND);
-            ShapeBuilder.quad(-i2 - 1, 0, 0, -i2 - 1, 8, 0, i2 + 1, 8, 0, i2 + 1, 0, 0, BACKGROUND);
-            ShapeBuilder.end();
+            MB.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
+            MB.quad(-i - 1, -Fonts.get(2).getHeight() * 0.25 + 1, 0, -i - 1, 9 - Fonts.get(2).getHeight() * 0.25, 0, i + 1, 9 - Fonts.get(2).getHeight() * 0.25, 0, i + 1, -Fonts.get(2).getHeight() * 0.25 + 1, 0, BACKGROUND);
+            MB.quad(-i2 - 1, 0, 0, -i2 - 1, 8, 0, i2 + 1, 8, 0, i2 + 1, 0, 0, BACKGROUND);
+            MB.end();
 
             waypoint.renderIcon(-8, 9, 0, a, 16);
 

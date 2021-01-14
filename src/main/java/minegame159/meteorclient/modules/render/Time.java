@@ -7,22 +7,22 @@ package minegame159.meteorclient.modules.render;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.PostTickEvent;
-import minegame159.meteorclient.events.packets.ReceivePacketEvent;
+import minegame159.meteorclient.events.packets.PacketEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import net.minecraft.network.packet.s2c.play.WorldTimeUpdateS2CPacket;
 
-public class Time extends ToggleModule {
+public class Time extends Module {
 
     private final SettingGroup sgDefault = settings.getDefaultGroup();
 
     private final Setting<Double> time = sgDefault.add(new DoubleSetting.Builder()
             .name("time")
-            .description("The custom time.")
+            .description("The specified time to be set.")
             .defaultValue(0)
             .sliderMin(-20000)
             .sliderMax(20000)
@@ -30,7 +30,7 @@ public class Time extends ToggleModule {
     );
 
     public Time() {
-        super(Category.Render, "time", "Sets the clientside time of day");
+        super(Category.Render, "time", "Makes you able to set a custom time.");
     }
 
     long oldTime;
@@ -46,7 +46,7 @@ public class Time extends ToggleModule {
     }
 
     @EventHandler
-    private final Listener<ReceivePacketEvent> onTime = new Listener<>(event -> {
+    private final Listener<PacketEvent.Receive> onTime = new Listener<>(event -> {
         if (event.packet instanceof WorldTimeUpdateS2CPacket) {
             oldTime = ((WorldTimeUpdateS2CPacket) event.packet).getTime();
             event.setCancelled(true);
@@ -54,7 +54,7 @@ public class Time extends ToggleModule {
     });
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
         mc.world.setTimeOfDay(time.get().longValue());
     });
 }

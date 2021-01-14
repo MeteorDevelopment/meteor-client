@@ -10,17 +10,18 @@ package minegame159.meteorclient.modules.combat;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.EntityAddedEvent;
-import minegame159.meteorclient.events.PostTickEvent;
+import minegame159.meteorclient.events.entity.EntityAddedEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.utils.Chat;
-import minegame159.meteorclient.utils.DamageCalcUtils;
-import minegame159.meteorclient.utils.PlayerUtils;
+import minegame159.meteorclient.utils.player.Chat;
+import minegame159.meteorclient.utils.player.DamageCalcUtils;
+import minegame159.meteorclient.utils.player.PlayerUtils;
+import minegame159.meteorclient.utils.player.RotationUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.BlockItem;
@@ -30,20 +31,29 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.world.RaycastContext;
 
-public class SmartSurround extends ToggleModule {
+public class SmartSurround extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Boolean> onlyObsidian = sgGeneral.add(new BoolSetting.Builder()
             .name("only-obsidian")
-            .description("Only uses Obsidian")
+            .description("Only whitelists obsidian to be used.")
             .defaultValue(false)
-            .build());
+            .build()
+    );
 
     private final Setting<Double> minDamage = sgGeneral.add(new DoubleSetting.Builder()
             .name("min-damage")
             .description("The minimum damage before this activates.")
             .defaultValue(5.5)
-            .build());
+            .build()
+    );
+
+    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
+            .name("Rotate")
+            .description("Forces you to rotate towards the block being placed.")
+            .defaultValue(true)
+            .build()
+    );
 
     private int oldSlot;
 
@@ -56,7 +66,7 @@ public class SmartSurround extends ToggleModule {
     private Entity crystal;
 
     public SmartSurround(){
-        super(Category.Combat, "smart-surround", "Tries to save you from crystals automatically.");
+        super(Category.Combat, "smart-surround", "Attempts to save you from crystals automatically.");
     }
 
     @EventHandler
@@ -94,7 +104,7 @@ public class SmartSurround extends ToggleModule {
     });
 
     @EventHandler
-    private final  Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private final  Listener<TickEvent.Post> onTick = new Listener<>(event -> {
         if (slot != -1) {
             if ((rPosX >= 2) && (rPosZ == 0)) {
                 placeObi(rPosX - 1, 0, crystal);
@@ -126,6 +136,7 @@ public class SmartSurround extends ToggleModule {
     });
 
     private void placeObi(int x, int z, Entity crystal) {
+        if (rotate.get()) RotationUtils.packetRotate(crystal.getBlockPos().add(x, -1, z));
         PlayerUtils.placeBlock(crystal.getBlockPos().add(x, -1, z), Hand.MAIN_HAND);
     }
 

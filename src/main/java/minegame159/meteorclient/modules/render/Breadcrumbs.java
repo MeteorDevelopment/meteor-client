@@ -7,32 +7,32 @@ package minegame159.meteorclient.modules.render;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.PostTickEvent;
-import minegame159.meteorclient.events.RenderEvent;
+import minegame159.meteorclient.events.render.RenderEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
-import minegame159.meteorclient.rendering.ShapeBuilder;
+import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.Color;
-import minegame159.meteorclient.utils.Pool;
+import minegame159.meteorclient.utils.misc.Pool;
+import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.world.dimension.DimensionType;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
 
-public class Breadcrumbs extends ToggleModule {
+public class Breadcrumbs extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<Color> color = sgGeneral.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> color = sgGeneral.add(new ColorSetting.Builder()
             .name("color")
-            .description("Color of the line.")
-            .defaultValue(new Color(225, 25, 25))
+            .description("The color of the Breadcrumbs trail.")
+            .defaultValue(new SettingColor(225, 25, 25))
             .build()
     );
 
     private final Setting<Integer> maxSections = sgGeneral.add(new IntSetting.Builder()
             .name("max-sections")
-            .description("Maximum number of sections.")
+            .description("The maximum number of sections.")
             .defaultValue(1000)
             .min(0)
             .sliderMax(5000)
@@ -41,7 +41,7 @@ public class Breadcrumbs extends ToggleModule {
 
     private final Setting<Double> sectionLength = sgGeneral.add(new DoubleSetting.Builder()
             .name("section-length")
-            .description("Section length, 1 is equal to 1 block.")
+            .description("The section length in blocks.")
             .defaultValue(0.5)
             .min(0)
             .sliderMin(0)
@@ -57,7 +57,7 @@ public class Breadcrumbs extends ToggleModule {
     private DimensionType lastDimension;
 
     public Breadcrumbs() {
-        super(Category.Render, "breadcrumbs", "Displays a line where you walked.");
+        super(Category.Render, "breadcrumbs", "Displays a trail behind where you have walked.");
     }
 
     @Override
@@ -75,7 +75,7 @@ public class Breadcrumbs extends ToggleModule {
     }
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
         if (lastDimension != mc.world.getDimension()) {
             for (Section sec : sections) sectionPool.free(sec);
             sections.clear();
@@ -122,7 +122,7 @@ public class Breadcrumbs extends ToggleModule {
         }
 
         public void render() {
-            ShapeBuilder.line(x1, y1, z1, x2, y2, z2, color.get());
+            Renderer.LINES.line(x1, y1, z1, x2, y2, z2, color.get());
         }
     }
 }

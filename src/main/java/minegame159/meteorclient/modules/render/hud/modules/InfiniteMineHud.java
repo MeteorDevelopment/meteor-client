@@ -3,11 +3,10 @@ package minegame159.meteorclient.modules.render.hud.modules;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.player.InfinityMiner;
 import minegame159.meteorclient.modules.render.hud.HUD;
-import net.minecraft.block.Block;
 
 public class InfiniteMineHud extends DoubleTextHudModule {
     public InfiniteMineHud(HUD hud) {
-        super(hud, "infmine", "Details Regarding Infinity Mine", "Infinity Mine: ");
+        super(hud, "infmine", "Displays details regarding Infinity Mine.", "Infinity Mine: ");
     }
 
     @Override
@@ -16,14 +15,14 @@ public class InfiniteMineHud extends DoubleTextHudModule {
         if (!infinityMiner.isActive()) return "Disabled";
 
         switch (infinityMiner.getMode()) {
-            case HOME:
+            case Home:
                 int[] coords = infinityMiner.getHomeCoords();
                 return "Heading Home: " + coords[0] + " " + coords[1] + " " + coords[2];
-            case TARGET:
+            case Target:
                 return "Mining: " + infinityMiner.getCurrentTarget().getName().getString();
-            case REPAIR:
+            case Repair:
                 return "Repair-Mining: " + infinityMiner.getCurrentTarget().getName().getString();
-            case STILL:
+            case Still:
                 return "Resting";
             default:
                 return "";

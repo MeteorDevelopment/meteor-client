@@ -7,21 +7,44 @@ package minegame159.meteorclient.modules.movement;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.PostTickEvent;
+import minegame159.meteorclient.events.world.TickEvent;
+import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 
-public class AutoJump extends ToggleModule {
+public class AutoJump extends Module {
     public enum JumpIf {
         Sprinting,
         Walking,
         Always
     }
 
+    public enum Mode {
+        Jump,
+        Velocity
+    }
+
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+
+    private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
+            .name("mode")
+            .description("The method of jumping.")
+            .defaultValue(Mode.Jump)
+            .build()
+    );
+
+    private final Setting<Double> velocityHeight = sgGeneral.add(new DoubleSetting.Builder()
+            .name("velocity-height")
+            .description("The distance that velocity mode moves you.")
+            .defaultValue(0.25)
+            .min(0)
+            .sliderMax(2)
+            .build()
+    );
 
     private final Setting<JumpIf> jumpIf = sgGeneral.add(new EnumSetting.Builder<JumpIf>()
             .name("jump-if")
@@ -44,9 +67,10 @@ public class AutoJump extends ToggleModule {
     }
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
-        if (!mc.player.isOnGround() || mc.player.isSneaking()) return;
+    private final Listener<TickEvent.Pre> onTick = new Listener<>(event -> {
+        if (!mc.player.isOnGround() || mc.player.isSneaking() || !jump()) return;
 
-        if (jump()) mc.player.jump();
+        if (mode.get() == Mode.Jump) mc.player.jump();
+        else ((IVec3d) mc.player.getVelocity()).setY(velocityHeight.get());
     });
 }

@@ -7,83 +7,79 @@ package minegame159.meteorclient.modules.render;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.RenderEvent;
+import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
-import minegame159.meteorclient.rendering.ShapeBuilder;
+import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.rendering.Renderer;
+import minegame159.meteorclient.rendering.ShapeMode;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.Color;
+import minegame159.meteorclient.utils.render.color.Color;
+import minegame159.meteorclient.utils.render.color.SettingColor;
+import minegame159.meteorclient.utils.world.Dir;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.ChestBlock;
 import net.minecraft.block.entity.*;
 import net.minecraft.block.enums.ChestType;
-import net.minecraft.util.math.Direction;
 
 import java.util.Arrays;
 import java.util.List;
 
-public class StorageESP extends ToggleModule {
-    public enum Mode {
-        Lines,
-        Sides,
-        Both
-    }
-
+public class StorageESP extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<List<BlockEntityType<?>>> storageBlocks = sgGeneral.add(new StorageBlockListSetting.Builder()
             .name("storage-blocks")
-            .description("Select storage blocks to display.")
+            .description("Select the storage blocks to display.")
             .defaultValue(Arrays.asList(StorageBlockListSetting.STORAGE_BLOCKS))
             .build()
     );
 
-    private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
-            .name("mode")
-            .description("Rendering mode.")
-            .defaultValue(Mode.Both)
+    private final Setting<ShapeMode> shapeMode = sgGeneral.add(new EnumSetting.Builder<ShapeMode>()
+            .name("shape-mode")
+            .description("How the shapes are rendered.")
+            .defaultValue(ShapeMode.Both)
             .build()
     );
 
-    private final Setting<Color> chest = sgGeneral.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> chest = sgGeneral.add(new ColorSetting.Builder()
             .name("chest")
-            .description("Color of chests.")
-            .defaultValue(new Color(255, 160, 0, 255))
+            .description("The color of chests.")
+            .defaultValue(new SettingColor(255, 160, 0, 255))
             .build()
     );
 
-    private final Setting<Color> barrel = sgGeneral.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> barrel = sgGeneral.add(new ColorSetting.Builder()
             .name("barrel")
-            .description("Color of barrels.")
-            .defaultValue(new Color(255, 160, 0, 255))
+            .description("The color of barrels.")
+            .defaultValue(new SettingColor(255, 160, 0, 255))
             .build()
     );
 
-    private final Setting<Color> shulker = sgGeneral.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> shulker = sgGeneral.add(new ColorSetting.Builder()
             .name("shulker")
-            .description("Color of shulkers.")
-            .defaultValue(new Color(255, 160, 0, 255))
+            .description("The color of Shulker Boxes.")
+            .defaultValue(new SettingColor(255, 160, 0, 255))
             .build()
     );
 
-    private final Setting<Color> enderChest = sgGeneral.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> enderChest = sgGeneral.add(new ColorSetting.Builder()
             .name("ender-chest")
-            .description("Color of ender chests.")
-            .defaultValue(new Color(120, 0, 255, 255))
+            .description("The color of Ender Chests.")
+            .defaultValue(new SettingColor(120, 0, 255, 255))
             .build()
     );
 
-    private final Setting<Color> other = sgGeneral.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> other = sgGeneral.add(new ColorSetting.Builder()
             .name("other")
-            .description("Color of furnaces, dispenders, droppers and hoppers.")
-            .defaultValue(new Color(140, 140, 140, 255))
+            .description("The color of furnaces, dispenders, droppers and hoppers.")
+            .defaultValue(new SettingColor(140, 140, 140, 255))
             .build()
     );
 
     private final Setting<Double> fadeDistance = sgGeneral.add(new DoubleSetting.Builder()
             .name("fade-distance")
-            .description("At which distance the color will fade out.")
+            .description("The distance at which the color will fade.")
             .defaultValue(6)
             .min(0)
             .sliderMax(12)
@@ -96,7 +92,7 @@ public class StorageESP extends ToggleModule {
     private int count;
 
     public StorageESP() {
-        super(Category.Render, "storage-esp", "Shows storage blocks.");
+        super(Category.Render, "storage-esp", "Renders all specified storage blocks.");
     }
 
     private void getTileEntityColor(BlockEntity blockEntity) {
@@ -113,7 +109,7 @@ public class StorageESP extends ToggleModule {
 
         render = true;
 
-        if (mode.get() == Mode.Sides || mode.get() == Mode.Both) {
+        if (shapeMode.get() == ShapeMode.Sides || shapeMode.get() == ShapeMode.Both) {
             sideColor.set(lineColor);
             sideColor.a -= 225;
             if (sideColor.a < 0) sideColor.a = 0;
@@ -138,23 +134,23 @@ public class StorageESP extends ToggleModule {
                 double y2 = blockEntity.getPos().getY() + 1;
                 double z2 = blockEntity.getPos().getZ() + 1;
 
-                Direction excludeDir = null;
+                int excludeDir = 0;
                 if (blockEntity instanceof ChestBlockEntity) {
                     BlockState state = mc.world.getBlockState(blockEntity.getPos());
                     if ((state.getBlock() == Blocks.CHEST || state.getBlock() == Blocks.TRAPPED_CHEST) && state.get(ChestBlock.CHEST_TYPE) != ChestType.SINGLE) {
-                        excludeDir = ChestBlock.getFacing(state);
+                        excludeDir = Dir.get(ChestBlock.getFacing(state));
                     }
                 }
 
                 if (blockEntity instanceof ChestBlockEntity || blockEntity instanceof EnderChestBlockEntity) {
                     double a = 1.0 / 16.0;
 
-                    if (excludeDir != Direction.WEST) x1 += a;
-                    if (excludeDir != Direction.NORTH) z1 += a;
+                    if (Dir.is(excludeDir, Dir.WEST)) x1 += a;
+                    if (Dir.is(excludeDir, Dir.NORTH)) z1 += a;
 
-                    if (excludeDir != Direction.EAST) x2 -= a;
+                    if (Dir.is(excludeDir, Dir.EAST)) x2 -= a;
                     y2 -= a * 2;
-                    if (excludeDir != Direction.SOUTH) z2 -= a;
+                    if (Dir.is(excludeDir, Dir.SOUTH)) z2 -= a;
                 }
 
                 double dist = mc.player.squaredDistanceTo(blockEntity.getPos().getX() + 1, blockEntity.getPos().getY() + 1, blockEntity.getPos().getZ() + 1);
@@ -168,12 +164,7 @@ public class StorageESP extends ToggleModule {
                 sideColor.a *= a;
 
                 if (a >= 0.075) {
-                    if (mode.get() == Mode.Lines) ShapeBuilder.boxEdges(x1, y1, z1, x2, y2, z2, lineColor, excludeDir);
-                    else if (mode.get() == Mode.Sides) ShapeBuilder.boxSides(x1, y1, z1, x2, y2, z2, sideColor, excludeDir);
-                    else {
-                        ShapeBuilder.boxEdges(x1, y1, z1, x2, y2, z2, lineColor, excludeDir);
-                        ShapeBuilder.boxSides(x1, y1, z1, x2, y2, z2, sideColor, excludeDir);
-                    }
+                    Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x1, y1, z1, x2, y2, z2, sideColor, lineColor, shapeMode.get(), excludeDir);
                 }
 
                 lineColor.a = prevLineA;

@@ -8,8 +8,9 @@ package minegame159.meteorclient.modules.render.hud.modules;
 import minegame159.meteorclient.modules.render.hud.BoundingBox;
 import minegame159.meteorclient.modules.render.hud.HUD;
 import minegame159.meteorclient.modules.render.hud.HudRenderer;
-import minegame159.meteorclient.utils.ISerializable;
 import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.misc.ISerializable;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.nbt.CompoundTag;
 
 public abstract class HudModule implements ISerializable<HudModule> {
@@ -22,11 +23,14 @@ public abstract class HudModule implements ISerializable<HudModule> {
 
     public final BoundingBox box = new BoundingBox();
 
+    protected final MinecraftClient mc;
+
     public HudModule(HUD hud, String name, String description) {
         this.hud = hud;
         this.name = name;
         this.title = Utils.nameToTitle(name);
         this.description = description;
+        this.mc = MinecraftClient.getInstance();
     }
 
     public abstract void update(HudRenderer renderer);

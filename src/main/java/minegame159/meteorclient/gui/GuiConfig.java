@@ -6,7 +6,12 @@
 package minegame159.meteorclient.gui;
 
 import minegame159.meteorclient.Config;
-import minegame159.meteorclient.utils.*;
+import minegame159.meteorclient.utils.misc.ISerializable;
+import minegame159.meteorclient.utils.misc.NbtUtils;
+import minegame159.meteorclient.utils.misc.Vector2;
+import minegame159.meteorclient.utils.render.AlignmentX;
+import minegame159.meteorclient.utils.render.color.RainbowColorManager;
+import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.nbt.CompoundTag;
 
 import java.util.HashMap;
@@ -19,64 +24,71 @@ public class GuiConfig implements ISerializable<GuiConfig> {
     public double scrollSensitivity = 1;
 
     public AlignmentX moduleNameAlignment = AlignmentX.Center;
+    public double moduleNameAlignmentPadding = 7;
 
-    public Color text = new Color(255, 255, 255);
-    public Color windowHeaderText = new Color(255, 255, 255);
-    public Color loggedInText = new Color(45, 225, 45);
-    public Color accountTypeText = new Color(150, 150, 150);
+    public SettingColor text = createColor(255, 255, 255, 255);
+    public SettingColor windowHeaderText = createColor(255, 255, 255, 255);
+    public SettingColor loggedInText = createColor(45, 225, 45, 255);
+    public SettingColor accountTypeText = createColor(150, 150, 150, 255);
 
-    public Color background = new Color(20, 20, 20, 200);
-    public Color backgroundHovered = new Color(30, 30, 30, 200);
-    public Color backgroundPressed = new Color(40, 40, 40, 200);
+    public SettingColor background = createColor(20, 20, 20, 200);
+    public SettingColor backgroundHovered = createColor(30, 30, 30, 200);
+    public SettingColor backgroundPressed = createColor(40, 40, 40, 200);
 
-    public Color scrollbar = new Color(80, 80, 80, 200);
-    public Color scrollbarHovered = new Color(90, 90, 90, 200);
-    public Color scrollbarPressed = new Color(100, 100, 100, 200);
+    public SettingColor scrollbar = createColor(80, 80, 80, 200);
+    public SettingColor scrollbarHovered = createColor(90, 90, 90, 200);
+    public SettingColor scrollbarPressed = createColor(100, 100, 100, 200);
 
-    public Color outline = new Color(0, 0, 0, 225);
-    public Color outlineHovered = new Color(10, 10, 10, 225);
-    public Color outlinePressed = new Color(20, 20, 20, 225);
+    public SettingColor outline = createColor(0, 0, 0, 225);
+    public SettingColor outlineHovered = createColor(10, 10, 10, 225);
+    public SettingColor outlinePressed = createColor(20, 20, 20, 225);
 
-    public Color checkbox = new Color(45, 225, 45);
-    public Color checkboxPressed = new Color(70, 225, 70);
+    public SettingColor checkbox = createColor(45, 225, 45, 255);
+    public SettingColor checkboxPressed = createColor(70, 225, 70, 255);
 
-    public Color separator = new Color(200, 200, 200, 225);
+    public SettingColor separator = createColor(200, 200, 200, 225);
 
-    public Color plus = new Color(45, 225, 45);
-    public Color plusHovered = new Color(60, 225, 60);
-    public Color plusPressed = new Color(75, 225, 75);
+    public SettingColor plus = createColor(45, 225, 45, 255);
+    public SettingColor plusHovered = createColor(60, 225, 60, 255);
+    public SettingColor plusPressed = createColor(75, 225, 75, 255);
 
-    public Color minus = new Color(225, 45, 45);
-    public Color minusHovered = new Color(225, 60, 60);
-    public Color minusPressed = new Color(225, 75, 75);
+    public SettingColor minus = createColor(225, 45, 45, 255);
+    public SettingColor minusHovered = createColor(225, 60, 60, 255);
+    public SettingColor minusPressed = createColor(225, 75, 75, 255);
 
-    public Color accent = new Color(135, 0, 255);
+    public SettingColor accent = createColor(135, 0, 255, 255);
 
-    public Color moduleBackground = new Color(50, 50, 50);
+    public SettingColor moduleBackground = createColor(50, 50, 50, 255);
 
-    public Color reset = new Color(50, 50, 50);
-    public Color resetHovered = new Color(60, 60, 60);
-    public Color resetPressed = new Color(70, 70, 70);
+    public SettingColor reset = createColor(50, 50, 50, 255);
+    public SettingColor resetHovered = createColor(60, 60, 60, 255);
+    public SettingColor resetPressed = createColor(70, 70, 70, 255);
 
-    public Color sliderLeft = new Color(0, 150, 80);
-    public Color sliderRight = new Color(50, 50, 50);
+    public SettingColor sliderLeft = createColor(0, 150, 80, 255);
+    public SettingColor sliderRight = createColor(50, 50, 50, 255);
 
-    public Color sliderHandle = new Color(0, 255, 180);
-    public Color sliderHandleHovered = new Color(0, 240, 165);
-    public Color sliderHandlePressed = new Color(0, 225, 150);
+    public SettingColor sliderHandle = createColor(0, 255, 180, 255);
+    public SettingColor sliderHandleHovered = createColor(0, 240, 165, 255);
+    public SettingColor sliderHandlePressed = createColor(0, 225, 150, 255);
 
-    public Color colorEditHandle = new Color(70, 70, 70);
-    public Color colorEditHandleHovered = new Color(80, 80, 80);
-    public Color colorEditHandlePressed = new Color(90, 90, 90);
+    public SettingColor colorEditHandle = createColor(70, 70, 70, 255);
+    public SettingColor colorEditHandleHovered = createColor(80, 80, 80, 255);
+    public SettingColor colorEditHandlePressed = createColor(90, 90, 90, 255);
 
-    public Color edit = new Color(50, 50, 50);
-    public Color editHovered = new Color(60, 60, 60);
-    public Color editPressed = new Color(70, 70, 70);
+    public SettingColor edit = createColor(50, 50, 50, 255);
+    public SettingColor editHovered = createColor(60, 60, 60, 255);
+    public SettingColor editPressed = createColor(70, 70, 70, 255);
 
     private Map<WindowType, WindowConfig> windowConfigs = new HashMap<>();
 
     public GuiConfig() {
         INSTANCE = this;
+    }
+    
+    private SettingColor createColor(int r, int g, int b, int a) {
+        SettingColor color = new SettingColor(r, g, b, a);
+        RainbowColorManager.addColor(color);
+        return color;
     }
 
     public WindowConfig getWindowConfig(WindowType type) {

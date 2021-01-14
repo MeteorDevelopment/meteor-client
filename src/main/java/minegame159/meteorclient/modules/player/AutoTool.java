@@ -10,19 +10,19 @@ package minegame159.meteorclient.modules.player;
 import me.zero.alpine.event.EventPriority;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.PostTickEvent;
-import minegame159.meteorclient.events.StartBreakingBlockEvent;
+import minegame159.meteorclient.events.entity.player.StartBreakingBlockEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixin.AxeItemAccessor;
 import minegame159.meteorclient.mixin.HoeItemAccessor;
 import minegame159.meteorclient.mixin.PickaxeItemAccessor;
 import minegame159.meteorclient.mixin.ShovelItemAccessor;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.utils.InvUtils;
+import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -35,7 +35,7 @@ import net.minecraft.screen.slot.SlotActionType;
 import java.util.HashSet;
 import java.util.Set;
 
-public class AutoTool extends ToggleModule {
+public class AutoTool extends Module {
     private static final Set<Material> EMPTY_MATERIALS = new HashSet<>(0);
     private static final Set<Block> EMPTY_BLOCKS = new HashSet<>(0);
 
@@ -54,46 +54,46 @@ public class AutoTool extends ToggleModule {
 
     private final Setting<Prefer> prefer = sgGeneral.add(new EnumSetting.Builder<Prefer>()
             .name("prefer")
-            .description("Prefer silk touch, fortune or none.")
+            .description("Either to prefer Silk Touch, Fortune, or none.")
             .defaultValue(Prefer.Fortune)
             .build()
     );
 
     private final Setting<Boolean> preferMending = sgGeneral.add(new BoolSetting.Builder()
             .name("prefer-mending")
-            .description("Prefers mending.")
+            .description("Whether or not to prefer the Mending enchantment.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> enderChestOnlyWithSilkTouch = sgGeneral.add(new BoolSetting.Builder()
             .name("ender-chest-only-with-silk-touch")
-            .description("Mine ender chest only with silk touch.")
+            .description("Mines Ender Chests only with the Silk Touch enchantment.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> antiBreak = sgGeneral.add(new BoolSetting.Builder()
             .name("anti-break")
-            .description("Stops you from breaking your weapon.")
+            .description("Stops you from breaking your tool.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<materialPreference> material = sgGeneral.add(new EnumSetting.Builder<materialPreference>().name("material-preference")
-            .description("How the AntiBreak decides what to replace your tool with")
+            .description("How the Anti-Break decides what to replenish your tool with.")
             .defaultValue(materialPreference.Best)
             .build()
     );
 
     public AutoTool() {
-        super(Category.Player, "auto-tool", "Automatically switches to the most effective tool when breaking blocks.");
+        super(Category.Player, "auto-tool", "Automatically switches to the most effective tool when performing an action.");
     }
 
     private BlockState blockState = null;
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
         if(mc.player.getMainHandStack().getItem() instanceof ToolItem && antiBreak.get()
                 && (mc.player.getMainHandStack().getItem().getMaxDamage() - mc.player.getMainHandStack().getDamage()) <= 11){
             int slot = -1;
@@ -144,6 +144,8 @@ public class AutoTool extends ToggleModule {
         blockState = mc.world.getBlockState(event.blockPos);
         int bestScore = -1;
         int bestSlot = -1;
+
+        if (blockState.getHardness(mc.world, event.blockPos) < 0) return;
 
         for (int i = 0; i < 9; i++) {
             ItemStack itemStack = mc.player.inventory.getStack(i);

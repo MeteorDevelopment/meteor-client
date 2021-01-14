@@ -9,6 +9,7 @@ import minegame159.meteorclient.gui.GuiConfig;
 import minegame159.meteorclient.gui.renderer.GuiRenderer;
 import minegame159.meteorclient.gui.renderer.Region;
 import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.misc.CursorStyle;
 import org.lwjgl.glfw.GLFW;
 
 public class WWindow extends WTable {
@@ -116,7 +117,7 @@ public class WWindow extends WTable {
         private final String title;
         private final WTriangle triangle;
 
-        private boolean dragging;
+        private boolean dragging, moved;
         private double lastMouseX, lastMouseY;
 
         public WHeader(String title) {
@@ -152,6 +153,7 @@ public class WWindow extends WTable {
                     return true;
                 } else if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
                     dragging = true;
+                    moved = false;
                     return true;
                 }
             }
@@ -162,6 +164,7 @@ public class WWindow extends WTable {
         @Override
         protected boolean onMouseReleased(boolean used, int button) {
             dragging = false;
+            if (!moved && button == GLFW.GLFW_MOUSE_BUTTON_LEFT && !triangle.isOver(lastMouseX, lastMouseY)) onMouseClicked(false, GLFW.GLFW_MOUSE_BUTTON_RIGHT);
             return mouseOver && !used;
         }
 
@@ -175,6 +178,8 @@ public class WWindow extends WTable {
                 mY = WWindow.this.y;
 
                 if (action != null) action.run();
+
+                moved = true;
             }
 
             lastMouseX = mouseX;
@@ -183,6 +188,8 @@ public class WWindow extends WTable {
 
         @Override
         protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
+            if (mouseOver) renderer.setCursorStyle(CursorStyle.Click);
+
             renderer.quad(Region.FULL, x, y, width, height, GuiConfig.INSTANCE.accent);
 
             if (expanded) animationProgress += delta / 4;

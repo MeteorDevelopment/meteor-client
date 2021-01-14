@@ -15,6 +15,8 @@ import minegame159.meteorclient.gui.widgets.WTextBox;
 import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.rendering.Matrices;
 import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.misc.CursorStyle;
+import minegame159.meteorclient.utils.misc.input.Input;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
@@ -115,7 +117,7 @@ public abstract class WidgetScreen extends Screen implements Listenable {
     public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
         if (locked) return false;
 
-        if (modifiers == GLFW.GLFW_MOD_CONTROL && keyCode == GLFW.GLFW_KEY_9) {
+        if ((modifiers == GLFW.GLFW_MOD_CONTROL || modifiers == GLFW.GLFW_MOD_SUPER) && keyCode == GLFW.GLFW_KEY_9) {
             renderDebug = !renderDebug;
             return true;
         }
@@ -165,6 +167,8 @@ public abstract class WidgetScreen extends Screen implements Listenable {
     @Override
     public void onClose() {
         if (locked) return;
+
+        Input.setCursorStyle(CursorStyle.Default);
 
         MeteorClient.EVENT_BUS.unsubscribe(this);
         GuiKeyEvents.postKeyEvents = prePostKeyEvents;

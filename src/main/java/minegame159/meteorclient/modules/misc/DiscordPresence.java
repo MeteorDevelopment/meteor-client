@@ -5,22 +5,119 @@
 
 package minegame159.meteorclient.modules.misc;
 
-//Created by squidoodly 12/05/2020
+//Created by squidoodly
 
+import club.minnced.discord.rpc.DiscordEventHandlers;
+import club.minnced.discord.rpc.DiscordRPC;
+import club.minnced.discord.rpc.DiscordRichPresence;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.PostTickEvent;
+import minegame159.meteorclient.Config;
+import minegame159.meteorclient.MeteorClient;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
-import minegame159.meteorclient.settings.BoolSetting;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.settings.StringSetting;
 import minegame159.meteorclient.utils.Utils;
-import net.arikia.dev.drpc.DiscordEventHandlers;
-import net.arikia.dev.drpc.DiscordRPC;
-import net.arikia.dev.drpc.DiscordRichPresence;
 
-public class DiscordPresence extends ToggleModule {
+public class DiscordPresence extends Module {
+
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+
+    private final Setting<String> line1 = sgGeneral.add(new StringSetting.Builder()
+            .name("line-1")
+            .description("The text it displays on line 1 of the RPC.")
+            .defaultValue("{player} || {server}")
+            .onChanged(booleanSetting -> updateDetails())
+            .build()
+    );
+
+    private final Setting<String> line2 = sgGeneral.add(new StringSetting.Builder()
+            .name("line-2")
+            .description("The text it displays on line 2 of the RPC.")
+            .defaultValue("Meteor on Crack!")
+            .onChanged(booleanSetting -> updateDetails())
+            .build()
+    );
+
+    public DiscordPresence() {
+        super(Category.Misc, "discord-presence", "Displays a RPC for you on Discord to show that you're playing Meteor Client!");
+    }
+
+    private static final DiscordRichPresence rpc = new DiscordRichPresence();
+    private static final DiscordRPC instance = DiscordRPC.INSTANCE;
+    private SmallImage currentSmallImage;
+    private int ticks;
+
+    @Override
+    public void onActivate() {
+        DiscordEventHandlers eventHandlers = new DiscordEventHandlers();
+        eventHandlers.disconnected = ((var1, var2) -> MeteorClient.LOG.info("Discord RPC disconnected, var1: " + var1 + ", var2: " + var2));
+
+        instance.Discord_Initialize("709793491911180378", eventHandlers, true, null);
+
+        rpc.startTimestamp = System.currentTimeMillis() / 1000L;
+        rpc.largeImageKey = "meteor_client";
+
+        String largeText = "Meteor Client " + Config.INSTANCE.version.getOriginalString();
+        if (!Config.INSTANCE.devBuild.isEmpty()) largeText += " Dev Build: " + Config.INSTANCE.devBuild;
+
+        rpc.largeImageText = largeText;
+        rpc.details = getLine(line1);
+        rpc.state = getLine(line2);
+        currentSmallImage = SmallImage.MineGame;
+
+        instance.Discord_UpdatePresence(rpc);
+    }
+
+    @Override
+    public void onDeactivate() {
+        instance.Discord_Shutdown();
+        instance.Discord_ClearPresence();
+    }
+
+    @EventHandler
+    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+        if (!Utils.canUpdate()) return;
+        ticks++;
+
+        if (ticks >= 200) {
+            currentSmallImage = currentSmallImage.next();
+            currentSmallImage.apply();
+            instance.Discord_UpdatePresence(rpc);
+
+            ticks = 0;
+        }
+
+        instance.Discord_RunCallbacks();
+
+        updateDetails();
+    });
+
+    private String getLine(Setting<String> line) {
+        if (line.get().length() > 0) return line.get().replace("{player}", getName()).replace("{server}", getServer());
+        else return null;
+    }
+
+    private String getServer(){
+        if (mc.isInSingleplayer()) return "SinglePlayer";
+        else return Utils.getWorldName();
+    }
+
+    private String getName(){
+        return mc.player.getGameProfile().getName();
+    }
+
+    private void updateDetails() {
+        if (isActive() && mc.player != null && mc.world != null) {
+            rpc.details = getLine(line1);
+            rpc.state = getLine(line2);
+            instance.Discord_UpdatePresence(rpc);
+        }
+    }
+
     private enum SmallImage {
         MineGame("minegame", "MineGame159"),
         Squid("squidoodly", "squidoodly");
@@ -32,116 +129,14 @@ public class DiscordPresence extends ToggleModule {
             this.text = text;
         }
 
-        void apply(DiscordRichPresence presence) {
-            presence.smallImageKey = key;
-            presence.smallImageText = text;
+        void apply() {
+            rpc.smallImageKey = key;
+            rpc.smallImageText = text;
         }
 
         SmallImage next() {
             if (this == MineGame) return Squid;
             return MineGame;
         }
-    }
-
-    private final SettingGroup sgGeneral = settings.getDefaultGroup();
-
-    private final Setting<Boolean> displayName = sgGeneral.add(new BoolSetting.Builder()
-            .name("display-name")
-            .description("Displays your name in discord rpc.")
-            .defaultValue(true)
-            .onChanged(booleanSetting -> updateDetails())
-            .build()
-    );
-
-    private final Setting<Boolean> displayServer = sgGeneral.add(new BoolSetting.Builder()
-            .name("display-server")
-            .description("Displays the server you are in.")
-            .defaultValue(true)
-            .onChanged(booleanSetting -> updateDetails())
-            .build()
-    );
-
-    private final DiscordRichPresence presence = new DiscordRichPresence();
-    private boolean ready;
-
-    private int ticks;
-    private SmallImage currentSmallImage;
-
-    public DiscordPresence() {
-        super(Category.Misc, "discord-presence", "That stuff you see in discord");
-    }
-
-    @Override
-    public void onActivate(){
-        ticks = 0;
-        currentSmallImage = SmallImage.MineGame;
-
-        DiscordRPC.discordInitialize("709793491911180378", new DiscordEventHandlers.Builder()
-                .setReadyEventHandler(user -> {
-                    ready = true;
-
-                    presence.startTimestamp = System.currentTimeMillis();
-                    presence.details = getText();
-                    presence.largeImageKey = "meteor_client";
-                    presence.largeImageText = "https://meteorclient.com/";
-                    currentSmallImage.apply(presence);
-
-                    DiscordRPC.discordUpdatePresence(presence);
-                })
-                .setDisconnectedEventHandler((errorCode, message) -> ready = false)
-                .setErroredEventHandler((errorCode, message) -> ready = false)
-                .build(), false);
-    }
-
-    @Override
-    public void onDeactivate(){
-        DiscordRPC.discordShutdown();
-    }
-
-    @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
-        if (!Utils.canUpdate()) return;
-
-        if (ready) {
-            ticks++;
-
-            if (ticks >= 200) {
-                currentSmallImage = currentSmallImage.next();
-                currentSmallImage.apply(presence);
-                DiscordRPC.discordUpdatePresence(presence);
-
-                ticks = 0;
-            }
-        }
-
-        DiscordRPC.discordRunCallbacks();
-    });
-
-    private void updateDetails() {
-        if (isActive()) {
-            presence.details = getText();
-            if (ready) DiscordRPC.discordUpdatePresence(presence);
-        }
-    }
-
-    private String getText() {
-        if (mc.isInSingleplayer()) {
-            if (displayName.get()) return getName() + " || SinglePlayer";
-            else return "SinglePlayer";
-        }
-
-        if (displayName.get() && displayServer.get()) return getName() + " || " + getServer();
-        else if (!displayName.get() && displayServer.get()) return getServer();
-        else if (displayName.get() && !displayServer.get()) return getName();
-
-        return "";
-    }
-
-    private String getServer(){
-        return Utils.getWorldName();
-    }
-
-    private String getName(){
-        return mc.player.getEntityName();
     }
 }

@@ -9,13 +9,13 @@ package minegame159.meteorclient.modules.combat;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.PostTickEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.InvUtils;
-import minegame159.meteorclient.utils.PlayerUtils;
 import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.player.InvUtils;
+import minegame159.meteorclient.utils.player.PlayerUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.gui.screen.ingame.Generic3x3ContainerScreen;
@@ -37,21 +37,21 @@ import java.util.Iterator;
 import java.util.List;
 
 
-public class Auto32K extends ToggleModule {
+public class Auto32K extends Module {
     public enum Mode{
         Hopper,
         Dispenser
     }
 
-    public Auto32K(){super(Category.Combat, "auto32k", "Does 32k PvP for you.");}
+    public Auto32K(){super(Category.Combat, "auto32k", "Automatically attacks other players with a 32k weapon.");}
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("mode")
-            .description("The bypass used.")
-            .defaultValue(Mode.Dispenser
-            ).build()
+            .description("The bypass mode used.")
+            .defaultValue(Mode.Dispenser)
+            .build()
     );
 
     private final Setting<Double> placeRange = sgGeneral.add(new DoubleSetting.Builder()
@@ -65,21 +65,21 @@ public class Auto32K extends ToggleModule {
 
     private final Setting<Boolean> fillHopper = sgGeneral.add(new BoolSetting.Builder()
             .name("fill-hopper")
-            .description("Fills all but one slot of the hopper.")
+            .description("Fills all slots of the hopper except one for the 32k.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<List<Block>> throwawayItems = sgGeneral.add(new BlockListSetting.Builder()
             .name("throwaway-blocks")
-            .description("Acceptable blocks to use to fill the hopper")
+            .description("Whitelisted blocks to use to fill the hopper.")
             .defaultValue(setDefaultBlocks())
             .build()
     );
 
     private final Setting<Boolean> autoMove = sgGeneral.add(new BoolSetting.Builder()
             .name("auto-move")
-            .description("Moves the sword for you")
+            .description("Moves the sword for you.")
             .defaultValue(true)
             .build()
     );
@@ -100,7 +100,7 @@ public class Auto32K extends ToggleModule {
     }
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
         if(phase <= 7) {
             if (mode.get() == Mode.Hopper) {
                 int shulkerSlot = InvUtils.findItemWithCount(Items.SHULKER_BOX).slot;
@@ -142,7 +142,7 @@ public class Auto32K extends ToggleModule {
                     mc.player.inventory.selectedSlot = hopperSlot;
                     if(bestBlock == null) return;
                     if (!PlayerUtils.placeBlock(bestBlock.add(x, 0, z), Hand.MAIN_HAND)) {
-                        Utils.sendMessage("#redFailed to place");
+                        Utils.sendMessage("#redFailed to place.");
                         this.toggle();
                         return;
                     }

@@ -14,10 +14,10 @@ public interface IVec3d {
     default void set(Vec3d vec) {
         set(vec.x, vec.y, vec.z);
     }
-
     default void set(Vec3i vec) {
         set(vec.getX(), vec.getY(), vec.getZ());
     }
+    void setXZ(double x, double z);
 
     void setY(double y);
 }

@@ -9,20 +9,20 @@ package minegame159.meteorclient.modules.combat;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.AttackEntityEvent;
+import minegame159.meteorclient.events.entity.player.AttackEntityEvent;
 import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.modules.ToggleModule;
 import net.minecraft.entity.player.PlayerEntity;
 
-public class AntiFriendHit extends ToggleModule {
+public class AntiFriendHit extends Module {
     public AntiFriendHit() {
-        super(Category.Combat, "anti-friend-hit", "Cancels attacks that hit friends");
+        super(Category.Combat, "anti-friend-hit", "Cancels out attacks that would hit friends.");
     }
 
     @EventHandler
     private final Listener<AttackEntityEvent> onAttackEntity = new Listener<>(event -> {
-        if (event.entity instanceof PlayerEntity &&  ModuleManager.INSTANCE.get(AntiFriendHit.class).isActive() && !FriendManager.INSTANCE.attack((PlayerEntity) event.entity)) event.cancel();
+        if (event.entity instanceof PlayerEntity && ModuleManager.INSTANCE.get(AntiFriendHit.class).isActive() && !FriendManager.INSTANCE.attack((PlayerEntity) event.entity)) event.cancel();
     });
 }

@@ -9,7 +9,6 @@ import minegame159.meteorclient.gui.screens.settings.ModuleListSettingScreen;
 import minegame159.meteorclient.gui.widgets.WButton;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.modules.ToggleModule;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -20,8 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class ModuleListSetting extends Setting<List<ToggleModule>> {
-    public ModuleListSetting(String name, String description, List<ToggleModule> defaultValue, Consumer<List<ToggleModule>> onChanged, Consumer<Setting<List<ToggleModule>>> onModuleActivated) {
+public class ModuleListSetting extends Setting<List<Module>> {
+    public ModuleListSetting(String name, String description, List<Module> defaultValue, Consumer<List<Module>> onChanged, Consumer<Setting<List<Module>>> onModuleActivated) {
         super(name, description, defaultValue, onChanged, onModuleActivated);
 
         value = new ArrayList<>(defaultValue);
@@ -40,14 +39,14 @@ public class ModuleListSetting extends Setting<List<ToggleModule>> {
     }
 
     @Override
-    protected List<ToggleModule> parseImpl(String str) {
+    protected List<Module> parseImpl(String str) {
         String[] values = str.split(",");
-        List<ToggleModule> modules = new ArrayList<>(1);
+        List<Module> modules = new ArrayList<>(1);
 
         try {
             for (String value : values) {
                 Module module = ModuleManager.INSTANCE.get(value.trim());
-                if (module instanceof ToggleModule) modules.add((ToggleModule) module);
+                if (module != null) modules.add(module);
             }
         } catch (Exception ignored) {}
 
@@ -60,7 +59,7 @@ public class ModuleListSetting extends Setting<List<ToggleModule>> {
     }
 
     @Override
-    protected boolean isValueValid(List<ToggleModule> value) {
+    protected boolean isValueValid(List<Module> value) {
         return true;
     }
 
@@ -74,20 +73,20 @@ public class ModuleListSetting extends Setting<List<ToggleModule>> {
         CompoundTag tag = saveGeneral();
 
         ListTag modulesTag = new ListTag();
-        for (ToggleModule module : get()) modulesTag.add(StringTag.of(module.name));
+        for (Module module : get()) modulesTag.add(StringTag.of(module.name));
         tag.put("modules", modulesTag);
 
         return tag;
     }
 
     @Override
-    public List<ToggleModule> fromTag(CompoundTag tag) {
+    public List<Module> fromTag(CompoundTag tag) {
         get().clear();
 
         ListTag valueTag = tag.getList("modules", 8);
         for (Tag tagI : valueTag) {
             Module module = ModuleManager.INSTANCE.get(tagI.asString());
-            if (module instanceof ToggleModule) get().add((ToggleModule) module);
+            if (module != null) get().add(module);
         }
 
         changed();
@@ -96,9 +95,9 @@ public class ModuleListSetting extends Setting<List<ToggleModule>> {
 
     public static class Builder {
         private String name = "undefined", description = "";
-        private List<ToggleModule> defaultValue;
-        private Consumer<List<ToggleModule>> onChanged;
-        private Consumer<Setting<List<ToggleModule>>> onModuleActivated;
+        private List<Module> defaultValue;
+        private Consumer<List<Module>> onChanged;
+        private Consumer<Setting<List<Module>>> onModuleActivated;
 
         public Builder name(String name) {
             this.name = name;
@@ -110,17 +109,17 @@ public class ModuleListSetting extends Setting<List<ToggleModule>> {
             return this;
         }
 
-        public Builder defaultValue(List<ToggleModule> defaultValue) {
+        public Builder defaultValue(List<Module> defaultValue) {
             this.defaultValue = defaultValue;
             return this;
         }
 
-        public Builder onChanged(Consumer<List<ToggleModule>> onChanged) {
+        public Builder onChanged(Consumer<List<Module>> onChanged) {
             this.onChanged = onChanged;
             return this;
         }
 
-        public Builder onModuleActivated(Consumer<Setting<List<ToggleModule>>> onModuleActivated) {
+        public Builder onModuleActivated(Consumer<Setting<List<Module>>> onModuleActivated) {
             this.onModuleActivated = onModuleActivated;
             return this;
         }

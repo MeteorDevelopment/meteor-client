@@ -5,17 +5,17 @@
 
 package minegame159.meteorclient.mixin;
 
+import baritone.api.BaritoneAPI;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import minegame159.meteorclient.Config;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.commands.CommandManager;
-import minegame159.meteorclient.events.EventStore;
-import minegame159.meteorclient.events.SendMessageEvent;
+import minegame159.meteorclient.events.entity.player.SendMessageEvent;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.movement.NoSlow;
 import minegame159.meteorclient.modules.movement.Scaffold;
 import minegame159.meteorclient.modules.player.Portals;
-import minegame159.meteorclient.utils.Chat;
+import minegame159.meteorclient.utils.player.Chat;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
@@ -41,8 +41,8 @@ public abstract class ClientPlayerEntityMixin {
     private void onSendChatMessage(String msg, CallbackInfo info) {
         if (ignoreChatMessage) return;
 
-        if (!msg.startsWith(Config.INSTANCE.getPrefix()) && !msg.startsWith("/")) {
-            SendMessageEvent event = EventStore.sendMessageEvent(msg);
+        if (!msg.startsWith(Config.INSTANCE.getPrefix()) && !msg.startsWith("/") && msg.startsWith(BaritoneAPI.getSettings().prefix.value)) {
+            SendMessageEvent event = SendMessageEvent.get(msg);
             MeteorClient.EVENT_BUS.post(event);
 
             ignoreChatMessage = true;

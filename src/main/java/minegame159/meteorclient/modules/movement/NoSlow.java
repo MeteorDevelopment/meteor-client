@@ -6,44 +6,44 @@
 package minegame159.meteorclient.modules.movement;
 
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 
-public class NoSlow extends ToggleModule {
+public class NoSlow extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Boolean> items = sgGeneral.add(new BoolSetting.Builder()
             .name("items")
-            .description("No slow from using items.")
+            .description("Whether or not using items will slow you.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> web = sgGeneral.add(new BoolSetting.Builder()
             .name("web")
-            .description("No slow from cob webs.")
+            .description("Whether or not cobwebs will slow you.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> soulSand = sgGeneral.add(new BoolSetting.Builder()
             .name("soul-sand")
-            .description("No slow from soul sand.")
+            .description("Whether or not Soul Sand will slow you.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> slimeBlock = sgGeneral.add(new BoolSetting.Builder()
             .name("slime-block")
-            .description("No slow from slime blocks.")
+            .description("Whether or not slime blocks will slow you.")
             .defaultValue(true)
             .build()
     );
 
     public NoSlow() {
-        super(Category.Movement, "no-slow", "Allows you to move normally while eating, using items, etc.");
+        super(Category.Movement, "no-slow", "Allows you to move normally when using objects that will slow you.");
     }
 
     public boolean items() {

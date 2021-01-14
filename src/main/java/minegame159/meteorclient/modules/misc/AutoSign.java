@@ -7,20 +7,20 @@ package minegame159.meteorclient.modules.misc;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.OpenScreenEvent;
-import minegame159.meteorclient.events.packets.SendPacketEvent;
+import minegame159.meteorclient.events.game.OpenScreenEvent;
+import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.mixininterface.ISignEditScreen;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import net.minecraft.block.entity.SignBlockEntity;
 import net.minecraft.client.gui.screen.ingame.SignEditScreen;
 import net.minecraft.network.packet.c2s.play.UpdateSignC2SPacket;
 
-public class AutoSign extends ToggleModule {
+public class AutoSign extends Module {
     private String[] text;
 
     public AutoSign() {
-        super(Category.Misc, "auto-sign", "Automatically writes signs. When enabled first sign's text will be used.");
+        super(Category.Misc, "auto-sign", "Automatically writes signs. The first sign's text will be used.");
     }
 
     @Override
@@ -29,7 +29,7 @@ public class AutoSign extends ToggleModule {
     }
 
     @EventHandler
-    private final Listener<SendPacketEvent> onSendPacket = new Listener<>(event -> {
+    private final Listener<PacketEvent.Send> onSendPacket = new Listener<>(event -> {
         if (!(event.packet instanceof UpdateSignC2SPacket)) return;
 
         text = ((UpdateSignC2SPacket) event.packet).getText();

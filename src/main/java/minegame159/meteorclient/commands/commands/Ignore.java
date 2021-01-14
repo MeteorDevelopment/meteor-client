@@ -11,7 +11,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.commands.Command;
-import minegame159.meteorclient.utils.Chat;
+import minegame159.meteorclient.utils.player.Chat;
 import net.minecraft.command.CommandSource;
 
 import java.io.*;

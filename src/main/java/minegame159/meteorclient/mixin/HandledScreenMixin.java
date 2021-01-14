@@ -7,10 +7,11 @@ package minegame159.meteorclient.mixin;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.modules.misc.EChestPreview;
-import minegame159.meteorclient.utils.EChestMemory;
-import minegame159.meteorclient.utils.KeyBinds;
+import minegame159.meteorclient.modules.render.EChestPreview;
+import minegame159.meteorclient.modules.render.ShulkerPeek;
 import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.misc.input.KeyBinds;
+import minegame159.meteorclient.utils.player.EChestMemory;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.screen.Screen;
@@ -42,7 +43,8 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
 
     @Shadow protected int x;
     @Shadow protected int y;
-    private static final Identifier TEXTURE = new Identifier("meteor-client", "container_3x9.png");
+    private static final Identifier LIGHT = new Identifier("meteor-client", "container_3x9.png");
+    private static final Identifier DARK = new Identifier("meteor-client", "container_3x9-dark.png");
     private static MinecraftClient mc;
 
     public HandledScreenMixin(Text title) {
@@ -58,7 +60,9 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
     private void onRender(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo info) {
         if (focusedSlot != null && !focusedSlot.getStack().isEmpty()) {
             // Shulker Preview
-            if (Utils.isShulker(focusedSlot.getStack().getItem()) && KeyBinds.SHULKER_PEEK.isPressed()) {
+            if (ModuleManager.INSTANCE.isActive(ShulkerPeek.class) && Utils.isShulker(focusedSlot.getStack().getItem())
+                    && ((KeyBinds.SHULKER_PEEK.isPressed() && ModuleManager.INSTANCE.get(ShulkerPeek.class).mode.get() == ShulkerPeek.Mode.Tooltip)
+                    || (ModuleManager.INSTANCE.get(ShulkerPeek.class).mode.get() == ShulkerPeek.Mode.Always))) {
                 CompoundTag compoundTag = focusedSlot.getStack().getSubTag("BlockEntityTag");
                 if (compoundTag != null) {
                     if (compoundTag.contains("Items", 9)) {
@@ -80,7 +84,9 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
     @Inject(method = "drawMouseoverTooltip", at = @At("HEAD"), cancellable = true)
     private void onDrawMouseoverTooltip(MatrixStack matrices, int x, int y, CallbackInfo info) {
         if (focusedSlot != null && !focusedSlot.getStack().isEmpty()) {
-            if (Utils.isShulker(focusedSlot.getStack().getItem()) && KeyBinds.SHULKER_PEEK.isPressed()) info.cancel();
+            if (ModuleManager.INSTANCE.isActive(ShulkerPeek.class) && Utils.isShulker(focusedSlot.getStack().getItem())
+                    && ((KeyBinds.SHULKER_PEEK.isPressed() && ModuleManager.INSTANCE.get(ShulkerPeek.class).mode.get() == ShulkerPeek.Mode.Tooltip)
+                    || (ModuleManager.INSTANCE.get(ShulkerPeek.class).mode.get() == ShulkerPeek.Mode.Always))) info.cancel();
             else if (focusedSlot.getStack().getItem() == Items.ENDER_CHEST && ModuleManager.INSTANCE.isActive(EChestPreview.class)) info.cancel();
         }
     }
@@ -116,10 +122,9 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
 
     private void drawBackground(MatrixStack matrices, int x, int y) {
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        mc.getTextureManager().bindTexture(TEXTURE);
+        mc.getTextureManager().bindTexture(ModuleManager.INSTANCE.get(ShulkerPeek.class).bgMode.get() == ShulkerPeek.BackgroundMode.Light ? LIGHT : DARK);
         int width = 176;
         int height = 67;
         DrawableHelper.drawTexture(matrices, x, y, 0, 0, 0, width, height, height, width);
     }
-
 }

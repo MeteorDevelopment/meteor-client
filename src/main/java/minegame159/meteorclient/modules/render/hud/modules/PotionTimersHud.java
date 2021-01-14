@@ -7,8 +7,7 @@ package minegame159.meteorclient.modules.render.hud.modules;
 
 import minegame159.meteorclient.modules.render.hud.HUD;
 import minegame159.meteorclient.modules.render.hud.HudRenderer;
-import minegame159.meteorclient.utils.Color;
-import net.minecraft.client.MinecraftClient;
+import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffectUtil;
@@ -17,12 +16,11 @@ public class PotionTimersHud extends HudModule {
     private final Color color = new Color();
 
     public PotionTimersHud(HUD hud) {
-        super(hud, "potion-timers", "Displays potion effects with timers.");
+        super(hud, "potion-timers", "Displays active potion effects with timers.");
     }
 
     @Override
     public void update(HudRenderer renderer) {
-        MinecraftClient mc = MinecraftClient.getInstance();
         if (mc.player == null) {
             box.setSize(renderer.textWidth("Potion Timers 0:00"), renderer.textHeight());
             return;
@@ -48,7 +46,6 @@ public class PotionTimersHud extends HudModule {
         double x = box.getX();
         double y = box.getY();
 
-        MinecraftClient mc = MinecraftClient.getInstance();
         if (mc.player == null) {
             renderer.text("Potion Timers 0:00", x, y, color);
             return;

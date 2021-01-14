@@ -9,7 +9,7 @@ import minegame159.meteorclient.accounts.Account;
 import minegame159.meteorclient.accounts.AccountManager;
 import minegame159.meteorclient.gui.GuiConfig;
 import minegame159.meteorclient.gui.widgets.*;
-import minegame159.meteorclient.utils.MeteorExecutor;
+import minegame159.meteorclient.utils.network.MeteorExecutor;
 import net.minecraft.client.MinecraftClient;
 
 public class WAccount extends WTable {

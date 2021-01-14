@@ -10,7 +10,6 @@ import minegame159.meteorclient.gui.GuiConfig;
 import minegame159.meteorclient.gui.renderer.GuiRenderer;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.DiffuseLighting;
-import net.minecraft.client.util.Window;
 import net.minecraft.item.ItemStack;
 
 public class WItem extends WWidget {

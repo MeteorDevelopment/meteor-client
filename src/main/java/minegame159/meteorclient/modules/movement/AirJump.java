@@ -7,34 +7,34 @@ package minegame159.meteorclient.modules.movement;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.KeyEvent;
-import minegame159.meteorclient.events.PostTickEvent;
+import minegame159.meteorclient.events.meteor.KeyEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.modules.render.Freecam;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.utils.KeyAction;
+import minegame159.meteorclient.utils.misc.input.KeyAction;
 
-public class AirJump extends ToggleModule {
+public class AirJump extends Module {
     public AirJump() {
-        super(Category.Movement, "air-jump", "Lets you jump in air.");
+        super(Category.Movement, "air-jump", "Lets you jump in the air.");
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Boolean> maintainY = sgGeneral.add(new BoolSetting.Builder()
             .name("maintain-level")
-            .description("Maintains your Y level")
+            .description("Maintains your current Y level.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> onHold = sgGeneral.add(new BoolSetting.Builder()
             .name("on-hold")
-            .description("Whether to jump when you hold jump as well as when you press.")
+            .description("Whether or not to air jump if you hold down the space bar.")
             .defaultValue(true)
             .build()
     );
@@ -54,7 +54,7 @@ public class AirJump extends ToggleModule {
     });
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
         if (ModuleManager.INSTANCE.isActive(Freecam.class)) return;
         if (maintainY.get() && mc.player.getBlockPos().getY() == level){
             mc.player.jump();

@@ -6,14 +6,13 @@
 package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.CharTypedEvent;
-import minegame159.meteorclient.events.EventStore;
-import minegame159.meteorclient.events.KeyEvent;
+import minegame159.meteorclient.events.meteor.CharTypedEvent;
+import minegame159.meteorclient.events.meteor.KeyEvent;
 import minegame159.meteorclient.gui.GuiKeyEvents;
 import minegame159.meteorclient.gui.WidgetScreen;
-import minegame159.meteorclient.utils.Input;
-import minegame159.meteorclient.utils.KeyAction;
 import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.misc.input.Input;
+import minegame159.meteorclient.utils.misc.input.KeyAction;
 import net.minecraft.client.Keyboard;
 import net.minecraft.client.MinecraftClient;
 import org.lwjgl.glfw.GLFW;
@@ -38,7 +37,7 @@ public abstract class KeyboardMixin {
             if (GuiKeyEvents.postKeyEvents()) {
                 Input.setKeyState(key, i != GLFW.GLFW_RELEASE);
 
-                KeyEvent event = EventStore.keyEvent(key, KeyAction.get(i));
+                KeyEvent event = KeyEvent.get(key, KeyAction.get(i));
                 MeteorClient.EVENT_BUS.post(event);
 
                 if (event.isCancelled()) info.cancel();
@@ -49,7 +48,7 @@ public abstract class KeyboardMixin {
     @Inject(method = "onChar", at = @At("HEAD"), cancellable = true)
     private void onChar(long window, int i, int j, CallbackInfo info) {
         if (Utils.canUpdate() && !client.isPaused() && (client.currentScreen == null || client.currentScreen instanceof WidgetScreen)) {
-            CharTypedEvent event = EventStore.charTypedEvent((char) i);
+            CharTypedEvent event = CharTypedEvent.get((char) i);
             MeteorClient.EVENT_BUS.post(event);
 
             if (event.isCancelled()) info.cancel();

@@ -1,7 +1,7 @@
 import java.util.jar.JarFile
 
 plugins {
-	id 'fabric-loom' version '0.4-SNAPSHOT'
+	id 'fabric-loom' version '0.5-SNAPSHOT'
 	id 'maven-publish'
 	id 'com.github.johnrengelman.shadow' version '6.0.0'
 }
@@ -19,6 +19,7 @@ minecraft {
 
 repositories {
 	maven { url "https://jitpack.io" }
+	jcenter()
 }
 
 dependencies {
@@ -45,8 +46,11 @@ dependencies {
 	include "com.gitlab.CDAGaming:fabritone:fabritone~1.16.x-Fabric-SNAPSHOT"
 
 	dependency "com.github.ZeroMemes:Alpine:1.9"
-	dependency "com.github.Vatuu:discord-rpc:1.6.2"
-	dependency "com.g00fy2:versioncompare:1.3.4"
+	dependency 'com.g00fy2:versioncompare:1.3.7'
+	dependency "org.joml:joml:1.10.0"
+
+	implementation 'com.github.minndevelopment:java-discordrpc:2.0.2'
+	shadow "club.minnced:java-discord-rpc:2.0.2"
 }
 
 shadowJar {
@@ -106,8 +110,8 @@ task generatePacketUtils() {
 		}
 
 		// Generate PacketUtils.java
-		def writer = new File("src/main/java/minegame159/meteorclient/utils/PacketUtils.java").newWriter()
-		writer << "package minegame159.meteorclient.utils;\n\n"
+		def writer = new File("src/main/java/minegame159/meteorclient/utils/network/PacketUtils.java").newWriter()
+		writer << "package minegame159.meteorclient.utils.network;\n\n"
 
 		//   Write imports
 		writer << "import net.minecraft.network.Packet;\n"
@@ -177,4 +181,19 @@ jar {
 remapJar {
 	dependsOn shadowJar
 	input.set(shadowJar.archiveFile)
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            artifact ("${project.buildDir.absolutePath}/libs/${archivesBaseName}-${project.version}.jar") {
+                classifier null
+                builtBy remapJar
+            }
+
+            artifact(sourcesJar) {
+                builtBy remapSourcesJar
+            }
+        }
+    }
 }

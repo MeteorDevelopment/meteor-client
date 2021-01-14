@@ -7,19 +7,19 @@ package minegame159.meteorclient.modules.movement;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.PostTickEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 
-public class AutoSprint extends ToggleModule {
+public class AutoSprint extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Boolean> permanent = sgGeneral.add(new BoolSetting.Builder()
-            .name("permanent"
-            ).description("Keeps you sprinting even when you aren't moving.")
+            .name("permanent")
+            .description("Makes you still sprint even if you do not move.")
             .defaultValue(true)
             .build()
     );
@@ -34,7 +34,7 @@ public class AutoSprint extends ToggleModule {
     }
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
     	if(mc.player.forwardSpeed > 0 && !permanent.get()) {
             mc.player.setSprinting(true);
     	} else if (permanent.get()) {

@@ -8,18 +8,18 @@ package minegame159.meteorclient.modules.movement;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.PlayerMoveEvent;
-import minegame159.meteorclient.events.PostTickEvent;
+import minegame159.meteorclient.events.entity.player.PlayerMoveEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.modules.player.ChestSwap;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.Chat;
-import minegame159.meteorclient.utils.InvUtils;
 import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.player.Chat;
+import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.ElytraItem;
 import net.minecraft.item.ItemStack;
@@ -29,7 +29,7 @@ import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.math.Vec3d;
 
-public class ElytraPlus extends ToggleModule {
+public class ElytraPlus extends Module {
     public enum Mode {
         Normal,
         Packet
@@ -61,14 +61,14 @@ public class ElytraPlus extends ToggleModule {
 
     private final Setting<Boolean> replace = sgGeneral.add(new BoolSetting.Builder()
             .name("elytra-replace")
-            .description("Replaces your broken elytra with new ones")
+            .description("Replaces broken elytra with a new elytra.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Integer> replaceDurability = sgGeneral.add(new IntSetting.Builder()
             .name("replace-durability")
-            .description("The durability to replace your elytra at")
+            .description("The durability threshold your elytra will be replaced at.")
             .defaultValue(2)
             .min(1)
             .max(Items.ELYTRA.getMaxDamage() - 1)
@@ -86,7 +86,7 @@ public class ElytraPlus extends ToggleModule {
 
     private final Setting<Double> horizontalSpeed = sgGeneral.add(new DoubleSetting.Builder()
             .name("horizontal-speed")
-            .description("How fast will you go forward and backward.")
+            .description("How fast you go forward and backward.")
             .defaultValue(1)
             .min(0)
             .build()
@@ -94,7 +94,7 @@ public class ElytraPlus extends ToggleModule {
 
     private final Setting<Double> verticalSpeed = sgGeneral.add(new DoubleSetting.Builder()
             .name("vertical-speed")
-            .description("How fast will u go up and down.")
+            .description("How fast you go up and down.")
             .defaultValue(1)
             .min(0)
             .build()
@@ -109,7 +109,7 @@ public class ElytraPlus extends ToggleModule {
 
     private final Setting<Boolean> dontGoIntoUnloadedChunks = sgGeneral.add(new BoolSetting.Builder()
             .name("don't-go-into-unloaded-chunks")
-            .description("Don't go into unloaded chunks.")
+            .description("Stops you from going into unloaded chunks.")
             .defaultValue(true)
             .build()
     );
@@ -134,7 +134,7 @@ public class ElytraPlus extends ToggleModule {
 
     private final Setting<Double> autopilotMinimumHeight = sgAutopilot.add(new DoubleSetting.Builder()
             .name("minimum-height")
-            .description("Autopilot minimum height.")
+            .description("The minimum height for autopilot.")
             .defaultValue(160)
             .min(0)
             .sliderMax(260)
@@ -154,7 +154,7 @@ public class ElytraPlus extends ToggleModule {
     private boolean lastForwardPressed;
 
     public ElytraPlus() {
-        super(Category.Movement, "Elytra+", "Makes elytra better.");
+        super(Category.Movement, "Elytra+", "Gives you more control over your elytra.");
     }
 
     @Override
@@ -219,7 +219,7 @@ public class ElytraPlus extends ToggleModule {
     });
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
         if (decrementFireworkTimer) {
             if (fireworkTimer <= 0) decrementFireworkTimer = false;
 

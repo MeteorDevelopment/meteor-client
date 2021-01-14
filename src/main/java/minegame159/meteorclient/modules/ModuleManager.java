@@ -11,21 +11,29 @@ import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listenable;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.commands.CommandManager;
-import minegame159.meteorclient.events.EventStore;
-import minegame159.meteorclient.events.GameJoinedEvent;
-import minegame159.meteorclient.events.GameLeftEvent;
-import minegame159.meteorclient.events.KeyEvent;
+import minegame159.meteorclient.events.game.GameJoinedEvent;
+import minegame159.meteorclient.events.game.GameLeftEvent;
+import minegame159.meteorclient.events.game.OpenScreenEvent;
+import minegame159.meteorclient.events.meteor.ActiveModulesChangedEvent;
+import minegame159.meteorclient.events.meteor.KeyEvent;
 import minegame159.meteorclient.modules.combat.*;
-import minegame159.meteorclient.modules.misc.Timer;
 import minegame159.meteorclient.modules.misc.*;
+import minegame159.meteorclient.modules.movement.Timer;
 import minegame159.meteorclient.modules.movement.*;
 import minegame159.meteorclient.modules.player.*;
 import minegame159.meteorclient.modules.render.*;
 import minegame159.meteorclient.modules.render.hud.HUD;
+import minegame159.meteorclient.settings.ColorSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.utils.*;
+import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.files.Savable;
+import minegame159.meteorclient.utils.misc.input.Input;
+import minegame159.meteorclient.utils.misc.input.KeyAction;
+import minegame159.meteorclient.utils.player.Chat;
+import minegame159.meteorclient.utils.player.InvUtils;
+import minegame159.meteorclient.utils.render.color.RainbowColorManager;
+import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -41,14 +49,14 @@ import java.io.File;
 import java.util.*;
 
 public class ModuleManager extends Savable<ModuleManager> implements Listenable {
-    public static final Category[] CATEGORIES = { Category.Combat, Category.Player, Category.Movement, Category.Render, Category.Misc };
+    public static final Category[] CATEGORIES = {Category.Combat, Category.Player, Category.Movement, Category.Render, Category.Misc};
     public static ModuleManager INSTANCE;
     public static final ModuleRegistry REGISTRY = new ModuleRegistry();
 
     private final Map<Class<? extends Module>, Module> modules = new HashMap<>();
     private final Map<Category, List<Module>> groups = new HashMap<>();
 
-    private final List<ToggleModule> active = new ArrayList<>();
+    private final List<Module> active = new ArrayList<>();
     private Module moduleToBind;
 
     public boolean onKeyOnlyBinding = false;
@@ -83,8 +91,8 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         return null;
     }
 
-    public boolean isActive(Class<? extends ToggleModule> klass) {
-        ToggleModule module = get(klass);
+    public boolean isActive(Class<? extends Module> klass) {
+        Module module = get(klass);
         return module != null && module.isActive();
     }
 
@@ -96,7 +104,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         return modules.values();
     }
 
-    public List<ToggleModule> getActive() {
+    public List<Module> getActive() {
         synchronized (active) {
             return active;
         }
@@ -137,19 +145,19 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         return modules;
     }
 
-    void addActive(ToggleModule module) {
+    void addActive(Module module) {
         synchronized (active) {
             if (!active.contains(module)) {
                 active.add(module);
-                MeteorClient.EVENT_BUS.post(EventStore.activeModulesChangedEvent());
+                MeteorClient.EVENT_BUS.post(ActiveModulesChangedEvent.get());
             }
         }
     }
 
-    void removeActive(ToggleModule module) {
+    void removeActive(Module module) {
         synchronized (active) {
             if (active.remove(module)) {
-                MeteorClient.EVENT_BUS.post(EventStore.activeModulesChangedEvent());
+                MeteorClient.EVENT_BUS.post(ActiveModulesChangedEvent.get());
             }
         }
     }
@@ -161,7 +169,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         // Check if binding module
         if (event.action == KeyAction.Press && moduleToBind != null) {
             moduleToBind.setKey(event.key);
-            Chat.info("Module (highlight)%s (default)bound to (highlight)%s(default).", moduleToBind.title, Utils.getKeyName(event.key));
+            Chat.info(1591599, null, "Module (highlight)%s (default)bound to (highlight)%s(default).", moduleToBind.title, Utils.getKeyName(event.key));
             moduleToBind = null;
             event.cancel();
             return;
@@ -172,9 +180,19 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
             for (Module module : modules.values()) {
                 if (module.getKey() == event.key && (event.action == KeyAction.Press || module.toggleOnKeyRelease)) {
                     module.doAction();
-                    if (module instanceof ToggleModule) ((ToggleModule) module).sendToggledMsg();
+                    module.sendToggledMsg();
+                }
+            }
+        }
+    }, EventPriority.HIGHEST + 1);
 
-                    save();
+    @EventHandler
+    private final Listener<OpenScreenEvent> onOpenScreen = new Listener<>(event -> {
+        for (Module module : modules.values()) {
+            if (module.toggleOnKeyRelease) {
+                if (module.isActive()) {
+                    module.toggle();
+                    module.sendToggledMsg();
                 }
             }
         }
@@ -183,17 +201,18 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
     @EventHandler
     private final Listener<GameJoinedEvent> onGameJoined = new Listener<>(event -> {
         synchronized (active) {
-            for (ToggleModule module : active) {
+            for (Module module : active) {
                 MeteorClient.EVENT_BUS.subscribe(module);
                 module.onActivate();
             }
+            MeteorClient.EVENT_BUS.subscribe(new InvUtils());
         }
     });
 
     @EventHandler
     private final Listener<GameLeftEvent> onGameLeft = new Listener<>(event -> {
         synchronized (active) {
-            for (ToggleModule module : active) {
+            for (Module module : active) {
                 MeteorClient.EVENT_BUS.unsubscribe(module);
                 module.onDeactivate();
             }
@@ -202,7 +221,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
 
     public void disableAll() {
         synchronized (active) {
-            for (ToggleModule module : active.toArray(new ToggleModule[0])) {
+            for (Module module : active.toArray(new Module[0])) {
                 module.toggle();
             }
         }
@@ -236,11 +255,19 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
 
     // INIT MODULES
 
-    private void addModule(Module module) {
+    public void addModule(Module module) {
         modules.put(module.getClass(), module);
         getGroup(module.category).add(module);
 
-        CommandManager.getDispatcher().register(module.buildCommand());
+        for (SettingGroup group : module.settings) {
+            for (Setting<?> setting : group) {
+                setting.module = module;
+
+                if (setting instanceof ColorSetting) {
+                    RainbowColorManager.addColorSetting((Setting<SettingColor>) setting);
+                }
+            }
+        }
     }
 
     private void initCombat() {
@@ -272,6 +299,9 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new SelfAnvil());
         addModule(new AntiAutoAnvil());
         addModule(new AutoCity());
+        addModule(new Swarm());
+        addModule(new Quiver());
+        addModule(new Hitboxes());
     }
 
     private void initPlayer() {
@@ -279,7 +309,6 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new DeathPosition());
         addModule(new FastUse());
         addModule(new AutoRespawn());
-        addModule(new AntiFire());
         addModule(new AutoMend());
         addModule(new AutoGap());
         addModule(new AutoReplenish());
@@ -287,10 +316,10 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new AutoTool());
         addModule(new AutoEat());
         addModule(new AutoMount());
-        addModule(new XpBottleThrower());
+        addModule(new EXPThrower());
         addModule(new MiddleClickExtra());
         addModule(new AutoDrop());
-        addModule(new AutoClick());
+        addModule(new AutoClicker());
         addModule(new Portals());
         addModule(new Reach());
         addModule(new PotionSpoof());
@@ -303,11 +332,16 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new ChestSwap());
         addModule(new NoMiningTrace());
         addModule(new EndermanLook());
+        addModule(new SpeedMine());
         addModule(new NoBreakDelay());
         addModule(new AntiCactus());
         addModule(new FakePlayer());
         addModule(new NameProtect());
         addModule(new InfinityMiner());
+        addModule(new AntiAFK());
+        addModule(new NoInteract());
+        addModule(new NoRotate());
+        addModule(new Trail());
     }
 
     private void initMovement() {
@@ -333,14 +367,18 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new Scaffold());
         addModule(new BoatFly());
         addModule(new NoSlow());
-        addModule(new InvMove());
+        addModule(new GUIMove());
         addModule(new Anchor());
         addModule(new ClickTP());
+        addModule(new EntitySpeed());
+        addModule(new ReverseStep());
+        addModule(new Timer());
+        addModule(new ElytraBoost());
     }
 
     private void initRender() {
         addModule(new HUD());
-        addModule(new FullBright());
+        addModule(new Fullbright());
         addModule(new StorageESP());
         addModule(new XRay());
         addModule(new ESP());
@@ -357,17 +395,23 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new NoRender());
         addModule(new Breadcrumbs());
         addModule(new BlockSelection());
+        addModule(new BreakIndicators());
         addModule(new CustomFOV());
         addModule(new HandView());
         addModule(new Time());
         addModule(new VoidESP());
-        addModule(new CityEsp());
+        addModule(new CityESP());
+        addModule(new ShulkerPeek());
+        addModule(new ParticleBlocker());
+        addModule(new UnfocusedCPU());
+        addModule(new FreeRotate());
+        addModule(new EChestPreview());
+        addModule(new ItemByteSize());
     }
 
     private void initMisc() {
         addModule(new AutoSign());
         addModule(new AutoReconnect());
-        addModule(new ShulkerTooltip());
         addModule(new AutoShearer());
         addModule(new AutoNametag());
         addModule(new BookBot());
@@ -377,61 +421,56 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new StashFinder());
         addModule(new AutoBrewer());
         addModule(new AutoSmelter());
-        addModule(new Annoy());
         addModule(new Spam());
-        addModule(new UnfocusedCPU());
-        addModule(new ItemByteSize());
         addModule(new PacketCanceller());
         addModule(new EntityLogger());
-        addModule(new EChestPreview());
-        addModule(new Timer());
-        addModule(new Suffix());
         addModule(new MessageAura());
         addModule(new Nuker());
         addModule(new SoundBlocker());
         addModule(new AntiPacketKick());
         addModule(new Announcer());
         addModule(new BetterChat());
-        addModule(new FancyChat());
-        addModule(new OffHandCrash());
+        addModule(new OffhandCrash());
         addModule(new LiquidFiller());
+        addModule(new VisualRange());
+        addModule(new AutoBreed());
     }
 
-    public static class ModuleRegistry extends Registry<ToggleModule> {
+    public static class ModuleRegistry extends Registry<Module> {
         public ModuleRegistry() {
             super(RegistryKey.ofRegistry(new Identifier("meteor-client", "modules")), Lifecycle.stable());
         }
 
         @Nullable
         @Override
-        public Identifier getId(ToggleModule entry) {
+        public Identifier getId(Module entry) {
             return null;
         }
 
         @Override
-        public Optional<RegistryKey<ToggleModule>> getKey(ToggleModule entry) {
+        public Optional<RegistryKey<Module>> getKey(Module entry) {
             return Optional.empty();
         }
 
         @Override
-        public int getRawId(@Nullable ToggleModule entry) {
+        public int getRawId(@Nullable Module entry) {
             return 0;
         }
 
         @Nullable
         @Override
-        public ToggleModule get(@Nullable RegistryKey<ToggleModule> key) {
+        public Module get(@Nullable RegistryKey<Module> key) {
             return null;
         }
 
         @Nullable
         @Override
-        public ToggleModule get(@Nullable Identifier id) {
+        public Module get(@Nullable Identifier id) {
             return null;
         }
 
         @Override
-        protected Lifecycle getEntryLifecycle(ToggleModule object) {
+        protected Lifecycle getEntryLifecycle(Module object) {
             return null;
         }
 
@@ -446,7 +485,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         }
 
         @Override
-        public Set<Map.Entry<RegistryKey<ToggleModule>, ToggleModule>> getEntries() {
+        public Set<Map.Entry<RegistryKey<Module>, Module>> getEntries() {
             return null;
         }
 
@@ -457,16 +496,16 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
 
         @Nullable
         @Override
-        public ToggleModule get(int index) {
+        public Module get(int index) {
             return null;
         }
 
         @Override
-        public Iterator<ToggleModule> iterator() {
+        public Iterator<Module> iterator() {
             return new ToggleModuleIterator();
         }
 
-        private static class ToggleModuleIterator implements Iterator<ToggleModule> {
+        private static class ToggleModuleIterator implements Iterator<Module> {
             private final Iterator<Module> iterator = ModuleManager.INSTANCE.getAll().iterator();
 
             @Override
@@ -475,8 +514,8 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
             }
 
             @Override
-            public ToggleModule next() {
-                return (ToggleModule) iterator.next();
+            public Module next() {
+                return iterator.next();
             }
         }
     }

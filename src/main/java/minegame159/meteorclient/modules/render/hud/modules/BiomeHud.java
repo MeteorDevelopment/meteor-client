@@ -6,7 +6,6 @@
 package minegame159.meteorclient.modules.render.hud.modules;
 
 import minegame159.meteorclient.modules.render.hud.HUD;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.math.BlockPos;
 import org.apache.commons.lang3.StringUtils;
 
@@ -22,7 +21,6 @@ public class BiomeHud extends DoubleTextHudModule {
 
     @Override
     protected String getRight() {
-        MinecraftClient mc = MinecraftClient.getInstance();
         if (mc.player == null || mc.world == null) return "";
 
         blockPos.set(mc.player.getX(), mc.player.getY(), mc.player.getZ());

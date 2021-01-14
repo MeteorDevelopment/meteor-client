@@ -10,31 +10,31 @@ package minegame159.meteorclient.modules.player;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.OpenScreenEvent;
-import minegame159.meteorclient.events.PostTickEvent;
+import minegame159.meteorclient.events.game.OpenScreenEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.Chat;
-import minegame159.meteorclient.utils.InvUtils;
+import minegame159.meteorclient.utils.player.Chat;
+import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.screen.slot.SlotActionType;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class AutoReplenish extends ToggleModule {
+@InvUtils.Priority(priority = 1)
+public class AutoReplenish extends Module {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Integer> amount = sgGeneral.add(new IntSetting.Builder()
             .name("amount")
-            .description("The amount this actives at")
+            .description("The amount of items left this actives at.")
             .defaultValue(8)
             .min(1)
             .sliderMax(63)
@@ -43,49 +43,56 @@ public class AutoReplenish extends ToggleModule {
 
     private final Setting<Boolean> offhand = sgGeneral.add(new BoolSetting.Builder()
             .name("offhand")
-            .description("Whether to re-fill your offhand")
+            .description("Whether or not to refill your offhand with items.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> alert = sgGeneral.add(new BoolSetting.Builder()
             .name("alert")
-            .description("Send messages in chat when you run out of items")
+            .description("Sends a client-side alert in chat when you run out of items.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> unstackable = sgGeneral.add(new BoolSetting.Builder()
             .name("unstackable")
-            .description("Replenishes unstackable items (only works for main hand and offhand)")
+            .description("Replenishes unstackable items. Only works in your main hand or offhand.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> searchHotbar = sgGeneral.add(new BoolSetting.Builder()
             .name("search-hotbar")
-            .description("Refills items if they are in your hotbar.")
+            .description("Refills items if they happen to be in your hotbar.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<List<Item>> excludedItems = sgGeneral.add(new ItemListSetting.Builder()
             .name("excluded-items")
-            .description("Items to not replenish.")
+            .description("Items that WILL NOT replenish.")
             .defaultValue(new ArrayList<>(0))
             .build()
     );
 
     private final Setting<Boolean> workInCont = sgGeneral.add(new BoolSetting.Builder()
             .name("work-in-containers")
-            .description("Allows this to work while you are in containers.")
+            .description("Whether or not for this module to work when you are currently in a container GUI.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> workInInv = sgGeneral.add(new BoolSetting.Builder()
             .name("work-in-inv")
-            .description("Allows this to work in you inventory.")
+            .description("Whether or not this will work while you are in your inventory.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Boolean> pauseInInventory = sgGeneral.add(new BoolSetting.Builder()
+            .name("pause-in-inventory")
+            .description("Stops replenishing items when you are currently in your inventory.")
             .defaultValue(true)
             .build()
     );
@@ -96,7 +103,7 @@ public class AutoReplenish extends ToggleModule {
     private int lastSlot;
 
     public AutoReplenish(){
-        super(Category.Player, "auto-replenish", "Automatically fills your hotbar and offhand items");
+        super(Category.Player, "auto-replenish", "Automatically refills items in your hotbar, main hand, or offhand.");
     }
 
     @Override
@@ -110,7 +117,7 @@ public class AutoReplenish extends ToggleModule {
     }
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
         if (!workInCont.get() && !workInInv.get()) {
             if (mc.currentScreen instanceof HandledScreen<?>) return;
         } else if (workInCont.get() && !workInInv.get()) {
@@ -118,6 +125,7 @@ public class AutoReplenish extends ToggleModule {
         } else if (!workInCont.get() && workInInv.get()) {
             if (mc.currentScreen instanceof HandledScreen<?> && !(mc.currentScreen instanceof InventoryScreen)) return;
         }
+        if (pauseInInventory.get() && mc.currentScreen instanceof InventoryScreen) return;
 
         // Hotbar, stackable items
         for (int i = 0; i < 9; i++) {
@@ -207,9 +215,11 @@ public class AutoReplenish extends ToggleModule {
     });
 
     private void moveItems(int from, int to, boolean stackable) {
-        InvUtils.clickSlot(InvUtils.invIndexToSlotId(from), 0, SlotActionType.PICKUP);
-        InvUtils.clickSlot(InvUtils.invIndexToSlotId(to), 0, SlotActionType.PICKUP);
-        if (stackable) InvUtils.clickSlot(InvUtils.invIndexToSlotId(from), 0, SlotActionType.PICKUP);
+        List<Integer> slots = new ArrayList<>();
+        slots.add(InvUtils.invIndexToSlotId(from));
+        slots.add(InvUtils.invIndexToSlotId(to));
+        if (stackable) slots.add(InvUtils.invIndexToSlotId(from));
+        InvUtils.addSlots(slots, this.getClass());
     }
 
     private int findSlot(Item item, int excludeSlot) {
@@ -217,7 +227,7 @@ public class AutoReplenish extends ToggleModule {
 
         if(slot == -1 && !items.contains(item)){
             if(alert.get()) {
-                Chat.warning(this, "You are out of (highlight)%s(default). Cannot refill.", item.toString());
+                Chat.warning(this, "You lack (highlight)%s(default) necessary to refill. Cannot refill.", item.toString());
             }
 
             items.add(item);

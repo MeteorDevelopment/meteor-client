@@ -9,14 +9,15 @@ package minegame159.meteorclient.modules.combat;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.PostTickEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.player.RotationUtils;
 import net.minecraft.block.*;
 import net.minecraft.client.gui.screen.ingame.SignEditScreen;
 import net.minecraft.item.*;
@@ -27,32 +28,39 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 
-public class AntiBed extends ToggleModule {
+public class AntiBed extends Module {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Boolean> selfToggle = sgGeneral.add(new BoolSetting.Builder()
             .name("self-toggle")
-            .description("Toggles this module when it's finished.")
+            .description("Toggles AntiBed when finished.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> autoCenter = sgGeneral.add(new BoolSetting.Builder()
             .name("auto-center")
-            .description("Moves you to the center of blocks when needed.")
+            .description("Teleports you to the center of the blocks.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> onlyOnGround = sgGeneral.add(new BoolSetting.Builder()
             .name("only-on-ground")
-            .description("Only works you are on the ground.")
+            .description("Only toggles Anti Bed when you are standing on a block.")
             .defaultValue(true)
             .build()
     );
 
-    public AntiBed(){super(Category.Combat, "anti-bed", "Stops people placing beds in blocks you are standing");}
+    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
+            .name("rotate")
+            .description("Automatically rotates towards where the blocks are placed.")
+            .defaultValue(true)
+            .build()
+    );
+
+    public AntiBed(){super(Category.Combat, "anti-bed", "Prevents people from placing beds where you are standing.");}
 
     private int place = -1;
     private boolean closeScreen = false;
@@ -63,7 +71,7 @@ public class AntiBed extends ToggleModule {
     }
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
         if (closeScreen && mc.currentScreen instanceof SignEditScreen) {
             closeScreen = false;
             mc.player.closeScreen();
@@ -77,6 +85,7 @@ public class AntiBed extends ToggleModule {
             place --;
             mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(Utils.vec3d(mc.player.getBlockPos().up()), Direction.DOWN, mc.player.getBlockPos().up(), mc.player.isOnGround()));
             ((IKeyBinding)mc.options.keySneak).setPressed(false);
+            if (rotate.get()) RotationUtils.packetRotate(mc.player.getBlockPos().up());
             if (selfToggle.get()) this.toggle();
         } else if (place > 0) {
             place --;
@@ -146,6 +155,7 @@ public class AntiBed extends ToggleModule {
                 mc.player.setSneaking(true);
                 mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(Utils.vec3d(mc.player.getBlockPos()), Direction.DOWN, mc.player.getBlockPos(), mc.player.isOnGround()));
                 mc.player.setSneaking(sneaking);
+                if (rotate.get()) RotationUtils.packetRotate(mc.player.getBlockPos());
                 mc.player.inventory.selectedSlot = preSlot;
                 place(i);
                 return;
@@ -172,6 +182,7 @@ public class AntiBed extends ToggleModule {
         mc.player.inventory.selectedSlot = i;
         boolean sneaking = mc.player.isSneaking();
         mc.player.setSneaking(true);
+        if (rotate.get()) RotationUtils.packetRotate(mc.player.getBlockPos().up());
         mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(Utils.vec3d(mc.player.getBlockPos().up()), Direction.DOWN, mc.player.getBlockPos().up(), mc.player.isOnGround()));
         mc.player.setSneaking(sneaking);
         mc.player.inventory.selectedSlot = preSlot;

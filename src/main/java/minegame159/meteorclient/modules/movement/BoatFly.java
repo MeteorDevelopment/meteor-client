@@ -7,39 +7,52 @@ package minegame159.meteorclient.modules.movement;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.PostTickEvent;
+import minegame159.meteorclient.events.entity.BoatMoveEvent;
+import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
-import net.minecraft.entity.vehicle.BoatEntity;
+import minegame159.meteorclient.utils.player.PlayerUtils;
+import net.minecraft.network.packet.s2c.play.VehicleMoveS2CPacket;
 import net.minecraft.util.math.Vec3d;
 
-public class BoatFly extends ToggleModule {
+public class BoatFly extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-
-    private final Setting<Boolean> autoSteer = sgGeneral.add(new BoolSetting.Builder()
-            .name("auto-steer")
-            .description("Automatically steer in the direction you are facing.")
-            .defaultValue(true)
+    
+    private final Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
+            .name("speed")
+            .description("Horizontal speed in blocks per second.")
+            .defaultValue(10)
+            .min(0)
+            .sliderMax(50)
             .build()
     );
 
-    private final Setting<Double> upwardsSpeed = sgGeneral.add(new DoubleSetting.Builder()
-            .name("upwards-speed")
-            .description("How fast you fly upwards.")
-            .defaultValue(0.3)
+    private final Setting<Double> verticalSpeed = sgGeneral.add(new DoubleSetting.Builder()
+            .name("vertical-speed")
+            .description("Vertical speed in blocks per second.")
+            .defaultValue(6)
+            .min(0)
+            .sliderMax(20)
+            .build()
+    );
+
+    private final Setting<Double> fallSpeed = sgGeneral.add(new DoubleSetting.Builder()
+            .name("fall-speed")
+            .description("How fast you fall in blocks per second.")
+            .defaultValue(0.1)
             .min(0)
             .build()
     );
 
-    private final Setting<Boolean> slowFalling = sgGeneral.add(new BoolSetting.Builder()
-            .name("slow-falling")
-            .description("Makes you fall slower.")
-            .defaultValue(true)
+    private final Setting<Boolean> cancelServerPackets = sgGeneral.add(new BoolSetting.Builder()
+            .name("cancel-server-packets")
+            .description("Cancels incoming boat move packets.")
+            .defaultValue(false)
             .build()
     );
 
@@ -48,20 +61,30 @@ public class BoatFly extends ToggleModule {
     }
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
-        if (!(mc.player.getVehicle() instanceof BoatEntity)) return;
+    private final Listener<BoatMoveEvent> onBoatMove = new Listener<>(event -> {
+        if (event.boat.getPrimaryPassenger() != mc.player) return;
 
-        if (autoSteer.get()) {
-            mc.player.getVehicle().yaw = mc.player.yaw;
-        }
+        event.boat.yaw = mc.player.yaw;
 
-        Vec3d velocity = mc.player.getVehicle().getVelocity();
-        if (mc.options.keyJump.isPressed()) {
-            ((IVec3d) velocity).set(velocity.x, upwardsSpeed.get(), velocity.z);
-        } else {
-            if (slowFalling.get()) {
-                ((IVec3d) velocity).set(velocity.x, 0, velocity.z);
-            }
+        // Horizontal movement
+        Vec3d vel = PlayerUtils.getHorizontalVelocity(speed.get());
+        double velX = vel.getX();
+        double velY = 0;
+        double velZ = vel.getZ();
+
+        // Vertical movement
+        if (mc.options.keyJump.isPressed()) velY += verticalSpeed.get() / 20;
+        if (mc.options.keySprint.isPressed()) velY -= verticalSpeed.get() / 20;
+        else velY -= fallSpeed.get() / 20;
+
+        // Apply velocity
+        ((IVec3d) event.boat.getVelocity()).set(velX, velY, velZ);
+    });
+
+    @EventHandler
+    private final Listener<PacketEvent.Receive> onReceivePacket = new Listener<>(event -> {
+        if (event.packet instanceof VehicleMoveS2CPacket && cancelServerPackets.get()) {
+            event.cancel();
         }
     });
 }

@@ -9,60 +9,89 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.EntityAddedEvent;
-import minegame159.meteorclient.events.PostTickEvent;
-import minegame159.meteorclient.events.RenderEvent;
+import minegame159.meteorclient.events.entity.EntityAddedEvent;
+import minegame159.meteorclient.events.render.RenderEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
-import minegame159.meteorclient.rendering.Matrices;
-import minegame159.meteorclient.rendering.ShapeBuilder;
-import minegame159.meteorclient.settings.ColorSetting;
-import minegame159.meteorclient.settings.DoubleSetting;
-import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.utils.Color;
-import minegame159.meteorclient.utils.Dimension;
+import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.rendering.*;
+import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.render.color.Color;
+import minegame159.meteorclient.utils.render.color.SettingColor;
+import minegame159.meteorclient.utils.world.Dimension;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
-import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class LogoutSpots extends ToggleModule {
-    private static final Color BACKGROUND = new Color(0, 0, 0, 75);
-    private static final Color TEXT = new Color(255, 255, 255);
+public class LogoutSpots extends Module {
+    private static final MeshBuilder MB = new MeshBuilder(64);
+
     private static final Color GREEN = new Color(25, 225, 25);
     private static final Color ORANGE = new Color(225, 105, 25);
     private static final Color RED = new Color(225, 25, 25);
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    
-    private final Color sideColor = new Color();
+    private final SettingGroup sgRender = settings.createGroup("Render");
+
+    // General
 
     private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
             .name("scale")
-            .description("Scale.")
+            .description("The scale.")
             .defaultValue(1)
             .min(0)
             .build()
     );
 
-    private final Setting<Color> lineColor = sgGeneral.add(new ColorSetting.Builder()
-            .name("color")
-            .description("Color.")
-            .defaultValue(new Color(255, 0, 255))
-            .onChanged(color1 -> {
-                sideColor.set(color1);
-                sideColor.a -= 200;
-                sideColor.validate();
-            })
+    private final Setting<Boolean> fullHeight = sgGeneral.add(new BoolSetting.Builder()
+            .name("full-height")
+            .description("Displays the height as the player's full height.")
+            .defaultValue(true)
+            .build()
+    );
+
+    // Render
+
+    private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
+            .name("shape-mode")
+            .description("How the shapes are rendered.")
+            .defaultValue(ShapeMode.Both)
+            .build()
+    );
+
+    private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()
+            .name("side-color")
+            .description("The side color.")
+            .defaultValue(new SettingColor(255, 0, 255, 55))
+            .build()
+    );
+
+    private final Setting<SettingColor> lineColor = sgRender.add(new ColorSetting.Builder()
+            .name("line-color")
+            .description("The line color.")
+            .defaultValue(new SettingColor(255, 0, 255))
+            .build()
+    );
+
+    private final Setting<SettingColor> nameColor = sgRender.add(new ColorSetting.Builder()
+            .name("name-color")
+            .description("The name color.")
+            .defaultValue(new SettingColor(255, 255, 255))
+            .build()
+    );
+
+    private final Setting<SettingColor> nameBackgroundColor = sgRender.add(new ColorSetting.Builder()
+            .name("name-background-color")
+            .description("The name background color.")
+            .defaultValue(new SettingColor(0, 0, 0, 75))
             .build()
     );
 
@@ -75,7 +104,7 @@ public class LogoutSpots extends ToggleModule {
     private Dimension lastDimension;
 
     public LogoutSpots() {
-        super(Category.Render, "logout-spots", "Displays players logout position.");
+        super(Category.Render, "logout-spots", "Displays a box where another player has logged out at.");
         lineColor.changed();
     }
 
@@ -120,7 +149,7 @@ public class LogoutSpots extends ToggleModule {
     });
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
         if (mc.getNetworkHandler().getPlayerList().size() != lastPlayerList.size()) {
             for (PlayerListEntry entry : lastPlayerList) {
                 if (mc.getNetworkHandler().getPlayerList().stream().anyMatch(playerListEntry -> playerListEntry.getProfile().equals(entry.getProfile()))) continue;
@@ -171,7 +200,7 @@ public class LogoutSpots extends ToggleModule {
 
     private class Entry {
         public final double x, y, z;
-        public final double width, height;
+        public final double xWidth, zWidth, height;
 
         public final UUID uuid;
         public final String name;
@@ -183,8 +212,9 @@ public class LogoutSpots extends ToggleModule {
             y = entity.getY();
             z = entity.getZ();
 
-            width = entity.getBoundingBox().getXLength();
-            height = entity.getBoundingBox().getZLength();
+            xWidth = entity.getBoundingBox().getXLength();
+            zWidth = entity.getBoundingBox().getZLength();
+            height = entity.getBoundingBox().getYLength();
 
             uuid = entity.getUuid();
             name = entity.getGameProfile().getName();
@@ -208,7 +238,8 @@ public class LogoutSpots extends ToggleModule {
             double healthPercentage = (double) health / maxHealth;
 
             // Render quad
-            ShapeBuilder.quadWithLines(x, y, z, width, height, sideColor, lineColor.get());
+            if (fullHeight.get()) Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x, y, z, x + xWidth, y + height, z + zWidth, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            else Renderer.quadWithLinesHorizontal(Renderer.NORMAL, Renderer.LINES, x, y, z, xWidth, sideColor.get(), lineColor.get(), shapeMode.get());
 
             // Get health color
             Color healthColor;
@@ -218,20 +249,20 @@ public class LogoutSpots extends ToggleModule {
 
             // Setup the rotation
             Matrices.push();
-            Matrices.translate(x + width / 2 - event.offsetX, y + 0.5 - event.offsetY, z + height / 2 - event.offsetZ);
+            Matrices.translate(x + xWidth / 2 - event.offsetX, y + (fullHeight.get() ? (height + 0.5) : 0.5)  - event.offsetY, z + zWidth / 2 - event.offsetZ);
             Matrices.rotate(-camera.getYaw(), 0, 1, 0);
             Matrices.rotate(camera.getPitch(), 1, 0, 0);
             Matrices.scale(-scale, -scale, scale);
 
             // Render background
             double i = MeteorClient.FONT_2X.getStringWidth(name) / 2.0 + MeteorClient.FONT_2X.getStringWidth(healthText) / 2.0;
-            ShapeBuilder.begin(null, GL11.GL_TRIANGLES, VertexFormats.POSITION_COLOR);
-            ShapeBuilder.quad(-i - 1, -1, 0, -i - 1, 8, 0, i + 1, 8, 0, i + 1, -1, 0, BACKGROUND);
-            ShapeBuilder.end();
+            MB.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
+            MB.quad(-i - 1, -1, 0, -i - 1, 8, 0, i + 1, 8, 0, i + 1, -1, 0, nameBackgroundColor.get());
+            MB.end();
 
             // Render name and health texts
             MeteorClient.FONT_2X.begin();
-            double hX = MeteorClient.FONT_2X.renderString(name, -i, 0, TEXT);
+            double hX = MeteorClient.FONT_2X.renderString(name, -i, 0, nameColor.get());
             MeteorClient.FONT_2X.renderString(healthText, hX, 0, healthColor);
             MeteorClient.FONT_2X.end();
 

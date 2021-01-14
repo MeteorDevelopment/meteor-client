@@ -7,21 +7,21 @@ package minegame159.meteorclient.modules.movement;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.PostTickEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.shape.VoxelShape;
 
 import java.util.stream.Stream;
 
-public class Parkour extends ToggleModule {
+public class Parkour extends Module {
     public Parkour() {
         super(Category.Movement, "parkour", "Automatically jumps at the edges of blocks.");
     }
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
         if(!mc.player.isOnGround() || mc.options.keyJump.isPressed()) return;
 
         if(mc.player.isSneaking() || mc.options.keySneak.isPressed()) return;

@@ -5,26 +5,30 @@
 
 package minegame159.meteorclient.modules.combat;
 
-//Created by squidoodly 03/06/2020
-//Updated by squidoodly 19/06/2020
+// Created by squidoodly 03/06/2020
+// Updated by squidoodly 19/06/2020
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.PostTickEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.player.FakePlayer;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.*;
+import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.entity.FakePlayerEntity;
+import minegame159.meteorclient.utils.player.Chat;
+import minegame159.meteorclient.utils.player.DamageCalcUtils;
+import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.block.entity.BedBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BedItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
@@ -32,94 +36,58 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 
-import java.util.ConcurrentModificationException;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
-public class BedAura extends ToggleModule {
+@InvUtils.Priority(priority = 0)
+public class BedAura extends Module {
     public enum Mode{
-        safe,
-        suicide
+        Safe,
+        Suicide
     }
 
     public BedAura(){
-        super(Category.Combat, "bed-aura", "Automatically places and blows up beds in the nether");
+        super(Category.Combat, "bed-aura", "Automatically places and explodes beds in the Nether and End.");
     }
 
-    private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgPlace = settings.createGroup("Place");
+    private final SettingGroup sgBreak = settings.createGroup("Break");
+    private final SettingGroup sgSwitch = settings.createGroup("Switch");
+    private final SettingGroup sgMisc = settings.createGroup("Misc");
 
-    private final Setting<Double> placeRange = sgGeneral.add(new DoubleSetting.Builder()
-            .name("place-range")
-            .description("The distance in a single direction the beds get placed.")
-            .defaultValue(3)
-            .min(0)
-            .sliderMax(5)
-            .build()
-    );
+    // Place
 
-    private final Setting<Double> breakRange = sgGeneral.add(new DoubleSetting.Builder()
-            .name("break-range")
-            .description("The distance in a single direction the beds get broken.")
-            .defaultValue(3)
-            .min(0)
-            .sliderMax(5)
-            .build()
-    );
-
-    private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
-            .name("place-mode")
-            .description("The way beds are placed")
-            .defaultValue(Mode.safe)
-            .build()
-    );
-
-    private final Setting<Boolean> selfToggle = sgGeneral.add(new BoolSetting.Builder()
-            .name("self-toggle")
-            .description("Toggles this in the overworld.")
+    private final Setting<Boolean> place = sgPlace.add(new BoolSetting.Builder()
+            .name("place")
+            .description("Allows Bed Aura to place beds.")
             .defaultValue(true)
             .build()
     );
 
-    private final Setting<Mode> clickMode = sgGeneral.add(new EnumSetting.Builder<Mode>()
-            .name("break-mode")
-            .description("The way the beds are broken")
-            .defaultValue(Mode.safe)
+    private final Setting<Mode> placeMode = sgPlace.add(new EnumSetting.Builder<Mode>()
+            .name("place-mode")
+            .description("How the beds get placed.")
+            .defaultValue(Mode.Safe)
             .build()
     );
 
-    private final Setting<Boolean> autoSwitch = sgGeneral.add(new BoolSetting.Builder()
-            .name("auto-switch")
-            .description("Switches to bed automatically")
-            .defaultValue(false)
-            .build()
-    );
-
-    private final Setting<Boolean> switchBack = sgGeneral.add(new BoolSetting.Builder()
-            .name("switch-back")
-            .description("Switches back to the previous slot after auto switching.")
-            .defaultValue(false)
-            .build()
-    );
-
-    private final Setting<Boolean> autoMove = sgGeneral.add(new BoolSetting.Builder()
-            .name("auto-move")
-            .description("Moves beds into your last hotbar slot.")
-            .defaultValue(false)
-            .build()
-    );
-
-    private final Setting<Integer> autoMoveSlot = sgGeneral.add(new IntSetting.Builder()
-            .name("auto-move-slot")
-            .description("The slot auto-move moves beds to.")
-            .defaultValue(8)
+    private final Setting<Double> placeRange = sgPlace.add(new DoubleSetting.Builder()
+            .name("place-range")
+            .description("The radius in which beds can be placed in.")
+            .defaultValue(3)
             .min(0)
-            .max(8)
+            .sliderMax(5)
             .build()
     );
 
-    private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
+    private final Setting<Double> minHealth = sgPlace.add(new DoubleSetting.Builder()
+            .name("min-health")
+            .description("The minimum health you have to be for Bed Aura to place.")
+            .defaultValue(15)
+            .build()
+    );
+
+    private final Setting<Integer> delay = sgPlace.add(new IntSetting.Builder()
             .name("delay")
             .description("The delay between placements.")
             .defaultValue(2)
@@ -128,14 +96,14 @@ public class BedAura extends ToggleModule {
             .build()
     );
 
-    private final Setting<Boolean> smartDelay = sgGeneral.add(new BoolSetting.Builder()
-            .name("smart-delay")
-            .description("Reduces crystal consumption when doing large amounts of damage.")
-            .defaultValue(true)
+    private final Setting<Boolean> airPlace = sgPlace.add(new BoolSetting.Builder()
+            .name("air-place")
+            .description("Places beds in the air if they do more damage.")
+            .defaultValue(false)
             .build()
     );
 
-    private final Setting<Double> healthDifference = sgGeneral.add(new DoubleSetting.Builder()
+    private final Setting<Double> healthDifference = sgPlace.add(new DoubleSetting.Builder()
             .name("damage-increase")
             .description("The damage increase for smart delay to work.")
             .defaultValue(5)
@@ -144,45 +112,90 @@ public class BedAura extends ToggleModule {
             .build()
     );
 
-    private final Setting<Boolean> airPlace = sgGeneral.add(new BoolSetting.Builder()
-            .name("air-place")
-            .description("Places beds in the air if they do more damage.")
+    private final Setting<Double> minDamage = sgPlace.add(new DoubleSetting.Builder()
+            .name("min-damage")
+            .description("The minimum damage the beds will place.")
+            .defaultValue(5.5)
+            .build()
+    );
+
+    private final Setting<Boolean> calcDamage = sgPlace.add(new BoolSetting.Builder()
+            .name("damage-calc")
+            .description("Whether to calculate damage (true) or just place on the head of the target (false).")
             .defaultValue(false)
             .build()
     );
 
-    private final Setting<Double> minDamage = sgPlace.add(new DoubleSetting.Builder()
-            .name("min-damage")
-            .description("The minimum damage the beds will place")
-            .defaultValue(5.5)
+    // Break
+
+    private final Setting<Mode> breakMode = sgBreak.add(new EnumSetting.Builder<Mode>()
+            .name("break-mode")
+            .description("How beds are broken.")
+            .defaultValue(Mode.Safe)
+            .build()
+    );
+
+    private final Setting<Double> breakRange = sgBreak.add(new DoubleSetting.Builder()
+            .name("break-range")
+            .description("The distance in a single direction the beds get broken.")
+            .defaultValue(4)
+            .min(0)
+            .sliderMax(5)
+            .build()
+    );
+
+    // Switch
+
+    private final Setting<Boolean> autoSwitch = sgSwitch.add(new BoolSetting.Builder()
+            .name("auto-switch")
+            .description("Switches to a bed automatically.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> switchBack = sgSwitch.add(new BoolSetting.Builder()
+            .name("switch-back")
+            .description("Switches back to the previous slot after auto switching.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> autoMove = sgSwitch.add(new BoolSetting.Builder()
+            .name("auto-move")
+            .description("Moves beds into your last hotbar slot.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Integer> autoMoveSlot = sgSwitch.add(new IntSetting.Builder()
+            .name("auto-move-slot")
+            .description("The slot Auto Move moves beds to.")
+            .defaultValue(8)
+            .min(0)
+            .max(8)
+            .build()
+    );
+
+    // Misc
+
+    private final Setting<Boolean> selfToggle = sgMisc.add(new BoolSetting.Builder()
+            .name("self-toggle")
+            .description("Toggles Bed Aura in the Overworld.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> smartDelay = sgMisc.add(new BoolSetting.Builder()
+            .name("smart-delay")
+            .description("Reduces bed consumption when doing large amounts of damage.")
+            .defaultValue(true)
             .build()
     );
 
     private final Setting<Double> maxDamage = sgPlace.add(new DoubleSetting.Builder()
             .name("max-damage")
-            .description("The maximum self-damage allowed")
+            .description("The maximum self-damage allowed.")
             .defaultValue(3)
-            .build()
-    );
-
-    private final Setting<Double> minHealth = sgPlace.add(new DoubleSetting.Builder()
-            .name("min-health")
-            .description("The minimum health you have to be for it to place")
-            .defaultValue(15)
-            .build()
-    );
-
-    private final Setting<Boolean> place = sgGeneral.add(new BoolSetting.Builder()
-            .name("place")
-            .description("Allow it to place beds")
-            .defaultValue(true)
-            .build()
-    );
-
-    private final Setting<Boolean> calcDamage = sgGeneral.add(new BoolSetting.Builder()
-            .name("damage-calc")
-            .description("Whether to calculate damage (true) or just place on the head of the target(false).")
-            .defaultValue(false)
             .build()
     );
 
@@ -202,12 +215,15 @@ public class BedAura extends ToggleModule {
     boolean bypassCheck = false;
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+        assert mc.player != null;
+        assert mc.world != null;
+        assert mc.interactionManager != null;
         delayLeft --;
         preSlot = -1;
-        if (mc.player.getHealth() + mc.player.getAbsorptionAmount() <= minHealth.get() && mode.get() != Mode.suicide) return;
+        if (mc.player.getHealth() + mc.player.getAbsorptionAmount() <= minHealth.get() && placeMode.get() != Mode.Suicide) return;
         if (selfToggle.get() && mc.world.getDimension().isBedWorking()) {
-            Chat.warning(this, "You are in the overworld. Disabling!");
+            Chat.warning(this, "You are in the Overworld... (highlight)disabling(default)!");
             this.toggle();
             return;
         }
@@ -216,7 +232,7 @@ public class BedAura extends ToggleModule {
                 if (entity instanceof BedBlockEntity && Utils.distance(entity.getPos().getX(), entity.getPos().getY(), entity.getPos().getZ(), mc.player.getX(), mc.player.getY(), mc.player.getZ()) <= breakRange.get()) {
                     currentDamage = DamageCalcUtils.bedDamage(mc.player, Utils.vec3d(entity.getPos()));
                     if (currentDamage < maxDamage.get()
-                            || (mc.player.getHealth() + mc.player.getAbsorptionAmount() - currentDamage) < minHealth.get() || clickMode.get().equals(Mode.suicide)) {
+                            || (mc.player.getHealth() + mc.player.getAbsorptionAmount() - currentDamage) < minHealth.get() || breakMode.get().equals(Mode.Suicide)) {
                         mc.player.setSneaking(false);
                         mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, entity.getPos(), false));
                     }
@@ -226,7 +242,7 @@ public class BedAura extends ToggleModule {
         } catch (ConcurrentModificationException ignored) {
             return;
         }
-        if (place.get() && (!(mc.player.getMainHandStack().getItem() instanceof BedItem)
+        if ((!(mc.player.getMainHandStack().getItem() instanceof BedItem)
                 && !(mc.player.getOffHandStack().getItem() instanceof BedItem)) && !autoSwitch.get() && !autoMove.get()) return;
         if (place.get()) {
             boolean doMove = true;
@@ -247,9 +263,11 @@ public class BedAura extends ToggleModule {
                                 slot = i;
                             }
                         }
-                        InvUtils.clickSlot(InvUtils.invIndexToSlotId(autoMoveSlot.get()), 0, SlotActionType.PICKUP);
-                        InvUtils.clickSlot(InvUtils.invIndexToSlotId(slot), 0, SlotActionType.PICKUP);
-                        InvUtils.clickSlot(InvUtils.invIndexToSlotId(autoMoveSlot.get()), 0, SlotActionType.PICKUP);
+                        List<Integer> slots = new ArrayList<>();
+                        slots.add(InvUtils.invIndexToSlotId(autoMoveSlot.get()));
+                        slots.add(InvUtils.invIndexToSlotId(slot));
+                        slots.add(InvUtils.invIndexToSlotId(autoMoveSlot.get()));
+                        InvUtils.addSlots(slots, this.getClass());
                     }
                 }
                 if (autoSwitch.get()){
@@ -317,6 +335,8 @@ public class BedAura extends ToggleModule {
     });
 
     private void placeBlock(){
+        assert mc.player != null;
+        assert mc.interactionManager != null;
         bestBlockPos = new BlockPos(bestBlock.x, bestBlock.y, bestBlock.z);
         Hand hand = Hand.MAIN_HAND;
         if (!(mc.player.getMainHandStack().getItem() instanceof BedItem) && mc.player.getOffHandStack().getItem() instanceof BedItem) {
@@ -354,29 +374,34 @@ public class BedAura extends ToggleModule {
         for(double i = playerPos.getX() - placeRange.get(); i < playerPos.getX() + placeRange.get(); i++){
             for(double j = playerPos.getZ() - placeRange.get(); j < playerPos.getZ() + placeRange.get(); j++){
                 for(double k = playerPos.getY() - 3; k < playerPos.getY() + 3; k++) {
-                    pos = new BlockPos(i, j, k);
+                    pos = new BlockPos(i, k, j);
                     vecPos = new Vec3d(Math.floor(i), Math.floor(k), Math.floor(j));
                     posUp = pos.add(0, 1, 0);
                     if (bestBlock == null) bestBlock = vecPos;
                     if (isValid(posUp)) {
                         if (airPlace.get() || !mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
-                            if (bestDamage < DamageCalcUtils.bedDamage(target, vecPos.add(0.5, 1.5, 0.5))
-                                    && (DamageCalcUtils.bedDamage(mc.player, vecPos.add(0.5, 1.5, 0.5)) < minDamage.get() || mode.get() == Mode.suicide)) {
+                            if (bestDamage < getBestDamage(target, vecPos.add(0.5, 1.5, 0.5))
+                                    && (DamageCalcUtils.bedDamage(mc.player, vecPos.add(0.5, 1.5, 0.5)) < minDamage.get() || placeMode.get() == Mode.Suicide)) {
                                 bestBlock = vecPos;
-                                bestDamage = DamageCalcUtils.bedDamage(target, bestBlock.add(0.5, 1.5, 0.5));
+                                bestDamage = getBestDamage(target, bestBlock.add(0.5, 1.5, 0.5));
                             }
                         }
                     }
                 }
             }
         }
-        if (bestBlock == null) return;
-        double north, east, south, west;
-        bestBlockPos = new BlockPos(bestBlock.x, bestBlock.y, bestBlock.z);
-        east = DamageCalcUtils.bedDamage(target, bestBlock.add(1.5, 1.5, 0.5));
-        west = DamageCalcUtils.bedDamage(target, bestBlock.add(-1.5, 1.5, 0.5));
-        south = DamageCalcUtils.bedDamage(target, bestBlock.add(0.5, 1.5, 1.5));
-        north = DamageCalcUtils.bedDamage(target, bestBlock.add(0.5, 1.5, -1.5));
+        if (bestDamage >= minDamage.get()) bestBlockPos = new BlockPos(bestBlock.x, bestBlock.y, bestBlock.z);
+        else bestBlock = null;
+
+    }
+
+    private double getBestDamage(LivingEntity target, Vec3d bestBlock){
+        double north, east, south, west, bestDamage;
+        east = DamageCalcUtils.bedDamage(target, bestBlock.add(1, 0, 0));
+        west = DamageCalcUtils.bedDamage(target, bestBlock.add(-1, 0, 0));
+        south = DamageCalcUtils.bedDamage(target, bestBlock.add(0, 0, 1));
+        north = DamageCalcUtils.bedDamage(target, bestBlock.add(0, 0, -1));
+        bestDamage = DamageCalcUtils.bedDamage(target, bestBlock);
 
         if ((east > north) && (east > south) && (east > west)) {
             direction = 0;
@@ -387,7 +412,8 @@ public class BedAura extends ToggleModule {
         } else if ((west > north) && (west > south) && (east < west)) {
             direction = 3;
         }
-        bestDamage = Math.max(bestDamage, Math.max(north, Math.max(east, Math.max(south, west))));
+
+        return Math.max(bestDamage, Math.max(north, Math.max(east, Math.max(south, west))));
     }
 
     private void findFacePlace(PlayerEntity target) {
@@ -426,6 +452,22 @@ public class BedAura extends ToggleModule {
                 bestBlock = new Vec3d(target.getBlockPos().getX() + 0.5, target.getBlockPos().getY() + 1, target.getBlockPos().getZ() - 0.5);
                 direction = 2;
                 bypassCheck = true;
+            } else if (isValidHalf(target.getBlockPos().add(1, 2, 0))) {
+                bestBlock = new Vec3d(target.getBlockPos().getX() + 1.5, target.getBlockPos().getY() + 2, target.getBlockPos().getZ() + 0.5);
+                direction = 3;
+                bypassCheck = true;
+            } else if (isValidHalf(target.getBlockPos().add(-1, 2, 0))) {
+                bestBlock = new Vec3d(target.getBlockPos().getX() - 0.5, target.getBlockPos().getY() + 2, target.getBlockPos().getZ() + 0.5);
+                direction = 0;
+                bypassCheck = true;
+            } else if (isValidHalf(target.getBlockPos().add(0, 2, 1))) {
+                bestBlock = new Vec3d(target.getBlockPos().getX() + 0.5, target.getBlockPos().getY() + 2, target.getBlockPos().getZ() + 1.5);
+                direction = 1;
+                bypassCheck = true;
+            } else if (isValidHalf(target.getBlockPos().add(0, 2, -1))) {
+                bestBlock = new Vec3d(target.getBlockPos().getX() + 0.5, target.getBlockPos().getY() + 2, target.getBlockPos().getZ() - 0.5);
+                direction = 2;
+                bypassCheck = true;
             }
         }
     }
@@ -436,6 +478,7 @@ public class BedAura extends ToggleModule {
     }
 
     private boolean isValid(BlockPos posUp) {
+        assert mc.world != null;
         return (mc.world.getBlockState(posUp).getMaterial().isReplaceable())
                 && mc.world.getOtherEntities(null, new Box(posUp.getX(), posUp.getY(), posUp.getZ(), posUp.getX() + 1.0D, posUp.getY() + 1.0D, posUp.getZ() + 1.0D)).isEmpty()
                 && (mc.world.getBlockState(new BlockPos(posUp).add(1, 0, 0)).getMaterial().isReplaceable() || mc.world.getBlockState(posUp.add(-1, 0, 0)).getMaterial().isReplaceable()

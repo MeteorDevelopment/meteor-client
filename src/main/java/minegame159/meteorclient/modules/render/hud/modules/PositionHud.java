@@ -8,7 +8,6 @@ package minegame159.meteorclient.modules.render.hud.modules;
 import minegame159.meteorclient.modules.render.hud.HUD;
 import minegame159.meteorclient.modules.render.hud.HudRenderer;
 import minegame159.meteorclient.utils.Utils;
-import net.minecraft.client.MinecraftClient;
 
 public class PositionHud extends HudModule {
     private final String left1 = "Pos: ";
@@ -20,14 +19,13 @@ public class PositionHud extends HudModule {
     private String right2;
 
     public PositionHud(HUD hud) {
-        super(hud, "coords", "Displays your position.");
+        super(hud, "coords", "Displays your coordinates in the world.");
     }
 
     @Override
     public void update(HudRenderer renderer) {
         if (left1Width == 0) left1Width = renderer.textWidth(left1);
 
-        MinecraftClient mc = MinecraftClient.getInstance();
         left2 = null;
 
         if (mc.player == null) {

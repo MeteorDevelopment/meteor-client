@@ -8,23 +8,23 @@ package minegame159.meteorclient.modules.player;
 import baritone.api.BaritoneAPI;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.PostTickEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.modules.combat.CrystalAura;
 import minegame159.meteorclient.modules.combat.KillAura;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.utils.InvUtils;
+import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.util.Hand;
 
-public class AutoEat extends ToggleModule {
+public class AutoEat extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgHunger = settings.createGroup("Hunger");
 
@@ -59,7 +59,7 @@ public class AutoEat extends ToggleModule {
 
     private final Setting<Boolean> disableAuras = sgGeneral.add(new BoolSetting.Builder()
             .name("disable-auras")
-            .description("disable all auras")
+            .description("Disable all auras when using this module.")
             .defaultValue(false)
             .build()
     );
@@ -74,7 +74,7 @@ public class AutoEat extends ToggleModule {
 
     private final Setting<Integer> minHunger = sgHunger.add(new IntSetting.Builder()
             .name("hunger")
-            .description("The hunger you eat at.")
+            .description("The level of hunger you eat at.")
             .defaultValue(17)
             .min(1)
             .max(19)
@@ -104,7 +104,7 @@ public class AutoEat extends ToggleModule {
     }
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
         if (mc.player.abilities.creativeMode) return;
         if (isEating && !mc.player.getMainHandStack().getItem().isFood()) ((IKeyBinding) mc.options.keyUse).setPressed(false);
 

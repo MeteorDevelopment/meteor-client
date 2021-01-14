@@ -7,26 +7,27 @@ package minegame159.meteorclient.modules.misc;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.PostTickEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.utils.InvUtils;
+import minegame159.meteorclient.utils.player.InvUtils;
+import minegame159.meteorclient.utils.player.RotationUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.SheepEntity;
 import net.minecraft.item.Items;
 import net.minecraft.item.ShearsItem;
 import net.minecraft.util.Hand;
 
-public class AutoShearer extends ToggleModule {
+public class AutoShearer extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     
     private final Setting<Double> distance = sgGeneral.add(new DoubleSetting.Builder()
             .name("distance")
-            .description("Maximum distance.")
+            .description("The maximum distance the sheep have to be to be sheared.")
             .min(0.0)
             .defaultValue(5.0)
             .build()
@@ -34,17 +35,24 @@ public class AutoShearer extends ToggleModule {
 
     private final Setting<Boolean> preserveBrokenShears = sgGeneral.add(new BoolSetting.Builder()
             .name("preserve-broken-shears")
-            .description("Will not break shears.")
+            .description("Prevents shears from being broken.")
             .defaultValue(false)
             .build()
     );
 
+    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
+            .name("rotate")
+            .description("Automatically faces the animal being sheared.")
+            .defaultValue(true)
+            .build()
+    );
+
     public AutoShearer() {
-        super(Category.Misc, "auto-shearer", "Automatically shears sheeps.");
+        super(Category.Misc, "auto-shearer", "Automatically shears sheep.");
     }
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
         for (Entity entity : mc.world.getEntities()) {
             if (!(entity instanceof SheepEntity) || ((SheepEntity) entity).isSheared() || ((SheepEntity) entity).isBaby() || mc.player.distanceTo(entity) > distance.get()) continue;
 
@@ -72,6 +80,7 @@ public class AutoShearer extends ToggleModule {
             }
 
             if (foundShears) {
+                if (rotate.get()) RotationUtils.packetRotate(entity);
                 mc.interactionManager.interactEntity(mc.player, entity, offHand ? Hand.OFF_HAND : Hand.MAIN_HAND);
                 return;
             }

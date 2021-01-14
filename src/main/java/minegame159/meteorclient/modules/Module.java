@@ -5,22 +5,25 @@
 
 package minegame159.meteorclient.modules;
 
-import com.mojang.brigadier.Command;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import me.zero.alpine.listener.Listenable;
+import minegame159.meteorclient.Config;
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.EventStore;
+import minegame159.meteorclient.events.meteor.ModuleBindChangedEvent;
+import minegame159.meteorclient.events.meteor.ModuleVisibilityChangedEvent;
 import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.gui.screens.ModuleScreen;
 import minegame159.meteorclient.gui.widgets.WWidget;
+import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.settings.Settings;
-import minegame159.meteorclient.utils.Color;
-import minegame159.meteorclient.utils.ISerializable;
 import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.misc.ISerializable;
+import minegame159.meteorclient.utils.player.Chat;
+import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.command.CommandSource;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.util.Formatting;
 
 import java.util.Objects;
 
@@ -34,6 +37,9 @@ public abstract class Module implements Listenable, ISerializable<Module> {
     public final Color color;
 
     public final Settings settings = new Settings();
+
+    private boolean active;
+    private boolean visible = true;
 
     public boolean serialize = true;
 
@@ -62,25 +68,47 @@ public abstract class Module implements Listenable, ISerializable<Module> {
     }
 
     public void doAction(boolean onActivateDeactivate) {
-        openScreen();
+        toggle(onActivateDeactivate);
     }
     public void doAction() {
         doAction(true);
     }
 
-    public LiteralArgumentBuilder<CommandSource> buildCommand() {
-        LiteralArgumentBuilder<CommandSource> builder = null;
+    public void onActivate() {}
+    public void onDeactivate() {}
 
-        if (this instanceof ToggleModule) {
-            builder = LiteralArgumentBuilder.literal(name);
+    public void toggle(boolean onActivateDeactivate) {
+        if (!active) {
+            active = true;
+            ModuleManager.INSTANCE.addActive(this);
 
-            builder.executes(context -> {
-                ((ToggleModule) this).toggle();
-                return Command.SINGLE_SUCCESS;
-            });
+            for (SettingGroup sg : settings) {
+                for (Setting setting : sg) {
+                    if (setting.onModuleActivated != null) setting.onModuleActivated.accept(setting);
+                }
+            }
+
+            if (onActivateDeactivate) {
+                MeteorClient.EVENT_BUS.subscribe(this);
+                onActivate();
+            }
         }
+        else {
+            active = false;
+            ModuleManager.INSTANCE.removeActive(this);
 
-        return builder;
+            if (onActivateDeactivate) {
+                MeteorClient.EVENT_BUS.unsubscribe(this);
+                onDeactivate();
+            }
+        }
+    }
+    public void toggle() {
+        toggle(true);
+    }
+
+    public String getInfoString() {
+        return null;
     }
 
     @Override
@@ -92,6 +120,9 @@ public abstract class Module implements Listenable, ISerializable<Module> {
         tag.putInt("key", key);
         tag.putBoolean("toggleOnKeyRelease", toggleOnKeyRelease);
         tag.put("settings", settings.toTag());
+
+        tag.putBoolean("active", active);
+        tag.putBoolean("visible", visible);
 
         return tag;
     }
@@ -106,12 +137,33 @@ public abstract class Module implements Listenable, ISerializable<Module> {
         Tag settingsTag = tag.get("settings");
         if (settingsTag instanceof CompoundTag) settings.fromTag((CompoundTag) settingsTag);
 
+        boolean active = tag.getBoolean("active");
+        if (active != isActive()) toggle(Utils.canUpdate());
+        setVisible(tag.getBoolean("visible"));
+
         return this;
+    }
+
+    public void setVisible(boolean visible) {
+        this.visible = visible;
+        MeteorClient.EVENT_BUS.post(ModuleVisibilityChangedEvent.get(this));
+    }
+
+    public boolean isVisible() {
+        return visible;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void sendToggledMsg() {
+        if (Config.INSTANCE.chatCommandsInfo) Chat.info(159159, null, "Toggled (highlight)%s(default) %s(default).", title, isActive() ? Formatting.GREEN + "on" : Formatting.RED + "off");
     }
 
     public void setKey(int key, boolean postEvent) {
         this.key = key;
-        if (postEvent) MeteorClient.EVENT_BUS.post(EventStore.moduleBindChangedEvent(this));
+        if (postEvent) MeteorClient.EVENT_BUS.post(ModuleBindChangedEvent.get(this));
     }
     public void setKey(int key) {
         setKey(key, true);

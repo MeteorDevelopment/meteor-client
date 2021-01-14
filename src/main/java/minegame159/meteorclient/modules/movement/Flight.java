@@ -7,12 +7,11 @@ package minegame159.meteorclient.modules.movement;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.PostTickEvent;
-import minegame159.meteorclient.events.PreTickEvent;
-import minegame159.meteorclient.events.packets.SendPacketEvent;
+import minegame159.meteorclient.events.packets.PacketEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixininterface.IPlayerMoveC2SPacket;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -21,7 +20,7 @@ import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.util.math.Vec3d;
 
-public class Flight extends ToggleModule {
+public class Flight extends Module {
     public enum Mode {
         Abilities,
         Velocity
@@ -31,14 +30,14 @@ public class Flight extends ToggleModule {
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("mode")
-            .description("Mode.")
+            .description("The mode for Flight.")
             .defaultValue(Mode.Abilities)
             .build()
     );
 
     private final Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
             .name("speed")
-            .description("Speed.")
+            .description("Your speed when flying.")
             .defaultValue(0.1)
             .min(0.0)
             .build()
@@ -49,7 +48,7 @@ public class Flight extends ToggleModule {
     }
 
     public Flight() {
-        super(Category.Movement, "flight", "FLYYYY! You will take fall damage so enable no fall.");
+        super(Category.Movement, "flight", "FLYYYY! No Fall is recommended with this module.");
     }
 
     @Override
@@ -75,7 +74,7 @@ public class Flight extends ToggleModule {
     private float lastYaw;
 
     @EventHandler
-    private final Listener<PreTickEvent> onPreTick = new Listener<>(event -> {
+    private final Listener<TickEvent.Pre> onPreTick = new Listener<>(event -> {
         float currentYaw = mc.player.yaw;
         if (mc.player.fallDistance >= 3f && currentYaw == lastYaw && mc.player.getVelocity().length() < 0.003d) {
             mc.player.yaw += flip ? 1 : -1;
@@ -85,7 +84,7 @@ public class Flight extends ToggleModule {
     });
 
     @EventHandler
-    private final Listener<PostTickEvent> onPostTick = new Listener<>(event -> {
+    private final Listener<TickEvent.Post> onPostTick = new Listener<>(event -> {
         if (mc.player.yaw != lastYaw) {
             mc.player.yaw = lastYaw;
         }
@@ -121,7 +120,7 @@ public class Flight extends ToggleModule {
      * @see ServerPlayNetworkHandler#onPlayerMove(PlayerMoveC2SPacket)
      */
     @EventHandler
-    private final Listener<SendPacketEvent> onSendPacket = new Listener<>(event -> {
+    private final Listener<PacketEvent.Send> onSendPacket = new Listener<>(event -> {
         if (!(event.packet instanceof PlayerMoveC2SPacket)) {
             return;
         }

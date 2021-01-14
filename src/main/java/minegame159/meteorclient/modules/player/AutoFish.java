@@ -7,18 +7,18 @@ package minegame159.meteorclient.modules.player;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.KeyEvent;
-import minegame159.meteorclient.events.PostTickEvent;
+import minegame159.meteorclient.events.meteor.KeyEvent;
 import minegame159.meteorclient.events.packets.PlaySoundPacketEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.entity.projectile.FishingBobberEntity;
 import net.minecraft.item.FishingRodItem;
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
 
-public class AutoFish extends ToggleModule {
+public class AutoFish extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgSplashRangeDetection = settings.createGroup("Splash Sound Range Detection");
 
@@ -32,7 +32,7 @@ public class AutoFish extends ToggleModule {
 
     private final Setting<Integer> ticksAutoCast = sgGeneral.add(new IntSetting.Builder()
             .name("ticks-auto-cast")
-            .description("Ticks to wait before auto casting.")
+            .description("The amount of ticks to wait before recasting automatically.")
             .defaultValue(10)
             .min(0)
             .sliderMax(60)
@@ -41,7 +41,7 @@ public class AutoFish extends ToggleModule {
 
     private final Setting<Integer> ticksCatch = sgGeneral.add(new IntSetting.Builder()
             .name("ticks-catch")
-            .description("Ticks to wait before catching the fish")
+            .description("The amount of ticks to wait before catching the fish.")
             .defaultValue(6)
             .min(0)
             .sliderMax(60)
@@ -50,7 +50,7 @@ public class AutoFish extends ToggleModule {
 
     private final Setting<Integer> ticksThrow = sgGeneral.add(new IntSetting.Builder()
             .name("ticks-throw")
-            .description("Ticks to wait before throwing the bobber.")
+            .description("The amount of ticks to wait before throwing the bobber.")
             .defaultValue(14)
             .min(0)
             .sliderMax(60)
@@ -67,7 +67,7 @@ public class AutoFish extends ToggleModule {
 
     private final Setting<Double> splashDetectionRange = sgSplashRangeDetection.add(new DoubleSetting.Builder()
             .name("splash-detection-range")
-            .description("Detection range of splash sound. Low values will not work when TPS is low.")
+            .description("The detection range of a splash. Lower values will not work when the TPS is low.")
             .defaultValue(10)
             .min(0)
             .build()
@@ -83,7 +83,7 @@ public class AutoFish extends ToggleModule {
     private int autoCastCheckTimer;
 
     public AutoFish() {
-        super(Category.Player, "auto-fish", "Automatically fishes.");
+        super(Category.Player, "auto-fish", "Automatically fishes for you.");
     }
 
     @Override
@@ -108,7 +108,7 @@ public class AutoFish extends ToggleModule {
     });
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
         // Auto cast
         if (autoCastCheckTimer <= 0) {
             autoCastCheckTimer = 30;

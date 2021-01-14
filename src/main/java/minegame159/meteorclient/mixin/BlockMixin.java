@@ -5,8 +5,8 @@
 
 package minegame159.meteorclient.mixin;
 
-import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.modules.render.XRay;
+import minegame159.meteorclient.MeteorClient;
+import minegame159.meteorclient.events.render.DrawSideEvent;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -25,18 +25,9 @@ public abstract class BlockMixin extends AbstractBlock implements ItemConvertibl
         super(settings);
     }
 
-    @Override
-    public float getAmbientOcclusionLightLevel(BlockState state, BlockView world, BlockPos pos) {
-        if (ModuleManager.INSTANCE.isActive(XRay.class)) return 1;
-        return super.getAmbientOcclusionLightLevel(state, world, pos);
-    }
-
     @Inject(at = @At("HEAD"), method = "shouldDrawSide", cancellable = true)
     private static void onShouldDrawSide(BlockState state, BlockView view, BlockPos pos, Direction facing, CallbackInfoReturnable<Boolean> info) {
-        XRay xray = ModuleManager.INSTANCE.get(XRay.class);
-
-        if (xray.isActive()) {
-            info.setReturnValue(!xray.isBlocked(state.getBlock()));
-        }
+        DrawSideEvent event = MeteorClient.postEvent(DrawSideEvent.get(state));
+        if (event.isSet()) info.setReturnValue(event.getDraw());
     }
 }

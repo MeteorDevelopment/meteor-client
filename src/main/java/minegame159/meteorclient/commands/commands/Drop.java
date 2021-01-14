@@ -11,7 +11,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import minegame159.meteorclient.commands.Command;
-import minegame159.meteorclient.utils.InvUtils;
+import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.command.CommandSource;
 import net.minecraft.item.Item;
@@ -31,7 +31,7 @@ public class Drop extends Command {
             new DynamicCommandExceptionType(o -> new LiteralText("No such item " + o + "!"));
 
     public Drop() {
-        super("drop", "Drops things.");
+        super("drop", "Automatically drops specified items.");
     }
 
     @Override
@@ -67,7 +67,7 @@ public class Drop extends Command {
     }
 
     private int drop(PlayerConsumer consumer) throws CommandSyntaxException {
-        ClientPlayerEntity player = MC.player;
+        ClientPlayerEntity player = mc.player;
         assert player != null;
 
         if (player.isSpectator()) throw NOT_SPECTATOR.create();

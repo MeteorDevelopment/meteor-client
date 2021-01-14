@@ -11,13 +11,14 @@ import com.mojang.authlib.exceptions.AuthenticationException;
 import com.mojang.authlib.exceptions.AuthenticationUnavailableException;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import com.mojang.authlib.yggdrasil.YggdrasilUserAuthentication;
+import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.accounts.Account;
 import minegame159.meteorclient.accounts.AccountType;
 import minegame159.meteorclient.accounts.ProfileResponse;
 import minegame159.meteorclient.accounts.ProfileSkinResponse;
 import minegame159.meteorclient.mixininterface.IMinecraftClient;
-import minegame159.meteorclient.utils.HttpUtils;
-import minegame159.meteorclient.utils.NbtException;
+import minegame159.meteorclient.utils.misc.NbtException;
+import minegame159.meteorclient.utils.network.HttpUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.Session;
 import net.minecraft.nbt.CompoundTag;
@@ -55,11 +56,16 @@ public class PremiumAccount extends Account<PremiumAccount> {
     public boolean fetchHead() {
         String skinUrl = null;
         ProfileResponse response = HttpUtils.get("https://sessionserver.mojang.com/session/minecraft/profile/" + cache.uuid, ProfileResponse.class);
-        String encodedTexturesJson = response.getTextures();
-        if (encodedTexturesJson != null) {
-            ProfileSkinResponse skin = GSON.fromJson(new String(Base64.getDecoder().decode(encodedTexturesJson), StandardCharsets.UTF_8), ProfileSkinResponse.class);
-            if (skin.textures.SKIN != null) skinUrl = skin.textures.SKIN.url;
+
+        if (response != null) {
+            String encodedTexturesJson = response.getTextures();
+
+            if (encodedTexturesJson != null) {
+                ProfileSkinResponse skin = GSON.fromJson(new String(Base64.getDecoder().decode(encodedTexturesJson), StandardCharsets.UTF_8), ProfileSkinResponse.class);
+                if (skin.textures.SKIN != null) skinUrl = skin.textures.SKIN.url;
+            }
         }
+
         if (skinUrl == null) skinUrl = "https://meteorclient.com/steve.png";
         return cache.makeHead(skinUrl);
     }
@@ -77,11 +83,11 @@ public class PremiumAccount extends Account<PremiumAccount> {
             cache.username = auth.getSelectedProfile().getName();
             return true;
         } catch (AuthenticationUnavailableException e) {
-            System.out.println("[Meteor] Failed to contact the authentication server.");
+            MeteorClient.LOG.error("Failed to contact the authentication server.");
             return false;
         } catch (AuthenticationException e) {
-            if (e.getMessage().contains("Invalid username or password") || e.getMessage().contains("account migrated")) System.out.println("[Meteor] Wrong password.");
-            else System.out.println("[Meteor] Failed to contact the authentication server.");
+            if (e.getMessage().contains("Invalid username or password") || e.getMessage().contains("account migrated")) MeteorClient.LOG.error("Wrong password.");
+            else MeteorClient.LOG.error("Failed to contact the authentication server.");
             return false;
         }
     }

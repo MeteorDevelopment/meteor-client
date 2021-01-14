@@ -11,20 +11,22 @@ package minegame159.meteorclient.modules.render;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.RenderEvent;
+import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.mixininterface.IBakedQuad;
 import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.modules.player.FakePlayer;
 import minegame159.meteorclient.modules.player.NameProtect;
+import minegame159.meteorclient.rendering.DrawMode;
 import minegame159.meteorclient.rendering.Matrices;
-import minegame159.meteorclient.rendering.ShapeBuilder;
+import minegame159.meteorclient.rendering.MeshBuilder;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.Color;
-import minegame159.meteorclient.utils.FakePlayerEntity;
 import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.entity.FakePlayerEntity;
+import minegame159.meteorclient.utils.render.color.Color;
+import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.VertexFormats;
@@ -39,18 +41,19 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.screen.PlayerScreenHandler;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
-import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Nametags extends ToggleModule {
+public class Nametags extends Module {
     public enum Position {
         ABOVE,
         ON_TOP
     }
+
+    private static final MeshBuilder MB = new MeshBuilder(2048);
 
     private static final Color BACKGROUND = new Color(0, 0, 0, 75);
     private static final Color WHITE = new Color(255, 255, 255);
@@ -60,7 +63,7 @@ public class Nametags extends ToggleModule {
 
     private final Setting<Boolean> displayArmor = sgGeneral.add(new BoolSetting.Builder()
             .name("display-armor")
-            .description("Display armor.")
+            .description("Displays armor.")
             .defaultValue(true)
             .build()
     );
@@ -74,28 +77,28 @@ public class Nametags extends ToggleModule {
 
     private final Setting<Position> displayOnItem = sgGeneral.add(new EnumSetting.Builder<Position>()
             .name("enchantment-position")
-            .description("Where enchantments are rendered.")
+            .description("Where the enchantments are rendered.")
             .defaultValue(Position.ON_TOP)
             .build()
     );
 
     private final Setting<List<Enchantment>> displayedEnchantments = sgGeneral.add(new EnchListSetting.Builder()
             .name("displayed-enchantments")
-            .description("The enchantments that are shown on nametags")
+            .description("The enchantments that are shown on nametags.")
             .defaultValue(setDefualtList())
             .build()
     );
 
     private final Setting<Boolean> displayPing = sgGeneral.add(new BoolSetting.Builder()
             .name("ping")
-            .description("Shows players ping")
+            .description("Shows the player's ping.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
             .name("scale")
-            .description("Scale.")
+            .description("The scale.")
             .defaultValue(1)
             .min(0.1)
             .build()
@@ -103,7 +106,7 @@ public class Nametags extends ToggleModule {
 
     private final Setting<Double> enchantTextScale = sgGeneral.add(new DoubleSetting.Builder()
             .name("enchant-text-scale")
-            .description("Enchantment text scale.")
+            .description("The scale of the enchantment text.")
             .defaultValue(0.6)
             .min(0.1)
             .max(1)
@@ -114,55 +117,55 @@ public class Nametags extends ToggleModule {
 
     private final Setting<Boolean> yourself = sgGeneral.add(new BoolSetting.Builder()
             .name("yourself")
-            .description("Displays nametag above your player in Freecam.")
+            .description("Displays a nametag on your player if you're in Freecam.")
             .defaultValue(true)
             .build()
     );
 
-    private final Setting<Color> normalName = sgColors.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> normalName = sgColors.add(new ColorSetting.Builder()
             .name("normal-color")
-            .description("The color of non-friends")
-            .defaultValue(new Color(255, 255, 255))
+            .description("The color of people not in your Friends List.")
+            .defaultValue(new SettingColor(255, 255, 255))
             .build()
     );
 
-    private final Setting<Color> pingColor = sgColors.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> pingColor = sgColors.add(new ColorSetting.Builder()
             .name("ping-color")
-            .description("The color of ping.")
-            .defaultValue(new Color(150, 150, 150))
+            .description("The color of the ping text.")
+            .defaultValue(new SettingColor(150, 150, 150))
             .build()
     );
 
-    private final Setting<Color> healthStage1 = sgColors.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> healthStage1 = sgColors.add(new ColorSetting.Builder()
             .name("health-stage-1")
-            .description("The color of full health")
-            .defaultValue(new Color(25, 252, 25))
+            .description("The color if a player is full health.")
+            .defaultValue(new SettingColor(25, 252, 25))
             .build()
     );
 
-    private final Setting<Color> healthStage2 = sgColors.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> healthStage2 = sgColors.add(new ColorSetting.Builder()
             .name("health-stage-2")
-            .description("The color of 2/3 health")
-            .defaultValue(new Color(255, 105, 25))
+            .description("The color if a player is at two-thirds health.")
+            .defaultValue(new SettingColor(255, 105, 25))
             .build()
     );
 
-    private final Setting<Color> healthStage3 = sgColors.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> healthStage3 = sgColors.add(new ColorSetting.Builder()
             .name("health-stage-3")
-            .description("The color of 1/3 health")
-            .defaultValue(new Color(255, 25, 25))
+            .description("The color of a player if they are at one-third health.")
+            .defaultValue(new SettingColor(255, 25, 25))
             .build()
     );
 
-    private final Setting<Color> enchantmentTextColor = sgColors.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> enchantmentTextColor = sgColors.add(new ColorSetting.Builder()
             .name("enchantment-text-color")
-            .description("The color of enchantment text.")
-            .defaultValue(new Color(255, 255, 255))
+            .description("The color of the enchantment text.")
+            .defaultValue(new SettingColor(255, 255, 255))
             .build()
     );
 
     public Nametags() {
-        super(Category.Render, "nametags", "Displays nametags above players.");
+        super(Category.Render, "nametags", "Displays customizable nametags above players.");
     }
 
     String name;
@@ -271,15 +274,17 @@ public class Nametags extends ToggleModule {
         double heightUp = armorHeight;
 
         // Render background
-        ShapeBuilder.begin(null, GL11.GL_TRIANGLES, VertexFormats.POSITION_COLOR);
-        ShapeBuilder.quad(-widthHalf - 1, -1, 0, -widthHalf - 1, heightDown, 0, widthHalf + 1, heightDown, 0, widthHalf + 1, -1, 0, BACKGROUND);
-        ShapeBuilder.end();
+        MB.texture = false;
+        MB.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
+        MB.quad(-widthHalf - 1, -1, 0, -widthHalf - 1, heightDown, 0, widthHalf + 1, heightDown, 0, widthHalf + 1, -1, 0, BACKGROUND);
+        MB.end();
 
         // Render armor
         double itemSpacing = (width - armorWidth) / 4;
         if (hasArmor) {
             double itemX = -widthHalf;
-            ShapeBuilder.begin(null, GL11.GL_TRIANGLES, VertexFormats.POSITION_TEXTURE_COLOR);
+            MB.texture = true;
+            MB.begin(null, DrawMode.Triangles, VertexFormats.POSITION_TEXTURE_COLOR);
 
             boolean isDamaged = false;
 
@@ -303,7 +308,7 @@ public class Nametags extends ToggleModule {
                     itemX += (armorWidths[i] - 16) / 2;
                     double addY = (armorHeight - 16) / 2;
 
-                    ShapeBuilder.texQuad(itemX, -heightUp + addY, 16, 16, sprite.getMinU(), sprite.getMinV(), sprite.getMaxU() - sprite.getMinU(), sprite.getMaxV() - sprite.getMinV(), WHITE, WHITE, WHITE, WHITE);
+                    MB.texQuad(itemX, -heightUp + addY, 16, 16, sprite.getMinU(), sprite.getMinV(), sprite.getMaxU() - sprite.getMinU(), sprite.getMaxV() - sprite.getMinV(), WHITE, WHITE, WHITE, WHITE);
 
                     itemX = preItemX;
                     WHITE.r = WHITE.g = WHITE.b = 255;
@@ -312,12 +317,13 @@ public class Nametags extends ToggleModule {
                 itemX += armorWidths[i] + itemSpacing;
             }
             mc.getTextureManager().bindTexture(PlayerScreenHandler.BLOCK_ATLAS_TEXTURE);
-            ShapeBuilder.end(true);
+            MB.end();
 
             // Durability
             if (isDamaged) {
                 itemX = -widthHalf;
-                ShapeBuilder.begin(null, GL11.GL_TRIANGLES, VertexFormats.POSITION_COLOR);
+                MB.texture = false;
+                MB.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
 
                 for (int i = 0; i < 4; i++) {
                     ItemStack itemStack = entity.inventory.armor.get(i);
@@ -334,12 +340,12 @@ public class Nametags extends ToggleModule {
                     double addY = (armorHeight - 16) / 2;
 
                     WHITE.r = WHITE.g = WHITE.b = 0;
-                    ShapeBuilder.quad(itemX + 2, -heightUp + 13 + addY, 0, itemX + 2 + 13, -heightUp + 13 + addY, 0, itemX + 2 + 13, -heightUp + 2 + 13 + addY, 0, itemX + 2, -heightUp + 2 + 13 + addY, 0, WHITE);
+                    MB.quad(itemX + 2, -heightUp + 13 + addY, 0, itemX + 2 + 13, -heightUp + 13 + addY, 0, itemX + 2 + 13, -heightUp + 2 + 13 + addY, 0, itemX + 2, -heightUp + 2 + 13 + addY, 0, WHITE);
 
                     WHITE.r = k >> 16 & 255;
                     WHITE.g = k >> 8 & 255;
                     WHITE.b = k & 255;
-                    ShapeBuilder.quad(itemX + 2, -heightUp + 13 + addY, 0, itemX + 2 + j, -heightUp + 13 + addY, 0, itemX + 2 + j, -heightUp + 1 + 13 + addY, 0, itemX + 2, -heightUp + 1 + 13 + addY, 0, WHITE);
+                    MB.quad(itemX + 2, -heightUp + 13 + addY, 0, itemX + 2 + j, -heightUp + 13 + addY, 0, itemX + 2 + j, -heightUp + 1 + 13 + addY, 0, itemX + 2, -heightUp + 1 + 13 + addY, 0, WHITE);
 
                     WHITE.r = WHITE.g = WHITE.b = 255;
                     itemX = preItemX;
@@ -347,7 +353,7 @@ public class Nametags extends ToggleModule {
                     itemX += armorWidths[i] + itemSpacing;
                 }
 
-                ShapeBuilder.end();
+                MB.end();
             }
         }
 
@@ -359,9 +365,9 @@ public class Nametags extends ToggleModule {
 
         // Render name, health enchant and texts
         MeteorClient.FONT_2X.begin();
-        double hX = MeteorClient.FONT_2X.renderStringWithShadow(name, -widthHalf, 0, FriendManager.INSTANCE.getColor(entity, normalName.get()));
+        double hX = MeteorClient.FONT_2X.renderStringWithShadow(name, -widthHalf, 0, FriendManager.INSTANCE.getColor(entity, normalName.get(), false));
         MeteorClient.FONT_2X.renderStringWithShadow(healthText, hX + (width - nameWidth - healthWidth), 0, healthColor);
-        MeteorClient.FONT_2X.renderStringWithShadow(pingText, hX + 3, 0, pingColor.get());
+        if (displayPing.get()) MeteorClient.FONT_2X.renderStringWithShadow(pingText, hX + 3, 0, pingColor.get());
         double itemX = -widthHalf;
 
         if (maxEnchantCount > 0) {

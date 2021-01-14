@@ -5,19 +5,25 @@
 
 package minegame159.meteorclient.waypoints;
 
+import minegame159.meteorclient.rendering.DrawMode;
 import minegame159.meteorclient.rendering.MeshBuilder;
-import minegame159.meteorclient.utils.Color;
-import minegame159.meteorclient.utils.ISerializable;
+import minegame159.meteorclient.utils.misc.ISerializable;
+import minegame159.meteorclient.utils.render.color.SettingColor;
+import minegame159.meteorclient.utils.world.Dimension;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.nbt.CompoundTag;
-import org.lwjgl.opengl.GL11;
 
 public class Waypoint implements ISerializable<Waypoint> {
-    private static final MeshBuilder MB = new MeshBuilder(100);
+    private static final MeshBuilder MB;
+
+    static {
+        MB = new MeshBuilder(128);
+        MB.texture = true;
+    }
 
     public String name = "Meteor on Crack!";
     public String icon = "Square";
-    public Color color = new Color(225, 25, 25);
+    public SettingColor color = new SettingColor(225, 25, 25);
 
     public int x, y, z;
 
@@ -27,8 +33,10 @@ public class Waypoint implements ISerializable<Waypoint> {
 
     public boolean overworld, nether, end;
 
+    public Dimension actualDimension;
+
     public void renderIcon(double x, double y, double z, double a, double size) {
-        MB.begin(null, GL11.GL_TRIANGLES, VertexFormats.POSITION_TEXTURE_COLOR);
+        MB.begin(null, DrawMode.Triangles, VertexFormats.POSITION_TEXTURE_COLOR);
 
         int preA = color.a;
         color.a *= a;
@@ -42,13 +50,9 @@ public class Waypoint implements ISerializable<Waypoint> {
         MB.pos(x, y + size, z).texture(0, 1).color(color).endVertex();
 
         Waypoints.ICONS.get(icon).bindTexture();
-        MB.end(true);
+        MB.end();
 
         color.a = preA;
-    }
-
-    public void renderIcon(double x, double y, double z) {
-        renderIcon(x, y, z, 1, 16);
     }
 
     private int findIconIndex() {
@@ -103,6 +107,8 @@ public class Waypoint implements ISerializable<Waypoint> {
         tag.putInt("maxVisibleDistance", maxVisibleDistance);
         tag.putDouble("scale", scale);
 
+        tag.putString("dimension", actualDimension.name());
+
         tag.putBoolean("overworld", overworld);
         tag.putBoolean("nether", nether);
         tag.putBoolean("end", end);
@@ -123,6 +129,8 @@ public class Waypoint implements ISerializable<Waypoint> {
         visible = tag.getBoolean("visible");
         maxVisibleDistance = tag.getInt("maxVisibleDistance");
         scale = tag.getDouble("scale");
+
+        actualDimension = Dimension.valueOf(tag.getString("dimension"));
 
         overworld = tag.getBoolean("overworld");
         nether = tag.getBoolean("nether");

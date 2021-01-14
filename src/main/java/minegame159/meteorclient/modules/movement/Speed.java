@@ -5,25 +5,35 @@
 
 package minegame159.meteorclient.modules.movement;
 
-import baritone.api.BaritoneAPI;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.PlayerMoveEvent;
-import minegame159.meteorclient.mixininterface.ILookBehavior;
+import minegame159.meteorclient.events.entity.player.PlayerMoveEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.modules.ToggleModule;
-import minegame159.meteorclient.settings.BoolSetting;
-import minegame159.meteorclient.settings.DoubleSetting;
-import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.player.PlayerUtils;
 import net.minecraft.entity.MovementType;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.util.math.Vec3d;
 
-public class Speed extends ToggleModule {
+public class Speed extends Module {
+
+    public enum JumpIf {
+        Sprinting,
+        Walking,
+        Always
+    }
+
+    public enum Mode {
+        Jump,
+        Velocity
+    }
+
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgJump = settings.createGroup("Jump");
     
     private final Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
             .name("speed")
@@ -36,31 +46,64 @@ public class Speed extends ToggleModule {
 
     private final Setting<Boolean> onlyOnGround = sgGeneral.add(new BoolSetting.Builder()
             .name("only-on-ground")
-            .description("Use speed only when on ground.")
+            .description("Uses speed only when standing on a block.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> inWater = sgGeneral.add(new BoolSetting.Builder()
             .name("in-water")
-            .description("Use speed when in water.")
+            .description("Uses speed when in water.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> whenSneaking = sgGeneral.add(new BoolSetting.Builder()
             .name("when-sneaking")
-            .description("Use speed when sneaking.")
+            .description("Uses speed when sneaking.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> applySpeedPotions = sgGeneral.add(new BoolSetting.Builder()
             .name("apply-speed-potions")
-            .description("Apply speed potion effect.")
+            .description("Applies the speed effect via potions.")
             .defaultValue(true)
             .build()
     );
+
+    // Jump
+
+    private final Setting<Boolean> jump = sgJump.add(new BoolSetting.Builder()
+            .name("jump")
+            .description("Automatically jumps.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Mode> jumpMode = sgJump.add(new EnumSetting.Builder<Mode>()
+            .name("mode")
+            .description("The method of jumping.")
+            .defaultValue(Mode.Jump)
+            .build()
+    );
+
+    private final Setting<Double> velocityHeight = sgJump.add(new DoubleSetting.Builder()
+            .name("velocity-height")
+            .description("The distance that velocity mode moves you.")
+            .defaultValue(0.25)
+            .min(0)
+            .sliderMax(2)
+            .build()
+    );
+
+    private final Setting<JumpIf> jumpIf = sgJump.add(new EnumSetting.Builder<JumpIf>()
+            .name("jump-if")
+            .description("Jump if.")
+            .defaultValue(JumpIf.Walking)
+            .build()
+    );
+
 
     public Speed() {
         super(Category.Movement, "speed", "Speeeeeed.");
@@ -73,47 +116,9 @@ public class Speed extends ToggleModule {
         if (onlyOnGround.get() && !mc.player.isOnGround()) return;
         if (!inWater.get() && mc.player.isTouchingWater()) return;
 
-        float yaw = mc.player.yaw;
-        if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing()) {
-            if (((ILookBehavior) BaritoneAPI.getProvider().getPrimaryBaritone().getLookBehavior()).getTarget() != null) {
-                yaw = ((ILookBehavior) BaritoneAPI.getProvider().getPrimaryBaritone().getLookBehavior()).getTarget().getYaw();
-            }
-        }
-
-        Vec3d forward = Vec3d.fromPolar(0, yaw);
-        Vec3d right = Vec3d.fromPolar(0, yaw + 90);
-        double velX = 0;
-        double velZ = 0;
-
-        boolean a = false;
-        if (mc.player.input.pressingForward) {
-            velX += forward.x / 20 * speed.get();
-            velZ += forward.z / 20 * speed.get();
-            a = true;
-        }
-        if (mc.player.input.pressingBack) {
-            velX -= forward.x / 20 * speed.get();
-            velZ -= forward.z / 20 * speed.get();
-            a = true;
-        }
-
-        boolean b = false;
-        if (mc.player.input.pressingRight) {
-            velX += right.x / 20 * speed.get();
-            velZ += right.z / 20 * speed.get();
-            b = true;
-        }
-        if (mc.player.input.pressingLeft) {
-            velX -= right.x / 20 * speed.get();
-            velZ -= right.z / 20 * speed.get();
-            b = true;
-        }
-
-        if (a && b) {
-            double diagonal = 1 / Math.sqrt(2);
-            velX *= diagonal;
-            velZ *= diagonal;
-        }
+        Vec3d vel = PlayerUtils.getHorizontalVelocity(speed.get());
+        double velX = vel.getX();
+        double velZ = vel.getZ();
 
         if (applySpeedPotions.get() && mc.player.hasStatusEffect(StatusEffects.SPEED)) {
             double value = (mc.player.getStatusEffect(StatusEffects.SPEED).getAmplifier() + 1) * 0.205;
@@ -129,4 +134,23 @@ public class Speed extends ToggleModule {
 
         ((IVec3d) event.movement).set(velX, event.movement.y, velZ);
     });
+
+    @EventHandler
+    private final Listener<TickEvent.Pre> onPreTick = new Listener<>(event -> {
+        if (jump.get()) {
+            if (!mc.player.isOnGround() || mc.player.isSneaking() || !jump()) return;
+
+            if (jumpMode.get() == Mode.Jump) mc.player.jump();
+            else ((IVec3d) mc.player.getVelocity()).setY(velocityHeight.get());
+        }
+    });
+
+    private boolean jump() {
+        switch (jumpIf.get()) {
+            case Sprinting: return mc.player.isSprinting() && (mc.player.forwardSpeed != 0 || mc.player.sidewaysSpeed != 0);
+            case Walking:   return mc.player.forwardSpeed != 0 || mc.player.sidewaysSpeed != 0;
+            case Always:    return true;
+            default:        return false;
+        }
+    }
 }

@@ -9,15 +9,15 @@ package minegame159.meteorclient.modules.movement;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.PostTickEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixininterface.IHorseBaseEntity;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.HorseBaseEntity;
 
-public class EntityControl extends ToggleModule {
-    public EntityControl(){super(Category.Movement, "entity-control", "Lets you control horses, donkeys and mules without a saddle.");}
+public class EntityControl extends Module {
+    public EntityControl(){super(Category.Movement, "entity-control", "Lets you control rideable entities without a saddle.");}
 
     @Override
     public void onDeactivate() {
@@ -29,7 +29,7 @@ public class EntityControl extends ToggleModule {
     }
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
         mc.world.getEntities().forEach(entity -> {
             if (entity instanceof HorseBaseEntity) {
                 ((IHorseBaseEntity) entity).setSaddled(true);

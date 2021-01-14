@@ -6,14 +6,16 @@
 package minegame159.meteorclient.modules.combat;
 
 import com.google.common.collect.Streams;
+import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
+import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.PostTickEvent;
-import minegame159.meteorclient.events.RenderEvent;
+import minegame159.meteorclient.events.render.RenderEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -24,10 +26,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class AimAssist extends ToggleModule {
+public class AimAssist extends Module {
     public enum Priority {
         LowestDistance,
         HighestDistance,
@@ -36,40 +35,40 @@ public class AimAssist extends ToggleModule {
     }
 
     public enum Target {
-        Eyes,
+        Head,
         Body,
         Feet
     }
     
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgSpeed = settings.createGroup("Speed");
+    private final SettingGroup sgSpeed = settings.createGroup("Aim Speed");
 
     // General
     private final Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()
             .name("range")
-            .description("Aim range.")
+            .description("How far away the entity has to be to be targeted.")
             .defaultValue(5)
             .min(0)
             .build()
     );
 
-    private final Setting<List<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
+    private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
             .name("entities")
             .description("Entities to aim at.")
-            .defaultValue(new ArrayList<>(0))
+            .defaultValue(new Object2BooleanOpenHashMap<>(0))
             .build()
     );
 
     private final Setting<Boolean> friends = sgGeneral.add(new BoolSetting.Builder()
             .name("friends")
-            .description("Aim at friends, useful only if attack players is on.")
+            .description("Whether or not to aim at friends. Works if you have selected players as an entity to attack.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> ignoreWalls = sgGeneral.add(new BoolSetting.Builder()
             .name("ignore-walls")
-            .description("Aim through walls.")
+            .description("Whether or not to ignore aiming through walls.")
             .defaultValue(false)
             .build()
     );
@@ -83,14 +82,14 @@ public class AimAssist extends ToggleModule {
 
     private final Setting<Target> target = sgGeneral.add(new EnumSetting.Builder<Target>()
             .name("target")
-            .description("Where to aim.")
+            .description("Which body part to aim at.")
             .defaultValue(Target.Body)
             .build()
     );
 
     // Speed
     private final Setting<Boolean> speedInstant = sgSpeed.add(new BoolSetting.Builder()
-            .name("speed-instant")
+            .name("instant-look")
             .description("Instantly looks at the entity.")
             .defaultValue(false)
             .build()
@@ -114,7 +113,7 @@ public class AimAssist extends ToggleModule {
     }
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
         entity = null;
 
         Streams.stream(mc.world.getEntities())
@@ -176,14 +175,14 @@ public class AimAssist extends ToggleModule {
 
     private void setVec3dToTargetPoint(Vec3d vec3d, Entity entity) {
         switch (target.get()) {
-            case Eyes: ((IVec3d) vec3d).set(entity.getX(), entity.getY() + entity.getEyeHeight(entity.getPose()), entity.getZ()); break;
+            case Head: ((IVec3d) vec3d).set(entity.getX(), entity.getY() + entity.getEyeHeight(entity.getPose()), entity.getZ()); break;
             case Body: ((IVec3d) vec3d).set(entity.getX(), entity.getY() + entity.getEyeHeight(entity.getPose()) / 2, entity.getZ()); break;
             case Feet: ((IVec3d) vec3d).set(entity.getX(), entity.getY(), entity.getZ()); break;
         }
     }
 
     private boolean canAttackEntity(Entity entity) {
-        if (entity == mc.player || !entities.get().contains(entity.getType())) return false;
+        if (entity == mc.player || !entities.get().getBoolean(entity.getType())) return false;
 
         if (entity instanceof PlayerEntity) {
             if (friends.get()) return true;

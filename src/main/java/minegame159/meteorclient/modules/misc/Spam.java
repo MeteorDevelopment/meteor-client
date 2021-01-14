@@ -7,10 +7,10 @@ package minegame159.meteorclient.modules.misc;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.PostTickEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -24,12 +24,12 @@ import net.minecraft.nbt.Tag;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Spam extends ToggleModule {
+public class Spam extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
             .name("delay")
-            .description("How much ticks to wait between messages. 20 ticks = 1 second.")
+            .description("The delay between specified messages in ticks.")
             .defaultValue(20)
             .min(0)
             .sliderMax(100)
@@ -38,7 +38,7 @@ public class Spam extends ToggleModule {
 
     private final Setting<Boolean> random = sgGeneral.add(new BoolSetting.Builder()
             .name("random")
-            .description("Selects random message.")
+            .description("Selects a random message from your spam message list.")
             .defaultValue(false)
             .build()
     );
@@ -48,7 +48,7 @@ public class Spam extends ToggleModule {
     private int messageI;
 
     public Spam() {
-        super(Category.Misc, "spam", "Spams message in chat.");
+        super(Category.Misc, "spam", "Spams specified messages in chat.");
     }
 
     @Override
@@ -58,7 +58,7 @@ public class Spam extends ToggleModule {
     }
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
         if (messages.isEmpty()) return;
 
         if (timer <= 0) {
@@ -133,7 +133,7 @@ public class Spam extends ToggleModule {
     }
 
     @Override
-    public ToggleModule fromTag(CompoundTag tag) {
+    public Module fromTag(CompoundTag tag) {
         messages.clear();
 
         if (tag.contains("messages")) {

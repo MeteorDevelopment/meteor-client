@@ -9,17 +9,16 @@ package minegame159.meteorclient.modules.player;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.PostTickEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.modules.combat.AutoArmor;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.utils.Chat;
-import minegame159.meteorclient.utils.InvUtils;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import minegame159.meteorclient.utils.player.Chat;
+import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.EquipmentSlot;
@@ -28,32 +27,32 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.SwordItem;
 import net.minecraft.screen.slot.SlotActionType;
 
-public class AutoMend extends ToggleModule {
+public class AutoMend extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     
     private final Setting<Boolean> swords = sgGeneral.add(new BoolSetting.Builder()
             .name("swords")
-            .description("Move swords.")
+            .description("Moves swords.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> armourSlots = sgGeneral.add(new BoolSetting.Builder()
             .name("use-armour-slots")
-            .description("Whether to use armour slots to mend items faster")
+            .description("Whether or not to use armor slots to mend items quicker.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> removeFinished = sgGeneral.add(new BoolSetting.Builder()
             .name("remove-finished")
-            .description("If there are no items to replace but space in your inventory, the items will be moved out of active slots")
+            .description("The items will be moved out of active slots if there are no items to replace, but space in your inventory.")
             .defaultValue(true)
             .build()
     );
 
     public AutoMend() {
-        super(Category.Player, "auto-mend", "Automatically replaces equipped items and items in offhand with mending when fully repaired.");
+        super(Category.Player, "auto-mend", "Automatically replaces equipped items and items in your offhand with Mending when fully repaired.");
     }
 
     private void replaceItem(boolean offhandEmpty) {
@@ -103,8 +102,9 @@ public class AutoMend extends ToggleModule {
     }
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
-        if (mc.currentScreen instanceof HandledScreen<?>) return;
+    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+
+        if (mc.player.currentScreenHandler.getStacks().size() < 45) return;
 
         if (mc.player.getOffHandStack().isEmpty()) replaceItem(true);
         else if (!mc.player.getOffHandStack().isDamaged()) replaceItem(false);

@@ -9,11 +9,14 @@ import it.unimi.dsi.fastutil.Stack;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import minegame159.meteorclient.gui.GuiConfig;
 import minegame159.meteorclient.gui.widgets.WWidget;
+import minegame159.meteorclient.rendering.DrawMode;
 import minegame159.meteorclient.rendering.Fonts;
 import minegame159.meteorclient.rendering.MeshBuilder;
 import minegame159.meteorclient.rendering.MyFont;
-import minegame159.meteorclient.utils.Color;
-import minegame159.meteorclient.utils.Pool;
+import minegame159.meteorclient.utils.misc.CursorStyle;
+import minegame159.meteorclient.utils.misc.Pool;
+import minegame159.meteorclient.utils.misc.input.Input;
+import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.texture.AbstractTexture;
@@ -42,13 +45,20 @@ public class GuiRenderer {
     public String tooltip;
 
     private MyFont font;
+    private CursorStyle cursorStyle;
+
+    public GuiRenderer() {
+        mb.texture = true;
+    }
 
     public void begin(boolean root) {
-        mb.begin(GL11.GL_TRIANGLES, VertexFormats.POSITION_COLOR_TEXTURE);
+        mb.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR_TEXTURE);
 
         if (root) {
             Window window = MinecraftClient.getInstance().getWindow();
             beginScissor(0, 0, window.getFramebufferWidth(), window.getFramebufferHeight(), false);
+
+            cursorStyle = CursorStyle.Default;
         }
     }
     public void begin() {
@@ -60,17 +70,8 @@ public class GuiRenderer {
         double mouseY = MinecraftClient.getInstance().mouse.getY();
         double tooltipWidth = tooltip != null ? textWidth(tooltip) : 0;
 
-        if (root && tooltipWidth > 0) {
-            quad(Region.FULL, mouseX + 8, mouseY + 8, tooltipWidth + 8, textHeight() + 8, GuiConfig.INSTANCE.background);
-        }
-
         MinecraftClient.getInstance().getTextureManager().bindTexture(TEXTURE);
-        mb.end(true);
-
-        if (root && tooltipWidth > 0) {
-            text(tooltip, mouseX + 8 + 4, mouseY + 8 + 4, false, GuiConfig.INSTANCE.text);
-            tooltip = null;
-        }
+        mb.end();
 
         Pair<MyFont, Double> font = Fonts.get(GuiConfig.INSTANCE.guiScale);
         this.font = font.getLeft();
@@ -82,6 +83,8 @@ public class GuiRenderer {
             }
         }
         this.font.end();
+
+        MyFont tooltipFont = this.font;
 
         font = Fonts.get(1.22222222 * GuiConfig.INSTANCE.guiScale);
         this.font = font.getLeft();
@@ -95,10 +98,28 @@ public class GuiRenderer {
         this.font.end();
         texts.clear();
 
-        if (root) endScissor();
+        if (root) {
+            if (tooltipWidth > 0) {
+                mb.texture = false;
+                mb.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
+                mb.quad(mouseX + 8, mouseY + 8, tooltipWidth + 8, textHeight() + 8, GuiConfig.INSTANCE.background);
+                mb.end();
+                mb.texture = true;
+
+                tooltipFont.render(tooltip, mouseX + 8 + 4, mouseY + 8 + 4, GuiConfig.INSTANCE.text);
+                tooltip = null;
+            }
+
+            endScissor();
+            Input.setCursorStyle(cursorStyle);
+        }
     }
     public void end() {
         end(false);
+    }
+
+    public void setCursorStyle(CursorStyle style) {
+        cursorStyle = style;
     }
 
     public void beginScissor(double x, double y, double width, double height, boolean changeGlState) {
@@ -231,7 +252,7 @@ public class GuiRenderer {
 
     public void texture(double x, double y, double width, double height, double rotation, AbstractTexture texture) {
         post(() -> {
-            mb.begin(GL_TRIANGLES, VertexFormats.POSITION_COLOR_TEXTURE);
+            mb.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR_TEXTURE);
 
             mb.pos(x, y, 0).color(WHITE).texture(0, 0).endVertex();
             mb.pos(x + width, y, 0).color(WHITE).texture(1, 0).endVertex();
@@ -245,7 +266,7 @@ public class GuiRenderer {
             GL11.glTranslated(x + width / 2, y + height / 2, 0);
             GL11.glRotated(rotation, 0, 0, 1);
             GL11.glTranslated(-x - width / 2, -y - height / 2, 0);
-            mb.end(true);
+            mb.end();
             GL11.glPopMatrix();
         });
     }

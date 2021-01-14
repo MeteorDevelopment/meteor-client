@@ -11,8 +11,9 @@ import minegame159.meteorclient.gui.renderer.Region;
 import minegame159.meteorclient.gui.screens.WindowScreen;
 import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.utils.Color;
 import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.render.color.Color;
+import minegame159.meteorclient.utils.render.color.SettingColor;
 
 public class ColorSettingScreen extends WindowScreen {
     private static final Color[] HUE_COLORS = { new Color(255, 0, 0), new Color(255, 255, 0), new Color(0, 255, 0), new Color(0, 255, 255), new Color(0, 0, 255), new Color(255, 0, 255), new Color(255, 0, 0) };
@@ -21,7 +22,7 @@ public class ColorSettingScreen extends WindowScreen {
 
     public Runnable action;
 
-    private final Setting<Color> setting;
+    private final Setting<SettingColor> setting;
 
     private final WQuad displayQuad;
 
@@ -29,8 +30,9 @@ public class ColorSettingScreen extends WindowScreen {
     private final WHueQuad hueQuad;
 
     private final WIntEdit rItb, gItb, bItb, aItb;
+    private final WDoubleEdit rainbowSpeed;
 
-    public ColorSettingScreen(Setting<Color> setting) {
+    public ColorSettingScreen(Setting<SettingColor> setting) {
         super("Select Color", true);
         this.setting = setting;
 
@@ -65,6 +67,15 @@ public class ColorSettingScreen extends WindowScreen {
         aItb = rgbaTable.add(new WIntEdit(setting.get().a, 0, 255)).getWidget();
         aItb.action = this::rgbaChanged;
 
+        WTable rainbowTable = add(new WTable()).fillX().expandX().getWidget();
+        row();
+        rainbowTable.add(new WLabel("Rainbow: "));
+        rainbowSpeed = rainbowTable.add(new WDoubleEdit(setting.get().rainbowSpeed, 0, 0.025, 4, false, 75)).fillX().expandX().getWidget();
+        rainbowSpeed.action = () -> {
+            setting.get().rainbowSpeed = rainbowSpeed.get();
+            setting.changed();
+        };
+
         WTable bottomTable = add(new WTable()).fillX().expandX().getWidget();
 
         WButton backButton = bottomTable.add(new WButton("Back")).fillX().expandX().getWidget();
@@ -73,16 +84,7 @@ public class ColorSettingScreen extends WindowScreen {
         WButton resetButton = bottomTable.add(new WButton(WButton.ButtonRegion.Reset)).getWidget();
         resetButton.action = () -> {
             setting.reset();
-
-            rItb.set(setting.get().r);
-            gItb.set(setting.get().g);
-            bItb.set(setting.get().b);
-            aItb.set(setting.get().a);
-
-            displayQuad.color.set(setting.get());
-            hueQuad.calculateFromSetting(true);
-            brightnessQuad.calculateFromColor(setting.get(), true);
-
+            setFromSetting();
             callAction();
         };
 
@@ -90,8 +92,27 @@ public class ColorSettingScreen extends WindowScreen {
         brightnessQuad.calculateFromColor(setting.get(), false);
     }
 
+    private void setFromSetting() {
+        rItb.set(setting.get().r);
+        gItb.set(setting.get().g);
+        bItb.set(setting.get().b);
+        aItb.set(setting.get().a);
+        rainbowSpeed.set(setting.get().rainbowSpeed);
+
+        displayQuad.color.set(setting.get());
+        hueQuad.calculateFromSetting(true);
+        brightnessQuad.calculateFromColor(setting.get(), true);
+    }
+
     private void callAction() {
         if (action != null) action.run();
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+
+        if (setting.get().rainbowSpeed > 0) setFromSetting();
     }
 
     private void rgbaChanged() {
@@ -219,8 +240,6 @@ public class ColorSettingScreen extends WindowScreen {
         }
 
         void calculateFromColor(Color c, boolean calculateNow) {
-            boolean calculated = false;
-
             double min = Math.min(Math.min(c.r, c.g), c.b);
             double max = Math.max(Math.max(c.r, c.g), c.b);
             double delta = max - min;
@@ -418,9 +437,9 @@ public class ColorSettingScreen extends WindowScreen {
             q = 1 * (1.0 - (1 * ff));
             t = 1 * (1.0 - (1 * (1.0 - ff)));
 
-            double r = 0;
-            double g = 0;
-            double b = 0;
+            double r;
+            double g;
+            double b;
 
             switch(i) {
                 case 0:

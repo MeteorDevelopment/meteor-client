@@ -10,6 +10,7 @@ import minegame159.meteorclient.gui.screens.settings.ColorSettingScreen;
 import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.settings.ColorSetting;
 import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.world.Dimension;
 import minegame159.meteorclient.waypoints.Waypoint;
 import minegame159.meteorclient.waypoints.Waypoints;
 import net.minecraft.client.MinecraftClient;
@@ -30,6 +31,8 @@ public class EditWaypointScreen extends WindowScreen {
             this.waypoint.x = (int) mc.player.getX();
             this.waypoint.y = (int) mc.player.getY() + 2;
             this.waypoint.z = (int) mc.player.getZ();
+
+            this.waypoint.actualDimension = Utils.getDimension();
 
             switch (Utils.getDimension()) {
                 case Overworld: this.waypoint.overworld = true; break;
@@ -109,20 +112,25 @@ public class EditWaypointScreen extends WindowScreen {
 
         add(new WHorizontalSeparator());
 
+        add(new WLabel("Actual Dimension:"));
+        WDropbox<Dimension> dimensionDropbox = add(new WDropbox<>(waypoint.actualDimension)).getWidget();
+        dimensionDropbox.action = () -> waypoint.actualDimension = dimensionDropbox.getValue();
+        row();
+
         // Overworld
-        add(new WLabel("Overworld:"));
+        add(new WLabel("Visible in Overworld:"));
         WCheckbox overworld = add(new WCheckbox(waypoint.overworld)).getWidget();
         overworld.action = () -> waypoint.overworld = overworld.checked;
         row();
 
         // Nether
-        add(new WLabel("Nether:"));
+        add(new WLabel("Visible in Nether:"));
         WCheckbox nether = add(new WCheckbox(waypoint.nether)).getWidget();
         nether.action = () -> waypoint.nether = nether.checked;
         row();
 
         // End
-        add(new WLabel("End:"));
+        add(new WLabel("Visible in End:"));
         WCheckbox end = add(new WCheckbox(waypoint.end)).getWidget();
         end.action = () -> waypoint.end = end.checked;
         row();

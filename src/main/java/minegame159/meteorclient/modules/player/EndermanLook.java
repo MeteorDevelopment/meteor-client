@@ -8,26 +8,26 @@ package minegame159.meteorclient.modules.player;
 import com.google.common.collect.Streams;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.PostTickEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.player.RotationUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.mob.EndermanEntity;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.math.Vec3d;
 
-public class EndermanLook extends ToggleModule {
+public class EndermanLook extends Module {
     public enum Mode{
         LookAt,
         LookAway
     }
 
     public EndermanLook() {
-        super(Category.Player, "enderman-look", "Prevents endermen from getting angry at you");
+        super(Category.Player, "enderman-look", "Either looks at all Endermen or prevents you from looking at Endermen.");
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -42,7 +42,7 @@ public class EndermanLook extends ToggleModule {
     EndermanEntity enderman = null;
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
         if (lookMode.get() == Mode.LookAway) {
             if (mc.player.abilities.creativeMode || !shouldLook())
                 return;
@@ -91,9 +91,6 @@ public class EndermanLook extends ToggleModule {
 
     private void lookAt(Entity ender){
         Vec3d enderVec = new Vec3d(ender.getX(), ender.getEyeY(), ender.getZ());
-        float pitch = Utils.getNeededPitch(enderVec);
-        float yaw = Utils.getNeededYaw(enderVec);
-        PlayerMoveC2SPacket.LookOnly packet = new PlayerMoveC2SPacket.LookOnly(yaw, pitch, mc.player.isOnGround());
-        mc.player.networkHandler.sendPacket(packet);
+        RotationUtils.packetRotate(enderVec);
     }
 }

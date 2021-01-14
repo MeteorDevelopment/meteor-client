@@ -7,13 +7,14 @@ package minegame159.meteorclient.modules.combat;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.PostTickEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.utils.PlayerUtils;
+import minegame159.meteorclient.utils.player.PlayerUtils;
+import minegame159.meteorclient.utils.player.RotationUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.BlockItem;
@@ -24,40 +25,40 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 
-public class Surround extends ToggleModule {
+public class Surround extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Boolean> doubleHeight = sgGeneral.add(new BoolSetting.Builder()
             .name("double-height")
-            .description("Places obsidian around your head.")
+            .description("Places obsidian on top of the original surround blocks to prevent people from face-placing you.")
             .defaultValue(false)
             .build()
     );
     
     private final Setting<Boolean> onlyOnGround = sgGeneral.add(new BoolSetting.Builder()
             .name("only-on-ground")
-            .description("Works only when you standing on ground.")
+            .description("Works only when you standing on blocks.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> onlyWhenSneaking = sgGeneral.add(new BoolSetting.Builder()
             .name("only-when-sneaking")
-            .description("Places blocks only when sneaking.")
+            .description("Places blocks only after sneaking.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> turnOff = sgGeneral.add(new BoolSetting.Builder()
             .name("turn-off")
-            .description("Turns off when placed.")
+            .description("Toggles off when all blocks are placed.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> center = sgGeneral.add(new BoolSetting.Builder()
             .name("center")
-            .description("Moves you to the center of the block.")
+            .description("Teleports you to the center of the block.")
             .defaultValue(true)
             .build()
     );
@@ -69,12 +70,19 @@ public class Surround extends ToggleModule {
             .build()
     );
 
+    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
+            .name("rotate")
+            .description("Automatically faces towards the obsidian being placed.")
+            .defaultValue(true)
+            .build()
+    );
+
     private int prevSlot;
     private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
     private boolean return_;
 
     public Surround() {
-        super(Category.Combat, "surround", "Surrounds you with obsidian (or other blocks) to take less damage.");
+        super(Category.Combat, "surround", "Surrounds you in blocks to prevent you from taking lots of damage.");
     }
 
     @Override
@@ -88,7 +96,7 @@ public class Surround extends ToggleModule {
     }
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
         if (disableOnJump.get() && mc.options.keyJump.isPressed()) {
             toggle();
             return;
@@ -143,6 +151,7 @@ public class Surround extends ToggleModule {
         boolean placed = !blockState.getMaterial().isReplaceable();
 
         if (!placed && findSlot()) {
+            if (rotate.get()) RotationUtils.packetRotate(blockPos);
             placed = PlayerUtils.placeBlock(blockPos, Hand.MAIN_HAND);
             resetSlot();
 

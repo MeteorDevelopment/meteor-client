@@ -6,10 +6,10 @@
 package minegame159.meteorclient.modules.player;
 
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 
-public class Portals extends ToggleModule {
+public class Portals extends Module {
     public Portals() {
-        super(Category.Player, "portals", "Allows you to use guis while in portal.");
+        super(Category.Player, "portals", "Allows you to use GUIs normally while in a Nether Portal.");
     }
 }

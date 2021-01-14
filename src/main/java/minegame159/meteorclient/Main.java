@@ -17,7 +17,7 @@ public class Main {
 
         int option = JOptionPane.showOptionDialog(
                 null,
-                "To install Meteor Client you need to put it in your mods folder along with Fabric API. Then run Fabric for latest minecraft version.",
+                "To install Meteor Client you need to put it in your mods folder along with Fabric API. Then run Fabric for latest Minecraft version.",
                 "Meteor Client",
                 JOptionPane.YES_NO_CANCEL_OPTION,
                 JOptionPane.ERROR_MESSAGE,

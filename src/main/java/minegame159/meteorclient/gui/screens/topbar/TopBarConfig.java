@@ -6,10 +6,10 @@
 package minegame159.meteorclient.gui.screens.topbar;
 
 import minegame159.meteorclient.Config;
-import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.Color;
+import minegame159.meteorclient.settings.BoolSetting;
+import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.settings.Settings;
+import minegame159.meteorclient.settings.StringSetting;
 
 public class TopBarConfig extends TopBarWindowScreen {
     public TopBarConfig() {
@@ -21,7 +21,6 @@ public class TopBarConfig extends TopBarWindowScreen {
         Settings s = new Settings();
 
         SettingGroup sgGeneral = s.getDefaultGroup();
-        SettingGroup sgCategoryColors = s.createGroup("Category Colors");
 
         sgGeneral.add(new StringSetting.Builder()
                 .name("prefix")
@@ -41,20 +40,14 @@ public class TopBarConfig extends TopBarWindowScreen {
                 .build()
         );
 
-        for (Category category : ModuleManager.CATEGORIES) {
-            sgCategoryColors.add(new ColorSetting.Builder()
-                    .name(category.toString().toLowerCase() + "-color")
-                    .description(category.toString() + " color.")
-                    .defaultValue(new Color(0, 0, 0, 0))
-                    .onChanged(color1 -> Config.INSTANCE.setCategoryColor(category, color1))
-                    .onModuleActivated(colorSetting -> {
-                        Color color = Config.INSTANCE.getCategoryColor(category);
-                        if (color == null) color = new Color(0, 0, 0, 0);
-                        colorSetting.set(color);
-                    })
-                    .build()
-            );
-        }
+        sgGeneral.add(new BoolSetting.Builder()
+                .name("delete-chat-commands-info")
+                .description("Delete previous chat messages.")
+                .defaultValue(true)
+                .onChanged(aBoolean -> Config.INSTANCE.deleteChatCommandsInfo = aBoolean)
+                .onModuleActivated(booleanSetting -> booleanSetting.set(Config.INSTANCE.deleteChatCommandsInfo))
+                .build()
+        );
 
         add(s.createTable()).fillX().expandX();
     }

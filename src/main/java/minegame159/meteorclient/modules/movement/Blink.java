@@ -7,18 +7,18 @@ package minegame159.meteorclient.modules.movement;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.PostTickEvent;
-import minegame159.meteorclient.events.packets.SendPacketEvent;
+import minegame159.meteorclient.events.packets.PacketEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class Blink extends ToggleModule {
+public class Blink extends Module {
     public Blink() {
-        super(Category.Movement, "blink", "Suspends all motion updates while enabled.");
+        super(Category.Movement, "blink", "Allows you to essentially teleport while suspending motion updates.");
     }
 
     private final List<PlayerMoveC2SPacket> packets = new ArrayList<>();
@@ -34,10 +34,10 @@ public class Blink extends ToggleModule {
     }
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> timer++);
+    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> timer++);
 
     @EventHandler
-    private final Listener<SendPacketEvent> onSendPacket = new Listener<>(event -> {
+    private final Listener<PacketEvent.Send> onSendPacket = new Listener<>(event -> {
         if (!(event.packet instanceof PlayerMoveC2SPacket)) return;
         event.cancel();
 

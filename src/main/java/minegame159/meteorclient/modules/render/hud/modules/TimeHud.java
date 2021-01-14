@@ -6,7 +6,6 @@
 package minegame159.meteorclient.modules.render.hud.modules;
 
 import minegame159.meteorclient.modules.render.hud.HUD;
-import net.minecraft.client.MinecraftClient;
 
 public class TimeHud extends DoubleTextHudModule {
     public TimeHud(HUD hud) {
@@ -15,7 +14,6 @@ public class TimeHud extends DoubleTextHudModule {
 
     @Override
     protected String getRight() {
-        MinecraftClient mc = MinecraftClient.getInstance();
         if (mc.world == null) return "00:00";
 
         int ticks = (int) (mc.world.getTimeOfDay() % 24000);

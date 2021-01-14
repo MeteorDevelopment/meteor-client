@@ -7,30 +7,57 @@ package minegame159.meteorclient.modules.render;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.KeyEvent;
-import minegame159.meteorclient.events.OpenScreenEvent;
-import minegame159.meteorclient.events.PostTickEvent;
+import minegame159.meteorclient.events.Cancellable;
+import minegame159.meteorclient.events.entity.TookDamageEvent;
+import minegame159.meteorclient.events.game.GameLeftEvent;
+import minegame159.meteorclient.events.game.OpenScreenEvent;
+import minegame159.meteorclient.events.meteor.KeyEvent;
+import minegame159.meteorclient.events.world.ChunkOcclusionEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
-import minegame159.meteorclient.settings.BoolSetting;
-import minegame159.meteorclient.settings.DoubleSetting;
-import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.utils.KeyAction;
+import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.misc.input.KeyAction;
+import minegame159.meteorclient.utils.player.Chat;
+import minegame159.meteorclient.utils.player.RotationUtils;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.minecraft.util.Formatting;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.EntityHitResult;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 
-public class Freecam extends ToggleModule {
+public class Freecam extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    
+
     private final Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
             .name("speed")
-            .description("Speed")
+            .description("Your speed in Freecam.")
             .defaultValue(1.0)
             .min(0.0)
+            .build()
+    );
+
+    public enum AutoDisableEvent {
+        None,
+        OnDamage,
+        OnDeath
+    }
+
+    private final Setting<AutoDisableEvent> autoDisableOnDamage = sgGeneral.add(new EnumSetting.Builder<AutoDisableEvent>()
+            .name("auto-disable-on-damage")
+            .description("Disables Freecam when you either take damage or die.")
+            .defaultValue(AutoDisableEvent.OnDamage)
+            .build()
+    );
+
+    private final Setting<Boolean> autoDisableOnLog = sgGeneral.add(new BoolSetting.Builder()
+            .name("auto-disable-on-log")
+            .description("Disables Freecam when you disconnect from a server.")
+            .defaultValue(true)
             .build()
     );
 
@@ -43,8 +70,15 @@ public class Freecam extends ToggleModule {
 
     private final Setting<Boolean> renderHands = sgGeneral.add(new BoolSetting.Builder()
             .name("render-hands")
-            .description("Render hands when in freecam.")
+            .description("Whether or not to render your hands in Freecam.")
             .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
+            .name("rotate")
+            .description("Rotates your character to whatever block or entity you are looking at.")
+            .defaultValue(false)
             .build()
     );
 
@@ -57,16 +91,17 @@ public class Freecam extends ToggleModule {
     private boolean forward, backward, right, left, up, down;
 
     public Freecam() {
-        super(Category.Render, "freecam", "You know what it does.");
+        super(Category.Render, "freecam", "Makes you fly out of your body.");
     }
 
     @Override
     public void onActivate() {
+        yaw = mc.player.yaw;
+        pitch = mc.player.pitch;
+
         ((IVec3d) pos).set(mc.gameRenderer.getCamera().getPos());
         ((IVec3d) prevPos).set(mc.gameRenderer.getCamera().getPos());
 
-        yaw = mc.player.yaw;
-        pitch = mc.player.pitch;
         prevYaw = yaw;
         prevPitch = pitch;
 
@@ -99,7 +134,7 @@ public class Freecam extends ToggleModule {
     }
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
         if (mc.currentScreen != null) return;
 
         Vec3d forward = Vec3d.fromPolar(0, getYaw(1 / 20f));
@@ -107,6 +142,21 @@ public class Freecam extends ToggleModule {
         double velX = 0;
         double velY = 0;
         double velZ = 0;
+
+
+        if (rotate.get()) {
+            BlockPos crossHairPos;
+            Vec3d crossHairPosition;
+
+            if (mc.crosshairTarget instanceof BlockHitResult) {
+                crossHairPosition = ((BlockHitResult) mc.crosshairTarget).getPos();
+                crossHairPos = ((BlockHitResult) mc.crosshairTarget).getBlockPos();
+                if (!mc.world.getBlockState(crossHairPos).isAir()) RotationUtils.clientRotate(crossHairPosition);
+            } else {
+                crossHairPos = ((EntityHitResult) mc.crosshairTarget).getEntity().getBlockPos();
+                RotationUtils.clientRotate(crossHairPos);
+            }
+        }
 
         double s = 0.5;
         if (mc.options.keySprint.isPressed()) s = 1;
@@ -173,6 +223,26 @@ public class Freecam extends ToggleModule {
         }
 
         if (cancel) event.cancel();
+    });
+
+    @EventHandler
+    private final Listener<ChunkOcclusionEvent> onChunkOcclusion = new Listener<>(Cancellable::cancel);
+
+    @EventHandler
+    private final Listener<TookDamageEvent> onTookDamage = new Listener<>(event -> {
+        if (event.entity.getUuid() == null) return;
+        if (!event.entity.getUuid().equals(mc.player.getUuid())) return;
+        if ((autoDisableOnDamage.get() == AutoDisableEvent.OnDamage) || (autoDisableOnDamage.get() == AutoDisableEvent.OnDeath && event.entity.getHealth() <= 0)) {
+            toggle();
+            Chat.info(this, "Auto toggled %s(default).", isActive() ? Formatting.GREEN + "on" : Formatting.RED + "off");
+        }
+    });
+
+    @EventHandler
+    private final Listener<GameLeftEvent> onGameLeft = new Listener<>(event -> {
+        if (!autoDisableOnLog.get()) return;
+
+        toggle();
     });
 
     public void changeLookDirection(double deltaX, double deltaY) {

@@ -9,52 +9,50 @@ package minegame159.meteorclient.modules.combat;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.AttackEntityEvent;
+import minegame159.meteorclient.events.entity.player.AttackEntityEvent;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EntityGroup;
 import net.minecraft.item.AxeItem;
 import net.minecraft.item.SwordItem;
 
-public class AutoWeapon extends ToggleModule {
+public class AutoWeapon extends Module {
     public enum Weapon{
         Sword,
         Axe
     }
 
     public AutoWeapon(){
-        super(Category.Combat, "auto-weapon", "Finds the best weapon in your hotbar.");
+        super(Category.Combat, "auto-weapon", "Finds the best weapon to use in your hotbar.");
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Weapon> weapon = sgGeneral.add(new EnumSetting.Builder<Weapon>()
             .name("Weapon")
-            .description("Which weapon to use for AutoWeapon")
+            .description("What type of weapon to use.")
             .defaultValue(Weapon.Sword)
             .build()
     );
 
     private final Setting<Integer> threshold = sgGeneral.add(new IntSetting.Builder()
             .name("threshold")
-            .description("If the non-prefered weapon does this much damage more then it will chose that over the prefered")
+            .description("If the non-preferred weapon produces this much damage this will favor it over your preferred weapon.")
             .defaultValue(4)
             .build()
     );
 
     private final Setting<Boolean> antiBreak = sgGeneral.add(new BoolSetting.Builder()
             .name("anti-break")
-            .description("Stops you from breaking your weapon.")
+            .description("Prevents you from breaking your weapon.")
             .defaultValue(false)
             .build()
     );
 
     @EventHandler
-    private final Listener<AttackEntityEvent> onAttack = new Listener<>(event -> {
-            mc.player.inventory.selectedSlot = getBestWeapon();
-    });
+    private final Listener<AttackEntityEvent> onAttack = new Listener<>(event -> mc.player.inventory.selectedSlot = getBestWeapon());
 
     private int getBestWeapon(){
         int slotS = mc.player.inventory.selectedSlot;

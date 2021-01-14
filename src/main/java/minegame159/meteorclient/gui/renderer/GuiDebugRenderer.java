@@ -7,10 +7,10 @@ package minegame159.meteorclient.gui.renderer;
 
 import minegame159.meteorclient.gui.widgets.Cell;
 import minegame159.meteorclient.gui.widgets.WWidget;
+import minegame159.meteorclient.rendering.DrawMode;
 import minegame159.meteorclient.rendering.MeshBuilder;
-import minegame159.meteorclient.utils.Color;
+import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.client.render.VertexFormats;
-import org.lwjgl.opengl.GL11;
 
 public class GuiDebugRenderer {
     private static final Color CELL_COLOR = new Color(25, 225, 25);
@@ -19,9 +19,9 @@ public class GuiDebugRenderer {
     private final MeshBuilder mb = new MeshBuilder();
 
     public void render(WWidget widget) {
-        mb.begin(GL11.GL_LINES, VertexFormats.POSITION_COLOR);
+        mb.begin(null, DrawMode.Lines, VertexFormats.POSITION_COLOR);
         renderWidget(widget);
-        mb.end(false);
+        mb.end();
     }
 
     private void renderWidget(WWidget widget) {

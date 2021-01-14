@@ -7,22 +7,23 @@ package minegame159.meteorclient.modules.combat;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.PostTickEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.item.Items;
 
-public class BowSpam extends ToggleModule {
+public class BowSpam extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Integer> charge = sgGeneral.add(new IntSetting.Builder()
             .name("charge")
-            .description("How much to charge the bow in ticks. (0-20)")
+            .description("How long to charge the bow before releasing in ticks.")
             .defaultValue(5)
             .min(5)
             .max(20)
@@ -57,7 +58,10 @@ public class BowSpam extends ToggleModule {
     }
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+        assert mc.player != null;
+        assert mc.interactionManager != null;
+        if (InvUtils.findItemWithCount(Items.ARROW).slot == -1) return;
         if (!onlyWhenHoldingRightClick.get() || mc.options.keyUse.isPressed()) {
             boolean isBow = mc.player.getMainHandStack().getItem() == Items.BOW;
             if (!isBow && wasBow) setPressed(false);

@@ -7,20 +7,21 @@ package minegame159.meteorclient.modules.render.hud;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.Render2DEvent;
+import minegame159.meteorclient.events.render.Render2DEvent;
 import minegame159.meteorclient.gui.widgets.WButton;
 import minegame159.meteorclient.gui.widgets.WLabel;
 import minegame159.meteorclient.gui.widgets.WTable;
 import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.modules.combat.*;
 import minegame159.meteorclient.modules.render.hud.modules.*;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.AlignmentX;
-import minegame159.meteorclient.utils.AlignmentY;
-import minegame159.meteorclient.utils.Color;
+import minegame159.meteorclient.utils.render.AlignmentX;
+import minegame159.meteorclient.utils.render.AlignmentY;
+import minegame159.meteorclient.utils.render.color.Color;
+import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -28,7 +29,7 @@ import net.minecraft.nbt.Tag;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HUD extends ToggleModule {
+public class HUD extends Module {
     private static final HudRenderer RENDERER = new HudRenderer();
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -55,24 +56,24 @@ public class HUD extends ToggleModule {
             .build()
     );
 
-    private final Setting<Color> primaryColor = sgGeneral.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> primaryColor = sgGeneral.add(new ColorSetting.Builder()
             .name("primary-color")
             .description("Primary color of text.")
-            .defaultValue(new Color(255, 255, 255))
+            .defaultValue(new SettingColor(255, 255, 255))
             .build()
     );
 
-    private final Setting<Color> secondaryColor = sgGeneral.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> secondaryColor = sgGeneral.add(new ColorSetting.Builder()
             .name("secondary-color")
             .description("Secondary color of text.")
-            .defaultValue(new Color(175, 175, 175))
+            .defaultValue(new SettingColor(175, 175, 175))
             .build()
     );
 
-    private final Setting<Color> welcomeColor = sgGeneral.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> welcomeColor = sgGeneral.add(new ColorSetting.Builder()
             .name("welcome-color")
             .description("Color of welcome text.")
-            .defaultValue(new Color(120, 43, 153))
+            .defaultValue(new SettingColor(120, 43, 153))
             .build()
     );
 
@@ -85,6 +86,38 @@ public class HUD extends ToggleModule {
             .build()
     );
 
+    private final Setting<ActiveModulesHud.ColorMode> activeModulesColorMode = sgActiveModules.add(new EnumSetting.Builder<ActiveModulesHud.ColorMode>()
+            .name("active-modules-color-mode")
+            .description("What color to use for active modules.")
+            .defaultValue(ActiveModulesHud.ColorMode.Random)
+            .build()
+    );
+
+    private final Setting<SettingColor> activeModulesFlatColor = sgActiveModules.add(new ColorSetting.Builder()
+            .name("active-modules-flat-color")
+            .description("Color for flat color mode.")
+            .defaultValue(new SettingColor(225, 25, 25))
+            .build()
+    );
+
+    private final Setting<Double> activeModulesRainbowSpeed = sgActiveModules.add(new DoubleSetting.Builder()
+            .name("active-modules-rainbow-speed")
+            .description("Rainbow speed of rainbow color mode.")
+            .defaultValue(0.05)
+            .sliderMax(0.1)
+            .decimalPlaces(4)
+            .build()
+    );
+
+    private final Setting<Double> activeModulesRainbowSpread = sgActiveModules.add(new DoubleSetting.Builder()
+            .name("active-modules-rainbow-spread")
+            .description("Rainbow spread of rainbow color mode.")
+            .defaultValue(0.025)
+            .sliderMax(0.05)
+            .decimalPlaces(4)
+            .build()
+    );
+
     // Inventory Viewer
     private final Setting<InventoryViewerHud.Background> invViewerBackground = sgInvViewer.add(new EnumSetting.Builder<InventoryViewerHud.Background>()
             .name("inventory-viewer-background")
@@ -93,10 +126,10 @@ public class HUD extends ToggleModule {
             .build()
     );
 
-    private final Setting<Color> invViewerColor = sgInvViewer.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> invViewerColor = sgInvViewer.add(new ColorSetting.Builder()
             .name("flat-mode-color")
             .description("Color of background on Flat mode.")
-            .defaultValue(new Color(0, 0, 0, 64))
+            .defaultValue(new SettingColor(0, 0, 0, 64))
             .build()
     );
 
@@ -112,6 +145,52 @@ public class HUD extends ToggleModule {
     );
 
     // Player Model
+    private final Setting<Double> playerModelScale = sgPlayerModel.add(new DoubleSetting.Builder()
+            .name("player-model-scale")
+            .description("Scale of player model.")
+            .defaultValue(2)
+            .min(1)
+            .sliderMin(1)
+            .sliderMax(4)
+            .build()
+    );
+
+    private final Setting<Boolean> copyYaw = sgPlayerModel.add(new BoolSetting.Builder()
+            .name("copy-yaw")
+            .description("Makes the player model's yaw equal to yours.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Boolean> copyPitch = sgPlayerModel.add(new BoolSetting.Builder()
+            .name("copy-pitch")
+            .description("Makes the player model's pitch equal to yours.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Integer> customYaw = sgPlayerModel.add(new IntSetting.Builder()
+            .name("custom-yaw")
+            .description("Custom yaw for when copy yaw is off.")
+            .defaultValue(0)
+            .min(-180)
+            .max(180)
+            .sliderMin(-180)
+            .sliderMax(180)
+            .build()
+    );
+
+    private final Setting<Integer> customPitch = sgPlayerModel.add(new IntSetting.Builder()
+            .name("custom-pitch")
+            .description("Custom pitch for when copy pitch is off.")
+            .defaultValue(0)
+            .min(-180)
+            .max(180)
+            .sliderMin(-180)
+            .sliderMax(180)
+            .build()
+    );
+
     private final Setting<Boolean> playerModelBackground = sgPlayerModel.add(new BoolSetting.Builder()
             .name("player-model-background")
             .description("Displays a background behind the player model.")
@@ -119,21 +198,10 @@ public class HUD extends ToggleModule {
             .build()
     );
 
-    private final Setting<Color> playerModelColor = sgPlayerModel.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> playerModelColor = sgPlayerModel.add(new ColorSetting.Builder()
             .name("player-model-background-color")
             .description("Color of background.")
-            .defaultValue(new Color(0, 0, 0, 64))
-            .build()
-    );
-
-    private final Setting<Double> playerModelScale = sgPlayerModel.add(new DoubleSetting.Builder()
-            .name("player-model-scale")
-            .description("Scale of player model.")
-            .defaultValue(2)
-            .min(1)
-            .max(4)
-            .sliderMin(1)
-            .sliderMax(4)
+            .defaultValue(new SettingColor(0, 0, 0, 64))
             .build()
     );
 
@@ -164,7 +232,7 @@ public class HUD extends ToggleModule {
     );
 
     // Module Info
-    private final Setting<List<ToggleModule>> moduleInfoModules = sgModuleInfo.add(new ModuleListSetting.Builder()
+    private final Setting<List<Module>> moduleInfoModules = sgModuleInfo.add(new ModuleListSetting.Builder()
             .name("module-info-modules")
             .description("Which modules to display")
             .defaultValue(moduleInfoModulesDefaultValue())
@@ -172,17 +240,17 @@ public class HUD extends ToggleModule {
             .build()
     );
 
-    private final Setting<Color> moduleInfoOnColor = sgModuleInfo.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> moduleInfoOnColor = sgModuleInfo.add(new ColorSetting.Builder()
             .name("module-info-on-color")
             .description("Color when module is on.")
-            .defaultValue(new Color(25, 225, 25))
+            .defaultValue(new SettingColor(25, 225, 25))
             .build()
     );
 
-    private final Setting<Color> moduleInfoOffColor = sgModuleInfo.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> moduleInfoOffColor = sgModuleInfo.add(new ColorSetting.Builder()
             .name("module-info-off-color")
             .description("Color when module is off.")
-            .defaultValue(new Color(225, 25, 25))
+            .defaultValue(new SettingColor(225, 25, 25))
             .build()
     );
 
@@ -212,8 +280,8 @@ public class HUD extends ToggleModule {
         init();
     }
 
-    private static List<ToggleModule> moduleInfoModulesDefaultValue() {
-        List<ToggleModule> modules = new ArrayList<>();
+    private static List<Module> moduleInfoModulesDefaultValue() {
+        List<Module> modules = new ArrayList<>();
         modules.add(ModuleManager.INSTANCE.get(KillAura.class));
         modules.add(ModuleManager.INSTANCE.get(CrystalAura.class));
         modules.add(ModuleManager.INSTANCE.get(AnchorAura.class));
@@ -271,7 +339,7 @@ public class HUD extends ToggleModule {
     public final Listener<Render2DEvent> onRender = new Listener<>(event -> {
         if (mc.options.debugEnabled) return;
 
-        RENDERER.begin(scale());
+        RENDERER.begin(scale(), event.tickDelta);
 
         for (HudModule module : modules) {
             if (module.active || mc.currentScreen instanceof HudEditorScreen) {
@@ -311,7 +379,7 @@ public class HUD extends ToggleModule {
     }
 
     @Override
-    public ToggleModule fromTag(CompoundTag tag) {
+    public Module fromTag(CompoundTag tag) {
         if (tag.contains("modules")) {
             ListTag modulesTag = tag.getList("modules", 10);
 
@@ -350,6 +418,18 @@ public class HUD extends ToggleModule {
     public ActiveModulesHud.Sort activeModulesSort() {
         return activeModulesSort.get();
     }
+    public ActiveModulesHud.ColorMode activeModulesColorMode() {
+        return activeModulesColorMode.get();
+    }
+    public SettingColor activeModulesFlatColor() {
+        return activeModulesFlatColor.get();
+    }
+    public double activeModulesRainbowSpeed() {
+        return activeModulesRainbowSpeed.get();
+    }
+    public double activeModulesRainbowSpread() {
+        return activeModulesRainbowSpread.get();
+    }
 
     public InventoryViewerHud.Background invViewerBackground() {
         return invViewerBackground.get();
@@ -361,15 +441,28 @@ public class HUD extends ToggleModule {
         return invViewerScale.get();
     }
 
+    public double playerModelScale() {
+        return playerModelScale.get();
+    }
+    public boolean playerModelCopyYaw() {
+        return copyYaw.get();
+    }
+    public boolean playerModelCopyPitch() {
+        return copyPitch.get();
+    }
+    public int playerModelCustomYaw() {
+        return customYaw.get();
+    }
+    public int playerModelCustomPitch() {
+        return customPitch.get();
+    }
     public boolean playerModelBackground() {
         return playerModelBackground.get();
     }
     public Color playerModelColor() {
         return playerModelColor.get();
     }
-    public double playerModelScale() {
-        return playerModelScale.get();
-    }
+
 
     public boolean armorFlip() {
         return armorFlip.get();
@@ -381,7 +474,7 @@ public class HUD extends ToggleModule {
         return armorScale.get();
     }
 
-    public List<ToggleModule> moduleInfoModules() {
+    public List<Module> moduleInfoModules() {
         return moduleInfoModules.get();
     }
     public Color moduleInfoOnColor() {

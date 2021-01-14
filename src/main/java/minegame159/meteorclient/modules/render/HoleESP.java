@@ -7,37 +7,61 @@ package minegame159.meteorclient.modules.render;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.PreTickEvent;
-import minegame159.meteorclient.events.RenderEvent;
+import minegame159.meteorclient.events.render.RenderEvent;
+import minegame159.meteorclient.events.world.TickEvent;
+import minegame159.meteorclient.mixin.AbstractBlockAccessor;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
-import minegame159.meteorclient.rendering.ShapeBuilder;
+import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.rendering.DrawMode;
+import minegame159.meteorclient.rendering.MeshBuilder;
+import minegame159.meteorclient.rendering.Renderer;
+import minegame159.meteorclient.rendering.ShapeMode;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.BlockIterator;
-import minegame159.meteorclient.utils.Color;
-import minegame159.meteorclient.utils.Pool;
+import minegame159.meteorclient.utils.misc.Pool;
+import minegame159.meteorclient.utils.render.color.Color;
+import minegame159.meteorclient.utils.render.color.SettingColor;
+import minegame159.meteorclient.utils.world.BlockIterator;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
+import net.minecraft.client.render.VertexFormats;
 import net.minecraft.util.math.BlockPos;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class HoleESP extends ToggleModule {
-
+public class HoleESP extends Module {
     public enum Mode {
         Flat,
         Box,
-        BoxBelow
+        BoxBelow,
+        Glow,
+        ReverseGlow
+    }
+
+    private static final MeshBuilder MB;
+    private static final MeshBuilder _MB;
+
+    static {
+        MB = new MeshBuilder(1024);
+        _MB = new MeshBuilder(1024);
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgColors = settings.createGroup("Colors");
 
+    // General
+
     private final Setting<Mode> renderMode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("render-mode")
-            .description("Rendering mode.")
-            .defaultValue(Mode.Flat)
+            .description("The rendering mode.")
+            .defaultValue(Mode.Glow)
+            .build()
+    );
+
+    private final Setting<ShapeMode> shapeMode = sgGeneral.add(new EnumSetting.Builder<ShapeMode>()
+            .name("shape-mode")
+            .description("How the shapes are rendered.")
+            .defaultValue(ShapeMode.Lines)
             .build()
     );
 
@@ -67,52 +91,62 @@ public class HoleESP extends ToggleModule {
             .build()
     );
 
+    private final Setting<Double> glowHeight = sgGeneral.add(new DoubleSetting.Builder()
+            .name("glow-height")
+            .description("The height of the glow when Glow mode is active")
+            .defaultValue(1)
+            .min(0)
+            .build()
+    );
+
+    // Colors
+
+    private final Setting<Boolean> depthTest = sgColors.add(new BoolSetting.Builder()
+            .name("glow-depth-test")
+            .description("Checks if there is things rendering in front of the glow.")
+            .defaultValue(false)
+            .build()
+    );
+
     private final Setting<Boolean> ignoreOwn = sgColors.add(new BoolSetting.Builder()
             .name("ignore-own")
-            .description("Ignores the hole you are standing in when rendering.")
+            .description("Ignores rendering the hole you are currently standing in.")
             .defaultValue(true)
             .build()
     );
 
-
-    private final Setting<Color> allBedrock = sgColors.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> allBedrock = sgColors.add(new ColorSetting.Builder()
             .name("all-bedrock")
             .description("All blocks are bedrock.")
-            .defaultValue(new Color(25, 225, 25))
+            .defaultValue(new SettingColor(25, 225, 25))
             .build()
     );
 
-    private final Setting<Color> someObsidian = sgColors.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> someObsidian = sgColors.add(new ColorSetting.Builder()
             .name("some-obsidian")
             .description("Some blocks are obsidian.")
-            .defaultValue(new Color(225, 145, 25))
+            .defaultValue(new SettingColor(225, 145, 25))
             .build()
     );
 
-    private final Setting<Color> allObsidian = sgColors.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> allObsidian = sgColors.add(new ColorSetting.Builder()
             .name("all-obsidian")
             .description("All blocks are obsidian.")
-            .defaultValue(new Color(225, 25, 25))
-            .build()
-    );
-
-    private final Setting<Boolean> fill = sgColors.add(new BoolSetting.Builder()
-            .name("fill")
-            .description("Fill the shapes rendered.")
-            .defaultValue(true)
+            .defaultValue(new SettingColor(225, 25, 25))
             .build()
     );
 
     private final Pool<Hole> holePool = new Pool<>(Hole::new);
     private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
     private final List<Hole> holes = new ArrayList<>();
+    private final Color transparent = new Color(0, 0, 0, 0);
 
     public HoleESP() {
-        super(Category.Render, "hole-esp", "Displays holes that you can be in so you don't take explosion damage.");
+        super(Category.Render, "hole-esp", "Displays Safe holes that you will take less damage in.");
     }
 
     @EventHandler
-    private final Listener<PreTickEvent> onTick = new Listener<>(event -> {
+    private final Listener<TickEvent.Pre> onTick = new Listener<>(event -> {
         for (Hole hole : holes) holePool.free(hole);
         holes.clear();
 
@@ -152,10 +186,10 @@ public class HoleESP extends ToggleModule {
     });
 
     private boolean checkHeight() {
-        if (!mc.world.getBlockState(blockPos).getMaterial().isReplaceable()) return false;
+        if (((AbstractBlockAccessor) mc.world.getBlockState(blockPos).getBlock()).isCollidable()) return false;
 
         for (int i = 0; i < holeHeight.get() - 1; i++) {
-            if (!mc.world.getBlockState(add(0, 1, 0)).getMaterial().isReplaceable()) return false;
+            if (((AbstractBlockAccessor) mc.world.getBlockState(add(0, 1, 0)).getBlock()).isCollidable()) return false;
         }
 
         add(0, -holeHeight.get() + 1, 0);
@@ -164,6 +198,13 @@ public class HoleESP extends ToggleModule {
 
     @EventHandler
     private final Listener<RenderEvent> onRender = new Listener<>(event -> {
+        if (renderMode.get() == Mode.Glow || renderMode.get() == Mode.ReverseGlow) {
+            MB.depthTest = depthTest.get();
+            _MB.depthTest = depthTest.get();
+            MB.begin(event, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
+            _MB.begin(event, DrawMode.Lines, VertexFormats.POSITION_COLOR);
+        }
+
         for (Hole hole : holes) {
             int x = hole.blockPos.getX();
             int y = hole.blockPos.getY();
@@ -171,22 +212,30 @@ public class HoleESP extends ToggleModule {
 
             switch (renderMode.get()) {
                 case Flat:
-                    if (fill.get()) ShapeBuilder.quadWithLines(x, y, z, hole.colorSides, hole.colorLines);
-                    else ShapeBuilder.emptyQuadWithLines(x, y, z, hole.colorLines);
+                    Renderer.quadWithLinesHorizontal(Renderer.NORMAL, Renderer.LINES, x, y, z, 1, hole.colorSides, hole.colorLines, shapeMode.get());
                     break;
                 case Box:
-                    if (fill.get()) {
-                        ShapeBuilder.blockSides(x, y, z, hole.colorSides, null);
-                    }
-                    ShapeBuilder.blockEdges(x, y, z, hole.colorLines, null);
+                    Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, blockPos, hole.colorSides, hole.colorLines, shapeMode.get(), 0);
                     break;
                 case BoxBelow:
-                    if (fill.get()) {
-                        ShapeBuilder.blockSides(x, y - 1, z, hole.colorSides, null);
-                    }
-                    ShapeBuilder.blockEdges(x, y - 1, z, hole.colorLines, null);
+                    Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x, y - 1, z, 1, hole.colorSides, hole.colorLines, shapeMode.get(), 0);
+                    break;
+                case Glow:
+                    Renderer.quadWithLinesHorizontal(Renderer.NORMAL, Renderer.LINES, x, y, z, 1, hole.colorSides, hole.colorLines, shapeMode.get());
+                    MB.gradientBoxSides(x, y, z, x + 1, y + glowHeight.get(), z + 1, hole.colorSides, transparent);
+                    gradientBoxVertical(x, y, z, glowHeight.get(), hole.colorLines, transparent, false);
+                    break;
+                case ReverseGlow:
+                    Renderer.quadWithLinesHorizontal(Renderer.NORMAL, Renderer.LINES, x, y + glowHeight.get(), z, 1, hole.colorSides, hole.colorLines, shapeMode.get());
+                    MB.gradientBoxSides(x, y, z, x + 1, y + glowHeight.get(), z + 1, transparent, hole.colorSides);
+                    gradientBoxVertical(x, y, z, glowHeight.get(), hole.colorLines, transparent, true);
                     break;
             }
+        }
+
+        if (renderMode.get() == Mode.ReverseGlow || renderMode.get() == Mode.Glow) {
+            MB.end();
+            _MB.end();
         }
     });
 
@@ -194,6 +243,7 @@ public class HoleESP extends ToggleModule {
         blockPos.setX(blockPos.getX() + x);
         blockPos.setY(blockPos.getY() + y);
         blockPos.setZ(blockPos.getZ() + z);
+
         return blockPos;
     }
 
@@ -204,11 +254,28 @@ public class HoleESP extends ToggleModule {
 
         public Hole set(BlockPos blockPos, Color color) {
             this.blockPos.set(blockPos);
+
             colorLines.set(color);
             colorSides.set(color);
             colorSides.a -= 175;
             colorSides.validate();
+
             return this;
+        }
+    }
+
+    private void gradientBoxVertical(double x, double y, double z, double height, Color startColor, Color endColor, boolean reverse) {
+        if (!reverse) {
+            _MB.gradientLine(x, y, z, x, y + height, z, startColor, endColor);
+            _MB.gradientLine(x + 1, y, z, x + 1, y + height, z, startColor, endColor);
+            _MB.gradientLine(x, y, z + 1, x, y + height, z + 1, startColor, endColor);
+            _MB.gradientLine(x + 1, y, z + 1, x + 1, y + height, z + 1, startColor, endColor);
+        }
+        else {
+            _MB.gradientLine(x, y + height, z, x, y, z, startColor, endColor);
+            _MB.gradientLine(x + 1, y + height, z, x + 1, y, z, startColor, endColor);
+            _MB.gradientLine(x, y + height, z + 1, x, y, z + 1, startColor, endColor);
+            _MB.gradientLine(x + 1, y + height, z + 1, x + 1, y, z + 1, startColor, endColor);
         }
     }
 }

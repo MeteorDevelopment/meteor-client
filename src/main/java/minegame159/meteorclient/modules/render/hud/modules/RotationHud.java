@@ -6,19 +6,16 @@
 package minegame159.meteorclient.modules.render.hud.modules;
 
 import minegame159.meteorclient.modules.render.hud.HUD;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.math.Direction;
 import org.apache.commons.lang3.StringUtils;
 
 public class RotationHud extends DoubleTextHudModule {
     public RotationHud(HUD hud) {
-        super(hud, "rotation", "Displays your rotation", "invalid ");
+        super(hud, "rotation", "Displays your rotation.", "invalid ");
     }
 
     @Override
     protected String getRight() {
-        MinecraftClient mc = MinecraftClient.getInstance();
-
         Direction direction = Direction.fromRotation(mc.gameRenderer.getCamera().getYaw());
         String axis = "invalid";
         switch (direction) {

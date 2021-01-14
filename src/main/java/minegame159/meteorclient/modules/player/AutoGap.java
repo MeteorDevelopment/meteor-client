@@ -9,11 +9,11 @@ package minegame159.meteorclient.modules.player;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.PostTickEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.modules.ToggleModule;
 import minegame159.meteorclient.modules.combat.CrystalAura;
 import minegame159.meteorclient.modules.combat.KillAura;
 import minegame159.meteorclient.settings.BoolSetting;
@@ -23,8 +23,8 @@ import minegame159.meteorclient.settings.SettingGroup;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.Items;
 
-public class AutoGap extends ToggleModule {
-    public enum Mode{
+public class AutoGap extends Module {
+    public enum Mode {
         Fire_Resistance,
         Regeneration,
         Constant
@@ -32,33 +32,33 @@ public class AutoGap extends ToggleModule {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     public AutoGap(){
-        super(Category.Player, "auto-gap", "Automatically eats gapples and egaps if their effects run out.");
+        super(Category.Player, "auto-gap", "Automatically eats Gaps or E-Gaps if its effects wear out.");
     }
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("mode")
-            .description("Determines when you eat the gapple.")
+            .description("Determines when you eat the Gap.")
             .defaultValue(Mode.Regeneration)
             .build()
     );
 
     private final Setting<Boolean> preferEgap = sgGeneral.add(new BoolSetting.Builder()
             .name("prefer-egap")
-            .description("Prefers to eat egapps over regular gapples")
+            .description("Prefers to eat E-Gaps over Gaps.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> preferAutoEat = sgGeneral.add(new BoolSetting.Builder()
             .name("prefer-auto-eat")
-            .description("Whether to use auto-eat or this in the event of a conflict")
+            .description("Whether or not to prefer Auto Eat or Auto Gap in case of a conflict.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> disableAuras = sgGeneral.add(new BoolSetting.Builder()
             .name("disable-auras")
-            .description("disable all auras")
+            .description("Disable all auras when using this module.")
             .defaultValue(false)
             .build()
     );
@@ -78,7 +78,7 @@ public class AutoGap extends ToggleModule {
     private boolean wasAutoEatOn = false;
 
     @EventHandler
-    private final Listener<PostTickEvent> onTick = new Listener<>(event -> {
+    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
         if(mc.options.keyUse.isPressed() && !wasThis && ModuleManager.INSTANCE.get(AutoEat.class).isActive() && preferAutoEat.get()){
             return;
         }else if(mc.options.keyUse.isPressed() && wasThis && ModuleManager.INSTANCE.get(AutoEat.class).isActive() && !preferAutoEat.get()){

@@ -10,10 +10,8 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.commands.Command;
 import minegame159.meteorclient.utils.Utils;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.ShulkerBoxScreen;
 import net.minecraft.command.CommandSource;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
@@ -29,22 +27,19 @@ public class Peek extends Command {
             new SimpleCommandExceptionType(new LiteralText("You must be holding a shulker box."));
 
     public Peek() {
-        super("peek", "Lets you see whats inside shulker boxes.");
+        super("peek", "Lets you see what's inside shulker boxes.");
     }
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.executes(context -> {
-            PlayerEntity player = MinecraftClient.getInstance().player;
-            assert player != null;
-
             ItemStack itemStack;
-            if (Utils.isShulker(player.getMainHandStack().getItem())) itemStack = player.getMainHandStack();
-            else if (Utils.isShulker(player.getOffHandStack().getItem())) itemStack = player.getOffHandStack();
+            if (Utils.isShulker(mc.player.getMainHandStack().getItem())) itemStack = mc.player.getMainHandStack();
+            else if (Utils.isShulker(mc.player.getOffHandStack().getItem())) itemStack = mc.player.getOffHandStack();
             else throw NOT_HOLDING_SHULKER_BOX.create();
 
             Utils.getItemsInContainerItem(itemStack, ITEMS);
-            MeteorClient.INSTANCE.screenToOpen = new PeekShulkerBoxScreen(new ShulkerBoxScreenHandler(0, player.inventory, new SimpleInventory(ITEMS)), player.inventory, itemStack.getName());
+            MeteorClient.INSTANCE.screenToOpen = new PeekShulkerBoxScreen(new ShulkerBoxScreenHandler(0, mc.player.inventory, new SimpleInventory(ITEMS)), mc.player.inventory, itemStack.getName());
 
             return SINGLE_SUCCESS;
         });

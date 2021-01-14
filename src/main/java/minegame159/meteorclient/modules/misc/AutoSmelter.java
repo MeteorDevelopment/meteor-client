@@ -7,20 +7,20 @@ package minegame159.meteorclient.modules.misc;
 
 import minegame159.meteorclient.mixininterface.IAbstractFurnaceScreenHandler;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
-import minegame159.meteorclient.utils.Chat;
-import minegame159.meteorclient.utils.InvUtils;
+import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.utils.player.Chat;
+import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.screen.AbstractFurnaceScreenHandler;
 import net.minecraft.screen.slot.SlotActionType;
 
-public class AutoSmelter extends ToggleModule {
+public class AutoSmelter extends Module {
     private int step;
     private boolean first;
     private int timer;
     private boolean waitingForItemsToSmelt;
 
     public AutoSmelter() {
-        super(Category.Misc, "auto-smelter", "Automatically smelts all smeltable items in your inventory.");
+        super(Category.Misc, "auto-smelter", "Automatically smelts all items in your inventory that can be smelted.");
     }
 
     @Override
@@ -37,7 +37,7 @@ public class AutoSmelter extends ToggleModule {
     public void tick(AbstractFurnaceScreenHandler c) {
         timer++;
 
-        // When furnace is opened
+        // When the furnace is opened.
         if (!first) {
             first = true;
 
@@ -45,20 +45,20 @@ public class AutoSmelter extends ToggleModule {
             timer = 0;
         }
 
-        // Check fuel
+        // Check for fuel.
         if (checkFuel(c)) return;
 
-        // Wait for smelting to complete
+        // Wait for the smelting to be complete.
         if (c.getCookProgress() != 0 || timer < 5) return;
 
         if (step == 0) {
-            // Take smelted results
+            // Take the smelted results.
             if (takeResults(c)) return;
 
             step++;
             timer = 0;
         } else if (step == 1) {
-            // Wait for the items to smelt
+            // Wait for the items to smelt.
             if (waitingForItemsToSmelt) {
                 if (c.slots.get(0).getStack().isEmpty()) {
                     step = 0;
@@ -68,7 +68,7 @@ public class AutoSmelter extends ToggleModule {
                 return;
             }
 
-            // Insert items
+            // Insert items.
             if (insertItems(c)) return;
 
             waitingForItemsToSmelt = true;
@@ -88,7 +88,7 @@ public class AutoSmelter extends ToggleModule {
         }
 
         if (slot == -1) {
-            Chat.warning(this, "Disabled because you don't have any items to smelt in your inventory.");
+            Chat.warning(this, "You do not have any items in your inventory that can be smelted... disabling.");
             toggle();
             return true;
         }
@@ -105,7 +105,7 @@ public class AutoSmelter extends ToggleModule {
                 InvUtils.clickSlot(1, 0, SlotActionType.QUICK_MOVE);
 
                 if (!c.slots.get(1).getStack().isEmpty()) {
-                    Chat.warning(this, "Disabled because your inventory is full.");
+                    Chat.warning(this, "Your inventory is currently full... disabling.");
                     toggle();
                     return true;
                 }
@@ -120,7 +120,7 @@ public class AutoSmelter extends ToggleModule {
             }
 
             if (slot == -1) {
-                Chat.warning(this, "Disabled because you don't have any fuel in your inventory.");
+                Chat.warning(this, "You do not have any fuel in your inventory... disabling.");
                 toggle();
                 return true;
             }
@@ -136,7 +136,7 @@ public class AutoSmelter extends ToggleModule {
         InvUtils.clickSlot(2, 0, SlotActionType.QUICK_MOVE);
 
         if (!c.slots.get(2).getStack().isEmpty()) {
-            Chat.warning(this, "Disabled because your inventory is full.");
+            Chat.warning(this, "Your inventory is full... disabling.");
             toggle();
             return true;
         }

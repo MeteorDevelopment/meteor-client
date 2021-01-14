@@ -12,6 +12,9 @@ import minegame159.meteorclient.mixininterface.IMinecraftClient;
 import minegame159.meteorclient.mixininterface.IMinecraftServer;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.utils.player.Chat;
+import minegame159.meteorclient.utils.render.color.Color;
+import minegame159.meteorclient.utils.world.Dimension;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ServerInfo;
 import net.minecraft.client.options.ServerList;
@@ -26,7 +29,6 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.registry.Registry;
 import org.apache.commons.io.output.ByteArrayOutputStream;
@@ -52,6 +54,8 @@ public class Utils {
 
     private static final Random random = new Random();
     private static final DecimalFormat df;
+
+    public static final Color WHITE = new Color(255, 255, 255);
 
     static {
         df = new DecimalFormat("0");
@@ -295,20 +299,6 @@ public class Utils {
         return new byte[0];
     }
 
-    public static float getNeededYaw(Vec3d vec) {
-        return mc.player.yaw + MathHelper.wrapDegrees((float) Math.toDegrees(Math.atan2(vec.z - mc.player.getZ(), vec.x - mc.player.getX())) - 90f - mc.player.yaw);
-    }
-
-    public static float getNeededPitch(Vec3d vec) {
-        double diffX = vec.x - mc.player.getX();
-        double diffY = vec.y - (mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()));
-        double diffZ = vec.z - mc.player.getZ();
-
-        double diffXZ = Math.sqrt(diffX * diffX + diffZ * diffZ);
-
-        return mc.player.pitch + MathHelper.wrapDegrees((float) -Math.toDegrees(Math.atan2(diffY, diffXZ)) - mc.player.pitch);
-    }
-
     public static double distanceToCamera(double x, double y, double z) {
         Camera camera = mc.gameRenderer.getCamera();
         return Math.sqrt(camera.getPos().squaredDistanceTo(x, y, z));
@@ -318,7 +308,7 @@ public class Utils {
     }
 
     public static boolean canUpdate() {
-        return mc.world != null || mc.player != null;
+        return mc != null && (mc.world != null || mc.player != null);
     }
 
     public static int random(int min, int max) {
@@ -343,7 +333,9 @@ public class Utils {
     }
 
     public static void leftClick() {
+        mc.options.keyAttack.setPressed(true);
         ((IMinecraftClient) mc).leftClick();
+        mc.options.keyAttack.setPressed(false);
     }
     public static void rightClick() {
         ((IMinecraftClient) mc).rightClick();
@@ -367,7 +359,7 @@ public class Utils {
     }
 
     public static boolean isThrowable(Item item) {
-        return item instanceof BowItem || item instanceof CrossbowItem || item instanceof SnowballItem || item instanceof EggItem || item instanceof EnderPearlItem || item instanceof SplashPotionItem || item instanceof LingeringPotionItem || item instanceof FishingRodItem || item instanceof TridentItem;
+        return item instanceof ExperienceBottleItem || item instanceof BowItem || item instanceof CrossbowItem || item instanceof SnowballItem || item instanceof EggItem || item instanceof EnderPearlItem || item instanceof SplashPotionItem || item instanceof LingeringPotionItem || item instanceof FishingRodItem || item instanceof TridentItem;
     }
 
     public static String floatToString(float number) {

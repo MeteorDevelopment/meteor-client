@@ -9,43 +9,42 @@ import minegame159.meteorclient.gui.widgets.WButton;
 import minegame159.meteorclient.gui.widgets.WTable;
 import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.ToggleModule;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.Chat;
-import minegame159.meteorclient.utils.FakePlayerEntity;
-import net.minecraft.util.Pair;
+import minegame159.meteorclient.utils.entity.FakePlayerEntity;
+import minegame159.meteorclient.utils.player.Chat;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class FakePlayer extends ToggleModule {
+public class FakePlayer extends Module {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<String> name = sgGeneral.add(new StringSetting.Builder()
             .name("name")
-            .description("Fakeplayer's name.")
+            .description("The name of the fake player.")
             .defaultValue("MeteorOnCrack")
             .build()
     );
 
     private final Setting<Boolean> copyInv = sgGeneral.add(new BoolSetting.Builder()
             .name("copy-inv")
-            .description("Copies your inventory to the Fakeplayer.")
+            .description("Copies your exact inventory to the fake player.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> glowing = sgGeneral.add(new BoolSetting.Builder()
             .name("glowing")
-            .description("Makes the FakePlayer have the glowing effect.")
+            .description("Grants the fake player a glowing effect.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Integer> health = sgGeneral.add(new IntSetting.Builder()
             .name("health")
-            .description("Fakeplayer's health.")
+            .description("The fake player's default health.")
             .defaultValue(20)
             .min(1)
             .sliderMax(100)
@@ -54,20 +53,20 @@ public class FakePlayer extends ToggleModule {
 
     private final Setting<Boolean> idInNametag = sgGeneral.add(new BoolSetting.Builder()
             .name("id-in-nametag")
-            .description("Renders the Fakeplayer's ID in its nametag.")
+            .description("Displays the fake player's ID inside its nametag.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> chatInfo = sgGeneral.add(new BoolSetting.Builder()
             .name("chat-info")
-            .description("Tells you when a player is added or removed.")
+            .description("Informs you when a fake player has been spawned or removed.")
             .defaultValue(false)
             .build()
     );
 
     public FakePlayer() {
-        super(Category.Player, "fake-player", "Spawns a clientside fake player.");
+        super(Category.Player, "fake-player", "Spawns a client-side fake player for testing usages.");
     }
 
     public static Map<FakePlayerEntity, Integer> players = new HashMap<>();
@@ -105,11 +104,10 @@ public class FakePlayer extends ToggleModule {
 
     public void spawnFakePlayer(String name, boolean copyInv, boolean glowing, float health) {
         if (isActive()) {
+            if (mc.world == null) return;
             FakePlayerEntity fakePlayer = new FakePlayerEntity(name, copyInv, glowing, health);
             if (chatInfo.get()) Chat.info(this, "Spawned a fakeplayer");
             players.put(fakePlayer, ID);
-            int idlog = new Pair<>(fakePlayer, ID).getRight();
-            System.out.println(idlog);
             ID++;
         }
     }
@@ -117,13 +115,13 @@ public class FakePlayer extends ToggleModule {
     public void removeFakePlayer(int id) {
         if (isActive()) {
             if (players.isEmpty()) {
-                if (chatInfo.get()) Chat.info(this, "No active fakeplayers to remove!");
+                if (chatInfo.get()) Chat.info(this, "There are no active fake players to remove!");
                 return;
             }
             for (Map.Entry<FakePlayerEntity, Integer> player : players.entrySet()) {
                 if (player.getValue() == id) {
                     player.getKey().despawn();
-                    if (chatInfo.get()) Chat.info(this, "Removed a fakeplayer with the id of (highlight)" + id);
+                    if (chatInfo.get()) Chat.info(this, "Removed fake player with ID (highlight)" + id);
                 }
             }
         }
@@ -132,20 +130,20 @@ public class FakePlayer extends ToggleModule {
     public void clearFakePlayers( boolean shouldCheckActive) {
         if (shouldCheckActive && isActive()) {
             if (players.isEmpty()) {
-                if (chatInfo.get()) Chat.info(this, "No active fakeplayers to remove!");
+                if (chatInfo.get()) Chat.info(this, "There are no active fake players to remove!");
                 return;
             } else {
                 for (Map.Entry<FakePlayerEntity, Integer> player : players.entrySet()) {
                     player.getKey().despawn();
                 }
-                if (chatInfo.get()) Chat.info(this, "Removed all fakeplayers.");
+                if (chatInfo.get()) Chat.info(this, "Removed all fake players.");
 
             }
         } else if (!shouldCheckActive) {
             for (Map.Entry<FakePlayerEntity, Integer> player : players.entrySet()) {
                 player.getKey().despawn();
             }
-            if (chatInfo.get()) Chat.info(this, "Removed all fakeplayers.");
+            if (chatInfo.get()) Chat.info(this, "Removed all fake players.");
         }
         players.clear();
     }
