@@ -57,10 +57,12 @@ public class BedAura extends Module {
 
     // Place
 
-    private final Setting<Boolean> place = sgPlace.add(new BoolSetting.Builder()
-            .name("place")
-            .description("Allows Bed Aura to place beds.")
-            .defaultValue(true)
+    private final Setting<Integer> placeDelay = sgPlace.add(new IntSetting.Builder()
+            .name("place-delay")
+            .description("The delay between placements.")
+            .defaultValue(2)
+            .min(0)
+            .sliderMax(10)
             .build()
     );
 
@@ -80,22 +82,6 @@ public class BedAura extends Module {
             .build()
     );
 
-    private final Setting<Double> minHealth = sgPlace.add(new DoubleSetting.Builder()
-            .name("min-health")
-            .description("The minimum health you have to be for Bed Aura to place.")
-            .defaultValue(15)
-            .build()
-    );
-
-    private final Setting<Integer> delay = sgPlace.add(new IntSetting.Builder()
-            .name("delay")
-            .description("The delay between placements.")
-            .defaultValue(2)
-            .min(0)
-            .sliderMax(10)
-            .build()
-    );
-
     private final Setting<Boolean> airPlace = sgPlace.add(new BoolSetting.Builder()
             .name("air-place")
             .description("Places beds in the air if they do more damage.")
@@ -103,12 +89,17 @@ public class BedAura extends Module {
             .build()
     );
 
-    private final Setting<Double> healthDifference = sgPlace.add(new DoubleSetting.Builder()
-            .name("damage-increase")
-            .description("The damage increase for smart delay to work.")
-            .defaultValue(5)
-            .min(0)
-            .max(20)
+    private final Setting<Boolean> place = sgPlace.add(new BoolSetting.Builder()
+            .name("place")
+            .description("Allows Bed Aura to place beds.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Double> minHealth = sgPlace.add(new DoubleSetting.Builder()
+            .name("min-health")
+            .description("The minimum health you have to be for Bed Aura to place.")
+            .defaultValue(15)
             .build()
     );
 
@@ -192,6 +183,15 @@ public class BedAura extends Module {
             .build()
     );
 
+    private final Setting<Double> healthDifference = sgPlace.add(new DoubleSetting.Builder()
+            .name("damage-increase")
+            .description("The damage increase for smart delay to work.")
+            .defaultValue(5)
+            .min(0)
+            .max(20)
+            .build()
+    );
+
     private final Setting<Double> maxDamage = sgPlace.add(new DoubleSetting.Builder()
             .name("max-damage")
             .description("The maximum self-damage allowed.")
@@ -199,7 +199,7 @@ public class BedAura extends Module {
             .build()
     );
 
-    private int delayLeft = delay.get();
+    private int delayLeft = placeDelay.get();
     private Vec3d bestBlock;
     private double bestDamage;
     private BlockPos playerPos;
@@ -323,7 +323,7 @@ public class BedAura extends Module {
             if (bestBlock != null && (bestDamage >= minDamage.get() || bypassCheck)) {
                 bypassCheck = false;
                 if (!smartDelay.get()) {
-                    delayLeft = delay.get();
+                    delayLeft = placeDelay.get();
                     placeBlock();
                 }else if (smartDelay.get() && (delayLeft <= 0 || bestDamage - lastDamage > healthDifference.get())) {
                     lastDamage = bestDamage;
