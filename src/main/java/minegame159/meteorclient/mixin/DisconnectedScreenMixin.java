@@ -34,7 +34,7 @@ public class DisconnectedScreenMixin implements IDisconnectedScreen {
 	private void onRenderBackground(CallbackInfo info) {
 		reconnectBtn = super.addButton(new ButtonWidget(width / 2 - 100, height / 2 + reasonHeight / 2 + 9 + 30, 200,
 				20, new LiteralText("Reconnecting in " + time / 20f), button -> timerActive = !timerActive));
-		timerActive = ModuleManager.INSTANCE.get(AutoReconnect.class).isActive();
+		timerActive = ModuleManager.INSTANCE.isActive(AutoReconnect.class);
 	}
 
 	@Override
