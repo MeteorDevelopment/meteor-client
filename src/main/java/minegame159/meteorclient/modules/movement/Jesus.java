@@ -147,6 +147,7 @@ public class Jesus extends Module {
         // Wait for timer
         packetTimer++;
         if (packetTimer < 4) return;
+        packetTimer = 0;
 
         // Cancel old packet
         event.cancel();
