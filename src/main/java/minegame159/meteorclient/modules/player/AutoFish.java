@@ -8,15 +8,15 @@ package minegame159.meteorclient.modules.player;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.meteor.KeyEvent;
-import minegame159.meteorclient.events.packets.PlaySoundPacketEvent;
+import minegame159.meteorclient.events.world.PlaySoundEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
+import net.minecraft.client.sound.SoundInstance;
 import net.minecraft.entity.projectile.FishingBobberEntity;
 import net.minecraft.item.FishingRodItem;
-import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
 
 public class AutoFish extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -94,11 +94,11 @@ public class AutoFish extends Module {
     }
 
     @EventHandler
-    private final Listener<PlaySoundPacketEvent> onPlaySoundPacket = new Listener<>(event -> {
-        PlaySoundS2CPacket p = event.packet;
+    private final Listener<PlaySoundEvent> onPlaySound = new Listener<>(event -> {
+        SoundInstance p = event.sound;
         FishingBobberEntity b = mc.player.fishHook;
 
-        if (p.getSound().getId().getPath().equals("entity.fishing_bobber.splash")) {
+        if (p.getId().getPath().equals("entity.fishing_bobber.splash")) {
             if (!splashDetectionRangeEnabled.get() || Utils.distance(b.getX(), b.getY(), b.getZ(), p.getX(), p.getY(), p.getZ()) <= splashDetectionRange.get()) {
                 ticksEnabled = true;
                 ticksToRightClick = ticksCatch.get();
