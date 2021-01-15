@@ -9,12 +9,12 @@ public class CanWalkOnFluidEvent {
 
     public LivingEntity entity;
     public Fluid fluid;
-
     public boolean walkOnFluid;
 
     public static CanWalkOnFluidEvent get(LivingEntity entity, Fluid fluid) {
         INSTANCE.entity = entity;
         INSTANCE.fluid = fluid;
+        INSTANCE.walkOnFluid = false;
         return INSTANCE;
     }
 }
