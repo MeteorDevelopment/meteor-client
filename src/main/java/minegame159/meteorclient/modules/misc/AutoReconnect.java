@@ -17,8 +17,6 @@ import net.minecraft.client.network.ServerInfo;
 
 public class AutoReconnect extends Module {
     
-    public static AutoReconnect INSTANCE;
-    
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     
     private final Setting<Double> time = sgGeneral.add(new DoubleSetting.Builder()
