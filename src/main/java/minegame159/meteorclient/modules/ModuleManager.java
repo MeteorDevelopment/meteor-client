@@ -398,7 +398,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new BreakIndicators());
         addModule(new CustomFOV());
         addModule(new HandView());
-        addModule(new Time());
+        addModule(new TimeChanger());
         addModule(new VoidESP());
         addModule(new CityESP());
         addModule(new ShulkerPeek());

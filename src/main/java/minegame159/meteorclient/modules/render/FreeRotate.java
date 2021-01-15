@@ -36,7 +36,7 @@ public class FreeRotate extends Module {
 
     public final Setting<Double> sensitivity = sgGeneral.add(new DoubleSetting.Builder()
             .name("camera-sensitivity")
-            .description("How fast the camera moves in camera mode.")
+            .description("How fast your camera moves in camera mode.")
             .defaultValue(8)
             .min(0)
             .sliderMax(10)
