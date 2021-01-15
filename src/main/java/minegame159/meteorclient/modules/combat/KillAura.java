@@ -251,7 +251,7 @@ public class KillAura extends Module {
 
     public void packetRotate() {
         Vec3d eyePos = new Vec3d(entity.getX(), entity.getEyeY(), entity.getZ());
-        Vec3d chestPos = new Vec3d(entity.getX(), (entity.getY() + (entity.getHeight() / 2)), entity.getZ());
+        Vec3d chestPos = new Vec3d(entity.getX(), (entity.getY() + entity.getHeight() / 2), entity.getZ());
 
         switch (rotationMode.get()) {
             case Eyes:
