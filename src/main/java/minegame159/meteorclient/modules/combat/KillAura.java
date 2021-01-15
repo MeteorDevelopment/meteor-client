@@ -47,6 +47,13 @@ public class KillAura extends Module {
         Any
     }
 
+    public enum RotationMode {
+        Eyes,
+        Chest,
+        Feet,
+        None
+    }
+
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgDelay = settings.createGroup("Delay");
     private final SettingGroup sgRandomDelay = settings.createGroup("Random Delay");
@@ -128,10 +135,10 @@ public class KillAura extends Module {
             .build()
     );
 
-    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
-            .name("rotate")
-            .description("Rotates to the entity you are attacking.")
-            .defaultValue(true)
+    private final Setting<RotationMode> rotationMode = sgGeneral.add(new EnumSetting.Builder<RotationMode>()
+            .name("rotation-mode")
+            .description("The mode to use for rotating towards the enemy server-side.")
+            .defaultValue(RotationMode.Eyes)
             .build()
     );
 
@@ -238,9 +245,26 @@ public class KillAura extends Module {
     private final Listener<TickEvent.Post> onPostTick = new Listener<>(event -> {
         findEntity();
         if (entity == null) return;
-        if (rotate.get()) RotationUtils.packetRotate(entity);
+        packetRotate();
         attack();
     });
+
+    public void packetRotate() {
+
+        switch (rotationMode.get()) {
+            case Eyes:
+                Vec3d eyePos = new Vec3d(entity.getX(), entity.getEyeY(), entity.getZ());
+                RotationUtils.packetRotate(eyePos);
+                break;
+            case Chest:
+                Vec3d chestPos = new Vec3d(entity.getX(), (entity.getY() + entity.getHeight() / 2), entity.getZ());
+                RotationUtils.packetRotate(chestPos);
+                break;
+            case Feet:
+                RotationUtils.packetRotate(entity);
+                break;
+        }
+    }
 
     private void attack() {
         if (entity == null) return;
