@@ -19,7 +19,7 @@ public class AutoReconnect extends Module {
     
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     
-    private final Setting<Double> time = sgGeneral.add(new DoubleSetting.Builder()
+    public final Setting<Double> time = sgGeneral.add(new DoubleSetting.Builder()
             .name("time")
             .description("The amount of seconds to wait before reconnecting to the server.")
             .defaultValue(5.0)
