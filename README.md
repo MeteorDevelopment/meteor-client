@@ -7,7 +7,7 @@
 ![GitHub contributors](https://img.shields.io/github/contributors/MeteorDevelopment/meteor-client)
 ![CircleCI](https://circleci.com/gh/MeteorDevelopment/meteor-client/tree/master.svg?style=svg)
 
-Minecraft fabric utility mod for the latest minecraft version.  
+Minecraft fabric utility mod for the latest Minecraft version.  
 Join our [Discord](https://discord.gg/bBGQZvd).
 
 ## Installation
@@ -17,10 +17,10 @@ Follow guide at [meteorclient.com](https://meteorclient.com/info).
 - Clone this repository
 - Run `./gradlew build`
 
-## Dev builds
-You can find dev builts at [circleci](https://app.circleci.com/pipelines/github/MineGame159/meteor-client?branch=master).
+## Dev Builds
+You can find dev builds at [circleci](https://app.circleci.com/pipelines/github/MineGame159/meteor-client?branch=master).
 
-## Older versions
+## Older Versions
 If you want to connect to servers that run older version you can download [multiconnect](https://www.curseforge.com/minecraft/mc-mods/multiconnect).
 
 ## Donation
