@@ -16,7 +16,7 @@ import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import net.minecraft.network.packet.s2c.play.WorldTimeUpdateS2CPacket;
 
-public class Time extends Module {
+public class TimeChanger extends Module {
 
     private final SettingGroup sgDefault = settings.getDefaultGroup();
 
@@ -29,8 +29,8 @@ public class Time extends Module {
             .build()
     );
 
-    public Time() {
-        super(Category.Render, "time", "Makes you able to set a custom time.");
+    public TimeChanger() {
+        super(Category.Render, "time-changer", "Makes you able to set a custom time.");
     }
 
     long oldTime;

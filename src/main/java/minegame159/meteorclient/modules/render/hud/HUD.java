@@ -36,7 +36,7 @@ public class HUD extends Module {
     private final SettingGroup sgActiveModules = settings.createGroup("Active Modules");
     private final SettingGroup sgInvViewer = settings.createGroup("Inventory Viewer");
     private final SettingGroup sgPlayerModel = settings.createGroup("Player Model");
-    private final SettingGroup sgArmor = settings.createGroup("Armor");
+    private final SettingGroup sgArmorInfo = settings.createGroup("Armor Info");
     private final SettingGroup sgModuleInfo = settings.createGroup("Module Info");
     private final SettingGroup sgCompass = settings.createGroup("Compass");
 
@@ -205,22 +205,22 @@ public class HUD extends Module {
             .build()
     );
 
-    // Armor
-    private final Setting<Boolean> armorFlip = sgArmor.add(new BoolSetting.Builder()
+    // Armor Info
+    private final Setting<Boolean> armorFlip = sgArmorInfo.add(new BoolSetting.Builder()
             .name("armor-flip-order")
             .description("Flips the order of armor items.")
             .defaultValue(true)
             .build()
     );
 
-    private final Setting<ArmorHud.Durability> armorDurability = sgArmor.add(new EnumSetting.Builder<ArmorHud.Durability>()
+    private final Setting<ArmorHud.Durability> armorDurability = sgArmorInfo.add(new EnumSetting.Builder<ArmorHud.Durability>()
             .name("armor-durability")
             .description("How to display armor durability.")
             .defaultValue(ArmorHud.Durability.Default)
             .build()
     );
 
-    private final Setting<Double> armorScale = sgArmor.add(new DoubleSetting.Builder()
+    private final Setting<Double> armorScale = sgArmorInfo.add(new DoubleSetting.Builder()
             .name("armor-scale")
             .description("Scale of armor.")
             .defaultValue(2)
@@ -327,7 +327,7 @@ public class HUD extends Module {
         HudModuleLayer bottomCenter = new HudModuleLayer(RENDERER, modules, AlignmentX.Center, AlignmentY.Bottom, 48, 64);
         bottomCenter.add(new ArmorHud(this));
         bottomCenter.add(new CompassHud(this));
-        bottomCenter.add(new TotemsHud(this));
+        bottomCenter.add(new TotemHUD(this));
 
         // Bottom Right
         HudModuleLayer bottomRight = new HudModuleLayer(RENDERER, modules, AlignmentX.Right, AlignmentY.Bottom, 2, 2);

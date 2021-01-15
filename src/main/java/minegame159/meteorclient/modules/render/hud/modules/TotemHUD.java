@@ -8,8 +8,8 @@ import minegame159.meteorclient.utils.render.RenderUtils;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 
-public class TotemsHud extends HudModule {
-    public TotemsHud(HUD hud) { super(hud, "totems", "Displays the amount of totems in your inventory."); }
+public class TotemHUD extends HudModule {
+    public TotemHUD(HUD hud) { super(hud, "totems", "Displays the amount of totems in your inventory."); }
 
 
 
