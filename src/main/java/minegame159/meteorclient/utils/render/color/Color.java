@@ -194,4 +194,66 @@ public class Color implements ISerializable<Color> {
         }
         return new Color((int) (r * 255), (int) (g * 255), (int) (b * 255), 255);
     }
+
+    /**
+     * Returns a {@link Color} based on its name, or white if the color name is invalid
+     */
+    public static Color fromName(String name)
+    {
+        Color color = new Color();
+
+        // Color values obtained from https://minecraft.gamepedia.com/Formatting_codes
+        switch (name)
+        {
+            case "black":
+                color.set(0, 0, 0, 255);
+                break;
+            case "dark_blue":
+                color.set(0, 0, 170, 255);
+                break;
+            case "dark_green":
+                color.set(0, 170, 0, 255);
+                break;
+            case "dark_aqua":
+                color.set(0, 170, 170, 255);
+                break;
+            case "dark_red":
+                color.set(170, 0, 0, 255);
+                break;
+            case "dark_purple":
+                color.set(170, 0, 170, 255);
+                break;
+            case "gold":
+                color.set(255, 170, 0, 255);
+                break;
+            case "gray":
+                color.set(170, 170, 170, 255);
+                break;
+            case "dark_gray":
+                color.set(85, 85, 85, 255);
+                break;
+            case "blue":
+                color.set(85, 85, 255, 255);
+                break;
+            case "green":
+                color.set(85, 255, 85, 255);
+                break;
+            case "aqua":
+                color.set(85, 255, 255, 255);
+                break;
+            case "red":
+                color.set(255, 85, 85, 255);
+                break;
+            case "light_purple":
+                color.set(255, 85, 255, 255);
+                break;
+            case "yellow":
+                color.set(255, 255, 85, 255);
+                break;
+            case "white":
+            default:
+                break;
+        }
+        return color;
+    }
 }

@@ -19,6 +19,8 @@ import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.rendering.ShapeMode;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.misc.ColoredText;
+import minegame159.meteorclient.utils.misc.TextUtils;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.entity.Entity;
@@ -199,6 +201,21 @@ public class ESP extends Module {
     }
 
     public Color getColor(Entity entity) {
+        if (entity instanceof PlayerEntity)
+        {
+            System.out.println("----------------------------------------");
+            System.out.println("As string: " + entity.getDisplayName().asString());
+            System.out.println("To string: " + entity.getDisplayName().toString());
+            System.out.println("Get string: " + entity.getDisplayName().getString());
+            System.out.println(">");
+            for (ColoredText coloredText : TextUtils.toColoredTextList(entity.getDisplayName()))
+            {
+                System.out.println("Text: " + coloredText.getText());
+                System.out.println("Color: " + coloredText.getColor());
+            }
+            System.out.println("----------------------------------------");
+        }
+
         if (entity instanceof PlayerEntity) return FriendManager.INSTANCE.getColor((PlayerEntity) entity, playersColor.get(), false);
 
         switch (entity.getType().getSpawnGroup()) {
