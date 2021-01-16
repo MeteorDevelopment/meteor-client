@@ -16,6 +16,7 @@ import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.entity.Target;
 import minegame159.meteorclient.utils.player.RotationUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -253,15 +254,13 @@ public class KillAura extends Module {
 
         switch (rotationMode.get()) {
             case Eyes:
-                Vec3d eyePos = new Vec3d(entity.getX(), entity.getEyeY(), entity.getZ());
-                RotationUtils.packetRotate(eyePos);
+                RotationUtils.packetRotate(entity, Target.Head);
                 break;
             case Chest:
-                Vec3d chestPos = new Vec3d(entity.getX(), (entity.getY() + entity.getHeight() / 2), entity.getZ());
-                RotationUtils.packetRotate(chestPos);
+                RotationUtils.packetRotate(entity);
                 break;
             case Feet:
-                RotationUtils.packetRotate(entity);
+                RotationUtils.packetRotate(entity, Target.Feet);
                 break;
         }
     }
