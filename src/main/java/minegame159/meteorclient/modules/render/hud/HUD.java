@@ -8,6 +8,7 @@ package minegame159.meteorclient.modules.render.hud;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.render.Render2DEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.gui.widgets.WButton;
 import minegame159.meteorclient.gui.widgets.WLabel;
 import minegame159.meteorclient.gui.widgets.WTable;
@@ -18,13 +19,19 @@ import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.combat.*;
 import minegame159.meteorclient.modules.render.hud.modules.*;
 import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.render.AlignmentX;
 import minegame159.meteorclient.utils.render.AlignmentY;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.render.color.SettingColor;
+import net.minecraft.block.Block;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.item.Item;
+import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.screen.slot.SlotActionType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +46,7 @@ public class HUD extends Module {
     private final SettingGroup sgArmor = settings.createGroup("Armor");
     private final SettingGroup sgModuleInfo = settings.createGroup("Module Info");
     private final SettingGroup sgCompass = settings.createGroup("Compass");
+    private final SettingGroup sgItemCountHud = settings.createGroup("Item Count Hud");
 
 
     private final ActiveModulesHud activeModulesHud = new ActiveModulesHud(this);
@@ -272,7 +280,15 @@ public class HUD extends Module {
             .build()
     );
 
+    private final Setting<List<Item>> itemCounts = sgItemCountHud.add(new ItemListSetting.Builder()
+            .name("display-items")
+            .description("Items to show the count of on your screen. Reset hud after selecting for them to show up.")
+            .defaultValue(new ArrayList<>(0))
+            .build()
+    );
+
     public final List<HudModule> modules = new ArrayList<>();
+
 
     public HUD() {
         super(Category.Render, "HUD", "In game overlay.");
@@ -327,6 +343,9 @@ public class HUD extends Module {
         HudModuleLayer bottomCenter = new HudModuleLayer(RENDERER, modules, AlignmentX.Center, AlignmentY.Bottom, 48, 64);
         bottomCenter.add(new ArmorHud(this));
         bottomCenter.add(new CompassHud(this));
+        for(Item item : itemCounts.get()) {
+            bottomCenter.add(new ItemCountHud(this, item));
+        }
 
         // Bottom Right
         HudModuleLayer bottomRight = new HudModuleLayer(RENDERER, modules, AlignmentX.Right, AlignmentY.Bottom, 2, 2);
