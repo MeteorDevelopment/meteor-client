@@ -47,21 +47,21 @@ public class Jesus extends Module {
     );
     // TODO: grammar (in descriptions):
     private final Setting<Boolean> disableOnSneakForWater = sgWater.add(new BoolSetting.Builder()
-            .name("disable-on-sneak")
+            .name("disable-on-sneak-for-water")
             .description("Lets you go under the water when your sneak key is held.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> dipIntoWater = sgWater.add(new BoolSetting.Builder()
-            .name("dip-into")
+            .name("dip-into-water")
             .description("Lets you go under the water when you fall over than certain height.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Integer> dipIntoWaterHeight = sgWater.add(new IntSetting.Builder()
-            .name("dip-into-height")
+            .name("dip-into-water-height")
             .description("Maximum safe height.")
             .defaultValue(3)
             .min(1)
@@ -79,21 +79,21 @@ public class Jesus extends Module {
     );
 
     private final Setting<Boolean> disableOnSneakForLava = sgLava.add(new BoolSetting.Builder()
-            .name("disable-on-sneak")
+            .name("disable-on-sneak-for-lava")
             .description("Lets you go under the lava when your sneak key is held.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> dipIntoLava = sgLava.add(new BoolSetting.Builder()
-            .name("dip-into")
+            .name("dip-into-lava")
             .description("Lets you go under the lava when you fall over than certain height.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Integer> dipIntoLavaHeight = sgLava.add(new IntSetting.Builder()
-            .name("dip-into-height")
+            .name("dip-into-lava-height")
             .description("Maximum safe height.")
             .defaultValue(15)
             .min(1)
@@ -104,7 +104,7 @@ public class Jesus extends Module {
     );
 
     private final Setting<Boolean> dipIntoLavaIfFireResistance = sgLava.add(new BoolSetting.Builder()
-            .name("dip-into-if-fire-resistance")
+            .name("dip-into-lava-if-fire-resistance")
             .description("Lets you go under the lava if you have Fire Resistance effect to avoid fall damage.")
             .defaultValue(true)
             .build()
