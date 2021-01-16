@@ -1,6 +1,7 @@
 package minegame159.meteorclient.commands.commands;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import minegame159.meteorclient.Config;
 import minegame159.meteorclient.commands.Command;
 import minegame159.meteorclient.commands.arguments.CompoundNbtTagArgumentType;
 import minegame159.meteorclient.utils.player.Chat;
@@ -9,11 +10,16 @@ import net.minecraft.command.argument.NbtPathArgumentType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
+import net.minecraft.text.BaseText;
+import net.minecraft.text.ClickEvent;
+import net.minecraft.text.HoverEvent;
+import net.minecraft.text.LiteralText;
+import net.minecraft.util.Formatting;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
-public class Nbt extends Command {
-    public Nbt() {
+public class NBT extends Command {
+    public NBT() {
         super("nbt", "Modifies NBT data for an item, example: .nbt add {display:{Name:'{\"text\":\"$cRed Name\"}'}}");
     }
 
@@ -47,11 +53,56 @@ public class Nbt extends Command {
         })));
         builder.then(literal("get").executes(s -> {
             ItemStack stack = mc.player.inventory.getMainHandStack();
-            if(stack == null) {
+            if (stack == null) {
                 Chat.error("You must hold an item in your main hand.");
+            } else {
+                CompoundTag tag = stack.getTag();
+                String nbt = tag == null ? "none" : tag.asString();
+
+                BaseText copyButton = new LiteralText("NBT");
+                copyButton.setStyle(copyButton.getStyle()
+                        .withFormatting(Formatting.UNDERLINE)
+                        .withClickEvent(new ClickEvent(
+                                ClickEvent.Action.RUN_COMMAND,
+                                Config.INSTANCE.getPrefix() + this.name + " copy"  // TODO: getCommandString
+                        ))
+                        .withHoverEvent(new HoverEvent(
+                                HoverEvent.Action.SHOW_TEXT,
+                                new LiteralText("Copy NBT data to your clipboard.") // TODO: grammar
+                        )));
+
+                BaseText text = new LiteralText("");
+                text.append(copyButton);
+                text.append(new LiteralText(": " + nbt));
+
+                Chat.info(text);
             }
-            else {
-                Chat.info(stack.getTag().toString());
+            return SINGLE_SUCCESS;
+        }));
+        builder.then(literal("copy").executes(s -> {
+            ItemStack stack = mc.player.inventory.getMainHandStack();
+            if (stack == null) {
+                Chat.error("You must hold an item in your main hand.");
+            } else {
+                CompoundTag tag = stack.getTag();
+                if (tag == null)
+                    Chat.error("No NBT data in this item.");  // TODO: grammar
+                else {
+                    mc.keyboard.setClipboard(tag.toString());
+                    BaseText nbt = new LiteralText("NBT");
+                    nbt.setStyle(nbt.getStyle()
+                            .withFormatting(Formatting.UNDERLINE)
+                            .withHoverEvent(new HoverEvent(
+                                    HoverEvent.Action.SHOW_TEXT,
+                                    new LiteralText(tag.toString())
+                            )));
+
+                    BaseText text = new LiteralText("");
+                    text.append(nbt);
+                    text.append(new LiteralText(" data copied!"));  // TODO: grammar (will write "NBT data copied!")
+
+                    Chat.info(text);
+                }
             }
             return SINGLE_SUCCESS;
         }));
@@ -62,12 +113,12 @@ public class Nbt extends Command {
     }
 
     private boolean validBasic(ItemStack stack) {
-        if(!mc.player.abilities.creativeMode) {
+        if (!mc.player.abilities.creativeMode) {
             Chat.error("Creative mode only.");
             return false;
         }
 
-        if(stack == null) {
+        if (stack == null) {
             Chat.error("You must hold an item in your main hand.");
             return false;
         }

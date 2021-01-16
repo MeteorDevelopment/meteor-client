@@ -47,7 +47,7 @@ public class CommandManager {
         addCommand(new Clip());
         addCommand(new Bind());
         addCommand(new Toggle());
-        addCommand(new Nbt());
+        addCommand(new NBT());
     }
 
     public static void dispatch(String message) throws CommandSyntaxException {
@@ -78,4 +78,11 @@ public class CommandManager {
             super(null, client);
         }
     }
+
+//    public static String getCommandString(Command command, String... args) {
+//        StringBuilder base = new StringBuilder(Config.INSTANCE.getPrefix() + command.name);
+//        for (String arg : args)
+//            base.append(' ').append(arg);
+//        return base.toString();
+//    }
 }
