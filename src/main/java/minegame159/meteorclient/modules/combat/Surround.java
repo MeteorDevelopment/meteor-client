@@ -20,10 +20,8 @@ import net.minecraft.block.Blocks;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 
 public class Surround extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -87,12 +85,7 @@ public class Surround extends Module {
 
     @Override
     public void onActivate() {
-        if (center.get()) {
-            double x = MathHelper.floor(mc.player.getX()) + 0.5;
-            double z = MathHelper.floor(mc.player.getZ()) + 0.5;
-            mc.player.updatePosition(x, mc.player.getY(), z);
-            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(mc.player.getX(), mc.player.getY(), mc.player.getZ(), mc.player.isOnGround()));
-        }
+        if (center.get()) PlayerUtils.centerPlayer();
     }
 
     @EventHandler
