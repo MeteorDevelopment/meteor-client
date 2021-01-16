@@ -10,10 +10,12 @@ import minegame159.meteorclient.mixininterface.ILookBehavior;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import net.minecraft.block.*;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 
 public class PlayerUtils {
@@ -147,5 +149,12 @@ public class PlayerUtils {
         ) clickable = true;
 
         return clickable;
+    }
+
+    public static void centerPlayer() {
+        double x = MathHelper.floor(mc.player.getX()) + 0.5;
+        double z = MathHelper.floor(mc.player.getZ()) + 0.5;
+        mc.player.updatePosition(x, mc.player.getY(), z);
+        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(mc.player.getX(), mc.player.getY(), mc.player.getZ(), mc.player.isOnGround()));
     }
 }
