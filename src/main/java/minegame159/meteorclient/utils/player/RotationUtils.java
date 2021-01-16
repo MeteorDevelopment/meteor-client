@@ -1,6 +1,10 @@
 package minegame159.meteorclient.utils.player;
 
+import me.zero.alpine.listener.Listener;
+import minegame159.meteorclient.MeteorClient;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.entity.Target;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
@@ -11,20 +15,45 @@ import net.minecraft.util.math.Vec3d;
 public class RotationUtils {
     public static MinecraftClient mc = MinecraftClient.getInstance();
 
+    public static float serverYaw;
+    public static float serverPitch;
+    public static int rotationTimer;
+
     public static void packetRotate(Entity entity) {
-        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(getNeededYaw(entity.getPos()), getNeededPitch(entity.getPos()), mc.player.isOnGround()));
+        packetRotate(entity, Target.Body);
+    }
+
+        public static void packetRotate(Entity entity, Target target) {
+        switch (target) {
+            case Head:
+                packetRotate(new Vec3d(entity.getX(), entity.getEyeY(), entity.getZ()));
+                break;
+            case Body:
+                packetRotate(new Vec3d(entity.getX(), (entity.getY() + entity.getHeight() / 2), entity.getZ()));
+                break;
+            case Feet:
+                packetRotate(getNeededYaw(entity.getPos()), getNeededPitch(entity.getPos()));
+                break;
+        }
     }
 
     public static void packetRotate(BlockPos blockPos) {
-        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(getNeededYaw(Utils.vec3d(blockPos)), getNeededPitch(Utils.vec3d(blockPos)), mc.player.isOnGround()));
+        packetRotate(getNeededYaw(Utils.vec3d(blockPos)), getNeededPitch(Utils.vec3d(blockPos)));
     }
 
     public static void packetRotate(Vec3d vec) {
-        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(getNeededYaw(vec), getNeededPitch(vec), mc.player.isOnGround()));
+        packetRotate(getNeededYaw(vec), getNeededPitch(vec));
     }
 
     public static void packetRotate(float yaw, float pitch) {
         mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(yaw, pitch, mc.player.isOnGround()));
+        setCamRotation(yaw, pitch);
+    }
+
+    private static void setCamRotation(float yaw, float pitch) {
+        serverYaw = yaw;
+        serverPitch = pitch;
+        rotationTimer = 0;
     }
 
     public static void clientRotate(BlockPos blockPos) {
@@ -50,4 +79,10 @@ public class RotationUtils {
 
         return mc.player.pitch + MathHelper.wrapDegrees((float) -Math.toDegrees(Math.atan2(diffY, diffXZ)) - mc.player.pitch);
     }
+
+    public static void init() {
+        MeteorClient.EVENT_BUS.subscribe(onTick);
+    }
+
+    private static final Listener<TickEvent.Pre> onTick = new Listener<>(event -> rotationTimer++);
 }
