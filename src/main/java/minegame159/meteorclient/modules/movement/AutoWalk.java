@@ -22,6 +22,13 @@ public class AutoWalk extends Module {
         Simple,
         Smart
     }
+
+    public enum Direction {
+        Forwards,
+        Backwards,
+        Left,
+        Right
+    }
     
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
@@ -40,6 +47,13 @@ public class AutoWalk extends Module {
                     }
                 }
             })
+            .build()
+    );
+
+    private final Setting<Direction> direction = sgGeneral.add(new EnumSetting.Builder<Direction>()
+            .name("simiple-direction")
+            .description("The direction to walk in simple mode.")
+            .defaultValue(Direction.Forwards)
             .build()
     );
 
@@ -66,7 +80,20 @@ public class AutoWalk extends Module {
     @EventHandler
     private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
         if (mode.get() == Mode.Simple) {
-            ((IKeyBinding) mc.options.keyForward).setPressed(true);
+            switch (direction.get()) {
+                case Forwards:
+                    ((IKeyBinding) mc.options.keyForward).setPressed(true);
+                    break;
+                case Backwards:
+                    ((IKeyBinding) mc.options.keyBack).setPressed(true);
+                    break;
+                case Left:
+                    ((IKeyBinding) mc.options.keyLeft).setPressed(true);
+                    break;
+                case Right:
+                    ((IKeyBinding) mc.options.keyRight).setPressed(true);
+                    break;
+            }
         } else {
             if (timer > 20) {
                 timer = 0;
