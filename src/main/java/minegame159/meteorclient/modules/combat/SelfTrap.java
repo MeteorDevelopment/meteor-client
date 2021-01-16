@@ -16,9 +16,11 @@ import minegame159.meteorclient.rendering.ShapeMode;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.player.PlayerUtils;
+import minegame159.meteorclient.utils.player.RotationUtils;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.ShapeContext;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 
 import java.util.ArrayList;
@@ -71,6 +73,13 @@ public class SelfTrap extends Module {
     private final Setting<Boolean> center = sgGeneral.add(new BoolSetting.Builder()
             .name("center")
             .description("Centers you on the block you are standing on before placing.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
+            .name("rotate")
+            .description("Sends rotation packets to the server when placing.")
             .defaultValue(true)
             .build()
     );
@@ -146,7 +155,9 @@ public class SelfTrap extends Module {
             int prevSlot = mc.player.inventory.selectedSlot;
             mc.player.inventory.selectedSlot = slot;
 
-            if (PlayerUtils.placeBlockRotate(placePositions.get(placePositions.size()-1))) {
+
+            if (PlayerUtils.placeBlock(placePositions.get(placePositions.size()-1), Hand.MAIN_HAND)) {
+                if (rotate.get()) RotationUtils.packetRotate(placePositions.get(placePositions.size()-1));
                 placePositions.remove(placePositions.get(placePositions.size() - 1));
                 placed = true;
             }

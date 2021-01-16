@@ -25,11 +25,6 @@ public class PlayerUtils {
     private static final double diagonal = 1 / Math.sqrt(2);
     private static final Vec3d horizontalVelocity = new Vec3d(0, 0, 0);
 
-    public static boolean placeBlockRotate(BlockPos blockPos) {
-        RotationUtils.packetRotate(blockPos);
-        return placeBlock(blockPos, Hand.MAIN_HAND, true);
-    }
-
     public static boolean placeBlock(BlockPos blockPos, Hand hand) {
         return placeBlock(blockPos, hand, true);
     }
