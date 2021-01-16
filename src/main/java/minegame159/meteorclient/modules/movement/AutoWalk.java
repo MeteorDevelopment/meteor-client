@@ -51,7 +51,7 @@ public class AutoWalk extends Module {
     );
 
     private final Setting<Direction> direction = sgGeneral.add(new EnumSetting.Builder<Direction>()
-            .name("simiple-direction")
+            .name("simple-direction")
             .description("The direction to walk in simple mode.")
             .defaultValue(Direction.Forwards)
             .build()
