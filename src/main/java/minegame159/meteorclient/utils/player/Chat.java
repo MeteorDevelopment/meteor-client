@@ -9,7 +9,9 @@ import minegame159.meteorclient.Config;
 import minegame159.meteorclient.mixininterface.IChatHud;
 import minegame159.meteorclient.modules.Module;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.text.BaseText;
 import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 public class Chat {
@@ -23,6 +25,12 @@ public class Chat {
     }
     public static void info(String format, Object... args) {
         info(0, null, format, args);
+    }
+    public static void info(Module module, Text msg) {
+        sendMsg(0, module, msg);
+    }
+    public static void info(Text msg) {
+        info(null, msg);
     }
 
     public static void warning(Module module, String format, Object... args) {
@@ -39,16 +47,44 @@ public class Chat {
         error(null, format, args);
     }
 
-    private static void sendMsg(int id, Module module, String msg, Formatting color) {
+    private static void sendMsg(int id, Module module, Text msg) {
         if (mc.world == null) return;
 
         if (!Config.INSTANCE.deleteChatCommandsInfo) id = 0;
 
+        BaseText message = new LiteralText("");
+        message.append(getPrefix(module));
+        message.append(msg);
+
+        ((IChatHud) mc.inGameHud.getChatHud()).add(message, id);
+    }
+
+    private static void sendMsg(int id, Module module, String msg, Formatting color) {
+        BaseText message = new LiteralText(msg);
+        message.setStyle(message.getStyle().withFormatting(color));
+
+        sendMsg(id, module, message);
+    }
+
+    private static BaseText getPrefix(Module module) {
+        BaseText meteor = new LiteralText("Meteor");
+        meteor.setStyle(meteor.getStyle().withFormatting(Formatting.BLUE));
+
+        BaseText prefix = new LiteralText("");
+        prefix.setStyle(prefix.getStyle().withFormatting(Formatting.GRAY));
+        prefix.append("[");
+        prefix.append(meteor);
+        prefix.append("] ");
+
         if (module != null) {
-            ((IChatHud) mc.inGameHud.getChatHud()).add(new LiteralText(String.format("%s[%sMeteor%s] %s[%s] %s%s", Formatting.GRAY, Formatting.BLUE,Formatting.GRAY, Formatting.AQUA, module.title, color, msg)), id);
-        } else {
-            ((IChatHud) mc.inGameHud.getChatHud()).add(new LiteralText(String.format("%s[%sMeteor%s] %s%s", Formatting.GRAY, Formatting.BLUE, Formatting.GRAY, color, msg)), id);
+            BaseText moduleTitle = new LiteralText(module.title);
+            moduleTitle.setStyle(moduleTitle.getStyle().withFormatting(Formatting.AQUA));
+            prefix.append("[");
+            prefix.append(moduleTitle);
+            prefix.append("] ");
         }
+
+        return prefix;
     }
 
     private static String formatMsg(String format, Formatting defaultColor, Object... args) {

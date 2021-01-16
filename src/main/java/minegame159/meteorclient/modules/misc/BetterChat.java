@@ -19,10 +19,9 @@ import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.player.Chat;
 import net.minecraft.client.gui.hud.ChatHudLine;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.OrderedText;
-import net.minecraft.text.Text;
+import net.minecraft.text.*;
 import net.minecraft.util.ChatUtil;
 import net.minecraft.util.Formatting;
 
@@ -31,6 +30,31 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class BetterChat extends Module {
+    // Protection
+
+    private final SettingGroup sgProtection = settings.createGroup("Protection");  // TODO: grammar (descriptions, fix this pls):
+
+    private final Setting<Boolean> coordsProtectionEnabled = sgProtection.add(new BoolSetting.Builder()
+            .name("coords-protection-enabled")
+            .description("Prevents you from sending a message to the chat if there are coordinates there.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Boolean> disableAllMessages = sgProtection.add(new BoolSetting.Builder()
+            .name("disable-all-messages")
+            .description("Prevents you from sending all messages to the global chat.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> disableButton = sgProtection.add(new BoolSetting.Builder()
+            .name("disable-button")
+            .description("Add a button to the warning to send a message to the chat in any way.")
+            .defaultValue(true)
+            .build()
+    );
+
     // Anti Spam
 
     private final SettingGroup sgAntiSpam = settings.createGroup("Anti Spam");
@@ -102,21 +126,21 @@ public class BetterChat extends Module {
     );
 
     private final Setting<String> prefixText = sgPrefix.add(new StringSetting.Builder()
-            .name("text")
+            .name("prefix-text")
             .description("The text to add as your prefix.")
             .defaultValue("> ")
             .build()
     );
 
     private final Setting<Boolean> prefixSmallCaps = sgPrefix.add(new BoolSetting.Builder()
-            .name("small-caps")
+            .name("prefix-small-caps")
             .description("Uses a small font.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> prefixRandom = sgPrefix.add(new BoolSetting.Builder()
-            .name("random")
+            .name("prefix-random")
             .description("Example: <msg> (538)")
             .defaultValue(false)
             .build()
@@ -135,21 +159,21 @@ public class BetterChat extends Module {
 
 
     private final Setting<String> suffixText = sgSuffix.add(new StringSetting.Builder()
-            .name("text")
+            .name("suffix-text")
             .description("The text to add as your suffix.")
             .defaultValue(" | Meteor on Crack!")
             .build()
     );
 
     private final Setting<Boolean> suffixSmallCaps = sgSuffix.add(new BoolSetting.Builder()
-            .name("small-caps")
+            .name("suffix-small-caps")
             .description("Uses a small font.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> suffixRandom = sgSuffix.add(new BoolSetting.Builder()
-            .name("random")
+            .name("suffix-random")
             .description("Example: <msg> (538)")
             .defaultValue(false)
             .build()
@@ -210,24 +234,33 @@ public class BetterChat extends Module {
 
     @EventHandler
     private final Listener<SendMessageEvent> onSendMessage = new Listener<>(event -> {
-
         String message = event.msg;
 
-        if (annoyEnabled.get()) {
-            StringBuilder sb = new StringBuilder(message.length());
-            boolean upperCase = true;
-            for (int cp : message.codePoints().toArray()) {
-                if (upperCase) sb.appendCodePoint(Character.toUpperCase(cp));
-                else sb.appendCodePoint(Character.toLowerCase(cp));
-                upperCase = !upperCase;
-            }
-            message = sb.toString();
+        if (annoyEnabled.get())
+            message = applyAnnoy(message);
+
+        if (fancyEnabled.get())
+            message = applyFancy(message);
+
+        message = getPrefix() + message + getSuffix();
+
+        if (disableAllMessages.get()) {
+            sendWarningMessage(message,
+                    "You are trying to send a message to the global chat! ",  // TODO: grammar
+                    "Send your message to the global chat:");
+            event.cancel();
+            return;
         }
 
-        if (fancyEnabled.get()) message = changeMessage(message);
+        if (coordsProtectionEnabled.get() && containsCoordinates(message)) {
+            sendWarningMessage(message,
+                    "It looks like there are coordinates in your message! ",  // TODO: grammar: Maybe should make this message shorter, so that the entire message with the button fits on one line
+                    "Send your message to the global chat even if there are coordinates:");
+            event.cancel();
+            return;
+        }
 
-        if (!event.msg.startsWith(Config.INSTANCE.getPrefix() + "b")) event.msg = getPrefix() + message + getSuffix();
-        else event.msg = message;
+        event.msg = message;
     });
 
     // ANTI SPAM
@@ -334,61 +367,23 @@ public class BetterChat extends Module {
         return false;
     }
 
-    // PREFIX/SUFFIX
+    // ANNOY
 
-    private String getPrefix() {
-        String text;
-
-        if (prefixEnabled.get()) {
-            if (prefixRandom.get()) {
-                text = String.format("(%03d) ", Utils.random(0, 1000));
-            } else {
-                text = prefixText.get();
-
-                if (prefixSmallCaps.get()) {
-                    sb.setLength(0);
-
-                    for (char ch : text.toCharArray()) {
-                        if (SMALL_CAPS.containsKey(ch)) sb.append(SMALL_CAPS.get(ch));
-                        else sb.append(ch);
-                    }
-
-                    text = sb.toString();
-                }
-            }
-        } else text = "";
-
-        return text;
+    private String applyAnnoy(String message) {
+        StringBuilder sb = new StringBuilder(message.length());
+        boolean upperCase = true;
+        for (int cp : message.codePoints().toArray()) {
+            if (upperCase) sb.appendCodePoint(Character.toUpperCase(cp));
+            else sb.appendCodePoint(Character.toLowerCase(cp));
+            upperCase = !upperCase;
+        }
+        message = sb.toString();
+        return message;
     }
 
-    private String getSuffix() {
-        String text;
+    // FANCY CHAT
 
-        if (suffixEnabled.get()) {
-            if (suffixRandom.get()) {
-                text = String.format(" (%03d)", Utils.random(0, 1000));
-            } else {
-                text = suffixText.get();
-
-                if (suffixSmallCaps.get()) {
-                    sb.setLength(0);
-
-                    for (char ch : text.toCharArray()) {
-                        if (SMALL_CAPS.containsKey(ch)) sb.append(SMALL_CAPS.get(ch));
-                        else sb.append(ch);
-                    }
-
-                    text = sb.toString();
-                }
-            }
-        } else text = "";
-
-        return text;
-    }
-
-    //FANCY CHAT
-
-    private String changeMessage(String changeFrom) {
+    private String applyFancy(String changeFrom) {
         String output = changeFrom;
         sb.setLength(0);
 
@@ -401,5 +396,79 @@ public class BetterChat extends Module {
 
         return output;
     }
-}
 
+    // PREFIX/SUFFIX
+
+    private String getAffix(Setting<Boolean> affixEnabled, Setting<Boolean> affixRandom, String affixRandomFormat, Setting<String> affixText, Setting<Boolean> affixSmallCaps) {
+        String text;
+
+        if (affixEnabled.get()) {
+            if (affixRandom.get()) {
+                text = String.format(affixRandomFormat, Utils.random(0, 1000));
+            } else {
+                text = affixText.get();
+
+                if (affixSmallCaps.get()) {
+                    sb.setLength(0);
+
+                    for (char ch : text.toCharArray()) {
+                        if (SMALL_CAPS.containsKey(ch)) sb.append(SMALL_CAPS.get(ch));
+                        else sb.append(ch);
+                    }
+
+                    text = sb.toString();
+                }
+            }
+        } else text = "";
+
+        return text;
+    }
+
+    private String getPrefix() {
+        return getAffix(prefixEnabled, prefixRandom, "(%03d) ", prefixText, prefixSmallCaps);
+    }
+
+    private String getSuffix() {
+        return getAffix(suffixEnabled, suffixRandom, " (%03d)", suffixText, suffixSmallCaps);
+    }
+
+    // PROTECTION
+
+    private boolean containsCoordinates(String message) {
+        return message.matches(".*(?<x>-?\\d{3,}(?:\\.\\d*)?)(?:\\s+(?<y>\\d{1,3}(?:\\.\\d*)?))?\\s+(?<z>-?\\d{3,}(?:\\.\\d*)?).*");
+    }
+
+    private BaseText getSendButton(String message, String hint) {
+        BaseText sendButton = new LiteralText("[SEND ANYWAY]");
+        BaseText hintBaseText = new LiteralText("");
+
+        BaseText hintMsg = new LiteralText(hint);
+        hintMsg.setStyle(hintBaseText.getStyle().withFormatting(Formatting.GRAY));
+        hintBaseText.append(hintMsg);
+
+        hintBaseText.append(new LiteralText('\n' + message));
+
+        sendButton.setStyle(sendButton.getStyle()
+                .withFormatting(Formatting.DARK_RED)
+                .withClickEvent(new ClickEvent(
+                        ClickEvent.Action.RUN_COMMAND,
+                        Config.INSTANCE.getPrefix() + "say " + message  // TODO: getCommandString
+                ))
+                .withHoverEvent(new HoverEvent(
+                        HoverEvent.Action.SHOW_TEXT,
+                        hintBaseText
+                )));
+        return sendButton;
+    }
+
+    private void sendWarningMessage(String message, String title, String hint) {
+        BaseText warningMessage = new LiteralText(title);
+
+        if (disableButton.get()) {
+            BaseText sendButton = getSendButton(message, hint);
+            warningMessage.append(sendButton);
+        }
+
+        Chat.info(warningMessage);
+    }
+}

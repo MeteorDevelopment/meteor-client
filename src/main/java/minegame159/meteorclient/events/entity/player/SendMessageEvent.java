@@ -5,12 +5,15 @@
 
 package minegame159.meteorclient.events.entity.player;
 
-public class SendMessageEvent {
+import minegame159.meteorclient.events.Cancellable;
+
+public class SendMessageEvent extends Cancellable {
     private static final SendMessageEvent INSTANCE = new SendMessageEvent();
 
     public String msg;
 
     public static SendMessageEvent get(String msg) {
+        INSTANCE.setCancelled(false);
         INSTANCE.msg = msg;
         return INSTANCE;
     }
