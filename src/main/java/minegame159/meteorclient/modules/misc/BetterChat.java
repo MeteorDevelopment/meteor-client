@@ -153,7 +153,7 @@ public class BetterChat extends Module {
     private final Setting<Boolean> suffixEnabled = sgSuffix.add(new BoolSetting.Builder()
             .name("suffix-enabled")
             .description("Enables a suffix.")
-            .defaultValue(true)
+            .defaultValue(false)
             .build()
     );
 
