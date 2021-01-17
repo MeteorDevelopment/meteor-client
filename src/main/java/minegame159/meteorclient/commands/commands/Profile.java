@@ -11,6 +11,7 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import minegame159.meteorclient.commands.Command;
 import minegame159.meteorclient.utils.files.ProfileUtils;
+import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.command.CommandSource;
 import net.minecraft.text.LiteralText;
 
@@ -34,7 +35,7 @@ public class Profile extends Command {
                     String profile = context.getArgument("profile", String.class);
 
                     ProfileUtils.load(profile);
-//                    ChatUtils.prefixDelete("Profiles", "Loaded profile (highlight)" + profile + "(default).");
+                    ChatUtils.prefixInfo("Profiles","Loaded profile (highlight)" + profile + "(default).");
 
                     return SINGLE_SUCCESS;
                 })));
@@ -44,7 +45,7 @@ public class Profile extends Command {
                     String profile = context.getArgument("name", String.class);
 
                     ProfileUtils.save(profile);
-//                    ChatUtils.prefixDelete("Profiles", "Saved profile (highlight)" + profile + "(default).");
+                    ChatUtils.prefixInfo("Profiles","Saved profile (highlight)" + profile + "(default).");
 
                     return SINGLE_SUCCESS;
                 })));
@@ -54,7 +55,7 @@ public class Profile extends Command {
                     String profile = context.getArgument("profile", String.class);
 
                     ProfileUtils.delete(profile);
-//                    ChatUtils.prefixDelete("Profiles", "Deleted profile (highlight)" + profile + "(default).");
+                    ChatUtils.prefixInfo("Profiles","Deleted profile (highlight)" + profile + "(default).");
 
                     return SINGLE_SUCCESS;
                 })));
