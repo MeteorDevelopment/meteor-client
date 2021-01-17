@@ -184,4 +184,10 @@ public class AutoAnvil extends Module {
         }
         return slot;
     }
+
+    @Override
+    public String getInfoString() {
+        if (target != null) return target.getEntityName();
+        return null;
+    }
 }

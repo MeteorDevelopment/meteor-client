@@ -940,4 +940,10 @@ public class CrystalAura extends Module {
         }
         return hand;
     }
+
+    @Override
+    public String getInfoString() {
+        if (target != null) return target.getEntityName();
+        return null;
+    }
 }

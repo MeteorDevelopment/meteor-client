@@ -51,10 +51,11 @@ public class AutoCity extends Module {
         super(Category.Combat, "auto-city", "Automatically cities a target by mining the nearest obsidian next to them.");
     }
 
+    private PlayerEntity target;
+
     @Override
     public void onActivate() {
-
-        PlayerEntity target = CityUtils.getPlayerTarget();
+        target = CityUtils.getPlayerTarget();
         BlockPos mineTarget = CityUtils.getTargetBlock(checkBelow.get());
 
         if (target == null || mineTarget == null) {
@@ -106,5 +107,11 @@ public class AutoCity extends Module {
             mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, mineTarget, Direction.UP));
         }
         toggle();
+    }
+
+    @Override
+    public String getInfoString() {
+        if (target != null) return target.getEntityName();
+        return null;
     }
 }

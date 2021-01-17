@@ -253,4 +253,8 @@ public class OffhandExtra extends Module {
         return -1;
     }
 
+    @Override
+    public String getInfoString() {
+        return mode.get().name();
+    }
 }

@@ -237,4 +237,10 @@ public class AutoTrap extends Module {
 
         return target;
     }
+
+    @Override
+    public String getInfoString() {
+        if (target != null) return target.getEntityName();
+        return null;
+    }
 }
