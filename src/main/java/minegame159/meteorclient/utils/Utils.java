@@ -10,9 +10,6 @@ import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import minegame159.meteorclient.mixininterface.IMinecraftClient;
 import minegame159.meteorclient.mixininterface.IMinecraftServer;
-import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.utils.player.Chat;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.world.Dimension;
 import net.minecraft.client.MinecraftClient;
@@ -339,19 +336,6 @@ public class Utils {
     }
     public static void rightClick() {
         ((IMinecraftClient) mc).rightClick();
-    }
-
-    public static Module tryToGetModule(String[] args) {
-        if (args.length < 1) {
-            Chat.error("You must specify module name.");
-            return null;
-        }
-        Module oldModule = ModuleManager.INSTANCE.get(args[0]);
-        if (oldModule == null) {
-            Chat.error("Module with name (highlight)%s (default)doesn't exist.", args[0]);
-            return null;
-        }
-        return oldModule;
     }
 
     public static boolean isShulker(Item item) {

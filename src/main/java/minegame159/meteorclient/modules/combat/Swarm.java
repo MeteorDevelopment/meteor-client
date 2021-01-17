@@ -22,7 +22,7 @@ import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.settings.StringSetting;
 import minegame159.meteorclient.utils.network.MeteorExecutor;
-import minegame159.meteorclient.utils.player.Chat;
+import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 
@@ -100,7 +100,7 @@ public class Swarm extends Module {
         table2.add(connect);
         WButton reset = new WButton("Reset");
         reset.action = () -> {
-            Chat.info("Swarm: Closing all connections.");
+            ChatUtils.moduleInfo(this, "Closing all connections.");
             closeAllServerConnections();
             currentMode = Mode.Idle;
             setLabel();
@@ -172,7 +172,7 @@ public class Swarm extends Module {
     }
 
     public void mine() {
-        Chat.info("Swarm: Starting mining job.");
+        ChatUtils.moduleInfo(this, "Starting mining job.");
         if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing())
             BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
         BaritoneAPI.getProvider().getPrimaryBaritone().getMineProcess().mine(targetBlock.getBlock());
@@ -199,7 +199,7 @@ public class Swarm extends Module {
                     try {
                         socket = new Socket(ipAddress, serverPort.get());
                     } catch (Exception ignored) {
-                        Chat.info("Server not found. Attempting to reconnect in 5 seconds.");
+                        ChatUtils.moduleWarning(ModuleManager.INSTANCE.get(Swarm.class), "Server not found. Attempting to reconnect in 5 seconds.");
                     }
                     if (socket == null) {
                         Thread.sleep(5000);
@@ -208,13 +208,13 @@ public class Swarm extends Module {
                 if (socket != null) {
                     inputStream = socket.getInputStream();
                     dataInputStream = new DataInputStream(inputStream);
-                    Chat.info("New Socket");
+                    ChatUtils.moduleInfo(ModuleManager.INSTANCE.get(Swarm.class), "New Socket");
                     while (!isInterrupted()) {
                         if (socket != null) {
                             String read;
                             read = dataInputStream.readUTF();
                             if (!read.equals("")) {
-                                Chat.info("New Command: " + read);
+                                ChatUtils.moduleInfo(ModuleManager.INSTANCE.get(Swarm.class),"New Command: " + read);
                                 execute(read);
                             }
                         }
@@ -223,7 +223,7 @@ public class Swarm extends Module {
                     inputStream.close();
                 }
             } catch (Exception e) {
-                Chat.error("There is an error in your connection to the server.");
+                ChatUtils.moduleError(ModuleManager.INSTANCE.get(Swarm.class), "There is an error in your connection to the server.");
                 disconnect();
                 client = null;
             } finally {
@@ -231,7 +231,7 @@ public class Swarm extends Module {
                     try {
                         socket.close();
                     } catch (Exception e) {
-                        Chat.error("There is an error in your connection to the server.");
+                        ChatUtils.moduleError(ModuleManager.INSTANCE.get(Swarm.class),"There is an error in your connection to the server.");
                     }
                 }
             }
@@ -256,7 +256,7 @@ public class Swarm extends Module {
             try {
                 int port = serverPort.get();
                 this.serverSocket = new ServerSocket(port);
-                Chat.info("Swarm Server: New Server Opened On Port " + serverPort.get());
+                ChatUtils.moduleInfo(ModuleManager.INSTANCE.get(Swarm.class),"New Server Opened On Port " + serverPort.get());
                 start();
             } catch (Exception ignored) {
 
@@ -266,7 +266,7 @@ public class Swarm extends Module {
         @Override
         public void run() {
             try {
-                Chat.info("Swarm Server: Listening for incoming connections.");
+                ChatUtils.moduleInfo(ModuleManager.INSTANCE.get(Swarm.class),"Listening for incoming connections.");
                 while (!this.isInterrupted()) {
                     Socket connection = this.serverSocket.accept();
                     assignConnectionToSubServer(connection);
@@ -279,7 +279,7 @@ public class Swarm extends Module {
             for (int i = 0; i < clientConnections.length; i++) {
                 if (this.clientConnections[i] == null) {
                     this.clientConnections[i] = new SubServer(connection);
-                    Chat.info("Swarm Server: New slave connected.");
+                    ChatUtils.moduleInfo(ModuleManager.INSTANCE.get(Swarm.class),"New slave connected.");
                     break;
                 }
             }
@@ -295,7 +295,7 @@ public class Swarm extends Module {
                 }
                 serverSocket.close();
             } catch (Exception e) {
-                Chat.info("Server closed.");
+                ChatUtils.moduleInfo(ModuleManager.INSTANCE.get(Swarm.class),"Server closed.");
             }
         }
 
@@ -352,7 +352,7 @@ public class Swarm extends Module {
                 outputStream.close();
                 dataOutputStream.close();
             } catch (Exception e) {
-                Chat.info("Error in subsystem.");
+                ChatUtils.moduleError(ModuleManager.INSTANCE.get(Swarm.class), "Error in subsystem.");
             }
         }
 

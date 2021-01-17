@@ -17,7 +17,7 @@ import minegame159.meteorclient.modules.combat.AutoArmor;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.utils.player.Chat;
+import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
@@ -112,7 +112,7 @@ public class AutoMend extends Module {
 
         if(armourSlots.get()) {
             if(ModuleManager.INSTANCE.get(AutoArmor.class).isActive()) {
-                Chat.warning(this, "Cannot use armor slots while AutoArmor is active. Please disable AutoArmor and try again. Disabling Use Armor Slots.");
+                ChatUtils.moduleWarning(this, "Cannot use armor slots while AutoArmor is active. Please disable AutoArmor and try again. Disabling Use Armor Slots.");
                 armourSlots.set(false);
             }
             for (int i = 5; i < 9; i++) {

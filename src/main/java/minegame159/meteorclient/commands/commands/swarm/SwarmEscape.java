@@ -5,7 +5,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import minegame159.meteorclient.commands.Command;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.combat.Swarm;
-import minegame159.meteorclient.utils.player.Chat;
+import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.command.CommandSource;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
@@ -28,7 +28,7 @@ public class SwarmEscape extends Command {
                             swarm.currentMode = Swarm.Mode.Idle;
                             ModuleManager.INSTANCE.get(Swarm.class).toggle();
                         } else {
-                            Chat.info("Swarm: You are the queen.");
+                            ChatUtils.moduleInfo(ModuleManager.INSTANCE.get(Swarm.class), "You are the queen.");
                         }
                     }
                     return SINGLE_SUCCESS;

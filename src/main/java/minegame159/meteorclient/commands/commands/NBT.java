@@ -4,7 +4,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import minegame159.meteorclient.Config;
 import minegame159.meteorclient.commands.Command;
 import minegame159.meteorclient.commands.arguments.CompoundNbtTagArgumentType;
-import minegame159.meteorclient.utils.player.Chat;
+import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.NbtPathArgumentType;
 import net.minecraft.item.ItemStack;
@@ -54,7 +54,7 @@ public class NBT extends Command {
         builder.then(literal("get").executes(s -> {
             ItemStack stack = mc.player.inventory.getMainHandStack();
             if (stack == null) {
-                Chat.error("You must hold an item in your main hand.");
+                ChatUtils.prefixError("NBT","You must hold an item in your main hand.");
             } else {
                 CompoundTag tag = stack.getTag();
                 String nbt = tag == null ? "none" : tag.asString();
@@ -75,18 +75,18 @@ public class NBT extends Command {
                 text.append(copyButton);
                 text.append(new LiteralText(": " + nbt));
 
-                Chat.info(text);
+                ChatUtils.info("NBT", text);
             }
             return SINGLE_SUCCESS;
         }));
         builder.then(literal("copy").executes(s -> {
             ItemStack stack = mc.player.inventory.getMainHandStack();
             if (stack == null) {
-                Chat.error("You must hold an item in your main hand.");
+                ChatUtils.prefixError("NBT","You must hold an item in your main hand.");
             } else {
                 CompoundTag tag = stack.getTag();
                 if (tag == null)
-                    Chat.error("No NBT data in this item.");  // TODO: grammar
+                    ChatUtils.prefixError("NBT","No NBT data in this item.");  // TODO: grammar
                 else {
                     mc.keyboard.setClipboard(tag.toString());
                     BaseText nbt = new LiteralText("NBT");
@@ -101,7 +101,7 @@ public class NBT extends Command {
                     text.append(nbt);
                     text.append(new LiteralText(" data copied!"));  // TODO: grammar (will write "NBT data copied!")
 
-                    Chat.info(text);
+                    ChatUtils.info("NBT", text);
                 }
             }
             return SINGLE_SUCCESS;
@@ -114,12 +114,12 @@ public class NBT extends Command {
 
     private boolean validBasic(ItemStack stack) {
         if (!mc.player.abilities.creativeMode) {
-            Chat.error("Creative mode only.");
+            ChatUtils.prefixError("NBT","Creative mode only.");
             return false;
         }
 
         if (stack == null) {
-            Chat.error("You must hold an item in your main hand.");
+            ChatUtils.prefixError("NBT","You must hold an item in your main hand.");
             return false;
         }
         return true;

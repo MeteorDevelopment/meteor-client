@@ -14,7 +14,7 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import minegame159.meteorclient.commands.Command;
 import minegame159.meteorclient.friends.FriendManager;
-import minegame159.meteorclient.utils.player.Chat;
+import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.command.CommandSource;
 
 import java.util.Arrays;
@@ -38,9 +38,9 @@ public class Friend extends Command {
                             minegame159.meteorclient.friends.Friend friend =
                                     context.getArgument("friend", minegame159.meteorclient.friends.Friend.class);
                             if (FriendManager.INSTANCE.add(friend)) {
-                                Chat.info("Added (highlight)%s (default)to friends.", friend.name);
+                                ChatUtils.prefixInfo("Friends","Added (highlight)%s (default)to friends.", friend.name);
                             } else {
-                                Chat.error("That person is already your friend.");
+                                ChatUtils.prefixError("Friends","That person is already your friend.");
                             }
 
                             return SINGLE_SUCCESS;
@@ -50,18 +50,18 @@ public class Friend extends Command {
                             minegame159.meteorclient.friends.Friend friend =
                                     context.getArgument("friend", minegame159.meteorclient.friends.Friend.class);
                             if (FriendManager.INSTANCE.remove(friend)) {
-                                Chat.info("Removed (highlight)%s (default)from friends.", friend.name);
+                                ChatUtils.prefixInfo("Friends","Removed (highlight)%s (default)from friends.", friend.name);
                             } else {
-                                Chat.error("That person is not your friend.");
+                                ChatUtils.prefixError("Friends", "That person is not your friend.");
                             }
 
                             return SINGLE_SUCCESS;
                         })))
                 .then(literal("list").executes(context -> {
-                    Chat.info("You have (highlight)%d (default)friends:", FriendManager.INSTANCE.count());
+                    ChatUtils.prefixInfo("Friends","You have (highlight)%d (default)friends:", FriendManager.INSTANCE.count());
 
                     for (minegame159.meteorclient.friends.Friend friend : FriendManager.INSTANCE) {
-                        Chat.info(" - (highlight)%s", friend.name);
+                        ChatUtils.info(" - (highlight)%s", friend.name);
                     }
 
                     return SINGLE_SUCCESS;

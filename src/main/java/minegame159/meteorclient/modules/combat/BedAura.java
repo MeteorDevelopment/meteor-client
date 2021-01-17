@@ -18,7 +18,7 @@ import minegame159.meteorclient.modules.player.FakePlayer;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.entity.FakePlayerEntity;
-import minegame159.meteorclient.utils.player.Chat;
+import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.DamageCalcUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.block.entity.BedBlockEntity;
@@ -223,7 +223,7 @@ public class BedAura extends Module {
         preSlot = -1;
         if (mc.player.getHealth() + mc.player.getAbsorptionAmount() <= minHealth.get() && placeMode.get() != Mode.Suicide) return;
         if (selfToggle.get() && mc.world.getDimension().isBedWorking()) {
-            Chat.warning(this, "You are in the Overworld... (highlight)disabling(default)!");
+            ChatUtils.moduleError(this, "You are in the Overworld... (highlight)disabling(default)!");
             this.toggle();
             return;
         }

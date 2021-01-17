@@ -12,7 +12,7 @@ import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.entity.FakePlayerEntity;
-import minegame159.meteorclient.utils.player.Chat;
+import minegame159.meteorclient.utils.player.ChatUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -106,7 +106,7 @@ public class FakePlayer extends Module {
         if (isActive()) {
             if (mc.world == null) return;
             FakePlayerEntity fakePlayer = new FakePlayerEntity(name, copyInv, glowing, health);
-            if (chatInfo.get()) Chat.info(this, "Spawned a fakeplayer");
+            if (chatInfo.get()) ChatUtils.moduleInfo(this, "Spawned a fakeplayer");
             players.put(fakePlayer, ID);
             ID++;
         }
@@ -115,13 +115,13 @@ public class FakePlayer extends Module {
     public void removeFakePlayer(int id) {
         if (isActive()) {
             if (players.isEmpty()) {
-                if (chatInfo.get()) Chat.info(this, "There are no active fake players to remove!");
+                if (chatInfo.get()) ChatUtils.moduleError(this, "There are no active fake players to remove!");
                 return;
             }
             for (Map.Entry<FakePlayerEntity, Integer> player : players.entrySet()) {
                 if (player.getValue() == id) {
                     player.getKey().despawn();
-                    if (chatInfo.get()) Chat.info(this, "Removed fake player with ID (highlight)" + id);
+                    if (chatInfo.get()) ChatUtils.moduleInfo(this, "Removed fake player with ID (highlight)" + id);
                 }
             }
         }
@@ -130,20 +130,20 @@ public class FakePlayer extends Module {
     public void clearFakePlayers( boolean shouldCheckActive) {
         if (shouldCheckActive && isActive()) {
             if (players.isEmpty()) {
-                if (chatInfo.get()) Chat.info(this, "There are no active fake players to remove!");
+                if (chatInfo.get()) ChatUtils.moduleInfo(this, "There are no active fake players to remove!");
                 return;
             } else {
                 for (Map.Entry<FakePlayerEntity, Integer> player : players.entrySet()) {
                     player.getKey().despawn();
                 }
-                if (chatInfo.get()) Chat.info(this, "Removed all fake players.");
+                if (chatInfo.get()) ChatUtils.moduleInfo(this, "Removed all fake players.");
 
             }
         } else if (!shouldCheckActive) {
             for (Map.Entry<FakePlayerEntity, Integer> player : players.entrySet()) {
                 player.getKey().despawn();
             }
-            if (chatInfo.get()) Chat.info(this, "Removed all fake players.");
+            if (chatInfo.get()) ChatUtils.moduleInfo(this, "Removed all fake players.");
         }
         players.clear();
     }

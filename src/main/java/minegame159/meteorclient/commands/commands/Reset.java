@@ -12,7 +12,7 @@ import minegame159.meteorclient.commands.arguments.ModuleArgumentType;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.utils.player.Chat;
+import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.command.CommandSource;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
@@ -37,14 +37,14 @@ public class Reset extends Command {
                 }))
         ).then(literal("gui").executes(context -> {
             Config.INSTANCE.guiConfig.clearWindowConfigs();
-            Chat.info("The ClickGUI positioning has been reset.");
+            ChatUtils.info("The ClickGUI positioning has been reset.");
             return SINGLE_SUCCESS;
         })).then(literal("bind")
                 .then(argument("module", ModuleArgumentType.module()).executes(context -> {
                     Module module = context.getArgument("module", Module.class);
 
                     module.setKey(-1);
-                    Chat.info("This bind has been reset.");
+                    ChatUtils.prefixInfo("KeyBinds","This bind has been reset.");
 
                     return SINGLE_SUCCESS;
                 }))
