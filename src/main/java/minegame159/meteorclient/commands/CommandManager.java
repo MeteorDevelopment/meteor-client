@@ -48,6 +48,7 @@ public class CommandManager {
         addCommand(new Bind());
         addCommand(new Toggle());
         addCommand(new NBT());
+        addCommand(new Profile());
     }
 
     public static void dispatch(String message) throws CommandSyntaxException {
