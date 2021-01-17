@@ -7,6 +7,7 @@ import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.Utils;
 import net.minecraft.entity.projectile.FireworkRocketEntity;
 import net.minecraft.item.FireworkItem;
 import net.minecraft.item.ItemStack;
@@ -79,7 +80,7 @@ public class ElytraBoost extends Module {
     });
 
     private void boost() {
-        if (mc.player.isFallFlying() && mc.currentScreen == null) {
+        if (mc.player.isFallFlying() && mc.currentScreen == null && Utils.canUpdate()) {
             ItemStack itemStack = Items.FIREWORK_ROCKET.getDefaultStack();
             itemStack.getOrCreateSubTag("Fireworks").putByte("Flight", fireworkLevel.get().byteValue());
 
