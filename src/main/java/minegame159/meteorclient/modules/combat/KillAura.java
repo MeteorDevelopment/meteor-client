@@ -190,7 +190,7 @@ public class KillAura extends Module {
 
     private int hitDelayTimer;
     private int randomDelayTimer;
-    private LivingEntity entity;
+    private LivingEntity target;
     private boolean wasPathing;
 
     private final List<LivingEntity> entityList = new ArrayList<>();
@@ -203,19 +203,19 @@ public class KillAura extends Module {
     public void onDeactivate() {
         hitDelayTimer = 0;
         randomDelayTimer = 0;
-        entity = null;
+        target = null;
     }
 
     @EventHandler
-    private final Listener<TickEvent.Pre> onPreTick = new Listener<>(event -> entity = null);
+    private final Listener<TickEvent.Pre> onPreTick = new Listener<>(event -> target = null);
 
     @EventHandler
     private final Listener<TickEvent.Post> onPostTick = new Listener<>(event -> {
         findEntity();
-        if (entity == null) return;
+        if (target == null) return;
 
-        if (rotationMode.get() == RotationMode.Always) packetRotate(entity);
-        attack(entity);
+        if (rotationMode.get() == RotationMode.Always) packetRotate(target);
+        attack(target);
     });
 
     public void packetRotate(LivingEntity entity) {
@@ -282,7 +282,7 @@ public class KillAura extends Module {
 
         if (entityList.size() > 0) {
             entityList.sort(this::sort);
-            entity = entityList.get(0);
+            target = entityList.get(0);
             entityList.clear();
 
             if (pauseOnCombat.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing() && !wasPathing) {
@@ -319,6 +319,12 @@ public class KillAura extends Module {
     private int invertSort(int sort) {
         if (sort == 0) return 0;
         return sort > 0 ? -1 : 1;
+    }
+
+    @Override
+    public String getInfoString() {
+        if (target != null) return target.getEntityName();
+        return null;
     }
 
         /*@EventHandler

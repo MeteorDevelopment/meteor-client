@@ -383,4 +383,10 @@ public class AnchorAura extends Module {
     private float getTotalHealth(PlayerEntity target) {
         return target.getHealth() + target.getAbsorptionAmount();
     }
+
+    @Override
+    public String getInfoString() {
+        if (target != null) return target.getEntityName();
+        return null;
+    }
 }

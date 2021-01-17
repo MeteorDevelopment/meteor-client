@@ -179,4 +179,10 @@ public class FakePlayer extends Module {
     public float getHealth() {
         return health.get().floatValue();
     }
+
+    @Override
+    public String getInfoString() {
+        if (!players.isEmpty()) return String.valueOf(players.size());
+        return null;
+    }
 }
