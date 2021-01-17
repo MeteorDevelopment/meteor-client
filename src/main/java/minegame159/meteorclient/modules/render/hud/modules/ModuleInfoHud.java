@@ -5,26 +5,23 @@
 
 package minegame159.meteorclient.modules.render.hud.modules;
 
-import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.meteor.ActiveModulesChangedEvent;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.render.hud.HUD;
 import minegame159.meteorclient.modules.render.hud.HudRenderer;
 
 public class ModuleInfoHud extends HudModule {
-    private boolean update = true;
+//    private boolean update = true;
 
     public ModuleInfoHud(HUD hud) {
         super(hud, "module-info", "Displays if selected modules are enabled or disabled.");
 
-        MeteorClient.EVENT_BUS.subscribe(new Listener<ActiveModulesChangedEvent>(event -> update = true));
+//        MeteorClient.EVENT_BUS.subscribe(new Listener<ActiveModulesChangedEvent>(event -> update = true));
     }
 
-    public void recalculate() {
-        update = true;
-    }
+//    public void recalculate() {
+//        update = true;
+//    }
 
     @Override
     public void update(HudRenderer renderer) {
@@ -33,8 +30,8 @@ public class ModuleInfoHud extends HudModule {
             return;
         }
 
-        if (!update) return;
-        update = false;
+//        if (!update) return;
+//        update = false;
 
         double width = 0;
         double height = 0;
@@ -70,15 +67,20 @@ public class ModuleInfoHud extends HudModule {
 
     private void renderModule(HudRenderer renderer, Module module, double x, double y) {
         renderer.text(module.title, x, y, hud.primaryColor());
-        renderer.text(module.isActive() ? " ON" : " OFF", x + renderer.textWidth(module.title), y, module.isActive() ? hud.moduleInfoOnColor() : hud.moduleInfoOffColor());
+
+        String info = getModuleInfo(module);
+        renderer.text(info,x + renderer.textWidth(module.title) + renderer.textWidth(" "), y, module.isActive() ? hud.moduleInfoOnColor() : hud.moduleInfoOffColor());
     }
 
     private double getModuleWidth(HudRenderer renderer, Module module) {
-        double w = renderer.textWidth(module.title);
+        double width = renderer.textWidth(module.title);
+        if (hud.moduleInfo()) width += renderer.textWidth(" ") + renderer.textWidth(getModuleInfo(module));
+        return width;
+    }
 
-        if (module.isActive()) w += renderer.textWidth(" ON");
-        else w += renderer.textWidth(" OFF");
-
-        return w;
+    private String getModuleInfo(Module module) {
+        if (module.getInfoString() != null && module.isActive() && hud.moduleInfo()) return module.getInfoString();
+        else if (module.isActive()) return "ON";
+        else return "OFF";
     }
 }
