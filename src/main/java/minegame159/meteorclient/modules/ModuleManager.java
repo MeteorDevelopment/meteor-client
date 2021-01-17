@@ -30,7 +30,7 @@ import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.files.Savable;
 import minegame159.meteorclient.utils.misc.input.Input;
 import minegame159.meteorclient.utils.misc.input.KeyAction;
-import minegame159.meteorclient.utils.player.Chat;
+import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.render.color.RainbowColorManager;
 import minegame159.meteorclient.utils.render.color.SettingColor;
@@ -169,7 +169,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         // Check if binding module
         if (event.action == KeyAction.Press && moduleToBind != null) {
             moduleToBind.setKey(event.key);
-            Chat.info(1591599, null, "Module (highlight)%s (default)bound to (highlight)%s(default).", moduleToBind.title, Utils.getKeyName(event.key));
+            ChatUtils.prefixInfo("KeyBinds", "Module (highlight)%s (default)bound to (highlight)%s(default).", moduleToBind.title, Utils.getKeyName(event.key));
             moduleToBind = null;
             event.cancel();
             return;

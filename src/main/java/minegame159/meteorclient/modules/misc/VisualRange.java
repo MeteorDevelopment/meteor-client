@@ -12,7 +12,7 @@ import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.settings.StringSetting;
 import minegame159.meteorclient.utils.entity.FakePlayerEntity;
-import minegame159.meteorclient.utils.player.Chat;
+import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.entity.player.PlayerEntity;
 
 public class VisualRange extends Module {
@@ -57,7 +57,7 @@ public class VisualRange extends Module {
         if (event.entity.equals(mc.player) || !(event.entity instanceof PlayerEntity) || !FriendManager.INSTANCE.attack((PlayerEntity) event.entity) && ignoreFriends.get() || (event.entity instanceof FakePlayerEntity && ignoreFakes.get())) return;
 
         String enter = enterMessage.get().replace("{player}", ((PlayerEntity) event.entity).getGameProfile().getName());
-        Chat.info(this, enter);
+        ChatUtils.moduleInfo(this, enter);
     });
 
     @EventHandler
@@ -65,6 +65,6 @@ public class VisualRange extends Module {
         if (event.entity.equals(mc.player) || !(event.entity instanceof PlayerEntity) || !FriendManager.INSTANCE.attack((PlayerEntity) event.entity) && ignoreFriends.get() || (event.entity instanceof FakePlayerEntity && ignoreFakes.get())) return;
 
         String leave = leaveMessage.get().replace("{player}", ((PlayerEntity) event.entity).getGameProfile().getName());
-        Chat.info(this, leave);
+        ChatUtils.moduleInfo(this, leave);
     });
 }

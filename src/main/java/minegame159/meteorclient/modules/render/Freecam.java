@@ -20,7 +20,7 @@ import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.misc.input.KeyAction;
-import minegame159.meteorclient.utils.player.Chat;
+import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.RotationUtils;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.util.Formatting;
@@ -234,7 +234,7 @@ public class Freecam extends Module {
         if (!event.entity.getUuid().equals(mc.player.getUuid())) return;
         if ((autoDisableOnDamage.get() == AutoDisableEvent.OnDamage) || (autoDisableOnDamage.get() == AutoDisableEvent.OnDeath && event.entity.getHealth() <= 0)) {
             toggle();
-            Chat.info(this, "Auto toggled %s(default).", isActive() ? Formatting.GREEN + "on" : Formatting.RED + "off");
+            ChatUtils.moduleInfo(this, "Auto toggled %s(default).", isActive() ? Formatting.GREEN + "on" : Formatting.RED + "off");
         }
     });
 

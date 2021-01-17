@@ -9,7 +9,6 @@ package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.misc.BypassDeathScreen;
-import minegame159.meteorclient.utils.player.Chat;
 import net.minecraft.client.gui.screen.DeathScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -30,7 +29,7 @@ public class DeathScreenMixin extends Screen {
     protected void init(CallbackInfo ci) {
         if (ModuleManager.INSTANCE.get(BypassDeathScreen.class).isActive()) {
             this.addButton(new ButtonWidget(this.width / 2 - 100, this.height / 4 + 48, 200, 20, new LiteralText("Ghost Spectate"), (buttonWidgetx) -> {
-                Chat.info("You gay nigga 3");
+//                ChatUtils.info("You gay nigga 3");
                 ModuleManager.INSTANCE.get(BypassDeathScreen.class).shouldBypass = true;
                 this.client.openScreen(null);
             }));

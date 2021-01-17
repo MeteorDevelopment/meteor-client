@@ -19,7 +19,7 @@ import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
-import minegame159.meteorclient.utils.player.Chat;
+import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.client.gui.hud.ChatHudLine;
 import net.minecraft.text.*;
 import net.minecraft.util.ChatUtil;
@@ -469,6 +469,6 @@ public class BetterChat extends Module {
             warningMessage.append(sendButton);
         }
 
-        Chat.info(warningMessage);
+        ChatUtils.info("Warning", warningMessage);
     }
 }

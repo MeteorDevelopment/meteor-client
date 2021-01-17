@@ -15,7 +15,7 @@ import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.player.Chat;
+import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
@@ -226,9 +226,7 @@ public class AutoReplenish extends Module {
         int slot = findItems(item, excludeSlot);
 
         if(slot == -1 && !items.contains(item)){
-            if(alert.get()) {
-                Chat.warning(this, "You lack (highlight)%s(default) necessary to refill. Cannot refill.", item.toString());
-            }
+            if(alert.get()) ChatUtils.moduleWarning(this, "You lack (highlight)%s(default) necessary to refill. Cannot refill.", item.toString());
 
             items.add(item);
         }

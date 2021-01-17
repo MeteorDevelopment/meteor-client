@@ -16,7 +16,7 @@ import minegame159.meteorclient.mixininterface.ITextHandler;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.player.Chat;
+import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.item.Items;
@@ -179,7 +179,7 @@ public class BookBot extends Module {
 
                 // Check to see if the file exists.
                 if (!file.exists()) {
-                    Chat.error(this, "The file you specified doesn't exist in the meteor folder."); // You dumb bitch.
+                    ChatUtils.moduleError(this, "The file you specified doesn't exist in the meteor folder."); // You dumb bitch.
                     return;
                 }
 
@@ -202,7 +202,7 @@ public class BookBot extends Module {
                     writeBook();
                 } catch (IOException ignored) { //EZ ignore. > 1 blocked message.
                     // If it fails then send a message.
-                    Chat.error(this, "Failed to read the file.");
+                    ChatUtils.moduleError(this, "Failed to read the file.");
                     //When you try your best but you don't succeed.
                 }
             } else {
