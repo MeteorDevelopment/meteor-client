@@ -203,6 +203,8 @@ public class BedAura extends Module {
     private Vec3d bestBlock;
     private double bestDamage;
     private BlockPos bestBlockPos;
+    private BlockPos pos;
+    private Vec3d vecPos;
     private double lastDamage = 0;
     private int direction = 0;
     int preSlot = -1;
@@ -337,21 +339,15 @@ public class BedAura extends Module {
         if (!(mc.player.getMainHandStack().getItem() instanceof BedItem) && mc.player.getOffHandStack().getItem() instanceof BedItem) {
             hand = Hand.OFF_HAND;
         }
-        float preYaw = mc.player.yaw;
         if (direction == 0) {
-            mc.player.yaw = -90f;
             mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(-90f, mc.player.pitch, mc.player.isOnGround()));
         } else if (direction == 1) {
-            mc.player.yaw = 179f;
             mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(179f, mc.player.pitch, mc.player.isOnGround()));
         } else if (direction == 2) {
-            mc.player.yaw = 1f;
             mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(1f, mc.player.pitch, mc.player.isOnGround()));
         } else if (direction == 3) {
-            mc.player.yaw = 90f;
             mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(90f, mc.player.pitch, mc.player.isOnGround()));
         }
-        mc.player.yaw = preYaw;
         lastDamage = bestDamage;
         mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(mc.player.getPos(), Direction.UP, bestBlockPos, false));
         mc.player.swingHand(Hand.MAIN_HAND);
@@ -369,11 +365,10 @@ public class BedAura extends Module {
         for(double i = playerPos.getX() - placeRange.get(); i < playerPos.getX() + placeRange.get(); i++){
             for(double j = playerPos.getZ() - placeRange.get(); j < playerPos.getZ() + placeRange.get(); j++){
                 for(double k = playerPos.getY() - 3; k < playerPos.getY() + 3; k++) {
-                    BlockPos pos = new BlockPos(i, k, j);
-                    Vec3d vecPos = new Vec3d(Math.floor(i), Math.floor(k), Math.floor(j));
-                    BlockPos posUp = pos.add(0, 1, 0);
+                    pos = new BlockPos(i, k, j);
+                    vecPos = new Vec3d(Math.floor(i), Math.floor(k), Math.floor(j));
                     if (bestBlock == null) bestBlock = vecPos;
-                    if (isValid(posUp)) {
+                    if (isValid(pos.up())) {
                         if (airPlace.get() || !mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
                             if (bestDamage < getBestDamage(target, vecPos.add(0.5, 1.5, 0.5))
                                     && (DamageCalcUtils.bedDamage(mc.player, vecPos.add(0.5, 1.5, 0.5)) < minDamage.get() || placeMode.get() == Mode.Suicide)) {
@@ -469,7 +464,7 @@ public class BedAura extends Module {
 
     private boolean isValidHalf(BlockPos pos) {
         assert mc.world != null;
-        return (airPlace.get() || mc.world.isAir(pos)) && mc.world.isAir(pos.up());
+        return (airPlace.get() || !mc.world.isAir(pos)) && mc.world.isAir(pos.up());
     }
 
     private boolean isValid(BlockPos posUp) {
