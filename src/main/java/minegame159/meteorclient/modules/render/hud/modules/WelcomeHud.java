@@ -5,6 +5,8 @@
 
 package minegame159.meteorclient.modules.render.hud.modules;
 
+import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.player.NameProtect;
 import minegame159.meteorclient.modules.render.hud.HUD;
 import net.minecraft.client.MinecraftClient;
 
@@ -15,11 +17,13 @@ public class WelcomeHud extends DoubleTextHudModule {
         rightColor = hud.welcomeColor();
     }
 
+    NameProtect nameProtect = ModuleManager.INSTANCE.get(NameProtect.class);
+
     @Override
     protected String getRight() {
         MinecraftClient mc = MinecraftClient.getInstance();
         if (mc.player == null) return "UnknownPlayer!";
 
-        return mc.player.getGameProfile().getName() + "!";
+        return nameProtect.isActive() ? nameProtect.getValue() + "!" : mc.player.getGameProfile().getName() + "!";
     }
 }
