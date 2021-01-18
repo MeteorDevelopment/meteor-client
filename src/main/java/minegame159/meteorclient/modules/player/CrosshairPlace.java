@@ -14,18 +14,18 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 
-public class AirPlace extends Module {
+public class CrosshairPlace extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Boolean> toggle = sgGeneral.add(new BoolSetting.Builder()
             .name("toggle")
-            .description("Toggles off after placing once.")
+            .description("Toggles off after placing a block once.")
             .defaultValue(true)
             .build()
     );
 
-    public AirPlace() {
-        super(Category.Player, "air-place", "Places a block where your crosshair is pointing at.");
+    public CrosshairPlace() {
+        super(Category.Player, "crosshair-place", "Places a block where your crosshair is pointing at.");
     }
 
     @EventHandler
