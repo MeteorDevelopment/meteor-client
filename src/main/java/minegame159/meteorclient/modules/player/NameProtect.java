@@ -43,8 +43,4 @@ public class NameProtect extends Module {
         if (name.get().length() > 0 && isActive()) return name.get();
         else return original;
     }
-
-    public String getValue() {
-        return name.get();
-    }
 }

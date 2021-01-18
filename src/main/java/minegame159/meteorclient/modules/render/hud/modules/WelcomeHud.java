@@ -24,6 +24,6 @@ public class WelcomeHud extends DoubleTextHudModule {
         MinecraftClient mc = MinecraftClient.getInstance();
         if (mc.player == null) return "UnknownPlayer!";
 
-        return nameProtect.isActive() ? nameProtect.getValue() + "!" : mc.player.getGameProfile().getName() + "!";
+        return nameProtect.getName(mc.player.getGameProfile().getName()) + "!";
     }
 }
