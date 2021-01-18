@@ -230,7 +230,8 @@ public class AimAssist extends Module {
 
     @Override
     public String getInfoString() {
-        if (entity != null) return entity.getEntityName();
+        if (entity != null && entity instanceof PlayerEntity) return entity.getEntityName();
+        if (entity != null) return entity.getType().getName().getString();
         return null;
     }
 }

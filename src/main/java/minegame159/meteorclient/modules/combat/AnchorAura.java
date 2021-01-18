@@ -386,7 +386,8 @@ public class AnchorAura extends Module {
 
     @Override
     public String getInfoString() {
-        if (target != null) return target.getEntityName();
+        if (target != null && target instanceof PlayerEntity) return target.getEntityName();
+        if (target != null) return target.getType().getName().getString();
         return null;
     }
 }

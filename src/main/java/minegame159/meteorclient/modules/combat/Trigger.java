@@ -15,6 +15,7 @@ import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Hand;
 
 public class Trigger extends Module {
@@ -57,7 +58,8 @@ public class Trigger extends Module {
 
     @Override
     public String getInfoString() {
-        if (target != null) return target.getEntityName();
+        if (target != null && target instanceof PlayerEntity) return target.getEntityName();
+        if (target != null) return target.getType().getName().getString();
         return null;
     }
 }
