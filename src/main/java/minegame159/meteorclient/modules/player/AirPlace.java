@@ -14,7 +14,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 
-public class CrosshairPlace extends Module {
+public class AirPlace extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Boolean> toggle = sgGeneral.add(new BoolSetting.Builder()
@@ -24,8 +24,8 @@ public class CrosshairPlace extends Module {
             .build()
     );
 
-    public CrosshairPlace() {
-        super(Category.Player, "crosshair-place", "Places a block where your crosshair is pointing at.");
+    public AirPlace() {
+        super(Category.Player, "air-place", "Places a block where your crosshair is pointing at.");
     }
 
     @EventHandler
