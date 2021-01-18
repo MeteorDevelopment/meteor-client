@@ -4,9 +4,7 @@ import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.text.Text;
 import net.minecraft.text.TextColor;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
 
 /**
  * Some utilities for {@link Text}
@@ -19,6 +17,52 @@ public class TextUtils {
 		preOrderTraverse(text, stack, coloredTexts);
 		coloredTexts.removeIf(e -> e.getText().equals(""));
 		return coloredTexts;
+	}
+
+	/**
+	 * Returns the {@link Color} that is most prevalent through the given {@link Text}
+	 * @param text the {@link Text} to scan through
+	 * @return You know what it returns. Read the docs! Also, returns null if the internal {@link Optional} is empty
+	 */
+	public static Color getMostPopularColor(Text text)
+	{
+		Comparator<Integer> integerComparator = Comparator.naturalOrder();
+		Optional<Map.Entry<Color, Integer>> optionalColor = getColoredCharacterCount(toColoredTextList(text))
+				.entrySet().stream()
+				.max((a, b) -> integerComparator.compare(a.getValue(), b.getValue()));
+
+		return optionalColor.map(Map.Entry::getKey).orElse(null);
+	}
+
+	/**
+	 * Takes a {@link List}<{@link ColoredText}> and returns a {@link HashMap}, where the keys are all the existing {@link Color}s in the
+	 * aforementioned list, and the corresponding keys are the number of characters that have that color.
+	 *
+	 * @param coloredTexts The list of {@link ColoredText} to obtain the color count of. Best paired with the output from {@link #toColoredTextList(Text)}
+	 *
+	 * @return a {@link Map} whose keys are colors (and the set of keys being all possible colors used in the list, thus all colors in the text,
+	 * if the argument for this function is fed from the return from {@link #toColoredTextList(Text)}), and the corresponding values being {@link Integer}s
+	 * representing the number of occurrences of text that bear that color. The order of the keys are in no particular order
+	 */
+	public static Map<Color, Integer> getColoredCharacterCount(List<ColoredText> coloredTexts)
+	{
+		Map<Color, Integer> colorCount = new HashMap<>();
+
+		for (ColoredText coloredText : coloredTexts)
+		{
+			if (colorCount.containsKey(coloredText.getColor()))
+			{
+				// Since color was already catalogued, simply update the record by adding the length of the new text segment to the old one
+				colorCount.put(coloredText.getColor(), colorCount.get(coloredText.getColor()) + coloredText.getText().length());
+			}
+			else
+			{
+				// Add new entry to the hashmap
+				colorCount.put(coloredText.getColor(), coloredText.getText().length());
+			}
+		}
+
+		return colorCount;
 	}
 
 	/**

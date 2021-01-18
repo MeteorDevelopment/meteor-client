@@ -29,6 +29,10 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Box;
 
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
 public class ESP extends Module {
     private static final Identifier BOX2D = new Identifier("meteor-client", "box2d.png");
     private static final MeshBuilder MB = new MeshBuilder(128);
@@ -170,7 +174,6 @@ public class ESP extends Module {
         if (isOutline()) return;
 
         count = 0;
-
         for (Entity entity : mc.world.getEntities()) {
             if ((!ModuleManager.INSTANCE.isActive(Freecam.class) && entity == mc.player) || !entities.get().getBoolean(entity.getType())) continue;
             count++;
@@ -203,20 +206,20 @@ public class ESP extends Module {
     public Color getColor(Entity entity) {
         if (entity instanceof PlayerEntity)
         {
+            /*
             System.out.println("----------------------------------------");
             System.out.println("As string: " + entity.getDisplayName().asString());
             System.out.println("To string: " + entity.getDisplayName().toString());
             System.out.println("Get string: " + entity.getDisplayName().getString());
             System.out.println(">");
-            for (ColoredText coloredText : TextUtils.toColoredTextList(entity.getDisplayName()))
+            for (Map.Entry<Color, Integer> colorCount : TextUtils.getColoredCharacterCount(TextUtils.toColoredTextList(entity.getDisplayName())).entrySet())
             {
-                System.out.println("Text: " + coloredText.getText());
-                System.out.println("Color: " + coloredText.getColor());
+                System.out.println("Color: " + colorCount.getKey() + ", charcount: " + colorCount.getValue());
             }
-            System.out.println("----------------------------------------");
+            System.out.println("----------------------------------------");*/
         }
-
-        if (entity instanceof PlayerEntity) return FriendManager.INSTANCE.getColor((PlayerEntity) entity, playersColor.get(), false);
+        //if (entity instanceof PlayerEntity) return FriendManager.INSTANCE.getColor((PlayerEntity) entity, playersColor.get(), false);
+        if (entity instanceof PlayerEntity) return FriendManager.INSTANCE.getColor((PlayerEntity) entity, TextUtils.getMostPopularColor(entity.getDisplayName()), false);
 
         switch (entity.getType().getSpawnGroup()) {
             case CREATURE:       return animalsColor.get();

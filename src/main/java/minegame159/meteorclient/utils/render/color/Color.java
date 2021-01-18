@@ -8,6 +8,8 @@ package minegame159.meteorclient.utils.render.color;
 import minegame159.meteorclient.utils.misc.ISerializable;
 import net.minecraft.nbt.CompoundTag;
 
+import java.util.Objects;
+
 public class Color implements ISerializable<Color> {
     public int r, g, b, a;
 
@@ -193,6 +195,22 @@ public class Color implements ISerializable<Color> {
                 break;
         }
         return new Color((int) (r * 255), (int) (g * 255), (int) (b * 255), 255);
+    }
+
+    @Override
+    public boolean equals(Object o)
+    {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Color color = (Color)o;
+        return r == color.r && g == color.g && b == color.b && a == color.a;
+    }
+
+    // Hashable for maps
+    @Override
+    public int hashCode()
+    {
+        return Objects.hash(r, g, b, a);
     }
 
     /**
