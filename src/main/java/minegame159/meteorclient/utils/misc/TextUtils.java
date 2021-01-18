@@ -22,7 +22,7 @@ public class TextUtils {
 	/**
 	 * Returns the {@link Color} that is most prevalent through the given {@link Text}
 	 * @param text the {@link Text} to scan through
-	 * @return You know what it returns. Read the docs! Also, returns null if the internal {@link Optional} is empty
+	 * @return You know what it returns. Read the docs! Also, returns white if the internal {@link Optional} is empty
 	 */
 	public static Color getMostPopularColor(Text text)
 	{
@@ -31,7 +31,7 @@ public class TextUtils {
 				.entrySet().stream()
 				.max((a, b) -> integerComparator.compare(a.getValue(), b.getValue()));
 
-		return optionalColor.map(Map.Entry::getKey).orElse(null);
+		return optionalColor.map(Map.Entry::getKey).orElse(new Color(255, 255, 255));
 	}
 
 	/**
@@ -84,7 +84,7 @@ public class TextUtils {
 		TextColor mcTextColor = text.getStyle().getColor();
 
 
-		// If mcTextColor is null, the color is inherited from its parent. In this case, the path of the recursion is stored on the stack,
+		// If mcTextColor is null, the color should be inherited from its parent. In this case, the path of the recursion is stored on the stack,
 		// with the current element's parent at the top, so simply peek it if possible. If not, there is no parent element,
 		// and with no color, use the default of white.
 		Color textColor;

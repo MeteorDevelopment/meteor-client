@@ -143,6 +143,13 @@ public class Tracers extends Module {
 
                 Friend friend = FriendManager.INSTANCE.get((PlayerEntity) entity);
                 if (friend != null) color = FriendManager.INSTANCE.getColor((PlayerEntity) entity, color, false);
+// TODO: Remove this
+                if (color == null)
+                {
+                    System.out.println(playersColor.get());
+                    System.out.println(TextUtils.getMostPopularColor(entity.getDisplayName()));
+                    int kl = 0;
+                }
 
                 if (friend == null || FriendManager.INSTANCE.show((PlayerEntity) entity)) RenderUtils.drawTracerToEntity(event, entity, color, target.get(), stem.get()); count++;
             } else {
