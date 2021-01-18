@@ -20,6 +20,7 @@ import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import net.minecraft.block.Material;
+import net.minecraft.enchantment.ProtectionEnchantment;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.network.Packet;
@@ -71,6 +72,13 @@ public class Jesus extends Module {
             .build()
     );
 
+    private final Setting<Boolean> dipIntoWaterIfBurning = sgWater.add(new BoolSetting.Builder()
+            .name("dip-into-water-if-burning")
+            .description("Lets you go under the water when you burning.")
+            .defaultValue(true)
+            .build()
+    );
+
     private final Setting<Boolean> walkOnLava = sgLava.add(new BoolSetting.Builder()
             .name("walk-on-lava")
             .description("Lets you walk on lava.")
@@ -106,6 +114,13 @@ public class Jesus extends Module {
     private final Setting<Boolean> dipIntoLavaIfFireResistance = sgLava.add(new BoolSetting.Builder()
             .name("dip-into-lava-if-fire-resistance")
             .description("Lets you go under the lava if you have Fire Resistance effect to avoid fall damage.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Boolean> fireResistanceSafeMode = sgLava.add(new BoolSetting.Builder()
+            .name("fire-resistance-safe-mode")
+            .description("Prevents being in lava when the Fire Resistance effect is nearly over.")
             .defaultValue(true)
             .build()
     );
@@ -224,14 +239,22 @@ public class Jesus extends Module {
     private boolean waterShouldBeSolid() {
         return walkOnWater.get() &&
                 !(disableOnSneakForWater.get() && mc.options.keySneak.isPressed()) &&
-                !(dipIntoWater.get() && mc.player.fallDistance > dipIntoWaterHeight.get());
+                !(dipIntoWater.get() && mc.player.fallDistance > dipIntoWaterHeight.get()) &&
+                !(dipIntoWaterIfBurning.get() && mc.player.isOnFire());
+    }
+
+    private boolean lavaIsSafe() {
+        if (!dipIntoLavaIfFireResistance.get()) return false;
+
+        return mc.player.hasStatusEffect(StatusEffects.FIRE_RESISTANCE) &&
+                (!fireResistanceSafeMode.get() || mc.player.getStatusEffect(StatusEffects.FIRE_RESISTANCE).getDuration() > ProtectionEnchantment.transformFireDuration(mc.player, 15 * 20));
     }
 
     private boolean lavaShouldBeSolid() {
         return walkOnLava.get() &&
-                !(disableOnSneakForLava.get() && mc.options.keySneak.isPressed()) &&
+                !((disableOnSneakForLava.get() | lavaIsSafe()) && mc.options.keySneak.isPressed()) &&
                 !(dipIntoLava.get() && mc.player.fallDistance > dipIntoLavaHeight.get()) &&
-                !(dipIntoLavaIfFireResistance.get() && mc.player.hasStatusEffect(StatusEffects.FIRE_RESISTANCE) && mc.player.fallDistance > 3);
+                !(lavaIsSafe() && mc.player.fallDistance > 3);
     }
 
     private boolean isOverLiquid() {
