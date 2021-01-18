@@ -450,7 +450,7 @@ public class CrystalAura extends Module {
             locked = false;
         }
 
-        if ((mc.player.isUsingItem() && (mc.player.getMainHandStack().getItem().isFood() || mc.player.getOffHandStack().isFood()) && pauseOnEat.get()) || (mc.interactionManager.isBreakingBlock() && pauseOnMine.get())) {
+        if ((mc.player.isUsingItem() && (mc.player.getMainHandStack().getItem().isFood() || mc.player.getOffHandStack().getItem().isFood()) && pauseOnEat.get()) || (mc.interactionManager.isBreakingBlock() && pauseOnMine.get())) {
             return;
         }
 
