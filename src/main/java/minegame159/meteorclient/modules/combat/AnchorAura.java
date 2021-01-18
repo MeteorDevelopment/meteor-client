@@ -224,7 +224,7 @@ public class AnchorAura extends Module {
     @EventHandler
     private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
         if (mc.world.getDimension().isRespawnAnchorWorking()) {
-            Chat.error(this, "You are in the Nether... (highlight)disabling(default)!");
+            ChatUtils.moduleError(this, "You are in the Nether... disabling.");
             this.toggle();
             return;
         }
@@ -382,5 +382,11 @@ public class AnchorAura extends Module {
 
     private float getTotalHealth(PlayerEntity target) {
         return target.getHealth() + target.getAbsorptionAmount();
+    }
+
+    @Override
+    public String getInfoString() {
+        if (target != null) return target.getEntityName();
+        return null;
     }
 }

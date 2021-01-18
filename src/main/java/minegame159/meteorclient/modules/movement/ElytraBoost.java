@@ -7,10 +7,13 @@ import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.Utils;
 import net.minecraft.entity.projectile.FireworkRocketEntity;
 import net.minecraft.item.FireworkItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.ActionResult;
 
 import java.util.ArrayList;
@@ -32,6 +35,13 @@ public class ElytraBoost extends Module {
             .defaultValue(0)
             .min(0)
             .max(255)
+            .build()
+    );
+
+    private final Setting<Boolean> playSound = sgGeneral.add(new BoolSetting.Builder()
+            .name("play-sound")
+            .description("Plays the firework sound when a boost is triggered.")
+            .defaultValue(true)
             .build()
     );
 
@@ -70,12 +80,14 @@ public class ElytraBoost extends Module {
     });
 
     private void boost() {
+        if (!Utils.canUpdate()) return;
         if (mc.player.isFallFlying() && mc.currentScreen == null) {
             ItemStack itemStack = Items.FIREWORK_ROCKET.getDefaultStack();
             itemStack.getOrCreateSubTag("Fireworks").putByte("Flight", fireworkLevel.get().byteValue());
 
             FireworkRocketEntity entity = new FireworkRocketEntity(mc.world, itemStack, mc.player);
             fireworks.add(entity);
+            if (playSound.get()) mc.world.playSoundFromEntity(mc.player, entity, SoundEvents.ENTITY_FIREWORK_ROCKET_LAUNCH, SoundCategory.AMBIENT, 3.0F, 1.0F);
             mc.world.addEntity(entity.getEntityId(), entity);
         }
     }

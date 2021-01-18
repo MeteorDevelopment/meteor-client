@@ -10,13 +10,13 @@ import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.utils.player.Chat;
+import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
+import minegame159.meteorclient.utils.player.RotationUtils;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.potion.PotionUtil;
 import net.minecraft.screen.slot.SlotActionType;
 
@@ -99,7 +99,7 @@ public class Quiver extends Module {
         int bowSlot = findBow();
 
         if (bowSlot == -1) {
-            if (chatInfo.get()) Chat.error(this, "No bow found… disabling.");
+            if (chatInfo.get()) ChatUtils.moduleError(this, "No bow found... disabling.");
             toggle();
             return;
         } else mc.player.inventory.selectedSlot = bowSlot;
@@ -119,7 +119,7 @@ public class Quiver extends Module {
         if (speedSlot != -1) arrowsToShoot++;
 
         if (arrowsToShoot == 0) {
-            if (chatInfo.get()) Chat.error(this, "No appropriate arrows found… disabling.");
+            if (chatInfo.get()) ChatUtils.moduleError(this, "No appropriate arrows found... disabling.");
             toggle();
             return;
         }
@@ -138,7 +138,7 @@ public class Quiver extends Module {
     @EventHandler
     private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
 
-        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(mc.player.yaw, -90, mc.player.isOnGround()));
+        RotationUtils.packetRotate(mc.player.yaw, -90);
 
         boolean canStop = false;
 
@@ -149,7 +149,7 @@ public class Quiver extends Module {
         }
 
         if (shotStrength && shotSpeed && canStop) {
-            if (chatInfo.get()) Chat.info(this, "Quiver complete… disabling.");
+            if (chatInfo.get()) ChatUtils.moduleInfo(this, "Quiver complete... disabling.");
             toggle();
             return;
         }
@@ -158,14 +158,14 @@ public class Quiver extends Module {
             if (!shooting && !shotStrength && foundStrength) {
                 shoot(strengthSlot);
                 shootingArrow = ArrowType.Strength;
-                if (chatInfo.get()) Chat.info(this, "Quivering a strength arrow.");
+                if (chatInfo.get()) ChatUtils.moduleInfo(this, "Quivering a strength arrow.");
                 shotStrength = true;
             }
 
             if (!shooting && !shotSpeed && foundSpeed && shotStrength) {
                 shoot(speedSlot);
                 shootingArrow = ArrowType.Speed;
-                if (chatInfo.get()) Chat.info(this, "Quivering a speed arrow.");
+                if (chatInfo.get()) ChatUtils.moduleInfo(this, "Quivering a speed arrow.");
                 shotSpeed = true;
             }
 

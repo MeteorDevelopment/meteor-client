@@ -17,7 +17,7 @@ import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.rendering.ColorStyle;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.misc.TextUtils;
+import minegame159.meteorclient.utils.entity.Target;
 import minegame159.meteorclient.utils.render.RenderUtils;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.render.color.SettingColor;
@@ -53,10 +53,10 @@ public class Tracers extends Module {
 
     // Appearance
 
-    private final Setting<RenderUtils.TracerTarget> target = sgAppearance.add(new EnumSetting.Builder<RenderUtils.TracerTarget>()
+    private final Setting<Target> target = sgAppearance.add(new EnumSetting.Builder<Target>()
             .name("target")
             .description("What part of the entity to target.")
-            .defaultValue(RenderUtils.TracerTarget.Body)
+            .defaultValue(Target.Body)
             .build()
     );
 

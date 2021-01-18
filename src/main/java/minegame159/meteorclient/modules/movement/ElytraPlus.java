@@ -18,7 +18,7 @@ import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.player.ChestSwap;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
-import minegame159.meteorclient.utils.player.Chat;
+import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.ElytraItem;
@@ -279,7 +279,7 @@ public class ElytraPlus extends Module {
                     decrementFireworkTimer = true;
                     fireworkTimer = 20;
                 } else {
-                    Chat.warning(this, "Disabled autopilot because you don't have any fireworks left in your hotbar.");
+                    ChatUtils.moduleWarning(this, "Disabled autopilot because you don't have any fireworks left in your hotbar.");
                     autopilotEnabled.set(false);
                 }
             }

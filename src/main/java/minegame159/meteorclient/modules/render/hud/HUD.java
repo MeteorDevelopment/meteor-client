@@ -82,7 +82,14 @@ public class HUD extends Module {
             .name("active-modules-sort")
             .description("How to sort active modules.")
             .defaultValue(ActiveModulesHud.Sort.ByBiggest)
-            .onChanged(sort -> activeModulesHud.recalculate())
+//            .onChanged(sort -> activeModulesHud.recalculate())
+            .build()
+    );
+
+    private final Setting<Boolean> activeInfo = sgActiveModules.add(new BoolSetting.Builder()
+            .name("additional-info")
+            .description("Shows additional info from the module next to the name in the active modules list.")
+            .defaultValue(true)
             .build()
     );
 
@@ -236,7 +243,14 @@ public class HUD extends Module {
             .name("module-info-modules")
             .description("Which modules to display")
             .defaultValue(moduleInfoModulesDefaultValue())
-            .onChanged(toggleModules -> moduleInfoHud.recalculate())
+//            .onChanged(toggleModules -> moduleInfoHud.recalculate())
+            .build()
+    );
+
+    private final Setting<Boolean> moduleInfo = sgModuleInfo.add(new BoolSetting.Builder()
+            .name("additional-info")
+            .description("Shows additional info from the module next to the name in the module info list.")
+            .defaultValue(true)
             .build()
     );
 
@@ -419,6 +433,9 @@ public class HUD extends Module {
     public ActiveModulesHud.Sort activeModulesSort() {
         return activeModulesSort.get();
     }
+    public boolean activeInfo() {
+        return activeInfo.get();
+    }
     public ActiveModulesHud.ColorMode activeModulesColorMode() {
         return activeModulesColorMode.get();
     }
@@ -477,6 +494,9 @@ public class HUD extends Module {
 
     public List<Module> moduleInfoModules() {
         return moduleInfoModules.get();
+    }
+    public boolean moduleInfo() {
+        return moduleInfo.get();
     }
     public Color moduleInfoOnColor() {
         return moduleInfoOnColor.get();

@@ -33,10 +33,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.AxeItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.item.SwordItem;
+import net.minecraft.item.*;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
@@ -328,6 +325,19 @@ public class CrystalAura extends Module {
             .build()
     );
 
+    private final Setting<Boolean> pauseOnEat = sgMisc.add(new BoolSetting.Builder()
+            .name("pause-on-eat")
+            .description("Pauses Crystal Aura while eating.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> pauseOnMine = sgMisc.add(new BoolSetting.Builder()
+            .name("pause-on-mine")
+            .description("Pauses Crystal Aura while mining blocks.")
+            .defaultValue(false)
+            .build()
+    );
 
     // Render
 
@@ -439,6 +449,11 @@ public class CrystalAura extends Module {
             heldCrystal = null;
             locked = false;
         }
+
+        if ((mc.player.isUsingItem() && (mc.player.getMainHandStack().getItem().isFood() || mc.player.getOffHandStack().isFood()) && pauseOnEat.get()) || (mc.interactionManager.isBreakingBlock() && pauseOnMine.get())) {
+            return;
+        }
+
         if (locked && heldCrystal != null && ((!surroundBreak.get()
                 && target.getBlockPos().getSquaredDistance(new Vec3i(heldCrystal.getX(), heldCrystal.getY(), heldCrystal.getZ())) == 4d) || (!surroundHold.get()
                 && target.getBlockPos().getSquaredDistance(new Vec3i(heldCrystal.getX(), heldCrystal.getY(), heldCrystal.getZ())) == 2d))){
@@ -939,5 +954,11 @@ public class CrystalAura extends Module {
             hand = Hand.OFF_HAND;
         }
         return hand;
+    }
+
+    @Override
+    public String getInfoString() {
+        if (target != null) return target.getEntityName();
+        return null;
     }
 }

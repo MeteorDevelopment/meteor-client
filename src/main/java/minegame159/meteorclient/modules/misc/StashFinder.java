@@ -21,12 +21,11 @@ import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
-import minegame159.meteorclient.utils.player.Chat;
+import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.block.entity.*;
 import net.minecraft.client.toast.Toast;
 import net.minecraft.client.toast.ToastManager;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.ChunkPos;
 
@@ -145,7 +144,7 @@ public class StashFinder extends Module {
                         }
                     });
                 } else
-                    Chat.info(Formatting.WHITE + "StashRecorder found stash.");
+                    ChatUtils.moduleInfo(this,"(highlight)Found stash.");
             }
         }
     });

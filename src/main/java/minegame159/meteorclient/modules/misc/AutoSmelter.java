@@ -8,7 +8,7 @@ package minegame159.meteorclient.modules.misc;
 import minegame159.meteorclient.mixininterface.IAbstractFurnaceScreenHandler;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.utils.player.Chat;
+import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.screen.AbstractFurnaceScreenHandler;
 import net.minecraft.screen.slot.SlotActionType;
@@ -88,7 +88,7 @@ public class AutoSmelter extends Module {
         }
 
         if (slot == -1) {
-            Chat.warning(this, "You do not have any items in your inventory that can be smelted... disabling.");
+            ChatUtils.moduleError(this, "You do not have any items in your inventory that can be smelted... disabling.");
             toggle();
             return true;
         }
@@ -105,7 +105,7 @@ public class AutoSmelter extends Module {
                 InvUtils.clickSlot(1, 0, SlotActionType.QUICK_MOVE);
 
                 if (!c.slots.get(1).getStack().isEmpty()) {
-                    Chat.warning(this, "Your inventory is currently full... disabling.");
+                    ChatUtils.moduleError(this, "Your inventory is currently full... disabling.");
                     toggle();
                     return true;
                 }
@@ -120,7 +120,7 @@ public class AutoSmelter extends Module {
             }
 
             if (slot == -1) {
-                Chat.warning(this, "You do not have any fuel in your inventory... disabling.");
+                ChatUtils.moduleError(this, "You do not have any fuel in your inventory... disabling.");
                 toggle();
                 return true;
             }
@@ -136,7 +136,7 @@ public class AutoSmelter extends Module {
         InvUtils.clickSlot(2, 0, SlotActionType.QUICK_MOVE);
 
         if (!c.slots.get(2).getStack().isEmpty()) {
-            Chat.warning(this, "Your inventory is full... disabling.");
+            ChatUtils.moduleError(this, "Your inventory is full... disabling.");
             toggle();
             return true;
         }

@@ -44,10 +44,12 @@ public class CommandManager {
         addCommand(new SwarmScatter());
         addCommand(new SwarmModuleToggle());
         addCommand(new SwarmQueen());
-        addCommand(new Clip());
         addCommand(new Bind());
         addCommand(new Toggle());
-        addCommand(new Nbt());
+        addCommand(new NBT());
+        addCommand(new Profile());
+        addCommand(new HClip());
+        addCommand(new VClip());
     }
 
     public static void dispatch(String message) throws CommandSyntaxException {
@@ -78,4 +80,11 @@ public class CommandManager {
             super(null, client);
         }
     }
+
+//    public static String getCommandString(Command command, String... args) {
+//        StringBuilder base = new StringBuilder(Config.INSTANCE.getPrefix() + command.name);
+//        for (String arg : args)
+//            base.append(' ').append(arg);
+//        return base.toString();
+//    }
 }

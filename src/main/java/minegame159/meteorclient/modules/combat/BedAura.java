@@ -18,7 +18,7 @@ import minegame159.meteorclient.modules.player.FakePlayer;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.entity.FakePlayerEntity;
-import minegame159.meteorclient.utils.player.Chat;
+import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.DamageCalcUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.block.entity.BedBlockEntity;
@@ -202,17 +202,14 @@ public class BedAura extends Module {
     private int delayLeft = placeDelay.get();
     private Vec3d bestBlock;
     private double bestDamage;
-    private BlockPos playerPos;
-    private double currentDamage;
     private BlockPos bestBlockPos;
     private BlockPos pos;
     private Vec3d vecPos;
-    private BlockPos posUp;
-    private float preYaw;
     private double lastDamage = 0;
     private int direction = 0;
     int preSlot = -1;
     boolean bypassCheck = false;
+    private AbstractClientPlayerEntity target;
 
     @EventHandler
     private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
@@ -223,14 +220,14 @@ public class BedAura extends Module {
         preSlot = -1;
         if (mc.player.getHealth() + mc.player.getAbsorptionAmount() <= minHealth.get() && placeMode.get() != Mode.Suicide) return;
         if (selfToggle.get() && mc.world.getDimension().isBedWorking()) {
-            Chat.warning(this, "You are in the Overworld... (highlight)disabling(default)!");
+            ChatUtils.moduleError(this, "You are in the Overworld... (highlight)disabling(default)!");
             this.toggle();
             return;
         }
         try {
             for (BlockEntity entity : mc.world.blockEntities) {
                 if (entity instanceof BedBlockEntity && Utils.distance(entity.getPos().getX(), entity.getPos().getY(), entity.getPos().getZ(), mc.player.getX(), mc.player.getY(), mc.player.getZ()) <= breakRange.get()) {
-                    currentDamage = DamageCalcUtils.bedDamage(mc.player, Utils.vec3d(entity.getPos()));
+                    double currentDamage = DamageCalcUtils.bedDamage(mc.player, Utils.vec3d(entity.getPos()));
                     if (currentDamage < maxDamage.get()
                             || (mc.player.getHealth() + mc.player.getAbsorptionAmount() - currentDamage) < minHealth.get() || breakMode.get().equals(Mode.Suicide)) {
                         mc.player.setSneaking(false);
@@ -285,7 +282,7 @@ public class BedAura extends Module {
                     && !(mc.player.getOffHandStack().getItem() instanceof BedItem)){
                 return;
             }
-            AbstractClientPlayerEntity target = null;
+            target = null;
             for (Map.Entry<FakePlayerEntity, Integer> player : FakePlayer.players.entrySet()){
                 if (target == null) {
                     target = player.getKey();
@@ -342,21 +339,15 @@ public class BedAura extends Module {
         if (!(mc.player.getMainHandStack().getItem() instanceof BedItem) && mc.player.getOffHandStack().getItem() instanceof BedItem) {
             hand = Hand.OFF_HAND;
         }
-        preYaw = mc.player.yaw;
         if (direction == 0) {
-            mc.player.yaw = -90f;
             mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(-90f, mc.player.pitch, mc.player.isOnGround()));
         } else if (direction == 1) {
-            mc.player.yaw = 179f;
             mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(179f, mc.player.pitch, mc.player.isOnGround()));
         } else if (direction == 2) {
-            mc.player.yaw = 1f;
             mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(1f, mc.player.pitch, mc.player.isOnGround()));
         } else if (direction == 3) {
-            mc.player.yaw = 90f;
             mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(90f, mc.player.pitch, mc.player.isOnGround()));
         }
-        mc.player.yaw = preYaw;
         lastDamage = bestDamage;
         mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(mc.player.getPos(), Direction.UP, bestBlockPos, false));
         mc.player.swingHand(Hand.MAIN_HAND);
@@ -370,15 +361,14 @@ public class BedAura extends Module {
         assert mc.player != null;
         bestBlock = null;
         bestDamage = 0;
-        playerPos = mc.player.getBlockPos();
+        BlockPos playerPos = mc.player.getBlockPos();
         for(double i = playerPos.getX() - placeRange.get(); i < playerPos.getX() + placeRange.get(); i++){
             for(double j = playerPos.getZ() - placeRange.get(); j < playerPos.getZ() + placeRange.get(); j++){
                 for(double k = playerPos.getY() - 3; k < playerPos.getY() + 3; k++) {
                     pos = new BlockPos(i, k, j);
                     vecPos = new Vec3d(Math.floor(i), Math.floor(k), Math.floor(j));
-                    posUp = pos.add(0, 1, 0);
                     if (bestBlock == null) bestBlock = vecPos;
-                    if (isValid(posUp)) {
+                    if (isValid(pos.up())) {
                         if (airPlace.get() || !mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
                             if (bestDamage < getBestDamage(target, vecPos.add(0.5, 1.5, 0.5))
                                     && (DamageCalcUtils.bedDamage(mc.player, vecPos.add(0.5, 1.5, 0.5)) < minDamage.get() || placeMode.get() == Mode.Suicide)) {
@@ -474,7 +464,7 @@ public class BedAura extends Module {
 
     private boolean isValidHalf(BlockPos pos) {
         assert mc.world != null;
-        return (airPlace.get() || mc.world.isAir(pos)) && mc.world.isAir(pos.up());
+        return (airPlace.get() || !mc.world.isAir(pos)) && mc.world.isAir(pos.up());
     }
 
     private boolean isValid(BlockPos posUp) {
@@ -483,5 +473,11 @@ public class BedAura extends Module {
                 && mc.world.getOtherEntities(null, new Box(posUp.getX(), posUp.getY(), posUp.getZ(), posUp.getX() + 1.0D, posUp.getY() + 1.0D, posUp.getZ() + 1.0D)).isEmpty()
                 && (mc.world.getBlockState(new BlockPos(posUp).add(1, 0, 0)).getMaterial().isReplaceable() || mc.world.getBlockState(posUp.add(-1, 0, 0)).getMaterial().isReplaceable()
                 || mc.world.getBlockState(posUp.add(0, 0, 1)).getMaterial().isReplaceable() || mc.world.getBlockState(posUp.add(0, 0, -1)).getMaterial().isReplaceable());
+    }
+
+    @Override
+    public String getInfoString() {
+        if (target != null) return target.getEntityName();
+        return null;
     }
 }
