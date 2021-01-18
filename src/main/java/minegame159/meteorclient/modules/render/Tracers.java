@@ -18,6 +18,7 @@ import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.rendering.ColorStyle;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.entity.Target;
+import minegame159.meteorclient.utils.misc.TextUtils;
 import minegame159.meteorclient.utils.render.RenderUtils;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.render.color.SettingColor;
