@@ -67,6 +67,7 @@ public class NoFall extends Module {
 
     @EventHandler
     private final Listener<PacketEvent.Send> onSendPacket = new Listener<>(event -> {
+        if (mc.player != null && mc.player.abilities.creativeMode) return;
         if (event.packet instanceof PlayerMoveC2SPacket) {
             if (elytra.get() && (mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() == Items.ELYTRA && mc.options.keyJump.isPressed() || mc.player.isFallFlying())) {
                 for (int i = 0; i <= Math.ceil(height.get()); i++) {
