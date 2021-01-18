@@ -15,7 +15,9 @@ import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.rendering.ColorStyle;
 import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.misc.TextUtils;
 import minegame159.meteorclient.utils.render.RenderUtils;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.render.color.SettingColor;
@@ -66,6 +68,12 @@ public class Tracers extends Module {
     );
 
     // Colors
+    private final Setting<ColorStyle> colorStyle = sgColors.add(new EnumSetting.Builder<ColorStyle>()
+            .name("color-style")
+            .description("Choose between fixed-color highlight, or based off the user's nametag")
+            .defaultValue(ColorStyle.Fixed)
+            .build()
+    );
 
     private final Setting<SettingColor> playersColor = sgColors.add(new ColorSetting.Builder()
             .name("players-colors")
@@ -130,9 +138,10 @@ public class Tracers extends Module {
             if ((!ModuleManager.INSTANCE.isActive(Freecam.class) && entity == mc.player) || !entities.get().getBoolean(entity.getType())) continue;
 
             if (entity instanceof PlayerEntity) {
-                Color color = playersColor.get();
+                Color color = colorStyle.get() == ColorStyle.Fixed ? playersColor.get() : TextUtils.getMostPopularColor(entity.getDisplayName());
+
                 Friend friend = FriendManager.INSTANCE.get((PlayerEntity) entity);
-                if (friend != null) color = FriendManager.INSTANCE.getColor((PlayerEntity) entity, playersColor.get(), false);
+                if (friend != null) color = FriendManager.INSTANCE.getColor((PlayerEntity) entity, color, false);
 
                 if (friend == null || FriendManager.INSTANCE.show((PlayerEntity) entity)) RenderUtils.drawTracerToEntity(event, entity, color, target.get(), stem.get()); count++;
             } else {

@@ -14,12 +14,12 @@ import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.rendering.ColorStyle;
 import minegame159.meteorclient.rendering.MeshBuilder;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.rendering.ShapeMode;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
-import minegame159.meteorclient.utils.misc.ColoredText;
 import minegame159.meteorclient.utils.misc.TextUtils;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.render.color.SettingColor;
@@ -28,10 +28,6 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Box;
-
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 public class ESP extends Module {
     private static final Identifier BOX2D = new Identifier("meteor-client", "box2d.png");
@@ -76,6 +72,13 @@ public class ESP extends Module {
     );
 
     // Colors
+
+    private final Setting<ColorStyle> colorStyle = sgColors.add(new EnumSetting.Builder<ColorStyle>()
+            .name("color-style")
+            .description("Choose between fixed-color highlight, or based off the user's nametag")
+            .defaultValue(ColorStyle.Fixed)
+            .build()
+    );
 
     private final Setting<SettingColor> playersColor = sgColors.add(new ColorSetting.Builder()
             .name("players-color")
@@ -205,21 +208,13 @@ public class ESP extends Module {
 
     public Color getColor(Entity entity) {
         if (entity instanceof PlayerEntity)
-        {
-            /*
-            System.out.println("----------------------------------------");
-            System.out.println("As string: " + entity.getDisplayName().asString());
-            System.out.println("To string: " + entity.getDisplayName().toString());
-            System.out.println("Get string: " + entity.getDisplayName().getString());
-            System.out.println(">");
-            for (Map.Entry<Color, Integer> colorCount : TextUtils.getColoredCharacterCount(TextUtils.toColoredTextList(entity.getDisplayName())).entrySet())
-            {
-                System.out.println("Color: " + colorCount.getKey() + ", charcount: " + colorCount.getValue());
-            }
-            System.out.println("----------------------------------------");*/
-        }
-        //if (entity instanceof PlayerEntity) return FriendManager.INSTANCE.getColor((PlayerEntity) entity, playersColor.get(), false);
-        if (entity instanceof PlayerEntity) return FriendManager.INSTANCE.getColor((PlayerEntity) entity, TextUtils.getMostPopularColor(entity.getDisplayName()), false);
+            return FriendManager.INSTANCE.getColor(
+                    (PlayerEntity)entity,
+                    colorStyle.get() == ColorStyle.Fixed ?
+                            playersColor.get() :
+                            TextUtils.getMostPopularColor(entity.getDisplayName()),
+                    false
+            );
 
         switch (entity.getType().getSpawnGroup()) {
             case CREATURE:       return animalsColor.get();
