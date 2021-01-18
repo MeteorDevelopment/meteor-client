@@ -15,7 +15,7 @@ import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.movement.NoSlow;
 import minegame159.meteorclient.modules.movement.Scaffold;
 import minegame159.meteorclient.modules.player.Portals;
-import minegame159.meteorclient.utils.player.Chat;
+import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
@@ -41,13 +41,15 @@ public abstract class ClientPlayerEntityMixin {
     private void onSendChatMessage(String msg, CallbackInfo info) {
         if (ignoreChatMessage) return;
 
-        if (!msg.startsWith(Config.INSTANCE.getPrefix()) && !msg.startsWith("/") && msg.startsWith(BaritoneAPI.getSettings().prefix.value)) {
+        if (!msg.startsWith(Config.INSTANCE.getPrefix()) && !msg.startsWith("/") && !msg.startsWith(BaritoneAPI.getSettings().prefix.value)) {
             SendMessageEvent event = SendMessageEvent.get(msg);
             MeteorClient.EVENT_BUS.post(event);
 
-            ignoreChatMessage = true;
-            sendChatMessage(event.msg);
-            ignoreChatMessage = false;
+            if (!event.isCancelled()) {
+                ignoreChatMessage = true;
+                sendChatMessage(event.msg);
+                ignoreChatMessage = false;
+            }
 
             info.cancel();
             return;
@@ -57,7 +59,7 @@ public abstract class ClientPlayerEntityMixin {
             try {
                 CommandManager.dispatch(msg.substring(Config.INSTANCE.getPrefix().length()));
             } catch (CommandSyntaxException e) {
-                Chat.error(e.getMessage());
+                ChatUtils.error(e.getMessage());
             }
             info.cancel();
         }

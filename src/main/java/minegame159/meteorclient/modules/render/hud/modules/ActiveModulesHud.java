@@ -5,10 +5,6 @@
 
 package minegame159.meteorclient.modules.render.hud.modules;
 
-import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.meteor.ActiveModulesChangedEvent;
-import minegame159.meteorclient.events.meteor.ModuleVisibilityChangedEvent;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.render.hud.HUD;
@@ -31,7 +27,7 @@ public class ActiveModulesHud extends HudModule {
     }
 
     private final List<Module> modules = new ArrayList<>();
-    private boolean update = true;
+//    private boolean update = true;
 
     private final Color rainbow = new Color(255, 255, 255);
     private double rainbowHue1, rainbowHue2;
@@ -39,13 +35,13 @@ public class ActiveModulesHud extends HudModule {
     public ActiveModulesHud(HUD hud) {
         super(hud, "active-modules", "Displays your active modules.");
 
-        MeteorClient.EVENT_BUS.subscribe(new Listener<ActiveModulesChangedEvent>(event -> update = true));
-        MeteorClient.EVENT_BUS.subscribe(new Listener<ModuleVisibilityChangedEvent>(event -> update = true));
+//        MeteorClient.EVENT_BUS.subscribe(new Listener<ActiveModulesChangedEvent>(event -> update = true));
+//        MeteorClient.EVENT_BUS.subscribe(new Listener<ModuleVisibilityChangedEvent>(event -> update = true));
     }
 
-    public void recalculate() {
-        update = true;
-    }
+//    public void recalculate() {
+//        update = true;
+//    }
 
     @Override
     public void update(HudRenderer renderer) {
@@ -54,8 +50,8 @@ public class ActiveModulesHud extends HudModule {
             return;
         }
 
-        if (!update) return;
-        update = false;
+//        if (!update) return;
+//        update = false;
         modules.clear();
 
         for (Module module : ModuleManager.INSTANCE.getActive()) {
@@ -116,7 +112,7 @@ public class ActiveModulesHud extends HudModule {
 
     private void renderModule(HudRenderer renderer, Module module, double x, double y) {
         Color color = hud.activeModulesFlatColor();
-        
+
         ColorMode colorMode = hud.activeModulesColorMode();
         if (colorMode == ColorMode.Random) color = module.color;
         else if (colorMode == ColorMode.Rainbow) {
@@ -132,16 +128,20 @@ public class ActiveModulesHud extends HudModule {
         
         renderer.text(module.title, x, y, color);
 
-        String info = module.getInfoString();
-        if (info != null) {
-            renderer.text(info, x + renderer.textWidth(module.title) + renderer.textWidth(" "), y, hud.secondaryColor());
+        if (hud.activeInfo()) {
+            String info = module.getInfoString();
+            if (info != null) renderer.text(info, x + renderer.textWidth(module.title) + renderer.textWidth(" "), y, hud.secondaryColor());
         }
     }
 
     private double getModuleWidth(HudRenderer renderer, Module module) {
-        String info = module.getInfoString();
         double width = renderer.textWidth(module.title);
-        if (info != null) width += renderer.textWidth(" ") + renderer.textWidth(info);
+
+        if (hud.activeInfo()) {
+            String info = module.getInfoString();
+            if (info != null) width += renderer.textWidth(" ") + renderer.textWidth(info);
+        }
+
         return width;
     }
 }

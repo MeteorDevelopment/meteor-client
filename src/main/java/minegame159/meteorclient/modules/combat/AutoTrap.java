@@ -19,10 +19,12 @@ import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.entity.FakePlayerEntity;
 import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.player.PlayerUtils;
+import minegame159.meteorclient.utils.player.RotationUtils;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.ShapeContext;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 
 import java.util.ArrayList;
@@ -74,6 +76,13 @@ public class AutoTrap extends Module {
             .defaultValue(5)
             .sliderMin(0)
             .sliderMax(10)
+            .build()
+    );
+
+    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
+            .name("rotate")
+            .description("Sends rotation packets to the server when placing.")
+            .defaultValue(true)
             .build()
     );
 
@@ -160,7 +169,8 @@ public class AutoTrap extends Module {
             int prevSlot = mc.player.inventory.selectedSlot;
             mc.player.inventory.selectedSlot = slot;
 
-            if (PlayerUtils.placeBlockRotate(placePositions.get(placePositions.size()-1))) {
+            if (PlayerUtils.placeBlock(placePositions.get(placePositions.size()-1), Hand.MAIN_HAND)) {
+                if (rotate.get()) RotationUtils.packetRotate(placePositions.get(placePositions.size()-1));
                 placePositions.remove(placePositions.get(placePositions.size() - 1));
                 placed = true;
             }
@@ -226,5 +236,11 @@ public class AutoTrap extends Module {
         }
 
         return target;
+    }
+
+    @Override
+    public String getInfoString() {
+        if (target != null) return target.getEntityName();
+        return null;
     }
 }

@@ -22,17 +22,29 @@ public class ProfileUtils {
     private static final File FOLDER = new File(MeteorClient.FOLDER, "profiles");
 
     public static List<String> getProfiles() {
-      String[] childs = FOLDER.list();
+      String[] children = FOLDER.list();
       List<String> profiles = new ArrayList<>(0);
 
-      if (childs != null) {
-          for (String child : childs) {
+      if (children != null) {
+          for (String child : children) {
               File file = new File(child);
               if (!child.contains(".")) profiles.add(file.getName());
           }
       }
 
       return profiles;
+    }
+
+    public static boolean isProfile(String profile) {
+        String[] children = FOLDER.list();
+
+        if (children != null) {
+            for (String child : children) {
+                if (child.equals(profile)) return true;
+            }
+        }
+
+        return false;
     }
 
     public static boolean save(String profile) {

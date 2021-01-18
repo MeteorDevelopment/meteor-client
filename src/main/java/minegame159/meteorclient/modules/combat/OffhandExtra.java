@@ -16,7 +16,7 @@ import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.player.Chat;
+import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
@@ -154,7 +154,7 @@ public class OffhandExtra extends Module {
                     }
                 }
                 if (!sentMessage) {
-                    Chat.warning(this, "None of the chosen item found.");
+                    ChatUtils.moduleWarning(this, "None of the chosen item found.");
                     sentMessage = true;
                 }
                 if (selfToggle.get()) this.toggle();
@@ -189,7 +189,7 @@ public class OffhandExtra extends Module {
             int result = findSlot(item);
             if (result == -1 && mc.player.getOffHandStack().getItem() != getItem()) {
                 if (!sentMessage) {
-                    Chat.warning(this, "None of the chosen item found.");
+                    ChatUtils.moduleWarning(this, "None of the chosen item found.");
                     sentMessage = true;
                 }
                 if (selfToggle.get()) this.toggle();
@@ -253,4 +253,8 @@ public class OffhandExtra extends Module {
         return -1;
     }
 
+    @Override
+    public String getInfoString() {
+        return mode.get().name();
+    }
 }

@@ -10,11 +10,16 @@ import minegame159.meteorclient.mixininterface.ILookBehavior;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import net.minecraft.block.*;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.RaycastContext;
 
 public class PlayerUtils {
     private static final MinecraftClient mc = MinecraftClient.getInstance();
@@ -22,11 +27,6 @@ public class PlayerUtils {
 
     private static final double diagonal = 1 / Math.sqrt(2);
     private static final Vec3d horizontalVelocity = new Vec3d(0, 0, 0);
-
-    public static boolean placeBlockRotate(BlockPos blockPos) {
-        RotationUtils.packetRotate(blockPos);
-        return placeBlock(blockPos, Hand.MAIN_HAND, true);
-    }
 
     public static boolean placeBlock(BlockPos blockPos, Hand hand) {
         return placeBlock(blockPos, hand, true);
@@ -147,5 +147,26 @@ public class PlayerUtils {
         ) clickable = true;
 
         return clickable;
+    }
+
+    public static void centerPlayer() {
+        double x = MathHelper.floor(mc.player.getX()) + 0.5;
+        double z = MathHelper.floor(mc.player.getZ()) + 0.5;
+        mc.player.updatePosition(x, mc.player.getY(), z);
+        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(mc.player.getX(), mc.player.getY(), mc.player.getZ(), mc.player.isOnGround()));
+    }
+
+    public static boolean canSeeEntity(LivingEntity entity) {
+        Vec3d vec1 = new Vec3d(0, 0, 0);
+        Vec3d vec2 = new Vec3d(0, 0, 0);
+
+        ((IVec3d) vec1).set(mc.player.getX(), mc.player.getY() + mc.player.getStandingEyeHeight(), mc.player.getZ());
+        ((IVec3d) vec2).set(entity.getX(), entity.getY(), entity.getZ());
+        boolean canSeeFeet =  mc.world.raycast(new RaycastContext(vec1, vec2, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player)).getType() == HitResult.Type.MISS;
+
+        ((IVec3d) vec2).set(entity.getX(), entity.getY() + entity.getStandingEyeHeight(), entity.getZ());
+        boolean canSeeEyes =  mc.world.raycast(new RaycastContext(vec1, vec2, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player)).getType() == HitResult.Type.MISS;
+
+        return canSeeFeet || canSeeEyes;
     }
 }

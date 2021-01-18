@@ -12,10 +12,11 @@ import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.friends.FriendManager;
-import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.entity.Target;
+import minegame159.meteorclient.utils.player.PlayerUtils;
 import minegame159.meteorclient.utils.player.RotationUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -25,9 +26,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.AxeItem;
 import net.minecraft.item.SwordItem;
 import net.minecraft.util.Hand;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.RaycastContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +43,18 @@ public class KillAura extends Module {
         Axe,
         SwordOrAxe,
         Any
+    }
+
+    public enum RotationDirection {
+        Eyes,
+        Chest,
+        Feet
+    }
+
+    public enum RotationMode {
+        Always,
+        OnHit,
+        None
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -128,10 +138,17 @@ public class KillAura extends Module {
             .build()
     );
 
-    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
-            .name("rotate")
-            .description("Rotates to the entity you are attacking.")
-            .defaultValue(true)
+    private final Setting<RotationMode> rotationMode = sgGeneral.add(new EnumSetting.Builder<RotationMode>()
+            .name("rotation-mode")
+            .description("Determines when you should rotate towards the target.")
+            .defaultValue(RotationMode.OnHit)
+            .build()
+    );
+
+    private final Setting<RotationDirection> rotationDirection = sgGeneral.add(new EnumSetting.Builder<RotationDirection>()
+            .name("rotation-direction")
+            .description("The direction to use for rotating towards the enemy.")
+            .defaultValue(RotationDirection.Eyes)
             .build()
     );
 
@@ -173,12 +190,10 @@ public class KillAura extends Module {
 
     private int hitDelayTimer;
     private int randomDelayTimer;
-    private LivingEntity entity;
+    private LivingEntity target;
     private boolean wasPathing;
 
     private final List<LivingEntity> entityList = new ArrayList<>();
-    private final Vec3d vec1 = new Vec3d(0, 0, 0);
-    private final Vec3d vec2 = new Vec3d(0, 0, 0);
 
     public KillAura() {
         super(Category.Combat, "kill-aura", "Attacks specified entities around you.");
@@ -188,13 +203,131 @@ public class KillAura extends Module {
     public void onDeactivate() {
         hitDelayTimer = 0;
         randomDelayTimer = 0;
-        entity = null;
+        target = null;
     }
 
     @EventHandler
-    private final Listener<TickEvent.Pre> onPreTick = new Listener<>(event -> entity = null);
+    private final Listener<TickEvent.Pre> onPreTick = new Listener<>(event -> target = null);
 
-    /*@EventHandler
+    @EventHandler
+    private final Listener<TickEvent.Post> onPostTick = new Listener<>(event -> {
+        findEntity();
+        if (target == null) return;
+
+        if (rotationMode.get() == RotationMode.Always) packetRotate(target);
+        attack(target);
+    });
+
+    public void packetRotate(LivingEntity entity) {
+        switch (rotationDirection.get()) {
+            case Eyes:  RotationUtils.packetRotate(entity, Target.Head); break;
+            case Chest: RotationUtils.packetRotate(entity); break;
+            case Feet:  RotationUtils.packetRotate(entity, Target.Feet); break;
+        }
+    }
+
+    private void attack(LivingEntity entity) {
+        if (entity == null) return;
+
+        if (smartDelay.get()) if (mc.player.getAttackCooldownProgress(0.5f) < 1) return;
+
+        else {
+            if (hitDelayTimer >= 0) {
+                hitDelayTimer--;
+                return;
+            } else hitDelayTimer = hitDelay.get();
+        }
+
+        if (randomDelayEnabled.get()) {
+            if (randomDelayTimer > 0) {
+                randomDelayTimer--;
+                return;
+            } else {
+                randomDelayTimer = (int) Math.round(Math.random() * randomDelayMax.get());
+            }
+        }
+
+        if (Math.random() > hitChance.get() / 100) return;
+
+        if (rotationMode.get() == RotationMode.OnHit) packetRotate(entity);
+
+        mc.interactionManager.attackEntity(mc.player, entity);
+        mc.player.swingHand(Hand.MAIN_HAND);
+    }
+
+    private void findEntity() {
+        if (mc.player.isDead() || !mc.player.isAlive()) return;
+        if (!itemInHand()) return;
+
+        for (Entity e : mc.world.getEntities()) {
+            if (!(e instanceof LivingEntity)) continue;
+            LivingEntity entity = (LivingEntity) e;
+
+            if (entity == mc.player || entity == mc.cameraEntity) continue;
+            if (entity.isDead() || !entity.isAlive()) continue;
+            if (entity.distanceTo(mc.player) > range.get()) continue;
+            if (!entities.get().getBoolean(entity.getType())) continue;
+            if (!nametagged.get() && entity.hasCustomName()) continue;
+            if (!ignoreWalls.get() && PlayerUtils.canSeeEntity(entity)) continue;
+
+            if (entity instanceof PlayerEntity) {
+                if (((PlayerEntity) entity).isCreative()) continue;
+                if (!friends.get() && !FriendManager.INSTANCE.attack((PlayerEntity) entity)) continue;
+            }
+
+            if (entity instanceof AnimalEntity) if (!babies.get() && entity.isBaby()) continue;
+
+            entityList.add(entity);
+        }
+
+        if (entityList.size() > 0) {
+            entityList.sort(this::sort);
+            target = entityList.get(0);
+            entityList.clear();
+
+            if (pauseOnCombat.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing() && !wasPathing) {
+                BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("pause");
+                wasPathing = true;
+            }
+        } else {
+            if (wasPathing){
+                BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume");
+                wasPathing = false;
+            }
+        }
+    }
+
+    private boolean itemInHand() {
+        switch(onlyWith.get()){
+            case Axe:        return mc.player.getMainHandStack().getItem() instanceof AxeItem;
+            case Sword:      return mc.player.getMainHandStack().getItem() instanceof SwordItem;
+            case SwordOrAxe: return mc.player.getMainHandStack().getItem() instanceof AxeItem || mc.player.getMainHandStack().getItem() instanceof SwordItem;
+            default:         return true;
+        }
+    }
+
+    private int sort(LivingEntity e1, LivingEntity e2) {
+        switch (priority.get()) {
+            case LowestDistance:  return Double.compare(e1.distanceTo(mc.player), e2.distanceTo(mc.player));
+            case HighestDistance: return invertSort(Double.compare(e1.distanceTo(mc.player), e2.distanceTo(mc.player)));
+            case LowestHealth:    return Float.compare(e1.getHealth(), e2.getHealth());
+            case HighestHealth:   return invertSort(Float.compare(e1.getHealth(), e2.getHealth()));
+            default:              return 0;
+        }
+    }
+
+    private int invertSort(int sort) {
+        if (sort == 0) return 0;
+        return sort > 0 ? -1 : 1;
+    }
+
+    @Override
+    public String getInfoString() {
+        if (target != null) return target.getEntityName();
+        return null;
+    }
+
+        /*@EventHandler
     private final Listener<PacketEvent.Send> onSendPacket = new Listener<>(event -> {
         if (movePacket != null) return;
 
@@ -233,120 +366,4 @@ public class KillAura extends Module {
             ));
         }
     });*/
-
-    @EventHandler
-    private final Listener<TickEvent.Post> onPostTick = new Listener<>(event -> {
-        findEntity();
-        if (entity == null) return;
-        if (rotate.get()) RotationUtils.packetRotate(entity);
-        attack();
-    });
-
-    private void attack() {
-        if (entity == null) return;
-
-        mc.interactionManager.attackEntity(mc.player, entity);
-        mc.player.swingHand(Hand.MAIN_HAND);
-    }
-
-    private void findEntity() {
-        if (mc.player.isDead() || !mc.player.isAlive()) return;
-        if (!itemInHand()) return;
-
-        if (smartDelay.get()) {
-            if (mc.player.getAttackCooldownProgress(0.5f) < 1) return;
-        } else {
-            if (hitDelayTimer >= 0) {
-                hitDelayTimer--;
-                return;
-            } else hitDelayTimer = hitDelay.get();
-        }
-
-        if (randomDelayEnabled.get()) {
-            if (randomDelayTimer > 0) {
-                randomDelayTimer--;
-                return;
-            } else {
-                randomDelayTimer = (int) Math.round(Math.random() * randomDelayMax.get());
-            }
-        }
-
-        if (Math.random() > hitChance.get() / 100) return;
-
-        for (Entity e : mc.world.getEntities()) {
-            if (!(e instanceof LivingEntity)) continue;
-            LivingEntity entity = (LivingEntity) e;
-
-            if (entity == mc.player || entity == mc.cameraEntity) continue;
-            if (entity.isDead() || !entity.isAlive()) continue;
-            if (entity.distanceTo(mc.player) > range.get()) continue;
-            if (!entities.get().getBoolean(entity.getType())) continue;
-            if (!nametagged.get() && entity.hasCustomName()) continue;
-            if (!canSeeEntity(entity)) continue;
-
-            if (entity instanceof PlayerEntity) {
-                if (((PlayerEntity) entity).isCreative()) continue;
-                if (!friends.get() && !FriendManager.INSTANCE.attack((PlayerEntity) entity)) continue;
-            }
-
-            if (entity instanceof AnimalEntity) {
-                if (!babies.get() && entity.isBaby()) continue;
-            }
-
-            entityList.add(entity);
-        }
-
-        if (entityList.size() > 0) {
-            entityList.sort(this::sort);
-            entity = entityList.get(0);
-            entityList.clear();
-
-            if (pauseOnCombat.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing() && !wasPathing) {
-                BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("pause");
-                wasPathing = true;
-            }
-        } else {
-            if (wasPathing){
-                BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume");
-                wasPathing = false;
-            }
-        }
-    }
-
-    private boolean canSeeEntity(LivingEntity entity) {
-        if (ignoreWalls.get()) return true;
-
-        ((IVec3d) vec1).set(mc.player.getX(), mc.player.getY() + mc.player.getStandingEyeHeight(), mc.player.getZ());
-        ((IVec3d) vec2).set(entity.getX(), entity.getY(), entity.getZ());
-        boolean canSeeFeet =  mc.world.raycast(new RaycastContext(vec1, vec2, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player)).getType() == HitResult.Type.MISS;
-
-        ((IVec3d) vec2).set(entity.getX(), entity.getY() + entity.getStandingEyeHeight(), entity.getZ());
-        boolean canSeeEyes =  mc.world.raycast(new RaycastContext(vec1, vec2, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player)).getType() == HitResult.Type.MISS;
-
-        return canSeeFeet || canSeeEyes;
-    }
-
-    private boolean itemInHand() {
-        switch(onlyWith.get()){
-            case Axe:        return mc.player.getMainHandStack().getItem() instanceof AxeItem;
-            case Sword:      return mc.player.getMainHandStack().getItem() instanceof SwordItem;
-            case SwordOrAxe: return mc.player.getMainHandStack().getItem() instanceof AxeItem || mc.player.getMainHandStack().getItem() instanceof SwordItem;
-            default:         return true;
-        }
-    }
-
-    private int sort(LivingEntity e1, LivingEntity e2) {
-        switch (priority.get()) {
-            case LowestDistance:  return Double.compare(e1.distanceTo(mc.player), e2.distanceTo(mc.player));
-            case HighestDistance: return invertSort(Double.compare(e1.distanceTo(mc.player), e2.distanceTo(mc.player)));
-            case LowestHealth:    return Float.compare(e1.getHealth(), e2.getHealth());
-            case HighestHealth:   return invertSort(Float.compare(e1.getHealth(), e2.getHealth()));
-            default:              return 0;
-        }
-    }
-
-    private int invertSort(int sort) {
-        if (sort == 0) return 0;
-        return sort > 0 ? -1 : 1;
-    }
 }

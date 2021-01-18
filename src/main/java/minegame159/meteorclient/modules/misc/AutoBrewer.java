@@ -12,7 +12,7 @@ import minegame159.meteorclient.settings.PotionSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.misc.MyPotion;
-import minegame159.meteorclient.utils.player.Chat;
+import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
@@ -119,7 +119,7 @@ public class AutoBrewer extends Module {
             }
 
             if (slot == -1) {
-                Chat.warning(this, "You do not have any %s left in your inventory... disabling.", item.getName().getString());
+                ChatUtils.moduleError(this, "You do not have any %s left in your inventory... disabling.", item.getName().getString());
                 toggle();
                 return true;
             }
@@ -141,7 +141,7 @@ public class AutoBrewer extends Module {
         }
 
         if (slot == -1) {
-            Chat.warning(this, "You do not have any %s left in your inventory... disabling.", ingredient.getName().getString());
+            ChatUtils.moduleError(this, "You do not have any %s left in your inventory... disabling.", ingredient.getName().getString());
             toggle();
             return true;
         }
@@ -163,7 +163,7 @@ public class AutoBrewer extends Module {
             }
 
             if (slot == -1) {
-                Chat.warning(this, "You do not have a sufficient amount of blaze powder to use as fuel for the brew... disabling.");
+                ChatUtils.moduleError(this, "You do not have a sufficient amount of blaze powder to use as fuel for the brew... disabling.");
                 toggle();
                 return true;
             }
@@ -195,7 +195,7 @@ public class AutoBrewer extends Module {
             }
 
             if (slot == -1) {
-                Chat.warning(this, "You do not have a sufficient amount of water bottles to complete this brew... disabling.");
+                ChatUtils.moduleError(this, "You do not have a sufficient amount of water bottles to complete this brew... disabling.");
                 toggle();
                 return true;
             }
@@ -212,7 +212,7 @@ public class AutoBrewer extends Module {
             InvUtils.clickSlot(i, 0, SlotActionType.QUICK_MOVE);
 
             if (!c.slots.get(i).getStack().isEmpty()) {
-                Chat.warning(this, "You do not have a sufficient amount of inventory space... disabling.");
+                ChatUtils.moduleError(this, "You do not have a sufficient amount of inventory space... disabling.");
                 toggle();
                 return true;
             }
