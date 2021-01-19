@@ -70,7 +70,7 @@ public class TitleScreenMixin extends Screen {
             Utils.firstTimeTitleScreen = false;
             MeteorClient.LOG.info("Checking latest version of Meteor Client");
 
-            MeteorExecutor.execute(() -> HttpUtils.getLines("http://meteorclient.com:8082/api/version", s -> {
+            MeteorExecutor.execute(() -> HttpUtils.getLines("https://meteorclient.com/api/version", s -> {
                 Version latestVer = new Version(s);
                 if (latestVer.isHigherThan(Config.INSTANCE.version)) MinecraftClient.getInstance().openScreen(new NewUpdateScreen(latestVer));
             }));

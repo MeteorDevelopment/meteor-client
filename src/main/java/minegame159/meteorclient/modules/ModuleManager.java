@@ -342,6 +342,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new NoInteract());
         addModule(new NoRotate());
         addModule(new Trail());
+        addModule(new AirPlace());
     }
 
     private void initMovement() {
@@ -407,6 +408,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new FreeRotate());
         addModule(new EChestPreview());
         addModule(new ItemByteSize());
+        addModule(new ItemPhysics());
     }
 
     private void initMisc() {

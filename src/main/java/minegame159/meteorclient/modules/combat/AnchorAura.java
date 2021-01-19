@@ -158,6 +158,20 @@ public class AnchorAura extends Module {
             .build()
     );
 
+    private final Setting<Boolean> pauseOnEat = sgMisc.add(new BoolSetting.Builder()
+            .name("pause-on-eat")
+            .description("Pauses Anchor Aura while eating.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> pauseOnMine = sgMisc.add(new BoolSetting.Builder()
+            .name("pause-on-mine")
+            .description("Pauses Anchor Aura while mining blocks.")
+            .defaultValue(false)
+            .build()
+    );
+
     // Render
 
     private final Setting<Boolean> renderPlace = sgRender.add(new BoolSetting.Builder()
@@ -231,6 +245,10 @@ public class AnchorAura extends Module {
 
         if (!checkItems()) {
             target = null;
+            return;
+        }
+
+        if ((mc.player.isUsingItem() && (mc.player.getMainHandStack().getItem().isFood() || mc.player.getOffHandStack().getItem().isFood()) && pauseOnEat.get()) || (mc.interactionManager.isBreakingBlock() && pauseOnMine.get())) {
             return;
         }
 
@@ -386,7 +404,8 @@ public class AnchorAura extends Module {
 
     @Override
     public String getInfoString() {
-        if (target != null) return target.getEntityName();
+        if (target != null && target instanceof PlayerEntity) return target.getEntityName();
+        if (target != null) return target.getType().getName().getString();
         return null;
     }
 }

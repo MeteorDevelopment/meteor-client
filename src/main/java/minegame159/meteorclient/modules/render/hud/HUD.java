@@ -220,6 +220,14 @@ public class HUD extends Module {
             .build()
     );
 
+    private final Setting<ArmorHud.Orientation> armorOrientation = sgArmor.add(new EnumSetting.Builder<ArmorHud.Orientation>()
+            .name("orientation")
+            .description("How to display armor.")
+            .defaultValue(ArmorHud.Orientation.Horizontal)
+            .build()
+    );
+
+
     private final Setting<ArmorHud.Durability> armorDurability = sgArmor.add(new EnumSetting.Builder<ArmorHud.Durability>()
             .name("armor-durability")
             .description("How to display armor durability.")
@@ -232,7 +240,6 @@ public class HUD extends Module {
             .description("Scale of armor.")
             .defaultValue(2)
             .min(2)
-            .max(4)
             .sliderMin(2)
             .sliderMax(4)
             .build()
@@ -484,6 +491,9 @@ public class HUD extends Module {
 
     public boolean armorFlip() {
         return armorFlip.get();
+    }
+    public ArmorHud.Orientation armorOrientation() {
+        return armorOrientation.get();
     }
     public ArmorHud.Durability armorDurability() {
         return armorDurability.get();
