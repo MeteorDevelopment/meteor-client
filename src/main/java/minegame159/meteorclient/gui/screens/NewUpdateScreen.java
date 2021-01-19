@@ -33,7 +33,7 @@ public class NewUpdateScreen extends WindowScreen {
         add(new WHorizontalSeparator());
 
         WTable buttonsT = add(new WTable()).getWidget();
-        buttonsT.add(new WButton("Download " + latestVer.getOriginalString())).fillX().expandX().getWidget().action = () -> Util.getOperatingSystem().open("https://meteorclient.com/");
+        buttonsT.add(new WButton("Download " + latestVer.getOriginalString())).fillX().expandX().getWidget().action = () -> Util.getOperatingSystem().open("http://meteorclient.com/");
         buttonsT.add(new WButton("OK")).fillX().expandX().getWidget().action = this::onClose;
     }
 }

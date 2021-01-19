@@ -66,7 +66,7 @@ public class PremiumAccount extends Account<PremiumAccount> {
             }
         }
 
-        if (skinUrl == null) skinUrl = "https://meteorclient.com/steve.png";
+        if (skinUrl == null) skinUrl = "http://meteorclient.com/steve.png";
         return cache.makeHead(skinUrl);
     }
 
