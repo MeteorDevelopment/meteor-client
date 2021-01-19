@@ -45,7 +45,7 @@ public class AutoTotem extends Module {
 
     private final Setting<Boolean> fast = sgGeneral.add(new BoolSetting.Builder()
             .name("fast")
-            .description("Switches to a totem without any checks.\n(Only works well with more than 1 totem)")
+            .description("Switches to a totem without any checks. (Only works well with more than 1 totem)")
             .defaultValue(false)
             .build()
     );
