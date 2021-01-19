@@ -5,8 +5,6 @@
 
 package minegame159.meteorclient.gui.screens.topbar;
 
-import baritone.api.BaritoneAPI;
-import baritone.api.utils.SettingsUtil;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 
@@ -27,7 +25,8 @@ public class TopBarBaritone extends TopBarWindowScreen {
         SettingGroup sgInt = s.createGroup("Whole Numbers");
         SettingGroup sgColor = s.createGroup("Colors");
 
-        try {
+        // TODO: baritone
+        /*try {
             Class<? extends baritone.api.Settings> klass = BaritoneAPI.getSettings().getClass();
             for (Field field : klass.getDeclaredFields()) {
                 Object obj = field.get(BaritoneAPI.getSettings());
@@ -96,14 +95,14 @@ public class TopBarBaritone extends TopBarWindowScreen {
             }
         } catch (IllegalAccessException e) {
             e.printStackTrace();
-        }
+        }*/
 
         add(s.createTable()).fillX().expandX();
     }
 
     @Override
     public void onClose() {
-        SettingsUtil.save(BaritoneAPI.getSettings());
+        //SettingsUtil.save(BaritoneAPI.getSettings());
 
         super.onClose();
     }

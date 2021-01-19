@@ -5,13 +5,11 @@
 
 package minegame159.meteorclient.utils.world;
 
-import baritone.api.BaritoneAPI;
-import baritone.api.pathing.goals.Goal;
-import baritone.api.utils.SettingsUtil;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 
-public class GoalDirection implements Goal {
+// TODO: baritone
+public class GoalDirection/* implements Goal*/ {
     private static final double SQRT_2 = Math.sqrt(2.0D);
     private final float yaw;
     private int x;
@@ -39,7 +37,8 @@ public class GoalDirection implements Goal {
     }
 
     public String toString() {
-        return String.format("GoalXZ{x=%s,z=%s}", SettingsUtil.maybeCensor(this.x), SettingsUtil.maybeCensor(this.z));
+        return "";
+        //return String.format("GoalXZ{x=%s,z=%s}", SettingsUtil.maybeCensor(this.x), SettingsUtil.maybeCensor(this.z));
     }
 
     public static double calculate(double xDiff, double zDiff) {
@@ -56,7 +55,8 @@ public class GoalDirection implements Goal {
         }
 
         diagonal *= SQRT_2;
-        return (diagonal + straight) * BaritoneAPI.getSettings().costHeuristic.value;
+        return 1;
+        //return (diagonal + straight) * BaritoneAPI.getSettings().costHeuristic.value;
     }
 
     public int getX() {

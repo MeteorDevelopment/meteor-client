@@ -5,7 +5,6 @@
 
 package minegame159.meteorclient.mixin;
 
-import baritone.api.BaritoneAPI;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import minegame159.meteorclient.Config;
 import minegame159.meteorclient.MeteorClient;
@@ -41,7 +40,8 @@ public abstract class ClientPlayerEntityMixin {
     private void onSendChatMessage(String msg, CallbackInfo info) {
         if (ignoreChatMessage) return;
 
-        if (!msg.startsWith(Config.INSTANCE.getPrefix()) && !msg.startsWith("/") && !msg.startsWith(BaritoneAPI.getSettings().prefix.value)) {
+        // TODO: baritone
+        if (!msg.startsWith(Config.INSTANCE.getPrefix()) && !msg.startsWith("/")/* && !msg.startsWith(BaritoneAPI.getSettings().prefix.value)*/) {
             SendMessageEvent event = SendMessageEvent.get(msg);
             MeteorClient.EVENT_BUS.post(event);
 
