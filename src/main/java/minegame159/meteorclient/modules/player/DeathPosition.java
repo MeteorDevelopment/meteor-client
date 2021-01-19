@@ -5,8 +5,6 @@
 
 package minegame159.meteorclient.modules.player;
 
-import baritone.api.BaritoneAPI;
-import baritone.api.pathing.goals.GoalXZ;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.entity.TookDamageEvent;
@@ -108,9 +106,10 @@ public class DeathPosition extends Module {
         } else {
             if (mc.world != null) {
                 double x = deathPos.get("x"), z = deathPos.get("z");
-                if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing())
+                // TODO: baritone
+                /*if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing())
                     BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
-                BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalXZ((int) x, (int) z));
+                BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalXZ((int) x, (int) z));*/
             }
         }
     }

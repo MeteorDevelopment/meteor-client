@@ -1,7 +1,5 @@
 package minegame159.meteorclient.commands.commands.swarm;
 
-import baritone.api.BaritoneAPI;
-import baritone.api.pathing.goals.GoalXZ;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import minegame159.meteorclient.commands.Command;
@@ -28,7 +26,8 @@ public class SwarmGoto extends Command {
                                         if (swarm.currentMode == Swarm.Mode.Queen && swarm.server != null) {
                                             swarm.server.sendMessage(context.getInput());
                                         } else if (swarm.currentMode != Swarm.Mode.Queen) {
-                                            BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalXZ(x, z));
+                                            // TODO: baritone
+                                            //BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalXZ(x, z));
                                         }
                                     }
                                     return SINGLE_SUCCESS;

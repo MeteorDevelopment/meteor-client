@@ -5,7 +5,6 @@
 
 package minegame159.meteorclient.modules.combat;
 
-import baritone.api.BaritoneAPI;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import me.zero.alpine.listener.EventHandler;
@@ -285,15 +284,16 @@ public class KillAura extends Module {
             target = entityList.get(0);
             entityList.clear();
 
-            if (pauseOnCombat.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing() && !wasPathing) {
+            // TODO: baritone
+            /*if (pauseOnCombat.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing() && !wasPathing) {
                 BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("pause");
                 wasPathing = true;
-            }
+            }*/
         } else {
-            if (wasPathing){
+            /*if (wasPathing){
                 BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume");
                 wasPathing = false;
-            }
+            }*/
         }
     }
 
