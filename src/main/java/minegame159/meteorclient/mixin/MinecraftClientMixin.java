@@ -32,7 +32,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import javax.annotation.Nullable;
 import java.net.Proxy;
 
 @Mixin(MinecraftClient.class)
@@ -55,7 +54,7 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
 
     @Shadow private static int currentFps;
 
-    @Shadow @Nullable public Screen currentScreen;
+    @Shadow public Screen currentScreen;
 
     @Shadow public abstract Profiler getProfiler();
 

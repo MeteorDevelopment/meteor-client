@@ -1,6 +1,5 @@
 package minegame159.meteorclient.commands.commands.swarm;
 
-import baritone.api.BaritoneAPI;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import minegame159.meteorclient.commands.Command;
 import minegame159.meteorclient.modules.ModuleManager;
@@ -23,8 +22,9 @@ public class SwarmEscape extends Command {
                     if (swarm.isActive()) {
                         if (swarm.currentMode != Swarm.Mode.Queen) {
                             swarm.closeAllServerConnections();
-                            if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing())
-                                BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
+                            // TODO: baritone
+                            //if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing())
+                            //    BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
                             swarm.currentMode = Swarm.Mode.Idle;
                             ModuleManager.INSTANCE.get(Swarm.class).toggle();
                         } else {
