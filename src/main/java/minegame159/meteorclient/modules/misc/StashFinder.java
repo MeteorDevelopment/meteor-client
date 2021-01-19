@@ -5,8 +5,6 @@
 
 package minegame159.meteorclient.modules.misc;
 
-import baritone.api.BaritoneAPI;
-import baritone.api.pathing.goals.GoalXZ;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -183,7 +181,8 @@ public class StashFinder extends Module {
             open.action = () -> mc.openScreen(new StashFinderChunkScreen(chunk));
 
             WButton gotoBtn = table.add(new WButton("Goto")).getWidget();
-            gotoBtn.action = () -> BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalXZ(chunk.x, chunk.z));
+            // TODO: baritone
+            //gotoBtn.action = () -> BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalXZ(chunk.x, chunk.z));
 
             WMinus remove = table.add(new WMinus()).getWidget();
             remove.action = () -> {
