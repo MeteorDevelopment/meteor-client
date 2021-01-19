@@ -332,6 +332,13 @@ public class CrystalAura extends Module {
             .build()
     );
 
+    private final Setting<Boolean> pauseOnDrink = sgMisc.add(new BoolSetting.Builder()
+            .name("pause-on-drink")
+            .description("Pauses Crystal Aura while drinking a potion.")
+            .defaultValue(false)
+            .build()
+    );
+
     private final Setting<Boolean> pauseOnMine = sgMisc.add(new BoolSetting.Builder()
             .name("pause-on-mine")
             .description("Pauses Crystal Aura while mining blocks.")
@@ -450,7 +457,9 @@ public class CrystalAura extends Module {
             locked = false;
         }
 
-        if ((mc.player.isUsingItem() && (mc.player.getMainHandStack().getItem().isFood() || mc.player.getOffHandStack().getItem().isFood()) && pauseOnEat.get()) || (mc.interactionManager.isBreakingBlock() && pauseOnMine.get())) {
+        if ((mc.player.isUsingItem() && (mc.player.getMainHandStack().getItem().isFood() || mc.player.getOffHandStack().getItem().isFood()) && pauseOnEat.get())
+                || (mc.interactionManager.isBreakingBlock() && pauseOnMine.get())
+                || (mc.player.isUsingItem() && (mc.player.getMainHandStack().getItem() instanceof PotionItem || mc.player.getOffHandStack().getItem() instanceof PotionItem) && pauseOnDrink.get())) {
             return;
         }
 
