@@ -27,9 +27,9 @@ public class Main {
         );
 
         if (option == 0) {
-            openUrl("https://fabricmc.net");
+            openUrl("http://fabricmc.net");
         } else if (option == 1) {
-            openUrl("https://www.curseforge.com/minecraft/mc-mods/fabric-api");
+            openUrl("http://www.curseforge.com/minecraft/mc-mods/fabric-api");
         } else if (option == 2) {
             String os = System.getProperty("os.name").toLowerCase();
 

@@ -23,7 +23,7 @@ public class CrackedAccount extends Account<CrackedAccount> {
 
     @Override
     public boolean fetchHead() {
-        return cache.makeHead("https://meteorclient.com/steve.png");
+        return cache.makeHead("http://meteorclient.com/steve.png");
     }
 
     @Override
