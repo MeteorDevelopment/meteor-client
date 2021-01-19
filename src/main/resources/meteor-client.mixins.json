@@ -97,7 +97,8 @@
     "WorldRendererAccessor",
     "WorldRendererMixin",
     "FireworkRocketEntityMixin",
-    "BoxMixin"
+    "BoxMixin",
+    "ItemEntityRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

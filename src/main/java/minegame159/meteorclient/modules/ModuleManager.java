@@ -407,6 +407,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new FreeRotate());
         addModule(new EChestPreview());
         addModule(new ItemByteSize());
+        addModule(new ItemPhysics());
     }
 
     private void initMisc() {
