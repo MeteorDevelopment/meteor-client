@@ -24,6 +24,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Items;
+import net.minecraft.item.PotionItem;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
@@ -165,6 +166,13 @@ public class AnchorAura extends Module {
             .build()
     );
 
+    private final Setting<Boolean> pauseOnDrink = sgMisc.add(new BoolSetting.Builder()
+            .name("pause-on-drink")
+            .description("Pauses Anchor Aura while drinking a potion.")
+            .defaultValue(false)
+            .build()
+    );
+
     private final Setting<Boolean> pauseOnMine = sgMisc.add(new BoolSetting.Builder()
             .name("pause-on-mine")
             .description("Pauses Anchor Aura while mining blocks.")
@@ -248,7 +256,9 @@ public class AnchorAura extends Module {
             return;
         }
 
-        if ((mc.player.isUsingItem() && (mc.player.getMainHandStack().getItem().isFood() || mc.player.getOffHandStack().getItem().isFood()) && pauseOnEat.get()) || (mc.interactionManager.isBreakingBlock() && pauseOnMine.get())) {
+        if ((mc.player.isUsingItem() && (mc.player.getMainHandStack().getItem().isFood() || mc.player.getOffHandStack().getItem().isFood()) && pauseOnEat.get())
+                || (mc.interactionManager.isBreakingBlock() && pauseOnMine.get())
+                || (mc.player.isUsingItem() && (mc.player.getMainHandStack().getItem() instanceof PotionItem || mc.player.getOffHandStack().getItem() instanceof PotionItem) && pauseOnDrink.get())) {
             return;
         }
 
