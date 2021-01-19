@@ -75,7 +75,7 @@ public class ESP extends Module {
 
     private final Setting<ColorStyle> colorStyle = sgColors.add(new EnumSetting.Builder<ColorStyle>()
             .name("color-style")
-            .description("Choose between fixed-color highlight, or based off the user's nametag")
+            .description("Choose between fixed-color highlight, or based off the user's nametag (players only)")
             .defaultValue(ColorStyle.Fixed)
             .build()
     );
