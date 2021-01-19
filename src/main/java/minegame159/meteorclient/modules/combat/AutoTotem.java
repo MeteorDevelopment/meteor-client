@@ -43,6 +43,13 @@ import java.util.List;
 public class AutoTotem extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
+    private final Setting<Boolean> fast = sgGeneral.add(new BoolSetting.Builder()
+            .name("fast")
+            .description("Switches to a totem without any checks.\n(Only works well with more than 1 totem)")
+            .defaultValue(false)
+            .build()
+    );
+
     private final Setting<Boolean> smart = sgGeneral.add(new BoolSetting.Builder()
             .name("smart")
             .description("Only switches to a totem when you are close to death.")
@@ -91,29 +98,43 @@ public class AutoTotem extends Module {
     @EventHandler
     private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
         assert mc.player != null;
-        if (mc.currentScreen instanceof InventoryScreen && !inventorySwitch.get()) return;
-        if (mc.currentScreen != null && !(mc.currentScreen instanceof InventoryScreen)) return;
-
+        if (mc.currentScreen != null && !(mc.currentScreen instanceof InventoryScreen && inventorySwitch.get())) return;
+        //result.slot: the first totem in inventory; result.count: the total amount of totems in inventory
         InvUtils.FindItemResult result = InvUtils.findItemWithCount(Items.TOTEM_OF_UNDYING);
 
+        //try to change to a totem ASAP
+        if (fast.get() && result.slot != -1 && result.slot!=40) try {
+            int totem_place=InvUtils.invIndexToSlotId(result.slot);
+            List<Integer> slots = java.util.Arrays.asList(totem_place,InvUtils.OFFHAND_SLOT,totem_place);
+            InvUtils.addSlots(slots, this.getClass());
+            locked = true;
+        } catch (Exception ignored) {}
+
+        //activate OffhandExtra if there are no totems, and fallback is on
         if (result.count <= 0) {
             if (!ModuleManager.INSTANCE.get(OffhandExtra.class).isActive() && fallback.get()) {
                 ModuleManager.INSTANCE.get(OffhandExtra.class).toggle();
             }
-
+            //set OffhandExtra to not use totems
             ModuleManager.INSTANCE.get(OffhandExtra.class).setTotems(true);
         } else {
+            //set OffhandExtra to use totems
             ModuleManager.INSTANCE.get(OffhandExtra.class).setTotems(false);
 
-            if (mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING && (!smart.get()
+            //if no totem in offhand, and a totem is needed
+            if (!fast.get() && mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING && (!smart.get()
                     || isLow())) {
+                //tell OffhandExtra (and any other module i guess) not to change the offhand
                 locked = true;
+                //move totem to offhand
                 moveTotem(result);
             } else if (smart.get() && !isLow()) {
+                //else tell OffhandExtra (and any other module i guess) that they can change the offhand
                 locked = false;
             }
         }
 
+        //for the info string
         totemCountString = Integer.toString(result.count);
     });
 
