@@ -19,7 +19,7 @@ import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.utils.player.Chat;
+import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.block.ShulkerBoxBlock;
 import net.minecraft.client.gui.screen.ingame.HorseScreen;
@@ -126,7 +126,7 @@ public class AutoMountBypassDupe extends Module {
                 if (slot != -1 && slot < 9) {
                     mc.player.inventory.selectedSlot  = slot;
                  } else {
-                    Chat.warning(this, "Cannot find chest in your hotbar. Disabling!");
+                    ChatUtils.moduleError(this, "Cannot find chest in your hotbar... disabling.");
                     this.toggle();
                 }
             }

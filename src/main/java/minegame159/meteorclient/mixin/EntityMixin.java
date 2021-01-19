@@ -50,7 +50,9 @@ public abstract class EntityMixin {
         }
 
         Velocity velocity = ModuleManager.INSTANCE.get(Velocity.class);
-        entity.setVelocity(entity.getVelocity().x + x * velocity.getHorizontal(), entity.getVelocity().y + y * velocity.getVertical(), entity.getVelocity().z + z * velocity.getHorizontal());
+        if (velocity.isActive()){
+            entity.setVelocity(entity.getVelocity().x + x * velocity.getHorizontal(), entity.getVelocity().y + y * velocity.getVertical(), entity.getVelocity().z + z * velocity.getHorizontal());
+        }
     }
 
     @Inject(method = "getJumpVelocityMultiplier", at = @At("HEAD"), cancellable = true)

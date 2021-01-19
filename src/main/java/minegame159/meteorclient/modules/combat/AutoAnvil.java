@@ -15,7 +15,7 @@ import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.player.FakePlayer;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.entity.FakePlayerEntity;
-import minegame159.meteorclient.utils.player.Chat;
+import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.PlayerUtils;
 import minegame159.meteorclient.utils.player.RotationUtils;
 import net.minecraft.block.AbstractButtonBlock;
@@ -106,7 +106,7 @@ public class AutoAnvil extends Module {
     private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
 
         if (isActive() && toggleOnBreak.get() && target != null && target.inventory.getArmorStack(3).isEmpty()) {
-            Chat.info(this, "Target head slot is empty… disabling.");
+            ChatUtils.moduleError(this, "Target head slot is empty... disabling.");
             toggle();
             return;
         }
@@ -183,5 +183,12 @@ public class AutoAnvil extends Module {
             }
         }
         return slot;
+    }
+
+    @Override
+    public String getInfoString() {
+        if (target != null && target instanceof PlayerEntity) return target.getEntityName();
+        if (target != null) return target.getType().getName().getString();
+        return null;
     }
 }

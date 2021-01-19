@@ -19,19 +19,32 @@ public class ArmorHud extends HudModule {
         Percentage
     }
 
+    public enum Orientation {
+        Horizontal,
+        Vertical
+    }
+
     public ArmorHud(HUD hud) {
         super(hud, "armor", "Displays information about your armor.");
     }
 
     @Override
     public void update(HudRenderer renderer) {
-        box.setSize(16 * hud.armorScale() * 4 + 2 * 4, 16 * hud.armorScale());
+        switch (hud.armorOrientation()) {
+            case Horizontal:
+                box.setSize(16 * hud.armorScale() * 4 + 2 * 4, 16 * hud.armorScale());
+                break;
+            case Vertical:
+                box.setSize(16 * hud.armorScale(), 16 * hud.armorScale() * 4 + 2 * 4);
+        }
     }
 
     @Override
     public void render(HudRenderer renderer) {
         double x = box.getX();
         double y = box.getY();
+        double armorX;
+        double armorY;
 
         int slot = hud.armorFlip() ? 3 : 0;
         for (int position = 0; position < 4; position++) {
@@ -39,26 +52,42 @@ public class ArmorHud extends HudModule {
 
             RenderSystem.pushMatrix();
             RenderSystem.scaled(hud.armorScale(), hud.armorScale(), 1);
-            mc.getItemRenderer().renderGuiItemIcon(itemStack, (int) (x / hud.armorScale() + position * 18), (int) (y / hud.armorScale()));
+
+            if (hud.armorOrientation() == Orientation.Vertical) {
+                armorX = x / hud.armorScale();
+                armorY = y / hud.armorScale() + position * 18;
+            } else {
+                armorX = x / hud.armorScale() + position * 18;
+                armorY = y / hud.armorScale();
+            }
+            mc.getItemRenderer().renderGuiItemIcon(itemStack, (int) armorX, (int) armorY);
 
             if (itemStack.isDamageable()) {
-                switch (hud.armorDurability()) {
-                    case Default: {
-                        mc.getItemRenderer().renderGuiItemOverlay(mc.textRenderer, itemStack, (int) (x / hud.armorScale() + position * 18), (int) (y / hud.armorScale()));
-                        break;
+                if (hud.armorDurability() == Durability.Default) {
+                    mc.getItemRenderer().renderGuiItemOverlay(mc.textRenderer, itemStack, (int) armorX, (int) armorY);
+                } else if (hud.armorDurability() != Durability.None) {
+                    String message = "sex";
+
+                    switch (hud.armorDurability()) {
+                        case Numbers:
+                            message = Integer.toString(itemStack.getMaxDamage() - itemStack.getDamage());
+                            break;
+                        case Percentage:
+                            message = Integer.toString(Math.round(((itemStack.getMaxDamage() - itemStack.getDamage()) * 100f) / (float) itemStack.getMaxDamage()));
+                            break;
                     }
-                    case Numbers: {
-                        String message = Integer.toString(itemStack.getMaxDamage() - itemStack.getDamage());
-                        double messageWidth = renderer.textWidth(message);
-                        renderer.text(message, x + 18 * position * hud.armorScale() + 8 * hud.armorScale() - messageWidth / 2.0, y + (box.height - renderer.textHeight()), hud.primaryColor());
-                        break;
+
+                    double messageWidth = renderer.textWidth(message);
+
+                    if (hud.armorOrientation() == Orientation.Vertical) {
+                        armorX = x + (box.height - renderer.textHeight());
+                        armorY = y + 18 * position * hud.armorScale() + 8 * hud.armorScale() - messageWidth / 2.0;
+                    } else {
+                        armorX = x + 18 * position * hud.armorScale() + 8 * hud.armorScale() - messageWidth / 2.0;
+                        armorY = y + (box.height - renderer.textHeight());
                     }
-                    case Percentage: {
-                        String message = Integer.toString(Math.round(((itemStack.getMaxDamage() - itemStack.getDamage()) * 100f) / (float) itemStack.getMaxDamage()));
-                        double messageWidth = renderer.textWidth(message);
-                        renderer.text(message, x + 18 * position * hud.armorScale() + 8 * hud.armorScale() - messageWidth / 2.0, y + (box.height - renderer.textHeight()), hud.primaryColor());
-                        break;
-                    }
+
+                    renderer.text(message, armorX, armorY, hud.primaryColor());
                 }
             }
 

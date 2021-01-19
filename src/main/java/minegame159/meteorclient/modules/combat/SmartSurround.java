@@ -18,10 +18,7 @@ import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.utils.player.Chat;
-import minegame159.meteorclient.utils.player.DamageCalcUtils;
-import minegame159.meteorclient.utils.player.PlayerUtils;
-import minegame159.meteorclient.utils.player.RotationUtils;
+import minegame159.meteorclient.utils.player.*;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.BlockItem;
@@ -78,7 +75,7 @@ public class SmartSurround extends Module {
                 slot = findObiInHotbar();
 
                 if (slot == -1 && onlyObsidian.get()) {
-                    Chat.warning(this, "No Obsidian in hotbar. Disabling!");
+                    ChatUtils.moduleError(this, "No obsidian in hotbar... disabling.");
                     return;
                 }
 
@@ -93,7 +90,7 @@ public class SmartSurround extends Module {
                 }
 
                 if (slot == -1) {
-                    Chat.warning(this, "No blocks in hotbar. Disabling!");
+                    ChatUtils.moduleError(this, "No blocks in hotbar... disabling.");
                     return;
                 }
 

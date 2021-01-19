@@ -227,4 +227,11 @@ public class AimAssist extends Module {
         if (sort == 0) return 0;
         return sort > 0 ? -1 : 1;
     }
+
+    @Override
+    public String getInfoString() {
+        if (entity != null && entity instanceof PlayerEntity) return entity.getEntityName();
+        if (entity != null) return entity.getType().getName().getString();
+        return null;
+    }
 }

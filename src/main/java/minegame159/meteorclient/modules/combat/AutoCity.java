@@ -5,10 +5,7 @@ import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.utils.player.Chat;
-import minegame159.meteorclient.utils.player.CityUtils;
-import minegame159.meteorclient.utils.player.PlayerUtils;
-import minegame159.meteorclient.utils.player.RotationUtils;
+import minegame159.meteorclient.utils.player.*;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
@@ -54,19 +51,20 @@ public class AutoCity extends Module {
         super(Category.Combat, "auto-city", "Automatically cities a target by mining the nearest obsidian next to them.");
     }
 
+    private PlayerEntity target;
+
     @Override
     public void onActivate() {
-
-        PlayerEntity target = CityUtils.getPlayerTarget();
+        target = CityUtils.getPlayerTarget();
         BlockPos mineTarget = CityUtils.getTargetBlock(checkBelow.get());
 
         if (target == null || mineTarget == null) {
-            if (chatInfo.get()) Chat.error(this, "No target block found… disabling.");
+            if (chatInfo.get()) ChatUtils.moduleError(this, "No target block found... disabling.");
         } else {
-            if (chatInfo.get()) Chat.info(this, "Attempting to city " + target.getGameProfile().getName());
+            if (chatInfo.get()) ChatUtils.moduleInfo(this, "Attempting to city " + target.getGameProfile().getName());
 
             if (MathHelper.sqrt(mc.player.squaredDistanceTo(mineTarget.getX(), mineTarget.getY(), mineTarget.getZ())) > mc.interactionManager.getReachDistance()) {
-                if (chatInfo.get()) Chat.error(this, "Target block out of reach… disabling.");
+                if (chatInfo.get()) ChatUtils.moduleError(this, "Target block out of reach... disabling.");
                 toggle();
                 return;
             }
@@ -82,7 +80,7 @@ public class AutoCity extends Module {
             }
 
             if (pickSlot == -1) {
-                if (chatInfo.get()) Chat.error(this, "No pick found… disabling.");
+                if (chatInfo.get()) ChatUtils.moduleError(this, "No pick found... disabling.");
                 toggle();
                 return;
             }
@@ -99,7 +97,7 @@ public class AutoCity extends Module {
 
             if (support.get() && obbySlot != -1 && mc.world.getBlockState(mineTarget.down(1)).isAir()) {
                 PlayerUtils.placeBlock(mineTarget.down(1), obbySlot, Hand.MAIN_HAND);
-            } else if (support.get() && obbySlot == -1) if (chatInfo.get()) Chat.warning(this, "No obsidian found for support, mining anyway.");
+            } else if (support.get() && obbySlot == -1) if (chatInfo.get()) ChatUtils.moduleWarning(this, "No obsidian found for support, mining anyway.");
 
             mc.player.inventory.selectedSlot = pickSlot;
 
@@ -109,5 +107,12 @@ public class AutoCity extends Module {
             mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, mineTarget, Direction.UP));
         }
         toggle();
+    }
+
+    @Override
+    public String getInfoString() {
+        if (target != null && target instanceof PlayerEntity) return target.getEntityName();
+        if (target != null) return target.getType().getName().getString();
+        return null;
     }
 }
