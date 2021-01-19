@@ -69,6 +69,7 @@ public class DeathPosition extends Module {
                 waypoint.y = (int) mc.player.getY() + 2;
                 waypoint.z = (int) mc.player.getZ();
                 waypoint.maxVisibleDistance = Integer.MAX_VALUE;
+                waypoint.actualDimension = Utils.getDimension();
 
                 switch (Utils.getDimension()) {
                     case Overworld:
