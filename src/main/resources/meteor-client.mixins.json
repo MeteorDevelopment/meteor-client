@@ -67,7 +67,6 @@
     "LightmapTextureManagerMixin",
     "LivingEntityMixin",
     "LivingEntityRendererMixin",
-    "LookBehaviorMixin",
     "MinecraftClientMixin",
     "MinecraftServerMixin",
     "MiningToolItemMixin",
