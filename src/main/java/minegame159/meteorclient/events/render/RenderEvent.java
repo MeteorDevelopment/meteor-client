@@ -19,5 +19,4 @@ public class RenderEvent {
         INSTANCE.offsetZ = offsetZ;
         return INSTANCE;
     }
-
 }

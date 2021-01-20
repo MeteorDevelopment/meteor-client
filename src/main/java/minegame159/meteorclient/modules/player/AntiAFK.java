@@ -7,11 +7,9 @@ import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.settings.BoolSetting;
-import minegame159.meteorclient.settings.IntSetting;
-import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.player.RotationUtils;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -22,6 +20,11 @@ import java.util.List;
 import java.util.Random;
 
 public class AntiAFK extends Module {
+
+    public enum SpinMode {
+        Server,
+        Client
+    }
 
     public AntiAFK() {
         super(Category.Player, "anti-afk", "Performs different actions to prevent getting kicked for AFK reasons.");
@@ -36,14 +39,31 @@ public class AntiAFK extends Module {
             .name("spin")
             .description("Spins.")
             .defaultValue(true)
-            .build());
+            .build()
+    );
+
+    private final Setting<SpinMode> spinMode = sgActions.add(new EnumSetting.Builder<SpinMode>()
+            .name("spin-mode")
+            .description("The method of rotating.")
+            .defaultValue(SpinMode.Server)
+            .build()
+    );
 
     private final Setting<Integer> spinSpeed = sgActions.add(new IntSetting.Builder()
             .name("spin-speed")
             .description("The speed to spin you.")
             .defaultValue(7)
-            .min(1)
-            .max(10)
+            .build()
+    );
+
+    private final Setting<Double> pitch = sgActions.add(new DoubleSetting.Builder()
+            .name("pitch")
+            .description("The pitch to set in server mode.")
+            .defaultValue(-90)
+            .min(-90)
+            .max(90)
+            .sliderMin(-90)
+            .sliderMax(90)
             .build()
     );
 
@@ -108,29 +128,47 @@ public class AntiAFK extends Module {
 
     private final Random random = new Random();
 
-    @SuppressWarnings("unused")
+    private float prevYaw;
+
+    @Override
+    public void onActivate() {
+        prevYaw = mc.player.yaw;
+    }
+
     @EventHandler
     private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
-        if (mc.player != null && mc.world != null) {
-            if (spin.get())
-                mc.player.yaw = (mc.player.yaw >= 360) ? 0 : mc.player.yaw + random.nextInt(spinSpeed.get()) + 1;
-            if (jump.get() && mc.options.keyJump.isPressed())
-                ((IKeyBinding) mc.options.keyJump).setPressed(false);
-            else if (jump.get() && random.nextInt(99) + 1 == 50)
-                ((IKeyBinding) mc.options.keyJump).setPressed(true);
+        if (Utils.canUpdate()) {
+
+            //Spin
+            if (spin.get()) {
+                prevYaw += spinSpeed.get();
+                switch (spinMode.get()) {
+                    case Client:
+                        mc.player.yaw = prevYaw;
+                        break;
+                    case Server:
+                        RotationUtils.packetRotate(prevYaw, pitch.get().floatValue());
+                        break;
+                }
+            }
+
+            //Jump
+            if (jump.get() && mc.options.keyJump.isPressed()) ((IKeyBinding) mc.options.keyJump).setPressed(false);
+            if (jump.get() && mc.options.keySneak.isPressed()) ((IKeyBinding) mc.options.keySneak).setPressed(false);
+            else if (jump.get() && random.nextInt(99) + 1 == 50) ((IKeyBinding) mc.options.keyJump).setPressed(true);
+
+            //Click
             if (click.get() && random.nextInt(99) + 1 == 45) {
                 mc.options.keyAttack.setPressed(true);
                 Utils.leftClick();
                 mc.options.keyAttack.setPressed(false);
             }
-            if (jump.get() && mc.options.keySneak.isPressed())
-                ((IKeyBinding) mc.options.keySneak).setPressed(false);
-            else if (disco.get() && random.nextInt(24) + 1 == 15) {
-                ((IKeyBinding) mc.options.keySneak).setPressed(true);
-            }
-            if (messages.isEmpty()) return;
 
-            if (sendMessages.get())
+            //Disco
+            if (disco.get() && random.nextInt(24) + 1 == 15) ((IKeyBinding) mc.options.keySneak).setPressed(true);
+
+            //Spam
+            if (sendMessages.get() && !messages.isEmpty())
                 if (timer <= 0) {
                     int i;
                     if (randomMessage.get()) {
@@ -147,6 +185,7 @@ public class AntiAFK extends Module {
                     timer--;
                 }
 
+            //Strafe
             if (strafe.get() && strafeTimer == 20) {
                 ((IKeyBinding) mc.options.keyLeft).setPressed(!direction);
                 ((IKeyBinding) mc.options.keyRight).setPressed(direction);

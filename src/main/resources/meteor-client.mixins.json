@@ -67,7 +67,6 @@
     "LightmapTextureManagerMixin",
     "LivingEntityMixin",
     "LivingEntityRendererMixin",
-    "LookBehaviorMixin",
     "MinecraftClientMixin",
     "MinecraftServerMixin",
     "MiningToolItemMixin",
@@ -97,7 +96,8 @@
     "WorldRendererAccessor",
     "WorldRendererMixin",
     "FireworkRocketEntityMixin",
-    "BoxMixin"
+    "BoxMixin",
+    "ItemEntityRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

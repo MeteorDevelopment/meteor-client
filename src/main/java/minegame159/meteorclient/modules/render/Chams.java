@@ -7,11 +7,10 @@ package minegame159.meteorclient.modules.render;
 
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
-import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.entity.EntityUtils;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.client.render.VertexConsumer;
@@ -20,10 +19,10 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
 
 public class Chams extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgColors = settings.createGroup("Colors");
     
     private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
             .name("entities")
@@ -47,8 +46,12 @@ public class Chams extends Module {
     );
 
     // Colors
-
-    private final SettingGroup sgColors = settings.createGroup("Colors");
+    public final Setting<Boolean> useNameColor = sgColors.add(new BoolSetting.Builder()
+            .name("use-name-color")
+            .description("Uses players displayname color for the chams color (good for minigames).")
+            .defaultValue(false)
+            .build()
+    );
 
     private final Setting<SettingColor> playersColor = sgColors.add(new ColorSetting.Builder()
             .name("players-color")
@@ -102,7 +105,7 @@ public class Chams extends Module {
 
     public boolean renderChams(EntityModel<LivingEntity> model, MatrixStack matrices, VertexConsumer vertices, int light, int overlay, LivingEntity entity) {
         if (ignoreRender(entity) || !colored.get()) return false;
-        Color color = getColor(entity);
+        Color color = EntityUtils.getEntityColor(entity, playersColor.get(), animalsColor.get(), waterAnimalsColor.get(), monstersColor.get(), ambientColor.get(), miscColor.get(), useNameColor.get());
         model.render(matrices, vertices, light, overlay, (float)color.r/255f, (float)color.g/255f, (float)color.b/255f, (float)color.a/255f);
         return true;
     }
@@ -115,18 +118,4 @@ public class Chams extends Module {
 //        modelPart.render(matrices, vertices, light, overlay, (float)color.r/255f, (float)color.g/255f, (float)color.b/255f, (float)color.a/255f);
 //        return true;
 //    }
-
-    public Color getColor(Entity entity) {
-        if (entity instanceof PlayerEntity) return FriendManager.INSTANCE.getColor((PlayerEntity) entity, playersColor.get(), true);
-
-        switch (entity.getType().getSpawnGroup()) {
-            case CREATURE:       return animalsColor.get();
-            case WATER_CREATURE: return waterAnimalsColor.get();
-            case MONSTER:        return monstersColor.get();
-            case AMBIENT:        return ambientColor.get();
-            case MISC:           return miscColor.get();
-        }
-
-        return Utils.WHITE;
-    }
 }

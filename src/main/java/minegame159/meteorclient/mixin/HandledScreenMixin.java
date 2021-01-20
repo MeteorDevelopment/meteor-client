@@ -35,11 +35,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import javax.annotation.Nullable;
-
 @Mixin(HandledScreen.class)
 public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen implements ScreenHandlerProvider<T> {
-    @Shadow @Nullable protected Slot focusedSlot;
+    @Shadow protected Slot focusedSlot;
 
     @Shadow protected int x;
     @Shadow protected int y;
