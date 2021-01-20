@@ -50,7 +50,7 @@ public class Holefiller extends Module {
             .build()
     );
 
-    private final Setting<Holefiller.PlaceMode> mode = sgGeneral.add(new EnumSetting.Builder<Holefiller.PlaceMode>()
+    private final Setting<PlaceMode> mode = sgGeneral.add(new EnumSetting.Builder<PlaceMode>()
             .name("block")
             .description("What kind of blocks you use to fill holes with.")
             .defaultValue(PlaceMode.Obsidian)
