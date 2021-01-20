@@ -252,7 +252,7 @@ public class Jesus extends Module {
 
     private boolean lavaShouldBeSolid() {
         return walkOnLava.get() &&
-                !((disableOnSneakForLava.get() | lavaIsSafe()) && mc.options.keySneak.isPressed()) &&
+                !((disableOnSneakForLava.get() || lavaIsSafe()) && mc.options.keySneak.isPressed()) &&
                 !(dipIntoLava.get() && mc.player.fallDistance > dipIntoLavaHeight.get()) &&
                 !(lavaIsSafe() && mc.player.fallDistance > 3);
     }
