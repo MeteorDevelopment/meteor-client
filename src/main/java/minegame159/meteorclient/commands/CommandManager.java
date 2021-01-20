@@ -35,7 +35,7 @@ public class CommandManager {
         addCommand(new SwarmCloseConnections());
         addCommand(new SwarmEscape());
         addCommand(new SwarmFollow());
-        addCommand(new SwamGoto());
+        addCommand(new SwarmGoto());
         addCommand(new SwarmInfinityMiner());
         addCommand(new SwarmMine());
         addCommand(new SwarmRelease());
