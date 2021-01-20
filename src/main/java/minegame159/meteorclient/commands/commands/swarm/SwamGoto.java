@@ -16,9 +16,9 @@ import net.minecraft.command.CommandSource;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
-public class SwamGoTo extends Command {
+public class SwamGoto extends Command {
 
-    public SwamGoTo() {
+    public SwamGoto() {
         super("swarm", "(highlight)goto <x> <z>(default) - Path to a destination.");
     }
 
