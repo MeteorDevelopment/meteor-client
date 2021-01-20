@@ -1,3 +1,8 @@
+/*
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
+ * Copyright (c) 2021 Meteor Development.
+ */
+
 package minegame159.meteorclient.modules.render.hud.modules;
 
 import minegame159.meteorclient.modules.render.hud.HUD;
@@ -8,8 +13,8 @@ import minegame159.meteorclient.utils.render.RenderUtils;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 
-public class TotemsHud extends HudModule {
-    public TotemsHud(HUD hud) { super(hud, "totems", "Displays the amount of totems in your inventory."); }
+public class TotemHud extends HudModule {
+    public TotemHud(HUD hud) { super(hud, "totems", "Displays the amount of totems in your inventory."); }
 
 
 
