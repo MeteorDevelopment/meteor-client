@@ -295,7 +295,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new SelfTrap());
         addModule(new SelfWeb());
         addModule(new AutoWeb());
-        addModule(new HoleFiller());
+        addModule(new Holefiller());
         addModule(new SelfAnvil());
         addModule(new AntiAutoAnvil());
         addModule(new AutoCity());
