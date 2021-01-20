@@ -30,28 +30,15 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class BetterChat extends Module {
-    // Protection
 
-    private final SettingGroup sgProtection = settings.createGroup("Protection");  // TODO: grammar (descriptions, fix this pls):
+    // Annoy
 
-    private final Setting<Boolean> coordsProtectionEnabled = sgProtection.add(new BoolSetting.Builder()
-            .name("coords-protection-enabled")
-            .description("Prevents you from sending a message to the chat if there are coordinates there.")
-            .defaultValue(true)
-            .build()
-    );
+    private final SettingGroup sgAnnoy = settings.createGroup("Annoy");
 
-    private final Setting<Boolean> disableAllMessages = sgProtection.add(new BoolSetting.Builder()
-            .name("disable-all-messages")
-            .description("Prevents you from sending all messages to the global chat.")
+    private final Setting<Boolean> annoyEnabled = sgAnnoy.add(new BoolSetting.Builder()
+            .name("annoy-enabled")
+            .description("Makes your messages aNnOyInG.")
             .defaultValue(false)
-            .build()
-    );
-
-    private final Setting<Boolean> disableButton = sgProtection.add(new BoolSetting.Builder()
-            .name("disable-button")
-            .description("Add a button to the warning to send a message to the chat in any way.")
-            .defaultValue(true)
             .build()
     );
 
@@ -79,6 +66,17 @@ public class BetterChat extends Module {
             .name("anti-spam-move-to-bottom")
             .description("Moves any duplicate messages to the bottom of the chat.")
             .defaultValue(true)
+            .build()
+    );
+
+    // Fancy Chat
+
+    private final SettingGroup sgFancyChat = settings.createGroup("Fancy Chat");
+
+    private final Setting<Boolean> fancyEnabled = sgFancyChat.add(new BoolSetting.Builder()
+            .name("fancy-chat-enabled")
+            .description("Makes your messages fancy!")
+            .defaultValue(false)
             .build()
     );
 
@@ -146,6 +144,31 @@ public class BetterChat extends Module {
             .build()
     );
 
+    // Protection TODO: Find a better name for this.
+
+    private final SettingGroup sgProtection = settings.createGroup("Protection");
+
+    private final Setting<Boolean> coordsProtectionEnabled = sgProtection.add(new BoolSetting.Builder()
+            .name("coords-protection-enabled")
+            .description("Prevents you from sending messages in chat that may contain coordinates.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Boolean> disableAllMessages = sgProtection.add(new BoolSetting.Builder()
+            .name("disable-all-messages")
+            .description("Prevents you from essentially being able to send messages in chat.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> disableButton = sgProtection.add(new BoolSetting.Builder()
+            .name("disable-button")
+            .description("Adds a button to the warning to send a message to the chat in any way.")
+            .defaultValue(true)
+            .build()
+    );
+
     // Suffix
 
     private final SettingGroup sgSuffix = settings.createGroup("Suffix");
@@ -188,24 +211,6 @@ public class BetterChat extends Module {
             .defaultValue(true)
             .build()
     );*/
-
-    private final SettingGroup sgAnnoy = settings.createGroup("Annoy");
-
-    private final Setting<Boolean> annoyEnabled = sgAnnoy.add(new BoolSetting.Builder()
-            .name("annoy-enabled")
-            .description("Makes your messages aNnOyInG.")
-            .defaultValue(false)
-            .build()
-    );
-
-    private final SettingGroup sgFancyChat = settings.createGroup("Fancy Chat");
-
-    private final Setting<Boolean> fancyEnabled = sgFancyChat.add(new BoolSetting.Builder()
-            .name("fancy-chat-enabled")
-            .description("Makes your messages fancy!")
-            .defaultValue(false)
-            .build()
-    );
 
     private boolean skipMessage;
 
