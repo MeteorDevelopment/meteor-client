@@ -16,7 +16,7 @@ import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 public class SwarmScatter extends Command {
 
     public SwarmScatter(){
-        super("swarm","(highlight)scatter - Send them running.");
+        super("swarm","(highlight)scatter(default) - Send them running.");
     }
 
 
