@@ -16,6 +16,7 @@ import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.entity.EntityUtils;
 import minegame159.meteorclient.utils.entity.Target;
 import minegame159.meteorclient.utils.render.RenderUtils;
 import minegame159.meteorclient.utils.render.color.Color;
@@ -74,6 +75,13 @@ public class Tracers extends Module {
     );
 
     // Colors
+
+    public final Setting<Boolean> useNameColor = sgColors.add(new BoolSetting.Builder()
+            .name("use-name-color")
+            .description("Uses players displayname color for the tracer color (good for minigames).")
+            .defaultValue(false)
+            .build()
+    );
 
     private final Setting<SettingColor> playersColor = sgColors.add(new ColorSetting.Builder()
             .name("players-colors")
@@ -134,31 +142,16 @@ public class Tracers extends Module {
     private final Listener<RenderEvent> onRender = new Listener<>(event -> {
         count = 0;
 
+
         for (Entity entity : mc.world.getEntities()) {
-            if ((!ModuleManager.INSTANCE.isActive(Freecam.class) && entity == mc.player) || !entities.get().getBoolean(entity.getType())) continue;
-            if (!showInvis.get() && entity.isInvisible()) continue;
-
-            if (entity instanceof PlayerEntity) {
-                Color color = playersColor.get();
-                Friend friend = FriendManager.INSTANCE.get((PlayerEntity) entity);
-                if (friend != null) color = FriendManager.INSTANCE.getColor((PlayerEntity) entity, playersColor.get(), false);
-
-                if (friend == null || FriendManager.INSTANCE.show((PlayerEntity) entity)) RenderUtils.drawTracerToEntity(event, entity, color, target.get(), stem.get()); count++;
-            } else {
-                switch (entity.getType().getSpawnGroup()) {
-                    case CREATURE: RenderUtils.drawTracerToEntity(event, entity, animalsColor.get(), target.get(), stem.get()); count++; break;
-                    case WATER_CREATURE: RenderUtils.drawTracerToEntity(event, entity, waterAnimalsColor.get(), target.get(), stem.get()); count++; break;
-                    case MONSTER: RenderUtils.drawTracerToEntity(event, entity, monstersColor.get(), target.get(), stem.get()); count++; break;
-                    case AMBIENT: RenderUtils.drawTracerToEntity(event, entity, ambientColor.get(), target.get(), stem.get()); count++; break;
-                    case MISC: RenderUtils.drawTracerToEntity(event, entity, miscColor.get(), target.get(), stem.get()); count++; break;
-                }
-            }
+            if ((!ModuleManager.INSTANCE.isActive(Freecam.class) && entity == mc.player) || !entities.get().getBoolean(entity.getType()) || (!showInvis.get() && entity.isInvisible())) continue;
+            Color color = EntityUtils.getEntityColor(entity, playersColor.get(), animalsColor.get(), waterAnimalsColor.get(), monstersColor.get(), ambientColor.get(), miscColor.get(), useNameColor.get());
+            RenderUtils.drawTracerToEntity(event, entity, color, target.get(), stem.get()); count++;
         }
 
         if (storage.get()) {
             for (BlockEntity blockEntity : mc.world.blockEntities) {
                 if (blockEntity.isRemoved()) continue;
-
                 if (blockEntity instanceof ChestBlockEntity || blockEntity instanceof BarrelBlockEntity || blockEntity instanceof ShulkerBoxBlockEntity) {
                     RenderUtils.drawTracerToBlockEntity(blockEntity, storageColor.get(), event);
                     count++;
