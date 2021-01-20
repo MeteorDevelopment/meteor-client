@@ -238,10 +238,10 @@ public class HUD extends Module {
     private final Setting<Double> armorScale = sgArmor.add(new DoubleSetting.Builder()
             .name("armor-scale")
             .description("Scale of armor.")
-            .defaultValue(2)
+            .defaultValue(3.5)
             .min(2)
             .sliderMin(2)
-            .sliderMax(4)
+            .sliderMax(5)
             .build()
     );
 
