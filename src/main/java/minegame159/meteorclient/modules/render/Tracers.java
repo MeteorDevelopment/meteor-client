@@ -66,6 +66,13 @@ public class Tracers extends Module {
             .build()
     );
 
+    public final Setting<Boolean> showInvis = sgGeneral.add(new BoolSetting.Builder()
+            .name("show-invisible")
+            .description("Shows invisibile entities.")
+            .defaultValue(true)
+            .build()
+    );
+
     // Colors
 
     private final Setting<SettingColor> playersColor = sgColors.add(new ColorSetting.Builder()
@@ -129,6 +136,7 @@ public class Tracers extends Module {
 
         for (Entity entity : mc.world.getEntities()) {
             if ((!ModuleManager.INSTANCE.isActive(Freecam.class) && entity == mc.player) || !entities.get().getBoolean(entity.getType())) continue;
+            if (!showInvis.get() && entity.isInvisible()) continue;
 
             if (entity instanceof PlayerEntity) {
                 Color color = playersColor.get();
