@@ -14,42 +14,48 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientCommandSource;
 import net.minecraft.command.CommandSource;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
+
 public class CommandManager {
     private static final CommandDispatcher<CommandSource> DISPATCHER = new CommandDispatcher<>();
     private static final CommandSource COMMAND_SOURCE = new ChatCommandSource(MinecraftClient.getInstance());
+    private static final List<Command> commands = new ArrayList<>();
 
     public static void init() {
-        addCommand(new ClearChat());
-        addCommand(new Enchant());
-        addCommand(new Reset());
-        addCommand(new Panic());
         addCommand(new Baritone());
-        addCommand(new Reload());
+        addCommand(new Bind());
+        addCommand(new VClip());
+        addCommand(new HClip());
+        addCommand(new ClearChat());
         addCommand(new Dismount());
-        addCommand(new Say());
-        addCommand(new Ignore());
         addCommand(new Drop());
-        addCommand(new Friend());
-        addCommand(new Peek());
+        addCommand(new Enchant());
         addCommand(new FakePlayerCommand());
-        addCommand(new SwarmCloseConnections());
-        addCommand(new SwarmEscape());
-        addCommand(new SwarmFollow());
-        addCommand(new SwarmGoto());
-        addCommand(new SwarmInfinityMiner());
-        addCommand(new SwarmMine());
-        addCommand(new SwarmRelease());
-        addCommand(new SwarmSlave());
-        addCommand(new SwarmStop());
-        addCommand(new SwarmScatter());
+        addCommand(new Friend());
+        addCommand(new Help());
+        addCommand(new Ignore());
+        addCommand(new NBT());
+        addCommand(new Panic());
+        addCommand(new Peek());
+        addCommand(new Profile());
+        addCommand(new Reload());
+        addCommand(new Reset());
+        addCommand(new Say());
         addCommand(new SwarmModuleToggle());
         addCommand(new SwarmQueen());
-        addCommand(new Bind());
+        addCommand(new SwarmSlave());
+        addCommand(new SwarmEscape());
+        addCommand(new SwarmGoto());
+        addCommand(new SwarmFollow());
+        addCommand(new SwarmScatter());
+        addCommand(new SwarmMine());
+        addCommand(new SwarmInfinityMiner());
+        addCommand(new SwarmRelease());
+        addCommand(new SwarmStop());
+        addCommand(new SwarmCloseConnections());
         addCommand(new Toggle());
-        addCommand(new NBT());
-        addCommand(new Profile());
-        addCommand(new HClip());
-        addCommand(new VClip());
     }
 
     public static void dispatch(String message) throws CommandSyntaxException {
@@ -61,10 +67,6 @@ public class CommandManager {
         // `results` carries information about whether or not the command failed to parse, which path was took, etc.
         // it might be useful to inspect later, before executing.
         CommandManager.DISPATCHER.execute(results);
-    }
-
-    private static void addCommand(Command command) {
-        command.registerTo(DISPATCHER);
     }
 
     public static CommandDispatcher<CommandSource> getDispatcher() {
@@ -79,6 +81,19 @@ public class CommandManager {
         public ChatCommandSource(MinecraftClient client) {
             super(null, client);
         }
+    }
+
+    private static void addCommand(Command command) {
+        command.registerTo(DISPATCHER);
+        commands.add(command);
+    }
+
+    public static int getCount() {
+        return commands.size();
+    }
+
+    public static void forEach(Consumer<Command> consumer) {
+        commands.forEach(consumer);
     }
 
 //    public static String getCommandString(Command command, String... args) {
