@@ -108,9 +108,10 @@ public class FriendManager extends Savable<FriendManager> implements Iterable<Fr
         }
     }
 
-    public Color getColor(PlayerEntity player, Color defaultColor, boolean oldAlpha) {
+    public Color getFriendColor(PlayerEntity player) {
         Friend friend = get(player);
-        if (friend == null) return defaultColor;
+        if (friend == null) return null;
+
         Color color = null;
         switch (friend.type) {
             case Enemy:
@@ -123,7 +124,7 @@ public class FriendManager extends Savable<FriendManager> implements Iterable<Fr
                 color = FriendManager.INSTANCE.neutralColor;
                 break;
         }
-        return new Color(color.r, color.g, color.b, oldAlpha ? defaultColor.a : 255);
+        return color;
     }
 
     public void addOrRemove(Friend friend) {

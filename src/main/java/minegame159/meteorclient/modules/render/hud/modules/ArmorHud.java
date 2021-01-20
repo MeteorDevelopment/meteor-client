@@ -80,8 +80,8 @@ public class ArmorHud extends HudModule {
                     double messageWidth = renderer.textWidth(message);
 
                     if (hud.armorOrientation() == Orientation.Vertical) {
-                        armorX += 4 * hud.armorScale();
-                        armorY = y + 18 * position * hud.armorScale() + 12 * hud.armorScale() - messageWidth / 2.0;
+                        armorX = x + 8 * hud.armorScale() - messageWidth / 2.0;
+                        armorY = y + (18 * position * hud.armorScale()) + (18 * hud.armorScale() - renderer.textHeight());
                     } else {
                         armorX = x + 18 * position * hud.armorScale() + 8 * hud.armorScale() - messageWidth / 2.0;
                         armorY = y + (box.height - renderer.textHeight());

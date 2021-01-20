@@ -39,6 +39,9 @@ public class AutoTool extends Module {
     private static final Set<Material> EMPTY_MATERIALS = new HashSet<>(0);
     private static final Set<Block> EMPTY_BLOCKS = new HashSet<>(0);
 
+    private int selectedSlotBefore = -1; // Used to keep track of which slot was selected before AutoTool activates. -1 when AutoTool is inactive
+    private boolean wasPressed = false; // Checks if attack button was held last tick. Valid only in the onTick method
+
     public enum Prefer {
         None,
         Fortune,
@@ -80,6 +83,13 @@ public class AutoTool extends Module {
             .build()
     );
 
+    private final Setting<Boolean> revertTool = sgGeneral.add(new BoolSetting.Builder()
+            .name("revert-tool")
+            .description("Reverts your hand to whatever was selected when releasing your attack key.")
+            .defaultValue(false)
+            .build()
+    );
+
     private final Setting<materialPreference> material = sgGeneral.add(new EnumSetting.Builder<materialPreference>().name("material-preference")
             .description("How the Anti-Break decides what to replenish your tool with.")
             .defaultValue(materialPreference.Best)
@@ -94,53 +104,68 @@ public class AutoTool extends Module {
 
     @EventHandler
     private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
-        if(mc.player.getMainHandStack().getItem() instanceof ToolItem && antiBreak.get()
-                && (mc.player.getMainHandStack().getItem().getMaxDamage() - mc.player.getMainHandStack().getDamage()) <= 11){
-            int slot = -1;
-            int score = 0;
-            for(int i = 0; i < 36; i++){
-                if ((mc.player.inventory.getStack(i).getMaxDamage() - mc.player.inventory.getStack(i).getDamage()) <= 11) continue;
-                if(material.get() == materialPreference.None && mc.player.inventory.getStack(i).getItem().getClass() == mc.player.getMainHandStack().getItem().getClass()){
-                    slot = i;
-                    break;
-                }else if(material.get() == materialPreference.Same && mc.player.inventory.getStack(i).getItem() == mc.player.getMainHandStack().getItem()){
-                    slot = i;
-                    break;
-                }else if(material.get() == materialPreference.Best && blockState != null){
-                    if(mc.player.inventory.getStack(i).getItem().getClass() == mc.player.getMainHandStack().getItem().getClass()){
-                        if(score < Math.round(mc.player.inventory.getStack(i).getMiningSpeedMultiplier(blockState))){
-                            score = Math.round(mc.player.inventory.getStack(i).getMiningSpeedMultiplier(blockState));
-                            slot = i;
-                        }
-                    }
-                }else if (material.get() == materialPreference.Best && blockState == null) break;
-            }
-            if(slot == -1 && material.get() != materialPreference.None){
-                for(int i = 0; i < 36; i++){
-                    if(mc.player.inventory.getStack(i).getItem().getClass() == mc.player.getMainHandStack().getItem().getClass()
-                            && (mc.player.inventory.getStack(i).getMaxDamage() - mc.player.inventory.getStack(i).getDamage()) > 11){
+
+        // Key was released but was pressed last tick, so player just released mouse
+        if (!mc.options.keyAttack.isPressed() && wasPressed && revertTool.get())
+        {
+            // Set selected slot to what it was before
+            mc.player.inventory.selectedSlot = selectedSlotBefore;
+            selectedSlotBefore = -1;
+        }
+
+        wasPressed = mc.options.keyAttack.isPressed();
+
+        if (!(mc.player.getMainHandStack().getItem() instanceof ToolItem) || !antiBreak.get()
+                || (mc.player.getMainHandStack().getItem().getMaxDamage() - mc.player.getMainHandStack().getDamage()) > 11) {
+            return;
+        }
+        int slot = -1;
+        int score = 0;
+        for(int i = 0; i < 36; i++){
+            if ((mc.player.inventory.getStack(i).getMaxDamage() - mc.player.inventory.getStack(i).getDamage()) <= 11) continue;
+            if(material.get() == materialPreference.None && mc.player.inventory.getStack(i).getItem().getClass() == mc.player.getMainHandStack().getItem().getClass()){
+                slot = i;
+                break;
+            }else if(material.get() == materialPreference.Same && mc.player.inventory.getStack(i).getItem() == mc.player.getMainHandStack().getItem()){
+                slot = i;
+                break;
+            }else if(material.get() == materialPreference.Best && blockState != null){
+                if(mc.player.inventory.getStack(i).getItem().getClass() == mc.player.getMainHandStack().getItem().getClass()){
+                    if(score < Math.round(mc.player.inventory.getStack(i).getMiningSpeedMultiplier(blockState))){
+                        score = Math.round(mc.player.inventory.getStack(i).getMiningSpeedMultiplier(blockState));
                         slot = i;
-                        break;
                     }
                 }
+            }else if (material.get() == materialPreference.Best && blockState == null) break;
+        }
+        if(slot == -1 && material.get() != materialPreference.None){
+            for(int i = 0; i < 36; i++){
+                if(mc.player.inventory.getStack(i).getItem().getClass() == mc.player.getMainHandStack().getItem().getClass()
+                        && (mc.player.inventory.getStack(i).getMaxDamage() - mc.player.inventory.getStack(i).getDamage()) > 11){
+                    slot = i;
+                    break;
+                }
             }
-            if(slot != -1){
-                InvUtils.clickSlot(InvUtils.invIndexToSlotId(mc.player.inventory.selectedSlot), 0, SlotActionType.PICKUP);
-                InvUtils.clickSlot(InvUtils.invIndexToSlotId(slot), 0, SlotActionType.PICKUP);
-                InvUtils.clickSlot(InvUtils.invIndexToSlotId(mc.player.inventory.selectedSlot), 0, SlotActionType.PICKUP);
-            }else if(mc.player.inventory.getEmptySlot() != -1){
-                int emptySlot = mc.player.inventory.getEmptySlot();
-                InvUtils.clickSlot(InvUtils.invIndexToSlotId(mc.player.inventory.selectedSlot), 0, SlotActionType.PICKUP);
-                InvUtils.clickSlot(InvUtils.invIndexToSlotId(emptySlot), 0, SlotActionType.PICKUP);
-            }else {
-                if (mc.player.inventory.selectedSlot < 8) mc.player.inventory.selectedSlot = mc.player.inventory.selectedSlot + 1;
-                else mc.player.inventory.selectedSlot = mc.player.inventory.selectedSlot - 1;
-            }
+        }
+        if(slot != -1){
+            InvUtils.clickSlot(InvUtils.invIndexToSlotId(mc.player.inventory.selectedSlot), 0, SlotActionType.PICKUP);
+            InvUtils.clickSlot(InvUtils.invIndexToSlotId(slot), 0, SlotActionType.PICKUP);
+            InvUtils.clickSlot(InvUtils.invIndexToSlotId(mc.player.inventory.selectedSlot), 0, SlotActionType.PICKUP);
+        }else if(mc.player.inventory.getEmptySlot() != -1){
+            int emptySlot = mc.player.inventory.getEmptySlot();
+            InvUtils.clickSlot(InvUtils.invIndexToSlotId(mc.player.inventory.selectedSlot), 0, SlotActionType.PICKUP);
+            InvUtils.clickSlot(InvUtils.invIndexToSlotId(emptySlot), 0, SlotActionType.PICKUP);
+        }else {
+            if (mc.player.inventory.selectedSlot < 8) mc.player.inventory.selectedSlot = mc.player.inventory.selectedSlot + 1;
+            else mc.player.inventory.selectedSlot = mc.player.inventory.selectedSlot - 1;
         }
     });
 
     @EventHandler
     private final Listener<StartBreakingBlockEvent> onStartBreakingBlock = new Listener<>(event -> {
+        if (selectedSlotBefore == -1)
+            selectedSlotBefore = mc.player.inventory.selectedSlot;
+
         blockState = mc.world.getBlockState(event.blockPos);
         int bestScore = -1;
         int bestSlot = -1;
