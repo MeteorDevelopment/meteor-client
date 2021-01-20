@@ -11,7 +11,7 @@ import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 public class SwarmStop extends Command {
 
     public SwarmStop() {
-        super("swarm","(highlight)stop(default) Stop all current tasks.");
+        super("swarm","(highlight)stop(default) - Stop all current tasks.");
     }
 
     @Override
