@@ -10,7 +10,6 @@ import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.render.RenderEvent;
-import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
@@ -18,17 +17,15 @@ import minegame159.meteorclient.rendering.MeshBuilder;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.rendering.ShapeMode;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.entity.EntityUtils;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Box;
 
 public class ESP extends Module {
-    private static final Identifier BOX2D = new Identifier("meteor-client", "box2d.png");
+//    private static final Identifier BOX2D = new Identifier("meteor-client", "box2d.png");
     private static final MeshBuilder MB = new MeshBuilder(128);
 
     public enum Mode {
@@ -70,6 +67,13 @@ public class ESP extends Module {
     );
 
     // Colors
+
+    public final Setting<Boolean> useNameColor = sgColors.add(new BoolSetting.Builder()
+            .name("use-name-color")
+            .description("Uses players displayname color for the ESP color (good for minigames).")
+            .defaultValue(false)
+            .build()
+    );
 
     private final Setting<SettingColor> playersColor = sgColors.add(new ColorSetting.Builder()
             .name("players-color")
@@ -199,18 +203,9 @@ public class ESP extends Module {
     }
 
     public Color getColor(Entity entity) {
-        if (entity instanceof PlayerEntity) return FriendManager.INSTANCE.getColor((PlayerEntity) entity, playersColor.get(), false);
-
-        switch (entity.getType().getSpawnGroup()) {
-            case CREATURE:       return animalsColor.get();
-            case WATER_CREATURE: return waterAnimalsColor.get();
-            case MONSTER:        return monstersColor.get();
-            case AMBIENT:        return ambientColor.get();
-            case MISC:           return miscColor.get();
-        }
-
-        return Utils.WHITE;
+        return EntityUtils.getEntityColor(entity, playersColor.get(), animalsColor.get(), waterAnimalsColor.get(), monstersColor.get(), ambientColor.get(), miscColor.get(), useNameColor.get());
     }
+
 
     public boolean isOutline() {
         return mode.get() == Mode.Outline;
