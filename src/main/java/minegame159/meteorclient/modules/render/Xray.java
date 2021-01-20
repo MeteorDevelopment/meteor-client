@@ -1,6 +1,6 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.modules.render;
@@ -26,7 +26,7 @@ import net.minecraft.block.Block;
 import java.util.ArrayList;
 import java.util.List;
 
-public class XRay extends Module {
+public class Xray extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     
     private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
@@ -41,7 +41,7 @@ public class XRay extends Module {
 
     private boolean fullBrightWasActive = false;
 
-    public XRay() {
+    public Xray() {
         super(Category.Render, "xray", "Only renders specified blocks. Good for mining.");
     }
 

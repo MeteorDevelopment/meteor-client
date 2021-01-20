@@ -1,3 +1,8 @@
+/*
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
+ * Copyright (c) 2021 Meteor Development.
+ */
+
 package minegame159.meteorclient.commands.commands.swarm;
 
 import baritone.api.BaritoneAPI;
@@ -11,9 +16,9 @@ import net.minecraft.command.CommandSource;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
-public class SwarmGoto extends Command {
+public class SwamGoTo extends Command {
 
-    public SwarmGoto() {
+    public SwamGoTo() {
         super("swarm", "(highlight)goto <x> <z>(default) - Path to a destination.");
     }
 

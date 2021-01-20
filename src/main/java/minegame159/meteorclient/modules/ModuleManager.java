@@ -381,7 +381,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new HUD());
         addModule(new Fullbright());
         addModule(new StorageESP());
-        addModule(new XRay());
+        addModule(new Xray());
         addModule(new ESP());
         addModule(new Freecam());
         addModule(new Tracers());
@@ -399,7 +399,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new BreakIndicators());
         addModule(new CustomFOV());
         addModule(new HandView());
-        addModule(new Time());
+        addModule(new TimeChanger());
         addModule(new VoidESP());
         addModule(new CityESP());
         addModule(new ShulkerPeek());
