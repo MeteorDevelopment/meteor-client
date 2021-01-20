@@ -1,5 +1,6 @@
 package minegame159.meteorclient.commands.commands.swarm;
 
+import baritone.api.BaritoneAPI;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import minegame159.meteorclient.commands.Command;
 import minegame159.meteorclient.commands.arguments.PlayerArgumentType;
@@ -31,8 +32,7 @@ public class SwarmFollow extends Command {
                         swarm.server.sendMessage(context.getInput());
                     } else {
                         if (playerEntity != null) {
-                            // TODO: baritone
-                            //BaritoneAPI.getProvider().getPrimaryBaritone().getFollowProcess().follow(entity -> entity.getDisplayName().asString().equalsIgnoreCase(playerEntity.getDisplayName().asString()));
+                            BaritoneAPI.getProvider().getPrimaryBaritone().getFollowProcess().follow(entity -> entity.getDisplayName().asString().equalsIgnoreCase(playerEntity.getDisplayName().asString()));
                         }
                     }
                     return SINGLE_SUCCESS;

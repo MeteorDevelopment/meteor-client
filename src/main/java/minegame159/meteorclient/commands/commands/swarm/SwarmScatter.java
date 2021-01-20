@@ -1,5 +1,7 @@
 package minegame159.meteorclient.commands.commands.swarm;
 
+import baritone.api.BaritoneAPI;
+import baritone.api.pathing.goals.GoalXZ;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import minegame159.meteorclient.commands.Command;
@@ -29,10 +31,9 @@ public class SwarmScatter extends Command {
             double r = radius * Math.sqrt(random.nextDouble());
             double x = mc.player.getX() + r * Math.cos(a);
             double z = mc.player.getZ() + r * Math.sin(a);
-            // TODO: baritone
-            /*if(BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing())
+            if(BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing())
                 BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
-            BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalXZ((int)x,(int)z));*/
+            BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalXZ((int)x,(int)z));
         }
     }
 

@@ -5,7 +5,8 @@
 
 package minegame159.meteorclient.mixininterface;
 
+import baritone.api.utils.Rotation;
+
 public interface ILookBehavior {
-    // TODO: baritone
-    //Rotation getTarget();
+    Rotation getTarget();
 }
