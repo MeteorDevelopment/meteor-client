@@ -71,28 +71,26 @@ public class Holefiller extends Module {
     }
 
     @EventHandler
-    private final Listener<TickEvent.Pre> onTick = new Listener<>(event -> {
-        BlockIterator.register(horizontalRadius.get(), verticalRadius.get(), (blockPos1, blockState) -> {
-            if (!blockState.getMaterial().isReplaceable()) return;
+    private final Listener<TickEvent.Pre> onTick = new Listener<>(event -> BlockIterator.register(horizontalRadius.get(), verticalRadius.get(), (blockPos1, blockState) -> {
+        if (!blockState.getMaterial().isReplaceable()) return;
 
-            blockPos.set(blockPos1);
+        blockPos.set(blockPos1);
 
-            Block bottom = mc.world.getBlockState(add(0, -1, 0)).getBlock();
-            if (bottom != Blocks.BEDROCK && bottom != Blocks.OBSIDIAN) return;
-            Block forward = mc.world.getBlockState(add(0, 1, 1)).getBlock();
-            if (forward != Blocks.BEDROCK && forward != Blocks.OBSIDIAN) return;
-            Block back = mc.world.getBlockState(add(0, 0, -2)).getBlock();
-            if (back != Blocks.BEDROCK && back != Blocks.OBSIDIAN) return;
-            Block right = mc.world.getBlockState(add(1, 0, 1)).getBlock();
-            if (right != Blocks.BEDROCK && right != Blocks.OBSIDIAN) return;
-            Block left = mc.world.getBlockState(add(-2, 0, 0)).getBlock();
-            if (left != Blocks.BEDROCK && left != Blocks.OBSIDIAN) return;
-            add(1, 0, 0);
+        Block bottom = mc.world.getBlockState(add(0, -1, 0)).getBlock();
+        if (bottom != Blocks.BEDROCK && bottom != Blocks.OBSIDIAN) return;
+        Block forward = mc.world.getBlockState(add(0, 1, 1)).getBlock();
+        if (forward != Blocks.BEDROCK && forward != Blocks.OBSIDIAN) return;
+        Block back = mc.world.getBlockState(add(0, 0, -2)).getBlock();
+        if (back != Blocks.BEDROCK && back != Blocks.OBSIDIAN) return;
+        Block right = mc.world.getBlockState(add(1, 0, 1)).getBlock();
+        if (right != Blocks.BEDROCK && right != Blocks.OBSIDIAN) return;
+        Block left = mc.world.getBlockState(add(-2, 0, 0)).getBlock();
+        if (left != Blocks.BEDROCK && left != Blocks.OBSIDIAN) return;
+        add(1, 0, 0);
 
-            if (rotate.get()) RotationUtils.packetRotate(blockPos1);
-            if (PlayerUtils.placeBlock(blockPos, findSlot(), Hand.MAIN_HAND)) BlockIterator.disableCurrent();
-        });
-    });
+        if (rotate.get()) RotationUtils.packetRotate(blockPos1);
+        if (PlayerUtils.placeBlock(blockPos, findSlot(), Hand.MAIN_HAND)) BlockIterator.disableCurrent();
+    }));
 
     private int findSlot() {
         for (int i = 0; i < 9; i++) {
