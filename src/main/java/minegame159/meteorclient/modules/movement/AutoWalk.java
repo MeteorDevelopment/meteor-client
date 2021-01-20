@@ -5,6 +5,7 @@
 
 package minegame159.meteorclient.modules.movement;
 
+import baritone.api.BaritoneAPI;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.world.TickEvent;
@@ -38,8 +39,7 @@ public class AutoWalk extends Module {
             .onChanged(mode1 -> {
                 if (isActive()) {
                     if (mode1 == Mode.Simple) {
-                        // TODO: baritone
-                        //BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
+                        BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
                         goal = null;
                     } else {
                         timer = 0;
@@ -72,7 +72,7 @@ public class AutoWalk extends Module {
     @Override
     public void onDeactivate() {
         if (mode.get() == Mode.Simple) ((IKeyBinding) mc.options.keyForward).setPressed(false);
-        //else BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
+        else BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
 
         goal = null;
     }
@@ -107,6 +107,6 @@ public class AutoWalk extends Module {
     private void createGoal() {
         timer = 0;
         goal = new GoalDirection(mc.player.getPos(), mc.player.yaw);
-        //BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(goal);
+        BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(goal);
     }
 }

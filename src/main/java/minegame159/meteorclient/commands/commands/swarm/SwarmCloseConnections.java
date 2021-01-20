@@ -1,5 +1,6 @@
 package minegame159.meteorclient.commands.commands.swarm;
 
+import baritone.api.BaritoneAPI;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import minegame159.meteorclient.commands.Command;
 import minegame159.meteorclient.modules.ModuleManager;
@@ -22,9 +23,8 @@ public class SwarmCloseConnections extends Command {
                         if(swarm.isActive()) {
                             swarm.closeAllServerConnections();
                             swarm.currentMode = Swarm.Mode.Idle;
-                            // TODO: baritone
-                            //if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing())
-                            //    BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
+                            if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing())
+                                BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
                             if (ModuleManager.INSTANCE.get(Swarm.class).isActive())
                                 ModuleManager.INSTANCE.get(Swarm.class).toggle();
                         }

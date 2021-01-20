@@ -44,6 +44,7 @@ import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryKey;
 import org.lwjgl.glfw.GLFW;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.util.*;
 
@@ -442,6 +443,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
             super(RegistryKey.ofRegistry(new Identifier("meteor-client", "modules")), Lifecycle.stable());
         }
 
+        @Nullable
         @Override
         public Identifier getId(Module entry) {
             return null;
@@ -453,17 +455,19 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         }
 
         @Override
-        public int getRawId(Module entry) {
+        public int getRawId(@Nullable Module entry) {
             return 0;
         }
 
+        @Nullable
         @Override
-        public Module get(RegistryKey<Module> key) {
+        public Module get(@Nullable RegistryKey<Module> key) {
             return null;
         }
 
+        @Nullable
         @Override
-        public Module get(Identifier id) {
+        public Module get(@Nullable Identifier id) {
             return null;
         }
 
@@ -492,6 +496,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
             return false;
         }
 
+        @Nullable
         @Override
         public Module get(int index) {
             return null;

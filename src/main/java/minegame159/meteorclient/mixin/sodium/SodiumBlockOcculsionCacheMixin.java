@@ -3,7 +3,7 @@
  * Copyright (c) 2020 Meteor Development.
  */
 
-package minegame159.meteorclient.mixin;
+package minegame159.meteorclient.mixin.sodium;
 
 import me.jellysquid.mods.sodium.client.render.occlusion.BlockOcclusionCache;
 import minegame159.meteorclient.MeteorClient;
@@ -18,7 +18,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(value = BlockOcclusionCache.class, remap = false)
-public class BlockOcculsionCacheMixin {
+public class SodiumBlockOcculsionCacheMixin {
     @Inject(at = @At("HEAD"), method = "shouldDrawSide", cancellable = true)
     private void shouldDrawSide(BlockState selfState, BlockView view, BlockPos pos, Direction facing, CallbackInfoReturnable<Boolean> info) {
         DrawSideEvent event = MeteorClient.postEvent(DrawSideEvent.get(selfState));

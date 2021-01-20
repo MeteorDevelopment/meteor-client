@@ -42,8 +42,15 @@ dependencies {
 	// For XRay compatibility
 	modImplementation "com.github.jellysquid3:sodium-fabric:1.16.x~stable-SNAPSHOT"
 
-	//modImplementation "com.gitlab.CDAGaming:fabritone:fabritone~1.16.x-Fabric-SNAPSHOT"
-	//include "com.gitlab.CDAGaming:fabritone:fabritone~1.16.x-Fabric-SNAPSHOT"
+	modImplementation("com.gitlab.CDAGaming:fabritone:fabric~1.16.3-SNAPSHOT") {
+		exclude(group: "org.lwjgl.lwjgl", module: "lwjgl-platform")
+		exclude(group: "org.lwjgl.lwjgl", module: "lwjgl")
+		exclude(group: "net.java.jinput", module: "jinput-platform")
+		exclude(group: "net.java.jinput", module: "jinput")
+		exclude(group: "net.sf.jopt-simple", module: "jopt-simple")
+		exclude(group: "org.ow2.asm", module: "asm-debug-all")
+	}
+	include "com.gitlab.CDAGaming:fabritone:fabric~1.16.3-SNAPSHOT"
 
 	dependency "com.github.ZeroMemes:Alpine:1.9"
 	dependency 'com.g00fy2:versioncompare:1.3.7'

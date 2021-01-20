@@ -5,6 +5,7 @@
 
 package minegame159.meteorclient.modules.movement;
 
+import baritone.api.BaritoneAPI;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.entity.player.CanWalkOnFluidEvent;
@@ -123,18 +124,17 @@ public class Jesus extends Module {
 
     @Override
     public void onActivate() {
-        // TODO: baritone
-        /*preBaritoneAssumeWalkOnWater = BaritoneAPI.getSettings().assumeWalkOnWater.value;
+        preBaritoneAssumeWalkOnWater = BaritoneAPI.getSettings().assumeWalkOnWater.value;
         preBaritoneAssumeWalkOnLava = BaritoneAPI.getSettings().assumeWalkOnLava.value;
 
         BaritoneAPI.getSettings().assumeWalkOnWater.value = walkOnWater.get();
-        BaritoneAPI.getSettings().assumeWalkOnLava.value = walkOnLava.get();*/
+        BaritoneAPI.getSettings().assumeWalkOnLava.value = walkOnLava.get();
     }
 
     @Override
     public void onDeactivate() {
-        /*BaritoneAPI.getSettings().assumeWalkOnWater.value = preBaritoneAssumeWalkOnWater;
-        BaritoneAPI.getSettings().assumeWalkOnLava.value = preBaritoneAssumeWalkOnLava;*/
+        BaritoneAPI.getSettings().assumeWalkOnWater.value = preBaritoneAssumeWalkOnWater;
+        BaritoneAPI.getSettings().assumeWalkOnLava.value = preBaritoneAssumeWalkOnLava;
     }
 
     @EventHandler
