@@ -1,6 +1,6 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.modules.combat;
@@ -22,7 +22,7 @@ import net.minecraft.item.Items;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 
-public class HoleFiller extends Module {
+public class Holefiller extends Module {
 
     public enum PlaceMode {
         Obsidian,
@@ -50,7 +50,7 @@ public class HoleFiller extends Module {
             .build()
     );
 
-    private final Setting<HoleFiller.PlaceMode> mode = sgGeneral.add(new EnumSetting.Builder<HoleFiller.PlaceMode>()
+    private final Setting<PlaceMode> mode = sgGeneral.add(new EnumSetting.Builder<PlaceMode>()
             .name("block")
             .description("What kind of blocks you use to fill holes with.")
             .defaultValue(PlaceMode.Obsidian)
@@ -66,7 +66,7 @@ public class HoleFiller extends Module {
 
     private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
 
-    public HoleFiller() {
+    public Holefiller() {
         super(Category.Combat, "hole-filler", "Fills holes with specified blocks.");
     }
 
