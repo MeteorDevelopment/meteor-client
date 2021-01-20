@@ -49,6 +49,13 @@ public class StorageESP extends Module {
             .build()
     );
 
+    private final Setting<SettingColor> trappedChest = sgGeneral.add(new ColorSetting.Builder()
+            .name("trapped-chest")
+            .description("The color of trapped chests.")
+            .defaultValue(new SettingColor(255, 0, 0, 255))
+            .build()
+    );
+
     private final Setting<SettingColor> barrel = sgGeneral.add(new ColorSetting.Builder()
             .name("barrel")
             .description("The color of barrels.")
@@ -100,7 +107,8 @@ public class StorageESP extends Module {
 
         if (!storageBlocks.get().contains(blockEntity.getType())) return;
 
-        if (blockEntity instanceof ChestBlockEntity) lineColor.set(chest.get());
+        if (blockEntity instanceof TrappedChestBlockEntity) lineColor.set(trappedChest.get()); // Must come before ChestBlockEntity as it is the superclass of TrappedChestBlockEntity
+        else if (blockEntity instanceof ChestBlockEntity) lineColor.set(chest.get());
         else if (blockEntity instanceof BarrelBlockEntity) lineColor.set(barrel.get());
         else if (blockEntity instanceof ShulkerBoxBlockEntity) lineColor.set(shulker.get());
         else if (blockEntity instanceof EnderChestBlockEntity) lineColor.set(enderChest.get());
