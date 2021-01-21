@@ -135,6 +135,8 @@ public class Freecam extends Module {
 
     @EventHandler
     private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+        if (mc.cameraEntity.isInsideWall()) mc.getCameraEntity().noClip = true;
+
         if (mc.currentScreen != null) return;
 
         Vec3d forward = Vec3d.fromPolar(0, getYaw(1 / 20f));
