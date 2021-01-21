@@ -128,7 +128,8 @@ public class AutoTool extends Module {
         }
 
         if (bestSlot != -1) {
-            prevSlot = mc.player.inventory.selectedSlot;
+            if (prevSlot == -1)
+                prevSlot = mc.player.inventory.selectedSlot;
             mc.player.inventory.selectedSlot = bestSlot;
         }
     }, EventPriority.HIGH);
