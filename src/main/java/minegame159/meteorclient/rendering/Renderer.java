@@ -58,11 +58,10 @@ public class Renderer {
         }
 
         if (mode == ShapeMode.Lines || mode == ShapeMode.Both) {
-            // Coords are relative to facing north
-            lines.line(x1, y1, z1, x2, y2, z2, lineColor); // left
-            lines.line(x2, y2, z2, x3, y3, z3, lineColor); // top
-            lines.line(x3, y3, z3, x4, y4, z4, lineColor); // right
-            lines.line(x4, y4, z4, x1, y1, z1, lineColor); // down
+            lines.line(x1, y1, z1, x2, y2, z2, lineColor);
+            lines.line(x2, y2, z2, x3, y3, z3, lineColor);
+            lines.line(x3, y3, z3, x4, y4, z4, lineColor);
+            lines.line(x4, y4, z4, x1, y1, z1, lineColor);
         }
     }
 
