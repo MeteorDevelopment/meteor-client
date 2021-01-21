@@ -32,7 +32,7 @@ import static org.lwjgl.opengl.GL11.*;
 
 public class GuiRenderer {
     private static final Color WHITE = new Color(255, 255, 255);
-    private static final Identifier TEXTURE = new Identifier("meteor-client", "newgui.png");
+    private static final Identifier TEXTURE = new Identifier("meteor-client", "gui.png");
 
     private final MeshBuilder mb = new MeshBuilder();
 
