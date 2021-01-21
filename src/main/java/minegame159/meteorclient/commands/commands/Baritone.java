@@ -1,10 +1,11 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.commands.commands;
 
+import baritone.api.BaritoneAPI;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import minegame159.meteorclient.commands.Command;
@@ -22,8 +23,7 @@ public class Baritone extends Command {
         builder.then(argument("command", StringArgumentType.greedyString())
                 .executes(context -> {
                     String command = context.getArgument("command", String.class);
-                    // TODO: baritone
-                    //BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute(command);
+                    BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute(command);
                     return SINGLE_SUCCESS;
                 }));
     }

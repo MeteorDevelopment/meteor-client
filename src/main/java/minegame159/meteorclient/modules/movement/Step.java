@@ -1,10 +1,11 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.modules.movement;
 
+import baritone.api.BaritoneAPI;
 import com.google.common.collect.Streams;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
@@ -71,9 +72,8 @@ public class Step extends Module {
         assert mc.player != null;
         prevStepHeight = mc.player.stepHeight;
 
-        // TODO: baritone
-        /*prevBaritoneAssumeStep = BaritoneAPI.getSettings().assumeStep.value;
-        BaritoneAPI.getSettings().assumeStep.value = true;*/
+        prevBaritoneAssumeStep = BaritoneAPI.getSettings().assumeStep.value;
+        BaritoneAPI.getSettings().assumeStep.value = true;
     }
 
     @EventHandler
@@ -93,7 +93,7 @@ public class Step extends Module {
     public void onDeactivate() {
         if (mc.player != null) mc.player.stepHeight = prevStepHeight;
 
-        //BaritoneAPI.getSettings().assumeStep.value = prevBaritoneAssumeStep;
+        BaritoneAPI.getSettings().assumeStep.value = prevBaritoneAssumeStep;
     }
 
     private float getHealth(){

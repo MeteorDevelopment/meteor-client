@@ -1,10 +1,11 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.modules.movement;
 
+import baritone.api.BaritoneAPI;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.entity.player.CanWalkOnFluidEvent;
@@ -19,6 +20,7 @@ import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import net.minecraft.block.Material;
+import net.minecraft.enchantment.ProtectionEnchantment;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.network.Packet;
@@ -70,6 +72,13 @@ public class Jesus extends Module {
             .build()
     );
 
+    private final Setting<Boolean> dipIntoWaterIfBurning = sgWater.add(new BoolSetting.Builder()
+            .name("dip-into-water-if-burning")
+            .description("Lets you go under the water when you burning.")
+            .defaultValue(true)
+            .build()
+    );
+
     private final Setting<Boolean> walkOnLava = sgLava.add(new BoolSetting.Builder()
             .name("walk-on-lava")
             .description("Lets you walk on lava.")
@@ -109,6 +118,13 @@ public class Jesus extends Module {
             .build()
     );
 
+    private final Setting<Boolean> fireResistanceSafeMode = sgLava.add(new BoolSetting.Builder()
+            .name("fire-resistance-safe-mode")
+            .description("Prevents being in lava when the Fire Resistance effect is nearly over.")
+            .defaultValue(true)
+            .build()
+    );
+
     private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
 
     private int tickTimer = 10;
@@ -123,18 +139,17 @@ public class Jesus extends Module {
 
     @Override
     public void onActivate() {
-        // TODO: baritone
-        /*preBaritoneAssumeWalkOnWater = BaritoneAPI.getSettings().assumeWalkOnWater.value;
+        preBaritoneAssumeWalkOnWater = BaritoneAPI.getSettings().assumeWalkOnWater.value;
         preBaritoneAssumeWalkOnLava = BaritoneAPI.getSettings().assumeWalkOnLava.value;
 
         BaritoneAPI.getSettings().assumeWalkOnWater.value = walkOnWater.get();
-        BaritoneAPI.getSettings().assumeWalkOnLava.value = walkOnLava.get();*/
+        BaritoneAPI.getSettings().assumeWalkOnLava.value = walkOnLava.get();
     }
 
     @Override
     public void onDeactivate() {
-        /*BaritoneAPI.getSettings().assumeWalkOnWater.value = preBaritoneAssumeWalkOnWater;
-        BaritoneAPI.getSettings().assumeWalkOnLava.value = preBaritoneAssumeWalkOnLava;*/
+        BaritoneAPI.getSettings().assumeWalkOnWater.value = preBaritoneAssumeWalkOnWater;
+        BaritoneAPI.getSettings().assumeWalkOnLava.value = preBaritoneAssumeWalkOnLava;
     }
 
     @EventHandler
@@ -224,14 +239,22 @@ public class Jesus extends Module {
     private boolean waterShouldBeSolid() {
         return walkOnWater.get() &&
                 !(disableOnSneakForWater.get() && mc.options.keySneak.isPressed()) &&
-                !(dipIntoWater.get() && mc.player.fallDistance > dipIntoWaterHeight.get());
+                !(dipIntoWater.get() && mc.player.fallDistance > dipIntoWaterHeight.get()) &&
+                !(dipIntoWaterIfBurning.get() && mc.player.isOnFire());
+    }
+
+    private boolean lavaIsSafe() {
+        if (!dipIntoLavaIfFireResistance.get()) return false;
+
+        return mc.player.hasStatusEffect(StatusEffects.FIRE_RESISTANCE) &&
+                (!fireResistanceSafeMode.get() || mc.player.getStatusEffect(StatusEffects.FIRE_RESISTANCE).getDuration() > ProtectionEnchantment.transformFireDuration(mc.player, 15 * 20));
     }
 
     private boolean lavaShouldBeSolid() {
         return walkOnLava.get() &&
-                !(disableOnSneakForLava.get() && mc.options.keySneak.isPressed()) &&
+                !((disableOnSneakForLava.get() || lavaIsSafe()) && mc.options.keySneak.isPressed()) &&
                 !(dipIntoLava.get() && mc.player.fallDistance > dipIntoLavaHeight.get()) &&
-                !(dipIntoLavaIfFireResistance.get() && mc.player.hasStatusEffect(StatusEffects.FIRE_RESISTANCE) && mc.player.fallDistance > 3);
+                !(lavaIsSafe() && mc.player.fallDistance > 3);
     }
 
     private boolean isOverLiquid() {

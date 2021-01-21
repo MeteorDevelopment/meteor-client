@@ -1,3 +1,8 @@
+/*
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
+ * Copyright (c) 2021 Meteor Development.
+ */
+
 package minegame159.meteorclient.commands.commands.swarm;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -11,7 +16,7 @@ import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 public class SwarmQueen extends Command {
 
     public SwarmQueen() {
-        super("swarm", "(highlight)queen (default)- Start a new swarm as the queen.");
+        super("swarm", "(highlight)queen (default)- Start a new swarm as the Queen.");
     }
 
 

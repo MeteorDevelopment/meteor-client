@@ -1,3 +1,8 @@
+/*
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
+ * Copyright (c) 2021 Meteor Development.
+ */
+
 package minegame159.meteorclient.commands.commands.swarm;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -11,7 +16,7 @@ import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 public class SwarmStop extends Command {
 
     public SwarmStop() {
-        super("swarm","(highlight)stop(default) Stop all current tasks.");
+        super("swarm","(highlight)stop(default) - Stop all current tasks.");
     }
 
     @Override

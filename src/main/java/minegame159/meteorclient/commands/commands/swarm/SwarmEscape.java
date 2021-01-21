@@ -1,5 +1,11 @@
+/*
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
+ * Copyright (c) 2021 Meteor Development.
+ */
+
 package minegame159.meteorclient.commands.commands.swarm;
 
+import baritone.api.BaritoneAPI;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import minegame159.meteorclient.commands.Command;
 import minegame159.meteorclient.modules.ModuleManager;
@@ -12,7 +18,7 @@ import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 public class SwarmEscape extends Command {
 
     public SwarmEscape() {
-        super("swarm", "(highlight)escape(default)- Removes this player from the active swarm.");
+        super("swarm", "(highlight)escape(default) - Removes this player from the active swarm.");
     }
 
     @Override
@@ -22,9 +28,8 @@ public class SwarmEscape extends Command {
                     if (swarm.isActive()) {
                         if (swarm.currentMode != Swarm.Mode.Queen) {
                             swarm.closeAllServerConnections();
-                            // TODO: baritone
-                            //if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing())
-                            //    BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
+                            if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing())
+                                BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
                             swarm.currentMode = Swarm.Mode.Idle;
                             ModuleManager.INSTANCE.get(Swarm.class).toggle();
                         } else {

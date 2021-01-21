@@ -1,5 +1,12 @@
+/*
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
+ * Copyright (c) 2021 Meteor Development.
+ */
+
 package minegame159.meteorclient.commands.commands.swarm;
 
+import baritone.api.BaritoneAPI;
+import baritone.api.pathing.goals.GoalXZ;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import minegame159.meteorclient.commands.Command;
@@ -14,7 +21,7 @@ import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 public class SwarmScatter extends Command {
 
     public SwarmScatter(){
-        super("swarm","(highlight)scatter - Send them running.");
+        super("swarm","(highlight)scatter(default) - Send them running.");
     }
 
 
@@ -29,10 +36,9 @@ public class SwarmScatter extends Command {
             double r = radius * Math.sqrt(random.nextDouble());
             double x = mc.player.getX() + r * Math.cos(a);
             double z = mc.player.getZ() + r * Math.sin(a);
-            // TODO: baritone
-            /*if(BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing())
+            if(BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing())
                 BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
-            BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalXZ((int)x,(int)z));*/
+            BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalXZ((int)x,(int)z));
         }
     }
 

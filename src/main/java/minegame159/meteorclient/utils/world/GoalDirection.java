@@ -1,15 +1,17 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.utils.world;
 
+import baritone.api.BaritoneAPI;
+import baritone.api.pathing.goals.Goal;
+import baritone.api.utils.SettingsUtil;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 
-// TODO: baritone
-public class GoalDirection/* implements Goal*/ {
+public class GoalDirection implements Goal {
     private static final double SQRT_2 = Math.sqrt(2.0D);
     private final float yaw;
     private int x;
@@ -37,8 +39,7 @@ public class GoalDirection/* implements Goal*/ {
     }
 
     public String toString() {
-        return "";
-        //return String.format("GoalXZ{x=%s,z=%s}", SettingsUtil.maybeCensor(this.x), SettingsUtil.maybeCensor(this.z));
+        return String.format("GoalXZ{x=%s,z=%s}", SettingsUtil.maybeCensor(this.x), SettingsUtil.maybeCensor(this.z));
     }
 
     public static double calculate(double xDiff, double zDiff) {
@@ -55,8 +56,7 @@ public class GoalDirection/* implements Goal*/ {
         }
 
         diagonal *= SQRT_2;
-        return 1;
-        //return (diagonal + straight) * BaritoneAPI.getSettings().costHeuristic.value;
+        return (diagonal + straight) * BaritoneAPI.getSettings().costHeuristic.value;
     }
 
     public int getX() {

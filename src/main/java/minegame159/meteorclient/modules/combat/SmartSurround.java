@@ -1,12 +1,11 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.modules.combat;
 
 //Created by squidoodly 15/04/2020
-//Added by squidoodly 18/04/2020
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
