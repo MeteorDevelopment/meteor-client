@@ -13,6 +13,7 @@ import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixininterface.IHorseBaseEntity;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.utils.Utils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.HorseBaseEntity;
 
@@ -21,6 +22,7 @@ public class EntityControl extends Module {
 
     @Override
     public void onDeactivate() {
+        if (!Utils.canUpdate() || mc.world.getEntities() == null) return;
         mc.world.getEntities().forEach(entity -> {
             if (entity instanceof HorseBaseEntity) {
                 ((IHorseBaseEntity) entity).setSaddled(false);
