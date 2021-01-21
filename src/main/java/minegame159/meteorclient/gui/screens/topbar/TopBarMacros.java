@@ -37,8 +37,9 @@ public class TopBarMacros extends TopBarWindowScreen {
 
                 WMinus remove = t.add(new WMinus()).getWidget();
                 remove.action = () -> MacroManager.INSTANCE.remove(macro);
-            }
 
+                t.row();
+            }
             row();
         }
 
