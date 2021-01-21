@@ -5,6 +5,8 @@
 
 package minegame159.meteorclient.mixin;
 
+import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.misc.AutoSteal;
 import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.render.MeteorButtonWidget;
 import net.minecraft.client.MinecraftClient;
@@ -33,25 +35,16 @@ public abstract class GenericContainerScreenMixin extends HandledScreen<GenericC
         addButton(new MeteorButtonWidget(x + backgroundWidth - 88, y + 3, 40, 12, new LiteralText("Dump"), button -> dump(handler)));
     }
 
-    private void steal(GenericContainerScreenHandler handler) {
-        for (int i = 0; i < handler.getRows() * 9; i++) {
-            InvUtils.clickSlot(i, 0, SlotActionType.QUICK_MOVE);
-        }
-
-        boolean empty = true;
-        for (int i = 0; i < handler.getRows() * 9; i++) {
-            if (!handler.getSlot(i).getStack().isEmpty()) {
-                empty = false;
-                break;
-            }
-        }
-
-        if (empty) MinecraftClient.getInstance().player.closeHandledScreen();
-    }
 
     private void dump(GenericContainerScreenHandler handler) {
         for (int i = handler.getRows() * 9; i < handler.getRows() * 9 + 1 + 3 * 9; i++) {
             InvUtils.clickSlot(i, 0, SlotActionType.QUICK_MOVE);
         }
+    }
+
+    private void steal(GenericContainerScreenHandler handler)
+    {
+        ModuleManager.INSTANCE.get(AutoSteal.class).stealAsync(handler);
+
     }
 }
