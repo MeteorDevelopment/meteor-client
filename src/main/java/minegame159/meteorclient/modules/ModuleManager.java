@@ -436,6 +436,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new LiquidFiller());
         addModule(new VisualRange());
         addModule(new AutoBreed());
+        addModule(new AutoSteal());
     }
 
     public static class ModuleRegistry extends Registry<Module> {
