@@ -22,7 +22,7 @@ public class Help extends Command {
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.executes(context -> {
             ChatUtils.info("--- List of all (highlight)%d(default) commands ---", CommandManager.getCount());
-            CommandManager.forEach(command -> ChatUtils.info("(highlight)%s(default): %s", command.name, command.description));
+            CommandManager.forEach(command -> ChatUtils.info("(highlight)%s(default): %s", command.getName(), command.getDescription()));
             return SINGLE_SUCCESS;
         });
     }

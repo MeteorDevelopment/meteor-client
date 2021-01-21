@@ -9,14 +9,15 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
+import minegame159.meteorclient.Config;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.CommandSource;
 
 public abstract class Command {
     protected static MinecraftClient mc;
 
-    public final String name;
-    public final String description;
+    private final String name;
+    private final String description;
 
     public Command(String name, String description) {
         this.name = name;
@@ -40,4 +41,22 @@ public abstract class Command {
     }
 
     public abstract void build(LiteralArgumentBuilder<CommandSource> builder);
+
+    public String getName() {
+        return name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    // Generate proper command-string to execute.
+    // For example CommandManager.get(Say.class).toString("raw_message") -> ".say raw_test".
+    public String toString(String... args) {
+        StringBuilder base = new StringBuilder(Config.INSTANCE.getPrefix() + name);
+        for (String arg : args)
+            base.append(' ').append(arg);
+
+        return base.toString();
+    }
 }

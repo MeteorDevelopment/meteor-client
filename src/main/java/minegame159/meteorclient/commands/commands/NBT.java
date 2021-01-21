@@ -6,7 +6,6 @@
 package minegame159.meteorclient.commands.commands;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import minegame159.meteorclient.Config;
 import minegame159.meteorclient.commands.Command;
 import minegame159.meteorclient.commands.arguments.CompoundNbtTagArgumentType;
 import minegame159.meteorclient.utils.player.ChatUtils;
@@ -69,7 +68,7 @@ public class NBT extends Command {
                         .withFormatting(Formatting.UNDERLINE)
                         .withClickEvent(new ClickEvent(
                                 ClickEvent.Action.RUN_COMMAND,
-                                Config.INSTANCE.getPrefix() + this.name + " copy"  // TODO: getCommandString
+                                this.toString("copy")
                         ))
                         .withHoverEvent(new HoverEvent(
                                 HoverEvent.Action.SHOW_TEXT,
