@@ -9,8 +9,9 @@ import it.unimi.dsi.fastutil.chars.Char2CharArrayMap;
 import it.unimi.dsi.fastutil.chars.Char2CharMap;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.Config;
+import minegame159.meteorclient.commands.CommandManager;
 import minegame159.meteorclient.commands.commands.Ignore;
+import minegame159.meteorclient.commands.commands.Say;
 import minegame159.meteorclient.events.entity.player.SendMessageEvent;
 import minegame159.meteorclient.friends.Friend;
 import minegame159.meteorclient.friends.FriendManager;
@@ -112,6 +113,31 @@ public class BetterChat extends Module {
             .build()
     );
 
+    // Protection TODO: Find a better name for this.
+
+    private final SettingGroup sgProtection = settings.createGroup("Protection");
+
+    private final Setting<Boolean> coordsProtectionEnabled = sgProtection.add(new BoolSetting.Builder()
+            .name("coords-protection-enabled")
+            .description("Prevents you from sending messages in chat that may contain coordinates.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Boolean> disableAllMessages = sgProtection.add(new BoolSetting.Builder()
+            .name("disable-all-messages")
+            .description("Prevents you from essentially being able to send messages in chat.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> disableButton = sgProtection.add(new BoolSetting.Builder()
+            .name("disable-button")
+            .description("Adds a button to the warning to send a message to the chat in any way.")
+            .defaultValue(true)
+            .build()
+    );
+
     // Prefix
 
     private final SettingGroup sgPrefix = settings.createGroup("Prefix");
@@ -141,31 +167,6 @@ public class BetterChat extends Module {
             .name("prefix-random")
             .description("Example: <msg> (538)")
             .defaultValue(false)
-            .build()
-    );
-
-    // Protection TODO: Find a better name for this.
-
-    private final SettingGroup sgProtection = settings.createGroup("Protection");
-
-    private final Setting<Boolean> coordsProtectionEnabled = sgProtection.add(new BoolSetting.Builder()
-            .name("coords-protection-enabled")
-            .description("Prevents you from sending messages in chat that may contain coordinates.")
-            .defaultValue(true)
-            .build()
-    );
-
-    private final Setting<Boolean> disableAllMessages = sgProtection.add(new BoolSetting.Builder()
-            .name("disable-all-messages")
-            .description("Prevents you from essentially being able to send messages in chat.")
-            .defaultValue(false)
-            .build()
-    );
-
-    private final Setting<Boolean> disableButton = sgProtection.add(new BoolSetting.Builder()
-            .name("disable-button")
-            .description("Adds a button to the warning to send a message to the chat in any way.")
-            .defaultValue(true)
             .build()
     );
 
@@ -457,7 +458,7 @@ public class BetterChat extends Module {
                 .withFormatting(Formatting.DARK_RED)
                 .withClickEvent(new ClickEvent(
                         ClickEvent.Action.RUN_COMMAND,
-                        Config.INSTANCE.getPrefix() + "say " + message  // TODO: getCommandString
+                        CommandManager.get(Say.class).toString(message)
                 ))
                 .withHoverEvent(new HoverEvent(
                         HoverEvent.Action.SHOW_TEXT,

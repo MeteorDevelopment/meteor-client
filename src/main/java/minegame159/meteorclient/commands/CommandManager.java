@@ -15,13 +15,16 @@ import net.minecraft.client.network.ClientCommandSource;
 import net.minecraft.command.CommandSource;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 public class CommandManager {
     private static final CommandDispatcher<CommandSource> DISPATCHER = new CommandDispatcher<>();
     private static final CommandSource COMMAND_SOURCE = new ChatCommandSource(MinecraftClient.getInstance());
     private static final List<Command> commands = new ArrayList<>();
+    private static final Map<Class<? extends Command>, Command> commandInstances = new HashMap<>();
 
     public static void init() {
         addCommand(new Baritone());
@@ -86,6 +89,7 @@ public class CommandManager {
     private static void addCommand(Command command) {
         command.registerTo(DISPATCHER);
         commands.add(command);
+        commandInstances.put(command.getClass(), command);
     }
 
     public static int getCount() {
@@ -96,10 +100,7 @@ public class CommandManager {
         commands.forEach(consumer);
     }
 
-//    public static String getCommandString(Command command, String... args) {
-//        StringBuilder base = new StringBuilder(Config.INSTANCE.getPrefix() + command.name);
-//        for (String arg : args)
-//            base.append(' ').append(arg);
-//        return base.toString();
-//    }
+    public static <T extends Command> T get(Class<T> klass) {
+        return (T) commandInstances.get(klass);
+    }
 }

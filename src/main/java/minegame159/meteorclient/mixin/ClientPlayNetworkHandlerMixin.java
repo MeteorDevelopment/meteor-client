@@ -40,9 +40,16 @@ public abstract class ClientPlayNetworkHandlerMixin {
 
     @Shadow private ClientWorld world;
 
+    private boolean worldNotNull;
+
+    @Inject(at = @At("HEAD"), method = "onGameJoin")
+    private void onGameJoinHead(GameJoinS2CPacket packet, CallbackInfo info) {
+        worldNotNull = world != null;
+    }
+
     @Inject(at = @At("TAIL"), method = "onGameJoin")
-    private void onGameJoin(GameJoinS2CPacket packet, CallbackInfo info) {
-        if (world != null) {
+    private void onGameJoinTail(GameJoinS2CPacket packet, CallbackInfo info) {
+        if (worldNotNull) {
             MeteorClient.IS_DISCONNECTING = true;
             MeteorClient.EVENT_BUS.post(GameLeftEvent.get());
         }
