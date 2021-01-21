@@ -4,13 +4,13 @@ public class ThreadUtils {
 
 	/**
 	 * Runs a method in a thread. The method cannot return anything. A stack trace is dumped if an exception occurs
-	 * @param method the method to run
+	 * @param runnable the method to run
 	 */
-	public static void runInThread(Runnable method)
+	public static void runInThread(Runnable runnable)
 	{
 		new Thread(() -> {
 			try {
-				method.run();
+				runnable.run();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
