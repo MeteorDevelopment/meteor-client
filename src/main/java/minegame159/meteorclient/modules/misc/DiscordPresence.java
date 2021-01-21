@@ -105,7 +105,7 @@ public class DiscordPresence extends Module {
     }
 
     private void updateDetails() {
-        if (isActive() && mc.player != null && mc.world != null) {
+        if (isActive() && Utils.canUpdate()) {
             rpc.details = getLine(line1);
             rpc.state = getLine(line2);
             instance.Discord_UpdatePresence(rpc);

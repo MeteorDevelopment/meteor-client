@@ -10,7 +10,6 @@ import minegame159.meteorclient.gui.renderer.GuiRenderer;
 import minegame159.meteorclient.gui.renderer.Region;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.utils.Utils;
-import net.minecraft.client.MinecraftClient;
 import org.lwjgl.glfw.GLFW;
 
 public class WModule extends WPressable {
@@ -53,7 +52,7 @@ public class WModule extends WPressable {
 
     @Override
     protected void onAction(int button) {
-        if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT) module.doAction(MinecraftClient.getInstance().world != null);
+        if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT) module.doAction(Utils.canUpdate());
         else if (button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) module.openScreen();
     }
 
