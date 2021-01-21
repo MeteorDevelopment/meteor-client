@@ -58,10 +58,11 @@ public class Renderer {
         }
 
         if (mode == ShapeMode.Lines || mode == ShapeMode.Both) {
-            lines.line(x1, y1, z1, x2, y2, z2, lineColor);
-            lines.line(x2, y2, z2, x3, y3, z3, lineColor);
-            lines.line(x3, y3, z3, x4, y4, z4, lineColor);
-            lines.line(x4, y4, z4, x1, y1, z1, lineColor);
+            // Coords are relative to facing north
+            lines.line(x1, y1, z1, x2, y2, z2, lineColor); // left
+            lines.line(x2, y2, z2, x3, y3, z3, lineColor); // top
+            lines.line(x3, y3, z3, x4, y4, z4, lineColor); // right
+            lines.line(x4, y4, z4, x1, y1, z1, lineColor); // down
         }
     }
 
@@ -69,7 +70,7 @@ public class Renderer {
         quadWithLines(normal, lines, x, y, z, x, y, z + size, x + size, y, z + size, x + size, y, z, sideColor, lineColor, mode);
     }
 
-    public static void quadWithLinesVertical(MeshBuilder normal, MeshBuilder lines, double x1, double y1, double z1, double x2, double y2, Color sideColor, Color lineColor, ShapeMode mode) {
-        quadWithLines(normal, lines, x1, y1, z1, x1, y2, z1, x2, y2, z1, x2, y1, z1, sideColor, lineColor, mode);
+    public static void quadWithLinesVertical(MeshBuilder normal, MeshBuilder lines, double x1, double y1, double z1, double x2, double y2, double z2, Color sideColor, Color lineColor, ShapeMode mode) {
+        quadWithLines(normal, lines, x1, y1, z1, x1, y2, z1, x2, y2, z2, x2, y1, z2, sideColor, lineColor, mode);
     }
 }
