@@ -174,14 +174,13 @@ public class AutoLog extends Module {
     }
 
     private final Listener<TickEvent.Post> healthListener = new Listener<>(event -> {
-        if(this.isActive()){
+        if (isActive()) disableHealthListener();
+
+        else if (Utils.canUpdate()
+                && !mc.player.isDead()
+                && mc.player.getHealth() >= health.get()) {
+            toggle();
             disableHealthListener();
-        }
-       else if(mc.player != null && mc.world != null && !mc.player.isDead()){
-           if(mc.player.getHealth() >= health.get()){
-               this.toggle();
-               disableHealthListener();
-           }
        }
     });
 

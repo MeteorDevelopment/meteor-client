@@ -12,7 +12,6 @@ import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.utils.Utils;
-import net.minecraft.client.MinecraftClient;
 
 public class ModuleScreen extends WindowScreen {
     private Module module;
@@ -79,7 +78,7 @@ public class ModuleScreen extends WindowScreen {
         bottomTable.add(new WLabel("Active:"));
         WCheckbox active = bottomTable.add(new WCheckbox(module.isActive())).getWidget();
         active.action = () -> {
-            if (module.isActive() != active.checked) module.toggle(MinecraftClient.getInstance().world != null);
+            if (module.isActive() != active.checked) module.toggle(Utils.canUpdate());
         };
 
         //   Visible
