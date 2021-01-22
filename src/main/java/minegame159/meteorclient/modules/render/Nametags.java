@@ -10,7 +10,6 @@ package minegame159.meteorclient.modules.render;
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.mixininterface.IBakedQuad;
@@ -20,15 +19,15 @@ import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.player.FakePlayer;
 import minegame159.meteorclient.modules.player.NameProtect;
 import minegame159.meteorclient.rendering.DrawMode;
-import minegame159.meteorclient.rendering.Matrices;
 import minegame159.meteorclient.rendering.MeshBuilder;
+import minegame159.meteorclient.rendering.text.TextRenderer;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.entity.FakePlayerEntity;
+import minegame159.meteorclient.utils.render.NametagUtils;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.client.network.PlayerListEntry;
-import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.render.model.BakedQuad;
 import net.minecraft.client.texture.Sprite;
@@ -182,18 +181,9 @@ public class Nametags extends Module {
     });
 
     private void renderNametag(RenderEvent event, PlayerEntity entity) {
-        Camera camera = mc.gameRenderer.getCamera();
-
-        // Compute scale
-        double dist = Utils.distanceToCamera(entity);
-        double scale = 0.04 * this.scale.get();
-        if(dist > 15){
-            scale *= dist/15;
-        }
-
+        // Get ping
         int ping;
         try {
-            // Get ping
             PlayerListEntry playerListEntry = mc.getNetworkHandler().getPlayerListEntry(entity.getUuid());
             ping = playerListEntry.getLatency();
         }catch(NullPointerException ignored){
@@ -212,24 +202,17 @@ public class Nametags extends Module {
         } else name = entity.getGameProfile().getName();
 
         String healthText = " " + health;
-        String pingText = "[" + ping + "]";
+        String pingText = " [" + ping + "]";
 
-        // Setup the rotation
-        Matrices.push();
-        double x = entity.prevX + (entity.getX() - entity.prevX) * event.tickDelta;
-        double y = entity.prevY + (entity.getY() - entity.prevY) * event.tickDelta + entity.getHeight() + 0.5;
-        double z = entity.prevZ + (entity.getZ() - entity.prevZ) * event.tickDelta;
-        Matrices.translate(x - event.offsetX, y - event.offsetY, z - event.offsetZ);
-        Matrices.rotate(-camera.getYaw(), 0, 1, 0);
-        Matrices.rotate(camera.getPitch(), 1, 0, 0);
-        Matrices.scale(-scale, -scale, scale);
+        NametagUtils.begin(event, entity, scale.get());
 
         // Get armor info
         double[] armorWidths = new double[4];
         boolean hasArmor = false;
         int maxEnchantCount = 0;
         if (displayArmor.get() || displayArmorEnchants.get()) {
-            MeteorClient.FONT_2X.scale = 0.5 * enchantTextScale.get();
+            TextRenderer.get().begin(0.5 * enchantTextScale.get(), true, true);
+
             for (int i = 0; i < 4; i++) {
                 ItemStack itemStack = entity.inventory.armor.get(i);
                 Map<Enchantment, Integer> enchantments = EnchantmentHelper.get(itemStack);
@@ -246,19 +229,20 @@ public class Nametags extends Module {
                 if (displayArmorEnchants.get()) {
                     for (Enchantment enchantment : enchantmentsToShowScale.keySet()) {
                         String enchantName = Utils.getEnchantShortName(enchantment) + " " + enchantmentsToShowScale.get(enchantment);
-                        armorWidths[i] = Math.max(armorWidths[i], MeteorClient.FONT_2X.getStringWidth(enchantName));
+                        armorWidths[i] = Math.max(armorWidths[i], TextRenderer.get().getWidth(enchantName));
                     }
 
                     maxEnchantCount = Math.max(maxEnchantCount, enchantmentsToShowScale.size());
                 }
             }
-            MeteorClient.FONT_2X.scale = 0.5;
+
+            TextRenderer.get().end();
         }
 
         // Setup size
-        double nameWidth = MeteorClient.FONT_2X.getStringWidth(name);
-        double healthWidth = MeteorClient.FONT_2X.getStringWidth(healthText);
-        double pingWidth = MeteorClient.FONT_2X.getStringWidth(pingText);
+        double nameWidth = TextRenderer.get().getWidth(name);
+        double healthWidth = TextRenderer.get().getWidth(healthText);
+        double pingWidth = TextRenderer.get().getWidth(pingText);
         double width = nameWidth + healthWidth;
         if(displayPing.get()){
             width += pingWidth;
@@ -268,10 +252,11 @@ public class Nametags extends Module {
         width = Math.max(width, armorWidth);
         double widthHalf = width / 2;
 
-        double heightDown = MeteorClient.FONT_2X.getHeight();
+        double heightDown = TextRenderer.get().getHeight();
         double armorHeight = (hasArmor ? 16 : 0);
-        armorHeight = Math.max(armorHeight, maxEnchantCount * MeteorClient.FONT_2X.getHeight() * enchantTextScale.get());
+        armorHeight = Math.max(armorHeight, maxEnchantCount * TextRenderer.get().getHeight() * enchantTextScale.get());
         double heightUp = armorHeight;
+        TextRenderer.get().end();
 
         // Render background
         MB.texture = false;
@@ -364,15 +349,16 @@ public class Nametags extends Module {
         else healthColor = healthStage1.get();
 
         // Render name, health enchant and texts
-        MeteorClient.FONT_2X.begin();
+        TextRenderer.get().begin(1, false, true);
         Color nameColor = FriendManager.INSTANCE.getFriendColor(entity);
-        double hX = MeteorClient.FONT_2X.renderStringWithShadow(name, -widthHalf, 0, nameColor != null ? nameColor : normalName.get());
-        MeteorClient.FONT_2X.renderStringWithShadow(healthText, hX + (width - nameWidth - healthWidth), 0, healthColor);
-        if (displayPing.get()) MeteorClient.FONT_2X.renderStringWithShadow(pingText, hX + 3, 0, pingColor.get());
+        double hX = TextRenderer.get().render(name, -widthHalf, 0, nameColor != null ? nameColor : normalName.get());
+        hX = TextRenderer.get().render(healthText, hX, 0, healthColor);
+        if (displayPing.get()) TextRenderer.get().render(pingText, hX, 0, pingColor.get());
         double itemX = -widthHalf;
+        TextRenderer.get().end();
 
         if (maxEnchantCount > 0) {
-            MeteorClient.FONT_2X.scale = 0.5 * enchantTextScale.get();
+            TextRenderer.get().begin(0.5 * enchantTextScale.get(), false, true);
 
             for (int i = 0; i < 4; i++) {
                 ItemStack itemStack = entity.inventory.armor.get(i);
@@ -386,26 +372,25 @@ public class Nametags extends Module {
 
                 double aW = armorWidths[i];
                 double enchantY = 0;
-                double addY = (armorHeight - enchantmentsToShow.size() * MeteorClient.FONT_2X.getHeight()) / 2;
+                double addY = (armorHeight - enchantmentsToShow.size() * TextRenderer.get().getHeight()) / 2;
                 if (displayOnItem.get() == Position.ABOVE) {
                     addY -= 16;
                 }
 
                 for (Enchantment enchantment : enchantmentsToShow.keySet()) {
                     String enchantName = Utils.getEnchantShortName(enchantment) + " " + enchantmentsToShow.get(enchantment);
-                    MeteorClient.FONT_2X.renderStringWithShadow(enchantName, itemX + ((aW - MeteorClient.FONT_2X.getStringWidth(enchantName)) / 2), -heightUp + enchantY + addY, enchantmentTextColor.get());
+                    TextRenderer.get().render(enchantName, itemX + ((aW - TextRenderer.get().getWidth(enchantName)) / 2), -heightUp + enchantY + addY, enchantmentTextColor.get());
 
-                    enchantY += MeteorClient.FONT_2X.getHeight();
+                    enchantY += TextRenderer.get().getHeight();
                 }
 
                 itemX += armorWidths[i] + itemSpacing;
             }
 
-            MeteorClient.FONT_2X.scale = 0.5;
+            TextRenderer.get().end();
         }
-        MeteorClient.FONT_2X.end();
 
-        Matrices.pop();
+        NametagUtils.end();
     }
 
     private List<Enchantment> setDefualtList(){

@@ -10,6 +10,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.commands.CommandManager;
+import minegame159.meteorclient.commands.commands.swarm.SwarmQueen;
+import minegame159.meteorclient.commands.commands.swarm.SwarmSlave;
 import minegame159.meteorclient.events.game.GameJoinedEvent;
 import minegame159.meteorclient.events.game.GameLeftEvent;
 import minegame159.meteorclient.events.world.TickEvent;
@@ -219,7 +221,7 @@ public class Swarm extends Module {
                             String read;
                             read = dataInputStream.readUTF();
                             if (!read.equals("")) {
-                                ChatUtils.moduleInfo(ModuleManager.INSTANCE.get(Swarm.class),"New Command: " + read);
+                                ChatUtils.moduleInfo(ModuleManager.INSTANCE.get(Swarm.class), "New Command: " + read);
                                 execute(read);
                             }
                         }
@@ -236,7 +238,7 @@ public class Swarm extends Module {
                     try {
                         socket.close();
                     } catch (Exception e) {
-                        ChatUtils.moduleError(ModuleManager.INSTANCE.get(Swarm.class),"There is an error in your connection to the server.");
+                        ChatUtils.moduleError(ModuleManager.INSTANCE.get(Swarm.class), "There is an error in your connection to the server.");
                     }
                 }
             }
@@ -261,7 +263,7 @@ public class Swarm extends Module {
             try {
                 int port = serverPort.get();
                 this.serverSocket = new ServerSocket(port);
-                ChatUtils.moduleInfo(ModuleManager.INSTANCE.get(Swarm.class),"New Server Opened On Port " + serverPort.get());
+                ChatUtils.moduleInfo(ModuleManager.INSTANCE.get(Swarm.class), "New Server Opened On Port " + serverPort.get());
                 start();
             } catch (Exception ignored) {
 
@@ -271,7 +273,7 @@ public class Swarm extends Module {
         @Override
         public void run() {
             try {
-                ChatUtils.moduleInfo(ModuleManager.INSTANCE.get(Swarm.class),"Listening for incoming connections.");
+                ChatUtils.moduleInfo(ModuleManager.INSTANCE.get(Swarm.class), "Listening for incoming connections.");
                 while (!this.isInterrupted()) {
                     Socket connection = this.serverSocket.accept();
                     assignConnectionToSubServer(connection);
@@ -284,7 +286,7 @@ public class Swarm extends Module {
             for (int i = 0; i < clientConnections.length; i++) {
                 if (this.clientConnections[i] == null) {
                     this.clientConnections[i] = new SubServer(connection);
-                    ChatUtils.moduleInfo(ModuleManager.INSTANCE.get(Swarm.class),"New slave connected.");
+                    ChatUtils.moduleInfo(ModuleManager.INSTANCE.get(Swarm.class), "New slave connected.");
                     break;
                 }
             }
@@ -300,7 +302,7 @@ public class Swarm extends Module {
                 }
                 serverSocket.close();
             } catch (Exception e) {
-                ChatUtils.moduleInfo(ModuleManager.INSTANCE.get(Swarm.class),"Server closed.");
+                ChatUtils.moduleInfo(ModuleManager.INSTANCE.get(Swarm.class), "Server closed.");
             }
         }
 
@@ -391,7 +393,7 @@ public class Swarm extends Module {
         this.toggle();
     });
 
-    private static class SwarmHelpScreen extends WindowScreen {
+    private class SwarmHelpScreen extends WindowScreen {
 
         private final WTable textTable;
         private final WButton introButton;
@@ -404,25 +406,25 @@ public class Swarm extends Module {
             textTable = new WTable();
             introButton = new WButton("(1) Introduction");
             introButton.action = () -> {
-                buildTextTable(swarmGuideIntro);
+                buildTextTable(getSwarmGuideIntro());
                 initWidgets();
             };
             ipConfigButton = new WButton("(2) Configuration");
             ipConfigButton.action = () -> {
-                buildTextTable(swarmGuideConfig);
+                buildTextTable(getSwarmGuideConfig());
                 initWidgets();
             };
             queenButton = new WButton("(3) Queen");
             queenButton.action = () -> {
-                buildTextTable(swarmGuideQueen);
+                buildTextTable(getSwarmGuideQueen());
                 initWidgets();
             };
             slaveButton = new WButton("(4) Slave");
             slaveButton.action = () -> {
-                buildTextTable(swarmGuideSlave);
+                buildTextTable(getSwarmGuideSlave());
                 initWidgets();
             };
-            buildTextTable(swarmGuideIntro);
+            buildTextTable(getSwarmGuideIntro());
             initWidgets();
         }
 
@@ -441,7 +443,7 @@ public class Swarm extends Module {
 
         private void buildTextTable(List<String> text) {
             textTable.clear();
-            for(String s : text){
+            for (String s : text) {
                 textTable.add(new WLabel(s));
                 textTable.row();
             }
@@ -449,51 +451,59 @@ public class Swarm extends Module {
     }
 
     //I know its ugly, I don't care.
-    private final static List<String> swarmGuideIntro = Arrays.asList(
-            "Welcome to Swarm!",
-            "",
-            "Swarm at its heart is a command tunnel which allows a controlling account, referred",
-            "to as the queen account, to control other accounts by means of a background server.",
-            "",
-            "By default, Swarm is configured to work with multiple instances of Minecraft running on the",
-            "same computer however with some additional configuration it will work across your local network",
-            "or the broader internet.",
-            "",
-            "All swarm commands should be proceeded by '.s'"
-    );
+    private List<String> getSwarmGuideIntro() {
+        return Arrays.asList(
+                "Welcome to Swarm!",
+                "",
+                "Swarm at its heart is a command tunnel which allows a controlling account, referred",
+                "to as the queen account, to control other accounts by means of a background server.",
+                "",
+                "By default, Swarm is configured to work with multiple instances of Minecraft running on the",
+                "same computer however with some additional configuration it will work across your local network",
+                "or the broader internet.",
+                "",
+                String.format("All swarm commands should be proceeded by \"%s\"", CommandManager.get(SwarmQueen.class).toString())
+        );
+    }
 
-    private final static List<String> swarmGuideConfig = Arrays.asList(
-            "Localhost Connections:",
-            " If the Queen and Slave accounts are all being run on the same computer, there is no need to change anything",
-            " here if the configured port is not being used for anything else.",
-            "",
-            "Local Connections:",
-            " If the Queen and Slave accounts are not on the same computer, but on the same WiFi/Ethernet network,",
-            " you will need to change the ip-address on each Slave client to the IPv4/6 address of the computer the",
-            " Queen instance is running on. To find your IPv4 address on Windows, open CMD and enter the command ipconfig.",
-            "",
-            "Broad-Internet Connections:",
-            " If you are attempting to make a connection over the broader internet a port forward will be required on the",
-            " queen account. I will not cover how to perform a port forward, look it up. You will need administrator access",
-            " to your router. Route all traffic through your configured port to the IPv4 address of the computer which is",
-            " hosting the queen account. After you have successfully port-forwarded on the queen instance, change the ip",
-            " address of the slave accounts to the public-ip address of the queen account. To find your public-ip address",
-            " just google 'what is my ip'. NEVER SHARE YOUR PUBLIC IP WITH ANYONE YOU DO NOT TRUST. Assuming you setup",
-            " everything correctly, you may now proceed as usual."
-    );
+    private List<String> getSwarmGuideConfig() {
+        return Arrays.asList(
+                "Localhost Connections:",
+                " If the Queen and Slave accounts are all being run on the same computer, there is no need to change anything",
+                " here if the configured port is not being used for anything else.",
+                "",
+                "Local Connections:",
+                " If the Queen and Slave accounts are not on the same computer, but on the same WiFi/Ethernet network,",
+                " you will need to change the ip-address on each Slave client to the IPv4/6 address of the computer the",
+                " Queen instance is running on. To find your IPv4 address on Windows, open CMD and enter the command ipconfig.",
+                "",
+                "Broad-Internet Connections:",
+                " If you are attempting to make a connection over the broader internet a port forward will be required on the",
+                " queen account. I will not cover how to perform a port forward, look it up. You will need administrator access",
+                " to your router. Route all traffic through your configured port to the IPv4 address of the computer which is",
+                " hosting the queen account. After you have successfully port-forwarded on the queen instance, change the ip",
+                " address of the slave accounts to the public-ip address of the queen account. To find your public-ip address",
+                " just google 'what is my ip'. NEVER SHARE YOUR PUBLIC IP WITH ANYONE YOU DO NOT TRUST. Assuming you setup",
+                " everything correctly, you may now proceed as usual."
+        );
+    }
 
-    private final static List<String> swarmGuideQueen = Arrays.asList(
-            "Setting up the Queen:",
-            " Pick an instance of Minecraft to be your queen account.",
-            " Ensure the swarm module is enabled.",
-            " Then click the, button labeled 'Run Server(Q)' under the Swarm config menu.",
-            " You may also enter the command .s queen."
-    );
+    private List<String> getSwarmGuideQueen() {
+        return Arrays.asList(
+                "Setting up the Queen:",
+                " Pick an instance of Minecraft to be your queen account.",
+                " Ensure the swarm module is enabled.",
+                " Then click the, button labeled 'Run Server(Q)' under the Swarm config menu.", String.format(
+                        " You may also enter the command \"%s\".", CommandManager.get(SwarmQueen.class).toString("queen"))
+        );
+    }
 
-    private final static List<String> swarmGuideSlave = Arrays.asList(
-            "Connecting your slaves:",
-            " For each slave account, assuming you correctly configured the ip and port",
-            " in Step 1 simply press the button labeled 'Connect (S)', or enter the command '.s slave'"
-    );
+    private List<String> getSwarmGuideSlave() {
+        return Arrays.asList(
+                "Connecting your slaves:",
+                " For each slave account, assuming you correctly configured the ip and port", String.format(
+                        " in Step 1 simply press the button labeled 'Connect (S)', or enter the command \"%s\"", CommandManager.get(SwarmSlave.class).toString("slave"))
+        );
+    }
 
 }

@@ -23,6 +23,8 @@ public class Config extends Savable<Config> {
     private String prefix = ".";
     public GuiConfig guiConfig = new GuiConfig();
 
+    public boolean customFont = true;
+
     public boolean chatCommandsInfo = true;
     public boolean deleteChatCommandsInfo = true;
 
@@ -47,6 +49,7 @@ public class Config extends Savable<Config> {
 
         tag.putString("version", version.getOriginalString());
         tag.putString("prefix", prefix);
+        tag.putBoolean("customFont", customFont);
         tag.put("guiConfig", guiConfig.toTag());
         tag.putBoolean("chatCommandsInfo", chatCommandsInfo);
         tag.putBoolean("deleteChatCommandsInfo", deleteChatCommandsInfo);
@@ -58,6 +61,7 @@ public class Config extends Savable<Config> {
     public Config fromTag(CompoundTag tag) {
         prefix = tag.getString("prefix");
         guiConfig.fromTag(tag.getCompound("guiConfig"));
+        if (tag.contains("customFont")) customFont = tag.getBoolean("customFont");
         chatCommandsInfo = !tag.contains("chatCommandsInfo") || tag.getBoolean("chatCommandsInfo");
         deleteChatCommandsInfo = !tag.contains("deleteChatCommandsInfo") || tag.getBoolean("deleteChatCommandsInfo");
 

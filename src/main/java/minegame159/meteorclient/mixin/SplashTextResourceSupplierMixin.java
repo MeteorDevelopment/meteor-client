@@ -22,5 +22,17 @@ public class SplashTextResourceSupplierMixin {
         list.add("Meteor on Crack!");
         list.add("Star Meteor Client on GitHub!");
         list.add("All hail Meteor!");
+        list.add("Based utility mod.");
+        list.add("based");
+        list.add(":EZ:");
+        list.add(":kekw:");
+        list.add("OK retard.");
+        list.add("cat");
+        list.add("snale");
+        list.add("monkey");
+        list.add("mingane");
+        list.add("https://bigrat.monster");
+        list.add("snale moment");
+        list.add("inertia moment");
     }
 }
