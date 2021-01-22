@@ -27,22 +27,22 @@ public abstract class GenericContainerScreenMixin extends HandledScreen<GenericC
     protected void init() {
         super.init();
 
-        //StorageUtils
-        addButton(new MeteorButtonWidget(x + backgroundWidth - 46, y + 3, 40, 12, new LiteralText("Steal"), button -> steal(handler)));
-        addButton(new MeteorButtonWidget(x + backgroundWidth - 88, y + 3, 40, 12, new LiteralText("Dump"), button -> dump(handler)));
-
         AutoSteal autoSteal = ModuleManager.INSTANCE.get(AutoSteal.class);
-        if (autoSteal.isActive())
-            steal(handler);
+
+        if (autoSteal.isActive() && autoSteal.getStealButtonEnabled())
+            addButton(new MeteorButtonWidget(x + backgroundWidth - 88, y + 3, 40, 12, new LiteralText("Steal"), button -> steal(handler)));
+        if (autoSteal.isActive() && autoSteal.getDumpButtonEnabled())
+            addButton(new MeteorButtonWidget(x + backgroundWidth - 46, y + 3, 40, 12, new LiteralText("Dump"), button -> dump(handler)));
+
+        if (autoSteal.isActive() && autoSteal.getAutoStealEnabled()) steal(handler);
+        else if (autoSteal.isActive() && autoSteal.getAutoDumpEnabled()) dump(handler);
     }
 
+    private void steal(GenericContainerScreenHandler handler) {
+        ModuleManager.INSTANCE.get(AutoSteal.class).stealAsync(handler);
+    }
 
     private void dump(GenericContainerScreenHandler handler) {
         ModuleManager.INSTANCE.get(AutoSteal.class).dumpAsync(handler);
-    }
-
-    private void steal(GenericContainerScreenHandler handler)
-    {
-        ModuleManager.INSTANCE.get(AutoSteal.class).stealAsync(handler);
     }
 }
