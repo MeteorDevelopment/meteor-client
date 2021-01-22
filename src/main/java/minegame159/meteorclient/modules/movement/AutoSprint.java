@@ -23,7 +23,7 @@ public class AutoSprint extends Module {
             .defaultValue(true)
             .build()
     );
-	
+
     public AutoSprint() {
         super(Category.Movement, "auto-sprint", "Automatically sprints.");
     }
@@ -35,10 +35,10 @@ public class AutoSprint extends Module {
 
     @EventHandler
     private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
-    	if(mc.player.forwardSpeed > 0 && !permanent.get()) {
+        if(mc.player.forwardSpeed > 0 && !permanent.get()) {
             mc.player.setSprinting(true);
-    	} else if (permanent.get()) {
-    		mc.player.setSprinting(true);
-    	}
+        } else if (permanent.get()) {
+            mc.player.setSprinting(true);
+        }
     });
 }
