@@ -51,9 +51,13 @@ public abstract class Command {
     }
 
     // Generate proper command-string to execute.
-    // For example CommandManager.get(Say.class).toString("raw_message") -> ".say raw_test".
+    // For example: CommandManager.get(Say.class).toString("raw_message") -> ".say raw_message".
+    public String toString() {
+        return Config.INSTANCE.getPrefix() + name;
+    }
+
     public String toString(String... args) {
-        StringBuilder base = new StringBuilder(Config.INSTANCE.getPrefix() + name);
+        StringBuilder base = new StringBuilder(toString());
         for (String arg : args)
             base.append(' ').append(arg);
 
