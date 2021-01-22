@@ -31,7 +31,7 @@ public class SplashTextResourceSupplierMixin {
         list.add("snale");
         list.add("monkey");
         list.add("mingane");
-        list.add("bigrat.monster");
+        list.add("https://bigrat.monster");
         list.add("snale moment");
         list.add("inertia moment");
     }
