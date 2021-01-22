@@ -343,6 +343,7 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         addModule(new NoRotate());
         addModule(new Trail());
         addModule(new AirPlace());
+        addModule(new AutoSteal());
     }
 
     private void initMovement() {
