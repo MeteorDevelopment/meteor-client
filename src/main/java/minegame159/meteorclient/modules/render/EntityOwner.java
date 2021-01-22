@@ -12,18 +12,16 @@ import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.rendering.DrawMode;
-import minegame159.meteorclient.rendering.Fonts;
-import minegame159.meteorclient.rendering.Matrices;
 import minegame159.meteorclient.rendering.MeshBuilder;
+import minegame159.meteorclient.rendering.text.TextRenderer;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.network.HttpUtils;
 import minegame159.meteorclient.utils.network.MeteorExecutor;
 import minegame159.meteorclient.utils.network.UuidNameHistoryResponseItem;
+import minegame159.meteorclient.utils.render.NametagUtils;
 import minegame159.meteorclient.utils.render.color.Color;
-import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.HorseBaseEntity;
@@ -78,47 +76,34 @@ public class EntityOwner extends Module {
     });
 
     private void renderNametag(RenderEvent event, Entity entity, String name) {
-        Camera camera = mc.gameRenderer.getCamera();
+        NametagUtils.begin(event, entity, scale.get());
+        TextRenderer.get().begin(1, false, true);
 
-        // Compute scale
-        double scale = 0.025 * this.scale.get();
-        double dist = Utils.distanceToCamera(entity);
-        if (dist > 8) scale *= dist / 8;
-
-        // Setup the rotation
-        Matrices.push();
-        double x = entity.prevX + (entity.getX() - entity.prevX) * event.tickDelta;
-        double y = entity.prevY + (entity.getY() - entity.prevY) * event.tickDelta + entity.getHeight() + 0.25;
-        double z = entity.prevZ + (entity.getZ() - entity.prevZ) * event.tickDelta;
-        Matrices.translate(x - event.offsetX, y - event.offsetY, z - event.offsetZ);
-        Matrices.rotate(-camera.getYaw(), 0, 1, 0);
-        Matrices.rotate(camera.getPitch(), 1, 0, 0);
-        Matrices.scale(-scale, -scale, scale);
+        double w = TextRenderer.get().getWidth(name) / 2;
+        double h = TextRenderer.get().getHeight();
 
         // Render background
-        double ii = Fonts.get(2).getWidth(name) / 2.0;
-        double i = ii * 0.25;
         MB.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
-        MB.quad(-i - 1, 0, 0, -i - 1, 8, 0, i + 1, 8, 0, i + 1, 0, 0, BACKGROUND);
+        MB.quad(-w - 1, 0, 0, -w - 1, h, 0, w + 1, h, 0, w + 1, 0, 0, BACKGROUND);
         MB.end();
 
         // Render name text
-        Matrices.scale(0.25, 0.25, 1);
-        Fonts.get(2).render(name, -ii, 0, TEXT);
+        TextRenderer.get().render(name, -w, 0, TEXT);
 
-        Matrices.pop();
+        TextRenderer.get().end();
+        NametagUtils.end();
     }
 
     private String getOwnerName(UUID uuid) {
-// gets the name if the entity owner is online.
+        // Check if the player is online
         PlayerEntity player = mc.world.getPlayerByUuid(uuid);
         if (player != null) return player.getGameProfile().getName();
 
-        // Checks cache
+        // Check cache
         String name = uuidToName.get(uuid);
         if (name != null) return name;
 
-// Makes a HTTP request to Mojang API. Fuck MineMonkey for pointing this out.
+        // Makes a HTTP request to Mojang API
         MeteorExecutor.execute(() -> {
             if (isActive()) {
                 List<UuidNameHistoryResponseItem> response = HttpUtils.get("https://api.mojang.com/user/profiles/" + uuid.toString().replace("-", "") + "/names", RESPONSE_TYPE);

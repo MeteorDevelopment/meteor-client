@@ -10,9 +10,8 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import minegame159.meteorclient.gui.GuiConfig;
 import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.rendering.DrawMode;
-import minegame159.meteorclient.rendering.Fonts;
 import minegame159.meteorclient.rendering.MeshBuilder;
-import minegame159.meteorclient.rendering.MyFont;
+import minegame159.meteorclient.rendering.text.TextRenderer;
 import minegame159.meteorclient.utils.misc.CursorStyle;
 import minegame159.meteorclient.utils.misc.Pool;
 import minegame159.meteorclient.utils.misc.input.Input;
@@ -22,7 +21,6 @@ import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.texture.AbstractTexture;
 import net.minecraft.client.util.Window;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.Pair;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
@@ -44,7 +42,6 @@ public class GuiRenderer {
 
     public String tooltip;
 
-    private MyFont font;
     private CursorStyle cursorStyle;
 
     public GuiRenderer() {
@@ -73,29 +70,23 @@ public class GuiRenderer {
         MinecraftClient.getInstance().getTextureManager().bindTexture(TEXTURE);
         mb.end();
 
-        Pair<MyFont, Double> font = Fonts.get(GuiConfig.INSTANCE.guiScale);
-        this.font = font.getLeft();
-        this.font.begin(font.getRight());
+        TextRenderer.get().begin(GuiConfig.INSTANCE.guiScale);
         for (Text text : texts) {
             if (!text.title) {
                 text.render();
                 textPool.free(text);
             }
         }
-        this.font.end();
+        TextRenderer.get().end();
 
-        MyFont tooltipFont = this.font;
-
-        font = Fonts.get(1.22222222 * GuiConfig.INSTANCE.guiScale);
-        this.font = font.getLeft();
-        this.font.begin(font.getRight());
+        TextRenderer.get().begin(1.22222222 * GuiConfig.INSTANCE.guiScale);
         for (Text text : texts) {
             if (text.title) {
                 text.render();
                 textPool.free(text);
             }
         }
-        this.font.end();
+        TextRenderer.get().end();
         texts.clear();
 
         if (root) {
@@ -106,7 +97,10 @@ public class GuiRenderer {
                 mb.end();
                 mb.texture = true;
 
-                tooltipFont.render(tooltip, mouseX + 8 + 4, mouseY + 8 + 4, GuiConfig.INSTANCE.text);
+                TextRenderer.get().begin(GuiConfig.INSTANCE.guiScale);
+                TextRenderer.get().render(tooltip, mouseX + 8 + 4, mouseY + 8 + 4, GuiConfig.INSTANCE.text);
+                TextRenderer.get().end();
+
                 tooltip = null;
             }
 
@@ -227,23 +221,23 @@ public class GuiRenderer {
         texts.add(textPool.get().set(text, x, y, shadow, color, false));
     }
     public double textWidth(String text, int length) {
-        return Fonts.get().getWidth(text, length) * GuiConfig.INSTANCE.guiScale;
+        return TextRenderer.get().getWidth(text, length);
     }
     public double textWidth(String text) {
-        return Fonts.get().getWidth(text) * GuiConfig.INSTANCE.guiScale;
+        return TextRenderer.get().getWidth(text);
     }
     public double textHeight() {
-        return Fonts.get().getHeight() * GuiConfig.INSTANCE.guiScale;
+        return TextRenderer.get().getHeight();
     }
 
     public void title(String text, double x, double y, Color color) {
         texts.add(textPool.get().set(text, x, y, false, color, true));
     }
     public double titleWidth(String text) {
-        return Fonts.get().getWidth(text) * 1.22222222 * GuiConfig.INSTANCE.guiScale;
+        return TextRenderer.get().getWidth(text) * 1.22222222;
     }
     public double titleHeight() {
-        return Fonts.get().getHeight() * 1.22222222 * GuiConfig.INSTANCE.guiScale;
+        return TextRenderer.get().getHeight() * 1.22222222;
     }
 
     public void post(Runnable task) {
@@ -298,7 +292,7 @@ public class GuiRenderer {
         }
     }
 
-    private class Text {
+    private static class Text {
         public String text;
         public double x, y;
         public boolean shadow;
@@ -317,7 +311,7 @@ public class GuiRenderer {
         }
 
         public void render() {
-            font.render(text, x, y, color);
+            TextRenderer.get().render(text, x, y, color, true);
         }
     }
 }

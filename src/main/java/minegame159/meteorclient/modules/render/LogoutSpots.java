@@ -8,13 +8,13 @@ package minegame159.meteorclient.modules.render;
 import com.mojang.blaze3d.systems.RenderSystem;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.entity.EntityAddedEvent;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.rendering.*;
+import minegame159.meteorclient.rendering.text.TextRenderer;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.render.color.Color;
@@ -230,7 +230,7 @@ public class LogoutSpots extends Module {
             // Compute scale
             double scale = 0.025;
             double dist = Utils.distanceToCamera(x, y, z);
-            if (dist > 10) scale *= dist / 10 * LogoutSpots.this.scale.get();
+            if (dist > 8) scale *= dist / 8 * LogoutSpots.this.scale.get();
 
             if (dist > mc.options.viewDistance * 16) return;
 
@@ -255,16 +255,16 @@ public class LogoutSpots extends Module {
             Matrices.scale(-scale, -scale, scale);
 
             // Render background
-            double i = MeteorClient.FONT_2X.getStringWidth(name) / 2.0 + MeteorClient.FONT_2X.getStringWidth(healthText) / 2.0;
+            double i = TextRenderer.get().getWidth(name) / 2.0 + TextRenderer.get().getWidth(healthText) / 2.0;
             MB.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
             MB.quad(-i - 1, -1, 0, -i - 1, 8, 0, i + 1, 8, 0, i + 1, -1, 0, nameBackgroundColor.get());
             MB.end();
 
             // Render name and health texts
-            MeteorClient.FONT_2X.begin();
-            double hX = MeteorClient.FONT_2X.renderString(name, -i, 0, nameColor.get());
-            MeteorClient.FONT_2X.renderString(healthText, hX, 0, healthColor);
-            MeteorClient.FONT_2X.end();
+            TextRenderer.get().begin(1, false, true);
+            double hX = TextRenderer.get().render(name, -i, 0, nameColor.get());
+            TextRenderer.get().render(healthText, hX, 0, healthColor);
+            TextRenderer.get().end();
 
             Matrices.pop();
         }

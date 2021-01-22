@@ -25,7 +25,8 @@ import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.misc.DiscordPresence;
 import minegame159.meteorclient.rendering.Fonts;
-import minegame159.meteorclient.rendering.MFont;
+import minegame159.meteorclient.rendering.Matrices;
+import minegame159.meteorclient.rendering.text.CustomTextRenderer;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.entity.EntityUtils;
 import minegame159.meteorclient.utils.misc.input.KeyAction;
@@ -44,6 +45,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.options.KeyBinding;
+import net.minecraft.client.util.math.MatrixStack;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -52,10 +54,11 @@ import java.io.File;
 public class MeteorClient implements ClientModInitializer, Listenable {
     public static MeteorClient INSTANCE;
     public static final EventBus EVENT_BUS = new EventManager();
-    public static MFont FONT_2X;
     public static boolean IS_DISCONNECTING;
     public static final File FOLDER = new File(FabricLoader.getInstance().getGameDir().toString(), "meteor-client");
     public static final Logger LOG = LogManager.getLogger();
+
+    public static CustomTextRenderer FONT;
 
     private MinecraftClient mc;
 
@@ -80,6 +83,7 @@ public class MeteorClient implements ClientModInitializer, Listenable {
         Config.INSTANCE.load();
         Fonts.init();
 
+        Matrices.begin(new MatrixStack());
         MeteorExecutor.init();
         new ModuleManager();
         CommandManager.init();

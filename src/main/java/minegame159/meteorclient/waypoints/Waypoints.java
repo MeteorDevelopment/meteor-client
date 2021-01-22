@@ -14,9 +14,9 @@ import minegame159.meteorclient.events.game.GameLeftEvent;
 import minegame159.meteorclient.events.meteor.WaypointListChangedEvent;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.rendering.DrawMode;
-import minegame159.meteorclient.rendering.Fonts;
 import minegame159.meteorclient.rendering.Matrices;
 import minegame159.meteorclient.rendering.MeshBuilder;
+import minegame159.meteorclient.rendering.text.TextRenderer;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.files.Savable;
 import minegame159.meteorclient.utils.misc.NbtUtils;
@@ -113,8 +113,8 @@ public class Waypoints extends Savable<Waypoints> implements Listenable, Iterabl
             // Compute scale
             double dist = Utils.distanceToCamera(x, y, z);
             if (dist > waypoint.maxVisibleDistance) continue;
-            double scale = 0.04;
-            if(dist > 10) scale *= dist / 10;
+            double scale = 0.01 * waypoint.scale;
+            if(dist > 8) scale *= dist / 8;
 
             double a = 1;
             if (dist < 10) {
@@ -157,29 +157,29 @@ public class Waypoints extends Savable<Waypoints> implements Listenable, Iterabl
             Matrices.rotate(-camera.getYaw(), 0, 1, 0);
             Matrices.rotate(camera.getPitch(), 1, 0, 0);
             Matrices.translate(0, 0.5, 0);
-            Matrices.scale(-scale * waypoint.scale, -scale * waypoint.scale, scale);
+            Matrices.scale(-scale, -scale, scale);
 
             String distText = Math.round(dist) + " blocks";
 
             // Render background
-            double ii = Fonts.get(2).getWidth(waypoint.name) / 2.0;
-            double i = ii * 0.25;
-            double ii2 = Fonts.get(2).getWidth(distText) / 2.0;
-            double i2 = ii2 * 0.25;
-            MB.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
-            MB.quad(-i - 1, -Fonts.get(2).getHeight() * 0.25 + 1, 0, -i - 1, 9 - Fonts.get(2).getHeight() * 0.25, 0, i + 1, 9 - Fonts.get(2).getHeight() * 0.25, 0, i + 1, -Fonts.get(2).getHeight() * 0.25 + 1, 0, BACKGROUND);
-            MB.quad(-i2 - 1, 0, 0, -i2 - 1, 8, 0, i2 + 1, 8, 0, i2 + 1, 0, 0, BACKGROUND);
-            MB.end();
+            TextRenderer.get().begin(1, false, true);
+            double w = TextRenderer.get().getWidth(waypoint.name) / 2.0;
+            double w2 = TextRenderer.get().getWidth(distText) / 2.0;
+            double h = TextRenderer.get().getHeight();
 
-            waypoint.renderIcon(-8, 9, 0, a, 16);
+            // TODO: I HATE EVERYTHING ABOUT HOW RENDERING ROTATING THINGS WORKS AND I CANNOT BE ASKED TO WORK THIS OUT, THE WHOLE THING NEEDS TO BE RECODED REEEEEEEEEEEEEEEEEEEE
+            /*MB.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
+            MB.quad(-w - 1, -h + 1, 0, -w - 1, 9 - h, 0, w + 1, 9 - h, 0, w + 1, -h + 1, 0, BACKGROUND);
+            MB.quad(-w2 - 1, 0, 0, -w2 - 1, 8, 0, w2 + 1, 8, 0, w2 + 1, 0, 0, BACKGROUND);
+            MB.end();*/
+
+            waypoint.renderIcon(-8, h, 0, a, 16);
 
             // Render name text
-            Matrices.scale(0.25, 0.25, 0.25);
-            Fonts.get(2).begin();
-            Fonts.get(2).render(waypoint.name, -ii, -Fonts.get(2).getHeight() + 1, TEXT);
-            Fonts.get(2).render(distText, -ii2, 0, TEXT);
-            Fonts.get(2).end();
+            TextRenderer.get().render(waypoint.name, -w, -h + 1, TEXT);
+            TextRenderer.get().render(distText, -w2, 0, TEXT);
 
+            TextRenderer.get().end();
             Matrices.pop();
 
             BACKGROUND.a = preBgA;

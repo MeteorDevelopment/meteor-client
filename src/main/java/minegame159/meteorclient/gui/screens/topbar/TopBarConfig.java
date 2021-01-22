@@ -32,6 +32,18 @@ public class TopBarConfig extends TopBarWindowScreen {
         );
 
         sgGeneral.add(new BoolSetting.Builder()
+                .name("custom-font")
+                .description("Use custom font.")
+                .defaultValue(true)
+                .onChanged(aBoolean -> {
+                    Config.INSTANCE.customFont = aBoolean;
+                    root.invalidate();
+                })
+                .onModuleActivated(booleanSetting -> booleanSetting.set(Config.INSTANCE.customFont))
+                .build()
+        );
+
+        sgGeneral.add(new BoolSetting.Builder()
                 .name("chat-commands-info")
                 .description("Send chat message when you use chat comamnds (eg toggling module, changing a setting, etc).")
                 .defaultValue(true)
