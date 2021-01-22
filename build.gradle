@@ -40,7 +40,7 @@ dependencies {
 	// You may need to force-disable transitiveness on them.
 
 	// For XRay compatibility
-	modImplementation "com.github.jellysquid3:sodium-fabric:1.16.x~stable-SNAPSHOT"
+	modImplementation "com.github.jellysquid3:sodium-fabric:mc1.16.3-0.1.0"
 
 	modImplementation("com.gitlab.CDAGaming:fabritone:fabric~1.16.3-SNAPSHOT") {
 		exclude(group: "org.lwjgl.lwjgl", module: "lwjgl-platform")
