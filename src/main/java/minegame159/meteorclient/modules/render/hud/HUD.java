@@ -313,7 +313,7 @@ public class HUD extends Module {
 
     private void init() {
         modules.clear();
-        RENDERER.setScale(scale());
+        RENDERER.begin(scale(), 0, true);
 
         // Top Left
         HudModuleLayer topLeft = new HudModuleLayer(RENDERER, modules, AlignmentX.Left, AlignmentY.Top, 2, 2);
@@ -355,13 +355,15 @@ public class HUD extends Module {
         bottomRight.add(new PositionHud(this));
         bottomRight.add(new RotationHud(this));
         bottomRight.add(new PotionTimersHud(this));
+
+        RENDERER.end();
     }
 
     @EventHandler
     public final Listener<Render2DEvent> onRender = new Listener<>(event -> {
         if (mc.options.debugEnabled) return;
 
-        RENDERER.begin(scale(), event.tickDelta);
+        RENDERER.begin(scale(), event.tickDelta, false);
 
         for (HudModule module : modules) {
             if (module.active || mc.currentScreen instanceof HudEditorScreen) {
