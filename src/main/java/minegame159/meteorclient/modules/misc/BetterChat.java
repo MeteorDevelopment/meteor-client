@@ -32,9 +32,18 @@ import java.util.regex.Pattern;
 
 public class BetterChat extends Module {
 
-    // Annoy
-
     private final SettingGroup sgAnnoy = settings.createGroup("Annoy");
+    private final SettingGroup sgAntiSpam = settings.createGroup("Anti Spam");
+    private final SettingGroup sgFancyChat = settings.createGroup("Fancy Chat");
+    private final SettingGroup sgIgnore = settings.createGroup("Ignore");
+    private final SettingGroup sgLongerChat = settings.createGroup("Longer Chat");
+    private final SettingGroup sgProtection = settings.createGroup("Protection");
+    private final SettingGroup sgPrefix = settings.createGroup("Prefix");
+    private final SettingGroup sgSuffix = settings.createGroup("Suffix");
+    // private final SettingGroup sgFriendColor = settings.createGroup("Friend Color");
+
+
+    // Annoy
 
     private final Setting<Boolean> annoyEnabled = sgAnnoy.add(new BoolSetting.Builder()
             .name("annoy-enabled")
@@ -45,8 +54,6 @@ public class BetterChat extends Module {
 
     // Anti Spam
 
-    private final SettingGroup sgAntiSpam = settings.createGroup("Anti Spam");
-
     private final Setting<Boolean> antiSpamEnabled = sgAntiSpam.add(new BoolSetting.Builder()
             .name("anti-spam-enabled")
             .description("Enables the anti-spam.")
@@ -55,7 +62,7 @@ public class BetterChat extends Module {
     );
 
     private final Setting<Integer> antiSpamDepth = sgAntiSpam.add(new IntSetting.Builder()
-            .name("anti-spam-depth")
+            .name("depth")
             .description("How many chat messages to check for duplicate messages.")
             .defaultValue(4)
             .min(1)
@@ -64,15 +71,13 @@ public class BetterChat extends Module {
     );
 
     private final Setting<Boolean> antiSpamMoveToBottom = sgAntiSpam.add(new BoolSetting.Builder()
-            .name("anti-spam-move-to-bottom")
+            .name("move-to-bottom")
             .description("Moves any duplicate messages to the bottom of the chat.")
             .defaultValue(true)
             .build()
     );
 
     // Fancy Chat
-
-    private final SettingGroup sgFancyChat = settings.createGroup("Fancy Chat");
 
     private final Setting<Boolean> fancyEnabled = sgFancyChat.add(new BoolSetting.Builder()
             .name("fancy-chat-enabled")
@@ -84,8 +89,6 @@ public class BetterChat extends Module {
 
     // Ignore
 
-    private final SettingGroup sgIgnore = settings.createGroup("Ignore");
-
     private final Setting<Boolean> ignoreEnabled = sgIgnore.add(new BoolSetting.Builder()
             .name("ignore-enabled")
             .description("Ignores player defined by the .ignore command.")
@@ -95,8 +98,6 @@ public class BetterChat extends Module {
 
     // Longer Chat
 
-    private final SettingGroup sgLongerChat = settings.createGroup("Longer Chat");
-
     private final Setting<Boolean> longerChatEnabled = sgLongerChat.add(new BoolSetting.Builder()
             .name("longer-chat-enabled")
             .description("Extends chat length.")
@@ -105,7 +106,7 @@ public class BetterChat extends Module {
     );
 
     private final Setting<Integer> longerChatLines = sgLongerChat.add(new IntSetting.Builder()
-            .name("longer-chat-lines")
+            .name("extra-lines")
             .description("The amount of extra chat lines.")
             .defaultValue(1000)
             .min(100)
@@ -114,8 +115,6 @@ public class BetterChat extends Module {
     );
 
     // Protection TODO: Find a better name for this.
-
-    private final SettingGroup sgProtection = settings.createGroup("Protection");
 
     private final Setting<Boolean> coordsProtectionEnabled = sgProtection.add(new BoolSetting.Builder()
             .name("coords-protection-enabled")
@@ -140,8 +139,6 @@ public class BetterChat extends Module {
 
     // Prefix
 
-    private final SettingGroup sgPrefix = settings.createGroup("Prefix");
-
     private final Setting<Boolean> prefixEnabled = sgPrefix.add(new BoolSetting.Builder()
             .name("prefix-enabled")
             .description("Enables a prefix.")
@@ -150,29 +147,27 @@ public class BetterChat extends Module {
     );
 
     private final Setting<String> prefixText = sgPrefix.add(new StringSetting.Builder()
-            .name("prefix-text")
+            .name("text")
             .description("The text to add as your prefix.")
             .defaultValue("> ")
             .build()
     );
 
     private final Setting<Boolean> prefixSmallCaps = sgPrefix.add(new BoolSetting.Builder()
-            .name("prefix-small-caps")
+            .name("small-caps")
             .description("Uses a small font.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> prefixRandom = sgPrefix.add(new BoolSetting.Builder()
-            .name("prefix-random")
+            .name("random-number")
             .description("Example: <msg> (538)")
             .defaultValue(false)
             .build()
     );
 
     // Suffix
-
-    private final SettingGroup sgSuffix = settings.createGroup("Suffix");
 
     private final Setting<Boolean> suffixEnabled = sgSuffix.add(new BoolSetting.Builder()
             .name("suffix-enabled")
@@ -183,28 +178,28 @@ public class BetterChat extends Module {
 
 
     private final Setting<String> suffixText = sgSuffix.add(new StringSetting.Builder()
-            .name("suffix-text")
+            .name("text")
             .description("The text to add as your suffix.")
             .defaultValue(" | Meteor on Crack!")
             .build()
     );
 
     private final Setting<Boolean> suffixSmallCaps = sgSuffix.add(new BoolSetting.Builder()
-            .name("suffix-small-caps")
+            .name("small-caps")
             .description("Uses a small font.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> suffixRandom = sgSuffix.add(new BoolSetting.Builder()
-            .name("suffix-random")
+            .name("random")
             .description("Example: <msg> (538)")
             .defaultValue(false)
             .build()
     );
 
     // Friend Color
-    /*private final SettingGroup sgFriendColor = settings.createGroup("Friend Color");
+    /*
 
     private final Setting<Boolean> friendColorEnabled = sgFriendColor.add(new BoolSetting.Builder()
             .name("friend-color-enabled")

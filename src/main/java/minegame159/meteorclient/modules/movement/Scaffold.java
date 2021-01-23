@@ -27,23 +27,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Scaffold extends Module {
-    private final SettingGroup sg = settings.getDefaultGroup();
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<Boolean> safeWalk = sg.add(new BoolSetting.Builder()
+    private final Setting<Boolean> safeWalk = sgGeneral.add(new BoolSetting.Builder()
             .name("safe-walk")
             .description("Whether or not to toggle Safe Walk when using Scaffold.")
             .defaultValue(true)
             .build()
     );
 
-    private final Setting<Boolean> fastTower = sg.add(new BoolSetting.Builder()
+    private final Setting<Boolean> fastTower = sgGeneral.add(new BoolSetting.Builder()
             .name("fast-tower")
             .description("Whether or not to scaffold upwards faster.")
             .defaultValue(false)
             .build()
     );
 
-    private final Setting<Integer> radius = sg.add(new IntSetting.Builder()
+    private final Setting<Integer> radius = sgGeneral.add(new IntSetting.Builder()
             .name("radius")
             .description("The radius of your scaffold.")
             .defaultValue(1)
@@ -53,28 +53,28 @@ public class Scaffold extends Module {
             .build()
     );
 
-    private final Setting<List<Block>> blackList = sg.add(new BlockListSetting.Builder()
+    private final Setting<List<Block>> blackList = sgGeneral.add(new BlockListSetting.Builder()
             .name("blacklist")
             .description("Blacklists certain blocks from being used to scaffold.")
             .defaultValue(new ArrayList<>())
             .build()
     );
 
-    private final Setting<Boolean> selfToggle = sg.add(new BoolSetting.Builder()
+    private final Setting<Boolean> selfToggle = sgGeneral.add(new BoolSetting.Builder()
             .name("self-toggle")
             .description("Toggles Scaffold when you run out of blocks.")
             .defaultValue(true)
             .build()
     );
 
-    private final Setting<Boolean> renderSwing = sg.add(new BoolSetting.Builder()
-            .name("render-swing")
+    private final Setting<Boolean> renderSwing = sgGeneral.add(new BoolSetting.Builder()
+            .name("swing")
             .description("Renders your client-side swing.")
             .defaultValue(true)
             .build()
     );
 
-    private final Setting<Boolean> rotate = sg.add(new BoolSetting.Builder()
+    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
             .name("rotate")
             .description("Rotates towards the blocks being placed.")
             .defaultValue(true)

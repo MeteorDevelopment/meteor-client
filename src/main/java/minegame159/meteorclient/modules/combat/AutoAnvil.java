@@ -34,32 +34,9 @@ import net.minecraft.util.math.Direction;
 
 public class AutoAnvil extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgPlace = settings.createGroup("Place");
 
-    private final Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()
-            .name("range")
-            .description("How far away the target can be to be affected.")
-            .defaultValue(4)
-            .min(0)
-            .build()
-    );
-
-    private final Setting<Integer> height = sgGeneral.add(new IntSetting.Builder()
-            .name("height")
-            .description("How high to place the anvils.")
-            .defaultValue(5)
-            .min(0)
-            .max(10)
-            .sliderMin(0)
-            .sliderMax(10)
-            .build()
-    );
-
-    private final Setting<Boolean> placeButton = sgGeneral.add(new BoolSetting.Builder()
-            .name("place-at-feet")
-            .description("Automatically places a button or pressure plate at the targets feet to break the anvils.")
-            .defaultValue(true)
-            .build()
-    );
+    // General
 
     private final Setting<Boolean> toggleOnBreak = sgGeneral.add(new BoolSetting.Builder()
             .name("toggle-on-break")
@@ -68,7 +45,24 @@ public class AutoAnvil extends Module {
             .build()
     );
 
-    private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
+    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
+            .name("rotate")
+            .description("Automatically rotates towards the position anvils/pressure plates/buttons are placed.")
+            .defaultValue(true)
+            .build()
+    );
+
+    // Place
+
+    private final Setting<Double> range = sgPlace.add(new DoubleSetting.Builder()
+            .name("range")
+            .description("How far away the target can be to be affected.")
+            .defaultValue(4)
+            .min(0)
+            .build()
+    );
+
+    private final Setting<Integer> delay = sgPlace.add(new IntSetting.Builder()
             .name("delay")
             .description("The delay in between anvil placements.")
             .min(0)
@@ -77,9 +71,20 @@ public class AutoAnvil extends Module {
             .build()
     );
 
-    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
-            .name("rotate")
-            .description("Automatically rotates towards the position anvils/pressure plates/buttons are placed.")
+    private final Setting<Integer> height = sgPlace.add(new IntSetting.Builder()
+            .name("height")
+            .description("The height at which to place the anvils.")
+            .defaultValue(5)
+            .min(0)
+            .max(10)
+            .sliderMin(0)
+            .sliderMax(10)
+            .build()
+    );
+
+    private final Setting<Boolean> placeButton = sgPlace.add(new BoolSetting.Builder()
+            .name("place-at-feet")
+            .description("Automatically places a button or pressure plate at the targets feet to break the anvils.")
             .defaultValue(true)
             .build()
     );

@@ -40,7 +40,7 @@ public class AutoNametag extends Module {
 
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
             .name("rotate")
-            .description("Automatically faces the mob being nametagged.")
+            .description("Automatically faces towards the mob being nametagged.")
             .defaultValue(true)
             .build()
     );

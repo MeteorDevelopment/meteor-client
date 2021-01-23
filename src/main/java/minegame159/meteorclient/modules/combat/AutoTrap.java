@@ -63,15 +63,6 @@ public class AutoTrap extends Module {
             .build()
     );
 
-    private final Setting<Integer> delaySetting = sgGeneral.add(new IntSetting.Builder()
-            .name("place-delay")
-            .description("How many ticks between block placements.")
-            .defaultValue(1)
-            .sliderMin(0)
-            .sliderMax(10)
-            .build()
-    );
-
     private final Setting<Integer> range = sgGeneral.add(new IntSetting.Builder()
             .name("range")
             .description("The radius players can be in to be targeted.")
@@ -81,16 +72,25 @@ public class AutoTrap extends Module {
             .build()
     );
 
-    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
-            .name("rotate")
-            .description("Sends rotation packets to the server when placing.")
-            .defaultValue(true)
+    private final Setting<Integer> delaySetting = sgGeneral.add(new IntSetting.Builder()
+            .name("place-delay")
+            .description("How many ticks between block placements.")
+            .defaultValue(1)
+            .sliderMin(0)
+            .sliderMax(10)
             .build()
     );
 
     private final Setting<Boolean> turnOff = sgGeneral.add(new BoolSetting.Builder()
             .name("turn-off")
             .description("Turns off after placing.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
+            .name("rotate")
+            .description("Sends rotation packets to the server when placing.")
             .defaultValue(true)
             .build()
     );
