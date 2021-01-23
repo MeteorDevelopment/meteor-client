@@ -1,11 +1,12 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.mixin;
 
-//Created by squidoodly 21/05/2020
+//Created by squidoodly 21/05/2020 :bruh:
+// Did squidoodly put his name on everything???
 
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.misc.BypassDeathScreen;
