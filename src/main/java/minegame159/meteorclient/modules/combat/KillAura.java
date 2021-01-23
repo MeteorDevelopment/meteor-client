@@ -187,10 +187,10 @@ public class KillAura extends Module {
 
     private int hitDelayTimer;
     private int randomDelayTimer;
-    private LivingEntity target;
+    private Entity target;
     private boolean wasPathing;
 
-    private final List<LivingEntity> entityList = new ArrayList<>();
+    private final List<Entity> entityList = new ArrayList<>();
 
     public KillAura() {
         super(Category.Combat, "kill-aura", "Attacks specified entities around you.");
@@ -215,7 +215,7 @@ public class KillAura extends Module {
         attack(target);
     });
 
-    public void packetRotate(LivingEntity entity) {
+    public void packetRotate(Entity entity) {
         switch (rotationDirection.get()) {
             case Eyes:  RotationUtils.packetRotate(entity, Target.Head); break;
             case Chest: RotationUtils.packetRotate(entity); break;
@@ -223,16 +223,20 @@ public class KillAura extends Module {
         }
     }
 
-    private void attack(LivingEntity entity) {
+    private void attack(Entity entity) {
         if (entity == null) return;
 
-        if (smartDelay.get()) if (mc.player.getAttackCooldownProgress(0.5f) < 1) return;
-
-        else {
-            if (hitDelayTimer >= 0) {
-                hitDelayTimer--;
-                return;
-            } else hitDelayTimer = hitDelay.get();
+        // Entities without health can be hit instantly
+        if (entity instanceof LivingEntity) {
+            if (smartDelay.get()) {
+                if (mc.player.getAttackCooldownProgress(0.5f) < 1) return;
+            }
+            else {
+                if (hitDelayTimer >= 0) {
+                    hitDelayTimer--;
+                    return;
+                } else hitDelayTimer = hitDelay.get();
+            }
         }
 
         if (randomDelayEnabled.get()) {
@@ -256,12 +260,9 @@ public class KillAura extends Module {
         if (mc.player.isDead() || !mc.player.isAlive()) return;
         if (!itemInHand()) return;
 
-        for (Entity e : mc.world.getEntities()) {
-            if (!(e instanceof LivingEntity)) continue;
-            LivingEntity entity = (LivingEntity) e;
-
+        for (Entity entity : mc.world.getEntities()) {
             if (entity == mc.player || entity == mc.cameraEntity) continue;
-            if (entity.isDead() || !entity.isAlive()) continue;
+            if ((entity instanceof LivingEntity && ((LivingEntity) entity).isDead()) || !entity.isAlive()) continue;
             if (entity.distanceTo(mc.player) > range.get()) continue;
             if (!entities.get().getBoolean(entity.getType())) continue;
             if (!nametagged.get() && entity.hasCustomName()) continue;
@@ -272,7 +273,7 @@ public class KillAura extends Module {
                 if (!friends.get() && !FriendManager.INSTANCE.attack((PlayerEntity) entity)) continue;
             }
 
-            if (entity instanceof AnimalEntity) if (!babies.get() && entity.isBaby()) continue;
+            if (entity instanceof AnimalEntity && !babies.get() && ((AnimalEntity) entity).isBaby()) continue;
 
             entityList.add(entity);
         }
@@ -303,14 +304,25 @@ public class KillAura extends Module {
         }
     }
 
-    private int sort(LivingEntity e1, LivingEntity e2) {
+    private int sort(Entity e1, Entity e2) {
         switch (priority.get()) {
             case LowestDistance:  return Double.compare(e1.distanceTo(mc.player), e2.distanceTo(mc.player));
             case HighestDistance: return invertSort(Double.compare(e1.distanceTo(mc.player), e2.distanceTo(mc.player)));
-            case LowestHealth:    return Float.compare(e1.getHealth(), e2.getHealth());
-            case HighestHealth:   return invertSort(Float.compare(e1.getHealth(), e2.getHealth()));
+            case LowestHealth:    return sortHealth(e1, e2);
+            case HighestHealth:   return invertSort(sortHealth(e1, e2));
             default:              return 0;
         }
+    }
+
+    private int sortHealth(Entity e1, Entity e2) {
+        boolean e1l = e1 instanceof LivingEntity;
+        boolean e2l = e2 instanceof LivingEntity;
+
+        if (!e1l && !e2l) return 0;
+        else if (e1l && !e2l) return 1;
+        else if (!e1l && e2l) return -1;
+
+        return Float.compare(((LivingEntity) e1).getHealth(), ((LivingEntity) e2).getHealth());
     }
 
     private int invertSort(int sort) {
