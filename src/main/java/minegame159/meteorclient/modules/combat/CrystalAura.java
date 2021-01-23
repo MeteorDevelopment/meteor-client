@@ -733,7 +733,7 @@ public class CrystalAura extends Module {
         }
         float yaw = mc.player.yaw;
         float pitch = mc.player.pitch;
-        if (rotationMode.get() == RotationMode.FaceCrystal || rotationMode.get() == RotationMode.Return) RotationUtils.packetRotate(block.add(0.5, 1.5, 0.5));
+        if (rotationMode.get() == RotationMode.FaceCrystal || rotationMode.get() == RotationMode.Return) RotationUtils.packetRotate(block.add(0.5, 1, 0.5));
         mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(mc.player.getPos(), Direction.UP, new BlockPos(block), false));
         if (!noSwing.get()) mc.player.swingHand(hand);
         if (rotationMode.get() == RotationMode.Return)RotationUtils.packetRotate(yaw, pitch);
