@@ -26,7 +26,7 @@ import java.util.List;
 
 public class VoidESP extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgRender = settings.createGroup("Colors");
+    private final SettingGroup sgRender = settings.createGroup("Render");
 
     // General
 

@@ -33,8 +33,8 @@ public class AutoShearer extends Module {
             .build()
     );
 
-    private final Setting<Boolean> preserveBrokenShears = sgGeneral.add(new BoolSetting.Builder()
-            .name("preserve-broken-shears")
+    private final Setting<Boolean> antiBreak = sgGeneral.add(new BoolSetting.Builder()
+            .name("anti-break")
             .description("Prevents shears from being broken.")
             .defaultValue(false)
             .build()
@@ -42,7 +42,7 @@ public class AutoShearer extends Module {
 
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
             .name("rotate")
-            .description("Automatically faces the animal being sheared.")
+            .description("Automatically faces towards the animal being sheared.")
             .defaultValue(true)
             .build()
     );
@@ -59,10 +59,10 @@ public class AutoShearer extends Module {
             boolean findNewShears = false;
             boolean offHand = false;
             if (mc.player.inventory.getMainHandStack().getItem() instanceof ShearsItem) {
-                if (preserveBrokenShears.get() && mc.player.inventory.getMainHandStack().getDamage() >= mc.player.inventory.getMainHandStack().getMaxDamage() - 1) findNewShears = true;
+                if (antiBreak.get() && mc.player.inventory.getMainHandStack().getDamage() >= mc.player.inventory.getMainHandStack().getMaxDamage() - 1) findNewShears = true;
             }
             else if (mc.player.inventory.offHand.get(0).getItem() instanceof ShearsItem) {
-                if (preserveBrokenShears.get() && mc.player.inventory.offHand.get(0).getDamage() >= mc.player.inventory.offHand.get(0).getMaxDamage() - 1) findNewShears = true;
+                if (antiBreak.get() && mc.player.inventory.offHand.get(0).getDamage() >= mc.player.inventory.offHand.get(0).getMaxDamage() - 1) findNewShears = true;
                 else offHand = true;
             }
             else {
@@ -71,7 +71,7 @@ public class AutoShearer extends Module {
 
             boolean foundShears = !findNewShears;
             if (findNewShears) {
-                int slot = InvUtils.findItemInHotbar(Items.SHEARS, itemStack -> (!preserveBrokenShears.get() || (preserveBrokenShears.get() && itemStack.getDamage() < itemStack.getMaxDamage() - 1)));
+                int slot = InvUtils.findItemInHotbar(Items.SHEARS, itemStack -> (!antiBreak.get() || (antiBreak.get() && itemStack.getDamage() < itemStack.getMaxDamage() - 1)));
 
                 if (slot != -1) {
                     mc.player.inventory.selectedSlot = slot;

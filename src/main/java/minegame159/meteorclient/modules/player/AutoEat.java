@@ -32,21 +32,21 @@ public class AutoEat extends Module {
 
     private final Setting<Boolean> egaps = sgGeneral.add(new BoolSetting.Builder()
             .name("egaps")
-            .description("Eat enchanted golden apples.")
+            .description("Eats enchanted golden apples.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> gaps = sgGeneral.add(new BoolSetting.Builder()
             .name("gaps")
-            .description("Eat golden apples.")
+            .description("Eats golden apples.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> chorus = sgGeneral.add(new BoolSetting.Builder()
             .name("chorus")
-            .description("Eat chorus fruit.")
+            .description("Eats chorus fruit.")
             .defaultValue(false)
             .build()
     );
@@ -68,14 +68,14 @@ public class AutoEat extends Module {
     // Hunger
 
     private final Setting<Boolean> autoHunger = sgHunger.add(new BoolSetting.Builder()
-            .name("auto-hunger")
+            .name("auto-eat")
             .description("Automatically eats whenever it can.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Integer> minHunger = sgHunger.add(new IntSetting.Builder()
-            .name("hunger")
+            .name("min-hunger")
             .description("The level of hunger you eat at.")
             .defaultValue(17)
             .min(1)

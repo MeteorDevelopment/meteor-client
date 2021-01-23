@@ -33,19 +33,19 @@ import net.minecraft.util.math.Vec3d;
 public class Freecam extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
-            .name("speed")
-            .description("Your speed in Freecam.")
-            .defaultValue(1.0)
-            .min(0.0)
-            .build()
-    );
-
     public enum AutoDisableEvent {
         None,
         OnDamage,
         OnDeath
     }
+
+    private final Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
+            .name("speed")
+            .description("Your speed while in Freecam.")
+            .defaultValue(1.0)
+            .min(0.0)
+            .build()
+    );
 
     private final Setting<AutoDisableEvent> autoDisableOnDamage = sgGeneral.add(new EnumSetting.Builder<AutoDisableEvent>()
             .name("auto-disable-on-damage")

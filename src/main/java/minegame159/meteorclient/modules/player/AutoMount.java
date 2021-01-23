@@ -29,15 +29,9 @@ public class AutoMount extends Module {
     public AutoMount(){super(Category.Player, "auto-mount", "Automatically mounts entities.");}
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgAnimals = settings.createGroup("Animals");
 
-    private final Setting<Boolean> donkeys  = sgGeneral.add(new BoolSetting.Builder().name("donkey").description("Donkey").defaultValue(false).build());
-    private final Setting<Boolean> llamas  = sgGeneral.add(new BoolSetting.Builder().name("llama").description("Llama").defaultValue(false).build());
-    private final Setting<Boolean> boats  = sgGeneral.add(new BoolSetting.Builder().name("boat").description("Boat").defaultValue(false).build());
-    private final Setting<Boolean> minecarts  = sgGeneral.add(new BoolSetting.Builder().name("minecart").description("Minecart").defaultValue(false).build());
-    private final Setting<Boolean> horses  = sgGeneral.add(new BoolSetting.Builder().name("horse").description("Horse").defaultValue(false).build());
-    private final Setting<Boolean> pigs  = sgGeneral.add(new BoolSetting.Builder().name("pig").description("Pig").defaultValue(false).build());
-    private final Setting<Boolean> mules  = sgGeneral.add(new BoolSetting.Builder().name("mule").description("Mule").defaultValue(false).build());
-    private final Setting<Boolean> skeletons  = sgGeneral.add(new BoolSetting.Builder().name("skeleton-horse").description("Skeleton Horse").defaultValue(false).build());
+    // General
 
     private final Setting<Boolean> checkSaddle = sgGeneral.add(new BoolSetting.Builder()
             .name("check-saddle")
@@ -50,6 +44,64 @@ public class AutoMount extends Module {
             .name("rotate")
             .description("Faces the entity you mount.")
             .defaultValue(true)
+            .build()
+    );
+
+    // Animals
+
+    private final Setting<Boolean> donkeys  = sgAnimals.add(new BoolSetting.Builder()
+            .name("donkey")
+            .description("Donkey")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> skeletonHorse = sgAnimals.add(new BoolSetting.Builder()
+            .name("skeleton-horse")
+            .description("Skeleton Horse")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> llamas  = sgAnimals.add(new BoolSetting.Builder()
+            .name("llama")
+            .description("Llama")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> boats  = sgAnimals.add(new BoolSetting.Builder()
+            .name("boat")
+            .description("Boat")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> minecarts  = sgAnimals.add(new BoolSetting.Builder()
+            .name("minecart")
+            .description("Minecart")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> horses  = sgGeneral.add(new BoolSetting.Builder()
+            .name("horse")
+            .description("Horse")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> pigs  = sgAnimals.add(new BoolSetting.Builder()
+            .name("pig")
+            .description("Pig")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> mules  = sgAnimals.add(new BoolSetting.Builder()
+            .name("mule")
+            .description("Mule")
+            .defaultValue(false)
             .build()
     );
 
@@ -81,7 +133,7 @@ public class AutoMount extends Module {
             } else if (mules.get() && entity instanceof MuleEntity && (!checkSaddle.get() || ((MuleEntity) entity).isSaddled())) {
                 if (rotate.get()) RotationUtils.packetRotate(entity);
                 mc.player.networkHandler.sendPacket(new PlayerInteractEntityC2SPacket(entity, Hand.MAIN_HAND, mc.player.isSneaking()));
-            } else if (skeletons.get() && entity instanceof SkeletonHorseEntity && (!checkSaddle.get() || ((SkeletonHorseEntity) entity).isSaddled())) {
+            } else if (skeletonHorse.get() && entity instanceof SkeletonHorseEntity && (!checkSaddle.get() || ((SkeletonHorseEntity) entity).isSaddled())) {
                 if (rotate.get()) RotationUtils.packetRotate(entity);
                 mc.player.networkHandler.sendPacket(new PlayerInteractEntityC2SPacket(entity, Hand.MAIN_HAND, mc.player.isSneaking()));
             }
