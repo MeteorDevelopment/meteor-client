@@ -10,6 +10,7 @@ import me.zero.alpine.listener.Listenable;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.combat.AutoTotem;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -105,6 +106,9 @@ public class InvUtils implements Listenable {
 
     public static void addSlots(List<Integer> slots, Class<? extends Module> klass){
         if (moveQueue.contains(new CustomPair(klass, slots)) || currentQueue.containsAll(slots)) return;
+        if (klass == AutoTotem.class) {
+            moveQueue.removeIf(pair -> pair.getRight().contains(45));
+        }
         if (!moveQueue.isEmpty() && canMove(klass)){
             moveQueue.addFirst(new CustomPair(klass, slots));
         } else {
