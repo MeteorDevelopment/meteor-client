@@ -92,6 +92,11 @@ public class InvUtils implements Listenable {
             moveQueue.clear();
             return;
         }
+        if (!mc.player.inventory.getCursorStack().isEmpty() && mc.currentScreen == null){
+            int slot = mc.player.inventory.getEmptySlot();
+            if (slot == -1) findItemWithCount(mc.player.inventory.getCursorStack().getItem());
+            if (slot != -1) clickSlot(invIndexToSlotId(slot), 0, SlotActionType.PICKUP);
+        }
         if (!moveQueue.isEmpty()) {
             if (currentQueue.isEmpty()) {
                 CustomPair pair = moveQueue.remove();
