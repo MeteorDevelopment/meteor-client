@@ -89,7 +89,7 @@ public class AutoTotem extends Module {
     }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private final Listener<TickEvent.Pre> onTick = new Listener<>(event -> {
         assert mc.player != null;
         if (mc.currentScreen instanceof InventoryScreen && !inventorySwitch.get()) return;
         if (mc.currentScreen != null && !(mc.currentScreen instanceof InventoryScreen)) return;
@@ -102,6 +102,7 @@ public class AutoTotem extends Module {
             }
 
             ModuleManager.INSTANCE.get(OffhandExtra.class).setTotems(true);
+            locked = false;
         } else {
             ModuleManager.INSTANCE.get(OffhandExtra.class).setTotems(false);
 
@@ -138,6 +139,7 @@ public class AutoTotem extends Module {
         assert mc.world != null;
         assert mc.player != null;
         double damageTaken = 0;
+        if (mc.player.abilities.creativeMode) return damageTaken;
         for(Entity entity : mc.world.getEntities()){
             if(entity instanceof EndCrystalEntity && damageTaken < DamageCalcUtils.crystalDamage(mc.player, entity.getPos())){
                 damageTaken = DamageCalcUtils.crystalDamage(mc.player, entity.getPos());
