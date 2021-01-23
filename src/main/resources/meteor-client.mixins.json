@@ -99,7 +99,8 @@
     "BoxMixin",
     "ItemEntityRendererMixin",
     "LookBehaviorMixin",
-    "ClientChunkProvideBaritoneSodiumComapMixin"
+    "ClientChunkProvideBaritoneSodiumComapMixin",
+    "ProjectileEntityAccessor"
   ],
   "injectors": {
     "defaultRequire": 1
