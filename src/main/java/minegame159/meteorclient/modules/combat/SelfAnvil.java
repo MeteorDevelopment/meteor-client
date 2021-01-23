@@ -26,7 +26,7 @@ public class SelfAnvil extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
-            .name("Rotate")
+            .name("rotate")
             .description("Forces you to rotate upwards when placing the anvil.")
             .defaultValue(true)
             .build()

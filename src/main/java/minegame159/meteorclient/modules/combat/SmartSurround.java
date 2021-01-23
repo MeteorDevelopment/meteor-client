@@ -45,7 +45,7 @@ public class SmartSurround extends Module {
     );
 
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
-            .name("Rotate")
+            .name("rotate")
             .description("Forces you to rotate towards the block being placed.")
             .defaultValue(true)
             .build()

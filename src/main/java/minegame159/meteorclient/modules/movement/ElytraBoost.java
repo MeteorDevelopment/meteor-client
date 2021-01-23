@@ -28,14 +28,14 @@ public class ElytraBoost extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Boolean> dontConsumeFirework = sgGeneral.add(new BoolSetting.Builder()
-            .name("dont-consume-firework")
+            .name("anti-consume")
             .description("Doesn't consume the firework when using it.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Integer> fireworkLevel = sgGeneral.add(new IntSetting.Builder()
-            .name("firework-level")
+            .name("firework-duration")
             .description("The duration.")
             .defaultValue(0)
             .min(0)
@@ -52,7 +52,7 @@ public class ElytraBoost extends Module {
 
     private final Setting<Integer> keybind = sgGeneral.add(new KeybindSetting.Builder()
             .name("keybind")
-            .description("Keybind to boost.")
+            .description("The keybind to boost.")
             .action(this::boost)
             .build()
     );
