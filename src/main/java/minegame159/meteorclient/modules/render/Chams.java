@@ -23,6 +23,8 @@ import net.minecraft.entity.LivingEntity;
 public class Chams extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgColors = settings.createGroup("Colors");
+
+    // General
     
     private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
             .name("entities")
@@ -46,6 +48,7 @@ public class Chams extends Module {
     );
 
     // Colors
+
     public final Setting<Boolean> useNameColor = sgColors.add(new BoolSetting.Builder()
             .name("use-name-color")
             .description("Uses players displayname color for the chams color (good for minigames).")
@@ -111,6 +114,7 @@ public class Chams extends Module {
     }
 
     // TODO: 30/12/2020 Fix crystal chams
+    // also fix cape rendering in chams
 
 //    public boolean renderChamsCrystal(ModelPart modelPart, MatrixStack matrices, VertexConsumer vertices, int light, int overlay) {
 //        if (!isActive() || !entities.get().contains(EntityType.END_CRYSTAL) || !colored.get()) return false;

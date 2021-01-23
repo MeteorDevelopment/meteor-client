@@ -19,8 +19,8 @@ public class FastLadder extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     
     private final Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
-            .name("speed")
-            .description("Speed.")
+            .name("climb-speed")
+            .description("Your climb speed.")
             .defaultValue(0.2872)
             .min(0.0)
             .build()

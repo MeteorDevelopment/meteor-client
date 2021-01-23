@@ -29,6 +29,7 @@ public class AutoEat extends Module {
     private final SettingGroup sgHunger = settings.createGroup("Hunger");
 
     // General
+
     private final Setting<Boolean> egaps = sgGeneral.add(new BoolSetting.Builder()
             .name("egaps")
             .description("Eat enchanted golden apples.")
@@ -65,6 +66,7 @@ public class AutoEat extends Module {
     );
 
     // Hunger
+
     private final Setting<Boolean> autoHunger = sgHunger.add(new BoolSetting.Builder()
             .name("auto-hunger")
             .description("Automatically eats whenever it can.")
