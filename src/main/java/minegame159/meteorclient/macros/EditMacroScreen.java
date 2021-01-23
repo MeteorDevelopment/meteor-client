@@ -16,16 +16,16 @@ import minegame159.meteorclient.utils.Utils;
 
 public class EditMacroScreen extends WindowScreen {
     private Macro macro;
-    private final boolean newMacro;
+    private final boolean isNewMacro;
 
     private WLabel keyLabel;
     private boolean waitingForKey;
 
     public EditMacroScreen(Macro m) {
         super(m == null ? "Create Macro" : "Edit Macro", true);
-        this.macro = m == null ? new Macro() : m;
+        isNewMacro = m == null;
+        this.macro = isNewMacro ? new Macro() : m;
 
-        newMacro = m == null;
         initWidgets(m);
     }
 
@@ -39,18 +39,9 @@ public class EditMacroScreen extends WindowScreen {
 
         // Messages
         add(new WLabel("Messages:")).padTop(4).top();
-        WTable messages = add(new WTable()).getWidget();
-        fillMessagesTable(messages);
+        WTable lines = add(new WTable()).getWidget();
+        fillMessagesTable(lines);
         row();
-
-        // New message
-        WTextBox message = messages.add(new WTextBox("", 400)).fillX().expandX().getWidget();
-        WPlus add = messages.add(new WPlus()).getWidget();
-        add.action = () -> {
-            macro.addMessage(message.getText().trim());
-            clear();
-            initWidgets(macro);
-        };
 
         // Key
         keyLabel = add(new WLabel(getKeyLabelText())).getWidget();
@@ -61,9 +52,9 @@ public class EditMacroScreen extends WindowScreen {
         row();
 
         // Apply
-        WButton apply = add(new WButton(newMacro ? "Add" : "Apply")).fillX().expandX().getWidget();
+        WButton apply = add(new WButton(isNewMacro ? "Add" : "Apply")).fillX().expandX().getWidget();
         apply.action = () -> {
-            if (newMacro) {
+            if (isNewMacro) {
                 if (macro.name != null && !macro.name.isEmpty() && macro.messages.size() > 0 && macro.key != -1) {
                     MacroManager.INSTANCE.add(macro);
                     onClose();
@@ -76,21 +67,33 @@ public class EditMacroScreen extends WindowScreen {
         };
     }
 
-    private void fillMessagesTable(WTable t) {
+    private void fillMessagesTable(WTable lines) {
+        if (macro.messages.isEmpty())
+            macro.addMessage("");
+
         for (int i = 0; i < macro.messages.size(); i++) {
             int ii = i;
 
-            WTextBox command = t.add(new WTextBox(macro.messages.get(i), 400)).getWidget();
-            command.action = () -> macro.messages.set(ii, command.getText().trim());
+            WTextBox line = lines.add(new WTextBox(macro.messages.get(i), 400)).getWidget();
+            line.action = () -> macro.messages.set(ii, line.getText().trim());
 
-            WMinus remove = t.add(new WMinus()).getWidget();
-            remove.action = () -> {
-                macro.removeMessage(ii);
-                t.clear();
-                fillMessagesTable(t);
-            };
+            if (i != macro.messages.size() - 1) {
+                WMinus remove = lines.add(new WMinus()).getWidget();
+                remove.action = () -> {
+                    macro.removeMessage(ii);
+                    clear();
+                    initWidgets(macro);
+                };
+            } else {
+                WPlus add = lines.add(new WPlus()).getWidget();
+                add.action = () -> {
+                    macro.addMessage("");
+                    clear();
+                    initWidgets(macro);
+                };
+            }
 
-            t.row();
+            lines.row();
         }
     }
 
@@ -99,6 +102,7 @@ public class EditMacroScreen extends WindowScreen {
         return "Key: " + (macro.key == -1 ? "none" : Utils.getKeyName(macro.key));
     }
 
+    @SuppressWarnings("unused")
     @EventHandler
     private final Listener<KeyEvent> onKey = new Listener<>(event -> {
         if (waitingForKey) {
