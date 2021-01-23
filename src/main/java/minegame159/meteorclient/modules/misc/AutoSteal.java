@@ -10,6 +10,7 @@ import minegame159.meteorclient.utils.misc.ThreadUtils;
 import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.screen.GenericContainerScreenHandler;
+import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.SlotActionType;
 
 import java.util.concurrent.ThreadLocalRandom;
@@ -84,7 +85,11 @@ public class AutoSteal extends Module {
         return minimumDelay.get() + (randomDelay.get() > 0 ? ThreadLocalRandom.current().nextInt(0, randomDelay.get()) : 0);
     }
 
-    private void moveSlots(GenericContainerScreenHandler handler, int start, int end) {
+    private int getRows(ScreenHandler handler) {
+        return (handler instanceof GenericContainerScreenHandler ? ((GenericContainerScreenHandler) handler).getRows() : 3);
+    }
+
+    private void moveSlots(ScreenHandler handler, int start, int end) {
         for (int i = start; i < end; i++) {
             if (!handler.getSlot(i).hasStack())
                 continue;
@@ -102,39 +107,39 @@ public class AutoSteal extends Module {
     }
 
     /**
-     * Thread-blocking operation to steal from containers. You REALLY should use {@link #stealAsync(GenericContainerScreenHandler)}
+     * Thread-blocking operation to steal from containers. You REALLY should use {@link #stealAsync(ScreenHandler)}
      *
      * @param handler Passed in from {@link minegame159.meteorclient.mixin.GenericContainerScreenMixin}
      */
-    private void steal(GenericContainerScreenHandler handler) {
-        moveSlots(handler, 0, handler.getRows() * 9);
+    private void steal(ScreenHandler handler) {
+        moveSlots(handler, 0, getRows(handler) * 9);
     }
 
     /**
-     * Thread-blocking operation to dump to containers. You REALLY should use {@link #dumpAsync(GenericContainerScreenHandler)}
+     * Thread-blocking operation to dump to containers. You REALLY should use {@link #dumpAsync(ScreenHandler)}
      *
      * @param handler Passed in from {@link minegame159.meteorclient.mixin.GenericContainerScreenMixin}
      */
-    private void dump(GenericContainerScreenHandler handler) {
-        int playerInvOffset = handler.getRows() * 9;
+    private void dump(ScreenHandler handler) {
+        int playerInvOffset = getRows(handler) * 9;
         moveSlots(handler, playerInvOffset, playerInvOffset + 4 * 9);
     }
 
     /**
-     * Runs {@link #steal(GenericContainerScreenHandler)} in a separate thread
+     * Runs {@link #steal(ScreenHandler)} in a separate thread
      *
      * @param handler Passed in from {@link minegame159.meteorclient.mixin.GenericContainerScreenMixin}
      */
-    public void stealAsync(GenericContainerScreenHandler handler) {
+    public void stealAsync(ScreenHandler handler) {
         ThreadUtils.runInThread(() -> steal(handler));
     }
 
     /**
-     * Runs {@link #dump(GenericContainerScreenHandler)} in a separate thread
+     * Runs {@link #dump(ScreenHandler)} in a separate thread
      *
      * @param handler Passed in from {@link minegame159.meteorclient.mixin.GenericContainerScreenMixin}
      */
-    public void dumpAsync(GenericContainerScreenHandler handler) {
+    public void dumpAsync(ScreenHandler handler) {
         ThreadUtils.runInThread(() -> dump(handler));
     }
 
