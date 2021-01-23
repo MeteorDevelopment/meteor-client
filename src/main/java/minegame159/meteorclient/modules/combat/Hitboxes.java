@@ -27,7 +27,7 @@ public class Hitboxes extends Module {
     );
 
     private final Setting<Double> value = sgGeneral.add(new DoubleSetting.Builder()
-            .name("value")
+            .name("expand")
             .description("How much to expand the hitbox of the entity.")
             .defaultValue(0.5)
             .build()

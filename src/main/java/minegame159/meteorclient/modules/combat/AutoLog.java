@@ -34,6 +34,16 @@ import net.minecraft.util.math.Vec3d;
 
 public class AutoLog extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+
+    private final Setting<Integer> range = sgGeneral.add(new IntSetting.Builder()
+            .name("range")
+            .description("How close a crystal has to be to you before you disconnect.")
+            .defaultValue(4)
+            .min(1)
+            .max(10)
+            .sliderMax(5)
+            .build()
+    );
     
     private final Setting<Integer> health = sgGeneral.add(new IntSetting.Builder()
             .name("health")
@@ -60,26 +70,16 @@ public class AutoLog extends Module {
     );
 
     private final Setting<Boolean> instantDeath = sgGeneral.add(new BoolSetting.Builder()
-            .name("32k")
+            .name("32K")
             .description("Disconnects when a player near you can instantly kill you.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> crystalLog = sgGeneral.add(new BoolSetting.Builder()
-            .name("crystal-log")
+            .name("crystal-nearby")
             .description("Disconnects when a crystal appears near you.")
             .defaultValue(false)
-            .build()
-    );
-
-    private final Setting<Integer> range = sgGeneral.add(new IntSetting.Builder()
-            .name("range")
-            .description("How close a crystal has to be to you before you disconnect.")
-            .defaultValue(4)
-            .min(1)
-            .max(10)
-            .sliderMax(5)
             .build()
     );
 

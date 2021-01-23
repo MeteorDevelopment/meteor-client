@@ -21,8 +21,8 @@ import net.minecraft.util.Hand;
 public class Trigger extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     
-    private final Setting<Boolean> onlyWhenHoldingAttack = sgGeneral.add(new BoolSetting.Builder()
-            .name("only-when-holding-attack")
+    private final Setting<Boolean> whenHoldingLeftClick = sgGeneral.add(new BoolSetting.Builder()
+            .name("when-holding-left-click")
             .description("Attacks only when you are holding left click.")
             .defaultValue(false)
             .build()
@@ -44,7 +44,7 @@ public class Trigger extends Module {
 
         target = mc.targetedEntity;
 
-        if (onlyWhenHoldingAttack.get()) {
+        if (whenHoldingLeftClick.get()) {
             if (mc.options.keyAttack.isPressed()) attack(target);
         } else {
             attack(target);

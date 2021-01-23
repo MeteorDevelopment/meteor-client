@@ -5,7 +5,8 @@
 
 package minegame159.meteorclient.modules.combat;
 
-//Created by squidoodly 16/07/2020 (Yay! Empty class!!!)
+//Created by squidoodly 16/07/2020
+// Not empty class anymore :bruh: - notseanbased
 
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;

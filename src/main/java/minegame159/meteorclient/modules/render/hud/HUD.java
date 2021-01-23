@@ -81,7 +81,7 @@ public class HUD extends Module {
     private final Setting<ActiveModulesHud.Sort> activeModulesSort = sgActiveModules.add(new EnumSetting.Builder<ActiveModulesHud.Sort>()
             .name("active-modules-sort")
             .description("How to sort active modules.")
-            .defaultValue(ActiveModulesHud.Sort.ByBiggest)
+            .defaultValue(ActiveModulesHud.Sort.Biggest)
 //            .onChanged(sort -> activeModulesHud.recalculate())
             .build()
     );
@@ -328,7 +328,7 @@ public class HUD extends Module {
         topLeft.add(new BreakingBlockHud(this));
         topLeft.add(new LookingAtHud(this));
         topLeft.add(moduleInfoHud);
-        topLeft.add(new InfiniteMineHud(this));
+        topLeft.add(new InfiniteMinerHud(this));
 
         // Top Center
         HudModuleLayer topCenter = new HudModuleLayer(RENDERER, modules, AlignmentX.Center, AlignmentY.Top, 0, 2);

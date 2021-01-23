@@ -71,7 +71,7 @@ public class CrystalAura extends Module {
     private final SettingGroup sgMisc = settings.createGroup("Misc");
     private final SettingGroup sgRender = settings.createGroup("Render");
 
-    //Placement
+    // Place
 
     private final Setting<Integer> placeDelay = sgPlace.add(new IntSetting.Builder()
             .name("place-delay")
@@ -180,19 +180,19 @@ public class CrystalAura extends Module {
             .build()
     );
 
+    private final Setting<Boolean> support = sgPlace.add(new BoolSetting.Builder()
+            .name("support")
+            .description("Places a block in the air and crystals on it. Helps with killing players that are flying.")
+            .defaultValue(false)
+            .build()
+    );
+
     private final Setting<Integer> supportDelay = sgPlace.add(new IntSetting.Builder()
             .name("support-delay")
             .description("The delay between support blocks being placed.")
             .defaultValue(5)
             .min(0)
             .sliderMax(10)
-            .build()
-    );
-
-    private final Setting<Boolean> support = sgPlace.add(new BoolSetting.Builder()
-            .name("support")
-            .description("Places a block in the air and crystals on it. Helps with killing players that are flying.")
-            .defaultValue(false)
             .build()
     );
 
@@ -203,7 +203,7 @@ public class CrystalAura extends Module {
             .build()
     );
 
-    //Breaking
+    // Break
 
     private final Setting<Integer> breakDelay = sgBreak.add(new IntSetting.Builder()
             .name("break-delay")
@@ -230,7 +230,7 @@ public class CrystalAura extends Module {
             .build()
     );
 
-    // Targeting
+    // Target
 
     private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgTarget.add(new EntityTypeListSetting.Builder()
             .name("entities")
@@ -272,7 +272,7 @@ public class CrystalAura extends Module {
             .build()
     );
 
-    //Misc
+    // Misc
 
     private final Setting<Double> maxDamage = sgMisc.add(new DoubleSetting.Builder()
             .name("max-damage")
