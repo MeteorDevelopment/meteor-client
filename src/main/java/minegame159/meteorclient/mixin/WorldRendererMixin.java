@@ -13,7 +13,6 @@ import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.Framebuffer;
-import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.*;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.util.math.MatrixStack;
@@ -25,6 +24,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
@@ -68,9 +68,9 @@ public abstract class WorldRendererMixin {
         if (ModuleManager.INSTANCE.isActive(BlockSelection.class)) info.cancel();
     }
 
-    @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;isSpectator()Z"))
-    private boolean renderIsSpectatorProxy(ClientPlayerEntity player) {
-        return ModuleManager.INSTANCE.isActive(Freecam.class) || player.isSpectator();
+    @ModifyArg(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/WorldRenderer;setupTerrain(Lnet/minecraft/client/render/Camera;Lnet/minecraft/client/render/Frustum;ZIZ)V"), index = 4)
+    private boolean renderSetupTerrainModifyArg(boolean spectator) {
+        return ModuleManager.INSTANCE.isActive(Freecam.class) || spectator;
     }
 
     // Outlines
