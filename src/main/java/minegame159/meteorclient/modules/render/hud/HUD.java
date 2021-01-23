@@ -96,7 +96,7 @@ public class HUD extends Module {
     private final Setting<ActiveModulesHud.ColorMode> activeModulesColorMode = sgActiveModules.add(new EnumSetting.Builder<ActiveModulesHud.ColorMode>()
             .name("active-modules-color-mode")
             .description("What color to use for active modules.")
-            .defaultValue(ActiveModulesHud.ColorMode.Random)
+            .defaultValue(ActiveModulesHud.ColorMode.Rainbow)
             .build()
     );
 
