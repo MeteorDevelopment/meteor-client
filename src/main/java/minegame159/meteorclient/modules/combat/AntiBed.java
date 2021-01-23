@@ -34,7 +34,7 @@ public class AntiBed extends Module {
 
     private final Setting<Boolean> selfToggle = sgGeneral.add(new BoolSetting.Builder()
             .name("self-toggle")
-            .description("Toggles AntiBed when finished.")
+            .description("Toggles AntiBed off when finished.")
             .defaultValue(false)
             .build()
     );

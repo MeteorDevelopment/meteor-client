@@ -6,6 +6,7 @@
 package minegame159.meteorclient.modules.combat;
 
 //Created by squidoodly 03/08/2020
+// Official Squidoodly Watermark!
 
 import com.google.common.collect.Streams;
 import me.zero.alpine.listener.EventHandler;

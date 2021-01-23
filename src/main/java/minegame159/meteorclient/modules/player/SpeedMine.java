@@ -28,6 +28,7 @@ public class SpeedMine extends Module {
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+
     public final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("mode")
             .defaultValue(Mode.Normal)

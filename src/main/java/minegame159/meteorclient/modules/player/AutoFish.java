@@ -20,7 +20,7 @@ import net.minecraft.item.FishingRodItem;
 
 public class AutoFish extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgSplashRangeDetection = settings.createGroup("Splash Sound Range Detection");
+    private final SettingGroup sgSplashRangeDetection = settings.createGroup("Splash Range Detection");
 
     // General
     private final Setting<Boolean> autoCast = sgGeneral.add(new BoolSetting.Builder()

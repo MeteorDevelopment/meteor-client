@@ -72,7 +72,7 @@ public class NBT extends Command {
                         ))
                         .withHoverEvent(new HoverEvent(
                                 HoverEvent.Action.SHOW_TEXT,
-                                new LiteralText("Copy NBT data to your clipboard.") // TODO: grammar
+                                new LiteralText("Copy the NBT data to your clipboard.")
                         )));
 
                 BaseText text = new LiteralText("");
@@ -90,7 +90,7 @@ public class NBT extends Command {
             } else {
                 CompoundTag tag = stack.getTag();
                 if (tag == null)
-                    ChatUtils.prefixError("NBT","No NBT data in this item.");  // TODO: grammar
+                    ChatUtils.prefixError("NBT","No NBT data on this item.");
                 else {
                     mc.keyboard.setClipboard(tag.toString());
                     BaseText nbt = new LiteralText("NBT");
@@ -103,7 +103,7 @@ public class NBT extends Command {
 
                     BaseText text = new LiteralText("");
                     text.append(nbt);
-                    text.append(new LiteralText(" data copied!"));  // TODO: grammar (will write "NBT data copied!")
+                    text.append(new LiteralText(" data copied!"));
 
                     ChatUtils.info("NBT", text);
                 }

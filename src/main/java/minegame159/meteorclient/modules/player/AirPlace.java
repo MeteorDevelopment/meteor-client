@@ -31,6 +31,8 @@ public class AirPlace extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgRender = settings.createGroup("Render");
 
+    // General
+
     private final Setting<Place> placeWhen = sgGeneral.add(new EnumSetting.Builder<Place>()
             .name("place-when")
             .description("Decides when it should place.")

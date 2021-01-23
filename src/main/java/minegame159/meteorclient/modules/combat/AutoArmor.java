@@ -53,18 +53,14 @@ public class AutoArmor extends Module {
     public AutoArmor(){super(Category.Combat, "auto-armor", "Automatically manages and equips your armor for you.");}
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgDelay = settings.createGroup("Delay");
+
+    // General
 
     private final Setting<Prot> mode = sgGeneral.add(new EnumSetting.Builder<Prot>()
             .name("prioritize")
             .description("Which type of protection to prioritize.")
             .defaultValue(Prot.Protection)
-            .build()
-    );
-
-    private final Setting<Boolean> pauseInInventory = sgGeneral.add(new BoolSetting.Builder()
-            .name("pause-in-inventory")
-            .description("Stops managing armor when you are in your inventory.")
-            .defaultValue(false)
             .build()
     );
 
@@ -130,16 +126,6 @@ public class AutoArmor extends Module {
             .build()
     );
 
-    private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
-            .name("delay")
-            .description("Delay between pieces being equipped to prevent desync.")
-            .defaultValue(1)
-            .min(0)
-            .max(20)
-            .sliderMax(5)
-            .build()
-    );
-
     private final Setting<Boolean> boomSwitch = sgGeneral.add(new BoolSetting.Builder()
             .name("switch-for-explosion")
             .description("Switches to Blast Protection automatically if you're going to get hit by an explosion.")
@@ -157,7 +143,26 @@ public class AutoArmor extends Module {
             .build()
     );
 
-    private final Setting<Integer> switchCooldown = sgGeneral.add(new IntSetting.Builder().name("switch-cooldown")
+    private final Setting<Boolean> ignoreElytra = sgGeneral.add(new BoolSetting.Builder()
+            .name("ignore-elytra")
+            .description("Will not replace your elytra if you have it equipped.")
+            .defaultValue(false)
+            .build()
+    );
+
+    // Delay
+
+    private final Setting<Integer> delay = sgDelay.add(new IntSetting.Builder()
+            .name("delay")
+            .description("Delay between pieces being equipped to prevent desync.")
+            .defaultValue(1)
+            .min(0)
+            .max(20)
+            .sliderMax(5)
+            .build()
+    );
+
+    private final Setting<Integer> switchCooldown = sgDelay.add(new IntSetting.Builder().name("switch-cooldown")
             .description("The cooldown between swapping from your current type of Protection to your preferred type of Protection.")
             .defaultValue(20)
             .min(0)
@@ -166,12 +171,13 @@ public class AutoArmor extends Module {
             .build()
     );
 
-    private final Setting<Boolean> ignoreElytra = sgGeneral.add(new BoolSetting.Builder()
-            .name("ignore-elytra")
-            .description("Will not replace your elytra if you have it equipped.")
+    private final Setting<Boolean> pauseInInventory = sgDelay.add(new BoolSetting.Builder()
+            .name("pause-in-inventory")
+            .description("Stops managing armor when you are in your inventory.")
             .defaultValue(false)
             .build()
     );
+
 
     private int delayLeft = delay.get();
     private boolean didSkip = false;
