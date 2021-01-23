@@ -18,7 +18,7 @@ import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.Pool;
 import minegame159.meteorclient.utils.render.color.SettingColor;
-import net.minecraft.block.Blocks;
+import net.minecraft.block.Block;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -69,8 +69,8 @@ public class PacketMine extends Module {
             .build()
     );
 
-    private final Pool<Block> blockPool = new Pool<>(Block::new);
-    private final List<Block> blocks = new ArrayList<>();
+    private final Pool<MyBlock> blockPool = new Pool<>(MyBlock::new);
+    private final List<MyBlock> blocks = new ArrayList<>();
 
     public PacketMine() {
         super(Category.Player, "packet-mine", "Sends packets to mine blocks without the mining animation.");
@@ -78,18 +78,27 @@ public class PacketMine extends Module {
 
     @Override
     public void onDeactivate() {
-        for (Block block : blocks) blockPool.free(block);
+        for (MyBlock block : blocks) blockPool.free(block);
         blocks.clear();
+    }
+
+    private boolean isMiningBlock(BlockPos pos) {
+        for (MyBlock block : blocks) {
+            if (block.blockPos.equals(pos)) return true;
+        }
+
+        return false;
     }
 
     @EventHandler
     private final Listener<StartBreakingBlockEvent> onStartBreakingBlock = new Listener<>(event -> {
         if (mc.world.getBlockState(event.blockPos).getHardness(mc.world, event.blockPos) < 0) return;
 
-        Block block = blockPool.get();
-        if (!blocks.contains(block)) {
+        if (!isMiningBlock(event.blockPos)) {
+            MyBlock block = blockPool.get();
             block.blockPos = event.blockPos;
             block.direction = event.direction;
+            block.originalBlock = mc.world.getBlockState(block.blockPos).getBlock();
             blocks.add(block);
         }
 
@@ -98,28 +107,33 @@ public class PacketMine extends Module {
 
     @EventHandler
     private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
-        if (oneByOne.get() && !blocks.isEmpty() && !blocks.get(blocks.size() - 1).mining()) blocks.remove(blocks.size() - 1);
-        else blocks.removeIf(block -> !block.mining());
+        blocks.removeIf(MyBlock::shouldRemove);
+
+        if (oneByOne.get()) {
+            if (!blocks.isEmpty()) blocks.get(0).mine();
+        }
+        else blocks.forEach(MyBlock::mine);
     });
 
     @EventHandler
     private final Listener<RenderEvent> onRender = new Listener<>(event -> {
-        if (!render.get()) return;
-        for (Block block : blocks) block.render();
+        if (render.get()) {
+            for (MyBlock block : blocks) block.render();
+        }
     });
 
-    private class Block {
+    private class MyBlock {
         public BlockPos blockPos;
         public Direction direction;
+        public Block originalBlock;
 
-        public boolean mining() {
-            if (mc.world.getBlockState(blockPos).getBlock() == Blocks.AIR
-                    || Utils.distance(mc.player.getX() - 0.5, mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()), mc.player.getZ() - 0.5, blockPos.getX() + direction.getOffsetX(), blockPos.getY() + direction.getOffsetY(), blockPos.getZ() + direction.getOffsetZ()) > mc.interactionManager.getReachDistance())
-                return false;
+        public boolean shouldRemove() {
+            return mc.world.getBlockState(blockPos).getBlock() != originalBlock || Utils.distance(mc.player.getX() - 0.5, mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()), mc.player.getZ() - 0.5, blockPos.getX() + direction.getOffsetX(), blockPos.getY() + direction.getOffsetY(), blockPos.getZ() + direction.getOffsetZ()) > mc.interactionManager.getReachDistance();
+        }
 
+        public void mine() {
             mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
             mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
-            return true;
         }
 
         public void render() {
