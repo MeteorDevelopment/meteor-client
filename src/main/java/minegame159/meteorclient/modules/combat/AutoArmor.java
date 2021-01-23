@@ -119,13 +119,6 @@ public class AutoArmor extends Module {
             .build()
     );
 
-    private final Setting<Boolean> pause = sgGeneral.add(new BoolSetting.Builder()
-            .name("pause-between-pieces")
-            .description("Pauses between equipping each individual piece to prevent desync.")
-            .defaultValue(true)
-            .build()
-    );
-
     private final Setting<Boolean> boomSwitch = sgGeneral.add(new BoolSetting.Builder()
             .name("switch-for-explosion")
             .description("Switches to Blast Protection automatically if you're going to get hit by an explosion.")
@@ -175,6 +168,13 @@ public class AutoArmor extends Module {
             .name("pause-in-inventory")
             .description("Stops managing armor when you are in your inventory.")
             .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> pause = sgGeneral.add(new BoolSetting.Builder()
+            .name("pause-between-pieces")
+            .description("Pauses between equipping each individual piece to prevent desync.")
+            .defaultValue(true)
             .build()
     );
 

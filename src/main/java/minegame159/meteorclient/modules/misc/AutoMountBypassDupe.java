@@ -48,7 +48,7 @@ public class AutoMountBypassDupe extends Module {
             .build());
 
     private final Setting<Boolean> faceDown = sgGeneral.add(new BoolSetting.Builder()
-            .name("face-down")
+            .name("rotate-down")
             .description("Faces down when dropping items.")
             .defaultValue(true)
             .build()
@@ -56,7 +56,7 @@ public class AutoMountBypassDupe extends Module {
 
     private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
             .name("delay")
-            .description("Time in ticks between actions. 20 ticks = 1 second.")
+            .description("The delay in ticks between actions.")
             .defaultValue(4)
             .min(0)
             .build()

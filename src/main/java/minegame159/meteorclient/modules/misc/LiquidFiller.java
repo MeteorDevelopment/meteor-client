@@ -32,6 +32,13 @@ public class LiquidFiller extends Module {
 
     private final SettingGroup sgGeneral  = settings.getDefaultGroup();
 
+    private final Setting<PlaceIn> placeInLiquids = sgGeneral.add(new EnumSetting.Builder<PlaceIn>()
+            .name("place-in")
+            .description("What type of liquids to place in.")
+            .defaultValue(PlaceIn.Lava)
+            .build()
+    );
+
     private final Setting<Integer> horizontalRadius = sgGeneral.add(new IntSetting.Builder()
             .name("horizontal-radius")
             .description("Horizontal radius in which to search for liquids.")
@@ -54,13 +61,6 @@ public class LiquidFiller extends Module {
             .name("block-whitelist")
             .description("The allowed blocks that it will use to fill up the liquid.")
             .defaultValue(new ArrayList<>())
-            .build()
-    );
-
-    private final Setting<PlaceIn> placeInLiquids = sgGeneral.add(new EnumSetting.Builder<PlaceIn>()
-            .name("place-in")
-            .description("What type of liquids to place in.")
-            .defaultValue(PlaceIn.Lava)
             .build()
     );
 

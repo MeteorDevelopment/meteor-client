@@ -31,7 +31,8 @@ public class TopBarFriends extends TopBarWindowScreen {
         SettingGroup sgNeutral = s.createGroup("Neutral");
         SettingGroup sgTrusted = s.createGroup("Trusted");
 
-        //Enemies
+        // Enemies
+
         sgEnemy.add(new BoolSetting.Builder()
                 .name("show-in-tracers")
                 .description("Whether to show enemies in tracers.")
@@ -50,7 +51,8 @@ public class TopBarFriends extends TopBarWindowScreen {
                 .build()
         );
 
-        //Neutral
+        // Neutral
+
         sgNeutral.add(new BoolSetting.Builder()
                 .name("show-in-tracers")
                 .description("Whether to show neutrals in tracers.")
@@ -78,7 +80,8 @@ public class TopBarFriends extends TopBarWindowScreen {
                 .build()
         );
 
-        //Trusted
+        // Trusted
+
         sgTrusted.add(new BoolSetting.Builder()
                 .name("show-in-tracers")
                 .description("Whether to show trusted in tracers.")

@@ -26,6 +26,8 @@ public class FreeRotate extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgArrows = settings.createGroup("Arrows");
 
+    // General
+
     public final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("mode")
             .description("Which entity to rotate.")

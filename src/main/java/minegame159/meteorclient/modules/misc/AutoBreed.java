@@ -44,7 +44,7 @@ public class AutoBreed extends Module {
     );
 
     private final Setting<Hand> hand = sgGeneral.add(new EnumSetting.Builder<Hand>()
-            .name("hand")
+            .name("hand-for-breeding")
             .description("The hand to use for breeding.")
             .defaultValue(Hand.MAIN_HAND)
             .build()

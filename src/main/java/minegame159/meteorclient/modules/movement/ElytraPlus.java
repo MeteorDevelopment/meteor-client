@@ -45,6 +45,7 @@ public class ElytraPlus extends Module {
     private final SettingGroup sgAutopilot = settings.createGroup("Autopilot");
 
     // General
+
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("mode")
             .description("The mode used to make you fly.")
@@ -108,7 +109,7 @@ public class ElytraPlus extends Module {
     );
 
     private final Setting<Boolean> dontGoIntoUnloadedChunks = sgGeneral.add(new BoolSetting.Builder()
-            .name("don't-go-into-unloaded-chunks")
+            .name("no-unloaded-chunks")
             .description("Stops you from going into unloaded chunks.")
             .defaultValue(true)
             .build()
@@ -122,6 +123,7 @@ public class ElytraPlus extends Module {
     );
 
     // Autopilot
+
     private final Setting<Boolean> autopilotEnabled = sgAutopilot.add(new BoolSetting.Builder()
             .name("autopilot-enabled")
             .description("Automatically flies forward maintaining minimum height.")

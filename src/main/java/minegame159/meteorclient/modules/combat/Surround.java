@@ -75,6 +75,7 @@ public class Surround extends Module {
             .build()
     );
 
+    // TODO: Make a render for Surround monkeys.
     private int prevSlot;
     private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
     private boolean return_;
