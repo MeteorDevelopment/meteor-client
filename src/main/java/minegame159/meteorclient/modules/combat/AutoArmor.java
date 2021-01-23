@@ -171,7 +171,7 @@ public class AutoArmor extends Module {
             .build()
     );
 
-    private final Setting<Boolean> pause = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> pause = sgDelay.add(new BoolSetting.Builder()
             .name("pause-between-pieces")
             .description("Pauses between equipping each individual piece to prevent desync.")
             .defaultValue(true)
