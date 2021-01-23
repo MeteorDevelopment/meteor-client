@@ -87,7 +87,7 @@ public class InvUtils implements Listenable {
 
     @EventHandler
     private static final Listener<TickEvent.Pre> onTick = new Listener<>(event -> {
-        if (mc.world == null || mc.player == null){
+        if (mc.world == null || mc.player == null || mc.player.abilities.creativeMode){
             currentQueue.clear();
             moveQueue.clear();
             return;
