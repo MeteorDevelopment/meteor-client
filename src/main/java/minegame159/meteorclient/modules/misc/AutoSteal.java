@@ -16,29 +16,31 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class AutoSteal extends Module {
     public AutoSteal() {
-        super(Category.Player, "auto-steal", "Buttons for automatically dumps/steals from chests.");   // TODO: grammar
+        super(Category.Player, "auto-steal", "Automatically dumps or steals from storage blocks.");
     }
 
-    // TODO: grammar (descriptions)
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgDelays = settings.createGroup("Delay");
+
+    // General
 
     private final Setting<Boolean> stealButtonEnabled = sgGeneral.add(new BoolSetting.Builder()
             .name("steal-button-enabled")
-            .description("Shows Steal button on container screen.")
+            .description("Shows the Steal button on the container screen.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> dumpButtonEnabled = sgGeneral.add(new BoolSetting.Builder()
             .name("dump-button-enabled")
-            .description("Shows Dump button on container screen.")
+            .description("Shows the Dump button on the container screen.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> autoStealEnabled = sgGeneral.add(new BoolSetting.Builder()
             .name("auto-steal-enabled")
-            .description("Start steals when container open.")
+            .description("Starts the auto steal when a container open.")
             .defaultValue(false)
             .onChanged((bool_1) -> checkAutoSettings())
             .build()
@@ -46,19 +48,17 @@ public class AutoSteal extends Module {
 
     private final Setting<Boolean> autoDumpEnabled = sgGeneral.add(new BoolSetting.Builder()
             .name("auto-dump-enabled")
-            .description("Start dumps when container open.")
+            .description("Start auto dump when a container opens.")
             .defaultValue(false)
             .onChanged((bool_1) -> checkAutoSettings())
             .build()
     );
 
-
-    private final SettingGroup sgDelays = settings.createGroup("Delays");
+    // Delay
 
     private final Setting<Integer> minimumDelay = sgDelays.add(new IntSetting.Builder()
             .name("min-delay")
-            .description("Minimum delay between stealing the next stack in milliseconds. Use 0 to steal the entire inventory instantly.")
-            .min(0)
+            .description("The minimum delay between stealing the next stack in milliseconds.")
             .sliderMax(1000)
             .defaultValue(180)
             .build()
@@ -75,7 +75,7 @@ public class AutoSteal extends Module {
 
     private void checkAutoSettings() {
         if (autoStealEnabled.get() && autoDumpEnabled.get()) {
-            ChatUtils.error("Can't enabled auto-steal and auto-dump at the same time!");
+            ChatUtils.error("You can't enable Auto Steal and Auto Dump at the same time!");
             autoDumpEnabled.set(false);
         }
     }

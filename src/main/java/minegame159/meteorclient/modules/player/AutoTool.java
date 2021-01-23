@@ -57,7 +57,7 @@ public class AutoTool extends Module {
     );
 
     private final Setting<Boolean> enderChestOnlyWithSilkTouch = sgGeneral.add(new BoolSetting.Builder()
-            .name("ender-chest-only-with-silk-touch")
+            .name("silk-touch-with-ender-chest")
             .description("Mines Ender Chests only with the Silk Touch enchantment.")
             .defaultValue(true)
             .build()

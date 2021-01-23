@@ -59,7 +59,6 @@ public class KillAura extends Module {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgDelay = settings.createGroup("Delay");
-    private final SettingGroup sgRandomDelay = settings.createGroup("Random Delay");
 
     // General
 
@@ -170,16 +169,14 @@ public class KillAura extends Module {
             .build()
     );
 
-    // Random Hit Delay
-
-    private final Setting<Boolean> randomDelayEnabled = sgRandomDelay.add(new BoolSetting.Builder()
+    private final Setting<Boolean> randomDelayEnabled = sgDelay.add(new BoolSetting.Builder()
             .name("random-delay-enabled")
             .description("Adds a random delay between hits to attempt to bypass anti-cheats.")
             .defaultValue(false)
             .build()
     );
 
-    private final Setting<Integer> randomDelayMax = sgRandomDelay.add(new IntSetting.Builder()
+    private final Setting<Integer> randomDelayMax = sgDelay.add(new IntSetting.Builder()
             .name("random-delay-max")
             .description("The maximum value for random delay.")
             .defaultValue(4)

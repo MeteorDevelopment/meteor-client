@@ -168,6 +168,7 @@ public class Waypoints extends Savable<Waypoints> implements Listenable, Iterabl
             double h = TextRenderer.get().getHeight();
 
             // TODO: I HATE EVERYTHING ABOUT HOW RENDERING ROTATING THINGS WORKS AND I CANNOT BE ASKED TO WORK THIS OUT, THE WHOLE THING NEEDS TO BE RECODED REEEEEEEEEEEEEEEEEEEE
+            // sounds like a personal problem
             /*MB.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
             MB.quad(-w - 1, -h + 1, 0, -w - 1, 9 - h, 0, w + 1, 9 - h, 0, w + 1, -h + 1, 0, BACKGROUND);
             MB.quad(-w2 - 1, 0, 0, -w2 - 1, 8, 0, w2 + 1, 8, 0, w2 + 1, 0, 0, BACKGROUND);

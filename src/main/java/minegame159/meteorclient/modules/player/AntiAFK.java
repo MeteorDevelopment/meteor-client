@@ -86,7 +86,7 @@ public class AntiAFK extends Module {
 
     private final Setting<Boolean> disco = sgActions.add(new BoolSetting.Builder()
             .name("disco")
-            .description("Sneaks.")
+            .description("Sneaks and unsneaks quickly.")
             .defaultValue(false)
             .build());
 

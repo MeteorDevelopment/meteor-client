@@ -36,7 +36,7 @@ public class HUD extends Module {
     private final SettingGroup sgActiveModules = settings.createGroup("Active Modules");
     private final SettingGroup sgInvViewer = settings.createGroup("Inventory Viewer");
     private final SettingGroup sgPlayerModel = settings.createGroup("Player Model");
-    private final SettingGroup sgArmor = settings.createGroup("Armor");
+    private final SettingGroup sgArmor = settings.createGroup("Armor Info");
     private final SettingGroup sgModuleInfo = settings.createGroup("Module Info");
     private final SettingGroup sgCompass = settings.createGroup("Compass");
 

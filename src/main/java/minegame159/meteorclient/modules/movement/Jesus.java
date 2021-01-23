@@ -37,8 +37,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class Jesus extends Module {
-    private final SettingGroup sgWater = settings.createGroup("Water"); // TODO: grammar: maybe "Water Settings" or "Water Behaviour"?
+    private final SettingGroup sgWater = settings.createGroup("Water");
     private final SettingGroup sgLava = settings.createGroup("Lava");
+
+    // Water
 
     private final Setting<Boolean> walkOnWater = sgWater.add(new BoolSetting.Builder()
             .name("walk-on-water")
@@ -46,7 +48,7 @@ public class Jesus extends Module {
             .defaultValue(true)
             .build()
     );
-    // TODO: grammar (in descriptions):
+
     private final Setting<Boolean> disableOnSneakForWater = sgWater.add(new BoolSetting.Builder()
             .name("disable-on-sneak-for-water")
             .description("Lets you go under the water when your sneak key is held.")
@@ -56,7 +58,7 @@ public class Jesus extends Module {
 
     private final Setting<Boolean> dipIntoWater = sgWater.add(new BoolSetting.Builder()
             .name("dip-into-water")
-            .description("Lets you go under the water when you fall over than certain height.")
+            .description("Lets you go under the water when you fall over a certain height.")
             .defaultValue(true)
             .build()
     );
@@ -64,7 +66,7 @@ public class Jesus extends Module {
     private final Setting<Integer> dipIntoWaterHeight = sgWater.add(new IntSetting.Builder()
             .name("dip-into-water-height")
             .description("Maximum safe height.")
-            .defaultValue(3)
+            .defaultValue(4)
             .min(1)
             .max(255)
             .sliderMin(3)
@@ -74,10 +76,12 @@ public class Jesus extends Module {
 
     private final Setting<Boolean> dipIntoWaterIfBurning = sgWater.add(new BoolSetting.Builder()
             .name("dip-into-water-if-burning")
-            .description("Lets you go under the water when you burning.")
+            .description("Lets you go under the water when you are burning.")
             .defaultValue(true)
             .build()
     );
+
+    // Lava
 
     private final Setting<Boolean> walkOnLava = sgLava.add(new BoolSetting.Builder()
             .name("walk-on-lava")
@@ -113,7 +117,7 @@ public class Jesus extends Module {
 
     private final Setting<Boolean> dipIntoLavaIfFireResistance = sgLava.add(new BoolSetting.Builder()
             .name("dip-into-lava-if-fire-resistance")
-            .description("Lets you go under the lava if you have Fire Resistance effect to avoid fall damage.")
+            .description("Lets you go under the lava if you have Fire Resistance effect to avoid burning.") // rofl someone put "fall damage here"
             .defaultValue(true)
             .build()
     );
@@ -134,7 +138,7 @@ public class Jesus extends Module {
     private boolean preBaritoneAssumeWalkOnLava;
 
     public Jesus() {
-        super(Category.Movement, "jesus", "Walk on water, be like Jesus (also works on lava).");
+        super(Category.Movement, "jesus", "Walk on liquids, be like Jesus (also works on lava).");
     }
 
     @Override

@@ -252,7 +252,7 @@ public class BetterChat extends Module {
 
         if (disableAllMessages.get()) {
             sendWarningMessage(message,
-                    "You are trying to send a message to the global chat! ",  // TODO: grammar
+                    "You are trying to send a message to the global chat! ",
                     "Send your message to the global chat:");
             event.cancel();
             return;
@@ -260,7 +260,7 @@ public class BetterChat extends Module {
 
         if (coordsProtectionEnabled.get() && containsCoordinates(message)) {
             sendWarningMessage(message,
-                    "It looks like there are coordinates in your message! ",  // TODO: grammar: Maybe should make this message shorter, so that the entire message with the button fits on one line
+                    "It looks like there are coordinates in your message! ",
                     "Send your message to the global chat even if there are coordinates:");
             event.cancel();
             return;

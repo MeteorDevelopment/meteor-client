@@ -24,6 +24,7 @@ public class FreeRotate extends Module {
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgArrows = settings.createGroup("Arrows");
 
     public final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("mode")
@@ -48,14 +49,16 @@ public class FreeRotate extends Module {
             .build()
     );
 
-    public final Setting<Boolean> arrows = sgGeneral.add(new BoolSetting.Builder()
+    // Arrows
+
+    public final Setting<Boolean> arrows = sgArrows.add(new BoolSetting.Builder()
             .name("arrows-control-opposite")
             .description("Allows you to control the other entities rotation with the arrow keys.")
             .defaultValue(true)
             .build()
     );
 
-    private final Setting<Double> arrowSpeed = sgGeneral.add(new DoubleSetting.Builder()
+    private final Setting<Double> arrowSpeed = sgArrows.add(new DoubleSetting.Builder()
             .name("arrow-speed")
             .description("Rotation speed with arrow keys.")
             .defaultValue(4)

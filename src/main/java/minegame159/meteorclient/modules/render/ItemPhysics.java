@@ -23,7 +23,7 @@ import java.util.Random;
 public class ItemPhysics extends Module {
 
     public ItemPhysics() {
-        super(Category.Render, "item-physics", "Applies physics to ground items.");
+        super(Category.Render, "item-physics", "Applies physics to items on the ground.");
     }
 
     @EventHandler
