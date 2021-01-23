@@ -22,6 +22,7 @@ import minegame159.meteorclient.utils.misc.input.KeyBinds;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.inventory.Inventories;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.MutableText;
@@ -78,7 +79,6 @@ public class ShulkerPeek extends Module {
     @EventHandler
     private final Listener<GetTooltipEvent> onGetTooltip = new Listener<>(event -> {
         if (mode.get() != Mode.Tooltip) return;
-        if (!Utils.isShulker(event.itemStack.getItem())) return;
 
         CompoundTag compoundTag = event.itemStack.getSubTag("BlockEntityTag");
         if (compoundTag != null) {
