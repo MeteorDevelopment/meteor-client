@@ -9,9 +9,9 @@ import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.player.InfinityMiner;
 import minegame159.meteorclient.modules.render.hud.HUD;
 
-public class InfiniteMineHud extends DoubleTextHudModule {
-    public InfiniteMineHud(HUD hud) {
-        super(hud, "infmine", "Displays details regarding Infinity Mine.", "Infinity Mine: ");
+public class InfiniteMinerHud extends DoubleTextHudModule {
+    public InfiniteMinerHud(HUD hud) {
+        super(hud, "infinite-miner", "Displays details regarding Infinity Miner.", "Infinity Mine: ");
     }
 
     @Override

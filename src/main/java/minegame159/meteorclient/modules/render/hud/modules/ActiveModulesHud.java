@@ -16,8 +16,8 @@ import java.util.List;
 
 public class ActiveModulesHud extends HudModule {
     public enum Sort {
-        ByBiggest,
-        BySmallest
+        Biggest,
+        Smallest
     }
 
     public enum ColorMode {
@@ -62,7 +62,7 @@ public class ActiveModulesHud extends HudModule {
             double _1 = getModuleWidth(renderer, o1);
             double _2 = getModuleWidth(renderer, o2);
 
-            if (hud.activeModulesSort() == Sort.BySmallest) {
+            if (hud.activeModulesSort() == Sort.Smallest) {
                 double temp = _1;
                 _1 = _2;
                 _2 = temp;

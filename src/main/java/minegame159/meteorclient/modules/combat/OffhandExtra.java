@@ -35,33 +35,13 @@ public class OffhandExtra extends Module {
     }
     
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgExtra = settings.createGroup("Extras");
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("mode")
             .description("Changes what item that will go into your offhand.")
             .defaultValue(Mode.EGap)
             .onChanged(mode -> currentMode = mode)
-            .build()
-    );
-
-    private final Setting<Boolean> sword = sgGeneral.add(new BoolSetting.Builder()
-            .name("sword-gap")
-            .description("Changes the mode to EGap if you are holding a sword in your main hand.")
-            .defaultValue(false)
-            .build()
-    );
-
-    private final Setting<Boolean> offhandCrystal = sgGeneral.add(new BoolSetting.Builder()
-            .name("offhand-crystal-on-gap")
-            .description("Changes the mode to Crystal if you are holding an enchanted golden apple in your main hand.")
-            .defaultValue(false)
-            .build()
-    );
-
-    private final Setting<Boolean> offhandCA = sgGeneral.add(new BoolSetting.Builder()
-            .name("offhand-crystal-on-ca")
-            .description("Changes the mode to Crystal when Crystal Aura is on.")
-            .defaultValue(false)
             .build()
     );
 
@@ -98,6 +78,29 @@ public class OffhandExtra extends Module {
     private final Setting<Boolean> hotBar = sgGeneral.add(new BoolSetting.Builder()
             .name("search-hotbar")
             .description("Whether to take items out of your hotbar or not.")
+            .defaultValue(false)
+            .build()
+    );
+
+    // Extras
+
+    private final Setting<Boolean> sword = sgExtra.add(new BoolSetting.Builder()
+            .name("sword-gap")
+            .description("Changes the mode to EGap if you are holding a sword in your main hand.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> offhandCrystal = sgExtra.add(new BoolSetting.Builder()
+            .name("offhand-crystal-on-gap")
+            .description("Changes the mode to Crystal if you are holding an enchanted golden apple in your main hand.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> offhandCA = sgExtra.add(new BoolSetting.Builder()
+            .name("offhand-crystal-on-ca")
+            .description("Changes the mode to Crystal when Crystal Aura is on.")
             .defaultValue(false)
             .build()
     );

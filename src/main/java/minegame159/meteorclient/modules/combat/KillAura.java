@@ -67,6 +67,7 @@ public class KillAura extends Module {
             .description("The maximum range the entity can be to attack it.")
             .defaultValue(4)
             .min(0)
+            .max(6)
             .build()
     );
 

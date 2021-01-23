@@ -39,7 +39,7 @@ public class Quiver extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Integer> charge = sgGeneral.add(new IntSetting.Builder()
-            .name("charge")
+            .name("charge-delay")
             .description("The amount of delay for bow charging in ticks.")
             .defaultValue(6)
             .min(5)
@@ -58,7 +58,7 @@ public class Quiver extends Module {
 
     private final Setting<Boolean> chatInfo = sgGeneral.add(new BoolSetting.Builder()
             .name("chat-info")
-            .description("Sends you information about the module.")
+            .description("Sends you information about the module when toggled.")
             .defaultValue(true)
             .build()
     );

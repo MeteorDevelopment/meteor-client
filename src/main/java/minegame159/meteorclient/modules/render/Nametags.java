@@ -49,7 +49,7 @@ import java.util.Map;
 public class Nametags extends Module {
     public enum Position {
         ABOVE,
-        ON_TOP
+        ONTOP
     }
 
     private static final MeshBuilder MB = new MeshBuilder(2048);
@@ -59,6 +59,8 @@ public class Nametags extends Module {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgColors = settings.createGroup("Colors");
+
+    // General
 
     private final Setting<Boolean> displayArmor = sgGeneral.add(new BoolSetting.Builder()
             .name("display-armor")
@@ -77,7 +79,7 @@ public class Nametags extends Module {
     private final Setting<Position> displayOnItem = sgGeneral.add(new EnumSetting.Builder<Position>()
             .name("enchantment-position")
             .description("Where the enchantments are rendered.")
-            .defaultValue(Position.ON_TOP)
+            .defaultValue(Position.ONTOP)
             .build()
     );
 
@@ -120,6 +122,8 @@ public class Nametags extends Module {
             .defaultValue(true)
             .build()
     );
+
+    // Colors
 
     private final Setting<SettingColor> normalName = sgColors.add(new ColorSetting.Builder()
             .name("normal-color")
