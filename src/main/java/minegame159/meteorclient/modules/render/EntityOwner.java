@@ -9,11 +9,13 @@ import com.google.common.reflect.TypeToken;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.render.RenderEvent;
+import minegame159.meteorclient.mixin.ProjectileEntityAccessor;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.rendering.DrawMode;
 import minegame159.meteorclient.rendering.MeshBuilder;
 import minegame159.meteorclient.rendering.text.TextRenderer;
+import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
@@ -27,6 +29,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.HorseBaseEntity;
 import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.projectile.ProjectileEntity;
+import net.minecraft.entity.projectile.thrown.EnderPearlEntity;
 
 import java.lang.reflect.Type;
 import java.util.HashMap;
@@ -51,6 +55,13 @@ public class EntityOwner extends Module {
             .build()
     );
 
+    private final Setting<Boolean> projectiles = sgGeneral.add(new BoolSetting.Builder()
+            .name("projectiles")
+            .description("Display owner names of projectiles.")
+            .defaultValue(false)
+            .build()
+    );
+
     private final Map<UUID, String> uuidToName = new HashMap<>();
 
     public EntityOwner() {
@@ -65,10 +76,12 @@ public class EntityOwner extends Module {
     @EventHandler
     private final Listener<RenderEvent> onRender = new Listener<>(event -> {
         for (Entity entity : mc.world.getEntities()) {
-            UUID ownerUuid = null;
+            UUID ownerUuid;
+
             if (entity instanceof TameableEntity) ownerUuid = ((TameableEntity) entity).getOwnerUuid();
             else if (entity instanceof HorseBaseEntity) ownerUuid = ((HorseBaseEntity) entity).getOwnerUuid();
-            if (ownerUuid == null) continue;
+            else if (entity instanceof ProjectileEntity && projectiles.get()) ownerUuid = ((ProjectileEntityAccessor) entity).getOwnerUuid();
+            else continue;
 
             String name = getOwnerName(ownerUuid);
             renderNametag(event, entity, name);
