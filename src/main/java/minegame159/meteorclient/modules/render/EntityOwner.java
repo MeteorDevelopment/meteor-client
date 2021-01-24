@@ -30,7 +30,6 @@ import net.minecraft.entity.passive.HorseBaseEntity;
 import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
-import net.minecraft.entity.projectile.thrown.EnderPearlEntity;
 
 import java.lang.reflect.Type;
 import java.util.HashMap;
@@ -83,8 +82,10 @@ public class EntityOwner extends Module {
             else if (entity instanceof ProjectileEntity && projectiles.get()) ownerUuid = ((ProjectileEntityAccessor) entity).getOwnerUuid();
             else continue;
 
-            String name = getOwnerName(ownerUuid);
-            renderNametag(event, entity, name);
+            if (ownerUuid != null) {
+                String name = getOwnerName(ownerUuid);
+                renderNametag(event, entity, name);
+            }
         }
     });
 
