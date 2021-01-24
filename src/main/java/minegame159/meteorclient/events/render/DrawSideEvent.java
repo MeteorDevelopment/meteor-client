@@ -1,17 +1,17 @@
 package minegame159.meteorclient.events.render;
 
+import minegame159.meteorclient.utils.misc.Pool;
 import net.minecraft.block.BlockState;
 
-public class DrawSideEvent {
-
-    private static final DrawSideEvent INSTANCE = new DrawSideEvent();
+public class DrawSideEvent {  // TODO: Xray: async DrawSideEvent
+    private static final Pool<DrawSideEvent> INSTANCE = new Pool<>(DrawSideEvent::new);
 
     public BlockState state;
 
     private boolean set, draw;
 
-    public void reset() {
-        set = false;
+    private void reset() {
+        set = draw = false;
     }
 
     public void setDraw(boolean draw) {
@@ -27,8 +27,13 @@ public class DrawSideEvent {
     }
 
     public static DrawSideEvent get(BlockState state) {
-        INSTANCE.reset();
-        INSTANCE.state = state;
-        return INSTANCE;
+        DrawSideEvent event = INSTANCE.get();
+        event.reset();
+        event.state = state;
+        return event;
+    }
+
+    public static void returnDrawSideEvent(DrawSideEvent event) {
+        INSTANCE.free(event);
     }
 }
