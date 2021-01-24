@@ -101,7 +101,8 @@
     "TitleScreenMixin",
     "Vec3dMixin",
     "WorldRendererAccessor",
-    "WorldRendererMixin"
+    "WorldRendererMixin",
+    "ClientPlayerEntityAccessor"
   ],
   "injectors": {
     "defaultRequire": 1
