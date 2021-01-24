@@ -7,7 +7,6 @@ package minegame159.meteorclient.modules.combat;
 
 import com.google.common.collect.Streams;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
-import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import me.zero.alpine.event.EventPriority;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
@@ -20,6 +19,7 @@ import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.rendering.ShapeMode;
 import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.Pool;
 import minegame159.meteorclient.utils.player.DamageCalcUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
@@ -236,7 +236,7 @@ public class CrystalAura extends Module {
     private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgTarget.add(new EntityTypeListSetting.Builder()
             .name("entities")
             .description("The entities to attack.")
-            .defaultValue(getDefault())
+            .defaultValue(Utils.asObject2BooleanOpenHashMap(EntityType.PLAYER))
             .onlyAttackable()
             .build()
     );
@@ -937,12 +937,6 @@ public class CrystalAura extends Module {
         public void render() {
             Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x, y, z, 1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
         }
-    }
-
-    private Object2BooleanMap<EntityType<?>> getDefault(){
-        Object2BooleanMap<EntityType<?>> map = new Object2BooleanOpenHashMap<>();
-        map.put(EntityType.PLAYER, true);
-        return map;
     }
 
     private boolean shouldBreak(EndCrystalEntity entity){
