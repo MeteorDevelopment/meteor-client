@@ -6,6 +6,7 @@
 package minegame159.meteorclient.modules.misc;
 
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
+import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.entity.EntityAddedEvent;
@@ -16,7 +17,6 @@ import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.EntityTypeListSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
@@ -27,7 +27,7 @@ public class EntityLogger extends Module {
     private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
             .name("entites")
             .description("Select specific entities.")
-            .defaultValue(Utils.asObject2BooleanOpenHashMap(EntityType.PLAYER))
+            .defaultValue(new Object2BooleanOpenHashMap<>(0))
             .build()
     );
 
