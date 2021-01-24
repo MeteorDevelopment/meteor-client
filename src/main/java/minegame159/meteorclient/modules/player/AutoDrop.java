@@ -17,9 +17,10 @@ import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.item.Item;
+import net.minecraft.item.Items;
 import net.minecraft.screen.slot.SlotActionType;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class AutoDrop extends Module {
@@ -28,7 +29,7 @@ public class AutoDrop extends Module {
     private final Setting<List<Item>> items = sgGeneral.add(new ItemListSetting.Builder()
             .name("items")
             .description("Items to drop.")
-            .defaultValue(new ArrayList<>(0))
+            .defaultValue(Arrays.asList(Items.WHEAT_SEEDS, Items.SUNFLOWER, Items.CHORUS_FLOWER, Items.CORNFLOWER, Items.LILAC, Items.ROSE_BUSH, Items.PEONY, Items.TALL_GRASS, Items.LARGE_FERN))
             .build()
     );
 
