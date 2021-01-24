@@ -15,12 +15,8 @@ import com.mojang.authlib.yggdrasil.YggdrasilUserAuthentication;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.accounts.*;
 import minegame159.meteorclient.mixininterface.IMinecraftClient;
-import minegame159.meteorclient.utils.network.HttpUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.Session;
-
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 
 public class TheAlteningAccount extends Account<TheAlteningAccount> {
     private static final String AUTH = "http://authserver.thealtening.com";
@@ -52,15 +48,11 @@ public class TheAlteningAccount extends Account<TheAlteningAccount> {
 
     @Override
     public boolean fetchHead() {
-        String skinUrl = null;
-        ProfileResponse response = HttpUtils.get("https://sessionserver.mojang.com/session/minecraft/profile/" + cache.uuid, ProfileResponse.class);
-        String encodedTexturesJson = response.getTextures();
-        if (encodedTexturesJson != null) {
-            ProfileSkinResponse skin = GSON.fromJson(new String(Base64.getDecoder().decode(encodedTexturesJson), StandardCharsets.UTF_8), ProfileSkinResponse.class);
-            if (skin.textures.SKIN != null) skinUrl = skin.textures.SKIN.url;
+        try {
+            return cache.makeHead("https://crafatar.com/avatars/" + cache.uuid + "?size=8&overlay&default=MHF_Steve");
+        } catch (Exception e) {
+            return false;
         }
-        if (skinUrl == null) skinUrl = "http://meteorclient.com/steve.png";
-        return cache.makeHead(skinUrl);
     }
 
     @Override
