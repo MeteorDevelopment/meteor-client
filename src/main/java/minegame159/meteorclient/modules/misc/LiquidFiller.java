@@ -20,7 +20,7 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class LiquidFiller extends Module {
@@ -60,7 +60,7 @@ public class LiquidFiller extends Module {
     private final Setting<List<Block>> whitelist = sgGeneral.add(new BlockListSetting.Builder()
             .name("block-whitelist")
             .description("The allowed blocks that it will use to fill up the liquid.")
-            .defaultValue(new ArrayList<>())
+            .defaultValue(Arrays.asList(Blocks.DIRT, Blocks.COBBLESTONE))
             .build()
     );
 

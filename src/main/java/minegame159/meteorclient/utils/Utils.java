@@ -5,14 +5,11 @@
 package minegame159.meteorclient.utils;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import minegame159.meteorclient.Config;
-import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.mixininterface.IMinecraftClient;
 import minegame159.meteorclient.mixininterface.IMinecraftServer;
-import minegame159.meteorclient.rendering.text.TextRenderer;
-import minegame159.meteorclient.rendering.text.VanillaTextRenderer;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.world.Dimension;
 import net.minecraft.client.MinecraftClient;
@@ -43,6 +40,8 @@ import java.io.InputStream;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
 
@@ -386,5 +385,13 @@ public class Utils {
         compoundTag.putString("id", String.valueOf(Registry.ENCHANTMENT.getId(enchantment)));
         compoundTag.putShort("lvl", (short) level);
         listTag.add(compoundTag);
+    }
+
+    @SafeVarargs
+    public static <T> Object2BooleanOpenHashMap<T> asObject2BooleanOpenHashMap(T... checked) {
+        Map<T, Boolean> map = new HashMap<>();
+        for (T item : checked)
+            map.put(item, true);
+        return new Object2BooleanOpenHashMap<T>(map);
     }
 }

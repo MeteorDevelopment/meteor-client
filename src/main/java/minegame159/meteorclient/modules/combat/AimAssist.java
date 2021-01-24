@@ -7,7 +7,6 @@ package minegame159.meteorclient.modules.combat;
 
 import com.google.common.collect.Streams;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
-import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.events.render.RenderEvent;
@@ -17,6 +16,7 @@ import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.Utils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -56,7 +56,7 @@ public class AimAssist extends Module {
     private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
             .name("entities")
             .description("Entities to aim at.")
-            .defaultValue(new Object2BooleanOpenHashMap<>(0))
+            .defaultValue(Utils.asObject2BooleanOpenHashMap(EntityType.PLAYER))
             .build()
     );
 
