@@ -9,7 +9,6 @@ import me.zero.alpine.listener.EventHandler;
 import me.zero.alpine.listener.Listener;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.Cancellable;
-import minegame159.meteorclient.events.render.DrawSideEvent;
 import minegame159.meteorclient.events.render.RenderBlockEntityEvent;
 import minegame159.meteorclient.events.world.AmbientOcclusionEvent;
 import minegame159.meteorclient.events.world.ChunkOcclusionEvent;
@@ -22,8 +21,9 @@ import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.block.Block;
+import net.minecraft.block.Blocks;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Xray extends Module {
@@ -76,8 +76,11 @@ public class Xray extends Module {
         }
     });
 
-    @EventHandler
-    private final Listener<DrawSideEvent> onDrawSide = new Listener<>(event -> event.setDraw(!isBlocked(event.state.getBlock())));
+//    @EventHandler  // TODO: Xray: async DrawSideEvent
+//    private final Listener<DrawSideEvent> onDrawSide = new Listener<>(event -> {
+//        event.setDraw(!isBlocked(event.state.getBlock()));
+//        DrawSideEvent.returnDrawSideEvent(event);
+//    });
 
     @EventHandler
     private final Listener<ChunkOcclusionEvent> onChunkOcclusion = new Listener<>(Cancellable::cancel);

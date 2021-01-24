@@ -16,12 +16,12 @@ public class Pool<T> {
         this.producer = producer;
     }
 
-    public T get() {
+    public synchronized T get() {
         if (items.size() > 0) return items.remove(items.size() - 1);
         return producer.create();
     }
 
-    public void free(T obj) {
+    public synchronized void free(T obj) {
         items.add(obj);
     }
 }
