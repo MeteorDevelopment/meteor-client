@@ -70,7 +70,10 @@ public class TopBarGui extends TopBarWindowScreen {
                 .build()
         );
 
-        sg.add(new ColorSetting.Builder()
+
+        SettingGroup sgColors = s.createGroup("Colors");
+
+        sgColors.add(new ColorSetting.Builder()
                 .name("text")
                 .description("Text color.")
                 .defaultValue(new SettingColor(255, 255, 255))
@@ -78,7 +81,7 @@ public class TopBarGui extends TopBarWindowScreen {
                 .onModuleActivated(colorSetting -> colorSetting.set(GuiConfig.INSTANCE.text))
                 .build()
         );
-        sg.add(new ColorSetting.Builder()
+        sgColors.add(new ColorSetting.Builder()
                 .name("window-header-text")
                 .description("Window header text color.")
                 .defaultValue(new SettingColor(255, 255, 255))
@@ -86,7 +89,7 @@ public class TopBarGui extends TopBarWindowScreen {
                 .onModuleActivated(colorSetting -> colorSetting.set(GuiConfig.INSTANCE.windowHeaderText))
                 .build()
         );
-        sg.add(new ColorSetting.Builder()
+        sgColors.add(new ColorSetting.Builder()
                 .name("logged-in-text")
                 .description("Logged in text color.")
                 .defaultValue(new SettingColor(45, 225, 45))
@@ -94,7 +97,7 @@ public class TopBarGui extends TopBarWindowScreen {
                 .onModuleActivated(colorSetting -> colorSetting.set(GuiConfig.INSTANCE.loggedInText))
                 .build()
         );
-        sg.add(new ColorSetting.Builder()
+        sgColors.add(new ColorSetting.Builder()
                 .name("account-type-text")
                 .description("Account type text color.")
                 .defaultValue(new SettingColor(150, 150, 150))
@@ -103,7 +106,7 @@ public class TopBarGui extends TopBarWindowScreen {
                 .build()
         );
 
-        sg.add(new ColorSetting.Builder()
+        sgColors.add(new ColorSetting.Builder()
                 .name("background")
                 .description("Background color")
                 .defaultValue(new SettingColor(20, 20, 20, 200))
@@ -111,7 +114,7 @@ public class TopBarGui extends TopBarWindowScreen {
                 .onModuleActivated(colorSetting -> colorSetting.set(GuiConfig.INSTANCE.background))
                 .build()
         );
-        sg.add(new ColorSetting.Builder()
+        sgColors.add(new ColorSetting.Builder()
                 .name("background-hovered")
                 .description("Background hovered color.")
                 .defaultValue(new SettingColor(30, 30, 30, 200))
@@ -119,7 +122,7 @@ public class TopBarGui extends TopBarWindowScreen {
                 .onModuleActivated(colorSetting -> colorSetting.set(GuiConfig.INSTANCE.backgroundHovered))
                 .build()
         );
-        sg.add(new ColorSetting.Builder()
+        sgColors.add(new ColorSetting.Builder()
                 .name("background-pressed")
                 .description("Background pressed color.")
                 .defaultValue(new SettingColor(40, 40, 40, 200))
@@ -128,7 +131,7 @@ public class TopBarGui extends TopBarWindowScreen {
                 .build()
         );
 
-        sg.add(new ColorSetting.Builder()
+        sgColors.add(new ColorSetting.Builder()
                 .name("scrollbar")
                 .description("Scrollbar color")
                 .defaultValue(new SettingColor(80, 80, 80, 200))
@@ -136,7 +139,7 @@ public class TopBarGui extends TopBarWindowScreen {
                 .onModuleActivated(colorSetting -> colorSetting.set(GuiConfig.INSTANCE.scrollbar))
                 .build()
         );
-        sg.add(new ColorSetting.Builder()
+        sgColors.add(new ColorSetting.Builder()
                 .name("scrollbar-hovered")
                 .description("Scrollbar hovered color")
                 .defaultValue(new SettingColor(90, 90, 90, 200))
@@ -144,7 +147,7 @@ public class TopBarGui extends TopBarWindowScreen {
                 .onModuleActivated(colorSetting -> colorSetting.set(GuiConfig.INSTANCE.scrollbarHovered))
                 .build()
         );
-        sg.add(new ColorSetting.Builder()
+        sgColors.add(new ColorSetting.Builder()
                 .name("scrollbar-pressed")
                 .description("Scrollbar pressed color")
                 .defaultValue(new SettingColor(100, 100, 100, 200))
@@ -153,7 +156,7 @@ public class TopBarGui extends TopBarWindowScreen {
                 .build()
         );
 
-        sg.add(new ColorSetting.Builder()
+        sgColors.add(new ColorSetting.Builder()
                 .name("outline")
                 .description("Outline color.")
                 .defaultValue(new SettingColor(0, 0, 0, 225))
@@ -161,7 +164,7 @@ public class TopBarGui extends TopBarWindowScreen {
                 .onModuleActivated(colorSetting -> colorSetting.set(GuiConfig.INSTANCE.outline))
                 .build()
         );
-        sg.add(new ColorSetting.Builder()
+        sgColors.add(new ColorSetting.Builder()
                 .name("outline-hovered")
                 .description("Outline hovered color.")
                 .defaultValue(new SettingColor(10, 10, 10, 225))
@@ -169,7 +172,7 @@ public class TopBarGui extends TopBarWindowScreen {
                 .onModuleActivated(colorSetting -> colorSetting.set(GuiConfig.INSTANCE.outlineHovered))
                 .build()
         );
-        sg.add(new ColorSetting.Builder()
+        sgColors.add(new ColorSetting.Builder()
                 .name("outline-pressed")
                 .description("Outline pressed color.")
                 .defaultValue(new SettingColor(20, 20, 20, 225))
@@ -178,7 +181,7 @@ public class TopBarGui extends TopBarWindowScreen {
                 .build()
         );
 
-        sg.add(new ColorSetting.Builder()
+        sgColors.add(new ColorSetting.Builder()
                 .name("checkbox")
                 .description("Checkbox color.")
                 .defaultValue(new SettingColor(45, 225, 45))
@@ -186,7 +189,7 @@ public class TopBarGui extends TopBarWindowScreen {
                 .onModuleActivated(colorSetting -> colorSetting.set(GuiConfig.INSTANCE.checkbox))
                 .build()
         );
-        sg.add(new ColorSetting.Builder()
+        sgColors.add(new ColorSetting.Builder()
                 .name("checkbox-pressed")
                 .description("Checkbox pressed color.")
                 .defaultValue(new SettingColor(70, 225, 70))
@@ -195,7 +198,7 @@ public class TopBarGui extends TopBarWindowScreen {
                 .build()
         );
 
-        sg.add(new ColorSetting.Builder()
+        sgColors.add(new ColorSetting.Builder()
                 .name("separator")
                 .description("Separator color.")
                 .defaultValue(new SettingColor(200, 200, 200, 225))
@@ -204,7 +207,7 @@ public class TopBarGui extends TopBarWindowScreen {
                 .build()
         );
 
-        sg.add(new ColorSetting.Builder()
+        sgColors.add(new ColorSetting.Builder()
                 .name("plus")
                 .description("Plus color.")
                 .defaultValue(new SettingColor(45, 225, 45))
@@ -212,7 +215,7 @@ public class TopBarGui extends TopBarWindowScreen {
                 .onModuleActivated(colorSetting -> colorSetting.set(GuiConfig.INSTANCE.plus))
                 .build()
         );
-        sg.add(new ColorSetting.Builder()
+        sgColors.add(new ColorSetting.Builder()
                 .name("plus-hovered")
                 .description("Plus hovered color.")
                 .defaultValue(new SettingColor(60, 225, 60))
@@ -220,7 +223,7 @@ public class TopBarGui extends TopBarWindowScreen {
                 .onModuleActivated(colorSetting -> colorSetting.set(GuiConfig.INSTANCE.plusHovered))
                 .build()
         );
-        sg.add(new ColorSetting.Builder()
+        sgColors.add(new ColorSetting.Builder()
                 .name("plus-pressed")
                 .description("Plus pressed color.")
                 .defaultValue(new SettingColor(75, 255, 75))
@@ -229,7 +232,7 @@ public class TopBarGui extends TopBarWindowScreen {
                 .build()
         );
 
-        sg.add(new ColorSetting.Builder()
+        sgColors.add(new ColorSetting.Builder()
                 .name("minus")
                 .description("Minus color.")
                 .defaultValue(new SettingColor(225, 45, 45))
@@ -237,7 +240,7 @@ public class TopBarGui extends TopBarWindowScreen {
                 .onModuleActivated(colorSetting -> colorSetting.set(GuiConfig.INSTANCE.minus))
                 .build()
         );
-        sg.add(new ColorSetting.Builder()
+        sgColors.add(new ColorSetting.Builder()
                 .name("minus-hovered")
                 .description("Minus hovered color.")
                 .defaultValue(new SettingColor(225, 60, 60))
@@ -245,7 +248,7 @@ public class TopBarGui extends TopBarWindowScreen {
                 .onModuleActivated(colorSetting -> colorSetting.set(GuiConfig.INSTANCE.minusHovered))
                 .build()
         );
-        sg.add(new ColorSetting.Builder()
+        sgColors.add(new ColorSetting.Builder()
                 .name("minus-pressed")
                 .description("Minus pressed color.")
                 .defaultValue(new SettingColor(225, 75, 75))
@@ -254,7 +257,7 @@ public class TopBarGui extends TopBarWindowScreen {
                 .build()
         );
 
-        sg.add(new ColorSetting.Builder()
+        sgColors.add(new ColorSetting.Builder()
                 .name("accent")
                 .description("Accent color.")
                 .defaultValue(new SettingColor(135, 0, 255))
@@ -263,7 +266,7 @@ public class TopBarGui extends TopBarWindowScreen {
                 .build()
         );
 
-        sg.add(new ColorSetting.Builder()
+        sgColors.add(new ColorSetting.Builder()
                 .name("module-background")
                 .description("Module background color.")
                 .defaultValue(new SettingColor(50, 50, 50))
@@ -272,7 +275,7 @@ public class TopBarGui extends TopBarWindowScreen {
                 .build()
         );
 
-        sg.add(new ColorSetting.Builder()
+        sgColors.add(new ColorSetting.Builder()
                 .name("reset")
                 .description("Reset color.")
                 .defaultValue(new SettingColor(50, 50, 50))
@@ -280,7 +283,7 @@ public class TopBarGui extends TopBarWindowScreen {
                 .onModuleActivated(colorSetting -> colorSetting.set(GuiConfig.INSTANCE.reset))
                 .build()
         );
-        sg.add(new ColorSetting.Builder()
+        sgColors.add(new ColorSetting.Builder()
                 .name("reset-hovered")
                 .description("Reset hovered color.")
                 .defaultValue(new SettingColor(60, 60, 60))
@@ -288,7 +291,7 @@ public class TopBarGui extends TopBarWindowScreen {
                 .onModuleActivated(colorSetting -> colorSetting.set(GuiConfig.INSTANCE.resetHovered))
                 .build()
         );
-        sg.add(new ColorSetting.Builder()
+        sgColors.add(new ColorSetting.Builder()
                 .name("reset-pressed")
                 .description("Reset pressed color.")
                 .defaultValue(new SettingColor(70, 70, 70))
@@ -297,7 +300,7 @@ public class TopBarGui extends TopBarWindowScreen {
                 .build()
         );
 
-        sg.add(new ColorSetting.Builder()
+        sgColors.add(new ColorSetting.Builder()
                 .name("slider-left")
                 .description("Slider left color.")
                 .defaultValue(new SettingColor(0, 150, 80))
@@ -305,7 +308,7 @@ public class TopBarGui extends TopBarWindowScreen {
                 .onModuleActivated(colorSetting -> colorSetting.set(GuiConfig.INSTANCE.sliderLeft))
                 .build()
         );
-        sg.add(new ColorSetting.Builder()
+        sgColors.add(new ColorSetting.Builder()
                 .name("slider-right")
                 .description("Slider right color.")
                 .defaultValue(new SettingColor(50, 50, 50))
@@ -314,7 +317,7 @@ public class TopBarGui extends TopBarWindowScreen {
                 .build()
         );
 
-        sg.add(new ColorSetting.Builder()
+        sgColors.add(new ColorSetting.Builder()
                 .name("slider-handle")
                 .description("Slider handle color.")
                 .defaultValue(new SettingColor(0, 255, 180))
@@ -322,7 +325,7 @@ public class TopBarGui extends TopBarWindowScreen {
                 .onModuleActivated(colorSetting -> colorSetting.set(GuiConfig.INSTANCE.sliderHandle))
                 .build()
         );
-        sg.add(new ColorSetting.Builder()
+        sgColors.add(new ColorSetting.Builder()
                 .name("slider-handle-hovered")
                 .description("Slider handle hovered color.")
                 .defaultValue(new SettingColor(0, 240, 165))
@@ -330,7 +333,7 @@ public class TopBarGui extends TopBarWindowScreen {
                 .onModuleActivated(colorSetting -> colorSetting.set(GuiConfig.INSTANCE.sliderHandleHovered))
                 .build()
         );
-        sg.add(new ColorSetting.Builder()
+        sgColors.add(new ColorSetting.Builder()
                 .name("slider-handle-pressed")
                 .description("Slider handle pressed color.")
                 .defaultValue(new SettingColor(0, 225, 150))
@@ -339,7 +342,7 @@ public class TopBarGui extends TopBarWindowScreen {
                 .build()
         );
 
-        sg.add(new ColorSetting.Builder()
+        sgColors.add(new ColorSetting.Builder()
                 .name("color-edit-handle")
                 .description("SettingColor edit handle")
                 .defaultValue(new SettingColor(70, 70, 70))
@@ -347,7 +350,7 @@ public class TopBarGui extends TopBarWindowScreen {
                 .onModuleActivated(colorSetting -> colorSetting.set(GuiConfig.INSTANCE.colorEditHandle))
                 .build()
         );
-        sg.add(new ColorSetting.Builder()
+        sgColors.add(new ColorSetting.Builder()
                 .name("color-edit-handle-hovered")
                 .description("SettingColor edit handle hovered color.")
                 .defaultValue(new SettingColor(80, 80, 80))
@@ -355,7 +358,7 @@ public class TopBarGui extends TopBarWindowScreen {
                 .onModuleActivated(colorSetting -> colorSetting.set(GuiConfig.INSTANCE.colorEditHandleHovered))
                 .build()
         );
-        sg.add(new ColorSetting.Builder()
+        sgColors.add(new ColorSetting.Builder()
                 .name("color-edit-handle-pressed")
                 .description("SettingColor edit handle pressed.")
                 .defaultValue(new SettingColor(90, 90, 90))
@@ -364,7 +367,7 @@ public class TopBarGui extends TopBarWindowScreen {
                 .build()
         );
 
-        sg.add(new ColorSetting.Builder()
+        sgColors.add(new ColorSetting.Builder()
                 .name("edit")
                 .description("Edit color.")
                 .defaultValue(new SettingColor(50, 50, 50))
@@ -372,7 +375,7 @@ public class TopBarGui extends TopBarWindowScreen {
                 .onModuleActivated(colorSetting -> colorSetting.set(GuiConfig.INSTANCE.edit))
                 .build()
         );
-        sg.add(new ColorSetting.Builder()
+        sgColors.add(new ColorSetting.Builder()
                 .name("edit-hovered")
                 .description("Edit hovered color.")
                 .defaultValue(new SettingColor(60, 60, 60))
@@ -380,7 +383,7 @@ public class TopBarGui extends TopBarWindowScreen {
                 .onModuleActivated(colorSetting -> colorSetting.set(GuiConfig.INSTANCE.editHovered))
                 .build()
         );
-        sg.add(new ColorSetting.Builder()
+        sgColors.add(new ColorSetting.Builder()
                 .name("edit-pressed")
                 .description("Edit pressed color.")
                 .defaultValue(new SettingColor(70, 70, 70))
@@ -388,6 +391,36 @@ public class TopBarGui extends TopBarWindowScreen {
                 .onModuleActivated(colorSetting -> colorSetting.set(GuiConfig.INSTANCE.editPressed))
                 .build()
         );
+
+        SettingGroup sgListSettingScreen = s.createGroup("List Setting Screen");
+
+        sgListSettingScreen.add(new BoolSetting.Builder()
+                .name("expand-list-setting-screen")
+                .description("Automatically expand all lists from List Setting Screen when count of matches no more than a certain value.")  // TODO: grammar
+                .defaultValue(true)
+                .onChanged(bool -> GuiConfig.INSTANCE.expandListSettingScreen = bool)
+                .onModuleActivated(boolSetting -> boolSetting.set(GuiConfig.INSTANCE.expandListSettingScreen))
+                .build()
+        );
+
+        sgListSettingScreen.add(new BoolSetting.Builder()
+                .name("collapse-list-setting-screen")
+                .description("Automatically collapse all lists from List Setting Screen when count of matches more than a certain value.")  // TODO: grammar
+                .defaultValue(true)
+                .onChanged(bool -> GuiConfig.INSTANCE.collapseListSettingScreen = bool)
+                .onModuleActivated(setting -> setting.set(GuiConfig.INSTANCE.collapseListSettingScreen))
+                .build()
+        );
+
+        sgListSettingScreen.add(new IntSetting.Builder()
+                .name("count-list-setting-screen")
+                .description("The count of matches after which the list will be expanded/collapsed.")  // TODO: grammar
+                .defaultValue(20)
+                .onChanged(i -> GuiConfig.INSTANCE.countListSettingScreen = i)
+                .onModuleActivated(setting -> setting.set(GuiConfig.INSTANCE.countListSettingScreen))
+                .build()
+        );
+
 
         add(s.createTable()).fillX().expandX();
     }

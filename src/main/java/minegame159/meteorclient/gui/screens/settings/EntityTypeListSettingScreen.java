@@ -5,6 +5,7 @@
 
 package minegame159.meteorclient.gui.screens.settings;
 
+import minegame159.meteorclient.gui.GuiConfig;
 import minegame159.meteorclient.gui.screens.WindowScreen;
 import minegame159.meteorclient.gui.widgets.WCheckbox;
 import minegame159.meteorclient.gui.widgets.WLabel;
@@ -25,7 +26,7 @@ import java.util.function.Consumer;
 public class EntityTypeListSettingScreen extends WindowScreen {
     private final EntityTypeListSetting setting;
     private final WTextBox filter;
-    
+
     private String filterText = "";
 
     private WSection animals, waterAnimals, monsters, ambient, misc;
@@ -40,7 +41,7 @@ public class EntityTypeListSettingScreen extends WindowScreen {
         filter.setFocused(true);
         filter.action = () -> {
             filterText = filter.getText().trim();
-            
+
             clear();
             initWidgets();
         };
@@ -152,6 +153,26 @@ public class EntityTypeListSettingScreen extends WindowScreen {
         if (monsters.getCells().size() > 0) add(monsters).fillX().expandX();
         if (ambient.getCells().size() > 0) add(ambient).fillX().expandX();
         if (misc.getCells().size() > 0) add(misc).fillX().expandX();
+
+        int totalCount = (hasWaterAnimal + waterAnimals.getCells().size() + monsters.getCells().size() + ambient.getCells().size() + misc.getCells().size()) / 2;
+
+        if (totalCount <= GuiConfig.INSTANCE.countListSettingScreen) {
+            if (GuiConfig.INSTANCE.expandListSettingScreen) {
+                if (animals.getCells().size() > 0) animals.setExpanded(true, false);
+                if (waterAnimals.getCells().size() > 0) waterAnimals.setExpanded(true, false);
+                if (monsters.getCells().size() > 0) monsters.setExpanded(true, false);
+                if (ambient.getCells().size() > 0) ambient.setExpanded(true, false);
+                if (misc.getCells().size() > 0) misc.setExpanded(true, false);
+            }
+        } else {
+            if (GuiConfig.INSTANCE.collapseListSettingScreen) {
+                if (animals.getCells().size() > 0) animals.setExpanded(false, false);
+                if (waterAnimals.getCells().size() > 0) waterAnimals.setExpanded(false, false);
+                if (monsters.getCells().size() > 0) monsters.setExpanded(false, false);
+                if (ambient.getCells().size() > 0) ambient.setExpanded(false, false);
+                if (misc.getCells().size() > 0) misc.setExpanded(false, false);
+            }
+        }
     }
 
     private void tableChecked(List<EntityType<?>> entityTypes, boolean checked) {
