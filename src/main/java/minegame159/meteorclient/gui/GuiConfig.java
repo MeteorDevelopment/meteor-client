@@ -79,6 +79,10 @@ public class GuiConfig implements ISerializable<GuiConfig> {
     public SettingColor editHovered = createColor(60, 60, 60, 255);
     public SettingColor editPressed = createColor(70, 70, 70, 255);
 
+    public boolean expandListSettingScreen = true;
+    public boolean collapseListSettingScreen = true;
+    public int countListSettingScreen = 20;
+
     private Map<WindowType, WindowConfig> windowConfigs = new HashMap<>();
 
     public GuiConfig() {

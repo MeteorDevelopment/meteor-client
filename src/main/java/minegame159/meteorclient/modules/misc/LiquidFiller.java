@@ -60,7 +60,7 @@ public class LiquidFiller extends Module {
     private final Setting<List<Block>> whitelist = sgGeneral.add(new BlockListSetting.Builder()
             .name("block-whitelist")
             .description("The allowed blocks that it will use to fill up the liquid.")
-            .defaultValue(new ArrayList<>())
+            .defaultValue(new ArrayList<>(0))
             .build()
     );
 
