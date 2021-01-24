@@ -100,7 +100,12 @@ public abstract class ClientPlayNetworkHandlerMixin {
         double deltaZ = vec3d.z - player.getVelocity().z;
 
         Velocity velocity = ModuleManager.INSTANCE.get(Velocity.class);
-        player.setVelocity(player.getVelocity().x + deltaX * velocity.getHorizontal(), player.getVelocity().y + deltaY * velocity.getVertical(), player.getVelocity().z + deltaZ * velocity.getHorizontal());
+
+        player.setVelocity(
+                (player.getVelocity().x + deltaX) * velocity.getHorizontal(),
+                (player.getVelocity().y + deltaY) * velocity.getVertical(),
+                (player.getVelocity().z + deltaZ) * velocity.getHorizontal()
+        );
     }
 
     @Inject(method = "onItemPickupAnimation", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/world/ClientWorld;getEntityById(I)Lnet/minecraft/entity/Entity;", ordinal = 0))
