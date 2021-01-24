@@ -9,44 +9,40 @@ import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.utils.misc.ISerializable;
 import minegame159.meteorclient.utils.misc.NbtException;
 import minegame159.meteorclient.utils.render.ByteTexture;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.Identifier;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.net.URL;
 
 public class AccountCache implements ISerializable<AccountCache> {
-    private static ByteTexture STEVE;
-
-    private final boolean steve;
 
     public String username = "";
     public String uuid = "";
 
     private ByteTexture headTexture;
 
-    public AccountCache(boolean steve) {
-        this.steve = steve;
-    }
-
     public ByteTexture getHeadTexture() {
-        if (steve) return STEVE;
         return headTexture;
     }
 
     public boolean makeHead(String skinUrl) {
-        if (steve && STEVE != null) return true;
-
         try {
-            BufferedImage skin = ImageIO.read(new URL(skinUrl));
+            BufferedImage skin;
             byte[] head = new byte[8 * 8 * 3];
             int[] pixel = new int[4];
 
-            // Head
+            if (skinUrl.equals("steve"))
+                skin = ImageIO.read(MinecraftClient.getInstance().getResourceManager().getResource(new Identifier("meteor-client", "steve.png")).getInputStream());
+            else skin = ImageIO.read(new URL(skinUrl));
+
+            // Whole picture
+            // TODO: Find a better way to do it
             int i = 0;
-            for (int x = 8; x < 8 + 8; x++) {
-                for (int y = 8; y < 8 + 8; y++) {
+            for (int x = 0; x < 4 + 4; x++) {
+                for (int y = 0; y < 4 + 4; y++) {
                     skin.getData().getPixel(x, y, pixel);
 
                     for (int j = 0; j < 3; j++) {
@@ -56,28 +52,9 @@ public class AccountCache implements ISerializable<AccountCache> {
                 }
             }
 
-            // Hair or idk how to call it
-            i = 0;
-            for (int x = 40; x < 40 + 8; x++) {
-                for (int y = 8; y < 8 + 8; y++) {
-                    skin.getData().getPixel(x, y, pixel);
-
-                    int a = pixel[3];
-                    for (int j = 0; j < 3; j++) {
-                        if (a == 255) head[i] = (byte) pixel[j];
-                        i++;
-                    }
-                }
-            }
-
-            if (steve) {
-                STEVE = new ByteTexture(8, 8, head, false);
-            } else {
-                headTexture = new ByteTexture(8, 8, head, false);
-            }
-
+            headTexture = new ByteTexture(8, 8, head, false);
             return true;
-        } catch (IOException e) {
+        } catch (Exception e) {
             MeteorClient.LOG.error("Failed to read skin url. (" + skinUrl + ")");
             return false;
         }

@@ -23,7 +23,7 @@ public abstract class Account<T extends Account<?>> implements ISerializable<T> 
     public Account(AccountType type, String name) {
         this.type = type;
         this.name = name;
-        this.cache = new AccountCache(type == AccountType.Cracked);
+        this.cache = new AccountCache();
     }
 
     public abstract boolean fetchInfo();

@@ -17,7 +17,7 @@ public class AddTheAlteningAccountScreen extends WindowScreen {
 
         // Token
         add(new WLabel("Token:"));
-        WTextBox token = add(new WTextBox("", 400)).getWidget();
+        WAccountField token = add(new WAccountField("", 400)).getWidget();
         token.setFocused(true);
         row();
 

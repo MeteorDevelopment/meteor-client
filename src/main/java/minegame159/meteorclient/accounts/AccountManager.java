@@ -36,6 +36,10 @@ public class AccountManager extends Savable<AccountManager> implements Iterable<
         save();
     }
 
+    public boolean exists(Account<?> account) {
+        return accounts.contains(account);
+    }
+
     public void remove(Account<?> account) {
         if (accounts.remove(account)) {
             MeteorClient.EVENT_BUS.post(AccountListChangedEvent.get());
