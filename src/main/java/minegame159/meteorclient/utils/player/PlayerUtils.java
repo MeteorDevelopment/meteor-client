@@ -11,7 +11,6 @@ import minegame159.meteorclient.mixininterface.IVec3d;
 import net.minecraft.block.*;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -21,6 +20,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
+import net.minecraft.world.World;
 
 public class PlayerUtils {
     private static final MinecraftClient mc = MinecraftClient.getInstance();
@@ -47,10 +47,11 @@ public class PlayerUtils {
     }
 
     public static boolean placeBlock(BlockPos blockPos, Hand hand, boolean swing) {
-        assert mc.world != null;
-        assert  mc.interactionManager != null;
-        assert mc.player != null;
         if (blockPos == null) return false;
+
+        // Check y level
+        if (World.isOutOfBuildLimitVertically(blockPos)) return false;
+
         // Check if current block is replaceable
         if (!mc.world.getBlockState(blockPos).getMaterial().isReplaceable()) return false;
 
