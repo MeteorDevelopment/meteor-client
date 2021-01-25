@@ -44,17 +44,16 @@ public abstract class EntityMixin {
 
     @Redirect(method = "setVelocityClient", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;setVelocity(DDD)V"))
     private void setVelocityClientEntiySetVelocityProxy(Entity entity, double x, double y, double z) {
-        if (entity != MinecraftClient.getInstance().player) entity.setVelocity(x, y, z);
-
-        else {
+        if (((Object) this) == MinecraftClient.getInstance().player) {
             Velocity velocity = ModuleManager.INSTANCE.get(Velocity.class);
-
             entity.setVelocity(
                     (entity.getVelocity().x + x) * velocity.getHorizontal(),
                     (entity.getVelocity().y + y) * velocity.getVertical(),
                     (entity.getVelocity().z + z) * velocity.getHorizontal()
             );
         }
+
+        else entity.setVelocity(x, y, z);
     }
 
     @Inject(method = "getJumpVelocityMultiplier", at = @At("HEAD"), cancellable = true)
