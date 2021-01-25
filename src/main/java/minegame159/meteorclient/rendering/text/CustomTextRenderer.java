@@ -38,6 +38,8 @@ public class CustomTextRenderer implements TextRenderer {
 
     @Override
     public void begin(double scale, boolean scaleOnly, boolean big) {
+        if (building) throw new RuntimeException("CustomTextRenderer.begin() called twice");
+
         if (!scaleOnly) mb.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR_TEXTURE);
 
         if (big) {
@@ -93,6 +95,8 @@ public class CustomTextRenderer implements TextRenderer {
 
     @Override
     public void end() {
+        if (!building) throw new RuntimeException("CustomTextRenderer.end() called without calling begin()");
+
         if (!scaleOnly) {
             font.texture.bindTexture();
             mb.end();
