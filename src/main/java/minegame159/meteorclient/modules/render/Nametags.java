@@ -244,6 +244,7 @@ public class Nametags extends Module {
         }
 
         // Setup size
+        TextRenderer.get().begin();
         double nameWidth = TextRenderer.get().getWidth(name);
         double healthWidth = TextRenderer.get().getWidth(healthText);
         double pingWidth = TextRenderer.get().getWidth(pingText);
