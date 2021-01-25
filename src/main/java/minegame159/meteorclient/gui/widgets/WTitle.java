@@ -16,8 +16,7 @@ public class WTitle extends WWidget {
 
     public WTitle(String text) {
         this.text = text;
-
-        this.color = GuiConfig.INSTANCE.text;
+        this.color = GuiConfig.INSTANCE.windowHeaderText;
     }
 
     @Override
