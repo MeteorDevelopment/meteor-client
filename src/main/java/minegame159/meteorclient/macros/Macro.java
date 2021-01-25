@@ -37,7 +37,7 @@ public class Macro implements Listenable, ISerializable<Macro> {
 
     @EventHandler
     private final Listener<KeyEvent> onKey = new Listener<>(event -> {
-        if (event.action == KeyAction.Release && event.key == key && MinecraftClient.getInstance().currentScreen == null) {
+        if (event.action != KeyAction.Release && event.key == key && MinecraftClient.getInstance().currentScreen == null) {
             for (String command : messages) {
                 MinecraftClient.getInstance().player.sendChatMessage(command);
             }
