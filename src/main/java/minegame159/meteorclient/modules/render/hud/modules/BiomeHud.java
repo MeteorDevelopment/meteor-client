@@ -6,7 +6,9 @@
 package minegame159.meteorclient.modules.render.hud.modules;
 
 import minegame159.meteorclient.modules.render.hud.HUD;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.registry.Registry;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
@@ -24,6 +26,7 @@ public class BiomeHud extends DoubleTextHudModule {
         if (mc.player == null || mc.world == null) return "";
 
         blockPos.set(mc.player.getX(), mc.player.getY(), mc.player.getZ());
-        return Arrays.stream(mc.world.getBiome(blockPos).getCategory().getName().split("_")).map(StringUtils::capitalize).collect(Collectors.joining(" "));
+        Identifier id = mc.world.getRegistryManager().get(Registry.BIOME_KEY).getId(mc.world.getBiome(blockPos));
+        return Arrays.stream(id.getPath().split("_")).map(StringUtils::capitalize).collect(Collectors.joining(" "));
     }
 }
