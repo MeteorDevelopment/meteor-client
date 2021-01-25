@@ -154,13 +154,6 @@ public class AnchorAura extends Module {
             .build()
     );
 
-    private final Setting<Double> minHealth = sgMisc.add(new DoubleSetting.Builder()
-            .name("min-health")
-            .description("The minimum health you have to be for Anchor Aura to work.")
-            .defaultValue(15)
-            .build()
-    );
-
     // Pause
 
     private final Setting<Boolean> pauseOnEat = sgPause.add(new BoolSetting.Builder()
@@ -245,7 +238,9 @@ public class AnchorAura extends Module {
             .build()
     );
 
-    public AnchorAura() {super(Category.Combat, "anchor-aura", "Automatically places and breaks Respawn Anchors to harm entities.");}
+    public AnchorAura() {
+        super(Category.Combat, "anchor-aura", "Automatically places and breaks Respawn Anchors to harm entities.");
+    }
 
     private int placeDelayLeft;
     private int breakDelayLeft;
@@ -277,7 +272,7 @@ public class AnchorAura extends Module {
             return;
         }
 
-        if (getTotalHealth(mc.player) <= minHealth.get() && placeMode.get() != Mode.Suicide && breakMode.get() != Mode.Suicide) return;
+        if (getTotalHealth(mc.player) <= pauseOnHealth.get() && placeMode.get() != Mode.Suicide && breakMode.get() != Mode.Suicide) return;
 
         if (target == null || mc.player.distanceTo(target) > targetRange.get() || !target.isAlive()) target = findTarget();
         if (target == null) return;

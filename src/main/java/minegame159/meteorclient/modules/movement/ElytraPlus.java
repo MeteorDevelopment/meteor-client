@@ -315,7 +315,6 @@ public class ElytraPlus extends Module {
             }
             lastForwardPressed = true;
         } else if (autoPilotMode.get() == AutoPilotMode.Firework) {
-            ticksLeft--;
             if (!mc.player.isFallFlying()) return;
             if (slot == -1 && mc.player.getOffHandStack().getItem() != Items.FIREWORK_ROCKET) {
                 ChatUtils.moduleWarning(this, "No fireworks found in hotbar... Changing AutoPilot mode to NONE.");
@@ -329,6 +328,7 @@ public class ElytraPlus extends Module {
                 mc.player.swingHand(getFireworkHand());
                 if (autoPilotFireworkGhosthand.get()) mc.player.inventory.selectedSlot = prevSlot;
             }
+            ticksLeft--;
         }
     }
 

@@ -113,13 +113,6 @@ public class CrystalAura extends Module {
             .build()
     );
 
-    private final Setting<Double> minHealth = sgPlace.add(new DoubleSetting.Builder()
-            .name("min-health")
-            .description("The minimum health you have to be for it to place.")
-            .defaultValue(15)
-            .build()
-    );
-
     private final Setting<Boolean> surroundBreak = sgPlace.add(new BoolSetting.Builder()
             .name("surround-break")
             .description("Places a crystal next to a surrounded player and keeps it there so they cannot use Surround again.")
@@ -502,7 +495,7 @@ public class CrystalAura extends Module {
             }
         }
         boolean shouldFacePlace = false;
-        if (getTotalHealth(mc.player) <= minHealth.get() && placeMode.get() != Mode.Suicide) return;
+        if (getTotalHealth(mc.player) <= pauseOnHealth.get() && placeMode.get() != Mode.Suicide) return;
         if (target != null && heldCrystal != null && placeDelayLeft <= 0 && mc.world.raycast(new RaycastContext(target.getPos(), heldCrystal.getPos(), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, target)).getType()
                 == HitResult.Type.MISS) locked = false;
         if (heldCrystal == null) locked = false;
@@ -591,7 +584,7 @@ public class CrystalAura extends Module {
         }
     });
 
-    private void singleBreak(){
+    private void singleBreak() {
         assert mc.player != null;
         assert mc.world != null;
         Streams.stream(mc.world.getEntities())
@@ -605,7 +598,7 @@ public class CrystalAura extends Module {
                 .ifPresent(entity -> hitCrystal((EndCrystalEntity) entity));
     }
 
-    private void multiBreak(){
+    private void multiBreak() {
         assert mc.world != null;
         assert mc.player != null;
         crystalMap.clear();
@@ -637,7 +630,7 @@ public class CrystalAura extends Module {
         }
     }
 
-    private EndCrystalEntity findBestCrystal(Map<EndCrystalEntity, List<Double>> map){
+    private EndCrystalEntity findBestCrystal(Map<EndCrystalEntity, List<Double>> map) {
         bestDamage = 0;
         double currentDamage = 0;
         if (targetMode.get() == TargetMode.HighestXDamages){
@@ -666,7 +659,7 @@ public class CrystalAura extends Module {
         return bestBreak;
     }
 
-    private void hitCrystal(EndCrystalEntity entity){
+    private void hitCrystal(EndCrystalEntity entity) {
         assert mc.player != null;
         assert mc.world != null;
         assert mc.interactionManager != null;
@@ -692,7 +685,7 @@ public class CrystalAura extends Module {
         breakDelayLeft = breakDelay.get();
     }
 
-    private void findTarget(){
+    private void findTarget() {
         assert  mc.world != null;
         Optional<LivingEntity> livingEntity = Streams.stream(mc.world.getEntities())
                 .filter(Entity::isAlive)
@@ -710,7 +703,7 @@ public class CrystalAura extends Module {
         target = livingEntity.get();
     }
 
-    private void doSwitch(){
+    private void doSwitch() {
         assert mc.player != null;
         if (mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL) {
             int slot = InvUtils.findItemWithCount(Items.END_CRYSTAL).slot;
@@ -721,7 +714,7 @@ public class CrystalAura extends Module {
         }
     }
 
-    private void doHeldCrystal(){
+    private void doHeldCrystal() {
         assert mc.player != null;
         if (switchMode.get() != SwitchMode.None) doSwitch();
         if (mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL) return;
@@ -737,7 +730,7 @@ public class CrystalAura extends Module {
         placeBlock(bestBlock, getHand());
     }
 
-    private void placeBlock(Vec3d block, Hand hand){
+    private void placeBlock(Vec3d block, Hand hand) {
         assert mc.player != null;
         assert mc.interactionManager != null;
         assert mc.world != null;
@@ -759,7 +752,7 @@ public class CrystalAura extends Module {
         }
     }
 
-    private void findValidBlocks(LivingEntity target){
+    private void findValidBlocks(LivingEntity target) {
         assert mc.player != null;
         assert mc.world != null;
         bestBlock = new Vec3d(0, 0, 0);
@@ -827,7 +820,7 @@ public class CrystalAura extends Module {
         }
     }
 
-    private void findFacePlace(LivingEntity target){
+    private void findFacePlace(LivingEntity target) {
         assert mc.world != null;
         assert mc.player != null;
         BlockPos targetBlockPos = target.getBlockPos();
@@ -846,12 +839,12 @@ public class CrystalAura extends Module {
         }
     }
 
-    private boolean getDamagePlace(BlockPos pos){
+    private boolean getDamagePlace(BlockPos pos) {
         assert mc.player != null;
         return placeMode.get() == Mode.Suicide || DamageCalcUtils.crystalDamage(mc.player, new Vec3d(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5)) <= maxDamage.get();
     }
 
-    private Vec3d findOpen(LivingEntity target){
+    private Vec3d findOpen(LivingEntity target) {
         assert mc.player != null;
         int x = 0;
         int z = 0;
@@ -874,7 +867,7 @@ public class CrystalAura extends Module {
         return null;
     }
 
-    private Vec3d findOpenSurround(LivingEntity target){
+    private Vec3d findOpenSurround(LivingEntity target) {
         assert mc.player != null;
         assert mc.world != null;
 
@@ -913,9 +906,9 @@ public class CrystalAura extends Module {
                 != HitResult.Type.MISS;
     }
 
-    private boolean isSafe(Vec3d crystalPos){
+    private boolean isSafe(Vec3d crystalPos) {
         assert mc.player != null;
-        return (!(breakMode.get() == Mode.Safe) || (getTotalHealth(mc.player) - DamageCalcUtils.crystalDamage(mc.player, crystalPos) > minHealth.get()
+        return (!(breakMode.get() == Mode.Safe) || (getTotalHealth(mc.player) - DamageCalcUtils.crystalDamage(mc.player, crystalPos) > pauseOnHealth.get()
                 && DamageCalcUtils.crystalDamage(mc.player, crystalPos) < maxDamage.get()));
     }
 
