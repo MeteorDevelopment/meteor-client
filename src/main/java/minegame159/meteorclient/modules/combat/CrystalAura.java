@@ -296,6 +296,16 @@ public class CrystalAura extends Module {
             .build()
     );
 
+    private final Setting<Double> pauseOnHealth = sgPause.add(new DoubleSetting.Builder()
+            .name("pause-on-health")
+            .description("Pauses Crystal Aura if your health is lower than this amount.")
+            .min(0)
+            .defaultValue(0)
+            .sliderMax(36)
+            .max(36)
+            .build()
+    );
+
     // Misc
 
     private final Setting<Double> maxDamage = sgMisc.add(new DoubleSetting.Builder()
@@ -462,7 +472,8 @@ public class CrystalAura extends Module {
 
         if ((mc.player.isUsingItem() && (mc.player.getMainHandStack().getItem().isFood() || mc.player.getOffHandStack().getItem().isFood()) && pauseOnEat.get())
                 || (mc.interactionManager.isBreakingBlock() && pauseOnMine.get())
-                || (mc.player.isUsingItem() && (mc.player.getMainHandStack().getItem() instanceof PotionItem || mc.player.getOffHandStack().getItem() instanceof PotionItem) && pauseOnDrink.get())) {
+                || (mc.player.isUsingItem() && (mc.player.getMainHandStack().getItem() instanceof PotionItem || mc.player.getOffHandStack().getItem() instanceof PotionItem) && pauseOnDrink.get())
+                || (mc.player.getHealth() <= pauseOnHealth.get())) {
             return;
         }
 
