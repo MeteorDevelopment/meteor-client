@@ -48,10 +48,20 @@ public class GuiRenderer {
         mb.texture = true;
     }
 
+    public void beginFontScale() {
+        TextRenderer.get().begin(GuiConfig.INSTANCE.guiScale, true, false);
+    }
+
+    public void endFontScale() {
+        TextRenderer.get().end();
+    }
+
     public void begin(boolean root) {
         mb.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR_TEXTURE);
 
         if (root) {
+            beginFontScale();
+
             Window window = MinecraftClient.getInstance().getWindow();
             beginScissor(0, 0, window.getFramebufferWidth(), window.getFramebufferHeight(), false);
 
@@ -70,6 +80,7 @@ public class GuiRenderer {
         MinecraftClient.getInstance().getTextureManager().bindTexture(TEXTURE);
         mb.end();
 
+        endFontScale();
         TextRenderer.get().begin(GuiConfig.INSTANCE.guiScale);
         for (Text text : texts) {
             if (!text.title) {
@@ -88,8 +99,11 @@ public class GuiRenderer {
         }
         TextRenderer.get().end();
         texts.clear();
+        beginFontScale();
 
         if (root) {
+            endFontScale();
+
             if (tooltipWidth > 0) {
                 mb.texture = false;
                 mb.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
