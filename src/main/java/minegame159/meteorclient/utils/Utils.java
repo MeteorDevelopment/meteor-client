@@ -23,6 +23,7 @@ import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.item.*;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
@@ -375,16 +376,36 @@ public class Utils {
     }
 
     public static void addEnchantment(ItemStack itemStack, Enchantment enchantment, int level) {
-        itemStack.getOrCreateTag();
-        if (!itemStack.getTag().contains("Enchantments", 9)) {
-            itemStack.getTag().put("Enchantments", new ListTag());
+        CompoundTag tag = itemStack.getOrCreateTag();
+        ListTag listTag;
+
+        // Get list tag
+        if (!tag.contains("Enchantments", 9)) {
+            listTag = new ListTag();
+            tag.put("Enchantments", listTag);
+        }
+        else {
+            listTag = tag.getList("Enchantments", 10);
         }
 
-        ListTag listTag = itemStack.getTag().getList("Enchantments", 10);
-        CompoundTag compoundTag = new CompoundTag();
-        compoundTag.putString("id", String.valueOf(Registry.ENCHANTMENT.getId(enchantment)));
-        compoundTag.putShort("lvl", (short) level);
-        listTag.add(compoundTag);
+        // Check if item already has the enchantment and modify the level
+        String enchId = Registry.ENCHANTMENT.getId(enchantment).toString();
+
+        for (Tag _t : listTag) {
+            CompoundTag t = (CompoundTag) _t;
+
+            if (t.getString("id").equals(enchId)) {
+                t.putShort("lvl", (short) level);
+                return;
+            }
+        }
+
+        // Add the enchantment if it doesn't already have it
+        CompoundTag enchTag = new CompoundTag();
+        enchTag.putString("id", enchId);
+        enchTag.putShort("lvl", (short) level);
+
+        listTag.add(enchTag);
     }
 
     @SafeVarargs
