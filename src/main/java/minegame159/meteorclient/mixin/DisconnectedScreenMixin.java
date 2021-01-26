@@ -29,12 +29,16 @@ public class DisconnectedScreenMixin extends ScreenMixin {
 
     private ButtonWidget reconnectBtn;
     private boolean timerActive = true;
-    private double time = ((AutoReconnect) ModuleManager.INSTANCE.get(AutoReconnect.class)).time.get() * 20;
+    private double time = ModuleManager.INSTANCE.get(AutoReconnect.class).time.get() * 20;
 
-    @Inject(method = "init", at = @At("HEAD"))
+    @Inject(method = "init", at = @At("TAIL"))
     private void onRenderBackground(CallbackInfo info) {
-        reconnectBtn = super.addButton(new ButtonWidget(width / 2 - 100, height / 2 + reasonHeight / 2 + 9 + 30, 200,
-                20, new LiteralText("Reconnecting in " + time / 20f), button -> timerActive = !timerActive));
+
+        int x = width / 2 - 100;
+        int y = Math.min((height / 2 + reasonHeight / 2) + 32, height - 30);
+
+        reconnectBtn = addButton(new ButtonWidget(x, y, 200, 20, new LiteralText("Reconnecting in " + time / 20f), button -> timerActive = !timerActive));
+
         timerActive = ModuleManager.INSTANCE.isActive(AutoReconnect.class);
     }
 
@@ -43,12 +47,10 @@ public class DisconnectedScreenMixin extends ScreenMixin {
         if (timerActive) {
             time--;
             if (time <= 0) {
-                Utils.mc.openScreen(new ConnectScreen(new MultiplayerScreen(new TitleScreen()), Utils.mc,
-                        ((AutoReconnect) ModuleManager.INSTANCE.get(AutoReconnect.class)).lastServerInfo));
+                Utils.mc.openScreen(new ConnectScreen(new MultiplayerScreen(new TitleScreen()), Utils.mc, ModuleManager.INSTANCE.get(AutoReconnect.class).lastServerInfo));
 
             } else {
-                ((IAbstractButtonWidget) reconnectBtn)
-                        .setText(new LiteralText(String.format("Reconnecting in %.1f", time / 20f)));
+                ((IAbstractButtonWidget) reconnectBtn).setText(new LiteralText(String.format("Reconnecting in %.1f", time / 20f)));
             }
         }
     }
