@@ -26,6 +26,7 @@ public class HttpUtils {
             conn.setRequestMethod("GET");
             conn.setConnectTimeout(2500);
             conn.setReadTimeout(2500);
+            conn.setRequestProperty("User-Agent", "Meteor Client");
 
             return conn.getInputStream();
         } catch (SocketTimeoutException ignored) {
