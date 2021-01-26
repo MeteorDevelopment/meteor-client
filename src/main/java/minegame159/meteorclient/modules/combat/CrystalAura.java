@@ -113,13 +113,6 @@ public class CrystalAura extends Module {
             .build()
     );
 
-    private final Setting<Double> minHealth = sgPlace.add(new DoubleSetting.Builder()
-            .name("min-health")
-            .description("The minimum health you have to be for it to place.")
-            .defaultValue(15)
-            .build()
-    );
-
     private final Setting<Boolean> surroundBreak = sgPlace.add(new BoolSetting.Builder()
             .name("surround-break")
             .description("Places a crystal next to a surrounded player and keeps it there so they cannot use Surround again.")
@@ -293,6 +286,16 @@ public class CrystalAura extends Module {
             .name("pause-on-mine")
             .description("Pauses Crystal Aura while mining blocks.")
             .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Double> pauseOnHealth = sgPause.add(new DoubleSetting.Builder()
+            .name("pause-on-health")
+            .description("Pauses Crystal Aura if your health is lower than this value.")
+            .min(0)
+            .defaultValue(10)
+            .max(36)
+            .sliderMax(36)
             .build()
     );
 
@@ -491,7 +494,7 @@ public class CrystalAura extends Module {
             }
         }
         boolean shouldFacePlace = false;
-        if (getTotalHealth(mc.player) <= minHealth.get() && placeMode.get() != Mode.Suicide) return;
+        if (getTotalHealth(mc.player) <= pauseOnHealth.get() && placeMode.get() != Mode.Suicide) return;
         if (target != null && heldCrystal != null && placeDelayLeft <= 0 && mc.world.raycast(new RaycastContext(target.getPos(), heldCrystal.getPos(), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, target)).getType()
                 == HitResult.Type.MISS) locked = false;
         if (heldCrystal == null) locked = false;
@@ -904,7 +907,7 @@ public class CrystalAura extends Module {
 
     private boolean isSafe(Vec3d crystalPos){
         assert mc.player != null;
-        return (!(breakMode.get() == Mode.Safe) || (getTotalHealth(mc.player) - DamageCalcUtils.crystalDamage(mc.player, crystalPos) > minHealth.get()
+        return (!(breakMode.get() == Mode.Safe) || (getTotalHealth(mc.player) - DamageCalcUtils.crystalDamage(mc.player, crystalPos) > pauseOnHealth.get()
                 && DamageCalcUtils.crystalDamage(mc.player, crystalPos) < maxDamage.get()));
     }
 

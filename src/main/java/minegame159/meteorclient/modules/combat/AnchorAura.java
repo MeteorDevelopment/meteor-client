@@ -57,6 +57,7 @@ public class AnchorAura extends Module {
 
     private final SettingGroup sgPlace = settings.createGroup("Place");
     private final SettingGroup sgBreak = settings.createGroup("Break");
+    private final SettingGroup sgPause = settings.createGroup("Pause");
     private final SettingGroup sgMisc = settings.createGroup("Misc");
     private final SettingGroup sgRender = settings.createGroup("Render");
 
@@ -128,6 +129,39 @@ public class AnchorAura extends Module {
             .build()
     );
 
+    // Pause
+
+    private final Setting<Boolean> pauseOnEat = sgPause.add(new BoolSetting.Builder()
+            .name("pause-on-eat")
+            .description("Pauses Anchor Aura while eating.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> pauseOnDrink = sgPause.add(new BoolSetting.Builder()
+            .name("pause-on-drink")
+            .description("Pauses Anchor Aura while drinking a potion.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> pauseOnMine = sgPause.add(new BoolSetting.Builder()
+            .name("pause-on-mine")
+            .description("Pauses Anchor Aura while mining blocks.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Double> pauseOnHealth = sgPause.add(new DoubleSetting.Builder()
+            .name("pause-on-health")
+            .description("Pauses Anchor Aura if your health is lower than this value.")
+            .min(0)
+            .defaultValue(10)
+            .max(36)
+            .sliderMax(36)
+            .build()
+    );
+
     // Misc
 
     private final Setting<RotationMode> rotationMode = sgMisc.add(new EnumSetting.Builder<RotationMode>()
@@ -150,34 +184,6 @@ public class AnchorAura extends Module {
             .name("max-self-damage")
             .description("The maximum self-damage allowed.")
             .defaultValue(8)
-            .build()
-    );
-
-    private final Setting<Double> minHealth = sgMisc.add(new DoubleSetting.Builder()
-            .name("min-health")
-            .description("The minimum health you have to be for Anchor Aura to work.")
-            .defaultValue(15)
-            .build()
-    );
-
-    private final Setting<Boolean> pauseOnEat = sgMisc.add(new BoolSetting.Builder()
-            .name("pause-on-eat")
-            .description("Pauses Anchor Aura while eating.")
-            .defaultValue(false)
-            .build()
-    );
-
-    private final Setting<Boolean> pauseOnDrink = sgMisc.add(new BoolSetting.Builder()
-            .name("pause-on-drink")
-            .description("Pauses Anchor Aura while drinking a potion.")
-            .defaultValue(false)
-            .build()
-    );
-
-    private final Setting<Boolean> pauseOnMine = sgMisc.add(new BoolSetting.Builder()
-            .name("pause-on-mine")
-            .description("Pauses Anchor Aura while mining blocks.")
-            .defaultValue(false)
             .build()
     );
 
@@ -263,7 +269,7 @@ public class AnchorAura extends Module {
             return;
         }
 
-        if (getTotalHealth(mc.player) <= minHealth.get() && placeMode.get() != Mode.Suicide && breakMode.get() != Mode.Suicide) return;
+        if (getTotalHealth(mc.player) <= pauseOnHealth.get() && placeMode.get() != Mode.Suicide && breakMode.get() != Mode.Suicide) return;
 
         if (target == null || mc.player.distanceTo(target) > targetRange.get() || !target.isAlive()) target = findTarget();
         if (target == null) return;
