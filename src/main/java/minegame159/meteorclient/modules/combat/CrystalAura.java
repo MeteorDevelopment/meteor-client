@@ -293,7 +293,7 @@ public class CrystalAura extends Module {
             .name("pause-on-health")
             .description("Pauses Crystal Aura if your health is lower than this value.")
             .min(0)
-            .defaultValue(10)
+            .defaultValue(4)
             .max(36)
             .sliderMax(36)
             .build()
