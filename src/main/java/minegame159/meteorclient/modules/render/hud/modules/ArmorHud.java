@@ -7,6 +7,7 @@ package minegame159.meteorclient.modules.render.hud.modules;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.modules.render.hud.HUD;
+import minegame159.meteorclient.modules.render.hud.HudEditorScreen;
 import minegame159.meteorclient.modules.render.hud.HudRenderer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -60,13 +61,14 @@ public class ArmorHud extends HudModule {
                 armorX = x / hud.armorScale() + position * 18;
                 armorY = y / hud.armorScale();
             }
+
             mc.getItemRenderer().renderGuiItemIcon(itemStack, (int) armorX, (int) armorY);
 
-            if (itemStack.isDamageable()) {
+            if (itemStack.isDamageable() && !(mc.currentScreen instanceof HudEditorScreen)) {
                 if (hud.armorDurability() == Durability.Default) {
                     mc.getItemRenderer().renderGuiItemOverlay(mc.textRenderer, itemStack, (int) armorX, (int) armorY);
                 } else if (hud.armorDurability() != Durability.None) {
-                    String message = "sex";
+                    String message = "err";
 
                     switch (hud.armorDurability()) {
                         case Numbers:
@@ -99,12 +101,12 @@ public class ArmorHud extends HudModule {
     }
 
     private ItemStack getItem(int i) {
-        if (mc.player == null) {
+        if (mc.player == null || mc.currentScreen instanceof HudEditorScreen) {
             switch (i) {
-                default: return Items.DIAMOND_BOOTS.getDefaultStack();
-                case 1:  return Items.DIAMOND_LEGGINGS.getDefaultStack();
-                case 2:  return Items.DIAMOND_CHESTPLATE.getDefaultStack();
-                case 3:  return Items.DIAMOND_HELMET.getDefaultStack();
+                default: return Items.NETHERITE_BOOTS.getDefaultStack();
+                case 1:  return Items.NETHERITE_LEGGINGS.getDefaultStack();
+                case 2:  return Items.NETHERITE_CHESTPLATE.getDefaultStack();
+                case 3:  return Items.NETHERITE_HELMET.getDefaultStack();
             }
         }
         return mc.player.inventory.getArmorStack(i);
