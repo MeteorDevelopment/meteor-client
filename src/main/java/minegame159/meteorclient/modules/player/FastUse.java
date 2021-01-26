@@ -35,7 +35,7 @@ public class FastUse extends Module {
     );
 
     private final Setting<Boolean> exp = sgGeneral.add(new BoolSetting.Builder()
-            .name("xp")
+            .name("xP")
             .description("Fast-throws XP bottles if the mode is \"Some\".")
             .defaultValue(false)
             .build()

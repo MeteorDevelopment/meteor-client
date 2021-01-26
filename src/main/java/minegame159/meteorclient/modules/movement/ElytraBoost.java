@@ -27,7 +27,7 @@ import java.util.List;
 public class ElytraBoost extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<Boolean> dontConsumeFirework = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> antiConsumeFirework = sgGeneral.add(new BoolSetting.Builder()
             .name("anti-consume")
             .description("Doesn't consume the firework when using it.")
             .defaultValue(true)
@@ -72,7 +72,7 @@ public class ElytraBoost extends Module {
     private final Listener<InteractItemEvent> onInteractItem = new Listener<>(event -> {
         ItemStack itemStack = mc.player.getStackInHand(event.hand);
 
-        if (itemStack.getItem() instanceof FireworkItem && dontConsumeFirework.get()) {
+        if (itemStack.getItem() instanceof FireworkItem && antiConsumeFirework.get()) {
             event.toReturn = ActionResult.PASS;
 
             boost();

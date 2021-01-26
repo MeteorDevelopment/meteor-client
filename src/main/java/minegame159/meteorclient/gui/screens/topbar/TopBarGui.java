@@ -396,7 +396,7 @@ public class TopBarGui extends TopBarWindowScreen {
 
         sgListSettingScreen.add(new BoolSetting.Builder()
                 .name("expand-list-setting-screen")
-                .description("Automatically expand all lists from List Setting Screen when count of matches no more than a certain value.")  // TODO: grammar
+                .description("Automatically expand all lists from List Setting Screen when count of matches no more than a certain value.")
                 .defaultValue(true)
                 .onChanged(bool -> GuiConfig.INSTANCE.expandListSettingScreen = bool)
                 .onModuleActivated(boolSetting -> boolSetting.set(GuiConfig.INSTANCE.expandListSettingScreen))
@@ -405,7 +405,7 @@ public class TopBarGui extends TopBarWindowScreen {
 
         sgListSettingScreen.add(new BoolSetting.Builder()
                 .name("collapse-list-setting-screen")
-                .description("Automatically collapse all lists from List Setting Screen when count of matches more than a certain value.")  // TODO: grammar
+                .description("Automatically collapse all lists from List Setting Screen when count of matches more than a certain value.")
                 .defaultValue(true)
                 .onChanged(bool -> GuiConfig.INSTANCE.collapseListSettingScreen = bool)
                 .onModuleActivated(setting -> setting.set(GuiConfig.INSTANCE.collapseListSettingScreen))
@@ -414,7 +414,7 @@ public class TopBarGui extends TopBarWindowScreen {
 
         sgListSettingScreen.add(new IntSetting.Builder()
                 .name("count-list-setting-screen")
-                .description("The count of matches after which the list will be expanded/collapsed.")  // TODO: grammar
+                .description("The count of matches after which the list will be expanded/collapsed.")
                 .defaultValue(20)
                 .onChanged(i -> GuiConfig.INSTANCE.countListSettingScreen = i)
                 .onModuleActivated(setting -> setting.set(GuiConfig.INSTANCE.countListSettingScreen))

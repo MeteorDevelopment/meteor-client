@@ -60,8 +60,8 @@ public class EChestFarmer extends Module {
             .build()
     );
 
-    private final Setting<Boolean> disableOnAmount = sgGeneral.add(new BoolSetting.Builder()
-            .name("disable-on-completion")
+    private final Setting<Boolean> selfToggle = sgGeneral.add(new BoolSetting.Builder()
+            .name("self-toggle")
             .description("Whether or not to disable when you reach your desired amount of stacks of obsidian.")
             .defaultValue(true)
             .build()
@@ -73,11 +73,11 @@ public class EChestFarmer extends Module {
     @EventHandler
     private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
         if (lowerAmount.get() < InvUtils.findItemWithCount(Items.OBSIDIAN).count) stop = false;
-        if (stop && !disableOnAmount.get()) {
+        if (stop && !selfToggle.get()) {
             stop = false;
             numLeft = Math.floorDiv(amount.get(), 8);
             return;
-        } else if (stop && disableOnAmount.get()) {
+        } else if (stop && selfToggle.get()) {
             this.toggle();
             return;
         }

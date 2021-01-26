@@ -57,19 +57,19 @@ public class BedAura extends Module {
 
     // Place
 
+    private final Setting<Mode> placeMode = sgPlace.add(new EnumSetting.Builder<Mode>()
+            .name("place-mode")
+            .description("How the beds get placed.")
+            .defaultValue(Mode.Safe)
+            .build()
+    );
+
     private final Setting<Integer> placeDelay = sgPlace.add(new IntSetting.Builder()
             .name("place-delay")
             .description("The delay between placements.")
             .defaultValue(2)
             .min(0)
             .sliderMax(10)
-            .build()
-    );
-
-    private final Setting<Mode> placeMode = sgPlace.add(new EnumSetting.Builder<Mode>()
-            .name("place-mode")
-            .description("How the beds get placed.")
-            .defaultValue(Mode.Safe)
             .build()
     );
 
@@ -129,7 +129,7 @@ public class BedAura extends Module {
     private final Setting<Double> breakRange = sgBreak.add(new DoubleSetting.Builder()
             .name("break-range")
             .description("The distance in a single direction the beds get broken.")
-            .defaultValue(4)
+            .defaultValue(5)
             .min(0)
             .sliderMax(5)
             .build()
