@@ -80,7 +80,7 @@ public class AntiAFK extends Module {
 
     private final Setting<Boolean> click = sgActions.add(new BoolSetting.Builder()
             .name("click")
-            .description("Clicks.")
+            .description("Swings.")
             .defaultValue(false)
             .build());
 
@@ -110,7 +110,7 @@ public class AntiAFK extends Module {
     );
 
     private final Setting<Integer> delay = sgMessages.add(new IntSetting.Builder()
-            .name("delay")
+            .name("message-delay")
             .description("The delay between specified messages in ticks.")
             .defaultValue(20)
             .min(0)

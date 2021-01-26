@@ -22,7 +22,7 @@ public class BowSpam extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Integer> charge = sgGeneral.add(new IntSetting.Builder()
-            .name("charge")
+            .name("charge-delay")
             .description("How long to charge the bow before releasing in ticks.")
             .defaultValue(5)
             .min(5)
@@ -33,7 +33,7 @@ public class BowSpam extends Module {
     );
 
     private final Setting<Boolean> onlyWhenHoldingRightClick = sgGeneral.add(new BoolSetting.Builder()
-            .name("only-when-holding-right-click")
+            .name("when-holding-right-click")
             .description("Works only when holding right click.")
             .defaultValue(false)
             .build()

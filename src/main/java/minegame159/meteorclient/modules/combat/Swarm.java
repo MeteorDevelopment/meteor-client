@@ -60,7 +60,7 @@ public class Swarm extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<String> ipAddress = sgGeneral.add(new StringSetting.Builder()
-            .name("iP-address")
+            .name("iP-address") // not typo any other grammar fixers do not change this thx
             .description("The IP address of the Queen.")
             .defaultValue("localhost")
             .build());

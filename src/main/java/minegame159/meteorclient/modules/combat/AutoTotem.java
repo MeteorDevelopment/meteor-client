@@ -45,7 +45,7 @@ public class AutoTotem extends Module {
 
     private final Setting<Boolean> smart = sgGeneral.add(new BoolSetting.Builder()
             .name("smart")
-            .description("Only switches to a totem when you are close to death.")
+            .description("Only switches to a totem when you are close to death. Needed for OffhandExtra.")
             .defaultValue(false)
             .build()
     );

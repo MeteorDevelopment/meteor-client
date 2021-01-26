@@ -34,6 +34,7 @@ public class SpeedMine extends Module {
             .defaultValue(Mode.Normal)
             .build()
     );
+    // why is this modifier measured that way
     public final Setting<Double> modifier = sgGeneral.add(new DoubleSetting.Builder()
             .name("modifier")
             .description("Mining speed modifier. An additional value of 0.2 is equivalent to one haste level (1.2 = haste 1).")

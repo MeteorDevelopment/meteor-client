@@ -28,19 +28,19 @@ public class ItemByteSize extends Module {
         True
     }
 
-    private final SettingGroup sgUseKbIfBigEnough = settings.createGroup("Use KB if big enough");
+    private final SettingGroup sgUseKB = settings.createGroup("Use KB");
 
-    private final Setting<Boolean> useKbIfBigEnoughEnabled = sgUseKbIfBigEnough.add(new BoolSetting.Builder()
-            .name("use-kb-if-big-enough-enabled")
-            .description("Uses KB instead of bytes if your item's size is larger or equal to 1KB.")
-            .defaultValue(true)
-            .build()
-    );
-
-    private final Setting<Mode> mode = sgUseKbIfBigEnough.add(new EnumSetting.Builder<Mode>()
+    private final Setting<Mode> mode = sgUseKB.add(new EnumSetting.Builder<Mode>()
             .name("mode")
             .description("Uses the standard mode (1KB to 1000b) OR true mode (1KB to 1024b).")
             .defaultValue(Mode.True)
+            .build()
+    );
+
+    private final Setting<Boolean> useKBEnabled = sgUseKB.add(new BoolSetting.Builder()
+            .name("use-kB-enabled")
+            .description("Uses KB instead of bytes if your item's size is larger or equal to 1KB.")
+            .defaultValue(true)
             .build()
     );
 
@@ -66,7 +66,7 @@ public class ItemByteSize extends Module {
     }
 
     public String bytesToString(int count) {
-        if (useKbIfBigEnoughEnabled.get() && count >= getKbSize()) return String.format("%.2f kb", count / (float) getKbSize());
+        if (useKBEnabled.get() && count >= getKbSize()) return String.format("%.2f kb", count / (float) getKbSize());
         return String.format("%d bytes", count);
     }
 }

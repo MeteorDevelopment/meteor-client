@@ -31,14 +31,14 @@ public class AutoWeapon extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Weapon> weapon = sgGeneral.add(new EnumSetting.Builder<Weapon>()
-            .name("Weapon")
+            .name("weapon")
             .description("What type of weapon to use.")
             .defaultValue(Weapon.Sword)
             .build()
     );
 
     private final Setting<Integer> threshold = sgGeneral.add(new IntSetting.Builder()
-            .name("threshold")
+            .name("damage-threshold")
             .description("If the non-preferred weapon produces this much damage this will favor it over your preferred weapon.")
             .defaultValue(4)
             .build()
