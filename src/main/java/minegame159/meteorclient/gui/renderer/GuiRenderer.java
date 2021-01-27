@@ -80,7 +80,8 @@ public class GuiRenderer {
         MinecraftClient.getInstance().getTextureManager().bindTexture(TEXTURE);
         mb.end();
 
-        endFontScale();
+        boolean a = TextRenderer.get().isBuilding();
+        if (a) endFontScale();
         TextRenderer.get().begin(GuiConfig.INSTANCE.guiScale);
         for (Text text : texts) {
             if (!text.title) {
@@ -99,7 +100,7 @@ public class GuiRenderer {
         }
         TextRenderer.get().end();
         texts.clear();
-        beginFontScale();
+        if (a) beginFontScale();
 
         if (root) {
             endFontScale();
