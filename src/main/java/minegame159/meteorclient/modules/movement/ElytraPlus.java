@@ -386,12 +386,14 @@ public class ElytraPlus extends Module {
         }
     }
 
+    private final StaticListener staticListener = new StaticListener();
+
     protected void enableGroundListener() {
-        MeteorClient.EVENT_BUS.subscribe(StaticListener.class);
+        MeteorClient.EVENT_BUS.subscribe(staticListener);
     }
 
     protected void disableGroundListener() {
-        MeteorClient.EVENT_BUS.unsubscribe(StaticListener.class);
+        MeteorClient.EVENT_BUS.unsubscribe(staticListener);
     }
 
     private Hand getFireworkHand() {

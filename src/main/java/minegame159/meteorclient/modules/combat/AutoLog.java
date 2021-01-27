@@ -186,10 +186,12 @@ public class AutoLog extends Module {
         }
     }
 
+    private final StaticListener staticListener = new StaticListener();
+
     private void enableHealthListener(){
-        MeteorClient.EVENT_BUS.subscribe(StaticListener.class);
+        MeteorClient.EVENT_BUS.subscribe(staticListener);
     }
     private void disableHealthListener(){
-        MeteorClient.EVENT_BUS.unsubscribe(StaticListener.class);
+        MeteorClient.EVENT_BUS.unsubscribe(staticListener);
     }
 }
