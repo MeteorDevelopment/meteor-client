@@ -7,8 +7,7 @@ package minegame159.meteorclient.modules.combat;
 
 //Created by squidoodly 15/04/2020
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.EntityAddedEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
@@ -17,7 +16,10 @@ import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.utils.player.*;
+import minegame159.meteorclient.utils.player.ChatUtils;
+import minegame159.meteorclient.utils.player.DamageCalcUtils;
+import minegame159.meteorclient.utils.player.PlayerUtils;
+import minegame159.meteorclient.utils.player.RotationUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.BlockItem;
@@ -66,7 +68,7 @@ public class SmartSurround extends Module {
     }
 
     @EventHandler
-    private final Listener<EntityAddedEvent> onSpawn = new Listener<>(event -> {
+    private void onSpawn(EntityAddedEvent event) {
         crystal = event.entity;
 
         if (event.entity.getType() == EntityType.END_CRYSTAL) {
@@ -97,10 +99,10 @@ public class SmartSurround extends Module {
                 rPosZ = mc.player.getBlockPos().getZ() - event.entity.getBlockPos().getZ();
             }
         }
-    });
+    }
 
     @EventHandler
-    private final  Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         if (slot != -1) {
             if ((rPosX >= 2) && (rPosZ == 0)) {
                 placeObi(rPosX - 1, 0, crystal);
@@ -129,7 +131,7 @@ public class SmartSurround extends Module {
                 mc.player.inventory.selectedSlot = oldSlot;
             }
         }
-    });
+    }
 
     private void placeObi(int x, int z, Entity crystal) {
         if (rotate.get()) RotationUtils.packetRotate(crystal.getBlockPos().add(x, -1, z));

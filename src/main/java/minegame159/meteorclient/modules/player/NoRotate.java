@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.modules.player;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.mixininterface.IPlayerMoveC2SPacket;
 import minegame159.meteorclient.modules.Category;
@@ -22,11 +21,11 @@ public class NoRotate extends Module {
     }
 
     @EventHandler
-    private final Listener<PacketEvent.Send> onSendPacket = new Listener<>(event -> {
+    private void onSendPacket(PacketEvent.Send event) {
         if (event.packet instanceof PlayerMoveC2SPacket) {
             if (ModuleManager.INSTANCE.get(EXPThrower.class).isActive() || ModuleManager.INSTANCE.get(Quiver.class).isActive()) return;
             ((IPlayerMoveC2SPacket) event.packet).setPitch(mc.player.getPitch(0));
             ((IPlayerMoveC2SPacket) event.packet).setYaw(mc.player.getYaw(1));
         }
-    });
+    }
 }

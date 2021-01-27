@@ -27,8 +27,7 @@ import java.net.InetAddress;
 public class ClientConnectionMixin {
     @Inject(method = "handlePacket", at = @At("HEAD"), cancellable = true)
     private static <T extends PacketListener> void onHandlePacket(Packet<T> packet, PacketListener listener, CallbackInfo info) {
-        PacketEvent.Receive event = PacketEvent.Receive.get(packet);
-        MeteorClient.EVENT_BUS.post(event);
+        PacketEvent.Receive event = MeteorClient.EVENT_BUS.post(PacketEvent.Receive.get(packet));
 
         if (event.isCancelled()) info.cancel();
     }

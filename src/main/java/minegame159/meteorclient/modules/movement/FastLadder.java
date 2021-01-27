@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.modules.movement;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
@@ -31,11 +30,11 @@ public class FastLadder extends Module {
     }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         if (!mc.player.isClimbing() || !mc.player.horizontalCollision) return;
         if (mc.player.input.movementForward == 0 && mc.player.input.movementSideways == 0) return;
 
         Vec3d velocity = mc.player.getVelocity();
         mc.player.setVelocity(velocity.x, speed.get(), velocity.z);
-    });
+    }
 }

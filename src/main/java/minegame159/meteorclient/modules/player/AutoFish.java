@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.modules.player;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.meteor.KeyEvent;
 import minegame159.meteorclient.events.world.PlaySoundEvent;
 import minegame159.meteorclient.events.world.TickEvent;
@@ -94,7 +93,7 @@ public class AutoFish extends Module {
     }
 
     @EventHandler
-    private final Listener<PlaySoundEvent> onPlaySound = new Listener<>(event -> {
+    private void onPlaySound(PlaySoundEvent event) {
         SoundInstance p = event.sound;
         FishingBobberEntity b = mc.player.fishHook;
 
@@ -105,10 +104,10 @@ public class AutoFish extends Module {
                 ticksData = 0;
             }
         }
-    });
+    }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         // Auto cast
         if (autoCastCheckTimer <= 0) {
             autoCastCheckTimer = 30;
@@ -145,10 +144,10 @@ public class AutoFish extends Module {
         }
 
         ticksToRightClick--;
-    });
+    }
 
     @EventHandler
-    private final Listener<KeyEvent> onKey = new Listener<>(event -> {
+    private void onKey(KeyEvent event) {
         if (mc.options.keyUse.isPressed()) ticksEnabled = false;
-    });
+    }
 }

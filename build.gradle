@@ -24,24 +24,22 @@ repositories {
 
 dependencies {
 	def dependency = { id ->
-		modImplementation id
+		implementation id
 		shadow id
 	}
 
-	//to change the versions see the gradle.properties file
+	// Minecraft
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
-	// Fabric API. This is technically optional, but you probably want it anyway.
+	// Fabric API
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-
-	// PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
-	// You may need to force-disable transitiveness on them.
 
 	// For XRay compatibility
 	modImplementation "com.github.jellysquid3:sodium-fabric:1.16.x~stable-SNAPSHOT"
 
+	// Baritone
 	modImplementation("com.gitlab.CDAGaming:fabritone:fabric~1.16.3-SNAPSHOT") {
 		exclude(group: "org.lwjgl.lwjgl", module: "lwjgl-platform")
 		exclude(group: "org.lwjgl.lwjgl", module: "lwjgl")
@@ -52,12 +50,10 @@ dependencies {
 	}
 	include "com.gitlab.CDAGaming:fabritone:fabric~1.16.3-SNAPSHOT"
 
-	dependency "com.github.ZeroMemes:Alpine:1.9"
-	dependency 'com.g00fy2:versioncompare:1.3.7'
-	dependency "org.joml:joml:1.10.0"
-
-	implementation 'com.github.minndevelopment:java-discordrpc:2.0.2'
-	shadow "club.minnced:java-discord-rpc:2.0.2"
+	// Other dependencies
+	dependency "com.github.MeteorDevelopment:orbit:0.1.2"
+	dependency "com.g00fy2:versioncompare:1.3.7"
+	dependency "com.github.minndevelopment:java-discordrpc:2.0.2"
 }
 
 shadowJar {

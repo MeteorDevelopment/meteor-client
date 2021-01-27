@@ -5,9 +5,7 @@
 
 package minegame159.meteorclient.utils.player;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listenable;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.combat.AutoTotem;
@@ -24,7 +22,7 @@ import java.lang.annotation.Target;
 import java.util.*;
 import java.util.function.Predicate;
 
-public class InvUtils implements Listenable {
+public class InvUtils {
     public static final int OFFHAND_SLOT = 45;
     private static final MinecraftClient mc = MinecraftClient.getInstance();
 
@@ -86,7 +84,7 @@ public class InvUtils implements Listenable {
     }
 
     @EventHandler
-    private static final Listener<TickEvent.Pre> onTick = new Listener<>(event -> {
+    private static void onTick(TickEvent.Pre event) {
         if (mc.world == null || mc.player == null || mc.player.abilities.creativeMode){
             currentQueue.clear();
             moveQueue.clear();
@@ -107,7 +105,7 @@ public class InvUtils implements Listenable {
                 currentQueue.clear();
             }
         }
-    });
+    }
 
     public static void addSlots(List<Integer> slots, Class<? extends Module> klass){
         if (moveQueue.contains(new CustomPair(klass, slots)) || currentQueue.containsAll(slots)) return;
@@ -119,7 +117,7 @@ public class InvUtils implements Listenable {
         } else {
             moveQueue.add(new CustomPair(klass, slots));
         }
-        onTick.invoke(new TickEvent.Pre());
+        onTick(new TickEvent.Pre());
     }
 
     public static boolean canMove(Class<? extends Module> klass){

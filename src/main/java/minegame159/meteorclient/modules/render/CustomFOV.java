@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.modules.render;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
@@ -34,17 +33,16 @@ public class CustomFOV extends Module {
         mc.options.fov = fov.get();
     }
 
-
     public void getFOV() {
         mc.options.fov = fov.get();
     }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         if (fov.get() != mc.options.fov) {
             getFOV();
         }
-    });
+    }
 
     @Override
     public void onDeactivate() {
@@ -54,5 +52,4 @@ public class CustomFOV extends Module {
     public CustomFOV() {
         super(Category.Render, "custom-fov", "Allows your FOV to be more customizable.");
     }
-
 }

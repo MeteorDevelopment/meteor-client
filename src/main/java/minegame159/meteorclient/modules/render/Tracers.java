@@ -6,8 +6,7 @@
 package minegame159.meteorclient.modules.render;
 
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
@@ -27,7 +26,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 
 public class Tracers extends Module {
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgAppearance = settings.createGroup("Appearance");
     private final SettingGroup sgColors = settings.createGroup("Colors");
@@ -136,9 +134,8 @@ public class Tracers extends Module {
     }
 
     @EventHandler
-    private final Listener<RenderEvent> onRender = new Listener<>(event -> {
+    private void onRender(RenderEvent event) {
         count = 0;
-
 
         for (Entity entity : mc.world.getEntities()) {
             if ((!ModuleManager.INSTANCE.isActive(Freecam.class) && entity == mc.player) || !entities.get().getBoolean(entity.getType()) || (!showInvis.get() && entity.isInvisible())) continue;
@@ -155,7 +152,7 @@ public class Tracers extends Module {
                 }
             }
         }
-    });
+    }
 
     @Override
     public String getInfoString() {

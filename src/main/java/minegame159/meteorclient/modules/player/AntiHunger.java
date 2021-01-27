@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.modules.player;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixininterface.IPlayerMoveC2SPacket;
@@ -50,7 +49,7 @@ public class AntiHunger extends Module {
     }
 
     @EventHandler
-    private final Listener<PacketEvent.Send> onSendPacket = new Listener<>(event -> {
+    private void onSendPacket(PacketEvent.Send event) {
         if (ignorePacket) return;
 
         if (event.packet instanceof ClientCommandC2SPacket && sprint.get()) {
@@ -64,10 +63,10 @@ public class AntiHunger extends Module {
         if (event.packet instanceof PlayerMoveC2SPacket && onGround.get() && mc.player.isOnGround() && mc.player.fallDistance <= 0.0 && !mc.interactionManager.isBreakingBlock()) {
             ((IPlayerMoveC2SPacket) event.packet).setOnGround(false);
         }
-    });
+    }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         if (mc.player.isOnGround() && !lastOnGround && !sendOnGroundTruePacket) sendOnGroundTruePacket = true;
 
         if (mc.player.isOnGround() && sendOnGroundTruePacket && onGround.get()) {
@@ -79,5 +78,5 @@ public class AntiHunger extends Module {
         }
 
         lastOnGround = mc.player.isOnGround();
-    });
+    }
 }

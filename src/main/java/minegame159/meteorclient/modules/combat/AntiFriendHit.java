@@ -8,8 +8,7 @@ package minegame159.meteorclient.modules.combat;
 //Created by squidoodly 16/07/2020
 // Not empty class anymore :bruh: - notseanbased
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.player.AttackEntityEvent;
 import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.modules.Category;
@@ -23,7 +22,7 @@ public class AntiFriendHit extends Module {
     }
 
     @EventHandler
-    private final Listener<AttackEntityEvent> onAttackEntity = new Listener<>(event -> {
+    private void onAttackEntity(AttackEntityEvent event) {
         if (event.entity instanceof PlayerEntity && ModuleManager.INSTANCE.get(AntiFriendHit.class).isActive() && !FriendManager.INSTANCE.attack((PlayerEntity) event.entity)) event.cancel();
-    });
+    }
 }

@@ -5,11 +5,9 @@
 
 package minegame159.meteorclient;
 
-import me.zero.alpine.bus.EventBus;
-import me.zero.alpine.bus.EventManager;
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listenable;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventBus;
+import meteordevelopment.orbit.EventHandler;
+import meteordevelopment.orbit.IEventBus;
 import minegame159.meteorclient.accounts.AccountManager;
 import minegame159.meteorclient.commands.CommandManager;
 import minegame159.meteorclient.commands.commands.Ignore;
@@ -51,9 +49,9 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 
-public class MeteorClient implements ClientModInitializer, Listenable {
+public class MeteorClient implements ClientModInitializer {
     public static MeteorClient INSTANCE;
-    public static final EventBus EVENT_BUS = new EventManager();
+    public static final IEventBus EVENT_BUS = new EventBus();
     public static boolean IS_DISCONNECTING;
     public static final File FOLDER = new File(FabricLoader.getInstance().getGameDir().toString(), "meteor-client");
     public static final Logger LOG = LogManager.getLogger();
@@ -136,10 +134,12 @@ public class MeteorClient implements ClientModInitializer, Listenable {
     }
 
     @EventHandler
-    private final Listener<GameLeftEvent> onGameLeft = new Listener<>(event -> save());
+    private void onGameLeft(GameLeftEvent event) {
+        save();
+    }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         Capes.tick();
 
         if (screenToOpen != null && mc.currentScreen == null) {
@@ -150,10 +150,10 @@ public class MeteorClient implements ClientModInitializer, Listenable {
         if (Utils.canUpdate()) {
             mc.player.getActiveStatusEffects().values().removeIf(statusEffectInstance -> statusEffectInstance.getDuration() <= 0);
         }
-    });
+    }
 
     @EventHandler
-    private final Listener<KeyEvent> onKey = new Listener<>(event -> {
+    private void onKey(KeyEvent event) {
         // Click GUI
         if (event.action == KeyAction.Press && event.key == KeyBindingHelper.getBoundKeyOf(KeyBinds.OPEN_CLICK_GUI).getCode()) {
             if ((!Utils.canUpdate() && !(mc.currentScreen instanceof WidgetScreen)) || mc.currentScreen == null) openClickGui();
@@ -162,10 +162,5 @@ public class MeteorClient implements ClientModInitializer, Listenable {
         // Shulker Peek
         KeyBinding shulkerPeek = KeyBinds.SHULKER_PEEK;
         ((IKeyBinding) shulkerPeek).setPressed(shulkerPeek.matchesKey(event.key, 0) && event.action != KeyAction.Release);
-    });
-
-    public static <T> T postEvent(T event) {
-        EVENT_BUS.post(event);
-        return event;
     }
 }

@@ -7,8 +7,7 @@ package minegame159.meteorclient.modules.misc;
 
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.EntityAddedEvent;
 import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.modules.Category;
@@ -50,7 +49,7 @@ public class EntityLogger extends Module {
     }
 
     @EventHandler
-    private final Listener<EntityAddedEvent> onEntityAdded = new Listener<>(event -> {
+    private void onEntityAdded(EntityAddedEvent event) {
         if (event.entity.getUuid().equals(mc.player.getUuid())) return;
 
         if (entities.get().getBoolean(event.entity.getType())) {
@@ -64,5 +63,5 @@ public class EntityLogger extends Module {
 
             ChatUtils.moduleInfo(this, "(highlight)%s (default)has spawned at (highlight)%.0f(default), (highlight)%.0f(default), (highlight)%.0f(default).", name, event.entity.getX(), event.entity.getY(), event.entity.getZ());
         }
-    });
+    }
 }

@@ -63,7 +63,7 @@ public abstract class EntityMixin {
             float g = world.getBlockState(getVelocityAffectingPos()).getBlock().getJumpVelocityMultiplier();
             float a = f == 1.0D ? g : f;
 
-            JumpVelocityMultiplierEvent event = MeteorClient.postEvent(JumpVelocityMultiplierEvent.get());
+            JumpVelocityMultiplierEvent event = MeteorClient.EVENT_BUS.post(JumpVelocityMultiplierEvent.get());
             info.setReturnValue(a * event.multiplier);
         }
     }

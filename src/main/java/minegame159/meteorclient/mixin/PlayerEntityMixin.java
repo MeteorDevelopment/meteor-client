@@ -32,7 +32,8 @@ public class PlayerEntityMixin implements IPlayerEntity {
 
     @Inject(method = "clipAtLedge", at = @At("HEAD"), cancellable = true)
     protected void clipAtLedge(CallbackInfoReturnable<Boolean> info) {
-        ClipAtLedgeEvent event = MeteorClient.postEvent(ClipAtLedgeEvent.get());
+        ClipAtLedgeEvent event = MeteorClient.EVENT_BUS.post(ClipAtLedgeEvent.get());
+
         if (event.isSet()) info.setReturnValue(event.isClip());
     }
 
@@ -49,8 +50,8 @@ public class PlayerEntityMixin implements IPlayerEntity {
     @Inject(method = "getBlockBreakingSpeed", at = @At(value = "RETURN"), cancellable = true)
     public void onGetBlockBreakingSpeed(BlockState block, CallbackInfoReturnable<Float> cir) {
         SpeedMine module = ModuleManager.INSTANCE.get(SpeedMine.class);
-        if (!module.isActive() || module.mode.get() != SpeedMine.Mode.Normal)
-            return;
+        if (!module.isActive() || module.mode.get() != SpeedMine.Mode.Normal) return;
+
         cir.setReturnValue((float) (cir.getReturnValue() * module.modifier.get()));
     }
 

@@ -7,8 +7,7 @@ package minegame159.meteorclient.modules.misc;
 
 //Created by squidoodly 12/07/2020
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
@@ -79,16 +78,15 @@ public class AutoMountBypassDupe extends Module {
         timer = 0;
     }
 
-
     @EventHandler
-    private final Listener<PacketEvent.Send> onSendPacket = new Listener<>(event -> {
+    private void onSendPacket(PacketEvent.Send event) {
         if (noCancel) return;
 
         ModuleManager.INSTANCE.get(MountBypass.class).onSendPacket(event);
-    });
+    }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         if (GLFW.glfwGetKey(mc.getWindow().getHandle(), GLFW.GLFW_KEY_ESCAPE) == GLFW.GLFW_PRESS) {
             toggle();
             mc.player.closeHandledScreen();
@@ -186,7 +184,7 @@ public class AutoMountBypassDupe extends Module {
                 slotsToMove.clear();
             }
         }
-    });
+    }
 
     private int getInvSize(Entity e){
         if (!(e instanceof AbstractDonkeyEntity)) return -1;

@@ -5,7 +5,6 @@
 
 package minegame159.meteorclient.gui;
 
-import me.zero.alpine.listener.Listenable;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.gui.renderer.GuiDebugRenderer;
 import minegame159.meteorclient.gui.renderer.GuiRenderer;
@@ -23,7 +22,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.LiteralText;
 import org.lwjgl.glfw.GLFW;
 
-public abstract class WidgetScreen extends Screen implements Listenable {
+public abstract class WidgetScreen extends Screen {
     private static final GuiRenderer GUI_RENDERER = new GuiRenderer();
     private static final GuiDebugRenderer GUI_DEBUG_RENDERER = new GuiDebugRenderer();
 

@@ -6,8 +6,7 @@
 package minegame159.meteorclient.modules.render;
 
 import com.google.common.reflect.TypeToken;
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.mixin.ProjectileEntityAccessor;
 import minegame159.meteorclient.modules.Category;
@@ -73,7 +72,7 @@ public class EntityOwner extends Module {
     }
 
     @EventHandler
-    private final Listener<RenderEvent> onRender = new Listener<>(event -> {
+    private void onRender(RenderEvent event) {
         for (Entity entity : mc.world.getEntities()) {
             UUID ownerUuid;
 
@@ -87,7 +86,7 @@ public class EntityOwner extends Module {
                 renderNametag(event, entity, name);
             }
         }
-    });
+    }
 
     private void renderNametag(RenderEvent event, Entity entity, String name) {
         NametagUtils.begin(event, entity, scale.get());

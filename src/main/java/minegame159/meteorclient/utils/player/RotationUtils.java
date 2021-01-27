@@ -5,7 +5,7 @@
 
 package minegame159.meteorclient.utils.player;
 
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.utils.Utils;
@@ -86,8 +86,11 @@ public class RotationUtils {
     }
 
     public static void init() {
-        MeteorClient.EVENT_BUS.subscribe(onTick);
+        MeteorClient.EVENT_BUS.subscribe(RotationUtils.class);
     }
 
-    private static final Listener<TickEvent.Pre> onTick = new Listener<>(event -> rotationTimer++);
+    @EventHandler
+    private static void onTick(TickEvent.Pre event) {
+        rotationTimer++;
+    }
 }

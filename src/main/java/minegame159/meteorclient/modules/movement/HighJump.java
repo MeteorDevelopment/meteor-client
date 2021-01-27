@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.modules.movement;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.player.JumpVelocityMultiplierEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
@@ -30,7 +29,7 @@ public class HighJump extends Module {
     }
 
     @EventHandler
-    private final Listener<JumpVelocityMultiplierEvent> onJumpVelocityMultiplier = new Listener<>(event -> {
+    private void onJumpVelocityMultiplier(JumpVelocityMultiplierEvent event) {
         event.multiplier *= multiplier.get();
-    });
+    }
 }

@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.modules.movement;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixin.AbstractBlockAccessor;
 import minegame159.meteorclient.mixininterface.IVec3d;
@@ -87,10 +86,12 @@ public class Anchor extends Module {
     }
 
     @EventHandler
-    private final Listener<TickEvent.Pre> onPreTick = new Listener<>(event -> cancelJump = foundHole && cancelMove.get() && mc.player.pitch >= minPitch.get());
+    private void onPreTick(TickEvent.Pre event) {
+        cancelJump = foundHole && cancelMove.get() && mc.player.pitch >= minPitch.get();
+    }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onPostTick = new Listener<>(event -> {
+    private void onPostTick(TickEvent.Post event) {
         controlMovement = false;
 
         int x = MathHelper.floor(mc.player.getX());
@@ -132,7 +133,7 @@ public class Anchor extends Module {
 
             ((IVec3d) mc.player.getVelocity()).set(deltaX, mc.player.getVelocity().y - (pull.get() ? pullSpeed.get() : 0), deltaZ);
         }
-    });
+    }
 
     private boolean isHole(int x, int y, int z) {
         return isHoleBlock(x, y - 1, z) &&

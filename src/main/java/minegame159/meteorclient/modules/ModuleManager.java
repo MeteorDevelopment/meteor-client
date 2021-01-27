@@ -6,10 +6,8 @@
 package minegame159.meteorclient.modules;
 
 import com.mojang.serialization.Lifecycle;
-import me.zero.alpine.event.EventPriority;
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listenable;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
+import meteordevelopment.orbit.EventPriority;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.game.GameJoinedEvent;
 import minegame159.meteorclient.events.game.GameLeftEvent;
@@ -48,7 +46,7 @@ import javax.annotation.Nullable;
 import java.io.File;
 import java.util.*;
 
-public class ModuleManager extends Savable<ModuleManager> implements Listenable {
+public class ModuleManager extends Savable<ModuleManager> {
     public static final Category[] CATEGORIES = {Category.Combat, Category.Player, Category.Movement, Category.Render, Category.Misc};
     public static ModuleManager INSTANCE;
     public static final ModuleRegistry REGISTRY = new ModuleRegistry();
@@ -162,8 +160,8 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
         }
     }
 
-    @EventHandler
-    public Listener<KeyEvent> onKey = new Listener<>(event -> {
+    @EventHandler(priority = EventPriority.HIGHEST + 1)
+    private void onKey(KeyEvent event) {
         if (event.action == KeyAction.Repeat) return;
 
         // Check if binding module
@@ -184,10 +182,10 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
                 }
             }
         }
-    }, EventPriority.HIGHEST + 1);
+    }
 
-    @EventHandler
-    private final Listener<OpenScreenEvent> onOpenScreen = new Listener<>(event -> {
+    @EventHandler(priority = EventPriority.HIGHEST + 1)
+    private void onOpenScreen(OpenScreenEvent event) {
         for (Module module : modules.values()) {
             if (module.toggleOnKeyRelease) {
                 if (module.isActive()) {
@@ -196,10 +194,10 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
                 }
             }
         }
-    }, EventPriority.HIGHEST + 1);
+    }
 
     @EventHandler
-    private final Listener<GameJoinedEvent> onGameJoined = new Listener<>(event -> {
+    private void onGameJoined(GameJoinedEvent event) {
         synchronized (active) {
             for (Module module : active) {
                 MeteorClient.EVENT_BUS.subscribe(module);
@@ -207,17 +205,17 @@ public class ModuleManager extends Savable<ModuleManager> implements Listenable 
             }
             MeteorClient.EVENT_BUS.subscribe(new InvUtils());
         }
-    });
+    }
 
     @EventHandler
-    private final Listener<GameLeftEvent> onGameLeft = new Listener<>(event -> {
+    private void onGameLeft(GameLeftEvent event) {
         synchronized (active) {
             for (Module module : active) {
                 MeteorClient.EVENT_BUS.unsubscribe(module);
                 module.onDeactivate();
             }
         }
-    });
+    }
 
     public void disableAll() {
         synchronized (active) {

@@ -6,8 +6,7 @@
 package minegame159.meteorclient.modules.player;
 
 import com.google.common.collect.Streams;
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
@@ -42,7 +41,7 @@ public class EndermanLook extends Module {
     EndermanEntity enderman = null;
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         if (lookMode.get() == Mode.LookAway) {
             if (mc.player.abilities.creativeMode || !shouldLook())
                 return;
@@ -66,7 +65,7 @@ public class EndermanLook extends Module {
                     .findFirst()
                     .ifPresent(tempEntity -> enderman = ((EndermanEntity)tempEntity));
         }
-    });
+    }
 
     private boolean shouldLook() {
         return Streams.stream(mc.world.getEntities())

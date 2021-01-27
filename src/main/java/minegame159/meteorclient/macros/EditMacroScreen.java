@@ -4,9 +4,8 @@
  */
 package minegame159.meteorclient.macros;
 
-import me.zero.alpine.event.EventPriority;
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
+import meteordevelopment.orbit.EventPriority;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.meteor.KeyEvent;
 import minegame159.meteorclient.events.meteor.MacroListChangedEvent;
@@ -15,7 +14,7 @@ import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.utils.Utils;
 
 public class EditMacroScreen extends WindowScreen {
-    private Macro macro;
+    private final Macro macro;
     private final boolean isNewMacro;
 
     private WLabel keyLabel;
@@ -103,12 +102,12 @@ public class EditMacroScreen extends WindowScreen {
     }
 
     @SuppressWarnings("unused")
-    @EventHandler
-    private final Listener<KeyEvent> onKey = new Listener<>(event -> {
+    @EventHandler(priority = EventPriority.HIGHEST + 2)
+    private void onKey(KeyEvent event) {
         if (waitingForKey) {
             waitingForKey = false;
             macro.key = event.key;
             keyLabel.setText(getKeyLabelText());
         }
-    }, EventPriority.HIGHEST);
+    }
 }

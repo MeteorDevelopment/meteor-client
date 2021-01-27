@@ -60,8 +60,8 @@ public abstract class ClientPlayNetworkHandlerMixin {
 
     @Inject(at = @At("HEAD"), method = "sendPacket", cancellable = true)
     private void onSendPacketHead(Packet<?> packet, CallbackInfo info) {
-        PacketEvent.Send event = PacketEvent.Send.get(packet);
-        MeteorClient.EVENT_BUS.post(event);
+        PacketEvent.Send event = MeteorClient.EVENT_BUS.post(PacketEvent.Send.get(packet));
+
         if (event.isCancelled()) info.cancel();
     }
 

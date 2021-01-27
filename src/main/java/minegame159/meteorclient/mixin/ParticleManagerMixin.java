@@ -26,7 +26,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class ParticleManagerMixin {
     @Inject(method = "addParticle(Lnet/minecraft/particle/ParticleEffect;DDDDDD)Lnet/minecraft/client/particle/Particle;", at = @At("HEAD"), cancellable = true)
     private void onAddParticle(ParticleEffect parameters, double x, double y, double z, double velocityX, double velocityY, double velocityZ, CallbackInfoReturnable<Particle> info) {
-        ParticleEvent event = MeteorClient.postEvent(ParticleEvent.get(parameters));
+        ParticleEvent event = MeteorClient.EVENT_BUS.post(ParticleEvent.get(parameters));
         if (event.isCancelled()) info.cancel();
     }
 

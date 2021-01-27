@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.modules.combat;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.game.OpenScreenEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.friends.FriendManager;
@@ -103,12 +102,12 @@ public class AutoAnvil extends Module {
     }
 
     @EventHandler
-    private final Listener<OpenScreenEvent> onOpenScreen = new Listener<>(event -> {
+    private void onOpenScreen(OpenScreenEvent event) {
         if (event.screen instanceof AnvilScreen) mc.player.closeScreen();
-    });
+    }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
 
         if (isActive() && toggleOnBreak.get() && target != null && target.inventory.getArmorStack(3).isEmpty()) {
             ChatUtils.moduleError(this, "Target head slot is empty... disabling.");
@@ -160,7 +159,7 @@ public class AutoAnvil extends Module {
 
             mc.player.inventory.selectedSlot = prevSlot;
         } else timer++;
-    });
+    }
 
     public int getFloorSlot() {
         int slot = -1;

@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.modules.player;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
@@ -22,7 +21,6 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 
 public class AirPlace extends Module {
-
     public enum Place {
         OnClick,
         Always
@@ -81,8 +79,7 @@ public class AirPlace extends Module {
     }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
-
+    private void onTick(TickEvent.Post event) {
         if (!(mc.crosshairTarget instanceof BlockHitResult) || !(mc.player.getMainHandStack().getItem() instanceof BlockItem)) return;
 
         target = ((BlockHitResult) mc.crosshairTarget).getBlockPos();
@@ -93,16 +90,15 @@ public class AirPlace extends Module {
                 || placeWhen.get() == Place.OnClick && (mc.options.keyUse.wasPressed() || mc.options.keyUse.isPressed())) {
             PlayerUtils.placeBlock(target, Hand.MAIN_HAND);
         }
-
-    });
+    }
 
     @EventHandler
-    private final Listener<RenderEvent> onRender = new Listener<>(event -> {
+    private void onRender(RenderEvent event) {
         if (!(mc.crosshairTarget instanceof BlockHitResult)
                 || !mc.world.getBlockState(target).isAir()
                 || !(mc.player.getMainHandStack().getItem() instanceof BlockItem)
                 || !render.get()) return;
 
         Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, target, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-    });
+    }
 }

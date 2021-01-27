@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.modules.movement;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.meteor.KeyEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
@@ -42,7 +41,7 @@ public class AirJump extends Module {
     private int level = 0;
 
     @EventHandler
-    private final Listener<KeyEvent> onKey = new Listener<>(event -> {
+    private void onKey(KeyEvent event) {
         if (ModuleManager.INSTANCE.isActive(Freecam.class) || mc.currentScreen != null) return;
         if ((event.action == KeyAction.Press || (event.action == KeyAction.Repeat && onHold.get())) && mc.options.keyJump.matchesKey(event.key, 0)) {
             mc.player.jump();
@@ -51,13 +50,13 @@ public class AirJump extends Module {
         if ((event.action == KeyAction.Press || (event.action == KeyAction.Repeat && onHold.get())) && mc.options.keySneak.matchesKey(event.key, 0)){
             level -= 1;
         }
-    });
+    }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         if (ModuleManager.INSTANCE.isActive(Freecam.class)) return;
         if (maintainY.get() && mc.player.getBlockPos().getY() == level){
             mc.player.jump();
         }
-    });
+    }
 }

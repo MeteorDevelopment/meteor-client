@@ -7,8 +7,7 @@ package minegame159.meteorclient.modules.misc;
 
 import it.unimi.dsi.fastutil.chars.Char2CharArrayMap;
 import it.unimi.dsi.fastutil.chars.Char2CharMap;
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.commands.CommandManager;
 import minegame159.meteorclient.commands.commands.Ignore;
 import minegame159.meteorclient.commands.commands.Say;
@@ -31,7 +30,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class BetterChat extends Module {
-
     private final SettingGroup sgAnnoy = settings.createGroup("Annoy");
     private final SettingGroup sgAntiSpam = settings.createGroup("Anti Spam");
     private final SettingGroup sgFancyChat = settings.createGroup("Fancy Chat");
@@ -234,7 +232,7 @@ public class BetterChat extends Module {
     }
 
     @EventHandler
-    private final Listener<SendMessageEvent> onSendMessage = new Listener<>(event -> {
+    private void onSendMessage(SendMessageEvent event) {
         String message = event.msg;
 
         if (annoyEnabled.get())
@@ -262,7 +260,7 @@ public class BetterChat extends Module {
         }
 
         event.msg = message;
-    });
+    }
 
     // ANTI SPAM
 

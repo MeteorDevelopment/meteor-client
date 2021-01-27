@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.modules.combat;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.game.OpenScreenEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
@@ -37,7 +36,7 @@ public class SelfAnvil extends Module {
     }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         int anvilSlot = -1;
         for (int i = 0; i < 9; i++) {
             Item item = mc.player.inventory.getStack(i).getItem();
@@ -60,10 +59,10 @@ public class SelfAnvil extends Module {
 
         mc.player.inventory.selectedSlot = prevSlot;
         toggle();
-    });
+    }
 
     @EventHandler
-    private final Listener<OpenScreenEvent> onOpenScreen = new Listener<>(event -> {
+    private void onOpenScreen(OpenScreenEvent event) {
         if (event.screen instanceof AnvilScreen) event.cancel();
-    });
+    }
 }

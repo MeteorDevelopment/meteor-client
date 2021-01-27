@@ -8,8 +8,7 @@ package minegame159.meteorclient.modules.player;
 import baritone.api.BaritoneAPI;
 import baritone.api.pathing.goals.GoalBlock;
 import com.google.common.collect.Lists;
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.game.GameJoinedEvent;
 import minegame159.meteorclient.events.game.GameLeftEvent;
 import minegame159.meteorclient.events.meteor.ActiveModulesChangedEvent;
@@ -36,7 +35,6 @@ import java.util.List;
  */
 
 public class InfinityMiner extends Module {
-
     public enum Mode {
         Target,
         Repair,
@@ -146,7 +144,7 @@ public class InfinityMiner extends Module {
 
     @SuppressWarnings("unused")
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         try {
             if (mc.player == null) return;
             if (!baritoneRunning && currentMode == Mode.Still) {
@@ -191,17 +189,17 @@ public class InfinityMiner extends Module {
             }
         } catch (Exception ignored) {
         }
-    });
+    }
 
     @SuppressWarnings("unused")
     @EventHandler
-    private final Listener<ActiveModulesChangedEvent> moduleChange = new Listener<>(event -> {
+    private void moduleChange(ActiveModulesChangedEvent event) {
         if (!BLOCKER) {
             for (Module module : getToggleModules()) {
                 if (module != null && !module.isActive()) originalSettings.remove(module.name);
             }
         }
-    });
+    }
 
     private void baritoneRequestMineTargetBlock() {
         try {
@@ -268,22 +266,21 @@ public class InfinityMiner extends Module {
 
     @SuppressWarnings("unused")
     @EventHandler
-    private final Listener<GameLeftEvent> onGameDisconnect = new Listener<>(event -> {
+    private void onGameDisconnect(GameLeftEvent event) {
         baritoneRequestStop();
         if (!BaritoneAPI.getSettings().mineScanDroppedItems.value)
             BaritoneAPI.getSettings().mineScanDroppedItems.value = true;
         if (this.isActive()) this.toggle();
-    });
+    }
 
     @SuppressWarnings("unused")
     @EventHandler
-    private final Listener<GameJoinedEvent> onGameJoin = new Listener<>(event -> {
+    private void onGameJoin(GameJoinedEvent event) {
         baritoneRequestStop();
         if (!BaritoneAPI.getSettings().mineScanDroppedItems.value)
             BaritoneAPI.getSettings().mineScanDroppedItems.value = true;
         if (this.isActive()) this.toggle();
-    });
-
+    }
 
     public Mode getMode() {
         return currentMode;

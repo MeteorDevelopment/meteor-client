@@ -7,8 +7,7 @@ package minegame159.meteorclient.modules.render;
 
 //Created by squidoodly 24/12/2020
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.game.GetTooltipEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
@@ -22,7 +21,6 @@ import minegame159.meteorclient.utils.misc.input.KeyBinds;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.inventory.Inventories;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.MutableText;
@@ -77,7 +75,7 @@ public class ShulkerPeek extends Module {
     );
 
     @EventHandler
-    private final Listener<GetTooltipEvent> onGetTooltip = new Listener<>(event -> {
+    private void onGetTooltip(GetTooltipEvent event) {
         if (mode.get() != Mode.Tooltip) return;
 
         CompoundTag compoundTag = event.itemStack.getSubTag("BlockEntityTag");
@@ -149,5 +147,5 @@ public class ShulkerPeek extends Module {
                 event.list.add(new LiteralText("Press " + Formatting.YELLOW + Utils.getKeyName(KeyBindingHelper.getBoundKeyOf(KeyBinds.SHULKER_PEEK).getCode()) + Formatting.RESET + " to peek"));
             }
         }
-    });
+    }
 }

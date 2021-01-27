@@ -7,9 +7,8 @@ package minegame159.meteorclient.modules.player;
 
 //Updated by squidoodly 15/06/2020
 
-import me.zero.alpine.event.EventPriority;
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
+import meteordevelopment.orbit.EventPriority;
 import minegame159.meteorclient.events.entity.player.StartBreakingBlockEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixin.AxeItemAccessor;
@@ -88,17 +87,17 @@ public class AutoTool extends Module {
     private boolean wasPressed;
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         if (switchBack.get() && !mc.options.keyAttack.isPressed() && wasPressed && prevSlot != -1) {
             mc.player.inventory.selectedSlot = prevSlot;
             prevSlot = -1;
         }
 
         wasPressed = mc.options.keyAttack.isPressed();
-    });
+    }
 
-    @EventHandler
-    private final Listener<StartBreakingBlockEvent> onStartBreakingBlock = new Listener<>(event -> {
+    @EventHandler(priority = EventPriority.HIGH)
+    private void onStartBreakingBlock(StartBreakingBlockEvent event) {
         BlockState blockState = mc.world.getBlockState(event.blockPos);
         int bestScore = -1;
         int score = 0;
@@ -132,7 +131,7 @@ public class AutoTool extends Module {
                 prevSlot = mc.player.inventory.selectedSlot;
             mc.player.inventory.selectedSlot = bestSlot;
         }
-    }, EventPriority.HIGH);
+    }
 
     public boolean isEffectiveOn(Item item, BlockState blockState) {
         if (item.isEffectiveOn(blockState)) return true;

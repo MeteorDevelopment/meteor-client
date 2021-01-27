@@ -5,7 +5,6 @@
 
 package minegame159.meteorclient.modules;
 
-import me.zero.alpine.listener.Listenable;
 import minegame159.meteorclient.Config;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.meteor.ModuleBindChangedEvent;
@@ -27,7 +26,7 @@ import net.minecraft.util.Formatting;
 
 import java.util.Objects;
 
-public abstract class Module implements Listenable, ISerializable<Module> {
+public abstract class Module implements ISerializable<Module> {
     protected final MinecraftClient mc;
 
     public final Category category;

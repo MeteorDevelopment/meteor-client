@@ -9,8 +9,7 @@ package minegame159.meteorclient.modules.combat;
 //Updated by squidoodly 19/06/2020
 //Updated by squidoodly 30/12/2020
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.modules.Category;
@@ -97,8 +96,7 @@ public class AutoTotem extends Module {
     }
 
     @EventHandler
-    private final Listener<TickEvent.Pre> onTick = new Listener<>(event -> {
-        assert mc.player != null;
+    private void onTick(TickEvent.Pre event) {
         if (mc.currentScreen instanceof InventoryScreen && !inventorySwitch.get()) return;
         if (mc.currentScreen != null && !(mc.currentScreen instanceof InventoryScreen)) return;
 
@@ -124,7 +122,7 @@ public class AutoTotem extends Module {
         }
 
         totemCountString = Integer.toString(result.count);
-    });
+    }
 
     @Override
     public String getInfoString() {

@@ -27,7 +27,6 @@ If you want to connect to servers that run older version you can download [multi
 We would appreciate if you donated to us through [PayPal](https://paypal.me/MineGame159). Include your Discord tag so we can give you donator role and contact you. Minimum for donator role is 5$.
 
 ## Thank you
-[ZeroMemes](https://github.com/ZeroMemes) for [Alpine](https://github.com/ZeroMemes/Alpine)  
 [Cabaletta](https://github.com/cabaletta) for [Baritone](https://github.com/cabaletta/baritone)  
 [CDAGaming](https://gitlab.com/CDAGaming) for [Fabritone](https://gitlab.com/CDAGaming/fabritone)  
 [Minn](https://github.com/MinnDevelopment) for [Discord Rpc](https://github.com/MinnDevelopment/java-discord-rpc)  

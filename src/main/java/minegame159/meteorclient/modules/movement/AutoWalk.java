@@ -6,8 +6,7 @@
 package minegame159.meteorclient.modules.movement;
 
 import baritone.api.BaritoneAPI;
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.Category;
@@ -78,7 +77,7 @@ public class AutoWalk extends Module {
     }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         if (mode.get() == Mode.Simple) {
             switch (direction.get()) {
                 case Forwards:
@@ -102,7 +101,7 @@ public class AutoWalk extends Module {
 
             timer++;
         }
-    });
+    }
 
     private void createGoal() {
         timer = 0;

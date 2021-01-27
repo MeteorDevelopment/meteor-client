@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.gui.screens.topbar;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.meteor.MacroListChangedEvent;
 import minegame159.meteorclient.gui.widgets.WButton;
 import minegame159.meteorclient.gui.widgets.WLabel;
@@ -49,8 +48,8 @@ public class TopBarMacros extends TopBarWindowScreen {
     }
 
     @EventHandler
-    private final Listener<MacroListChangedEvent> onMacroListChanged = new Listener<>(event -> {
+    private void onMacroListChanged(MacroListChangedEvent event) {
         clear();
         initWidgets();
-    });
+    }
 }

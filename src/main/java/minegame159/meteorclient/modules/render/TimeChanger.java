@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.modules.render;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
@@ -17,7 +16,6 @@ import minegame159.meteorclient.settings.SettingGroup;
 import net.minecraft.network.packet.s2c.play.WorldTimeUpdateS2CPacket;
 
 public class TimeChanger extends Module {
-
     private final SettingGroup sgDefault = settings.getDefaultGroup();
 
     private final Setting<Double> time = sgDefault.add(new DoubleSetting.Builder()
@@ -46,15 +44,15 @@ public class TimeChanger extends Module {
     }
 
     @EventHandler
-    private final Listener<PacketEvent.Receive> onTime = new Listener<>(event -> {
+    private void onPacketReceive(PacketEvent.Receive event) {
         if (event.packet instanceof WorldTimeUpdateS2CPacket) {
             oldTime = ((WorldTimeUpdateS2CPacket) event.packet).getTime();
             event.setCancelled(true);
         }
-    });
+    }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         mc.world.setTimeOfDay(time.get().longValue());
-    });
+    }
 }

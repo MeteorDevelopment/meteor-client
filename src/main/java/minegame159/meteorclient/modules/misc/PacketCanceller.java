@@ -7,9 +7,8 @@ package minegame159.meteorclient.modules.misc;
 
 import it.unimi.dsi.fastutil.objects.Object2BooleanArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
-import me.zero.alpine.event.EventPriority;
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
+import meteordevelopment.orbit.EventPriority;
 import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
@@ -48,13 +47,13 @@ public class PacketCanceller extends Module {
         super(Category.Misc, "packet-canceller", "Allows you to cancel certain packets.");
     }
 
-    @EventHandler
-    private final Listener<PacketEvent.Receive> onReceivePacket = new Listener<>(event -> {
+    @EventHandler(priority = EventPriority.HIGHEST + 1)
+    private void onReceivePacket(PacketEvent.Receive event) {
         if (s2cPackets.get().getBoolean(event.packet.getClass())) event.cancel();
-    }, EventPriority.HIGHEST + 1);
+    }
 
-    @EventHandler
-    private final Listener<PacketEvent.Send> onSendPacket = new Listener<>(event -> {
+    @EventHandler(priority = EventPriority.HIGHEST + 1)
+    private void onSendPacket(PacketEvent.Send event) {
         if (c2sPackets.get().getBoolean(event.packet.getClass())) event.cancel();
-    }, EventPriority.HIGHEST + 1);
+    }
 }

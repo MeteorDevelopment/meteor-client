@@ -5,9 +5,7 @@
 
 package minegame159.meteorclient.modules.render;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.Cancellable;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.TookDamageEvent;
 import minegame159.meteorclient.events.game.GameLeftEvent;
 import minegame159.meteorclient.events.game.OpenScreenEvent;
@@ -122,7 +120,9 @@ public class Freecam extends Module {
     }
 
     @EventHandler
-    private final Listener<OpenScreenEvent> onOpenScreen = new Listener<>(event -> unpress());
+    private void onOpenScreen(OpenScreenEvent event) {
+        unpress();
+    }
 
     private void unpress() {
         ((IKeyBinding) mc.options.keyForward).setPressed(false);
@@ -134,7 +134,7 @@ public class Freecam extends Module {
     }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         if (mc.cameraEntity.isInsideWall()) mc.getCameraEntity().noClip = true;
 
         if (mc.currentScreen != null) return;
@@ -202,10 +202,10 @@ public class Freecam extends Module {
 
         ((IVec3d) prevPos).set(pos);
         ((IVec3d) pos).set(pos.x + velX, pos.y + velY, pos.z + velZ);
-    });
+    }
 
     @EventHandler
-    private final Listener<KeyEvent> onKey = new Listener<>(event -> {
+    private void onKey(KeyEvent event) {
         boolean cancel = true;
 
         if (KeyBindingHelper.getBoundKeyOf(mc.options.keyForward).getCode() == event.key) {
@@ -225,27 +225,30 @@ public class Freecam extends Module {
         }
 
         if (cancel) event.cancel();
-    });
+    }
 
     @EventHandler
-    private final Listener<ChunkOcclusionEvent> onChunkOcclusion = new Listener<>(Cancellable::cancel);
+    private void onChunkOcclusion(ChunkOcclusionEvent event) {
+        event.cancel();
+    }
 
     @EventHandler
-    private final Listener<TookDamageEvent> onTookDamage = new Listener<>(event -> {
+    private void onTookDamage(TookDamageEvent event) {
         if (event.entity.getUuid() == null) return;
         if (!event.entity.getUuid().equals(mc.player.getUuid())) return;
+
         if ((autoDisableOnDamage.get() == AutoDisableEvent.OnDamage) || (autoDisableOnDamage.get() == AutoDisableEvent.OnDeath && event.entity.getHealth() <= 0)) {
             toggle();
             ChatUtils.moduleInfo(this, "Auto toggled %s(default).", isActive() ? Formatting.GREEN + "on" : Formatting.RED + "off");
         }
-    });
+    }
 
     @EventHandler
-    private final Listener<GameLeftEvent> onGameLeft = new Listener<>(event -> {
+    private void onGameLeft(GameLeftEvent event) {
         if (!autoDisableOnLog.get()) return;
 
         toggle();
-    });
+    }
 
     public void changeLookDirection(double deltaX, double deltaY) {
         prevYaw = yaw;

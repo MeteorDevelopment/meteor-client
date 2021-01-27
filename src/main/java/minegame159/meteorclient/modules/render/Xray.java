@@ -5,10 +5,8 @@
 
 package minegame159.meteorclient.modules.render;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.Cancellable;
 import minegame159.meteorclient.events.render.RenderBlockEntityEvent;
 import minegame159.meteorclient.events.world.AmbientOcclusionEvent;
 import minegame159.meteorclient.events.world.ChunkOcclusionEvent;
@@ -65,7 +63,7 @@ public class Xray extends Module {
     }
 
     @EventHandler
-    private final Listener<RenderBlockEntityEvent> onRenderBlockEntity = new Listener<>(event -> {
+    private void onRenderBlockEntity(RenderBlockEntityEvent event) {
         if (!Utils.blockRenderingBlockEntitiesInXray) return;
 
         for (Block block : ((BlockEntityTypeAccessor) event.blockEntity.getType()).getBlocks()) {
@@ -74,19 +72,23 @@ public class Xray extends Module {
                 break;
             }
         }
-    });
+    }
 
 //    @EventHandler  // TODO: Xray: async DrawSideEvent
-//    private final Listener<DrawSideEvent> onDrawSide = new Listener<>(event -> {
+//    private final Listener<DrawSideEvent> onDrawSide( event) {
 //        event.setDraw(!isBlocked(event.state.getBlock()));
 //        DrawSideEvent.returnDrawSideEvent(event);
 //    });
 
     @EventHandler
-    private final Listener<ChunkOcclusionEvent> onChunkOcclusion = new Listener<>(Cancellable::cancel);
+    private void onChunkOcclusion(ChunkOcclusionEvent event) {
+        event.cancel();
+    }
 
     @EventHandler
-    private final Listener<AmbientOcclusionEvent> onAmbientOcclusion = new Listener<>(event -> event.lightLevel = 1);
+    private void onAmbientOcclusion(AmbientOcclusionEvent event) {
+        event.lightLevel = 1;
+    }
 
     public boolean isBlocked(Block block) {
         return isActive() && !blocks.get().contains(block);

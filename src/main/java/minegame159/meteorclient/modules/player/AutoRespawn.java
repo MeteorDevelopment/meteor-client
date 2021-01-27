@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.modules.player;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.game.OpenScreenEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
@@ -18,10 +17,10 @@ public class AutoRespawn extends Module {
     }
 
     @EventHandler
-    private final Listener<OpenScreenEvent> onOpenScreenEvent = new Listener<>(event -> {
+    private void onOpenScreenEvent(OpenScreenEvent event) {
         if (!(event.screen instanceof DeathScreen)) return;
 
         mc.player.requestRespawn();
         event.cancel();
-    });
+    }
 }

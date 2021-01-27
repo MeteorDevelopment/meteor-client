@@ -42,8 +42,7 @@ public abstract class ClientPlayerEntityMixin {
         if (ignoreChatMessage) return;
 
         if (!msg.startsWith(Config.INSTANCE.getPrefix()) && !msg.startsWith("/") && !msg.startsWith(BaritoneAPI.getSettings().prefix.value)) {
-            SendMessageEvent event = SendMessageEvent.get(msg);
-            MeteorClient.EVENT_BUS.post(event);
+            SendMessageEvent event = MeteorClient.EVENT_BUS.post(SendMessageEvent.get(msg));
 
             if (!event.isCancelled()) {
                 ignoreChatMessage = true;

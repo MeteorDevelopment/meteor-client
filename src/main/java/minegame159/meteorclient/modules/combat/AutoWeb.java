@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.modules.combat;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.modules.Category;
@@ -58,7 +57,7 @@ public class AutoWeb extends Module {
     private PlayerEntity target = null;
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         int webSlot = -1;
         for (int i = 0; i < 9; i++) {
             Item item = mc.player.inventory.getStack(i).getItem();
@@ -115,5 +114,5 @@ public class AutoWeb extends Module {
             if (swung >= 1) mc.player.swingHand(Hand.MAIN_HAND);
             mc.player.inventory.selectedSlot = prevSlot;
         }
-    });
+    }
 }

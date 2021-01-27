@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.modules.movement;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.BoatMoveEvent;
 import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.mixininterface.IVec3d;
@@ -61,7 +60,7 @@ public class BoatFly extends Module {
     }
 
     @EventHandler
-    private final Listener<BoatMoveEvent> onBoatMove = new Listener<>(event -> {
+    private void onBoatMove(BoatMoveEvent event) {
         if (event.boat.getPrimaryPassenger() != mc.player) return;
 
         event.boat.yaw = mc.player.yaw;
@@ -79,12 +78,12 @@ public class BoatFly extends Module {
 
         // Apply velocity
         ((IVec3d) event.boat.getVelocity()).set(velX, velY, velZ);
-    });
+    }
 
     @EventHandler
-    private final Listener<PacketEvent.Receive> onReceivePacket = new Listener<>(event -> {
+    private void onReceivePacket(PacketEvent.Receive event) {
         if (event.packet instanceof VehicleMoveS2CPacket && cancelServerPackets.get()) {
             event.cancel();
         }
-    });
+    }
 }

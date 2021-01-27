@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.modules.render;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
@@ -118,20 +117,19 @@ public class VoidESP extends Module {
     }
 
     private boolean isBlockMatching(Block block) {
-        if (airOnly.get())
-            return block == Blocks.AIR;
+        if (airOnly.get()) return block == Blocks.AIR;
         return block != Blocks.BEDROCK;
     }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         getHoles(horizontalRadius.get(), holeHeight.get());
-    });
+    }
 
     @EventHandler
-    private final Listener<RenderEvent> onRender = new Listener<>(event -> {
+    private void onRender(RenderEvent event) {
         for (BlockPos voidHole : voidHoles) {
             Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, voidHole, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
         }
-    });
+    }
 }

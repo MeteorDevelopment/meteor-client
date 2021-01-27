@@ -8,8 +8,7 @@ package minegame159.meteorclient.modules.render;
 //Updated by squidoodly 03/07/2020
 //Updated by squidoodly 30/07/2020
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.mixininterface.IBakedQuad;
@@ -171,10 +170,8 @@ public class Nametags extends Module {
         super(Category.Render, "nametags", "Displays customizable nametags above players.");
     }
 
-    String name;
-
     @EventHandler
-    private final Listener<RenderEvent> onRender = new Listener<>(event -> {
+    private void onRender(RenderEvent event) {
         for (Entity entity : mc.world.getEntities()) {
             boolean a = !ModuleManager.INSTANCE.isActive(Freecam.class);
             if (!(entity instanceof PlayerEntity) || (a && entity == mc.player) || (a && entity == mc.cameraEntity)) continue;
@@ -182,7 +179,7 @@ public class Nametags extends Module {
 
             renderNametag(event, (PlayerEntity) entity);
         }
-    });
+    }
 
     private void renderNametag(RenderEvent event, PlayerEntity entity) {
         // Get ping
@@ -199,6 +196,7 @@ public class Nametags extends Module {
         int health = Math.round(entity.getHealth() + absorption);
         double healthPercentage = health / (entity.getMaxHealth() + absorption);
 
+        String name;
         if (entity == mc.player && ModuleManager.INSTANCE.get(NameProtect.class).isActive()) {
             name = ModuleManager.INSTANCE.get(NameProtect.class).getName(entity.getGameProfile().getName());
         } else if (ModuleManager.INSTANCE.get(FakePlayer.class).isActive() && entity instanceof FakePlayerEntity && ModuleManager.INSTANCE.get(FakePlayer.class).showID()) {

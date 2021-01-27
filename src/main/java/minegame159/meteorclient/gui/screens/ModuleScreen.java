@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.gui.screens;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.meteor.ModuleBindChangedEvent;
 import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.modules.Module;
@@ -91,9 +90,9 @@ public class ModuleScreen extends WindowScreen {
     }
 
     @EventHandler
-    private final Listener<ModuleBindChangedEvent> onModuleBindChanged = new Listener<>(event -> {
+    private void onModuleBindChanged(ModuleBindChangedEvent event) {
         if (event.module == module) {
             keybind.set(event.module.getKey());
         }
-    });
+    }
 }

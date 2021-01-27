@@ -1,6 +1,6 @@
 package minegame159.meteorclient.settings;
 
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.meteor.KeyEvent;
 import minegame159.meteorclient.gui.widgets.WKeybind;
@@ -10,17 +10,24 @@ import net.minecraft.nbt.CompoundTag;
 import java.util.function.Consumer;
 
 public class KeybindSetting extends Setting<Integer> {
+    private final Runnable action;
+
     public KeybindSetting(String name, String description, Integer defaultValue, Consumer<Integer> onChanged, Consumer<Setting<Integer>> onModuleActivated, Runnable action) {
         super(name, description, defaultValue, onChanged, onModuleActivated);
+
+        this.action = action;
 
         widget = new WKeybind(get());
         ((WKeybind) widget).action = () -> set(((WKeybind) widget).get());
 
-        MeteorClient.EVENT_BUS.subscribe(new Listener<KeyEvent>(event -> {
-            ((WKeybind) widget).onKey(event.key);
+        MeteorClient.EVENT_BUS.subscribe(this);
+    }
 
-            if (event.action == KeyAction.Release && event.key == get() && module.isActive() && action != null) action.run();
-        }));
+    @EventHandler
+    private void onKey(KeyEvent event) {
+        ((WKeybind) widget).onKey(event.key);
+
+        if (event.action == KeyAction.Release && event.key == get() && module.isActive() && action != null) action.run();
     }
 
     @Override

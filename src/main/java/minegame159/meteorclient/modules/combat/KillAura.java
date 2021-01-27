@@ -8,8 +8,7 @@ package minegame159.meteorclient.modules.combat;
 import baritone.api.BaritoneAPI;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.modules.Category;
@@ -205,16 +204,18 @@ public class KillAura extends Module {
     }
 
     @EventHandler
-    private final Listener<TickEvent.Pre> onPreTick = new Listener<>(event -> target = null);
+    private void onPreTick(TickEvent.Pre event) {
+        target = null;
+    }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onPostTick = new Listener<>(event -> {
+    private void onPostTick(TickEvent.Post event) {
         findEntity();
         if (target == null) return;
 
         if (rotationMode.get() == RotationMode.Always) packetRotate(target);
         attack(target);
-    });
+    }
 
     public void packetRotate(Entity entity) {
         switch (rotationDirection.get()) {
@@ -339,7 +340,7 @@ public class KillAura extends Module {
     }
 
         /*@EventHandler
-    private final Listener<PacketEvent.Send> onSendPacket = new Listener<>(event -> {
+    private final Listener<PacketEvent.Send> onSendPacket( event) {
         if (movePacket != null) return;
 
         if (event.packet instanceof PlayerMoveC2SPacket.PositionOnly) {
@@ -363,12 +364,12 @@ public class KillAura extends Module {
     });*/
 
     /*@EventHandler
-    private final Listener<PacketSentEvent> onPacketSent = new Listener<>(event -> {
+    private final Listener<PacketSentEvent> onPacketSent( event) {
         if (event.packet == movePacket) attack();
     });
 
     @EventHandler
-    private final Listener<TickEvent.Post> onPostTick = new Listener<>(event -> {
+    private final Listener<TickEvent.Post> onPostTick( event) {
         if (movePacket == null) {
             mc.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.LookOnly(
                     mc.player.yaw,

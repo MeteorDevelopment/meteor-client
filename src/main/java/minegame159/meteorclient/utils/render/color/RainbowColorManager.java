@@ -5,7 +5,7 @@
 
 package minegame159.meteorclient.utils.render.color;
 
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.settings.Setting;
@@ -20,7 +20,7 @@ public class RainbowColorManager {
     private static final List<SettingColor> colors = new ArrayList<>();
 
     public static void init() {
-        MeteorClient.EVENT_BUS.subscribe(onTick);
+        MeteorClient.EVENT_BUS.subscribe(RainbowColorManager.class);
     }
 
     public static void addColorSetting(Setting<SettingColor> setting) {
@@ -31,7 +31,8 @@ public class RainbowColorManager {
         colors.add(color);
     }
 
-    private static final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    @EventHandler
+    private static void onTick(TickEvent.Post event) {
         for (Setting<SettingColor> setting : colorSettings) {
             if (setting.module == null || setting.module.isActive()) setting.get().update();
         }
@@ -43,5 +44,5 @@ public class RainbowColorManager {
         for (Waypoint waypoint : Waypoints.INSTANCE) {
             waypoint.color.update();
         }
-    });
+    }
 }

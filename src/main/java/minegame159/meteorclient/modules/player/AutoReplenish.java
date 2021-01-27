@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.modules.player;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
@@ -26,7 +25,6 @@ import java.util.List;
 
 @InvUtils.Priority(priority = 1)
 public class AutoReplenish extends Module {
-
     public AutoReplenish(){
         super(Category.Player, "auto-replenish", "Automatically refills items in your hotbar, main hand, or offhand.");
     }
@@ -95,9 +93,10 @@ public class AutoReplenish extends Module {
     }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         if (mc.currentScreen instanceof GenericContainerScreen) sent = false;
         if (mc.player.currentScreenHandler.getStacks().size() < 45 || (pauseInInventory.get() && mc.currentScreen instanceof InventoryScreen)) return;
+
         //Hotbar
         for (int i = 0; i < 9; i++){
             stack = mc.player.inventory.getStack(i);
@@ -123,7 +122,7 @@ public class AutoReplenish extends Module {
             }
             offhandStack = mc.player.getOffHandStack();
         }
-    });
+    }
 
     private int findItem(ItemStack itemStack, int excludedSlot){
         int slot = -1;

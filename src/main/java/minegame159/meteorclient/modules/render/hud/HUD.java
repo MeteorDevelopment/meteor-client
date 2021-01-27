@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.modules.render.hud;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.Render2DEvent;
 import minegame159.meteorclient.gui.widgets.WButton;
 import minegame159.meteorclient.gui.widgets.WLabel;
@@ -360,7 +359,7 @@ public class HUD extends Module {
     }
 
     @EventHandler
-    public final Listener<Render2DEvent> onRender = new Listener<>(event -> {
+    public void onRender(Render2DEvent event) {
         if (mc.options.debugEnabled) return;
 
         RENDERER.begin(scale(), event.tickDelta, false);
@@ -373,7 +372,7 @@ public class HUD extends Module {
         }
 
         RENDERER.end();
-    });
+    }
 
     @Override
     public WWidget getWidget() {

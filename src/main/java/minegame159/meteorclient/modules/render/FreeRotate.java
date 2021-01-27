@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.modules.render;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
@@ -17,7 +16,6 @@ import net.minecraft.client.options.Perspective;
 import org.lwjgl.glfw.GLFW;
 
 public class FreeRotate extends Module {
-
     public enum Mode {
         Player,
         Camera
@@ -100,7 +98,7 @@ public class FreeRotate extends Module {
     }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         if (arrows.get()) {
             for (int i = 0; i < (arrowSpeed.get() * 2); i++) {
                 switch (mode.get()) {
@@ -122,5 +120,5 @@ public class FreeRotate extends Module {
 
         mc.player.pitch = Utils.clamp(mc.player.pitch, -90, 90);
         cameraPitch = Utils.clamp(cameraPitch, -90, 90);
-    });
+    }
 }

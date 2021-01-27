@@ -5,9 +5,7 @@
 
 package minegame159.meteorclient.modules.misc;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listenable;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.entity.DropItemsEvent;
 import minegame159.meteorclient.events.entity.player.BreakBlockEvent;
@@ -58,13 +56,13 @@ public class Announcer extends Module {
     }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         for (Feature feature : features) {
             if (feature.isEnabled()) feature.tick();
         }
-    });
+    }
 
-    private abstract class Feature implements Listenable {
+    private abstract class Feature {
         protected SettingGroup sg;
 
         private final Setting<Boolean> enabled;
@@ -195,7 +193,7 @@ public class Announcer extends Module {
         }
 
         @EventHandler
-        private final Listener<BreakBlockEvent> onBreakBlock = new Listener<>(event -> {
+        private void onBreakBlock(BreakBlockEvent event) {
             Block block = event.getBlockState(mc.world).getBlock();
 
             if (lastBlock != null && lastBlock != block) {
@@ -205,7 +203,7 @@ public class Announcer extends Module {
             lastBlock = block;
             count++;
             notBrokenTimer = 0;
-        });
+        }
 
         @Override
         void tick() {
@@ -248,7 +246,7 @@ public class Announcer extends Module {
         }
 
         @EventHandler
-        private final Listener<PlaceBlockEvent> onPlaceBlock = new Listener<>(event -> {
+        private void onPlaceBlock(PlaceBlockEvent event) {
             if (lastBlock != null && lastBlock != event.block) {
                 sendMsg();
             }
@@ -256,7 +254,7 @@ public class Announcer extends Module {
             lastBlock = event.block;
             count++;
             notPlacedTimer = 0;
-        });
+        }
 
         @Override
         void tick() {
@@ -299,7 +297,7 @@ public class Announcer extends Module {
         }
 
         @EventHandler
-        private final Listener<DropItemsEvent> onDropItems = new Listener<>(event -> {
+        private void onDropItems(DropItemsEvent event) {
             if (lastItem != null && lastItem != event.itemStack.getItem()) {
                 sendMsg();
             }
@@ -307,7 +305,7 @@ public class Announcer extends Module {
             lastItem = event.itemStack.getItem();
             count += event.itemStack.getCount();
             notDroppedTimer = 0;
-        });
+        }
 
         @Override
         void tick() {
@@ -350,7 +348,7 @@ public class Announcer extends Module {
         }
 
         @EventHandler
-        private final Listener<PickItemsEvent> onPickItems = new Listener<>(event -> {
+        private void onPickItems(PickItemsEvent event) {
             if (lastItem != null && lastItem != event.itemStack.getItem()) {
                 sendMsg();
             }
@@ -358,7 +356,7 @@ public class Announcer extends Module {
             lastItem = event.itemStack.getItem();
             count += event.itemStack.getCount();
             notPickedUpTimer = 0;
-        });
+        }
 
         @Override
         void tick() {
@@ -396,12 +394,12 @@ public class Announcer extends Module {
         void tick() {}
 
         @EventHandler
-        private final Listener<OpenScreenEvent> onOpenScreen = new Listener<>(event -> {
+        private void onOpenScreen(OpenScreenEvent event) {
             if (event.screen instanceof HandledScreen<?>) {
                 String name = event.screen.getTitle().getString();
                 if (!name.isEmpty()) sendMsg(name);
             }
-        });
+        }
 
         void sendMsg(String name) {
             mc.player.sendChatMessage(msg.get().replace("{name}", name));

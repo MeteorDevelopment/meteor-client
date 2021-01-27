@@ -7,8 +7,7 @@ package minegame159.meteorclient.modules.player;
 
 //Created by squidoodly 03/06/2020
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.Category;
@@ -29,6 +28,7 @@ public class AutoGap extends Module {
         Regeneration,
         Constant
     }
+
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     public AutoGap(){
@@ -78,7 +78,7 @@ public class AutoGap extends Module {
     private boolean wasAutoEatOn = false;
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         if(mc.options.keyUse.isPressed() && !wasThis && ModuleManager.INSTANCE.get(AutoEat.class).isActive() && preferAutoEat.get()){
             return;
         }else if(mc.options.keyUse.isPressed() && wasThis && ModuleManager.INSTANCE.get(AutoEat.class).isActive() && !preferAutoEat.get()){
@@ -158,7 +158,7 @@ public class AutoGap extends Module {
                 wasThis = true;
             }
         }
-    });
+    }
 
     public boolean rightClickThings() {
         return !isActive() || !wasThis;

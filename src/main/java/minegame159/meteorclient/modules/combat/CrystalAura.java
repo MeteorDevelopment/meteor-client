@@ -7,9 +7,8 @@ package minegame159.meteorclient.modules.combat;
 
 import com.google.common.collect.Streams;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
-import me.zero.alpine.event.EventPriority;
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
+import meteordevelopment.orbit.EventPriority;
 import minegame159.meteorclient.events.entity.EntityRemovedEvent;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.events.world.TickEvent;
@@ -431,18 +430,16 @@ public class CrystalAura extends Module {
     }
 
     @EventHandler
-    private final Listener<EntityRemovedEvent> onEntityRemoved = new Listener<>(event -> {
+    private void onEntityRemoved(EntityRemovedEvent event) {
         if (heldCrystal == null) return;
         if (event.entity.getBlockPos().equals(heldCrystal.getBlockPos())) {
             heldCrystal = null;
             locked = false;
         }
-    });
+    }
 
-    @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
-        assert mc.player != null;
-        assert mc.world != null;
+    @EventHandler(priority = EventPriority.HIGH)
+    private void onTick(TickEvent.Post event) {
         for (Iterator<RenderBlock> it = renderBlocks.iterator(); it.hasNext();) {
             RenderBlock renderBlock = it.next();
 
@@ -569,16 +566,16 @@ public class CrystalAura extends Module {
             if (switchMode.get() == SwitchMode.Spoof && preSlot != mc.player.inventory.selectedSlot && preSlot != -1)
                 mc.player.inventory.selectedSlot = preSlot;
         }
-    }, EventPriority.HIGH);
+    }
 
     @EventHandler
-    private final Listener<RenderEvent> onRender = new Listener<>(event -> {
+    private void onRender(RenderEvent event) {
         if (render.get()) {
             for (RenderBlock renderBlock : renderBlocks) {
                 renderBlock.render();
             }
         }
-    });
+    }
 
     private void singleBreak(){
         assert mc.player != null;

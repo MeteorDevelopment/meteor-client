@@ -7,8 +7,7 @@ package minegame159.meteorclient.modules.combat;
 
 //Created by squidoodly 25/04/2020
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.player.RightClickEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.gui.WidgetScreen;
@@ -131,7 +130,7 @@ public class OffhandExtra extends Module {
     }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         assert mc.player != null;
         currentMode = mode.get();
 
@@ -174,10 +173,10 @@ public class OffhandExtra extends Module {
             }
 
         }
-    });
+    }
 
     @EventHandler
-    private final Listener<RightClickEvent> onRightClick = new Listener<>(event -> {
+    private void onRightClick(RightClickEvent event) {
         assert mc.player != null;
         if (mc.currentScreen != null) return;
         if (ModuleManager.INSTANCE.get(AutoTotem.class).getLocked() || !canMove()) return;
@@ -204,7 +203,7 @@ public class OffhandExtra extends Module {
             }
             currentMode = mode.get();
         }
-    });
+    }
 
     private Item getItem(){
         Item item = Items.TOTEM_OF_UNDYING;
