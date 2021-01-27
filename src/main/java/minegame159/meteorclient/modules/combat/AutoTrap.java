@@ -144,7 +144,7 @@ public class AutoTrap extends Module {
     @EventHandler
     private void onTick(TickEvent.Post event) {
 
-        int slot = InvUtils.findItemInHotbar(Blocks.OBSIDIAN.asItem(), itemStack -> true);
+        int slot = InvUtils.findItemInHotbar(Blocks.OBSIDIAN.asItem());
 
         if (turnOff.get() && ((placed && placePositions.isEmpty()) || slot == -1)) {
             sendToggledMsg();

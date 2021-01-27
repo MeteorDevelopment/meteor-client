@@ -60,6 +60,11 @@ public class InvUtils {
         return findItemResult;
     }
 
+
+    public static int findItemInHotbar(Item item) {
+        return findItemInHotbar(item, itemStack -> true);
+    }
+
     public static int findItemInHotbar(Item item, Predicate<ItemStack> isGood) {
         assert mc.player != null;
         for (int i = 0; i < 9; i++) {

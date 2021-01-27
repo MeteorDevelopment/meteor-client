@@ -12,6 +12,7 @@ import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.player.RotationUtils;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
@@ -55,14 +56,7 @@ public class EXPThrower extends Module {
             }
         }
 
-        int slot = -1;
-
-        for (int i = 0; i < 9; i++) {
-            if (mc.player.inventory.getStack(i).getItem() == Items.EXPERIENCE_BOTTLE) {
-                slot = i;
-                break;
-            }
-        }
+        int slot = InvUtils.findItemInHotbar(Items.EXPERIENCE_BOTTLE);
 
         if (slot != -1) {
             if (lookDown.get()) RotationUtils.packetRotate(mc.player.yaw, 90);

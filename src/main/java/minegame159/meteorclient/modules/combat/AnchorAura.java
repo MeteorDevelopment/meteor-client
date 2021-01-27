@@ -267,8 +267,8 @@ public class AnchorAura extends Module {
         if (target == null || mc.player.distanceTo(target) > targetRange.get() || !target.isAlive()) target = findTarget();
         if (target == null) return;
 
-        int anchorSlot = InvUtils.findItemInHotbar(Items.RESPAWN_ANCHOR, itemStack -> true);
-        int glowSlot = InvUtils.findItemInHotbar(Items.GLOWSTONE, itemStack -> true);
+        int anchorSlot = InvUtils.findItemInHotbar(Items.RESPAWN_ANCHOR);
+        int glowSlot = InvUtils.findItemInHotbar(Items.GLOWSTONE);
 
 
 
@@ -315,7 +315,7 @@ public class AnchorAura extends Module {
     }
 
     private boolean checkItems() {
-        return InvUtils.findItemInHotbar(Items.RESPAWN_ANCHOR, itemStack -> true) != -1 && InvUtils.findItemInHotbar(Items.GLOWSTONE, itemStack -> true) != -1;
+        return InvUtils.findItemInHotbar(Items.RESPAWN_ANCHOR) != -1 && InvUtils.findItemInHotbar(Items.GLOWSTONE) != -1;
     }
 
     private BlockPos findPlacePos(PlayerEntity target) {

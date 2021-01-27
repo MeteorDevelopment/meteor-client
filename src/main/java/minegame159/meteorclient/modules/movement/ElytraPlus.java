@@ -285,7 +285,7 @@ public class ElytraPlus extends Module {
         if (moveForward.get()) if (mc.player.getY() < autoPilotMinimumHeight.get()) ((IKeyBinding) mc.options.keyForward).setPressed(true);
         lastForwardPressed = true;
         if (useFireworks.get()) {
-            int slot = InvUtils.findItemInHotbar(Items.FIREWORK_ROCKET, itemStack -> true);
+            int slot = InvUtils.findItemInHotbar(Items.FIREWORK_ROCKET);
             int prevSlot = mc.player.inventory.selectedSlot;
 
             if (!mc.player.isFallFlying()) return;
