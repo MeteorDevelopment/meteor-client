@@ -268,7 +268,7 @@ public class KillAura extends Module {
             if (entity.distanceTo(mc.player) > range.get()) continue;
             if (!entities.get().getBoolean(entity.getType())) continue;
             if (!nametagged.get() && entity.hasCustomName()) continue;
-            if (!ignoreWalls.get() && PlayerUtils.canSeeEntity(entity)) continue;
+            if (!ignoreWalls.get() && !PlayerUtils.canSeeEntity(entity)) continue;
 
             if (entity instanceof PlayerEntity) {
                 if (((PlayerEntity) entity).isCreative()) continue;
