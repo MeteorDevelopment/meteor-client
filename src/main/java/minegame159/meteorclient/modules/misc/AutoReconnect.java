@@ -30,7 +30,7 @@ public class AutoReconnect extends Module {
 
     public AutoReconnect() {
         super(Category.Misc, "auto-reconnect", "Automatically reconnects when disconnected from a server.");
-        MeteorClient.EVENT_BUS.subscribe(StaticListener.class);
+        MeteorClient.EVENT_BUS.subscribe(new StaticListener());
     }
 
     private class StaticListener {
