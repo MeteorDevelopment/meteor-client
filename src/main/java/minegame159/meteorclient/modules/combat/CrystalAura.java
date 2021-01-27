@@ -769,7 +769,7 @@ public class CrystalAura extends Module {
             for(double j = playerPos.getZ() - placeRange.get(); j < playerPos.getZ() + placeRange.get(); j++){
                 for(double k = playerPos.getY() - placeRange.get(); k < playerPos.getY() + placeRange.get(); k++){
                     Vec3d pos = new Vec3d(Math.floor(i), Math.floor(k), Math.floor(j));
-                    if(isValid(new BlockPos(pos)) && getDamagePlace(new BlockPos(pos))){
+                    if(isValid(new BlockPos(pos)) && getDamagePlace(new BlockPos(pos).up())){
                         if (!strict.get() || isEmpty(new BlockPos(pos.add(0, 2, 0)))) {
                             if (!multiTarget.get()) {
                                 if (isEmpty(new BlockPos(pos)) && bestSupportDamage < DamageCalcUtils.crystalDamage(target, pos.add(0.5, 1, 0.5))){
@@ -834,7 +834,8 @@ public class CrystalAura extends Module {
 
     private boolean getDamagePlace(BlockPos pos){
         assert mc.player != null;
-        return placeMode.get() == Mode.Suicide || DamageCalcUtils.crystalDamage(mc.player, new Vec3d(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5)) <= maxDamage.get();
+        return placeMode.get() == Mode.Suicide || (DamageCalcUtils.crystalDamage(mc.player, new Vec3d(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5)) <= maxDamage.get()
+                && getTotalHealth(mc.player) - DamageCalcUtils.crystalDamage(mc.player, new Vec3d(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5)) >= minHealth.get());
     }
 
     private Vec3d findOpen(LivingEntity target){
