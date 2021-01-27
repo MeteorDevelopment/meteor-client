@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.modules.combat;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.Category;
@@ -141,8 +140,7 @@ public class Quiver extends Module {
     }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
-
+    private void onTick(TickEvent.Post event) {
         RotationUtils.packetRotate(mc.player.yaw, -90);
 
         boolean canStop = false;
@@ -173,9 +171,8 @@ public class Quiver extends Module {
                 if (chatInfo.get()) ChatUtils.moduleInfo(this, "Quivering a speed arrow.");
                 shotSpeed = true;
             }
-
         }
-    });
+    }
 
     private void shoot(int moveSlot) {
         if (moveSlot != 9) moveItems(moveSlot, 9);

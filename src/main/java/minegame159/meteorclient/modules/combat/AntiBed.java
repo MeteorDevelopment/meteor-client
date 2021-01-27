@@ -7,8 +7,7 @@ package minegame159.meteorclient.modules.combat;
 
 //Created by squidoodly 07/08/2020
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.Category;
@@ -71,7 +70,7 @@ public class AntiBed extends Module {
     }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         if (closeScreen && mc.currentScreen instanceof SignEditScreen) {
             closeScreen = false;
             mc.player.closeScreen();
@@ -161,7 +160,7 @@ public class AntiBed extends Module {
                 return;
             }
         }
-    });
+    }
 
     private BlockPos checkBlocks(){
         BlockPos blockPos = null;

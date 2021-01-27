@@ -47,7 +47,7 @@ public abstract class LivingEntityMixin extends Entity {
 
     @Inject(method = "canWalkOnFluid", at = @At("HEAD"), cancellable = true)
     private void onCanWalkOnFluid(Fluid fluid, CallbackInfoReturnable<Boolean> info) {
-        CanWalkOnFluidEvent event = MeteorClient.postEvent(CanWalkOnFluidEvent.get((LivingEntity) (Object) this, fluid));
+        CanWalkOnFluidEvent event = MeteorClient.EVENT_BUS.post(CanWalkOnFluidEvent.get((LivingEntity) (Object) this, fluid));
         if (event.walkOnFluid) info.setReturnValue(true);
     }
 

@@ -6,8 +6,7 @@
 package minegame159.meteorclient.modules.render;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.EntityAddedEvent;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.events.world.TickEvent;
@@ -131,7 +130,7 @@ public class LogoutSpots extends Module {
     }
 
     @EventHandler
-    private final Listener<EntityAddedEvent> onEntityAdded = new Listener<>(event -> {
+    private void onEntityAdded(EntityAddedEvent event) {
         if (event.entity instanceof PlayerEntity) {
             int toRemove = -1;
 
@@ -146,10 +145,10 @@ public class LogoutSpots extends Module {
                 players.remove(toRemove);
             }
         }
-    });
+    }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         if (mc.getNetworkHandler().getPlayerList().size() != lastPlayerList.size()) {
             for (PlayerListEntry entry : lastPlayerList) {
                 if (mc.getNetworkHandler().getPlayerList().stream().anyMatch(playerListEntry -> playerListEntry.getProfile().equals(entry.getProfile()))) continue;
@@ -176,7 +175,7 @@ public class LogoutSpots extends Module {
         Dimension dimension = Utils.getDimension();
         if (dimension != lastDimension) players.clear();
         lastDimension = dimension;
-    });
+    }
 
     private void add(Entry entry) {
         players.removeIf(player -> player.uuid.equals(entry.uuid));
@@ -184,14 +183,14 @@ public class LogoutSpots extends Module {
     }
 
     @EventHandler
-    private final Listener<RenderEvent> onRender = new Listener<>(event -> {
+    private void onRender(RenderEvent event) {
         for (Entry player : players) player.render(event);
 
         RenderSystem.disableDepthTest();
         RenderSystem.disableTexture();
         DiffuseLighting.disable();
         RenderSystem.enableBlend();
-    });
+    }
 
     @Override
     public String getInfoString() {

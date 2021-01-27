@@ -25,7 +25,7 @@ public abstract class ItemStackMixin {
     @Inject(method = "getTooltip", at = @At("TAIL"), locals = LocalCapture.CAPTURE_FAILSOFT)
     private void onGetTooltip(PlayerEntity player, TooltipContext context, CallbackInfoReturnable<List<Text>> info, List<Text> list) {
         if (Utils.canUpdate()) {
-            MeteorClient.postEvent(GetTooltipEvent.get((ItemStack) (Object) this, list));
+            MeteorClient.EVENT_BUS.post(GetTooltipEvent.get((ItemStack) (Object) this, list));
         }
     }
 }

@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.gui.screens.topbar;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.meteor.WaypointListChangedEvent;
 import minegame159.meteorclient.gui.widgets.WButton;
 import minegame159.meteorclient.utils.Utils;
@@ -37,8 +36,8 @@ public class TopBarWaypoints extends TopBarWindowScreen {
     }
 
     @EventHandler
-    private final Listener<WaypointListChangedEvent> onWaypointListChanged = new Listener<>(event -> {
+    private void onWaypointListChanged(WaypointListChangedEvent event) {
         clear();
         initWidgets();
-    });
+    }
 }

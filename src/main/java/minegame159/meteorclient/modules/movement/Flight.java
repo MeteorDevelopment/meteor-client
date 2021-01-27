@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.modules.movement;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixininterface.IPlayerMoveC2SPacket;
@@ -104,19 +103,17 @@ public class Flight extends Module {
     private float lastYaw;
 
     @EventHandler
-    private final Listener<TickEvent.Pre> onPreTick = new Listener<>(event -> {
+    private void onPreTick(TickEvent.Pre event) {
         float currentYaw = mc.player.yaw;
         if (mc.player.fallDistance >= 3f && currentYaw == lastYaw && mc.player.getVelocity().length() < 0.003d) {
             mc.player.yaw += flip ? 1 : -1;
             flip = !flip;
         }
         lastYaw = currentYaw;
-    });
+    }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onPostTick = new Listener<>(event -> {
-
-
+    private void onPostTick(TickEvent.Post event) {
         if (antiKickMode.get() == AntiKickMode.Normal && delayLeft > 0) delayLeft --;
 
         else if (antiKickMode.get() == AntiKickMode.Normal && delayLeft <= 0 && offLeft > 0) {
@@ -163,7 +160,7 @@ public class Flight extends Module {
                 mc.player.abilities.allowFlying = true;
                 break;
         }
-    });
+    }
 
     private long lastModifiedTime = 0;
     private double lastY = Double.MAX_VALUE;
@@ -172,7 +169,7 @@ public class Flight extends Module {
      * @see ServerPlayNetworkHandler#onPlayerMove(PlayerMoveC2SPacket)
      */
     @EventHandler
-    private final Listener<PacketEvent.Send> onSendPacket = new Listener<>(event -> {
+    private void onSendPacket(PacketEvent.Send event) {
         if (!(event.packet instanceof PlayerMoveC2SPacket) || antiKickMode.get() != AntiKickMode.Packet) return;
 
         PlayerMoveC2SPacket packet = (PlayerMoveC2SPacket) event.packet;
@@ -191,5 +188,5 @@ public class Flight extends Module {
                 lastY = currentY;
             }
         }
-    });
+    }
 }

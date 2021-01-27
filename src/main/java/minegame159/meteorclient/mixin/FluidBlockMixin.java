@@ -24,7 +24,8 @@ public abstract class FluidBlockMixin extends Block implements FluidDrainable {
 
     @Inject(method = "getCollisionShape", at = @At("HEAD"), cancellable = true)
     private void onGetCollisionShape(BlockState state, BlockView view, BlockPos pos, ShapeContext context, CallbackInfoReturnable<VoxelShape> info) {
-        FluidCollisionShapeEvent event = MeteorClient.postEvent(FluidCollisionShapeEvent.get(state));
+        FluidCollisionShapeEvent event = MeteorClient.EVENT_BUS.post(FluidCollisionShapeEvent.get(state));
+
         if (event.shape != null) info.setReturnValue(event.shape);
     }
 }

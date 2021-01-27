@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.modules.player;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
@@ -16,7 +15,6 @@ import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 
 public class Rotation extends Module {
-
     public enum LockMode {
         Smart,
         Simple,
@@ -71,11 +69,11 @@ public class Rotation extends Module {
 
     @Override
     public void onActivate() {
-        onTick.invoke(null);
+        onTick(null);
     }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         switch (yawLockMode.get()) {
             case Simple:
                 setYawAngle(yawAngle.get().floatValue());
@@ -93,7 +91,7 @@ public class Rotation extends Module {
                 mc.player.pitch = getSmartPitchDirection();
                 break;
         }
-    });
+    }
 
     private float getSmartYawDirection() {
         return Math.round((mc.player.yaw + 1f) / 45f) * 45f;

@@ -5,7 +5,7 @@
 
 package minegame159.meteorclient.utils.player;
 
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.entity.player.PlayerMoveEvent;
 import minegame159.meteorclient.mixininterface.IKeyBinding;
@@ -25,10 +25,10 @@ import java.util.ArrayList;
 public class PathFinder {
     private Entity target;
     private final static int PATH_AHEAD = 3;
-    private final ArrayList<PathBlock> PATH = new ArrayList<>(PATH_AHEAD);
+    private final ArrayList<PathBlock> path = new ArrayList<>(PATH_AHEAD);
     private final static int QUAD_1 = 1, QUAD_2 = 2, SOUTH = 0, NORTH = 180;
     private PathBlock currentPathBlock;
-    private MinecraftClient mc;
+    private final MinecraftClient mc;
 
     public PathFinder(){
         mc = MinecraftClient.getInstance();
@@ -166,7 +166,8 @@ public class PathFinder {
         }
     }
 
-    Listener<PlayerMoveEvent> moveEventListener = new Listener<>(event -> {
+    @EventHandler
+    private void moveEventListener(PlayerMoveEvent event) {
         if (target != null && mc.player != null) {
             if (mc.player.distanceTo(target) > 3) {
                 if (currentPathBlock == null) currentPathBlock = getNextPathBlock();
@@ -178,25 +179,22 @@ public class PathFinder {
             } else {
                 if (mc.options.keyForward.isPressed())
                     ((IKeyBinding) mc.options.keyForward).setPressed(false);
-                PATH.clear();
+                path.clear();
                 currentPathBlock = null;
             }
         }
-    });
+    }
 
     public void initiate(Entity entity) {
         target = entity;
-        if (target != null)
-            currentPathBlock = getNextPathBlock();
-        MeteorClient.EVENT_BUS.subscribe(moveEventListener);
+        if (target != null) currentPathBlock = getNextPathBlock();
+        MeteorClient.EVENT_BUS.subscribe(this);
     }
 
     public void disable() {
         target = null;
-        PATH.clear();
-        if (mc.options.keyForward.isPressed())
-            ((IKeyBinding) mc.options.keyForward).setPressed(false);
-        MeteorClient.EVENT_BUS.unsubscribe(moveEventListener);
+        path.clear();
+        if (mc.options.keyForward.isPressed()) ((IKeyBinding) mc.options.keyForward).setPressed(false);
+        MeteorClient.EVENT_BUS.unsubscribe(this);
     }
-
 }

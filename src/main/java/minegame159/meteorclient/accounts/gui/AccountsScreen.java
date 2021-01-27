@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.accounts.gui;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.accounts.Account;
 import minegame159.meteorclient.accounts.AccountManager;
 import minegame159.meteorclient.events.meteor.AccountListChangedEvent;
@@ -49,10 +48,10 @@ public class AccountsScreen extends WindowScreen {
     }
 
     @EventHandler
-    private final Listener<AccountListChangedEvent> onAccountListChanged = new Listener<>(event -> {
+    private void onAccountListChanged(AccountListChangedEvent event) {
         clear();
         initWidgets();
-    });
+    }
 
     static void addAccount(WButton add, WidgetScreen screen, Account<?> account) {
         add.setText("...");

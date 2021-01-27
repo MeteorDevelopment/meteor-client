@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.modules.movement;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.player.InteractItemEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
@@ -69,7 +68,7 @@ public class ElytraBoost extends Module {
     }
 
     @EventHandler
-    private final Listener<InteractItemEvent> onInteractItem = new Listener<>(event -> {
+    private void onInteractItem(InteractItemEvent event) {
         ItemStack itemStack = mc.player.getStackInHand(event.hand);
 
         if (itemStack.getItem() instanceof FireworkItem && dontConsumeFirework.get()) {
@@ -77,12 +76,12 @@ public class ElytraBoost extends Module {
 
             boost();
         }
-    });
+    }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         fireworks.removeIf(fireworkRocketEntity -> fireworkRocketEntity.removed);
-    });
+    }
 
     private void boost() {
         if (!Utils.canUpdate()) return;

@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.modules.movement;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.player.PlayerMoveEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixininterface.IVec3d;
@@ -20,7 +19,6 @@ import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.util.math.Vec3d;
 
 public class Speed extends Module {
-
     public enum JumpIf {
         Sprinting,
         Walking,
@@ -110,7 +108,7 @@ public class Speed extends Module {
     }
 
     @EventHandler
-    private final Listener<PlayerMoveEvent> onPlayerMove = new Listener<>(event -> {
+    private void onPlayerMove(PlayerMoveEvent event) {
         if (event.type != MovementType.SELF || mc.player.isFallFlying() || mc.player.isClimbing() || mc.player.getVehicle() != null) return;
         if (!whenSneaking.get() && mc.player.isSneaking()) return;
         if (onlyOnGround.get() && !mc.player.isOnGround()) return;
@@ -133,17 +131,17 @@ public class Speed extends Module {
         }
 
         ((IVec3d) event.movement).set(velX, event.movement.y, velZ);
-    });
+    }
 
     @EventHandler
-    private final Listener<TickEvent.Pre> onPreTick = new Listener<>(event -> {
+    private void onPreTick(TickEvent.Pre event) {
         if (jump.get()) {
             if (!mc.player.isOnGround() || mc.player.isSneaking() || !jump()) return;
 
             if (jumpMode.get() == Mode.Jump) mc.player.jump();
             else ((IVec3d) mc.player.getVelocity()).setY(velocityHeight.get());
         }
-    });
+    }
 
     private boolean jump() {
         switch (jumpIf.get()) {

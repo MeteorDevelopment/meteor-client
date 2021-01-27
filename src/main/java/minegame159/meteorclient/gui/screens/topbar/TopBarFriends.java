@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.gui.screens.topbar;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.meteor.FriendListChangedEvent;
 import minegame159.meteorclient.friends.Friend;
 import minegame159.meteorclient.friends.FriendManager;
@@ -130,8 +129,8 @@ public class TopBarFriends extends TopBarWindowScreen {
     }
 
     @EventHandler
-    private final Listener<FriendListChangedEvent> onFriendListChanged = new Listener<>(event -> {
+    private void onFriendListChanged(FriendListChangedEvent event) {
         clear();
         initWidgets();
-    });
+    }
 }

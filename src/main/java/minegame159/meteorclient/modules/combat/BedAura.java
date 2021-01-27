@@ -8,8 +8,7 @@ package minegame159.meteorclient.modules.combat;
 // Created by squidoodly 03/06/2020
 // Updated by squidoodly 19/06/2020
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.modules.Category;
@@ -212,10 +211,7 @@ public class BedAura extends Module {
     private AbstractClientPlayerEntity target;
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
-        assert mc.player != null;
-        assert mc.world != null;
-        assert mc.interactionManager != null;
+    private void onTick(TickEvent.Post event) {
         delayLeft --;
         preSlot = -1;
         if (mc.player.getHealth() + mc.player.getAbsorptionAmount() <= minHealth.get() && placeMode.get() != Mode.Suicide) return;
@@ -329,7 +325,7 @@ public class BedAura extends Module {
                 }
             }
         }
-    });
+    }
 
     private void placeBlock(){
         assert mc.player != null;

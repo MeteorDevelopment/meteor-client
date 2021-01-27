@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.modules.render;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixin.AbstractBlockAccessor;
@@ -146,7 +145,7 @@ public class HoleESP extends Module {
     }
 
     @EventHandler
-    private final Listener<TickEvent.Pre> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Pre event) {
         for (Hole hole : holes) holePool.free(hole);
         holes.clear();
 
@@ -183,7 +182,7 @@ public class HoleESP extends Module {
                 else holes.add(holePool.get().set(blockPos, someObsidian.get()));
             }
         });
-    });
+    }
 
     private boolean checkHeight() {
         if (((AbstractBlockAccessor) mc.world.getBlockState(blockPos).getBlock()).isCollidable()) return false;
@@ -197,7 +196,7 @@ public class HoleESP extends Module {
     }
 
     @EventHandler
-    private final Listener<RenderEvent> onRender = new Listener<>(event -> {
+    private void onRender(RenderEvent event) {
         if (renderMode.get() == Mode.Glow || renderMode.get() == Mode.ReverseGlow) {
             MB.depthTest = depthTest.get();
             _MB.depthTest = depthTest.get();
@@ -237,7 +236,7 @@ public class HoleESP extends Module {
             MB.end();
             _MB.end();
         }
-    });
+    }
 
     private BlockPos.Mutable add(int x, int y, int z) {
         blockPos.setX(blockPos.getX() + x);

@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.modules.movement;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.entity.player.PlayerMoveEvent;
 import minegame159.meteorclient.events.world.TickEvent;
@@ -198,7 +197,7 @@ public class ElytraPlus extends Module {
     }
 
     @EventHandler
-    private final Listener<PlayerMoveEvent> onPlayerMove = new Listener<>(event -> {
+    private void onPlayerMove(PlayerMoveEvent event) {
         if (!(mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() instanceof ElytraItem)) return;
 
         handleAutoTakeOff();
@@ -237,10 +236,10 @@ public class ElytraPlus extends Module {
                 lastForwardPressed = false;
             }
         }
-    });
+    }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         if (replace.get()) {
             if (mc.player.inventory.getArmorStack(2).getItem() == Items.ELYTRA) {
                 if (mc.player.inventory.getArmorStack(2).getMaxDamage() - mc.player.inventory.getArmorStack(2).getDamage() <= replaceDurability.get()) {
@@ -280,7 +279,7 @@ public class ElytraPlus extends Module {
             mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.START_FALL_FLYING));
             mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket(true));
         }
-    });
+    }
 
     private void handleAutopilot() {
         if (moveForward.get()) if (mc.player.getY() < autoPilotMinimumHeight.get()) ((IKeyBinding) mc.options.keyForward).setPressed(true);
@@ -375,21 +374,24 @@ public class ElytraPlus extends Module {
         lastJumpPressed = jumpPressed;
     }
 
-    private final Listener<PlayerMoveEvent> chestSwapGroundListener = new Listener<>(event -> {
-        if (mc.player != null && mc.player.isOnGround()) {
-            if (mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() == Items.ELYTRA) {
-                ModuleManager.INSTANCE.get(ChestSwap.class).swap();
-                disableGroundListener();
+    private class StaticListener {
+        @EventHandler
+        private void chestSwapGroundListener(PlayerMoveEvent event) {
+            if (mc.player != null && mc.player.isOnGround()) {
+                if (mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() == Items.ELYTRA) {
+                    ModuleManager.INSTANCE.get(ChestSwap.class).swap();
+                    disableGroundListener();
+                }
             }
         }
-    });
+    }
 
     protected void enableGroundListener() {
-        MeteorClient.EVENT_BUS.subscribe(chestSwapGroundListener);
+        MeteorClient.EVENT_BUS.subscribe(StaticListener.class);
     }
 
     protected void disableGroundListener() {
-        MeteorClient.EVENT_BUS.unsubscribe(chestSwapGroundListener);
+        MeteorClient.EVENT_BUS.unsubscribe(StaticListener.class);
     }
 
     private Hand getFireworkHand() {

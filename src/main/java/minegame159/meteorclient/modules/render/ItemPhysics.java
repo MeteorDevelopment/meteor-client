@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.modules.render;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderItemEntityEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
@@ -21,13 +20,12 @@ import net.minecraft.item.ItemStack;
 import java.util.Random;
 
 public class ItemPhysics extends Module {
-
     public ItemPhysics() {
         super(Category.Render, "item-physics", "Applies physics to items on the ground.");
     }
 
     @EventHandler
-    private final Listener<RenderItemEntityEvent> onRenderItemEntity = new Listener<>(event -> {
+    private void onRenderItemEntity(RenderItemEntityEvent event) {
         event.setCancelled(true);
 
         ItemStack itemStack = event.itemEntity.getStack();
@@ -88,7 +86,7 @@ public class ItemPhysics extends Module {
         }
 
         event.matrixStack.pop();
-    });
+    }
 
     private int getRenderedAmount(ItemStack stack) {
         int i = 1;

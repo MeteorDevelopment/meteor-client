@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.modules.combat;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
@@ -90,7 +89,7 @@ public class Surround extends Module {
     }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         if (disableOnJump.get() && mc.options.keyJump.isPressed()) {
             toggle();
             return;
@@ -135,7 +134,7 @@ public class Surround extends Module {
         if (turnOff.get() && p1 && p2 && p3 && p4 && p5) {
             if (doubleHeightPlaced || !doubleHeight.get()) toggle();
         }
-    });
+    }
 
     private boolean place(int x, int y, int z) {
         setBlockPos(x, y, z);

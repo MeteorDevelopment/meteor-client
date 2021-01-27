@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.modules.combat;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.friends.FriendManager;
@@ -143,7 +142,7 @@ public class AutoTrap extends Module {
     }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
 
         int slot = InvUtils.findItemInHotbar(Blocks.OBSIDIAN.asItem(), itemStack -> true);
 
@@ -180,14 +179,13 @@ public class AutoTrap extends Module {
             mc.player.inventory.selectedSlot = prevSlot;
             delay = 0;
         } else delay++;
-    });
+    }
 
     @EventHandler
-    private final Listener<RenderEvent> onRender = new Listener<>(event -> {
+    private void onRender(RenderEvent event) {
         if (!render.get() || placePositions.isEmpty()) return;
         for (BlockPos pos : placePositions) Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, pos, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-    });
-
+    }
 
     private List<BlockPos> getPlacePos(PlayerEntity target) {
         placePositions.clear();

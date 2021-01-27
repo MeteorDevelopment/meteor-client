@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.modules.player;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.mixininterface.IKeyBinding;
@@ -25,7 +24,6 @@ import java.util.List;
 import java.util.Random;
 
 public class AntiAFK extends Module {
-
     public enum SpinMode {
         Server,
         Client
@@ -141,9 +139,8 @@ public class AntiAFK extends Module {
     }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         if (Utils.canUpdate()) {
-
             //Spin
             if (spin.get()) {
                 prevYaw += spinSpeed.get();
@@ -198,9 +195,8 @@ public class AntiAFK extends Module {
                 strafeTimer = 0;
             } else
                 strafeTimer++;
-
         }
-    });
+    }
 
     @Override
     public WWidget getWidget() {

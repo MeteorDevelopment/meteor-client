@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.modules.player;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixininterface.IMinecraftClient;
 import minegame159.meteorclient.modules.Category;
@@ -19,7 +18,6 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.item.Items;
 
 public class FastUse extends Module {
-
     public enum Mode {
         All,
         Some
@@ -53,7 +51,7 @@ public class FastUse extends Module {
     }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         switch (mode.get()) {
             case All:
                 ((IMinecraftClient) mc).setItemUseCooldown(0);
@@ -61,6 +59,7 @@ public class FastUse extends Module {
             case Some:
                 if (exp.get() && (mc.player.getMainHandStack().getItem() == Items.EXPERIENCE_BOTTLE || mc.player.getOffHandStack().getItem() == Items.EXPERIENCE_BOTTLE)) ((IMinecraftClient) mc).setItemUseCooldown(0);
                 if (blocks.get() && mc.player.getMainHandStack().getItem() instanceof BlockItem || mc.player.getOffHandStack().getItem() instanceof BlockItem) ((IMinecraftClient) mc).setItemUseCooldown(0);
+                break;
         }
-    });
+    }
 }

@@ -6,8 +6,7 @@
 package minegame159.meteorclient.modules.render;
 
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
@@ -25,7 +24,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.util.math.Box;
 
 public class ESP extends Module {
-//    private static final Identifier BOX2D = new Identifier("meteor-client", "box2d.png");
+    //private static final Identifier BOX2D = new Identifier("meteor-client", "box2d.png");
     private static final MeshBuilder MB = new MeshBuilder(128);
 
     public enum Mode {
@@ -168,7 +167,7 @@ public class ESP extends Module {
     }
 
     @EventHandler
-    private final Listener<RenderEvent> onRender = new Listener<>(event -> {
+    private void onRender(RenderEvent event) {
         if (isOutline()) return;
 
         count = 0;
@@ -178,7 +177,7 @@ public class ESP extends Module {
             count++;
             render(event, entity, getColor(entity));
         }
-    });
+    }
 
     @Override
     public String getInfoString() {

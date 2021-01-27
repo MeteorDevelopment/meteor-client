@@ -7,8 +7,7 @@ package minegame159.meteorclient.modules.player;
 
 //Created by squidooly 16/07/2020
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
@@ -106,10 +105,10 @@ public class AutoMount extends Module {
     );
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
-        if(mc.player.hasVehicle())return;
-        for(Entity entity : mc.world.getEntities()){
-            if(mc.player.distanceTo(entity) > 4) continue;
+    private void onTick(TickEvent.Post event) {
+        if (mc.player.hasVehicle()) return;
+        for (Entity entity : mc.world.getEntities()){
+            if (mc.player.distanceTo(entity) > 4) continue;
 
             if (mc.player.getMainHandStack().getItem() instanceof SpawnEggItem) return;
             if (donkeys.get() && entity instanceof DonkeyEntity && (!checkSaddle.get() || ((DonkeyEntity) entity).isSaddled())) {
@@ -138,5 +137,5 @@ public class AutoMount extends Module {
                 mc.player.networkHandler.sendPacket(new PlayerInteractEntityC2SPacket(entity, Hand.MAIN_HAND, mc.player.isSneaking()));
             }
         }
-    });
+    }
 }

@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.modules.movement;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.mixininterface.IPlayerMoveC2SPacket;
 import minegame159.meteorclient.modules.Category;
@@ -25,10 +24,12 @@ public class NoFall extends Module {
         Packet,
         AirPlace
     }
+
     public enum PlaceMode{
         BeforeDeath,
         BeforeDamage
     }
+
     public NoFall() {
         super(Category.Movement, "no-fall", "Prevents you from taking fall damage.");
     }
@@ -66,8 +67,9 @@ public class NoFall extends Module {
     );
 
     @EventHandler
-    private final Listener<PacketEvent.Send> onSendPacket = new Listener<>(event -> {
+    private void onSendPacket(PacketEvent.Send event) {
         if (mc.player != null && mc.player.abilities.creativeMode) return;
+
         if (event.packet instanceof PlayerMoveC2SPacket) {
             if (elytra.get() && (mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() == Items.ELYTRA && mc.options.keyJump.isPressed() || mc.player.isFallFlying())) {
                 for (int i = 0; i <= Math.ceil(height.get()); i++) {
@@ -100,5 +102,5 @@ public class NoFall extends Module {
                 }
             }
         }
-    });
+    }
 }

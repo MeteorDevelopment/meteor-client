@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.modules.render;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
@@ -125,7 +124,7 @@ public class StorageESP extends Module {
     }
 
     @EventHandler
-    private final Listener<RenderEvent> onRender = new Listener<>(event -> {
+    private void onRender(RenderEvent event) {
         count = 0;
 
         for (BlockEntity blockEntity : mc.world.blockEntities) {
@@ -181,7 +180,7 @@ public class StorageESP extends Module {
                 count++;
             }
         }
-    });
+    }
 
     @Override
     public String getInfoString() {

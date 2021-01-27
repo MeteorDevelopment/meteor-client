@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.modules.player;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.player.StartBreakingBlockEvent;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.events.world.TickEvent;
@@ -91,7 +90,7 @@ public class PacketMine extends Module {
     }
 
     @EventHandler
-    private final Listener<StartBreakingBlockEvent> onStartBreakingBlock = new Listener<>(event -> {
+    private void onStartBreakingBlock(StartBreakingBlockEvent event) {
         if (mc.world.getBlockState(event.blockPos).getHardness(mc.world, event.blockPos) < 0) return;
 
         if (!isMiningBlock(event.blockPos)) {
@@ -103,24 +102,24 @@ public class PacketMine extends Module {
         }
 
         event.cancel();
-    });
+    }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         blocks.removeIf(MyBlock::shouldRemove);
 
         if (oneByOne.get()) {
             if (!blocks.isEmpty()) blocks.get(0).mine();
         }
         else blocks.forEach(MyBlock::mine);
-    });
+    }
 
     @EventHandler
-    private final Listener<RenderEvent> onRender = new Listener<>(event -> {
+    private void onRender(RenderEvent event) {
         if (render.get()) {
             for (MyBlock block : blocks) block.render();
         }
-    });
+    }
 
     private class MyBlock {
         public BlockPos blockPos;

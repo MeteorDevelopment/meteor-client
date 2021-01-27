@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.modules.player;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
@@ -20,7 +19,6 @@ import net.minecraft.item.Items;
 import net.minecraft.util.Hand;
 
 public class EXPThrower extends Module {
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Boolean> lookDown = sgGeneral.add(new BoolSetting.Builder()
@@ -42,17 +40,16 @@ public class EXPThrower extends Module {
     }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
-
-        if(autoToggle.get()) {
+    private void onTick(TickEvent.Post event) {
+        if (autoToggle.get()) {
             int count = 0;
             int set = 0;
 
-            for(int i = 0; i < 4; i++) {
-                if(!mc.player.inventory.armor.get(i).isEmpty() && EnchantmentHelper.getLevel(Enchantments.MENDING, mc.player.inventory.getArmorStack(i)) == 1) set++;
-                if(!mc.player.inventory.armor.get(i).isDamaged()) count++;
+            for (int i = 0; i < 4; i++) {
+                if (!mc.player.inventory.armor.get(i).isEmpty() && EnchantmentHelper.getLevel(Enchantments.MENDING, mc.player.inventory.getArmorStack(i)) == 1) set++;
+                if (!mc.player.inventory.armor.get(i).isDamaged()) count++;
             }
-            if(count == set && set != 0) {
+            if (count == set && set != 0) {
                 toggle();
                 return;
             }
@@ -74,5 +71,5 @@ public class EXPThrower extends Module {
             mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
             mc.player.inventory.selectedSlot = preSelectedSlot;
         }
-    });
+    }
 }

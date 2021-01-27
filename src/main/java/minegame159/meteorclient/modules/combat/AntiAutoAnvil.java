@@ -4,8 +4,7 @@
  */
 package minegame159.meteorclient.modules.combat;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
@@ -33,11 +32,8 @@ public class AntiAutoAnvil extends Module {
     }
 
     @EventHandler
-    private final Listener<TickEvent.Pre> onTick = new Listener<>(event -> {
-        assert mc.interactionManager != null;
-        assert mc.world != null;
-        assert mc.player != null;
-        for(int i = 2; i <= mc.interactionManager.getReachDistance() + 2; i++){
+    private void onTick(TickEvent.Pre event) {
+        for (int i = 2; i <= mc.interactionManager.getReachDistance() + 2; i++){
             if (mc.world.getBlockState(mc.player.getBlockPos().add(0, i, 0)).getBlock() == Blocks.ANVIL
                     && mc.world.getBlockState(mc.player.getBlockPos().add(0, i - 1, 0)).isAir()){
                 int slot = InvUtils.findItemWithCount(Items.OBSIDIAN).slot;
@@ -49,5 +45,5 @@ public class AntiAutoAnvil extends Module {
                 }
             }
         }
-    });
+    }
 }

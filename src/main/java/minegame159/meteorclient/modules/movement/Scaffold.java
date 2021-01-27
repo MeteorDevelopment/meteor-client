@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.modules.movement;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.player.ClipAtLedgeEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
@@ -99,7 +98,7 @@ public class Scaffold extends Module {
     }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         if (fastTower.get() && !mc.world.getBlockState(setPos(0, -1, 0)).getMaterial().isReplaceable() && mc.options.keyJump.isPressed() && findSlot(mc.world.getBlockState(setPos(0, -1, 0))) != -1 && mc.player.sidewaysSpeed == 0 &&mc.player.forwardSpeed == 0) mc.player.jump();
         blockState = mc.world.getBlockState(setPos(0, -1, 0));
         if (!blockState.getMaterial().isReplaceable()) return;
@@ -164,17 +163,17 @@ public class Scaffold extends Module {
 
         // Change back to previous slot
         mc.player.inventory.selectedSlot = prevSelectedSlot;
-    });
+    }
 
     @EventHandler
-    private final Listener<ClipAtLedgeEvent> onClipAtLedge = new Listener<>(event -> {
+    private void onClipAtLedge(ClipAtLedgeEvent event) {
         if (mc.player.input.sneaking) {
             event.setClip(false);
             return;
         }
 
         if (safeWalk.get()) event.setClip(true);
-    });
+    }
 
     private boolean findBlock() {
         if (mc.player.inventory.getStack(slot).isEmpty()) {

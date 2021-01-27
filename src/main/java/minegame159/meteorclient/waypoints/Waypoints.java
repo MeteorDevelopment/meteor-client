@@ -5,15 +5,12 @@
 
 package minegame159.meteorclient.waypoints;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listenable;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.game.GameJoinedEvent;
 import minegame159.meteorclient.events.game.GameLeftEvent;
 import minegame159.meteorclient.events.meteor.WaypointListChangedEvent;
 import minegame159.meteorclient.events.render.RenderEvent;
-import minegame159.meteorclient.rendering.DrawMode;
 import minegame159.meteorclient.rendering.Matrices;
 import minegame159.meteorclient.rendering.MeshBuilder;
 import minegame159.meteorclient.rendering.text.TextRenderer;
@@ -24,7 +21,6 @@ import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.world.Dimension;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.Camera;
-import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.texture.AbstractTexture;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.NativeImageBackedTexture;
@@ -34,7 +30,7 @@ import net.minecraft.util.math.Vec3d;
 import java.io.*;
 import java.util.*;
 
-public class Waypoints extends Savable<Waypoints> implements Listenable, Iterable<Waypoint> {
+public class Waypoints extends Savable<Waypoints> implements Iterable<Waypoint> {
     public static final Map<String, AbstractTexture> ICONS = new HashMap<>();
     public static final Waypoints INSTANCE = new Waypoints();
 
@@ -66,13 +62,15 @@ public class Waypoints extends Savable<Waypoints> implements Listenable, Iterabl
     }
 
     @EventHandler
-    private final Listener<GameJoinedEvent> onGameJoined = new Listener<>(event -> load());
+    private void onGameJoined(GameJoinedEvent event) {
+        load();
+    }
 
     @EventHandler
-    private final Listener<GameLeftEvent> onGameDisconnected = new Listener<>(event -> {
+    private void onGameDisconnected(GameLeftEvent event) {
         save();
         waypoints.clear();
-    });
+    }
 
     private boolean checkDimension(Waypoint waypoint) {
         Dimension dimension = Utils.getDimension();
@@ -100,7 +98,7 @@ public class Waypoints extends Savable<Waypoints> implements Listenable, Iterabl
     }
 
     @EventHandler
-    private final Listener<RenderEvent> onRender = new Listener<>(event -> {
+    private void onRender(RenderEvent event) {
         for (Waypoint waypoint : this) {
             if (!waypoint.visible || !checkDimension(waypoint)) continue;
 
@@ -186,7 +184,7 @@ public class Waypoints extends Savable<Waypoints> implements Listenable, Iterabl
             BACKGROUND.a = preBgA;
             TEXT.a = preTextA;
         }
-    });
+    }
 
     @Override
     public File getFile() {

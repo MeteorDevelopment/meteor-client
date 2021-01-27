@@ -7,8 +7,7 @@ package minegame159.meteorclient.modules.combat;
 
 import baritone.api.BaritoneAPI;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.commands.CommandManager;
 import minegame159.meteorclient.commands.commands.swarm.SwarmQueen;
 import minegame159.meteorclient.commands.commands.swarm.SwarmSlave;
@@ -165,10 +164,10 @@ public class Swarm extends Module {
 
     @SuppressWarnings("unused")
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         if (targetBlock != null)
             mine();
-    });
+    }
 
     public void idle() {
         currentMode = Mode.Idle;
@@ -381,20 +380,19 @@ public class Swarm extends Module {
 
     @SuppressWarnings("unused")
     @EventHandler
-    private final Listener<GameLeftEvent> gameLeftEventListener = new Listener<>(event -> {
+    private void gameLeftEventListener(GameLeftEvent event) {
         closeAllServerConnections();
         this.toggle();
-    });
+    }
 
     @SuppressWarnings("unused")
     @EventHandler
-    private final Listener<GameJoinedEvent> gameJoinedEventListener = new Listener<>(event -> {
+    private void gameJoinedEventListener(GameJoinedEvent event) {
         closeAllServerConnections();
         this.toggle();
-    });
+    }
 
     private class SwarmHelpScreen extends WindowScreen {
-
         private final WTable textTable;
         private final WButton introButton;
         private final WButton ipConfigButton;

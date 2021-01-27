@@ -7,8 +7,7 @@ package minegame159.meteorclient.modules.misc;
 
 //Created by squidoodly 06/07/2020 AT FUCKING 12:00AM KILL ME
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixininterface.IClientPlayerInteractionManager;
@@ -129,7 +128,7 @@ public class BookBot extends Module {
     }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         // Make sure we aren't in the inventory.
         if(mc.currentScreen instanceof HandledScreen<?>) return;
         // If there are no books left to write we are done.
@@ -214,7 +213,7 @@ public class BookBot extends Module {
                 }
             }
         }
-    });
+    }
 
     private void writeBook() {
         pages.clear();

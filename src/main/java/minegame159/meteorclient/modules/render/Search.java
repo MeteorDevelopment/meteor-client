@@ -8,8 +8,7 @@ package minegame159.meteorclient.modules.render;
 import it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap;
 import it.unimi.dsi.fastutil.longs.LongArrayList;
 import it.unimi.dsi.fastutil.longs.LongList;
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.events.world.ChunkDataEvent;
 import minegame159.meteorclient.events.world.TickEvent;
@@ -129,7 +128,9 @@ public class Search extends Module {
     }
 
     @EventHandler
-    private final Listener<ChunkDataEvent> onChunkData = new Listener<>(event -> searchChunk(event.chunk, event));
+    private void onChunkData(ChunkDataEvent event) {
+        searchChunk(event.chunk, event);
+    }
 
     private void searchChunk(Chunk chunk, ChunkDataEvent event) {
         MeteorExecutor.execute(() -> {
@@ -172,7 +173,7 @@ public class Search extends Module {
     }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         if (lastDimension != mc.world.getDimension()) {
             synchronized (chunks) {
                 for (MyChunk chunk : chunks.values()) chunk.dispose();
@@ -189,11 +190,10 @@ public class Search extends Module {
         }
 
         lastDimension = mc.world.getDimension();
-    });
+    }
 
     @EventHandler
-    private final Listener<RenderEvent> onRender = new Listener<>(event -> {
-
+    private void onRender(RenderEvent event) {
         synchronized (chunks) {
             toRemove.clear();
             
@@ -207,7 +207,7 @@ public class Search extends Module {
                 chunks.remove(key);
             }
         }
-    });
+    }
 
     private void addToUpdate(int x, int z) {
         long key = ChunkPos.toLong(x, z);

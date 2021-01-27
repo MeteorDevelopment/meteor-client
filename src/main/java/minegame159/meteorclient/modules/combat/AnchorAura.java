@@ -9,8 +9,7 @@ package minegame159.meteorclient.modules.combat;
 // Official Squidoodly Watermark!
 
 import com.google.common.collect.Streams;
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.friends.FriendManager;
@@ -245,7 +244,7 @@ public class AnchorAura extends Module {
     }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         if (mc.world.getDimension().isRespawnAnchorWorking()) {
             ChatUtils.moduleError(this, "You are in the Nether... disabling.");
             this.toggle();
@@ -305,15 +304,15 @@ public class AnchorAura extends Module {
 
         placeDelayLeft++;
         breakDelayLeft++;
-    });
+    }
 
     @EventHandler
-    private final Listener<RenderEvent> onRender = new Listener<>(event -> {
+    private void onRender(RenderEvent event) {
         if (target != null) {
             if (renderPlace.get() && findPlacePos(target) != null) Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, findPlacePos(target).getX(), findPlacePos(target).getY(), findPlacePos(target).getZ(), 1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
             if (renderBreak.get() && findAnchor(target) != null) Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, findAnchor(target).getX(), findAnchor(target).getY(), findAnchor(target).getZ(), 1, breakSideColor.get(), breakLineColor.get(), shapeMode.get(), 0);
         }
-    });
+    }
 
     private boolean checkItems() {
         return InvUtils.findItemInHotbar(Items.RESPAWN_ANCHOR, itemStack -> true) != -1 && InvUtils.findItemInHotbar(Items.GLOWSTONE, itemStack -> true) != -1;

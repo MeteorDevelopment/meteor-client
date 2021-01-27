@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.modules.combat;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.friends.FriendManager;
@@ -102,7 +101,7 @@ public class AutoLog extends Module {
     }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         if (mc.player.getHealth() <= 0) {
             this.toggle();
             return;
@@ -139,7 +138,7 @@ public class AutoLog extends Module {
                 if (toggleOff.get()) this.toggle();
             }
         }
-    });
+    }
 
     private double getHealthReduction(){
         double damageTaken = 0;
@@ -173,23 +172,24 @@ public class AutoLog extends Module {
         return damageTaken;
     }
 
-    private final Listener<TickEvent.Post> healthListener = new Listener<>(event -> {
-        if (isActive()) disableHealthListener();
+    private class StaticListener {
+        @EventHandler
+        private void healthListener(TickEvent.Post event) {
+            if (isActive()) disableHealthListener();
 
-        else if (Utils.canUpdate()
-                && !mc.player.isDead()
-                && mc.player.getHealth() >= health.get()) {
-            toggle();
-            disableHealthListener();
-       }
-    });
+            else if (Utils.canUpdate()
+                    && !mc.player.isDead()
+                    && mc.player.getHealth() >= health.get()) {
+                toggle();
+                disableHealthListener();
+           }
+        }
+    }
 
     private void enableHealthListener(){
-        MeteorClient.EVENT_BUS.subscribe(healthListener);
+        MeteorClient.EVENT_BUS.subscribe(StaticListener.class);
     }
     private void disableHealthListener(){
-        MeteorClient.EVENT_BUS.unsubscribe(healthListener);
+        MeteorClient.EVENT_BUS.unsubscribe(StaticListener.class);
     }
-
-
 }

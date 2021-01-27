@@ -7,8 +7,7 @@ package minegame159.meteorclient.modules.misc;
 
 //Updated by squidoodly 24/07/2020
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.EntityAddedEvent;
 import minegame159.meteorclient.friends.Friend;
 import minegame159.meteorclient.friends.FriendManager;
@@ -42,11 +41,11 @@ public class MessageAura extends Module {
     );
 
     @EventHandler
-    private final Listener<EntityAddedEvent> onEntityAdded = new Listener<>(event -> {
+    private void onEntityAdded(EntityAddedEvent event) {
         if (!(event.entity instanceof PlayerEntity) || event.entity.getUuid().equals(mc.player.getUuid())) return;
 
         if (!ignoreFriends.get() || (ignoreFriends.get() && !FriendManager.INSTANCE.contains(new Friend((PlayerEntity)event.entity)))) {
             mc.player.sendChatMessage("/msg " + ((PlayerEntity) event.entity).getGameProfile().getName() + " " + message.get());
         }
-    });
+    }
 }

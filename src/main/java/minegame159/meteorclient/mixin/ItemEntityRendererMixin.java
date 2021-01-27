@@ -20,7 +20,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class ItemEntityRendererMixin {
     @Inject(method = "render", at = @At("HEAD"), cancellable = true)
     private void render(ItemEntity itemEntity, float f, float g, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, CallbackInfo ci) {
-        RenderItemEntityEvent event = MeteorClient.postEvent(RenderItemEntityEvent.get(itemEntity, f, g, matrixStack, vertexConsumerProvider, i));
+        RenderItemEntityEvent event = MeteorClient.EVENT_BUS.post(RenderItemEntityEvent.get(itemEntity, f, g, matrixStack, vertexConsumerProvider, i));
+
         if (event.isCancelled()) ci.cancel();
     }
 }

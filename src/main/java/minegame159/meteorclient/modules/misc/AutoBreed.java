@@ -6,8 +6,7 @@
 package minegame159.meteorclient.modules.misc;
 
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
@@ -24,7 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AutoBreed extends Module {
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
@@ -72,7 +70,7 @@ public class AutoBreed extends Module {
     }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         for (Entity entity : mc.world.getEntities()) {
             AnimalEntity animal;
 
@@ -91,5 +89,5 @@ public class AutoBreed extends Module {
             animalsFed.add(animal);
             return;
         }
-    });
+    }
 }

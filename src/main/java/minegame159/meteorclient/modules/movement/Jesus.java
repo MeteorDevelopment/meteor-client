@@ -6,8 +6,7 @@
 package minegame159.meteorclient.modules.movement;
 
 import baritone.api.BaritoneAPI;
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.player.CanWalkOnFluidEvent;
 import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.events.world.FluidCollisionShapeEvent;
@@ -157,7 +156,7 @@ public class Jesus extends Module {
     }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         if (mc.player.isTouchingWater() && !waterShouldBeSolid()) return;
         if (mc.player.isInLava() && !lavaShouldBeSolid()) return;
 
@@ -177,28 +176,28 @@ public class Jesus extends Module {
             ((IVec3d) velocity).set(velocity.x, 0, velocity.z);
 
         tickTimer++;
-    });
+    }
 
     @EventHandler
-    private final Listener<CanWalkOnFluidEvent> onCanWalkOnFluid = new Listener<>(event -> {
+    private void onCanWalkOnFluid(CanWalkOnFluidEvent event) {
         if (event.entity != mc.player) return;
 
         if ((event.fluid == Fluids.WATER || event.fluid == Fluids.FLOWING_WATER) && waterShouldBeSolid())
             event.walkOnFluid = true;
         else if ((event.fluid == Fluids.LAVA || event.fluid == Fluids.FLOWING_LAVA) && lavaShouldBeSolid())
             event.walkOnFluid = true;
-    });
+    }
 
     @EventHandler
-    private final Listener<FluidCollisionShapeEvent> onFluidCollisionShape = new Listener<>(event -> {
+    private void onFluidCollisionShape(FluidCollisionShapeEvent event) {
         if (event.state.getMaterial() == Material.WATER && !mc.player.isTouchingWater() && waterShouldBeSolid())
             event.shape = VoxelShapes.fullCube();
         else if (event.state.getMaterial() == Material.LAVA && !mc.player.isInLava() && lavaShouldBeSolid())
             event.shape = VoxelShapes.fullCube();
-    });
+    }
 
     @EventHandler
-    private final Listener<PacketEvent.Send> onSendPacket = new Listener<>(event -> {
+    private void onSendPacket(PacketEvent.Send event) {
         if (!(event.packet instanceof PlayerMoveC2SPacket)) return;
         if (mc.player.isTouchingWater() && !waterShouldBeSolid()) return;
         if (mc.player.isInLava() && !lavaShouldBeSolid()) return;
@@ -238,7 +237,7 @@ public class Jesus extends Module {
 
         // Send new packet
         mc.getNetworkHandler().getConnection().send(newPacket);
-    });
+    }
 
     private boolean waterShouldBeSolid() {
         return walkOnWater.get() &&

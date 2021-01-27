@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.modules.misc;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
@@ -76,17 +75,19 @@ public class LiquidFiller extends Module {
     }
 
     @EventHandler
-    private final Listener<TickEvent.Pre> onTick = new Listener<>(event -> BlockIterator.register(horizontalRadius.get(), verticalRadius.get(), (blockPos, blockState) -> {
-        if (blockState.getFluidState().getLevel() == 8 && blockState.getFluidState().isStill()) {
-            Block liquid = blockState.getBlock();
+    private void onTick(TickEvent.Pre event) {
+        BlockIterator.register(horizontalRadius.get(), verticalRadius.get(), (blockPos, blockState) -> {
+            if (blockState.getFluidState().getLevel() == 8 && blockState.getFluidState().isStill()) {
+                Block liquid = blockState.getBlock();
 
-            PlaceIn placeIn = placeInLiquids.get();
-            if (placeIn == PlaceIn.Both || (placeIn == PlaceIn.Lava && liquid == Blocks.LAVA) || (placeIn == PlaceIn.Water && liquid == Blocks.WATER)) {
-                if (rotate.get()) RotationUtils.packetRotate(blockPos);
-                if (PlayerUtils.placeBlock(blockPos, findSlot(), Hand.MAIN_HAND)) BlockIterator.disableCurrent();
+                PlaceIn placeIn = placeInLiquids.get();
+                if (placeIn == PlaceIn.Both || (placeIn == PlaceIn.Lava && liquid == Blocks.LAVA) || (placeIn == PlaceIn.Water && liquid == Blocks.WATER)) {
+                    if (rotate.get()) RotationUtils.packetRotate(blockPos);
+                    if (PlayerUtils.placeBlock(blockPos, findSlot(), Hand.MAIN_HAND)) BlockIterator.disableCurrent();
+                }
             }
-        }
-    }));
+        });
+    }
 
     private int findSlot() {
         int slot = -1;

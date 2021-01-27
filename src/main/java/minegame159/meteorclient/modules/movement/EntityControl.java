@@ -7,8 +7,7 @@ package minegame159.meteorclient.modules.movement;
 
 //Created by squidoodly 10/07/2020
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixin.ClientPlayerEntityAccessor;
 import minegame159.meteorclient.mixininterface.IHorseBaseEntity;
@@ -45,11 +44,11 @@ public class EntityControl extends Module {
     }
 
     @EventHandler
-    private final Listener<TickEvent.Pre> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Pre event) {
         for (Entity entity : mc.world.getEntities()) {
             if (entity instanceof HorseBaseEntity) ((IHorseBaseEntity) entity).setSaddled(true);
         }
 
         if (maxJump.get()) ((ClientPlayerEntityAccessor) mc.player).setMountJumpStrength(1);
-    });
+    }
 }

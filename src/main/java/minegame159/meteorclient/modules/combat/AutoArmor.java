@@ -7,8 +7,7 @@ package minegame159.meteorclient.modules.combat;
 
 //Rewritten by squidoodly 25/07/2020
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
@@ -185,7 +184,7 @@ public class AutoArmor extends Module {
     private float currentToughness = 0;
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         if (mc.player.abilities.creativeMode) return;
         if (pauseInInventory.get() && mc.currentScreen instanceof InventoryScreen) return;
         if (boomSwitch.get() && mode.get() != Prot.Blast_Protection && explosionNear()) {
@@ -248,7 +247,7 @@ public class AutoArmor extends Module {
             }
             mode.set(preMode);
         }
-    });
+    }
 
     private int getItemScore(ItemStack itemStack){
         int score = 0;

@@ -7,8 +7,7 @@ package minegame159.meteorclient.modules.player;
 
 //Created by squidoodly 06/07/2020
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.meteor.MiddleMouseButtonEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixininterface.IKeyBinding;
@@ -64,7 +63,7 @@ public class MiddleClickExtra extends Module {
     private int preCount;
 
     @EventHandler
-    private final Listener<MiddleMouseButtonEvent> onMiddleMouse = new Listener<>(event -> {
+    private void onMiddleMouse(MiddleMouseButtonEvent event) {
         InvUtils.FindItemResult result;
         switch(mode.get()){
             case Pearl: {
@@ -126,18 +125,18 @@ public class MiddleClickExtra extends Module {
                 break;
             }
         }
-    });
+    }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
-        if(!wasUsing) return;
-        if(preCount > InvUtils.findItemWithCount(mode.get().item).count || (mc.player.getMainHandStack().getItem() != mode.get().item
-                && (mode.get() == Mode.Bow && mc.player.getMainHandStack().getItem() != Items.BOW))){
+    private void onTick(TickEvent.Post event) {
+        if (!wasUsing) return;
+
+        if (preCount > InvUtils.findItemWithCount(mode.get().item).count || (mc.player.getMainHandStack().getItem() != mode.get().item && (mode.get() == Mode.Bow && mc.player.getMainHandStack().getItem() != Items.BOW))){
             ((IKeyBinding) mc.options.keyUse).setPressed(false);
             mc.player.inventory.selectedSlot = preSlot;
             wasUsing = false;
         } else {
             ((IKeyBinding) mc.options.keyUse).setPressed(true);
         }
-    });
+    }
 }

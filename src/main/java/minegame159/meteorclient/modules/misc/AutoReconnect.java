@@ -5,7 +5,7 @@
 
 package minegame159.meteorclient.modules.misc;
 
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.world.ConnectToServerEvent;
 import minegame159.meteorclient.modules.Category;
@@ -16,7 +16,6 @@ import minegame159.meteorclient.settings.SettingGroup;
 import net.minecraft.client.network.ServerInfo;
 
 public class AutoReconnect extends Module {
-    
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     
     public final Setting<Double> time = sgGeneral.add(new DoubleSetting.Builder()
@@ -31,8 +30,13 @@ public class AutoReconnect extends Module {
 
     public AutoReconnect() {
         super(Category.Misc, "auto-reconnect", "Automatically reconnects when disconnected from a server.");
-        MeteorClient.EVENT_BUS.subscribe(new Listener<ConnectToServerEvent>(event -> {
+        MeteorClient.EVENT_BUS.subscribe(StaticListener.class);
+    }
+
+    private class StaticListener {
+        @EventHandler
+        private void onConnectToServer(ConnectToServerEvent event) {
             lastServerInfo = mc.isInSingleplayer() ? null : mc.getCurrentServerEntry();
-        }));
+        }
     }
 }
