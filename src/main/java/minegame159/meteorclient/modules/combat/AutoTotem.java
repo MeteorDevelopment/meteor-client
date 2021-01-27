@@ -30,6 +30,7 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Items;
@@ -73,6 +74,13 @@ public class AutoTotem extends Module {
             .build()
     );
 
+    private final Setting<Boolean> elytraHold = sgGeneral.add(new BoolSetting.Builder()
+            .name("elytra-hold")
+            .description("Whether or not to always hold a totem when flying with an elytra.")
+            .defaultValue(false)
+            .build()
+    );
+
     private String totemCountString = "0";
 
     private final MinecraftClient mc = MinecraftClient.getInstance();
@@ -107,10 +115,10 @@ public class AutoTotem extends Module {
             ModuleManager.INSTANCE.get(OffhandExtra.class).setTotems(false);
 
             if (mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING && (!smart.get()
-                    || isLow())) {
+                    || isLow() || elytraMove())) {
                 locked = true;
                 moveTotem(result);
-            } else if (smart.get() && !isLow()) {
+            } else if (smart.get() && !isLow() && !elytraMove()) {
                 locked = false;
             }
         }
@@ -178,6 +186,10 @@ public class AutoTotem extends Module {
 
     private boolean isLow(){
         return getHealth() < health.get() || (getHealth() - getHealthReduction()) < health.get();
+    }
+
+    private boolean elytraMove(){
+        return elytraHold.get() && mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() == Items.ELYTRA && mc.player.isFallFlying();
     }
 
 }
