@@ -22,5 +22,7 @@ public interface TextRenderer {
     double render(String text, double x, double y, Color color, boolean shadow);
     default double render(String text, double x, double y, Color color) { return render(text, x, y, color, false); }
 
+    boolean isBuilding();
+
     void end();
 }

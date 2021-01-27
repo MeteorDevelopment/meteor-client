@@ -147,11 +147,9 @@ public class WDropbox<T extends Enum<?>> extends WWidget {
 
         if (open) {
             renderer.post(() -> {
-                RENDERER.beginFontScale();
                 RENDERER.begin();
                 root.render(RENDERER, mouseX, mouseY, delta);
                 RENDERER.end();
-                RENDERER.endFontScale();
             });
         }
     }

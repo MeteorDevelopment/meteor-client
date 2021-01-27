@@ -94,6 +94,11 @@ public class CustomTextRenderer implements TextRenderer {
     }
 
     @Override
+    public boolean isBuilding() {
+        return building;
+    }
+
+    @Override
     public void end() {
         if (!building) throw new RuntimeException("CustomTextRenderer.end() called without calling begin()");
 

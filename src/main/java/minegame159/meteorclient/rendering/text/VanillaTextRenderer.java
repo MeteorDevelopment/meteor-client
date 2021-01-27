@@ -14,6 +14,7 @@ public class VanillaTextRenderer implements TextRenderer {
 
     // Vanilla font is almost twice as small as our custom font (vanilla = 9, custom = 18)
     private double scale = 1.74;
+    private boolean building;
 
     private VanillaTextRenderer() {
         // Use INSTANCE
@@ -37,6 +38,7 @@ public class VanillaTextRenderer implements TextRenderer {
 
         // Vanilla font is twice as small as our custom font (vanilla = 9, custom = 18)
         this.scale = scale * 1.74;
+        this.building = true;
     }
 
     @Override
@@ -58,10 +60,16 @@ public class VanillaTextRenderer implements TextRenderer {
     }
 
     @Override
+    public boolean isBuilding() {
+        return building;
+    }
+
+    @Override
     public void end() {
         // Vanilla renderer doesn't support batching
 
         // Vanilla font is twice as small as our custom font (vanilla = 9, custom = 18)
         this.scale = 1.74;
+        this.building = false;
     }
 }
