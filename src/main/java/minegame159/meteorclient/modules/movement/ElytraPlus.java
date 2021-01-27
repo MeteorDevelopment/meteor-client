@@ -17,8 +17,6 @@ import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.player.ChestSwap;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.Utils;
-import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.ElytraItem;
@@ -27,6 +25,7 @@ import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.screen.slot.SlotActionType;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.Vec3d;
 
 public class ElytraPlus extends Module {
@@ -124,20 +123,40 @@ public class ElytraPlus extends Module {
 
     // Autopilot
 
-    private final Setting<Boolean> autopilotEnabled = sgAutopilot.add(new BoolSetting.Builder()
-            .name("autopilot-enabled")
-            .description("Automatically flies forward maintaining minimum height.")
+    private final Setting<Boolean> useFireworks = sgAutopilot.add(new BoolSetting.Builder()
+            .name("use-fireworks")
+            .description("Uses firework rockets every second of your choice.")
             .defaultValue(false)
-            .onChanged(aBoolean -> {
-                if (isActive() && !aBoolean) ((IKeyBinding) mc.options.keyForward).setPressed(false);
-            })
             .build()
     );
 
-    private final Setting<Double> autopilotMinimumHeight = sgAutopilot.add(new DoubleSetting.Builder()
+    private final Setting<Double> autoPilotFireworkDelay = sgAutopilot.add(new DoubleSetting.Builder()
+            .name("firework-delay")
+            .description("The delay in seconds in between shooting fireworks for Firework mode.")
+            .min(1)
+            .defaultValue(10)
+            .sliderMax(20)
+            .build()
+    );
+
+    private final Setting<Boolean> autoPilotFireworkGhosthand = sgAutopilot.add(new BoolSetting.Builder()
+            .name("firework-ghost-hand")
+            .description("Doesn't switch to your firework slot client-side.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> moveForward = sgAutopilot.add(new BoolSetting.Builder()
+            .name("move-forward")
+            .description("Moves forward while elytra flying.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Double> autoPilotMinimumHeight = sgAutopilot.add(new DoubleSetting.Builder()
             .name("minimum-height")
-            .description("The minimum height for autopilot.")
-            .defaultValue(160)
+            .description("The minimum height for moving forward.")
+            .defaultValue(120)
             .min(0)
             .sliderMax(260)
             .build()
@@ -145,15 +164,14 @@ public class ElytraPlus extends Module {
 
     private boolean lastJumpPressed;
     private boolean incrementJumpTimer;
+    private boolean lastForwardPressed;
+
     private int jumpTimer;
 
     private double velX, velY, velZ;
+    private double ticksLeft = autoPilotFireworkDelay.get() * 20;
+
     private Vec3d forward, right;
-
-    private boolean decrementFireworkTimer;
-    private int fireworkTimer;
-
-    private boolean lastForwardPressed;
 
     public ElytraPlus() {
         super(Category.Movement, "Elytra+", "Gives you more control over your elytra.");
@@ -163,6 +181,7 @@ public class ElytraPlus extends Module {
     public void onActivate() {
         lastJumpPressed = false;
         jumpTimer = 0;
+        ticksLeft = 0;
         if ((chestSwap.get() == ChestSwapMode.Always || chestSwap.get() == ChestSwapMode.WaitForGround) && mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() != Items.ELYTRA) {
             ModuleManager.INSTANCE.get(ChestSwap.class).swap();
         }
@@ -170,7 +189,7 @@ public class ElytraPlus extends Module {
 
     @Override
     public void onDeactivate() {
-        if (autopilotEnabled.get()) ((IKeyBinding) mc.options.keyForward).setPressed(false);
+        if (moveForward.get()) ((IKeyBinding) mc.options.keyForward).setPressed(false);
 
         if (chestSwap.get() == ChestSwapMode.Always && mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() == Items.ELYTRA) {
             ModuleManager.INSTANCE.get(ChestSwap.class).swap();
@@ -222,11 +241,6 @@ public class ElytraPlus extends Module {
 
     @EventHandler
     private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
-        if (decrementFireworkTimer) {
-            if (fireworkTimer <= 0) decrementFireworkTimer = false;
-
-            fireworkTimer--;
-        }
         if (replace.get()) {
             if (mc.player.inventory.getArmorStack(2).getItem() == Items.ELYTRA) {
                 if (mc.player.inventory.getArmorStack(2).getMaxDamage() - mc.player.inventory.getArmorStack(2).getDamage() <= replaceDurability.get()) {
@@ -269,28 +283,27 @@ public class ElytraPlus extends Module {
     });
 
     private void handleAutopilot() {
-        if (autopilotEnabled.get()) {
-            ((IKeyBinding) mc.options.keyForward).setPressed(true);
+        if (moveForward.get()) if (mc.player.getY() < autoPilotMinimumHeight.get()) ((IKeyBinding) mc.options.keyForward).setPressed(true);
+        lastForwardPressed = true;
+        if (useFireworks.get()) {
+            int slot = InvUtils.findItemInHotbar(Items.FIREWORK_ROCKET, itemStack -> true);
+            int prevSlot = mc.player.inventory.selectedSlot;
 
-            if (mc.player.getY() < autopilotMinimumHeight.get() && !decrementFireworkTimer) {
-                int slot = InvUtils.findItemInHotbar(Items.FIREWORK_ROCKET, itemStack -> true);
+            if (!mc.player.isFallFlying()) return;
+            if (slot == -1 && mc.player.getOffHandStack().getItem() != Items.FIREWORK_ROCKET) return;
+            if (ticksLeft <= 0) {
+                ticksLeft = autoPilotFireworkDelay.get() * 20;
                 if (slot != -1) {
                     mc.player.inventory.selectedSlot = slot;
-                    Utils.rightClick();
-
-                    decrementFireworkTimer = true;
-                    fireworkTimer = 20;
-                } else {
-                    ChatUtils.moduleWarning(this, "Disabled autopilot because you don't have any fireworks left in your hotbar.");
-                    autopilotEnabled.set(false);
+                    mc.interactionManager.interactItem(mc.player, mc.world, getFireworkHand());
+                    mc.player.swingHand(getFireworkHand());
+                    if (autoPilotFireworkGhosthand.get()) mc.player.inventory.selectedSlot = prevSlot;
+                } else if (mc.player.getOffHandStack().getItem() == Items.FIREWORK_ROCKET) {
+                    mc.interactionManager.interactItem(mc.player, mc.world, getFireworkHand());
+                    mc.player.swingHand(getFireworkHand());
                 }
             }
-
-            if (fireworkTimer > 0) {
-                velY = 2;
-            }
-
-            lastForwardPressed = true;
+            ticksLeft--;
         }
     }
 
@@ -379,4 +392,12 @@ public class ElytraPlus extends Module {
         MeteorClient.EVENT_BUS.unsubscribe(chestSwapGroundListener);
     }
 
+    private Hand getFireworkHand() {
+        assert mc.player != null;
+        Hand hand = Hand.MAIN_HAND;
+        if (mc.player.getMainHandStack().getItem() != Items.FIREWORK_ROCKET && mc.player.getOffHandStack().getItem() == Items.FIREWORK_ROCKET) {
+            hand = Hand.OFF_HAND;
+        }
+        return hand;
+    }
 }
