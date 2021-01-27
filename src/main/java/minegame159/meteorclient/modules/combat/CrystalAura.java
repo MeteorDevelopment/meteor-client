@@ -767,7 +767,7 @@ public class CrystalAura extends Module {
         }
         for(double i = playerPos.getX() - placeRange.get(); i < playerPos.getX() + placeRange.get(); i++){
             for(double j = playerPos.getZ() - placeRange.get(); j < playerPos.getZ() + placeRange.get(); j++){
-                for(double k = playerPos.getY() - 3; k < playerPos.getY() + 3; k++){
+                for(double k = playerPos.getY() - placeRange.get(); k < playerPos.getY() + placeRange.get(); k++){
                     Vec3d pos = new Vec3d(Math.floor(i), Math.floor(k), Math.floor(j));
                     if(isValid(new BlockPos(pos)) && getDamagePlace(new BlockPos(pos))){
                         if (!strict.get() || isEmpty(new BlockPos(pos.add(0, 2, 0)))) {
