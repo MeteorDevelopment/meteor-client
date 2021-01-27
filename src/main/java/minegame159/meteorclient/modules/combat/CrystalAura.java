@@ -53,9 +53,10 @@ public class CrystalAura extends Module {
     }
 
     public enum RotationMode {
-        None,
-        FaceCrystal,
-        Return
+        Place,
+        Break,
+        Both,
+        None
     }
 
     public enum SwitchMode {
@@ -68,6 +69,7 @@ public class CrystalAura extends Module {
     private final SettingGroup sgBreak = settings.createGroup("Break");
     private final SettingGroup sgTarget = settings.createGroup("Target");
     private final SettingGroup sgPause = settings.createGroup("Pause");
+    private final SettingGroup sgRotations = settings.createGroup("Rotations");
     private final SettingGroup sgMisc = settings.createGroup("Misc");
     private final SettingGroup sgRender = settings.createGroup("Render");
 
@@ -230,6 +232,14 @@ public class CrystalAura extends Module {
             .build()
     );
 
+
+    private final Setting<Boolean> removeCrystals = sgBreak.add(new BoolSetting.Builder()
+            .name("fast-hit")
+            .description("Removes end crystals from the world as soon as it is hit. May cause desync on strict anticheats.")
+            .defaultValue(true)
+            .build()
+    );
+
     // Target
 
     private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgTarget.add(new EntityTypeListSetting.Builder()
@@ -295,19 +305,38 @@ public class CrystalAura extends Module {
             .build()
     );
 
+    // Anticheat
+
+    private final Setting<RotationMode> rotationMode = sgRotations.add(new EnumSetting.Builder<RotationMode>()
+            .name("rotation-mode")
+            .description("When to rotate when using Crystal Aura.")
+            .defaultValue(RotationMode.Place)
+            .build()
+    );
+
+    private final Setting<Double> rotationLock = sgRotations.add(new DoubleSetting.Builder()
+            .name("place-rotation-lock")
+            .description("Where to look at when placing crystals.")
+            .min(0)
+            .defaultValue(100)
+            .sliderMax(100)
+            .max(100)
+            .build()
+    );
+
+    private final Setting<Boolean> resetRotations = sgRotations.add(new BoolSetting.Builder()
+            .name("reset-rotations")
+            .description("Resets rotations once Crystal Aura is disabled.")
+            .defaultValue(false)
+            .build()
+    );
+
     // Misc
 
     private final Setting<Double> maxDamage = sgMisc.add(new DoubleSetting.Builder()
             .name("max-damage")
             .description("The maximum self-damage allowed.")
             .defaultValue(3)
-            .build()
-    );
-
-    private final Setting<RotationMode> rotationMode = sgMisc.add(new EnumSetting.Builder<RotationMode>()
-            .name("rotation-mode")
-            .description("Where to rotate when using Crystal Aura.")
-            .defaultValue(RotationMode.FaceCrystal)
             .build()
     );
 
@@ -318,9 +347,16 @@ public class CrystalAura extends Module {
             .build()
     );
 
+    private final Setting<Boolean> switchBack = sgMisc.add(new BoolSetting.Builder()
+            .name("switch-back")
+            .description("Switches back to your previous slot when disabling Crystal Aura.")
+            .defaultValue(true)
+            .build()
+    );
+
     private final Setting<Boolean> smartDelay = sgMisc.add(new BoolSetting.Builder()
             .name("smart-delay")
-            .description("Reduces crystal consumption when doing large amounts of damage. (Can tank performance on lower-end PCs)")
+            .description("Reduces crystal consumption when doing large amounts of damage. (Can tank performance on lower-end PCs).")
             .defaultValue(false)
             .build()
     );
@@ -422,11 +458,19 @@ public class CrystalAura extends Module {
     @Override
     public void onDeactivate() {
         assert mc.player != null;
-        if (preSlot != -1) mc.player.inventory.selectedSlot = preSlot;
+        if (switchBack.get()) if (preSlot != -1) mc.player.inventory.selectedSlot = preSlot;
         for (RenderBlock renderBlock : renderBlocks) {
             renderBlockPool.free(renderBlock);
         }
         renderBlocks.clear();
+        if (target != null && resetRotations.get()) {
+            float preYaw = mc.player.yaw;
+            float prePitch = mc.player.pitch;
+
+            if (rotationMode.get() == RotationMode.Both || rotationMode.get() == RotationMode.Place || rotationMode.get() == RotationMode.Break) {
+                RotationUtils.packetRotate(preYaw, prePitch);
+            }
+        }
     }
 
     @EventHandler
@@ -665,10 +709,9 @@ public class CrystalAura extends Module {
                 }
             }
         }
-
-        if (rotationMode.get() == RotationMode.FaceCrystal || rotationMode.get() == RotationMode.Return) RotationUtils.packetRotate(entity);
+        if (rotationMode.get() == RotationMode.Break || rotationMode.get() == RotationMode.Both) RotationUtils.packetRotate(entity);
         mc.interactionManager.attackEntity(mc.player, entity);
-        mc.world.removeEntity(entity.getEntityId());
+        if (removeCrystals.get()) mc.world.removeEntity(entity.getEntityId());
         if (!noSwing.get()) mc.player.swingHand(getHand());
         mc.player.inventory.selectedSlot = preSlot;
         if (heldCrystal != null && entity.getBlockPos().equals(heldCrystal.getBlockPos())) {
@@ -731,12 +774,9 @@ public class CrystalAura extends Module {
             PlayerUtils.placeBlock(new BlockPos(block), supportSlot, Hand.MAIN_HAND);
             supportDelayLeft = supportDelay.get();
         }
-        float yaw = mc.player.yaw;
-        float pitch = mc.player.pitch;
-        if (rotationMode.get() == RotationMode.FaceCrystal || rotationMode.get() == RotationMode.Return) RotationUtils.packetRotate(block.add(0.5, 0.5, 0.5));
+        if (rotationMode.get() == RotationMode.Place || rotationMode.get() == RotationMode.Both) RotationUtils.packetRotate(block.add(0.5, rotationLock.get() / 100, 0.5));
         mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(mc.player.getPos(), Direction.UP, new BlockPos(block), false));
         if (!noSwing.get()) mc.player.swingHand(hand);
-        if (rotationMode.get() == RotationMode.Return)RotationUtils.packetRotate(yaw, pitch);
 
         if (render.get()) {
             RenderBlock renderBlock = renderBlockPool.get();
