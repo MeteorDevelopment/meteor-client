@@ -84,11 +84,11 @@ public abstract class ClientPlayerEntityMixin {
 
     @Inject(method = "sendMovementPackets", at = @At("HEAD"))
     private void onSendMovementPacketsHead(CallbackInfo info) {
-        MeteorClient.EVENT_BUS.post(SendMovementPacketsEvent.Pre.INSTANCE);
+        MeteorClient.EVENT_BUS.post(SendMovementPacketsEvent.Pre.get());
     }
 
     @Inject(method = "sendMovementPackets", at = @At("TAIL"))
     private void onSendMovementPacketsTail(CallbackInfo info) {
-        MeteorClient.EVENT_BUS.post(SendMovementPacketsEvent.Post.INSTANCE);
+        MeteorClient.EVENT_BUS.post(SendMovementPacketsEvent.Post.get());
     }
 }
