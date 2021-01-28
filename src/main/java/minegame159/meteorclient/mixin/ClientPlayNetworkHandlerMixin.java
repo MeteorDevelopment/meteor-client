@@ -102,9 +102,9 @@ public abstract class ClientPlayNetworkHandlerMixin {
         Velocity velocity = ModuleManager.INSTANCE.get(Velocity.class);
 
         player.setVelocity(
-                (player.getVelocity().x + deltaX) * velocity.getHorizontal(),
-                (player.getVelocity().y + deltaY) * velocity.getVertical(),
-                (player.getVelocity().z + deltaZ) * velocity.getHorizontal()
+                player.getVelocity().x + deltaX * velocity.getHorizontal(),
+                player.getVelocity().y + deltaY * velocity.getVertical(),
+                player.getVelocity().z + deltaZ * velocity.getHorizontal()
         );
     }
 
