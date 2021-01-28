@@ -464,11 +464,8 @@ public class CrystalAura extends Module {
         }
         renderBlocks.clear();
         if (target != null && resetRotations.get()) {
-            float preYaw = mc.player.yaw;
-            float prePitch = mc.player.pitch;
-
             if (rotationMode.get() == RotationMode.Both || rotationMode.get() == RotationMode.Place || rotationMode.get() == RotationMode.Break) {
-                RotationUtils.packetRotate(preYaw, prePitch);
+                RotationUtils.packetRotate(mc.player.yaw, mc.player.pitch);
             }
         }
     }
