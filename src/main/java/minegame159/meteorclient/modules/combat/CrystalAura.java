@@ -316,7 +316,7 @@ public class CrystalAura extends Module {
 
     private final Setting<Double> rotationLock = sgRotations.add(new DoubleSetting.Builder()
             .name("place-rotation-lock")
-            .description("Where to look at when placing crystals.")
+            .description("How high to look at the support block you're placing your crystals on.")
             .min(0)
             .defaultValue(100)
             .sliderMax(100)
@@ -458,7 +458,7 @@ public class CrystalAura extends Module {
     @Override
     public void onDeactivate() {
         assert mc.player != null;
-        if (switchBack.get()) if (preSlot != -1) mc.player.inventory.selectedSlot = preSlot;
+        if (switchBack.get() && preSlot != -1) mc.player.inventory.selectedSlot = preSlot;
         for (RenderBlock renderBlock : renderBlocks) {
             renderBlockPool.free(renderBlock);
         }
