@@ -16,7 +16,7 @@ import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.entity.Target;
 import minegame159.meteorclient.utils.player.PlayerUtils;
-import minegame159.meteorclient.utils.player.RotationUtils;
+import minegame159.meteorclient.utils.player.Rotations;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -42,12 +42,6 @@ public class KillAura extends Module {
         Axe,
         SwordOrAxe,
         Any
-    }
-
-    public enum RotationDirection {
-        Eyes,
-        Chest,
-        Feet
     }
 
     public enum RotationMode {
@@ -144,10 +138,10 @@ public class KillAura extends Module {
             .build()
     );
 
-    private final Setting<RotationDirection> rotationDirection = sgGeneral.add(new EnumSetting.Builder<RotationDirection>()
+    private final Setting<Target> rotationDirection = sgGeneral.add(new EnumSetting.Builder<Target>()
             .name("rotation-direction")
             .description("The direction to use for rotating towards the enemy.")
-            .defaultValue(RotationDirection.Eyes)
+            .defaultValue(Target.Head)
             .build()
     );
 
@@ -204,39 +198,25 @@ public class KillAura extends Module {
     }
 
     @EventHandler
-    private void onPreTick(TickEvent.Pre event) {
-        target = null;
-    }
-
-    @EventHandler
-    private void onPostTick(TickEvent.Post event) {
+    private void onTick(TickEvent.Pre event) {
         findEntity();
         if (target == null) return;
 
-        if (rotationMode.get() == RotationMode.Always) packetRotate(target);
-        attack(target);
-    }
-
-    public void packetRotate(Entity entity) {
-        switch (rotationDirection.get()) {
-            case Eyes:  RotationUtils.packetRotate(entity, Target.Head); break;
-            case Chest: RotationUtils.packetRotate(entity); break;
-            case Feet:  RotationUtils.packetRotate(entity, Target.Feet); break;
+        if (!attack() && rotationMode.get() == RotationMode.Always) {
+            Rotations.rotate(Rotations.getYaw(target), Rotations.getPitch(target, rotationDirection.get()));
         }
     }
 
-    private void attack(Entity entity) {
-        if (entity == null) return;
-
+    private boolean attack() {
         // Entities without health can be hit instantly
-        if (entity instanceof LivingEntity) {
+        if (target instanceof LivingEntity) {
             if (smartDelay.get()) {
-                if (mc.player.getAttackCooldownProgress(0.5f) < 1) return;
+                if (mc.player.getAttackCooldownProgress(0.5f) < 1) return false;
             }
             else {
                 if (hitDelayTimer >= 0) {
                     hitDelayTimer--;
-                    return;
+                    return false;
                 } else hitDelayTimer = hitDelay.get();
             }
         }
@@ -244,21 +224,32 @@ public class KillAura extends Module {
         if (randomDelayEnabled.get()) {
             if (randomDelayTimer > 0) {
                 randomDelayTimer--;
-                return;
+                return false;
             } else {
                 randomDelayTimer = (int) Math.round(Math.random() * randomDelayMax.get());
             }
         }
 
-        if (Math.random() > hitChance.get() / 100) return;
+        if (Math.random() > hitChance.get() / 100) return false;
 
-        if (rotationMode.get() == RotationMode.OnHit) packetRotate(entity);
+        if (rotationMode.get() == RotationMode.None) {
+            hitEntity();
+        }
+        else if (rotationMode.get() == RotationMode.OnHit) {
+            Rotations.rotate(Rotations.getYaw(target), Rotations.getPitch(target, rotationDirection.get()), this::hitEntity);
+        }
 
-        mc.interactionManager.attackEntity(mc.player, entity);
+        return true;
+    }
+
+    private void hitEntity() {
+        mc.interactionManager.attackEntity(mc.player, target);
         mc.player.swingHand(Hand.MAIN_HAND);
     }
 
     private void findEntity() {
+        target = null;
+
         if (mc.player.isDead() || !mc.player.isAlive()) return;
         if (!itemInHand()) return;
 
@@ -338,44 +329,4 @@ public class KillAura extends Module {
         if (target != null) return target.getType().getName().getString();
         return null;
     }
-
-        /*@EventHandler
-    private final Listener<PacketEvent.Send> onSendPacket( event) {
-        if (movePacket != null) return;
-
-        if (event.packet instanceof PlayerMoveC2SPacket.PositionOnly) {
-            event.cancel();
-
-            PlayerMoveC2SPacket.PositionOnly p = (PlayerMoveC2SPacket.PositionOnly) event.packet;
-
-            mc.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.Both(
-                    p.getX(mc.player.getX()),
-                    p.getY(mc.player.getY()),
-                    p.getZ(mc.player.getZ()),
-                    mc.player.yaw,
-                    mc.player.pitch,
-                    p.isOnGround()
-            ));
-        } else if (event.packet instanceof PlayerMoveC2SPacket) {
-            movePacket = (PlayerMoveC2SPacket) event.packet;
-
-            rotatePacket();
-        }
-    });*/
-
-    /*@EventHandler
-    private final Listener<PacketSentEvent> onPacketSent( event) {
-        if (event.packet == movePacket) attack();
-    });
-
-    @EventHandler
-    private final Listener<TickEvent.Post> onPostTick( event) {
-        if (movePacket == null) {
-            mc.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.LookOnly(
-                    mc.player.yaw,
-                    mc.player.pitch,
-                    mc.player.isOnGround()
-            ));
-        }
-    });*/
 }

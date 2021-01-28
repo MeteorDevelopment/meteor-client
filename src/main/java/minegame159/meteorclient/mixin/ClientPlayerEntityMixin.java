@@ -11,6 +11,7 @@ import minegame159.meteorclient.Config;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.commands.CommandManager;
 import minegame159.meteorclient.events.entity.player.SendMessageEvent;
+import minegame159.meteorclient.events.entity.player.SendMovementPacketsEvent;
 import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.movement.NoSlow;
 import minegame159.meteorclient.modules.movement.Scaffold;
@@ -79,5 +80,15 @@ public abstract class ClientPlayerEntityMixin {
     @Inject(method = "isSneaking", at = @At("HEAD"), cancellable = true)
     private void onIsSneaking(CallbackInfoReturnable<Boolean> info) {
         if (ModuleManager.INSTANCE.isActive(Scaffold.class)) info.setReturnValue(false);
+    }
+
+    @Inject(method = "sendMovementPackets", at = @At("HEAD"))
+    private void onSendMovementPacketsHead(CallbackInfo info) {
+        MeteorClient.EVENT_BUS.post(SendMovementPacketsEvent.Pre.INSTANCE);
+    }
+
+    @Inject(method = "sendMovementPackets", at = @At("TAIL"))
+    private void onSendMovementPacketsTail(CallbackInfo info) {
+        MeteorClient.EVENT_BUS.post(SendMovementPacketsEvent.Post.INSTANCE);
     }
 }

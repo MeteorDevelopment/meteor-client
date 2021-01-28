@@ -34,6 +34,7 @@ import minegame159.meteorclient.utils.network.MeteorExecutor;
 import minegame159.meteorclient.utils.network.OnlinePlayers;
 import minegame159.meteorclient.utils.player.EChestMemory;
 import minegame159.meteorclient.utils.player.RotationUtils;
+import minegame159.meteorclient.utils.player.Rotations;
 import minegame159.meteorclient.utils.render.color.RainbowColorManager;
 import minegame159.meteorclient.utils.world.BlockIterator;
 import minegame159.meteorclient.waypoints.Waypoints;
@@ -90,6 +91,7 @@ public class MeteorClient implements ClientModInitializer {
         BlockIterator.init();
         RainbowColorManager.init();
         RotationUtils.init();
+        Rotations.init();
 
         load();
         Ignore.load();

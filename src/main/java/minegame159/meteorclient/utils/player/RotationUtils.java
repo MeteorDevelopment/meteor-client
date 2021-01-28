@@ -55,9 +55,9 @@ public class RotationUtils {
         setCamRotation(yaw, pitch);
     }
 
-    private static void setCamRotation(float yaw, float pitch) {
-        serverYaw = yaw;
-        serverPitch = pitch;
+    public static void setCamRotation(double yaw, double pitch) {
+        serverYaw = (float) yaw;
+        serverPitch = (float) pitch;
         rotationTimer = 0;
     }
 
