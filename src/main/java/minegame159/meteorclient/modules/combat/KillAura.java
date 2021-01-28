@@ -203,7 +203,7 @@ public class KillAura extends Module {
         if (target == null) return;
 
         if (!attack() && rotationMode.get() == RotationMode.Always) {
-            Rotations.rotate(Rotations.getYaw(target), Rotations.getPitch(target, rotationDirection.get()));
+            Rotations.rotate(Rotations.getYaw(target), Rotations.getPitch(target, rotationDirection.get()), this::hitEntity);
         }
     }
 
@@ -235,7 +235,7 @@ public class KillAura extends Module {
         if (rotationMode.get() == RotationMode.None) {
             hitEntity();
         }
-        else if (rotationMode.get() == RotationMode.OnHit) {
+        else {
             Rotations.rotate(Rotations.getYaw(target), Rotations.getPitch(target, rotationDirection.get()), this::hitEntity);
         }
 
