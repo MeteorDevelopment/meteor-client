@@ -5,7 +5,6 @@
 
 package minegame159.meteorclient.mixin;
 
-import jdk.vm.ci.code.site.Call;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.entity.DamageEvent;
 import minegame159.meteorclient.events.entity.TookDamageEvent;
