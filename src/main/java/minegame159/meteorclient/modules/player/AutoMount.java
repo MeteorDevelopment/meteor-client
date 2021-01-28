@@ -83,7 +83,7 @@ public class AutoMount extends Module {
             .build()
     );
 
-    private final Setting<Boolean> horses  = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> horses  = sgAnimals.add(new BoolSetting.Builder()
             .name("horse")
             .description("Horse")
             .defaultValue(false)
