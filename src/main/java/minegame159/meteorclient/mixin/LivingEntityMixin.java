@@ -5,14 +5,17 @@
 
 package minegame159.meteorclient.mixin;
 
+import jdk.vm.ci.code.site.Call;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.entity.DamageEvent;
 import minegame159.meteorclient.events.entity.TookDamageEvent;
 import minegame159.meteorclient.events.entity.player.CanWalkOnFluidEvent;
 import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.misc.OffhandCrash;
 import minegame159.meteorclient.modules.movement.AntiLevitation;
 import minegame159.meteorclient.modules.render.NoRender;
 import minegame159.meteorclient.utils.Utils;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -69,5 +72,12 @@ public abstract class LivingEntityMixin extends Entity {
     private void spawnItemParticles(ItemStack stack, int count, CallbackInfo info) {
         NoRender noRender = ModuleManager.INSTANCE.get(NoRender.class);
         if (noRender.noEatParticles() && stack.isFood()) info.cancel();
+    }
+
+    @Inject(method = "onEquipStack", at = @At("HEAD"), cancellable = true)
+    private void onEquipStack(ItemStack stack, CallbackInfo info) {
+        if ((Object) this == MinecraftClient.getInstance().player && ModuleManager.INSTANCE.get(OffhandCrash.class).isAntiCrash()) {
+            info.cancel();
+        }
     }
 }
