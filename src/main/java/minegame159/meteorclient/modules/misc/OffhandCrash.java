@@ -5,9 +5,11 @@
 
 package minegame159.meteorclient.modules.misc;
 
+import io.netty.channel.Channel;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.PlaySoundEvent;
 import minegame159.meteorclient.events.world.TickEvent;
+import minegame159.meteorclient.mixin.ClientConnectionAccessor;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
@@ -54,14 +56,13 @@ public class OffhandCrash extends Module {
     @EventHandler
     private void onTick(TickEvent.Post event) {
         if (doCrash.get()) {
-            for(int i = 0; i < speed.get(); ++i) mc.player.networkHandler.sendPacket(PACKET);
+            Channel channel = ((ClientConnectionAccessor) mc.player.networkHandler.getConnection()).getChannel();
+            for (int i = 0; i < speed.get(); ++i) channel.write(PACKET);
+            channel.flush();
         }
     }
 
-    @EventHandler
-    private void onPlaySound(PlaySoundEvent event) {
-        if (antiCrash.get() && event.sound.getId().toString().equals("minecraft:item.armor.equip_generic")){
-            event.cancel();
-        }
+    public boolean isAntiCrash() {
+        return isActive() && antiCrash.get();
     }
 }
