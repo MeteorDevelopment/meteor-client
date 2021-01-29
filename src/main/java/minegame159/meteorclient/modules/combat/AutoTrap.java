@@ -11,11 +11,11 @@ import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.player.FakePlayer;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.rendering.ShapeMode;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.entity.FakePlayerEntity;
+import minegame159.meteorclient.utils.entity.FakePlayerUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.player.PlayerUtils;
 import minegame159.meteorclient.utils.player.Rotations;
@@ -220,13 +220,13 @@ public class AutoTrap extends Module {
     }
 
     private PlayerEntity findTarget() {
-        for(PlayerEntity player : mc.world.getPlayers()){
+        for (PlayerEntity player : mc.world.getPlayers()){
             if (player == mc.player || !FriendManager.INSTANCE.attack(player) || !player.isAlive()) continue;
             if (target == null) target = player;
             else if (mc.player.distanceTo(player) < mc.player.distanceTo(target)) target = player;
         }
 
-        for (FakePlayerEntity fakeTarget : FakePlayer.players.keySet()) {
+        for (FakePlayerEntity fakeTarget : FakePlayerUtils.getPlayers().keySet()) {
             if (!FriendManager.INSTANCE.attack(fakeTarget) || !fakeTarget.isAlive()) continue;
             if (target == null) target = fakeTarget;
             else if (mc.player.distanceTo(fakeTarget) < mc.player.distanceTo(target)) target = fakeTarget;
@@ -237,8 +237,7 @@ public class AutoTrap extends Module {
 
     @Override
     public String getInfoString() {
-        if (target != null && target instanceof PlayerEntity) return target.getEntityName();
-        if (target != null) return target.getType().getName().getString();
+        if (target != null) return target.getEntityName();
         return null;
     }
 }

@@ -11,9 +11,9 @@ import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.player.FakePlayer;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.entity.FakePlayerEntity;
+import minegame159.meteorclient.utils.entity.FakePlayerUtils;
 import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.PlayerUtils;
 import minegame159.meteorclient.utils.player.Rotations;
@@ -122,7 +122,7 @@ public class AutoAnvil extends Module {
         }
 
         if (target == null) {
-            for (FakePlayerEntity player : FakePlayer.players.keySet()) {
+            for (FakePlayerEntity player : FakePlayerUtils.getPlayers().keySet()) {
                 if (!FriendManager.INSTANCE.attack(player) || !player.isAlive() || mc.player.distanceTo(player) > range.get()) continue;
 
                 if (target == null) target = player;

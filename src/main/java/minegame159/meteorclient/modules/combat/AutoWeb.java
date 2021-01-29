@@ -10,16 +10,16 @@ import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.player.FakePlayer;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.entity.FakePlayerEntity;
+import minegame159.meteorclient.utils.entity.FakePlayerUtils;
+import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.player.PlayerUtils;
 import minegame159.meteorclient.utils.player.Rotations;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
@@ -57,7 +57,7 @@ public class AutoWeb extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        int slot = findSlot();
+        int slot = InvUtils.findItemInHotbar(Items.COBWEB);
         if (slot == -1) return;
 
         if (target != null) {
@@ -75,7 +75,7 @@ public class AutoWeb extends Module {
         }
 
         if (target == null) {
-            for (FakePlayerEntity fakeTarget : FakePlayer.players.keySet()) {
+            for (FakePlayerEntity fakeTarget : FakePlayerUtils.getPlayers().keySet()) {
                 if (fakeTarget.getHealth() <= 0 || !FriendManager.INSTANCE.attack(fakeTarget) || !fakeTarget.isAlive()) continue;
 
                 if (target == null) {
@@ -96,24 +96,15 @@ public class AutoWeb extends Module {
                 else PlayerUtils.placeBlock(blockPos, slot, Hand.MAIN_HAND);
             }
 
-            targetPos = targetPos.add(0, 1, 0);
-            if (PlayerUtils.canPlace(targetPos)) {
-                BlockPos blockPos = targetPos;
-                if (rotate.get()) Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> PlayerUtils.placeBlock(blockPos, slot, Hand.MAIN_HAND));
-                else PlayerUtils.placeBlock(blockPos, slot, Hand.MAIN_HAND);
+            if (doubles.get()) {
+                targetPos = targetPos.add(0, 1, 0);
+                if (PlayerUtils.canPlace(targetPos)) {
+                    BlockPos blockPos = targetPos;
+                    if (rotate.get())
+                        Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> PlayerUtils.placeBlock(blockPos, slot, Hand.MAIN_HAND));
+                    else PlayerUtils.placeBlock(blockPos, slot, Hand.MAIN_HAND);
+                }
             }
         }
-    }
-
-    private int findSlot() {
-        for (int i = 0; i < 9; i++) {
-            Item item = mc.player.inventory.getStack(i).getItem();
-
-            if (item == Items.COBWEB) {
-                return i;
-            }
-        }
-
-        return -1;
     }
 }

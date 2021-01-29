@@ -5,16 +5,12 @@
 
 package minegame159.meteorclient.modules.combat;
 
-import meteordevelopment.orbit.EventHandler;
-import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.settings.BoolSetting;
-import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.player.*;
+import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.util.Hand;
@@ -25,10 +21,12 @@ import net.minecraft.util.math.MathHelper;
 public class AutoCity extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<Boolean> checkBelow = sgGeneral.add(new BoolSetting.Builder()
-            .name("check-below")
-            .description("Checks for obsidian or bedrock below the surround block for you to place crystals on.")
-            .defaultValue(true)
+    private final Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()
+            .name("range")
+            .description("The maximum range a city-able block will be found.")
+            .defaultValue(5)
+            .min(0)
+            .sliderMax(20)
             .build()
     );
 
@@ -59,15 +57,16 @@ public class AutoCity extends Module {
 
     private PlayerEntity target;
 
-    @EventHandler
-    private void onTick(TickEvent.Pre event) {
-        target = CityUtils.getPlayerTarget();
-        BlockPos mineTarget = CityUtils.getTargetBlock(checkBelow.get());
+    @Override
+    public void onActivate() {
+        target = CityUtils.getPlayerTarget(range.get());
+        BlockPos mineTarget = CityUtils.getTargetBlock(target);
+
+        int prevSlot = mc.player.inventory.selectedSlot;
 
         if (target == null || mineTarget == null) {
             if (chatInfo.get()) ChatUtils.moduleError(this, "No target block found... disabling.");
-        }
-        else {
+        } else {
             if (chatInfo.get()) ChatUtils.moduleInfo(this, "Attempting to city " + target.getGameProfile().getName());
 
             if (MathHelper.sqrt(mc.player.squaredDistanceTo(mineTarget.getX(), mineTarget.getY(), mineTarget.getZ())) > mc.interactionManager.getReachDistance()) {
@@ -76,29 +75,48 @@ public class AutoCity extends Module {
                 return;
             }
 
-            int slot = findPickSlot();
+            int slot = InvUtils.findItemInHotbar(Items.NETHERITE_PICKAXE);
+            if (slot == -1) slot = InvUtils.findItemInHotbar(Items.DIAMOND_PICKAXE);
+            if (mc.player.abilities.creativeMode) slot = mc.player.inventory.selectedSlot;
+
             if (slot == -1) {
                 if (chatInfo.get()) ChatUtils.moduleError(this, "No pick found... disabling.");
                 toggle();
                 return;
             }
 
-            int obbySlot = findObbySlot();
-            BlockPos blockPos = mineTarget.down(1);
 
-            if (support.get() && obbySlot != -1 && PlayerUtils.canPlace(blockPos)) {
-                if (rotate.get()) Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> PlayerUtils.placeBlock(blockPos, obbySlot, Hand.MAIN_HAND));
-                else PlayerUtils.placeBlock(blockPos, obbySlot, Hand.MAIN_HAND);
+            if (support.get()) {
+                int obbySlot = InvUtils.findItemInHotbar(Items.OBSIDIAN);
+                BlockPos blockPos = mineTarget.down(1);
+
+                if (obbySlot == -1 && chatInfo.get()) ChatUtils.moduleWarning(this, "No obsidian found for support, mining anyway.");
+
+                else if (!PlayerUtils.canPlace(blockPos)
+                        && mc.world.getBlockState(blockPos).getBlock() != Blocks.OBSIDIAN
+                        && mc.world.getBlockState(blockPos).getBlock() != Blocks.BEDROCK
+                        && chatInfo.get()) {
+                    ChatUtils.moduleWarning(this, "Couldn't place support block, mining anyway.");
+                }
+
+                else if (PlayerUtils.canPlace(blockPos)) {
+                    if (rotate.get()) {
+                        Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> PlayerUtils.placeBlock(blockPos, obbySlot, Hand.MAIN_HAND));
+                    } else {
+                        PlayerUtils.placeBlock(blockPos, obbySlot, Hand.MAIN_HAND);
+                    }
+                }
             }
-            else if (support.get() && obbySlot == -1) {
-                if (chatInfo.get()) ChatUtils.moduleWarning(this, "No obsidian found for support, mining anyway.");
-            }
+
+            mc.player.inventory.selectedSlot = slot;
 
             if (rotate.get()) Rotations.rotate(Rotations.getYaw(mineTarget), Rotations.getPitch(mineTarget), () -> mine(mineTarget));
             else mine(mineTarget);
+
+            mc.player.inventory.selectedSlot = prevSlot;
         }
 
-        toggle();
+        this.toggle();
     }
 
     private void mine(BlockPos blockPos) {
@@ -107,34 +125,9 @@ public class AutoCity extends Module {
         mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, Direction.UP));
     }
 
-    private int findPickSlot() {
-        for (int i = 0; i < 9; i++) {
-            Item item = mc.player.inventory.getStack(i).getItem();
-
-            if (item == Items.DIAMOND_PICKAXE || item == Items.NETHERITE_PICKAXE) {
-                return i;
-            }
-        }
-
-        return -1;
-    }
-
-    private int findObbySlot() {
-        for (int i = 0; i < 9; i++) {
-            Item item = mc.player.inventory.getStack(i).getItem();
-
-            if (item == Items.OBSIDIAN) {
-                return i;
-            }
-        }
-
-        return -1;
-    }
-
     @Override
     public String getInfoString() {
-        if (target != null && target instanceof PlayerEntity) return target.getEntityName();
-        if (target != null) return target.getType().getName().getString();
+        if (target != null) return target.getEntityName();
         return null;
     }
 }

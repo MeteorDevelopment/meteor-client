@@ -13,10 +13,10 @@ import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.player.FakePlayer;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.entity.FakePlayerEntity;
+import minegame159.meteorclient.utils.entity.FakePlayerUtils;
 import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.DamageCalcUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
@@ -35,7 +35,10 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
+import java.util.Iterator;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @InvUtils.Priority(priority = 0)
@@ -202,8 +205,6 @@ public class BedAura extends Module {
     private Vec3d bestBlock;
     private double bestDamage;
     private BlockPos bestBlockPos;
-    private BlockPos pos;
-    private Vec3d vecPos;
     private double lastDamage = 0;
     private int direction = 0;
     int preSlot = -1;
@@ -279,11 +280,12 @@ public class BedAura extends Module {
                 return;
             }
             target = null;
-            for (Map.Entry<FakePlayerEntity, Integer> player : FakePlayer.players.entrySet()){
-                if (target == null) {
-                    target = player.getKey();
-                } else if (mc.player.distanceTo(player.getKey()) < mc.player.distanceTo(target)){
-                    target = player.getKey();
+
+            for (FakePlayerEntity player : FakePlayerUtils.getPlayers().keySet()){
+                if (target == null) target = player;
+
+                else if (mc.player.distanceTo(player) < mc.player.distanceTo(target)){
+                    target = player;
                 }
             }
             if (target == null) {
@@ -353,16 +355,14 @@ public class BedAura extends Module {
     }
 
     private void findValidBlocks(PlayerEntity target){
-        assert mc.world != null;
-        assert mc.player != null;
         bestBlock = null;
         bestDamage = 0;
         BlockPos playerPos = mc.player.getBlockPos();
         for(double i = playerPos.getX() - placeRange.get(); i < playerPos.getX() + placeRange.get(); i++){
             for(double j = playerPos.getZ() - placeRange.get(); j < playerPos.getZ() + placeRange.get(); j++){
                 for(double k = playerPos.getY() - 3; k < playerPos.getY() + 3; k++) {
-                    pos = new BlockPos(i, k, j);
-                    vecPos = new Vec3d(Math.floor(i), Math.floor(k), Math.floor(j));
+                    BlockPos pos = new BlockPos(i, k, j);
+                    Vec3d vecPos = new Vec3d(Math.floor(i), Math.floor(k), Math.floor(j));
                     if (bestBlock == null) bestBlock = vecPos;
                     if (isValid(pos.up())) {
                         if (airPlace.get() || !mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
@@ -473,8 +473,7 @@ public class BedAura extends Module {
 
     @Override
     public String getInfoString() {
-        if (target != null && target instanceof PlayerEntity) return target.getEntityName();
-        if (target != null) return target.getType().getName().getString();
+        if (target != null) return target.getEntityName();
         return null;
     }
 }

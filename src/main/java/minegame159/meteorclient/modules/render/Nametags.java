@@ -23,6 +23,7 @@ import minegame159.meteorclient.rendering.text.TextRenderer;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.entity.FakePlayerEntity;
+import minegame159.meteorclient.utils.entity.FakePlayerUtils;
 import minegame159.meteorclient.utils.render.NametagUtils;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.render.color.SettingColor;
@@ -199,8 +200,8 @@ public class Nametags extends Module {
         String name;
         if (entity == mc.player && ModuleManager.INSTANCE.get(NameProtect.class).isActive()) {
             name = ModuleManager.INSTANCE.get(NameProtect.class).getName(entity.getGameProfile().getName());
-        } else if (ModuleManager.INSTANCE.get(FakePlayer.class).isActive() && entity instanceof FakePlayerEntity && ModuleManager.INSTANCE.get(FakePlayer.class).showID()) {
-            name = entity.getGameProfile().getName() + " [" + ModuleManager.INSTANCE.get(FakePlayer.class).getID((FakePlayerEntity) entity) + "]";
+        } else if (ModuleManager.INSTANCE.get(FakePlayer.class).showID() && entity instanceof FakePlayerEntity) {
+            name = entity.getGameProfile().getName() + " [" + FakePlayerUtils.getID((FakePlayerEntity) entity) + "]";
         } else name = entity.getGameProfile().getName();
 
         String healthText = " " + health;

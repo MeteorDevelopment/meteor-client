@@ -7,8 +7,9 @@ package minegame159.meteorclient.utils.player;
 
 import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.mixin.AbstractBlockAccessor;
-import minegame159.meteorclient.modules.player.FakePlayer;
+import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.entity.FakePlayerEntity;
+import minegame159.meteorclient.utils.entity.FakePlayerUtils;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
@@ -21,20 +22,17 @@ import java.util.ArrayList;
 public class CityUtils {
     private static final MinecraftClient mc = MinecraftClient.getInstance();
 
-    private static final BlockPos[] surround = {
-            new BlockPos(0, 0, -1),
-            new BlockPos(1, 0, 0),
-            new BlockPos(0, 0, 1),
-            new BlockPos(-1, 0, 0)
-    };
+    public static PlayerEntity getPlayerTarget(double range) {
+        if (mc.player.isDead()) return null;
 
-    public static PlayerEntity getPlayerTarget() {
         PlayerEntity closestTarget = null;
-        if (mc.player == null || mc.world == null) return null;
-        if (!mc.player.isAlive()) return null;
 
         for (PlayerEntity target : mc.world.getPlayers()) {
-            if (target == mc.player || target.getHealth() <= 0 || !FriendManager.INSTANCE.attack(target) || !target.isAlive()) continue;
+            if (target == mc.player
+                    || target.isDead()
+                    || !FriendManager.INSTANCE.attack(target)
+                    || mc.player.distanceTo(target) > range
+            ) continue;
 
             if (closestTarget == null) {
                 closestTarget = target;
@@ -47,8 +45,8 @@ public class CityUtils {
         }
 
         if (closestTarget == null) {
-            for (FakePlayerEntity target : FakePlayer.players.keySet()) {
-                if (target.getHealth() <= 0 || !FriendManager.INSTANCE.attack(target) || !target.isAlive()) continue;
+            for (FakePlayerEntity target : FakePlayerUtils.getPlayers().keySet()) {
+                if (target.isDead() || !FriendManager.INSTANCE.attack(target) || mc.player.distanceTo(target) > range) continue;
 
                 if (closestTarget == null) {
                     closestTarget = target;
@@ -64,7 +62,32 @@ public class CityUtils {
         return closestTarget;
     }
 
-    public static ArrayList<BlockPos> getTargetSurround(PlayerEntity player) {
+    public static BlockPos getTargetBlock(PlayerEntity target) {
+        BlockPos finalPos = null;
+
+        ArrayList<BlockPos> positions = getTargetSurround(target);
+        ArrayList<BlockPos> myPositions = getTargetSurround(mc.player);
+
+        if (positions == null) return null;
+
+        for (BlockPos pos : positions) {
+
+            if (myPositions != null && !myPositions.isEmpty() && myPositions.contains(pos)) continue;
+
+            if (finalPos == null) {
+                finalPos = pos;
+                continue;
+            }
+
+            if (mc.player.squaredDistanceTo(Utils.vec3d(pos)) < mc.player.squaredDistanceTo(Utils.vec3d(finalPos))) {
+                finalPos = pos;
+            }
+        }
+
+        return finalPos;
+    }
+
+    private static ArrayList<BlockPos> getTargetSurround(PlayerEntity player) {
         ArrayList<BlockPos> positions = new ArrayList<>();
         boolean isAir = false;
 
@@ -83,45 +106,16 @@ public class CityUtils {
         return positions;
     }
 
-
-    public static BlockPos getTargetBlock(boolean checkBelow) {
-        BlockPos finalPos = null;
-        boolean cancel = false;
-
-        ArrayList<BlockPos> positions = getTargetSurround(getPlayerTarget());
-        ArrayList<BlockPos> myPositions = getTargetSurround(mc.player);
-
-        if (positions == null) return null;
-
-        for (BlockPos pos : positions) {
-
-            if (myPositions != null && !myPositions.isEmpty() && myPositions.contains(pos)) cancel = true;
-
-            assert mc.world != null;
-            if (checkBelow && mc.world.getBlockState(pos.down(1)).getBlock() != Blocks.OBSIDIAN && mc.world.getBlockState(pos.down(1)).getBlock() != Blocks.BEDROCK) continue;
-
-            if (finalPos == null) {
-                finalPos = pos;
-                continue;
-            }
-
-            assert mc.player != null;
-            if (mc.player.squaredDistanceTo(getVec(pos)) < mc.player.squaredDistanceTo(getVec(finalPos))) {
-                finalPos = pos;
-            }
-        }
-
-        if (!cancel) return finalPos;
-        else return null;
-    }
-
     public static BlockPos getSurround(Entity entity, BlockPos toAdd) {
         final Vec3d v = entity.getPos();
         if (toAdd == null) return new BlockPos(v.x, v.y, v.z);
         return new BlockPos(v.x, v.y, v.z).add(toAdd);
     }
 
-    public static Vec3d getVec(BlockPos pos) {
-        return new Vec3d(pos.getX(), pos.getY(), pos.getZ());
-    }
+    private static final BlockPos[] surround = {
+            new BlockPos(0, 0, -1),
+            new BlockPos(1, 0, 0),
+            new BlockPos(0, 0, 1),
+            new BlockPos(-1, 0, 0)
+    };
 }
