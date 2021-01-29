@@ -333,6 +333,15 @@ public class CrystalAura extends Module {
 
     // Misc
 
+    private final Setting<Double> verticalRange = sgMisc.add(new DoubleSetting.Builder()
+            .name("vertical-range")
+            .description("The maximum vertical range for placing/breaking end crystals. May kill performance if this value is higher than 3.")
+            .min(0)
+            .defaultValue(3)
+            .max(7)
+            .build()
+    );
+
     private final Setting<Double> maxDamage = sgMisc.add(new DoubleSetting.Builder()
             .name("max-damage")
             .description("The maximum self-damage allowed.")
@@ -379,7 +388,7 @@ public class CrystalAura extends Module {
 
     private final Setting<Boolean> noSwing = sgMisc.add(new BoolSetting.Builder()
             .name("no-swing")
-            .description("Stops your hand from swinging.")
+            .description("Stops your hand from swinging client-side.")
             .defaultValue(true)
             .build()
     );
@@ -804,7 +813,7 @@ public class CrystalAura extends Module {
         }
         for(double i = playerPos.getX() - placeRange.get(); i < playerPos.getX() + placeRange.get(); i++){
             for(double j = playerPos.getZ() - placeRange.get(); j < playerPos.getZ() + placeRange.get(); j++){
-                for(double k = playerPos.getY() - placeRange.get(); k < playerPos.getY() + placeRange.get(); k++){
+                for(double k = playerPos.getY() - verticalRange.get(); k < playerPos.getY() + verticalRange.get(); k++){
                     Vec3d pos = new Vec3d(Math.floor(i), Math.floor(k), Math.floor(j));
                     if(isValid(new BlockPos(pos)) && getDamagePlace(new BlockPos(pos).up())){
                         if (!strict.get() || isEmpty(new BlockPos(pos.add(0, 2, 0)))) {
