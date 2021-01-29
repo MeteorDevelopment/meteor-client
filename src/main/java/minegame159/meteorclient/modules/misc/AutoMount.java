@@ -3,9 +3,9 @@
  * Copyright (c) 2021 Meteor Development.
  */
 
-package minegame159.meteorclient.modules.player;
+package minegame159.meteorclient.modules.misc;
 
-//Created by squidooly 16/07/2020
+//Created by squidoodly 16/07/2020
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
@@ -14,8 +14,6 @@ import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.utils.entity.Target;
-import minegame159.meteorclient.utils.player.RotationUtils;
 import minegame159.meteorclient.utils.player.Rotations;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.mob.SkeletonHorseEntity;
@@ -23,14 +21,13 @@ import net.minecraft.entity.passive.*;
 import net.minecraft.entity.vehicle.BoatEntity;
 import net.minecraft.entity.vehicle.MinecartEntity;
 import net.minecraft.item.SpawnEggItem;
-import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
 import net.minecraft.util.Hand;
 
 public class AutoMount extends Module {
-    public AutoMount(){super(Category.Player, "auto-mount", "Automatically mounts entities.");}
+    public AutoMount(){super(Category.Misc, "auto-mount", "Automatically mounts entities.");}
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgAnimals = settings.createGroup("Animals");
+    private final SettingGroup sgMount = settings.createGroup("Mount");
 
     // General
 
@@ -48,60 +45,60 @@ public class AutoMount extends Module {
             .build()
     );
 
-    // Animals
+    // Mount
 
-    private final Setting<Boolean> donkeys  = sgAnimals.add(new BoolSetting.Builder()
-            .name("donkey")
-            .description("Donkey")
-            .defaultValue(false)
-            .build()
-    );
-
-    private final Setting<Boolean> skeletonHorse = sgAnimals.add(new BoolSetting.Builder()
-            .name("skeleton-horse")
-            .description("Skeleton Horse")
-            .defaultValue(false)
-            .build()
-    );
-
-    private final Setting<Boolean> llamas  = sgAnimals.add(new BoolSetting.Builder()
-            .name("llama")
-            .description("Llama")
-            .defaultValue(false)
-            .build()
-    );
-
-    private final Setting<Boolean> boats  = sgAnimals.add(new BoolSetting.Builder()
-            .name("boat")
-            .description("Boat")
-            .defaultValue(false)
-            .build()
-    );
-
-    private final Setting<Boolean> minecarts  = sgAnimals.add(new BoolSetting.Builder()
-            .name("minecart")
-            .description("Minecart")
-            .defaultValue(false)
-            .build()
-    );
-
-    private final Setting<Boolean> horses  = sgAnimals.add(new BoolSetting.Builder()
+    private final Setting<Boolean> horses = sgMount.add(new BoolSetting.Builder()
             .name("horse")
             .description("Horse")
             .defaultValue(false)
             .build()
     );
 
-    private final Setting<Boolean> pigs  = sgAnimals.add(new BoolSetting.Builder()
+    private final Setting<Boolean> donkeys = sgMount.add(new BoolSetting.Builder()
+            .name("donkey")
+            .description("Donkey")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> mules = sgMount.add(new BoolSetting.Builder()
+            .name("mule")
+            .description("Mule")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> skeletonHorse = sgMount.add(new BoolSetting.Builder()
+            .name("skeleton-horse")
+            .description("Skeleton Horse")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> llamas = sgMount.add(new BoolSetting.Builder()
+            .name("llama")
+            .description("Llama")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> pigs = sgMount.add(new BoolSetting.Builder()
             .name("pig")
             .description("Pig")
             .defaultValue(false)
             .build()
     );
 
-    private final Setting<Boolean> mules  = sgAnimals.add(new BoolSetting.Builder()
-            .name("mule")
-            .description("Mule")
+    private final Setting<Boolean> boats = sgMount.add(new BoolSetting.Builder()
+            .name("boat")
+            .description("Boat")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> minecarts = sgMount.add(new BoolSetting.Builder()
+            .name("minecart")
+            .description("Minecart")
             .defaultValue(false)
             .build()
     );

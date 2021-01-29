@@ -78,7 +78,7 @@ public class Auto32K extends Module {
 
     private final Setting<Boolean> autoMove = sgGeneral.add(new BoolSetting.Builder()
             .name("auto-move")
-            .description("Moves the sword for you.")
+            .description("Moves the 32K into your inventory automatically.")
             .defaultValue(true)
             .build()
     );

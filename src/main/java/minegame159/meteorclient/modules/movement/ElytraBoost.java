@@ -28,14 +28,14 @@ public class ElytraBoost extends Module {
 
     private final Setting<Boolean> dontConsumeFirework = sgGeneral.add(new BoolSetting.Builder()
             .name("anti-consume")
-            .description("Doesn't consume the firework when using it.")
+            .description("Prevents fireworks from being consumed when using Elytra Boost.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Integer> fireworkLevel = sgGeneral.add(new IntSetting.Builder()
             .name("firework-duration")
-            .description("The duration.")
+            .description("The duration of the firework.")
             .defaultValue(0)
             .min(0)
             .max(255)
@@ -59,7 +59,7 @@ public class ElytraBoost extends Module {
     private final List<FireworkRocketEntity> fireworks = new ArrayList<>();
 
     public ElytraBoost() {
-        super(Category.Movement, "elytra-boost", "Boosts you as if you used a firework.");
+        super(Category.Movement, "elytra-boost", "Boosts your elytra as if you used a firework.");
     }
 
     @Override

@@ -33,7 +33,7 @@ public class Anchor extends Module {
 
     private final Setting<Integer> minPitch = sgGeneral.add(new IntSetting.Builder()
             .name("min-pitch")
-            .description("Minimum pitch at which anchor will work. (90 - -90)")
+            .description("The minimum pitch at which anchor will work.")
             .defaultValue(-90)
             .min(-90)
             .max(90)
@@ -44,14 +44,14 @@ public class Anchor extends Module {
 
     private final Setting<Boolean> cancelMove = sgGeneral.add(new BoolSetting.Builder()
             .name("cancel-jump-in-hole")
-            .description("Stops you from jumping when anchor is active and min pitch is met.")
+            .description("Prevents you from jumping when Anchor is active and Min Pitch is met.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> pull = sgGeneral.add(new BoolSetting.Builder()
             .name("pull")
-            .description("Whether to pull you faster into the hole.")
+            .description("The pull strength of Anchor.")
             .defaultValue(false)
             .build()
     );
