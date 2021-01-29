@@ -16,6 +16,7 @@ import minegame159.meteorclient.rendering.ShapeMode;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.Pool;
+import minegame159.meteorclient.utils.player.Rotations;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.block.Block;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
@@ -31,12 +32,13 @@ public class PacketMine extends Module {
 
     // General
 
-    private final Setting<Boolean> oneByOne = sgGeneral.add(new BoolSetting.Builder()
-            .name("one-by-one")
-            .description("Mines blocks one by one.")
+    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
+            .name("rotate")
+            .description("Sends rotation packets to the server when mining.")
             .defaultValue(true)
             .build()
     );
+
 
     // Render
 
@@ -91,27 +93,22 @@ public class PacketMine extends Module {
 
     @EventHandler
     private void onStartBreakingBlock(StartBreakingBlockEvent event) {
+        event.cancel();
+
         if (mc.world.getBlockState(event.blockPos).getHardness(mc.world, event.blockPos) < 0) return;
 
         if (!isMiningBlock(event.blockPos)) {
             MyBlock block = blockPool.get();
-            block.blockPos = event.blockPos;
-            block.direction = event.direction;
-            block.originalBlock = mc.world.getBlockState(block.blockPos).getBlock();
+            block.set(event);
             blocks.add(block);
         }
-
-        event.cancel();
     }
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
         blocks.removeIf(MyBlock::shouldRemove);
 
-        if (oneByOne.get()) {
-            if (!blocks.isEmpty()) blocks.get(0).mine();
-        }
-        else blocks.forEach(MyBlock::mine);
+        if (!blocks.isEmpty()) blocks.get(0).mine();
     }
 
     @EventHandler
@@ -125,14 +122,31 @@ public class PacketMine extends Module {
         public BlockPos blockPos;
         public Direction direction;
         public Block originalBlock;
+        public boolean mining;
+
+        public void set(StartBreakingBlockEvent event) {
+            this.blockPos = event.blockPos;
+            this.direction = event.direction;
+            this.originalBlock = mc.world.getBlockState(blockPos).getBlock();
+            this.mining = false;
+        }
 
         public boolean shouldRemove() {
             return mc.world.getBlockState(blockPos).getBlock() != originalBlock || Utils.distance(mc.player.getX() - 0.5, mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()), mc.player.getZ() - 0.5, blockPos.getX() + direction.getOffsetX(), blockPos.getY() + direction.getOffsetY(), blockPos.getZ() + direction.getOffsetZ()) > mc.interactionManager.getReachDistance();
         }
 
         public void mine() {
-            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
-            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
+            if (rotate.get()) Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), 50, this::sendMinePackets);
+            else sendMinePackets();
+        }
+
+        private void sendMinePackets() {
+            if (!mining) {
+                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
+                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
+
+                mining = true;
+            }
         }
 
         public void render() {
