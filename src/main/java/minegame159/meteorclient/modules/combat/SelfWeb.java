@@ -12,13 +12,12 @@ import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.utils.player.RotationUtils;
+import minegame159.meteorclient.utils.player.PlayerUtils;
+import minegame159.meteorclient.utils.player.Rotations;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
 
 public class SelfWeb extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -49,28 +48,39 @@ public class SelfWeb extends Module {
     }
 
     @EventHandler
-    private void onTick(TickEvent.Post event) {
-        int webSlot = -1;
+    private void onTick(TickEvent.Pre event) {
+        int slot = findSlot();
+        if (slot == -1) return;
+
+        BlockPos blockPos = mc.player.getBlockPos();
+        if (PlayerUtils.canPlace(blockPos)) {
+            if (rotate.get()) Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> PlayerUtils.placeBlock(blockPos, slot, Hand.MAIN_HAND));
+            else PlayerUtils.placeBlock(blockPos, slot, Hand.MAIN_HAND);
+        }
+
+        if (doubles.get()) {
+            int slot2 = findSlot();
+            if (slot2 == -1) return;
+
+            BlockPos blockPos2 = mc.player.getBlockPos().add(0, 1, 0);
+            if (PlayerUtils.canPlace(blockPos2)) {
+                if (rotate.get()) Rotations.rotate(Rotations.getYaw(blockPos2), Rotations.getPitch(blockPos2), () -> PlayerUtils.placeBlock(blockPos2, slot2, Hand.MAIN_HAND));
+                else PlayerUtils.placeBlock(blockPos2, slot2, Hand.MAIN_HAND);
+            }
+        }
+
+        if (turnOff.get()) toggle();
+    }
+
+    private int findSlot() {
         for (int i = 0; i < 9; i++) {
             Item item = mc.player.inventory.getStack(i).getItem();
 
             if (item == Items.COBWEB) {
-                webSlot = i;
-                break;
+                return i;
             }
         }
-        if (webSlot == -1) return;
 
-        int prevSlot = mc.player.inventory.selectedSlot;
-        mc.player.inventory.selectedSlot = webSlot;
-        BlockPos playerPos = mc.player.getBlockPos();
-
-        if (rotate.get()) RotationUtils.packetRotate(mc.player.getBlockPos());
-        mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.DOWN, playerPos, true));
-
-        if (doubles.get()) mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.DOWN, playerPos.add(0 ,1,0), true));
-
-        mc.player.inventory.selectedSlot = prevSlot;
-        if (turnOff.get()) toggle();
+        return -1;
     }
 }
