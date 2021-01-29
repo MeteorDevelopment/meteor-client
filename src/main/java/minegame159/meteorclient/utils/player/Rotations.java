@@ -3,6 +3,7 @@ package minegame159.meteorclient.utils.player;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.entity.player.SendMovementPacketsEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.utils.entity.Target;
 import minegame159.meteorclient.utils.misc.Pool;
 import net.minecraft.client.MinecraftClient;
@@ -20,6 +21,10 @@ public class Rotations {
     private static final List<Rotation> rotations = new ArrayList<>();
     private static float preYaw, prePitch;
     private static int i = 0;
+
+    public static float serverYaw;
+    public static float serverPitch;
+    public static int rotationTimer;
 
     public static void init() {
         MeteorClient.EVENT_BUS.subscribe(Rotations.class);
@@ -56,7 +61,7 @@ public class Rotations {
             mc.player.yaw = (float) rotation.yaw;
             mc.player.pitch = (float) rotation.pitch;
 
-            RotationUtils.setCamRotation(rotation.yaw, rotation.pitch);
+            setCamRotation(rotation.yaw, rotation.pitch);
             rotation.runCallback();
 
             rotationPool.free(rotation);
@@ -75,7 +80,7 @@ public class Rotations {
             for (; i < rotations.size(); i++) {
                 Rotation rotation = rotations.get(i);
 
-                RotationUtils.setCamRotation(rotation.yaw, rotation.pitch);
+                setCamRotation(rotation.yaw, rotation.pitch);
                 rotation.sendPacket();
 
                 rotationPool.free(rotation);
@@ -84,6 +89,11 @@ public class Rotations {
             rotations.clear();
             i = 0;
         }
+    }
+
+    @EventHandler
+    private static void onTick(TickEvent.Pre event) {
+        rotationTimer++;
     }
 
     public static double getYaw(Entity entity) {
@@ -118,6 +128,12 @@ public class Rotations {
         double diffXZ = Math.sqrt(diffX * diffX + diffZ * diffZ);
 
         return mc.player.pitch + MathHelper.wrapDegrees((float) -Math.toDegrees(Math.atan2(diffY, diffXZ)) - mc.player.pitch);
+    }
+
+    public static void setCamRotation(double yaw, double pitch) {
+        serverYaw = (float) yaw;
+        serverPitch = (float) pitch;
+        rotationTimer = 0;
     }
 
     private static class Rotation {
