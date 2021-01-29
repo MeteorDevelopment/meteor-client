@@ -316,7 +316,6 @@ public class ModuleManager extends Savable<ModuleManager> {
         addModule(new AutoMount());
         addModule(new AutoReplenish());
         addModule(new AutoRespawn());
-        addModule(new AutoSteal());
         addModule(new AutoTool());
         addModule(new BuildHeight());
         addModule(new ChestSwap());
@@ -420,6 +419,7 @@ public class ModuleManager extends Savable<ModuleManager> {
         addModule(new AutoShearer());
         addModule(new AutoSign());
         addModule(new AutoSmelter());
+        addModule(new AutoSteal());
         addModule(new BetterChat());
         addModule(new BookBot());
         addModule(new DiscordPresence());
