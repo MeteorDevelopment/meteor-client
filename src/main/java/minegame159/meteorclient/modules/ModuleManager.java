@@ -333,7 +333,6 @@ public class ModuleManager extends Savable<ModuleManager> {
         addModule(new NoBreakDelay());
         addModule(new NoInteract());
         addModule(new NoMiningTrace());
-        addModule(new NoRotate());
         addModule(new PacketMine());
         addModule(new Portals());
         addModule(new PotionSpoof());
