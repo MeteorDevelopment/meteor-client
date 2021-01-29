@@ -305,11 +305,11 @@ public class CrystalAura extends Module {
             .build()
     );
 
-    // Anticheat
+    // Rotations
 
     private final Setting<RotationMode> rotationMode = sgRotations.add(new EnumSetting.Builder<RotationMode>()
             .name("rotation-mode")
-            .description("When to rotate when using Crystal Aura.")
+            .description("The method of rotating when using Crystal Aura.")
             .defaultValue(RotationMode.Place)
             .build()
     );
@@ -333,6 +333,20 @@ public class CrystalAura extends Module {
 
     // Misc
 
+    private final Setting<SwitchMode> switchMode = sgMisc.add(new EnumSetting.Builder<SwitchMode>()
+            .name("switch-mode")
+            .description("How to switch items.")
+            .defaultValue(SwitchMode.Auto)
+            .build()
+    );
+
+    private final Setting<Boolean> switchBack = sgMisc.add(new BoolSetting.Builder()
+            .name("switch-back")
+            .description("Switches back to your previous slot when disabling Crystal Aura.")
+            .defaultValue(true)
+            .build()
+    );
+
     private final Setting<Double> verticalRange = sgMisc.add(new DoubleSetting.Builder()
             .name("vertical-range")
             .description("The maximum vertical range for placing/breaking end crystals. May kill performance if this value is higher than 3.")
@@ -346,20 +360,6 @@ public class CrystalAura extends Module {
             .name("max-damage")
             .description("The maximum self-damage allowed.")
             .defaultValue(3)
-            .build()
-    );
-
-    private final Setting<SwitchMode> switchMode = sgMisc.add(new EnumSetting.Builder<SwitchMode>()
-            .name("switch-mode")
-            .description("How to switch items.")
-            .defaultValue(SwitchMode.Auto)
-            .build()
-    );
-
-    private final Setting<Boolean> switchBack = sgMisc.add(new BoolSetting.Builder()
-            .name("switch-back")
-            .description("Switches back to your previous slot when disabling Crystal Aura.")
-            .defaultValue(true)
             .build()
     );
 
@@ -1013,3 +1013,4 @@ public class CrystalAura extends Module {
         return null;
     }
 }
+// holy shit 1000 lines

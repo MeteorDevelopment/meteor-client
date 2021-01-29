@@ -13,18 +13,18 @@ import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 
-public class AutoSprint extends Module {
+public class Sprint extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Boolean> permanent = sgGeneral.add(new BoolSetting.Builder()
             .name("permanent")
-            .description("Makes you still sprint even if you do not move.")
+            .description("Continues sprinting even if you do not move.")
             .defaultValue(true)
             .build()
     );
 
-    public AutoSprint() {
-        super(Category.Movement, "auto-sprint", "Automatically sprints.");
+    public Sprint() {
+        super(Category.Movement, "sprint", "Automatically sprints.");
     }
     
     @Override

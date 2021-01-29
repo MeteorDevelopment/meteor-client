@@ -349,7 +349,7 @@ public class ModuleManager extends Savable<ModuleManager> {
         addModule(new Anchor());
         addModule(new AntiLevitation());
         addModule(new AutoJump());
-        addModule(new AutoSprint());
+        addModule(new Sprint());
         addModule(new AutoWalk());
         addModule(new Blink());
         addModule(new BoatFly());
@@ -358,7 +358,7 @@ public class ModuleManager extends Savable<ModuleManager> {
         addModule(new ElytraPlus());
         addModule(new EntityControl());
         addModule(new EntitySpeed());
-        addModule(new FastLadder());
+        addModule(new FastClimb());
         addModule(new Flight());
         addModule(new GUIMove());
         addModule(new HighJump());

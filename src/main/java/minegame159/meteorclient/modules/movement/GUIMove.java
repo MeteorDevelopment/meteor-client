@@ -31,8 +31,8 @@ public class GUIMove extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Screens> screens = sgGeneral.add(new EnumSetting.Builder<Screens>()
-            .name("screens")
-            .description("Which screens to move in.")
+            .name("gUIs")
+            .description("Which GUIs to move in.")
             .defaultValue(Screens.Inventory)
             .build()
     );
@@ -60,7 +60,7 @@ public class GUIMove extends Module {
 
     private final Setting<Boolean> arrowsRotate = sgGeneral.add(new BoolSetting.Builder()
             .name("arrows-rotate")
-            .description("Allows you to use arrow keys to rotate while in GUIs.")
+            .description("Allows you to use your arrow keys to rotate while in GUIs.")
             .defaultValue(true)
             .build()
     );

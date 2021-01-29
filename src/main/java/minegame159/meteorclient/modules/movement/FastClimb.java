@@ -14,7 +14,7 @@ import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import net.minecraft.util.math.Vec3d;
 
-public class FastLadder extends Module {
+public class FastClimb extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     
     private final Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
@@ -25,8 +25,8 @@ public class FastLadder extends Module {
             .build()
     );
 
-    public FastLadder() {
-        super(Category.Movement, "fast-ladder", "Makes you climb ladders faster.");
+    public FastClimb() {
+        super(Category.Movement, "fast-climb", "Allows you to climb faster.");
     }
 
     @EventHandler
