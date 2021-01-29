@@ -288,7 +288,7 @@ public class ModuleManager extends Savable<ModuleManager> {
         addModule(new Criticals());
         addModule(new CrystalAura());
         addModule(new Hitboxes());
-        addModule(new Holefiller());
+        addModule(new HoleFiller());
         addModule(new KillAura());
         addModule(new OffhandExtra());
         addModule(new Quiver());

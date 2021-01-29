@@ -34,7 +34,6 @@ public class PlayerUtils {
     }
 
     public static boolean placeBlock(BlockPos blockPos, int slot, Hand hand) {
-        assert mc.player != null;
         if (slot == -1) return false;
 
         int preSlot = mc.player.inventory.selectedSlot;
@@ -46,7 +45,7 @@ public class PlayerUtils {
         return a;
     }
 
-    public static boolean placeBlock(BlockPos blockPos, Hand hand, boolean swing) {
+    public static boolean canPlace(BlockPos blockPos) {
         if (blockPos == null) return false;
 
         // Check y level
@@ -56,7 +55,11 @@ public class PlayerUtils {
         if (!mc.world.getBlockState(blockPos).getMaterial().isReplaceable()) return false;
 
         // Check if intersects entities
-        if (!mc.world.canPlace(Blocks.STONE.getDefaultState(), blockPos, ShapeContext.absent())) return false;
+        return mc.world.canPlace(Blocks.STONE.getDefaultState(), blockPos, ShapeContext.absent());
+    }
+
+    public static boolean placeBlock(BlockPos blockPos, Hand hand, boolean swing) {
+        if (!canPlace(blockPos)) return false;
 
         // Try to find a neighbour to click on to avoid air place
         for (Direction side : Direction.values()) {

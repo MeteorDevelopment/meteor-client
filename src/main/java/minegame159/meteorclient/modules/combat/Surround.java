@@ -13,9 +13,8 @@ import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.player.PlayerUtils;
-import minegame159.meteorclient.utils.player.RotationUtils;
+import minegame159.meteorclient.utils.player.Rotations;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
@@ -89,7 +88,7 @@ public class Surround extends Module {
     }
 
     @EventHandler
-    private void onTick(TickEvent.Post event) {
+    private void onTick(TickEvent.Pre event) {
         if (disableOnJump.get() && mc.options.keyJump.isPressed()) {
             toggle();
             return;
@@ -138,21 +137,26 @@ public class Surround extends Module {
 
     private boolean place(int x, int y, int z) {
         setBlockPos(x, y, z);
-
         BlockState blockState = mc.world.getBlockState(blockPos);
-        boolean wasObby = blockState.getBlock() == Blocks.OBSIDIAN;
-        boolean placed = !blockState.getMaterial().isReplaceable();
 
-        if (!placed && findSlot()) {
-            if (rotate.get()) RotationUtils.packetRotate(blockPos);
-            placed = PlayerUtils.placeBlock(blockPos, Hand.MAIN_HAND);
-            resetSlot();
+        if (!blockState.getMaterial().isReplaceable()) return true;
 
-            boolean isObby = mc.world.getBlockState(blockPos).getBlock() == Blocks.OBSIDIAN;
-            if (!wasObby && isObby) return_ = true;
+        if (findSlot() && PlayerUtils.canPlace(blockPos)) {
+            return_ = true;
+
+            if (rotate.get()) {
+                Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), 100, () -> {
+                    PlayerUtils.placeBlock(blockPos, Hand.MAIN_HAND);
+                    resetSlot();
+                });
+            }
+            else {
+                PlayerUtils.placeBlock(blockPos, Hand.MAIN_HAND);
+                resetSlot();
+            }
         }
 
-        return placed;
+        return false;
     }
 
     private void setBlockPos(int x, int y, int z) {

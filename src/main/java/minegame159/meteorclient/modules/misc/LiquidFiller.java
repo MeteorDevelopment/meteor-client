@@ -11,7 +11,7 @@ import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.player.PlayerUtils;
-import minegame159.meteorclient.utils.player.RotationUtils;
+import minegame159.meteorclient.utils.player.Rotations;
 import minegame159.meteorclient.utils.world.BlockIterator;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
@@ -76,17 +76,25 @@ public class LiquidFiller extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        BlockIterator.register(horizontalRadius.get(), verticalRadius.get(), (blockPos, blockState) -> {
-            if (blockState.getFluidState().getLevel() == 8 && blockState.getFluidState().isStill()) {
-                Block liquid = blockState.getBlock();
+        int slot = findSlot();
 
-                PlaceIn placeIn = placeInLiquids.get();
-                if (placeIn == PlaceIn.Both || (placeIn == PlaceIn.Lava && liquid == Blocks.LAVA) || (placeIn == PlaceIn.Water && liquid == Blocks.WATER)) {
-                    if (rotate.get()) RotationUtils.packetRotate(blockPos);
-                    if (PlayerUtils.placeBlock(blockPos, findSlot(), Hand.MAIN_HAND)) BlockIterator.disableCurrent();
+        if (slot != -1) {
+            BlockIterator.register(horizontalRadius.get(), verticalRadius.get(), (blockPos, blockState) -> {
+                if (blockState.getFluidState().getLevel() == 8 && blockState.getFluidState().isStill()) {
+                    Block liquid = blockState.getBlock();
+
+                    PlaceIn placeIn = placeInLiquids.get();
+                    if (placeIn == PlaceIn.Both || (placeIn == PlaceIn.Lava && liquid == Blocks.LAVA) || (placeIn == PlaceIn.Water && liquid == Blocks.WATER)) {
+                        if (PlayerUtils.canPlace(blockPos)) {
+                            if (rotate.get()) Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), 0, () -> PlayerUtils.placeBlock(blockPos, slot, Hand.MAIN_HAND));
+                            else PlayerUtils.placeBlock(blockPos, slot, Hand.MAIN_HAND);
+
+                            BlockIterator.disableCurrent();
+                        }
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     private int findSlot() {
