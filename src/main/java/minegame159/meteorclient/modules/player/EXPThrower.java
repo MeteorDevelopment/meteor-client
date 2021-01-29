@@ -13,7 +13,7 @@ import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.player.InvUtils;
-import minegame159.meteorclient.utils.player.RotationUtils;
+import minegame159.meteorclient.utils.player.Rotations;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.Items;
@@ -41,7 +41,7 @@ public class EXPThrower extends Module {
     }
 
     @EventHandler
-    private void onTick(TickEvent.Post event) {
+    private void onTick(TickEvent.Pre event) {
         if (autoToggle.get()) {
             int count = 0;
             int set = 0;
@@ -59,11 +59,15 @@ public class EXPThrower extends Module {
         int slot = InvUtils.findItemInHotbar(Items.EXPERIENCE_BOTTLE);
 
         if (slot != -1) {
-            if (lookDown.get()) RotationUtils.packetRotate(mc.player.yaw, 90);
-            int preSelectedSlot = mc.player.inventory.selectedSlot;
-            mc.player.inventory.selectedSlot = slot;
-            mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
-            mc.player.inventory.selectedSlot = preSelectedSlot;
+            if (lookDown.get()) Rotations.rotate(mc.player.yaw, 90, () -> throwExp(slot));
+            else throwExp(slot);
         }
+    }
+
+    private void throwExp(int slot) {
+        int preSelectedSlot = mc.player.inventory.selectedSlot;
+        mc.player.inventory.selectedSlot = slot;
+        mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
+        mc.player.inventory.selectedSlot = preSelectedSlot;
     }
 }
