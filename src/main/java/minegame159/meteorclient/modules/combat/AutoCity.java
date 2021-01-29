@@ -62,8 +62,6 @@ public class AutoCity extends Module {
         target = CityUtils.getPlayerTarget(range.get());
         BlockPos mineTarget = CityUtils.getTargetBlock(target);
 
-        int prevSlot = mc.player.inventory.selectedSlot;
-
         if (target == null || mineTarget == null) {
             if (chatInfo.get()) ChatUtils.moduleError(this, "No target block found... disabling.");
         } else {
@@ -112,8 +110,6 @@ public class AutoCity extends Module {
 
             if (rotate.get()) Rotations.rotate(Rotations.getYaw(mineTarget), Rotations.getPitch(mineTarget), () -> mine(mineTarget));
             else mine(mineTarget);
-
-            mc.player.inventory.selectedSlot = prevSlot;
         }
 
         this.toggle();
