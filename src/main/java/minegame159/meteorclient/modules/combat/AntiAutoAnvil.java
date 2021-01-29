@@ -13,7 +13,7 @@ import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.player.PlayerUtils;
-import minegame159.meteorclient.utils.player.RotationUtils;
+import minegame159.meteorclient.utils.player.Rotations;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.Items;
 
@@ -34,16 +34,31 @@ public class AntiAutoAnvil extends Module {
     @EventHandler
     private void onTick(TickEvent.Pre event) {
         for (int i = 2; i <= mc.interactionManager.getReachDistance() + 2; i++){
-            if (mc.world.getBlockState(mc.player.getBlockPos().add(0, i, 0)).getBlock() == Blocks.ANVIL
-                    && mc.world.getBlockState(mc.player.getBlockPos().add(0, i - 1, 0)).isAir()){
+            if (mc.world.getBlockState(mc.player.getBlockPos().add(0, i, 0)).getBlock() == Blocks.ANVIL && mc.world.getBlockState(mc.player.getBlockPos().add(0, i - 1, 0)).isAir()){
                 int slot = InvUtils.findItemWithCount(Items.OBSIDIAN).slot;
-                if (rotate.get()) RotationUtils.packetRotate(mc.player.yaw, -90);
+                boolean stop = false;
+
                 if (slot != 1 && slot < 9) {
-                    PlayerUtils.placeBlock(mc.player.getBlockPos().add(0, i - 2, 0), slot, InvUtils.getHand(Items.OBSIDIAN));
-                } else if (mc.player.getOffHandStack().getItem() == Items.OBSIDIAN){
-                    PlayerUtils.placeBlock(mc.player.getBlockPos().add(0, i - 2, 0),  InvUtils.getHand(Items.OBSIDIAN));
+                    firstThing(i, slot);
+                    stop = true;
                 }
+                else if (mc.player.getOffHandStack().getItem() == Items.OBSIDIAN){
+                    firstThing(i, -1);
+                    stop = true;
+                }
+
+                if (stop) break;
             }
         }
+    }
+
+    private void firstThing(int i, int slot) {
+        if (rotate.get()) Rotations.rotate(mc.player.yaw, -90, 15, () -> doThing(i, slot));
+        else doThing(i, slot);
+    }
+
+    private void doThing(int i, int slot) {
+        if (slot != -1) PlayerUtils.placeBlock(mc.player.getBlockPos().add(0, i - 2, 0), slot, InvUtils.getHand(Items.OBSIDIAN));
+        else PlayerUtils.placeBlock(mc.player.getBlockPos().add(0, i - 2, 0),  InvUtils.getHand(Items.OBSIDIAN));
     }
 }

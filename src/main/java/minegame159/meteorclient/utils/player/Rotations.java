@@ -62,7 +62,6 @@ public class Rotations {
             mc.player.pitch = (float) rotation.pitch;
 
             setCamRotation(rotation.yaw, rotation.pitch);
-            rotation.runCallback();
 
             rotationPool.free(rotation);
             i++;
@@ -73,6 +72,8 @@ public class Rotations {
     private static void onSendMovementPacketsPost(SendMovementPacketsEvent.Post event) {
         if (!rotations.isEmpty()) {
             if (mc.cameraEntity == mc.player) {
+                rotations.get(i - 1).runCallback();
+
                 mc.player.yaw = preYaw;
                 mc.player.pitch = prePitch;
             }

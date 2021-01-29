@@ -13,7 +13,7 @@ import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
-import minegame159.meteorclient.utils.player.RotationUtils;
+import minegame159.meteorclient.utils.player.Rotations;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -139,7 +139,7 @@ public class AntiAFK extends Module {
     }
 
     @EventHandler
-    private void onTick(TickEvent.Post event) {
+    private void onTick(TickEvent.Pre event) {
         if (Utils.canUpdate()) {
             //Spin
             if (spin.get()) {
@@ -149,7 +149,7 @@ public class AntiAFK extends Module {
                         mc.player.yaw = prevYaw;
                         break;
                     case Server:
-                        RotationUtils.packetRotate(prevYaw, pitch.get().floatValue());
+                        Rotations.rotate(prevYaw, pitch.get(), -15, null);
                         break;
                 }
             }

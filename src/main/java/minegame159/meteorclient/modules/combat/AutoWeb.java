@@ -16,14 +16,13 @@ import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.entity.FakePlayerEntity;
-import minegame159.meteorclient.utils.player.RotationUtils;
+import minegame159.meteorclient.utils.player.PlayerUtils;
+import minegame159.meteorclient.utils.player.Rotations;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
 
 public class AutoWeb extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -57,25 +56,17 @@ public class AutoWeb extends Module {
     private PlayerEntity target = null;
 
     @EventHandler
-    private void onTick(TickEvent.Post event) {
-        int webSlot = -1;
-        for (int i = 0; i < 9; i++) {
-            Item item = mc.player.inventory.getStack(i).getItem();
-
-            if (item == Items.COBWEB) {
-                webSlot = i;
-                break;
-            }
-        }
-        if (webSlot == -1) return;
+    private void onTick(TickEvent.Pre event) {
+        int slot = findSlot();
+        if (slot == -1) return;
 
         if (target != null) {
             if (mc.player.distanceTo(target) > range.get() || !target.isAlive()) target = null;
         }
 
         for (PlayerEntity player : mc.world.getPlayers()) {
-            if (player == mc.player || !FriendManager.INSTANCE.attack(player) || !player.isAlive() || mc.player.distanceTo(player) > range.get())
-                continue;
+            if (player == mc.player || !FriendManager.INSTANCE.attack(player) || !player.isAlive() || mc.player.distanceTo(player) > range.get()) continue;
+
             if (target == null) {
                 target = player;
             } else if (mc.player.distanceTo(target) > mc.player.distanceTo(player)) {
@@ -97,22 +88,32 @@ public class AutoWeb extends Module {
         }
 
         if (target != null) {
-            int prevSlot = mc.player.inventory.selectedSlot;
-            mc.player.inventory.selectedSlot = webSlot;
             BlockPos targetPos = target.getBlockPos();
-            int swung = 0;
-            if (mc.world.getBlockState(targetPos).isAir()) {
-                if (rotate.get()) RotationUtils.packetRotate(targetPos);
-                mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.DOWN, targetPos, true));
-                swung++;
+
+            if (PlayerUtils.canPlace(targetPos)) {
+                BlockPos blockPos = targetPos;
+                if (rotate.get()) Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> PlayerUtils.placeBlock(blockPos, slot, Hand.MAIN_HAND));
+                else PlayerUtils.placeBlock(blockPos, slot, Hand.MAIN_HAND);
             }
-            if (doubles.get() && mc.world.getBlockState(targetPos.add(0, 1, 0)).isAir()) {
-                if (rotate.get()) RotationUtils.packetRotate(targetPos.add(0, 1, 0));
-                mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, targetPos.add(0, 1, 0), true));
-                swung++;
+
+            targetPos = targetPos.add(0, 1, 0);
+            if (PlayerUtils.canPlace(targetPos)) {
+                BlockPos blockPos = targetPos;
+                if (rotate.get()) Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> PlayerUtils.placeBlock(blockPos, slot, Hand.MAIN_HAND));
+                else PlayerUtils.placeBlock(blockPos, slot, Hand.MAIN_HAND);
             }
-            if (swung >= 1) mc.player.swingHand(Hand.MAIN_HAND);
-            mc.player.inventory.selectedSlot = prevSlot;
         }
+    }
+
+    private int findSlot() {
+        for (int i = 0; i < 9; i++) {
+            Item item = mc.player.inventory.getStack(i).getItem();
+
+            if (item == Items.COBWEB) {
+                return i;
+            }
+        }
+
+        return -1;
     }
 }

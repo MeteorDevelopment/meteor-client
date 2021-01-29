@@ -16,7 +16,7 @@ import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.entity.FakePlayerEntity;
 import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.PlayerUtils;
-import minegame159.meteorclient.utils.player.RotationUtils;
+import minegame159.meteorclient.utils.player.Rotations;
 import net.minecraft.block.AbstractButtonBlock;
 import net.minecraft.block.AbstractPressurePlateBlock;
 import net.minecraft.block.AnvilBlock;
@@ -25,9 +25,7 @@ import net.minecraft.client.gui.screen.ingame.AnvilScreen;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
 
 // Created by Eureka
 
@@ -107,8 +105,7 @@ public class AutoAnvil extends Module {
     }
 
     @EventHandler
-    private void onTick(TickEvent.Post event) {
-
+    private void onTick(TickEvent.Pre event) {
         if (isActive() && toggleOnBreak.get() && target != null && target.inventory.getArmorStack(3).isEmpty()) {
             ChatUtils.moduleError(this, "Target head slot is empty... disabling.");
             toggle();
@@ -134,30 +131,26 @@ public class AutoAnvil extends Module {
         }
 
         if (timer >= delay.get() && target != null) {
-
             timer = 0;
 
-            int prevSlot = mc.player.inventory.selectedSlot;
-
-            if (getAnvilSlot() == -1) return;
+            int slot = getAnvilSlot();
+            if (slot == -1) return;
 
             if (placeButton.get()) {
+                int slot2 = getFloorSlot();
+                BlockPos blockPos = target.getBlockPos();
 
-                if (getFloorSlot() == -1) return;
-                mc.player.inventory.selectedSlot = getFloorSlot();
-
-                if (mc.world.getBlockState(target.getBlockPos()).isAir()) mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, target.getBlockPos(), true));
+                if (slot2 != -1 && PlayerUtils.canPlace(blockPos)) {
+                    if (rotate.get()) Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> PlayerUtils.placeBlock(blockPos, slot2, Hand.MAIN_HAND));
+                    else PlayerUtils.placeBlock(blockPos, slot2, Hand.MAIN_HAND);
+                }
             }
 
-            mc.player.inventory.selectedSlot = getAnvilSlot();
-
-            BlockPos placePos = target.getBlockPos().up().add(0, height.get(), 0);
-
-            if (rotate.get()) RotationUtils.packetRotate(placePos);
-
-            PlayerUtils.placeBlock(placePos, Hand.MAIN_HAND);
-
-            mc.player.inventory.selectedSlot = prevSlot;
+            BlockPos blockPos = target.getBlockPos().up().add(0, height.get(), 0);
+            if (PlayerUtils.canPlace(blockPos)) {
+                if (rotate.get()) Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> PlayerUtils.placeBlock(blockPos, slot, Hand.MAIN_HAND));
+                else PlayerUtils.placeBlock(blockPos, slot, Hand.MAIN_HAND);
+            }
         } else timer++;
     }
 
