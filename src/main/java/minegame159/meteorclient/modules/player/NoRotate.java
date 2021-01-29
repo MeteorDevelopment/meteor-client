@@ -6,13 +6,12 @@
 package minegame159.meteorclient.modules.player;
 
 import meteordevelopment.orbit.EventHandler;
+import meteordevelopment.orbit.EventPriority;
 import minegame159.meteorclient.events.packets.PacketEvent;
-import minegame159.meteorclient.mixininterface.IPlayerMoveC2SPacket;
+import minegame159.meteorclient.mixininterface.IEntitySetHeadYawS2CPacket;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.ModuleManager;
-import minegame159.meteorclient.modules.combat.Quiver;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.network.packet.s2c.play.EntitySetHeadYawS2CPacket;
 
 public class NoRotate extends Module {
 
@@ -20,12 +19,11 @@ public class NoRotate extends Module {
         super(Category.Player, "no-rotate", "Attempts to block rotations sent from server to client.");
     }
 
-    @EventHandler
-    private void onSendPacket(PacketEvent.Send event) {
-        if (event.packet instanceof PlayerMoveC2SPacket) {
-            if (ModuleManager.INSTANCE.get(EXPThrower.class).isActive() || ModuleManager.INSTANCE.get(Quiver.class).isActive()) return;
-            ((IPlayerMoveC2SPacket) event.packet).setPitch(mc.player.getPitch(0));
-            ((IPlayerMoveC2SPacket) event.packet).setYaw(mc.player.getYaw(1));
+    @EventHandler(priority = EventPriority.HIGHEST)
+    private void onReceivePacket(PacketEvent.Receive event) {
+        if (event.packet instanceof EntitySetHeadYawS2CPacket) {
+            ((IEntitySetHeadYawS2CPacket) event.packet).setPitch(mc.player.getPitch(0));
+            ((IEntitySetHeadYawS2CPacket) event.packet).setYaw(mc.player.getYaw(1));
         }
     }
 }
