@@ -9,7 +9,7 @@ import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.modules.render.Chams;
 import minegame159.meteorclient.modules.render.Freecam;
 import minegame159.meteorclient.utils.Utils;
-import minegame159.meteorclient.utils.player.RotationUtils;
+import minegame159.meteorclient.utils.player.Rotations;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
@@ -45,19 +45,19 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
 
     @ModifyVariable(method = "render", ordinal = 2, at = @At(value = "STORE", ordinal = 0))
     public float changeYaw(float oldValue, LivingEntity entity) {
-        if (entity.equals(Utils.mc.player) && RotationUtils.rotationTimer < 10) return RotationUtils.serverYaw;
+        if (entity.equals(Utils.mc.player) && Rotations.rotationTimer < 10) return Rotations.serverYaw;
         return oldValue;
     }
 
     @ModifyVariable(method = "render", ordinal = 3, at = @At(value = "STORE", ordinal = 0))
     public float changeHeadYaw(float oldValue, LivingEntity entity) {
-        if (entity.equals(Utils.mc.player) && RotationUtils.rotationTimer < 10) return RotationUtils.serverYaw;
+        if (entity.equals(Utils.mc.player) && Rotations.rotationTimer < 10) return Rotations.serverYaw;
         return oldValue;
     }
 
     @ModifyVariable(method = "render", ordinal = 5, at = @At(value = "STORE", ordinal = 3))
     public float changePitch(float oldValue, LivingEntity entity) {
-        if (entity.equals(Utils.mc.player) && RotationUtils.rotationTimer < 10) return RotationUtils.serverPitch;
+        if (entity.equals(Utils.mc.player) && Rotations.rotationTimer < 10) return Rotations.serverPitch;
         return oldValue;
     }
 }
