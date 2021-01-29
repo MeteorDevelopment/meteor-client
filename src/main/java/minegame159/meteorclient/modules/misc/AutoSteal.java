@@ -17,7 +17,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class AutoSteal extends Module {
     public AutoSteal() {
-        super(Category.Player, "auto-steal", "Automatically dumps or steals from storage blocks.");
+        super(Category.Misc, "auto-steal", "Automatically dumps or steals from storage blocks.");
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -32,18 +32,18 @@ public class AutoSteal extends Module {
             .build()
     );
 
-    private final Setting<Boolean> dumpButtonEnabled = sgGeneral.add(new BoolSetting.Builder()
-            .name("dump-button-enabled")
-            .description("Shows the Dump button on the container screen.")
-            .defaultValue(true)
-            .build()
-    );
-
     private final Setting<Boolean> autoStealEnabled = sgGeneral.add(new BoolSetting.Builder()
             .name("auto-steal-enabled")
             .description("Starts the auto steal when a container open.")
             .defaultValue(false)
             .onChanged((bool_1) -> checkAutoSettings())
+            .build()
+    );
+
+    private final Setting<Boolean> dumpButtonEnabled = sgGeneral.add(new BoolSetting.Builder()
+            .name("dump-button-enabled")
+            .description("Shows the Dump button on the container screen.")
+            .defaultValue(true)
             .build()
     );
 

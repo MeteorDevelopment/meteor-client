@@ -10,7 +10,7 @@ import minegame159.meteorclient.utils.world.TickRate;
 
 public class TpsHud extends DoubleTextHudModule {
     public TpsHud(HUD hud) {
-        super(hud, "tps", "Displays the server's TPS.", "Tps: ");
+        super(hud, "tps", "Displays the server's TPS.", "TPS: ");
     }
 
     @Override
