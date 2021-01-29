@@ -24,19 +24,12 @@ public class CityESP extends Module {
 
     // General
 
-    private final Setting<Integer> range = sgGeneral.add(new IntSetting.Builder()
+    private final Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()
             .name("range")
-            .description("The maximum range a city-able block will render.")
+            .description("The maximum range a city-able block will be found.")
             .defaultValue(5)
             .min(0)
             .sliderMax(20)
-            .build()
-    );
-
-    private final Setting<Boolean> checkBelow = sgGeneral.add(new BoolSetting.Builder()
-            .name("check-below")
-            .description("Checks if there is an obsidian or bedrock below the surrounded block for you to place crystals on.")
-            .defaultValue(true)
             .build()
     );
 
@@ -69,10 +62,9 @@ public class CityESP extends Module {
 
     @EventHandler
     private void onRender(RenderEvent event) {
-        PlayerEntity target = CityUtils.getPlayerTarget();
-        BlockPos targetBlock = CityUtils.getTargetBlock(checkBelow.get());
+        BlockPos targetBlock = CityUtils.getTargetBlock(CityUtils.getPlayerTarget(range.get()));
 
-        if (target == null || targetBlock == null || MathHelper.sqrt(mc.player.squaredDistanceTo(targetBlock.getX(), targetBlock.getY(), targetBlock.getZ())) > range.get()) return;
+        if (targetBlock == null) return;
 
         Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, targetBlock, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
     }
