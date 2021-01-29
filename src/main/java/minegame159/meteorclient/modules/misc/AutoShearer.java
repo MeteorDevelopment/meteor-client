@@ -14,7 +14,7 @@ import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.player.InvUtils;
-import minegame159.meteorclient.utils.player.RotationUtils;
+import minegame159.meteorclient.utils.player.Rotations;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.SheepEntity;
 import net.minecraft.item.Items;
@@ -46,17 +46,27 @@ public class AutoShearer extends Module {
             .build()
     );
 
+    private Entity entity;
+    private int preSlot;
+    private boolean offHand;
+
     public AutoShearer() {
         super(Category.Misc, "auto-shearer", "Automatically shears sheep.");
     }
 
+    @Override
+    public void onDeactivate() {
+        entity = null;
+    }
+
     @EventHandler
-    private void onTick(TickEvent.Post event) {
+    private void onTick(TickEvent.Pre event) {
+        entity = null;
+
         for (Entity entity : mc.world.getEntities()) {
             if (!(entity instanceof SheepEntity) || ((SheepEntity) entity).isSheared() || ((SheepEntity) entity).isBaby() || mc.player.distanceTo(entity) > distance.get()) continue;
 
             boolean findNewShears = false;
-            boolean offHand = false;
             if (mc.player.inventory.getMainHandStack().getItem() instanceof ShearsItem) {
                 if (antiBreak.get() && mc.player.inventory.getMainHandStack().getDamage() >= mc.player.inventory.getMainHandStack().getMaxDamage() - 1) findNewShears = true;
             }
@@ -79,10 +89,18 @@ public class AutoShearer extends Module {
             }
 
             if (foundShears) {
-                if (rotate.get()) RotationUtils.packetRotate(entity);
-                mc.interactionManager.interactEntity(mc.player, entity, offHand ? Hand.OFF_HAND : Hand.MAIN_HAND);
+                this.entity = entity;
+
+                if (rotate.get()) Rotations.rotate(Rotations.getYaw(entity), Rotations.getPitch(entity), -100, this::interact);
+                else interact();
+
                 return;
             }
         }
+    }
+
+    private void interact() {
+        mc.interactionManager.interactEntity(mc.player, entity, offHand ? Hand.OFF_HAND : Hand.MAIN_HAND);
+        mc.player.inventory.selectedSlot = preSlot;
     }
 }

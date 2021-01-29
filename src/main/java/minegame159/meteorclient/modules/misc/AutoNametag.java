@@ -12,7 +12,8 @@ import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.player.RotationUtils;
+import minegame159.meteorclient.utils.entity.Target;
+import minegame159.meteorclient.utils.player.Rotations;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.ItemStack;
@@ -44,17 +45,27 @@ public class AutoNametag extends Module {
             .build()
     );
 
+    private Entity entity;
+    private boolean offHand;
+    private int preSlot;
+
     public AutoNametag() {
         super(Category.Misc, "auto-nametag", "Automatically uses nametags on entities without a nametag. WILL nametag ALL entities in the specified distance.");
     }
 
+    @Override
+    public void onDeactivate() {
+        entity = null;
+    }
+
     @EventHandler
-    private void onTick(TickEvent.Post event) {
+    private void onTick(TickEvent.Pre event) {
+        entity = null;
+
         for (Entity entity : mc.world.getEntities()) {
             if (!entities.get().getBoolean(entity.getType()) || entity.hasCustomName() || mc.player.distanceTo(entity) > distance.get()) continue;
 
             boolean findNametag = true;
-            boolean offHand = false;
             if (mc.player.inventory.getMainHandStack().getItem() instanceof NameTagItem) {
                 findNametag = false;
             }
@@ -68,6 +79,7 @@ public class AutoNametag extends Module {
                 for (int i = 0; i < 9; i++) {
                     ItemStack itemStack = mc.player.inventory.getStack(i);
                     if (itemStack.getItem() instanceof NameTagItem) {
+                        preSlot = mc.player.inventory.selectedSlot;
                         mc.player.inventory.selectedSlot = i;
                         foundNametag = true;
                         break;
@@ -76,10 +88,18 @@ public class AutoNametag extends Module {
             }
 
             if (foundNametag) {
-                if (rotate.get()) RotationUtils.packetRotate(entity);
-                mc.interactionManager.interactEntity(mc.player, entity, offHand ? Hand.OFF_HAND : Hand.MAIN_HAND);
+                this.entity = entity;
+
+                if (rotate.get()) Rotations.rotate(Rotations.getYaw(entity), Rotations.getPitch(entity), -100, this::interact);
+                else interact();
+
                 return;
             }
         }
+    }
+
+    private void interact() {
+        mc.interactionManager.interactEntity(mc.player, entity, offHand ? Hand.OFF_HAND : Hand.MAIN_HAND);
+        mc.player.inventory.selectedSlot = preSlot;
     }
 }

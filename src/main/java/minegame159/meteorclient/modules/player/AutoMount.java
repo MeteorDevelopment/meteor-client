@@ -14,7 +14,9 @@ import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.utils.entity.Target;
 import minegame159.meteorclient.utils.player.RotationUtils;
+import minegame159.meteorclient.utils.player.Rotations;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.mob.SkeletonHorseEntity;
 import net.minecraft.entity.passive.*;
@@ -105,37 +107,36 @@ public class AutoMount extends Module {
     );
 
     @EventHandler
-    private void onTick(TickEvent.Post event) {
+    private void onTick(TickEvent.Pre event) {
         if (mc.player.hasVehicle()) return;
+
         for (Entity entity : mc.world.getEntities()){
             if (mc.player.distanceTo(entity) > 4) continue;
 
             if (mc.player.getMainHandStack().getItem() instanceof SpawnEggItem) return;
+
             if (donkeys.get() && entity instanceof DonkeyEntity && (!checkSaddle.get() || ((DonkeyEntity) entity).isSaddled())) {
-                if (rotate.get()) RotationUtils.packetRotate(entity);
-                mc.player.networkHandler.sendPacket(new PlayerInteractEntityC2SPacket(entity, Hand.MAIN_HAND, mc.player.isSneaking()));
+                interact(entity);
             } else if (llamas.get() && entity instanceof LlamaEntity) {
-                if (rotate.get()) RotationUtils.packetRotate(entity);
-                mc.player.networkHandler.sendPacket(new PlayerInteractEntityC2SPacket(entity, Hand.MAIN_HAND, mc.player.isSneaking()));
+                interact(entity);
             } else if (boats.get() && entity instanceof BoatEntity) {
-                if (rotate.get()) RotationUtils.packetRotate(entity);
-                mc.player.networkHandler.sendPacket(new PlayerInteractEntityC2SPacket(entity, Hand.MAIN_HAND, mc.player.isSneaking()));
+                interact(entity);
             } else if (minecarts.get() && entity instanceof MinecartEntity) {
-                if (rotate.get()) RotationUtils.packetRotate(entity);
-                mc.player.networkHandler.sendPacket(new PlayerInteractEntityC2SPacket(entity, Hand.MAIN_HAND, mc.player.isSneaking()));
+                interact(entity);
             } else if (horses.get() && entity instanceof HorseEntity && (!checkSaddle.get() || ((HorseEntity) entity).isSaddled())) {
-                if (rotate.get()) RotationUtils.packetRotate(entity);
-                mc.player.networkHandler.sendPacket(new PlayerInteractEntityC2SPacket(entity, Hand.MAIN_HAND, mc.player.isSneaking()));
+                interact(entity);
             } else if (pigs.get() && entity instanceof PigEntity && ((PigEntity) entity).isSaddled()) {
-                if (rotate.get()) RotationUtils.packetRotate(entity);
-                mc.player.networkHandler.sendPacket(new PlayerInteractEntityC2SPacket(entity, Hand.MAIN_HAND, mc.player.isSneaking()));
+                interact(entity);
             } else if (mules.get() && entity instanceof MuleEntity && (!checkSaddle.get() || ((MuleEntity) entity).isSaddled())) {
-                if (rotate.get()) RotationUtils.packetRotate(entity);
-                mc.player.networkHandler.sendPacket(new PlayerInteractEntityC2SPacket(entity, Hand.MAIN_HAND, mc.player.isSneaking()));
+                interact(entity);
             } else if (skeletonHorse.get() && entity instanceof SkeletonHorseEntity && (!checkSaddle.get() || ((SkeletonHorseEntity) entity).isSaddled())) {
-                if (rotate.get()) RotationUtils.packetRotate(entity);
-                mc.player.networkHandler.sendPacket(new PlayerInteractEntityC2SPacket(entity, Hand.MAIN_HAND, mc.player.isSneaking()));
+                interact(entity);
             }
         }
+    }
+
+    private void interact(Entity entity) {
+        if (rotate.get()) Rotations.rotate(Rotations.getYaw(entity), Rotations.getPitch(entity), -100, () -> mc.interactionManager.interactEntity(mc.player, entity, Hand.MAIN_HAND));
+        else mc.interactionManager.interactEntity(mc.player, entity, Hand.MAIN_HAND);
     }
 }

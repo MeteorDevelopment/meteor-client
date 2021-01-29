@@ -12,12 +12,11 @@ import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
-import minegame159.meteorclient.utils.player.RotationUtils;
+import minegame159.meteorclient.utils.player.Rotations;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.util.Hand;
-import net.minecraft.util.math.Vec3d;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,7 +69,7 @@ public class AutoBreed extends Module {
     }
 
     @EventHandler
-    private void onTick(TickEvent.Post event) {
+    private void onTick(TickEvent.Pre event) {
         for (Entity entity : mc.world.getEntities()) {
             AnimalEntity animal;
 
@@ -83,10 +82,12 @@ public class AutoBreed extends Module {
                     || mc.player.distanceTo(animal) > range.get()
                     || !animal.isBreedingItem(hand.get() == Hand.MAIN_HAND ? mc.player.getMainHandStack() : mc.player.getOffHandStack())) continue;
 
-            RotationUtils.packetRotate(new Vec3d(animal.getX(), animal.getY() + animal.getHeight() / 2, animal.getZ()));
-            mc.interactionManager.interactEntity(mc.player, animal, hand.get());
-            mc.player.swingHand(hand.get());
-            animalsFed.add(animal);
+            Rotations.rotate(Rotations.getYaw(entity), Rotations.getPitch(entity), -100, () -> {
+                mc.interactionManager.interactEntity(mc.player, animal, hand.get());
+                mc.player.swingHand(hand.get());
+                animalsFed.add(animal);
+            });
+
             return;
         }
     }

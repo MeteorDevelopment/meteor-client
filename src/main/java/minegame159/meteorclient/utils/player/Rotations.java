@@ -104,6 +104,7 @@ public class Rotations {
 
         return mc.player.pitch + MathHelper.wrapDegrees((float) -Math.toDegrees(Math.atan2(diffY, diffXZ)) - mc.player.pitch);
     }
+    public static double getPitch(Entity entity) { return getPitch(entity, Target.Body); }
 
     public static double getYaw(BlockPos pos) {
         return mc.player.yaw + MathHelper.wrapDegrees((float) Math.toDegrees(Math.atan2(pos.getZ() + 0.5 - mc.player.getZ(), pos.getX() + 0.5 - mc.player.getX())) - 90f - mc.player.yaw);
