@@ -12,7 +12,7 @@ import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.player.PlayerUtils;
-import minegame159.meteorclient.utils.player.RotationUtils;
+import minegame159.meteorclient.utils.player.Rotations;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.FallingBlock;
@@ -20,7 +20,6 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.shape.VoxelShapes;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -98,7 +97,7 @@ public class Scaffold extends Module {
     }
 
     @EventHandler
-    private void onTick(TickEvent.Post event) {
+    private void onTick(TickEvent.Pre event) {
         if (fastTower.get() && !mc.world.getBlockState(setPos(0, -1, 0)).getMaterial().isReplaceable() && mc.options.keyJump.isPressed() && findSlot(mc.world.getBlockState(setPos(0, -1, 0))) != -1 && mc.player.sidewaysSpeed == 0 &&mc.player.forwardSpeed == 0) mc.player.jump();
         blockState = mc.world.getBlockState(setPos(0, -1, 0));
         if (!blockState.getMaterial().isReplaceable()) return;
@@ -120,8 +119,8 @@ public class Scaffold extends Module {
         prevSelectedSlot = mc.player.inventory.selectedSlot;
         mc.player.inventory.selectedSlot = slot;
 
-        if (rotate.get()) RotationUtils.packetRotate(mc.player.getBlockPos().down());
-        PlayerUtils.placeBlock(mc.player.getBlockPos().down(), Hand.MAIN_HAND, renderSwing.get());
+        place(mc.player.getBlockPos().down());
+
         if (mc.player.input.sneaking) this.lastWasSneaking = false;
 
         // Place blocks around if radius is bigger than 1
@@ -132,33 +131,33 @@ public class Scaffold extends Module {
             // Forward
             for (int j = 0; j < count; j++) {
                 if (!findBlock()) return;
-                PlayerUtils.placeBlock(setPos(j - countHalf, -1, i), Hand.MAIN_HAND, renderSwing.get());
+                place(setPos(j - countHalf, -1, i));
             }
             // Backward
             for (int j = 0; j < count; j++) {
                 if (!findBlock()) return;
-                PlayerUtils.placeBlock(setPos(j - countHalf, -1, -i), Hand.MAIN_HAND, renderSwing.get());
+                place(setPos(j - countHalf, -1, -i));
             }
             // Right
             for (int j = 0; j < count; j++) {
                 if (!findBlock()) return;
-                PlayerUtils.placeBlock(setPos(i, -1, j - countHalf), Hand.MAIN_HAND, renderSwing.get());
+                place(setPos(i, -1, j - countHalf));
             }
             // Left
             for (int j = 0; j < count; j++) {
                 if (!findBlock()) return;
-                PlayerUtils.placeBlock(setPos(-i, -1, j - countHalf), Hand.MAIN_HAND, renderSwing.get());
+                place(setPos(-i, -1, j - countHalf));
             }
 
             // Diagonals
             if (!findBlock()) return;
-            PlayerUtils.placeBlock(setPos(-i, -1, i), Hand.MAIN_HAND, renderSwing.get());
+            place(setPos(-i, -1, i));
             if (!findBlock()) return;
-            PlayerUtils.placeBlock(setPos(i, -1, i), Hand.MAIN_HAND, renderSwing.get());
+            place(setPos(i, -1, i));
             if (!findBlock()) return;
-            PlayerUtils.placeBlock(setPos(-i, -1, -i), Hand.MAIN_HAND, renderSwing.get());
+            place(setPos(-i, -1, -i));
             if (!findBlock()) return;
-            PlayerUtils.placeBlock(setPos(i, -1, -i), Hand.MAIN_HAND, renderSwing.get());
+            place(setPos(i, -1, -i));
         }
 
         // Change back to previous slot
@@ -188,8 +187,11 @@ public class Scaffold extends Module {
         return true;
     }
 
-    private boolean isSolid(BlockState state) {
-        return state.getOutlineShape(mc.world, setPos(0, -1, 0)) != VoxelShapes.empty();
+    private void place(BlockPos blockPos) {
+        if (PlayerUtils.canPlace(blockPos)) {
+            if (rotate.get()) Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), -15, () -> PlayerUtils.placeBlock(blockPos, Hand.MAIN_HAND, renderSwing.get()));
+            else PlayerUtils.placeBlock(blockPos, Hand.MAIN_HAND, renderSwing.get());
+        }
     }
 
     private BlockPos setPos(int x, int y, int z) {

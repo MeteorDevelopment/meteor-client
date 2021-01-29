@@ -18,7 +18,7 @@ import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.entity.FakePlayerEntity;
 import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.player.PlayerUtils;
-import minegame159.meteorclient.utils.player.RotationUtils;
+import minegame159.meteorclient.utils.player.Rotations;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.ShapeContext;
@@ -41,7 +41,6 @@ public class AutoTrap extends Module {
         Platform,
         None
     }
-
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgRender = settings.createGroup("Render");
@@ -125,7 +124,7 @@ public class AutoTrap extends Module {
     );
 
     private PlayerEntity target;
-    private List<BlockPos> placePositions = new ArrayList<>();
+    private final List<BlockPos> placePositions = new ArrayList<>();
     private boolean placed;
     private int delay;
 
@@ -142,8 +141,7 @@ public class AutoTrap extends Module {
     }
 
     @EventHandler
-    private void onTick(TickEvent.Post event) {
-
+    private void onTick(TickEvent.Pre event) {
         int slot = InvUtils.findItemInHotbar(Blocks.OBSIDIAN.asItem());
 
         if (turnOff.get() && ((placed && placePositions.isEmpty()) || slot == -1)) {
@@ -164,19 +162,19 @@ public class AutoTrap extends Module {
             return;
         }
 
-        placePositions = getPlacePos(target);
+        findPlacePos(target);
 
         if (delay >= delaySetting.get() && placePositions.size() > 0) {
-            int prevSlot = mc.player.inventory.selectedSlot;
-            mc.player.inventory.selectedSlot = slot;
+            BlockPos blockPos = placePositions.get(placePositions.size() - 1);
 
-            if (PlayerUtils.placeBlock(placePositions.get(placePositions.size()-1), Hand.MAIN_HAND)) {
-                if (rotate.get()) RotationUtils.packetRotate(placePositions.get(placePositions.size()-1));
-                placePositions.remove(placePositions.get(placePositions.size() - 1));
+            if (PlayerUtils.canPlace(blockPos)) {
+                if (rotate.get()) Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), 50, () -> PlayerUtils.placeBlock(blockPos, slot, Hand.MAIN_HAND));
+                else PlayerUtils.placeBlock(blockPos, slot, Hand.MAIN_HAND);
+
+                placePositions.remove(blockPos);
                 placed = true;
             }
 
-            mc.player.inventory.selectedSlot = prevSlot;
             delay = 0;
         } else delay++;
     }
@@ -187,7 +185,7 @@ public class AutoTrap extends Module {
         for (BlockPos pos : placePositions) Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, pos, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
     }
 
-    private List<BlockPos> getPlacePos(PlayerEntity target) {
+    private void findPlacePos(PlayerEntity target) {
         placePositions.clear();
         BlockPos targetPos = target.getBlockPos();
 
@@ -214,7 +212,6 @@ public class AutoTrap extends Module {
             case Single:
                 add(targetPos.add(0, -1, 0));
         }
-        return placePositions;
     }
 
 

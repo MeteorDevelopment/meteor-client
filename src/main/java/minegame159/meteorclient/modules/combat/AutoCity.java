@@ -5,6 +5,8 @@
 
 package minegame159.meteorclient.modules.combat;
 
+import meteordevelopment.orbit.EventHandler;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
@@ -21,7 +23,6 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 
 public class AutoCity extends Module {
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Boolean> checkBelow = sgGeneral.add(new BoolSetting.Builder()
@@ -58,14 +59,15 @@ public class AutoCity extends Module {
 
     private PlayerEntity target;
 
-    @Override
-    public void onActivate() {
+    @EventHandler
+    private void onTick(TickEvent.Pre event) {
         target = CityUtils.getPlayerTarget();
         BlockPos mineTarget = CityUtils.getTargetBlock(checkBelow.get());
 
         if (target == null || mineTarget == null) {
             if (chatInfo.get()) ChatUtils.moduleError(this, "No target block found... disabling.");
-        } else {
+        }
+        else {
             if (chatInfo.get()) ChatUtils.moduleInfo(this, "Attempting to city " + target.getGameProfile().getName());
 
             if (MathHelper.sqrt(mc.player.squaredDistanceTo(mineTarget.getX(), mineTarget.getY(), mineTarget.getZ())) > mc.interactionManager.getReachDistance()) {
@@ -74,44 +76,59 @@ public class AutoCity extends Module {
                 return;
             }
 
-            int pickSlot = -1;
-            for (int i = 0; i < 9; i++) {
-                Item item = mc.player.inventory.getStack(i).getItem();
-
-                if (item == Items.DIAMOND_PICKAXE || item == Items.NETHERITE_PICKAXE) {
-                    pickSlot = i;
-                    break;
-                }
-            }
-
-            if (pickSlot == -1) {
+            int slot = findPickSlot();
+            if (slot == -1) {
                 if (chatInfo.get()) ChatUtils.moduleError(this, "No pick found... disabling.");
                 toggle();
                 return;
             }
 
-            int obbySlot = -1;
-            for (int i = 0; i < 9; i++) {
-                Item item = mc.player.inventory.getStack(i).getItem();
+            int obbySlot = findObbySlot();
+            BlockPos blockPos = mineTarget.down(1);
 
-                if (item == Items.OBSIDIAN) {
-                    obbySlot = i;
-                    break;
-                }
+            if (support.get() && obbySlot != -1 && PlayerUtils.canPlace(blockPos)) {
+                if (rotate.get()) Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> PlayerUtils.placeBlock(blockPos, obbySlot, Hand.MAIN_HAND));
+                else PlayerUtils.placeBlock(blockPos, obbySlot, Hand.MAIN_HAND);
+            }
+            else if (support.get() && obbySlot == -1) {
+                if (chatInfo.get()) ChatUtils.moduleWarning(this, "No obsidian found for support, mining anyway.");
             }
 
-            if (support.get() && obbySlot != -1 && mc.world.getBlockState(mineTarget.down(1)).isAir()) {
-                PlayerUtils.placeBlock(mineTarget.down(1), obbySlot, Hand.MAIN_HAND);
-            } else if (support.get() && obbySlot == -1) if (chatInfo.get()) ChatUtils.moduleWarning(this, "No obsidian found for support, mining anyway.");
-
-            mc.player.inventory.selectedSlot = pickSlot;
-
-            if (rotate.get()) RotationUtils.packetRotate(mineTarget);
-            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, mineTarget, Direction.UP));
-            mc.player.swingHand(Hand.MAIN_HAND);
-            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, mineTarget, Direction.UP));
+            if (rotate.get()) Rotations.rotate(Rotations.getYaw(mineTarget), Rotations.getPitch(mineTarget), () -> mine(mineTarget));
+            else mine(mineTarget);
         }
+
         toggle();
+    }
+
+    private void mine(BlockPos blockPos) {
+        mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, Direction.UP));
+        mc.player.swingHand(Hand.MAIN_HAND);
+        mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, Direction.UP));
+    }
+
+    private int findPickSlot() {
+        for (int i = 0; i < 9; i++) {
+            Item item = mc.player.inventory.getStack(i).getItem();
+
+            if (item == Items.DIAMOND_PICKAXE || item == Items.NETHERITE_PICKAXE) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    private int findObbySlot() {
+        for (int i = 0; i < 9; i++) {
+            Item item = mc.player.inventory.getStack(i).getItem();
+
+            if (item == Items.OBSIDIAN) {
+                return i;
+            }
+        }
+
+        return -1;
     }
 
     @Override

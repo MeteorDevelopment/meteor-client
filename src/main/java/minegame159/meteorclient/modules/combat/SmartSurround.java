@@ -19,7 +19,7 @@ import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.DamageCalcUtils;
 import minegame159.meteorclient.utils.player.PlayerUtils;
-import minegame159.meteorclient.utils.player.RotationUtils;
+import minegame159.meteorclient.utils.player.Rotations;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.BlockItem;
@@ -27,6 +27,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.RaycastContext;
 
 public class SmartSurround extends Module {
@@ -54,13 +55,9 @@ public class SmartSurround extends Module {
     );
 
     private int oldSlot;
-
     private int slot = -1;
-
     private int rPosX;
-
     private int rPosZ;
-
     private Entity crystal;
 
     public SmartSurround(){
@@ -102,7 +99,7 @@ public class SmartSurround extends Module {
     }
 
     @EventHandler
-    private void onTick(TickEvent.Post event) {
+    private void onTick(TickEvent.Pre event) {
         if (slot != -1) {
             if ((rPosX >= 2) && (rPosZ == 0)) {
                 placeObi(rPosX - 1, 0, crystal);
@@ -134,8 +131,12 @@ public class SmartSurround extends Module {
     }
 
     private void placeObi(int x, int z, Entity crystal) {
-        if (rotate.get()) RotationUtils.packetRotate(crystal.getBlockPos().add(x, -1, z));
-        PlayerUtils.placeBlock(crystal.getBlockPos().add(x, -1, z), Hand.MAIN_HAND);
+        BlockPos blockPos = crystal.getBlockPos().add(x, -1, z);
+
+        if (PlayerUtils.canPlace(blockPos)) {
+            if (rotate.get()) Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), 100, () -> PlayerUtils.placeBlock(blockPos, Hand.MAIN_HAND));
+            else PlayerUtils.placeBlock(blockPos, Hand.MAIN_HAND);
+        }
     }
 
     private int findObiInHotbar() {
