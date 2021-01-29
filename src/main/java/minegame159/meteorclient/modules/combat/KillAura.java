@@ -183,6 +183,7 @@ public class KillAura extends Module {
     private int randomDelayTimer;
     private Entity target;
     private boolean wasPathing;
+    private boolean canAttack;
 
     private final List<Entity> entityList = new ArrayList<>();
 
@@ -202,12 +203,16 @@ public class KillAura extends Module {
         findEntity();
         if (target == null) return;
 
-        if (!attack() && rotationMode.get() == RotationMode.Always) {
-            Rotations.rotate(Rotations.getYaw(target), Rotations.getPitch(target, rotationDirection.get()), this::hitEntity);
+        if (attack() && rotationMode.get() == RotationMode.Always) {
+            Rotations.rotate(Rotations.getYaw(target), Rotations.getPitch(target, rotationDirection.get()), () -> {
+                if (canAttack) hitEntity();
+            });
         }
     }
 
     private boolean attack() {
+        canAttack = false;
+
         // Entities without health can be hit instantly
         if (target instanceof LivingEntity) {
             if (smartDelay.get()) {
@@ -239,6 +244,7 @@ public class KillAura extends Module {
             Rotations.rotate(Rotations.getYaw(target), Rotations.getPitch(target, rotationDirection.get()), this::hitEntity);
         }
 
+        canAttack = true;
         return true;
     }
 

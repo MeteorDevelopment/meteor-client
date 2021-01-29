@@ -8,6 +8,7 @@ import minegame159.meteorclient.utils.misc.Pool;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 
 import java.util.ArrayList;
@@ -98,6 +99,20 @@ public class Rotations {
         double diffX = entity.getX() - mc.player.getX();
         double diffY = y - (mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()));
         double diffZ = entity.getZ() - mc.player.getZ();
+
+        double diffXZ = Math.sqrt(diffX * diffX + diffZ * diffZ);
+
+        return mc.player.pitch + MathHelper.wrapDegrees((float) -Math.toDegrees(Math.atan2(diffY, diffXZ)) - mc.player.pitch);
+    }
+
+    public static double getYaw(BlockPos pos) {
+        return mc.player.yaw + MathHelper.wrapDegrees((float) Math.toDegrees(Math.atan2(pos.getZ() + 0.5 - mc.player.getZ(), pos.getX() + 0.5 - mc.player.getX())) - 90f - mc.player.yaw);
+    }
+
+    public static double getPitch(BlockPos pos) {
+        double diffX = pos.getX() + 0.5 - mc.player.getX();
+        double diffY = pos.getY() + 0.5 - (mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()));
+        double diffZ = pos.getZ() + 0.5 - mc.player.getZ();
 
         double diffXZ = Math.sqrt(diffX * diffX + diffZ * diffZ);
 

@@ -6,6 +6,7 @@
 package minegame159.meteorclient.utils.world;
 
 import meteordevelopment.orbit.EventHandler;
+import meteordevelopment.orbit.EventPriority;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.utils.Utils;
@@ -32,8 +33,8 @@ public class BlockIterator {
         MeteorClient.EVENT_BUS.subscribe(BlockIterator.class);
     }
 
-    @EventHandler
-    private static void onTick(TickEvent.Post event) {
+    @EventHandler(priority = EventPriority.LOWEST - 1)
+    private static void onTick(TickEvent.Pre event) {
         if (!Utils.canUpdate()) return;
         MinecraftClient mc = MinecraftClient.getInstance();
 
