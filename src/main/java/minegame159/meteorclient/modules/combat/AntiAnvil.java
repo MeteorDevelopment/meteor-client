@@ -17,7 +17,7 @@ import minegame159.meteorclient.utils.player.Rotations;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.Items;
 
-public class AntiAnvils extends Module {
+public class AntiAnvil extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
@@ -27,7 +27,7 @@ public class AntiAnvils extends Module {
             .build()
     );
 
-    public AntiAnvils(){
+    public AntiAnvil(){
         super(Category.Combat, "anti-anvils", "Automatically prevents Auto Anvil by placing obsidian above you.");
     }
 

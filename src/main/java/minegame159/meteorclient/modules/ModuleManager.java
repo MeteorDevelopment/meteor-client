@@ -271,7 +271,7 @@ public class ModuleManager extends Savable<ModuleManager> {
     private void initCombat() {
         addModule(new AimAssist());
         addModule(new AnchorAura());
-        addModule(new AntiAnvils());
+        addModule(new AntiAnvil());
         addModule(new AntiBed());
         addModule(new AntiFriendHit());
         addModule(new Auto32K());
