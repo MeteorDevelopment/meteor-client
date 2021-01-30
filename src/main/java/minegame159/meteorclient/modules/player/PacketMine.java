@@ -56,7 +56,7 @@ public class PacketMine extends Module {
 
     private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
             .name("render")
-            .description("Whether to render blocks being mined.")
+            .description("Whether or not to render the block being mined.")
             .defaultValue(true)
             .build()
     );

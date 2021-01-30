@@ -55,8 +55,8 @@ public class AutoTool extends Module {
             .build()
     );
 
-    private final Setting<Boolean> enderChestOnlyWithSilkTouch = sgGeneral.add(new BoolSetting.Builder()
-            .name("silk-touch-with-ender-chest")
+    private final Setting<Boolean> silkTouchForEnderChest = sgGeneral.add(new BoolSetting.Builder()
+            .name("silk-touch-for-ender-chest")
             .description("Mines Ender Chests only with the Silk Touch enchantment.")
             .defaultValue(true)
             .build()
@@ -110,7 +110,7 @@ public class AutoTool extends Module {
 
             if (!isEffectiveOn(itemStack.getItem(), blockState) || shouldStopUsing(itemStack) || !(itemStack.getItem() instanceof ToolItem)) continue;
 
-            if (enderChestOnlyWithSilkTouch.get() && blockState.getBlock() == Blocks.ENDER_CHEST && EnchantmentHelper.getLevel(Enchantments.SILK_TOUCH, itemStack) == 0) continue;
+            if (silkTouchForEnderChest.get() && blockState.getBlock() == Blocks.ENDER_CHEST && EnchantmentHelper.getLevel(Enchantments.SILK_TOUCH, itemStack) == 0) continue;
 
             score += Math.round(itemStack.getMiningSpeedMultiplier(blockState));
             score += EnchantmentHelper.getLevel(Enchantments.UNBREAKING, itemStack);

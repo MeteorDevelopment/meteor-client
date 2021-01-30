@@ -48,8 +48,8 @@ import java.util.Map;
 
 public class Nametags extends Module {
     public enum Position {
-        ABOVE,
-        ONTOP
+        Above,
+        OnTop
     }
 
     private static final MeshBuilder MB = new MeshBuilder(2048);
@@ -79,7 +79,7 @@ public class Nametags extends Module {
     private final Setting<Position> displayOnItem = sgGeneral.add(new EnumSetting.Builder<Position>()
             .name("enchantment-position")
             .description("Where the enchantments are rendered.")
-            .defaultValue(Position.ONTOP)
+            .defaultValue(Position.OnTop)
             .build()
     );
 
@@ -377,7 +377,7 @@ public class Nametags extends Module {
                 double aW = armorWidths[i];
                 double enchantY = 0;
                 double addY = (armorHeight - enchantmentsToShow.size() * TextRenderer.get().getHeight()) / 2;
-                if (displayOnItem.get() == Position.ABOVE) {
+                if (displayOnItem.get() == Position.Above) {
                     addY -= 16;
                 }
 

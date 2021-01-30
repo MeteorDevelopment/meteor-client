@@ -22,14 +22,14 @@ public class SelfWeb extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Boolean> doubles = sgGeneral.add(new BoolSetting.Builder()
-            .name("doubles")
+            .name("double-place")
             .description("Places webs in your upper hitbox as well.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> turnOff = sgGeneral.add(new BoolSetting.Builder()
-            .name("turn-off")
+            .name("auto-toggle")
             .description("Toggles off after placing the webs.")
             .defaultValue(true)
             .build()

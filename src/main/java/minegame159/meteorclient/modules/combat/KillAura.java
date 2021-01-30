@@ -46,6 +46,7 @@ public class KillAura extends Module {
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgRotations = settings.createGroup("Rotations");
     private final SettingGroup sgDelay = settings.createGroup("Delay");
 
     // General
@@ -127,14 +128,16 @@ public class KillAura extends Module {
             .build()
     );
 
-    private final Setting<RotationMode> rotationMode = sgGeneral.add(new EnumSetting.Builder<RotationMode>()
+    // Rotations
+
+    private final Setting<RotationMode> rotationMode = sgRotations.add(new EnumSetting.Builder<RotationMode>()
             .name("rotation-mode")
             .description("Determines when you should rotate towards the target.")
             .defaultValue(RotationMode.OnHit)
             .build()
     );
 
-    private final Setting<Target> rotationDirection = sgGeneral.add(new EnumSetting.Builder<Target>()
+    private final Setting<Target> rotationDirection = sgRotations.add(new EnumSetting.Builder<Target>()
             .name("rotation-direction")
             .description("The direction to use for rotating towards the enemy.")
             .defaultValue(Target.Head)
