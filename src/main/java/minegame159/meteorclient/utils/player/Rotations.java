@@ -17,15 +17,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Rotations {
+    public static float serverYaw;
+    public static float serverPitch;
+    public static int rotationTimer;
+
     private static final MinecraftClient mc = MinecraftClient.getInstance();
     private static final Pool<Rotation> rotationPool = new Pool<>(Rotation::new);
     private static final List<Rotation> rotations = new ArrayList<>();
     private static float preYaw, prePitch;
     private static int i = 0;
-
-    public static float serverYaw;
-    public static float serverPitch;
-    public static int rotationTimer;
 
     public static void init() {
         MeteorClient.EVENT_BUS.subscribe(Rotations.class);

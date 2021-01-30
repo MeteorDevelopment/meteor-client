@@ -24,6 +24,7 @@ import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.shape.VoxelShape;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -170,7 +171,25 @@ public class PacketMine extends Module {
         }
 
         public void render() {
-            Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, blockPos, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            VoxelShape shape = mc.world.getBlockState(blockPos).getOutlineShape(mc.world, blockPos);
+
+            double x1 = blockPos.getX();
+            double y1 = blockPos.getY();
+            double z1 = blockPos.getZ();
+            double x2 = blockPos.getX() + 1;
+            double y2 = blockPos.getY() + 1;
+            double z2 = blockPos.getZ() + 1;
+
+            if (!shape.isEmpty()) {
+                x1 = blockPos.getX() + shape.getMin(Direction.Axis.X);
+                y1 = blockPos.getY() + shape.getMin(Direction.Axis.Y);
+                z1 = blockPos.getZ() + shape.getMin(Direction.Axis.Z);
+                x2 = blockPos.getX() + shape.getMax(Direction.Axis.X);
+                y2 = blockPos.getY() + shape.getMax(Direction.Axis.Y);
+                z2 = blockPos.getZ() + shape.getMax(Direction.Axis.Z);
+            }
+
+            Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x1, y1, z1, x2, y2, z2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
         }
     }
 }
