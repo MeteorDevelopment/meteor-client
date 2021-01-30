@@ -168,14 +168,13 @@ public class ESP extends Module {
 
     @EventHandler
     private void onRender(RenderEvent event) {
-        if (isOutline()) return;
-
         count = 0;
 
         for (Entity entity : mc.world.getEntities()) {
             if ((!ModuleManager.INSTANCE.isActive(Freecam.class) && entity == mc.player) || !entities.get().getBoolean(entity.getType())) continue;
             count++;
-            render(event, entity, getColor(entity));
+
+            if (mode.get() == Mode.Box) render(event, entity, getColor(entity));
         }
     }
 
@@ -204,7 +203,6 @@ public class ESP extends Module {
     public Color getColor(Entity entity) {
         return EntityUtils.getEntityColor(entity, playersColor.get(), animalsColor.get(), waterAnimalsColor.get(), monstersColor.get(), ambientColor.get(), miscColor.get(), useNameColor.get());
     }
-
 
     public boolean isOutline() {
         return mode.get() == Mode.Outline;
