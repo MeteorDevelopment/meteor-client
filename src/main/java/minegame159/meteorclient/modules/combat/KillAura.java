@@ -14,6 +14,8 @@ import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.entity.EntityUtils;
+import minegame159.meteorclient.utils.entity.SortPriority;
 import minegame159.meteorclient.utils.entity.Target;
 import minegame159.meteorclient.utils.player.PlayerUtils;
 import minegame159.meteorclient.utils.player.Rotations;
@@ -30,13 +32,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class KillAura extends Module {
-    public enum Priority {
-        LowestDistance,
-        HighestDistance,
-        LowestHealth,
-        HighestHealth
-    }
-
     public enum OnlyWith {
         Sword,
         Axe,
@@ -72,10 +67,10 @@ public class KillAura extends Module {
             .build()
     );
 
-    private final Setting<Priority> priority = sgGeneral.add(new EnumSetting.Builder<Priority>()
+    private final Setting<SortPriority> priority = sgGeneral.add(new EnumSetting.Builder<SortPriority>()
             .name("priority")
             .description("What type of entities to target.")
-            .defaultValue(Priority.LowestHealth)
+            .defaultValue(SortPriority.LowestHealth)
             .build()
     );
 
@@ -200,8 +195,40 @@ public class KillAura extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        findEntity();
-        if (target == null) return;
+
+        if (mc.player.isDead() || !mc.player.isAlive() || !itemInHand()) {
+            target = null;
+            return;
+        }
+
+        target = EntityUtils.get(entity -> {
+            if (entity == mc.player || entity == mc.cameraEntity) return false;
+            if ((entity instanceof LivingEntity && ((LivingEntity) entity).isDead()) || !entity.isAlive()) return false;
+            if (entity.distanceTo(mc.player) > range.get()) return false;
+            if (!entities.get().getBoolean(entity.getType())) return false;
+            if (!nametagged.get() && entity.hasCustomName()) return false;
+            if (!ignoreWalls.get() && !PlayerUtils.canSeeEntity(entity)) return false;
+            if (entity instanceof PlayerEntity) {
+                if (((PlayerEntity) entity).isCreative()) return false;
+                if (!friends.get() && !FriendManager.INSTANCE.attack((PlayerEntity) entity)) return false;
+            }
+            if (entity instanceof AnimalEntity && !babies.get() && ((AnimalEntity) entity).isBaby()) return false;
+
+            return true;
+        }, priority.get());
+
+        if (target == null) {
+            if (wasPathing){
+                BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume");
+                wasPathing = false;
+            }
+            return;
+        }
+
+        if (pauseOnCombat.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing() && !wasPathing) {
+            BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("pause");
+            wasPathing = true;
+        }
 
         if (attack() && rotationMode.get() == RotationMode.Always) {
             Rotations.rotate(Rotations.getYaw(target), Rotations.getPitch(target, rotationDirection.get()), () -> {
@@ -253,47 +280,6 @@ public class KillAura extends Module {
         mc.player.swingHand(Hand.MAIN_HAND);
     }
 
-    private void findEntity() {
-        target = null;
-
-        if (mc.player.isDead() || !mc.player.isAlive()) return;
-        if (!itemInHand()) return;
-
-        for (Entity entity : mc.world.getEntities()) {
-            if (entity == mc.player || entity == mc.cameraEntity) continue;
-            if ((entity instanceof LivingEntity && ((LivingEntity) entity).isDead()) || !entity.isAlive()) continue;
-            if (entity.distanceTo(mc.player) > range.get()) continue;
-            if (!entities.get().getBoolean(entity.getType())) continue;
-            if (!nametagged.get() && entity.hasCustomName()) continue;
-            if (!ignoreWalls.get() && !PlayerUtils.canSeeEntity(entity)) continue;
-
-            if (entity instanceof PlayerEntity) {
-                if (((PlayerEntity) entity).isCreative()) continue;
-                if (!friends.get() && !FriendManager.INSTANCE.attack((PlayerEntity) entity)) continue;
-            }
-
-            if (entity instanceof AnimalEntity && !babies.get() && ((AnimalEntity) entity).isBaby()) continue;
-
-            entityList.add(entity);
-        }
-
-        if (entityList.size() > 0) {
-            entityList.sort(this::sort);
-            target = entityList.get(0);
-            entityList.clear();
-
-            if (pauseOnCombat.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing() && !wasPathing) {
-                BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("pause");
-                wasPathing = true;
-            }
-        } else {
-            if (wasPathing){
-                BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume");
-                wasPathing = false;
-            }
-        }
-    }
-
     private boolean itemInHand() {
         switch(onlyWith.get()){
             case Axe:        return mc.player.getMainHandStack().getItem() instanceof AxeItem;
@@ -301,32 +287,6 @@ public class KillAura extends Module {
             case SwordOrAxe: return mc.player.getMainHandStack().getItem() instanceof AxeItem || mc.player.getMainHandStack().getItem() instanceof SwordItem;
             default:         return true;
         }
-    }
-
-    private int sort(Entity e1, Entity e2) {
-        switch (priority.get()) {
-            case LowestDistance:  return Double.compare(e1.distanceTo(mc.player), e2.distanceTo(mc.player));
-            case HighestDistance: return invertSort(Double.compare(e1.distanceTo(mc.player), e2.distanceTo(mc.player)));
-            case LowestHealth:    return sortHealth(e1, e2);
-            case HighestHealth:   return invertSort(sortHealth(e1, e2));
-            default:              return 0;
-        }
-    }
-
-    private int sortHealth(Entity e1, Entity e2) {
-        boolean e1l = e1 instanceof LivingEntity;
-        boolean e2l = e2 instanceof LivingEntity;
-
-        if (!e1l && !e2l) return 0;
-        else if (e1l && !e2l) return 1;
-        else if (!e1l && e2l) return -1;
-
-        return Float.compare(((LivingEntity) e1).getHealth(), ((LivingEntity) e2).getHealth());
-    }
-
-    private int invertSort(int sort) {
-        if (sort == 0) return 0;
-        return sort > 0 ? -1 : 1;
     }
 
     @Override
