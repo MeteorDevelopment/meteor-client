@@ -8,7 +8,7 @@ package minegame159.meteorclient.utils.player;
 import baritone.api.BaritoneAPI;
 import minegame159.meteorclient.mixininterface.ILookBehavior;
 import minegame159.meteorclient.mixininterface.IVec3d;
-import net.minecraft.block.*;
+import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
@@ -20,7 +20,6 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
-import net.minecraft.world.World;
 
 public class PlayerUtils {
     private static final MinecraftClient mc = MinecraftClient.getInstance();
@@ -45,21 +44,8 @@ public class PlayerUtils {
         return a;
     }
 
-    public static boolean canPlace(BlockPos blockPos) {
-        if (blockPos == null) return false;
-
-        // Check y level
-        if (World.isOutOfBuildLimitVertically(blockPos)) return false;
-
-        // Check if current block is replaceable
-        if (!mc.world.getBlockState(blockPos).getMaterial().isReplaceable()) return false;
-
-        // Check if intersects entities
-        return mc.world.canPlace(Blocks.STONE.getDefaultState(), blockPos, ShapeContext.absent());
-    }
-
     public static boolean placeBlock(BlockPos blockPos, Hand hand, boolean swing) {
-        if (!canPlace(blockPos)) return false;
+        if (!BlockUtils.canPlace(blockPos)) return false;
 
         // Try to find a neighbour to click on to avoid air place
         for (Direction side : Direction.values()) {
@@ -67,7 +53,7 @@ public class PlayerUtils {
             Direction side2 = side.getOpposite();
 
             // Check if neighbour isn't empty
-            if (mc.world.getBlockState(neighbor).isAir() || isBlockClickable(mc.world.getBlockState(neighbor).getBlock())) continue;
+            if (mc.world.getBlockState(neighbor).isAir() || BlockUtils.isClickable(mc.world.getBlockState(neighbor).getBlock())) continue;
 
             // Calculate hit pos
             ((IVec3d) hitPos).set(neighbor.getX() + 0.5 + side2.getVector().getX() * 0.5, neighbor.getY() + 0.5 + side2.getVector().getY() * 0.5, neighbor.getZ() + 0.5 + side2.getVector().getZ() * 0.5);
@@ -136,22 +122,6 @@ public class PlayerUtils {
 
         ((IVec3d) horizontalVelocity).setXZ(velX, velZ);
         return horizontalVelocity;
-    }
-
-    private static boolean isBlockClickable(Block block) {
-        boolean clickable = false;
-
-        if (block instanceof CraftingTableBlock
-                || block instanceof AnvilBlock
-                || block instanceof AbstractButtonBlock
-                || block instanceof AbstractPressurePlateBlock
-                || block instanceof BlockWithEntity
-                || block instanceof FenceGateBlock
-                || block instanceof DoorBlock
-                || block instanceof TrapdoorBlock
-        ) clickable = true;
-
-        return clickable;
     }
 
     public static void centerPlayer() {

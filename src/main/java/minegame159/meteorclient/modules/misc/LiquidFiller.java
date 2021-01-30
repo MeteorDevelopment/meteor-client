@@ -10,9 +10,8 @@ import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.player.PlayerUtils;
-import minegame159.meteorclient.utils.player.Rotations;
 import minegame159.meteorclient.utils.world.BlockIterator;
+import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.BlockItem;
@@ -85,10 +84,7 @@ public class LiquidFiller extends Module {
 
                     PlaceIn placeIn = placeInLiquids.get();
                     if (placeIn == PlaceIn.Both || (placeIn == PlaceIn.Lava && liquid == Blocks.LAVA) || (placeIn == PlaceIn.Water && liquid == Blocks.WATER)) {
-                        if (PlayerUtils.canPlace(blockPos)) {
-                            if (rotate.get()) Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), 0, () -> PlayerUtils.placeBlock(blockPos, slot, Hand.MAIN_HAND));
-                            else PlayerUtils.placeBlock(blockPos, slot, Hand.MAIN_HAND);
-
+                        if (BlockUtils.place(blockPos, Hand.MAIN_HAND, slot, rotate.get(), 0)) {
                             BlockIterator.disableCurrent();
                         }
                     }
