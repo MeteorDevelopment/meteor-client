@@ -32,6 +32,8 @@ public class Speed extends Module {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgJump = settings.createGroup("Jump");
+
+    // General
     
     private final Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
             .name("speed")

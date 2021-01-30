@@ -23,7 +23,7 @@ public class EXPThrower extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Boolean> lookDown = sgGeneral.add(new BoolSetting.Builder()
-            .name("rotate-down")
+            .name("rotate")
             .description("Forces you to rotate downwards when throwing bottles.")
             .defaultValue(true)
             .build()

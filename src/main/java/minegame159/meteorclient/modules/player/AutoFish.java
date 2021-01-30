@@ -19,9 +19,10 @@ import net.minecraft.item.FishingRodItem;
 
 public class AutoFish extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgSplashRangeDetection = settings.createGroup("Splash Range Detection");
+    private final SettingGroup sgSplashRangeDetection = settings.createGroup("Splash Detection");
 
     // General
+
     private final Setting<Boolean> autoCast = sgGeneral.add(new BoolSetting.Builder()
             .name("auto-cast")
             .description("Automatically casts when not fishing.")
@@ -39,7 +40,7 @@ public class AutoFish extends Module {
     );
 
     private final Setting<Integer> ticksCatch = sgGeneral.add(new IntSetting.Builder()
-            .name("ticks-catch")
+            .name("catch-delay")
             .description("The amount of ticks to wait before catching the fish.")
             .defaultValue(6)
             .min(0)
@@ -48,7 +49,7 @@ public class AutoFish extends Module {
     );
 
     private final Setting<Integer> ticksThrow = sgGeneral.add(new IntSetting.Builder()
-            .name("ticks-throw")
+            .name("throw-delay")
             .description("The amount of ticks to wait before throwing the bobber.")
             .defaultValue(14)
             .min(0)
@@ -56,7 +57,8 @@ public class AutoFish extends Module {
             .build()
     );
 
-    // Splash range detection
+    // Splash Detection
+
     private final Setting<Boolean> splashDetectionRangeEnabled = sgSplashRangeDetection.add(new BoolSetting.Builder()
             .name("splash-detection-range-enabled")
             .description("Allows you to use multiple accounts next to each other.")

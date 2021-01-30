@@ -29,8 +29,8 @@ import net.minecraft.util.math.Vec3d;
 public class AntiBed extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<Boolean> selfToggle = sgGeneral.add(new BoolSetting.Builder()
-            .name("self-toggle")
+    private final Setting<Boolean> autoToggle = sgGeneral.add(new BoolSetting.Builder()
+            .name("auto-toggle")
             .description("Toggles AntiBed off when finished.")
             .defaultValue(false)
             .build()
@@ -183,7 +183,7 @@ public class AntiBed extends Module {
         else blockPos = mc.player.getBlockPos();
 
         if (BlockUtils.place(blockPos, Hand.MAIN_HAND, slot, rotate.get(), 100)) {
-            if (selfToggle.get()) toggle();
+            if (autoToggle.get()) toggle();
         }
     }
 }

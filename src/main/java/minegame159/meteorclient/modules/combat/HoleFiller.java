@@ -49,7 +49,7 @@ public class HoleFiller extends Module {
 
     private final Setting<PlaceMode> mode = sgGeneral.add(new EnumSetting.Builder<PlaceMode>()
             .name("block")
-            .description("What kind of blocks you use to fill holes with.")
+            .description("The blocks you use to fill holes with.")
             .defaultValue(PlaceMode.Obsidian)
             .build()
     );

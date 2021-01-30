@@ -67,8 +67,8 @@ public class Freecam extends Module {
     );
 
     private final Setting<Boolean> renderHands = sgGeneral.add(new BoolSetting.Builder()
-            .name("render-hands")
-            .description("Whether or not to render your hands in Freecam.")
+            .name("render-hand")
+            .description("Whether or not to render your hand in Freecam.")
             .defaultValue(true)
             .build()
     );

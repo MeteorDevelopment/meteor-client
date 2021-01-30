@@ -18,7 +18,7 @@ public class Spider extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     
     private final Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
-            .name("speed")
+            .name("climb-speed")
             .description("The speed you go up blocks.")
             .defaultValue(0.2)
             .min(0.0)
