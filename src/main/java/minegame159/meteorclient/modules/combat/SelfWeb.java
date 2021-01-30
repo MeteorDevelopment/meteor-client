@@ -12,8 +12,7 @@ import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.utils.player.PlayerUtils;
-import minegame159.meteorclient.utils.player.Rotations;
+import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.util.Hand;
@@ -53,20 +52,14 @@ public class SelfWeb extends Module {
         if (slot == -1) return;
 
         BlockPos blockPos = mc.player.getBlockPos();
-        if (PlayerUtils.canPlace(blockPos)) {
-            if (rotate.get()) Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> PlayerUtils.placeBlock(blockPos, slot, Hand.MAIN_HAND));
-            else PlayerUtils.placeBlock(blockPos, slot, Hand.MAIN_HAND);
-        }
+        BlockUtils.place(blockPos, Hand.MAIN_HAND, slot, rotate.get(), 0);
 
         if (doubles.get()) {
-            int slot2 = findSlot();
-            if (slot2 == -1) return;
+            slot = findSlot();
+            if (slot == -1) return;
 
-            BlockPos blockPos2 = mc.player.getBlockPos().add(0, 1, 0);
-            if (PlayerUtils.canPlace(blockPos2)) {
-                if (rotate.get()) Rotations.rotate(Rotations.getYaw(blockPos2), Rotations.getPitch(blockPos2), () -> PlayerUtils.placeBlock(blockPos2, slot2, Hand.MAIN_HAND));
-                else PlayerUtils.placeBlock(blockPos2, slot2, Hand.MAIN_HAND);
-            }
+            blockPos = mc.player.getBlockPos().add(0, 1, 0);
+            BlockUtils.place(blockPos, Hand.MAIN_HAND, slot, rotate.get(), 0);
         }
 
         if (turnOff.get()) toggle();

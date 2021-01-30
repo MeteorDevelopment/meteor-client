@@ -17,9 +17,8 @@ import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.entity.FakePlayerEntity;
 import minegame159.meteorclient.utils.entity.FakePlayerUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
-import minegame159.meteorclient.utils.player.PlayerUtils;
-import minegame159.meteorclient.utils.player.Rotations;
 import minegame159.meteorclient.utils.render.color.SettingColor;
+import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.ShapeContext;
 import net.minecraft.entity.player.PlayerEntity;
@@ -167,10 +166,7 @@ public class AutoTrap extends Module {
         if (delay >= delaySetting.get() && placePositions.size() > 0) {
             BlockPos blockPos = placePositions.get(placePositions.size() - 1);
 
-            if (PlayerUtils.canPlace(blockPos)) {
-                if (rotate.get()) Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), 50, () -> PlayerUtils.placeBlock(blockPos, slot, Hand.MAIN_HAND));
-                else PlayerUtils.placeBlock(blockPos, slot, Hand.MAIN_HAND);
-
+            if (BlockUtils.place(blockPos, Hand.MAIN_HAND, slot, rotate.get(), 50)) {
                 placePositions.remove(blockPos);
                 placed = true;
             }

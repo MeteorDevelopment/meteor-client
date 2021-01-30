@@ -13,7 +13,7 @@ import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.player.PlayerUtils;
-import minegame159.meteorclient.utils.player.Rotations;
+import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
@@ -74,7 +74,6 @@ public class Surround extends Module {
     );
 
     // TODO: Make a render for Surround monkeys.
-    private int prevSlot;
     private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
     private boolean return_;
 
@@ -141,19 +140,9 @@ public class Surround extends Module {
 
         if (!blockState.getMaterial().isReplaceable()) return true;
 
-        if (findSlot() && PlayerUtils.canPlace(blockPos)) {
+        int slot = findSlot();
+        if (BlockUtils.place(blockPos, Hand.MAIN_HAND, slot, rotate.get(), 100)) {
             return_ = true;
-
-            if (rotate.get()) {
-                Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), 100, () -> {
-                    PlayerUtils.placeBlock(blockPos, Hand.MAIN_HAND);
-                    resetSlot();
-                });
-            }
-            else {
-                PlayerUtils.placeBlock(blockPos, Hand.MAIN_HAND);
-                resetSlot();
-            }
         }
 
         return false;
@@ -163,24 +152,17 @@ public class Surround extends Module {
         blockPos.set(mc.player.getX() + x, mc.player.getY() + y, mc.player.getZ() + z);
     }
 
-    private boolean findSlot() {
-        prevSlot = mc.player.inventory.selectedSlot;
-
+    private int findSlot() {
         for (int i = 0; i < 9; i++) {
             Item item = mc.player.inventory.getStack(i).getItem();
 
             if (!(item instanceof BlockItem)) continue;
 
             if (item == Items.OBSIDIAN) {
-                mc.player.inventory.selectedSlot = i;
-                return true;
+                return i;
             }
         }
 
-        return false;
-    }
-
-    private void resetSlot() {
-        mc.player.inventory.selectedSlot = prevSlot;
+        return -1;
     }
 }

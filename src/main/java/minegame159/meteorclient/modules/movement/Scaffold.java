@@ -11,8 +11,7 @@ import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.player.PlayerUtils;
-import minegame159.meteorclient.utils.player.Rotations;
+import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.FallingBlock;
@@ -115,11 +114,7 @@ public class Scaffold extends Module {
         slot = findSlot(blockState);
         if (slot == -1) return;
 
-        // Change slot
-        prevSelectedSlot = mc.player.inventory.selectedSlot;
-        mc.player.inventory.selectedSlot = slot;
-
-        place(mc.player.getBlockPos().down());
+        place(mc.player.getBlockPos().down(), slot);
 
         if (mc.player.input.sneaking) this.lastWasSneaking = false;
 
@@ -131,37 +126,34 @@ public class Scaffold extends Module {
             // Forward
             for (int j = 0; j < count; j++) {
                 if (!findBlock()) return;
-                place(setPos(j - countHalf, -1, i));
+                place(setPos(j - countHalf, -1, i), slot);
             }
             // Backward
             for (int j = 0; j < count; j++) {
                 if (!findBlock()) return;
-                place(setPos(j - countHalf, -1, -i));
+                place(setPos(j - countHalf, -1, -i), slot);
             }
             // Right
             for (int j = 0; j < count; j++) {
                 if (!findBlock()) return;
-                place(setPos(i, -1, j - countHalf));
+                place(setPos(i, -1, j - countHalf), slot);
             }
             // Left
             for (int j = 0; j < count; j++) {
                 if (!findBlock()) return;
-                place(setPos(-i, -1, j - countHalf));
+                place(setPos(-i, -1, j - countHalf), slot);
             }
 
             // Diagonals
             if (!findBlock()) return;
-            place(setPos(-i, -1, i));
+            place(setPos(-i, -1, i), slot);
             if (!findBlock()) return;
-            place(setPos(i, -1, i));
+            place(setPos(i, -1, i), slot);
             if (!findBlock()) return;
-            place(setPos(-i, -1, -i));
+            place(setPos(-i, -1, -i), slot);
             if (!findBlock()) return;
-            place(setPos(i, -1, -i));
+            place(setPos(i, -1, -i), slot);
         }
-
-        // Change back to previous slot
-        mc.player.inventory.selectedSlot = prevSelectedSlot;
     }
 
     @EventHandler
@@ -187,11 +179,8 @@ public class Scaffold extends Module {
         return true;
     }
 
-    private void place(BlockPos blockPos) {
-        if (PlayerUtils.canPlace(blockPos)) {
-            if (rotate.get()) Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), -15, () -> PlayerUtils.placeBlock(blockPos, Hand.MAIN_HAND, renderSwing.get()));
-            else PlayerUtils.placeBlock(blockPos, Hand.MAIN_HAND, renderSwing.get());
-        }
+    private void place(BlockPos blockPos, int slot) {
+        BlockUtils.place(blockPos, Hand.MAIN_HAND, slot, rotate.get(), -15);
     }
 
     private BlockPos setPos(int x, int y, int z) {

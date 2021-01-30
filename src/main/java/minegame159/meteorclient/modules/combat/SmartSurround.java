@@ -20,6 +20,7 @@ import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.DamageCalcUtils;
 import minegame159.meteorclient.utils.player.PlayerUtils;
 import minegame159.meteorclient.utils.player.Rotations;
+import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.BlockItem;
@@ -132,11 +133,7 @@ public class SmartSurround extends Module {
 
     private void placeObi(int x, int z, Entity crystal) {
         BlockPos blockPos = crystal.getBlockPos().add(x, -1, z);
-
-        if (PlayerUtils.canPlace(blockPos)) {
-            if (rotate.get()) Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), 100, () -> PlayerUtils.placeBlock(blockPos, Hand.MAIN_HAND));
-            else PlayerUtils.placeBlock(blockPos, Hand.MAIN_HAND);
-        }
+        BlockUtils.place(blockPos, Hand.MAIN_HAND, slot, rotate.get(), 100);
     }
 
     private int findObiInHotbar() {

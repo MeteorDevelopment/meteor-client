@@ -17,8 +17,7 @@ import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.entity.FakePlayerEntity;
 import minegame159.meteorclient.utils.entity.FakePlayerUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
-import minegame159.meteorclient.utils.player.PlayerUtils;
-import minegame159.meteorclient.utils.player.Rotations;
+import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Items;
 import net.minecraft.util.Hand;
@@ -89,21 +88,11 @@ public class AutoWeb extends Module {
 
         if (target != null) {
             BlockPos targetPos = target.getBlockPos();
-
-            if (PlayerUtils.canPlace(targetPos)) {
-                BlockPos blockPos = targetPos;
-                if (rotate.get()) Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> PlayerUtils.placeBlock(blockPos, slot, Hand.MAIN_HAND));
-                else PlayerUtils.placeBlock(blockPos, slot, Hand.MAIN_HAND);
-            }
+            BlockUtils.place(targetPos, Hand.MAIN_HAND, slot, rotate.get(), 0);
 
             if (doubles.get()) {
                 targetPos = targetPos.add(0, 1, 0);
-                if (PlayerUtils.canPlace(targetPos)) {
-                    BlockPos blockPos = targetPos;
-                    if (rotate.get())
-                        Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> PlayerUtils.placeBlock(blockPos, slot, Hand.MAIN_HAND));
-                    else PlayerUtils.placeBlock(blockPos, slot, Hand.MAIN_HAND);
-                }
+                BlockUtils.place(targetPos, Hand.MAIN_HAND, InvUtils.findItemInHotbar(Items.COBWEB), rotate.get(), 0);
             }
         }
     }

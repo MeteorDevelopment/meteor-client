@@ -16,8 +16,7 @@ import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.Utils;
-import minegame159.meteorclient.utils.player.PlayerUtils;
-import minegame159.meteorclient.utils.player.Rotations;
+import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.block.*;
 import net.minecraft.client.gui.screen.ingame.SignEditScreen;
 import net.minecraft.item.*;
@@ -183,10 +182,7 @@ public class AntiBed extends Module {
         if (up) blockPos = mc.player.getBlockPos().up();
         else blockPos = mc.player.getBlockPos();
 
-        if (PlayerUtils.canPlace(blockPos)) {
-            if (rotate.get()) Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), 100, () -> PlayerUtils.placeBlock(blockPos, slot, Hand.MAIN_HAND));
-            else PlayerUtils.placeBlock(blockPos, slot, Hand.MAIN_HAND);
-
+        if (BlockUtils.place(blockPos, Hand.MAIN_HAND, slot, rotate.get(), 100)) {
             if (selfToggle.get()) toggle();
         }
     }

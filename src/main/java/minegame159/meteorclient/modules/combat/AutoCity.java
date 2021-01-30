@@ -7,8 +7,15 @@ package minegame159.meteorclient.modules.combat;
 
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.player.*;
+import minegame159.meteorclient.settings.BoolSetting;
+import minegame159.meteorclient.settings.DoubleSetting;
+import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.utils.player.ChatUtils;
+import minegame159.meteorclient.utils.player.CityUtils;
+import minegame159.meteorclient.utils.player.InvUtils;
+import minegame159.meteorclient.utils.player.Rotations;
+import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Items;
@@ -88,21 +95,17 @@ public class AutoCity extends Module {
                 int obbySlot = InvUtils.findItemInHotbar(Items.OBSIDIAN);
                 BlockPos blockPos = mineTarget.down(1);
 
-                if (obbySlot == -1 && chatInfo.get()) ChatUtils.moduleWarning(this, "No obsidian found for support, mining anyway.");
-
-                else if (!PlayerUtils.canPlace(blockPos)
+                if (obbySlot == -1 && chatInfo.get()) {
+                    ChatUtils.moduleWarning(this, "No obsidian found for support, mining anyway.");
+                }
+                else if (!BlockUtils.canPlace(blockPos)
                         && mc.world.getBlockState(blockPos).getBlock() != Blocks.OBSIDIAN
                         && mc.world.getBlockState(blockPos).getBlock() != Blocks.BEDROCK
                         && chatInfo.get()) {
                     ChatUtils.moduleWarning(this, "Couldn't place support block, mining anyway.");
                 }
-
-                else if (PlayerUtils.canPlace(blockPos)) {
-                    if (rotate.get()) {
-                        Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> PlayerUtils.placeBlock(blockPos, obbySlot, Hand.MAIN_HAND));
-                    } else {
-                        PlayerUtils.placeBlock(blockPos, obbySlot, Hand.MAIN_HAND);
-                    }
+                else {
+                    BlockUtils.place(blockPos, Hand.MAIN_HAND, obbySlot, rotate.get(), 0);
                 }
             }
 

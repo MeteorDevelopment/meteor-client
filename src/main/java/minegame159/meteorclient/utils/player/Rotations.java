@@ -11,6 +11,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -99,6 +100,20 @@ public class Rotations {
 
     public static double getYaw(Entity entity) {
         return mc.player.yaw + MathHelper.wrapDegrees((float) Math.toDegrees(Math.atan2(entity.getZ() - mc.player.getZ(), entity.getX() - mc.player.getX())) - 90f - mc.player.yaw);
+    }
+
+    public static double getYaw(Vec3d pos) {
+        return mc.player.yaw + MathHelper.wrapDegrees((float) Math.toDegrees(Math.atan2(pos.getZ() - mc.player.getZ(), pos.getX() - mc.player.getX())) - 90f - mc.player.yaw);
+    }
+
+    public static double getPitch(Vec3d pos) {
+        double diffX = pos.getX() - mc.player.getX();
+        double diffY = pos.getY() - (mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()));
+        double diffZ = pos.getZ() - mc.player.getZ();
+
+        double diffXZ = Math.sqrt(diffX * diffX + diffZ * diffZ);
+
+        return mc.player.pitch + MathHelper.wrapDegrees((float) -Math.toDegrees(Math.atan2(diffY, diffXZ)) - mc.player.pitch);
     }
 
     public static double getPitch(Entity entity, Target target) {

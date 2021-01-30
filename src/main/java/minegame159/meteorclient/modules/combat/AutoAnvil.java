@@ -15,8 +15,7 @@ import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.entity.FakePlayerEntity;
 import minegame159.meteorclient.utils.entity.FakePlayerUtils;
 import minegame159.meteorclient.utils.player.ChatUtils;
-import minegame159.meteorclient.utils.player.PlayerUtils;
-import minegame159.meteorclient.utils.player.Rotations;
+import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.block.AbstractButtonBlock;
 import net.minecraft.block.AbstractPressurePlateBlock;
 import net.minecraft.block.AnvilBlock;
@@ -140,17 +139,11 @@ public class AutoAnvil extends Module {
                 int slot2 = getFloorSlot();
                 BlockPos blockPos = target.getBlockPos();
 
-                if (slot2 != -1 && PlayerUtils.canPlace(blockPos)) {
-                    if (rotate.get()) Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> PlayerUtils.placeBlock(blockPos, slot2, Hand.MAIN_HAND));
-                    else PlayerUtils.placeBlock(blockPos, slot2, Hand.MAIN_HAND);
-                }
+                BlockUtils.place(blockPos, Hand.MAIN_HAND, slot2, rotate.get(), 0);
             }
 
             BlockPos blockPos = target.getBlockPos().up().add(0, height.get(), 0);
-            if (PlayerUtils.canPlace(blockPos)) {
-                if (rotate.get()) Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> PlayerUtils.placeBlock(blockPos, slot, Hand.MAIN_HAND));
-                else PlayerUtils.placeBlock(blockPos, slot, Hand.MAIN_HAND);
-            }
+            BlockUtils.place(blockPos, Hand.MAIN_HAND, slot, rotate.get(), 0);
         } else timer++;
     }
 
