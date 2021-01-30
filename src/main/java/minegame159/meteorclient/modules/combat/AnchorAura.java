@@ -20,6 +20,7 @@ import minegame159.meteorclient.rendering.ShapeMode;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.player.*;
 import minegame159.meteorclient.utils.render.color.SettingColor;
+import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -277,12 +278,14 @@ public class AnchorAura extends Module {
             BlockPos breakPos = findAnchor(target);
 
             if (breakPos != null) {
-                if (rotationMode.get() == RotationMode.Both || rotationMode.get() == RotationMode.Break) RotationUtils.packetRotate(breakPos);
-
                 mc.player.setSneaking(false);
                 mc.options.keySneak.setPressed(false);
-                breakAnchor(breakPos, glowSlot, anchorSlot);
-
+                if (rotationMode.get() == RotationMode.Both || rotationMode.get() == RotationMode.Break) {
+                    Rotations.rotate(Rotations.getYaw(breakPos), Rotations.getPitch(breakPos), 50, () -> {
+                        breakAnchor(breakPos, glowSlot, anchorSlot);
+                    });
+                } else
+                    breakAnchor(breakPos, glowSlot, anchorSlot);
                 breakDelayLeft = 0;
             }
         }
@@ -292,12 +295,9 @@ public class AnchorAura extends Module {
             BlockPos placePos = findPlacePos(target);
 
             if (placePos != null) {
-                if (rotationMode.get() == RotationMode.Both || rotationMode.get() == RotationMode.Place) RotationUtils.packetRotate(placePos);
-
                 mc.player.setSneaking(false);
                 mc.options.keySneak.setPressed(false);
-                PlayerUtils.placeBlock(placePos, anchorSlot, Hand.MAIN_HAND);
-
+                BlockUtils.place(placePos, Hand.MAIN_HAND, anchorSlot, (rotationMode.get() == RotationMode.Place || rotationMode.get() == RotationMode.Both), 50);
                 placeDelayLeft = 0;
             }
         }
