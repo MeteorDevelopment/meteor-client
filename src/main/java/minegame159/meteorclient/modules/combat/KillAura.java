@@ -56,6 +56,7 @@ public class KillAura extends Module {
             .defaultValue(4)
             .min(0)
             .max(6)
+            .sliderMax(6)
             .build()
     );
 
