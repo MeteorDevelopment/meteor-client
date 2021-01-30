@@ -20,7 +20,7 @@ public class BlockUtils {
 
         Direction side = getPlaceSide(blockPos);
         BlockPos neighbour;
-        Vec3d hitPos = side == null ? new Vec3d(0, 0, 0) : BlockUtils.hitPos;
+        Vec3d hitPos = rotate ? new Vec3d(0, 0, 0) : BlockUtils.hitPos;
 
         if (side == null) {
             side = Direction.UP;
