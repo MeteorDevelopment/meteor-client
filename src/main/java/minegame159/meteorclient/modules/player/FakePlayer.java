@@ -20,7 +20,7 @@ public class FakePlayer extends Module {
     public final Setting<String> name = sgGeneral.add(new StringSetting.Builder()
             .name("name")
             .description("The name of the fake player.")
-            .defaultValue("MeteorOnCrack")
+            .defaultValue("seasnail8169")
             .build()
     );
 
@@ -48,7 +48,7 @@ public class FakePlayer extends Module {
     );
 
     public final Setting<Boolean> idInNametag = sgGeneral.add(new BoolSetting.Builder()
-            .name("id-in-nametag")
+            .name("iD-in-nametag")
             .description("Displays the fake player's ID inside its nametag.")
             .defaultValue(true)
             .build()

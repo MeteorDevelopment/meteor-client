@@ -23,7 +23,7 @@ public class TopBarGui extends TopBarWindowScreen {
         SettingGroup sg = s.getDefaultGroup();
 
         sg.add(new DoubleSetting.Builder()
-                .name("gui-scale")
+                .name("gUI-scale")
                 .description("Scale of the GUI.")
                 .defaultValue(1)
                 .min(1)

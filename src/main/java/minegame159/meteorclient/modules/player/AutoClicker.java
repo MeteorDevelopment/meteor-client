@@ -38,14 +38,14 @@ public class AutoClicker extends Module {
     );
 
     private final Setting<Button> button = sgGeneral.add(new EnumSetting.Builder<Button>()
-            .name("Button")
+            .name("button")
             .description("Which button to press.")
             .defaultValue(Button.Right)
             .build()
     );
 
     private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
-            .name("delay")
+            .name("click-delay")
             .description("The amount of delay between clicks in ticks.")
             .defaultValue(2)
             .min(0)

@@ -36,7 +36,7 @@ public class SmartSurround extends Module {
 
     private final Setting<Boolean> onlyObsidian = sgGeneral.add(new BoolSetting.Builder()
             .name("only-obsidian")
-            .description("Only whitelists obsidian to be used.")
+            .description("Only uses Obsidian as a surround block.")
             .defaultValue(false)
             .build()
     );
@@ -50,7 +50,7 @@ public class SmartSurround extends Module {
 
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
             .name("rotate")
-            .description("Forces you to rotate towards the block being placed.")
+            .description("Forces you to rotate towards the blocks being placed.")
             .defaultValue(true)
             .build()
     );
