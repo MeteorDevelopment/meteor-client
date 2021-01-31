@@ -5,7 +5,6 @@
 
 package minegame159.meteorclient.modules.combat;
 
-import baritone.api.utils.RayTraceUtils;
 import com.google.common.collect.Streams;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import meteordevelopment.orbit.EventHandler;
@@ -38,6 +37,7 @@ import net.minecraft.util.math.*;
 import net.minecraft.world.RaycastContext;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 public class CrystalAura extends Module {
     public enum Mode {
@@ -111,6 +111,13 @@ public class CrystalAura extends Module {
             .name("place")
             .description("Allows Crystal Aura to place crystals.")
             .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Boolean> multiPlace = sgPlace.add(new BoolSetting.Builder()
+            .name("multi-place")
+            .description("Allows Crystal Aura to place multiple crystals.")
+            .defaultValue(false)
             .build()
     );
 
@@ -331,7 +338,7 @@ public class CrystalAura extends Module {
     private final Setting<Boolean> strictLook = sgRotations.add(new BoolSetting.Builder()
             .name("strict-look")
             .description("Looks at exactly where you're placing.")
-            .defaultValue(false)
+            .defaultValue(true)
             .build()
     );
 
@@ -569,6 +576,7 @@ public class CrystalAura extends Module {
         if (switchMode.get() == SwitchMode.None && mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL) return;
         if (place.get()) {
             if (target == null) return;
+            if (!multiPlace.get() && getCrystalStream().count() > 0) return;
             if (surroundHold.get() && heldCrystal == null){
                 int slot = InvUtils.findItemWithCount(Items.END_CRYSTAL).slot;
                 if ((slot != -1 && slot < 9) || mc.player.getOffHandStack().getItem() == Items.END_CRYSTAL) {
@@ -638,18 +646,21 @@ public class CrystalAura extends Module {
         }
     }
 
-    private void singleBreak(){
-        assert mc.player != null;
-        assert mc.world != null;
-        Streams.stream(mc.world.getEntities())
+    private Stream<Entity> getCrystalStream() {
+        return Streams.stream(mc.world.getEntities())
                 .filter(entity -> entity instanceof EndCrystalEntity)
                 .filter(entity -> entity.distanceTo(mc.player) <= breakRange.get())
                 .filter(Entity::isAlive)
                 .filter(entity -> shouldBreak((EndCrystalEntity) entity))
-                .filter(entity -> ignoreWalls.get() || mc.player.canSee(entity))
-                .filter(entity -> isSafe(entity.getPos()))
-                .max(Comparator.comparingDouble(o -> DamageCalcUtils.crystalDamage(target, o.getPos())))
-                .ifPresent(entity -> hitCrystal((EndCrystalEntity) entity));
+                .filter(entity -> ignoreWalls.get() || mc.player.canSee(entity));
+    }
+
+    private void singleBreak(){
+        assert mc.player != null;
+        assert mc.world != null;
+        getCrystalStream().filter(entity -> isSafe(entity.getPos()))
+        .max(Comparator.comparingDouble(o -> DamageCalcUtils.crystalDamage(target, o.getPos())))
+        .ifPresent(entity -> hitCrystal((EndCrystalEntity) entity));
     }
 
     private void multiBreak(){
@@ -657,27 +668,21 @@ public class CrystalAura extends Module {
         assert mc.player != null;
         crystalMap.clear();
         crystalList.clear();
-        Streams.stream(mc.world.getEntities())
-                .filter(entity -> entity instanceof EndCrystalEntity)
-                .filter(entity -> entity.distanceTo(mc.player) <= breakRange.get())
-                .filter(Entity::isAlive)
-                .filter(entity -> shouldBreak((EndCrystalEntity) entity))
-                .filter(entity -> ignoreWalls.get() || mc.player.canSee(entity))
-                .filter(entity -> !isSafe(entity.getPos()))
-                .forEach(entity -> {
-                    for (Entity target : mc.world.getEntities()){
-                        if (target != mc.player && entities.get().getBoolean(target.getType()) && mc.player.distanceTo(target) <= targetRange.get()
-                                && target.isAlive() && target instanceof LivingEntity
-                                && (!(target instanceof PlayerEntity) || FriendManager.INSTANCE.attack((PlayerEntity) target))){
-                            crystalList.add(DamageCalcUtils.crystalDamage((LivingEntity) target, entity.getPos()));
-                        }
-                    }
-                    if (!crystalList.isEmpty()) {
-                        crystalList.sort(Comparator.comparingDouble(Double::doubleValue));
-                        crystalMap.put((EndCrystalEntity) entity, new ArrayList<>(crystalList));
-                        crystalList.clear();
-                    }
-                });
+        getCrystalStream().filter(entity -> !isSafe(entity.getPos()))
+        .forEach(entity -> {
+            for (Entity target : mc.world.getEntities()){
+                if (target != mc.player && entities.get().getBoolean(target.getType()) && mc.player.distanceTo(target) <= targetRange.get()
+                        && target.isAlive() && target instanceof LivingEntity
+                        && (!(target instanceof PlayerEntity) || FriendManager.INSTANCE.attack((PlayerEntity) target))){
+                    crystalList.add(DamageCalcUtils.crystalDamage((LivingEntity) target, entity.getPos()));
+                }
+            }
+            if (!crystalList.isEmpty()) {
+                crystalList.sort(Comparator.comparingDouble(Double::doubleValue));
+                crystalMap.put((EndCrystalEntity) entity, new ArrayList<>(crystalList));
+                crystalList.clear();
+            }
+        });
         EndCrystalEntity crystal = findBestCrystal(crystalMap);
         if (crystal != null) {
             hitCrystal(crystal);
