@@ -144,4 +144,17 @@ public class PlayerUtils {
 
         return canSeeFeet || canSeeEyes;
     }
+
+    public static float[] calculateAngle(Vec3d target) {
+        assert mc.player != null;
+        Vec3d eyesPos = new Vec3d(mc.player.getX(), mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()), mc.player.getZ());
+
+        double dX = target.x - eyesPos.x;
+        double dY = (target.y - eyesPos.y) * -1.0D;
+        double dZ = target.z - eyesPos.z;
+
+        double dist = MathHelper.sqrt(dX * dX + dZ * dZ);
+
+        return new float[] { (float) MathHelper.wrapDegrees(Math.toDegrees(Math.atan2(dZ, dX)) - 90.0D), (float) MathHelper.wrapDegrees(Math.toDegrees(Math.atan2(dY, dist))) };
+    }
 }
