@@ -5,6 +5,7 @@
 
 package minegame159.meteorclient.modules.combat;
 
+import baritone.api.utils.RayTraceUtils;
 import com.google.common.collect.Streams;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import meteordevelopment.orbit.EventHandler;
@@ -20,10 +21,7 @@ import minegame159.meteorclient.rendering.ShapeMode;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.Pool;
-import minegame159.meteorclient.utils.player.DamageCalcUtils;
-import minegame159.meteorclient.utils.player.InvUtils;
-import minegame159.meteorclient.utils.player.PlayerUtils;
-import minegame159.meteorclient.utils.player.RotationUtils;
+import minegame159.meteorclient.utils.player.*;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
@@ -100,9 +98,25 @@ public class CrystalAura extends Module {
             .build()
     );
 
+    private final Setting<Double> placeWallsRange = sgPlace.add(new DoubleSetting.Builder()
+            .name("place-walls-range")
+            .description("The radius in which crystals can be placed through walls.")
+            .defaultValue(3.0)
+            .min(0)
+            .sliderMax(7)
+            .build()
+    );
+
     private final Setting<Boolean> place = sgPlace.add(new BoolSetting.Builder()
             .name("place")
             .description("Allows Crystal Aura to place crystals.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Boolean> rayTrace = sgPlace.add(new BoolSetting.Builder()
+            .name("ray-trace")
+            .description("Only places when you can see block, unless it it closer than walls range.")
             .defaultValue(true)
             .build()
     );
@@ -314,13 +328,10 @@ public class CrystalAura extends Module {
             .build()
     );
 
-    private final Setting<Double> rotationLock = sgRotations.add(new DoubleSetting.Builder()
-            .name("place-rotation-lock")
-            .description("How high to look at the support block you're placing your crystals on.")
-            .min(0)
-            .defaultValue(100)
-            .sliderMax(100)
-            .max(100)
+    private final Setting<Boolean> strictLook = sgRotations.add(new BoolSetting.Builder()
+            .name("strict-look")
+            .description("Looks at exactly where you're placing.")
+            .defaultValue(false)
             .build()
     );
 
@@ -715,7 +726,17 @@ public class CrystalAura extends Module {
                 }
             }
         }
-        if (rotationMode.get() == RotationMode.Break || rotationMode.get() == RotationMode.Both) RotationUtils.packetRotate(entity);
+        if (rotationMode.get() == RotationMode.Break || rotationMode.get() == RotationMode.Both) {
+            float[] rotation = PlayerUtils.calculateAngle(entity.getPos());
+            Rotations.rotate(rotation[0], rotation[1], 30, () -> attackCrystal(entity, preSlot));
+        } else {
+            attackCrystal(entity, preSlot);
+        }
+
+        breakDelayLeft = breakDelay.get();
+    }
+
+    private void attackCrystal(EndCrystalEntity entity, int preSlot) {
         mc.interactionManager.attackEntity(mc.player, entity);
         if (removeCrystals.get()) mc.world.removeEntity(entity.getEntityId());
         if (!noSwing.get()) mc.player.swingHand(getHand());
@@ -724,7 +745,6 @@ public class CrystalAura extends Module {
             heldCrystal = null;
             locked = false;
         }
-        breakDelayLeft = breakDelay.get();
     }
 
     private void findTarget(){
@@ -780,9 +800,20 @@ public class CrystalAura extends Module {
             PlayerUtils.placeBlock(new BlockPos(block), supportSlot, Hand.MAIN_HAND);
             supportDelayLeft = supportDelay.get();
         }
-        if (rotationMode.get() == RotationMode.Place || rotationMode.get() == RotationMode.Both) RotationUtils.packetRotate(block.add(0.5, rotationLock.get() / 100, 0.5));
-        mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(mc.player.getPos(), Direction.UP, new BlockPos(block), false));
-        if (!noSwing.get()) mc.player.swingHand(hand);
+        BlockPos blockPos = new BlockPos(block);
+        Direction direction = rayTraceCheck(blockPos, true);
+        if (rotationMode.get() == RotationMode.Place || rotationMode.get() == RotationMode.Both) {
+            float[] rotation = PlayerUtils.calculateAngle(strictLook.get() ? new Vec3d(blockPos.getX() + 0.5 + direction.getVector().getX() * 1.0 / 2.0,
+                    blockPos.getY() + 0.5 + direction.getVector().getY() * 1.0 / 2.0,
+                    blockPos.getZ() + 0.5 + direction.getVector().getZ() * 1.0 / 2.0) : block.add(0.5, 1.0, 0.5));
+            Rotations.rotate(rotation[0], rotation[1], 25, () -> {
+                mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(mc.player.getPos(), direction, blockPos, false));
+                if (!noSwing.get()) mc.player.swingHand(hand);
+            });
+        } else {
+            mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(mc.player.getPos(), direction, new BlockPos(block), false));
+            if (!noSwing.get()) mc.player.swingHand(hand);
+        }
 
         if (render.get()) {
             RenderBlock renderBlock = renderBlockPool.get();
@@ -817,26 +848,28 @@ public class CrystalAura extends Module {
                     Vec3d pos = new Vec3d(Math.floor(i), Math.floor(k), Math.floor(j));
                     if(isValid(new BlockPos(pos)) && getDamagePlace(new BlockPos(pos).up())){
                         if (!strict.get() || isEmpty(new BlockPos(pos.add(0, 2, 0)))) {
-                            if (!multiTarget.get()) {
-                                if (isEmpty(new BlockPos(pos)) && bestSupportDamage < DamageCalcUtils.crystalDamage(target, pos.add(0.5, 1, 0.5))){
-                                    bestSupportBlock = pos;
-                                    bestSupportDamage = DamageCalcUtils.crystalDamage(target, pos.add(0.5, 1, 0.5));
-                                }else if (!isEmpty(new BlockPos(pos)) && bestDamage < DamageCalcUtils.crystalDamage(target, pos.add(0.5, 1, 0.5))) {
-                                    bestBlock = pos;
-                                    bestDamage = DamageCalcUtils.crystalDamage(target, bestBlock.add(0.5, 1, 0.5));
-                                }
-                            } else {
-                                for (Entity entity : mc.world.getEntities()){
-                                    if (entity != mc.player && entities.get().getBoolean(entity.getType()) && mc.player.distanceTo(entity) <= targetRange.get()
-                                            && entity.isAlive() && entity instanceof LivingEntity
-                                            && (!(entity instanceof PlayerEntity) || FriendManager.INSTANCE.attack((PlayerEntity) entity))){
-                                        crystalList.add(DamageCalcUtils.crystalDamage((LivingEntity) entity, pos.add(0.5, 1, 0.5)));
+                            if (!rayTrace.get() || pos.distanceTo(new Vec3d(mc.player.getX(), mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()), mc.player.getZ())) <= placeWallsRange.get() || rayTraceCheck(new BlockPos(pos), false) != null) {
+                                if (!multiTarget.get()) {
+                                    if (isEmpty(new BlockPos(pos)) && bestSupportDamage < DamageCalcUtils.crystalDamage(target, pos.add(0.5, 1, 0.5))) {
+                                        bestSupportBlock = pos;
+                                        bestSupportDamage = DamageCalcUtils.crystalDamage(target, pos.add(0.5, 1, 0.5));
+                                    } else if (!isEmpty(new BlockPos(pos)) && bestDamage < DamageCalcUtils.crystalDamage(target, pos.add(0.5, 1, 0.5))) {
+                                        bestBlock = pos;
+                                        bestDamage = DamageCalcUtils.crystalDamage(target, bestBlock.add(0.5, 1, 0.5));
                                     }
-                                }
-                                if (!crystalList.isEmpty()) {
-                                    crystalList.sort(Comparator.comparingDouble(Double::doubleValue));
-                                    crystalMap.put(new EndCrystalEntity(mc.world, pos.x, pos.y, pos.z), new ArrayList<>(crystalList));
-                                    crystalList.clear();
+                                } else {
+                                    for (Entity entity : mc.world.getEntities()) {
+                                        if (entity != mc.player && entities.get().getBoolean(entity.getType()) && mc.player.distanceTo(entity) <= targetRange.get()
+                                                && entity.isAlive() && entity instanceof LivingEntity
+                                                && (!(entity instanceof PlayerEntity) || FriendManager.INSTANCE.attack((PlayerEntity) entity))) {
+                                            crystalList.add(DamageCalcUtils.crystalDamage((LivingEntity) entity, pos.add(0.5, 1, 0.5)));
+                                        }
+                                    }
+                                    if (!crystalList.isEmpty()) {
+                                        crystalList.sort(Comparator.comparingDouble(Double::doubleValue));
+                                        crystalMap.put(new EndCrystalEntity(mc.world, pos.x, pos.y, pos.z), new ArrayList<>(crystalList));
+                                        crystalList.clear();
+                                    }
                                 }
                             }
                         }
@@ -933,6 +966,26 @@ public class CrystalAura extends Module {
         return (((canSupport && isEmpty(blockPos) && blockPos.getY() - target.getBlockPos().getY() == -1 && supportDelayLeft <= 0) || (mc.world.getBlockState(blockPos).getBlock() == Blocks.BEDROCK
                 || mc.world.getBlockState(blockPos).getBlock() == Blocks.OBSIDIAN))
                 && isEmpty(blockPos.add(0, 1, 0)));
+    }
+
+    private Direction rayTraceCheck(BlockPos pos, boolean forceReturn) {
+        Vec3d eyesPos = new Vec3d(mc.player.getX(), mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()), mc.player.getZ());
+        for (Direction direction : Direction.values()) {
+            RaycastContext raycastContext = new RaycastContext(eyesPos, new Vec3d(pos.getX() + 0.5 + direction.getVector().getX() * 0.5,
+                    pos.getY() + 0.5 + direction.getVector().getY() * 0.5,
+                    pos.getZ() + 0.5 + direction.getVector().getZ() * 0.5), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player);
+            BlockHitResult result = mc.world.raycast(raycastContext);
+            if (result != null && result.getType() == HitResult.Type.BLOCK && result.getBlockPos().equals(pos)) {
+                return direction;
+            }
+        }
+        if (forceReturn) { // When we're placing, we have to return a direction so we have a side to place against
+            if ((double) pos.getY() > eyesPos.y) {
+                return Direction.DOWN; // The player can never see the top of a block if they are under it
+            }
+            return Direction.UP;
+        }
+        return null;
     }
 
     private boolean validSurroundBreak(LivingEntity target, int x, int z) {
