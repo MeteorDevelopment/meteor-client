@@ -32,10 +32,10 @@ import java.util.regex.Pattern;
 public class BetterChat extends Module {
     private final SettingGroup sgAnnoy = settings.createGroup("Annoy");
     private final SettingGroup sgAntiSpam = settings.createGroup("Anti Spam");
+    private final SettingGroup sgChatProtect = settings.createGroup("Chat Protect");
     private final SettingGroup sgFancyChat = settings.createGroup("Fancy Chat");
     private final SettingGroup sgIgnore = settings.createGroup("Ignore");
     private final SettingGroup sgLongerChat = settings.createGroup("Longer Chat");
-    private final SettingGroup sgProtection = settings.createGroup("Protection");
     private final SettingGroup sgPrefix = settings.createGroup("Prefix");
     private final SettingGroup sgSuffix = settings.createGroup("Suffix");
     // private final SettingGroup sgFriendColor = settings.createGroup("Friend Color");
@@ -75,6 +75,29 @@ public class BetterChat extends Module {
             .build()
     );
 
+    // Chat Protect
+
+    private final Setting<Boolean> coordsProtectionEnabled = sgChatProtect.add(new BoolSetting.Builder()
+            .name("coords-protection-enabled")
+            .description("Prevents you from sending messages in chat that may contain coordinates.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Boolean> disableAllMessages = sgChatProtect.add(new BoolSetting.Builder()
+            .name("disable-all-messages")
+            .description("Prevents you from essentially being able to send messages in chat.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> disableButton = sgChatProtect.add(new BoolSetting.Builder()
+            .name("disable-button")
+            .description("Adds a button to the warning to send a message to the chat in any way.")
+            .defaultValue(true)
+            .build()
+    );
+
     // Fancy Chat
 
     private final Setting<Boolean> fancyEnabled = sgFancyChat.add(new BoolSetting.Builder()
@@ -109,29 +132,6 @@ public class BetterChat extends Module {
             .defaultValue(1000)
             .min(100)
             .sliderMax(1000)
-            .build()
-    );
-
-    // Protection TODO: Find a better name for this.
-
-    private final Setting<Boolean> coordsProtectionEnabled = sgProtection.add(new BoolSetting.Builder()
-            .name("coords-protection-enabled")
-            .description("Prevents you from sending messages in chat that may contain coordinates.")
-            .defaultValue(true)
-            .build()
-    );
-
-    private final Setting<Boolean> disableAllMessages = sgProtection.add(new BoolSetting.Builder()
-            .name("disable-all-messages")
-            .description("Prevents you from essentially being able to send messages in chat.")
-            .defaultValue(false)
-            .build()
-    );
-
-    private final Setting<Boolean> disableButton = sgProtection.add(new BoolSetting.Builder()
-            .name("disable-button")
-            .description("Adds a button to the warning to send a message to the chat in any way.")
-            .defaultValue(true)
             .build()
     );
 

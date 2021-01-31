@@ -31,9 +31,9 @@ public class AutoReplenish extends Module {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<Integer> amount = sgGeneral.add(new IntSetting.Builder()
-            .name("amount")
-            .description("The amount of items left this actives at.")
+    private final Setting<Integer> threshold = sgGeneral.add(new IntSetting.Builder()
+            .name("threshold")
+            .description("The threshold of items left this actives at.")
             .defaultValue(8)
             .min(1)
             .sliderMax(63)
@@ -102,7 +102,7 @@ public class AutoReplenish extends Module {
             stack = mc.player.inventory.getStack(i);
             if (!excludedItems.get().contains(stack.getItem()) && stack.getItem() != Items.AIR) {
                 if (stack.isStackable()){
-                    if (stack.getCount() <= amount.get()){
+                    if (stack.getCount() <= threshold.get()){
                         addSlots(i, findItem(stack, i));
                     }
                 } else if (unstackable.get()) {
@@ -115,7 +115,7 @@ public class AutoReplenish extends Module {
         }
         //Offhand
         if (offhand.get() && !ModuleManager.INSTANCE.get(AutoTotem.class).getLocked()){
-            if (mc.player.getOffHandStack().getCount() <= amount.get()){
+            if (mc.player.getOffHandStack().getCount() <= threshold.get()){
                 addSlots(InvUtils.OFFHAND_SLOT, findItem(mc.player.getOffHandStack(), InvUtils.OFFHAND_SLOT));
             } else if (mc.player.getOffHandStack().isEmpty() || !offhandStack.isStackable()){
                 addSlots(InvUtils.OFFHAND_SLOT, findItem(offhandStack, InvUtils.OFFHAND_SLOT));
