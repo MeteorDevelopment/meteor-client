@@ -116,7 +116,7 @@ public class Jesus extends Module {
 
     private final Setting<Boolean> dipIntoLavaIfFireResistance = sgLava.add(new BoolSetting.Builder()
             .name("dip-if-fire-resistance")
-            .description("Lets you go under the lava if you have Fire Resistance effect to avoid fall damage.") // rofl some retard put "fall damage" here
+            .description("Lets you go under the lava if you have Fire Resistance effect to avoid burning.") // rofl some retard put "fall damage" here
             .defaultValue(true)
             .build()
     );
