@@ -32,12 +32,14 @@ public class AutoTrap extends Module {
     public enum TopMode {
         Full,
         Top,
+        Face,
         None
     }
 
     public enum BottomMode {
         Single,
         Platform,
+        Full,
         None
     }
 
@@ -193,6 +195,12 @@ public class AutoTrap extends Module {
                 add(targetPos.add(0, 1, 1));
                 add(targetPos.add(0, 1, -1));
                 break;
+            case Face:
+                add(targetPos.add(1, 1, 0));
+                add(targetPos.add(-1, 1, 0));
+                add(targetPos.add(0, 1, 1));
+                add(targetPos.add(0, 1, -1));
+                break;
             case Top:
                 add(targetPos.add(0, 2, 0));
         }
@@ -204,6 +212,12 @@ public class AutoTrap extends Module {
                 add(targetPos.add(0, -1, 0));
                 add(targetPos.add(0, -1, 1));
                 add(targetPos.add(0, -1, -1));
+                break;
+            case Full:
+                add(targetPos.add(1, 0, 0));
+                add(targetPos.add(-1, 0, 0));
+                add(targetPos.add(0, 0, -1));
+                add(targetPos.add(0, 0, 1));
                 break;
             case Single:
                 add(targetPos.add(0, -1, 0));

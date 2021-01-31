@@ -24,6 +24,7 @@ public class HoleFiller extends Module {
     public enum PlaceMode {
         Obsidian,
         Cobweb,
+        Both,
         Any
     }
 
@@ -47,6 +48,15 @@ public class HoleFiller extends Module {
             .build()
     );
 
+    private final Setting<Integer> placeDelay = sgGeneral.add(new IntSetting.Builder()
+            .name("place-delay")
+            .description("The delay in ticks in between placement.")
+            .defaultValue(1)
+            .min(0)
+            .sliderMax(10)
+            .build()
+    );
+
     private final Setting<PlaceMode> mode = sgGeneral.add(new EnumSetting.Builder<PlaceMode>()
             .name("block")
             .description("The blocks you use to fill holes with.")
@@ -62,16 +72,23 @@ public class HoleFiller extends Module {
     );
 
     private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
+    private int tickDelayLeft;
 
     public HoleFiller() {
         super(Category.Combat, "hole-filler", "Fills holes with specified blocks.");
+    }
+
+    @Override
+    public void onActivate() {
+        tickDelayLeft = 0;
     }
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
         int slot = findSlot();
 
-        if (slot != -1) {
+        if (slot != -1 && tickDelayLeft <= 0) {
+            tickDelayLeft = placeDelay.get();
             BlockIterator.register(horizontalRadius.get(), verticalRadius.get(), (blockPos1, blockState) -> {
                 if (!blockState.getMaterial().isReplaceable()) return;
 
@@ -94,18 +111,21 @@ public class HoleFiller extends Module {
                 }
             });
         }
+        tickDelayLeft--;
     }
 
     private int findSlot() {
         for (int i = 0; i < 9; i++) {
             ItemStack itemStack = mc.player.inventory.getStack(i);
-
             switch (mode.get()) {
                 case Obsidian:
                     if (itemStack.getItem() == Items.OBSIDIAN || itemStack.getItem() == Items.CRYING_OBSIDIAN) return i;
                     break;
                 case Cobweb:
                     if (itemStack.getItem() == Items.COBWEB) return i;
+                    break;
+                case Both:
+                    if (itemStack.getItem() == Items.COBWEB || itemStack.getItem() == Items.OBSIDIAN || itemStack.getItem() == Items.CRYING_OBSIDIAN) return i;
                     break;
                 case Any:
                     if (itemStack.getItem() instanceof BlockItem && ((BlockItem) itemStack.getItem()).getBlock().getDefaultState().isFullCube(mc.world, blockPos)) return i;
