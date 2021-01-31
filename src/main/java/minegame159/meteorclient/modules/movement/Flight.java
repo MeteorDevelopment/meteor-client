@@ -57,7 +57,7 @@ public class Flight extends Module {
 
     private final Setting<Integer> delay = sgAntiKick.add(new IntSetting.Builder()
             .name("delay")
-            .description("The amount of time in ticks between toggles in normal mode.")
+            .description("The amount of delay in ticks between toggles in normal mode.")
             .defaultValue(80)
             .min(1)
             .max(5000)
@@ -67,7 +67,7 @@ public class Flight extends Module {
 
     private final Setting<Integer> offTime = sgAntiKick.add(new IntSetting.Builder()
             .name("off-time")
-            .description("The amount of time in ticks Flight is toggled off for in normal mode.")
+            .description("The amount of delay in ticks that Flight is toggled off for in normal mode.")
             .defaultValue(5)
             .min(1)
             .max(20)
