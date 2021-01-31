@@ -29,7 +29,7 @@ public class Flight extends Module {
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgAntiKick = settings.createGroup("AntiKick"); //Pog
+    private final SettingGroup sgAntiKick = settings.createGroup("Anti Kick"); //Pog
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("mode")
@@ -46,8 +46,10 @@ public class Flight extends Module {
             .build()
     );
 
+    // Anti Kick
+
     private final Setting<AntiKickMode> antiKickMode = sgGeneral.add(new EnumSetting.Builder<AntiKickMode>()
-            .name("anti-kick-mode")
+            .name("mode")
             .description("The mode for anti kick.")
             .defaultValue(AntiKickMode.Packet)
             .build()
@@ -55,7 +57,7 @@ public class Flight extends Module {
 
     private final Setting<Integer> delay = sgAntiKick.add(new IntSetting.Builder()
             .name("delay")
-            .description("The amount of time, in ticks, between toggles in normal mode.")
+            .description("The amount of delay, in ticks, between toggles in normal mode.")
             .defaultValue(80)
             .min(1)
             .max(5000)
@@ -65,7 +67,7 @@ public class Flight extends Module {
 
     private final Setting<Integer> offTime = sgAntiKick.add(new IntSetting.Builder()
             .name("off-time")
-            .description("The amount of time, in ticks, flight is toggled off for in normal mode.")
+            .description("The amount of delay, in ticks, that Flight is toggled off for in normal mode.")
             .defaultValue(5)
             .min(1)
             .max(20)

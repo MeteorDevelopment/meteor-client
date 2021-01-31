@@ -79,7 +79,7 @@ public class AutoTrap extends Module {
     );
 
     private final Setting<Boolean> turnOff = sgGeneral.add(new BoolSetting.Builder()
-            .name("turn-off")
+            .name("auto-toggle")
             .description("Turns off after placing.")
             .defaultValue(true)
             .build()

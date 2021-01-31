@@ -44,6 +44,7 @@ public class HUD extends Module {
     private final ModuleInfoHud moduleInfoHud = new ModuleInfoHud(this);
 
     // General
+
     private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
             .name("scale")
             .description("Scale of the HUD.")
@@ -77,6 +78,7 @@ public class HUD extends Module {
     );
 
     // Active Modules
+    
     private final Setting<ActiveModulesHud.Sort> activeModulesSort = sgActiveModules.add(new EnumSetting.Builder<ActiveModulesHud.Sort>()
             .name("active-modules-sort")
             .description("How to sort active modules.")
@@ -125,6 +127,7 @@ public class HUD extends Module {
     );
 
     // Inventory Viewer
+
     private final Setting<InventoryViewerHud.Background> invViewerBackground = sgInvViewer.add(new EnumSetting.Builder<InventoryViewerHud.Background>()
             .name("inventory-viewer-background")
             .description("Background of inventory viewer.")
@@ -147,6 +150,89 @@ public class HUD extends Module {
             .max(4)
             .sliderMin(1)
             .sliderMax(4)
+            .build()
+    );
+
+    // Armor Info
+
+    private final Setting<Boolean> armorFlip = sgArmor.add(new BoolSetting.Builder()
+            .name("armor-flip-order")
+            .description("Flips the order of armor items.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<ArmorHud.Orientation> armorOrientation = sgArmor.add(new EnumSetting.Builder<ArmorHud.Orientation>()
+            .name("orientation")
+            .description("How to display armor.")
+            .defaultValue(ArmorHud.Orientation.Horizontal)
+            .build()
+    );
+
+
+    private final Setting<ArmorHud.Durability> armorDurability = sgArmor.add(new EnumSetting.Builder<ArmorHud.Durability>()
+            .name("armor-durability")
+            .description("How to display armor durability.")
+            .defaultValue(ArmorHud.Durability.Default)
+            .build()
+    );
+
+    private final Setting<Double> armorScale = sgArmor.add(new DoubleSetting.Builder()
+            .name("armor-scale")
+            .description("Scale of armor.")
+            .defaultValue(3.5)
+            .min(2)
+            .sliderMin(2)
+            .sliderMax(5)
+            .build()
+    );
+
+    // Compass
+
+    private final Setting<CompassHud.Mode> compassMode = sgCompass.add(new EnumSetting.Builder<CompassHud.Mode>()
+            .name("mode")
+            .description("The mode of the compass.")
+            .defaultValue(CompassHud.Mode.Pole)
+            .build()
+    );
+
+    private final Setting<Double> compassScale = sgCompass.add(new DoubleSetting.Builder()
+            .name("scale")
+            .description("The scale of compass.")
+            .defaultValue(1)
+            .sliderMin(2)
+            .sliderMax(4)
+            .build()
+    );
+
+    // Module Info
+
+    private final Setting<List<Module>> moduleInfoModules = sgModuleInfo.add(new ModuleListSetting.Builder()
+            .name("module-info-modules")
+            .description("Which modules to display")
+            .defaultValue(moduleInfoModulesDefaultValue())
+//            .onChanged(toggleModules -> moduleInfoHud.recalculate())
+            .build()
+    );
+
+    private final Setting<Boolean> moduleInfo = sgModuleInfo.add(new BoolSetting.Builder()
+            .name("additional-info")
+            .description("Shows additional info from the module next to the name in the module info list.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<SettingColor> moduleInfoOnColor = sgModuleInfo.add(new ColorSetting.Builder()
+            .name("module-info-on-color")
+            .description("Color when module is on.")
+            .defaultValue(new SettingColor(25, 225, 25))
+            .build()
+    );
+
+    private final Setting<SettingColor> moduleInfoOffColor = sgModuleInfo.add(new ColorSetting.Builder()
+            .name("module-info-off-color")
+            .description("Color when module is off.")
+            .defaultValue(new SettingColor(225, 25, 25))
             .build()
     );
 
@@ -208,87 +294,6 @@ public class HUD extends Module {
             .name("player-model-background-color")
             .description("Color of background.")
             .defaultValue(new SettingColor(0, 0, 0, 64))
-            .build()
-    );
-
-    // Armor
-    private final Setting<Boolean> armorFlip = sgArmor.add(new BoolSetting.Builder()
-            .name("armor-flip-order")
-            .description("Flips the order of armor items.")
-            .defaultValue(true)
-            .build()
-    );
-
-    private final Setting<ArmorHud.Orientation> armorOrientation = sgArmor.add(new EnumSetting.Builder<ArmorHud.Orientation>()
-            .name("orientation")
-            .description("How to display armor.")
-            .defaultValue(ArmorHud.Orientation.Horizontal)
-            .build()
-    );
-
-
-    private final Setting<ArmorHud.Durability> armorDurability = sgArmor.add(new EnumSetting.Builder<ArmorHud.Durability>()
-            .name("armor-durability")
-            .description("How to display armor durability.")
-            .defaultValue(ArmorHud.Durability.Default)
-            .build()
-    );
-
-    private final Setting<Double> armorScale = sgArmor.add(new DoubleSetting.Builder()
-            .name("armor-scale")
-            .description("Scale of armor.")
-            .defaultValue(3.5)
-            .min(2)
-            .sliderMin(2)
-            .sliderMax(5)
-            .build()
-    );
-
-    // Module Info
-    private final Setting<List<Module>> moduleInfoModules = sgModuleInfo.add(new ModuleListSetting.Builder()
-            .name("module-info-modules")
-            .description("Which modules to display")
-            .defaultValue(moduleInfoModulesDefaultValue())
-//            .onChanged(toggleModules -> moduleInfoHud.recalculate())
-            .build()
-    );
-
-    private final Setting<Boolean> moduleInfo = sgModuleInfo.add(new BoolSetting.Builder()
-            .name("additional-info")
-            .description("Shows additional info from the module next to the name in the module info list.")
-            .defaultValue(true)
-            .build()
-    );
-
-    private final Setting<SettingColor> moduleInfoOnColor = sgModuleInfo.add(new ColorSetting.Builder()
-            .name("module-info-on-color")
-            .description("Color when module is on.")
-            .defaultValue(new SettingColor(25, 225, 25))
-            .build()
-    );
-
-    private final Setting<SettingColor> moduleInfoOffColor = sgModuleInfo.add(new ColorSetting.Builder()
-            .name("module-info-off-color")
-            .description("Color when module is off.")
-            .defaultValue(new SettingColor(225, 25, 25))
-            .build()
-    );
-
-    //Compass
-
-    private final Setting<CompassHud.Mode> compassMode = sgCompass.add(new EnumSetting.Builder<CompassHud.Mode>()
-            .name("inventory-viewer-background")
-            .description("Background of inventory viewer.")
-            .defaultValue(CompassHud.Mode.Pole)
-            .build()
-    );
-
-    private final Setting<Double> compassScale = sgCompass.add(new DoubleSetting.Builder()
-            .name("compass-scale")
-            .description("Scale of compass.")
-            .defaultValue(1)
-            .sliderMin(2)
-            .sliderMax(4)
             .build()
     );
 
