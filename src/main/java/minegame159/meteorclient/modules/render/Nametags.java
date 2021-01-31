@@ -71,7 +71,7 @@ public class Nametags extends Module {
 
     private final Setting<Boolean> displayArmorEnchants = sgGeneral.add(new BoolSetting.Builder()
             .name("display-armor-enchants")
-            .description("Display armor enchantments.")
+            .description("Displays armor enchantments.")
             .defaultValue(true)
             .build()
     );
@@ -117,7 +117,7 @@ public class Nametags extends Module {
     );
 
     private final Setting<Boolean> yourself = sgGeneral.add(new BoolSetting.Builder()
-            .name("yourself")
+            .name("self-nametag")
             .description("Displays a nametag on your player if you're in Freecam.")
             .defaultValue(true)
             .build()

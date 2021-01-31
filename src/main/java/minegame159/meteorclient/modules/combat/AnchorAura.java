@@ -57,6 +57,7 @@ public class AnchorAura extends Module {
 
     private final SettingGroup sgPlace = settings.createGroup("Place");
     private final SettingGroup sgBreak = settings.createGroup("Break");
+    private final SettingGroup sgPause = settings.createGroup("Pause");
     private final SettingGroup sgMisc = settings.createGroup("Misc");
     private final SettingGroup sgRender = settings.createGroup("Render");
 
@@ -128,6 +129,29 @@ public class AnchorAura extends Module {
             .build()
     );
 
+    // Pause
+
+    private final Setting<Boolean> pauseOnEat = sgPause.add(new BoolSetting.Builder()
+            .name("pause-on-eat")
+            .description("Pauses Anchor Aura while eating.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> pauseOnDrink = sgPause.add(new BoolSetting.Builder()
+            .name("pause-on-drink")
+            .description("Pauses Anchor Aura while drinking a potion.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> pauseOnMine = sgPause.add(new BoolSetting.Builder()
+            .name("pause-on-mine")
+            .description("Pauses Anchor Aura while mining blocks.")
+            .defaultValue(false)
+            .build()
+    );
+
     // Misc
 
     private final Setting<RotationMode> rotationMode = sgMisc.add(new EnumSetting.Builder<RotationMode>()
@@ -157,27 +181,6 @@ public class AnchorAura extends Module {
             .name("min-health")
             .description("The minimum health you have to be for Anchor Aura to work.")
             .defaultValue(15)
-            .build()
-    );
-
-    private final Setting<Boolean> pauseOnEat = sgMisc.add(new BoolSetting.Builder()
-            .name("pause-on-eat")
-            .description("Pauses Anchor Aura while eating.")
-            .defaultValue(false)
-            .build()
-    );
-
-    private final Setting<Boolean> pauseOnDrink = sgMisc.add(new BoolSetting.Builder()
-            .name("pause-on-drink")
-            .description("Pauses Anchor Aura while drinking a potion.")
-            .defaultValue(false)
-            .build()
-    );
-
-    private final Setting<Boolean> pauseOnMine = sgMisc.add(new BoolSetting.Builder()
-            .name("pause-on-mine")
-            .description("Pauses Anchor Aura while mining blocks.")
-            .defaultValue(false)
             .build()
     );
 
