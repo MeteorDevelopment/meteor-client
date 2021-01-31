@@ -73,6 +73,13 @@ public class Surround extends Module {
             .build()
     );
 
+    private final Setting<Boolean> useEnderChests = sgGeneral.add(new BoolSetting.Builder()
+            .name("use-ender-chests")
+            .description("Will surround with ender chests if they are found in your hotbar.")
+            .defaultValue(false)
+            .build()
+    );
+
     // TODO: Make a render for Surround monkeys.
     private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
     private boolean return_;
@@ -158,7 +165,7 @@ public class Surround extends Module {
 
             if (!(item instanceof BlockItem)) continue;
 
-            if (item == Items.OBSIDIAN) {
+            if (item == Items.OBSIDIAN || (item == Items.ENDER_CHEST && useEnderChests.get())) {
                 return i;
             }
         }
