@@ -10,6 +10,7 @@ import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import minegame159.meteorclient.events.entity.EntityRemovedEvent;
+import minegame159.meteorclient.events.entity.player.SendMovementPacketsEvent;
 import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.events.packets.PlaySoundPacketEvent;
 import minegame159.meteorclient.events.render.RenderEvent;
@@ -474,10 +475,13 @@ public class CrystalAura extends Module {
     private int supportDelayLeft = supportDelay.get();
     private final Map<EndCrystalEntity, List<Double>> crystalMap = new HashMap<>();
     private final List<Double> crystalList = new ArrayList<>();
+    private final List<Integer> removalQueue = new ArrayList<>();
     private EndCrystalEntity bestBreak = null;
 
     private final Pool<RenderBlock> renderBlockPool = new Pool<>(RenderBlock::new);
     private final List<RenderBlock> renderBlocks = new ArrayList<>();
+
+    private boolean broken = false;
 
     @Override
     public void onActivate() {
@@ -486,6 +490,7 @@ public class CrystalAura extends Module {
         breakDelayLeft = 0;
         heldCrystal = null;
         locked = false;
+        broken = false;
     }
 
     @Override
@@ -518,6 +523,12 @@ public class CrystalAura extends Module {
 
     @EventHandler(priority = EventPriority.HIGH)
     private void onTick(TickEvent.Post event) {
+        removalQueue.forEach(id -> mc.world.removeEntity(id));
+        removalQueue.clear();
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
+    private void onTick(SendMovementPacketsEvent.Pre event) {
         for (Iterator<RenderBlock> it = renderBlocks.iterator(); it.hasNext();) {
             RenderBlock renderBlock = it.next();
 
@@ -580,6 +591,12 @@ public class CrystalAura extends Module {
             }
         } else if (breakDelayLeft <= 0){
             multiBreak();
+        }
+
+        // Return after breaking
+        if (broken) {
+            broken = false;
+            return;
         }
 
         if (!smartDelay.get() && placeDelayLeft > 0 && ((!surroundHold.get() && (target != null && (!surroundBreak.get() || !isSurrounded(target)))) || heldCrystal != null) && (!spamFacePlace.get())) return;
@@ -748,12 +765,13 @@ public class CrystalAura extends Module {
             attackCrystal(entity, preSlot);
         }
 
+        broken = true;
         breakDelayLeft = breakDelay.get();
     }
 
     private void attackCrystal(EndCrystalEntity entity, int preSlot) {
         mc.interactionManager.attackEntity(mc.player, entity);
-        if (removeCrystals.get()) mc.world.removeEntity(entity.getEntityId());
+        if (removeCrystals.get()) removalQueue.add(entity.getEntityId());
         if (!noSwing.get()) mc.player.swingHand(getHand());
         mc.player.inventory.selectedSlot = preSlot;
         if (heldCrystal != null && entity.getBlockPos().equals(heldCrystal.getBlockPos())) {
