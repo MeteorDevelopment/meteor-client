@@ -16,8 +16,8 @@ import minegame159.meteorclient.settings.SettingGroup;
 public class Sprint extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<Boolean> permanent = sgGeneral.add(new BoolSetting.Builder()
-            .name("permanent")
+    private final Setting<Boolean> whenStationary = sgGeneral.add(new BoolSetting.Builder()
+            .name("when-stationary")
             .description("Continues sprinting even if you do not move.")
             .defaultValue(true)
             .build()
@@ -34,9 +34,9 @@ public class Sprint extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if (mc.player.forwardSpeed > 0 && !permanent.get()) {
+        if (mc.player.forwardSpeed > 0 && !whenStationary.get()) {
             mc.player.setSprinting(true);
-        } else if (permanent.get()) {
+        } else if (whenStationary.get()) {
             mc.player.setSprinting(true);
         }
     }

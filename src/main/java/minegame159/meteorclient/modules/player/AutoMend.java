@@ -37,14 +37,14 @@ public class AutoMend extends Module {
     );
 
     private final Setting<Boolean> armourSlots = sgGeneral.add(new BoolSetting.Builder()
-            .name("use-armour-slots")
+            .name("use-armor-slots")
             .description("Whether or not to use armor slots to mend items quicker.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> removeFinished = sgGeneral.add(new BoolSetting.Builder()
-            .name("remove-finished")
+            .name("remove-when-finished")
             .description("The items will be moved out of active slots if there are no items to replace, but space in your inventory.")
             .defaultValue(true)
             .build()
