@@ -10,6 +10,8 @@ import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import minegame159.meteorclient.events.entity.EntityRemovedEvent;
+import minegame159.meteorclient.events.packets.PacketEvent;
+import minegame159.meteorclient.events.packets.PlaySoundPacketEvent;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.friends.FriendManager;
@@ -30,6 +32,10 @@ import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
+import net.minecraft.network.packet.s2c.play.PlaySoundFromEntityS2CPacket;
+import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
@@ -499,6 +505,10 @@ public class CrystalAura extends Module {
 
     @EventHandler
     private void onEntityRemoved(EntityRemovedEvent event) {
+        if (event.entity instanceof EndCrystalEntity && event.entity.distanceTo(mc.player) <= breakRange.get()) {
+            breakDelayLeft = 0;
+        }
+
         if (heldCrystal == null) return;
         if (event.entity.getBlockPos().equals(heldCrystal.getBlockPos())) {
             heldCrystal = null;
@@ -576,7 +586,7 @@ public class CrystalAura extends Module {
         if (switchMode.get() == SwitchMode.None && mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL) return;
         if (place.get()) {
             if (target == null) return;
-            if (!multiPlace.get() && getCrystalStream().count() > 0) return;
+            if (!multiPlace.get() && breakDelayLeft > 0) return;
             if (surroundHold.get() && heldCrystal == null){
                 int slot = InvUtils.findItemWithCount(Items.END_CRYSTAL).slot;
                 if ((slot != -1 && slot < 9) || mc.player.getOffHandStack().getItem() == Items.END_CRYSTAL) {
