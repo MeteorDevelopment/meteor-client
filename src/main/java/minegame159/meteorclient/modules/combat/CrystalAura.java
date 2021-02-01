@@ -510,10 +510,6 @@ public class CrystalAura extends Module {
 
     @EventHandler
     private void onEntityRemoved(EntityRemovedEvent event) {
-        if (event.entity instanceof EndCrystalEntity && event.entity.distanceTo(mc.player) <= breakRange.get()) {
-            breakDelayLeft = 0;
-        }
-
         if (heldCrystal == null) return;
         if (event.entity.getBlockPos().equals(heldCrystal.getBlockPos())) {
             heldCrystal = null;
@@ -603,7 +599,7 @@ public class CrystalAura extends Module {
         if (switchMode.get() == SwitchMode.None && mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL) return;
         if (place.get()) {
             if (target == null) return;
-            if (!multiPlace.get() && breakDelayLeft > 0) return;
+            if (!multiPlace.get() && getCrystalStream().count() > 0) return;
             if (surroundHold.get() && heldCrystal == null){
                 int slot = InvUtils.findItemWithCount(Items.END_CRYSTAL).slot;
                 if ((slot != -1 && slot < 9) || mc.player.getOffHandStack().getItem() == Items.END_CRYSTAL) {
@@ -679,15 +675,15 @@ public class CrystalAura extends Module {
                 .filter(entity -> entity.distanceTo(mc.player) <= breakRange.get())
                 .filter(Entity::isAlive)
                 .filter(entity -> shouldBreak((EndCrystalEntity) entity))
-                .filter(entity -> ignoreWalls.get() || mc.player.canSee(entity));
+                .filter(entity -> ignoreWalls.get() || mc.player.canSee(entity))
+                .filter(entity -> isSafe(entity.getPos()));
     }
 
     private void singleBreak(){
         assert mc.player != null;
         assert mc.world != null;
-        getCrystalStream().filter(entity -> isSafe(entity.getPos()))
-        .max(Comparator.comparingDouble(o -> DamageCalcUtils.crystalDamage(target, o.getPos())))
-        .ifPresent(entity -> hitCrystal((EndCrystalEntity) entity));
+        getCrystalStream().max(Comparator.comparingDouble(o -> DamageCalcUtils.crystalDamage(target, o.getPos())))
+                .ifPresent(entity -> hitCrystal((EndCrystalEntity) entity));
     }
 
     private void multiBreak(){
@@ -695,8 +691,7 @@ public class CrystalAura extends Module {
         assert mc.player != null;
         crystalMap.clear();
         crystalList.clear();
-        getCrystalStream().filter(entity -> !isSafe(entity.getPos()))
-        .forEach(entity -> {
+        getCrystalStream().forEach(entity -> {
             for (Entity target : mc.world.getEntities()){
                 if (target != mc.player && entities.get().getBoolean(target.getType()) && mc.player.distanceTo(target) <= targetRange.get()
                         && target.isAlive() && target instanceof LivingEntity
