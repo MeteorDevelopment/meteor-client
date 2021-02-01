@@ -130,7 +130,7 @@ public class CrystalAura extends Module {
 
     private final Setting<Boolean> rayTrace = sgPlace.add(new BoolSetting.Builder()
             .name("ray-trace")
-            .description("Only places when you can see block, unless it it closer than walls range.")
+            .description("Whether or not to place through walls.")
             .defaultValue(true)
             .build()
     );
@@ -167,13 +167,6 @@ public class CrystalAura extends Module {
             .name("strict")
             .description("Won't place in one block holes to help compatibility with some servers.")
             .defaultValue(false)
-            .build()
-    );
-
-    private final Setting<Boolean> ignoreWalls = sgPlace.add(new BoolSetting.Builder()
-            .name("ignore-walls")
-            .description("Whether or not to place through walls.")
-            .defaultValue(true)
             .build()
     );
 
@@ -260,6 +253,12 @@ public class CrystalAura extends Module {
             .build()
     );
 
+    private final Setting<Boolean> ignoreWalls = sgBreak.add(new BoolSetting.Builder()
+            .name("ray-trace")
+            .description("Whether or not to break through walls.")
+            .defaultValue(true)
+            .build()
+    );
 
     private final Setting<Boolean> removeCrystals = sgBreak.add(new BoolSetting.Builder()
             .name("fast-hit")
@@ -675,7 +674,7 @@ public class CrystalAura extends Module {
                 .filter(entity -> entity.distanceTo(mc.player) <= breakRange.get())
                 .filter(Entity::isAlive)
                 .filter(entity -> shouldBreak((EndCrystalEntity) entity))
-                .filter(entity -> ignoreWalls.get() || mc.player.canSee(entity))
+                .filter(entity -> !ignoreWalls.get() || mc.player.canSee(entity))
                 .filter(entity -> isSafe(entity.getPos()));
     }
 
