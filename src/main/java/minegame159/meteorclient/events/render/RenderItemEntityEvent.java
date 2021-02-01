@@ -2,8 +2,11 @@ package minegame159.meteorclient.events.render;
 
 import minegame159.meteorclient.events.Cancellable;
 import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.ItemEntity;
+
+import java.util.Random;
 
 public class RenderItemEntityEvent extends Cancellable {
     private static final RenderItemEntityEvent INSTANCE = new RenderItemEntityEvent();
@@ -14,8 +17,10 @@ public class RenderItemEntityEvent extends Cancellable {
     public MatrixStack matrixStack;
     public VertexConsumerProvider vertexConsumerProvider;
     public int light;
+    public Random random;
+    public ItemRenderer itemRenderer;
 
-    public static RenderItemEntityEvent get(ItemEntity itemEntity, float f, float tickDelta, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int light) {
+    public static RenderItemEntityEvent get(ItemEntity itemEntity, float f, float tickDelta, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int light, Random random, ItemRenderer itemRenderer) {
         INSTANCE.setCancelled(false);
         INSTANCE.itemEntity = itemEntity;
         INSTANCE.f = f;
@@ -23,6 +28,8 @@ public class RenderItemEntityEvent extends Cancellable {
         INSTANCE.matrixStack = matrixStack;
         INSTANCE.vertexConsumerProvider = vertexConsumerProvider;
         INSTANCE.light = light;
+        INSTANCE.random = random;
+        INSTANCE.itemRenderer = itemRenderer;
         return INSTANCE;
     }
 }
