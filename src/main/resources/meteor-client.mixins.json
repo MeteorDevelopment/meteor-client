@@ -34,7 +34,9 @@
     "ChunkOcclusionDataBuilderMixin",
     "ChunkSkyLightProviderMixin",
     "ClientChunkProvideBaritoneSodiumComapMixin",
+    "ClientConnectionAccessor",
     "ClientConnectionMixin",
+    "ClientPlayerEntityAccessor",
     "ClientPlayerEntityMixin",
     "ClientPlayerInteractionManagerMixin",
     "ClientPlayNetworkHandlerMixin",
@@ -62,6 +64,7 @@
     "IdentifierAccessor",
     "InGameHudMixin",
     "InGameOverlayRendererMixin",
+    "ItemEntityMixin",
     "ItemEntityRendererMixin",
     "ItemStackMixin",
     "JsonGlProgramMixin",
@@ -101,9 +104,7 @@
     "TitleScreenMixin",
     "Vec3dMixin",
     "WorldRendererAccessor",
-    "WorldRendererMixin",
-    "ClientPlayerEntityAccessor",
-    "ClientConnectionAccessor"
+    "WorldRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1
