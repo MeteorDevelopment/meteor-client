@@ -13,7 +13,7 @@ import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
@@ -121,7 +121,7 @@ public class OffhandExtra extends Module {
     @Override
     public void onDeactivate() {
         if (mc.world == null || mc.player == null) return;
-        if (ModuleManager.INSTANCE.get(AutoTotem.class).isActive() && mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING) {
+        if (Modules.get().get(AutoTotem.class).isActive() && mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING) {
             InvUtils.FindItemResult result = InvUtils.findItemWithCount(Items.TOTEM_OF_UNDYING);
             if (result.slot != -1) {
                 doMove(result.slot);
@@ -136,11 +136,11 @@ public class OffhandExtra extends Module {
 
         if (mc.currentScreen != null && ((!(mc.currentScreen instanceof InventoryScreen) && !(mc.currentScreen instanceof WidgetScreen)) || !asimov.get())) return;
         if (!mc.player.isUsingItem()) isClicking = false;
-        if (ModuleManager.INSTANCE.get(AutoTotem.class).getLocked()) return;
+        if (Modules.get().get(AutoTotem.class).getLocked()) return;
 
         if ((mc.player.getMainHandStack().getItem() instanceof SwordItem || mc.player.getMainHandStack().getItem() instanceof AxeItem) && sword.get()) currentMode = Mode.EGap;
         else if (mc.player.getMainHandStack().getItem() instanceof EnchantedGoldenAppleItem && offhandCrystal.get()) currentMode = Mode.Crystal;
-        else if (ModuleManager.INSTANCE.isActive(CrystalAura.class) && offhandCA.get()) currentMode = Mode.Crystal;
+        else if (Modules.get().isActive(CrystalAura.class) && offhandCA.get()) currentMode = Mode.Crystal;
 
         if ((asimov.get() || noTotems) && mc.player.getOffHandStack().getItem() != getItem()) {
             int result = findSlot(getItem());
@@ -179,12 +179,12 @@ public class OffhandExtra extends Module {
     private void onRightClick(RightClickEvent event) {
         assert mc.player != null;
         if (mc.currentScreen != null) return;
-        if (ModuleManager.INSTANCE.get(AutoTotem.class).getLocked() || !canMove()) return;
+        if (Modules.get().get(AutoTotem.class).getLocked() || !canMove()) return;
         if ((mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING || (mc.player.getHealth() + mc.player.getAbsorptionAmount() > health.get())
                && (mc.player.getOffHandStack().getItem() != getItem()) && !(mc.currentScreen instanceof HandledScreen<?>))) {
             if (mc.player.getMainHandStack().getItem() instanceof SwordItem && sword.get()) currentMode = Mode.EGap;
             else if (mc.player.getMainHandStack().getItem() instanceof EnchantedGoldenAppleItem && offhandCrystal.get()) currentMode = Mode.Crystal;
-            else if (ModuleManager.INSTANCE.isActive(CrystalAura.class) && offhandCA.get()) currentMode = Mode.Crystal;
+            else if (Modules.get().isActive(CrystalAura.class) && offhandCA.get()) currentMode = Mode.Crystal;
             if (mc.player.getOffHandStack().getItem() == getItem()) return;
             isClicking = true;
             Item item = getItem();

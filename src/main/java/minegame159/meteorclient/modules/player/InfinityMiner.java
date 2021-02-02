@@ -15,7 +15,7 @@ import minegame159.meteorclient.events.meteor.ActiveModulesChangedEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.combat.AutoLog;
 import minegame159.meteorclient.modules.movement.GUIMove;
 import minegame159.meteorclient.modules.movement.Jesus;
@@ -243,15 +243,15 @@ public class InfinityMiner extends Module {
 
     private List<Module> getToggleModules() {
         return Lists.newArrayList(
-                ModuleManager.INSTANCE.get(Jesus.class),
-                ModuleManager.INSTANCE.get(NoBreakDelay.class),
-                ModuleManager.INSTANCE.get(AntiHunger.class),
-                ModuleManager.INSTANCE.get(AutoEat.class),
-                ModuleManager.INSTANCE.get(NoFall.class),
-                ModuleManager.INSTANCE.get(AutoLog.class),
-                ModuleManager.INSTANCE.get(AutoTool.class),
-                ModuleManager.INSTANCE.get(AutoDrop.class),
-                ModuleManager.INSTANCE.get(GUIMove.class)
+                Modules.get().get(Jesus.class),
+                Modules.get().get(NoBreakDelay.class),
+                Modules.get().get(AntiHunger.class),
+                Modules.get().get(AutoEat.class),
+                Modules.get().get(NoFall.class),
+                Modules.get().get(AutoLog.class),
+                Modules.get().get(AutoTool.class),
+                Modules.get().get(AutoDrop.class),
+                Modules.get().get(GUIMove.class)
         );
     }
 

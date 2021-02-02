@@ -15,19 +15,19 @@ import minegame159.meteorclient.waypoints.Waypoints;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RainbowColorManager {
+public class RainbowColors {
     private static final List<Setting<SettingColor>> colorSettings = new ArrayList<>();
     private static final List<SettingColor> colors = new ArrayList<>();
 
     public static void init() {
-        MeteorClient.EVENT_BUS.subscribe(RainbowColorManager.class);
+        MeteorClient.EVENT_BUS.subscribe(RainbowColors.class);
     }
 
-    public static void addColorSetting(Setting<SettingColor> setting) {
+    public static void addSetting(Setting<SettingColor> setting) {
         colorSettings.add(setting);
     }
 
-    public static void addColor(SettingColor color) {
+    public static void add(SettingColor color) {
         colors.add(color);
     }
 
@@ -41,7 +41,7 @@ public class RainbowColorManager {
             color.update();
         }
 
-        for (Waypoint waypoint : Waypoints.INSTANCE) {
+        for (Waypoint waypoint : Waypoints.get()) {
             waypoint.color.update();
         }
     }

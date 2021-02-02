@@ -14,7 +14,7 @@ import minegame159.meteorclient.events.packets.ContainerSlotUpdateEvent;
 import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.events.packets.PlaySoundPacketEvent;
 import minegame159.meteorclient.events.world.ChunkDataEvent;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.movement.Velocity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
@@ -99,7 +99,7 @@ public abstract class ClientPlayNetworkHandlerMixin {
         double deltaY = vec3d.y - player.getVelocity().y;
         double deltaZ = vec3d.z - player.getVelocity().z;
 
-        Velocity velocity = ModuleManager.INSTANCE.get(Velocity.class);
+        Velocity velocity = Modules.get().get(Velocity.class);
 
         player.setVelocity(
                 player.getVelocity().x + deltaX * velocity.getHorizontal(),

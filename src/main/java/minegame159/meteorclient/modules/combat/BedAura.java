@@ -10,7 +10,7 @@ package minegame159.meteorclient.modules.combat;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.friends.FriendManager;
+import minegame159.meteorclient.friends.Friends;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
@@ -28,7 +28,6 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BedItem;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
@@ -291,7 +290,7 @@ public class BedAura extends Module {
             }
             if (target == null) {
                 Iterator<AbstractClientPlayerEntity> validEntities = mc.world.getPlayers().stream()
-                        .filter(FriendManager.INSTANCE::attack)
+                        .filter(Friends.get()::attack)
                         .filter(entityPlayer -> !entityPlayer.getDisplayName().equals(mc.player.getDisplayName()))
                         .filter(entityPlayer -> mc.player.distanceTo(entityPlayer) <= 10)
                         .filter(entityPlayer -> !entityPlayer.isCreative() && !entityPlayer.isSpectator())

@@ -13,7 +13,7 @@ import minegame159.meteorclient.events.world.ChunkOcclusionEvent;
 import minegame159.meteorclient.mixin.BlockEntityTypeAccessor;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.settings.BlockListSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
@@ -47,7 +47,7 @@ public class Xray extends Module {
 
     @Override
     public void onActivate() {
-        Fullbright fullBright = ModuleManager.INSTANCE.get(Fullbright.class);
+        Fullbright fullBright = Modules.get().get(Fullbright.class);
         fullBrightWasActive = fullBright.isActive();
         if (!fullBright.isActive()) fullBright.toggle();
 
@@ -56,7 +56,7 @@ public class Xray extends Module {
 
     @Override
     public void onDeactivate() {
-        Fullbright fullBright = ModuleManager.INSTANCE.get(Fullbright.class);
+        Fullbright fullBright = Modules.get().get(Fullbright.class);
         if (!fullBrightWasActive && fullBright.isActive()) fullBright.toggle();
 
         if (!MeteorClient.IS_DISCONNECTING) mc.worldRenderer.reload();

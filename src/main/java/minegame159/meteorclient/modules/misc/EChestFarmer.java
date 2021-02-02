@@ -11,7 +11,7 @@ import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.player.AutoTool;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.IntSetting;
@@ -84,7 +84,7 @@ public class EChestFarmer extends Module {
         int slot = -1;
         if(itemResult.count != 0 && itemResult.slot < 9 && itemResult.slot != -1) {
             for (int i = 0; i < 9; i++) {
-                if (ModuleManager.INSTANCE.get(AutoTool.class).isEffectiveOn(mc.player.inventory.getStack(i).getItem(), ENDER_CHEST)
+                if (Modules.get().get(AutoTool.class).isEffectiveOn(mc.player.inventory.getStack(i).getItem(), ENDER_CHEST)
                         && EnchantmentHelper.getLevel(Enchantments.SILK_TOUCH, mc.player.inventory.getStack(i)) == 0) {
                     slot = i;
                 }

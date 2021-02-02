@@ -28,7 +28,7 @@ public class WCheckbox extends WPressable {
     @Override
     protected void onCalculateSize(GuiRenderer renderer) {
         double h = renderer.textHeight();
-        double s = GuiConfig.INSTANCE.guiScale;
+        double s = GuiConfig.get().guiScale;
         width = 6 * s + h + 6 * s;
         height = 6 * s + h + 6 * s;
     }
@@ -43,8 +43,8 @@ public class WCheckbox extends WPressable {
         double h = renderer.textHeight();
 
         if (animationProgress > 0) {
-            double s = GuiConfig.INSTANCE.guiScale;
-            renderer.quad(Region.FULL, x + 6 * s + h / 2 * (1 - animationProgress), y + 6 * s + h / 2 * (1 - animationProgress), h * animationProgress, h * animationProgress, pressed ? GuiConfig.INSTANCE.checkboxPressed : GuiConfig.INSTANCE.checkbox);
+            double s = GuiConfig.get().guiScale;
+            renderer.quad(Region.FULL, x + 6 * s + h / 2 * (1 - animationProgress), y + 6 * s + h / 2 * (1 - animationProgress), h * animationProgress, h * animationProgress, pressed ? GuiConfig.get().checkboxPressed : GuiConfig.get().checkbox);
         }
     }
 }

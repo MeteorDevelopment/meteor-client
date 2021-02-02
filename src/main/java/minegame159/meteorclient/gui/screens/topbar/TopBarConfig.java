@@ -26,8 +26,8 @@ public class TopBarConfig extends TopBarWindowScreen {
                 .name("prefix")
                 .description("Prefix.")
                 .defaultValue(".")
-                .onChanged(Config.INSTANCE::setPrefix)
-                .onModuleActivated(stringSetting -> stringSetting.set(Config.INSTANCE.getPrefix()))
+                .onChanged(Config.get()::setPrefix)
+                .onModuleActivated(stringSetting -> stringSetting.set(Config.get().getPrefix()))
                 .build()
         );
 
@@ -36,10 +36,10 @@ public class TopBarConfig extends TopBarWindowScreen {
                 .description("Use a custom font.")
                 .defaultValue(true)
                 .onChanged(aBoolean -> {
-                    Config.INSTANCE.customFont = aBoolean;
+                    Config.get().customFont = aBoolean;
                     root.invalidate();
                 })
-                .onModuleActivated(booleanSetting -> booleanSetting.set(Config.INSTANCE.customFont))
+                .onModuleActivated(booleanSetting -> booleanSetting.set(Config.get().customFont))
                 .build()
         );
 
@@ -47,8 +47,8 @@ public class TopBarConfig extends TopBarWindowScreen {
                 .name("chat-commands-info")
                 .description("Sends a chat message when you use chat comamnds (eg toggling module, changing a setting, etc).")
                 .defaultValue(true)
-                .onChanged(aBoolean -> Config.INSTANCE.chatCommandsInfo = aBoolean)
-                .onModuleActivated(booleanSetting -> booleanSetting.set(Config.INSTANCE.chatCommandsInfo))
+                .onChanged(aBoolean -> Config.get().chatCommandsInfo = aBoolean)
+                .onModuleActivated(booleanSetting -> booleanSetting.set(Config.get().chatCommandsInfo))
                 .build()
         );
 
@@ -56,8 +56,8 @@ public class TopBarConfig extends TopBarWindowScreen {
                 .name("delete-chat-commands-info")
                 .description("Delete previous chat messages.")
                 .defaultValue(true)
-                .onChanged(aBoolean -> Config.INSTANCE.deleteChatCommandsInfo = aBoolean)
-                .onModuleActivated(booleanSetting -> booleanSetting.set(Config.INSTANCE.deleteChatCommandsInfo))
+                .onChanged(aBoolean -> Config.get().deleteChatCommandsInfo = aBoolean)
+                .onModuleActivated(booleanSetting -> booleanSetting.set(Config.get().deleteChatCommandsInfo))
                 .build()
         );
 

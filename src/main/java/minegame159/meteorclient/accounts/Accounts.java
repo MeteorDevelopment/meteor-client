@@ -10,25 +10,30 @@ import minegame159.meteorclient.accounts.types.CrackedAccount;
 import minegame159.meteorclient.accounts.types.PremiumAccount;
 import minegame159.meteorclient.accounts.types.TheAlteningAccount;
 import minegame159.meteorclient.events.meteor.AccountListChangedEvent;
-import minegame159.meteorclient.utils.files.Savable;
+import minegame159.meteorclient.systems.System;
+import minegame159.meteorclient.systems.Systems;
 import minegame159.meteorclient.utils.misc.NbtException;
 import minegame159.meteorclient.utils.misc.NbtUtils;
 import minegame159.meteorclient.utils.network.MeteorExecutor;
 import net.minecraft.nbt.CompoundTag;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class AccountManager extends Savable<AccountManager> implements Iterable<Account<?>> {
-    public static final AccountManager INSTANCE = new AccountManager();
-
+public class Accounts extends System<Accounts> implements Iterable<Account<?>> {
     private List<Account<?>> accounts = new ArrayList<>();
 
-    private AccountManager() {
-        super(new File(MeteorClient.FOLDER, "accounts.nbt"));
+    public Accounts() {
+        super("accounts");
     }
+
+    public static Accounts get() {
+        return Systems.get(Accounts.class);
+    }
+
+    @Override
+    public void init() {}
 
     public void add(Account<?> account) {
         accounts.add(account);
@@ -66,7 +71,7 @@ public class AccountManager extends Savable<AccountManager> implements Iterable<
     }
 
     @Override
-    public AccountManager fromTag(CompoundTag tag) {
+    public Accounts fromTag(CompoundTag tag) {
         MeteorExecutor.execute(() -> accounts = NbtUtils.listFromTag(tag.getList("accounts", 10), tag1 -> {
             CompoundTag t = (CompoundTag) tag1;
             if (!t.contains("type")) return null;

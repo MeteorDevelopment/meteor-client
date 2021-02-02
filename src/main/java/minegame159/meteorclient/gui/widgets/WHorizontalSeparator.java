@@ -38,11 +38,11 @@ public class WHorizontalSeparator extends WWidget {
         double offsetY = Math.round(height / 2.0);
 
         if (text != null) {
-            renderer.quad(Region.FULL, x, y + offsetY, textStart, 1, GuiConfig.INSTANCE.separator);
-            renderer.text(text, x + textStart + 2, y, false, GuiConfig.INSTANCE.separator);
-            renderer.quad(Region.FULL, x + textEnd, y + offsetY, width - textEnd, 1, GuiConfig.INSTANCE.separator);
+            renderer.quad(Region.FULL, x, y + offsetY, textStart, 1, GuiConfig.get().separator);
+            renderer.text(text, x + textStart + 2, y, false, GuiConfig.get().separator);
+            renderer.quad(Region.FULL, x + textEnd, y + offsetY, width - textEnd, 1, GuiConfig.get().separator);
         } else {
-            renderer.quad(Region.FULL, x, y, width, height, GuiConfig.INSTANCE.separator);
+            renderer.quad(Region.FULL, x, y, width, height, GuiConfig.get().separator);
         }
     }
 }

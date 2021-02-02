@@ -11,7 +11,7 @@ import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.game.GetTooltipEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -86,7 +86,7 @@ public class ShulkerPeek extends Module {
                 int totalItemStacks = 0;
                 int displaysItemStacks = 0;
 
-                if (ModuleManager.INSTANCE.get(this.getClass()).isActive()) {
+                if (Modules.get().get(this.getClass()).isActive()) {
                     Map<Text, Integer> itemCounts = new HashMap<>();
                     for (ItemStack itemStack : itemStacks) {
                         if (!itemStack.isEmpty()) {

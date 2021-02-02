@@ -53,7 +53,7 @@ public abstract class Command {
     // Generate proper command-string to execute.
     // For example: CommandManager.get(Say.class).toString("raw_message") -> ".say raw_message".
     public String toString() {
-        return Config.INSTANCE.getPrefix() + name;
+        return Config.get().getPrefix() + name;
     }
 
     public String toString(String... args) {

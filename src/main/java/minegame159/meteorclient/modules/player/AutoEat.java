@@ -11,7 +11,7 @@ import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.combat.CrystalAura;
 import minegame159.meteorclient.modules.combat.KillAura;
 import minegame159.meteorclient.settings.BoolSetting;
@@ -151,11 +151,11 @@ public class AutoEat extends Module {
                 mc.interactionManager.stopUsingItem(mc.player);
                 ((IKeyBinding) mc.options.keyUse).setPressed(false);
                 if(wasKillActive){
-                    ModuleManager.INSTANCE.get(KillAura.class).toggle();
+                    Modules.get().get(KillAura.class).toggle();
                     wasKillActive = false;
                 }
                 if(wasCrystalActive){
-                    ModuleManager.INSTANCE.get(CrystalAura.class).toggle();
+                    Modules.get().get(CrystalAura.class).toggle();
                     wasCrystalActive = false;
                 }
                 if (preSelectedSlot != -1) mc.player.inventory.selectedSlot = preSelectedSlot;
@@ -170,11 +170,11 @@ public class AutoEat extends Module {
 
             if (!mc.player.isUsingItem()) {
                 if (disableAuras.get()) {
-                    if (ModuleManager.INSTANCE.get(KillAura.class).isActive()) {
+                    if (Modules.get().get(KillAura.class).isActive()) {
                         wasKillActive = true;
-                        ModuleManager.INSTANCE.get(KillAura.class).toggle();
+                        Modules.get().get(KillAura.class).toggle();
                     }
-                    if (ModuleManager.INSTANCE.get(CrystalAura.class).isActive()) {
+                    if (Modules.get().get(CrystalAura.class).isActive()) {
                         wasCrystalActive = true;
                     }
                 }

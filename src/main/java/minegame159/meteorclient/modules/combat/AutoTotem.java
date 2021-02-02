@@ -11,10 +11,10 @@ package minegame159.meteorclient.modules.combat;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.friends.FriendManager;
+import minegame159.meteorclient.friends.Friends;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.movement.NoFall;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.IntSetting;
@@ -103,14 +103,14 @@ public class AutoTotem extends Module {
         InvUtils.FindItemResult result = InvUtils.findItemWithCount(Items.TOTEM_OF_UNDYING);
 
         if (result.count <= 0) {
-            if (!ModuleManager.INSTANCE.get(OffhandExtra.class).isActive() && fallback.get()) {
-                ModuleManager.INSTANCE.get(OffhandExtra.class).toggle();
+            if (!Modules.get().get(OffhandExtra.class).isActive() && fallback.get()) {
+                Modules.get().get(OffhandExtra.class).toggle();
             }
 
-            ModuleManager.INSTANCE.get(OffhandExtra.class).setTotems(true);
+            Modules.get().get(OffhandExtra.class).setTotems(true);
             locked = false;
         } else {
-            ModuleManager.INSTANCE.get(OffhandExtra.class).setTotems(false);
+            Modules.get().get(OffhandExtra.class).setTotems(false);
 
             if (mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING && (!smart.get()
                     || isLow() || elytraMove())) {
@@ -150,14 +150,14 @@ public class AutoTotem extends Module {
             if(entity instanceof EndCrystalEntity && damageTaken < DamageCalcUtils.crystalDamage(mc.player, entity.getPos())){
                 damageTaken = DamageCalcUtils.crystalDamage(mc.player, entity.getPos());
             }else if(entity instanceof PlayerEntity && damageTaken < DamageCalcUtils.getSwordDamage((PlayerEntity) entity, true)){
-                if(FriendManager.INSTANCE.notTrusted((PlayerEntity) entity) && mc.player.getPos().distanceTo(entity.getPos()) < 5){
+                if(Friends.get().notTrusted((PlayerEntity) entity) && mc.player.getPos().distanceTo(entity.getPos()) < 5){
                     if(((PlayerEntity) entity).getActiveItem().getItem() instanceof SwordItem){
                         damageTaken = DamageCalcUtils.getSwordDamage((PlayerEntity) entity, true);
                     }
                 }
             }
         }
-        if(!ModuleManager.INSTANCE.get(NoFall.class).isActive() && mc.player.fallDistance > 3){
+        if(!Modules.get().get(NoFall.class).isActive() && mc.player.fallDistance > 3){
             double damage =mc.player.fallDistance * 0.5;
             if(damage > damageTaken){
                 damageTaken = damage;

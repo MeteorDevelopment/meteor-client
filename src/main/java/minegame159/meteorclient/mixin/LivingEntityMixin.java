@@ -9,7 +9,7 @@ import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.entity.DamageEvent;
 import minegame159.meteorclient.events.entity.TookDamageEvent;
 import minegame159.meteorclient.events.entity.player.CanWalkOnFluidEvent;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.misc.OffhandCrash;
 import minegame159.meteorclient.modules.movement.AntiLevitation;
 import minegame159.meteorclient.modules.render.NoRender;
@@ -55,27 +55,27 @@ public abstract class LivingEntityMixin extends Entity {
 
     @Redirect(method = "travel", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;hasStatusEffect(Lnet/minecraft/entity/effect/StatusEffect;)Z"))
     private boolean travelHasStatusEffectProxy(LivingEntity self, StatusEffect statusEffect) {
-        if (statusEffect == StatusEffects.LEVITATION && ModuleManager.INSTANCE.isActive(AntiLevitation.class)) return false;
+        if (statusEffect == StatusEffects.LEVITATION && Modules.get().isActive(AntiLevitation.class)) return false;
         return self.hasStatusEffect(statusEffect);
     }
 
     @Redirect(method = "travel", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;hasNoGravity()Z"))
     private boolean travelHasNoGravityProxy(LivingEntity self) {
-        if (self.hasStatusEffect(StatusEffects.LEVITATION) && ModuleManager.INSTANCE.isActive(AntiLevitation.class)) {
-            return !ModuleManager.INSTANCE.get(AntiLevitation.class).isApplyGravity();
+        if (self.hasStatusEffect(StatusEffects.LEVITATION) && Modules.get().isActive(AntiLevitation.class)) {
+            return !Modules.get().get(AntiLevitation.class).isApplyGravity();
         }
         return self.hasNoGravity();
     }
 
     @Inject(method = "spawnItemParticles", at = @At("HEAD"), cancellable = true)
     private void spawnItemParticles(ItemStack stack, int count, CallbackInfo info) {
-        NoRender noRender = ModuleManager.INSTANCE.get(NoRender.class);
+        NoRender noRender = Modules.get().get(NoRender.class);
         if (noRender.noEatParticles() && stack.isFood()) info.cancel();
     }
 
     @Inject(method = "onEquipStack", at = @At("HEAD"), cancellable = true)
     private void onEquipStack(ItemStack stack, CallbackInfo info) {
-        if ((Object) this == MinecraftClient.getInstance().player && ModuleManager.INSTANCE.get(OffhandCrash.class).isAntiCrash()) {
+        if ((Object) this == MinecraftClient.getInstance().player && Modules.get().get(OffhandCrash.class).isAntiCrash()) {
             info.cancel();
         }
     }

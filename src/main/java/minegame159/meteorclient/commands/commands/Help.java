@@ -7,7 +7,7 @@ package minegame159.meteorclient.commands.commands;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import minegame159.meteorclient.commands.Command;
-import minegame159.meteorclient.commands.CommandManager;
+import minegame159.meteorclient.commands.Commands;
 import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.command.CommandSource;
 
@@ -21,8 +21,8 @@ public class Help extends Command {
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.executes(context -> {
-            ChatUtils.info("--- List of all (highlight)%d(default) commands ---", CommandManager.getCount());
-            CommandManager.forEach(command -> ChatUtils.info("(highlight)%s(default): %s", command.getName(), command.getDescription()));
+            ChatUtils.info("--- List of all (highlight)%d(default) commands ---", Commands.get().getCount());
+            Commands.get().forEach(command -> ChatUtils.info("(highlight)%s(default): %s", command.getName(), command.getDescription()));
             return SINGLE_SUCCESS;
         });
     }

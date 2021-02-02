@@ -11,7 +11,7 @@ import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.player.PlayerUtils;
 import net.minecraft.entity.MovementType;
@@ -126,7 +126,7 @@ public class Speed extends Module {
             velZ += velZ * value;
         }
 
-        Anchor anchor = ModuleManager.INSTANCE.get(Anchor.class);
+        Anchor anchor = Modules.get().get(Anchor.class);
         if (anchor.isActive() && anchor.controlMovement) {
             velX = anchor.deltaX;
             velZ = anchor.deltaZ;

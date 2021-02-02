@@ -10,7 +10,7 @@ import minegame159.meteorclient.events.meteor.KeyEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.render.Freecam;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -42,7 +42,7 @@ public class AirJump extends Module {
 
     @EventHandler
     private void onKey(KeyEvent event) {
-        if (ModuleManager.INSTANCE.isActive(Freecam.class) || mc.currentScreen != null) return;
+        if (Modules.get().isActive(Freecam.class) || mc.currentScreen != null) return;
         if ((event.action == KeyAction.Press || (event.action == KeyAction.Repeat && onHold.get())) && mc.options.keyJump.matchesKey(event.key, 0)) {
             mc.player.jump();
             level = mc.player.getBlockPos().getY();
@@ -54,7 +54,7 @@ public class AirJump extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if (ModuleManager.INSTANCE.isActive(Freecam.class)) return;
+        if (Modules.get().isActive(Freecam.class)) return;
         if (maintainY.get() && mc.player.getBlockPos().getY() == level){
             mc.player.jump();
         }

@@ -12,7 +12,7 @@ import com.google.common.collect.Streams;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.friends.FriendManager;
+import minegame159.meteorclient.friends.Friends;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.rendering.Renderer;
@@ -391,7 +391,7 @@ public class AnchorAura extends Module {
                 .filter(entity -> entity instanceof PlayerEntity)
                 .filter(Entity::isAlive)
                 .filter(entity -> entity != mc.player)
-                .filter(entity -> FriendManager.INSTANCE.attack((PlayerEntity) entity))
+                .filter(entity -> Friends.get().attack((PlayerEntity) entity))
                 .filter(entity -> entity.distanceTo(mc.player) <= targetRange.get() * 2)
                 .min(Comparator.comparingDouble(o -> o.distanceTo(mc.player)))
                 .map(entity -> (PlayerEntity) entity);

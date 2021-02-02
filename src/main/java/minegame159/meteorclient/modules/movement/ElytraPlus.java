@@ -13,7 +13,7 @@ import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.player.ChestSwap;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.player.InvUtils;
@@ -182,7 +182,7 @@ public class ElytraPlus extends Module {
         jumpTimer = 0;
         ticksLeft = 0;
         if ((chestSwap.get() == ChestSwapMode.Always || chestSwap.get() == ChestSwapMode.WaitForGround) && mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() != Items.ELYTRA) {
-            ModuleManager.INSTANCE.get(ChestSwap.class).swap();
+            Modules.get().get(ChestSwap.class).swap();
         }
     }
 
@@ -191,7 +191,7 @@ public class ElytraPlus extends Module {
         if (moveForward.get()) ((IKeyBinding) mc.options.keyForward).setPressed(false);
 
         if (chestSwap.get() == ChestSwapMode.Always && mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() == Items.ELYTRA) {
-            ModuleManager.INSTANCE.get(ChestSwap.class).swap();
+            Modules.get().get(ChestSwap.class).swap();
         } else if (chestSwap.get() == ChestSwapMode.WaitForGround)
             enableGroundListener();
     }
@@ -379,7 +379,7 @@ public class ElytraPlus extends Module {
         private void chestSwapGroundListener(PlayerMoveEvent event) {
             if (mc.player != null && mc.player.isOnGround()) {
                 if (mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() == Items.ELYTRA) {
-                    ModuleManager.INSTANCE.get(ChestSwap.class).swap();
+                    Modules.get().get(ChestSwap.class).swap();
                     disableGroundListener();
                 }
             }

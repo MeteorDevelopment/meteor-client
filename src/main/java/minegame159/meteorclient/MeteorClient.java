@@ -8,23 +8,19 @@ package minegame159.meteorclient;
 import meteordevelopment.orbit.EventBus;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.IEventBus;
-import minegame159.meteorclient.accounts.AccountManager;
-import minegame159.meteorclient.commands.CommandManager;
-import minegame159.meteorclient.commands.commands.Ignore;
 import minegame159.meteorclient.events.game.GameLeftEvent;
 import minegame159.meteorclient.events.meteor.ClientInitialisedEvent;
 import minegame159.meteorclient.events.meteor.KeyEvent;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.gui.screens.topbar.TopBarModules;
-import minegame159.meteorclient.macros.MacroManager;
 import minegame159.meteorclient.mixininterface.IKeyBinding;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.misc.DiscordPresence;
 import minegame159.meteorclient.rendering.Fonts;
 import minegame159.meteorclient.rendering.Matrices;
 import minegame159.meteorclient.rendering.text.CustomTextRenderer;
+import minegame159.meteorclient.systems.Systems;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.entity.EntityUtils;
 import minegame159.meteorclient.utils.misc.input.KeyAction;
@@ -34,9 +30,8 @@ import minegame159.meteorclient.utils.network.MeteorExecutor;
 import minegame159.meteorclient.utils.network.OnlinePlayers;
 import minegame159.meteorclient.utils.player.EChestMemory;
 import minegame159.meteorclient.utils.player.Rotations;
-import minegame159.meteorclient.utils.render.color.RainbowColorManager;
+import minegame159.meteorclient.utils.render.color.RainbowColors;
 import minegame159.meteorclient.utils.world.BlockIterator;
-import minegame159.meteorclient.waypoints.Waypoints;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.loader.api.FabricLoader;
@@ -77,56 +72,31 @@ public class MeteorClient implements ClientModInitializer {
         Utils.mc = mc;
         EntityUtils.mc = mc;
 
-        Config.INSTANCE = new Config();
-        Config.INSTANCE.load();
-        Fonts.init();
+        Systems.addPreLoadTask(() -> {
+            if (!Modules.get().getFile().exists()) {
+                Modules.get().get(DiscordPresence.class).toggle(false);
+                Utils.addMeteorPvpToServerList();
+            }
+        });
 
         Matrices.begin(new MatrixStack());
+        Fonts.init();
         MeteorExecutor.init();
-        new ModuleManager();
-        CommandManager.init();
-        EChestMemory.init();
         Capes.init();
+        RainbowColors.init();
         BlockIterator.init();
-        RainbowColorManager.init();
+        EChestMemory.init();
         Rotations.init();
 
-        load();
-        Ignore.load();
-        Waypoints.loadIcons();
-
-        EVENT_BUS.subscribe(this);
+        Systems.init();
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            save();
+            Systems.save();
             OnlinePlayers.leave();
         }));
+
+        EVENT_BUS.subscribe(this);
         EVENT_BUS.post(new ClientInitialisedEvent());
-    }
-
-    public void load() {
-        LOG.info("Loading");
-
-        if (!ModuleManager.INSTANCE.load()) {
-            ModuleManager.INSTANCE.get(DiscordPresence.class).toggle(false);
-            Utils.addMeteorPvpToServerList();
-        }
-
-        FriendManager.INSTANCE.load();
-        MacroManager.INSTANCE.load();
-        AccountManager.INSTANCE.load();
-    }
-
-    public void save() {
-        LOG.info("Saving");
-
-        Config.INSTANCE.save();
-        ModuleManager.INSTANCE.save();
-        FriendManager.INSTANCE.save();
-        MacroManager.INSTANCE.save();
-        AccountManager.INSTANCE.save();
-
-        Ignore.save();
     }
 
     private void openClickGui() {
@@ -135,7 +105,7 @@ public class MeteorClient implements ClientModInitializer {
 
     @EventHandler
     private void onGameLeft(GameLeftEvent event) {
-        save();
+        Systems.save();
     }
 
     @EventHandler

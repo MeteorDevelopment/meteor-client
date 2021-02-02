@@ -8,7 +8,7 @@ package minegame159.meteorclient.commands.commands.swarm;
 import baritone.api.BaritoneAPI;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import minegame159.meteorclient.commands.Command;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.combat.Swarm;
 import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.command.CommandSource;
@@ -24,16 +24,16 @@ public class SwarmEscape extends Command {
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.then(literal("escape").executes(context -> {
-                    Swarm swarm = ModuleManager.INSTANCE.get(Swarm.class);
+                    Swarm swarm = Modules.get().get(Swarm.class);
                     if (swarm.isActive()) {
                         if (swarm.currentMode != Swarm.Mode.Queen) {
                             swarm.closeAllServerConnections();
                             if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing())
                                 BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
                             swarm.currentMode = Swarm.Mode.Idle;
-                            ModuleManager.INSTANCE.get(Swarm.class).toggle();
+                            Modules.get().get(Swarm.class).toggle();
                         } else {
-                            ChatUtils.moduleInfo(ModuleManager.INSTANCE.get(Swarm.class), "You are the queen.");
+                            ChatUtils.moduleInfo(Modules.get().get(Swarm.class), "You are the queen.");
                         }
                     }
                     return SINGLE_SUCCESS;

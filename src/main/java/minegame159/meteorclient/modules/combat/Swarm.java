@@ -8,7 +8,7 @@ package minegame159.meteorclient.modules.combat;
 import baritone.api.BaritoneAPI;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import meteordevelopment.orbit.EventHandler;
-import minegame159.meteorclient.commands.CommandManager;
+import minegame159.meteorclient.commands.Commands;
 import minegame159.meteorclient.commands.commands.swarm.SwarmQueen;
 import minegame159.meteorclient.commands.commands.swarm.SwarmSlave;
 import minegame159.meteorclient.events.game.GameJoinedEvent;
@@ -21,7 +21,7 @@ import minegame159.meteorclient.gui.widgets.WTable;
 import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.player.InfinityMiner;
 import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -171,8 +171,8 @@ public class Swarm extends Module {
 
     public void idle() {
         currentMode = Mode.Idle;
-        if (ModuleManager.INSTANCE.get(InfinityMiner.class).isActive())
-            ModuleManager.INSTANCE.get(InfinityMiner.class).toggle();
+        if (Modules.get().get(InfinityMiner.class).isActive())
+            Modules.get().get(InfinityMiner.class).toggle();
         if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing())
             BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
     }
@@ -205,7 +205,7 @@ public class Swarm extends Module {
                     try {
                         socket = new Socket(ipAddress, serverPort.get());
                     } catch (Exception ignored) {
-                        ChatUtils.moduleWarning(ModuleManager.INSTANCE.get(Swarm.class), "Server not found. Attempting to reconnect in 5 seconds.");
+                        ChatUtils.moduleWarning(Modules.get().get(Swarm.class), "Server not found. Attempting to reconnect in 5 seconds.");
                     }
                     if (socket == null) {
                         Thread.sleep(5000);
@@ -214,13 +214,13 @@ public class Swarm extends Module {
                 if (socket != null) {
                     inputStream = socket.getInputStream();
                     dataInputStream = new DataInputStream(inputStream);
-                    ChatUtils.moduleInfo(ModuleManager.INSTANCE.get(Swarm.class), "New Socket");
+                    ChatUtils.moduleInfo(Modules.get().get(Swarm.class), "New Socket");
                     while (!isInterrupted()) {
                         if (socket != null) {
                             String read;
                             read = dataInputStream.readUTF();
                             if (!read.equals("")) {
-                                ChatUtils.moduleInfo(ModuleManager.INSTANCE.get(Swarm.class), "New Command: " + read);
+                                ChatUtils.moduleInfo(Modules.get().get(Swarm.class), "New Command: " + read);
                                 execute(read);
                             }
                         }
@@ -229,7 +229,7 @@ public class Swarm extends Module {
                     inputStream.close();
                 }
             } catch (Exception e) {
-                ChatUtils.moduleError(ModuleManager.INSTANCE.get(Swarm.class), "There is an error in your connection to the server.");
+                ChatUtils.moduleError(Modules.get().get(Swarm.class), "There is an error in your connection to the server.");
                 disconnect();
                 client = null;
             } finally {
@@ -237,7 +237,7 @@ public class Swarm extends Module {
                     try {
                         socket.close();
                     } catch (Exception e) {
-                        ChatUtils.moduleError(ModuleManager.INSTANCE.get(Swarm.class), "There is an error in your connection to the server.");
+                        ChatUtils.moduleError(Modules.get().get(Swarm.class), "There is an error in your connection to the server.");
                     }
                 }
             }
@@ -262,7 +262,7 @@ public class Swarm extends Module {
             try {
                 int port = serverPort.get();
                 this.serverSocket = new ServerSocket(port);
-                ChatUtils.moduleInfo(ModuleManager.INSTANCE.get(Swarm.class), "New Server Opened On Port " + serverPort.get());
+                ChatUtils.moduleInfo(Modules.get().get(Swarm.class), "New Server Opened On Port " + serverPort.get());
                 start();
             } catch (Exception ignored) {
 
@@ -272,7 +272,7 @@ public class Swarm extends Module {
         @Override
         public void run() {
             try {
-                ChatUtils.moduleInfo(ModuleManager.INSTANCE.get(Swarm.class), "Listening for incoming connections.");
+                ChatUtils.moduleInfo(Modules.get().get(Swarm.class), "Listening for incoming connections.");
                 while (!this.isInterrupted()) {
                     Socket connection = this.serverSocket.accept();
                     assignConnectionToSubServer(connection);
@@ -285,7 +285,7 @@ public class Swarm extends Module {
             for (int i = 0; i < clientConnections.length; i++) {
                 if (this.clientConnections[i] == null) {
                     this.clientConnections[i] = new SubServer(connection);
-                    ChatUtils.moduleInfo(ModuleManager.INSTANCE.get(Swarm.class), "New slave connected.");
+                    ChatUtils.moduleInfo(Modules.get().get(Swarm.class), "New slave connected.");
                     break;
                 }
             }
@@ -301,7 +301,7 @@ public class Swarm extends Module {
                 }
                 serverSocket.close();
             } catch (Exception e) {
-                ChatUtils.moduleInfo(ModuleManager.INSTANCE.get(Swarm.class), "Server closed.");
+                ChatUtils.moduleInfo(Modules.get().get(Swarm.class), "Server closed.");
             }
         }
 
@@ -358,7 +358,7 @@ public class Swarm extends Module {
                 outputStream.close();
                 dataOutputStream.close();
             } catch (Exception e) {
-                ChatUtils.moduleError(ModuleManager.INSTANCE.get(Swarm.class), "Error in subsystem.");
+                ChatUtils.moduleError(Modules.get().get(Swarm.class), "Error in subsystem.");
             }
         }
 
@@ -373,7 +373,7 @@ public class Swarm extends Module {
 
     public void execute(@Nonnull String s) {
         try {
-            CommandManager.dispatch(s);
+            Commands.get().dispatch(s);
         } catch (CommandSyntaxException ignored) {
         }
     }
@@ -460,7 +460,7 @@ public class Swarm extends Module {
                 "same computer however with some additional configuration it will work across your local network",
                 "or the broader internet.",
                 "",
-                String.format("All swarm commands should be proceeded by \"%s\"", CommandManager.get(SwarmQueen.class).toString())
+                String.format("All swarm commands should be proceeded by \"%s\"", Commands.get().get(SwarmQueen.class).toString())
         );
     }
 
@@ -492,7 +492,7 @@ public class Swarm extends Module {
                 " Pick an instance of Minecraft to be your queen account.",
                 " Ensure the swarm module is enabled.",
                 " Then click the, button labeled 'Run Server(Q)' under the Swarm config menu.", String.format(
-                        " You may also enter the command \"%s\".", CommandManager.get(SwarmQueen.class).toString("queen"))
+                        " You may also enter the command \"%s\".", Commands.get().get(SwarmQueen.class).toString("queen"))
         );
     }
 
@@ -500,7 +500,7 @@ public class Swarm extends Module {
         return Arrays.asList(
                 "Connecting your slaves:",
                 " For each slave account, assuming you correctly configured the ip and port", String.format(
-                        " in Step 1 simply press the button labeled 'Connect (S)', or enter the command \"%s\"", CommandManager.get(SwarmSlave.class).toString("slave"))
+                        " in Step 1 simply press the button labeled 'Connect (S)', or enter the command \"%s\"", Commands.get().get(SwarmSlave.class).toString("slave"))
         );
     }
 

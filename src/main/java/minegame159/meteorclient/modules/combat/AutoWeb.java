@@ -7,7 +7,7 @@ package minegame159.meteorclient.modules.combat;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.friends.FriendManager;
+import minegame159.meteorclient.friends.Friends;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
@@ -64,7 +64,7 @@ public class AutoWeb extends Module {
         }
 
         for (PlayerEntity player : mc.world.getPlayers()) {
-            if (player == mc.player || !FriendManager.INSTANCE.attack(player) || !player.isAlive() || mc.player.distanceTo(player) > range.get()) continue;
+            if (player == mc.player || !Friends.get().attack(player) || !player.isAlive() || mc.player.distanceTo(player) > range.get()) continue;
 
             if (target == null) {
                 target = player;
@@ -75,7 +75,7 @@ public class AutoWeb extends Module {
 
         if (target == null) {
             for (FakePlayerEntity fakeTarget : FakePlayerUtils.getPlayers().keySet()) {
-                if (fakeTarget.getHealth() <= 0 || !FriendManager.INSTANCE.attack(fakeTarget) || !fakeTarget.isAlive()) continue;
+                if (fakeTarget.getHealth() <= 0 || !Friends.get().attack(fakeTarget) || !fakeTarget.isAlive()) continue;
 
                 if (target == null) {
                     target = fakeTarget;

@@ -9,7 +9,7 @@ import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.meteor.ModuleBindChangedEvent;
 import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.utils.Utils;
 
 public class ModuleScreen extends WindowScreen {
@@ -54,7 +54,7 @@ public class ModuleScreen extends WindowScreen {
 
         // Bind
         keybind = add(new WKeybind(module.getKey())).getWidget();
-        keybind.actionOnSet = () -> ModuleManager.INSTANCE.setModuleToBind(module);
+        keybind.actionOnSet = () -> Modules.get().setModuleToBind(module);
         keybind.action = () -> module.setKey(keybind.get());
         row();
 
@@ -64,7 +64,7 @@ public class ModuleScreen extends WindowScreen {
         WCheckbox toggleOnKeyRelease = tokrTable.add(new WCheckbox(module.toggleOnKeyRelease)).getWidget();
         toggleOnKeyRelease.action = () -> {
             module.toggleOnKeyRelease = toggleOnKeyRelease.checked;
-            ModuleManager.INSTANCE.save();
+            Modules.get().save();
         };
         row();
 

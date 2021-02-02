@@ -6,7 +6,7 @@
 package minegame159.meteorclient.mixin.sodium;
 
 import me.jellysquid.mods.sodium.client.render.occlusion.BlockOcclusionCache;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.render.Xray;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
@@ -23,7 +23,7 @@ public class SodiumBlockOcculsionCacheMixin {
     private void shouldDrawSide(BlockState selfState, BlockView view, BlockPos pos, Direction facing, CallbackInfoReturnable<Boolean> info) {
 //        DrawSideEvent event = MeteorClient.postEvent(DrawSideEvent.get(selfState));  // TODO: Xray: async DrawSideEvent
 //        if (event.isSet()) info.setReturnValue(event.getDraw());
-        Xray xray = ModuleManager.INSTANCE.get(Xray.class);
+        Xray xray = Modules.get().get(Xray.class);
 
         if (xray.isActive()) {
             info.setReturnValue(!xray.isBlocked(selfState.getBlock()));

@@ -6,7 +6,7 @@
 package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.mixininterface.IChatHud;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.misc.BetterChat;
 import net.minecraft.client.gui.hud.ChatHud;
 import net.minecraft.client.gui.hud.ChatHudLine;
@@ -33,14 +33,14 @@ public abstract class ChatHudMixin implements IChatHud {
     @Inject(at = @At("HEAD"), method = "addMessage(Lnet/minecraft/text/Text;IIZ)V", cancellable = true)
     private void onAddMessage(Text message, int messageId, int timestamp, boolean bl, CallbackInfo info) {
         // Better Chat
-        if (ModuleManager.INSTANCE.get(BetterChat.class).onMsg(message.getString(), messageId, timestamp, messages, visibleMessages)) {
+        if (Modules.get().get(BetterChat.class).onMsg(message.getString(), messageId, timestamp, messages, visibleMessages)) {
             info.cancel();
         }
     }
 
     @Redirect(method = "addMessage(Lnet/minecraft/text/Text;IIZ)V", at = @At(value = "INVOKE", target = "Ljava/util/List;size()I"))
     private int addMessageListSizeProxy(List<ChatHudLine> list) {
-        BetterChat betterChat = ModuleManager.INSTANCE.get(BetterChat.class);
+        BetterChat betterChat = Modules.get().get(BetterChat.class);
         return betterChat.isLongerChat() && betterChat.getChatLength() > 100 ? 1 : list.size();
     }
 

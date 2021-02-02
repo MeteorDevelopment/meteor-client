@@ -85,7 +85,7 @@ public class DeathPosition extends Module {
                         break;
                 }
 
-                Waypoints.INSTANCE.add(waypoint);
+                Waypoints.get().add(waypoint);
             }
         }
     }
@@ -117,7 +117,7 @@ public class DeathPosition extends Module {
     }
 
     private void clear() {
-        Waypoints.INSTANCE.remove(waypoint);
+        Waypoints.get().remove(waypoint);
         label.setText("No latest death.");
     }
 }

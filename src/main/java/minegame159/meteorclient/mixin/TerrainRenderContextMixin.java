@@ -5,7 +5,7 @@
 
 package minegame159.meteorclient.mixin;
 
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.render.Xray;
 import net.fabricmc.fabric.impl.client.indigo.renderer.render.TerrainRenderContext;
 import net.minecraft.block.BlockState;
@@ -21,7 +21,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class TerrainRenderContextMixin {
     @Inject(method = "tesselateBlock", at = @At("HEAD"), cancellable = true, remap = false)
     private void onTesselateBlock(BlockState blockState, BlockPos blockPos, BakedModel model, MatrixStack matrixStack, CallbackInfoReturnable<Boolean> info) {
-        if (ModuleManager.INSTANCE.get(Xray.class).isBlocked(blockState.getBlock())) {
+        if (Modules.get().get(Xray.class).isBlocked(blockState.getBlock())) {
             info.cancel();
         }
     }

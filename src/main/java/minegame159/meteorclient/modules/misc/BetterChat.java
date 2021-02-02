@@ -8,16 +8,16 @@ package minegame159.meteorclient.modules.misc;
 import it.unimi.dsi.fastutil.chars.Char2CharArrayMap;
 import it.unimi.dsi.fastutil.chars.Char2CharMap;
 import meteordevelopment.orbit.EventHandler;
-import minegame159.meteorclient.commands.CommandManager;
-import minegame159.meteorclient.commands.commands.Ignore;
+import minegame159.meteorclient.commands.Commands;
 import minegame159.meteorclient.commands.commands.Say;
 import minegame159.meteorclient.events.entity.player.SendMessageEvent;
 import minegame159.meteorclient.friends.Friend;
-import minegame159.meteorclient.friends.FriendManager;
+import minegame159.meteorclient.friends.Friends;
 import minegame159.meteorclient.mixininterface.IChatHudLine;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.systems.Ignores;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.client.gui.hud.ChatHudLine;
@@ -323,7 +323,7 @@ public class BetterChat extends Module {
     // IGNORE
 
     private boolean ignoreOnMsg(String message) {
-        for (String name : Ignore.ignoredPlayers) {
+        for (String name : Ignores.get()) {
             if (message.contains("<" + name + ">")) {
                 return true;
             }
@@ -345,7 +345,7 @@ public class BetterChat extends Module {
     // FRIEND COLOR
 
     private boolean friendColorOnMsg(String message) {
-        List<Friend> friends = FriendManager.INSTANCE.getAll();
+        List<Friend> friends = Friends.get().getAll();
         boolean hadFriends = false;
 
         for (Friend friend : friends) {
@@ -451,7 +451,7 @@ public class BetterChat extends Module {
                 .withFormatting(Formatting.DARK_RED)
                 .withClickEvent(new ClickEvent(
                         ClickEvent.Action.RUN_COMMAND,
-                        CommandManager.get(Say.class).toString(message)
+                        Commands.get().get(Say.class).toString(message)
                 ))
                 .withHoverEvent(new HoverEvent(
                         HoverEvent.Action.SHOW_TEXT,

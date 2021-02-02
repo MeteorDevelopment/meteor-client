@@ -5,7 +5,7 @@
 
 package minegame159.meteorclient.mixin;
 
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.render.Chams;
 import minegame159.meteorclient.modules.render.Freecam;
 import minegame159.meteorclient.utils.Utils;
@@ -33,14 +33,14 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
 
     @Redirect(method = "hasLabel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/MinecraftClient;getCameraEntity()Lnet/minecraft/entity/Entity;"))
     private Entity hasLabelGetCameraEntityProxy(MinecraftClient mc) {
-        if (ModuleManager.INSTANCE.isActive(Freecam.class)) return null;
+        if (Modules.get().isActive(Freecam.class)) return null;
         return mc.getCameraEntity();
     }
 
     @SuppressWarnings("UnresolvedMixinReference")
     @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/entity/model/EntityModel;render(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumer;IIFFFF)V"))
     private void redirectRender(EntityModel<LivingEntity> model, MatrixStack matrices, VertexConsumer vertices, int light, int overlay, float red, float green, float blue, float alpha, LivingEntity entity) {
-        if (!ModuleManager.INSTANCE.get(Chams.class).renderChams(model,matrices, vertices, light, overlay, entity)) model.render(matrices, vertices, light, overlay, red, green, blue, alpha);
+        if (!Modules.get().get(Chams.class).renderChams(model,matrices, vertices, light, overlay, entity)) model.render(matrices, vertices, light, overlay, red, green, blue, alpha);
     }
 
     @ModifyVariable(method = "render", ordinal = 2, at = @At(value = "STORE", ordinal = 0))

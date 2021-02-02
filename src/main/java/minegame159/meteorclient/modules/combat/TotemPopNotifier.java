@@ -11,7 +11,7 @@ import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.game.GameJoinedEvent;
 import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.friends.FriendManager;
+import minegame159.meteorclient.friends.Friends;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
@@ -93,7 +93,7 @@ public class TotemPopNotifier extends Module {
         if (p.getStatus() != 35) return;
 
         Entity entity = p.getEntity(mc.world);
-        if (entity == null || (entity.equals(mc.player) && ignoreOwn.get()) || (!FriendManager.INSTANCE.attack((PlayerEntity) entity) && ignoreFriend.get())) return;
+        if (entity == null || (entity.equals(mc.player) && ignoreOwn.get()) || (!Friends.get().attack((PlayerEntity) entity) && ignoreFriend.get())) return;
 
         synchronized (totemPops) {
             int pops = totemPops.getOrDefault(entity.getUuid(), 0);

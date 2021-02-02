@@ -11,7 +11,7 @@ import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.combat.AutoArmor;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -109,7 +109,7 @@ public class AutoMend extends Module {
         else if (EnchantmentHelper.getLevel(Enchantments.MENDING, mc.player.getOffHandStack()) == 0) replaceItem(false);
 
         if(armourSlots.get()) {
-            if(ModuleManager.INSTANCE.get(AutoArmor.class).isActive()) {
+            if(Modules.get().get(AutoArmor.class).isActive()) {
                 ChatUtils.moduleWarning(this, "Cannot use armor slots while AutoArmor is active. Please disable AutoArmor and try again. Disabling Use Armor Slots.");
                 armourSlots.set(false);
             }

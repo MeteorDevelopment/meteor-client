@@ -5,7 +5,7 @@
 
 package minegame159.meteorclient.mixin;
 
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.player.AntiCactus;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.CactusBlock;
@@ -24,7 +24,7 @@ public class CactusBlockMixin {
     @Inject(method = "getCollisionShape", at = {@At("HEAD")}, cancellable = true)
     private void onGetCollisionShape(BlockState blockState_1, BlockView blockView_1, BlockPos blockPos_1, ShapeContext entityContext_1, CallbackInfoReturnable<VoxelShape> infoR)
     {
-        if (ModuleManager.INSTANCE.isActive(AntiCactus.class)) {
+        if (Modules.get().isActive(AntiCactus.class)) {
             infoR.setReturnValue(VoxelShapes.fullCube());
         }
     }

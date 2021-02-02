@@ -9,7 +9,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import minegame159.meteorclient.commands.Command;
 import minegame159.meteorclient.commands.arguments.ModuleArgumentType;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.command.CommandSource;
 
@@ -27,7 +27,7 @@ public class Bind extends Command {
                     Module m = context.getArgument("module", Module.class);
 
                     ChatUtils.prefixInfo("KeyBinds","Press a key you want this module to be bound to.");
-                    ModuleManager.INSTANCE.setModuleToBind(m);
+                    Modules.get().setModuleToBind(m);
 
                     return SINGLE_SUCCESS;
                 }));

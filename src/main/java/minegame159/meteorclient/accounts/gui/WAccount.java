@@ -6,7 +6,7 @@
 package minegame159.meteorclient.accounts.gui;
 
 import minegame159.meteorclient.accounts.Account;
-import minegame159.meteorclient.accounts.AccountManager;
+import minegame159.meteorclient.accounts.Accounts;
 import minegame159.meteorclient.gui.GuiConfig;
 import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.utils.network.MeteorExecutor;
@@ -19,11 +19,11 @@ public class WAccount extends WTable {
 
         // Name
         WLabel name = add(new WLabel(account.getUsername())).getWidget();
-        if (MinecraftClient.getInstance().getSession().getUsername().equalsIgnoreCase(account.getUsername())) name.color = GuiConfig.INSTANCE.loggedInText;
+        if (MinecraftClient.getInstance().getSession().getUsername().equalsIgnoreCase(account.getUsername())) name.color = GuiConfig.get().loggedInText;
 
         // Account Type
         WLabel type = add(new WLabel("(" + account.getType() + ")")).fillX().right().getWidget();
-        type.color = GuiConfig.INSTANCE.accountTypeText;
+        type.color = GuiConfig.get().accountTypeText;
 
         // Login
         WButton login = add(new WButton("Login")).getWidget();
@@ -36,7 +36,7 @@ public class WAccount extends WTable {
                 if (account.login()) {
                     name.setText(account.getUsername());
 
-                    AccountManager.INSTANCE.save();
+                    Accounts.get().save();
 
                     screen.clear();
                     screen.initWidgets();
@@ -49,6 +49,6 @@ public class WAccount extends WTable {
 
         // Remove
         WMinus minus = add(new WMinus()).getWidget();
-        minus.action = () -> AccountManager.INSTANCE.remove(account);
+        minus.action = () -> Accounts.get().remove(account);
     }
 }

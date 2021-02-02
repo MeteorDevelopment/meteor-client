@@ -55,11 +55,11 @@ public class EditMacroScreen extends WindowScreen {
         apply.action = () -> {
             if (isNewMacro) {
                 if (macro.name != null && !macro.name.isEmpty() && macro.messages.size() > 0 && macro.key != -1) {
-                    MacroManager.INSTANCE.add(macro);
+                    Macros.get().add(macro);
                     onClose();
                 }
             } else {
-                MacroManager.INSTANCE.save();
+                Macros.get().save();
                 MeteorClient.EVENT_BUS.post(MacroListChangedEvent.get());
                 onClose();
             }

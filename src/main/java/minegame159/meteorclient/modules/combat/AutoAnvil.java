@@ -8,7 +8,7 @@ package minegame159.meteorclient.modules.combat;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.game.OpenScreenEvent;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.friends.FriendManager;
+import minegame159.meteorclient.friends.Friends;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
@@ -114,7 +114,7 @@ public class AutoAnvil extends Module {
         if (target != null && (mc.player.distanceTo(target) > range.get() || !target.isAlive())) target = null;
 
         for (PlayerEntity player : mc.world.getPlayers()) {
-            if (player == mc.player || !FriendManager.INSTANCE.attack(player) || !player.isAlive() || mc.player.distanceTo(player) > range.get()) continue;
+            if (player == mc.player || !Friends.get().attack(player) || !player.isAlive() || mc.player.distanceTo(player) > range.get()) continue;
 
             if (target == null) target = player;
             else if (mc.player.distanceTo(target) > mc.player.distanceTo(player)) target = player;
@@ -122,7 +122,7 @@ public class AutoAnvil extends Module {
 
         if (target == null) {
             for (FakePlayerEntity player : FakePlayerUtils.getPlayers().keySet()) {
-                if (!FriendManager.INSTANCE.attack(player) || !player.isAlive() || mc.player.distanceTo(player) > range.get()) continue;
+                if (!Friends.get().attack(player) || !player.isAlive() || mc.player.distanceTo(player) > range.get()) continue;
 
                 if (target == null) target = player;
                 else if (mc.player.distanceTo(target) > mc.player.distanceTo(player)) target = player;

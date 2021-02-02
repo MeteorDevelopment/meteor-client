@@ -77,7 +77,7 @@ public class WView extends WTable {
     @Override
     protected boolean onMouseScrolled(double amount) {
         if (hasScrollBar && (!onlyWhenMouseOver || mouseOver)) {
-            scrollHeight -= amount * 22 * GuiConfig.INSTANCE.scrollSensitivity;
+            scrollHeight -= amount * 22 * GuiConfig.get().scrollSensitivity;
             moveWidgets();
             return true;
         }

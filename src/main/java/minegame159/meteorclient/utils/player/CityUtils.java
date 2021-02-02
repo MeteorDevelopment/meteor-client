@@ -5,7 +5,7 @@
 
 package minegame159.meteorclient.utils.player;
 
-import minegame159.meteorclient.friends.FriendManager;
+import minegame159.meteorclient.friends.Friends;
 import minegame159.meteorclient.mixin.AbstractBlockAccessor;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.entity.FakePlayerEntity;
@@ -30,7 +30,7 @@ public class CityUtils {
         for (PlayerEntity target : mc.world.getPlayers()) {
             if (target == mc.player
                     || target.isDead()
-                    || !FriendManager.INSTANCE.attack(target)
+                    || !Friends.get().attack(target)
                     || mc.player.distanceTo(target) > range
             ) continue;
 
@@ -46,7 +46,7 @@ public class CityUtils {
 
         if (closestTarget == null) {
             for (FakePlayerEntity target : FakePlayerUtils.getPlayers().keySet()) {
-                if (target.isDead() || !FriendManager.INSTANCE.attack(target) || mc.player.distanceTo(target) > range) continue;
+                if (target.isDead() || !Friends.get().attack(target) || mc.player.distanceTo(target) > range) continue;
 
                 if (closestTarget == null) {
                     closestTarget = target;

@@ -5,14 +5,11 @@
 
 package minegame159.meteorclient.accounts.gui;
 
-import minegame159.meteorclient.accounts.Account;
-import minegame159.meteorclient.accounts.AccountManager;
-import minegame159.meteorclient.accounts.types.CrackedAccount;
+import minegame159.meteorclient.accounts.Accounts;
 import minegame159.meteorclient.accounts.types.PremiumAccount;
 import minegame159.meteorclient.gui.screens.WindowScreen;
 import minegame159.meteorclient.gui.widgets.WButton;
 import minegame159.meteorclient.gui.widgets.WLabel;
-import minegame159.meteorclient.gui.widgets.WTextBox;
 
 public class AddPremiumAccountScreen extends WindowScreen {
     public AddPremiumAccountScreen() {
@@ -33,7 +30,7 @@ public class AddPremiumAccountScreen extends WindowScreen {
         WButton add = add(new WButton("Add")).fillX().expandX().getWidget();
         add.action = () -> {
             PremiumAccount account = new PremiumAccount(email.getText(), password.getText());
-            if (!email.getText().isEmpty() && !password.getText().isEmpty() && email.getText().contains("@") && !AccountManager.INSTANCE.exists(account)) {
+            if (!email.getText().isEmpty() && !password.getText().isEmpty() && email.getText().contains("@") && !Accounts.get().exists(account)) {
                 AccountsScreen.addAccount(add, this, account);
             }
         };

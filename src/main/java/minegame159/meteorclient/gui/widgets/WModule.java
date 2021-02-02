@@ -45,7 +45,7 @@ public class WModule extends WPressable {
     protected void onCalculateSize(GuiRenderer renderer) {
         if (titleWidth == 0) titleWidth = renderer.textWidth(module.title);
 
-        double s = GuiConfig.INSTANCE.guiScale;
+        double s = GuiConfig.get().guiScale;
         width = 4 * s + titleWidth + 4 * s;
         height = 4 * s + renderer.textHeight() + 4 * s;
     }
@@ -79,24 +79,24 @@ public class WModule extends WPressable {
         animationProgress2 = Utils.clamp(animationProgress2, 0, 1);
 
         if (animationProgress1 > 0  || animationProgress2 > 0) {
-            renderer.quad(Region.FULL, x, y, width * animationProgress1, height, GuiConfig.INSTANCE.moduleBackground);
-            renderer.quad(Region.FULL, x, y + height * (1 - animationProgress2), 2 * GuiConfig.INSTANCE.guiScale, height * animationProgress2, GuiConfig.INSTANCE.accent);
+            renderer.quad(Region.FULL, x, y, width * animationProgress1, height, GuiConfig.get().moduleBackground);
+            renderer.quad(Region.FULL, x, y + height * (1 - animationProgress2), 2 * GuiConfig.get().guiScale, height * animationProgress2, GuiConfig.get().accent);
         }
 
         double nameX = x;
 
-        switch (GuiConfig.INSTANCE.moduleNameAlignment) {
+        switch (GuiConfig.get().moduleNameAlignment) {
             case Left:
-                nameX += GuiConfig.INSTANCE.moduleNameAlignmentPadding;
+                nameX += GuiConfig.get().moduleNameAlignmentPadding;
                 break;
             case Center:
                 nameX += + width / 2 - titleWidth / 2;
                 break;
             case Right:
-                nameX = (nameX + width - titleWidth) - GuiConfig.INSTANCE.moduleNameAlignmentPadding;
+                nameX = (nameX + width - titleWidth) - GuiConfig.get().moduleNameAlignmentPadding;
                 break;
         }
 
-        renderer.text(module.title, nameX, y + 4, false, GuiConfig.INSTANCE.text);
+        renderer.text(module.title, nameX, y + 4, false, GuiConfig.get().text);
     }
 }

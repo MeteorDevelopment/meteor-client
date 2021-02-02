@@ -12,7 +12,7 @@ import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.player.MountBypass;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.IntSetting;
@@ -82,7 +82,7 @@ public class AutoMountBypassDupe extends Module {
     private void onSendPacket(PacketEvent.Send event) {
         if (noCancel) return;
 
-        ModuleManager.INSTANCE.get(MountBypass.class).onSendPacket(event);
+        Modules.get().get(MountBypass.class).onSendPacket(event);
     }
 
     @EventHandler

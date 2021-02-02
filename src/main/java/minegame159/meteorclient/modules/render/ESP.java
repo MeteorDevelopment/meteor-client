@@ -10,7 +10,7 @@ import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.rendering.MeshBuilder;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.rendering.ShapeMode;
@@ -171,7 +171,7 @@ public class ESP extends Module {
         count = 0;
 
         for (Entity entity : mc.world.getEntities()) {
-            if ((!ModuleManager.INSTANCE.isActive(Freecam.class) && entity == mc.player) || !entities.get().getBoolean(entity.getType())) continue;
+            if ((!Modules.get().isActive(Freecam.class) && entity == mc.player) || !entities.get().getBoolean(entity.getType())) continue;
             count++;
 
             if (mode.get() == Mode.Box) render(event, entity, getColor(entity));

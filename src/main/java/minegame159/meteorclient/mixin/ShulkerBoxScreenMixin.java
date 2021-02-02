@@ -1,6 +1,6 @@
 package minegame159.meteorclient.mixin;
 
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.misc.AutoSteal;
 import minegame159.meteorclient.utils.render.MeteorButtonWidget;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
@@ -21,7 +21,7 @@ public abstract class ShulkerBoxScreenMixin extends HandledScreen<ShulkerBoxScre
     protected void init() {
         super.init();
 
-        AutoSteal autoSteal = ModuleManager.INSTANCE.get(AutoSteal.class);
+        AutoSteal autoSteal = Modules.get().get(AutoSteal.class);
 
         if (autoSteal.isActive() && autoSteal.getStealButtonEnabled())
             addButton(new MeteorButtonWidget(x + backgroundWidth - 88, y + 3, 40, 12, new LiteralText("Steal"), button -> steal(handler)));
@@ -33,10 +33,10 @@ public abstract class ShulkerBoxScreenMixin extends HandledScreen<ShulkerBoxScre
     }
 
     private void steal(ShulkerBoxScreenHandler handler) {
-        ModuleManager.INSTANCE.get(AutoSteal.class).stealAsync(handler);
+        Modules.get().get(AutoSteal.class).stealAsync(handler);
     }
 
     private void dump(ShulkerBoxScreenHandler handler) {
-        ModuleManager.INSTANCE.get(AutoSteal.class).dumpAsync(handler);
+        Modules.get().get(AutoSteal.class).dumpAsync(handler);
     }
 }

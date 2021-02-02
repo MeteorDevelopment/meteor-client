@@ -5,7 +5,7 @@
 
 package minegame159.meteorclient.mixin;
 
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.movement.GUIMove;
 import net.minecraft.client.input.KeyboardInput;
 import org.spongepowered.asm.mixin.Mixin;
@@ -17,6 +17,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class KeyboardInputMixin {
     @Inject(method = "tick", at = @At("TAIL"))
     private void onTick(boolean bl, CallbackInfo info) {
-        ModuleManager.INSTANCE.get(GUIMove.class).tick();
+        Modules.get().get(GUIMove.class).tick();
     }
 }

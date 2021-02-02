@@ -7,7 +7,7 @@ package minegame159.meteorclient.accounts.gui;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.accounts.Account;
-import minegame159.meteorclient.accounts.AccountManager;
+import minegame159.meteorclient.accounts.Accounts;
 import minegame159.meteorclient.events.meteor.AccountListChangedEvent;
 import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.gui.screens.WindowScreen;
@@ -25,11 +25,11 @@ public class AccountsScreen extends WindowScreen {
 
     void initWidgets() {
         // Accounts
-        if (AccountManager.INSTANCE.size() > 0) {
+        if (Accounts.get().size() > 0) {
             WTable t = add(new WTable()).fillX().expandX().getWidget();
             row();
 
-            for (Account<?> account : AccountManager.INSTANCE) {
+            for (Account<?> account : Accounts.get()) {
                 t.add(new WAccount(this, account)).fillX().expandX();
                 t.row();
             }
@@ -59,7 +59,7 @@ public class AccountsScreen extends WindowScreen {
 
         MeteorExecutor.execute(() -> {
             if (account.fetchInfo() && account.fetchHead()) {
-                AccountManager.INSTANCE.add(account);
+                Accounts.get().add(account);
                 screen.locked = false;
                 screen.onClose();
             }

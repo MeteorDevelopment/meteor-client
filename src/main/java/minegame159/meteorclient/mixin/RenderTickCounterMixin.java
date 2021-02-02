@@ -5,7 +5,7 @@
 
 package minegame159.meteorclient.mixin;
 
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.movement.Timer;
 import net.minecraft.client.render.RenderTickCounter;
 import org.objectweb.asm.Opcodes;
@@ -21,6 +21,6 @@ public class RenderTickCounterMixin {
 
     @Inject(method = "beginRenderTick", at = @At(value = "FIELD", target = "Lnet/minecraft/client/render/RenderTickCounter;prevTimeMillis:J", opcode = Opcodes.PUTFIELD))
     private void onBeingRenderTick(long a, CallbackInfoReturnable<Integer> info) {
-        lastFrameDuration *= ModuleManager.INSTANCE.get(Timer.class).getMultiplier();
+        lastFrameDuration *= Modules.get().get(Timer.class).getMultiplier();
     }
 }

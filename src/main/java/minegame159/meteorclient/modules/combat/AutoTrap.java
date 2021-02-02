@@ -8,7 +8,7 @@ package minegame159.meteorclient.modules.combat;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.friends.FriendManager;
+import minegame159.meteorclient.friends.Friends;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.rendering.Renderer;
@@ -231,13 +231,13 @@ public class AutoTrap extends Module {
 
     private PlayerEntity findTarget() {
         for (PlayerEntity player : mc.world.getPlayers()){
-            if (player == mc.player || !FriendManager.INSTANCE.attack(player) || !player.isAlive()) continue;
+            if (player == mc.player || !Friends.get().attack(player) || !player.isAlive()) continue;
             if (target == null) target = player;
             else if (mc.player.distanceTo(player) < mc.player.distanceTo(target)) target = player;
         }
 
         for (FakePlayerEntity fakeTarget : FakePlayerUtils.getPlayers().keySet()) {
-            if (!FriendManager.INSTANCE.attack(fakeTarget) || !fakeTarget.isAlive()) continue;
+            if (!Friends.get().attack(fakeTarget) || !fakeTarget.isAlive()) continue;
             if (target == null) target = fakeTarget;
             else if (mc.player.distanceTo(fakeTarget) < mc.player.distanceTo(target)) target = fakeTarget;
         }
