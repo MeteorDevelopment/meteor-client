@@ -19,7 +19,7 @@ import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.misc.input.KeyAction;
 import minegame159.meteorclient.utils.player.ChatUtils;
-import minegame159.meteorclient.utils.player.RotationUtils;
+import minegame159.meteorclient.utils.player.Rotations;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.hit.BlockHitResult;
@@ -151,12 +151,18 @@ public class Freecam extends Module {
             Vec3d crossHairPosition;
 
             if (mc.crosshairTarget instanceof BlockHitResult) {
-                crossHairPosition = ((BlockHitResult) mc.crosshairTarget).getPos();
+                crossHairPosition = mc.crosshairTarget.getPos();
                 crossHairPos = ((BlockHitResult) mc.crosshairTarget).getBlockPos();
-                if (!mc.world.getBlockState(crossHairPos).isAir()) RotationUtils.clientRotate(crossHairPosition);
+
+                if (!mc.world.getBlockState(crossHairPos).isAir()) {
+                    mc.player.yaw = (float) Rotations.getYaw(crossHairPosition);
+                    mc.player.pitch = (float) Rotations.getPitch(crossHairPosition);
+                }
             } else {
                 crossHairPos = ((EntityHitResult) mc.crosshairTarget).getEntity().getBlockPos();
-                RotationUtils.clientRotate(crossHairPos);
+
+                mc.player.yaw = (float) Rotations.getYaw(crossHairPos);
+                mc.player.pitch = (float) Rotations.getPitch(crossHairPos);
             }
         }
 
