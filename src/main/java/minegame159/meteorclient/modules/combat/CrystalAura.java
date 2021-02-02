@@ -461,6 +461,7 @@ public class CrystalAura extends Module {
     private double bestDamage = 0;
     private double lastDamage = 0;
     private EndCrystalEntity heldCrystal = null;
+    private EndCrystalEntity singleCrystal = null;
     private LivingEntity target;
     private boolean locked = false;
     private boolean canSupport;
@@ -482,6 +483,7 @@ public class CrystalAura extends Module {
         placeDelayLeft = 0;
         breakDelayLeft = 0;
         heldCrystal = null;
+        singleCrystal = null;
         locked = false;
         broken = false;
     }
@@ -508,6 +510,11 @@ public class CrystalAura extends Module {
             heldCrystal = null;
             locked = false;
         }
+        if (singleCrystal == null) return;
+        if (event.entity.getBlockPos().equals(singleCrystal.getBlockPos())){
+            singleCrystal = null;
+            locked = false;
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGH)
@@ -532,6 +539,7 @@ public class CrystalAura extends Module {
         supportDelayLeft --;
         if (target == null) {
             heldCrystal = null;
+            singleCrystal = null;
             locked = false;
         }
 
@@ -551,18 +559,28 @@ public class CrystalAura extends Module {
             heldCrystal = null;
             locked = false;
         }
+        if (singleCrystal != null && mc.player.distanceTo(singleCrystal) > breakRange.get()) {
+            singleCrystal = null;
+        }
         boolean isThere = false;
+        boolean isThere2 = false;
         if (heldCrystal != null) {
             for (Entity entity : mc.world.getEntities()) {
                 if (!(entity instanceof EndCrystalEntity)) continue;
                 if (heldCrystal != null && entity.getBlockPos().equals(heldCrystal.getBlockPos())) {
                     isThere = true;
-                    break;
                 }
+                if (singleCrystal != null && entity.getBlockPos().equals(heldCrystal.getBlockPos())){
+                    isThere2 = true;
+                }
+                if (isThere && isThere2) break;
             }
             if (!isThere){
                 heldCrystal = null;
                 locked = false;
+            }
+            if (!isThere2){
+                singleCrystal = null;
             }
         }
         boolean shouldFacePlace = false;
@@ -590,9 +608,8 @@ public class CrystalAura extends Module {
 
         if (!smartDelay.get() && placeDelayLeft > 0 && ((!surroundHold.get() && (target != null && (!surroundBreak.get() || !isSurrounded(target)))) || heldCrystal != null) && (!spamFacePlace.get())) return;
         if (switchMode.get() == SwitchMode.None && mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL) return;
-        if (place.get()) {
+        if (place.get() && singleCrystal == null) {
             if (target == null) return;
-            if (!multiPlace.get() && getCrystalStream().count() > 0) return;
             if (surroundHold.get() && heldCrystal == null){
                 int slot = InvUtils.findItemWithCount(Items.END_CRYSTAL).slot;
                 if ((slot != -1 && slot < 9) || mc.player.getOffHandStack().getItem() == Items.END_CRYSTAL) {
@@ -766,6 +783,9 @@ public class CrystalAura extends Module {
             heldCrystal = null;
             locked = false;
         }
+        if (singleCrystal != null && entity.getBlockPos().equals(singleCrystal.getBlockPos())){
+            singleCrystal = null;
+        }
     }
 
     private void findTarget(){
@@ -820,6 +840,7 @@ public class CrystalAura extends Module {
         if (mc.world.isAir(new BlockPos(block))) {
             PlayerUtils.placeBlock(new BlockPos(block), supportSlot, Hand.MAIN_HAND);
             supportDelayLeft = supportDelay.get();
+            return;
         }
         BlockPos blockPos = new BlockPos(block);
         Direction direction = rayTraceCheck(blockPos, true);
@@ -840,6 +861,10 @@ public class CrystalAura extends Module {
             RenderBlock renderBlock = renderBlockPool.get();
             renderBlock.reset(block);
             renderBlocks.add(renderBlock);
+        }
+
+        if (!multiPlace.get()){
+            singleCrystal = new EndCrystalEntity(mc.world, block.x, block.y + 1, block.z);
         }
     }
 
