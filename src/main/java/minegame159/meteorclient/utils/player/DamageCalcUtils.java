@@ -34,6 +34,7 @@ public class DamageCalcUtils {
 
     //Always Calculate damage, then armour, then enchantments, then potion effect
     public static double crystalDamage(LivingEntity player, Vec3d crystal){
+        if (player instanceof PlayerEntity && ((PlayerEntity) player).abilities.creativeMode) return 0;
         //Calculate crystal damage
         double modDistance = Math.sqrt(player.squaredDistanceTo(crystal));
         if(modDistance > 12) return 0;
@@ -60,6 +61,7 @@ public class DamageCalcUtils {
 
     //Always Calculate damage, then armour, then enchantments, then potion effect
     public static double bedDamage(LivingEntity player, Vec3d bed){
+        if (player instanceof PlayerEntity && ((PlayerEntity) player).abilities.creativeMode) return 0;
         double modDistance = Math.sqrt(player.squaredDistanceTo(bed));
         if(modDistance > 10) return 0;
         double exposure = Explosion.getExposure(bed, player);
