@@ -131,7 +131,7 @@ public class CrystalAura extends Module {
     private final Setting<Boolean> rayTrace = sgPlace.add(new BoolSetting.Builder()
             .name("ray-trace")
             .description("Whether or not to place through walls.")
-            .defaultValue(true)
+            .defaultValue(false)
             .build()
     );
 
@@ -256,7 +256,7 @@ public class CrystalAura extends Module {
     private final Setting<Boolean> ignoreWalls = sgBreak.add(new BoolSetting.Builder()
             .name("ray-trace")
             .description("Whether or not to break through walls.")
-            .defaultValue(true)
+            .defaultValue(false)
             .build()
     );
 
