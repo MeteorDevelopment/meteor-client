@@ -20,6 +20,7 @@ import minegame159.meteorclient.utils.entity.FakePlayerUtils;
 import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.DamageCalcUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
+import minegame159.meteorclient.utils.player.RotationUtils;
 import net.minecraft.block.entity.BedBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
@@ -338,13 +339,13 @@ public class BedAura extends Module {
             hand = Hand.OFF_HAND;
         }
         if (direction == 0) {
-            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(-90f, mc.player.pitch, mc.player.isOnGround()));
+            RotationUtils.packetRotate(-90, mc.player.pitch);
         } else if (direction == 1) {
-            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(179f, mc.player.pitch, mc.player.isOnGround()));
+            RotationUtils.packetRotate(179, mc.player.pitch);
         } else if (direction == 2) {
-            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(1f, mc.player.pitch, mc.player.isOnGround()));
+            RotationUtils.packetRotate(1, mc.player.pitch);
         } else if (direction == 3) {
-            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(90f, mc.player.pitch, mc.player.isOnGround()));
+            RotationUtils.packetRotate(90, mc.player.pitch);
         }
         lastDamage = bestDamage;
         mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(mc.player.getPos(), Direction.UP, bestBlockPos, false));
