@@ -40,6 +40,15 @@ public class AutoReplenish extends Module {
             .build()
     );
 
+    private final Setting<Integer> tickDelay = sgGeneral.add(new IntSetting.Builder()
+            .name("delay")
+            .description("The tick delay to replenish your hotbar.")
+            .defaultValue(1)
+            .min(0)
+            .sliderMax(10)
+            .build()
+    );
+
     private final Setting<Boolean> offhand = sgGeneral.add(new BoolSetting.Builder()
             .name("offhand")
             .description("Whether or not to refill your offhand with items.")
@@ -86,11 +95,14 @@ public class AutoReplenish extends Module {
     private ItemStack offhandStack;
     private ItemStack stack;
     private boolean sent = false;
+    private int tickDelayLeft;
 
     @Override
     public void onActivate() {
         offhandStack = mc.player.getOffHandStack();
+        tickDelayLeft = tickDelay.get();
     }
+
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
@@ -98,30 +110,34 @@ public class AutoReplenish extends Module {
         if (mc.player.currentScreenHandler.getStacks().size() < 45 || (pauseInInventory.get() && mc.currentScreen instanceof InventoryScreen)) return;
 
         //Hotbar
-        for (int i = 0; i < 9; i++){
-            stack = mc.player.inventory.getStack(i);
-            if (!excludedItems.get().contains(stack.getItem()) && stack.getItem() != Items.AIR) {
-                if (stack.isStackable()){
-                    if (stack.getCount() <= threshold.get()){
-                        addSlots(i, findItem(stack, i));
-                    }
-                } else if (unstackable.get()) {
-                    if (stack.isEmpty() && !hotbar.get(i).isStackable()){
-                        addSlots(i, findItem(hotbar.get(i), i));
+        if (tickDelayLeft <= 0) {
+            tickDelayLeft = tickDelay.get();
+            for (int i = 0; i < 9; i++) {
+                stack = mc.player.inventory.getStack(i);
+                if (!excludedItems.get().contains(stack.getItem()) && stack.getItem() != Items.AIR) {
+                    if (stack.isStackable()) {
+                        if (stack.getCount() <= threshold.get()) {
+                            addSlots(i, findItem(stack, i));
+                        }
+                    } else if (unstackable.get()) {
+                        if (stack.isEmpty() && !hotbar.get(i).isStackable()) {
+                            addSlots(i, findItem(hotbar.get(i), i));
+                        }
                     }
                 }
+                hotbar.add(i, stack);
             }
-            hotbar.add(i, stack);
-        }
-        //Offhand
-        if (offhand.get() && !ModuleManager.INSTANCE.get(AutoTotem.class).getLocked()){
-            if (mc.player.getOffHandStack().getCount() <= threshold.get()){
-                addSlots(InvUtils.OFFHAND_SLOT, findItem(mc.player.getOffHandStack(), InvUtils.OFFHAND_SLOT));
-            } else if (mc.player.getOffHandStack().isEmpty() || !offhandStack.isStackable()){
-                addSlots(InvUtils.OFFHAND_SLOT, findItem(offhandStack, InvUtils.OFFHAND_SLOT));
+            //Offhand
+            if (offhand.get() && !ModuleManager.INSTANCE.get(AutoTotem.class).getLocked()) {
+                if (mc.player.getOffHandStack().getCount() <= threshold.get()) {
+                    addSlots(InvUtils.OFFHAND_SLOT, findItem(mc.player.getOffHandStack(), InvUtils.OFFHAND_SLOT));
+                } else if (mc.player.getOffHandStack().isEmpty() || !offhandStack.isStackable()) {
+                    addSlots(InvUtils.OFFHAND_SLOT, findItem(offhandStack, InvUtils.OFFHAND_SLOT));
+                }
+                offhandStack = mc.player.getOffHandStack();
             }
-            offhandStack = mc.player.getOffHandStack();
         }
+        tickDelayLeft--;
     }
 
     private int findItem(ItemStack itemStack, int excludedSlot){
