@@ -1,6 +1,6 @@
 package minegame159.meteorclient.utils.entity;
 
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.player.FakePlayer;
 
 import java.util.HashMap;
@@ -11,7 +11,7 @@ public class FakePlayerUtils {
     public static int ID;
 
     public static void spawnFakePlayer() {
-        FakePlayer module = ModuleManager.INSTANCE.get(FakePlayer.class);
+        FakePlayer module = Modules.get().get(FakePlayer.class);
 
         if (module.isActive()) {
             FakePlayerEntity fakePlayer = new FakePlayerEntity(module.name.get(), module.copyInv.get(), module.glowing.get(), module.health.get());
@@ -21,7 +21,7 @@ public class FakePlayerUtils {
     }
     
     public static void removeFakePlayer(int id) {
-        if (ModuleManager.INSTANCE.isActive(FakePlayer.class)) {
+        if (Modules.get().isActive(FakePlayer.class)) {
             if (players.isEmpty()) return;
 
             for (Map.Entry<FakePlayerEntity, Integer> player : players.entrySet()) {

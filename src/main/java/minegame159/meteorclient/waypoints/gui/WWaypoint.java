@@ -40,16 +40,16 @@ public class WWaypoint extends WTable {
         WCheckbox visible = right.add(new WCheckbox(waypoint.visible)).getWidget();
         visible.action = () -> {
             waypoint.visible = visible.checked;
-            Waypoints.INSTANCE.save();
+            Waypoints.get().save();
         };
         right.add(new WButton(WButton.ButtonRegion.Edit)).getWidget().action = () -> MinecraftClient.getInstance().openScreen(new EditWaypointScreen(waypoint));
-        right.add(new WMinus()).getWidget().action = () -> Waypoints.INSTANCE.remove(waypoint);
+        right.add(new WMinus()).getWidget().action = () -> Waypoints.get().remove(waypoint);
         WButton path = new WButton("Goto");
         path.action = () -> {
             if(MinecraftClient.getInstance().player == null || MinecraftClient.getInstance().world == null) return;
             IBaritone baritone = BaritoneAPI.getProvider().getPrimaryBaritone();
             if (baritone.getPathingBehavior().isPathing()) baritone.getPathingBehavior().cancelEverything();
-            Vec3d vec = Waypoints.INSTANCE.getCoords(waypoint);
+            Vec3d vec = Waypoints.get().getCoords(waypoint);
             BlockPos pos = new BlockPos(vec.x, vec.y, vec.z);
             baritone.getCustomGoalProcess().setGoalAndPath(new GoalGetToBlock(pos));
         };

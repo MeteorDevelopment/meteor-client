@@ -12,8 +12,8 @@ import minegame159.meteorclient.utils.render.color.Color;
 
 public class WButton extends WPressable {
     public enum ButtonRegion {
-        Edit(Region.EDIT, GuiConfig.INSTANCE.edit, GuiConfig.INSTANCE.editHovered, GuiConfig.INSTANCE.editPressed),
-        Reset(Region.RESET, GuiConfig.INSTANCE.reset, GuiConfig.INSTANCE.resetHovered, GuiConfig.INSTANCE.resetPressed);
+        Edit(Region.EDIT, GuiConfig.get().edit, GuiConfig.get().editHovered, GuiConfig.get().editPressed),
+        Reset(Region.RESET, GuiConfig.get().reset, GuiConfig.get().resetHovered, GuiConfig.get().resetPressed);
 
         public final Region region;
         public final Color color, hovered, pressed;
@@ -52,7 +52,7 @@ public class WButton extends WPressable {
 
     @Override
     protected void onCalculateSize(GuiRenderer renderer) {
-        double s = GuiConfig.INSTANCE.guiScale;
+        double s = GuiConfig.get().guiScale;
         width = 6 * s + (text == null ? renderer.textHeight() : renderer.textWidth(text)) + 6 * s;
         height = 6 * s + renderer.textHeight() + 6 * s;
     }
@@ -61,10 +61,10 @@ public class WButton extends WPressable {
     protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
         renderer.background(this, super.pressed);
 
-        double s = GuiConfig.INSTANCE.guiScale;
+        double s = GuiConfig.get().guiScale;
 
         if (text != null) {
-            renderer.text(text, x + width / 2 - renderer.textWidth(text) / 2, y + 6 * s, false, GuiConfig.INSTANCE.text);
+            renderer.text(text, x + width / 2 - renderer.textWidth(text) / 2, y + 6 * s, false, GuiConfig.get().text);
         } else {
             Color color;
             if (pressed) color = region.pressed;

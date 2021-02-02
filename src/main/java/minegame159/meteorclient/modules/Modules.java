@@ -24,13 +24,14 @@ import minegame159.meteorclient.modules.render.hud.HUD;
 import minegame159.meteorclient.settings.ColorSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.systems.System;
+import minegame159.meteorclient.systems.Systems;
 import minegame159.meteorclient.utils.Utils;
-import minegame159.meteorclient.utils.files.Savable;
 import minegame159.meteorclient.utils.misc.input.Input;
 import minegame159.meteorclient.utils.misc.input.KeyAction;
 import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
-import minegame159.meteorclient.utils.render.color.RainbowColorManager;
+import minegame159.meteorclient.utils.render.color.RainbowColors;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.nbt.CompoundTag;
@@ -43,12 +44,10 @@ import net.minecraft.util.registry.RegistryKey;
 import org.lwjgl.glfw.GLFW;
 
 import javax.annotation.Nullable;
-import java.io.File;
 import java.util.*;
 
-public class ModuleManager extends Savable<ModuleManager> {
+public class Modules extends System<Modules> {
     public static final Category[] CATEGORIES = {Category.Combat, Category.Player, Category.Movement, Category.Render, Category.Misc};
-    public static ModuleManager INSTANCE;
     public static final ModuleRegistry REGISTRY = new ModuleRegistry();
 
     private final Map<Class<? extends Module>, Module> modules = new HashMap<>();
@@ -59,11 +58,16 @@ public class ModuleManager extends Savable<ModuleManager> {
 
     public boolean onKeyOnlyBinding = false;
 
-    public ModuleManager() {
-        super(new File(MeteorClient.FOLDER, "modules.nbt"));
+    public Modules() {
+        super("modules");
+    }
 
-        INSTANCE = this;
+    public static Modules get() {
+        return Systems.get(Modules.class);
+    }
 
+    @Override
+    public void init() {
         initCombat();
         initPlayer();
         initMovement();
@@ -73,10 +77,9 @@ public class ModuleManager extends Savable<ModuleManager> {
         for (List<Module> modules : groups.values()) {
             modules.sort(Comparator.comparing(o -> o.title));
         }
-
-        MeteorClient.EVENT_BUS.subscribe(this);
     }
 
+    @SuppressWarnings("unchecked")
     public <T extends Module> T get(Class<T> klass) {
         return (T) modules.get(klass);
     }
@@ -240,7 +243,9 @@ public class ModuleManager extends Savable<ModuleManager> {
     }
 
     @Override
-    public ModuleManager fromTag(CompoundTag tag) {
+    public Modules fromTag(CompoundTag tag) {
+        disableAll();
+
         ListTag modulesTag = tag.getList("modules", 10);
         for (Tag moduleTagI : modulesTag) {
             CompoundTag moduleTag = (CompoundTag) moduleTagI;
@@ -262,7 +267,7 @@ public class ModuleManager extends Savable<ModuleManager> {
                 setting.module = module;
 
                 if (setting instanceof ColorSetting) {
-                    RainbowColorManager.addColorSetting((Setting<SettingColor>) setting);
+                    RainbowColors.addSetting((Setting<SettingColor>) setting);
                 }
             }
         }
@@ -507,7 +512,7 @@ public class ModuleManager extends Savable<ModuleManager> {
         }
 
         private static class ToggleModuleIterator implements Iterator<Module> {
-            private final Iterator<Module> iterator = ModuleManager.INSTANCE.getAll().iterator();
+            private final Iterator<Module> iterator = Modules.get().getAll().iterator();
 
             @Override
             public boolean hasNext() {

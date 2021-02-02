@@ -9,7 +9,7 @@ import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.entity.player.PlayerMoveEvent;
 import minegame159.meteorclient.mixininterface.IKeyBinding;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.movement.Step;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -62,7 +62,7 @@ public class PathFinder {
 
     public PathBlock getNextPathBlock() {
         PathBlock nextBlock = new PathBlock(new BlockPos(getNextStraightPos()));
-        double stepHeight = (ModuleManager.INSTANCE.get(Step.class).isActive()) ? ModuleManager.INSTANCE.get(Step.class).height.get() : 0;
+        double stepHeight = (Modules.get().get(Step.class).isActive()) ? Modules.get().get(Step.class).height.get() : 0;
         if (isSolidFloor(nextBlock.blockPos) && isAirAbove(nextBlock.blockPos)) {
             return nextBlock;
         } else if (!isSolidFloor(nextBlock.blockPos) && isAirAbove(nextBlock.blockPos)) {

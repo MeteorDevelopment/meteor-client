@@ -5,12 +5,8 @@
 
 package minegame159.meteorclient.utils.files;
 
-import minegame159.meteorclient.Config;
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.accounts.AccountManager;
-import minegame159.meteorclient.friends.FriendManager;
-import minegame159.meteorclient.macros.MacroManager;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.systems.Systems;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -51,26 +47,15 @@ public class ProfileUtils {
         if (profile.isEmpty() || profile.contains(".")) return false;
         File folder = new File(FOLDER, profile);
 
-        Config.INSTANCE.save(new File(folder, Config.INSTANCE.getFile().getName()));
-        ModuleManager.INSTANCE.save(new File(folder, ModuleManager.INSTANCE.getFile().getName()));
-        FriendManager.INSTANCE.save(new File(folder, FriendManager.INSTANCE.getFile().getName()));
-        MacroManager.INSTANCE.save(new File(folder, MacroManager.INSTANCE.getFile().getName()));
-        AccountManager.INSTANCE.save(new File(folder, AccountManager.INSTANCE.getFile().getName()));
-
+        Systems.save(folder);
         return true;
     }
 
     public static void load(String profile) {
-        MeteorClient.INSTANCE.save();
-        ModuleManager.INSTANCE.disableAll();
-
         File folder = new File(FOLDER, profile);
 
-        Config.INSTANCE.load(new File(folder, Config.INSTANCE.getFile().getName()));
-        ModuleManager.INSTANCE.load(new File(folder, ModuleManager.INSTANCE.getFile().getName()));
-        FriendManager.INSTANCE.load(new File(folder, FriendManager.INSTANCE.getFile().getName()));
-        MacroManager.INSTANCE.load(new File(folder, MacroManager.INSTANCE.getFile().getName()));
-        AccountManager.INSTANCE.load(new File(folder, AccountManager.INSTANCE.getFile().getName()));
+        Systems.save();
+        Systems.load(folder);
     }
 
     public static void delete(String profile) {

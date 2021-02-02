@@ -6,7 +6,7 @@
 package minegame159.meteorclient.modules.render.hud.modules;
 
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.render.hud.HUD;
 import minegame159.meteorclient.modules.render.hud.HudRenderer;
 import minegame159.meteorclient.utils.render.color.Color;
@@ -45,7 +45,7 @@ public class ActiveModulesHud extends HudModule {
 
     @Override
     public void update(HudRenderer renderer) {
-        if (ModuleManager.INSTANCE == null) {
+        if (Modules.get() == null) {
             box.setSize(renderer.textWidth("Active Modules"), renderer.textHeight());
             return;
         }
@@ -54,7 +54,7 @@ public class ActiveModulesHud extends HudModule {
 //        update = false;
         modules.clear();
 
-        for (Module module : ModuleManager.INSTANCE.getActive()) {
+        for (Module module : Modules.get().getActive()) {
             if (module.isVisible()) modules.add(module);
         }
 
@@ -92,7 +92,7 @@ public class ActiveModulesHud extends HudModule {
         double x = box.getX();
         double y = box.getY();
 
-        if (ModuleManager.INSTANCE == null) {
+        if (Modules.get() == null) {
             renderer.text("Active Modules", x, y, hud.color);
             return;
         }

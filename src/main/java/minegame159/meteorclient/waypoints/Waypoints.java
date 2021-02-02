@@ -12,10 +12,10 @@ import minegame159.meteorclient.events.game.GameLeftEvent;
 import minegame159.meteorclient.events.meteor.WaypointListChangedEvent;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.rendering.Matrices;
-import minegame159.meteorclient.rendering.MeshBuilder;
 import minegame159.meteorclient.rendering.text.TextRenderer;
+import minegame159.meteorclient.systems.System;
+import minegame159.meteorclient.systems.Systems;
 import minegame159.meteorclient.utils.Utils;
-import minegame159.meteorclient.utils.files.Savable;
 import minegame159.meteorclient.utils.misc.NbtUtils;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.world.Dimension;
@@ -30,22 +30,46 @@ import net.minecraft.util.math.Vec3d;
 import java.io.*;
 import java.util.*;
 
-public class Waypoints extends Savable<Waypoints> implements Iterable<Waypoint> {
-    public static final Map<String, AbstractTexture> ICONS = new HashMap<>();
-    public static final Waypoints INSTANCE = new Waypoints();
-
+public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
     private static final String[] BUILTIN_ICONS = { "Square", "Circle", "Triangle", "Star", "Diamond" };
-
-    private static final MeshBuilder MB = new MeshBuilder(128);
 
     private static final Color BACKGROUND = new Color(0, 0, 0, 75);
     private static final Color TEXT = new Color(255, 255, 255);
 
+    public final Map<String, AbstractTexture> icons = new HashMap<>();
+
     private List<Waypoint> waypoints = new ArrayList<>();
 
-    private Waypoints() {
+    public Waypoints() {
         super(null);
-        MeteorClient.EVENT_BUS.subscribe(this);
+    }
+
+    public static Waypoints get() {
+        return Systems.get(Waypoints.class);
+    }
+
+    @Override
+    public void init() {
+        File iconsFolder = new File(new File(MeteorClient.FOLDER, "waypoints"), "icons");
+        iconsFolder.mkdirs();
+
+        for (String builtinIcon : BUILTIN_ICONS) {
+            File iconFile = new File(iconsFolder, builtinIcon + ".png");
+            if (!iconFile.exists()) copyIcon(iconFile);
+        }
+
+        File[] files = iconsFolder.listFiles();
+        for (File file : files) {
+            if (file.getName().endsWith(".png")) {
+                try {
+                    String name = file.getName().replace(".png", "");
+                    AbstractTexture texture = new NativeImageBackedTexture(NativeImage.read(new FileInputStream(file)));
+                    icons.put(name, texture);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     public void add(Waypoint waypoint) {
@@ -188,6 +212,7 @@ public class Waypoints extends Savable<Waypoints> implements Iterable<Waypoint> 
 
     @Override
     public File getFile() {
+        if (!Utils.canUpdate()) return null;
         return new File(new File(MeteorClient.FOLDER, "waypoints"), Utils.getWorldName() + ".nbt");
     }
 
@@ -210,30 +235,7 @@ public class Waypoints extends Savable<Waypoints> implements Iterable<Waypoint> 
         return waypoints.iterator();
     }
 
-    public static void loadIcons() {
-        File iconsFolder = new File(new File(MeteorClient.FOLDER, "waypoints"), "icons");
-        iconsFolder.mkdirs();
-
-        for (String builtinIcon : BUILTIN_ICONS) {
-            File iconFile = new File(iconsFolder, builtinIcon + ".png");
-            if (!iconFile.exists()) copyIcon(iconFile);
-        }
-
-        File[] files = iconsFolder.listFiles();
-        for (File file : files) {
-            if (file.getName().endsWith(".png")) {
-                try {
-                    String name = file.getName().replace(".png", "");
-                    AbstractTexture texture = new NativeImageBackedTexture(NativeImage.read(new FileInputStream(file)));
-                    ICONS.put(name, texture);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-
-    private static void copyIcon(File file) {
+    private void copyIcon(File file) {
         try {
             InputStream in = Waypoints.class.getResourceAsStream("/assets/meteor-client/waypoint-icons/" + file.getName());
             OutputStream out = new FileOutputStream(file);

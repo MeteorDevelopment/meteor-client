@@ -10,7 +10,7 @@ import baritone.api.pathing.goals.GoalXZ;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import minegame159.meteorclient.commands.Command;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.combat.Swarm;
 import net.minecraft.command.CommandSource;
 
@@ -28,7 +28,7 @@ public class SwarmGoto extends Command {
                         .then(argument("z", IntegerArgumentType.integer()).executes(context -> {
                                     int x = context.getArgument("x", Integer.class);
                                     int z = context.getArgument("z", Integer.class);
-                                    Swarm swarm = ModuleManager.INSTANCE.get(Swarm.class);
+                                    Swarm swarm = Modules.get().get(Swarm.class);
                                     if (swarm.isActive()) {
                                         if (swarm.currentMode == Swarm.Mode.Queen && swarm.server != null) {
                                             swarm.server.sendMessage(context.getInput());

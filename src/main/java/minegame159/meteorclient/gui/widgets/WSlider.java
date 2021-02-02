@@ -36,7 +36,7 @@ public class WSlider extends WWidget {
 
     @Override
     protected void onCalculateSize(GuiRenderer renderer) {
-        width = uWidth * GuiConfig.INSTANCE.guiScale;
+        width = uWidth * GuiConfig.get().guiScale;
         height = getHandleSize();
     }
 
@@ -100,20 +100,20 @@ public class WSlider extends WWidget {
         double valuePercentage = (value - min) / (max - min);
         double valueWidth = valuePercentage * (width - getHandleSize());
 
-        double s = GuiConfig.INSTANCE.guiScale;
+        double s = GuiConfig.get().guiScale;
 
-        renderer.quad(Region.FULL, x + getHandleSize()/2, y + 6 * s, valueWidth, 3 * s, GuiConfig.INSTANCE.sliderLeft);
-        renderer.quad(Region.FULL, x + getHandleSize()/2 + valueWidth, y + 6 * s, width - valueWidth - getHandleSize(), 3 * s, GuiConfig.INSTANCE.sliderRight);
+        renderer.quad(Region.FULL, x + getHandleSize()/2, y + 6 * s, valueWidth, 3 * s, GuiConfig.get().sliderLeft);
+        renderer.quad(Region.FULL, x + getHandleSize()/2 + valueWidth, y + 6 * s, width - valueWidth - getHandleSize(), 3 * s, GuiConfig.get().sliderRight);
 
         Color handleColor;
-        if (dragging) handleColor = GuiConfig.INSTANCE.sliderHandlePressed;
-        else if (handleMouseOver) handleColor = GuiConfig.INSTANCE.sliderHandleHovered;
-        else handleColor = GuiConfig.INSTANCE.sliderHandle;
+        if (dragging) handleColor = GuiConfig.get().sliderHandlePressed;
+        else if (handleMouseOver) handleColor = GuiConfig.get().sliderHandleHovered;
+        else handleColor = GuiConfig.get().sliderHandle;
 
         renderer.quad(Region.CIRCLE, x + valueWidth, y, getHandleSize(), getHandleSize(), handleColor);
     }
 
     private double getHandleSize() {
-        return HANDLE_SIZE * GuiConfig.INSTANCE.guiScale;
+        return HANDLE_SIZE * GuiConfig.get().guiScale;
     }
 }

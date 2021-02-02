@@ -13,7 +13,7 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import net.minecraft.command.CommandSource;
 import net.minecraft.text.LiteralText;
 
@@ -22,7 +22,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 public class ModuleArgumentType implements ArgumentType<Module> {
-    private static final Collection<String> EXAMPLES = ModuleManager.INSTANCE.getAll()
+    private static final Collection<String> EXAMPLES = Modules.get().getAll()
             .stream()
             .limit(3)
             .map(module -> module.name)
@@ -38,7 +38,7 @@ public class ModuleArgumentType implements ArgumentType<Module> {
     @Override
     public Module parse(StringReader reader) throws CommandSyntaxException {
         String argument = reader.readString();
-        Module module = ModuleManager.INSTANCE.get(argument);
+        Module module = Modules.get().get(argument);
 
         if (module == null) throw NO_SUCH_MODULE.create(argument);
 
@@ -47,7 +47,7 @@ public class ModuleArgumentType implements ArgumentType<Module> {
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return CommandSource.suggestMatching(ModuleManager.INSTANCE.getAll().stream().map(module -> module.name), builder);
+        return CommandSource.suggestMatching(Modules.get().getAll().stream().map(module -> module.name), builder);
     }
 
     @Override

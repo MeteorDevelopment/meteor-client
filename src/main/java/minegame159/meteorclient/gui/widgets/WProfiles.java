@@ -10,11 +10,11 @@ import minegame159.meteorclient.utils.files.ProfileUtils;
 
 public class WProfiles extends WWindow {
     public WProfiles() {
-        super("Profiles", GuiConfig.INSTANCE.getWindowConfig(GuiConfig.WindowType.Profiles).isExpanded(), true);
+        super("Profiles", GuiConfig.get().getWindowConfig(GuiConfig.WindowType.Profiles).isExpanded(), true);
         type = GuiConfig.WindowType.Profiles;
 
         action = () -> {
-            GuiConfig.INSTANCE.getWindowConfig(type).setPos(x, y);
+            GuiConfig.get().getWindowConfig(type).setPos(x, y);
         };
 
         initWidgets();

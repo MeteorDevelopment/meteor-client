@@ -8,7 +8,7 @@ package minegame159.meteorclient.mixin;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.entity.EntityAddedEvent;
 import minegame159.meteorclient.events.entity.EntityRemovedEvent;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.render.Search;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.world.ClientWorld;
@@ -33,7 +33,7 @@ public class ClientWorldMixin {
 
     @Inject(method = "setBlockStateWithoutNeighborUpdates", at = @At("TAIL"))
     private void onSetBlockStateWithoutNeighborUpdates(BlockPos blockPos, BlockState blockState, CallbackInfo info) {
-        Search search = ModuleManager.INSTANCE.get(Search.class);
+        Search search = Modules.get().get(Search.class);
         if (search.isActive()) search.onBlockUpdate(blockPos, blockState);
     }
 }

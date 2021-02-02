@@ -6,7 +6,7 @@
 package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.mixininterface.IBox;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.combat.Hitboxes;
 import minegame159.meteorclient.modules.render.Chams;
 import minegame159.meteorclient.modules.render.NoRender;
@@ -31,7 +31,7 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 public class EntityRenderDispatcherMixin {
     @Inject(method = "render", at = @At("HEAD"), cancellable = true)
     private <E extends Entity> void onRenderHead(E entity, double x, double y, double z, float yaw, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, CallbackInfo info) {
-        NoRender noRender = ModuleManager.INSTANCE.get(NoRender.class);
+        NoRender noRender = Modules.get().get(NoRender.class);
 
         if ((noRender.noItems() && entity instanceof ItemEntity) ||
                 (noRender.noFallingBlocks() && entity instanceof FallingBlockEntity) ||
@@ -41,7 +41,7 @@ public class EntityRenderDispatcherMixin {
             return;
         }
 
-        Chams chams = ModuleManager.INSTANCE.get(Chams.class);
+        Chams chams = Modules.get().get(Chams.class);
 
         if (chams.ignoreRender(entity) || !chams.isActive()) return;
 
@@ -55,7 +55,7 @@ public class EntityRenderDispatcherMixin {
     @Inject(method = "render", at = @At("TAIL"), cancellable = true)
     private <E extends Entity> void onRenderTail(E entity, double x, double y, double z, float yaw, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, CallbackInfo info) {
 
-        Chams chams = ModuleManager.INSTANCE.get(Chams.class);
+        Chams chams = Modules.get().get(Chams.class);
 
         if (chams.ignoreRender(entity) || !chams.isActive()) return;
 
@@ -68,7 +68,7 @@ public class EntityRenderDispatcherMixin {
 
     @Inject(method = "drawBox", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/WorldRenderer;drawBox(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumer;Lnet/minecraft/util/math/Box;FFFF)V"), locals = LocalCapture.CAPTURE_FAILSOFT)
     private void onDrawBox(MatrixStack matrix, VertexConsumer vertices, Entity entity, float red, float green, float blue, CallbackInfo info, Box box) {
-        double v = ModuleManager.INSTANCE.get(Hitboxes.class).getEntityValue(entity);
+        double v = Modules.get().get(Hitboxes.class).getEntityValue(entity);
         if (v != 0) ((IBox) box).expand(v);
     }
 }

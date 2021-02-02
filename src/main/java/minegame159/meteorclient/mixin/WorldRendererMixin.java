@@ -5,7 +5,7 @@
 
 package minegame159.meteorclient.mixin;
 
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.render.*;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.render.Outlines;
@@ -50,7 +50,7 @@ public abstract class WorldRendererMixin {
 
     @Inject(method = "renderWeather", at = @At("HEAD"), cancellable = true)
     private void onRenderWeather(LightmapTextureManager manager, float f, double d, double e, double g, CallbackInfo info) {
-        if (ModuleManager.INSTANCE.get(NoRender.class).noWeather()) info.cancel();
+        if (Modules.get().get(NoRender.class).noWeather()) info.cancel();
     }
 
     @Inject(method = "renderEntity", at = @At("HEAD"))
@@ -65,12 +65,12 @@ public abstract class WorldRendererMixin {
 
     @Inject(method = "drawBlockOutline", at = @At("HEAD"), cancellable = true)
     private void onDrawHighlightedBlockOutline(MatrixStack matrixStack, VertexConsumer vertexConsumer, Entity entity, double d, double e, double f, BlockPos blockPos, BlockState blockState, CallbackInfo info) {
-        if (ModuleManager.INSTANCE.isActive(BlockSelection.class)) info.cancel();
+        if (Modules.get().isActive(BlockSelection.class)) info.cancel();
     }
 
     @ModifyArg(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/WorldRenderer;setupTerrain(Lnet/minecraft/client/render/Camera;Lnet/minecraft/client/render/Frustum;ZIZ)V"), index = 4)
     private boolean renderSetupTerrainModifyArg(boolean spectator) {
-        return ModuleManager.INSTANCE.isActive(Freecam.class) || spectator;
+        return Modules.get().isActive(Freecam.class) || spectator;
     }
 
     // Outlines
@@ -84,7 +84,7 @@ public abstract class WorldRendererMixin {
     private void renderEntity(Entity entity, double cameraX, double cameraY, double cameraZ, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, CallbackInfo info) {
         if (vertexConsumers == Outlines.vertexConsumerProvider) return;
 
-        ESP esp = ModuleManager.INSTANCE.get(ESP.class);
+        ESP esp = Modules.get().get(ESP.class);
         if (!esp.isActive() || !esp.isOutline()) return;
 
         Color color = esp.getOutlineColor(entity);
@@ -119,7 +119,7 @@ public abstract class WorldRendererMixin {
 
     @Inject(method = "setBlockBreakingInfo", at = @At("HEAD"), cancellable = true)
     private void onBlockBreakingInfo(int entityId, BlockPos pos, int stage, CallbackInfo ci) {
-        BreakIndicators bi = ModuleManager.INSTANCE.get(BreakIndicators.class);
+        BreakIndicators bi = Modules.get().get(BreakIndicators.class);
         if(!bi.isActive())
             return;
 
@@ -141,7 +141,7 @@ public abstract class WorldRendererMixin {
     }
     @Inject(method = "removeBlockBreakingInfo", at = @At("TAIL"))
     private void onBlockBreakingInfoRemoval(BlockBreakingInfo info, CallbackInfo ci) {
-        BreakIndicators bi = ModuleManager.INSTANCE.get(BreakIndicators.class);
+        BreakIndicators bi = Modules.get().get(BreakIndicators.class);
         if(!bi.isActive())
             return;
 
@@ -152,7 +152,7 @@ public abstract class WorldRendererMixin {
 
     @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/entity/EntityRenderDispatcher;shouldRender(Lnet/minecraft/entity/Entity;Lnet/minecraft/client/render/Frustum;DDD)Z"))
     private <E extends Entity> boolean shouldRenderRedirect(EntityRenderDispatcher entityRenderDispatcher, E entity, Frustum frustum, double x, double y, double z) {
-        Chams chams = ModuleManager.INSTANCE.get(Chams.class);
+        Chams chams = Modules.get().get(Chams.class);
         if(chams.isActive() && chams.throughWalls.get()) {
             return true;
         } else {

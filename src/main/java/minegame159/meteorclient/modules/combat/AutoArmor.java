@@ -11,7 +11,7 @@ import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.player.ChestSwap;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.player.DamageCalcUtils;
@@ -215,7 +215,7 @@ public class AutoArmor extends Module {
             currentToughness = 0;
             currentUnbreaking = 0;
             currentMending = 0;
-            if ((ignoreElytra.get() || ModuleManager.INSTANCE.get(ChestSwap.class).isActive()) && itemStack.getItem() == Items.ELYTRA) continue;
+            if ((ignoreElytra.get() || Modules.get().get(ChestSwap.class).isActive()) && itemStack.getItem() == Items.ELYTRA) continue;
             if (EnchantmentHelper.hasBindingCurse(itemStack)) continue;
             if (itemStack.getItem() instanceof ArmorItem) {
                 if (a == 1 && bProtLegs.get()) {

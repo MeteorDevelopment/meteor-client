@@ -11,11 +11,9 @@ import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import minegame159.meteorclient.events.entity.EntityRemovedEvent;
 import minegame159.meteorclient.events.entity.player.SendMovementPacketsEvent;
-import minegame159.meteorclient.events.packets.PacketEvent;
-import minegame159.meteorclient.events.packets.PlaySoundPacketEvent;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.friends.FriendManager;
+import minegame159.meteorclient.friends.Friends;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.rendering.Renderer;
@@ -33,10 +31,6 @@ import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
-import net.minecraft.network.packet.s2c.play.PlaySoundFromEntityS2CPacket;
-import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
@@ -694,7 +688,7 @@ public class CrystalAura extends Module {
             for (Entity target : mc.world.getEntities()){
                 if (target != mc.player && entities.get().getBoolean(target.getType()) && mc.player.distanceTo(target) <= targetRange.get()
                         && target.isAlive() && target instanceof LivingEntity
-                        && (!(target instanceof PlayerEntity) || FriendManager.INSTANCE.attack((PlayerEntity) target))){
+                        && (!(target instanceof PlayerEntity) || Friends.get().attack((PlayerEntity) target))){
                     crystalList.add(DamageCalcUtils.crystalDamage((LivingEntity) target, entity.getPos()));
                 }
             }
@@ -779,7 +773,7 @@ public class CrystalAura extends Module {
         Optional<LivingEntity> livingEntity = Streams.stream(mc.world.getEntities())
                 .filter(Entity::isAlive)
                 .filter(entity -> entity != mc.player)
-                .filter(entity -> !(entity instanceof PlayerEntity) || FriendManager.INSTANCE.attack((PlayerEntity) entity))
+                .filter(entity -> !(entity instanceof PlayerEntity) || Friends.get().attack((PlayerEntity) entity))
                 .filter(entity -> entity instanceof LivingEntity)
                 .filter(entity -> entities.get().getBoolean(entity.getType()))
                 .filter(entity -> entity.distanceTo(mc.player) <= targetRange.get() * 2)
@@ -888,7 +882,7 @@ public class CrystalAura extends Module {
                                     for (Entity entity : mc.world.getEntities()) {
                                         if (entity != mc.player && entities.get().getBoolean(entity.getType()) && mc.player.distanceTo(entity) <= targetRange.get()
                                                 && entity.isAlive() && entity instanceof LivingEntity
-                                                && (!(entity instanceof PlayerEntity) || FriendManager.INSTANCE.attack((PlayerEntity) entity))) {
+                                                && (!(entity instanceof PlayerEntity) || Friends.get().attack((PlayerEntity) entity))) {
                                             crystalList.add(DamageCalcUtils.crystalDamage((LivingEntity) entity, pos.add(0.5, 1, 0.5)));
                                         }
                                     }

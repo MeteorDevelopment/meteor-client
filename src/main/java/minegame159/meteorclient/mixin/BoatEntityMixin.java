@@ -7,7 +7,7 @@ package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.entity.BoatMoveEvent;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.movement.BoatFly;
 import net.minecraft.entity.vehicle.BoatEntity;
 import org.spongepowered.asm.mixin.Mixin;
@@ -30,13 +30,13 @@ public class BoatEntityMixin {
 
     @Redirect(method = "updatePaddles", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/vehicle/BoatEntity;pressingLeft:Z"))
     private boolean onUpdatePaddlesPressingLeft(BoatEntity boat) {
-        if (ModuleManager.INSTANCE.isActive(BoatFly.class)) return false;
+        if (Modules.get().isActive(BoatFly.class)) return false;
         return pressingLeft;
     }
 
     @Redirect(method = "updatePaddles", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/vehicle/BoatEntity;pressingRight:Z"))
     private boolean onUpdatePaddlesPressingRight(BoatEntity boat) {
-        if (ModuleManager.INSTANCE.isActive(BoatFly.class)) return false;
+        if (Modules.get().isActive(BoatFly.class)) return false;
         return pressingRight;
     }
 }

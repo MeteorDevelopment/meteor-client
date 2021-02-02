@@ -9,7 +9,7 @@ import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.entity.DropItemsEvent;
 import minegame159.meteorclient.events.entity.player.ClipAtLedgeEvent;
 import minegame159.meteorclient.mixininterface.IPlayerEntity;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.movement.Anchor;
 import minegame159.meteorclient.modules.player.SpeedMine;
 import net.minecraft.block.BlockState;
@@ -49,7 +49,7 @@ public class PlayerEntityMixin implements IPlayerEntity {
 
     @Inject(method = "getBlockBreakingSpeed", at = @At(value = "RETURN"), cancellable = true)
     public void onGetBlockBreakingSpeed(BlockState block, CallbackInfoReturnable<Float> cir) {
-        SpeedMine module = ModuleManager.INSTANCE.get(SpeedMine.class);
+        SpeedMine module = Modules.get().get(SpeedMine.class);
         if (!module.isActive() || module.mode.get() != SpeedMine.Mode.Normal) return;
 
         cir.setReturnValue((float) (cir.getReturnValue() * module.modifier.get()));
@@ -57,7 +57,7 @@ public class PlayerEntityMixin implements IPlayerEntity {
 
     @Inject(method = "jump", at = @At("HEAD"), cancellable = true)
     public void dontJump(CallbackInfo info) {
-        Anchor module = ModuleManager.INSTANCE.get(Anchor.class);
+        Anchor module = Modules.get().get(Anchor.class);
         if (module.isActive() && module.cancelJump) info.cancel();
     }
 }

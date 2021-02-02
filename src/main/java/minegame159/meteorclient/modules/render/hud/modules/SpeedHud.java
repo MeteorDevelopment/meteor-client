@@ -5,7 +5,7 @@
 
 package minegame159.meteorclient.modules.render.hud.modules;
 
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.movement.Timer;
 import minegame159.meteorclient.modules.render.hud.HUD;
 
@@ -22,8 +22,8 @@ public class SpeedHud extends DoubleTextHudModule {
         double tZ = Math.abs(mc.player.getZ() - mc.player.prevZ);
         double length = Math.sqrt(tX * tX + tZ * tZ);
 
-        if (ModuleManager.INSTANCE.get(Timer.class).isActive()){
-            length *= ModuleManager.INSTANCE.get(Timer.class).getMultiplier();
+        if (Modules.get().get(Timer.class).isActive()){
+            length *= Modules.get().get(Timer.class).getMultiplier();
         }
 
         return String.format("%.1f", length * 20);

@@ -21,8 +21,8 @@ public class WItem extends WWidget {
 
     @Override
     protected void onCalculateSize(GuiRenderer renderer) {
-        width = 32 * GuiConfig.INSTANCE.guiScale;
-        height = 32 * GuiConfig.INSTANCE.guiScale;
+        width = 32 * GuiConfig.get().guiScale;
+        height = 32 * GuiConfig.get().guiScale;
     }
 
     @Override
@@ -32,7 +32,7 @@ public class WItem extends WWidget {
             DiffuseLighting.enable();
             GlStateManager.enableDepthTest();
 
-            double s = GuiConfig.INSTANCE.guiScale - 1;
+            double s = GuiConfig.get().guiScale - 1;
 
             GlStateManager.pushMatrix();
             GlStateManager.scaled(2 + s, 2 + s, 1);

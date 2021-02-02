@@ -9,10 +9,10 @@ import baritone.api.BaritoneAPI;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import minegame159.meteorclient.Config;
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.commands.CommandManager;
+import minegame159.meteorclient.commands.Commands;
 import minegame159.meteorclient.events.entity.player.SendMessageEvent;
 import minegame159.meteorclient.events.entity.player.SendMovementPacketsEvent;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.movement.NoSlow;
 import minegame159.meteorclient.modules.movement.Scaffold;
 import minegame159.meteorclient.modules.player.Portals;
@@ -42,7 +42,7 @@ public abstract class ClientPlayerEntityMixin {
     private void onSendChatMessage(String msg, CallbackInfo info) {
         if (ignoreChatMessage) return;
 
-        if (!msg.startsWith(Config.INSTANCE.getPrefix()) && !msg.startsWith("/") && !msg.startsWith(BaritoneAPI.getSettings().prefix.value)) {
+        if (!msg.startsWith(Config.get().getPrefix()) && !msg.startsWith("/") && !msg.startsWith(BaritoneAPI.getSettings().prefix.value)) {
             SendMessageEvent event = MeteorClient.EVENT_BUS.post(SendMessageEvent.get(msg));
 
             if (!event.isCancelled()) {
@@ -55,9 +55,9 @@ public abstract class ClientPlayerEntityMixin {
             return;
         }
 
-        if (msg.startsWith(Config.INSTANCE.getPrefix())) {
+        if (msg.startsWith(Config.get().getPrefix())) {
             try {
-                CommandManager.dispatch(msg.substring(Config.INSTANCE.getPrefix().length()));
+                Commands.get().dispatch(msg.substring(Config.get().getPrefix().length()));
             } catch (CommandSyntaxException e) {
                 ChatUtils.error(e.getMessage());
             }
@@ -67,19 +67,19 @@ public abstract class ClientPlayerEntityMixin {
 
     @Redirect(method = "updateNausea", at = @At(value = "FIELD", target = "Lnet/minecraft/client/MinecraftClient;currentScreen:Lnet/minecraft/client/gui/screen/Screen;"))
     private Screen updateNauseaGetCurrentScreenProxy(MinecraftClient client) {
-        if (ModuleManager.INSTANCE.isActive(Portals.class)) return null;
+        if (Modules.get().isActive(Portals.class)) return null;
         return client.currentScreen;
     }
 
     @Redirect(method = "tickMovement", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;isUsingItem()Z"))
     private boolean proxy_tickMovement_isUsingItem(ClientPlayerEntity player) {
-        if (ModuleManager.INSTANCE.get(NoSlow.class).items()) return false;
+        if (Modules.get().get(NoSlow.class).items()) return false;
         return player.isUsingItem();
     }
 
     @Inject(method = "isSneaking", at = @At("HEAD"), cancellable = true)
     private void onIsSneaking(CallbackInfoReturnable<Boolean> info) {
-        if (ModuleManager.INSTANCE.isActive(Scaffold.class)) info.setReturnValue(false);
+        if (Modules.get().isActive(Scaffold.class)) info.setReturnValue(false);
     }
 
     @Inject(method = "sendMovementPackets", at = @At("HEAD"))

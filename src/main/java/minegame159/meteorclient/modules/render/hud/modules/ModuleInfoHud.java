@@ -6,7 +6,7 @@
 package minegame159.meteorclient.modules.render.hud.modules;
 
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.render.hud.HUD;
 import minegame159.meteorclient.modules.render.hud.HudRenderer;
 
@@ -25,7 +25,7 @@ public class ModuleInfoHud extends HudModule {
 
     @Override
     public void update(HudRenderer renderer) {
-        if (ModuleManager.INSTANCE == null || hud.moduleInfoModules().isEmpty()) {
+        if (Modules.get() == null || hud.moduleInfoModules().isEmpty()) {
             box.setSize(renderer.textWidth("Module Info"), renderer.textHeight());
             return;
         }
@@ -53,7 +53,7 @@ public class ModuleInfoHud extends HudModule {
         double x = box.getX();
         double y = box.getY();
 
-        if (ModuleManager.INSTANCE == null || hud.moduleInfoModules().isEmpty()) {
+        if (Modules.get() == null || hud.moduleInfoModules().isEmpty()) {
             renderer.text("Module Info", x, y, hud.primaryColor());
             return;
         }

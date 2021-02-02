@@ -15,6 +15,6 @@ public class WatermarkHud extends DoubleTextHudModule {
 
     @Override
     protected String getRight() {
-        return Config.INSTANCE.version.getOriginalString();
+        return Config.get().version.getOriginalString();
     }
 }

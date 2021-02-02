@@ -10,7 +10,7 @@ import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.friends.FriendManager;
+import minegame159.meteorclient.friends.Friends;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
@@ -214,7 +214,7 @@ public class KillAura extends Module {
             if (!ignoreWalls.get() && !PlayerUtils.canSeeEntity(entity)) return false;
             if (entity instanceof PlayerEntity) {
                 if (((PlayerEntity) entity).isCreative()) return false;
-                if (!friends.get() && !FriendManager.INSTANCE.attack((PlayerEntity) entity)) return false;
+                if (!friends.get() && !Friends.get().attack((PlayerEntity) entity)) return false;
             }
             if (entity instanceof AnimalEntity && !babies.get() && ((AnimalEntity) entity).isBaby()) return false;
 

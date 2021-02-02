@@ -5,7 +5,7 @@
 
 package minegame159.meteorclient.utils.entity;
 
-import minegame159.meteorclient.friends.FriendManager;
+import minegame159.meteorclient.friends.Friends;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.text.TextUtils;
 import minegame159.meteorclient.utils.render.color.Color;
@@ -29,7 +29,7 @@ public class EntityUtils {
 
     public static Color getEntityColor(Entity entity, Color players, Color animals, Color waterAnmals, Color monsters, Color ambient, Color misc, boolean useNameColor) {
         if (entity instanceof PlayerEntity) {
-            Color friendColor = FriendManager.INSTANCE.getFriendColor((PlayerEntity) entity);
+            Color friendColor = Friends.get().getFriendColor((PlayerEntity) entity);
 
             if (friendColor != null) return new Color(friendColor.r, friendColor.g, friendColor.b, players.a);
             else if (useNameColor) return TextUtils.getMostPopularColor(entity.getDisplayName());

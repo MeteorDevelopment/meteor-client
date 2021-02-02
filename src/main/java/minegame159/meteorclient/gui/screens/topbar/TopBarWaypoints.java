@@ -23,7 +23,7 @@ public class TopBarWaypoints extends TopBarWindowScreen {
     @Override
     protected void initWidgets() {
         // Waypoints
-        for (Waypoint waypoint : Waypoints.INSTANCE) {
+        for (Waypoint waypoint : Waypoints.get()) {
             add(new WWaypoint(waypoint)).fillX().expandX();
             row();
         }

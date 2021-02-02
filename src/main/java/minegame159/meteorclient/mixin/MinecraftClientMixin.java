@@ -12,7 +12,7 @@ import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.gui.GuiKeyEvents;
 import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.mixininterface.IMinecraftClient;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.player.AutoEat;
 import minegame159.meteorclient.modules.player.AutoGap;
 import minegame159.meteorclient.utils.network.OnlinePlayers;
@@ -105,7 +105,7 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
 
     @Redirect(method = "doItemUse", at = @At(value = "FIELD", target = "Lnet/minecraft/client/MinecraftClient;crosshairTarget:Lnet/minecraft/util/hit/HitResult;", ordinal = 1))
     private HitResult doItemUseMinecraftClientCrosshairTargetProxy(MinecraftClient client) {
-        if (ModuleManager.INSTANCE.get(AutoEat.class).rightClickThings() && ModuleManager.INSTANCE.get(AutoGap.class).rightClickThings()) return client.crosshairTarget;
+        if (Modules.get().get(AutoEat.class).rightClickThings() && Modules.get().get(AutoGap.class).rightClickThings()) return client.crosshairTarget;
         return null;
     }
 

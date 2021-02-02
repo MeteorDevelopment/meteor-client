@@ -156,8 +156,8 @@ public class EntityTypeListSettingScreen extends WindowScreen {
 
         int totalCount = (hasWaterAnimal + waterAnimals.getCells().size() + monsters.getCells().size() + ambient.getCells().size() + misc.getCells().size()) / 2;
 
-        if (totalCount <= GuiConfig.INSTANCE.countListSettingScreen) {
-            if (GuiConfig.INSTANCE.expandListSettingScreen) {
+        if (totalCount <= GuiConfig.get().countListSettingScreen) {
+            if (GuiConfig.get().expandListSettingScreen) {
                 if (animals.getCells().size() > 0) animals.setExpanded(true, false);
                 if (waterAnimals.getCells().size() > 0) waterAnimals.setExpanded(true, false);
                 if (monsters.getCells().size() > 0) monsters.setExpanded(true, false);
@@ -165,7 +165,7 @@ public class EntityTypeListSettingScreen extends WindowScreen {
                 if (misc.getCells().size() > 0) misc.setExpanded(true, false);
             }
         } else {
-            if (GuiConfig.INSTANCE.collapseListSettingScreen) {
+            if (GuiConfig.get().collapseListSettingScreen) {
                 if (animals.getCells().size() > 0) animals.setExpanded(false, false);
                 if (waterAnimals.getCells().size() > 0) waterAnimals.setExpanded(false, false);
                 if (monsters.getCells().size() > 0) monsters.setExpanded(false, false);

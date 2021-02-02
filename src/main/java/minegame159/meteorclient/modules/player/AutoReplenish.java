@@ -9,7 +9,7 @@ import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.combat.AutoTotem;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.player.ChatUtils;
@@ -128,7 +128,7 @@ public class AutoReplenish extends Module {
                 hotbar.add(i, stack);
             }
             //Offhand
-            if (offhand.get() && !ModuleManager.INSTANCE.get(AutoTotem.class).getLocked()) {
+            if (offhand.get() && !Modules.get().get(AutoTotem.class).getLocked()) {
                 if (mc.player.getOffHandStack().getCount() <= threshold.get()) {
                     addSlots(InvUtils.OFFHAND_SLOT, findItem(mc.player.getOffHandStack(), InvUtils.OFFHAND_SLOT));
                 } else if (mc.player.getOffHandStack().isEmpty() || !offhandStack.isStackable()) {

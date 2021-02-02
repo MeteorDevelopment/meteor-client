@@ -9,7 +9,7 @@ import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.EntityAddedEvent;
-import minegame159.meteorclient.friends.FriendManager;
+import minegame159.meteorclient.friends.Friends;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
@@ -54,7 +54,7 @@ public class EntityLogger extends Module {
 
         if (entities.get().getBoolean(event.entity.getType())) {
             if (event.entity instanceof PlayerEntity) {
-                if (!friends.get() && FriendManager.INSTANCE.get((PlayerEntity) event.entity) != null) return;
+                if (!friends.get() && Friends.get().get((PlayerEntity) event.entity) != null) return;
             }
 
             String name;

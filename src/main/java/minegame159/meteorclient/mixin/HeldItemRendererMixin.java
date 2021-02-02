@@ -7,7 +7,7 @@ package minegame159.meteorclient.mixin;
 
 import com.google.common.base.MoreObjects;
 import com.mojang.blaze3d.platform.GlStateManager;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.render.HandView;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
@@ -28,7 +28,7 @@ public abstract class HeldItemRendererMixin {
 
     @ModifyVariable(method = "renderItem(FLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider$Immediate;Lnet/minecraft/client/network/ClientPlayerEntity;I)V", at = @At(value = "STORE", ordinal = 0), index = 6)
     private float modifySwing(float swingProgress) {
-        HandView module = ModuleManager.INSTANCE.get(HandView.class);
+        HandView module = Modules.get().get(HandView.class);
         MinecraftClient mc = Utils.mc;
         Hand hand = MoreObjects.firstNonNull(mc.player.preferredHand, Hand.MAIN_HAND);
 
@@ -42,7 +42,7 @@ public abstract class HeldItemRendererMixin {
 
     @Inject(method = "renderFirstPersonItem", at = @At(value = "TAIL", target = "Lnet/minecraft/client/render/item/HeldItemRenderer;renderItem(Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/item/ItemStack;Lnet/minecraft/client/render/model/json/ModelTransformation$Mode;ZLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V"))
     private void sex(AbstractClientPlayerEntity player, float tickDelta, float pitch, Hand hand, float swingProgress, ItemStack item, float equipProgress, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, CallbackInfo ci) {
-        HandView module = ModuleManager.INSTANCE.get(HandView.class);
+        HandView module = Modules.get().get(HandView.class);
         if (!module.isActive()) return;
         GlStateManager.scaled(module.scaleX.get(), module.scaleY.get(), module.scaleZ.get());
         GlStateManager.translated(module.posX.get(), module.posY.get(), module.posZ.get());

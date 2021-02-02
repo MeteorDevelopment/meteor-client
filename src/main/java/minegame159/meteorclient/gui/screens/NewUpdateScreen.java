@@ -24,7 +24,7 @@ public class NewUpdateScreen extends WindowScreen {
 
         WTable versionsT = add(new WTable()).getWidget();
         versionsT.add(new WLabel("Your version:"));
-        versionsT.add(new WLabel(Config.INSTANCE.version.getOriginalString()));
+        versionsT.add(new WLabel(Config.get().version.getOriginalString()));
         versionsT.row();
         versionsT.add(new WLabel("Latest version"));
         versionsT.add(new WLabel(latestVer.getOriginalString()));

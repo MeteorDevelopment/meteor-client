@@ -9,7 +9,7 @@ import io.netty.channel.ChannelHandlerContext;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.events.world.ConnectToServerEvent;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.misc.AntiPacketKick;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.Packet;
@@ -39,6 +39,6 @@ public class ClientConnectionMixin {
 
     @Inject(method = "exceptionCaught", at = @At("HEAD"), cancellable = true)
     private void exceptionCaught(ChannelHandlerContext context, Throwable throwable, CallbackInfo ci) {
-        if (throwable instanceof IOException && ModuleManager.INSTANCE.isActive(AntiPacketKick.class)) ci.cancel();
+        if (throwable instanceof IOException && Modules.get().isActive(AntiPacketKick.class)) ci.cancel();
     }
 }

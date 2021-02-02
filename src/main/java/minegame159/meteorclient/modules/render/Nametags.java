@@ -10,11 +10,11 @@ package minegame159.meteorclient.modules.render;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderEvent;
-import minegame159.meteorclient.friends.FriendManager;
+import minegame159.meteorclient.friends.Friends;
 import minegame159.meteorclient.mixininterface.IBakedQuad;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.player.FakePlayer;
 import minegame159.meteorclient.modules.player.NameProtect;
 import minegame159.meteorclient.rendering.DrawMode;
@@ -174,7 +174,7 @@ public class Nametags extends Module {
     @EventHandler
     private void onRender(RenderEvent event) {
         for (Entity entity : mc.world.getEntities()) {
-            boolean a = !ModuleManager.INSTANCE.isActive(Freecam.class);
+            boolean a = !Modules.get().isActive(Freecam.class);
             if (!(entity instanceof PlayerEntity) || (a && entity == mc.player) || (a && entity == mc.cameraEntity)) continue;
             if (!yourself.get() && entity.getUuid().equals(mc.player.getUuid())) continue;
 
@@ -198,9 +198,9 @@ public class Nametags extends Module {
         double healthPercentage = health / (entity.getMaxHealth() + absorption);
 
         String name;
-        if (entity == mc.player && ModuleManager.INSTANCE.get(NameProtect.class).isActive()) {
-            name = ModuleManager.INSTANCE.get(NameProtect.class).getName(entity.getGameProfile().getName());
-        } else if (ModuleManager.INSTANCE.get(FakePlayer.class).showID() && entity instanceof FakePlayerEntity) {
+        if (entity == mc.player && Modules.get().get(NameProtect.class).isActive()) {
+            name = Modules.get().get(NameProtect.class).getName(entity.getGameProfile().getName());
+        } else if (Modules.get().get(FakePlayer.class).showID() && entity instanceof FakePlayerEntity) {
             name = entity.getGameProfile().getName() + " [" + FakePlayerUtils.getID((FakePlayerEntity) entity) + "]";
         } else name = entity.getGameProfile().getName();
 
@@ -354,7 +354,7 @@ public class Nametags extends Module {
 
         // Render name, health enchant and texts
         TextRenderer.get().begin(1, false, true);
-        Color nameColor = FriendManager.INSTANCE.getFriendColor(entity);
+        Color nameColor = Friends.get().getFriendColor(entity);
         double hX = TextRenderer.get().render(name, -widthHalf, 0, nameColor != null ? nameColor : normalName.get());
         hX = TextRenderer.get().render(healthText, hX, 0, healthColor);
         if (displayPing.get()) TextRenderer.get().render(pingText, hX, 0, pingColor.get());

@@ -9,7 +9,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.mixininterface.IVec3d;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.player.LiquidInteract;
 import minegame159.meteorclient.modules.player.NoMiningTrace;
 import minegame159.meteorclient.modules.render.Freecam;
@@ -49,7 +49,7 @@ public abstract class GameRendererMixin {
 
     @Inject(method = "render", at = @At("HEAD"), cancellable = true)
     private void onRenderHead(float tickDelta, long startTime, boolean tick, CallbackInfo info) {
-        if (ModuleManager.INSTANCE.isActive(UnfocusedCPU.class) && !client.isWindowFocused()) info.cancel();
+        if (Modules.get().isActive(UnfocusedCPU.class) && !client.isWindowFocused()) info.cancel();
 
         a = false;
     }
@@ -80,7 +80,7 @@ public abstract class GameRendererMixin {
 
     @Inject(method = "updateTargetedEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/projectile/ProjectileUtil;raycast(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/util/math/Box;Ljava/util/function/Predicate;D)Lnet/minecraft/util/hit/EntityHitResult;"), cancellable = true)
     private void onUpdateTargetedEntity(float tickDelta, CallbackInfo info) {
-        if (ModuleManager.INSTANCE.get(NoMiningTrace.class).canWork() && client.crosshairTarget.getType() == HitResult.Type.BLOCK) {
+        if (Modules.get().get(NoMiningTrace.class).canWork() && client.crosshairTarget.getType() == HitResult.Type.BLOCK) {
             client.getProfiler().pop();
             info.cancel();
         }
@@ -96,7 +96,7 @@ public abstract class GameRendererMixin {
 
     @Redirect(method = "updateTargetedEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;raycast(DFZ)Lnet/minecraft/util/hit/HitResult;"))
     private HitResult updateTargetedEntityEntityRayTraceProxy(Entity entity, double maxDistance, float tickDelta, boolean includeFluids) {
-        if (ModuleManager.INSTANCE.isActive(LiquidInteract.class)) {
+        if (Modules.get().isActive(LiquidInteract.class)) {
             HitResult result = entity.raycast(maxDistance, tickDelta, includeFluids);
             if (result.getType() != HitResult.Type.MISS) return result;
 
@@ -107,19 +107,19 @@ public abstract class GameRendererMixin {
 
     @Inject(method = "bobViewWhenHurt", at = @At("HEAD"), cancellable = true)
     private void onBobViewWhenHurt(MatrixStack matrixStack, float f, CallbackInfo info) {
-        if (ModuleManager.INSTANCE.get(NoRender.class).noHurtCam()) info.cancel();
+        if (Modules.get().get(NoRender.class).noHurtCam()) info.cancel();
     }
 
     @Inject(method = "showFloatingItem", at = @At("HEAD"), cancellable = true)
     private void onShowFloatingItem(ItemStack floatingItem, CallbackInfo info) {
-        if (floatingItem.getItem() == Items.TOTEM_OF_UNDYING && ModuleManager.INSTANCE.get(NoRender.class).noTotemAnimation()) {
+        if (floatingItem.getItem() == Items.TOTEM_OF_UNDYING && Modules.get().get(NoRender.class).noTotemAnimation()) {
             info.cancel();
         }
     }
 
     @Redirect(method = "renderWorld", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/MathHelper;lerp(FFF)F"))
     private float applyCameraTransformationsMathHelperLerpProxy(float delta, float first, float second) {
-        if (ModuleManager.INSTANCE.get(NoRender.class).noNausea()) return 0;
+        if (Modules.get().get(NoRender.class).noNausea()) return 0;
         return MathHelper.lerp(delta, first, second);
     }
 
@@ -129,7 +129,7 @@ public abstract class GameRendererMixin {
 
     @Inject(method = "updateTargetedEntity", at = @At("INVOKE"), cancellable = true)
     private void updateTargetedEntityInvoke(float tickDelta, CallbackInfo info) {
-        Freecam freecam = ModuleManager.INSTANCE.get(Freecam.class);
+        Freecam freecam = Modules.get().get(Freecam.class);
 
         if (freecam.isActive() && client.getCameraEntity() != null && !freecamSet) {
             info.cancel();
@@ -172,6 +172,6 @@ public abstract class GameRendererMixin {
 
     @Inject(method = "renderHand", at = @At("INVOKE"), cancellable = true)
     private void renderHand(MatrixStack matrices, Camera camera, float tickDelta, CallbackInfo info) {
-        if (!ModuleManager.INSTANCE.get(Freecam.class).renderHands()) info.cancel();
+        if (!Modules.get().get(Freecam.class).renderHands()) info.cancel();
     }
 }

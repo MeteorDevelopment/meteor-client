@@ -10,10 +10,10 @@ package minegame159.meteorclient.modules.combat;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.player.AttackEntityEvent;
-import minegame159.meteorclient.friends.FriendManager;
+import minegame159.meteorclient.friends.Friends;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import net.minecraft.entity.player.PlayerEntity;
 
 public class AntiFriendHit extends Module {
@@ -23,6 +23,6 @@ public class AntiFriendHit extends Module {
 
     @EventHandler
     private void onAttackEntity(AttackEntityEvent event) {
-        if (event.entity instanceof PlayerEntity && ModuleManager.INSTANCE.get(AntiFriendHit.class).isActive() && !FriendManager.INSTANCE.attack((PlayerEntity) event.entity)) event.cancel();
+        if (event.entity instanceof PlayerEntity && Modules.get().get(AntiFriendHit.class).isActive() && !Friends.get().attack((PlayerEntity) event.entity)) event.cancel();
     }
 }

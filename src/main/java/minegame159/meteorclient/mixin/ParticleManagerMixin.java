@@ -7,7 +7,7 @@ package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.world.ParticleEvent;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.misc.Nuker;
 import minegame159.meteorclient.modules.render.NoRender;
 import net.minecraft.block.BlockState;
@@ -32,11 +32,11 @@ public class ParticleManagerMixin {
 
     @Inject(method = "addBlockBreakParticles", at = @At("HEAD"), cancellable = true)
     private void onAddBlockBreakParticles(BlockPos blockPos, BlockState state, CallbackInfo info) {
-        if (ModuleManager.INSTANCE.get(Nuker.class).noParticles() || ModuleManager.INSTANCE.get(NoRender.class).noBlockBreakParticles()) info.cancel();
+        if (Modules.get().get(Nuker.class).noParticles() || Modules.get().get(NoRender.class).noBlockBreakParticles()) info.cancel();
     }
 
     @Inject(method = "addBlockBreakingParticles", at = @At("HEAD"), cancellable = true)
     private void onAddBlockBreakingParticles(BlockPos blockPos, Direction direction, CallbackInfo info) {
-        if (ModuleManager.INSTANCE.get(Nuker.class).noParticles() || ModuleManager.INSTANCE.get(NoRender.class).noBlockBreakParticles()) info.cancel();
+        if (Modules.get().get(Nuker.class).noParticles() || Modules.get().get(NoRender.class).noBlockBreakParticles()) info.cancel();
     }
 }

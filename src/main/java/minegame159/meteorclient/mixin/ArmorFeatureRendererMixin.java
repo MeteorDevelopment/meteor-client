@@ -5,7 +5,7 @@
 
 package minegame159.meteorclient.mixin;
 
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.render.NoRender;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.feature.ArmorFeatureRenderer;
@@ -23,6 +23,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class ArmorFeatureRendererMixin<T extends LivingEntity, M extends BipedEntityModel<T>, A extends BipedEntityModel<T>> {
     @Inject(method = "renderArmor", at = @At("HEAD"), cancellable = true)
     private void onRenderArmor(MatrixStack matrices, VertexConsumerProvider vertexConsumers, T livingEntity, EquipmentSlot equipmentSlot, int i, A bipedEntityModel, CallbackInfo info) {
-        if (livingEntity instanceof PlayerEntity && ModuleManager.INSTANCE.get(NoRender.class).noArmor()) info.cancel();
+        if (livingEntity instanceof PlayerEntity && Modules.get().get(NoRender.class).noArmor()) info.cancel();
     }
 }

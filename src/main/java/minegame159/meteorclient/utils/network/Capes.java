@@ -48,7 +48,7 @@ public class Capes {
         }));
     }
 
-    public static Identifier getCape(PlayerEntity player) {
+    public static Identifier get(PlayerEntity player) {
         String capeName = OWNERS.get(player.getUuid());
         if (capeName != null) {
             Cape cape = TEXTURES.get(capeName);

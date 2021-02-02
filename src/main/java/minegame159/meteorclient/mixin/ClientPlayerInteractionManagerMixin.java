@@ -11,7 +11,7 @@ import minegame159.meteorclient.events.entity.player.BreakBlockEvent;
 import minegame159.meteorclient.events.entity.player.InteractItemEvent;
 import minegame159.meteorclient.events.entity.player.StartBreakingBlockEvent;
 import minegame159.meteorclient.mixininterface.IClientPlayerInteractionManager;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.misc.Nuker;
 import minegame159.meteorclient.modules.player.NoBreakDelay;
 import minegame159.meteorclient.modules.player.Reach;
@@ -60,19 +60,19 @@ public abstract class ClientPlayerInteractionManagerMixin implements IClientPlay
 
     @Inject(method = "getReachDistance", at = @At("HEAD"), cancellable = true)
     private void onGetReachDistance(CallbackInfoReturnable<Float> info) {
-        if (ModuleManager.INSTANCE.isActive(Reach.class)) info.setReturnValue(ModuleManager.INSTANCE.get(Reach.class).getReach());
+        if (Modules.get().isActive(Reach.class)) info.setReturnValue(Modules.get().get(Reach.class).getReach());
     }
 
     @Redirect(method = "updateBlockBreakingProgress", at = @At(value = "FIELD", target = "Lnet/minecraft/client/network/ClientPlayerInteractionManager;blockBreakingCooldown:I", opcode = Opcodes.PUTFIELD))
     private void onMethod_2902SetField_3716Proxy(ClientPlayerInteractionManager interactionManager, int value) {
-        if (ModuleManager.INSTANCE.isActive(Nuker.class)) value = 0;
-        if (ModuleManager.INSTANCE.isActive(NoBreakDelay.class)) value = 0;
+        if (Modules.get().isActive(Nuker.class)) value = 0;
+        if (Modules.get().isActive(NoBreakDelay.class)) value = 0;
         blockBreakingCooldown = value;
     }
 
     @Redirect(method = "attackBlock", at = @At(value = "FIELD", target = "Lnet/minecraft/client/network/ClientPlayerInteractionManager;blockBreakingCooldown:I", opcode = Opcodes.PUTFIELD))
     private void onAttackBlockSetField_3719Proxy(ClientPlayerInteractionManager interactionManager, int value) {
-        if (ModuleManager.INSTANCE.isActive(Nuker.class)) value = 0;
+        if (Modules.get().isActive(Nuker.class)) value = 0;
         blockBreakingCooldown = value;
     }
 

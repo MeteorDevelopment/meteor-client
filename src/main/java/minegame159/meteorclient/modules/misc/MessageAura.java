@@ -10,7 +10,7 @@ package minegame159.meteorclient.modules.misc;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.EntityAddedEvent;
 import minegame159.meteorclient.friends.Friend;
-import minegame159.meteorclient.friends.FriendManager;
+import minegame159.meteorclient.friends.Friends;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
@@ -44,7 +44,7 @@ public class MessageAura extends Module {
     private void onEntityAdded(EntityAddedEvent event) {
         if (!(event.entity instanceof PlayerEntity) || event.entity.getUuid().equals(mc.player.getUuid())) return;
 
-        if (!ignoreFriends.get() || (ignoreFriends.get() && !FriendManager.INSTANCE.contains(new Friend((PlayerEntity)event.entity)))) {
+        if (!ignoreFriends.get() || (ignoreFriends.get() && !Friends.get().contains(new Friend((PlayerEntity)event.entity)))) {
             mc.player.sendChatMessage("/msg " + ((PlayerEntity) event.entity).getGameProfile().getName() + " " + message.get());
         }
     }

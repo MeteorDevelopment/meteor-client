@@ -5,7 +5,7 @@
 
 package minegame159.meteorclient.modules.render.hud.modules;
 
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.player.InfinityMiner;
 import minegame159.meteorclient.modules.render.hud.HUD;
 
@@ -16,7 +16,7 @@ public class InfiniteMinerHud extends DoubleTextHudModule {
 
     @Override
     protected String getRight() {
-        InfinityMiner infinityMiner = ModuleManager.INSTANCE.get(InfinityMiner.class);
+        InfinityMiner infinityMiner = Modules.get().get(InfinityMiner.class);
         if (!infinityMiner.isActive()) return "Disabled";
 
         switch (infinityMiner.getMode()) {

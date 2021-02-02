@@ -8,14 +8,14 @@ package minegame159.meteorclient.gui.screens.settings;
 import minegame159.meteorclient.gui.widgets.WLabel;
 import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.settings.Setting;
 
 import java.util.List;
 
 public class ModuleListSettingScreen extends LeftRightListSettingScreen<Module> {
     public ModuleListSettingScreen(Setting<List<Module>> setting) {
-        super("Select Modules", setting, ModuleManager.REGISTRY);
+        super("Select Modules", setting, Modules.REGISTRY);
     }
 
     @Override

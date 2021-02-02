@@ -166,7 +166,7 @@ public class WSection extends WTable {
             removeRow();
             if (widget != null) add(widget);
             triangle = add(new WTriangle()).pad(4).getWidget();
-            triangle.color = triangle.colorHovered = triangle.colorPressed = GuiConfig.INSTANCE.separator;
+            triangle.color = triangle.colorHovered = triangle.colorPressed = GuiConfig.get().separator;
 
             triangle.action = () -> {
                 expanded = !expanded;

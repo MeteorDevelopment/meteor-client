@@ -6,7 +6,7 @@
 package minegame159.meteorclient.mixin;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.render.EChestPreview;
 import minegame159.meteorclient.modules.render.ShulkerPeek;
 import minegame159.meteorclient.utils.misc.input.KeyBinds;
@@ -59,7 +59,7 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
     private void onRender(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo info) {
         if (focusedSlot != null && !focusedSlot.getStack().isEmpty()) {
             // Shulker Preview
-            if (ModuleManager.INSTANCE.isActive(ShulkerPeek.class) && ((KeyBinds.SHULKER_PEEK.isPressed() && ModuleManager.INSTANCE.get(ShulkerPeek.class).mode.get() == ShulkerPeek.Mode.Tooltip) || (ModuleManager.INSTANCE.get(ShulkerPeek.class).mode.get() == ShulkerPeek.Mode.Always))) {
+            if (Modules.get().isActive(ShulkerPeek.class) && ((KeyBinds.SHULKER_PEEK.isPressed() && Modules.get().get(ShulkerPeek.class).mode.get() == ShulkerPeek.Mode.Tooltip) || (Modules.get().get(ShulkerPeek.class).mode.get() == ShulkerPeek.Mode.Always))) {
                 CompoundTag compoundTag = focusedSlot.getStack().getSubTag("BlockEntityTag");
                 if (compoundTag != null) {
                     if (compoundTag.contains("Items", 9)) {
@@ -72,7 +72,7 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
             }
 
             // EChest preview
-            if (focusedSlot.getStack().getItem() == Items.ENDER_CHEST && ModuleManager.INSTANCE.isActive(EChestPreview.class)) {
+            if (focusedSlot.getStack().getItem() == Items.ENDER_CHEST && Modules.get().isActive(EChestPreview.class)) {
                 draw(matrices, EChestMemory.ITEMS, mouseX, mouseY);
             }
         }
@@ -86,8 +86,8 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
     @Inject(method = "drawMouseoverTooltip", at = @At("HEAD"), cancellable = true)
     private void onDrawMouseoverTooltip(MatrixStack matrices, int x, int y, CallbackInfo info) {
         if (focusedSlot != null && !focusedSlot.getStack().isEmpty()) {
-            if (ModuleManager.INSTANCE.isActive(ShulkerPeek.class) && hasItems(focusedSlot.getStack()) && ((KeyBinds.SHULKER_PEEK.isPressed() && ModuleManager.INSTANCE.get(ShulkerPeek.class).mode.get() == ShulkerPeek.Mode.Tooltip) || (ModuleManager.INSTANCE.get(ShulkerPeek.class).mode.get() == ShulkerPeek.Mode.Always))) info.cancel();
-            else if (focusedSlot.getStack().getItem() == Items.ENDER_CHEST && ModuleManager.INSTANCE.isActive(EChestPreview.class)) info.cancel();
+            if (Modules.get().isActive(ShulkerPeek.class) && hasItems(focusedSlot.getStack()) && ((KeyBinds.SHULKER_PEEK.isPressed() && Modules.get().get(ShulkerPeek.class).mode.get() == ShulkerPeek.Mode.Tooltip) || (Modules.get().get(ShulkerPeek.class).mode.get() == ShulkerPeek.Mode.Always))) info.cancel();
+            else if (focusedSlot.getStack().getItem() == Items.ENDER_CHEST && Modules.get().isActive(EChestPreview.class)) info.cancel();
         }
     }
 
@@ -122,7 +122,7 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
 
     private void drawBackground(MatrixStack matrices, int x, int y) {
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        mc.getTextureManager().bindTexture(ModuleManager.INSTANCE.get(ShulkerPeek.class).bgMode.get() == ShulkerPeek.BackgroundMode.Light ? LIGHT : DARK);
+        mc.getTextureManager().bindTexture(Modules.get().get(ShulkerPeek.class).bgMode.get() == ShulkerPeek.BackgroundMode.Light ? LIGHT : DARK);
         int width = 176;
         int height = 67;
         DrawableHelper.drawTexture(matrices, x, y, 0, 0, 0, width, height, height, width);

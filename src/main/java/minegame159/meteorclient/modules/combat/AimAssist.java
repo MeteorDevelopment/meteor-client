@@ -10,7 +10,7 @@ import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.friends.FriendManager;
+import minegame159.meteorclient.friends.Friends;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
@@ -187,7 +187,7 @@ public class AimAssist extends Module {
 
         if (entity instanceof PlayerEntity) {
             if (friends.get()) return true;
-            return FriendManager.INSTANCE.attack((PlayerEntity) entity);
+            return Friends.get().attack((PlayerEntity) entity);
         }
 
         return true;

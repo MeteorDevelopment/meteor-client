@@ -6,7 +6,7 @@ import minegame159.meteorclient.utils.render.color.Color;
 
 public interface TextRenderer {
     static TextRenderer get() {
-        return Config.INSTANCE.customFont ? MeteorClient.FONT : VanillaTextRenderer.INSTANCE;
+        return Config.get().customFont ? MeteorClient.FONT : VanillaTextRenderer.INSTANCE;
     }
 
 
