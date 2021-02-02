@@ -513,7 +513,6 @@ public class CrystalAura extends Module {
         if (singleCrystal == null) return;
         if (event.entity.getBlockPos().equals(singleCrystal.getBlockPos())){
             singleCrystal = null;
-            locked = false;
         }
     }
 
