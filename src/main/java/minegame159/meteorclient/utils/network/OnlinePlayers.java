@@ -5,6 +5,8 @@
 
 package minegame159.meteorclient.utils.network;
 
+import net.minecraft.client.MinecraftClient;
+
 public class OnlinePlayers {
     private static long lastPingTime;
 
@@ -12,12 +14,20 @@ public class OnlinePlayers {
         long time = System.currentTimeMillis();
 
         if (time - lastPingTime > 5 * 60 * 1000) {
-            MeteorExecutor.execute(() -> HttpUtils.get("http://meteorclient.com/api/online/ping"));
+            MeteorExecutor.execute(() -> {
+                String url = "http://meteorclient.com/api/online/ping";
+
+                String uuid = MinecraftClient.getInstance().getSession().getUuid();
+                if (uuid != null && !uuid.isEmpty()) url += "?uuid=" + uuid;
+
+                HttpUtils.post(url);
+            });
+
             lastPingTime = time;
         }
     }
 
     public static void leave() {
-        MeteorExecutor.execute(() -> HttpUtils.get("http://meteorclient.com/api/online/leave"));
+        MeteorExecutor.execute(() -> HttpUtils.post("http://meteorclient.com/api/online/leave"));
     }
 }
