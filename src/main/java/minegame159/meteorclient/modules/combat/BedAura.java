@@ -10,6 +10,7 @@ package minegame159.meteorclient.modules.combat;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
+import minegame159.meteorclient.friends.Friends;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
@@ -82,8 +83,8 @@ public class BedAura extends Module {
 
     private final Setting<Double> range = sgMisc.add(new DoubleSetting.Builder()
             .name("range")
-            .description("The maximum range for beds to placed.")
-            .defaultValue(3)
+            .description("The maximum range for players to be targeted.")
+            .defaultValue(4)
             .min(0)
             .sliderMax(5)
             .build()
@@ -98,7 +99,7 @@ public class BedAura extends Module {
 
     private final Setting<Boolean> autoMove = sgMisc.add(new BoolSetting.Builder()
             .name("auto-move")
-            .description("Moves beds into a hotbar slot.")
+            .description("Moves beds into a selected hotbar slot.")
             .defaultValue(false)
             .build()
     );
@@ -106,9 +107,11 @@ public class BedAura extends Module {
     private final Setting<Integer> autoMoveSlot = sgMisc.add(new IntSetting.Builder()
             .name("auto-move-slot")
             .description("The slot Auto Move moves beds to.")
-            .defaultValue(8)
+            .defaultValue(9)
             .min(1)
-            .max(8)
+            .sliderMin(1)
+            .max(9)
+            .sliderMax(9)
             .build()
     );
 
@@ -329,9 +332,9 @@ public class BedAura extends Module {
                 }
             }
             List<Integer> slots = new ArrayList<>();
-            slots.add(InvUtils.invIndexToSlotId(autoMoveSlot.get()));
+            slots.add(InvUtils.invIndexToSlotId(autoMoveSlot.get()-1));
             slots.add(InvUtils.invIndexToSlotId(slot));
-            slots.add(InvUtils.invIndexToSlotId(autoMoveSlot.get()));
+            slots.add(InvUtils.invIndexToSlotId(autoMoveSlot.get()-1));
             InvUtils.addSlots(slots, this.getClass());
         }
     }
@@ -341,6 +344,7 @@ public class BedAura extends Module {
             if (!(entity instanceof PlayerEntity) || entity == mc.player) return false;
             if (((PlayerEntity) entity).isDead() || ((PlayerEntity) entity).getHealth() <= 0) return false;
             if (mc.player.distanceTo(entity) > range.get()) return false;
+            if (!Friends.get().attack((PlayerEntity) entity)) return false;
             return !((PlayerEntity) entity).isCreative() && !entity.isSpectator();
         }, priority.get());
     }
