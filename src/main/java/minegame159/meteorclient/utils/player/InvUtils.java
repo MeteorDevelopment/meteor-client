@@ -31,20 +31,23 @@ public class InvUtils {
     private static final Queue<Integer> currentQueue = new LinkedList<>();
 
     public static void clickSlot(int slot, int button, SlotActionType action) {
-        assert mc.interactionManager != null;
-        assert mc.player != null;
         mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, slot, button, action, mc.player);
     }
 
     public static Hand getHand (Item item) {
-        assert mc.player != null;
         Hand hand = Hand.MAIN_HAND;
         if (mc.player.getOffHandStack().getItem() == item) hand = Hand.OFF_HAND;
         return hand;
     }
 
+    public static Hand getHand(Predicate<ItemStack> isGood) {
+        Hand hand = null;
+        if (isGood.test(mc.player.getMainHandStack())) hand = Hand.MAIN_HAND;
+        else if (isGood.test(mc.player.getOffHandStack())) hand = Hand.OFF_HAND;
+        return hand;
+    }
+
     public static FindItemResult findItemWithCount(Item item) {
-        assert mc.player != null;
         findItemResult.slot = -1;
         findItemResult.count = 0;
 
@@ -66,12 +69,18 @@ public class InvUtils {
     }
 
     public static int findItemInHotbar(Item item, Predicate<ItemStack> isGood) {
-        assert mc.player != null;
         for (int i = 0; i < 9; i++) {
             ItemStack itemStack = mc.player.inventory.getStack(i);
             if (itemStack.getItem() == item && isGood.test(itemStack)) return i;
         }
 
+        return -1;
+    }
+
+    public static int findItemInHotbar(Predicate<ItemStack> isGood) {
+        for (int i = 0; i < 9; i++) {
+            if (isGood.test(mc.player.inventory.getStack(i))) return i;
+        }
         return -1;
     }
 
