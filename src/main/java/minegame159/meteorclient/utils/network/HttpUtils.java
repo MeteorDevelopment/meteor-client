@@ -20,10 +20,10 @@ import java.util.function.Consumer;
 public class HttpUtils {
     private static final Gson GSON = new Gson();
 
-    public static InputStream get(String url) {
+    private static InputStream request(String method, String url) {
         try {
             HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
-            conn.setRequestMethod("GET");
+            conn.setRequestMethod(method);
             conn.setConnectTimeout(2500);
             conn.setReadTimeout(2500);
             conn.setRequestProperty("User-Agent", "Meteor Client");
@@ -36,6 +36,14 @@ public class HttpUtils {
         }
 
         return null;
+    }
+
+    public static InputStream get(String url) {
+        return request("GET", url);
+    }
+
+    public static InputStream post(String url) {
+        return request("POST", url);
     }
 
     public static void getLines(String url, Consumer<String> callback) {
