@@ -39,8 +39,8 @@ dependencies {
 	// For XRay compatibility
 	modImplementation "com.github.jellysquid3:sodium-fabric:1.16.x~stable-SNAPSHOT"
 
-	// Baritone
-	modImplementation("com.gitlab.CDAGaming:fabritone:fabric~1.16.3-SNAPSHOT") {
+	// Baritone (the fork is standalone baritone and the only change is a setting to build it as fabric mod instead of forge one)
+	modImplementation("com.github.MeteorDevelopment:baritone:1.16.4-SNAPSHOT") {
 		exclude(group: "org.lwjgl.lwjgl", module: "lwjgl-platform")
 		exclude(group: "org.lwjgl.lwjgl", module: "lwjgl")
 		exclude(group: "net.java.jinput", module: "jinput-platform")
@@ -48,7 +48,7 @@ dependencies {
 		exclude(group: "net.sf.jopt-simple", module: "jopt-simple")
 		exclude(group: "org.ow2.asm", module: "asm-debug-all")
 	}
-	include "com.gitlab.CDAGaming:fabritone:fabric~1.16.3-SNAPSHOT"
+	include "com.github.MeteorDevelopment:baritone:1.16.4-SNAPSHOT"
 
 	// Other dependencies
 	dependency "com.github.MeteorDevelopment:orbit:0.1.5"
