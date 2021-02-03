@@ -18,10 +18,12 @@ import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.rendering.ShapeMode;
+import minegame159.meteorclient.rendering.text.TextRenderer;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.Pool;
 import minegame159.meteorclient.utils.player.*;
+import minegame159.meteorclient.utils.render.NametagUtils;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
@@ -441,6 +443,39 @@ public class CrystalAura extends Module {
             .build()
     );
 
+    private final Setting<Boolean> renderDamage = sgRender.add(new BoolSetting.Builder()
+            .name("render-damage")
+            .description("Renders the damage of the crystal where it is placing.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Integer> roundDamage = sgRender.add(new IntSetting.Builder()
+            .name("round-damage")
+            .description("Round damage to x decimal places.")
+            .defaultValue(2)
+            .min(0)
+            .max(3)
+            .sliderMax(3)
+            .build()
+    );
+
+    private final Setting<Double> damageScale = sgRender.add(new DoubleSetting.Builder()
+            .name("damage-scale")
+            .description("The scale of the damage text.")
+            .defaultValue(1.4)
+            .min(0)
+            .sliderMax(5)
+            .build()
+    );
+
+    private final Setting<SettingColor> damageColor = sgRender.add(new ColorSetting.Builder()
+            .name("damage-color")
+            .description("The color of the damage text.")
+            .defaultValue(new SettingColor(255, 255, 255, 255))
+            .build()
+    );
+
     private final Setting<Integer> renderTimer = sgRender.add(new IntSetting.Builder()
             .name("timer")
             .description("The amount of time between changing the block render.")
@@ -657,7 +692,7 @@ public class CrystalAura extends Module {
     private void onRender(RenderEvent event) {
         if (render.get()) {
             for (RenderBlock renderBlock : renderBlocks) {
-                renderBlock.render();
+                renderBlock.render(renderDamage.get(), event);
             }
         }
     }
@@ -839,6 +874,7 @@ public class CrystalAura extends Module {
         if (render.get()) {
             RenderBlock renderBlock = renderBlockPool.get();
             renderBlock.reset(block);
+            renderBlock.damage = DamageCalcUtils.crystalDamage(target, bestBlock.add(0.5, 1, 0.5));
             renderBlocks.add(renderBlock);
         }
     }
@@ -1038,6 +1074,7 @@ public class CrystalAura extends Module {
     private class RenderBlock {
         private int x, y, z;
         private int timer;
+        private double damage;
 
         public void reset(Vec3d pos) {
             x = MathHelper.floor(pos.getX());
@@ -1052,8 +1089,38 @@ public class CrystalAura extends Module {
             return false;
         }
 
-        public void render() {
+        public void render(boolean showDamage, RenderEvent event) {
             Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x, y, z, 1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+
+            if (showDamage) {
+                NametagUtils.begin(event, x + 0.5, y + 0.5, z + 0.5, damageScale.get(), Utils.distanceToCamera(x, y, z));
+                TextRenderer.get().begin(1, false, true);
+
+                String damageText = String.valueOf(Math.round(damage));
+
+
+                switch (roundDamage.get()) {
+                    case 0:
+                        damageText = String.valueOf(Math.round(damage));
+                        break;
+                    case 1:
+                        damageText = String.valueOf(Math.round(damage * 10.0) / 10.0);
+                        break;
+                    case 2:
+                        damageText = String.valueOf(Math.round(damage * 100.0) / 100.0);
+                        break;
+                    case 3:
+                        damageText = String.valueOf(Math.round(damage * 1000.0) / 1000.0);
+                        break;
+                }
+
+                double w = TextRenderer.get().getWidth(damageText) / 2;
+
+                TextRenderer.get().render(damageText, -w, 0, damageColor.get());
+
+                TextRenderer.get().end();
+                NametagUtils.end();
+            }
         }
     }
 

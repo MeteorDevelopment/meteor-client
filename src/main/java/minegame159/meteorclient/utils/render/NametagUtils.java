@@ -11,15 +11,22 @@ public class NametagUtils {
     private static final MinecraftClient mc = MinecraftClient.getInstance();
 
     public static void begin(RenderEvent event, Entity entity, double scale) {
+        begin(
+                event,
+                entity.prevX + (entity.getX() - entity.prevX) * event.tickDelta,
+                entity.prevY + (entity.getY() - entity.prevY) * event.tickDelta + entity.getHeight() + 0.25,
+                entity.prevZ + (entity.getZ() - entity.prevZ) * event.tickDelta,
+                scale,
+                Utils.distanceToCamera(entity)
+        );
+    }
+
+    public static void begin(RenderEvent event, double x, double y, double z, double scale, double distance) {
         Camera camera = mc.gameRenderer.getCamera();
         double s = 0.01 * scale;
-        double dist = Utils.distanceToCamera(entity);
-        if (dist > 8) s *= dist / 8;
+        if (distance > 8) s *= distance / 8;
 
         Matrices.push();
-        double x = entity.prevX + (entity.getX() - entity.prevX) * event.tickDelta;
-        double y = entity.prevY + (entity.getY() - entity.prevY) * event.tickDelta + entity.getHeight() + 0.25;
-        double z = entity.prevZ + (entity.getZ() - entity.prevZ) * event.tickDelta;
         Matrices.translate(x - event.offsetX, y - event.offsetY, z - event.offsetZ);
         Matrices.rotate(-camera.getYaw(), 0, 1, 0);
         Matrices.rotate(camera.getPitch(), 1, 0, 0);
