@@ -72,15 +72,6 @@ public class BedAura extends Module {
             .build()
     );
 
-    private final Setting<Double> placeRange = sgPlace.add(new DoubleSetting.Builder()
-            .name("place-range")
-            .description("The radius in which beds can be placed in.")
-            .defaultValue(3)
-            .min(0)
-            .sliderMax(5)
-            .build()
-    );
-
     // Break
 
     private final Setting<Integer> breakDelay = sgBreak.add(new IntSetting.Builder()
@@ -92,15 +83,6 @@ public class BedAura extends Module {
             .build()
     );
 
-    private final Setting<Double> breakRange = sgBreak.add(new DoubleSetting.Builder()
-            .name("break-range")
-            .description("The distance in a single direction the beds get broken.")
-            .defaultValue(4)
-            .min(0)
-            .sliderMax(5)
-            .build()
-    );
-
     private final Setting<Boolean> autoSwitch = sgMisc.add(new BoolSetting.Builder()
             .name("auto-switch")
             .description("Switches to a bed automatically.")
@@ -109,6 +91,15 @@ public class BedAura extends Module {
     );
 
     // Misc
+
+    private final Setting<Double> range = sgMisc.add(new DoubleSetting.Builder()
+            .name("range")
+            .description("The maximum range for beds to placed.")
+            .defaultValue(3)
+            .min(0)
+            .sliderMax(5)
+            .build()
+    );
 
     private final Setting<Boolean> switchBack = sgMisc.add(new BoolSetting.Builder()
             .name("switch-back")
@@ -161,6 +152,7 @@ public class BedAura extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
+        if (target == null || target.isDead() || mc.player.distanceTo(target) > range.get()) return;
         preSlot = -1;
         if (mc.player.getHealth() <= minHealth.get()) return;
         if (mc.world.getDimension().isBedWorking()) {
@@ -171,34 +163,7 @@ public class BedAura extends Module {
         if ((!(mc.player.getMainHandStack().getItem() instanceof BedItem)
                 && !(mc.player.getOffHandStack().getItem() instanceof BedItem)) && !autoSwitch.get() && !autoMove.get()) return;
         if (place.get()) {
-            boolean doMove = true;
-            if (!(mc.player.getMainHandStack().getItem() instanceof BedItem)
-                    && !(mc.player.getOffHandStack().getItem() instanceof BedItem)) {
-                if (autoMove.get()) {
-                    for (int i = 0; i < 9; i++) {
-                        if (mc.player.inventory.getStack(i).getItem() instanceof BedItem) {
-                            doMove = false;
-                            break;
-                        }
-                    }
-                    if (doMove) {
-                        int slot = -1;
-                        for (int i = 0; i < mc.player.inventory.main.size(); i++) {
-                            ItemStack itemStack = mc.player.inventory.main.get(i);
-                            if (itemStack.getItem() instanceof BedItem) {
-                                slot = i;
-                            }
-                        }
-                        List<Integer> slots = new ArrayList<>();
-                        slots.add(InvUtils.invIndexToSlotId(autoMoveSlot.get()));
-                        slots.add(InvUtils.invIndexToSlotId(slot));
-                        slots.add(InvUtils.invIndexToSlotId(autoMoveSlot.get()));
-                        InvUtils.addSlots(slots, this.getClass());
-                    }
-                }
-            }
             target = null;
-
             for (FakePlayerEntity player : FakePlayerUtils.getPlayers().keySet()){
                 if (target == null) target = player;
 
@@ -234,6 +199,7 @@ public class BedAura extends Module {
                         findFacePlace(target);
                         if (bestBlock != null || (bypassCheck)) {
                             bypassCheck = false;
+                            if (autoMove.get()) doAutoMove();
                             placeBed();
                             stage = 2;
                         }
@@ -288,7 +254,7 @@ public class BedAura extends Module {
     private void breakBed() {
         try {
             for (BlockEntity entity : mc.world.blockEntities) {
-                if (entity instanceof BedBlockEntity && Utils.distance(entity.getPos().getX(), entity.getPos().getY(), entity.getPos().getZ(), mc.player.getX(), mc.player.getY(), mc.player.getZ()) <= breakRange.get()) {
+                if (entity instanceof BedBlockEntity && Utils.distance(entity.getPos().getX(), entity.getPos().getY(), entity.getPos().getZ(), mc.player.getX(), mc.player.getY(), mc.player.getZ()) <= range.get()) {
                     mc.player.setSneaking(false);
                     mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, entity.getPos(), false));
                 }
@@ -302,7 +268,7 @@ public class BedAura extends Module {
     private void findFacePlace(PlayerEntity target) {
         assert mc.world != null;
         assert mc.player != null;
-        if (mc.player.distanceTo(target) < placeRange.get() && mc.world.isAir(target.getBlockPos().add(0, 1, 0))) {
+        if (mc.player.distanceTo(target) < range.get() && mc.world.isAir(target.getBlockPos().add(0, 1, 0))) {
             if (isValidHalf(target.getBlockPos().add(1, 0, 0))) {
                 bestBlock = new Vec3d(target.getBlockPos().getX() + 1.5, target.getBlockPos().getY() + 1, target.getBlockPos().getZ() + 0.5);
                 direction = 3;
@@ -370,6 +336,30 @@ public class BedAura extends Module {
             }
         }
         return slot;
+    }
+
+    private void doAutoMove() {
+        boolean doMove = true;
+        for (int i = 0; i < 9; i++) {
+            if (mc.player.inventory.getStack(i).getItem() instanceof BedItem) {
+                doMove = false;
+                break;
+            }
+        }
+        if (doMove) {
+            int slot = -1;
+            for (int i = 0; i < mc.player.inventory.main.size(); i++) {
+                ItemStack itemStack = mc.player.inventory.main.get(i);
+                if (itemStack.getItem() instanceof BedItem) {
+                    slot = i;
+                }
+            }
+            List<Integer> slots = new ArrayList<>();
+            slots.add(InvUtils.invIndexToSlotId(autoMoveSlot.get()));
+            slots.add(InvUtils.invIndexToSlotId(slot));
+            slots.add(InvUtils.invIndexToSlotId(autoMoveSlot.get()));
+            InvUtils.addSlots(slots, this.getClass());
+        }
     }
 
     @Override
