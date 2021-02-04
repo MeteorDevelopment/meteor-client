@@ -18,13 +18,12 @@ import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.entity.EntityUtils;
 import minegame159.meteorclient.utils.entity.SortPriority;
 import minegame159.meteorclient.utils.entity.Target;
+import minegame159.meteorclient.utils.player.PlayerUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.RaycastContext;
 
 public class AimAssist extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -93,7 +92,6 @@ public class AimAssist extends Module {
     );
 
     private final Vec3d vec3d1 = new Vec3d(0, 0, 0);
-    private final Vec3d vec3d2 = new Vec3d(0, 0, 0);
     private Entity target;
 
     public AimAssist() {
@@ -105,7 +103,7 @@ public class AimAssist extends Module {
         target = EntityUtils.get(entity -> {
             if (!entity.isAlive()) return false;
             if (mc.player.distanceTo(entity) >= range.get()) return false;
-            if (!canSeeEntity(entity)) return false;
+            if (PlayerUtils.canSeeEntity(entity)|| ignoreWalls.get()) return false;
             if (entity == mc.player || !entities.get().getBoolean(entity.getType())) return false;
 
             if (entity instanceof PlayerEntity && !friends.get()) {
@@ -162,19 +160,6 @@ public class AimAssist extends Module {
             case Body: ((IVec3d) vec3d).set(entity.getX(), entity.getY() + entity.getEyeHeight(entity.getPose()) / 2, entity.getZ()); break;
             case Feet: ((IVec3d) vec3d).set(entity.getX(), entity.getY(), entity.getZ()); break;
         }
-    }
-
-    private boolean canSeeEntity(Entity entity) {
-        if (ignoreWalls.get()) return true;
-
-        ((IVec3d) vec3d1).set(mc.player.getX(), mc.player.getY() + mc.player.getStandingEyeHeight(), mc.player.getZ());
-        ((IVec3d) vec3d2).set(entity.getX(), entity.getY(), entity.getZ());
-        boolean canSeeFeet =  mc.world.raycast(new RaycastContext(vec3d1, vec3d2, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player)).getType() == HitResult.Type.MISS;
-
-        ((IVec3d) vec3d2).set(entity.getX(), entity.getY() + entity.getStandingEyeHeight(), entity.getZ());
-        boolean canSeeEyes =  mc.world.raycast(new RaycastContext(vec3d1, vec3d2, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player)).getType() == HitResult.Type.MISS;
-
-        return canSeeFeet || canSeeEyes;
     }
 
     @Override
