@@ -25,14 +25,6 @@ import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 public abstract class CameraMixin {
     @Shadow private boolean thirdPerson;
 
-    @Shadow protected abstract void setRotation(float yaw, float pitch);
-
-    @Shadow protected abstract void setPos(double x, double y, double z);
-
-    @Shadow
-    private float pitch;
-    @Shadow
-    private float yaw;
 
     @Inject(method = "clipToSpace", at = @At("HEAD"), cancellable = true)
     private void onClipToSpace(double desiredCameraDistance, CallbackInfoReturnable<Double> info) {
@@ -42,28 +34,33 @@ public abstract class CameraMixin {
     }
 
     @Inject(method = "update", at = @At("TAIL"))
-    private void update(BlockView area, Entity focusedEntity, boolean thirdPerson, boolean inverseView, float tickDelta, CallbackInfo info) {
-        Freecam freecam = Modules.get().get(Freecam.class);
-
-        if (freecam.isActive()) {
-            setPos(freecam.getX(tickDelta), freecam.getY(tickDelta), freecam.getZ(tickDelta));
-            setRotation(freecam.getYaw(tickDelta), freecam.getPitch(tickDelta));
+    private void onUpdateTail(BlockView area, Entity focusedEntity, boolean thirdPerson, boolean inverseView, float tickDelta, CallbackInfo info) {
+        if (Modules.get().isActive(Freecam.class)) {
             this.thirdPerson = true;
         }
     }
 
-    @Inject(method = "update", at = @At(value = "INVOKE", target = "net/minecraft/client/render/Camera.moveBy(DDD)V", ordinal = 0))
-    private void perspectiveUpdatePitchYaw(BlockView area, Entity focusedEntity, boolean thirdPerson, boolean inverseView, float tickDelta, CallbackInfo info) {
-        FreeRotate freeRotate = Modules.get().get(FreeRotate.class);
-        if (freeRotate.playerMode()) {
-            this.pitch = freeRotate.cameraPitch;
-            this.yaw = freeRotate.cameraYaw;
+    @ModifyArgs(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/Camera;setPos(DDD)V"))
+    private void onUpdateSetPosArgs(Args args) {
+        Freecam freecam = Modules.get().get(Freecam.class);
+
+        if (freecam.isActive()) {
+            args.set(0, freecam.pos.x);
+            args.set(1, freecam.pos.y);
+            args.set(2, freecam.pos.z);
         }
     }
 
-    @ModifyArgs(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/Camera;setRotation(FF)V", ordinal = 0))
-    private void perspectiveFixRotation(Args args) {
+    @ModifyArgs(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/Camera;setRotation(FF)V"))
+    private void onUpdateSetRotationArgs(Args args) {
+        Freecam freecam = Modules.get().get(Freecam.class);
         FreeRotate freeRotate = Modules.get().get(FreeRotate.class);
+
+        if (freecam.isActive()) {
+            args.set(0, freecam.yaw);
+            args.set(1, freecam.pitch);
+        }
+
         if (freeRotate.isActive()) {
             args.set(0, freeRotate.cameraYaw);
             args.set(1, freeRotate.cameraPitch);
