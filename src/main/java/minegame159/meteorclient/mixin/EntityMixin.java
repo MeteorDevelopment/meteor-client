@@ -14,6 +14,7 @@ import minegame159.meteorclient.modules.combat.Hitboxes;
 import minegame159.meteorclient.modules.movement.NoSlow;
 import minegame159.meteorclient.modules.movement.Velocity;
 import minegame159.meteorclient.modules.render.ESP;
+import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.render.Outlines;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -70,7 +71,7 @@ public abstract class EntityMixin {
 
     @Redirect(method = "addVelocity", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/Vec3d;add(DDD)Lnet/minecraft/util/math/Vec3d;"))
     private Vec3d addVelocityVec3dAddProxy(Vec3d vec3d, double x, double y, double z) {
-        if ((Object) this != MinecraftClient.getInstance().player) return vec3d.add(x, y, z);
+        if ((Object) this != MinecraftClient.getInstance().player || Utils.isReleasingTrident) return vec3d.add(x, y, z);
 
         Velocity velocity = Modules.get().get(Velocity.class);
         return vec3d.add(x * velocity.getHorizontal(), y * velocity.getVertical(), z * velocity.getHorizontal());
