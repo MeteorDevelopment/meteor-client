@@ -11,6 +11,7 @@ import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
+import net.minecraft.item.PotionItem;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -156,5 +157,11 @@ public class PlayerUtils {
         double dist = MathHelper.sqrt(dX * dX + dZ * dZ);
 
         return new float[] { (float) MathHelper.wrapDegrees(Math.toDegrees(Math.atan2(dZ, dX)) - 90.0D), (float) MathHelper.wrapDegrees(Math.toDegrees(Math.atan2(dY, dist))) };
+    }
+
+    public static boolean shouldPause(boolean ifBreaking, boolean ifEating, boolean ifDrinking) {
+        if (ifBreaking && mc.interactionManager.isBreakingBlock()) return true;
+        if (ifEating && (mc.player.isUsingItem() && (mc.player.getMainHandStack().getItem().isFood() || mc.player.getOffHandStack().getItem().isFood()))) return true;
+        return ifDrinking && (mc.player.isUsingItem() && (mc.player.getMainHandStack().getItem() instanceof PotionItem || mc.player.getOffHandStack().getItem() instanceof PotionItem));
     }
 }

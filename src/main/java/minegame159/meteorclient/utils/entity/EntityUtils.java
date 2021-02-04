@@ -93,4 +93,23 @@ public class EntityUtils {
         if (sort == 0) return 0;
         return sort > 0 ? -1 : 1;
     }
+
+    public static float getTotalHealth(PlayerEntity target) {
+        return target.getHealth() + target.getAbsorptionAmount();
+    }
+
+    public static boolean isInvalid(PlayerEntity target, double range) {
+        if (target == null) return true;
+        return mc.player.distanceTo(target) > range || !target.isAlive() || target.isDead() || target.getHealth() <= 0;
+    }
+
+    public static PlayerEntity getPlayerTarget(double range, SortPriority priority) {
+        return (PlayerEntity) get(entity -> {
+            if (!(entity instanceof PlayerEntity) || entity == mc.player) return false;
+            if (((PlayerEntity) entity).isDead() || ((PlayerEntity) entity).getHealth() <= 0) return false;
+            if (mc.player.distanceTo(entity) > range) return false;
+            if (!Friends.get().attack((PlayerEntity) entity)) return false;
+            return entity instanceof FakePlayerEntity || (!((PlayerEntity) entity).isCreative() && entity.isSpectator());
+        }, priority);
+    }
 }
