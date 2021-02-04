@@ -20,7 +20,7 @@ public class PlayerModelHud extends HudModule {
 
     @Override
     public void update(HudRenderer renderer) {
-        box.setSize(51 * hud.playerModelScale(), 75 * hud.playerModelScale());
+        box.setSize(50 * hud.playerModelScale(), 75 * hud.playerModelScale());
     }
 
     @Override
