@@ -102,9 +102,7 @@ public class TopBarBaritone extends TopBarWindowScreen {
     }
 
     @Override
-    public void onClose() {
+    protected void onClosed() {
         SettingsUtil.save(BaritoneAPI.getSettings());
-
-        super.onClose();
     }
 }
