@@ -7,6 +7,7 @@ package minegame159.meteorclient.modules.render;
 
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
@@ -14,24 +15,7 @@ import minegame159.meteorclient.settings.SettingGroup;
 public class HandView extends Module {
 
     private final SettingGroup sgDefault = settings.getDefaultGroup();
-
-    public final Setting<Double> mainSwing = sgDefault.add(new DoubleSetting.Builder()
-            .name("main-swing-progress")
-            .description("The swing progress of your mainhand.")
-            .defaultValue(0)
-            .sliderMin(0)
-            .sliderMax(1)
-            .build()
-    );
-
-    public final Setting<Double> offSwing = sgDefault.add(new DoubleSetting.Builder()
-            .name("off-swing-progress")
-            .description("The swing progress of your offhand.")
-            .defaultValue(0)
-            .sliderMin(0)
-            .sliderMax(1)
-            .build()
-    );
+    private final SettingGroup sgSwing = settings.createGroup("Swing");
 
     public final Setting<Double> rotationX = sgDefault.add(new DoubleSetting.Builder()
             .name("rotation-x")
@@ -111,6 +95,31 @@ public class HandView extends Module {
             .defaultValue(-0.10)
             .sliderMin(-3)
             .sliderMax(3)
+            .build()
+    );
+
+    public final Setting<Double> mainSwing = sgSwing.add(new DoubleSetting.Builder()
+            .name("main-swing-progress")
+            .description("The swing progress of your mainhand.")
+            .defaultValue(0)
+            .sliderMin(0)
+            .sliderMax(1)
+            .build()
+    );
+
+    public final Setting<Double> offSwing = sgSwing.add(new DoubleSetting.Builder()
+            .name("off-swing-progress")
+            .description("The swing progress of your offhand.")
+            .defaultValue(0)
+            .sliderMin(0)
+            .sliderMax(1)
+            .build()
+    );
+
+    public final Setting<Boolean> noSwing = sgSwing.add(new BoolSetting.Builder()
+            .name("no-swing")
+            .description("Doesn't swing your hand if the two values above are 0 or 1.")
+            .defaultValue(false)
             .build()
     );
 
