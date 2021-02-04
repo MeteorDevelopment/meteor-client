@@ -214,7 +214,7 @@ public class HoleESP extends Module {
                     Renderer.quadWithLinesHorizontal(Renderer.NORMAL, Renderer.LINES, x, y, z, 1, hole.colorSides, hole.colorLines, shapeMode.get());
                     break;
                 case Box:
-                    Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, blockPos, hole.colorSides, hole.colorLines, shapeMode.get(), 0);
+                    Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, hole.blockPos, hole.colorSides, hole.colorLines, shapeMode.get(), 0);
                     break;
                 case BoxBelow:
                     Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x, y - 1, z, 1, hole.colorSides, hole.colorLines, shapeMode.get(), 0);
