@@ -103,7 +103,8 @@
     "TitleScreenMixin",
     "Vec3dMixin",
     "WorldRendererAccessor",
-    "WorldRendererMixin"
+    "WorldRendererMixin",
+    "TridentItemMixin"
   ],
   "injectors": {
     "defaultRequire": 1

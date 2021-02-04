@@ -51,6 +51,7 @@ public class Utils {
 
     public static boolean blockRenderingBlockEntitiesInXray;
     public static boolean firstTimeTitleScreen = true;
+    public static boolean isReleasingTrident;
 
     private static final Random random = new Random();
     private static final DecimalFormat df;
