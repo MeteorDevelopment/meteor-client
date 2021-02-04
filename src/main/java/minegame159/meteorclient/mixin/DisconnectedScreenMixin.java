@@ -23,7 +23,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(DisconnectedScreen.class)
 public class DisconnectedScreenMixin extends ScreenMixin {
-
     @Shadow
     private int reasonHeight;
 
@@ -33,23 +32,23 @@ public class DisconnectedScreenMixin extends ScreenMixin {
 
     @Inject(method = "init", at = @At("TAIL"))
     private void onRenderBackground(CallbackInfo info) {
+        if (Modules.get().get(AutoReconnect.class).lastServerInfo != null) {
+            int x = width / 2 - 100;
+            int y = Math.min((height / 2 + reasonHeight / 2) + 32, height - 30);
 
-        int x = width / 2 - 100;
-        int y = Math.min((height / 2 + reasonHeight / 2) + 32, height - 30);
+            reconnectBtn = addButton(new ButtonWidget(x, y, 200, 20, new LiteralText("Reconnecting in " + time / 20f), button -> timerActive = !timerActive));
 
-        reconnectBtn = addButton(new ButtonWidget(x, y, 200, 20, new LiteralText("Reconnecting in " + time / 20f), button -> timerActive = !timerActive));
-
-        timerActive = Modules.get().isActive(AutoReconnect.class);
+            timerActive = Modules.get().isActive(AutoReconnect.class);
+        }
     }
 
     @Override
     public void tick() {
         if (timerActive) {
-            time--;
             if (time <= 0) {
                 Utils.mc.openScreen(new ConnectScreen(new MultiplayerScreen(new TitleScreen()), Utils.mc, Modules.get().get(AutoReconnect.class).lastServerInfo));
-
             } else {
+                time--;
                 ((IAbstractButtonWidget) reconnectBtn).setText(new LiteralText(String.format("Reconnecting in %.1f", time / 20f)));
             }
         }
