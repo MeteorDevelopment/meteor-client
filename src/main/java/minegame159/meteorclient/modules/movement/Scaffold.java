@@ -79,8 +79,8 @@ public class Scaffold extends Module {
     );
 
     private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
-    private BlockState blockState, slotBlockState;
-    private int slot, prevSelectedSlot;
+    private BlockState blockState;
+    private int slot;
 
     private boolean lastWasSneaking;
     private double lastSneakingY;
@@ -170,7 +170,6 @@ public class Scaffold extends Module {
         if (mc.player.inventory.getStack(slot).isEmpty()) {
             slot = findSlot(blockState);
             if (slot == -1) {
-                mc.player.inventory.selectedSlot = prevSelectedSlot;
                 if (selfToggle.get()) this.toggle();
                 return false;
             }
@@ -180,7 +179,7 @@ public class Scaffold extends Module {
     }
 
     private void place(BlockPos blockPos, int slot) {
-        BlockUtils.place(blockPos, Hand.MAIN_HAND, slot, rotate.get(), -15);
+        BlockUtils.place(blockPos, Hand.MAIN_HAND, slot, rotate.get(), -15, renderSwing.get());
     }
 
     private BlockPos setPos(int x, int y, int z) {
@@ -193,6 +192,7 @@ public class Scaffold extends Module {
 
     private int findSlot(BlockState blockState) {
         int slot = -1;
+        BlockState slotBlockState;
         for (int i = 0; i < 9; i++) {
             ItemStack stack = mc.player.inventory.getStack(i);
             if (stack.isEmpty() || !(stack.getItem() instanceof BlockItem)) continue;
