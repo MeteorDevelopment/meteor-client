@@ -5,7 +5,6 @@
 
 package minegame159.meteorclient.modules.combat;
 
-import com.google.common.collect.Streams;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderEvent;
@@ -16,9 +15,11 @@ import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.entity.EntityUtils;
+import minegame159.meteorclient.utils.entity.SortPriority;
+import minegame159.meteorclient.utils.entity.Target;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.MathHelper;
@@ -26,19 +27,6 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
 
 public class AimAssist extends Module {
-    public enum Priority {
-        LowestDistance,
-        HighestDistance,
-        LowestHealth,
-        HighestHealth
-    }
-
-    public enum Target {
-        Head,
-        Body,
-        Feet
-    }
-    
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgSpeed = settings.createGroup("Aim Speed");
 
@@ -46,7 +34,7 @@ public class AimAssist extends Module {
 
     private final Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()
             .name("range")
-            .description("How far away the entity has to be to be targeted.")
+            .description("The range at which an entity can be targeted.")
             .defaultValue(5)
             .min(0)
             .build()
@@ -61,7 +49,7 @@ public class AimAssist extends Module {
 
     private final Setting<Boolean> friends = sgGeneral.add(new BoolSetting.Builder()
             .name("friends")
-            .description("Whether or not to aim at friends. Works if you have selected players as an entity to attack.")
+            .description("Whether or not to aim at friends.")
             .defaultValue(false)
             .build()
     );
@@ -73,23 +61,23 @@ public class AimAssist extends Module {
             .build()
     );
 
-    private final Setting<Priority> priority = sgGeneral.add(new EnumSetting.Builder<Priority>()
+    private final Setting<SortPriority> priority = sgGeneral.add(new EnumSetting.Builder<SortPriority>()
             .name("priority")
-            .description("What entities to target.")
-            .defaultValue(Priority.LowestHealth)
+            .description("How to select target from entities in range.")
+            .defaultValue(SortPriority.LowestHealth)
             .build()
     );
 
-    private final Setting<Target> target = sgGeneral.add(new EnumSetting.Builder<Target>()
+    private final Setting<Target> bodyTarget = sgGeneral.add(new EnumSetting.Builder<Target>()
             .name("target")
-            .description("Which body part to aim at.")
+            .description("Which part of the entities body to aim at.")
             .defaultValue(Target.Body)
             .build()
     );
 
     // Aim Speed
 
-    private final Setting<Boolean> speedInstant = sgSpeed.add(new BoolSetting.Builder()
+    private final Setting<Boolean> instant = sgSpeed.add(new BoolSetting.Builder()
             .name("instant-look")
             .description("Instantly looks at the entity.")
             .defaultValue(false)
@@ -106,8 +94,7 @@ public class AimAssist extends Module {
 
     private final Vec3d vec3d1 = new Vec3d(0, 0, 0);
     private final Vec3d vec3d2 = new Vec3d(0, 0, 0);
-
-    private Entity entity;
+    private Entity target;
 
     public AimAssist() {
         super(Category.Combat, "aim-assist", "Automatically aims at entities.");
@@ -115,27 +102,27 @@ public class AimAssist extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        entity = null;
+        target = EntityUtils.get(entity -> {
+            if (!entity.isAlive()) return false;
+            if (mc.player.distanceTo(entity) >= range.get()) return false;
+            if (!canSeeEntity(entity)) return false;
+            if (entity == mc.player || !entities.get().getBoolean(entity.getType())) return false;
 
-        Streams.stream(mc.world.getEntities())
-                .filter(entity -> mc.player.distanceTo(entity) <= range.get())
-                .filter(this::canAttackEntity)
-                .filter(this::canSeeEntity)
-                .filter(Entity::isAlive)
-                .min(this::sort)
-                .ifPresent(entity -> this.entity = entity);
+            if (entity instanceof PlayerEntity && !friends.get()) {
+                return Friends.get().attack((PlayerEntity) entity);
+            }
+
+            return true;
+            }, priority.get());
     }
 
     @EventHandler
     private void onRender(RenderEvent event) {
-        if (entity == null) return;
-
-        if (speedInstant.get()) aimInstantly();
-        else aim(event.tickDelta);
+        if (target != null) aim(target, event.tickDelta, instant.get());
     }
 
-    private void aimInstantly() {
-        setVec3dToTargetPoint(vec3d1, entity);
+    private void aim(Entity target, double delta, boolean instant) {
+        setVec3dToTargetPoint(vec3d1, target);
 
         double deltaX = vec3d1.x - mc.player.getX();
         double deltaZ = vec3d1.z - mc.player.getZ();
@@ -143,54 +130,38 @@ public class AimAssist extends Module {
 
         // Yaw
         double angle = Math.toDegrees(Math.atan2(deltaZ, deltaX)) - 90;
-        mc.player.yaw = (float) angle;
+        double deltaAngle;
+        double toRotate;
+
+        if (instant) {
+            mc.player.yaw = (float) angle;
+        } else {
+            deltaAngle = MathHelper.wrapDegrees(angle - mc.player.yaw);
+            toRotate = speed.get() * (deltaAngle >= 0 ? 1 : -1) * delta;
+            if ((toRotate >= 0 && toRotate > deltaAngle) || (toRotate < 0 && toRotate < deltaAngle)) toRotate = deltaAngle;
+            mc.player.yaw += toRotate;
+        }
 
         // Pitch
         double idk = Math.sqrt(deltaX * deltaX + deltaZ * deltaZ);
         angle = -Math.toDegrees(Math.atan2(deltaY, idk));
-        mc.player.pitch = (float) angle;
-    }
 
-    private void aim(double delta) {
-        setVec3dToTargetPoint(vec3d1, entity);
-
-        double deltaX = vec3d1.x - mc.player.getX();
-        double deltaZ = vec3d1.z - mc.player.getZ();
-        double deltaY = vec3d1.y - (mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()));
-
-        // Yaw
-        double angle = Math.toDegrees(Math.atan2(deltaZ, deltaX)) - 90;
-        double deltaAngle = MathHelper.wrapDegrees(angle - mc.player.yaw);
-        double toRotate = speed.get() * (deltaAngle >= 0 ? 1 : -1) * delta;
-        if ((toRotate >= 0 && toRotate > deltaAngle) || (toRotate < 0 && toRotate < deltaAngle)) toRotate = deltaAngle;
-        mc.player.yaw += toRotate;
-
-        // Pitch
-        double idk = Math.sqrt(deltaX * deltaX + deltaZ * deltaZ);
-        angle = -Math.toDegrees(Math.atan2(deltaY, idk));
-        deltaAngle = MathHelper.wrapDegrees(angle - mc.player.pitch);
-        toRotate = speed.get() * (deltaAngle >= 0 ? 1 : -1) * delta;
-        if ((toRotate >= 0 && toRotate > deltaAngle) || (toRotate < 0 && toRotate < deltaAngle)) toRotate = deltaAngle;
-        mc.player.pitch += toRotate;
+        if (instant) {
+            mc.player.pitch = (float) angle;
+        } else {
+            deltaAngle = MathHelper.wrapDegrees(angle - mc.player.pitch);
+            toRotate = speed.get() * (deltaAngle >= 0 ? 1 : -1) * delta;
+            if ((toRotate >= 0 && toRotate > deltaAngle) || (toRotate < 0 && toRotate < deltaAngle)) toRotate = deltaAngle;
+            mc.player.pitch += toRotate;
+        }
     }
 
     private void setVec3dToTargetPoint(Vec3d vec3d, Entity entity) {
-        switch (target.get()) {
+        switch (bodyTarget.get()) {
             case Head: ((IVec3d) vec3d).set(entity.getX(), entity.getY() + entity.getEyeHeight(entity.getPose()), entity.getZ()); break;
             case Body: ((IVec3d) vec3d).set(entity.getX(), entity.getY() + entity.getEyeHeight(entity.getPose()) / 2, entity.getZ()); break;
             case Feet: ((IVec3d) vec3d).set(entity.getX(), entity.getY(), entity.getZ()); break;
         }
-    }
-
-    private boolean canAttackEntity(Entity entity) {
-        if (entity == mc.player || !entities.get().getBoolean(entity.getType())) return false;
-
-        if (entity instanceof PlayerEntity) {
-            if (friends.get()) return true;
-            return Friends.get().attack((PlayerEntity) entity);
-        }
-
-        return true;
     }
 
     private boolean canSeeEntity(Entity entity) {
@@ -206,33 +177,10 @@ public class AimAssist extends Module {
         return canSeeFeet || canSeeEyes;
     }
 
-    private int sort(Entity e1, Entity e2) {
-        switch (priority.get()) {
-            case LowestDistance:  return Double.compare(e1.distanceTo(mc.player), e2.distanceTo(mc.player));
-            case HighestDistance: return invertSort(Double.compare(e1.distanceTo(mc.player), e2.distanceTo(mc.player)));
-            case LowestHealth: {
-                float a = e1 instanceof LivingEntity ? ((LivingEntity) e1).getHealth() : 0;
-                float b = e2 instanceof LivingEntity ? ((LivingEntity) e2).getHealth() : 0;
-                return Float.compare(a, b);
-            }
-            case HighestHealth: {
-                float a = e1 instanceof LivingEntity ? ((LivingEntity) e1).getHealth() : 0;
-                float b = e2 instanceof LivingEntity ? ((LivingEntity) e2).getHealth() : 0;
-                return invertSort(Float.compare(a, b));
-            }
-            default: return 0;
-        }
-    }
-
-    private int invertSort(int sort) {
-        if (sort == 0) return 0;
-        return sort > 0 ? -1 : 1;
-    }
-
     @Override
     public String getInfoString() {
-        if (entity != null && entity instanceof PlayerEntity) return entity.getEntityName();
-        if (entity != null) return entity.getType().getName().getString();
+        if (target != null && target instanceof PlayerEntity) return target.getEntityName();
+        if (target != null) return target.getType().getName().getString();
         return null;
     }
 }
