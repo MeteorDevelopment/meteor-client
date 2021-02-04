@@ -22,7 +22,7 @@ public class WKeybind extends WTable {
 
         set.action = () -> {
             listening = true;
-            label.setText(appendBindText("Bind: press any key"));
+            label.setText(appendBindText("Press any key"));
 
             if (actionOnSet != null) actionOnSet.run();
         };
@@ -60,7 +60,7 @@ public class WKeybind extends WTable {
     }
 
     private void setLabelToKey() {
-        label.setText(appendBindText(key == -1 ? "none" :  Utils.getKeyName(key)));
+        label.setText(appendBindText(key == -1 ? "None" :  Utils.getKeyName(key)));
     }
 
     private String appendBindText(String text) {
