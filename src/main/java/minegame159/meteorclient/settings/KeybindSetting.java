@@ -17,7 +17,7 @@ public class KeybindSetting extends Setting<Integer> {
 
         this.action = action;
 
-        widget = new WKeybind(get());
+        widget = new WKeybind(get(), false);
         ((WKeybind) widget).action = () -> set(((WKeybind) widget).get());
 
         MeteorClient.EVENT_BUS.subscribe(this);

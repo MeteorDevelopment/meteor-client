@@ -13,7 +13,7 @@ import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.utils.Utils;
 
 public class ModuleScreen extends WindowScreen {
-    private Module module;
+    private final Module module;
 
     private WKeybind keybind;
 
