@@ -17,6 +17,7 @@ public class WDoubleTextBox extends WTextBox {
 
         format = "%." + decimalPlaces + "f";
 
+        this.value = value - 1;
         setValue(value);
     }
 
