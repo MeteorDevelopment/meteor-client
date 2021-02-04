@@ -104,7 +104,8 @@
     "Vec3dMixin",
     "WorldRendererAccessor",
     "WorldRendererMixin",
-    "TridentItemMixin"
+    "TridentItemMixin",
+    "ModelPredicateProviderRegistryMixin"
   ],
   "injectors": {
     "defaultRequire": 1
