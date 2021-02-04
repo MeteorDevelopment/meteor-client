@@ -5,6 +5,7 @@
 
 package minegame159.meteorclient.modules.render.hud.modules;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.modules.render.hud.HUD;
 import minegame159.meteorclient.modules.render.hud.HudEditorScreen;
 import minegame159.meteorclient.modules.render.hud.HudRenderer;
@@ -51,6 +52,9 @@ public class ArmorHud extends HudModule {
         for (int position = 0; position < 4; position++) {
             ItemStack itemStack = getItem(slot);
 
+            RenderSystem.pushMatrix();
+            RenderSystem.scaled(hud.armorInfoScale.get(), hud.armorInfoScale.get(), 1);
+
             if (hud.armorInfoOrientation.get() == Orientation.Vertical) {
                 armorX = x / hud.armorInfoScale.get();
                 armorY = y / hud.armorInfoScale.get() + position * 18;
@@ -59,7 +63,7 @@ public class ArmorHud extends HudModule {
                 armorY = y / hud.armorInfoScale.get();
             }
 
-            RenderUtils.drawItem(itemStack, (int) armorX, (int) armorY, hud.armorInfoScale.get(), (itemStack.isDamageable() && hud.armorInfoDurability.get() == Durability.Default));
+            RenderUtils.drawItem(itemStack, (int) armorX, (int) armorY, (itemStack.isDamageable() && hud.armorInfoDurability.get() == Durability.Default));
 
             if (itemStack.isDamageable() && !(mc.currentScreen instanceof HudEditorScreen) && hud.armorInfoDurability.get() != Durability.Default && hud.armorInfoDurability.get() != Durability.None) {
                 String message = "err";
@@ -85,6 +89,8 @@ public class ArmorHud extends HudModule {
 
                 renderer.text(message, armorX, armorY, hud.primaryColor.get());
             }
+
+            RenderSystem.popMatrix();
 
             if (hud.armorInfoFlip.get()) slot--;
             else slot++;
