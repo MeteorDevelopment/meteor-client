@@ -109,7 +109,7 @@ public class EntityUtils {
             if (((PlayerEntity) entity).isDead() || ((PlayerEntity) entity).getHealth() <= 0) return false;
             if (mc.player.distanceTo(entity) > range) return false;
             if (!Friends.get().attack((PlayerEntity) entity)) return false;
-            return entity instanceof FakePlayerEntity || (!((PlayerEntity) entity).isCreative() && entity.isSpectator());
+            return entity instanceof FakePlayerEntity || (!((PlayerEntity) entity).isCreative() && !entity.isSpectator());
         }, priority);
     }
 }
