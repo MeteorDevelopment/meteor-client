@@ -7,12 +7,14 @@ public class WKeybind extends WTable {
     public Runnable actionOnSet;
 
     private final WLabel label;
+    private final boolean addBindText;
 
     private int key;
     private boolean listening;
 
-    public WKeybind(int key) {
+    public WKeybind(int key, boolean addBindText) {
         this.key = key;
+        this.addBindText = addBindText;
 
         label = add(new WLabel("")).getWidget();
         WButton set = add(new WButton("Set")).getWidget();
@@ -20,7 +22,7 @@ public class WKeybind extends WTable {
 
         set.action = () -> {
             listening = true;
-            label.setText("Bind: press any key");
+            label.setText(appendBindText("Bind: press any key"));
 
             if (actionOnSet != null) actionOnSet.run();
         };
@@ -32,6 +34,10 @@ public class WKeybind extends WTable {
         };
 
         setLabelToKey();
+    }
+
+    public WKeybind(int key) {
+        this(key, true);
     }
 
     public void onKey(int key) {
@@ -54,6 +60,10 @@ public class WKeybind extends WTable {
     }
 
     private void setLabelToKey() {
-        label.setText("Bind: " + (key == -1 ? "none" :  Utils.getKeyName(key)));
+        label.setText(appendBindText(key == -1 ? "none" :  Utils.getKeyName(key)));
+    }
+
+    private String appendBindText(String text) {
+        return addBindText ? "Bind: " + text : text;
     }
 }
