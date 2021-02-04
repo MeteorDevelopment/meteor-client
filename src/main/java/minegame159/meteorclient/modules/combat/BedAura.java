@@ -10,7 +10,6 @@ package minegame159.meteorclient.modules.combat;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.friends.Friends;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
@@ -19,13 +18,13 @@ import minegame159.meteorclient.utils.entity.EntityUtils;
 import minegame159.meteorclient.utils.entity.SortPriority;
 import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
-import minegame159.meteorclient.utils.player.RotationUtils;
+import minegame159.meteorclient.utils.player.PlayerUtils;
+import minegame159.meteorclient.utils.player.Rotations;
 import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.block.entity.BedBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BedItem;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
@@ -48,6 +47,7 @@ public class BedAura extends Module {
 
     private final SettingGroup sgPlace = settings.createGroup("Place");
     private final SettingGroup sgBreak = settings.createGroup("Break");
+    private final SettingGroup sgPause = settings.createGroup("Pause");
     private final SettingGroup sgMisc = settings.createGroup("Misc");
 
     // Place
@@ -79,9 +79,32 @@ public class BedAura extends Module {
             .build()
     );
 
+    // Pause
+
+    private final Setting<Boolean> pauseOnEat = sgPause.add(new BoolSetting.Builder()
+            .name("pause-on-eat")
+            .description("Pauses while eating.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> pauseOnDrink = sgPause.add(new BoolSetting.Builder()
+            .name("pause-on-drink")
+            .description("Pauses while drinking potions.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> pauseOnMine = sgPause.add(new BoolSetting.Builder()
+            .name("pause-on-mine")
+            .description("Pauses while mining blocks.")
+            .defaultValue(false)
+            .build()
+    );
+
     // Misc
 
-    private final Setting<Double> range = sgMisc.add(new DoubleSetting.Builder()
+    private final Setting<Double> targetRange = sgMisc.add(new DoubleSetting.Builder()
             .name("range")
             .description("The maximum range for players to be targeted.")
             .defaultValue(4)
@@ -159,17 +182,13 @@ public class BedAura extends Module {
             return;
         }
 
-        if (mc.player.getHealth() <= minHealth.get()) return;
+        if (PlayerUtils.shouldPause(pauseOnMine.get(), pauseOnEat.get(), pauseOnDrink.get())) return;
+        if (EntityUtils.getTotalHealth(mc.player) <= minHealth.get()) return;
 
-        if (target == null
-                || target.isDead()
-                || mc.player.distanceTo(target) > range.get()) {
-            target = findTarget();
-        }
-
+        if (EntityUtils.isInvalid(target, targetRange.get())) target = EntityUtils.getPlayerTarget(targetRange.get(), priority.get());
         if (target == null) return;
 
-        if (place.get() && hasBeds()) {
+        if (place.get() && InvUtils.findItemInAll(itemStack -> itemStack.getItem() instanceof BedItem) != -1) {
             switch (stage) {
                 case 1:
                     if (placeDelayLeft > 0) placeDelayLeft--;
@@ -214,37 +233,33 @@ public class BedAura extends Module {
 
         int slot = InvUtils.findItemInHotbar(itemStack -> itemStack.getItem() instanceof BedItem);
         if (slot == -1) return;
-
         if (autoSwitch.get()) mc.player.inventory.selectedSlot = slot;
 
         Hand hand = InvUtils.getHand(itemStack -> itemStack.getItem() instanceof BedItem);
-
         if (hand == null) return;
 
         mc.player.setSneaking(false);
 
         switch (direction) {
             case 0:
-                RotationUtils.packetRotate(-90, mc.player.pitch);
+                Rotations.rotate(-90, mc.player.pitch, () -> BlockUtils.place(pos, hand, slot, false, 100));
                 break;
             case 1:
-                RotationUtils.packetRotate(179, mc.player.pitch);
+                Rotations.rotate(179, mc.player.pitch, () -> BlockUtils.place(pos, hand, slot, false, 100));
                 break;
             case 2:
-                RotationUtils.packetRotate(1, mc.player.pitch);
+                Rotations.rotate(1, mc.player.pitch, () -> BlockUtils.place(pos, hand, slot, false, 100));
                 break;
             case 3:
-                RotationUtils.packetRotate(90, mc.player.pitch);
+                Rotations.rotate(90, mc.player.pitch, () -> BlockUtils.place(pos, hand, slot, false, 100));
                 break;
         }
-
-        BlockUtils.place(pos, hand, slot, false, 100);
     }
 
     private void breakBed() {
         try {
             for (BlockEntity entity : mc.world.blockEntities) {
-                if (entity instanceof BedBlockEntity && Utils.distance(entity.getPos().getX(), entity.getPos().getY(), entity.getPos().getZ(), mc.player.getX(), mc.player.getY(), mc.player.getZ()) <= range.get()) {
+                if (entity instanceof BedBlockEntity && Utils.distance(entity.getPos().getX(), entity.getPos().getY(), entity.getPos().getZ(), mc.player.getX(), mc.player.getY(), mc.player.getZ()) <= targetRange.get() && (entity.getPos() != mc.player.getBlockPos())) {
                     mc.player.setSneaking(false);
                     mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, entity.getPos(), false));
                 }
@@ -254,61 +269,58 @@ public class BedAura extends Module {
     }
 
     private BlockPos findFacePlace(PlayerEntity target) {
-
-        BlockPos bestBlock = null;
-
-        if (mc.player.distanceTo(target) < range.get() && mc.world.isAir(target.getBlockPos().add(0, 1, 0))) {
+        if (mc.player.distanceTo(target) < targetRange.get() && mc.world.isAir(target.getBlockPos().add(0, 1, 0))) {
             if (isValidHalf(target.getBlockPos().add(1, 0, 0))) {
-                bestBlock = new BlockPos(target.getBlockPos().getX() + 1.5, target.getBlockPos().getY() + 1, target.getBlockPos().getZ() + 0.5);
                 direction = 3;
                 bypassCheck = true;
+                return new BlockPos(target.getBlockPos().getX() + 1.5, target.getBlockPos().getY() + 1, target.getBlockPos().getZ() + 0.5);
             } else if (isValidHalf(target.getBlockPos().add(-1, 0, 0))) {
-                bestBlock = new BlockPos(target.getBlockPos().getX() - 0.5, target.getBlockPos().getY() + 1, target.getBlockPos().getZ() + 0.5);
                 direction = 0;
                 bypassCheck = true;
+                return new BlockPos(target.getBlockPos().getX() - 0.5, target.getBlockPos().getY() + 1, target.getBlockPos().getZ() + 0.5);
             } else if (isValidHalf(target.getBlockPos().add(0, 0, 1))) {
-                bestBlock = new BlockPos(target.getBlockPos().getX() + 0.5, target.getBlockPos().getY() + 1, target.getBlockPos().getZ() + 1.5);
                 direction = 1;
                 bypassCheck = true;
+                return new BlockPos(target.getBlockPos().getX() + 0.5, target.getBlockPos().getY() + 1, target.getBlockPos().getZ() + 1.5);
             } else if (isValidHalf(target.getBlockPos().add(0, 0, -1))) {
-                bestBlock = new BlockPos(target.getBlockPos().getX() + 0.5, target.getBlockPos().getY() + 1, target.getBlockPos().getZ() - 0.5);
                 direction = 2;
                 bypassCheck = true;
+                return new BlockPos(target.getBlockPos().getX() + 0.5, target.getBlockPos().getY() + 1, target.getBlockPos().getZ() - 0.5);
             } else if (isValidHalf(target.getBlockPos().add(1, 1, 0))) {
-                bestBlock = new BlockPos(target.getBlockPos().getX() + 1.5, target.getBlockPos().getY() + 1, target.getBlockPos().getZ() + 0.5);
                 direction = 3;
                 bypassCheck = true;
+                return new BlockPos(target.getBlockPos().getX() + 1.5, target.getBlockPos().getY() + 1, target.getBlockPos().getZ() + 0.5);
             } else if (isValidHalf(target.getBlockPos().add(-1, 1, 0))) {
-                bestBlock = new BlockPos(target.getBlockPos().getX() - 0.5, target.getBlockPos().getY() + 1, target.getBlockPos().getZ() + 0.5);
                 direction = 0;
                 bypassCheck = true;
+                return new BlockPos(target.getBlockPos().getX() - 0.5, target.getBlockPos().getY() + 1, target.getBlockPos().getZ() + 0.5);
             } else if (isValidHalf(target.getBlockPos().add(0, 1, 1))) {
-                bestBlock = new BlockPos(target.getBlockPos().getX() + 0.5, target.getBlockPos().getY() + 1, target.getBlockPos().getZ() + 1.5);
                 direction = 1;
                 bypassCheck = true;
+                return new BlockPos(target.getBlockPos().getX() + 0.5, target.getBlockPos().getY() + 1, target.getBlockPos().getZ() + 1.5);
             } else if (isValidHalf(target.getBlockPos().add(0, 1, -1))) {
-                bestBlock = new BlockPos(target.getBlockPos().getX() + 0.5, target.getBlockPos().getY() + 1, target.getBlockPos().getZ() - 0.5);
                 direction = 2;
                 bypassCheck = true;
+                return new BlockPos(target.getBlockPos().getX() + 0.5, target.getBlockPos().getY() + 1, target.getBlockPos().getZ() - 0.5);
             } else if (isValidHalf(target.getBlockPos().add(1, 2, 0))) {
-                bestBlock = new BlockPos(target.getBlockPos().getX() + 1.5, target.getBlockPos().getY() + 2, target.getBlockPos().getZ() + 0.5);
                 direction = 3;
                 bypassCheck = true;
+                return new BlockPos(target.getBlockPos().getX() + 1.5, target.getBlockPos().getY() + 2, target.getBlockPos().getZ() + 0.5);
             } else if (isValidHalf(target.getBlockPos().add(-1, 2, 0))) {
-                bestBlock = new BlockPos(target.getBlockPos().getX() - 0.5, target.getBlockPos().getY() + 2, target.getBlockPos().getZ() + 0.5);
                 direction = 0;
                 bypassCheck = true;
+                return new BlockPos(target.getBlockPos().getX() - 0.5, target.getBlockPos().getY() + 2, target.getBlockPos().getZ() + 0.5);
             } else if (isValidHalf(target.getBlockPos().add(0, 2, 1))) {
-                bestBlock = new BlockPos(target.getBlockPos().getX() + 0.5, target.getBlockPos().getY() + 2, target.getBlockPos().getZ() + 1.5);
                 direction = 1;
                 bypassCheck = true;
+                return new BlockPos(target.getBlockPos().getX() + 0.5, target.getBlockPos().getY() + 2, target.getBlockPos().getZ() + 1.5);
             } else if (isValidHalf(target.getBlockPos().add(0, 2, -1))) {
-                bestBlock = new BlockPos(target.getBlockPos().getX() + 0.5, target.getBlockPos().getY() + 2, target.getBlockPos().getZ() - 0.5);
                 direction = 2;
                 bypassCheck = true;
+                return new BlockPos(target.getBlockPos().getX() + 0.5, target.getBlockPos().getY() + 2, target.getBlockPos().getZ() - 0.5);
             }
         }
-        return bestBlock;
+        return null;
     }
 
     private boolean isValidHalf(BlockPos pos) {
@@ -316,46 +328,14 @@ public class BedAura extends Module {
     }
 
     private void doAutoMove() {
-        boolean doMove = true;
-        for (int i = 0; i < 9; i++) {
-            if (mc.player.inventory.getStack(i).getItem() instanceof BedItem) {
-                doMove = false;
-                break;
-            }
-        }
-        if (doMove) {
-            int slot = -1;
-            for (int i = 0; i < mc.player.inventory.main.size(); i++) {
-                ItemStack itemStack = mc.player.inventory.main.get(i);
-                if (itemStack.getItem() instanceof BedItem) {
-                    slot = i;
-                }
-            }
+        if (InvUtils.findItemInHotbar(itemStack -> itemStack.getItem() instanceof BedItem) == -1) {
+            int slot = InvUtils.findItemInMain(itemStack -> itemStack.getItem() instanceof BedItem);
             List<Integer> slots = new ArrayList<>();
             slots.add(InvUtils.invIndexToSlotId(autoMoveSlot.get()-1));
             slots.add(InvUtils.invIndexToSlotId(slot));
             slots.add(InvUtils.invIndexToSlotId(autoMoveSlot.get()-1));
             InvUtils.addSlots(slots, this.getClass());
         }
-    }
-
-    private PlayerEntity findTarget() {
-        return (PlayerEntity) EntityUtils.get(entity -> {
-            if (!(entity instanceof PlayerEntity) || entity == mc.player) return false;
-            if (((PlayerEntity) entity).isDead() || ((PlayerEntity) entity).getHealth() <= 0) return false;
-            if (mc.player.distanceTo(entity) > range.get()) return false;
-            if (!Friends.get().attack((PlayerEntity) entity)) return false;
-            return !((PlayerEntity) entity).isCreative() && !entity.isSpectator();
-        }, priority.get());
-    }
-
-    private boolean hasBeds() {
-        for (int i = 0; i < mc.player.inventory.size(); i++){
-            if (mc.player.inventory.getStack(i).getItem() instanceof BedItem) {
-                return true;
-            }
-        }
-        return false;
     }
 
     @Override
