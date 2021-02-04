@@ -277,7 +277,7 @@ public class Utils {
             default:
                 String keyName = GLFW.glfwGetKeyName(key, 0);
                 if (keyName == null) return "Unknown";
-                return keyName;
+                return StringUtils.capitalize(keyName);
         }
     }
 
