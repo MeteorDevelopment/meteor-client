@@ -34,14 +34,7 @@ public class ActiveModulesHud extends HudModule {
 
     public ActiveModulesHud(HUD hud) {
         super(hud, "active-modules", "Displays your active modules.");
-
-//        MeteorClient.EVENT_BUS.subscribe(new Listener<ActiveModulesChangedEvent>(event -> update = true));
-//        MeteorClient.EVENT_BUS.subscribe(new Listener<ModuleVisibilityChangedEvent>(event -> update = true));
     }
-
-//    public void recalculate() {
-//        update = true;
-//    }
 
     @Override
     public void update(HudRenderer renderer) {
@@ -50,8 +43,6 @@ public class ActiveModulesHud extends HudModule {
             return;
         }
 
-//        if (!update) return;
-//        update = false;
         modules.clear();
 
         for (Module module : Modules.get().getActive()) {
@@ -62,7 +53,7 @@ public class ActiveModulesHud extends HudModule {
             double _1 = getModuleWidth(renderer, o1);
             double _2 = getModuleWidth(renderer, o2);
 
-            if (hud.activeModulesSort() == Sort.Smallest) {
+            if (hud.activeModulesSort.get() == Sort.Smallest) {
                 double temp = _1;
                 _1 = _2;
                 _2 = temp;
@@ -97,7 +88,7 @@ public class ActiveModulesHud extends HudModule {
             return;
         }
 
-        rainbowHue1 += hud.activeModulesRainbowSpeed() * renderer.delta;
+        rainbowHue1 += hud.activeModulesRainbowSpeed.get() * renderer.delta;
         if (rainbowHue1 > 1) rainbowHue1 -= 1;
         else if (rainbowHue1 < -1) rainbowHue1 += 1;
 
@@ -111,12 +102,12 @@ public class ActiveModulesHud extends HudModule {
     }
 
     private void renderModule(HudRenderer renderer, Module module, double x, double y) {
-        Color color = hud.activeModulesFlatColor();
+        Color color = hud.activeModulesFlatColor.get();
 
-        ColorMode colorMode = hud.activeModulesColorMode();
+        ColorMode colorMode = hud.activeModulesColorMode.get();
         if (colorMode == ColorMode.Random) color = module.color;
         else if (colorMode == ColorMode.Rainbow) {
-            rainbowHue2 += hud.activeModulesRainbowSpread();
+            rainbowHue2 += hud.activeModulesRainbowSpread.get();
             int c = java.awt.Color.HSBtoRGB((float) rainbowHue2, 1, 1);
 
             rainbow.r = Color.toRGBAR(c);
@@ -128,16 +119,16 @@ public class ActiveModulesHud extends HudModule {
         
         renderer.text(module.title, x, y, color);
 
-        if (hud.activeInfo()) {
+        if (hud.activeInfo.get()) {
             String info = module.getInfoString();
-            if (info != null) renderer.text(info, x + renderer.textWidth(module.title) + renderer.textWidth(" "), y, hud.secondaryColor());
+            if (info != null) renderer.text(info, x + renderer.textWidth(module.title) + renderer.textWidth(" "), y, hud.secondaryColor.get());
         }
     }
 
     private double getModuleWidth(HudRenderer renderer, Module module) {
         double width = renderer.textWidth(module.title);
 
-        if (hud.activeInfo()) {
+        if (hud.activeInfo.get()) {
             String info = module.getInfoString();
             if (info != null) width += renderer.textWidth(" ") + renderer.textWidth(info);
         }

@@ -20,22 +20,18 @@ public class TotemHud extends HudModule {
 
     @Override
     public void update(HudRenderer renderer) {
-        box.setSize(16 * hud.armorScale(), 16 * hud.armorScale());
+        box.setSize(16 * hud.totemCountScale.get(), 16 * hud.totemCountScale.get());
     }
 
     @Override
     public void render(HudRenderer renderer) {
-        double x = box.getX();
-        double y = box.getY();
+        double x = box.getX() / hud.totemCountScale.get();
+        double y = box.getY() / hud.totemCountScale.get();
 
         if(mc.player == null || mc.currentScreen instanceof HudEditorScreen) {
-
-            RenderUtils.drawItem(Items.TOTEM_OF_UNDYING.getDefaultStack(), (int) (x / hud.armorScale()), (int) (y / hud.armorScale()), hud.armorScale(), true);
-
+            RenderUtils.drawItem(Items.TOTEM_OF_UNDYING.getDefaultStack(), (int) x, (int) y, hud.totemCountScale.get(), true);
         } else if(InvUtils.findItemWithCount(Items.TOTEM_OF_UNDYING).count > 0) {
-
-            RenderUtils.drawItem(new ItemStack(Items.TOTEM_OF_UNDYING, InvUtils.findItemWithCount(Items.TOTEM_OF_UNDYING).count), (int) (x / hud.armorScale()), (int) (y / hud.armorScale()), hud.armorScale(), true);
-
+            RenderUtils.drawItem(new ItemStack(Items.TOTEM_OF_UNDYING, InvUtils.findItemWithCount(Items.TOTEM_OF_UNDYING).count), (int) x, (int) y, hud.totemCountScale.get(), true);
         }
     }
 }
