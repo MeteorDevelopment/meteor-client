@@ -19,7 +19,6 @@ import minegame159.meteorclient.modules.render.hud.modules.*;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.render.AlignmentX;
 import minegame159.meteorclient.utils.render.AlignmentY;
-import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -38,14 +37,14 @@ public class HUD extends Module {
     private final SettingGroup sgArmor = settings.createGroup("Armor Info");
     private final SettingGroup sgModuleInfo = settings.createGroup("Module Info");
     private final SettingGroup sgCompass = settings.createGroup("Compass");
-
+    private final SettingGroup sgTotemCount = settings.createGroup("Totem Count");
 
     private final ActiveModulesHud activeModulesHud = new ActiveModulesHud(this);
     private final ModuleInfoHud moduleInfoHud = new ModuleInfoHud(this);
 
     // General
 
-    private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
+    public final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
             .name("scale")
             .description("Scale of the HUD.")
             .defaultValue(1)
@@ -56,21 +55,21 @@ public class HUD extends Module {
             .build()
     );
 
-    private final Setting<SettingColor> primaryColor = sgGeneral.add(new ColorSetting.Builder()
+    public final Setting<SettingColor> primaryColor = sgGeneral.add(new ColorSetting.Builder()
             .name("primary-color")
             .description("Primary color of text.")
             .defaultValue(new SettingColor(255, 255, 255))
             .build()
     );
 
-    private final Setting<SettingColor> secondaryColor = sgGeneral.add(new ColorSetting.Builder()
+    public final Setting<SettingColor> secondaryColor = sgGeneral.add(new ColorSetting.Builder()
             .name("secondary-color")
             .description("Secondary color of text.")
             .defaultValue(new SettingColor(175, 175, 175))
             .build()
     );
 
-    private final Setting<SettingColor> welcomeColor = sgGeneral.add(new ColorSetting.Builder()
+    public final Setting<SettingColor> welcomeColor = sgGeneral.add(new ColorSetting.Builder()
             .name("welcome-color")
             .description("Color of welcome text.")
             .defaultValue(new SettingColor(120, 43, 153))
@@ -78,8 +77,8 @@ public class HUD extends Module {
     );
 
     // Active Modules
-    
-    private final Setting<ActiveModulesHud.Sort> activeModulesSort = sgActiveModules.add(new EnumSetting.Builder<ActiveModulesHud.Sort>()
+
+    public final Setting<ActiveModulesHud.Sort> activeModulesSort = sgActiveModules.add(new EnumSetting.Builder<ActiveModulesHud.Sort>()
             .name("active-modules-sort")
             .description("How to sort active modules.")
             .defaultValue(ActiveModulesHud.Sort.Biggest)
@@ -87,28 +86,28 @@ public class HUD extends Module {
             .build()
     );
 
-    private final Setting<Boolean> activeInfo = sgActiveModules.add(new BoolSetting.Builder()
+    public final Setting<Boolean> activeInfo = sgActiveModules.add(new BoolSetting.Builder()
             .name("additional-info")
             .description("Shows additional info from the module next to the name in the active modules list.")
             .defaultValue(true)
             .build()
     );
 
-    private final Setting<ActiveModulesHud.ColorMode> activeModulesColorMode = sgActiveModules.add(new EnumSetting.Builder<ActiveModulesHud.ColorMode>()
+    public final Setting<ActiveModulesHud.ColorMode> activeModulesColorMode = sgActiveModules.add(new EnumSetting.Builder<ActiveModulesHud.ColorMode>()
             .name("active-modules-color-mode")
             .description("What color to use for active modules.")
             .defaultValue(ActiveModulesHud.ColorMode.Rainbow)
             .build()
     );
 
-    private final Setting<SettingColor> activeModulesFlatColor = sgActiveModules.add(new ColorSetting.Builder()
+    public final Setting<SettingColor> activeModulesFlatColor = sgActiveModules.add(new ColorSetting.Builder()
             .name("active-modules-flat-color")
             .description("Color for flat color mode.")
             .defaultValue(new SettingColor(225, 25, 25))
             .build()
     );
 
-    private final Setting<Double> activeModulesRainbowSpeed = sgActiveModules.add(new DoubleSetting.Builder()
+    public final Setting<Double> activeModulesRainbowSpeed = sgActiveModules.add(new DoubleSetting.Builder()
             .name("active-modules-rainbow-speed")
             .description("Rainbow speed of rainbow color mode.")
             .defaultValue(0.05)
@@ -117,7 +116,7 @@ public class HUD extends Module {
             .build()
     );
 
-    private final Setting<Double> activeModulesRainbowSpread = sgActiveModules.add(new DoubleSetting.Builder()
+    public final Setting<Double> activeModulesRainbowSpread = sgActiveModules.add(new DoubleSetting.Builder()
             .name("active-modules-rainbow-spread")
             .description("Rainbow spread of rainbow color mode.")
             .defaultValue(0.025)
@@ -128,21 +127,21 @@ public class HUD extends Module {
 
     // Inventory Viewer
 
-    private final Setting<InventoryViewerHud.Background> invViewerBackground = sgInvViewer.add(new EnumSetting.Builder<InventoryViewerHud.Background>()
+    public final Setting<InventoryViewerHud.Background> invViewerBackground = sgInvViewer.add(new EnumSetting.Builder<InventoryViewerHud.Background>()
             .name("inventory-viewer-background")
             .description("Background of inventory viewer.")
             .defaultValue(InventoryViewerHud.Background.Light)
             .build()
     );
 
-    private final Setting<SettingColor> invViewerColor = sgInvViewer.add(new ColorSetting.Builder()
+    public final Setting<SettingColor> invViewerColor = sgInvViewer.add(new ColorSetting.Builder()
             .name("flat-mode-color")
             .description("Color of background on Flat mode.")
             .defaultValue(new SettingColor(0, 0, 0, 64))
             .build()
     );
 
-    private final Setting<Double> invViewerScale = sgInvViewer.add(new DoubleSetting.Builder()
+    public final Setting<Double> invViewerScale = sgInvViewer.add(new DoubleSetting.Builder()
             .name("inventory-viewer-scale")
             .description("Scale of inventory viewer.")
             .defaultValue(2)
@@ -155,29 +154,28 @@ public class HUD extends Module {
 
     // Armor Info
 
-    private final Setting<Boolean> armorFlip = sgArmor.add(new BoolSetting.Builder()
+    public final Setting<Boolean> armorInfoFlip = sgArmor.add(new BoolSetting.Builder()
             .name("armor-flip-order")
             .description("Flips the order of armor items.")
             .defaultValue(true)
             .build()
     );
 
-    private final Setting<ArmorHud.Orientation> armorOrientation = sgArmor.add(new EnumSetting.Builder<ArmorHud.Orientation>()
+    public final Setting<ArmorHud.Orientation> armorInfoOrientation = sgArmor.add(new EnumSetting.Builder<ArmorHud.Orientation>()
             .name("orientation")
             .description("How to display armor.")
             .defaultValue(ArmorHud.Orientation.Horizontal)
             .build()
     );
 
-
-    private final Setting<ArmorHud.Durability> armorDurability = sgArmor.add(new EnumSetting.Builder<ArmorHud.Durability>()
+    public final Setting<ArmorHud.Durability> armorInfoDurability = sgArmor.add(new EnumSetting.Builder<ArmorHud.Durability>()
             .name("armor-durability")
             .description("How to display armor durability.")
             .defaultValue(ArmorHud.Durability.Default)
             .build()
     );
 
-    private final Setting<Double> armorScale = sgArmor.add(new DoubleSetting.Builder()
+    public final Setting<Double> armorInfoScale = sgArmor.add(new DoubleSetting.Builder()
             .name("armor-scale")
             .description("Scale of armor.")
             .defaultValue(3.5)
@@ -189,47 +187,58 @@ public class HUD extends Module {
 
     // Compass
 
-    private final Setting<CompassHud.Mode> compassMode = sgCompass.add(new EnumSetting.Builder<CompassHud.Mode>()
+    public final Setting<CompassHud.Mode> compassMode = sgCompass.add(new EnumSetting.Builder<CompassHud.Mode>()
             .name("mode")
             .description("The mode of the compass.")
             .defaultValue(CompassHud.Mode.Pole)
             .build()
     );
 
-    private final Setting<Double> compassScale = sgCompass.add(new DoubleSetting.Builder()
+    public final Setting<Double> compassScale = sgCompass.add(new DoubleSetting.Builder()
             .name("scale")
             .description("The scale of compass.")
-            .defaultValue(1)
-            .sliderMin(2)
+            .defaultValue(2.5)
+            .sliderMin(1)
+            .sliderMax(5)
+            .build()
+    );
+
+    //Totem
+
+    public final Setting<Double> totemCountScale = sgTotemCount.add(new DoubleSetting.Builder()
+            .name("scale")
+            .description("Scale of totem counter.")
+            .defaultValue(2)
+            .min(1)
+            .sliderMin(1)
             .sliderMax(4)
             .build()
     );
 
     // Module Info
 
-    private final Setting<List<Module>> moduleInfoModules = sgModuleInfo.add(new ModuleListSetting.Builder()
+    public final Setting<List<Module>> moduleInfoModules = sgModuleInfo.add(new ModuleListSetting.Builder()
             .name("module-info-modules")
             .description("Which modules to display")
             .defaultValue(moduleInfoModulesDefaultValue())
-//            .onChanged(toggleModules -> moduleInfoHud.recalculate())
             .build()
     );
 
-    private final Setting<Boolean> moduleInfo = sgModuleInfo.add(new BoolSetting.Builder()
+    public final Setting<Boolean> moduleInfo = sgModuleInfo.add(new BoolSetting.Builder()
             .name("additional-info")
             .description("Shows additional info from the module next to the name in the module info list.")
             .defaultValue(true)
             .build()
     );
 
-    private final Setting<SettingColor> moduleInfoOnColor = sgModuleInfo.add(new ColorSetting.Builder()
+    public final Setting<SettingColor> moduleInfoOnColor = sgModuleInfo.add(new ColorSetting.Builder()
             .name("module-info-on-color")
             .description("Color when module is on.")
             .defaultValue(new SettingColor(25, 225, 25))
             .build()
     );
 
-    private final Setting<SettingColor> moduleInfoOffColor = sgModuleInfo.add(new ColorSetting.Builder()
+    public final Setting<SettingColor> moduleInfoOffColor = sgModuleInfo.add(new ColorSetting.Builder()
             .name("module-info-off-color")
             .description("Color when module is off.")
             .defaultValue(new SettingColor(225, 25, 25))
@@ -237,7 +246,7 @@ public class HUD extends Module {
     );
 
     // Player Model
-    private final Setting<Double> playerModelScale = sgPlayerModel.add(new DoubleSetting.Builder()
+    public final Setting<Double> playerModelScale = sgPlayerModel.add(new DoubleSetting.Builder()
             .name("player-model-scale")
             .description("Scale of player model.")
             .defaultValue(2)
@@ -247,21 +256,21 @@ public class HUD extends Module {
             .build()
     );
 
-    private final Setting<Boolean> copyYaw = sgPlayerModel.add(new BoolSetting.Builder()
+    public final Setting<Boolean> playerModelCopyYaw = sgPlayerModel.add(new BoolSetting.Builder()
             .name("copy-yaw")
             .description("Makes the player model's yaw equal to yours.")
             .defaultValue(true)
             .build()
     );
 
-    private final Setting<Boolean> copyPitch = sgPlayerModel.add(new BoolSetting.Builder()
+    public final Setting<Boolean> playerModelCopyPitch = sgPlayerModel.add(new BoolSetting.Builder()
             .name("copy-pitch")
             .description("Makes the player model's pitch equal to yours.")
             .defaultValue(true)
             .build()
     );
 
-    private final Setting<Integer> customYaw = sgPlayerModel.add(new IntSetting.Builder()
+    public final Setting<Integer> playerModelCustomYaw = sgPlayerModel.add(new IntSetting.Builder()
             .name("custom-yaw")
             .description("Custom yaw for when copy yaw is off.")
             .defaultValue(0)
@@ -272,7 +281,7 @@ public class HUD extends Module {
             .build()
     );
 
-    private final Setting<Integer> customPitch = sgPlayerModel.add(new IntSetting.Builder()
+    public final Setting<Integer> playerModelCustomPitch = sgPlayerModel.add(new IntSetting.Builder()
             .name("custom-pitch")
             .description("Custom pitch for when copy pitch is off.")
             .defaultValue(0)
@@ -283,15 +292,15 @@ public class HUD extends Module {
             .build()
     );
 
-    private final Setting<Boolean> playerModelBackground = sgPlayerModel.add(new BoolSetting.Builder()
+    public final Setting<Boolean> playerModelBackground = sgPlayerModel.add(new BoolSetting.Builder()
             .name("player-model-background")
             .description("Displays a background behind the player model.")
             .defaultValue(true)
             .build()
     );
 
-    private final Setting<SettingColor> playerModelColor = sgPlayerModel.add(new ColorSetting.Builder()
-            .name("player-model-background-color")
+    public final Setting<SettingColor> playerModelBackgroundColor = sgPlayerModel.add(new ColorSetting.Builder()
+            .name("background-color")
             .description("Color of background.")
             .defaultValue(new SettingColor(0, 0, 0, 64))
             .build()
@@ -317,7 +326,7 @@ public class HUD extends Module {
 
     private void init() {
         modules.clear();
-        RENDERER.begin(scale(), 0, true);
+        RENDERER.begin(scale.get(), 0, true);
 
         // Top Left
         HudModuleLayer topLeft = new HudModuleLayer(RENDERER, modules, AlignmentX.Left, AlignmentY.Top, 2, 2);
@@ -332,7 +341,6 @@ public class HUD extends Module {
         topLeft.add(new BreakingBlockHud(this));
         topLeft.add(new LookingAtHud(this));
         topLeft.add(moduleInfoHud);
-        topLeft.add(new InfiniteMinerHud(this));
 
         // Top Center
         HudModuleLayer topCenter = new HudModuleLayer(RENDERER, modules, AlignmentX.Center, AlignmentY.Top, 0, 2);
@@ -367,7 +375,7 @@ public class HUD extends Module {
     public void onRender(Render2DEvent event) {
         if (mc.options.debugEnabled) return;
 
-        RENDERER.begin(scale(), event.tickDelta, false);
+        RENDERER.begin(scale.get(), event.tickDelta, false);
 
         for (HudModule module : modules) {
             if (module.active || mc.currentScreen instanceof HudEditorScreen) {
@@ -428,103 +436,5 @@ public class HUD extends Module {
         }
 
         return null;
-    }
-
-    public double scale() {
-        return scale.get();
-    }
-    public Color primaryColor() {
-        return primaryColor.get();
-    }
-    public Color secondaryColor() {
-        return secondaryColor.get();
-    }
-    public Color welcomeColor() {
-        return welcomeColor.get();
-    }
-
-    public ActiveModulesHud.Sort activeModulesSort() {
-        return activeModulesSort.get();
-    }
-    public boolean activeInfo() {
-        return activeInfo.get();
-    }
-    public ActiveModulesHud.ColorMode activeModulesColorMode() {
-        return activeModulesColorMode.get();
-    }
-    public SettingColor activeModulesFlatColor() {
-        return activeModulesFlatColor.get();
-    }
-    public double activeModulesRainbowSpeed() {
-        return activeModulesRainbowSpeed.get();
-    }
-    public double activeModulesRainbowSpread() {
-        return activeModulesRainbowSpread.get();
-    }
-
-    public InventoryViewerHud.Background invViewerBackground() {
-        return invViewerBackground.get();
-    }
-    public Color invViewerColor() {
-        return invViewerColor.get();
-    }
-    public double invViewerScale() {
-        return invViewerScale.get();
-    }
-
-    public double playerModelScale() {
-        return playerModelScale.get();
-    }
-    public boolean playerModelCopyYaw() {
-        return copyYaw.get();
-    }
-    public boolean playerModelCopyPitch() {
-        return copyPitch.get();
-    }
-    public int playerModelCustomYaw() {
-        return customYaw.get();
-    }
-    public int playerModelCustomPitch() {
-        return customPitch.get();
-    }
-    public boolean playerModelBackground() {
-        return playerModelBackground.get();
-    }
-    public Color playerModelColor() {
-        return playerModelColor.get();
-    }
-
-
-    public boolean armorFlip() {
-        return armorFlip.get();
-    }
-    public ArmorHud.Orientation armorOrientation() {
-        return armorOrientation.get();
-    }
-    public ArmorHud.Durability armorDurability() {
-        return armorDurability.get();
-    }
-    public double armorScale() {
-        return armorScale.get();
-    }
-
-    public List<Module> moduleInfoModules() {
-        return moduleInfoModules.get();
-    }
-    public boolean moduleInfo() {
-        return moduleInfo.get();
-    }
-    public Color moduleInfoOnColor() {
-        return moduleInfoOnColor.get();
-    }
-    public Color moduleInfoOffColor() {
-        return moduleInfoOffColor.get();
-    }
-
-    public double compassScale() {
-        return compassScale.get();
-    }
-    public CompassHud.Mode compassMode() {
-        return compassMode.get();
     }
 }

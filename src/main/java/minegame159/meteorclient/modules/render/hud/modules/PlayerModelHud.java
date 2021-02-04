@@ -20,7 +20,7 @@ public class PlayerModelHud extends HudModule {
 
     @Override
     public void update(HudRenderer renderer) {
-        box.setSize(50 * hud.playerModelScale(), 75 * hud.playerModelScale());
+        box.setSize(50 * hud.playerModelScale.get(), 75 * hud.playerModelScale.get());
     }
 
     @Override
@@ -28,17 +28,17 @@ public class PlayerModelHud extends HudModule {
         int x = box.getX();
         int y = box.getY();
 
-        if (hud.playerModelBackground()) {
+        if (hud.playerModelBackground.get()) {
             Renderer.NORMAL.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
-            Renderer.NORMAL.quad(x, y, box.width, box.height, hud.playerModelColor());
+            Renderer.NORMAL.quad(x, y, box.width, box.height, hud.playerModelBackgroundColor.get());
             Renderer.NORMAL.end();
         }
 
         if (mc.player != null) {
-            float yaw = hud.playerModelCopyYaw() ? MathHelper.wrapDegrees(mc.player.prevYaw + (mc.player.yaw - mc.player.prevYaw) * mc.getTickDelta()) : (float) hud.playerModelCustomYaw();
-            float pitch = hud.playerModelCopyPitch() ? mc.player.pitch : (float) hud.playerModelCustomPitch();
+            float yaw = hud.playerModelCopyYaw.get() ? MathHelper.wrapDegrees(mc.player.prevYaw + (mc.player.yaw - mc.player.prevYaw) * mc.getTickDelta()) : (float) hud.playerModelCustomYaw.get();
+            float pitch = hud.playerModelCopyPitch.get() ? mc.player.pitch : (float) hud.playerModelCustomPitch.get();
 
-            InventoryScreen.drawEntity(x + (int) (25 * hud.playerModelScale()), y + (int) (66 * hud.playerModelScale()), (int) (30 * hud.playerModelScale()), -yaw, -pitch, mc.player);
+            InventoryScreen.drawEntity(x + (int) (25 * hud.playerModelScale.get()), y + (int) (66 * hud.playerModelScale.get()), (int) (30 * hud.playerModelScale.get()), -yaw, -pitch, mc.player);
         }
     }
 }

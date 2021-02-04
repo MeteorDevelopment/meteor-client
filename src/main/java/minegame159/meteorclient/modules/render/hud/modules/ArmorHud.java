@@ -5,10 +5,10 @@
 
 package minegame159.meteorclient.modules.render.hud.modules;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.modules.render.hud.HUD;
 import minegame159.meteorclient.modules.render.hud.HudEditorScreen;
 import minegame159.meteorclient.modules.render.hud.HudRenderer;
+import minegame159.meteorclient.utils.render.RenderUtils;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 
@@ -31,12 +31,12 @@ public class ArmorHud extends HudModule {
 
     @Override
     public void update(HudRenderer renderer) {
-        switch (hud.armorOrientation()) {
+        switch (hud.armorInfoOrientation.get()) {
             case Horizontal:
-                box.setSize(16 * hud.armorScale() * 4 + 2 * 4, 16 * hud.armorScale());
+                box.setSize(16 * hud.armorInfoScale.get() * 4 + 2 * 4, 16 * hud.armorInfoScale.get());
                 break;
             case Vertical:
-                box.setSize(16 * hud.armorScale(), 16 * hud.armorScale() * 4 + 2 * 4);
+                box.setSize(16 * hud.armorInfoScale.get(), 16 * hud.armorInfoScale.get() * 4 + 2 * 4);
         }
     }
 
@@ -47,55 +47,48 @@ public class ArmorHud extends HudModule {
         double armorX;
         double armorY;
 
-        int slot = hud.armorFlip() ? 3 : 0;
+        int slot = hud.armorInfoFlip.get() ? 3 : 0;
         for (int position = 0; position < 4; position++) {
             ItemStack itemStack = getItem(slot);
 
-            RenderSystem.pushMatrix();
-            RenderSystem.scaled(hud.armorScale(), hud.armorScale(), 1);
-
-            if (hud.armorOrientation() == Orientation.Vertical) {
-                armorX = x / hud.armorScale();
-                armorY = y / hud.armorScale() + position * 18;
+            if (hud.armorInfoOrientation.get() == Orientation.Vertical) {
+                armorX = x / hud.armorInfoScale.get();
+                armorY = y / hud.armorInfoScale.get() + position * 18;
             } else {
-                armorX = x / hud.armorScale() + position * 18;
-                armorY = y / hud.armorScale();
+                armorX = x / hud.armorInfoScale.get() + position * 18;
+                armorY = y / hud.armorInfoScale.get();
             }
+
+            RenderUtils.drawItem(itemStack, (int) armorX, (int) armorY, hud.armorInfoScale.get(), (itemStack.isDamageable() && hud.armorInfoDurability.get() == Durability.Default));
 
             mc.getItemRenderer().renderGuiItemIcon(itemStack, (int) armorX, (int) armorY);
 
-            if (itemStack.isDamageable() && !(mc.currentScreen instanceof HudEditorScreen)) {
-                if (hud.armorDurability() == Durability.Default) {
-                    mc.getItemRenderer().renderGuiItemOverlay(mc.textRenderer, itemStack, (int) armorX, (int) armorY);
-                } else if (hud.armorDurability() != Durability.None) {
-                    String message = "err";
+            if (itemStack.isDamageable() && !(mc.currentScreen instanceof HudEditorScreen) && hud.armorInfoDurability.get() != Durability.Default && hud.armorInfoDurability.get() != Durability.None) {
+                String message = "err";
 
-                    switch (hud.armorDurability()) {
-                        case Numbers:
-                            message = Integer.toString(itemStack.getMaxDamage() - itemStack.getDamage());
-                            break;
-                        case Percentage:
-                            message = Integer.toString(Math.round(((itemStack.getMaxDamage() - itemStack.getDamage()) * 100f) / (float) itemStack.getMaxDamage()));
-                            break;
-                    }
-
-                    double messageWidth = renderer.textWidth(message);
-
-                    if (hud.armorOrientation() == Orientation.Vertical) {
-                        armorX = x + 8 * hud.armorScale() - messageWidth / 2.0;
-                        armorY = y + (18 * position * hud.armorScale()) + (18 * hud.armorScale() - renderer.textHeight());
-                    } else {
-                        armorX = x + 18 * position * hud.armorScale() + 8 * hud.armorScale() - messageWidth / 2.0;
-                        armorY = y + (box.height - renderer.textHeight());
-                    }
-
-                    renderer.text(message, armorX, armorY, hud.primaryColor());
+                switch (hud.armorInfoDurability.get()) {
+                    case Numbers:
+                        message = Integer.toString(itemStack.getMaxDamage() - itemStack.getDamage());
+                        break;
+                    case Percentage:
+                        message = Integer.toString(Math.round(((itemStack.getMaxDamage() - itemStack.getDamage()) * 100f) / (float) itemStack.getMaxDamage()));
+                        break;
                 }
+
+                double messageWidth = renderer.textWidth(message);
+
+                if (hud.armorInfoOrientation.get() == Orientation.Vertical) {
+                    armorX = x + 8 * hud.armorInfoScale.get() - messageWidth / 2.0;
+                    armorY = y + (18 * position * hud.armorInfoScale.get()) + (18 * hud.armorInfoScale.get() - renderer.textHeight());
+                } else {
+                    armorX = x + 18 * position * hud.armorInfoScale.get() + 8 * hud.armorInfoScale.get() - messageWidth / 2.0;
+                    armorY = y + (box.height - renderer.textHeight());
+                }
+
+                renderer.text(message, armorX, armorY, hud.primaryColor.get());
             }
 
-            RenderSystem.popMatrix();
-
-            if (hud.armorFlip()) slot--;
+            if (hud.armorInfoFlip.get()) slot--;
             else slot++;
         }
     }

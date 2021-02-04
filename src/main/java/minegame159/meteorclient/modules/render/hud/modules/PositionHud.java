@@ -24,8 +24,7 @@ public class PositionHud extends HudModule {
 
     @Override
     public void update(HudRenderer renderer) {
-        if (left1Width == 0) left1Width = renderer.textWidth(left1);
-
+        left1Width = renderer.textWidth(left1);
         left2 = null;
 
         if (mc.player == null) {
@@ -68,14 +67,14 @@ public class PositionHud extends HudModule {
         int y = box.getY();
 
         if (left2 != null) {
-            renderer.text(left2, x, y, hud.primaryColor());
-            renderer.text(right2, x + left2Width, y, hud.secondaryColor());
+            renderer.text(left2, x, y, hud.primaryColor.get());
+            renderer.text(right2, x + left2Width, y, hud.secondaryColor.get());
         }
 
         double xOffset = box.alignX(left1Width + renderer.textWidth(right1));
         double yOffset = renderer.textHeight() + 2;
 
-        renderer.text(left1, x + xOffset, y + yOffset, hud.primaryColor());
-        renderer.text(right1, x + xOffset + left1Width, y + yOffset, hud.secondaryColor());
+        renderer.text(left1, x + xOffset, y + yOffset, hud.primaryColor.get());
+        renderer.text(right1, x + xOffset + left1Width, y + yOffset, hud.secondaryColor.get());
     }
 }
