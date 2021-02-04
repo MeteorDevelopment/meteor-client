@@ -8,7 +8,6 @@ package minegame159.meteorclient.modules.render.hud.modules;
 import minegame159.meteorclient.modules.render.hud.HUD;
 import minegame159.meteorclient.modules.render.hud.HudEditorScreen;
 import minegame159.meteorclient.modules.render.hud.HudRenderer;
-import minegame159.meteorclient.utils.render.RenderUtils;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 
@@ -58,8 +57,6 @@ public class ArmorHud extends HudModule {
                 armorX = x / hud.armorInfoScale.get() + position * 18;
                 armorY = y / hud.armorInfoScale.get();
             }
-
-            RenderUtils.drawItem(itemStack, (int) armorX, (int) armorY, hud.armorInfoScale.get(), (itemStack.isDamageable() && hud.armorInfoDurability.get() == Durability.Default));
 
             mc.getItemRenderer().renderGuiItemIcon(itemStack, (int) armorX, (int) armorY);
 
