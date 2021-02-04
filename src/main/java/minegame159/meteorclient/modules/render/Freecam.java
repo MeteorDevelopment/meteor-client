@@ -139,8 +139,8 @@ public class Freecam extends Module {
 
         if (mc.currentScreen != null) return;
 
-        Vec3d forward = Vec3d.fromPolar(0, getYaw(1 / 20f));
-        Vec3d right = Vec3d.fromPolar(0, getYaw(1 / 20f) + 90);
+        Vec3d forward = Vec3d.fromPolar(0, yaw);
+        Vec3d right = Vec3d.fromPolar(0, yaw + 90);
         double velX = 0;
         double velY = 0;
         double velZ = 0;
@@ -264,26 +264,6 @@ public class Freecam extends Module {
         pitch += deltaY;
 
         pitch = MathHelper.clamp(pitch, -90, 90);
-    }
-
-    public double getX(float delta) {
-        return MathHelper.lerp(delta, prevPos.x, pos.x);
-    }
-
-    public double getY(float delta) {
-        return MathHelper.lerp(delta, prevPos.y, pos.y);
-    }
-
-    public double getZ(float delta) {
-        return MathHelper.lerp(delta, prevPos.z, pos.z);
-    }
-
-    public float getYaw(float delta) {
-        return MathHelper.lerp(delta, prevYaw, yaw);
-    }
-
-    public float getPitch(float delta) {
-        return MathHelper.lerp(delta, prevPitch, pitch);
     }
 
     public boolean renderHands() {
