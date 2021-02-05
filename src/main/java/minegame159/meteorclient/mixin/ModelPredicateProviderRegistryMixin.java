@@ -15,13 +15,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(targets = "net.minecraft.client.item.ModelPredicateProviderRegistry$2")
 public class ModelPredicateProviderRegistryMixin {
-    @Redirect(method = "call", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/LivingEntity;yaw:F"))
-    private float onCallLivingEntityGetYaw(LivingEntity entity) {
+    @Redirect(method = "call(Lnet/minecraft/item/ItemStack;Lnet/minecraft/client/world/ClientWorld;Lnet/minecraft/entity/LivingEntity;)F", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/LivingEntity;yaw:F"))
+    private float callLivingEntityGetYaw(LivingEntity entity) {
         if (Modules.get().isActive(Freecam.class)) return MinecraftClient.getInstance().gameRenderer.getCamera().getYaw();
         return entity.yaw;
     }
 
-    @Inject(method = "getAngleToPos", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "getAngleToPos(Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/entity/Entity;)D", at = @At("HEAD"), cancellable = true)
     private void onGetAngleToPos(Vec3d pos, Entity entity, CallbackInfoReturnable<Double> info) {
         if (Modules.get().isActive(Freecam.class)) {
             Camera camera = MinecraftClient.getInstance().gameRenderer.getCamera();
