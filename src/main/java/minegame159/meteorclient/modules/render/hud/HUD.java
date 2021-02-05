@@ -20,6 +20,7 @@ import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.render.AlignmentX;
 import minegame159.meteorclient.utils.render.AlignmentY;
 import minegame159.meteorclient.utils.render.color.SettingColor;
+import net.minecraft.enchantment.Enchantment;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -34,6 +35,7 @@ public class HUD extends Module {
     private final SettingGroup sgActiveModules = settings.createGroup("Active Modules");
     private final SettingGroup sgInvViewer = settings.createGroup("Inventory Viewer");
     private final SettingGroup sgPlayerModel = settings.createGroup("Player Model");
+    private final SettingGroup sgCombatInfo = settings.createGroup("Combat Info");
     private final SettingGroup sgArmor = settings.createGroup("Armor Info");
     private final SettingGroup sgModuleInfo = settings.createGroup("Module Info");
     private final SettingGroup sgCompass = settings.createGroup("Compass");
@@ -306,6 +308,45 @@ public class HUD extends Module {
             .build()
     );
 
+    //Combat info
+    public final Setting<Double> combatInfoScale = sgCombatInfo.add(new DoubleSetting.Builder()
+            .name("scale")
+            .description("Scale of combat info.")
+            .defaultValue(2)
+            .min(1)
+            .sliderMin(1)
+            .sliderMax(4)
+            .build()
+    );
+
+    public final Setting<SettingColor> combatInfoBackgroundColor = sgCombatInfo.add(new ColorSetting.Builder()
+            .name("background-color")
+            .description("Color of background.")
+            .defaultValue(new SettingColor(0, 0, 0, 64))
+            .build()
+    );
+
+    public final Setting<List<Enchantment>> combatInfoDisplayedEnchantments = sgCombatInfo.add(new EnchListSetting.Builder()
+            .name("displayed-enchantments")
+            .description("The enchantments that are shown on nametags.")
+            .defaultValue(CombatHud.setDefualtList())
+            .build()
+    );
+
+    public final Setting<SettingColor> combatInfoEnchantmentTextColor = sgCombatInfo.add(new ColorSetting.Builder()
+            .name("enchantment-color")
+            .description("Color of enchantment text.")
+            .defaultValue(new SettingColor(255, 255, 255))
+            .build()
+    );
+
+    public final Setting<Boolean> combatInfoDisplayPing = sgCombatInfo.add(new BoolSetting.Builder()
+            .name("ping")
+            .description("Shows the player's ping.")
+            .defaultValue(true)
+            .build()
+    );
+
     public final List<HudModule> modules = new ArrayList<>();
 
     public HUD() {
@@ -367,6 +408,7 @@ public class HUD extends Module {
         bottomRight.add(new PositionHud(this));
         bottomRight.add(new RotationHud(this));
         bottomRight.add(new PotionTimersHud(this));
+        bottomRight.add(new CombatHud(this));
 
         RENDERER.end();
     }
