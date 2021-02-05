@@ -171,6 +171,10 @@ public class Utils {
         return enchantment.getName(0).getString().substring(0, 4);
     }
 
+    public static String getEnchantSimpleName(Enchantment enchantment) {
+        return enchantment.getName(0).getString().substring(0, 3);
+    }
+
     public static int search(String text, String filter) {
         int wordsFound = 0;
         String[] words = filter.split(" ");
