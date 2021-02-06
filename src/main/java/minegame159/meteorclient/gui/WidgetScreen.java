@@ -32,7 +32,7 @@ public abstract class WidgetScreen extends Screen {
     private final int prePostKeyEvents;
     private boolean firstInit = true;
     private boolean renderDebug = false;
-    private boolean closed;
+    private boolean closed, onClose;
 
     public boolean locked;
 
@@ -168,7 +168,14 @@ public abstract class WidgetScreen extends Screen {
 
     @Override
     public void onClose() {
-        if (!locked) removed();
+        if (!locked) {
+            boolean preOnClose = onClose;
+            onClose = true;
+
+            removed();
+
+            onClose = preOnClose;
+        }
     }
 
     @Override
@@ -181,7 +188,7 @@ public abstract class WidgetScreen extends Screen {
 
             MeteorClient.EVENT_BUS.unsubscribe(this);
             GuiKeyEvents.postKeyEvents = prePostKeyEvents;
-            MinecraftClient.getInstance().openScreen(parent);
+            if (onClose) MinecraftClient.getInstance().openScreen(parent);
         }
     }
 
