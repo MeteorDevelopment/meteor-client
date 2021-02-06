@@ -319,6 +319,14 @@ public class HUD extends Module {
             .build()
     );
 
+    public final Setting<Double> combatInfoRange = sgCombatInfo.add(new DoubleSetting.Builder()
+            .name("range")
+            .description("The range to target players.")
+            .defaultValue(100)
+            .min(1)
+            .build()
+    );
+
     public final Setting<SettingColor> combatInfoBackgroundColor = sgCombatInfo.add(new ColorSetting.Builder()
             .name("background-color")
             .description("Color of background.")
@@ -346,6 +354,14 @@ public class HUD extends Module {
             .defaultValue(true)
             .build()
     );
+
+    public final Setting<Boolean> combatInfoDisplayDist = sgCombatInfo.add(new BoolSetting.Builder()
+            .name("distance")
+            .description("Shows the distance between you and the player.")
+            .defaultValue(true)
+            .build()
+    );
+
 
     public final List<HudModule> modules = new ArrayList<>();
 
