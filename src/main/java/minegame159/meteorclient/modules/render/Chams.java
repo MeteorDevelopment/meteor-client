@@ -6,6 +6,8 @@
 package minegame159.meteorclient.modules.render;
 
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
+import meteordevelopment.orbit.EventHandler;
+import minegame159.meteorclient.events.entity.RenderLivingEntityEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
@@ -13,12 +15,9 @@ import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.entity.EntityUtils;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.render.color.SettingColor;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.entity.model.EntityModel;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
+import org.lwjgl.opengl.GL11;
 
 public class Chams extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -102,24 +101,30 @@ public class Chams extends Module {
         super(Category.Render, "chams", "Renders entities through walls.");
     }
 
-    public boolean ignoreRender(Entity entity) {
-        return !isActive() || !entities.get().getBoolean(entity.getType());
+    public boolean shouldRender(Entity entity) {
+        return isActive() && entities.get().getBoolean(entity.getType());
     }
 
-    public boolean renderChams(EntityModel<LivingEntity> model, MatrixStack matrices, VertexConsumer vertices, int light, int overlay, LivingEntity entity) {
-        if (ignoreRender(entity) || !colored.get()) return false;
-        Color color = EntityUtils.getEntityColor(entity, playersColor.get(), animalsColor.get(), waterAnimalsColor.get(), monstersColor.get(), ambientColor.get(), miscColor.get(), useNameColor.get());
-        model.render(matrices, vertices, light, overlay, (float)color.r/255f, (float)color.g/255f, (float)color.b/255f, (float)color.a/255f);
-        return true;
+    @EventHandler
+    private void onPreRender(RenderLivingEntityEvent.Pre event) {
+        if(shouldRender(event.entity)) {
+            GL11.glEnable(GL11.GL_POLYGON_OFFSET_FILL);
+            GL11.glPolygonOffset(1.0f, -1000000.0f);
+        }
     }
 
-    // TODO: 30/12/2020 Fix crystal chams
-    // also fix cape rendering in chams
+    @EventHandler
+    private void onPostRender(RenderLivingEntityEvent.Post event) {
+        if(shouldRender(event.entity)) {
+            GL11.glPolygonOffset(1.0f, 1000000.0f);
+            GL11.glDisable(GL11.GL_POLYGON_OFFSET_FILL);
+        }
+    }
 
-//    public boolean renderChamsCrystal(ModelPart modelPart, MatrixStack matrices, VertexConsumer vertices, int light, int overlay) {
-//        if (!isActive() || !entities.get().contains(EntityType.END_CRYSTAL) || !colored.get()) return false;
-//        Color color = miscColor.get();
-//        modelPart.render(matrices, vertices, light, overlay, (float)color.r/255f, (float)color.g/255f, (float)color.b/255f, (float)color.a/255f);
-//        return true;
-//    }
+    @EventHandler
+    private void onInvokeRender(RenderLivingEntityEvent.Invoke event) {
+        if (shouldRender(event.entity) && colored.get()) event.setCancelled(true);
+        Color color = EntityUtils.getEntityColor(event.entity, playersColor.get(), animalsColor.get(), waterAnimalsColor.get(), monstersColor.get(), ambientColor.get(), miscColor.get(), useNameColor.get());
+        event.model.render(event.matrices, event.vertices, event.light, event.overlay, (float)color.r/255f, (float)color.g/255f, (float)color.b/255f, (float)color.a/255f);
+    }
 }
