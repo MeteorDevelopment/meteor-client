@@ -198,8 +198,10 @@ public class Nuker extends Module {
     }
 
     private void normalMine(BlockPos pos) {
-        mc.interactionManager.updateBlockBreakingProgress(pos, Direction.UP);
-        mc.player.swingHand(Hand.MAIN_HAND);
+        if (mc.interactionManager != null && mc.player != null) {
+            mc.interactionManager.updateBlockBreakingProgress(pos, Direction.UP);
+            mc.player.swingHand(Hand.MAIN_HAND);
+        }
     }
 
     private void cancelMine(BlockPos pos) {
