@@ -5,6 +5,7 @@
 
 package minegame159.meteorclient.modules.render;
 
+import com.mojang.blaze3d.platform.GlStateManager;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.RenderLivingEntityEvent;
@@ -107,17 +108,19 @@ public class Chams extends Module {
 
     @EventHandler
     private void onPreRender(RenderLivingEntityEvent.Pre event) {
-        if(shouldRender(event.entity)) {
+        if(shouldRender(event.entity) && throughWalls.get()) {
             GL11.glEnable(GL11.GL_POLYGON_OFFSET_FILL);
-            GL11.glPolygonOffset(1.0f, -1000000.0f);
+            GlStateManager.enablePolygonOffset();
+            GlStateManager.polygonOffset(1.0F, -1000000);
         }
     }
 
     @EventHandler
     private void onPostRender(RenderLivingEntityEvent.Post event) {
-        if(shouldRender(event.entity)) {
-            GL11.glPolygonOffset(1.0f, 1000000.0f);
+        if(shouldRender(event.entity) && throughWalls.get()) {
             GL11.glDisable(GL11.GL_POLYGON_OFFSET_FILL);
+            GlStateManager.polygonOffset(1.0F, 1000000);
+            GlStateManager.disablePolygonOffset();
         }
     }
 
