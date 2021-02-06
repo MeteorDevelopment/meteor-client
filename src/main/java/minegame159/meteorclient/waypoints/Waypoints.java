@@ -6,6 +6,7 @@
 package minegame159.meteorclient.waypoints;
 
 import meteordevelopment.orbit.EventHandler;
+import meteordevelopment.orbit.EventPriority;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.game.GameJoinedEvent;
 import minegame159.meteorclient.events.game.GameLeftEvent;
@@ -90,9 +91,8 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
         load();
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST)
     private void onGameDisconnected(GameLeftEvent event) {
-        save();
         waypoints.clear();
     }
 
