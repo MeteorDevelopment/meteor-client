@@ -13,7 +13,7 @@ import minegame159.meteorclient.utils.network.MeteorExecutor;
 import net.minecraft.client.MinecraftClient;
 
 public class WAccount extends WTable {
-    public WAccount(AccountsScreen screen, Account<?> account) {
+    public WAccount(AccountsScreen screen, Account<?> account, Runnable onRemoved) {
         // Head
         add(new WTexture(16, 16, 90, account.getCache().getHeadTexture()));
 
@@ -49,6 +49,9 @@ public class WAccount extends WTable {
 
         // Remove
         WMinus minus = add(new WMinus()).getWidget();
-        minus.action = () -> Accounts.get().remove(account);
+        minus.action = () -> {
+            Accounts.get().remove(account);
+            if (onRemoved != null) onRemoved.run();
+        };
     }
 }

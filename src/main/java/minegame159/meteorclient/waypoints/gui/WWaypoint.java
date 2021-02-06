@@ -22,7 +22,7 @@ public class WWaypoint extends WTable {
     private static final Color WHITE = new Color(255, 255, 255);
     private static final Color GRAY = new Color(200, 200, 200);
 
-    public WWaypoint(Waypoint waypoint) {
+    public WWaypoint(Waypoint waypoint, Runnable onRemoved) {
         // Icon
         add(new WWaypointIcon(waypoint));
 
@@ -43,7 +43,10 @@ public class WWaypoint extends WTable {
             Waypoints.get().save();
         };
         right.add(new WButton(WButton.ButtonRegion.Edit)).getWidget().action = () -> MinecraftClient.getInstance().openScreen(new EditWaypointScreen(waypoint));
-        right.add(new WMinus()).getWidget().action = () -> Waypoints.get().remove(waypoint);
+        right.add(new WMinus()).getWidget().action = () -> {
+            Waypoints.get().remove(waypoint);
+            if (onRemoved != null) onRemoved.run();
+        };
         WButton path = new WButton("Goto");
         path.action = () -> {
             if(MinecraftClient.getInstance().player == null || MinecraftClient.getInstance().world == null) return;

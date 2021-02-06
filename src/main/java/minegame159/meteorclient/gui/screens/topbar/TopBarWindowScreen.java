@@ -12,13 +12,22 @@ import minegame159.meteorclient.gui.widgets.WWindow;
 public abstract class TopBarWindowScreen extends TopBarScreen {
     private final WWindow window;
 
+    protected boolean refreshWidgetsOnInit;
+
     public TopBarWindowScreen(TopBarType type) {
         super(type);
 
         window = super.add(new WWindow(type.toString(), true)).centerXY().getWidget();
 
         addTopBar();
-        initWidgets();
+    }
+
+    @Override
+    protected void init() {
+        boolean wasFirstInit = firstInit;
+        if (refreshWidgetsOnInit) clear();
+        super.init();
+        if (refreshWidgetsOnInit || wasFirstInit) initWidgets();
     }
 
     protected abstract void initWidgets();
