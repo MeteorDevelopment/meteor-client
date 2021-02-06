@@ -128,6 +128,10 @@ public class MeshBuilder {
         pos(x4, y4, z4).color(startColor).endVertex();
     }
 
+    public void gradientQuad(double x, double y, double width, double height, Color startColor, Color endColor) {
+        gradientQuad(x, y, 0, x + width, y, 0, x + width, y + height, 0, x, y + height, 0,startColor, endColor);
+    }
+
     public void texQuad(double x, double y, double width, double height, double srcX, double srcY, double srcWidth, double srcHeight, Color color1, Color color2, Color color3, Color color4) {
         pos(x, y, 0).texture(srcX, srcY).color(color1).endVertex();
         pos(x + width, y, 0).texture(srcX + srcWidth, srcY).color(color2).endVertex();
@@ -183,5 +187,9 @@ public class MeshBuilder {
         if (Dir.is(excludeDir, Dir.WEST)) line(x1, y2, z1, x1, y2, z2, color);
         if (Dir.is(excludeDir, Dir.EAST)) line(x2, y1, z1, x2, y1, z2, color);
         if (Dir.is(excludeDir, Dir.EAST)) line(x2, y2, z1, x2, y2, z2, color);
+    }
+
+    public void boxEdges(double x, double y, double width, double height, Color color) {
+        boxEdges(x,y, 0, x + width, y + height, 0, color, 0);
     }
 }
