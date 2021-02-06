@@ -30,7 +30,7 @@ public abstract class WidgetScreen extends Screen {
     public final WWidget root;
 
     private final int prePostKeyEvents;
-    private boolean firstInit = true;
+    protected boolean firstInit = true;
     private boolean renderDebug = false;
     private boolean closed, onClose;
 

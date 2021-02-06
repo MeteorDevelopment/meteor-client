@@ -5,8 +5,6 @@
 
 package minegame159.meteorclient.gui.screens.topbar;
 
-import meteordevelopment.orbit.EventHandler;
-import minegame159.meteorclient.events.meteor.MacroListChangedEvent;
 import minegame159.meteorclient.gui.widgets.WButton;
 import minegame159.meteorclient.gui.widgets.WLabel;
 import minegame159.meteorclient.gui.widgets.WMinus;
@@ -20,6 +18,8 @@ import net.minecraft.client.MinecraftClient;
 public class TopBarMacros extends TopBarWindowScreen {
     public TopBarMacros() {
         super(TopBarType.Macros);
+
+        refreshWidgetsOnInit = true;
     }
 
     @Override
@@ -35,7 +35,12 @@ public class TopBarMacros extends TopBarWindowScreen {
                 edit.action = () -> MinecraftClient.getInstance().openScreen(new EditMacroScreen(macro));
 
                 WMinus remove = t.add(new WMinus()).getWidget();
-                remove.action = () -> Macros.get().remove(macro);
+                remove.action = () -> {
+                    Macros.get().remove(macro);
+
+                    clear();
+                    initWidgets();
+                };
 
                 t.row();
             }
@@ -45,11 +50,5 @@ public class TopBarMacros extends TopBarWindowScreen {
         // Create macro
         WButton create = add(new WButton("Create")).fillX().expandX().getWidget();
         create.action = () -> MinecraftClient.getInstance().openScreen(new EditMacroScreen(null));
-    }
-
-    @EventHandler
-    private void onMacroListChanged(MacroListChangedEvent event) {
-        clear();
-        initWidgets();
     }
 }

@@ -5,8 +5,6 @@
 
 package minegame159.meteorclient.friends;
 
-import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.meteor.FriendListChangedEvent;
 import minegame159.meteorclient.systems.System;
 import minegame159.meteorclient.systems.Systems;
 import minegame159.meteorclient.utils.entity.FriendType;
@@ -53,7 +51,6 @@ public class Friends extends System<Friends> implements Iterable<Friend> {
     public boolean add(Friend friend) {
         if (!friends.contains(friend)) {
             friends.add(friend);
-            MeteorClient.EVENT_BUS.post(FriendListChangedEvent.get());
             save();
             return true;
         }
@@ -140,7 +137,6 @@ public class Friends extends System<Friends> implements Iterable<Friend> {
 
     public boolean remove(Friend friend) {
         if (friends.remove(friend)) {
-            MeteorClient.EVENT_BUS.post(FriendListChangedEvent.get());
             save();
             return true;
         }
