@@ -122,6 +122,10 @@ public class Freecam extends Module {
     @EventHandler
     private void onOpenScreen(OpenScreenEvent event) {
         unpress();
+
+        ((IVec3d) prevPos).set(pos);
+        prevYaw = yaw;
+        prevPitch = pitch;
     }
 
     private void unpress() {
@@ -268,5 +272,22 @@ public class Freecam extends Module {
 
     public boolean renderHands() {
         return !isActive() || renderHands.get();
+    }
+
+    public double getX(float tickDelta) {
+        return MathHelper.lerp(tickDelta, prevPos.x, pos.x);
+    }
+    public double getY(float tickDelta) {
+        return MathHelper.lerp(tickDelta, prevPos.y, pos.y);
+    }
+    public double getZ(float tickDelta) {
+        return MathHelper.lerp(tickDelta, prevPos.z, pos.z);
+    }
+
+    public double getYaw(float tickDelta) {
+        return MathHelper.lerp(tickDelta, prevYaw, yaw);
+    }
+    public double getPitch(float tickDelta) {
+        return MathHelper.lerp(tickDelta, prevPitch, pitch);
     }
 }
