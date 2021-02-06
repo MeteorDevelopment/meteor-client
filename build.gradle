@@ -27,10 +27,6 @@ dependencies {
 		implementation id
 		shadow id
 	}
-	def dependency2 = { id, a ->
-		implementation(id, a)
-		shadow(id, a)
-	}
 
 	// Minecraft
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
@@ -57,9 +53,7 @@ dependencies {
 	// Other dependencies
 	dependency "com.github.MeteorDevelopment:orbit:0.1.5"
 	dependency "com.g00fy2:versioncompare:1.3.7"
-	dependency2("com.github.sbt:ipcsocket:1.3.0") {
-		transitive = false
-	}
+	dependency "com.github.minndevelopment:java-discordrpc:2.0.2"
 }
 
 shadowJar {
