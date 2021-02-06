@@ -82,13 +82,25 @@ public abstract class ClientPlayerEntityMixin {
         if (Modules.get().isActive(Scaffold.class)) info.setReturnValue(false);
     }
 
+    // Rotations
+
     @Inject(method = "sendMovementPackets", at = @At("HEAD"))
     private void onSendMovementPacketsHead(CallbackInfo info) {
         MeteorClient.EVENT_BUS.post(SendMovementPacketsEvent.Pre.get());
     }
 
+    @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayNetworkHandler;sendPacket(Lnet/minecraft/network/Packet;)V", ordinal = 0))
+    private void onTickHasVehicleBeforeSendPackets(CallbackInfo info) {
+        MeteorClient.EVENT_BUS.post(SendMovementPacketsEvent.Pre.get());
+    }
+
     @Inject(method = "sendMovementPackets", at = @At("TAIL"))
     private void onSendMovementPacketsTail(CallbackInfo info) {
+        MeteorClient.EVENT_BUS.post(SendMovementPacketsEvent.Post.get());
+    }
+
+    @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayNetworkHandler;sendPacket(Lnet/minecraft/network/Packet;)V", ordinal = 1, shift = At.Shift.AFTER))
+    private void onTickHasVehicleAfterSendPackets(CallbackInfo info) {
         MeteorClient.EVENT_BUS.post(SendMovementPacketsEvent.Post.get());
     }
 }
