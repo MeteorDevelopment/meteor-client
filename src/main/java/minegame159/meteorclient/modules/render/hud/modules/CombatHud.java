@@ -54,13 +54,21 @@ public class CombatHud extends HudModule {
             int x = box.getX();
             int y = box.getY();
 
+            if (mc.currentScreen instanceof HudEditorScreen) {
+                Renderer.NORMAL.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
+                Renderer.NORMAL.quad(x, y, box.width, box.height, hud.combatInfoBackgroundColor.get());
+                Renderer.NORMAL.end();
+            }
+
             playerEntity = EntityUtils.getPlayerTarget(hud.combatInfoRange.get(), SortPriority.LowestDistance);
             if (playerEntity == null) return;
 
             //Background
-            Renderer.NORMAL.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
-            Renderer.NORMAL.quad(x, y, box.width, box.height, hud.combatInfoBackgroundColor.get());
-            Renderer.NORMAL.end();
+            if (!(mc.currentScreen instanceof HudEditorScreen)) {
+                Renderer.NORMAL.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
+                Renderer.NORMAL.quad(x, y, box.width, box.height, hud.combatInfoBackgroundColor.get());
+                Renderer.NORMAL.end();
+            }
 
             //Player Model
             InventoryScreen.drawEntity(
@@ -90,12 +98,19 @@ public class CombatHud extends HudModule {
             String pingText = ping + "ms";
             Color pingColor;
 
-            if (ping < 75) pingColor = GREEN;
-            else if (ping > 75 && ping < 200) pingColor = ORANGE;
-            else pingColor = RED;
+            if (ping <= 75) pingColor = hud.combatInfoPingColor1.get();
+            else if (ping <= 200) pingColor = hud.combatInfoPingColor2.get();
+            else pingColor = hud.combatInfoPingColor3.get();
 
             double dist = Math.round(mc.player.distanceTo(playerEntity) * 100.0) / 100.0;
             String distText = dist + "m";
+
+
+            Color distColor;
+
+            if (dist <= 10) distColor = hud.combatInfoDistColor1.get();
+            else if (dist <= 50) distColor = hud.combatInfoDistColor2.get();
+            else distColor = hud.combatInfoDistColor3.get();
 
             String friendText = "Unknown";
             Color friendColor = hud.primaryColor.get();
@@ -154,11 +169,11 @@ public class CombatHud extends HudModule {
 
                 if (hud.combatInfoDisplayDist.get()) {
                     TextRenderer.get().render(breakText, x + friendWidth + breakWidth + pingWidth, y, hud.secondaryColor.get());
-                    TextRenderer.get().render(distText, x + friendWidth + breakWidth + pingWidth + breakWidth, y, hud.welcomeColor.get());
+                    TextRenderer.get().render(distText, x + friendWidth + breakWidth + pingWidth + breakWidth, y, distColor);
                 }
             } else if (hud.combatInfoDisplayDist.get()) {
                 TextRenderer.get().render(breakText, x + friendWidth, y, hud.secondaryColor.get());
-                TextRenderer.get().render(distText, x + friendWidth + breakWidth, y, hud.welcomeColor.get());
+                TextRenderer.get().render(distText, x + friendWidth + breakWidth, y, distColor);
             }
 
             TextRenderer.get().end();
@@ -248,8 +263,8 @@ public class CombatHud extends HudModule {
             int absorbWidth = (int) (totalAbsorbWidth * absorbPrecent);
 
             Renderer.NORMAL.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
-            Renderer.NORMAL.gradientQuad(x, y, healthWidth, 7, RED, ORANGE);
-            Renderer.NORMAL.gradientQuad(x + healthWidth, y, absorbWidth, 7, ORANGE, GREEN);
+            Renderer.NORMAL.gradientQuad(x, y, healthWidth, 7, hud.combatInfoHealthColor1.get(), hud.combatInfoHealthColor2.get());
+            Renderer.NORMAL.gradientQuad(x + healthWidth, y, absorbWidth, 7, hud.combatInfoHealthColor2.get(), hud.combatInfoHealthColor3.get());
             Renderer.NORMAL.end();
 
             String healthText = String.valueOf(Math.round(totalHealth * 10.0) / 10.0);
