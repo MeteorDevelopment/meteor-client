@@ -104,6 +104,7 @@ public class EntityUtils {
     }
 
     public static PlayerEntity getPlayerTarget(double range, SortPriority priority) {
+        if (!Utils.canUpdate()) return null;
         return (PlayerEntity) get(entity -> {
             if (!(entity instanceof PlayerEntity) || entity == mc.player) return false;
             if (((PlayerEntity) entity).isDead() || ((PlayerEntity) entity).getHealth() <= 0) return false;
