@@ -212,7 +212,7 @@ public class CombatHud extends HudModule {
                 }
 
                 for (Enchantment enchantment : enchantmentsToShow.keySet()) {
-                    String enchantName = Utils.getEnchantSimpleName(enchantment) + " " + enchantmentsToShow.get(enchantment);
+                    String enchantName = Utils.getEnchantSimpleName(enchantment, 3) + " " + enchantmentsToShow.get(enchantment);
 
                     double enchX = (armorX + 8) - (TextRenderer.get().getWidth(enchantName) / 2);
 
