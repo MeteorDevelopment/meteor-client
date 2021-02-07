@@ -105,13 +105,13 @@ public class EntityUtils {
         return mc.player.distanceTo(target) > range || !target.isAlive() || target.isDead() || target.getHealth() <= 0;
     }
 
-    public static PlayerEntity getPlayerTarget(double range, SortPriority priority) {
+    public static PlayerEntity getPlayerTarget(double range, SortPriority priority, boolean friends) {
         if (!Utils.canUpdate()) return null;
         return (PlayerEntity) get(entity -> {
             if (!(entity instanceof PlayerEntity) || entity == mc.player) return false;
             if (((PlayerEntity) entity).isDead() || ((PlayerEntity) entity).getHealth() <= 0) return false;
             if (mc.player.distanceTo(entity) > range) return false;
-            if (!Friends.get().attack((PlayerEntity) entity)) return false;
+            if (!Friends.get().attack((PlayerEntity) entity) && !friends) return false;
             return getGameMode((PlayerEntity) entity) == GameMode.SURVIVAL || entity instanceof FakePlayerEntity;
         }, priority);
     }
