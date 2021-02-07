@@ -10,10 +10,12 @@ import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.text.TextUtils;
 import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.GameMode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -112,5 +114,17 @@ public class EntityUtils {
             if (!Friends.get().attack((PlayerEntity) entity)) return false;
             return entity instanceof FakePlayerEntity || (!((PlayerEntity) entity).isCreative() && !entity.isSpectator());
         }, priority);
+    }
+
+    public static int getPing(PlayerEntity player) {
+        PlayerListEntry playerListEntry = mc.getNetworkHandler().getPlayerListEntry(player.getUuid());
+        if (playerListEntry == null) return 0;
+        return playerListEntry.getLatency();
+    }
+
+    public static GameMode getGameMode(PlayerEntity player) {
+        PlayerListEntry playerListEntry = mc.getNetworkHandler().getPlayerListEntry(player.getUuid());
+        if (playerListEntry == null) return null;
+        return playerListEntry.getGameMode();
     }
 }
