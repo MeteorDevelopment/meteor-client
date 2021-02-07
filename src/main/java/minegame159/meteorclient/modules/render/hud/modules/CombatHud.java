@@ -83,38 +83,35 @@ public class CombatHud extends HudModule {
             x += 50 * hud.combatInfoScale.get();
             y += 5 * hud.combatInfoScale.get();
 
-            //Name and ping texts
+            //Setting up texts
+            String breakText = " | ";
+
+            //Name
             String nameText = playerEntity.getGameProfile().getName();
             Color nameColor = Friends.get().getFriendColor(playerEntity);
 
-            int ping;
-            try {
-                ping =  mc.getNetworkHandler().getPlayerListEntry(playerEntity.getUuid()).getLatency();
-            } catch (NullPointerException ignored) {
-                ping = 0;
-            }
-
-            String breakText = " | ";
+            //Ping
+            int ping = EntityUtils.getPing(playerEntity);
             String pingText = ping + "ms";
-            Color pingColor;
 
+            Color pingColor;
             if (ping <= 75) pingColor = hud.combatInfoPingColor1.get();
             else if (ping <= 200) pingColor = hud.combatInfoPingColor2.get();
             else pingColor = hud.combatInfoPingColor3.get();
 
+            //Distance
             double dist = Math.round(mc.player.distanceTo(playerEntity) * 100.0) / 100.0;
             String distText = dist + "m";
 
-
             Color distColor;
-
             if (dist <= 10) distColor = hud.combatInfoDistColor1.get();
             else if (dist <= 50) distColor = hud.combatInfoDistColor2.get();
             else distColor = hud.combatInfoDistColor3.get();
 
+            //Status Text
             String friendText = "Unknown";
-            Color friendColor = hud.primaryColor.get();
 
+            Color friendColor = hud.primaryColor.get();
             if (Friends.get().get(playerEntity) != null) {
                 Friend player = Friends.get().get(playerEntity);
                 friendText = player.type.name();
