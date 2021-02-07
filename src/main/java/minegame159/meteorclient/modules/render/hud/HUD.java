@@ -328,6 +328,13 @@ public class HUD extends Module {
             .build()
     );
 
+    public final Setting<Boolean> combatInfoIgnoreFriends = sgCombatInfo.add(new BoolSetting.Builder()
+            .name("ignore-friends")
+            .description("Ignores friends when targeting.")
+            .defaultValue(false)
+            .build()
+    );
+
     public final Setting<Boolean> combatInfoDisplayPing = sgCombatInfo.add(new BoolSetting.Builder()
             .name("ping")
             .description("Shows the player's ping.")
@@ -364,63 +371,63 @@ public class HUD extends Module {
     );
 
     public final Setting<SettingColor> combatInfoPingColor1 = sgCombatInfo.add(new ColorSetting.Builder()
-            .name("ping-color-1")
+            .name("ping-stage-1")
             .description("Color of ping text when under 75.")
             .defaultValue(new SettingColor(15, 255, 15))
             .build()
     );
 
     public final Setting<SettingColor> combatInfoPingColor2 = sgCombatInfo.add(new ColorSetting.Builder()
-            .name("ping-color-2")
+            .name("ping-stage-2")
             .description("Color of ping text when between 75 and 200.")
             .defaultValue(new SettingColor(255, 150, 15))
             .build()
     );
 
     public final Setting<SettingColor> combatInfoPingColor3 = sgCombatInfo.add(new ColorSetting.Builder()
-            .name("ping-color-3")
+            .name("ping-stage-3")
             .description("Color of ping text when over 200.")
             .defaultValue(new SettingColor(255, 15, 15))
             .build()
     );
 
     public final Setting<SettingColor> combatInfoDistColor1 = sgCombatInfo.add(new ColorSetting.Builder()
-            .name("distance-color-1")
+            .name("distance-stage-1")
             .description("The color when a player is within 10 blocks of you.")
             .defaultValue(new SettingColor(255, 15, 15))
             .build()
     );
 
     public final Setting<SettingColor> combatInfoDistColor2 = sgCombatInfo.add(new ColorSetting.Builder()
-            .name("distance-color-2")
+            .name("distance-stage-2")
             .description("The color when a player is within 50 blocks of you.")
             .defaultValue(new SettingColor(255, 150, 15))
             .build()
     );
 
     public final Setting<SettingColor> combatInfoDistColor3 = sgCombatInfo.add(new ColorSetting.Builder()
-            .name("distance-color-3")
+            .name("distance-stage-3")
             .description("The color when a player is greater then 50 blocks away from you.")
             .defaultValue(new SettingColor(15, 255, 15))
             .build()
     );
 
     public final Setting<SettingColor> combatInfoHealthColor1 = sgCombatInfo.add(new ColorSetting.Builder()
-            .name("healh-color-1")
+            .name("healh-stage-1")
             .description("The color on the left of the health gradient.")
             .defaultValue(new SettingColor(255, 15, 15))
             .build()
     );
 
     public final Setting<SettingColor> combatInfoHealthColor2 = sgCombatInfo.add(new ColorSetting.Builder()
-            .name("health-color-2")
+            .name("health-stage-2")
             .description("The color in the middle of the health gradient.")
             .defaultValue(new SettingColor(255, 150, 15))
             .build()
     );
 
     public final Setting<SettingColor> combatInfoHealthColor3 = sgCombatInfo.add(new ColorSetting.Builder()
-            .name("health-color-3")
+            .name("health-stage-3")
             .description("The color on the right of the health gradient.")
             .defaultValue(new SettingColor(15, 255, 15))
             .build()

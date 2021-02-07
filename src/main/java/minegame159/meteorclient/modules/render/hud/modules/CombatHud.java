@@ -60,7 +60,7 @@ public class CombatHud extends HudModule {
                 Renderer.NORMAL.end();
             }
 
-            playerEntity = EntityUtils.getPlayerTarget(hud.combatInfoRange.get(), SortPriority.LowestDistance);
+            playerEntity = EntityUtils.getPlayerTarget(hud.combatInfoRange.get(), SortPriority.LowestDistance, hud.combatInfoIgnoreFriends.get());
             if (playerEntity == null) return;
 
             //Background
