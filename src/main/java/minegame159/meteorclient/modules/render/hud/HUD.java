@@ -324,6 +324,7 @@ public class HUD extends Module {
             .description("The range to target players.")
             .defaultValue(100)
             .min(1)
+            .sliderMax(200)
             .build()
     );
 

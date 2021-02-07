@@ -171,7 +171,7 @@ public class Utils {
         return enchantment.getName(0).getString().substring(0, 4);
     }
 
-    public static String getEnchantSimpleName(Enchantment enchantment) {
+    public static String getEnchantSimpleName(Enchantment enchantment, int length) {
         return enchantment.getName(0).getString().substring(0, 3);
     }
 
