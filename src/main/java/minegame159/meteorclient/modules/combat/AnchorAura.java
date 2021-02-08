@@ -106,7 +106,7 @@ public class AnchorAura extends Module {
 
     private final Setting<Safety> breakMode = sgBreak.add(new EnumSetting.Builder<Safety>()
             .name("break-mode")
-            .description("The way anchors are allowed to be placed near you.")
+            .description("The way anchors are allowed to be broken near you.")
             .defaultValue(Safety.Safe)
             .build()
     );

@@ -74,13 +74,13 @@ public class DamageCalcUtils {
         //Reduce by resistance
         damage = resistanceReduction(player, damage);
 
-        //Reduce my armour
+        //Reduce by armour
         damage = DamageUtil.getDamageLeft((float)damage, (float)player.getArmor(), (float)player.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS).getValue());
 
         //Reduce by enchants
         damage  = blastProtReduction(player, damage, new Explosion(mc.world, null, bed.x, bed.y, bed.z, 5f, true, Explosion.DestructionType.DESTROY));
 
-        if(damage < 0) damage = 0;
+        if (damage < 0) damage = 0;
         return damage;
     }
 
