@@ -7,6 +7,7 @@ package minegame159.meteorclient.modules.movement;
 
 import baritone.api.BaritoneAPI;
 import meteordevelopment.orbit.EventHandler;
+import meteordevelopment.orbit.EventPriority;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.Category;
@@ -14,7 +15,9 @@ import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.utils.misc.input.Input;
 import minegame159.meteorclient.utils.world.GoalDirection;
+import net.minecraft.client.options.KeyBinding;
 
 public class AutoWalk extends Module {
     public enum Mode {
@@ -44,6 +47,8 @@ public class AutoWalk extends Module {
                         timer = 0;
                         createGoal();
                     }
+
+                    unpress();
                 }
             })
             .build()
@@ -53,6 +58,9 @@ public class AutoWalk extends Module {
             .name("simple-direction")
             .description("The direction to walk in simple mode.")
             .defaultValue(Direction.Forwards)
+            .onChanged(direction1 -> {
+                if (isActive()) unpress();
+            })
             .build()
     );
 
@@ -70,27 +78,27 @@ public class AutoWalk extends Module {
 
     @Override
     public void onDeactivate() {
-        if (mode.get() == Mode.Simple) ((IKeyBinding) mc.options.keyForward).setPressed(false);
+        if (mode.get() == Mode.Simple) unpress();
         else BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
 
         goal = null;
     }
 
-    @EventHandler
-    private void onTick(TickEvent.Post event) {
+    @EventHandler(priority = EventPriority.HIGH)
+    private void onTick(TickEvent.Pre event) {
         if (mode.get() == Mode.Simple) {
             switch (direction.get()) {
                 case Forwards:
-                    ((IKeyBinding) mc.options.keyForward).setPressed(true);
+                    setPressed(mc.options.keyForward, true);
                     break;
                 case Backwards:
-                    ((IKeyBinding) mc.options.keyBack).setPressed(true);
+                    setPressed(mc.options.keyBack, true);
                     break;
                 case Left:
-                    ((IKeyBinding) mc.options.keyLeft).setPressed(true);
+                    setPressed(mc.options.keyLeft, true);
                     break;
                 case Right:
-                    ((IKeyBinding) mc.options.keyRight).setPressed(true);
+                    setPressed(mc.options.keyRight, true);
                     break;
             }
         } else {
@@ -101,6 +109,18 @@ public class AutoWalk extends Module {
 
             timer++;
         }
+    }
+
+    private void unpress() {
+        setPressed(mc.options.keyForward, false);
+        setPressed(mc.options.keyBack, false);
+        setPressed(mc.options.keyLeft, false);
+        setPressed(mc.options.keyRight, false);
+    }
+
+    private void setPressed(KeyBinding key, boolean pressed) {
+        ((IKeyBinding) key).setPressed(pressed);
+        Input.setKeyState(key, pressed);
     }
 
     private void createGoal() {
