@@ -245,43 +245,38 @@ public class KillAura extends Module {
             wasPathing = true;
         }
 
-        if (!targetMultiple.get() || !smartDelay.get() || mc.player.getAttackCooldownProgress(0.5f) >= 1) {
-            if (randomDelayEnabled.get()) {
-                if (randomDelayTimer > 0) {
-                    randomDelayTimer--;
-                    return;
-                } else {
-                    randomDelayTimer = (int) Math.round(Math.random() * randomDelayMax.get());
-                }
-            }
+        if (smartDelay.get() && mc.player.getAttackCooldownProgress(0.5f) < 1) {
+            return;
+        }
 
-            for (Entity target : entityList) {
-                if (attack(target) && rotationMode.get() == RotationMode.Always) {
-                    Rotations.rotate(Rotations.getYaw(target), Rotations.getPitch(target, rotationDirection.get()), () -> {
-                        if (canAttack) hitEntity(target);
-                    });
-                }
+        if (hitDelayTimer >= 0) {
+            hitDelayTimer--;
+            return;
+        }
+        else {
+            hitDelayTimer = hitDelay.get();
+        }
+
+        if (randomDelayEnabled.get()) {
+            if (randomDelayTimer > 0) {
+                randomDelayTimer--;
+                return;
+            } else {
+                randomDelayTimer = (int) Math.round(Math.random() * randomDelayMax.get());
+            }
+        }
+
+        for (Entity target : entityList) {
+            if (attack(target) && rotationMode.get() == RotationMode.Always) {
+                Rotations.rotate(Rotations.getYaw(target), Rotations.getPitch(target, rotationDirection.get()), () -> {
+                    if (canAttack) hitEntity(target);
+                });
             }
         }
     }
 
     private boolean attack(Entity target) {
         canAttack = false;
-
-        // Entities without health can be hit instantly
-        if (!targetMultiple.get()) {
-            if (target instanceof LivingEntity) {
-                if (smartDelay.get()) {
-                    if (mc.player.getAttackCooldownProgress(0.5f) < 1) return false;
-                }
-                else {
-                    if (hitDelayTimer >= 0) {
-                        hitDelayTimer--;
-                        return false;
-                    } else hitDelayTimer = hitDelay.get();
-                }
-            }
-        }
 
         if (Math.random() > hitChance.get() / 100) return false;
 
