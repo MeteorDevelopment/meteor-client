@@ -47,15 +47,19 @@ public class WWaypoint extends WTable {
             Waypoints.get().remove(waypoint);
             if (onRemoved != null) onRemoved.run();
         };
-        WButton path = new WButton("Goto");
-        path.action = () -> {
-            if(MinecraftClient.getInstance().player == null || MinecraftClient.getInstance().world == null) return;
-            IBaritone baritone = BaritoneAPI.getProvider().getPrimaryBaritone();
-            if (baritone.getPathingBehavior().isPathing()) baritone.getPathingBehavior().cancelEverything();
-            Vec3d vec = Waypoints.get().getCoords(waypoint);
-            BlockPos pos = new BlockPos(vec.x, vec.y, vec.z);
-            baritone.getCustomGoalProcess().setGoalAndPath(new GoalGetToBlock(pos));
-        };
-        right.add(path);
+
+        // Goto
+        if (waypoint.actualDimension == Utils.getDimension()) {
+            WButton path = new WButton("Goto");
+            path.action = () -> {
+                if (MinecraftClient.getInstance().player == null || MinecraftClient.getInstance().world == null) return;
+                IBaritone baritone = BaritoneAPI.getProvider().getPrimaryBaritone();
+                if (baritone.getPathingBehavior().isPathing()) baritone.getPathingBehavior().cancelEverything();
+                Vec3d vec = Waypoints.get().getCoords(waypoint);
+                BlockPos pos = new BlockPos(vec.x, vec.y, vec.z);
+                baritone.getCustomGoalProcess().setGoalAndPath(new GoalGetToBlock(pos));
+            };
+            right.add(path);
+        }
     }
 }
