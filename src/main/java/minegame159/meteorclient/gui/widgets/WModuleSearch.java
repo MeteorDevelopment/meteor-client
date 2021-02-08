@@ -21,6 +21,12 @@ public class WModuleSearch extends WWindow {
 
         action = () -> GuiConfig.get().getWindowConfig(type).setPos(x, y);
 
+        filter = new WTextBox(filter != null ? filter.getText() : "", 140);
+        filter.action = () -> {
+            clear();
+            initWidgets(false);
+        };
+
         initWidgets(true);
     }
 
@@ -28,12 +34,8 @@ public class WModuleSearch extends WWindow {
         boolean focused = filter != null && filter.isFocused();
 
         // Search bar
-        filter = add(new WTextBox(filter != null ? filter.getText() : "", 140)).fillX().expandX().getWidget();
+        add(filter).fillX().expandX().getWidget();
         filter.setFocused(focused || (first && isExpanded()));
-        filter.action = () -> {
-            clear();
-            initWidgets(false);
-        };
         row();
 
         // Modules
