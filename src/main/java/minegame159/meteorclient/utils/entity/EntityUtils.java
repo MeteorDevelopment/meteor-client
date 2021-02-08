@@ -21,7 +21,7 @@ import java.util.function.Predicate;
 
 public class EntityUtils {
     public static MinecraftClient mc;
-    public static List<Entity> entities = new ArrayList<>();
+    private static List<Entity> entities = new ArrayList<>();
 
     public static boolean isAttackable(EntityType<?> type) {
         return type != EntityType.AREA_EFFECT_CLOUD && type != EntityType.ARROW && type != EntityType.FALLING_BLOCK && type != EntityType.FIREWORK_ROCKET && type != EntityType.ITEM && type != EntityType.LLAMA_SPIT && type != EntityType.SPECTRAL_ARROW && type != EntityType.ENDER_PEARL && type != EntityType.EXPERIENCE_BOTTLE && type != EntityType.POTION && type != EntityType.TRIDENT && type != EntityType.LIGHTNING_BOLT && type != EntityType.FISHING_BOBBER && type != EntityType.EXPERIENCE_ORB && type != EntityType.EGG;
@@ -47,21 +47,21 @@ public class EntityUtils {
         return Utils.WHITE;
     }
 
-    public static void getAll(Predicate<Entity> isGood, SortPriority sortPriority) {
-        entities.clear();
+    public static void getAll(Predicate<Entity> isGood, SortPriority sortPriority, List<Entity> target) {
         for (Entity entity : mc.world.getEntities()) {
-            if (isGood.test(entity)) entities.add(entity);
+            if (isGood.test(entity)) target.add(entity);
         }
 
         for (Entity entity : FakePlayerUtils.getPlayers().keySet()) {
-            if (isGood.test(entity)) entities.add(entity);
+            if (isGood.test(entity)) target.add(entity);
         }
 
-        entities.sort((e1, e2) -> sort(e1, e2, sortPriority));
+        target.sort((e1, e2) -> sort(e1, e2, sortPriority));
     }
 
     public static Entity get(Predicate<Entity> isGood, SortPriority sortPriority) {
-        getAll(isGood, sortPriority);
+        entities.clear();
+        getAll(isGood, sortPriority, entities);
         if (!entities.isEmpty()) {
             return entities.get(0);
         }

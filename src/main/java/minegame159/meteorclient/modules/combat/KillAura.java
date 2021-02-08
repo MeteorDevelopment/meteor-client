@@ -210,6 +210,7 @@ public class KillAura extends Module {
             entityList.clear();
             return;
         }
+        entityList.clear();
         EntityUtils.getAll(entity -> {
             if (entity == mc.player || entity == mc.cameraEntity) return false;
             if ((entity instanceof LivingEntity && ((LivingEntity) entity).isDead()) || !entity.isAlive()) return false;
@@ -224,13 +225,10 @@ public class KillAura extends Module {
             if (entity instanceof AnimalEntity && !babies.get() && ((AnimalEntity) entity).isBaby()) return false;
 
             return true;
-        }, priority.get());
-        entityList.clear();
+        }, priority.get(), entityList);
 
-        if (targetMultiple.get())
-            entityList.addAll(EntityUtils.entities);
-        else if (!EntityUtils.entities.isEmpty())
-            entityList.add(EntityUtils.entities.get(0));
+        if (!targetMultiple.get() && !entityList.isEmpty())
+            entityList.subList(1, entityList.size()).clear();
 
         if (entityList.isEmpty()) {
             if (wasPathing){
