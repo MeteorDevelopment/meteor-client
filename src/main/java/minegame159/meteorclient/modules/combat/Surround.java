@@ -66,6 +66,13 @@ public class Surround extends Module {
             .build()
     );
 
+    private final Setting<Boolean> disableOnYChange = sgGeneral.add(new BoolSetting.Builder()
+            .name("disable-on-y-change")
+            .description("Automatically disables when your y level (step, jumping, atc).")
+            .defaultValue(true)
+            .build()
+    );
+
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
             .name("rotate")
             .description("Automatically faces towards the obsidian being placed.")
@@ -95,7 +102,7 @@ public class Surround extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        if (disableOnJump.get() && mc.options.keyJump.isPressed()) {
+        if ((disableOnJump.get() && (mc.options.keyJump.isPressed() || mc.player.input.jumping)) || (disableOnYChange.get() && mc.player.prevY != mc.player.getY())) {
             toggle();
             return;
         }
