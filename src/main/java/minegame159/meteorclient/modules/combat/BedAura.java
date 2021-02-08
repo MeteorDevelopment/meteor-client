@@ -9,20 +9,20 @@ package minegame159.meteorclient.modules.combat;
 // Updated by squidoodly 19/06/2020
 
 import meteordevelopment.orbit.EventHandler;
+import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.rendering.Renderer;
+import minegame159.meteorclient.rendering.ShapeMode;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.entity.EntityUtils;
 import minegame159.meteorclient.utils.entity.SortPriority;
-import minegame159.meteorclient.utils.player.ChatUtils;
-import minegame159.meteorclient.utils.player.InvUtils;
-import minegame159.meteorclient.utils.player.PlayerUtils;
-import minegame159.meteorclient.utils.player.Rotations;
+import minegame159.meteorclient.utils.player.*;
+import minegame159.meteorclient.utils.render.color.SettingColor;
 import minegame159.meteorclient.utils.world.BlockUtils;
-import net.minecraft.block.entity.BedBlockEntity;
-import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.BedBlock;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BedItem;
 import net.minecraft.util.Hand;
@@ -31,24 +31,21 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 
 import java.util.ArrayList;
-import java.util.ConcurrentModificationException;
 import java.util.List;
 
 @InvUtils.Priority(priority = 0)
 public class BedAura extends Module {
-    public enum Mode{
-        Safe,
-        Suicide
-    }
 
-    public BedAura(){
-        super(Category.Combat, "bed-aura", "Automatically places and explodes beds in the Nether and End.");
+    private enum Stage {
+        Placing,
+        Breaking
     }
 
     private final SettingGroup sgPlace = settings.createGroup("Place");
     private final SettingGroup sgBreak = settings.createGroup("Break");
     private final SettingGroup sgPause = settings.createGroup("Pause");
     private final SettingGroup sgMisc = settings.createGroup("Misc");
+    private final SettingGroup sgRender = settings.createGroup("Render");
 
     // Place
 
@@ -59,10 +56,17 @@ public class BedAura extends Module {
             .build()
     );
 
+    private final Setting<Safety> placeMode = sgPlace.add(new EnumSetting.Builder<Safety>()
+            .name("place-mode")
+            .description("The way beds are allowed to be placed near you.")
+            .defaultValue(Safety.Safe)
+            .build()
+    );
+
     private final Setting<Integer> placeDelay = sgPlace.add(new IntSetting.Builder()
             .name("place-delay")
             .description("The tick delay for placing beds.")
-            .defaultValue(11)
+            .defaultValue(9)
             .min(0)
             .sliderMax(20)
             .build()
@@ -73,9 +77,16 @@ public class BedAura extends Module {
     private final Setting<Integer> breakDelay = sgBreak.add(new IntSetting.Builder()
             .name("break-delay")
             .description("The tick delay for breaking beds.")
-            .defaultValue(1)
+            .defaultValue(0)
             .min(0)
             .sliderMax(20)
+            .build()
+    );
+
+    private final Setting<Safety> breakMode = sgBreak.add(new EnumSetting.Builder<Safety>()
+            .name("break-mode")
+            .description("The way beds are allowed to be broken near you.")
+            .defaultValue(Safety.Safe)
             .build()
     );
 
@@ -138,6 +149,33 @@ public class BedAura extends Module {
             .build()
     );
 
+    private final Setting<Boolean> noSwing = sgMisc.add(new BoolSetting.Builder()
+            .name("no-swing")
+            .description("Disables hand swings clientside.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Double> minDamage = sgMisc.add(new DoubleSetting.Builder()
+            .name("min-damage")
+            .description("The minimum damage to inflict on your target.")
+            .defaultValue(7)
+            .min(0)
+            .sliderMax(20)
+            .max(20)
+            .build()
+    );
+
+    private final Setting<Double> maxSelfDamage = sgMisc.add(new DoubleSetting.Builder()
+            .name("max-self-damage")
+            .description("The maximum damage to inflict on yourself.")
+            .defaultValue(7)
+            .min(0)
+            .sliderMax(20)
+            .max(20)
+            .build()
+    );
+
     private final Setting<Double> minHealth = sgMisc.add(new DoubleSetting.Builder()
             .name("min-health")
             .description("The minimum health required for Bed Aura to work.")
@@ -155,23 +193,60 @@ public class BedAura extends Module {
             .build()
     );
 
-    private int direction = 0;
-    boolean bypassCheck = false;
+    // Render
+
+    private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
+            .name("render")
+            .description("Renders the block where it is placing a bed.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()
+            .name("place-side-color")
+            .description("The side color for positions to be placed.")
+            .defaultValue(new SettingColor(0, 0, 0, 75))
+            .build()
+    );
+
+    private final Setting<SettingColor> lineColor = sgRender.add(new ColorSetting.Builder()
+            .name("place-line-color")
+            .description("The line color for positions to be placed.")
+            .defaultValue(new SettingColor(15, 255, 211, 255))
+            .build()
+    );
+
+    private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
+            .name("shape-mode")
+            .description("How the shapes are rendered.")
+            .defaultValue(ShapeMode.Both)
+            .build()
+    );
+
+    private Direction direction;
     private PlayerEntity target;
+    private BlockPos bestPos;
+
     private int breakDelayLeft;
     private int placeDelayLeft;
-    int stage = 1;
 
-    @Override
-    public void onActivate() {
-        placeDelayLeft = placeDelay.get();
-        breakDelayLeft = breakDelay.get();
-        target = null;
+    private Stage stage;
+
+    public BedAura(){
+        super(Category.Combat, "bed-aura", "Automatically places and explodes beds in the Nether and End.");
     }
 
     @Override
-    public void onDeactivate() {
-        target = null;
+    public void onActivate() {
+        if (place.get()) stage = Stage.Placing;
+        else stage = Stage.Breaking;
+
+        bestPos = null;
+
+        direction = Direction.EAST;
+
+        placeDelayLeft = placeDelay.get();
+        breakDelayLeft = placeDelay.get();
     }
 
     @EventHandler
@@ -185,146 +260,162 @@ public class BedAura extends Module {
         if (PlayerUtils.shouldPause(pauseOnMine.get(), pauseOnEat.get(), pauseOnDrink.get())) return;
         if (EntityUtils.getTotalHealth(mc.player) <= minHealth.get()) return;
 
-        if (EntityUtils.isInvalid(target, targetRange.get())) target = EntityUtils.getPlayerTarget(targetRange.get(), priority.get(), false);
-        if (target == null) return;
+        target = EntityUtils.getPlayerTarget(targetRange.get(), priority.get(), false);
+
+        if (target == null) {
+            bestPos = null;
+            return;
+        }
 
         if (place.get() && InvUtils.findItemInAll(itemStack -> itemStack.getItem() instanceof BedItem) != -1) {
             switch (stage) {
-                case 1:
+                case Placing:
+                    bestPos = getPlacePos(target);
+
                     if (placeDelayLeft > 0) placeDelayLeft--;
-
                     else {
-                        BlockPos place = findFacePlace(target);
-
-                        if (place != null || (bypassCheck)) {
-                            bypassCheck = false;
-                            if (autoMove.get()) doAutoMove();
-                            placeBed(place);
-                            stage = 2;
-                        }
-
-                    }
-
-                    break;
-                case 2:
-                    if (breakDelayLeft > 0) breakDelayLeft--;
-
-                    else {
-                        breakDelayLeft = breakDelay.get();
+                        placeBed(bestPos);
                         placeDelayLeft = placeDelay.get();
-                        breakBed();
-                        stage = 1;
+                        stage = Stage.Breaking;
                     }
-                    break;
+                case Breaking:
+                    bestPos = getBreakPos(target);
+
+                    if (breakDelayLeft > 0) breakDelayLeft--;
+                    else {
+                        breakBed(bestPos);
+                        breakDelayLeft = breakDelay.get();
+                        stage = Stage.Placing;
+                    }
             }
         } else {
-            if (breakDelayLeft > 0) breakDelayLeft--;
+            bestPos = getBreakPos(target);
 
+            if (breakDelayLeft > 0) breakDelayLeft--;
             else {
                 breakDelayLeft = breakDelay.get();
-                breakBed();
-                stage = 1;
+                breakBed(bestPos);
+            }
+        }
+    }
+
+    @EventHandler
+    private void onRender(RenderEvent event) {
+        if (render.get() && bestPos != null) {
+            int x = bestPos.getX();
+            int y = bestPos.getY();
+            int z = bestPos.getZ();
+
+            switch (direction) {
+                case NORTH:
+                    Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x, y, z, x + 1, y + 0.5, z + 2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                    break;
+                case SOUTH:
+                    Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x, y, z - 1, x + 1, y + 0.5, z + 1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                    break;
+                case EAST:
+                    Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x - 1, y, z, x + 1, y + 0.5, z + 1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                    break;
+                case WEST:
+                    Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x, y, z, x + 2, y + 0.5, z + 1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                    break;
             }
         }
     }
 
     private void placeBed(BlockPos pos) {
-        if (pos == null) return;
+        if (pos == null || InvUtils.findItemInAll(itemStack -> itemStack.getItem() instanceof BedItem) == -1) return;
+
+        if (autoMove.get()) doAutoMove();
 
         int slot = InvUtils.findItemInHotbar(itemStack -> itemStack.getItem() instanceof BedItem);
         if (slot == -1) return;
+
         if (autoSwitch.get()) mc.player.inventory.selectedSlot = slot;
 
         Hand hand = InvUtils.getHand(itemStack -> itemStack.getItem() instanceof BedItem);
         if (hand == null) return;
 
-        mc.player.setSneaking(false);
+       boolean wasSneaking = mc.player.isSneaking();
+       if (wasSneaking) mc.player.setSneaking(false);
 
-        switch (direction) {
-            case 0:
-                Rotations.rotate(-90, mc.player.pitch, () -> BlockUtils.place(pos, hand, slot, false, 100));
-                break;
-            case 1:
-                Rotations.rotate(179, mc.player.pitch, () -> BlockUtils.place(pos, hand, slot, false, 100));
-                break;
-            case 2:
-                Rotations.rotate(1, mc.player.pitch, () -> BlockUtils.place(pos, hand, slot, false, 100));
-                break;
-            case 3:
-                Rotations.rotate(90, mc.player.pitch, () -> BlockUtils.place(pos, hand, slot, false, 100));
-                break;
-        }
+        Rotations.rotate(yawFromDir(direction), mc.player.pitch, () -> BlockUtils.place(pos, hand, slot, false, 100, !noSwing.get()));
+
+        if (wasSneaking) mc.player.setSneaking(true);
     }
 
-    private void breakBed() {
-        try {
-            for (BlockEntity entity : mc.world.blockEntities) {
-                if (entity instanceof BedBlockEntity && Utils.distance(entity.getPos().getX(), entity.getPos().getY(), entity.getPos().getZ(), mc.player.getX(), mc.player.getY(), mc.player.getZ()) <= targetRange.get() && (entity.getPos() != mc.player.getBlockPos())) {
-                    mc.player.setSneaking(false);
-                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, entity.getPos(), false));
-                }
+    private void breakBed(BlockPos pos) {
+        if (pos == null) return;
 
-            }
-        } catch (ConcurrentModificationException ignored) {}
+        boolean wasSneaking = mc.player.isSneaking();
+        if (wasSneaking) mc.player.setSneaking(false);
+
+        mc.interactionManager.interactBlock(mc.player, mc.world, Hand.OFF_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, bestPos, false));
+
+        if (wasSneaking) mc.player.setSneaking(true);
     }
 
-    private BlockPos findFacePlace(PlayerEntity target) {
-        if (mc.player.distanceTo(target) < targetRange.get() && mc.world.isAir(target.getBlockPos().add(0, 1, 0))) {
-            if (isValidHalf(target.getBlockPos().add(1, 0, 0))) {
-                direction = 3;
-                bypassCheck = true;
-                return new BlockPos(target.getBlockPos().getX() + 1.5, target.getBlockPos().getY() + 1, target.getBlockPos().getZ() + 0.5);
-            } else if (isValidHalf(target.getBlockPos().add(-1, 0, 0))) {
-                direction = 0;
-                bypassCheck = true;
-                return new BlockPos(target.getBlockPos().getX() - 0.5, target.getBlockPos().getY() + 1, target.getBlockPos().getZ() + 0.5);
-            } else if (isValidHalf(target.getBlockPos().add(0, 0, 1))) {
-                direction = 1;
-                bypassCheck = true;
-                return new BlockPos(target.getBlockPos().getX() + 0.5, target.getBlockPos().getY() + 1, target.getBlockPos().getZ() + 1.5);
-            } else if (isValidHalf(target.getBlockPos().add(0, 0, -1))) {
-                direction = 2;
-                bypassCheck = true;
-                return new BlockPos(target.getBlockPos().getX() + 0.5, target.getBlockPos().getY() + 1, target.getBlockPos().getZ() - 0.5);
-            } else if (isValidHalf(target.getBlockPos().add(1, 1, 0))) {
-                direction = 3;
-                bypassCheck = true;
-                return new BlockPos(target.getBlockPos().getX() + 1.5, target.getBlockPos().getY() + 1, target.getBlockPos().getZ() + 0.5);
-            } else if (isValidHalf(target.getBlockPos().add(-1, 1, 0))) {
-                direction = 0;
-                bypassCheck = true;
-                return new BlockPos(target.getBlockPos().getX() - 0.5, target.getBlockPos().getY() + 1, target.getBlockPos().getZ() + 0.5);
-            } else if (isValidHalf(target.getBlockPos().add(0, 1, 1))) {
-                direction = 1;
-                bypassCheck = true;
-                return new BlockPos(target.getBlockPos().getX() + 0.5, target.getBlockPos().getY() + 1, target.getBlockPos().getZ() + 1.5);
-            } else if (isValidHalf(target.getBlockPos().add(0, 1, -1))) {
-                direction = 2;
-                bypassCheck = true;
-                return new BlockPos(target.getBlockPos().getX() + 0.5, target.getBlockPos().getY() + 1, target.getBlockPos().getZ() - 0.5);
-            } else if (isValidHalf(target.getBlockPos().add(1, 2, 0))) {
-                direction = 3;
-                bypassCheck = true;
-                return new BlockPos(target.getBlockPos().getX() + 1.5, target.getBlockPos().getY() + 2, target.getBlockPos().getZ() + 0.5);
-            } else if (isValidHalf(target.getBlockPos().add(-1, 2, 0))) {
-                direction = 0;
-                bypassCheck = true;
-                return new BlockPos(target.getBlockPos().getX() - 0.5, target.getBlockPos().getY() + 2, target.getBlockPos().getZ() + 0.5);
-            } else if (isValidHalf(target.getBlockPos().add(0, 2, 1))) {
-                direction = 1;
-                bypassCheck = true;
-                return new BlockPos(target.getBlockPos().getX() + 0.5, target.getBlockPos().getY() + 2, target.getBlockPos().getZ() + 1.5);
-            } else if (isValidHalf(target.getBlockPos().add(0, 2, -1))) {
-                direction = 2;
-                bypassCheck = true;
-                return new BlockPos(target.getBlockPos().getX() + 0.5, target.getBlockPos().getY() + 2, target.getBlockPos().getZ() - 0.5);
-            }
-        }
+    private BlockPos getPlacePos(PlayerEntity target) {
+        BlockPos targetPos = target.getBlockPos();
+
+        if (checkPlace(Direction.NORTH, target, true)) return targetPos.up().north();
+        if (checkPlace(Direction.SOUTH, target, true)) return targetPos.up().south();
+        if (checkPlace(Direction.EAST, target, true)) return targetPos.up().east();
+        if (checkPlace(Direction.WEST, target, true)) return targetPos.up().west();
+
+        if (checkPlace(Direction.NORTH, target, false)) return targetPos.north();
+        if (checkPlace(Direction.SOUTH, target, false)) return targetPos.south();
+        if (checkPlace(Direction.EAST, target, false)) return targetPos.east();
+        if (checkPlace(Direction.WEST, target, false)) return targetPos.west();
+
         return null;
     }
 
-    private boolean isValidHalf(BlockPos pos) {
-        return (!mc.world.isAir(pos)) && mc.world.isAir(pos.up());
+    private boolean checkPlace(Direction direction, PlayerEntity target, boolean up) {
+        BlockPos headPos = up ? target.getBlockPos().up() : target.getBlockPos();
+
+        if (BlockUtils.canPlace(headPos)
+                && BlockUtils.canPlace(headPos.offset(direction))
+                && (placeMode.get() == Safety.Suicide
+                || (DamageCalcUtils.bedDamage(target, Utils.vec3d(headPos)) >= minDamage.get()
+                && DamageCalcUtils.bedDamage(mc.player, Utils.vec3d(headPos.offset(direction))) < maxSelfDamage.get()
+                && DamageCalcUtils.bedDamage(mc.player, Utils.vec3d(headPos)) < maxSelfDamage.get()))) {
+            this.direction = direction;
+            return true;
+        }
+
+        return false;
+    }
+
+    private BlockPos getBreakPos(PlayerEntity target) {
+        BlockPos targetPos = target.getBlockPos();
+
+        if (checkBreak(Direction.NORTH, target, true)) return targetPos.up().north();
+        if (checkBreak(Direction.SOUTH, target, true)) return targetPos.up().south();
+        if (checkBreak(Direction.EAST, target, true)) return targetPos.up().east();
+        if (checkBreak(Direction.WEST, target, true)) return targetPos.up().west();
+
+        if (checkBreak(Direction.NORTH, target, false)) return targetPos.north();
+        if (checkBreak(Direction.SOUTH, target, false)) return targetPos.south();
+        if (checkBreak(Direction.EAST, target, false)) return targetPos.east();
+        if (checkBreak(Direction.WEST, target, false)) return targetPos.west();
+
+        return null;
+    }
+
+    private boolean checkBreak(Direction direction, PlayerEntity target, boolean up) {
+        BlockPos headPos = up ? target.getBlockPos().up() : target.getBlockPos();
+
+        if (mc.world.getBlockState(headPos).getBlock() instanceof BedBlock
+                && mc.world.getBlockState(headPos.offset(direction)).getBlock() instanceof BedBlock
+                && (breakMode.get() == Safety.Suicide
+                || (DamageCalcUtils.bedDamage(target, Utils.vec3d(headPos)) >= minDamage.get()
+                && DamageCalcUtils.bedDamage(mc.player, Utils.vec3d(headPos.offset(direction))) < maxSelfDamage.get()
+                && DamageCalcUtils.bedDamage(mc.player, Utils.vec3d(headPos)) < maxSelfDamage.get()))) {
+            this.direction = direction;
+            return true;
+        }
+        return false;
     }
 
     private void doAutoMove() {
@@ -336,6 +427,16 @@ public class BedAura extends Module {
             slots.add(InvUtils.invIndexToSlotId(autoMoveSlot.get()-1));
             InvUtils.addSlots(slots, this.getClass());
         }
+    }
+
+    private float yawFromDir(Direction direction) {
+        switch (direction) {
+            case EAST:  return 90;
+            case NORTH: return 0;
+            case SOUTH: return 180;
+            case WEST:  return -90;
+        }
+        return 0;
     }
 
     @Override
