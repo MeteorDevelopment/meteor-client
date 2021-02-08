@@ -6,6 +6,7 @@
 package minegame159.meteorclient.utils.player;
 
 import meteordevelopment.orbit.EventHandler;
+import meteordevelopment.orbit.EventPriority;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.combat.AutoTotem;
@@ -34,7 +35,7 @@ public class InvUtils {
         mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, slot, button, action, mc.player);
     }
 
-    public static Hand getHand (Item item) {
+    public static Hand getHand(Item item) {
         Hand hand = Hand.MAIN_HAND;
         if (mc.player.getOffHandStack().getItem() == item) hand = Hand.OFF_HAND;
         return hand;
@@ -44,6 +45,7 @@ public class InvUtils {
         Hand hand = null;
         if (isGood.test(mc.player.getMainHandStack())) hand = Hand.MAIN_HAND;
         else if (isGood.test(mc.player.getOffHandStack())) hand = Hand.OFF_HAND;
+
         return hand;
     }
 
@@ -76,23 +78,26 @@ public class InvUtils {
         }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST)
     private static void onTick(TickEvent.Pre event) {
         if (mc.world == null || mc.player == null || mc.player.abilities.creativeMode){
             currentQueue.clear();
             moveQueue.clear();
             return;
         }
+
         if (!mc.player.inventory.getCursorStack().isEmpty() && mc.currentScreen == null && mc.player.currentScreenHandler.getStacks().size() > 44){
             int slot = mc.player.inventory.getEmptySlot();
             if (slot == -1) findItemWithCount(mc.player.inventory.getCursorStack().getItem());
             if (slot != -1) clickSlot(invIndexToSlotId(slot), 0, SlotActionType.PICKUP);
         }
+
         if (!moveQueue.isEmpty()) {
             if (currentQueue.isEmpty()) {
                 CustomPair pair = moveQueue.remove();
                 currentQueue.addAll(pair.getRight());
             }
+
             if (mc.player.currentScreenHandler.getStacks().size() > 44) {
                 currentQueue.forEach(slot -> clickSlot(slot, 0, SlotActionType.PICKUP));
                 currentQueue.clear();
@@ -102,14 +107,17 @@ public class InvUtils {
 
     public static void addSlots(List<Integer> slots, Class<? extends Module> klass){
         if (moveQueue.contains(new CustomPair(klass, slots)) || currentQueue.containsAll(slots)) return;
+
         if (klass == AutoTotem.class) {
             moveQueue.removeIf(pair -> pair.getRight().contains(45));
         }
+
         if (!moveQueue.isEmpty() && canMove(klass)){
             moveQueue.addFirst(new CustomPair(klass, slots));
         } else {
             moveQueue.add(new CustomPair(klass, slots));
         }
+
         onTick(new TickEvent.Pre());
     }
 
