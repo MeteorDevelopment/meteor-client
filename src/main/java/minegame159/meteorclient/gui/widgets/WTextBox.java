@@ -39,6 +39,8 @@ public class WTextBox extends WWidget {
     }
 
     public void setText(String text) {
+        if (this.text.equals(text)) return;
+
         this.text = text;
         cursor = -1;
         if (renderer != null) calculateTextWidths();
@@ -306,10 +308,10 @@ public class WTextBox extends WWidget {
         }
 
         if (fixedCursor != -1) {
-            this.cursor = fixedCursor;
+            cursor = fixedCursor;
             fixedCursor = -1;
         } else {
-            this.cursor = text.length();
+            cursor = text.length();
         }
     }
 
