@@ -20,11 +20,14 @@ import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.player.DamageCalcUtils;
 import minegame159.meteorclient.utils.world.Dimension;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BedBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.fluid.Fluid;
+import net.minecraft.fluid.Fluids;
 import net.minecraft.item.SwordItem;
 import net.minecraft.network.packet.s2c.play.DisconnectS2CPacket;
 import net.minecraft.text.LiteralText;
@@ -140,25 +143,51 @@ public class AutoLog extends Module {
         }
     }
 
-    private double getHealthReduction(){
+    private double getHealthReduction() {
         double damageTaken = 0;
-        for(Entity entity : mc.world.getEntities()){
-            if(entity instanceof EndCrystalEntity && damageTaken < DamageCalcUtils.crystalDamage(mc.player, entity.getPos())){
+
+        for (Entity entity : mc.world.getEntities()) {
+            // Check for end crystals
+            if (entity instanceof EndCrystalEntity && damageTaken < DamageCalcUtils.crystalDamage(mc.player, entity.getPos())) {
                 damageTaken = DamageCalcUtils.crystalDamage(mc.player, entity.getPos());
-            }else if(entity instanceof PlayerEntity && damageTaken < DamageCalcUtils.getSwordDamage((PlayerEntity) entity, true)){
-                if(Friends.get().notTrusted((PlayerEntity) entity) && mc.player.getPos().distanceTo(entity.getPos()) < 5){
-                    if(((PlayerEntity) entity).getActiveItem().getItem() instanceof SwordItem){
+            }
+            // Check for players holding swords
+            else if (entity instanceof PlayerEntity && damageTaken < DamageCalcUtils.getSwordDamage((PlayerEntity) entity, true)) {
+                if (Friends.get().notTrusted((PlayerEntity) entity) && mc.player.getPos().distanceTo(entity.getPos()) < 5) {
+                    if (((PlayerEntity) entity).getActiveItem().getItem() instanceof SwordItem) {
                         damageTaken = DamageCalcUtils.getSwordDamage((PlayerEntity) entity, true);
                     }
                 }
             }
         }
-        if(!Modules.get().get(NoFall.class).isActive() && mc.player.fallDistance > 3){
-            double damage =mc.player.fallDistance * 0.5;
-            if(damage > damageTaken){
+
+        // Check for fall distance with water check
+        if (!Modules.get().get(NoFall.class).isActive() && mc.player.fallDistance > 3) {
+            double damage = mc.player.fallDistance * 0.5;
+
+            BlockPos.Mutable blockPos = mc.player.getBlockPos().mutableCopy();
+            boolean aboveWater = false;
+
+            for (int i = 0; i < 64; i++) {
+                BlockState state = mc.world.getBlockState(blockPos);
+
+                if (state.getMaterial().blocksMovement()) break;
+
+                Fluid fluid = state.getFluidState().getFluid();
+                if (fluid == Fluids.WATER || fluid == Fluids.FLOWING_WATER) {
+                    aboveWater = true;
+                    break;
+                }
+
+                blockPos.move(0, -1, 0);
+            }
+
+            if (damage > damageTaken && !aboveWater) {
                 damageTaken = damage;
             }
         }
+
+        // Check for beds if in nether
         if (Utils.getDimension() != Dimension.Overworld) {
             for (BlockEntity blockEntity : mc.world.blockEntities) {
                 BlockPos bp = blockEntity.getPos();
@@ -169,6 +198,7 @@ public class AutoLog extends Module {
                 }
             }
         }
+
         return damageTaken;
     }
 
