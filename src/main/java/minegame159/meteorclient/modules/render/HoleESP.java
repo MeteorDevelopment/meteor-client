@@ -221,13 +221,18 @@ public class HoleESP extends Module {
                     break;
                 case Glow:
                     Renderer.quadWithLinesHorizontal(Renderer.NORMAL, Renderer.LINES, x, y, z, 1, hole.colorSides, hole.colorLines, shapeMode.get());
-                    MB.gradientBoxSides(x, y, z, x + 1, y + glowHeight.get(), z + 1, hole.colorSides, transparent);
-                    gradientBoxVertical(x, y, z, glowHeight.get(), hole.colorLines, transparent, false);
+                    if (shapeMode.get() != ShapeMode.Lines) MB.gradientBoxSides(x, y, z, x + 1, y + glowHeight.get(), z + 1, hole.colorSides, transparent);
+                    if (shapeMode.get() != ShapeMode.Sides) {
+                        Renderer.quadWithLinesHorizontal(Renderer.NORMAL, Renderer.LINES, x, y + glowHeight.get(), z, 1, hole.colorSides, hole.colorLines, ShapeMode.Lines);
+                        gradientBoxVertical(x, y, z, glowHeight.get(), hole.colorLines, transparent, false);
+                    }
                     break;
                 case ReverseGlow:
-                    Renderer.quadWithLinesHorizontal(Renderer.NORMAL, Renderer.LINES, x, y + glowHeight.get(), z, 1, hole.colorSides, hole.colorLines, shapeMode.get());
-                    MB.gradientBoxSides(x, y, z, x + 1, y + glowHeight.get(), z + 1, transparent, hole.colorSides);
-                    gradientBoxVertical(x, y, z, glowHeight.get(), hole.colorLines, transparent, true);
+                    if (shapeMode.get() != ShapeMode.Lines) MB.gradientBoxSides(x, y, z, x + 1, y + glowHeight.get(), z + 1, transparent, hole.colorSides);
+                    if (shapeMode.get() != ShapeMode.Sides) {
+                        Renderer.quadWithLinesHorizontal(Renderer.NORMAL, Renderer.LINES, x, y + glowHeight.get(), z, 1, hole.colorSides, hole.colorLines, ShapeMode.Lines);
+                        gradientBoxVertical(x, y, z, glowHeight.get(), hole.colorLines, transparent, true);
+                    }
                     break;
             }
         }
