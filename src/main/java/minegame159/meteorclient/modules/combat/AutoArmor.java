@@ -31,7 +31,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 @InvUtils.Priority(priority = Integer.MAX_VALUE - 1)
@@ -94,13 +93,6 @@ public class AutoArmor extends Module {
             .build()
     );
 
-    private final Setting<Boolean> banBinding = sgGeneral.add(new BoolSetting.Builder()
-            .name("ban-binding")
-            .description("Stops you from equipping any armor with the enchant Curse of Binding.")
-            .defaultValue(false)
-            .build()
-    );
-
     private final Setting<Boolean> antiBreak = sgGeneral.add(new BoolSetting.Builder()
             .name("anti-break")
             .description("Attempts to stop your armor from being broken.")
@@ -109,7 +101,7 @@ public class AutoArmor extends Module {
     );
 
     private final Setting<Integer> breakDurability = sgGeneral.add(new IntSetting.Builder()
-            .name("break-durability")
+            .name("anti-break-durability")
             .description("The durability damaged armor is swapped.")
             .defaultValue(10)
             .max(50)
@@ -252,11 +244,7 @@ public class AutoArmor extends Module {
     private int getItemScore(ItemStack itemStack){
         int score = 0;
         if (antiBreak.get() && (itemStack.getMaxDamage() - itemStack.getDamage()) <= breakDurability.get()) return 0;
-        if (banBinding.get() && EnchantmentHelper.hasBindingCurse(itemStack)) return -10;
-        Iterator<Enchantment> bad = avoidEnch.get().iterator();
-        for (Enchantment ench = bad.next(); bad.hasNext(); ench = bad.next()) {
-            if (EnchantmentHelper.getLevel(ench, itemStack) > 0) return 1;
-        }
+        for (Enchantment ench : avoidEnch.get()) if (EnchantmentHelper.getLevel(ench, itemStack) > 0) return -10;
         score += 4 * (EnchantmentHelper.getLevel(mode.get().enchantment, itemStack) - currentBest);
         score += 2 * (EnchantmentHelper.getLevel(Enchantments.PROTECTION, itemStack) - currentProt);
         score += 2 * (EnchantmentHelper.getLevel(Enchantments.BLAST_PROTECTION, itemStack) - currentBlast);
