@@ -299,30 +299,6 @@ public class BedAura extends Module {
         }
     }
 
-    @EventHandler
-    private void onRender(RenderEvent event) {
-        if (render.get() && bestPos != null) {
-            int x = bestPos.getX();
-            int y = bestPos.getY();
-            int z = bestPos.getZ();
-
-            switch (direction) {
-                case NORTH:
-                    Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x, y, z, x + 1, y + 0.5, z + 2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                    break;
-                case SOUTH:
-                    Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x, y, z - 1, x + 1, y + 0.5, z + 1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                    break;
-                case EAST:
-                    Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x - 1, y, z, x + 1, y + 0.5, z + 1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                    break;
-                case WEST:
-                    Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x, y, z, x + 2, y + 0.5, z + 1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-                    break;
-            }
-        }
-    }
-
     private void placeBed(BlockPos pos) {
         if (pos == null || InvUtils.findItemInAll(itemStack -> itemStack.getItem() instanceof BedItem) == -1) return;
 
@@ -337,22 +313,20 @@ public class BedAura extends Module {
         if (hand == null) return;
 
        boolean wasSneaking = mc.player.isSneaking();
-       if (wasSneaking) mc.player.setSneaking(false);
+        if (wasSneaking) mc.player.input.sneaking = false;
 
         Rotations.rotate(yawFromDir(direction), mc.player.pitch, () -> BlockUtils.place(pos, hand, slot, false, 100, !noSwing.get()));
 
-        if (wasSneaking) mc.player.setSneaking(true);
+        if (wasSneaking) mc.player.input.sneaking = true;
     }
 
     private void breakBed(BlockPos pos) {
         if (pos == null) return;
 
         boolean wasSneaking = mc.player.isSneaking();
-        if (wasSneaking) mc.player.setSneaking(false);
-
+        if (wasSneaking) mc.player.input.sneaking = false;
         mc.interactionManager.interactBlock(mc.player, mc.world, Hand.OFF_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, bestPos, false));
-
-        if (wasSneaking) mc.player.setSneaking(true);
+        if (wasSneaking) mc.player.input.sneaking = true;
     }
 
     private BlockPos getPlacePos(PlayerEntity target) {
@@ -374,7 +348,7 @@ public class BedAura extends Module {
     private boolean checkPlace(Direction direction, PlayerEntity target, boolean up) {
         BlockPos headPos = up ? target.getBlockPos().up() : target.getBlockPos();
 
-        if (BlockUtils.canPlace(headPos)
+        if (mc.world.getBlockState(headPos).getMaterial().isReplaceable()
                 && BlockUtils.canPlace(headPos.offset(direction))
                 && (placeMode.get() == Safety.Suicide
                 || (DamageCalcUtils.bedDamage(target, Utils.vec3d(headPos)) >= minDamage.get()
@@ -437,6 +411,30 @@ public class BedAura extends Module {
             case WEST:  return -90;
         }
         return 0;
+    }
+
+    @EventHandler
+    private void onRender(RenderEvent event) {
+        if (render.get() && bestPos != null) {
+            int x = bestPos.getX();
+            int y = bestPos.getY();
+            int z = bestPos.getZ();
+
+            switch (direction) {
+                case NORTH:
+                    Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x, y, z, x + 1, y + 0.5, z + 2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                    break;
+                case SOUTH:
+                    Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x, y, z - 1, x + 1, y + 0.5, z + 1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                    break;
+                case EAST:
+                    Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x - 1, y, z, x + 1, y + 0.5, z + 1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                    break;
+                case WEST:
+                    Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x, y, z, x + 2, y + 0.5, z + 1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                    break;
+            }
+        }
     }
 
     @Override
