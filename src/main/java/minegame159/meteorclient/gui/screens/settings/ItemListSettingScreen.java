@@ -8,6 +8,7 @@ package minegame159.meteorclient.gui.screens.settings;
 import minegame159.meteorclient.gui.widgets.WItemWithLabel;
 import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.utils.misc.Names;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.util.registry.Registry;
@@ -31,6 +32,6 @@ public class ItemListSettingScreen extends LeftRightListSettingScreen<Item> {
 
     @Override
     protected String getValueName(Item value) {
-        return value.getName().getString();
+        return Names.get(value);
     }
 }

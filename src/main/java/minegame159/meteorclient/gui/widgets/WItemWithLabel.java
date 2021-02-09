@@ -5,6 +5,7 @@
 
 package minegame159.meteorclient.gui.widgets;
 
+import minegame159.meteorclient.utils.misc.Names;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffectUtil;
 import net.minecraft.item.ItemStack;
@@ -25,7 +26,7 @@ public class WItemWithLabel extends WTable {
     }
 
     public WItemWithLabel(ItemStack itemStack) {
-        this(itemStack, itemStack.getName().getString());
+        this(itemStack, Names.get(itemStack.getItem()));
     }
 
     private String getStringToAppend() {
