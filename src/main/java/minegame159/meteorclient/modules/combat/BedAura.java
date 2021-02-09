@@ -422,16 +422,16 @@ public class BedAura extends Module {
 
             switch (direction) {
                 case NORTH:
-                    Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x, y, z, x + 1, y + 0.5, z + 2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                    Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x, y, z, x + 1, y + 0.6, z + 2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                     break;
                 case SOUTH:
-                    Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x, y, z - 1, x + 1, y + 0.5, z + 1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                    Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x, y, z - 1, x + 1, y + 0.6, z + 1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                     break;
                 case EAST:
-                    Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x - 1, y, z, x + 1, y + 0.5, z + 1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                    Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x - 1, y, z, x + 1, y + 0.6, z + 1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                     break;
                 case WEST:
-                    Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x, y, z, x + 2, y + 0.5, z + 1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                    Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x, y, z, x + 2, y + 0.6, z + 1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                     break;
             }
         }
