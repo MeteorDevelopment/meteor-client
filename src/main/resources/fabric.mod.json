@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "id": "meteor-client",
+  "version": "${version}",
+
+  "name": "Meteor Client",
+  "description": "Based utility mod.",
+  "authors": [
+    "MineGame159",
+    "squidoodly",
+    "seasnail"
+  ],
+  "contact": {
+    "homepage": "https://meteorclient.com",
+    "issues": "https://github.com/MeteorDevelopment/meteor-client/issues",
+    "sources": "https://github.com/MeteorDevelopment/meteor-client",
+    "discord": "https://meteorclient.com/discord"
+  },
+
+  "license": "GPL-3.0",
+  "icon": "assets/meteor-client/icon.png",
+
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "minegame159.meteorclient.MeteorClient"
+    ]
+  },
+  "mixins": [
+    "meteor-client.mixins.json",
+    "meteor-client-sodium.mixins.json"
+  ],
+
+  "accessWidener": "meteor-client.accesswidener",
+
+  "custom": {
+    "meteor-client:devbuild": "@devbuild@"
+  },
+
+  "depends": {
+    "fabricloader": ">=0.7.4",
+    "fabric": "*",
+    "minecraft": "1.16.x"
+  },
+  "suggests": {
+    "flamingo": "*"
+  }
+}
