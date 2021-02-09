@@ -12,6 +12,7 @@ import minegame159.meteorclient.gui.widgets.WLabel;
 import minegame159.meteorclient.gui.widgets.WTable;
 import minegame159.meteorclient.gui.widgets.WTextBox;
 import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.utils.misc.Names;
 import net.minecraft.entity.effect.StatusEffect;
 import org.apache.commons.lang3.StringUtils;
 
@@ -48,12 +49,12 @@ public class StatusEffectSettingScreen extends WindowScreen {
         row();
 
         List<StatusEffect> statusEffects = new ArrayList<>(setting.get().keySet());
-        statusEffects.sort(Comparator.comparing(statusEffect -> statusEffect.getName().getString()));
+        statusEffects.sort(Comparator.comparing(Names::get));
 
         WTable table = add(new WTable()).expandX().fillX().getWidget();
 
         for (StatusEffect statusEffect : statusEffects) {
-            String name = statusEffect.getName().getString();
+            String name = Names.get(statusEffect);
             if (!StringUtils.containsIgnoreCase(name, filterText)) continue;
 
             table.add(new WLabel(name));

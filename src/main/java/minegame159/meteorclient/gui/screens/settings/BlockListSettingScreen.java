@@ -9,6 +9,7 @@ import minegame159.meteorclient.gui.widgets.WItemWithLabel;
 import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.mixin.IdentifierAccessor;
 import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.utils.misc.Names;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.util.Identifier;
@@ -35,7 +36,7 @@ public class BlockListSettingScreen extends LeftRightListSettingScreen<Block> {
 
     @Override
     protected String getValueName(Block value) {
-        return value.getName().getString();
+        return Names.get(value);
     }
 
     @Override
