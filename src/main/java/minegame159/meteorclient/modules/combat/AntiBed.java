@@ -61,7 +61,7 @@ public class AntiBed extends Module {
     private boolean closeScreen = false;
 
     public AntiBed() {
-        super(Category.Combat, "anti-bed", "Places blocks on you to prevent beds from being placed.");
+        super(Category.Combat, "anti-bed", "Prevents people from placing beds where you are standing.");
     }
 
     @Override
