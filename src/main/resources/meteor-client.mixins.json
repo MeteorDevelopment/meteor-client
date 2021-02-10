@@ -107,6 +107,8 @@
     "TridentItemMixin",
     "ModelPredicateProviderRegistryMixin",
     "ItemStackAccessor",
+    "Matrix4fMixin",
+    "QuaternionMixin",
     "PlayerPositionLookS2CPacketMixin"
   ],
   "injectors": {
