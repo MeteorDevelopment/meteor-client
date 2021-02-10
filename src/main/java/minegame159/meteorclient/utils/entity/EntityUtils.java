@@ -50,15 +50,7 @@ public class EntityUtils {
     }
 
     public static Entity get(Predicate<Entity> isGood, SortPriority sortPriority) {
-        for (Entity entity : mc.world.getEntities()) {
-            if (isGood.test(entity)) entities.add(entity);
-        }
-
-        for (Entity entity : FakePlayerUtils.getPlayers().keySet()) {
-            if (isGood.test(entity)) entities.add(entity);
-        }
-
-        entities.sort((e1, e2) -> sort(e1, e2, sortPriority));
+        entities = getList(isGood, sortPriority);
 
         if (!entities.isEmpty()) {
             Entity res = entities.get(0);
@@ -68,6 +60,21 @@ public class EntityUtils {
         }
 
         return null;
+    }
+
+    public static List<Entity> getList(Predicate<Entity> isGood, SortPriority sortPriority) {
+        entities.clear();
+
+        for (Entity entity : mc.world.getEntities()) {
+            if (isGood.test(entity)) entities.add(entity);
+        }
+
+        for (Entity entity : FakePlayerUtils.getPlayers().keySet()) {
+            if (isGood.test(entity)) entities.add(entity);
+        }
+
+        entities.sort((e1, e2) -> sort(e1, e2, sortPriority));
+        return entities;
     }
 
     private static int sort(Entity e1, Entity e2, SortPriority priority) {
