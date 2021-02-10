@@ -106,7 +106,8 @@
     "WorldRendererMixin",
     "TridentItemMixin",
     "ModelPredicateProviderRegistryMixin",
-    "ItemStackAccessor"
+    "ItemStackAccessor",
+    "PlayerPositionLookS2CPacketMixin"
   ],
   "injectors": {
     "defaultRequire": 1

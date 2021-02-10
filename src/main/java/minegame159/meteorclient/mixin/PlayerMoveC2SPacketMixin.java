@@ -30,16 +30,6 @@ public class PlayerMoveC2SPacketMixin implements IPlayerMoveC2SPacket {
     }
 
     @Override
-    public void setYaw(float yaw) {
-        this.yaw = yaw;
-    }
-
-    @Override
-    public void setPitch(float pitch) {
-        this.pitch = pitch;
-    }
-
-    @Override
     public void setTag(int tag) { this.tag = tag; }
 
     @Override
