@@ -14,15 +14,12 @@ import java.util.List;
 
 public class HudRenderer {
     public double delta;
-    private boolean scaleOnly;
     private final List<Runnable> postTasks = new ArrayList<>();
 
     public void begin(double scale, double tickDelta, boolean scaleOnly) {
-        if (!scaleOnly) Utils.unscaledProjection();
         TextRenderer.get().begin(scale, scaleOnly, false);
 
         this.delta = tickDelta;
-        this.scaleOnly = scaleOnly;
     }
 
     public void end() {
@@ -33,8 +30,6 @@ public class HudRenderer {
         }
 
         postTasks.clear();
-
-        if (!scaleOnly) Utils.scaledProjection();
     }
 
     public void text(String text, double x, double y, Color color) {

@@ -106,7 +106,9 @@
     "WorldRendererMixin",
     "TridentItemMixin",
     "ModelPredicateProviderRegistryMixin",
-    "ItemStackAccessor"
+    "ItemStackAccessor",
+    "Matrix4fMixin",
+    "QuaternionMixin"
   ],
   "injectors": {
     "defaultRequire": 1

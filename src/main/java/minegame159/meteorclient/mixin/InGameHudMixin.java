@@ -11,6 +11,7 @@ import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.render.Render2DEvent;
 import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.render.NoRender;
+import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.util.math.MatrixStack;
@@ -39,6 +40,7 @@ public abstract class InGameHudMixin {
         client.getProfiler().push("meteor-client_render_2d");
         RenderSystem.pushMatrix();
 
+        Utils.unscaledProjection();
         RenderSystem.enableBlend();
         RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA);
         RenderSystem.lineWidth(1);
@@ -48,6 +50,7 @@ public abstract class InGameHudMixin {
 
         GL11.glDisable(GL11.GL_LINE_SMOOTH);
         RenderSystem.lineWidth(1);
+        Utils.scaledProjection();
 
         RenderSystem.popMatrix();
         client.getProfiler().pop();
