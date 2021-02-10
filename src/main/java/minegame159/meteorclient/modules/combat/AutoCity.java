@@ -106,7 +106,7 @@ public class AutoCity extends Module {
                         if (chatInfo.get()) ChatUtils.moduleWarning(this, "No obsidian found for support, mining anyway.");
                     }
                     else {
-                        BlockUtils.place(blockPos, Hand.MAIN_HAND, obbySlot, rotate.get(), 0);
+                        BlockUtils.place(blockPos, Hand.MAIN_HAND, obbySlot, rotate.get(), 0, true);
                     }
                 }
             }

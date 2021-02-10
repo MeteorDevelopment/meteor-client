@@ -52,14 +52,14 @@ public class SelfWeb extends Module {
         if (slot == -1) return;
 
         BlockPos blockPos = mc.player.getBlockPos();
-        BlockUtils.place(blockPos, Hand.MAIN_HAND, slot, rotate.get(), 0);
+        BlockUtils.place(blockPos, Hand.MAIN_HAND, slot, rotate.get(), 0, false);
 
         if (doubles.get()) {
             slot = findSlot();
             if (slot == -1) return;
 
             blockPos = mc.player.getBlockPos().add(0, 1, 0);
-            BlockUtils.place(blockPos, Hand.MAIN_HAND, slot, rotate.get(), 0);
+            BlockUtils.place(blockPos, Hand.MAIN_HAND, slot, rotate.get(), 0, false);
         }
 
         if (turnOff.get()) toggle();
