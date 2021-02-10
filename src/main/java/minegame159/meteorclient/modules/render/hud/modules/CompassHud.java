@@ -11,7 +11,6 @@ import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.util.math.MathHelper;
 
 public class CompassHud extends HudModule {
-
     public enum Mode {
         Axis,
         Pole
@@ -35,22 +34,27 @@ public class CompassHud extends HudModule {
         int y = box.getY();
 
         for (Direction dir : Direction.values()) {
-            renderer.text(hud.compassMode() == Mode.Axis ? dir.getAlternate() : dir.name(), (x + (box.width / 2.0)) + getX(getPosOnCompass(dir)), (y + (box.height / 2.0)) + getY(getPosOnCompass(dir)), (dir == Direction.N) ? RED : WHITE);
+            double pos = getPosOnCompass(dir);
+            renderer.text(hud.compassMode.get() == Mode.Axis ? dir.getAlternate() : dir.name(), (x + (box.width / 2.0)) + getX(pos), (y + (box.height / 2.0)) + getY(pos), (dir == Direction.N) ? RED : WHITE);
         }
     }
 
     private double getX(double rad) {
-        return Math.sin(rad) * (hud.compassScale() * 40);
+        return Math.sin(rad) * (hud.compassScale.get() * 40);
     }
 
     private double getY(double rad) {
-        if (mc.player == null) return 0;
-        return Math.cos(rad) * Math.sin(Math.toRadians(MathHelper.clamp(mc.player.pitch + 30.0f, -90.0f, 90.0f))) * (hud.compassScale() * 40);
+        double pitch = 0;
+        if (mc.player != null) pitch = mc.player.pitch;
+
+        return Math.cos(rad) * Math.sin(Math.toRadians(MathHelper.clamp(pitch + 30.0f, -90.0f, 90.0f))) * (hud.compassScale.get() * 40);
     }
 
     private double getPosOnCompass(Direction dir) {
-        if (mc.player == null) return 0;
-        return Math.toRadians(MathHelper.wrapDegrees(mc.player.yaw)) + dir.ordinal() * 1.5707963267948966;
+        double yaw = 0;
+        if (mc.player != null) yaw = mc.player.yaw;
+
+        return Math.toRadians(MathHelper.wrapDegrees(yaw)) + dir.ordinal() * 1.5707963267948966;
     }
 
     private enum Direction {

@@ -223,7 +223,7 @@ public class Modules extends System<Modules> {
     public void disableAll() {
         synchronized (active) {
             for (Module module : active.toArray(new Module[0])) {
-                module.toggle();
+                module.toggle(Utils.canUpdate());
             }
         }
     }
@@ -412,6 +412,7 @@ public class Modules extends System<Modules> {
         addModule(new UnfocusedCPU());
         addModule(new VoidESP());
         addModule(new Xray());
+        addModule(new BossStack());
     }
 
     private void initMisc() {

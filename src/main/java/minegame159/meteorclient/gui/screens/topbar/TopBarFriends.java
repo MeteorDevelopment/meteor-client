@@ -5,8 +5,6 @@
 
 package minegame159.meteorclient.gui.screens.topbar;
 
-import meteordevelopment.orbit.EventHandler;
-import minegame159.meteorclient.events.meteor.FriendListChangedEvent;
 import minegame159.meteorclient.friends.Friend;
 import minegame159.meteorclient.friends.Friends;
 import minegame159.meteorclient.gui.widgets.*;
@@ -20,6 +18,8 @@ import minegame159.meteorclient.utils.render.color.SettingColor;
 public class TopBarFriends extends TopBarWindowScreen {
     public TopBarFriends() {
         super(TopBarType.Friends);
+
+        refreshWidgetsOnInit = true;
     }
 
     @Override
@@ -112,7 +112,12 @@ public class TopBarFriends extends TopBarWindowScreen {
             typeSetting.action = () -> friend.type = typeSetting.getValue();
 
             WMinus remove = section.add(new WMinus()).getWidget();
-            remove.action = () -> Friends.get().remove(friend);
+            remove.action = () -> {
+                Friends.get().remove(friend);
+
+                clear();
+                initWidgets();
+            };
 
             section.row();
         }
@@ -126,11 +131,5 @@ public class TopBarFriends extends TopBarWindowScreen {
             String name = username.getText().trim();
             if (!name.isEmpty()) Friends.get().add(new Friend(name));
         };
-    }
-
-    @EventHandler
-    private void onFriendListChanged(FriendListChangedEvent event) {
-        clear();
-        initWidgets();
     }
 }

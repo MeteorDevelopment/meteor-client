@@ -6,7 +6,6 @@
 package minegame159.meteorclient.macros;
 
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.meteor.MacroListChangedEvent;
 import minegame159.meteorclient.systems.System;
 import minegame159.meteorclient.systems.Systems;
 import minegame159.meteorclient.utils.misc.NbtUtils;
@@ -33,7 +32,6 @@ public class Macros extends System<Macros> implements Iterable<Macro> {
     public void add(Macro macro) {
         macros.add(macro);
         MeteorClient.EVENT_BUS.subscribe(macro);
-        MeteorClient.EVENT_BUS.post(MacroListChangedEvent.get());
         save();
     }
 
@@ -44,7 +42,6 @@ public class Macros extends System<Macros> implements Iterable<Macro> {
     public void remove(Macro macro) {
         if (macros.remove(macro)) {
             MeteorClient.EVENT_BUS.unsubscribe(macro);
-            MeteorClient.EVENT_BUS.post(MacroListChangedEvent.get());
             save();
         }
     }

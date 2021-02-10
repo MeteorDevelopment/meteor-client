@@ -200,7 +200,7 @@ public class Nametags extends Module {
         String name;
         if (entity == mc.player && Modules.get().get(NameProtect.class).isActive()) {
             name = Modules.get().get(NameProtect.class).getName(entity.getGameProfile().getName());
-        } else if (Modules.get().get(FakePlayer.class).showID() && entity instanceof FakePlayerEntity) {
+        } else if (Modules.get().get(FakePlayer.class).showID(entity)) {
             name = entity.getGameProfile().getName() + " [" + FakePlayerUtils.getID((FakePlayerEntity) entity) + "]";
         } else name = entity.getGameProfile().getName();
 

@@ -95,17 +95,19 @@ public class AutoCity extends Module {
                 int obbySlot = InvUtils.findItemInHotbar(Items.OBSIDIAN);
                 BlockPos blockPos = mineTarget.down(1);
 
-                if (obbySlot == -1 && chatInfo.get()) {
-                    ChatUtils.moduleWarning(this, "No obsidian found for support, mining anyway.");
-                }
-                else if (!BlockUtils.canPlace(blockPos)
+                if (!BlockUtils.canPlace(blockPos)
                         && mc.world.getBlockState(blockPos).getBlock() != Blocks.OBSIDIAN
                         && mc.world.getBlockState(blockPos).getBlock() != Blocks.BEDROCK
                         && chatInfo.get()) {
                     ChatUtils.moduleWarning(this, "Couldn't place support block, mining anyway.");
                 }
                 else {
-                    BlockUtils.place(blockPos, Hand.MAIN_HAND, obbySlot, rotate.get(), 0);
+                    if (obbySlot == -1) {
+                        if (chatInfo.get()) ChatUtils.moduleWarning(this, "No obsidian found for support, mining anyway.");
+                    }
+                    else {
+                        BlockUtils.place(blockPos, Hand.MAIN_HAND, obbySlot, rotate.get(), 0);
+                    }
                 }
             }
 

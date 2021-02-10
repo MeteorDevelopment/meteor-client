@@ -1,7 +1,7 @@
 package minegame159.meteorclient.systems;
 
-import com.google.common.io.Files;
 import minegame159.meteorclient.MeteorClient;
+import minegame159.meteorclient.utils.files.StreamUtils;
 import minegame159.meteorclient.utils.misc.ISerializable;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
@@ -34,7 +34,7 @@ public abstract class System<T> implements ISerializable<T> {
             if (folder != null) file = new File(folder, file.getName());
 
             file.getParentFile().mkdirs();
-            Files.copy(tempFile, file);
+            StreamUtils.copy(tempFile, file);
             tempFile.delete();
         } catch (IOException e) {
             e.printStackTrace();

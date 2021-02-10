@@ -11,7 +11,9 @@ import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.entity.FakePlayerEntity;
 import minegame159.meteorclient.utils.entity.FakePlayerUtils;
+import net.minecraft.entity.player.PlayerEntity;
 
 public class FakePlayer extends Module {
 
@@ -84,8 +86,8 @@ public class FakePlayer extends Module {
         return table;
     }
 
-    public boolean showID() {
-        return isActive() && idInNametag.get();
+    public boolean showID(PlayerEntity entity) {
+        return isActive() && idInNametag.get() && entity instanceof FakePlayerEntity;
     }
 
     @Override

@@ -26,14 +26,18 @@ public class RenderUtils {
     private static final MinecraftClient mc = MinecraftClient.getInstance();
 
     //Items
-    public static void drawItem(ItemStack itemStack, int x, int y, double scale, boolean count) {
+    public static void drawItem(ItemStack itemStack, int x, int y, boolean overlay) {
         DiffuseLighting.enable();
+        mc.getItemRenderer().renderGuiItemIcon(itemStack, x, y);
+        if (overlay) mc.getItemRenderer().renderGuiItemOverlay(mc.textRenderer, itemStack, x, y, null);
+        DiffuseLighting.disable();
+    }
+
+    public static void drawItem(ItemStack itemStack, int x, int y, double scale, boolean overlay) {
         RenderSystem.pushMatrix();
         RenderSystem.scaled(scale, scale, 1);
-        mc.getItemRenderer().renderGuiItemIcon(itemStack, x, y);
-        if (count) mc.getItemRenderer().renderGuiItemOverlay(mc.textRenderer, itemStack, x, y, null);
+        drawItem(itemStack, x, y, overlay);
         RenderSystem.popMatrix();
-        DiffuseLighting.disable();
     }
 
     //Tracers

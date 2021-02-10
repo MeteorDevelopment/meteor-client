@@ -20,8 +20,7 @@ public abstract class DoubleTextHudModule extends HudModule {
 
     public DoubleTextHudModule(HUD hud, String name, String description, String left) {
         super(hud, name, description);
-
-        this.rightColor = hud.secondaryColor();
+        this.rightColor = hud.secondaryColor.get();
         this.left = left;
     }
 
@@ -40,7 +39,7 @@ public abstract class DoubleTextHudModule extends HudModule {
         int x = box.getX();
         int y = box.getY();
 
-        renderer.text(left, x, y, hud.primaryColor());
+        renderer.text(left, x, y, hud.primaryColor.get());
         renderer.text(right, x + leftWidth, y, rightColor);
     }
 

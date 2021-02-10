@@ -69,7 +69,7 @@ public abstract class GameRendererMixin {
 
         client.getProfiler().push("meteor-client_render");
 
-        RenderEvent event = RenderEvent.get(tickDelta, camera.getPos().x, camera.getPos().y, camera.getPos().z);
+        RenderEvent event = RenderEvent.get(matrix, tickDelta, camera.getPos().x, camera.getPos().y, camera.getPos().z);
 
         Renderer.begin(event);
         MeteorClient.EVENT_BUS.post(event);

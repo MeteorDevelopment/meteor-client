@@ -30,8 +30,9 @@ public abstract class WidgetScreen extends Screen {
     public final WWidget root;
 
     private final int prePostKeyEvents;
-    private boolean firstInit = true;
+    protected boolean firstInit = true;
     private boolean renderDebug = false;
+    private boolean closed, onClose;
 
     public boolean locked;
 
@@ -62,6 +63,8 @@ public abstract class WidgetScreen extends Screen {
         }
 
         loopWidget(root);
+
+        closed = false;
     }
 
     private void loopWidget(WWidget widget) {
@@ -165,14 +168,31 @@ public abstract class WidgetScreen extends Screen {
 
     @Override
     public void onClose() {
-        if (locked) return;
+        if (!locked) {
+            boolean preOnClose = onClose;
+            onClose = true;
 
-        Input.setCursorStyle(CursorStyle.Default);
+            removed();
 
-        MeteorClient.EVENT_BUS.unsubscribe(this);
-        GuiKeyEvents.postKeyEvents = prePostKeyEvents;
-        MinecraftClient.getInstance().openScreen(parent);
+            onClose = preOnClose;
+        }
     }
+
+    @Override
+    public void removed() {
+        if (!closed) {
+            closed = true;
+            onClosed();
+
+            Input.setCursorStyle(CursorStyle.Default);
+
+            MeteorClient.EVENT_BUS.unsubscribe(this);
+            GuiKeyEvents.postKeyEvents = prePostKeyEvents;
+            if (onClose) MinecraftClient.getInstance().openScreen(parent);
+        }
+    }
+
+    protected void onClosed() {}
 
     @Override
     public boolean shouldCloseOnEsc() {

@@ -301,4 +301,21 @@ public class InfinityMiner extends Module {
     private int getCurrentDamage() {
         return (mc.player != null) ? mc.player.getMainHandStack().getItem().getMaxDamage() - mc.player.getMainHandStack().getDamage() : -1;
     }
+
+    @Override
+    public String getInfoString() {
+        switch (getMode()) {
+            case Home:
+                int[] coords = getHomeCoords();
+                return "Heading Home: " + coords[0] + " " + coords[1] + " " + coords[2];
+            case Target:
+                return "Mining: " + getCurrentTarget().getName().getString();
+            case Repair:
+                return "Repair-Mining: " + getCurrentTarget().getName().getString();
+            case Still:
+                return "Resting";
+            default:
+                return "";
+        }
+    }
 }

@@ -17,10 +17,7 @@ import minegame159.meteorclient.mixin.PickaxeItemAccessor;
 import minegame159.meteorclient.mixin.ShovelItemAccessor;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.settings.BoolSetting;
-import minegame159.meteorclient.settings.EnumSetting;
-import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.settings.*;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -66,6 +63,16 @@ public class AutoTool extends Module {
             .name("anti-break")
             .description("Stops you from breaking your tool.")
             .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Integer> breakDurability = sgGeneral.add(new IntSetting.Builder()
+            .name("anti-break-durability")
+            .description("The durability to stop using a tool.")
+            .defaultValue(10)
+            .max(50)
+            .min(2)
+            .sliderMax(20)
             .build()
     );
 
@@ -127,9 +134,15 @@ public class AutoTool extends Module {
         }
 
         if (bestSlot != -1) {
-            if (prevSlot == -1)
-                prevSlot = mc.player.inventory.selectedSlot;
+            if (prevSlot == -1) prevSlot = mc.player.inventory.selectedSlot;
             mc.player.inventory.selectedSlot = bestSlot;
+        }
+
+        ItemStack currentStack = mc.player.inventory.getStack(mc.player.inventory.selectedSlot);
+
+        if (shouldStopUsing(currentStack) && currentStack.getItem() instanceof ToolItem) {
+            mc.options.keyAttack.setPressed(false);
+            event.setCancelled(true);
         }
     }
 
@@ -162,6 +175,6 @@ public class AutoTool extends Module {
     }
 
     private boolean shouldStopUsing(ItemStack itemStack) {
-        return antiBreak.get() && itemStack.getMaxDamage() - itemStack.getDamage() > 11;
+        return antiBreak.get() && itemStack.getMaxDamage() - itemStack.getDamage() < breakDurability.get();
     }
 }

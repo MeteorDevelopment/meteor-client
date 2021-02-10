@@ -5,10 +5,8 @@
 
 package minegame159.meteorclient.accounts.gui;
 
-import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.accounts.Account;
 import minegame159.meteorclient.accounts.Accounts;
-import minegame159.meteorclient.events.meteor.AccountListChangedEvent;
 import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.gui.screens.WindowScreen;
 import minegame159.meteorclient.gui.widgets.WButton;
@@ -19,7 +17,12 @@ import net.minecraft.client.MinecraftClient;
 public class AccountsScreen extends WindowScreen {
     public AccountsScreen() {
         super("Accounts", true);
+    }
 
+    @Override
+    protected void init() {
+        clear();
+        super.init();
         initWidgets();
     }
 
@@ -30,7 +33,10 @@ public class AccountsScreen extends WindowScreen {
             row();
 
             for (Account<?> account : Accounts.get()) {
-                t.add(new WAccount(this, account)).fillX().expandX();
+                t.add(new WAccount(this, account, () -> {
+                    clear();
+                    initWidgets();
+                })).fillX().expandX();
                 t.row();
             }
         }
@@ -45,12 +51,6 @@ public class AccountsScreen extends WindowScreen {
     private void addButton(WTable t, String text, Runnable action) {
         WButton button = t.add(new WButton(text)).fillX().expandX().getWidget();
         button.action = action;
-    }
-
-    @EventHandler
-    private void onAccountListChanged(AccountListChangedEvent event) {
-        clear();
-        initWidgets();
     }
 
     static void addAccount(WButton add, WidgetScreen screen, Account<?> account) {

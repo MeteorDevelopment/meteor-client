@@ -14,6 +14,7 @@ import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.entity.EntityUtils;
+import minegame159.meteorclient.utils.entity.FakePlayerUtils;
 import minegame159.meteorclient.utils.entity.Target;
 import minegame159.meteorclient.utils.render.RenderUtils;
 import minegame159.meteorclient.utils.render.color.Color;
@@ -139,8 +140,11 @@ public class Tracers extends Module {
 
         for (Entity entity : mc.world.getEntities()) {
             if ((!Modules.get().isActive(Freecam.class) && entity == mc.player) || !entities.get().getBoolean(entity.getType()) || (!showInvis.get() && entity.isInvisible())) continue;
+            if (FakePlayerUtils.isFakePlayerOutOfRenderDistance(entity)) continue;
+
             Color color = EntityUtils.getEntityColor(entity, playersColor.get(), animalsColor.get(), waterAnimalsColor.get(), monstersColor.get(), ambientColor.get(), miscColor.get(), useNameColor.get());
-            RenderUtils.drawTracerToEntity(event, entity, color, target.get(), stem.get()); count++;
+            RenderUtils.drawTracerToEntity(event, entity, color, target.get(), stem.get());
+            count++;
         }
 
         if (storage.get()) {

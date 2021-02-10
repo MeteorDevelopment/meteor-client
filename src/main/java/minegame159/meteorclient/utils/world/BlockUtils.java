@@ -1,9 +1,11 @@
 package minegame159.meteorclient.utils.world;
 
 import minegame159.meteorclient.mixininterface.IVec3d;
+import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.player.Rotations;
 import net.minecraft.block.*;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
@@ -15,7 +17,7 @@ public class BlockUtils {
     private static final MinecraftClient mc = MinecraftClient.getInstance();
     private static final Vec3d hitPos = new Vec3d(0, 0, 0);
 
-    public static boolean place(BlockPos blockPos, Hand hand, int slot, boolean rotate, int priority) {
+    public static boolean place(BlockPos blockPos, Hand hand, int slot, boolean rotate, int priority, boolean swing, boolean swap, boolean swapBack) {
         if (slot == -1 || !canPlace(blockPos)) return false;
 
         Direction side = getPlaceSide(blockPos);
@@ -34,26 +36,30 @@ public class BlockUtils {
 
         if (rotate) {
             Direction s = side;
-            Rotations.rotate(Rotations.getYaw(hitPos), Rotations.getPitch(hitPos), priority, () -> place(slot, hitPos, hand, s, neighbour));
+            Rotations.rotate(Rotations.getYaw(hitPos), Rotations.getPitch(hitPos), priority, () -> place(slot, hitPos, hand, s, neighbour, swing, swap, swapBack));
         }
-        else place(slot, hitPos, hand, side, neighbour);
+        else place(slot, hitPos, hand, side, neighbour, swing, swap, swapBack);
 
         return true;
     }
+    public static boolean place(BlockPos blockPos, Hand hand, int slot, boolean rotate, int priority) {
+        return place(blockPos, hand, slot, rotate, priority, true, true, true);
+    }
 
-    private static void place(int slot, Vec3d hitPos, Hand hand, Direction side, BlockPos neighbour) {
+    private static void place(int slot, Vec3d hitPos, Hand hand, Direction side, BlockPos neighbour, boolean swing, boolean swap, boolean swapBack) {
         int preSlot = mc.player.inventory.selectedSlot;
-        mc.player.inventory.selectedSlot = slot;
+        if (swap) InvUtils.swap(slot);
 
         boolean wasSneaking = mc.player.input.sneaking;
         mc.player.input.sneaking = false;
 
         mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(hitPos, side, neighbour, false));
-        mc.player.swingHand(hand);
+        if (swing) mc.player.swingHand(hand);
+        else mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(hand));
 
         mc.player.input.sneaking = wasSneaking;
 
-        mc.player.inventory.selectedSlot = preSlot;
+        if (swapBack) InvUtils.swap(preSlot);
     }
 
     public static boolean canPlace(BlockPos blockPos) {

@@ -50,11 +50,9 @@ public abstract class ClientPlayNetworkHandlerMixin {
     @Inject(at = @At("TAIL"), method = "onGameJoin")
     private void onGameJoinTail(GameJoinS2CPacket packet, CallbackInfo info) {
         if (worldNotNull) {
-            MeteorClient.IS_DISCONNECTING = true;
             MeteorClient.EVENT_BUS.post(GameLeftEvent.get());
         }
 
-        MeteorClient.IS_DISCONNECTING = false;
         MeteorClient.EVENT_BUS.post(GameJoinedEvent.get());
     }
 

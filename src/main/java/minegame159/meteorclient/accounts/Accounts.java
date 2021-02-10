@@ -5,11 +5,9 @@
 
 package minegame159.meteorclient.accounts;
 
-import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.accounts.types.CrackedAccount;
 import minegame159.meteorclient.accounts.types.PremiumAccount;
 import minegame159.meteorclient.accounts.types.TheAlteningAccount;
-import minegame159.meteorclient.events.meteor.AccountListChangedEvent;
 import minegame159.meteorclient.systems.System;
 import minegame159.meteorclient.systems.Systems;
 import minegame159.meteorclient.utils.misc.NbtException;
@@ -37,7 +35,6 @@ public class Accounts extends System<Accounts> implements Iterable<Account<?>> {
 
     public void add(Account<?> account) {
         accounts.add(account);
-        MeteorClient.EVENT_BUS.post(AccountListChangedEvent.get());
         save();
     }
 
@@ -47,7 +44,6 @@ public class Accounts extends System<Accounts> implements Iterable<Account<?>> {
 
     public void remove(Account<?> account) {
         if (accounts.remove(account)) {
-            MeteorClient.EVENT_BUS.post(AccountListChangedEvent.get());
             save();
         }
     }

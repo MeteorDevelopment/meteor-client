@@ -17,12 +17,14 @@ import minegame159.meteorclient.gui.screens.topbar.TopBarModules;
 import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.misc.DiscordPresence;
+import minegame159.meteorclient.modules.render.hud.HudEditorScreen;
 import minegame159.meteorclient.rendering.Fonts;
 import minegame159.meteorclient.rendering.Matrices;
 import minegame159.meteorclient.rendering.text.CustomTextRenderer;
 import minegame159.meteorclient.systems.Systems;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.entity.EntityUtils;
+import minegame159.meteorclient.utils.misc.Names;
 import minegame159.meteorclient.utils.misc.input.KeyAction;
 import minegame159.meteorclient.utils.misc.input.KeyBinds;
 import minegame159.meteorclient.utils.network.Capes;
@@ -47,7 +49,6 @@ import java.io.File;
 public class MeteorClient implements ClientModInitializer {
     public static MeteorClient INSTANCE;
     public static final IEventBus EVENT_BUS = new EventBus();
-    public static boolean IS_DISCONNECTING;
     public static final File FOLDER = new File(FabricLoader.getInstance().getGameDir().toString(), "meteor-client");
     public static final Logger LOG = LogManager.getLogger();
 
@@ -87,6 +88,7 @@ public class MeteorClient implements ClientModInitializer {
         BlockIterator.init();
         EChestMemory.init();
         Rotations.init();
+        Names.init();
 
         Systems.init();
 
@@ -126,7 +128,7 @@ public class MeteorClient implements ClientModInitializer {
     private void onKey(KeyEvent event) {
         // Click GUI
         if (event.action == KeyAction.Press && event.key == KeyBindingHelper.getBoundKeyOf(KeyBinds.OPEN_CLICK_GUI).getCode()) {
-            if ((!Utils.canUpdate() && !(mc.currentScreen instanceof WidgetScreen)) || mc.currentScreen == null) openClickGui();
+            if ((!Utils.canUpdate() && !(mc.currentScreen instanceof WidgetScreen) && !(mc.currentScreen instanceof HudEditorScreen)) || mc.currentScreen == null) openClickGui();
         }
 
         // Shulker Peek

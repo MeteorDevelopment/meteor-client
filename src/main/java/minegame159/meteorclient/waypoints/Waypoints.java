@@ -6,10 +6,10 @@
 package minegame159.meteorclient.waypoints;
 
 import meteordevelopment.orbit.EventHandler;
+import meteordevelopment.orbit.EventPriority;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.game.GameJoinedEvent;
 import minegame159.meteorclient.events.game.GameLeftEvent;
-import minegame159.meteorclient.events.meteor.WaypointListChangedEvent;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.rendering.Matrices;
 import minegame159.meteorclient.rendering.text.TextRenderer;
@@ -74,13 +74,11 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
 
     public void add(Waypoint waypoint) {
         waypoints.add(waypoint);
-        MeteorClient.EVENT_BUS.post(WaypointListChangedEvent.get());
         save();
     }
 
     public void remove(Waypoint waypoint) {
         if (waypoints.remove(waypoint)) {
-            MeteorClient.EVENT_BUS.post(WaypointListChangedEvent.get());
             save();
         }
     }
@@ -90,9 +88,8 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
         load();
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST)
     private void onGameDisconnected(GameLeftEvent event) {
-        save();
         waypoints.clear();
     }
 

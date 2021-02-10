@@ -49,8 +49,8 @@ import java.util.stream.Collectors;
 public class Utils {
     public static MinecraftClient mc;
 
-    public static boolean blockRenderingBlockEntitiesInXray;
     public static boolean firstTimeTitleScreen = true;
+    public static boolean isReleasingTrident;
 
     private static final Random random = new Random();
     private static final DecimalFormat df;
@@ -170,6 +170,10 @@ public class Utils {
         return enchantment.getName(0).getString().substring(0, 4);
     }
 
+    public static String getEnchantSimpleName(Enchantment enchantment, int length) {
+        return enchantment.getName(0).getString().substring(0, 3);
+    }
+
     public static int search(String text, String filter) {
         int wordsFound = 0;
         String[] words = filter.split(" ");
@@ -277,7 +281,7 @@ public class Utils {
             default:
                 String keyName = GLFW.glfwGetKeyName(key, 0);
                 if (keyName == null) return "Unknown";
-                return keyName;
+                return StringUtils.capitalize(keyName);
         }
     }
 

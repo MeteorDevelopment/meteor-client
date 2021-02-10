@@ -10,10 +10,12 @@ import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.text.TextUtils;
 import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.GameMode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +49,7 @@ public class EntityUtils {
         return Utils.WHITE;
     }
 
-    public static void getAll(Predicate<Entity> isGood, SortPriority sortPriority, List<Entity> target) {
+    public static void getList(Predicate<Entity> isGood, SortPriority sortPriority, List<Entity> target) {
         for (Entity entity : mc.world.getEntities()) {
             if (isGood.test(entity)) target.add(entity);
         }
@@ -61,7 +63,7 @@ public class EntityUtils {
 
     public static Entity get(Predicate<Entity> isGood, SortPriority sortPriority) {
         entities.clear();
-        getAll(isGood, sortPriority, entities);
+        getList(isGood, sortPriority, entities);
         if (!entities.isEmpty()) {
             return entities.get(0);
         }
@@ -93,5 +95,37 @@ public class EntityUtils {
     private static int invertSort(int sort) {
         if (sort == 0) return 0;
         return sort > 0 ? -1 : 1;
+    }
+
+    public static float getTotalHealth(PlayerEntity target) {
+        return target.getHealth() + target.getAbsorptionAmount();
+    }
+
+    public static boolean isInvalid(PlayerEntity target, double range) {
+        if (target == null) return true;
+        return mc.player.distanceTo(target) > range || !target.isAlive() || target.isDead() || target.getHealth() <= 0;
+    }
+
+    public static PlayerEntity getPlayerTarget(double range, SortPriority priority, boolean friends) {
+        if (!Utils.canUpdate()) return null;
+        return (PlayerEntity) get(entity -> {
+            if (!(entity instanceof PlayerEntity) || entity == mc.player) return false;
+            if (((PlayerEntity) entity).isDead() || ((PlayerEntity) entity).getHealth() <= 0) return false;
+            if (mc.player.distanceTo(entity) > range) return false;
+            if (!Friends.get().attack((PlayerEntity) entity) && !friends) return false;
+            return getGameMode((PlayerEntity) entity) == GameMode.SURVIVAL || entity instanceof FakePlayerEntity;
+        }, priority);
+    }
+
+    public static int getPing(PlayerEntity player) {
+        PlayerListEntry playerListEntry = mc.getNetworkHandler().getPlayerListEntry(player.getUuid());
+        if (playerListEntry == null) return 0;
+        return playerListEntry.getLatency();
+    }
+
+    public static GameMode getGameMode(PlayerEntity player) {
+        PlayerListEntry playerListEntry = mc.getNetworkHandler().getPlayerListEntry(player.getUuid());
+        if (playerListEntry == null) return null;
+        return playerListEntry.getGameMode();
     }
 }

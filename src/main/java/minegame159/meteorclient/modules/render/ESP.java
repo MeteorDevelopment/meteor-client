@@ -17,6 +17,7 @@ import minegame159.meteorclient.rendering.ShapeMode;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.entity.EntityUtils;
+import minegame159.meteorclient.utils.entity.FakePlayerUtils;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.entity.Entity;
@@ -172,9 +173,10 @@ public class ESP extends Module {
 
         for (Entity entity : mc.world.getEntities()) {
             if ((!Modules.get().isActive(Freecam.class) && entity == mc.player) || !entities.get().getBoolean(entity.getType())) continue;
-            count++;
+            if (FakePlayerUtils.isFakePlayerOutOfRenderDistance(entity)) continue;
 
             if (mode.get() == Mode.Box) render(event, entity, getColor(entity));
+            count++;
         }
     }
 
