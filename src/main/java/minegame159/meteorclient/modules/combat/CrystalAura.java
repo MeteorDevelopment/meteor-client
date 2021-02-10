@@ -1119,7 +1119,7 @@ public class CrystalAura extends Module {
                 TextRenderer.get().render(damageText, -w, 0, damageColor.get());
 
                 TextRenderer.get().end();
-                NametagUtils.end();
+                NametagUtils.endOld();
             }
         }
     }
