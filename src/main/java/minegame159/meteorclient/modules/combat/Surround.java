@@ -102,7 +102,7 @@ public class Surround extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        if ((disableOnJump.get() && (mc.options.keyJump.isPressed() || mc.player.input.jumping)) || (disableOnYChange.get() && mc.player.prevY != mc.player.getY())) {
+        if ((disableOnJump.get() && (mc.options.keyJump.isPressed() || mc.player.input.jumping)) || (disableOnYChange.get() && mc.player.prevY < mc.player.getY())) {
             toggle();
             return;
         }
