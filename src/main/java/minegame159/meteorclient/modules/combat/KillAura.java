@@ -128,6 +128,13 @@ public class KillAura extends Module {
             .build()
     );
 
+    private final Setting<Boolean> targetMultiple = sgGeneral.add(new BoolSetting.Builder()
+            .name("target-multiple")
+            .description("Target multiple entities at once")
+            .defaultValue(false)
+            .build()
+    );
+
     // Rotations
 
     private final Setting<RotationMode> rotationMode = sgRotations.add(new EnumSetting.Builder<RotationMode>()
@@ -180,7 +187,6 @@ public class KillAura extends Module {
 
     private int hitDelayTimer;
     private int randomDelayTimer;
-    private Entity target;
     private boolean wasPathing;
     private boolean canAttack;
 
@@ -194,18 +200,18 @@ public class KillAura extends Module {
     public void onDeactivate() {
         hitDelayTimer = 0;
         randomDelayTimer = 0;
-        target = null;
+        entityList.clear();
     }
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
 
         if (mc.player.isDead() || !mc.player.isAlive() || !itemInHand()) {
-            target = null;
+            entityList.clear();
             return;
         }
-
-        target = EntityUtils.get(entity -> {
+        entityList.clear();
+        EntityUtils.getList(entity -> {
             if (entity == mc.player || entity == mc.cameraEntity) return false;
             if ((entity instanceof LivingEntity && ((LivingEntity) entity).isDead()) || !entity.isAlive()) return false;
             if (entity.distanceTo(mc.player) > range.get()) return false;
@@ -219,9 +225,12 @@ public class KillAura extends Module {
             if (entity instanceof AnimalEntity && !babies.get() && ((AnimalEntity) entity).isBaby()) return false;
 
             return true;
-        }, priority.get());
+        }, priority.get(), entityList);
 
-        if (target == null) {
+        if (!targetMultiple.get() && !entityList.isEmpty())
+            entityList.subList(1, entityList.size()).clear();
+
+        if (entityList.isEmpty()) {
             if (wasPathing){
                 BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume");
                 wasPathing = false;
@@ -234,52 +243,53 @@ public class KillAura extends Module {
             wasPathing = true;
         }
 
-        if (attack() && rotationMode.get() == RotationMode.Always) {
-            Rotations.rotate(Rotations.getYaw(target), Rotations.getPitch(target, rotationDirection.get()), () -> {
-                if (canAttack) hitEntity();
-            });
+        if (smartDelay.get() && mc.player.getAttackCooldownProgress(0.5f) < 1) {
+            return;
         }
-    }
 
-    private boolean attack() {
-        canAttack = false;
-
-        // Entities without health can be hit instantly
-        if (target instanceof LivingEntity) {
-            if (smartDelay.get()) {
-                if (mc.player.getAttackCooldownProgress(0.5f) < 1) return false;
-            }
-            else {
-                if (hitDelayTimer >= 0) {
-                    hitDelayTimer--;
-                    return false;
-                } else hitDelayTimer = hitDelay.get();
-            }
+        if (hitDelayTimer >= 0) {
+            hitDelayTimer--;
+            return;
+        }
+        else {
+            hitDelayTimer = hitDelay.get();
         }
 
         if (randomDelayEnabled.get()) {
             if (randomDelayTimer > 0) {
                 randomDelayTimer--;
-                return false;
+                return;
             } else {
                 randomDelayTimer = (int) Math.round(Math.random() * randomDelayMax.get());
             }
         }
 
+        for (Entity target : entityList) {
+            if (attack(target) && rotationMode.get() == RotationMode.Always) {
+                Rotations.rotate(Rotations.getYaw(target), Rotations.getPitch(target, rotationDirection.get()), () -> {
+                    if (canAttack) hitEntity(target);
+                });
+            }
+        }
+    }
+
+    private boolean attack(Entity target) {
+        canAttack = false;
+
         if (Math.random() > hitChance.get() / 100) return false;
 
         if (rotationMode.get() == RotationMode.None) {
-            hitEntity();
+            hitEntity(target);
         }
         else {
-            Rotations.rotate(Rotations.getYaw(target), Rotations.getPitch(target, rotationDirection.get()), this::hitEntity);
+            Rotations.rotate(Rotations.getYaw(target), Rotations.getPitch(target, rotationDirection.get()), () -> hitEntity(target));
         }
 
         canAttack = true;
         return true;
     }
 
-    private void hitEntity() {
+    private void hitEntity(Entity target) {
         mc.interactionManager.attackEntity(mc.player, target);
         mc.player.swingHand(Hand.MAIN_HAND);
     }
@@ -295,8 +305,12 @@ public class KillAura extends Module {
 
     @Override
     public String getInfoString() {
-        if (target != null && target instanceof PlayerEntity) return target.getEntityName();
-        if (target != null) return target.getType().getName().getString();
+        if (!entityList.isEmpty()) {
+            Entity targetFirst = entityList.get(0);
+            if (targetFirst instanceof PlayerEntity)
+                return targetFirst.getEntityName();
+            return targetFirst.getType().getName().getString();
+        }
         return null;
     }
 }
