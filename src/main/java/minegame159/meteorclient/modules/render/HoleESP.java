@@ -33,8 +33,7 @@ public class HoleESP extends Module {
         Box,
         BoxBelow,
         Glow,
-        ReverseGlow,
-        DoubleGlow
+        ReverseGlow
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -119,42 +118,42 @@ public class HoleESP extends Module {
     private final Setting<SettingColor> singleBedrock = sgColors.add(new ColorSetting.Builder()
             .name("single-bedrock")
             .description("The color for single holes that are completely bedrock.")
-            .defaultValue(new SettingColor(25, 225, 25))
+            .defaultValue(new SettingColor(25, 225, 25, 100))
             .build()
     );
 
     private final Setting<SettingColor> singleObsidian = sgColors.add(new ColorSetting.Builder()
             .name("single-obsidian")
             .description("The color for single holes that are completely obsidian.")
-            .defaultValue(new SettingColor(225, 25, 25))
+            .defaultValue(new SettingColor(225, 25, 25, 100))
             .build()
     );
 
     private final Setting<SettingColor> singleMixed = sgColors.add(new ColorSetting.Builder()
             .name("single-mixed")
             .description("The color for single holes that have mixed bedrock and obsidian.")
-            .defaultValue(new SettingColor(225, 145, 25))
+            .defaultValue(new SettingColor(225, 145, 25, 100))
             .build()
     );
 
     private final Setting<SettingColor> doubleBedrock = sgColors.add(new ColorSetting.Builder()
             .name("double-bedrock")
             .description("The color for double holes that are completely bedrock.")
-            .defaultValue(new SettingColor(25, 225, 25))
+            .defaultValue(new SettingColor(25, 225, 25, 100))
             .build()
     );
 
     private final Setting<SettingColor> doubleObsidian = sgColors.add(new ColorSetting.Builder()
             .name("double-obsidian")
             .description("The color for double holes that are completely obsidian.")
-            .defaultValue(new SettingColor(225, 25, 25))
+            .defaultValue(new SettingColor(225, 25, 25, 100))
             .build()
     );
 
     private final Setting<SettingColor> doubleMixed = sgColors.add(new ColorSetting.Builder()
             .name("double-mixed")
             .description("The color for double holes that have mixed bedrock and obsidian.")
-            .defaultValue(new SettingColor(225, 145, 25))
+            .defaultValue(new SettingColor(225, 145, 25, 100))
             .build()
     );
 
@@ -176,8 +175,16 @@ public class HoleESP extends Module {
         BlockIterator.register(horizontalRadius.get(), verticalRadius.get(), (blockPos1, blockState) -> {
             blockPos.set(blockPos1);
 
-            if (!checkHeight(blockPos)) return;
-            if (ignoreOwn.get() && (mc.player.getBlockPos().equals(blockPos))) return;
+            if ((ignoreOwn.get() && (mc.player.getBlockPos().equals(blockPos))) || isBlocked(blockPos)) return;
+
+//            for (Hole hole : holes) {
+//                if (hole.blockPos == blockPos
+//                        || hole.blockPos == blockPos.north()
+//                        || hole.blockPos == blockPos.east()
+//                        || hole.blockPos == blockPos.south()
+//                        || hole.blockPos == blockPos.west()
+//                ) return;
+//            }
 
             Direction currentDir = Direction.UP;
             int bedrocks = 0, obbys = 0, airs = 0;
@@ -228,55 +235,53 @@ public class HoleESP extends Module {
             }
 
             else if (obbys + bedrocks == 4 && airs == 1 && doubles.get()) {
-                int doubleResult = checkArround(blockPos.offset(currentDir), currentDir.getOpposite());
+                int[] doubleResult = checkArround(blockPos.offset(currentDir), currentDir.getOpposite());
 
-                if (doubleResult == 1) holes.add(holePool.get().set(blockPos, doubleBedrock.get(), currentDir));
-                else if (doubleResult == 2) holes.add(holePool.get().set(blockPos, doubleObsidian.get(), currentDir));
-                else if (doubleResult == 3) holes.add(holePool.get().set(blockPos, doubleMixed.get(), currentDir));
+                if (doubleResult[0] == 4 && bedrocks == 4) holes.add(holePool.get().set(blockPos, doubleBedrock.get(), currentDir));
+                else if (doubleResult[1] == 4 && obbys == 4) holes.add(holePool.get().set(blockPos, doubleObsidian.get(), currentDir));
+                else if (doubleResult[0] + doubleResult[1] == 4) holes.add(holePool.get().set(blockPos, doubleMixed.get(), currentDir));
             }
         });
     }
 
-    private int checkArround(BlockPos pos, Direction exclude) {
+    private int[] checkArround(BlockPos pos, Direction exclude) {
+        int bedrocks = 0, obbys = 0;
 
-        if (!checkHeight(pos)) return 0;
+        if (isBlocked(pos)) return new int[] {bedrocks, obbys};
 
         Block bottom = mc.world.getBlockState(pos.down()).getBlock();
-        if (bottom != Blocks.BEDROCK && bottom != Blocks.OBSIDIAN) return 0;
+        if (bottom == Blocks.BEDROCK) bedrocks++;
+        else if (bottom == Blocks.OBSIDIAN) obbys++;
 
         Block north = mc.world.getBlockState(pos.north()).getBlock();
-        if (exclude != Direction.NORTH && north != Blocks.BEDROCK && north != Blocks.OBSIDIAN) return 0;
-
-        Block south = mc.world.getBlockState(pos.south()).getBlock();
-        if (exclude != Direction.SOUTH && south != Blocks.BEDROCK && south != Blocks.OBSIDIAN) return 0;
-
-        Block east = mc.world.getBlockState(pos.east()).getBlock();
-        if (exclude != Direction.EAST && east != Blocks.BEDROCK && east != Blocks.OBSIDIAN) return 0;
-
-        Block west = mc.world.getBlockState(pos.west()).getBlock();
-        if (exclude != Direction.WEST && west != Blocks.BEDROCK && west != Blocks.OBSIDIAN) return 0;
-
-        if (bottom == Blocks.BEDROCK
-                && (exclude == Direction.NORTH || north == Blocks.BEDROCK)
-                && (exclude == Direction.SOUTH || south == Blocks.BEDROCK)
-                && (exclude == Direction.EAST || east == Blocks.BEDROCK)
-                && (exclude == Direction.WEST || west == Blocks.BEDROCK)) return 1;
-        else if (bottom == Blocks.OBSIDIAN
-                && (exclude == Direction.NORTH || north == Blocks.OBSIDIAN)
-                && (exclude == Direction.SOUTH || south == Blocks.OBSIDIAN)
-                && (exclude == Direction.EAST || east == Blocks.OBSIDIAN)
-                && (exclude == Direction.WEST || west == Blocks.OBSIDIAN)) return 2;
-        else return 3;
-    }
-
-    private boolean checkHeight(BlockPos pos) {
-        if (((AbstractBlockAccessor) mc.world.getBlockState(pos).getBlock()).isCollidable()) return false;
-
-        for (int i = 0; i < holeHeight.get(); i++) {
-            if (((AbstractBlockAccessor) mc.world.getBlockState(pos.up(i)).getBlock()).isCollidable()) return false;
+        if (exclude != Direction.NORTH) {
+            if (north == Blocks.BEDROCK) bedrocks++;
+            else if (north == Blocks.OBSIDIAN) obbys++;
         }
 
-        return true;
+        Block south = mc.world.getBlockState(pos.south()).getBlock();
+        if (south == Blocks.BEDROCK) bedrocks++;
+        else if (south == Blocks.OBSIDIAN) obbys++;
+
+        Block east = mc.world.getBlockState(pos.east()).getBlock();
+        if (east == Blocks.BEDROCK) bedrocks++;
+        else if (east == Blocks.OBSIDIAN) obbys++;
+
+        Block west = mc.world.getBlockState(pos.west()).getBlock();
+        if (west == Blocks.BEDROCK) bedrocks++;
+        else if (west == Blocks.OBSIDIAN) obbys++;
+
+        return new int[] {bedrocks, obbys};
+    }
+
+    private boolean isBlocked(BlockPos pos) {
+        if (((AbstractBlockAccessor) mc.world.getBlockState(pos).getBlock()).isCollidable()) return true;
+
+        for (int i = 0; i < holeHeight.get(); i++) {
+            if (((AbstractBlockAccessor) mc.world.getBlockState(pos.up(i)).getBlock()).isCollidable()) return true;
+        }
+
+        return false;
     }
 
     @EventHandler
@@ -286,9 +291,8 @@ public class HoleESP extends Module {
                 case Flat:          drawFlat(hole); break;
                 case Box:           drawBox(hole, false); break;
                 case BoxBelow:      drawBox(hole, true); break;
-                case Glow:          drawBoxGlowDirection(hole, false); break;
-                case ReverseGlow:   drawBoxGlowDirection(hole, true); break;
-                case DoubleGlow:    drawBoxGlowDirection(hole, false); drawBoxGlowDirection(hole, true); break;
+                case ReverseGlow:
+                case Glow:          drawBoxGlowDirection(hole, (renderMode.get() == Mode.ReverseGlow)); break;
             }
         }
     }
@@ -311,7 +315,7 @@ public class HoleESP extends Module {
         int y = down ? hole.blockPos.getY() - 1 : hole.blockPos.getY();
         int z = hole.blockPos.getZ();
         switch (hole.direction) {
-            case UP:    Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, hole.blockPos, hole.colorSides, hole.colorLines, shapeMode.get(), 0); break;
+            case UP:    Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, down ? hole.blockPos.down() : hole.blockPos, hole.colorSides, hole.colorLines, shapeMode.get(), 0); break;
             case NORTH: Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x, y, z + 1, x + 1, y + 1, z - 1, hole.colorSides, hole.colorLines, shapeMode.get(), 0); break;
             case SOUTH: Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x, y, z, x + 1, y + 1, z + 2, hole.colorSides, hole.colorLines, shapeMode.get(), 0); break;
             case EAST:  Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x, y, z, x + 2, y + 1, z + 1, hole.colorSides, hole.colorLines, shapeMode.get(), 0); break;
@@ -333,22 +337,12 @@ public class HoleESP extends Module {
     }
 
     private void drawGlowSimple(double x1, double y, double z1, double x2, double z2, Color colorSides, Color colorLines, boolean reverse) {
-        if (shapeMode.get() != ShapeMode.Lines) {
-            Renderer.NORMAL.gradientBoxSides(x1, y, z1, x2, z2, glowHeight.get(), colorLines, transparent, reverse);
-        }
+        if (shapeMode.get() != ShapeMode.Lines) Renderer.NORMAL.gradientBoxSides(x1, y, z1, x2, z2, glowHeight.get(), colorLines, transparent, reverse);
         if (shapeMode.get() != ShapeMode.Sides) {
-            if (drawOpposite.get()) Renderer.quadWithLinesHorizontal(Renderer.NORMAL, Renderer.LINES, x1, y, z1, x2, z2, colorSides, colorLines, ShapeMode.Lines);
+            if (drawOpposite.get()) Renderer.quadWithLinesHorizontal(Renderer.NORMAL, Renderer.LINES, x1, reverse ? y : y + glowHeight.get(), z1, x2, z2, colorSides, colorLines, ShapeMode.Lines);
             Renderer.quadWithLinesHorizontal(Renderer.NORMAL, Renderer.LINES, x1, reverse ? y + glowHeight.get() : y, z1, x2, z2, colorSides, colorLines, ShapeMode.Lines);
             Renderer.LINES.gradientVerticalBox(x1, y, z1, x2, z2, glowHeight.get(), colorLines, transparent, reverse);
         }
-    }
-
-    private BlockPos.Mutable add(int x, int y, int z) {
-        blockPos.setX(blockPos.getX() + x);
-        blockPos.setY(blockPos.getY() + y);
-        blockPos.setZ(blockPos.getZ() + z);
-
-        return blockPos;
     }
 
     private static class Hole {
@@ -363,7 +357,7 @@ public class HoleESP extends Module {
 
             colorLines.set(color);
             colorSides.set(color);
-            colorSides.a -= 175;
+            colorSides.a *= 0.5;
             colorSides.validate();
 
             return this;
