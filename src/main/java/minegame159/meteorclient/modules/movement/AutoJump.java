@@ -24,7 +24,7 @@ public class AutoJump extends Module {
 
     public enum Mode {
         Jump,
-        Velocity
+        LowHop
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
