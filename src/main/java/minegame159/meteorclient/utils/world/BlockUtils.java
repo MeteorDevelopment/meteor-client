@@ -1,6 +1,7 @@
 package minegame159.meteorclient.utils.world;
 
 import minegame159.meteorclient.mixininterface.IVec3d;
+import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.player.Rotations;
 import net.minecraft.block.*;
 import net.minecraft.client.MinecraftClient;
@@ -38,9 +39,9 @@ public class BlockUtils {
 
         if (rotate) {
             Direction s = side;
-            Rotations.rotate(Rotations.getYaw(hitPos), Rotations.getPitch(hitPos), priority, () -> place(slot, hitPos, hand, s, neighbour, swing));
+            Rotations.rotate(Rotations.getYaw(hitPos), Rotations.getPitch(hitPos), priority, () -> place(slot, hitPos, hand, s, neighbour, swing, swap, swapBack));
         }
-        else place(slot, hitPos, hand, side, neighbour, swing);
+        else place(slot, hitPos, hand, side, neighbour, swing, swap, swapBack);
 
         return true;
     }
@@ -48,7 +49,7 @@ public class BlockUtils {
         return place(blockPos, hand, slot, rotate, priority, true, checkEntity);
     }
 
-    private static void place(int slot, Vec3d hitPos, Hand hand, Direction side, BlockPos neighbour, boolean swing) {
+    private static void place(int slot, Vec3d hitPos, Hand hand, Direction side, BlockPos neighbour, boolean swing, boolean swap, boolean swapBack) {
         int preSlot = mc.player.inventory.selectedSlot;
         mc.player.inventory.selectedSlot = slot;
 
@@ -61,7 +62,7 @@ public class BlockUtils {
 
         mc.player.input.sneaking = wasSneaking;
 
-        mc.player.inventory.selectedSlot = preSlot;
+        if (swapBack) InvUtils.swap(preSlot);
     }
 
     public static boolean canPlace(BlockPos blockPos) {

@@ -159,8 +159,8 @@ public class CrystalAura extends Module {
             .build()
     );
 
-    private final Setting<Boolean> strict = sgPlace.add(new BoolSetting.Builder()
-            .name("strict")
+    private final Setting<Boolean> oldPlace = sgPlace.add(new BoolSetting.Builder()
+            .name("1.12-place")
             .description("Won't place in one block holes to help compatibility with some servers.")
             .defaultValue(false)
             .build()
@@ -904,7 +904,7 @@ public class CrystalAura extends Module {
                 for(double k = playerPos.getY() - verticalRange.get(); k < playerPos.getY() + verticalRange.get(); k++){
                     Vec3d pos = new Vec3d(Math.floor(i), Math.floor(k), Math.floor(j));
                     if(isValid(new BlockPos(pos)) && getDamagePlace(new BlockPos(pos).up())){
-                        if (!strict.get() || isEmpty(new BlockPos(pos.add(0, 2, 0)))) {
+                        if (!oldPlace.get() || isEmpty(new BlockPos(pos.add(0, 2, 0)))) {
                             if (!rayTrace.get() || pos.distanceTo(new Vec3d(mc.player.getX(), mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()), mc.player.getZ())) <= placeWallsRange.get() || rayTraceCheck(new BlockPos(pos), false) != null) {
                                 if (!multiTarget.get()) {
                                     if (isEmpty(new BlockPos(pos)) && bestSupportDamage < DamageCalcUtils.crystalDamage(target, pos.add(0.5, 1, 0.5))) {

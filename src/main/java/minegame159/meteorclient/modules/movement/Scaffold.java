@@ -179,7 +179,7 @@ public class Scaffold extends Module {
     }
 
     private void place(BlockPos blockPos, int slot) {
-        BlockUtils.place(blockPos, Hand.MAIN_HAND, slot, rotate.get(), -15, renderSwing.get());
+        BlockUtils.place(blockPos, Hand.MAIN_HAND, slot, rotate.get(), -15, renderSwing.get(), true, true);
     }
 
     private BlockPos setPos(int x, int y, int z) {
