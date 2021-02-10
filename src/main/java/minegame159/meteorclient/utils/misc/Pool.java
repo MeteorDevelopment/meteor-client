@@ -5,11 +5,13 @@
 
 package minegame159.meteorclient.utils.misc;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Queue;
 
 public class Pool<T> {
-    private final List<T> items = new ArrayList<>();
+    private final Queue<T> items = new ArrayDeque<>();
     private final Producer<T> producer;
 
     public Pool(Producer<T> producer) {
@@ -17,11 +19,11 @@ public class Pool<T> {
     }
 
     public synchronized T get() {
-        if (items.size() > 0) return items.remove(items.size() - 1);
+        if (items.size() > 0) return items.poll();
         return producer.create();
     }
 
     public synchronized void free(T obj) {
-        items.add(obj);
+        items.offer(obj);
     }
 }
