@@ -51,7 +51,7 @@ public class BlockUtils {
 
     private static void place(int slot, Vec3d hitPos, Hand hand, Direction side, BlockPos neighbour, boolean swing, boolean swap, boolean swapBack) {
         int preSlot = mc.player.inventory.selectedSlot;
-        mc.player.inventory.selectedSlot = slot;
+        if (swap) InvUtils.swap(slot);
 
         boolean wasSneaking = mc.player.input.sneaking;
         mc.player.input.sneaking = false;
