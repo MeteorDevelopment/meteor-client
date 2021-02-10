@@ -6,20 +6,21 @@
 package minegame159.meteorclient.modules.render;
 
 import meteordevelopment.orbit.EventHandler;
-import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.render.RenderBlockEntityEvent;
 import minegame159.meteorclient.events.world.AmbientOcclusionEvent;
 import minegame159.meteorclient.events.world.ChunkOcclusionEvent;
-import minegame159.meteorclient.mixin.BlockEntityTypeAccessor;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.settings.BlockListSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.utils.Utils;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.shape.VoxelShapes;
+import net.minecraft.world.BlockView;
 
 import java.util.Arrays;
 import java.util.List;
@@ -39,46 +40,28 @@ public class Xray extends Module {
             .build()
     );
 
-    private boolean fullBrightWasActive = false;
-
     public Xray() {
         super(Category.Render, "xray", "Only renders specified blocks. Good for mining.");
     }
 
     @Override
     public void onActivate() {
-        Fullbright fullBright = Modules.get().get(Fullbright.class);
-        fullBrightWasActive = fullBright.isActive();
-        if (!fullBright.isActive()) fullBright.toggle();
+        Fullbright.enable();
 
         mc.worldRenderer.reload();
     }
 
     @Override
     public void onDeactivate() {
-        Fullbright fullBright = Modules.get().get(Fullbright.class);
-        if (!fullBrightWasActive && fullBright.isActive()) fullBright.toggle();
+        Fullbright.disable();
 
-        if (!MeteorClient.IS_DISCONNECTING) mc.worldRenderer.reload();
+        mc.worldRenderer.reload();
     }
 
     @EventHandler
     private void onRenderBlockEntity(RenderBlockEntityEvent event) {
-        if (!Utils.blockRenderingBlockEntitiesInXray) return;
-
-        for (Block block : ((BlockEntityTypeAccessor) event.blockEntity.getType()).getBlocks()) {
-            if (isBlocked(block)) {
-                event.cancel();
-                break;
-            }
-        }
+        if (isBlocked(event.blockEntity.getCachedState().getBlock())) event.cancel();
     }
-
-//    @EventHandler  // TODO: Xray: async DrawSideEvent
-//    private final Listener<DrawSideEvent> onDrawSide( event) {
-//        event.setDraw(!isBlocked(event.state.getBlock()));
-//        DrawSideEvent.returnDrawSideEvent(event);
-//    });
 
     @EventHandler
     private void onChunkOcclusion(ChunkOcclusionEvent event) {
@@ -90,7 +73,23 @@ public class Xray extends Module {
         event.lightLevel = 1;
     }
 
+    public boolean modifyDrawSide(BlockState state, BlockView view, BlockPos pos, Direction facing, boolean returns) {
+        if (returns) {
+            if (isBlocked(state.getBlock())) return false;
+        }
+        else {
+            if (!isBlocked(state.getBlock())) {
+                BlockPos adjPos = pos.offset(facing);
+                BlockState adjState = view.getBlockState(adjPos);
+
+                return adjState.getCullingFace(view, adjPos, facing.getOpposite()) != VoxelShapes.fullCube() || adjState.getBlock() != state.getBlock();
+            }
+        }
+
+        return returns;
+    }
+
     public boolean isBlocked(Block block) {
-        return isActive() && !blocks.get().contains(block);
+        return !blocks.get().contains(block);
     }
 }

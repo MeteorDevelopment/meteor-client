@@ -49,7 +49,6 @@ import java.util.stream.Collectors;
 public class Utils {
     public static MinecraftClient mc;
 
-    public static boolean blockRenderingBlockEntitiesInXray;
     public static boolean firstTimeTitleScreen = true;
     public static boolean isReleasingTrident;
 

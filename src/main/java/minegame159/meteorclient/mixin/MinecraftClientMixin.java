@@ -27,6 +27,7 @@ import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.profiler.Profiler;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -48,13 +49,13 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
 
     @Shadow protected abstract void doAttack();
 
-    @Shadow public Mouse mouse;
+    @Shadow @Final public Mouse mouse;
 
-    @Shadow private Window window;
+    @Shadow @Final private Window window;
 
     @Shadow @Final private Proxy netProxy;
 
-    @Shadow private Session session;
+    @Shadow @Final @Mutable private Session session;
 
     @Shadow private static int currentFps;
 
@@ -86,7 +87,6 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
     @Inject(method = "disconnect(Lnet/minecraft/client/gui/screen/Screen;)V", at = @At("HEAD"))
     private void onDisconnect(Screen screen, CallbackInfo info) {
         if (world != null) {
-            MeteorClient.IS_DISCONNECTING = true;
             MeteorClient.EVENT_BUS.post(GameLeftEvent.get());
         }
     }

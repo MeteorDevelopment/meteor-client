@@ -49,7 +49,6 @@ import java.io.File;
 public class MeteorClient implements ClientModInitializer {
     public static MeteorClient INSTANCE;
     public static final IEventBus EVENT_BUS = new EventBus();
-    public static boolean IS_DISCONNECTING;
     public static final File FOLDER = new File(FabricLoader.getInstance().getGameDir().toString(), "meteor-client");
     public static final Logger LOG = LogManager.getLogger();
 

@@ -25,14 +25,12 @@ public abstract class BlockMixin extends AbstractBlock implements ItemConvertibl
         super(settings);
     }
 
-    @Inject(at = @At("HEAD"), method = "shouldDrawSide", cancellable = true)
+    @Inject(method = "shouldDrawSide", at = @At("RETURN"), cancellable = true)
     private static void onShouldDrawSide(BlockState state, BlockView view, BlockPos pos, Direction facing, CallbackInfoReturnable<Boolean> info) {
-//        DrawSideEvent event = MeteorClient.postEvent(DrawSideEvent.get(state));  // TODO: Xray: async DrawSideEvent
-//        if (event.isSet()) info.setReturnValue(event.getDraw());
         Xray xray = Modules.get().get(Xray.class);
 
         if (xray.isActive()) {
-            info.setReturnValue(!xray.isBlocked(state.getBlock()));
+            info.setReturnValue(xray.modifyDrawSide(state, view, pos, facing, info.getReturnValueZ()));
         }
     }
 }

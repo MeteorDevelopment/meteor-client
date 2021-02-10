@@ -6,27 +6,59 @@
 package minegame159.meteorclient.modules.render;
 
 import meteordevelopment.orbit.EventHandler;
+import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
+import net.minecraft.client.MinecraftClient;
 
 public class Fullbright extends Module {
     public Fullbright() {
         super(Category.Render, "fullbright", "Lights up your world!");
+
+        MeteorClient.EVENT_BUS.subscribe(StaticListener.class);
     }
 
     @Override
     public void onActivate() {
-        mc.options.gamma = 16;
+        enable();
     }
 
     @Override
     public void onDeactivate() {
-        mc.options.gamma = 1;
+        disable();
     }
 
-    @EventHandler
-    private void onTick(TickEvent.Post event) {
-        mc.options.gamma = 16;
+    public static void enable() {
+        StaticListener.timesEnabled++;
+    }
+
+    public static void disable() {
+        StaticListener.timesEnabled--;
+    }
+
+    private static class StaticListener {
+        private static final MinecraftClient mc = MinecraftClient.getInstance();
+
+        private static int timesEnabled;
+        private static int lastTimesEnabled;
+
+        private static double prevGamma;
+
+        @EventHandler
+        private static void onTick(TickEvent.Post event) {
+            if (timesEnabled > 0 && lastTimesEnabled == 0) {
+                prevGamma = mc.options.gamma;
+            }
+            else if (timesEnabled == 0 && lastTimesEnabled > 0) {
+                mc.options.gamma = prevGamma;
+            }
+
+            if (timesEnabled > 0) {
+                mc.options.gamma = 16;
+            }
+
+            lastTimesEnabled = timesEnabled;
+        }
     }
 }
