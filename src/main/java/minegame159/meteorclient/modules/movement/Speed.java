@@ -7,35 +7,61 @@ package minegame159.meteorclient.modules.movement;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.player.PlayerMoveEvent;
+import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.Modules;
+import minegame159.meteorclient.modules.movement.speed.NCP;
+import minegame159.meteorclient.modules.movement.speed.SpeedMode;
+import minegame159.meteorclient.modules.movement.speed.SpeedModes;
+import minegame159.meteorclient.modules.movement.speed.Vanilla;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.player.PlayerUtils;
 import net.minecraft.entity.MovementType;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
 
 public class Speed extends Module {
-    public enum JumpIf {
-        Sprinting,
-        Walking,
-        Always
-    }
+    private final SettingGroup sgDefault = settings.getDefaultGroup();
+    private final SettingGroup sgVanilla = settings.createGroup("Vanilla");
+    private final SettingGroup sgNCP = settings.createGroup("NCP");
 
-    public enum Mode {
-        Jump,
-        Velocity
-    }
+    //Main
+    public final Setting<SpeedModes> speedMode = sgDefault.add(new EnumSetting.Builder<SpeedModes>()
+            .name("mode")
+            .description("The method of applying speed.")
+            .defaultValue(SpeedModes.Vanilla)
+            .onModuleActivated(speedModesSetting -> onSpeedModeChanged(speedModesSetting.get()))
+            .onChanged(this::onSpeedModeChanged)
+            .build()
+    );
 
-    private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgJump = settings.createGroup("Jump");
+    public final Setting<Boolean> inLiquids = sgDefault.add(new BoolSetting.Builder()
+            .name("in-liquids")
+            .description("Uses speed when in lava or water.")
+            .defaultValue(false)
+            .build()
+    );
 
-    // General
-    
-    private final Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
+    public final Setting<Boolean> whenSneaking = sgDefault.add(new BoolSetting.Builder()
+            .name("when-sneaking")
+            .description("Uses speed when sneaking.")
+            .defaultValue(false)
+            .build()
+    );
+
+    //NCP
+
+    public final Setting<Double> ncpSpeed = sgNCP.add(new DoubleSetting.Builder()
+            .name("speed")
+            .description("How fast you go.")
+            .defaultValue(1.7)
+            .min(0)
+            .sliderMax(50)
+            .build()
+    );
+
+    //Vanilla
+
+    public final Setting<Double> speed = sgVanilla.add(new DoubleSetting.Builder()
             .name("speed")
             .description("How fast you want to go in blocks per second.")
             .defaultValue(5.6)
@@ -44,69 +70,64 @@ public class Speed extends Module {
             .build()
     );
 
-    private final Setting<Boolean> onlyOnGround = sgGeneral.add(new BoolSetting.Builder()
+    public final Setting<Boolean> onlyOnGround = sgVanilla.add(new BoolSetting.Builder()
             .name("only-on-ground")
             .description("Uses speed only when standing on a block.")
             .defaultValue(false)
             .build()
     );
 
-    private final Setting<Boolean> inWater = sgGeneral.add(new BoolSetting.Builder()
-            .name("in-water")
-            .description("Uses speed when in water.")
-            .defaultValue(false)
-            .build()
-    );
-
-    private final Setting<Boolean> whenSneaking = sgGeneral.add(new BoolSetting.Builder()
-            .name("when-sneaking")
-            .description("Uses speed when sneaking.")
-            .defaultValue(false)
-            .build()
-    );
-
-    private final Setting<Boolean> applySpeedPotions = sgGeneral.add(new BoolSetting.Builder()
+    public final Setting<Boolean> applySpeedPotions = sgVanilla.add(new BoolSetting.Builder()
             .name("apply-speed-potions")
             .description("Applies the speed effect via potions.")
             .defaultValue(true)
             .build()
     );
 
-    // Jump
-
-    private final Setting<Boolean> jump = sgJump.add(new BoolSetting.Builder()
+    public final Setting<Boolean> jump = sgVanilla.add(new BoolSetting.Builder()
             .name("jump")
             .description("Automatically jumps.")
             .defaultValue(false)
             .build()
     );
 
-    private final Setting<Mode> jumpMode = sgJump.add(new EnumSetting.Builder<Mode>()
+    public final Setting<AutoJump.Mode> jumpMode = sgVanilla.add(new EnumSetting.Builder<AutoJump.Mode>()
             .name("mode")
             .description("The method of jumping.")
-            .defaultValue(Mode.Jump)
+            .defaultValue(AutoJump.Mode.Jump)
             .build()
     );
 
-    private final Setting<Double> velocityHeight = sgJump.add(new DoubleSetting.Builder()
-            .name("velocity-height")
-            .description("The distance that velocity mode moves you.")
+    public final Setting<Double> hopHeight = sgVanilla.add(new DoubleSetting.Builder()
+            .name("hop-height")
+            .description("The distance that lowhop moves you.")
             .defaultValue(0.25)
             .min(0)
             .sliderMax(2)
             .build()
     );
 
-    private final Setting<JumpIf> jumpIf = sgJump.add(new EnumSetting.Builder<JumpIf>()
-            .name("jump-if")
-            .description("Jump if.")
-            .defaultValue(JumpIf.Walking)
+    public final Setting<AutoJump.JumpWhen> jumpIf = sgVanilla.add(new EnumSetting.Builder<AutoJump.JumpWhen>()
+            .name("jump-when")
+            .description("Jumps when you are doing said action.")
+            .defaultValue(AutoJump.JumpWhen.Walking)
             .build()
     );
 
+    private SpeedMode currentMode;
 
     public Speed() {
         super(Category.Movement, "speed", "Speeeeeed.");
+    }
+
+    @Override
+    public void onActivate() {
+        currentMode.onActivate();
+    }
+
+    @Override
+    public void onDeactivate() {
+        currentMode.onDeactivate();
     }
 
     @EventHandler
@@ -114,43 +135,38 @@ public class Speed extends Module {
         if (event.type != MovementType.SELF || mc.player.isFallFlying() || mc.player.isClimbing() || mc.player.getVehicle() != null) return;
         if (!whenSneaking.get() && mc.player.isSneaking()) return;
         if (onlyOnGround.get() && !mc.player.isOnGround()) return;
-        if (!inWater.get() && mc.player.isTouchingWater()) return;
+        if (!inLiquids.get() && (mc.player.isTouchingWater() || mc.player.isInLava())) return;
 
-        Vec3d vel = PlayerUtils.getHorizontalVelocity(speed.get());
-        double velX = vel.getX();
-        double velZ = vel.getZ();
-
-        if (applySpeedPotions.get() && mc.player.hasStatusEffect(StatusEffects.SPEED)) {
-            double value = (mc.player.getStatusEffect(StatusEffects.SPEED).getAmplifier() + 1) * 0.205;
-            velX += velX * value;
-            velZ += velZ * value;
-        }
-
-        Anchor anchor = Modules.get().get(Anchor.class);
-        if (anchor.isActive() && anchor.controlMovement) {
-            velX = anchor.deltaX;
-            velZ = anchor.deltaZ;
-        }
-
-        ((IVec3d) event.movement).set(velX, event.movement.y, velZ);
+        currentMode.onMove(event);
     }
 
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
-        if (jump.get()) {
-            if (!mc.player.isOnGround() || mc.player.isSneaking() || !jump()) return;
+        if (mc.player.isFallFlying()
+                || mc.player.isClimbing()
+                || mc.player.getVehicle() != null
+                || (!whenSneaking.get() && mc.player.isSneaking())
+                || (onlyOnGround.get() && !mc.player.isOnGround())
+                || (!inLiquids.get() && (mc.player.isTouchingWater() || mc.player.isInLava()))) {
+            return;
+        }
+        currentMode.onTick(event);
+    }
 
-            if (jumpMode.get() == Mode.Jump) mc.player.jump();
-            else ((IVec3d) mc.player.getVelocity()).setY(velocityHeight.get());
+    @EventHandler
+    private void onPacketRecieve(PacketEvent.Receive event) {
+        if (event.packet instanceof PlayerPositionLookS2CPacket) currentMode.onRubberband();
+    }
+
+    private void onSpeedModeChanged(SpeedModes mode) {
+        switch (mode) {
+            case Vanilla:   currentMode = new Vanilla(); break;
+            case NCP:       currentMode = new NCP(); break;
         }
     }
 
-    private boolean jump() {
-        switch (jumpIf.get()) {
-            case Sprinting: return mc.player.isSprinting() && (mc.player.forwardSpeed != 0 || mc.player.sidewaysSpeed != 0);
-            case Walking:   return mc.player.forwardSpeed != 0 || mc.player.sidewaysSpeed != 0;
-            case Always:    return true;
-            default:        return false;
-        }
+    @Override
+    public String getInfoString() {
+        return currentMode.type.name();
     }
 }
