@@ -49,6 +49,16 @@ public class EntityUtils {
         return Utils.WHITE;
     }
 
+    public static Entity get(Predicate<Entity> isGood, SortPriority sortPriority) {
+        entities.clear();
+        getList(isGood, sortPriority, entities);
+        if (!entities.isEmpty()) {
+            return entities.get(0);
+        }
+
+        return null;
+    }
+
     public static void getList(Predicate<Entity> isGood, SortPriority sortPriority, List<Entity> target) {
         for (Entity entity : mc.world.getEntities()) {
             if (isGood.test(entity)) target.add(entity);
@@ -59,16 +69,6 @@ public class EntityUtils {
         }
 
         target.sort((e1, e2) -> sort(e1, e2, sortPriority));
-    }
-
-    public static Entity get(Predicate<Entity> isGood, SortPriority sortPriority) {
-        entities.clear();
-        getList(isGood, sortPriority, entities);
-        if (!entities.isEmpty()) {
-            return entities.get(0);
-        }
-
-        return null;
     }
 
     private static int sort(Entity e1, Entity e2, SortPriority priority) {

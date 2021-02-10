@@ -211,7 +211,7 @@ public class KillAura extends Module {
             return;
         }
         entityList.clear();
-        EntityUtils.getAll(entity -> {
+        EntityUtils.getList(entity -> {
             if (entity == mc.player || entity == mc.cameraEntity) return false;
             if ((entity instanceof LivingEntity && ((LivingEntity) entity).isDead()) || !entity.isAlive()) return false;
             if (entity.distanceTo(mc.player) > range.get()) return false;
