@@ -17,7 +17,7 @@ public class BlockUtils {
     private static final MinecraftClient mc = MinecraftClient.getInstance();
     private static final Vec3d hitPos = new Vec3d(0, 0, 0);
 
-    public static boolean place(BlockPos blockPos, Hand hand, int slot, boolean rotate, int priority, boolean swing, boolean checkEntity) {
+    public static boolean place(BlockPos blockPos, Hand hand, int slot, boolean rotate, int priority, boolean swing, boolean checkEntity, boolean swap, boolean swapBack) {
         if (!checkEntity) {
             if (!mc.world.getBlockState(blockPos).getMaterial().isReplaceable()) return false;
         }
@@ -46,7 +46,7 @@ public class BlockUtils {
         return true;
     }
     public static boolean place(BlockPos blockPos, Hand hand, int slot, boolean rotate, int priority, boolean checkEntity) {
-        return place(blockPos, hand, slot, rotate, priority, true, checkEntity);
+        return place(blockPos, hand, slot, rotate, priority, true, checkEntity, true, true);
     }
 
     private static void place(int slot, Vec3d hitPos, Hand hand, Direction side, BlockPos neighbour, boolean swing, boolean swap, boolean swapBack) {
