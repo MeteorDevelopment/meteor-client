@@ -4,6 +4,7 @@ import minegame159.meteorclient.events.entity.player.PlayerMoveEvent;
 import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.movement.Speed;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 
 public class SpeedMode {
@@ -15,7 +16,7 @@ public class SpeedMode {
     public double distance;
     public double speed;
 
-    public SpeedMode(SpeedModes type) {
+    SpeedMode(SpeedModes type) {
         this.settings = Modules.get().get(Speed.class);
         this.mc = MinecraftClient.getInstance();
         this.type = type;
@@ -23,21 +24,15 @@ public class SpeedMode {
         reset();
     }
 
-    public void onTick() {
-        distance = Math.sqrt((mc.player.getX() - mc.player.prevX) * (mc.player.getX() - mc.player.prevX) + (mc.player.getZ() - mc.player.prevZ) * (mc.player.getZ() - mc.player.prevZ));
-    }
-
+    public void onTick() {}
     public void onMove(PlayerMoveEvent event) {}
-
     public void onRubberband() {
         reset();
     }
-
     public void onActivate() {}
-
     public void onDeactivate() {}
 
-    public double getDefaultSpeed() {
+    protected double getDefaultSpeed() {
         double defaultSpeed = 0.2873;
         if (mc.player.hasStatusEffect(StatusEffects.SPEED)) {
             int amplifier = mc.player.getStatusEffect(StatusEffects.SPEED).getAmplifier();
@@ -50,10 +45,16 @@ public class SpeedMode {
         return defaultSpeed;
     }
 
-    private void reset() {
+    protected void reset() {
         stage = 0;
         distance = 0;
         speed = 0.2873;
+    }
+
+    protected double getHop(double height) {
+        StatusEffectInstance jumpBoost = mc.player.hasStatusEffect(StatusEffects.JUMP_BOOST) ? mc.player.getStatusEffect(StatusEffects.JUMP_BOOST) : null;
+        if (jumpBoost != null) height += jumpBoost.getAmplifier() + 1 * 0.1f;
+        return height;
     }
 
     public String getHudString() {
