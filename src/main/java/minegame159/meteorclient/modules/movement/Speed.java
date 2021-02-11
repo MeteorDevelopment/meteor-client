@@ -53,9 +53,9 @@ public class Speed extends Module {
     public final Setting<Double> ncpSpeed = sgNCP.add(new DoubleSetting.Builder()
             .name("speed")
             .description("How fast you go.")
-            .defaultValue(1.7)
+            .defaultValue(1.6)
             .min(0)
-            .sliderMax(50)
+            .sliderMax(3)
             .build()
     );
 
@@ -117,7 +117,7 @@ public class Speed extends Module {
     private SpeedMode currentMode;
 
     public Speed() {
-        super(Category.Movement, "speed", "Speeeeeed.");
+        super(Category.Movement, "speed", "Modifies your movement speed when moving on the ground.");
     }
 
     @Override
@@ -150,7 +150,7 @@ public class Speed extends Module {
                 || (!inLiquids.get() && (mc.player.isTouchingWater() || mc.player.isInLava()))) {
             return;
         }
-        currentMode.onTick(event);
+        currentMode.onTick();
     }
 
     @EventHandler
@@ -167,6 +167,6 @@ public class Speed extends Module {
 
     @Override
     public String getInfoString() {
-        return currentMode.type.name();
+        return currentMode.getHudString();
     }
 }
