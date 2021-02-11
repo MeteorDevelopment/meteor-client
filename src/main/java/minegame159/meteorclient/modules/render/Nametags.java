@@ -67,6 +67,13 @@ public class Nametags extends Module {
             .build()
     );
 
+    private final Setting<Boolean> displayTools = sgGeneral.add(new BoolSetting.Builder()
+            .name("display-tools")
+            .description("Displays tools.")
+            .defaultValue(true)
+            .build()
+    );
+
     private final Setting<Boolean> displayArmorEnchants = sgGeneral.add(new BoolSetting.Builder()
             .name("display-armor-enchants")
             .description("Display armor enchantments.")
@@ -207,14 +214,23 @@ public class Nametags extends Module {
         NametagUtils.begin(event, entity, scale.get());
 
         // Get armor info
-        double[] armorWidths = new double[4];
+        int nametagItemSlots = displayTools.get() ? 6 : 4; // 4 for armor, +2 for hand/offhand
+        double[] armorWidths = new double[nametagItemSlots];
         boolean hasArmor = false;
         int maxEnchantCount = 0;
         if (displayArmor.get() || displayArmorEnchants.get()) {
             TextRenderer.get().begin(0.5 * enchantTextScale.get(), true, true);
 
-            for (int i = 0; i < 4; i++) {
-                ItemStack itemStack = entity.inventory.armor.get(i);
+            for (int i = 0; i < nametagItemSlots; i++) {
+                ItemStack itemStack;
+                if (i == 4) // Main hand
+                    itemStack = entity.getMainHandStack();
+                else if (i == 5) // Off hand
+                    itemStack = entity.getOffHandStack();
+                else
+                    itemStack = entity.inventory.armor.get(i);
+
+
                 Map<Enchantment, Integer> enchantments = EnchantmentHelper.get(itemStack);
                 Map<Enchantment, Integer> enchantmentsToShowScale = new HashMap<>();
                 for (Enchantment enchantment : displayedEnchantments.get()) {
@@ -265,7 +281,7 @@ public class Nametags extends Module {
         MB.end();
 
         // Render armor
-        double itemSpacing = (width - armorWidth) / 4;
+        double itemSpacing = (width - armorWidth) / nametagItemSlots;
         if (hasArmor) {
             double itemX = -widthHalf;
             MB.texture = true;
@@ -273,14 +289,18 @@ public class Nametags extends Module {
 
             boolean isDamaged = false;
 
-            for (int i = 0; i < 4; i++) {
-                ItemStack itemStack = entity.inventory.armor.get(i);
+            for (int i = 0; i < nametagItemSlots; i++) {
+                ItemStack itemStack;
+                if (i == 4) // Main hand
+                    itemStack = entity.getMainHandStack();
+                else if (i == 5) // Off hand
+                    itemStack = entity.getOffHandStack();
+                else
+                    itemStack = entity.inventory.armor.get(i);
 
                 if (itemStack.isDamaged()) isDamaged = true;
-
                 for (BakedQuad quad : mc.getItemRenderer().getModels().getModel(itemStack).getQuads(null, null, null)) {
                     Sprite sprite = ((IBakedQuad) quad).getSprite();
-
                     if (itemStack.getItem() instanceof DyeableArmorItem) {
                         int c = ((DyeableArmorItem) itemStack.getItem()).getColor(itemStack);
 
@@ -310,8 +330,14 @@ public class Nametags extends Module {
                 MB.texture = false;
                 MB.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
 
-                for (int i = 0; i < 4; i++) {
-                    ItemStack itemStack = entity.inventory.armor.get(i);
+                for (int i = 0; i < nametagItemSlots; i++) {
+                    ItemStack itemStack;
+                    if (i == 4) // Main hand
+                        itemStack = entity.getMainHandStack();
+                    else if (i == 5) // Off hand
+                        itemStack = entity.getOffHandStack();
+                    else
+                        itemStack = entity.inventory.armor.get(i);
 
                     double damage = Math.max(0, itemStack.getDamage());
                     double maxDamage = itemStack.getMaxDamage();
