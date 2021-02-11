@@ -8,7 +8,6 @@ package minegame159.meteorclient.rendering;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.rendering.text.CustomTextRenderer;
 
-import java.awt.*;
 import java.io.*;
 
 public class Fonts {

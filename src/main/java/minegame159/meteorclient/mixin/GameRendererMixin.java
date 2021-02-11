@@ -18,6 +18,7 @@ import minegame159.meteorclient.modules.render.UnfocusedCPU;
 import minegame159.meteorclient.rendering.Matrices;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.render.NametagUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.GameRenderer;
@@ -27,6 +28,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Matrix4f;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -34,12 +36,11 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 @Mixin(GameRenderer.class)
 public abstract class GameRendererMixin {
     @Shadow @Final private MinecraftClient client;
-
-    @Shadow @Final private Camera camera;
 
     @Shadow public abstract void updateTargetedEntity(float tickDelta);
 
@@ -63,8 +64,8 @@ public abstract class GameRendererMixin {
         a = true;
     }
 
-    @Inject(method = "renderWorld", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiler/Profiler;swap(Ljava/lang/String;)V", args = { "ldc=hand" }))
-    private void onRenderWorld(float tickDelta, long limitTime, MatrixStack matrix, CallbackInfo info) {
+    @Inject(method = "renderWorld", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiler/Profiler;swap(Ljava/lang/String;)V", args = { "ldc=hand" }), locals = LocalCapture.CAPTURE_FAILSOFT)
+    private void onRenderWorld(float tickDelta, long limitTime, MatrixStack matrix, CallbackInfo info, boolean bl, Camera camera, MatrixStack matrixStack2, Matrix4f matrix4f) {
         if (!Utils.canUpdate()) return;
 
         client.getProfiler().push("meteor-client_render");
@@ -72,6 +73,7 @@ public abstract class GameRendererMixin {
         RenderEvent event = RenderEvent.get(matrix, tickDelta, camera.getPos().x, camera.getPos().y, camera.getPos().z);
 
         Renderer.begin(event);
+        NametagUtils.onRender(matrix, matrix4f);
         MeteorClient.EVENT_BUS.post(event);
         Renderer.end();
 

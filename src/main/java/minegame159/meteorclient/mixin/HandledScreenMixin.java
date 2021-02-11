@@ -8,9 +8,11 @@ package minegame159.meteorclient.mixin;
 import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.render.EChestPreview;
+import minegame159.meteorclient.modules.render.ItemHighlight;
 import minegame159.meteorclient.modules.render.ShulkerPeek;
 import minegame159.meteorclient.utils.misc.input.KeyBinds;
 import minegame159.meteorclient.utils.player.EChestMemory;
+import minegame159.meteorclient.utils.render.RenderUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.screen.Screen;
@@ -102,7 +104,7 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
         int row = 0;
         int i = 0;
         for (ItemStack itemStack : itemStacks) {
-            drawItem(itemStack, mouseX + 6 + 8 + i * 18, mouseY + 6 + 7 + row * 18);
+            RenderUtils.drawItem(itemStack, mouseX + 6 + 8 + i * 18, mouseY + 6 + 7 + row * 18, true);
 
             i++;
             if (i >= 9) {
@@ -115,16 +117,17 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
         RenderSystem.enableDepthTest();
     }
 
-    private void drawItem(ItemStack itemStack, int x, int y) {
-        mc.getItemRenderer().renderGuiItemIcon(itemStack, x, y);
-        mc.getItemRenderer().renderGuiItemOverlay(mc.textRenderer, itemStack, x, y, null);
-    }
-
     private void drawBackground(MatrixStack matrices, int x, int y) {
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         mc.getTextureManager().bindTexture(Modules.get().get(ShulkerPeek.class).bgMode.get() == ShulkerPeek.BackgroundMode.Light ? LIGHT : DARK);
         int width = 176;
         int height = 67;
         DrawableHelper.drawTexture(matrices, x, y, 0, 0, 0, width, height, height, width);
+    }
+
+    @Inject(method = "drawSlot", at = @At("HEAD"))
+    private void onDrawSlot(MatrixStack matrices, Slot slot, CallbackInfo info) {
+        int color = Modules.get().get(ItemHighlight.class).getColor(slot.getStack());
+        if (color != -1) fill(matrices, slot.x, slot.y, slot.x + 16, slot.y + 16, color);
     }
 }

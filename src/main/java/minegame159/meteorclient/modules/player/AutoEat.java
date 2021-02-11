@@ -7,6 +7,7 @@ package minegame159.meteorclient.modules.player;
 
 import baritone.api.BaritoneAPI;
 import meteordevelopment.orbit.EventHandler;
+import minegame159.meteorclient.events.entity.player.ItemUseCrosshairTargetEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.Category;
@@ -205,7 +206,8 @@ public class AutoEat extends Module {
         }
     }
 
-    public boolean rightClickThings() {
-        return !isActive() || !isEating;
+    @EventHandler
+    private void onItemUseCrosshairTarget(ItemUseCrosshairTargetEvent event) {
+        if (isActive() && isEating) event.target = null;
     }
 }

@@ -18,8 +18,6 @@ import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.DamageCalcUtils;
-import minegame159.meteorclient.utils.player.PlayerUtils;
-import minegame159.meteorclient.utils.player.Rotations;
 import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;

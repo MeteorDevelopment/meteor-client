@@ -96,8 +96,13 @@ public class BlockUtils {
             BlockPos neighbor = blockPos.offset(side);
             Direction side2 = side.getOpposite();
 
+            BlockState state = mc.world.getBlockState(neighbor);
+
             // Check if neighbour isn't empty
-            if (mc.world.getBlockState(neighbor).isAir() || isClickable(mc.world.getBlockState(neighbor).getBlock())) continue;
+            if (state.isAir() || isClickable(state.getBlock())) continue;
+
+            // Check if neighbour is a fluid
+            if (!state.getFluidState().isEmpty()) continue;
 
             return side2;
         }

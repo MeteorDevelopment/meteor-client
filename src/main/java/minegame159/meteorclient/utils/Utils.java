@@ -171,7 +171,7 @@ public class Utils {
     }
 
     public static String getEnchantSimpleName(Enchantment enchantment, int length) {
-        return enchantment.getName(0).getString().substring(0, 3);
+        return enchantment.getName(0).getString().substring(0, length);
     }
 
     public static int search(String text, String filter) {

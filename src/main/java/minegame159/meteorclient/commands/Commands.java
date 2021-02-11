@@ -15,7 +15,6 @@ import minegame159.meteorclient.systems.Systems;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientCommandSource;
 import net.minecraft.command.CommandSource;
-import net.minecraft.nbt.CompoundTag;
 
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -222,9 +222,7 @@ public class KillAura extends Module {
                 if (((PlayerEntity) entity).isCreative()) return false;
                 if (!friends.get() && !Friends.get().attack((PlayerEntity) entity)) return false;
             }
-            if (entity instanceof AnimalEntity && !babies.get() && ((AnimalEntity) entity).isBaby()) return false;
-
-            return true;
+            return !(entity instanceof AnimalEntity) || babies.get() || !((AnimalEntity) entity).isBaby();
         }, priority.get(), entityList);
 
         if (!targetMultiple.get() && !entityList.isEmpty())

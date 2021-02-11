@@ -13,6 +13,8 @@ public interface TextRenderer {
     default void begin(double scale) { begin(scale, false, false); }
     default void begin() { begin(1, false, false); }
 
+    default void beginBig() { begin(1, false, true); }
+
     double getWidth(String text, int length);
     default double getWidth(String text) { return getWidth(text, text.length()); }
 

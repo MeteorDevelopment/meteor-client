@@ -154,10 +154,14 @@ public class HudEditorScreen extends Screen {
 
         if (!Utils.canUpdate()) {
             renderBackground(matrices);
+
+            Utils.unscaledProjection();
             hud.onRender(Render2DEvent.get(0, 0, delta));
         }
+        else {
+            Utils.unscaledProjection();
+        }
 
-        Utils.unscaledProjection();
         Renderer.NORMAL.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
 
         for (HudModule module : hud.modules) {
