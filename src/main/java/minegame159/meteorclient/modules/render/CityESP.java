@@ -14,9 +14,7 @@ import minegame159.meteorclient.rendering.ShapeMode;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.player.CityUtils;
 import minegame159.meteorclient.utils.render.color.SettingColor;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 
 public class CityESP extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
