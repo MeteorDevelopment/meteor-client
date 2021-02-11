@@ -1,6 +1,6 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.modules;
@@ -18,6 +18,8 @@ import minegame159.meteorclient.modules.combat.*;
 import minegame159.meteorclient.modules.misc.*;
 import minegame159.meteorclient.modules.movement.Timer;
 import minegame159.meteorclient.modules.movement.*;
+import minegame159.meteorclient.modules.movement.elytrafly.ElytraFly;
+import minegame159.meteorclient.modules.movement.speed.Speed;
 import minegame159.meteorclient.modules.player.*;
 import minegame159.meteorclient.modules.render.*;
 import minegame159.meteorclient.modules.render.hud.HUD;
@@ -359,7 +361,7 @@ public class Modules extends System<Modules> {
         addModule(new BoatFly());
         addModule(new ClickTP());
         addModule(new ElytraBoost());
-        addModule(new ElytraPlus());
+        addModule(new ElytraFly());
         addModule(new EntityControl());
         addModule(new EntitySpeed());
         addModule(new FastClimb());

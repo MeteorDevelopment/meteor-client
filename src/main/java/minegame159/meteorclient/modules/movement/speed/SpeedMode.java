@@ -1,8 +1,12 @@
+/*
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
+ * Copyright (c) 2021 Meteor Development.
+ */
+
 package minegame159.meteorclient.modules.movement.speed;
 
 import minegame159.meteorclient.events.entity.player.PlayerMoveEvent;
 import minegame159.meteorclient.modules.Modules;
-import minegame159.meteorclient.modules.movement.Speed;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
@@ -12,15 +16,13 @@ public class SpeedMode {
     protected final Speed settings;
     private final SpeedModes type;
 
-    public int stage;
-    public double distance;
-    public double speed;
+    protected int stage;
+    protected double distance, speed;
 
-    SpeedMode(SpeedModes type) {
+    public SpeedMode(SpeedModes type) {
         this.settings = Modules.get().get(Speed.class);
         this.mc = MinecraftClient.getInstance();
         this.type = type;
-
         reset();
     }
 
