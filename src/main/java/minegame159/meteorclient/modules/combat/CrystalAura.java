@@ -11,9 +11,10 @@ import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import minegame159.meteorclient.events.entity.EntityRemovedEvent;
 import minegame159.meteorclient.events.entity.player.SendMovementPacketsEvent;
-import minegame159.meteorclient.events.render.RenderEvent;
+import minegame159.meteorclient.events.render.Render2DEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.friends.Friends;
+import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.rendering.Renderer;
@@ -689,11 +690,11 @@ public class CrystalAura extends Module {
     }
 
     @EventHandler
-    private void onRender(RenderEvent event) {
-        if (render.get()) {
-            for (RenderBlock renderBlock : renderBlocks) {
-                renderBlock.render(renderDamage.get(), event);
-            }
+    private void onRender2D(Render2DEvent event) {
+        if (!render.get()) return;
+
+        for (RenderBlock renderBlock : renderBlocks) {
+            renderBlock.render();
         }
     }
 
@@ -1071,6 +1072,8 @@ public class CrystalAura extends Module {
         return mc.world.getBlockState(pos).isAir() && mc.world.getOtherEntities(null, new Box(pos.getX(), pos.getY(), pos.getZ(), pos.getX() + 1.0D, pos.getY() + 2.0D, pos.getZ() + 1.0D)).isEmpty();
     }
 
+    private static final Vec3d pos = new Vec3d(0, 0, 0);
+
     private class RenderBlock {
         private int x, y, z;
         private int timer;
@@ -1089,37 +1092,41 @@ public class CrystalAura extends Module {
             return false;
         }
 
-        public void render(boolean showDamage, RenderEvent event) {
+        public void render() {
             Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x, y, z, 1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
 
-            if (showDamage) {
-                NametagUtils.begin(event, x + 0.5, y + 0.5, z + 0.5, damageScale.get(), Utils.distanceToCamera(x, y, z));
-                TextRenderer.get().begin(1, false, true);
+            if (renderDamage.get()) {
+                ((IVec3d) pos).set(x + 0.5, y + 0.5, z + 0.5);
 
-                String damageText = String.valueOf(Math.round(damage));
+                if (NametagUtils.to2D(pos, damageScale.get())) {
+                    NametagUtils.begin(pos);
+                    TextRenderer.get().begin(1, false, true);
+
+                    String damageText = String.valueOf(Math.round(damage));
 
 
-                switch (roundDamage.get()) {
-                    case 0:
-                        damageText = String.valueOf(Math.round(damage));
-                        break;
-                    case 1:
-                        damageText = String.valueOf(Math.round(damage * 10.0) / 10.0);
-                        break;
-                    case 2:
-                        damageText = String.valueOf(Math.round(damage * 100.0) / 100.0);
-                        break;
-                    case 3:
-                        damageText = String.valueOf(Math.round(damage * 1000.0) / 1000.0);
-                        break;
+                    switch (roundDamage.get()) {
+                        case 0:
+                            damageText = String.valueOf(Math.round(damage));
+                            break;
+                        case 1:
+                            damageText = String.valueOf(Math.round(damage * 10.0) / 10.0);
+                            break;
+                        case 2:
+                            damageText = String.valueOf(Math.round(damage * 100.0) / 100.0);
+                            break;
+                        case 3:
+                            damageText = String.valueOf(Math.round(damage * 1000.0) / 1000.0);
+                            break;
+                    }
+
+                    double w = TextRenderer.get().getWidth(damageText) / 2;
+
+                    TextRenderer.get().render(damageText, -w, 0, damageColor.get());
+
+                    TextRenderer.get().end();
+                    NametagUtils.end();
                 }
-
-                double w = TextRenderer.get().getWidth(damageText) / 2;
-
-                TextRenderer.get().render(damageText, -w, 0, damageColor.get());
-
-                TextRenderer.get().end();
-                NametagUtils.endOld();
             }
         }
     }

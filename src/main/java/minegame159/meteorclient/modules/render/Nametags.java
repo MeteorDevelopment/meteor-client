@@ -13,6 +13,7 @@ import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.Render2DEvent;
 import minegame159.meteorclient.friends.Friends;
+import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.Modules;
@@ -270,6 +271,8 @@ public class Nametags extends Module {
             .build()
     );
 
+    private final Vec3d pos = new Vec3d(0, 0, 0);
+
     private final double[] itemWidths = new double[6];
     private final Color RED = new Color(255, 15, 15);
     private final Map<Enchantment, Integer> enchantmentsToShowScale = new HashMap<>();
@@ -280,29 +283,39 @@ public class Nametags extends Module {
 
     @EventHandler
     private void onRender2D(Render2DEvent event) {
-        for (Entity entity : mc.world.getEntities()) {
-            double height = entity.getEyeHeight(entity.getPose());
-            if (entity instanceof ItemEntity || entity instanceof ItemFrameEntity) height += 0.2;
-            else height += 0.5;
+        boolean notFreecamActive = !Modules.get().isActive(Freecam.class);
 
-            Vec3d pos = entity.getPos().add(0, height, 0);
+        for (Entity entity : mc.world.getEntities()) {
+            if (!entities.get().containsKey(entity.getType())) continue;
+            EntityType<?> type = entity.getType();
+
+            if (type == EntityType.PLAYER) {
+                if (notFreecamActive && entity == mc.cameraEntity) continue;
+                if (!yourself.get() && entity == mc.player) continue;
+            }
+
+            Vec3d p = entity.getPos();
+            ((IVec3d) pos).set(p.x, p.y + getHeight(entity), p.z);
 
             if (NametagUtils.to2D(pos, scale.get())) {
-                if (entity instanceof PlayerEntity && entities.get().getBoolean(EntityType.PLAYER)) {
-                    boolean a = !Modules.get().isActive(Freecam.class);
-                    if ((a && entity == mc.player) || (a && entity == mc.cameraEntity)) continue;
-                    if (!yourself.get() && entity.getUuid().equals(mc.player.getUuid())) continue;
-
-                    renderNametagPlayer((PlayerEntity) entity, pos);
-                }
-                else if (entity instanceof ItemEntity && entities.get().getBoolean(EntityType.ITEM)) renderNametagItem(((ItemEntity) entity).getStack(), pos);
-                else if (entity instanceof ItemFrameEntity && entities.get().getBoolean(EntityType.ITEM_FRAME)) renderNametagItem(((ItemFrameEntity) entity).getHeldItemStack(), pos);
-                else if (entity instanceof LivingEntity && entities.get().getBoolean(entity.getType())) renderGenericNametag((LivingEntity) entity, pos);
+                if (type == EntityType.PLAYER) renderNametagPlayer((PlayerEntity) entity);
+                else if (type == EntityType.ITEM) renderNametagItem(((ItemEntity) entity).getStack());
+                else if (type == EntityType.ITEM_FRAME) renderNametagItem(((ItemFrameEntity) entity).getHeldItemStack());
+                else if (entity instanceof LivingEntity) renderGenericNametag((LivingEntity) entity);
             }
         }
     }
 
-    private void renderNametagPlayer(PlayerEntity entity, Vec3d pos) {
+    private double getHeight(Entity entity) {
+        double height = entity.getEyeHeight(entity.getPose());
+
+        if (entity.getType() == EntityType.ITEM || entity.getType() == EntityType.ITEM_FRAME) height += 0.2;
+        else height += 0.5;
+
+        return height;
+    }
+
+    private void renderNametagPlayer(PlayerEntity entity) {
         TextRenderer text = TextRenderer.get();
         NametagUtils.begin(pos);
 
@@ -484,7 +497,7 @@ public class Nametags extends Module {
         NametagUtils.end();
     }
 
-    private void renderNametagItem(ItemStack stack, Vec3d pos) {
+    private void renderNametagItem(ItemStack stack) {
         TextRenderer text = TextRenderer.get();
         NametagUtils.begin(pos);
 
@@ -512,7 +525,7 @@ public class Nametags extends Module {
         NametagUtils.end();
     }
 
-    private void renderGenericNametag(LivingEntity entity, Vec3d pos) {
+    private void renderGenericNametag(LivingEntity entity) {
         TextRenderer text = TextRenderer.get();
         NametagUtils.begin(pos);
 
