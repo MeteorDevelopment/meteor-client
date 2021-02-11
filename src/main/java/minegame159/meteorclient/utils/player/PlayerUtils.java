@@ -6,7 +6,7 @@
 package minegame159.meteorclient.utils.player;
 
 import baritone.api.BaritoneAPI;
-import minegame159.meteorclient.mixininterface.ILookBehavior;
+import minegame159.meteorclient.mixin.LookBehaviourAccessor;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.utils.misc.Vector2;
 import minegame159.meteorclient.utils.world.BlockUtils;
@@ -83,8 +83,8 @@ public class PlayerUtils {
     public static Vec3d getHorizontalVelocity(double bps) {
         float yaw = mc.player.yaw;
         if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing()) {
-            if (((ILookBehavior) BaritoneAPI.getProvider().getPrimaryBaritone().getLookBehavior()).getTarget() != null) {
-                yaw = ((ILookBehavior) BaritoneAPI.getProvider().getPrimaryBaritone().getLookBehavior()).getTarget().getYaw();
+            if (((LookBehaviourAccessor) BaritoneAPI.getProvider().getPrimaryBaritone().getLookBehavior()).getTarget() != null) {
+                yaw = ((LookBehaviourAccessor) BaritoneAPI.getProvider().getPrimaryBaritone().getLookBehavior()).getTarget().getYaw();
             }
         }
 

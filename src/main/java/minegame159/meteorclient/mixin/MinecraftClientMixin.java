@@ -18,12 +18,14 @@ import minegame159.meteorclient.utils.network.OnlinePlayers;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.Mouse;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.util.Session;
 import net.minecraft.client.util.Window;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.profiler.Profiler;
-import org.spongepowered.asm.mixin.*;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
@@ -31,28 +33,17 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import javax.annotation.Nullable;
-import java.net.Proxy;
 import java.util.concurrent.CompletableFuture;
 
 @Mixin(MinecraftClient.class)
 public abstract class MinecraftClientMixin implements IMinecraftClient {
     @Shadow public ClientWorld world;
 
-    @Shadow private int itemUseCooldown;
-
     @Shadow protected abstract void doItemUse();
-
-    @Shadow protected abstract void doAttack();
 
     @Shadow @Final public Mouse mouse;
 
     @Shadow @Final private Window window;
-
-    @Shadow @Final private Proxy netProxy;
-
-    @Shadow @Final @Mutable private Session session;
-
-    @Shadow private static int currentFps;
 
     @Shadow @Nullable public Screen currentScreen;
 
@@ -128,32 +119,7 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
     // Interface
 
     @Override
-    public void leftClick() {
-        doAttack();
-    }
-
-    @Override
     public void rightClick() {
         rightClick = true;
-    }
-
-    @Override
-    public void setItemUseCooldown(int cooldown) {
-        itemUseCooldown = cooldown;
-    }
-
-    @Override
-    public Proxy getProxy() {
-        return netProxy;
-    }
-
-    @Override
-    public void setSession(Session session) {
-        this.session = session;
-    }
-
-    @Override
-    public int getFps() {
-        return currentFps;
     }
 }

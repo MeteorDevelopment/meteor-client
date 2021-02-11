@@ -7,7 +7,6 @@ package minegame159.meteorclient.modules.combat;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
@@ -83,6 +82,6 @@ public class BowSpam extends Module {
     }
 
     private void setPressed(boolean pressed) {
-        ((IKeyBinding) mc.options.keyUse).setPressed(pressed);
+        mc.options.keyUse.setPressed(pressed);
     }
 }

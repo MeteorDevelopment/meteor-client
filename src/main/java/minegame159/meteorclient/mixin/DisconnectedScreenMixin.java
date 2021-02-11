@@ -5,7 +5,6 @@
 
 package minegame159.meteorclient.mixin;
 
-import minegame159.meteorclient.mixininterface.IAbstractButtonWidget;
 import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.misc.AutoReconnect;
 import minegame159.meteorclient.utils.Utils;
@@ -49,7 +48,7 @@ public class DisconnectedScreenMixin extends ScreenMixin {
                 Utils.mc.openScreen(new ConnectScreen(new MultiplayerScreen(new TitleScreen()), Utils.mc, Modules.get().get(AutoReconnect.class).lastServerInfo));
             } else {
                 time--;
-                if (reconnectBtn != null) ((IAbstractButtonWidget) reconnectBtn).setText(new LiteralText(String.format("Reconnecting in %.1f", time / 20f)));
+                if (reconnectBtn != null) ((AbstractButtonWidgetAccessor) reconnectBtn).setText(new LiteralText(String.format("Reconnecting in %.1f", time / 20f)));
             }
         }
     }

@@ -7,7 +7,7 @@ package minegame159.meteorclient.accounts;
 
 import com.mojang.authlib.yggdrasil.YggdrasilEnvironment;
 import com.mojang.authlib.yggdrasil.YggdrasilMinecraftSessionService;
-import minegame159.meteorclient.mixininterface.IMinecraftClient;
+import minegame159.meteorclient.mixin.MinecraftClientAccessor;
 import minegame159.meteorclient.utils.misc.ISerializable;
 import minegame159.meteorclient.utils.misc.NbtException;
 import net.minecraft.client.MinecraftClient;
@@ -53,7 +53,7 @@ public abstract class Account<T extends Account<?>> implements ISerializable<T> 
     }
 
     protected void setSession(Session session) {
-        ((IMinecraftClient) MinecraftClient.getInstance()).setSession(session);
+        ((MinecraftClientAccessor) MinecraftClient.getInstance()).setSession(session);
     }
 
     @Override

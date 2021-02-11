@@ -8,28 +8,21 @@ package minegame159.meteorclient.mixin;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.entity.DropItemsEvent;
 import minegame159.meteorclient.events.entity.player.ClipAtLedgeEvent;
-import minegame159.meteorclient.mixininterface.IPlayerEntity;
 import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.movement.Anchor;
 import minegame159.meteorclient.modules.player.SpeedMine;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Mutable;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(PlayerEntity.class)
-public class PlayerEntityMixin implements IPlayerEntity {
-    @Shadow @Final @Mutable public PlayerInventory inventory;
-
+public class PlayerEntityMixin {
     @Inject(method = "clipAtLedge", at = @At("HEAD"), cancellable = true)
     protected void clipAtLedge(CallbackInfoReturnable<Boolean> info) {
         ClipAtLedgeEvent event = MeteorClient.EVENT_BUS.post(ClipAtLedgeEvent.get());
@@ -40,11 +33,6 @@ public class PlayerEntityMixin implements IPlayerEntity {
     @Inject(method = "dropItem(Lnet/minecraft/item/ItemStack;ZZ)Lnet/minecraft/entity/ItemEntity;", at = @At("HEAD"))
     private void onDropItem(ItemStack stack, boolean bl, boolean bl2, CallbackInfoReturnable<ItemEntity> info) {
         MeteorClient.EVENT_BUS.post(DropItemsEvent.get(stack));
-    }
-
-    @Override
-    public void setInventory(PlayerInventory inventory) {
-        this.inventory = inventory;
     }
 
     @Inject(method = "getBlockBreakingSpeed", at = @At(value = "RETURN"), cancellable = true)

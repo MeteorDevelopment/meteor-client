@@ -8,7 +8,6 @@ package minegame159.meteorclient.utils.player;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.entity.player.PlayerMoveEvent;
-import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.movement.Step;
 import net.minecraft.block.Block;
@@ -175,10 +174,10 @@ public class PathFinder {
                     currentPathBlock = getNextPathBlock();
                 lookAtDestination(currentPathBlock);
                 if (!mc.options.keyForward.isPressed())
-                    ((IKeyBinding) mc.options.keyForward).setPressed(true);
+                    mc.options.keyForward.setPressed(true);
             } else {
                 if (mc.options.keyForward.isPressed())
-                    ((IKeyBinding) mc.options.keyForward).setPressed(false);
+                    mc.options.keyForward.setPressed(false);
                 path.clear();
                 currentPathBlock = null;
             }
@@ -194,7 +193,7 @@ public class PathFinder {
     public void disable() {
         target = null;
         path.clear();
-        if (mc.options.keyForward.isPressed()) ((IKeyBinding) mc.options.keyForward).setPressed(false);
+        if (mc.options.keyForward.isPressed()) mc.options.keyForward.setPressed(false);
         MeteorClient.EVENT_BUS.unsubscribe(this);
     }
 }

@@ -5,7 +5,7 @@
 
 package minegame159.meteorclient.modules.render.hud.modules;
 
-import minegame159.meteorclient.mixininterface.IClientPlayerInteractionManager;
+import minegame159.meteorclient.mixin.ClientPlayerInteractionManagerAccessor;
 import minegame159.meteorclient.modules.render.hud.HUD;
 
 public class BreakingBlockHud extends DoubleTextHudModule {
@@ -16,6 +16,6 @@ public class BreakingBlockHud extends DoubleTextHudModule {
     @Override
     protected String getRight() {
         if (mc.interactionManager == null) return "0%";
-        return String.format("%.0f%%", ((IClientPlayerInteractionManager) mc.interactionManager).getBreakingProgress() * 100);
+        return String.format("%.0f%%", ((ClientPlayerInteractionManagerAccessor) mc.interactionManager).getBreakingProgress() * 100);
     }
 }

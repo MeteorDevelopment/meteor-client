@@ -8,7 +8,6 @@ package minegame159.meteorclient.modules.player;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.gui.widgets.*;
-import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
@@ -156,9 +155,9 @@ public class AntiAFK extends Module {
             }
 
             //Jump
-            if (jump.get() && mc.options.keyJump.isPressed()) ((IKeyBinding) mc.options.keyJump).setPressed(false);
-            if (jump.get() && mc.options.keySneak.isPressed()) ((IKeyBinding) mc.options.keySneak).setPressed(false);
-            else if (jump.get() && random.nextInt(99) + 1 == 50) ((IKeyBinding) mc.options.keyJump).setPressed(true);
+            if (jump.get() && mc.options.keyJump.isPressed()) mc.options.keyJump.setPressed(false);
+            if (jump.get() && mc.options.keySneak.isPressed()) mc.options.keySneak.setPressed(false);
+            else if (jump.get() && random.nextInt(99) + 1 == 50) mc.options.keyJump.setPressed(true);
 
             //Click
             if (click.get() && random.nextInt(99) + 1 == 45) {
@@ -168,7 +167,7 @@ public class AntiAFK extends Module {
             }
 
             //Disco
-            if (disco.get() && random.nextInt(24) + 1 == 15) ((IKeyBinding) mc.options.keySneak).setPressed(true);
+            if (disco.get() && random.nextInt(24) + 1 == 15) mc.options.keySneak.setPressed(true);
 
             //Spam
             if (sendMessages.get() && !messages.isEmpty())
@@ -190,8 +189,8 @@ public class AntiAFK extends Module {
 
             //Strafe
             if (strafe.get() && strafeTimer == 20) {
-                ((IKeyBinding) mc.options.keyLeft).setPressed(!direction);
-                ((IKeyBinding) mc.options.keyRight).setPressed(direction);
+                mc.options.keyLeft.setPressed(!direction);
+                mc.options.keyRight.setPressed(direction);
                 direction = !direction;
                 strafeTimer = 0;
             } else

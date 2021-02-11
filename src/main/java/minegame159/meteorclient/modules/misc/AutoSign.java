@@ -8,7 +8,7 @@ package minegame159.meteorclient.modules.misc;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.game.OpenScreenEvent;
 import minegame159.meteorclient.events.packets.PacketEvent;
-import minegame159.meteorclient.mixininterface.ISignEditScreen;
+import minegame159.meteorclient.mixin.SignEditScreenAccessor;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import net.minecraft.block.entity.SignBlockEntity;
@@ -38,7 +38,7 @@ public class AutoSign extends Module {
     private void onOpenScreen(OpenScreenEvent event) {
         if (!(event.screen instanceof SignEditScreen) || text == null) return;
 
-        SignBlockEntity sign = ((ISignEditScreen) event.screen).getSign();
+        SignBlockEntity sign = ((SignEditScreenAccessor) event.screen).getSign();
 
         mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(sign.getPos(), text[0], text[1], text[2], text[3]));
 
