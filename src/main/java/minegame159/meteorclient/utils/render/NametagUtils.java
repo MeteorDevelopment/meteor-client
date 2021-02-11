@@ -51,12 +51,12 @@ public class NametagUtils {
         if (out.getW() <= 0.0f) return false;
 
         ((IQuaternion) (Object) out).toScreen();
-        float x = out.getX() * mc.getWindow().getWidth();
-        float y = out.getY() * mc.getWindow().getHeight();
+        float x = out.getX() * mc.getWindow().getFramebufferWidth();
+        float y = out.getY() * mc.getWindow().getFramebufferHeight();
 
         if (Float.isInfinite(x) || Float.isInfinite(y)) return false;
 
-        ((IVec3d) pos).set(x / windowScale, mc.getWindow().getHeight() - y / windowScale, out.getZ());
+        ((IVec3d) pos).set(x / windowScale, mc.getWindow().getFramebufferHeight() - y / windowScale, out.getZ());
         return true;
     }
 
