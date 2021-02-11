@@ -3,7 +3,7 @@
  * Copyright (c) 2021 Meteor Development.
  */
 
-package minegame159.meteorclient.modules.movement;
+package minegame159.meteorclient.modules.movement.speed;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.player.PlayerMoveEvent;
@@ -11,10 +11,9 @@ import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.movement.speed.NCP;
-import minegame159.meteorclient.modules.movement.speed.SpeedMode;
-import minegame159.meteorclient.modules.movement.speed.SpeedModes;
-import minegame159.meteorclient.modules.movement.speed.Vanilla;
+import minegame159.meteorclient.modules.movement.AutoJump;
+import minegame159.meteorclient.modules.movement.speed.modes.NCP;
+import minegame159.meteorclient.modules.movement.speed.modes.Vanilla;
 import minegame159.meteorclient.settings.*;
 import net.minecraft.entity.MovementType;
 import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;

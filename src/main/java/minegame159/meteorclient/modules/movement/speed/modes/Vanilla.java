@@ -1,10 +1,17 @@
-package minegame159.meteorclient.modules.movement.speed;
+/*
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
+ * Copyright (c) 2021 Meteor Development.
+ */
+
+package minegame159.meteorclient.modules.movement.speed.modes;
 
 import minegame159.meteorclient.events.entity.player.PlayerMoveEvent;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.movement.Anchor;
 import minegame159.meteorclient.modules.movement.AutoJump;
+import minegame159.meteorclient.modules.movement.speed.SpeedMode;
+import minegame159.meteorclient.modules.movement.speed.SpeedModes;
 import minegame159.meteorclient.utils.player.PlayerUtils;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.util.math.Vec3d;
