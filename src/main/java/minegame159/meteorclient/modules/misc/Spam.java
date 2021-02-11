@@ -28,10 +28,10 @@ public class Spam extends Module {
 
     private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
             .name("delay")
-            .description("The delay between specified messages in ticks.")
-            .defaultValue(20)
+            .description("The delay between specified messages in seconds.")
+            .defaultValue(2)
             .min(0)
-            .sliderMax(100)
+            .sliderMax(20)
             .build()
     );
 
@@ -52,7 +52,7 @@ public class Spam extends Module {
 
     @Override
     public void onActivate() {
-        timer = delay.get();
+        timer = delay.get() * 20;
         messageI = 0;
     }
 
@@ -71,7 +71,7 @@ public class Spam extends Module {
 
             mc.player.sendChatMessage(messages.get(i));
 
-            timer = delay.get();
+            timer = delay.get() * 20;
         } else {
             timer--;
         }

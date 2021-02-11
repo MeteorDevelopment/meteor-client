@@ -88,6 +88,7 @@
     "PickaxeItemAccessor",
     "PlayerEntityMixin",
     "PlayerMoveC2SPacketMixin",
+    "PlayerPositionLookS2CPacketAccessor",
     "ProjectileEntityAccessor",
     "QuaternionMixin",
     "RenderTickCounterMixin",
