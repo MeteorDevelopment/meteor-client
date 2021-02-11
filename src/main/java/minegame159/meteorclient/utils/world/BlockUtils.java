@@ -1,6 +1,7 @@
 package minegame159.meteorclient.utils.world;
 
 import minegame159.meteorclient.mixininterface.IVec3d;
+import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.player.Rotations;
 import net.minecraft.block.*;
 import net.minecraft.client.MinecraftClient;
@@ -16,8 +17,8 @@ public class BlockUtils {
     private static final MinecraftClient mc = MinecraftClient.getInstance();
     private static final Vec3d hitPos = new Vec3d(0, 0, 0);
 
-    public static boolean place(BlockPos blockPos, Hand hand, int slot, boolean rotate, int priority, boolean swing, boolean ignoreEntity) {
-        if (slot == -1 || (!canPlace(blockPos) && !ignoreEntity)) return false;
+    public static boolean place(BlockPos blockPos, Hand hand, int slot, boolean rotate, int priority, boolean swing, boolean swap, boolean swapBack) {
+        if (slot == -1 || !canPlace(blockPos)) return false;
 
         Direction side = getPlaceSide(blockPos);
         BlockPos neighbour;
@@ -35,19 +36,19 @@ public class BlockUtils {
 
         if (rotate) {
             Direction s = side;
-            Rotations.rotate(Rotations.getYaw(hitPos), Rotations.getPitch(hitPos), priority, () -> place(slot, hitPos, hand, s, neighbour, swing));
+            Rotations.rotate(Rotations.getYaw(hitPos), Rotations.getPitch(hitPos), priority, () -> place(slot, hitPos, hand, s, neighbour, swing, swap, swapBack));
         }
-        else place(slot, hitPos, hand, side, neighbour, swing);
+        else place(slot, hitPos, hand, side, neighbour, swing, swap, swapBack);
 
         return true;
     }
-    public static boolean place(BlockPos blockPos, Hand hand, int slot, boolean rotate, int priority, boolean ignoreEntity) {
-        return place(blockPos, hand, slot, rotate, priority, true, ignoreEntity);
+    public static boolean place(BlockPos blockPos, Hand hand, int slot, boolean rotate, int priority) {
+        return place(blockPos, hand, slot, rotate, priority, true, true, true);
     }
 
-    private static void place(int slot, Vec3d hitPos, Hand hand, Direction side, BlockPos neighbour, boolean swing) {
+    private static void place(int slot, Vec3d hitPos, Hand hand, Direction side, BlockPos neighbour, boolean swing, boolean swap, boolean swapBack) {
         int preSlot = mc.player.inventory.selectedSlot;
-        mc.player.inventory.selectedSlot = slot;
+        if (swap) InvUtils.swap(slot);
 
         boolean wasSneaking = mc.player.input.sneaking;
         mc.player.input.sneaking = false;
@@ -58,7 +59,7 @@ public class BlockUtils {
 
         mc.player.input.sneaking = wasSneaking;
 
-        mc.player.inventory.selectedSlot = preSlot;
+        if (swapBack) InvUtils.swap(preSlot);
     }
 
     public static boolean canPlace(BlockPos blockPos) {
@@ -95,8 +96,13 @@ public class BlockUtils {
             BlockPos neighbor = blockPos.offset(side);
             Direction side2 = side.getOpposite();
 
+            BlockState state = mc.world.getBlockState(neighbor);
+
             // Check if neighbour isn't empty
-            if (mc.world.getBlockState(neighbor).isAir() || isClickable(mc.world.getBlockState(neighbor).getBlock())) continue;
+            if (state.isAir() || isClickable(state.getBlock())) continue;
+
+            // Check if neighbour is a fluid
+            if (!state.getFluidState().isEmpty()) continue;
 
             return side2;
         }

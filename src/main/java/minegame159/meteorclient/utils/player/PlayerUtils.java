@@ -8,6 +8,7 @@ package minegame159.meteorclient.utils.player;
 import baritone.api.BaritoneAPI;
 import minegame159.meteorclient.mixininterface.ILookBehavior;
 import minegame159.meteorclient.mixininterface.IVec3d;
+import minegame159.meteorclient.utils.misc.Vector2;
 import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
@@ -163,5 +164,49 @@ public class PlayerUtils {
         if (ifBreaking && mc.interactionManager.isBreakingBlock()) return true;
         if (ifEating && (mc.player.isUsingItem() && (mc.player.getMainHandStack().getItem().isFood() || mc.player.getOffHandStack().getItem().isFood()))) return true;
         return ifDrinking && (mc.player.isUsingItem() && (mc.player.getMainHandStack().getItem() instanceof PotionItem || mc.player.getOffHandStack().getItem() instanceof PotionItem));
+    }
+
+    public static boolean isMoving() {
+        return mc.player.forwardSpeed != 0 || mc.player.sidewaysSpeed != 0;
+    }
+
+    public static boolean isSprinting() {
+        return mc.player.isSprinting() && (mc.player.forwardSpeed != 0 || mc.player.sidewaysSpeed != 0);
+    }
+
+    public static Vector2 transformStrafe(double speed) {
+        float forward = mc.player.input.movementForward;
+        float side = mc.player.input.movementSideways;
+        float yaw = mc.player.prevYaw + (mc.player.yaw - mc.player.prevYaw) * mc.getTickDelta();
+
+        double velX, velZ;
+
+        if (forward == 0.0f && side == 0.0f) return new Vector2(0, 0);
+
+        else if (forward != 0.0f) {
+            if (side >= 1.0f) {
+                yaw += (float) (forward > 0.0f ? -45 : 45);
+                side = 0.0f;
+            }
+
+            else if (side <= -1.0f) {
+                yaw += (float) (forward > 0.0f ? 45 : -45);
+                side = 0.0f;
+            }
+
+            if (forward > 0.0f)
+                forward = 1.0f;
+
+            else if (forward < 0.0f)
+                forward = -1.0f;
+        }
+
+        double mx = Math.cos(Math.toRadians(yaw + 90.0f));
+        double mz = Math.sin(Math.toRadians(yaw + 90.0f));
+
+        velX = (double) forward * speed * mx + (double) side * speed * mz;
+        velZ = (double) forward * speed * mz - (double) side * speed * mx;
+
+        return new Vector2(velX, velZ);
     }
 }

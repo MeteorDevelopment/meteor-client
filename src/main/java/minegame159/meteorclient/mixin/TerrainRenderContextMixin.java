@@ -17,11 +17,13 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(TerrainRenderContext.class)
+@Mixin(value = TerrainRenderContext.class, remap = false)
 public class TerrainRenderContextMixin {
-    @Inject(method = "tesselateBlock", at = @At("HEAD"), cancellable = true, remap = false)
+    @Inject(method = "tesselateBlock", at = @At("HEAD"), cancellable = true)
     private void onTesselateBlock(BlockState blockState, BlockPos blockPos, BakedModel model, MatrixStack matrixStack, CallbackInfoReturnable<Boolean> info) {
-        if (Modules.get().get(Xray.class).isBlocked(blockState.getBlock())) {
+        Xray xray = Modules.get().get(Xray.class);
+
+        if (xray.isActive() && xray.isBlocked(blockState.getBlock())) {
             info.cancel();
         }
     }

@@ -27,10 +27,14 @@ public class RenderUtils {
 
     //Items
     public static void drawItem(ItemStack itemStack, int x, int y, boolean overlay) {
+        RenderSystem.disableLighting();
+        RenderSystem.disableDepthTest();
         DiffuseLighting.enable();
         mc.getItemRenderer().renderGuiItemIcon(itemStack, x, y);
         if (overlay) mc.getItemRenderer().renderGuiItemOverlay(mc.textRenderer, itemStack, x, y, null);
         DiffuseLighting.disable();
+        DiffuseLighting.disable();
+        RenderSystem.enableDepthTest();
     }
 
     public static void drawItem(ItemStack itemStack, int x, int y, double scale, boolean overlay) {
@@ -49,12 +53,10 @@ public class RenderUtils {
                 .add(mc.gameRenderer.getCamera().getPos());
     }
 
-
     public static void drawTracerToEntity(RenderEvent event, Entity entity, Color color, Target target, boolean stem) {
         double x = entity.prevX + (entity.getX() - entity.prevX) * event.tickDelta;
         double y = entity.prevY + (entity.getY() - entity.prevY) * event.tickDelta;
         double z = entity.prevZ + (entity.getZ() - entity.prevZ) * event.tickDelta;
-
 
         double height = entity.getBoundingBox().maxY - entity.getBoundingBox().minY;
         if (target == Target.Head) y += height;

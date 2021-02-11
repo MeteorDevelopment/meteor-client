@@ -7,7 +7,6 @@ package minegame159.meteorclient.modules.misc;
 
 import io.netty.channel.Channel;
 import meteordevelopment.orbit.EventHandler;
-import minegame159.meteorclient.events.world.PlaySoundEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixin.ClientConnectionAccessor;
 import minegame159.meteorclient.modules.Category;

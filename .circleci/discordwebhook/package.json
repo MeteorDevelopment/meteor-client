@@ -1,0 +1,13 @@
+{
+  "name": "discordwebhook",
+  "version": "1.0.0",
+  "main": "main.js",
+  "author": "MineGame159",
+  "license": "MIT",
+  "scripts": {
+    "start": "node ."
+  },
+  "dependencies": {
+    "axios": "^0.21.1"
+  }
+}

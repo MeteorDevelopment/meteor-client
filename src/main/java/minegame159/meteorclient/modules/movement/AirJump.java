@@ -38,11 +38,19 @@ public class AirJump extends Module {
             .build()
     );
 
+    private final Setting<Boolean> onGround = sgGeneral.add(new BoolSetting.Builder()
+            .name("on-ground")
+            .description("Whether to airjump if you are on the ground.")
+            .defaultValue(false)
+            .build()
+    );
+
+
     private int level = 0;
 
     @EventHandler
     private void onKey(KeyEvent event) {
-        if (Modules.get().isActive(Freecam.class) || mc.currentScreen != null) return;
+        if (Modules.get().isActive(Freecam.class) || mc.currentScreen != null || (!onGround.get() && mc.player.isOnGround())) return;
         if ((event.action == KeyAction.Press || (event.action == KeyAction.Repeat && onHold.get())) && mc.options.keyJump.matchesKey(event.key, 0)) {
             mc.player.jump();
             level = mc.player.getBlockPos().getY();
@@ -54,7 +62,7 @@ public class AirJump extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if (Modules.get().isActive(Freecam.class)) return;
+        if (Modules.get().isActive(Freecam.class) || (!onGround.get() && mc.player.isOnGround())) return;
         if (maintainY.get() && mc.player.getBlockPos().getY() == level){
             mc.player.jump();
         }

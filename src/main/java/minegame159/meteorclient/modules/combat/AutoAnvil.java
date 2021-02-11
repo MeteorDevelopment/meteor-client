@@ -134,15 +134,16 @@ public class AutoAnvil extends Module {
 
             int slot = getAnvilSlot();
             if (slot == -1) return;
+
             if (placeButton.get()) {
                 int slot2 = getFloorSlot();
                 BlockPos blockPos = target.getBlockPos();
-                BlockUtils.place(blockPos, Hand.MAIN_HAND, slot2, rotate.get(), 0, true);
+
+                BlockUtils.place(blockPos, Hand.MAIN_HAND, slot2, rotate.get(), 0);
             }
 
             BlockPos blockPos = target.getBlockPos().up().add(0, height.get(), 0);
-            BlockUtils.place(blockPos, Hand.MAIN_HAND, slot, rotate.get(), 0, false);
-
+            BlockUtils.place(blockPos, Hand.MAIN_HAND, slot, rotate.get(), 0);
         } else timer++;
     }
 

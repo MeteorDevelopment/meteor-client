@@ -5,17 +5,11 @@
 
 package minegame159.meteorclient.accounts.types;
 
-import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.accounts.Account;
 import minegame159.meteorclient.accounts.AccountType;
 import minegame159.meteorclient.accounts.ProfileResponse;
 import minegame159.meteorclient.utils.network.HttpUtils;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.Session;
-import net.minecraft.util.Identifier;
-
-import java.io.IOException;
-import java.util.UUID;
 
 public class CrackedAccount extends Account<CrackedAccount> {
     public CrackedAccount(String name) {

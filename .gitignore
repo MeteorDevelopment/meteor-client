@@ -1,0 +1,11 @@
+*.DS_Store
+.gradle
+.idea
+build
+out
+run
+logs
+.circleci/discordwebhook/node_modules
+*.iws
+*.ipr
+*.iml

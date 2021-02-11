@@ -7,7 +7,6 @@ package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.render.*;
-import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.render.Outlines;
 import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.block.BlockState;
@@ -51,16 +50,6 @@ public abstract class WorldRendererMixin {
     @Inject(method = "renderWeather", at = @At("HEAD"), cancellable = true)
     private void onRenderWeather(LightmapTextureManager manager, float f, double d, double e, double g, CallbackInfo info) {
         if (Modules.get().get(NoRender.class).noWeather()) info.cancel();
-    }
-
-    @Inject(method = "renderEntity", at = @At("HEAD"))
-    private void onRenderEntitiesHead(Entity entity, double cameraX, double cameraY, double cameraZ, float tickDelta, MatrixStack matrix, VertexConsumerProvider vertexConsumers, CallbackInfo info) {
-        Utils.blockRenderingBlockEntitiesInXray = true;
-    }
-
-    @Inject(method = "renderEntity", at = @At("TAIL"))
-    private void onRenderEntitiesTail(Entity entity, double cameraX, double cameraY, double cameraZ, float tickDelta, MatrixStack matrix, VertexConsumerProvider vertexConsumers, CallbackInfo info) {
-        Utils.blockRenderingBlockEntitiesInXray = false;
     }
 
     @Inject(method = "drawBlockOutline", at = @At("HEAD"), cancellable = true)

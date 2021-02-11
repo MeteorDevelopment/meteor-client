@@ -182,4 +182,8 @@ public class InvUtils {
         }
         return -1;
     }
+
+    public static void swap(int slot) {
+        if (slot != mc.player.inventory.selectedSlot && slot >= 0 && slot < 9) mc.player.inventory.selectedSlot = slot;
+    }
 }

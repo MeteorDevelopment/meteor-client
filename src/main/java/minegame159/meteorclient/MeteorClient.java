@@ -24,6 +24,7 @@ import minegame159.meteorclient.rendering.text.CustomTextRenderer;
 import minegame159.meteorclient.systems.Systems;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.entity.EntityUtils;
+import minegame159.meteorclient.utils.misc.Names;
 import minegame159.meteorclient.utils.misc.input.KeyAction;
 import minegame159.meteorclient.utils.misc.input.KeyBinds;
 import minegame159.meteorclient.utils.network.Capes;
@@ -48,7 +49,6 @@ import java.io.File;
 public class MeteorClient implements ClientModInitializer {
     public static MeteorClient INSTANCE;
     public static final IEventBus EVENT_BUS = new EventBus();
-    public static boolean IS_DISCONNECTING;
     public static final File FOLDER = new File(FabricLoader.getInstance().getGameDir().toString(), "meteor-client");
     public static final Logger LOG = LogManager.getLogger();
 
@@ -88,6 +88,7 @@ public class MeteorClient implements ClientModInitializer {
         BlockIterator.init();
         EChestMemory.init();
         Rotations.init();
+        Names.init();
 
         Systems.init();
 

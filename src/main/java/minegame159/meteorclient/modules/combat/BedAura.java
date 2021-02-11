@@ -131,6 +131,13 @@ public class BedAura extends Module {
             .build()
     );
 
+    private final Setting<Boolean> swapBack = sgMisc.add(new BoolSetting.Builder()
+            .name("swap-back")
+            .description("Switches back to previous slot after placing.")
+            .defaultValue(true)
+            .build()
+    );
+
     private final Setting<Boolean> autoMove = sgMisc.add(new BoolSetting.Builder()
             .name("auto-move")
             .description("Moves beds into a selected hotbar slot.")
@@ -312,12 +319,7 @@ public class BedAura extends Module {
         Hand hand = InvUtils.getHand(itemStack -> itemStack.getItem() instanceof BedItem);
         if (hand == null) return;
 
-       boolean wasSneaking = mc.player.isSneaking();
-        if (wasSneaking) mc.player.input.sneaking = false;
-
-        Rotations.rotate(yawFromDir(direction), mc.player.pitch, () -> BlockUtils.place(pos, hand, slot, false, 100, !noSwing.get()));
-
-        if (wasSneaking) mc.player.input.sneaking = true;
+        Rotations.rotate(yawFromDir(direction), mc.player.pitch, () -> BlockUtils.place(pos, hand, slot, false, 100, !noSwing.get(), autoSwitch.get(), swapBack.get()));
     }
 
     private void breakBed(BlockPos pos) {
