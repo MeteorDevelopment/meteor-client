@@ -93,7 +93,7 @@ public class Nametags extends Module {
     private final Setting<List<Enchantment>> displayedEnchantments = sgGeneral.add(new EnchListSetting.Builder()
             .name("displayed-enchantments")
             .description("The enchantments that are shown on nametags.")
-            .defaultValue(setDefualtList())
+            .defaultValue(setDefaultList())
             .build()
     );
 
@@ -225,13 +225,7 @@ public class Nametags extends Module {
             TextRenderer.get().begin(0.5 * enchantTextScale.get(), true, true);
 
             for (int i = 0; i < nametagItemSlots; i++) {
-                ItemStack itemStack;
-                if (i == 4) // Main hand
-                    itemStack = entity.getMainHandStack();
-                else if (i == 5) // Off hand
-                    itemStack = entity.getOffHandStack();
-                else
-                    itemStack = entity.inventory.armor.get(i);
+                ItemStack itemStack = getItemStack(entity, i);
 
 
                 Map<Enchantment, Integer> enchantments = EnchantmentHelper.get(itemStack);
@@ -294,15 +288,10 @@ public class Nametags extends Module {
             boolean isDamaged = false;
 
             for (int i = 0; i < nametagItemSlots; i++) {
-                ItemStack itemStack;
-                if (i == 4) // Main hand
-                    itemStack = entity.getMainHandStack();
-                else if (i == 5) // Off hand
-                    itemStack = entity.getOffHandStack();
-                else
-                    itemStack = entity.inventory.armor.get(i);
+                ItemStack itemStack = getItemStack(entity, i);
 
                 if (itemStack.isDamaged()) isDamaged = true;
+
                 for (BakedQuad quad : mc.getItemRenderer().getModels().getModel(itemStack).getQuads(null, null, null)) {
                     Sprite sprite = ((IBakedQuad) quad).getSprite();
                     if (itemStack.getItem() instanceof DyeableArmorItem) {
@@ -335,13 +324,7 @@ public class Nametags extends Module {
                 MB.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
 
                 for (int i = 0; i < nametagItemSlots; i++) {
-                    ItemStack itemStack;
-                    if (i == 4) // Main hand
-                        itemStack = entity.getMainHandStack();
-                    else if (i == 5) // Off hand
-                        itemStack = entity.getOffHandStack();
-                    else
-                        itemStack = entity.inventory.armor.get(i);
+                    ItemStack itemStack = getItemStack(entity, i);
 
                     double damage = Math.max(0, itemStack.getDamage());
                     double maxDamage = itemStack.getMaxDamage();
@@ -423,7 +406,19 @@ public class Nametags extends Module {
         NametagUtils.end();
     }
 
-    private List<Enchantment> setDefualtList(){
+    private ItemStack getItemStack(PlayerEntity entity, int i)
+    {
+        ItemStack itemStack;
+        if (i == 4) // Off hand
+            itemStack = entity.getOffHandStack();
+        else if (i == 5) // Main hand
+            itemStack = entity.getMainHandStack();
+        else
+            itemStack = entity.inventory.armor.get(i);
+        return itemStack;
+    }
+
+    private List<Enchantment> setDefaultList(){
         List<Enchantment> ench = new ArrayList<>();
         for (Enchantment enchantment : Registry.ENCHANTMENT) {
             ench.add(enchantment);
