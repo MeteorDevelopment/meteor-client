@@ -5,9 +5,7 @@
 
 package minegame159.meteorclient.utils.misc.input;
 
-import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.utils.misc.CursorStyle;
-import net.fabricmc.fabric.api.client.keybinding.FabricKeyBinding;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.options.KeyBinding;
