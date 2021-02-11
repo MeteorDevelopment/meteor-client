@@ -36,6 +36,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.decoration.ItemFrameEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.Vec3d;
@@ -280,7 +281,10 @@ public class Nametags extends Module {
     @EventHandler
     private void onRender2D(Render2DEvent event) {
         for (Entity entity : mc.world.getEntities()) {
-            double height = entity instanceof ItemEntity ? entity.getEyeHeight(entity.getPose()) + 0.2 : entity.getEyeHeight(entity.getPose()) + 0.5;
+            double height = entity.getEyeHeight(entity.getPose());
+            if (entity instanceof ItemEntity || entity instanceof ItemFrameEntity) height += 0.2;
+            else height += 0.5;
+
             Vec3d pos = entity.getPos().add(0, height, 0);
 
             if (NametagUtils.to2D(pos, scale.get())) {
@@ -291,7 +295,8 @@ public class Nametags extends Module {
 
                     renderNametagPlayer((PlayerEntity) entity, pos);
                 }
-                else if (entity instanceof ItemEntity && entities.get().getBoolean(EntityType.ITEM)) renderNametagItem((ItemEntity) entity, pos);
+                else if (entity instanceof ItemEntity && entities.get().getBoolean(EntityType.ITEM)) renderNametagItem(((ItemEntity) entity).getStack(), pos);
+                else if (entity instanceof ItemFrameEntity && entities.get().getBoolean(EntityType.ITEM_FRAME)) renderNametagItem(((ItemFrameEntity) entity).getHeldItemStack(), pos);
                 else if (entity instanceof LivingEntity && entities.get().getBoolean(entity.getType())) renderGenericNametag((LivingEntity) entity, pos);
             }
         }
@@ -479,12 +484,12 @@ public class Nametags extends Module {
         NametagUtils.end();
     }
 
-    private void renderNametagItem(ItemEntity entity, Vec3d pos) {
+    private void renderNametagItem(ItemStack stack, Vec3d pos) {
         TextRenderer text = TextRenderer.get();
         NametagUtils.begin(pos);
 
-        String name = entity.getStack().getName().getString();
-        String count = " x" + entity.getStack().getCount();
+        String name = stack.getName().getString();
+        String count = " x" + stack.getCount();
 
         double nameWidth = text.getWidth(name);
         double countWidth = text.getWidth(count);
@@ -493,7 +498,6 @@ public class Nametags extends Module {
         double width = nameWidth;
         if (itemCount.get()) width += countWidth;
         double widthHalf = width / 2;
-
 
         drawBg(-widthHalf, -heightDown, width, heightDown);
 
