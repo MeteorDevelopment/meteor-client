@@ -41,7 +41,7 @@ public class SelfAnvil extends Module {
 
         BlockPos blockPos = mc.player.getBlockPos().add(0, 2, 0);
 
-        if (BlockUtils.place(blockPos, Hand.MAIN_HAND, slot, rotate.get(), 0)) {
+        if (BlockUtils.place(blockPos, Hand.MAIN_HAND, slot, rotate.get(), 0, true)) {
             toggle();
         }
     }
