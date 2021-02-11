@@ -6,15 +6,12 @@ import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.movement.Anchor;
 import minegame159.meteorclient.utils.misc.Vector2;
 import minegame159.meteorclient.utils.player.PlayerUtils;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
 
 public class NCP extends SpeedMode {
 
     public NCP() {
         super(SpeedModes.NCP);
     }
-
 
     @Override
     public void onMove(PlayerMoveEvent event) {
@@ -27,14 +24,8 @@ public class NCP extends SpeedMode {
             case 1: //Jump
                 if (!PlayerUtils.isMoving() || !mc.player.isOnGround()) break;
 
-                double motionY = 0.40123128;
-
-                StatusEffectInstance jumpBoost = mc.player.hasStatusEffect(StatusEffects.JUMP_BOOST) ? mc.player.getStatusEffect(StatusEffects.JUMP_BOOST) : null;
-                if (jumpBoost != null) motionY += jumpBoost.getAmplifier() + 1 * 0.1f;
-
-                ((IVec3d) event.movement).setY(motionY);
+                ((IVec3d) event.movement).setY(getHop(0.40123128));
                 speed *= settings.ncpSpeed.get();
-
                 stage++;
                 break;
             case 2: speed = distance - 0.76 * (distance - getDefaultSpeed()); stage++; break; //Slowdown after jump
@@ -59,5 +50,10 @@ public class NCP extends SpeedMode {
         }
 
         ((IVec3d) event.movement).setXZ(velX, velZ);
+    }
+
+    @Override
+    public void onTick() {
+        distance = Math.sqrt((mc.player.getX() - mc.player.prevX) * (mc.player.getX() - mc.player.prevX) + (mc.player.getZ() - mc.player.prevZ) * (mc.player.getZ() - mc.player.prevZ));
     }
 }
