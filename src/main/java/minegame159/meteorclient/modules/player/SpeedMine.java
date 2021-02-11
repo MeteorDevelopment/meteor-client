@@ -7,7 +7,7 @@ package minegame159.meteorclient.modules.player;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.mixininterface.IStatusEffectInstance;
+import minegame159.meteorclient.mixin.StatusEffectInstanceAccessor;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.DoubleSetting;
@@ -55,9 +55,9 @@ public class SpeedMine extends Module {
             int amplifier = mode == Mode.Haste2 ? 1 : 0;
             if (mc.player.hasStatusEffect(HASTE)) {
                 StatusEffectInstance effect = mc.player.getStatusEffect(HASTE);
-                ((IStatusEffectInstance) effect).setAmplifier(amplifier);
+                ((StatusEffectInstanceAccessor) effect).setAmplifier(amplifier);
                 if (effect.getDuration() < 20) {
-                    ((IStatusEffectInstance) effect).setDuration(20);
+                    ((StatusEffectInstanceAccessor) effect).setDuration(20);
                 }
             } else {
                 mc.player.addStatusEffect(new StatusEffectInstance(HASTE, 20, amplifier, false, false, false));

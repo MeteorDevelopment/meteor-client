@@ -5,7 +5,7 @@
 
 package minegame159.meteorclient.modules.misc;
 
-import minegame159.meteorclient.mixininterface.IAbstractFurnaceScreenHandler;
+import minegame159.meteorclient.mixin.AbstractFurnaceScreenHandlerAccessor;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.utils.player.ChatUtils;
@@ -81,7 +81,7 @@ public class AutoSmelter extends Module {
         int slot = -1;
 
         for (int i = 3; i < c.slots.size(); i++) {
-            if (((IAbstractFurnaceScreenHandler) c).isSmeltableI(c.slots.get(i).getStack())) {
+            if (((AbstractFurnaceScreenHandlerAccessor) c).isSmeltable(c.slots.get(i).getStack())) {
                 slot = i;
                 break;
             }
@@ -100,7 +100,7 @@ public class AutoSmelter extends Module {
     }
 
     private boolean checkFuel(AbstractFurnaceScreenHandler c) {
-        if (c.getFuelProgress() <= 1 && !((IAbstractFurnaceScreenHandler) c).isFuelI(c.slots.get(1).getStack())) {
+        if (c.getFuelProgress() <= 1 && !((AbstractFurnaceScreenHandlerAccessor) c).isFuel(c.slots.get(1).getStack())) {
             if (!c.slots.get(1).getStack().isEmpty()) {
                 InvUtils.clickSlot(1, 0, SlotActionType.QUICK_MOVE);
 
@@ -113,7 +113,7 @@ public class AutoSmelter extends Module {
 
             int slot = -1;
             for (int i = 3; i < c.slots.size(); i++) {
-                if (((IAbstractFurnaceScreenHandler) c).isFuelI(c.slots.get(i).getStack())) {
+                if (((AbstractFurnaceScreenHandlerAccessor) c).isFuel(c.slots.get(i).getStack())) {
                     slot = i;
                     break;
                 }

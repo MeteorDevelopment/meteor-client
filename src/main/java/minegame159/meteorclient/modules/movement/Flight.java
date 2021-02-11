@@ -8,7 +8,7 @@ package minegame159.meteorclient.modules.movement;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.mixininterface.IPlayerMoveC2SPacket;
+import minegame159.meteorclient.mixin.PlayerMoveC2SPacketAccessor;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
@@ -184,7 +184,7 @@ public class Flight extends Module {
                     && mc.world.getBlockState(mc.player.getBlockPos().down()).isAir()) {
                 // actual check is for >= -0.03125D but we have to do a bit more than that
                 // probably due to compression or some shit idk
-                ((IPlayerMoveC2SPacket) packet).setY(lastY - 0.03130D);
+                ((PlayerMoveC2SPacketAccessor) packet).setY(lastY - 0.03130D);
                 lastModifiedTime = currentTime;
             } else {
                 lastY = currentY;

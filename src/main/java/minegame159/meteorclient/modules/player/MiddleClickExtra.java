@@ -10,7 +10,6 @@ package minegame159.meteorclient.modules.player;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.meteor.MiddleMouseButtonEvent;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
@@ -83,7 +82,7 @@ public class MiddleClickExtra extends Module {
                     preSlot = mc.player.inventory.selectedSlot;
                     mc.player.inventory.selectedSlot = result.slot;
                     preCount = result.count;
-                    ((IKeyBinding) mc.options.keyUse).setPressed(true);
+                    mc.options.keyUse.setPressed(true);
                     wasUsing = true;
                 } else if(notify.get()) {
                     ChatUtils.moduleWarning(this, "Unable to find specified item.");
@@ -95,7 +94,7 @@ public class MiddleClickExtra extends Module {
                     preSlot = mc.player.inventory.selectedSlot;
                     mc.player.inventory.selectedSlot = result.slot;
                     preCount = result.count;
-                    ((IKeyBinding) mc.options.keyUse).setPressed(true);
+                    mc.options.keyUse.setPressed(true);
                     wasUsing = true;
                 } else if(notify.get()) {
                     ChatUtils.moduleWarning(this, "Unable to find selected item.");
@@ -132,11 +131,11 @@ public class MiddleClickExtra extends Module {
         if (!wasUsing) return;
 
         if (preCount > InvUtils.findItemWithCount(mode.get().item).count || (mc.player.getMainHandStack().getItem() != mode.get().item && (mode.get() == Mode.Bow && mc.player.getMainHandStack().getItem() != Items.BOW))){
-            ((IKeyBinding) mc.options.keyUse).setPressed(false);
+            mc.options.keyUse.setPressed(false);
             mc.player.inventory.selectedSlot = preSlot;
             wasUsing = false;
         } else {
-            ((IKeyBinding) mc.options.keyUse).setPressed(true);
+            mc.options.keyUse.setPressed(true);
         }
     }
 }

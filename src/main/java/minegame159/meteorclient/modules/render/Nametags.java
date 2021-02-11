@@ -235,7 +235,7 @@ public class Nametags extends Module {
     );
 
     private final Setting<SettingColor> itemCountColor = sgItems.add(new ColorSetting.Builder()
-            .name("itme-count-color")
+            .name("item-count-color")
             .description("The color of the item count.")
             .defaultValue(new SettingColor(232, 185, 35))
             .build()

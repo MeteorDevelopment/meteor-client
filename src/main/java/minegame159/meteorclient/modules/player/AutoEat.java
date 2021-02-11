@@ -9,7 +9,6 @@ import baritone.api.BaritoneAPI;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.player.ItemUseCrosshairTargetEvent;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.Modules;
@@ -98,7 +97,7 @@ public class AutoEat extends Module {
     @Override
     public void onDeactivate() {
         if (isEating) {
-            ((IKeyBinding) mc.options.keyUse).setPressed(false);
+            mc.options.keyUse.setPressed(false);
             isEating = false;
             if (preSelectedSlot != -1) mc.player.inventory.selectedSlot = preSelectedSlot;
             if (wasThis) BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume"); wasThis = false;
@@ -108,7 +107,7 @@ public class AutoEat extends Module {
     @EventHandler
     private void onTick(TickEvent.Post event) {
         if (mc.player.abilities.creativeMode) return;
-        if (isEating && !mc.player.getMainHandStack().getItem().isFood()) ((IKeyBinding) mc.options.keyUse).setPressed(false);
+        if (isEating && !mc.player.getMainHandStack().getItem().isFood()) mc.options.keyUse.setPressed(false);
 
         slot = -1;
         int bestHunger = -1;
@@ -150,7 +149,7 @@ public class AutoEat extends Module {
             if (mc.player.getHungerManager().getFoodLevel() > preFoodLevel || slot == -1) {
                 isEating = false;
                 mc.interactionManager.stopUsingItem(mc.player);
-                ((IKeyBinding) mc.options.keyUse).setPressed(false);
+                mc.options.keyUse.setPressed(false);
                 if(wasKillActive){
                     Modules.get().get(KillAura.class).toggle();
                     wasKillActive = false;
@@ -180,7 +179,7 @@ public class AutoEat extends Module {
                     }
                 }
 
-                ((IKeyBinding) mc.options.keyUse).setPressed(true);
+                mc.options.keyUse.setPressed(true);
                 if (slot == InvUtils.OFFHAND_SLOT) {
                     mc.interactionManager.interactItem(mc.player, mc.world, Hand.OFF_HAND);
                 } else {

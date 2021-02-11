@@ -5,7 +5,7 @@
 
 package minegame159.meteorclient.modules.render.hud.modules;
 
-import minegame159.meteorclient.mixininterface.IMinecraftClient;
+import minegame159.meteorclient.mixin.MinecraftClientAccessor;
 import minegame159.meteorclient.modules.render.hud.HUD;
 
 public class FpsHud extends DoubleTextHudModule {
@@ -15,6 +15,6 @@ public class FpsHud extends DoubleTextHudModule {
 
     @Override
     protected String getRight() {
-        return Integer.toString(((IMinecraftClient) mc).getFps());
+        return Integer.toString(((MinecraftClientAccessor) mc).getFps());
     }
 }

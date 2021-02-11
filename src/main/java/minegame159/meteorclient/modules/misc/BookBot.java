@@ -10,8 +10,8 @@ package minegame159.meteorclient.modules.misc;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.world.TickEvent;
+import minegame159.meteorclient.mixin.TextHandlerAccessor;
 import minegame159.meteorclient.mixininterface.IClientPlayerInteractionManager;
-import minegame159.meteorclient.mixininterface.ITextHandler;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
@@ -233,7 +233,7 @@ public class BookBot extends Module {
                 boolean endOfStream2 = false;
 
                 while (true) {
-                    float charWidth = ((ITextHandler) mc.textRenderer.getTextHandler()).getWidthRetriever().getWidth(nextChar, Style.EMPTY);
+                    float charWidth = ((TextHandlerAccessor) mc.textRenderer.getTextHandler()).getWidthRetriever().getWidth(nextChar, Style.EMPTY);
                     if (nextChar == '\n') {
                         if (!readChar()) endOfStream2 = true;
                         break;

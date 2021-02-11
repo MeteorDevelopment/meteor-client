@@ -9,7 +9,6 @@ import baritone.api.BaritoneAPI;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.EnumSetting;
@@ -119,7 +118,7 @@ public class AutoWalk extends Module {
     }
 
     private void setPressed(KeyBinding key, boolean pressed) {
-        ((IKeyBinding) key).setPressed(pressed);
+        key.setPressed(pressed);
         Input.setKeyState(key, pressed);
     }
 

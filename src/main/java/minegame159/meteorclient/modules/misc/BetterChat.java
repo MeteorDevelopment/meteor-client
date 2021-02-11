@@ -13,7 +13,7 @@ import minegame159.meteorclient.commands.commands.Say;
 import minegame159.meteorclient.events.entity.player.SendMessageEvent;
 import minegame159.meteorclient.friends.Friend;
 import minegame159.meteorclient.friends.Friends;
-import minegame159.meteorclient.mixininterface.IChatHudLine;
+import minegame159.meteorclient.mixin.ChatHudLineAccessor;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
@@ -290,9 +290,9 @@ public class BetterChat extends Module {
         if (ChatUtil.stripTextFormat(msgString).equals(newMsg)) {
             msgString += Formatting.GRAY + " (2)";
 
-            ((IChatHudLine<Text>) msg).setText(new LiteralText(msgString));
-            ((IChatHudLine<Text>) msg).setTimestamp(newTimestamp);
-            ((IChatHudLine<Text>) msg).setId(newId);
+            ((ChatHudLineAccessor<Text>) msg).setText(new LiteralText(msgString));
+            ((ChatHudLineAccessor<Text>) msg).setTimestamp(newTimestamp);
+            ((ChatHudLineAccessor<Text>) msg).setId(newId);
 
             return true;
         } else {
@@ -308,9 +308,9 @@ public class BetterChat extends Module {
                 if (ChatUtil.stripTextFormat(msgString).equals(newMsg)) {
                     msgString += Formatting.GRAY + " (" + (number + 1) + ")";
 
-                    ((IChatHudLine) msg).setText(new LiteralText(msgString));
-                    ((IChatHudLine) msg).setTimestamp(newTimestamp);
-                    ((IChatHudLine) msg).setId(newId);
+                    ((ChatHudLineAccessor) msg).setText(new LiteralText(msgString));
+                    ((ChatHudLineAccessor) msg).setTimestamp(newTimestamp);
+                    ((ChatHudLineAccessor) msg).setId(newId);
 
                     return true;
                 }

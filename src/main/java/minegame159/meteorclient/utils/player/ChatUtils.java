@@ -6,7 +6,7 @@
 package minegame159.meteorclient.utils.player;
 
 import minegame159.meteorclient.Config;
-import minegame159.meteorclient.mixininterface.IChatHud;
+import minegame159.meteorclient.mixin.ChatHudAccessor;
 import minegame159.meteorclient.modules.Module;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.BaseText;
@@ -111,7 +111,7 @@ public class ChatUtils {
 
         if (!Config.get().deleteChatCommandsInfo) id = 0;
 
-        ((IChatHud) mc.inGameHud.getChatHud()).add(message, id);
+        ((ChatHudAccessor) mc.inGameHud.getChatHud()).add(message, id);
     }
 
     private static BaseText getPrefix(String title, PrefixType type) {

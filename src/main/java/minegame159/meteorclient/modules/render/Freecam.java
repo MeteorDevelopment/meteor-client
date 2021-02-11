@@ -12,7 +12,6 @@ import minegame159.meteorclient.events.game.OpenScreenEvent;
 import minegame159.meteorclient.events.meteor.KeyEvent;
 import minegame159.meteorclient.events.world.ChunkOcclusionEvent;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
@@ -129,12 +128,12 @@ public class Freecam extends Module {
     }
 
     private void unpress() {
-        ((IKeyBinding) mc.options.keyForward).setPressed(false);
-        ((IKeyBinding) mc.options.keyBack).setPressed(false);
-        ((IKeyBinding) mc.options.keyRight).setPressed(false);
-        ((IKeyBinding) mc.options.keyLeft).setPressed(false);
-        ((IKeyBinding) mc.options.keyJump).setPressed(false);
-        ((IKeyBinding) mc.options.keySneak).setPressed(false);
+        mc.options.keyForward.setPressed(false);
+        mc.options.keyBack.setPressed(false);
+        mc.options.keyRight.setPressed(false);
+        mc.options.keyLeft.setPressed(false);
+        mc.options.keyJump.setPressed(false);
+        mc.options.keySneak.setPressed(false);
     }
 
     @EventHandler

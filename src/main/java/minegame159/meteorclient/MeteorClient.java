@@ -14,7 +14,6 @@ import minegame159.meteorclient.events.meteor.KeyEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.gui.screens.topbar.TopBarModules;
-import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.misc.DiscordPresence;
 import minegame159.meteorclient.modules.render.hud.HudEditorScreen;
@@ -133,6 +132,6 @@ public class MeteorClient implements ClientModInitializer {
 
         // Shulker Peek
         KeyBinding shulkerPeek = KeyBinds.SHULKER_PEEK;
-        ((IKeyBinding) shulkerPeek).setPressed(shulkerPeek.matchesKey(event.key, 0) && event.action != KeyAction.Release);
+        shulkerPeek.setPressed(shulkerPeek.matchesKey(event.key, 0) && event.action != KeyAction.Release);
     }
 }
