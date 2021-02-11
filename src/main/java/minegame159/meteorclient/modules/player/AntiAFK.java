@@ -109,10 +109,10 @@ public class AntiAFK extends Module {
 
     private final Setting<Integer> delay = sgMessages.add(new IntSetting.Builder()
             .name("delay")
-            .description("The delay between specified messages in ticks.")
-            .defaultValue(20)
+            .description("The delay between specified messages in seconds.")
+            .defaultValue(2)
             .min(0)
-            .sliderMax(500)
+            .sliderMax(20)
             .build()
     );
 
@@ -136,6 +136,7 @@ public class AntiAFK extends Module {
     @Override
     public void onActivate() {
         prevYaw = mc.player.yaw;
+        timer = delay.get() * 20;
     }
 
     @EventHandler
@@ -182,7 +183,7 @@ public class AntiAFK extends Module {
 
                     mc.player.sendChatMessage(messages.get(i));
 
-                    timer = delay.get();
+                    timer = delay.get() * 20;
                 } else {
                     timer--;
                 }

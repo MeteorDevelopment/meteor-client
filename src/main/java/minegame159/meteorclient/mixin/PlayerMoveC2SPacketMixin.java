@@ -15,8 +15,6 @@ import org.spongepowered.asm.mixin.Unique;
 public class PlayerMoveC2SPacketMixin implements IPlayerMoveC2SPacket {
     @Shadow protected double y;
     @Shadow protected boolean onGround;
-    @Shadow protected float yaw;
-    @Shadow protected float pitch;
     @Unique private int tag;
 
     @Override
@@ -27,16 +25,6 @@ public class PlayerMoveC2SPacketMixin implements IPlayerMoveC2SPacket {
     @Override
     public void setOnGround(boolean onGround) {
         this.onGround = onGround;
-    }
-
-    @Override
-    public void setYaw(float yaw) {
-        this.yaw = yaw;
-    }
-
-    @Override
-    public void setPitch(float pitch) {
-        this.pitch = pitch;
     }
 
     @Override
