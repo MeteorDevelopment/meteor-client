@@ -1,41 +1,36 @@
 package minegame159.meteorclient.modules.movement.speed;
 
 import minegame159.meteorclient.events.entity.player.PlayerMoveEvent;
-import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.movement.Speed;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.effect.StatusEffects;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-
 public class SpeedMode {
     protected final MinecraftClient mc;
-    public final SpeedModes type;
-    protected final Speed speed;
+    protected final Speed settings;
+    private final SpeedModes type;
 
-    public double moveSpeed;
     public int stage;
-    public int ticks;
-    public double lastDist;
-    public int timerDelay;
+    public double distance;
+    public double speed;
 
     public SpeedMode(SpeedModes type) {
-        this.speed = Modules.get().get(Speed.class);
+        this.settings = Modules.get().get(Speed.class);
         this.mc = MinecraftClient.getInstance();
         this.type = type;
+
+        reset();
     }
 
-    public void onTick(TickEvent.Pre event) {}
+    public void onTick() {
+        distance = Math.sqrt((mc.player.getX() - mc.player.prevX) * (mc.player.getX() - mc.player.prevX) + (mc.player.getZ() - mc.player.prevZ) * (mc.player.getZ() - mc.player.prevZ));
+    }
 
     public void onMove(PlayerMoveEvent event) {}
 
     public void onRubberband() {
-        stage = 4;
-        timerDelay = 0;
-        moveSpeed = 0.2873;
-        lastDist = 0;
+        reset();
     }
 
     public void onActivate() {}
@@ -55,9 +50,13 @@ public class SpeedMode {
         return defaultSpeed;
     }
 
-    public static double round(double value) {
-        BigDecimal bd = new BigDecimal(value);
-        bd = bd.setScale(3, RoundingMode.HALF_UP);
-        return bd.doubleValue();
+    private void reset() {
+        stage = 0;
+        distance = 0;
+        speed = 0.2873;
+    }
+
+    public String getHudString() {
+        return type.name();
     }
 }
