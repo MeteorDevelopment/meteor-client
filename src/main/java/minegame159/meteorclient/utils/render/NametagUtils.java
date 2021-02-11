@@ -24,6 +24,7 @@ public class NametagUtils {
     private static Matrix4f model;
     private static Matrix4f projection;
     private static Vec3d camera, cameraNegated;
+    private static double windowScale;
 
     private static double scale;
 
@@ -33,6 +34,8 @@ public class NametagUtils {
 
         camera = mc.gameRenderer.getCamera().getPos();
         cameraNegated = camera.negate();
+
+        windowScale = mc.getWindow().calculateScaleFactor(1, mc.forcesUnicodeFont());
     }
 
     public static boolean to2D(Vec3d pos, double scale) {
@@ -53,7 +56,7 @@ public class NametagUtils {
 
         if (Float.isInfinite(x) || Float.isInfinite(y)) return false;
 
-        ((IVec3d) pos).set(x, mc.getWindow().getHeight() - y, out.getZ());
+        ((IVec3d) pos).set(x / windowScale, mc.getWindow().getHeight() - y / windowScale, out.getZ());
         return true;
     }
 
