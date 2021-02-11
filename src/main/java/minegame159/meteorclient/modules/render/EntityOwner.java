@@ -9,6 +9,7 @@ import com.google.common.reflect.TypeToken;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.Render2DEvent;
 import minegame159.meteorclient.mixin.ProjectileEntityAccessor;
+import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.rendering.DrawMode;
@@ -61,6 +62,7 @@ public class EntityOwner extends Module {
             .build()
     );
 
+    private final Vec3d pos = new Vec3d(0, 0, 0);
     private final Map<UUID, String> uuidToName = new HashMap<>();
 
     public EntityOwner() {
@@ -83,16 +85,17 @@ public class EntityOwner extends Module {
             else continue;
 
             if (ownerUuid != null) {
-                Vec3d pos = entity.getPos().add(0, entity.getEyeHeight(entity.getPose()) + 0.75, 0);
+                Vec3d p = entity.getPos();
+                ((IVec3d) pos).set(p.x, p.y + entity.getEyeHeight(entity.getPose()) + 0.75, p.z);
 
                 if (NametagUtils.to2D(pos, scale.get())) {
-                    renderNametag(pos, getOwnerName(ownerUuid));
+                    renderNametag(getOwnerName(ownerUuid));
                 }
             }
         }
     }
 
-    private void renderNametag(Vec3d pos, String name) {
+    private void renderNametag(String name) {
         TextRenderer text = TextRenderer.get();
 
         NametagUtils.begin(pos);

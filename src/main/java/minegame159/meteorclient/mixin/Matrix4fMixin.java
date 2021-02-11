@@ -1,6 +1,8 @@
 package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.mixininterface.IMatrix4f;
+import minegame159.meteorclient.utils.misc.Vec4;
+import net.fabricmc.loader.util.sat4j.core.Vec;
 import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.Quaternion;
 import org.spongepowered.asm.mixin.Mixin;
@@ -29,12 +31,12 @@ public class Matrix4fMixin implements IMatrix4f {
     @Shadow protected float a33;
 
     @Override
-    public Quaternion multiplyMatrix(Quaternion q) {
-        return new Quaternion(
-                a00 * q.getX() + a01 * q.getY() + a02 * q.getZ() + a03 * q.getW(),
-                a10 * q.getX() + a11 * q.getY() + a12 * q.getZ() + a13 * q.getW(),
-                a20 * q.getX() + a21 * q.getY() + a22 * q.getZ() + a23 * q.getW(),
-                a30 * q.getX() + a31 * q.getY() + a32 * q.getZ() + a33 * q.getW()
+    public void multiplyMatrix(Vec4 v, Vec4 out) {
+        out.set(
+                a00 * v.x + a01 * v.y + a02 * v.z + a03 * v.w,
+                a10 * v.x + a11 * v.y + a12 * v.z + a13 * v.w,
+                a20 * v.x + a21 * v.y + a22 * v.z + a23 * v.w,
+                a30 * v.x + a31 * v.y + a32 * v.z + a33 * v.w
         );
     }
 }
