@@ -68,7 +68,9 @@ public abstract class WidgetScreen extends Screen {
     }
 
     private void loopWidget(WWidget widget) {
-        if (widget instanceof WTextBox && ((WTextBox) widget).isFocused()) GuiKeyEvents.setPostKeyEvents(true);
+        if (widget instanceof WTextBox) {
+            GuiKeyEvents.setPostKeyEvents(((WTextBox) widget).isFocused());
+        }
 
         for (Cell<?> cell : widget.getCells()) {
             loopWidget(cell.getWidget());

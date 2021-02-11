@@ -103,7 +103,7 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
             return;
         }
 
-        GuiKeyEvents.resetPostKeyEvents();
+        if (screen == null) GuiKeyEvents.resetPostKeyEvents();
     }
 
     @Redirect(method = "doItemUse", at = @At(value = "FIELD", target = "Lnet/minecraft/client/MinecraftClient;crosshairTarget:Lnet/minecraft/util/hit/HitResult;", ordinal = 1))

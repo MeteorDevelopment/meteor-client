@@ -31,11 +31,9 @@ public class WModuleSearch extends WWindow {
     }
 
     private void initWidgets(boolean first) {
-        boolean focused = filter != null && filter.isFocused();
-
         // Search bar
         add(filter).fillX().expandX().getWidget();
-        filter.setFocused(focused || (first && isExpanded()));
+        if (first && isExpanded()) filter.setFocused(true);
         row();
 
         // Modules
