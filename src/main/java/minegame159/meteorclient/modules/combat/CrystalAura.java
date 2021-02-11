@@ -12,6 +12,7 @@ import meteordevelopment.orbit.EventPriority;
 import minegame159.meteorclient.events.entity.EntityRemovedEvent;
 import minegame159.meteorclient.events.entity.player.SendMovementPacketsEvent;
 import minegame159.meteorclient.events.render.Render2DEvent;
+import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.friends.Friends;
 import minegame159.meteorclient.mixininterface.IVec3d;
@@ -690,11 +691,20 @@ public class CrystalAura extends Module {
     }
 
     @EventHandler
+    private void onRender(RenderEvent event) {
+        if (!render.get()) return;
+
+        for (RenderBlock renderBlock : renderBlocks) {
+            renderBlock.render3D();
+        }
+    }
+
+    @EventHandler
     private void onRender2D(Render2DEvent event) {
         if (!render.get()) return;
 
         for (RenderBlock renderBlock : renderBlocks) {
-            renderBlock.render();
+            renderBlock.render2D();
         }
     }
 
@@ -1092,9 +1102,11 @@ public class CrystalAura extends Module {
             return false;
         }
 
-        public void render() {
+        public void render3D() {
             Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x, y, z, 1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+        }
 
+        public void render2D() {
             if (renderDamage.get()) {
                 ((IVec3d) pos).set(x + 0.5, y + 0.5, z + 0.5);
 
