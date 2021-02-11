@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.modules.movement;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
@@ -34,10 +33,12 @@ public class Blink extends Module {
     }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> timer++);
+    private void onTick(TickEvent.Post event) {
+        timer++;
+    }
 
     @EventHandler
-    private final Listener<PacketEvent.Send> onSendPacket = new Listener<>(event -> {
+    private void onSendPacket(PacketEvent.Send event) {
         if (!(event.packet instanceof PlayerMoveC2SPacket)) return;
         event.cancel();
 
@@ -56,7 +57,7 @@ public class Blink extends Module {
 
             packets.add(p);
         }
-    });
+    }
 
     @Override
     public String getInfoString() {

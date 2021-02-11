@@ -6,7 +6,7 @@
 package minegame159.meteorclient.modules.render.hud;
 
 import minegame159.meteorclient.events.render.Render2DEvent;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.render.hud.modules.HudModule;
 import minegame159.meteorclient.rendering.DrawMode;
 import minegame159.meteorclient.rendering.Renderer;
@@ -44,7 +44,7 @@ public class HudEditorScreen extends Screen {
         super(new LiteralText("Hud Editor"));
 
         this.parent = MinecraftClient.getInstance().currentScreen;
-        this.hud = ModuleManager.INSTANCE.get(HUD.class);
+        this.hud = Modules.get().get(HUD.class);
     }
 
     @Override
@@ -154,10 +154,14 @@ public class HudEditorScreen extends Screen {
 
         if (!Utils.canUpdate()) {
             renderBackground(matrices);
-            hud.onRender.invoke(Render2DEvent.get(0, 0, delta));
+
+            Utils.unscaledProjection();
+            hud.onRender(Render2DEvent.get(0, 0, delta));
+        }
+        else {
+            Utils.unscaledProjection();
         }
 
-        Utils.unscaledProjection();
         Renderer.NORMAL.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
 
         for (HudModule module : hud.modules) {

@@ -6,8 +6,7 @@
 package minegame159.meteorclient.modules.movement;
 
 import baritone.api.BaritoneAPI;
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.player.CanWalkOnFluidEvent;
 import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.events.world.FluidCollisionShapeEvent;
@@ -37,8 +36,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class Jesus extends Module {
-    private final SettingGroup sgWater = settings.createGroup("Water"); // TODO: grammar: maybe "Water Settings" or "Water Behaviour"?
+    private final SettingGroup sgWater = settings.createGroup("Water");
     private final SettingGroup sgLava = settings.createGroup("Lava");
+
+    // Water
 
     private final Setting<Boolean> walkOnWater = sgWater.add(new BoolSetting.Builder()
             .name("walk-on-water")
@@ -46,7 +47,7 @@ public class Jesus extends Module {
             .defaultValue(true)
             .build()
     );
-    // TODO: grammar (in descriptions):
+
     private final Setting<Boolean> disableOnSneakForWater = sgWater.add(new BoolSetting.Builder()
             .name("disable-on-sneak-for-water")
             .description("Lets you go under the water when your sneak key is held.")
@@ -56,7 +57,7 @@ public class Jesus extends Module {
 
     private final Setting<Boolean> dipIntoWater = sgWater.add(new BoolSetting.Builder()
             .name("dip-into-water")
-            .description("Lets you go under the water when you fall over than certain height.")
+            .description("Lets you go under the water when you fall over a certain height.")
             .defaultValue(true)
             .build()
     );
@@ -64,7 +65,7 @@ public class Jesus extends Module {
     private final Setting<Integer> dipIntoWaterHeight = sgWater.add(new IntSetting.Builder()
             .name("dip-into-water-height")
             .description("Maximum safe height.")
-            .defaultValue(3)
+            .defaultValue(4)
             .min(1)
             .max(255)
             .sliderMin(3)
@@ -74,10 +75,12 @@ public class Jesus extends Module {
 
     private final Setting<Boolean> dipIntoWaterIfBurning = sgWater.add(new BoolSetting.Builder()
             .name("dip-into-water-if-burning")
-            .description("Lets you go under the water when you burning.")
+            .description("Lets you go under the water when you are burning.")
             .defaultValue(true)
             .build()
     );
+
+    // Lava
 
     private final Setting<Boolean> walkOnLava = sgLava.add(new BoolSetting.Builder()
             .name("walk-on-lava")
@@ -112,8 +115,8 @@ public class Jesus extends Module {
     );
 
     private final Setting<Boolean> dipIntoLavaIfFireResistance = sgLava.add(new BoolSetting.Builder()
-            .name("dip-into-lava-if-fire-resistance")
-            .description("Lets you go under the lava if you have Fire Resistance effect to avoid fall damage.")
+            .name("dip-if-fire-resistance")
+            .description("Lets you go under the lava if you have Fire Resistance effect.") // rofl some retard put "fall damage" here
             .defaultValue(true)
             .build()
     );
@@ -124,7 +127,7 @@ public class Jesus extends Module {
             .defaultValue(true)
             .build()
     );
-
+// make it so that you can customize the amount of time the effect has left for this to work if that makes sense.
     private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
 
     private int tickTimer = 10;
@@ -134,7 +137,7 @@ public class Jesus extends Module {
     private boolean preBaritoneAssumeWalkOnLava;
 
     public Jesus() {
-        super(Category.Movement, "jesus", "Walk on water, be like Jesus (also works on lava).");
+        super(Category.Movement, "jesus", "Walk on liquids like Jesus.");
     }
 
     @Override
@@ -153,7 +156,7 @@ public class Jesus extends Module {
     }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         if (mc.player.isTouchingWater() && !waterShouldBeSolid()) return;
         if (mc.player.isInLava() && !lavaShouldBeSolid()) return;
 
@@ -173,28 +176,28 @@ public class Jesus extends Module {
             ((IVec3d) velocity).set(velocity.x, 0, velocity.z);
 
         tickTimer++;
-    });
+    }
 
     @EventHandler
-    private final Listener<CanWalkOnFluidEvent> onCanWalkOnFluid = new Listener<>(event -> {
+    private void onCanWalkOnFluid(CanWalkOnFluidEvent event) {
         if (event.entity != mc.player) return;
 
         if ((event.fluid == Fluids.WATER || event.fluid == Fluids.FLOWING_WATER) && waterShouldBeSolid())
             event.walkOnFluid = true;
         else if ((event.fluid == Fluids.LAVA || event.fluid == Fluids.FLOWING_LAVA) && lavaShouldBeSolid())
             event.walkOnFluid = true;
-    });
+    }
 
     @EventHandler
-    private final Listener<FluidCollisionShapeEvent> onFluidCollisionShape = new Listener<>(event -> {
+    private void onFluidCollisionShape(FluidCollisionShapeEvent event) {
         if (event.state.getMaterial() == Material.WATER && !mc.player.isTouchingWater() && waterShouldBeSolid())
             event.shape = VoxelShapes.fullCube();
         else if (event.state.getMaterial() == Material.LAVA && !mc.player.isInLava() && lavaShouldBeSolid())
             event.shape = VoxelShapes.fullCube();
-    });
+    }
 
     @EventHandler
-    private final Listener<PacketEvent.Send> onSendPacket = new Listener<>(event -> {
+    private void onSendPacket(PacketEvent.Send event) {
         if (!(event.packet instanceof PlayerMoveC2SPacket)) return;
         if (mc.player.isTouchingWater() && !waterShouldBeSolid()) return;
         if (mc.player.isInLava() && !lavaShouldBeSolid()) return;
@@ -234,7 +237,7 @@ public class Jesus extends Module {
 
         // Send new packet
         mc.getNetworkHandler().getConnection().send(newPacket);
-    });
+    }
 
     private boolean waterShouldBeSolid() {
         return walkOnWater.get() &&

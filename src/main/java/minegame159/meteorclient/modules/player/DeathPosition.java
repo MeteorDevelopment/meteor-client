@@ -7,8 +7,7 @@ package minegame159.meteorclient.modules.player;
 
 import baritone.api.BaritoneAPI;
 import baritone.api.pathing.goals.GoalXZ;
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.TookDamageEvent;
 import minegame159.meteorclient.gui.widgets.WButton;
 import minegame159.meteorclient.gui.widgets.WLabel;
@@ -52,8 +51,9 @@ public class DeathPosition extends Module {
 
     @SuppressWarnings("unused")
     @EventHandler
-    private final Listener<TookDamageEvent> onTookDamage = new Listener<>(event -> {
+    private void onTookDamage(TookDamageEvent event) {
         if (mc.player == null) return;
+
         if (event.entity.getUuid() != null && event.entity.getUuid().equals(mc.player.getUuid()) && event.entity.getHealth() <= 0) {
             deathPos.put("x", mc.player.getX());
             deathPos.put("z", mc.player.getZ());
@@ -85,10 +85,10 @@ public class DeathPosition extends Module {
                         break;
                 }
 
-                Waypoints.INSTANCE.add(waypoint);
+                Waypoints.get().add(waypoint);
             }
         }
-    });
+    }
 
     @Override
     public WWidget getWidget() {
@@ -117,7 +117,7 @@ public class DeathPosition extends Module {
     }
 
     private void clear() {
-        Waypoints.INSTANCE.remove(waypoint);
+        Waypoints.get().remove(waypoint);
         label.setText("No latest death.");
     }
 }

@@ -10,8 +10,7 @@ package minegame159.meteorclient.modules.misc;
 import club.minnced.discord.rpc.DiscordEventHandlers;
 import club.minnced.discord.rpc.DiscordRPC;
 import club.minnced.discord.rpc.DiscordRichPresence;
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.Config;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
@@ -22,7 +21,6 @@ import minegame159.meteorclient.settings.StringSetting;
 import minegame159.meteorclient.utils.Utils;
 
 public class DiscordPresence extends Module {
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<String> line1 = sgGeneral.add(new StringSetting.Builder()
@@ -57,8 +55,8 @@ public class DiscordPresence extends Module {
 
         rpc.startTimestamp = System.currentTimeMillis() / 1000L;
         rpc.largeImageKey = "meteor_client";
-        String largeText = "Meteor Client " + Config.INSTANCE.version.getOriginalString();
-        if (!Config.INSTANCE.devBuild.isEmpty()) largeText += " Dev Build: " + Config.INSTANCE.devBuild;
+        String largeText = "Meteor Client " + Config.get().version.getOriginalString();
+        if (!Config.get().devBuild.isEmpty()) largeText += " Dev Build: " + Config.get().devBuild;
         rpc.largeImageText = largeText;
         currentSmallImage = SmallImage.MineGame;
         updateDetails();
@@ -74,7 +72,7 @@ public class DiscordPresence extends Module {
     }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         if (!Utils.canUpdate()) return;
         ticks++;
 
@@ -88,7 +86,7 @@ public class DiscordPresence extends Module {
 
         updateDetails();
         instance.Discord_RunCallbacks();
-    });
+    }
 
     private String getLine(Setting<String> line) {
         if (line.get().length() > 0) return line.get().replace("{player}", getName()).replace("{server}", getServer());

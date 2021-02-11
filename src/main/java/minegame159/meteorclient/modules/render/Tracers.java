@@ -6,17 +6,15 @@
 package minegame159.meteorclient.modules.render;
 
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
-import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderEvent;
-import minegame159.meteorclient.friends.Friend;
-import minegame159.meteorclient.friends.FriendManager;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.entity.EntityUtils;
+import minegame159.meteorclient.utils.entity.FakePlayerUtils;
 import minegame159.meteorclient.utils.entity.Target;
 import minegame159.meteorclient.utils.render.RenderUtils;
 import minegame159.meteorclient.utils.render.color.Color;
@@ -27,10 +25,8 @@ import net.minecraft.block.entity.ChestBlockEntity;
 import net.minecraft.block.entity.ShulkerBoxBlockEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.player.PlayerEntity;
 
 public class Tracers extends Module {
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgAppearance = settings.createGroup("Appearance");
     private final SettingGroup sgColors = settings.createGroup("Colors");
@@ -40,7 +36,7 @@ public class Tracers extends Module {
     private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
             .name("entites")
             .description("Select specific entities.")
-            .defaultValue(new Object2BooleanOpenHashMap<>(0))
+            .defaultValue(Utils.asObject2BooleanOpenHashMap(EntityType.PLAYER))
             .build()
     );
 
@@ -139,14 +135,16 @@ public class Tracers extends Module {
     }
 
     @EventHandler
-    private final Listener<RenderEvent> onRender = new Listener<>(event -> {
+    private void onRender(RenderEvent event) {
         count = 0;
 
-
         for (Entity entity : mc.world.getEntities()) {
-            if ((!ModuleManager.INSTANCE.isActive(Freecam.class) && entity == mc.player) || !entities.get().getBoolean(entity.getType()) || (!showInvis.get() && entity.isInvisible())) continue;
+            if ((!Modules.get().isActive(Freecam.class) && entity == mc.player) || !entities.get().getBoolean(entity.getType()) || (!showInvis.get() && entity.isInvisible())) continue;
+            if (FakePlayerUtils.isFakePlayerOutOfRenderDistance(entity)) continue;
+
             Color color = EntityUtils.getEntityColor(entity, playersColor.get(), animalsColor.get(), waterAnimalsColor.get(), monstersColor.get(), ambientColor.get(), miscColor.get(), useNameColor.get());
-            RenderUtils.drawTracerToEntity(event, entity, color, target.get(), stem.get()); count++;
+            RenderUtils.drawTracerToEntity(event, entity, color, target.get(), stem.get());
+            count++;
         }
 
         if (storage.get()) {
@@ -158,7 +156,7 @@ public class Tracers extends Module {
                 }
             }
         }
-    });
+    }
 
     @Override
     public String getInfoString() {

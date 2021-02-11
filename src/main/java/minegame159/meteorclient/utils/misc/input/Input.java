@@ -20,6 +20,10 @@ public class Input {
         if (key < keys.length) keys[key] = pressed;
     }
 
+    public static void setKeyState(KeyBinding key, boolean pressed) {
+        setKeyState(KeyBindingHelper.getBoundKeyOf(key).getCode(), pressed);
+    }
+
     public static boolean isPressed(KeyBinding keyBinding) {
         int key = KeyBindingHelper.getBoundKeyOf(keyBinding).getCode();
         if (key == GLFW.GLFW_KEY_UNKNOWN) return false;

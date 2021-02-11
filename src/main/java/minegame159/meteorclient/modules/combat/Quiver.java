@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.modules.combat;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.Category;
@@ -39,7 +38,7 @@ public class Quiver extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Integer> charge = sgGeneral.add(new IntSetting.Builder()
-            .name("charge")
+            .name("charge-delay")
             .description("The amount of delay for bow charging in ticks.")
             .defaultValue(6)
             .min(5)
@@ -58,7 +57,7 @@ public class Quiver extends Module {
 
     private final Setting<Boolean> chatInfo = sgGeneral.add(new BoolSetting.Builder()
             .name("chat-info")
-            .description("Sends you information about the module.")
+            .description("Sends you information about the module when toggled.")
             .defaultValue(true)
             .build()
     );
@@ -141,8 +140,7 @@ public class Quiver extends Module {
     }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
-
+    private void onTick(TickEvent.Post event) {
         RotationUtils.packetRotate(mc.player.yaw, -90);
 
         boolean canStop = false;
@@ -173,9 +171,8 @@ public class Quiver extends Module {
                 if (chatInfo.get()) ChatUtils.moduleInfo(this, "Quivering a speed arrow.");
                 shotSpeed = true;
             }
-
         }
-    });
+    }
 
     private void shoot(int moveSlot) {
         if (moveSlot != 9) moveItems(moveSlot, 9);

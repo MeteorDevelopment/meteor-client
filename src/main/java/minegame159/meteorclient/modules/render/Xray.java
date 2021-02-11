@@ -5,25 +5,24 @@
 
 package minegame159.meteorclient.modules.render;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.Cancellable;
-import minegame159.meteorclient.events.render.DrawSideEvent;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderBlockEntityEvent;
 import minegame159.meteorclient.events.world.AmbientOcclusionEvent;
 import minegame159.meteorclient.events.world.ChunkOcclusionEvent;
-import minegame159.meteorclient.mixin.BlockEntityTypeAccessor;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.ModuleManager;
 import minegame159.meteorclient.settings.BlockListSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.utils.Utils;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.shape.VoxelShapes;
+import net.minecraft.world.BlockView;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Xray extends Module {
@@ -32,14 +31,14 @@ public class Xray extends Module {
     private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
             .name("blocks")
             .description("Blocks.")
-            .defaultValue(new ArrayList<>(0))
+            .defaultValue(Arrays.asList(Blocks.COAL_ORE, Blocks.IRON_ORE, Blocks.GOLD_ORE, Blocks.LAPIS_ORE,
+                    Blocks.REDSTONE_ORE, Blocks.DIAMOND_ORE, Blocks.EMERALD_ORE,
+                    Blocks.NETHER_GOLD_ORE, Blocks.NETHER_QUARTZ_ORE, Blocks.ANCIENT_DEBRIS))
             .onChanged(blocks1 -> {
                 if (isActive()) mc.worldRenderer.reload();
             })
             .build()
     );
-
-    private boolean fullBrightWasActive = false;
 
     public Xray() {
         super(Category.Render, "xray", "Only renders specified blocks. Good for mining.");
@@ -47,43 +46,50 @@ public class Xray extends Module {
 
     @Override
     public void onActivate() {
-        Fullbright fullBright = ModuleManager.INSTANCE.get(Fullbright.class);
-        fullBrightWasActive = fullBright.isActive();
-        if (!fullBright.isActive()) fullBright.toggle();
+        Fullbright.enable();
 
         mc.worldRenderer.reload();
     }
 
     @Override
     public void onDeactivate() {
-        Fullbright fullBright = ModuleManager.INSTANCE.get(Fullbright.class);
-        if (!fullBrightWasActive && fullBright.isActive()) fullBright.toggle();
+        Fullbright.disable();
 
-        if (!MeteorClient.IS_DISCONNECTING) mc.worldRenderer.reload();
+        mc.worldRenderer.reload();
     }
 
     @EventHandler
-    private final Listener<RenderBlockEntityEvent> onRenderBlockEntity = new Listener<>(event -> {
-        if (!Utils.blockRenderingBlockEntitiesInXray) return;
+    private void onRenderBlockEntity(RenderBlockEntityEvent event) {
+        if (isBlocked(event.blockEntity.getCachedState().getBlock())) event.cancel();
+    }
 
-        for (Block block : ((BlockEntityTypeAccessor) event.blockEntity.getType()).getBlocks()) {
-            if (isBlocked(block)) {
-                event.cancel();
-                break;
+    @EventHandler
+    private void onChunkOcclusion(ChunkOcclusionEvent event) {
+        event.cancel();
+    }
+
+    @EventHandler
+    private void onAmbientOcclusion(AmbientOcclusionEvent event) {
+        event.lightLevel = 1;
+    }
+
+    public boolean modifyDrawSide(BlockState state, BlockView view, BlockPos pos, Direction facing, boolean returns) {
+        if (returns) {
+            if (isBlocked(state.getBlock())) return false;
+        }
+        else {
+            if (!isBlocked(state.getBlock())) {
+                BlockPos adjPos = pos.offset(facing);
+                BlockState adjState = view.getBlockState(adjPos);
+
+                return adjState.getCullingFace(view, adjPos, facing.getOpposite()) != VoxelShapes.fullCube() || adjState.getBlock() != state.getBlock();
             }
         }
-    });
 
-    @EventHandler
-    private final Listener<DrawSideEvent> onDrawSide = new Listener<>(event -> event.setDraw(!isBlocked(event.state.getBlock())));
-
-    @EventHandler
-    private final Listener<ChunkOcclusionEvent> onChunkOcclusion = new Listener<>(Cancellable::cancel);
-
-    @EventHandler
-    private final Listener<AmbientOcclusionEvent> onAmbientOcclusion = new Listener<>(event -> event.lightLevel = 1);
+        return returns;
+    }
 
     public boolean isBlocked(Block block) {
-        return isActive() && !blocks.get().contains(block);
+        return !blocks.get().contains(block);
     }
 }

@@ -8,11 +8,16 @@ package minegame159.meteorclient.modules.combat;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
+import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.utils.player.*;
+import minegame159.meteorclient.utils.player.ChatUtils;
+import minegame159.meteorclient.utils.player.CityUtils;
+import minegame159.meteorclient.utils.player.InvUtils;
+import minegame159.meteorclient.utils.player.Rotations;
+import minegame159.meteorclient.utils.world.BlockUtils;
+import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.util.Hand;
@@ -21,13 +26,14 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 
 public class AutoCity extends Module {
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<Boolean> checkBelow = sgGeneral.add(new BoolSetting.Builder()
-            .name("check-below")
-            .description("Checks for obsidian or bedrock below the surround block for you to place crystals on.")
-            .defaultValue(true)
+    private final Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()
+            .name("range")
+            .description("The maximum range a city-able block will be found.")
+            .defaultValue(5)
+            .min(0)
+            .sliderMax(20)
             .build()
     );
 
@@ -60,8 +66,8 @@ public class AutoCity extends Module {
 
     @Override
     public void onActivate() {
-        target = CityUtils.getPlayerTarget();
-        BlockPos mineTarget = CityUtils.getTargetBlock(checkBelow.get());
+        target = CityUtils.getPlayerTarget(range.get());
+        BlockPos mineTarget = CityUtils.getTargetBlock(target);
 
         if (target == null || mineTarget == null) {
             if (chatInfo.get()) ChatUtils.moduleError(this, "No target block found... disabling.");
@@ -74,50 +80,55 @@ public class AutoCity extends Module {
                 return;
             }
 
-            int pickSlot = -1;
-            for (int i = 0; i < 9; i++) {
-                Item item = mc.player.inventory.getStack(i).getItem();
+            int slot = InvUtils.findItemInHotbar(Items.NETHERITE_PICKAXE);
+            if (slot == -1) slot = InvUtils.findItemInHotbar(Items.DIAMOND_PICKAXE);
+            if (mc.player.abilities.creativeMode) slot = mc.player.inventory.selectedSlot;
 
-                if (item == Items.DIAMOND_PICKAXE || item == Items.NETHERITE_PICKAXE) {
-                    pickSlot = i;
-                    break;
-                }
-            }
-
-            if (pickSlot == -1) {
+            if (slot == -1) {
                 if (chatInfo.get()) ChatUtils.moduleError(this, "No pick found... disabling.");
                 toggle();
                 return;
             }
 
-            int obbySlot = -1;
-            for (int i = 0; i < 9; i++) {
-                Item item = mc.player.inventory.getStack(i).getItem();
 
-                if (item == Items.OBSIDIAN) {
-                    obbySlot = i;
-                    break;
+            if (support.get()) {
+                int obbySlot = InvUtils.findItemInHotbar(Items.OBSIDIAN);
+                BlockPos blockPos = mineTarget.down(1);
+
+                if (!BlockUtils.canPlace(blockPos)
+                        && mc.world.getBlockState(blockPos).getBlock() != Blocks.OBSIDIAN
+                        && mc.world.getBlockState(blockPos).getBlock() != Blocks.BEDROCK
+                        && chatInfo.get()) {
+                    ChatUtils.moduleWarning(this, "Couldn't place support block, mining anyway.");
+                }
+                else {
+                    if (obbySlot == -1) {
+                        if (chatInfo.get()) ChatUtils.moduleWarning(this, "No obsidian found for support, mining anyway.");
+                    }
+                    else {
+                        BlockUtils.place(blockPos, Hand.MAIN_HAND, obbySlot, rotate.get(), 0);
+                    }
                 }
             }
 
-            if (support.get() && obbySlot != -1 && mc.world.getBlockState(mineTarget.down(1)).isAir()) {
-                PlayerUtils.placeBlock(mineTarget.down(1), obbySlot, Hand.MAIN_HAND);
-            } else if (support.get() && obbySlot == -1) if (chatInfo.get()) ChatUtils.moduleWarning(this, "No obsidian found for support, mining anyway.");
+            mc.player.inventory.selectedSlot = slot;
 
-            mc.player.inventory.selectedSlot = pickSlot;
-
-            if (rotate.get()) RotationUtils.packetRotate(mineTarget);
-            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, mineTarget, Direction.UP));
-            mc.player.swingHand(Hand.MAIN_HAND);
-            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, mineTarget, Direction.UP));
+            if (rotate.get()) Rotations.rotate(Rotations.getYaw(mineTarget), Rotations.getPitch(mineTarget), () -> mine(mineTarget));
+            else mine(mineTarget);
         }
-        toggle();
+
+        this.toggle();
+    }
+
+    private void mine(BlockPos blockPos) {
+        mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, Direction.UP));
+        mc.player.swingHand(Hand.MAIN_HAND);
+        mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, Direction.UP));
     }
 
     @Override
     public String getInfoString() {
-        if (target != null && target instanceof PlayerEntity) return target.getEntityName();
-        if (target != null) return target.getType().getName().getString();
+        if (target != null) return target.getEntityName();
         return null;
     }
 }

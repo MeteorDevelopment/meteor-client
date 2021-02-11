@@ -8,9 +8,11 @@ package minegame159.meteorclient.utils.player;
 import baritone.api.BaritoneAPI;
 import minegame159.meteorclient.mixininterface.ILookBehavior;
 import minegame159.meteorclient.mixininterface.IVec3d;
-import net.minecraft.block.*;
+import minegame159.meteorclient.utils.misc.Vector2;
+import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.Entity;
+import net.minecraft.item.PotionItem;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -33,7 +35,6 @@ public class PlayerUtils {
     }
 
     public static boolean placeBlock(BlockPos blockPos, int slot, Hand hand) {
-        assert mc.player != null;
         if (slot == -1) return false;
 
         int preSlot = mc.player.inventory.selectedSlot;
@@ -46,15 +47,7 @@ public class PlayerUtils {
     }
 
     public static boolean placeBlock(BlockPos blockPos, Hand hand, boolean swing) {
-        assert mc.world != null;
-        assert  mc.interactionManager != null;
-        assert mc.player != null;
-        if (blockPos == null) return false;
-        // Check if current block is replaceable
-        if (!mc.world.getBlockState(blockPos).getMaterial().isReplaceable()) return false;
-
-        // Check if intersects entities
-        if (!mc.world.canPlace(Blocks.STONE.getDefaultState(), blockPos, ShapeContext.absent())) return false;
+        if (!BlockUtils.canPlace(blockPos)) return false;
 
         // Try to find a neighbour to click on to avoid air place
         for (Direction side : Direction.values()) {
@@ -62,7 +55,7 @@ public class PlayerUtils {
             Direction side2 = side.getOpposite();
 
             // Check if neighbour isn't empty
-            if (mc.world.getBlockState(neighbor).isAir() || isBlockClickable(mc.world.getBlockState(neighbor).getBlock())) continue;
+            if (mc.world.getBlockState(neighbor).isAir() || BlockUtils.isClickable(mc.world.getBlockState(neighbor).getBlock())) continue;
 
             // Calculate hit pos
             ((IVec3d) hitPos).set(neighbor.getX() + 0.5 + side2.getVector().getX() * 0.5, neighbor.getY() + 0.5 + side2.getVector().getY() * 0.5, neighbor.getZ() + 0.5 + side2.getVector().getZ() * 0.5);
@@ -133,22 +126,6 @@ public class PlayerUtils {
         return horizontalVelocity;
     }
 
-    private static boolean isBlockClickable(Block block) {
-        boolean clickable = false;
-
-        if (block instanceof CraftingTableBlock
-                || block instanceof AnvilBlock
-                || block instanceof AbstractButtonBlock
-                || block instanceof AbstractPressurePlateBlock
-                || block instanceof BlockWithEntity
-                || block instanceof FenceGateBlock
-                || block instanceof DoorBlock
-                || block instanceof TrapdoorBlock
-        ) clickable = true;
-
-        return clickable;
-    }
-
     public static void centerPlayer() {
         double x = MathHelper.floor(mc.player.getX()) + 0.5;
         double z = MathHelper.floor(mc.player.getZ()) + 0.5;
@@ -156,7 +133,7 @@ public class PlayerUtils {
         mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(mc.player.getX(), mc.player.getY(), mc.player.getZ(), mc.player.isOnGround()));
     }
 
-    public static boolean canSeeEntity(LivingEntity entity) {
+    public static boolean canSeeEntity(Entity entity) {
         Vec3d vec1 = new Vec3d(0, 0, 0);
         Vec3d vec2 = new Vec3d(0, 0, 0);
 
@@ -168,5 +145,68 @@ public class PlayerUtils {
         boolean canSeeEyes =  mc.world.raycast(new RaycastContext(vec1, vec2, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player)).getType() == HitResult.Type.MISS;
 
         return canSeeFeet || canSeeEyes;
+    }
+
+    public static float[] calculateAngle(Vec3d target) {
+        assert mc.player != null;
+        Vec3d eyesPos = new Vec3d(mc.player.getX(), mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()), mc.player.getZ());
+
+        double dX = target.x - eyesPos.x;
+        double dY = (target.y - eyesPos.y) * -1.0D;
+        double dZ = target.z - eyesPos.z;
+
+        double dist = MathHelper.sqrt(dX * dX + dZ * dZ);
+
+        return new float[] { (float) MathHelper.wrapDegrees(Math.toDegrees(Math.atan2(dZ, dX)) - 90.0D), (float) MathHelper.wrapDegrees(Math.toDegrees(Math.atan2(dY, dist))) };
+    }
+
+    public static boolean shouldPause(boolean ifBreaking, boolean ifEating, boolean ifDrinking) {
+        if (ifBreaking && mc.interactionManager.isBreakingBlock()) return true;
+        if (ifEating && (mc.player.isUsingItem() && (mc.player.getMainHandStack().getItem().isFood() || mc.player.getOffHandStack().getItem().isFood()))) return true;
+        return ifDrinking && (mc.player.isUsingItem() && (mc.player.getMainHandStack().getItem() instanceof PotionItem || mc.player.getOffHandStack().getItem() instanceof PotionItem));
+    }
+
+    public static boolean isMoving() {
+        return mc.player.forwardSpeed != 0 || mc.player.sidewaysSpeed != 0;
+    }
+
+    public static boolean isSprinting() {
+        return mc.player.isSprinting() && (mc.player.forwardSpeed != 0 || mc.player.sidewaysSpeed != 0);
+    }
+
+    public static Vector2 transformStrafe(double speed) {
+        float forward = mc.player.input.movementForward;
+        float side = mc.player.input.movementSideways;
+        float yaw = mc.player.prevYaw + (mc.player.yaw - mc.player.prevYaw) * mc.getTickDelta();
+
+        double velX, velZ;
+
+        if (forward == 0.0f && side == 0.0f) return new Vector2(0, 0);
+
+        else if (forward != 0.0f) {
+            if (side >= 1.0f) {
+                yaw += (float) (forward > 0.0f ? -45 : 45);
+                side = 0.0f;
+            }
+
+            else if (side <= -1.0f) {
+                yaw += (float) (forward > 0.0f ? 45 : -45);
+                side = 0.0f;
+            }
+
+            if (forward > 0.0f)
+                forward = 1.0f;
+
+            else if (forward < 0.0f)
+                forward = -1.0f;
+        }
+
+        double mx = Math.cos(Math.toRadians(yaw + 90.0f));
+        double mz = Math.sin(Math.toRadians(yaw + 90.0f));
+
+        velX = (double) forward * speed * mx + (double) side * speed * mz;
+        velZ = (double) forward * speed * mz - (double) side * speed * mx;
+
+        return new Vector2(velX, velZ);
     }
 }

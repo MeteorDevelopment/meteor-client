@@ -10,7 +10,7 @@ import minegame159.meteorclient.utils.misc.ISerializable;
 import minegame159.meteorclient.utils.misc.NbtUtils;
 import minegame159.meteorclient.utils.misc.Vector2;
 import minegame159.meteorclient.utils.render.AlignmentX;
-import minegame159.meteorclient.utils.render.color.RainbowColorManager;
+import minegame159.meteorclient.utils.render.color.RainbowColors;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.nbt.CompoundTag;
 
@@ -18,8 +18,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class GuiConfig implements ISerializable<GuiConfig> {
-    public static GuiConfig INSTANCE;
-
     public double guiScale = 1;
     public double scrollSensitivity = 1;
 
@@ -79,15 +77,19 @@ public class GuiConfig implements ISerializable<GuiConfig> {
     public SettingColor editHovered = createColor(60, 60, 60, 255);
     public SettingColor editPressed = createColor(70, 70, 70, 255);
 
+    public boolean expandListSettingScreen = true;
+    public boolean collapseListSettingScreen = true;
+    public int countListSettingScreen = 20;
+
     private Map<WindowType, WindowConfig> windowConfigs = new HashMap<>();
 
-    public GuiConfig() {
-        INSTANCE = this;
+    public static GuiConfig get() {
+        return Config.get().guiConfig;
     }
     
     private SettingColor createColor(int r, int g, int b, int a) {
         SettingColor color = new SettingColor(r, g, b, a);
-        RainbowColorManager.addColor(color);
+        RainbowColors.add(color);
         return color;
     }
 
@@ -97,7 +99,7 @@ public class GuiConfig implements ISerializable<GuiConfig> {
 
     public void clearWindowConfigs() {
         windowConfigs.clear();
-        Config.INSTANCE.save();
+        Config.get().save();
     }
 
     @Override
@@ -269,7 +271,7 @@ public class GuiConfig implements ISerializable<GuiConfig> {
 
         public void setExpanded(boolean expanded) {
             this.expanded = expanded;
-            Config.INSTANCE.save();
+            Config.get().save();
         }
 
         @Override

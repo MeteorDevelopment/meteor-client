@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.modules.movement;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.player.InteractItemEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
@@ -28,15 +27,15 @@ public class ElytraBoost extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Boolean> dontConsumeFirework = sgGeneral.add(new BoolSetting.Builder()
-            .name("dont-consume-firework")
-            .description("Doesn't consume the firework when using it.")
+            .name("anti-consume")
+            .description("Prevents fireworks from being consumed when using Elytra Boost.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Integer> fireworkLevel = sgGeneral.add(new IntSetting.Builder()
-            .name("firework-level")
-            .description("The duration.")
+            .name("firework-duration")
+            .description("The duration of the firework.")
             .defaultValue(0)
             .min(0)
             .max(255)
@@ -52,7 +51,7 @@ public class ElytraBoost extends Module {
 
     private final Setting<Integer> keybind = sgGeneral.add(new KeybindSetting.Builder()
             .name("keybind")
-            .description("Keybind to boost.")
+            .description("The keybind to boost.")
             .action(this::boost)
             .build()
     );
@@ -60,7 +59,7 @@ public class ElytraBoost extends Module {
     private final List<FireworkRocketEntity> fireworks = new ArrayList<>();
 
     public ElytraBoost() {
-        super(Category.Movement, "elytra-boost", "Boosts you as if you used a firework.");
+        super(Category.Movement, "elytra-boost", "Boosts your elytra as if you used a firework.");
     }
 
     @Override
@@ -69,7 +68,7 @@ public class ElytraBoost extends Module {
     }
 
     @EventHandler
-    private final Listener<InteractItemEvent> onInteractItem = new Listener<>(event -> {
+    private void onInteractItem(InteractItemEvent event) {
         ItemStack itemStack = mc.player.getStackInHand(event.hand);
 
         if (itemStack.getItem() instanceof FireworkItem && dontConsumeFirework.get()) {
@@ -77,12 +76,12 @@ public class ElytraBoost extends Module {
 
             boost();
         }
-    });
+    }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         fireworks.removeIf(fireworkRocketEntity -> fireworkRocketEntity.removed);
-    });
+    }
 
     private void boost() {
         if (!Utils.canUpdate()) return;

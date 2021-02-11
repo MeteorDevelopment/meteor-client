@@ -5,15 +5,13 @@
 
 package minegame159.meteorclient.modules.misc;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.player.PlayerUtils;
-import minegame159.meteorclient.utils.player.RotationUtils;
 import minegame159.meteorclient.utils.world.BlockIterator;
+import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.BlockItem;
@@ -31,6 +29,13 @@ public class LiquidFiller extends Module {
     }
 
     private final SettingGroup sgGeneral  = settings.getDefaultGroup();
+
+    private final Setting<PlaceIn> placeInLiquids = sgGeneral.add(new EnumSetting.Builder<PlaceIn>()
+            .name("place-in")
+            .description("What type of liquids to place in.")
+            .defaultValue(PlaceIn.Lava)
+            .build()
+    );
 
     private final Setting<Integer> horizontalRadius = sgGeneral.add(new IntSetting.Builder()
             .name("horizontal-radius")
@@ -53,14 +58,7 @@ public class LiquidFiller extends Module {
     private final Setting<List<Block>> whitelist = sgGeneral.add(new BlockListSetting.Builder()
             .name("block-whitelist")
             .description("The allowed blocks that it will use to fill up the liquid.")
-            .defaultValue(new ArrayList<>())
-            .build()
-    );
-
-    private final Setting<PlaceIn> placeInLiquids = sgGeneral.add(new EnumSetting.Builder<PlaceIn>()
-            .name("place-in")
-            .description("What type of liquids to place in.")
-            .defaultValue(PlaceIn.Lava)
+            .defaultValue(new ArrayList<>(0))
             .build()
     );
 
@@ -76,17 +74,24 @@ public class LiquidFiller extends Module {
     }
 
     @EventHandler
-    private final Listener<TickEvent.Pre> onTick = new Listener<>(event -> BlockIterator.register(horizontalRadius.get(), verticalRadius.get(), (blockPos, blockState) -> {
-        if (blockState.getFluidState().getLevel() == 8 && blockState.getFluidState().isStill()) {
-            Block liquid = blockState.getBlock();
+    private void onTick(TickEvent.Pre event) {
+        int slot = findSlot();
 
-            PlaceIn placeIn = placeInLiquids.get();
-            if (placeIn == PlaceIn.Both || (placeIn == PlaceIn.Lava && liquid == Blocks.LAVA) || (placeIn == PlaceIn.Water && liquid == Blocks.WATER)) {
-                if (rotate.get()) RotationUtils.packetRotate(blockPos);
-                if (PlayerUtils.placeBlock(blockPos, findSlot(), Hand.MAIN_HAND)) BlockIterator.disableCurrent();
-            }
+        if (slot != -1) {
+            BlockIterator.register(horizontalRadius.get(), verticalRadius.get(), (blockPos, blockState) -> {
+                if (blockState.getFluidState().getLevel() == 8 && blockState.getFluidState().isStill()) {
+                    Block liquid = blockState.getBlock();
+
+                    PlaceIn placeIn = placeInLiquids.get();
+                    if (placeIn == PlaceIn.Both || (placeIn == PlaceIn.Lava && liquid == Blocks.LAVA) || (placeIn == PlaceIn.Water && liquid == Blocks.WATER)) {
+                        if (BlockUtils.place(blockPos, Hand.MAIN_HAND, slot, rotate.get(), 0)) {
+                            BlockIterator.disableCurrent();
+                        }
+                    }
+                }
+            });
         }
-    }));
+    }
 
     private int findSlot() {
         int slot = -1;

@@ -1,6 +1,6 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.mixin;
@@ -8,7 +8,7 @@ package minegame159.meteorclient.mixin;
 import minegame159.meteorclient.Config;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import net.minecraft.util.crash.CrashReport;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -21,17 +21,17 @@ import java.util.List;
 public class CrashReportMixin {
     @Inject(method = "addStackTrace", at = @At("TAIL"))
     private void onAddStackTrace(StringBuilder sb, CallbackInfo info) {
-        if (ModuleManager.INSTANCE != null) {
+        if (Modules.get() != null) {
             sb.append("\n\n");
             sb.append("-- Meteor Client --\n");
-            sb.append("Version: ").append(Config.INSTANCE.version.getOriginalString()).append("\n");
+            sb.append("Version: ").append(Config.get().version.getOriginalString()).append("\n");
 
-            if (!Config.INSTANCE.devBuild.isEmpty()) {
-                sb.append("Dev Build: ").append(Config.INSTANCE.devBuild).append("\n");
+            if (!Config.get().devBuild.isEmpty()) {
+                sb.append("Dev Build: ").append(Config.get().devBuild).append("\n");
             }
 
-            for (Category category : ModuleManager.CATEGORIES) {
-                List<Module> modules = ModuleManager.INSTANCE.getGroup(category);
+            for (Category category : Modules.CATEGORIES) {
+                List<Module> modules = Modules.get().getGroup(category);
                 boolean active = false;
                 for (Module module : modules) {
                     if (module instanceof Module && module.isActive()) {

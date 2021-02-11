@@ -1,6 +1,6 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.mixin;
@@ -9,8 +9,9 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.render.Render2DEvent;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.render.NoRender;
+import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.util.math.MatrixStack;
@@ -39,6 +40,7 @@ public abstract class InGameHudMixin {
         client.getProfiler().push("meteor-client_render_2d");
         RenderSystem.pushMatrix();
 
+        Utils.unscaledProjection();
         RenderSystem.enableBlend();
         RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA);
         RenderSystem.lineWidth(1);
@@ -48,6 +50,7 @@ public abstract class InGameHudMixin {
 
         GL11.glDisable(GL11.GL_LINE_SMOOTH);
         RenderSystem.lineWidth(1);
+        Utils.scaledProjection();
 
         RenderSystem.popMatrix();
         client.getProfiler().pop();
@@ -55,31 +58,31 @@ public abstract class InGameHudMixin {
 
     @Inject(method = "renderStatusEffectOverlay", at = @At("HEAD"), cancellable = true)
     private void onRenderStatusEffectOverlay(CallbackInfo info) {
-        if (ModuleManager.INSTANCE.get(NoRender.class).noPotionIcons()) info.cancel();
+        if (Modules.get().get(NoRender.class).noPotionIcons()) info.cancel();
     }
 
     @Inject(method = "renderPortalOverlay", at = @At("HEAD"), cancellable = true)
     private void onRenderPortalOverlay(float f, CallbackInfo info) {
-        if (ModuleManager.INSTANCE.get(NoRender.class).noPortalOverlay()) info.cancel();
+        if (Modules.get().get(NoRender.class).noPortalOverlay()) info.cancel();
     }
 
     @Inject(method = "renderPumpkinOverlay", at = @At("HEAD"), cancellable = true)
     private void onRenderPumpkinOverlay(CallbackInfo info) {
-        if (ModuleManager.INSTANCE.get(NoRender.class).noPumpkinOverlay()) info.cancel();
+        if (Modules.get().get(NoRender.class).noPumpkinOverlay()) info.cancel();
     }
 
     @Inject(method = "renderVignetteOverlay", at = @At("HEAD"), cancellable = true)
     private void onRenderVignetteOverlay(Entity entity, CallbackInfo info) {
-        if (ModuleManager.INSTANCE.get(NoRender.class).noVignette()) info.cancel();
+        if (Modules.get().get(NoRender.class).noVignette()) info.cancel();
     }
 
     @Inject(method = "renderScoreboardSidebar", at = @At("HEAD"), cancellable = true)
     private void onRenderScoreboardSidebar(MatrixStack matrixStack, ScoreboardObjective scoreboardObjective, CallbackInfo info) {
-        if (ModuleManager.INSTANCE.get(NoRender.class).noScoreboard()) info.cancel();
+        if (Modules.get().get(NoRender.class).noScoreboard()) info.cancel();
     }
 
     @Inject(method = "renderCrosshair", at = @At("HEAD"), cancellable = true)
     private void onRenderCrosshair(MatrixStack matrices, CallbackInfo info) {
-        if (ModuleManager.INSTANCE.get(NoRender.class).noCrosshair()) info.cancel();
+        if (Modules.get().get(NoRender.class).noCrosshair()) info.cancel();
     }
 }

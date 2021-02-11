@@ -9,13 +9,12 @@ package minegame159.meteorclient.modules.combat;
 //Updated by squidoodly 19/06/2020
 //Updated by squidoodly 30/12/2020
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.friends.FriendManager;
+import minegame159.meteorclient.friends.Friends;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.movement.NoFall;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.IntSetting;
@@ -30,6 +29,7 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Items;
@@ -73,6 +73,13 @@ public class AutoTotem extends Module {
             .build()
     );
 
+    private final Setting<Boolean> elytraHold = sgGeneral.add(new BoolSetting.Builder()
+            .name("elytra-hold")
+            .description("Whether or not to always hold a totem when flying with an elytra.")
+            .defaultValue(false)
+            .build()
+    );
+
     private String totemCountString = "0";
 
     private final MinecraftClient mc = MinecraftClient.getInstance();
@@ -89,33 +96,33 @@ public class AutoTotem extends Module {
     }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
-        assert mc.player != null;
+    private void onTick(TickEvent.Pre event) {
         if (mc.currentScreen instanceof InventoryScreen && !inventorySwitch.get()) return;
         if (mc.currentScreen != null && !(mc.currentScreen instanceof InventoryScreen)) return;
 
         InvUtils.FindItemResult result = InvUtils.findItemWithCount(Items.TOTEM_OF_UNDYING);
 
         if (result.count <= 0) {
-            if (!ModuleManager.INSTANCE.get(OffhandExtra.class).isActive() && fallback.get()) {
-                ModuleManager.INSTANCE.get(OffhandExtra.class).toggle();
+            if (!Modules.get().get(OffhandExtra.class).isActive() && fallback.get()) {
+                Modules.get().get(OffhandExtra.class).toggle();
             }
 
-            ModuleManager.INSTANCE.get(OffhandExtra.class).setTotems(true);
+            Modules.get().get(OffhandExtra.class).setTotems(true);
+            locked = false;
         } else {
-            ModuleManager.INSTANCE.get(OffhandExtra.class).setTotems(false);
+            Modules.get().get(OffhandExtra.class).setTotems(false);
 
             if (mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING && (!smart.get()
-                    || isLow())) {
+                    || isLow() || elytraMove())) {
                 locked = true;
                 moveTotem(result);
-            } else if (smart.get() && !isLow()) {
+            } else if (smart.get() && !isLow() && !elytraMove()) {
                 locked = false;
             }
         }
 
         totemCountString = Integer.toString(result.count);
-    });
+    }
 
     @Override
     public String getInfoString() {
@@ -138,18 +145,19 @@ public class AutoTotem extends Module {
         assert mc.world != null;
         assert mc.player != null;
         double damageTaken = 0;
+        if (mc.player.abilities.creativeMode) return damageTaken;
         for(Entity entity : mc.world.getEntities()){
             if(entity instanceof EndCrystalEntity && damageTaken < DamageCalcUtils.crystalDamage(mc.player, entity.getPos())){
                 damageTaken = DamageCalcUtils.crystalDamage(mc.player, entity.getPos());
             }else if(entity instanceof PlayerEntity && damageTaken < DamageCalcUtils.getSwordDamage((PlayerEntity) entity, true)){
-                if(FriendManager.INSTANCE.notTrusted((PlayerEntity) entity) && mc.player.getPos().distanceTo(entity.getPos()) < 5){
+                if(Friends.get().notTrusted((PlayerEntity) entity) && mc.player.getPos().distanceTo(entity.getPos()) < 5){
                     if(((PlayerEntity) entity).getActiveItem().getItem() instanceof SwordItem){
                         damageTaken = DamageCalcUtils.getSwordDamage((PlayerEntity) entity, true);
                     }
                 }
             }
         }
-        if(!ModuleManager.INSTANCE.get(NoFall.class).isActive() && mc.player.fallDistance > 3){
+        if(!Modules.get().get(NoFall.class).isActive() && mc.player.fallDistance > 3){
             double damage =mc.player.fallDistance * 0.5;
             if(damage > damageTaken){
                 damageTaken = damage;
@@ -176,6 +184,10 @@ public class AutoTotem extends Module {
 
     private boolean isLow(){
         return getHealth() < health.get() || (getHealth() - getHealthReduction()) < health.get();
+    }
+
+    private boolean elytraMove(){
+        return elytraHold.get() && mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() == Items.ELYTRA && mc.player.isFallFlying();
     }
 
 }

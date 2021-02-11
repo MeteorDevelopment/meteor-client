@@ -1,11 +1,11 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.mixin;
 
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.movement.Velocity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
@@ -29,7 +29,7 @@ public class ExplosionMixin {
     private Vec3d collectBlocksAndDamageEntitiesVec3dAddProxy(Vec3d vec3d, double x, double y, double z) {
         if (!entity.getUuid().equals(MinecraftClient.getInstance().player.getUuid())) return vec3d.add(x, y, z);
 
-        Velocity velocity = ModuleManager.INSTANCE.get(Velocity.class);
+        Velocity velocity = Modules.get().get(Velocity.class);
         Vec3d newVec3d = vec3d.add(x * velocity.getHorizontal(), y * velocity.getVertical(), z * velocity.getHorizontal());
 
         entity = null;

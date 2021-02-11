@@ -5,12 +5,11 @@
 
 package minegame159.meteorclient.modules.render;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.game.GetTooltipEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -49,17 +48,17 @@ public class ItemByteSize extends Module {
     }
 
     @EventHandler
-    private final Listener<GetTooltipEvent> onGetTooltip = new Listener<>(event -> {
+    private void onGetTooltip(GetTooltipEvent event) {
         try {
             event.itemStack.toTag(new CompoundTag()).write(ByteCountDataOutput.INSTANCE);
             int byteCount = ByteCountDataOutput.INSTANCE.getCount();
             ByteCountDataOutput.INSTANCE.reset();
 
-            event.list.add(new LiteralText(Formatting.GRAY + ModuleManager.INSTANCE.get(ItemByteSize.class).bytesToString(byteCount)));
+            event.list.add(new LiteralText(Formatting.GRAY + Modules.get().get(ItemByteSize.class).bytesToString(byteCount)));
         } catch (IOException e) {
             e.printStackTrace();
         }
-    });
+    }
 
     private int getKbSize() {
         return mode.get() == Mode.True ? 1024 : 1000;

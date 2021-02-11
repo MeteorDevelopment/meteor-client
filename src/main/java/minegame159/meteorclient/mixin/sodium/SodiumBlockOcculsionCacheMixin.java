@@ -1,13 +1,13 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.mixin.sodium;
 
 import me.jellysquid.mods.sodium.client.render.occlusion.BlockOcclusionCache;
-import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.render.DrawSideEvent;
+import minegame159.meteorclient.modules.Modules;
+import minegame159.meteorclient.modules.render.Xray;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -19,9 +19,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(value = BlockOcclusionCache.class, remap = false)
 public class SodiumBlockOcculsionCacheMixin {
-    @Inject(at = @At("HEAD"), method = "shouldDrawSide", cancellable = true)
-    private void shouldDrawSide(BlockState selfState, BlockView view, BlockPos pos, Direction facing, CallbackInfoReturnable<Boolean> info) {
-        DrawSideEvent event = MeteorClient.postEvent(DrawSideEvent.get(selfState));
-        if (event.isSet()) info.setReturnValue(event.getDraw());
+    @Inject(method = "shouldDrawSide", at = @At("RETURN"), cancellable = true)
+    private void shouldDrawSide(BlockState state, BlockView view, BlockPos pos, Direction facing, CallbackInfoReturnable<Boolean> info) {
+        Xray xray = Modules.get().get(Xray.class);
+
+        if (xray.isActive()) {
+            info.setReturnValue(xray.modifyDrawSide(state, view, pos, facing, info.getReturnValueZ()));
+        }
     }
 }

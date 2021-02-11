@@ -1,6 +1,6 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.mixin;
@@ -8,11 +8,12 @@ package minegame159.meteorclient.mixin;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.game.GameLeftEvent;
 import minegame159.meteorclient.events.game.OpenScreenEvent;
+import minegame159.meteorclient.events.game.ResourcePacksReloadedEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.gui.GuiKeyEvents;
 import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.mixininterface.IMinecraftClient;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.player.AutoEat;
 import minegame159.meteorclient.modules.player.AutoGap;
 import minegame159.meteorclient.utils.network.OnlinePlayers;
@@ -26,14 +27,17 @@ import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.profiler.Profiler;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import javax.annotation.Nullable;
 import java.net.Proxy;
+import java.util.concurrent.CompletableFuture;
 
 @Mixin(MinecraftClient.class)
 public abstract class MinecraftClientMixin implements IMinecraftClient {
@@ -45,13 +49,13 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
 
     @Shadow protected abstract void doAttack();
 
-    @Shadow public Mouse mouse;
+    @Shadow @Final public Mouse mouse;
 
-    @Shadow private Window window;
+    @Shadow @Final private Window window;
 
     @Shadow @Final private Proxy netProxy;
 
-    @Shadow private Session session;
+    @Shadow @Final @Mutable private Session session;
 
     @Shadow private static int currentFps;
 
@@ -83,7 +87,6 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
     @Inject(method = "disconnect(Lnet/minecraft/client/gui/screen/Screen;)V", at = @At("HEAD"))
     private void onDisconnect(Screen screen, CallbackInfo info) {
         if (world != null) {
-            MeteorClient.IS_DISCONNECTING = true;
             MeteorClient.EVENT_BUS.post(GameLeftEvent.get());
         }
     }
@@ -105,8 +108,14 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
 
     @Redirect(method = "doItemUse", at = @At(value = "FIELD", target = "Lnet/minecraft/client/MinecraftClient;crosshairTarget:Lnet/minecraft/util/hit/HitResult;", ordinal = 1))
     private HitResult doItemUseMinecraftClientCrosshairTargetProxy(MinecraftClient client) {
-        if (ModuleManager.INSTANCE.get(AutoEat.class).rightClickThings() && ModuleManager.INSTANCE.get(AutoGap.class).rightClickThings()) return client.crosshairTarget;
+        if (Modules.get().get(AutoEat.class).rightClickThings() && Modules.get().get(AutoGap.class).rightClickThings()) return client.crosshairTarget;
         return null;
+    }
+
+    @ModifyVariable(method = "reloadResources", at = @At("STORE"), ordinal = 0)
+    private CompletableFuture<Void> onReloadResourcesNewCompletableFuture(CompletableFuture<Void> completableFuture) {
+        completableFuture.thenRun(() -> MeteorClient.EVENT_BUS.post(ResourcePacksReloadedEvent.get()));
+        return completableFuture;
     }
 
     @Override

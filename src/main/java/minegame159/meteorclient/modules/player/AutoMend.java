@@ -7,12 +7,11 @@ package minegame159.meteorclient.modules.player;
 
 //Updated by squidoodly 18/06/2020
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.combat.AutoArmor;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -38,14 +37,14 @@ public class AutoMend extends Module {
     );
 
     private final Setting<Boolean> armourSlots = sgGeneral.add(new BoolSetting.Builder()
-            .name("use-armour-slots")
+            .name("use-armor-slots")
             .description("Whether or not to use armor slots to mend items quicker.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> removeFinished = sgGeneral.add(new BoolSetting.Builder()
-            .name("remove-finished")
+            .name("remove-when-finished")
             .description("The items will be moved out of active slots if there are no items to replace, but space in your inventory.")
             .defaultValue(true)
             .build()
@@ -102,8 +101,7 @@ public class AutoMend extends Module {
     }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
-
+    private void onTick(TickEvent.Post event) {
         if (mc.player.currentScreenHandler.getStacks().size() < 45) return;
 
         if (mc.player.getOffHandStack().isEmpty()) replaceItem(true);
@@ -111,7 +109,7 @@ public class AutoMend extends Module {
         else if (EnchantmentHelper.getLevel(Enchantments.MENDING, mc.player.getOffHandStack()) == 0) replaceItem(false);
 
         if(armourSlots.get()) {
-            if(ModuleManager.INSTANCE.get(AutoArmor.class).isActive()) {
+            if(Modules.get().get(AutoArmor.class).isActive()) {
                 ChatUtils.moduleWarning(this, "Cannot use armor slots while AutoArmor is active. Please disable AutoArmor and try again. Disabling Use Armor Slots.");
                 armourSlots.set(false);
             }
@@ -121,5 +119,5 @@ public class AutoMend extends Module {
                 else if (EnchantmentHelper.getLevel(Enchantments.MENDING, mc.player.inventory.getStack(39 - (i - 5))) == 0) replaceArmour(i, false);
             }
         }
-    });
+    }
 }

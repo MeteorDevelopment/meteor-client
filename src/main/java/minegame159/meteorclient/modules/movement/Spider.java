@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.modules.movement;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
@@ -19,7 +18,7 @@ public class Spider extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     
     private final Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
-            .name("speed")
+            .name("climb-speed")
             .description("The speed you go up blocks.")
             .defaultValue(0.2)
             .min(0.0)
@@ -31,12 +30,12 @@ public class Spider extends Module {
     }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         if (!mc.player.horizontalCollision) return;
 
         Vec3d velocity = mc.player.getVelocity();
         if (velocity.y >= 0.2) return;
 
         mc.player.setVelocity(velocity.x, speed.get(), velocity.z);
-    });
+    }
 }

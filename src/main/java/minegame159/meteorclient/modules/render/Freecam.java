@@ -5,9 +5,7 @@
 
 package minegame159.meteorclient.modules.render;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.Cancellable;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.TookDamageEvent;
 import minegame159.meteorclient.events.game.GameLeftEvent;
 import minegame159.meteorclient.events.game.OpenScreenEvent;
@@ -21,7 +19,7 @@ import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.misc.input.KeyAction;
 import minegame159.meteorclient.utils.player.ChatUtils;
-import minegame159.meteorclient.utils.player.RotationUtils;
+import minegame159.meteorclient.utils.player.Rotations;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.hit.BlockHitResult;
@@ -33,19 +31,19 @@ import net.minecraft.util.math.Vec3d;
 public class Freecam extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
-            .name("speed")
-            .description("Your speed in Freecam.")
-            .defaultValue(1.0)
-            .min(0.0)
-            .build()
-    );
-
     public enum AutoDisableEvent {
         None,
         OnDamage,
         OnDeath
     }
+
+    private final Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
+            .name("speed")
+            .description("Your speed while in Freecam.")
+            .defaultValue(1.0)
+            .min(0.0)
+            .build()
+    );
 
     private final Setting<AutoDisableEvent> autoDisableOnDamage = sgGeneral.add(new EnumSetting.Builder<AutoDisableEvent>()
             .name("auto-disable-on-damage")
@@ -69,8 +67,8 @@ public class Freecam extends Module {
     );
 
     private final Setting<Boolean> renderHands = sgGeneral.add(new BoolSetting.Builder()
-            .name("render-hands")
-            .description("Whether or not to render your hands in Freecam.")
+            .name("render-hand")
+            .description("Whether or not to render your hand in Freecam.")
             .defaultValue(true)
             .build()
     );
@@ -122,7 +120,13 @@ public class Freecam extends Module {
     }
 
     @EventHandler
-    private final Listener<OpenScreenEvent> onOpenScreen = new Listener<>(event -> unpress());
+    private void onOpenScreen(OpenScreenEvent event) {
+        unpress();
+
+        ((IVec3d) prevPos).set(pos);
+        prevYaw = yaw;
+        prevPitch = pitch;
+    }
 
     private void unpress() {
         ((IKeyBinding) mc.options.keyForward).setPressed(false);
@@ -134,13 +138,13 @@ public class Freecam extends Module {
     }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         if (mc.cameraEntity.isInsideWall()) mc.getCameraEntity().noClip = true;
 
         if (mc.currentScreen != null) return;
 
-        Vec3d forward = Vec3d.fromPolar(0, getYaw(1 / 20f));
-        Vec3d right = Vec3d.fromPolar(0, getYaw(1 / 20f) + 90);
+        Vec3d forward = Vec3d.fromPolar(0, yaw);
+        Vec3d right = Vec3d.fromPolar(0, yaw + 90);
         double velX = 0;
         double velY = 0;
         double velZ = 0;
@@ -151,12 +155,18 @@ public class Freecam extends Module {
             Vec3d crossHairPosition;
 
             if (mc.crosshairTarget instanceof BlockHitResult) {
-                crossHairPosition = ((BlockHitResult) mc.crosshairTarget).getPos();
+                crossHairPosition = mc.crosshairTarget.getPos();
                 crossHairPos = ((BlockHitResult) mc.crosshairTarget).getBlockPos();
-                if (!mc.world.getBlockState(crossHairPos).isAir()) RotationUtils.clientRotate(crossHairPosition);
+
+                if (!mc.world.getBlockState(crossHairPos).isAir()) {
+                    mc.player.yaw = (float) Rotations.getYaw(crossHairPosition);
+                    mc.player.pitch = (float) Rotations.getPitch(crossHairPosition);
+                }
             } else {
                 crossHairPos = ((EntityHitResult) mc.crosshairTarget).getEntity().getBlockPos();
-                RotationUtils.clientRotate(crossHairPos);
+
+                mc.player.yaw = (float) Rotations.getYaw(crossHairPos);
+                mc.player.pitch = (float) Rotations.getPitch(crossHairPos);
             }
         }
 
@@ -202,10 +212,10 @@ public class Freecam extends Module {
 
         ((IVec3d) prevPos).set(pos);
         ((IVec3d) pos).set(pos.x + velX, pos.y + velY, pos.z + velZ);
-    });
+    }
 
     @EventHandler
-    private final Listener<KeyEvent> onKey = new Listener<>(event -> {
+    private void onKey(KeyEvent event) {
         boolean cancel = true;
 
         if (KeyBindingHelper.getBoundKeyOf(mc.options.keyForward).getCode() == event.key) {
@@ -225,27 +235,30 @@ public class Freecam extends Module {
         }
 
         if (cancel) event.cancel();
-    });
+    }
 
     @EventHandler
-    private final Listener<ChunkOcclusionEvent> onChunkOcclusion = new Listener<>(Cancellable::cancel);
+    private void onChunkOcclusion(ChunkOcclusionEvent event) {
+        event.cancel();
+    }
 
     @EventHandler
-    private final Listener<TookDamageEvent> onTookDamage = new Listener<>(event -> {
+    private void onTookDamage(TookDamageEvent event) {
         if (event.entity.getUuid() == null) return;
         if (!event.entity.getUuid().equals(mc.player.getUuid())) return;
+
         if ((autoDisableOnDamage.get() == AutoDisableEvent.OnDamage) || (autoDisableOnDamage.get() == AutoDisableEvent.OnDeath && event.entity.getHealth() <= 0)) {
             toggle();
             ChatUtils.moduleInfo(this, "Auto toggled %s(default).", isActive() ? Formatting.GREEN + "on" : Formatting.RED + "off");
         }
-    });
+    }
 
     @EventHandler
-    private final Listener<GameLeftEvent> onGameLeft = new Listener<>(event -> {
+    private void onGameLeft(GameLeftEvent event) {
         if (!autoDisableOnLog.get()) return;
 
         toggle();
-    });
+    }
 
     public void changeLookDirection(double deltaX, double deltaY) {
         prevYaw = yaw;
@@ -257,27 +270,24 @@ public class Freecam extends Module {
         pitch = MathHelper.clamp(pitch, -90, 90);
     }
 
-    public double getX(float delta) {
-        return MathHelper.lerp(delta, prevPos.x, pos.x);
-    }
-
-    public double getY(float delta) {
-        return MathHelper.lerp(delta, prevPos.y, pos.y);
-    }
-
-    public double getZ(float delta) {
-        return MathHelper.lerp(delta, prevPos.z, pos.z);
-    }
-
-    public float getYaw(float delta) {
-        return MathHelper.lerp(delta, prevYaw, yaw);
-    }
-
-    public float getPitch(float delta) {
-        return MathHelper.lerp(delta, prevPitch, pitch);
-    }
-
     public boolean renderHands() {
         return !isActive() || renderHands.get();
+    }
+
+    public double getX(float tickDelta) {
+        return MathHelper.lerp(tickDelta, prevPos.x, pos.x);
+    }
+    public double getY(float tickDelta) {
+        return MathHelper.lerp(tickDelta, prevPos.y, pos.y);
+    }
+    public double getZ(float tickDelta) {
+        return MathHelper.lerp(tickDelta, prevPos.z, pos.z);
+    }
+
+    public double getYaw(float tickDelta) {
+        return MathHelper.lerp(tickDelta, prevYaw, yaw);
+    }
+    public double getPitch(float tickDelta) {
+        return MathHelper.lerp(tickDelta, prevPitch, pitch);
     }
 }

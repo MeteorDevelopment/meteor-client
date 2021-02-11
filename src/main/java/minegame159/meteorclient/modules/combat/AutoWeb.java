@@ -5,26 +5,23 @@
 
 package minegame159.meteorclient.modules.combat;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.friends.FriendManager;
+import minegame159.meteorclient.friends.Friends;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.player.FakePlayer;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.entity.FakePlayerEntity;
-import minegame159.meteorclient.utils.player.RotationUtils;
+import minegame159.meteorclient.utils.entity.FakePlayerUtils;
+import minegame159.meteorclient.utils.player.InvUtils;
+import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
 
 public class AutoWeb extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -58,25 +55,17 @@ public class AutoWeb extends Module {
     private PlayerEntity target = null;
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
-        int webSlot = -1;
-        for (int i = 0; i < 9; i++) {
-            Item item = mc.player.inventory.getStack(i).getItem();
-
-            if (item == Items.COBWEB) {
-                webSlot = i;
-                break;
-            }
-        }
-        if (webSlot == -1) return;
+    private void onTick(TickEvent.Pre event) {
+        int slot = InvUtils.findItemInHotbar(Items.COBWEB);
+        if (slot == -1) return;
 
         if (target != null) {
             if (mc.player.distanceTo(target) > range.get() || !target.isAlive()) target = null;
         }
 
         for (PlayerEntity player : mc.world.getPlayers()) {
-            if (player == mc.player || !FriendManager.INSTANCE.attack(player) || !player.isAlive() || mc.player.distanceTo(player) > range.get())
-                continue;
+            if (player == mc.player || !Friends.get().attack(player) || !player.isAlive() || mc.player.distanceTo(player) > range.get()) continue;
+
             if (target == null) {
                 target = player;
             } else if (mc.player.distanceTo(target) > mc.player.distanceTo(player)) {
@@ -85,8 +74,8 @@ public class AutoWeb extends Module {
         }
 
         if (target == null) {
-            for (FakePlayerEntity fakeTarget : FakePlayer.players.keySet()) {
-                if (fakeTarget.getHealth() <= 0 || !FriendManager.INSTANCE.attack(fakeTarget) || !fakeTarget.isAlive()) continue;
+            for (FakePlayerEntity fakeTarget : FakePlayerUtils.getPlayers().keySet()) {
+                if (fakeTarget.getHealth() <= 0 || !Friends.get().attack(fakeTarget) || !fakeTarget.isAlive()) continue;
 
                 if (target == null) {
                     target = fakeTarget;
@@ -98,22 +87,13 @@ public class AutoWeb extends Module {
         }
 
         if (target != null) {
-            int prevSlot = mc.player.inventory.selectedSlot;
-            mc.player.inventory.selectedSlot = webSlot;
             BlockPos targetPos = target.getBlockPos();
-            int swung = 0;
-            if (mc.world.getBlockState(targetPos).isAir()) {
-                if (rotate.get()) RotationUtils.packetRotate(targetPos);
-                mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.DOWN, targetPos, true));
-                swung++;
+            BlockUtils.place(targetPos, Hand.MAIN_HAND, slot, rotate.get(), 0);
+
+            if (doubles.get()) {
+                targetPos = targetPos.add(0, 1, 0);
+                BlockUtils.place(targetPos, Hand.MAIN_HAND, InvUtils.findItemInHotbar(Items.COBWEB), rotate.get(), 0);
             }
-            if (doubles.get() && mc.world.getBlockState(targetPos.add(0, 1, 0)).isAir()) {
-                if (rotate.get()) RotationUtils.packetRotate(targetPos.add(0, 1, 0));
-                mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, targetPos.add(0, 1, 0), true));
-                swung++;
-            }
-            if (swung >= 1) mc.player.swingHand(Hand.MAIN_HAND);
-            mc.player.inventory.selectedSlot = prevSlot;
         }
-    });
+    }
 }

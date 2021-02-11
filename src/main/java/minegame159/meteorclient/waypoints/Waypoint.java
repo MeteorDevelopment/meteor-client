@@ -49,7 +49,7 @@ public class Waypoint implements ISerializable<Waypoint> {
         MB.pos(x + size, y + size, z).texture(1, 1).color(color).endVertex();
         MB.pos(x, y + size, z).texture(0, 1).color(color).endVertex();
 
-        Waypoints.ICONS.get(icon).bindTexture();
+        Waypoints.get().icons.get(icon).bindTexture();
         MB.end();
 
         color.a = preA;
@@ -57,7 +57,7 @@ public class Waypoint implements ISerializable<Waypoint> {
 
     private int findIconIndex() {
         int i = 0;
-        for (String icon : Waypoints.ICONS.keySet()) {
+        for (String icon : Waypoints.get().icons.keySet()) {
             if (this.icon.equals(icon)) return i;
             i++;
         }
@@ -66,8 +66,8 @@ public class Waypoint implements ISerializable<Waypoint> {
     }
 
     private int correctIconIndex(int i) {
-        if (i < 0) return Waypoints.ICONS.size() + i;
-        else if (i >= Waypoints.ICONS.size()) return i - Waypoints.ICONS.size();
+        if (i < 0) return Waypoints.get().icons.size() + i;
+        else if (i >= Waypoints.get().icons.size()) return i - Waypoints.get().icons.size();
         return i;
     }
 
@@ -75,7 +75,7 @@ public class Waypoint implements ISerializable<Waypoint> {
         i = correctIconIndex(i);
 
         int _i = 0;
-        for (String icon : Waypoints.ICONS.keySet()) {
+        for (String icon : Waypoints.get().icons.keySet()) {
             if (_i == i) return icon;
             _i++;
         }
@@ -136,7 +136,7 @@ public class Waypoint implements ISerializable<Waypoint> {
         nether = tag.getBoolean("nether");
         end = tag.getBoolean("end");
 
-        if (!Waypoints.ICONS.containsKey(icon)) icon = "Square";
+        if (!Waypoints.get().icons.containsKey(icon)) icon = "Square";
 
         return this;
     }

@@ -5,9 +5,7 @@
 
 package minegame159.meteorclient.macros;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listenable;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.meteor.KeyEvent;
 import minegame159.meteorclient.utils.misc.ISerializable;
 import minegame159.meteorclient.utils.misc.NbtUtils;
@@ -22,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class Macro implements Listenable, ISerializable<Macro> {
+public class Macro implements ISerializable<Macro> {
     public String name = "";
     public List<String> messages = new ArrayList<>(1);
     public int key = -1;
@@ -36,14 +34,14 @@ public class Macro implements Listenable, ISerializable<Macro> {
     }
 
     @EventHandler
-    private final Listener<KeyEvent> onKey = new Listener<>(event -> {
-        if (event.action == KeyAction.Press && event.key == key && MinecraftClient.getInstance().currentScreen == null) {
+    private void onKey(KeyEvent event) {
+        if (event.action != KeyAction.Release && event.key == key && MinecraftClient.getInstance().currentScreen == null) {
             for (String command : messages) {
                 MinecraftClient.getInstance().player.sendChatMessage(command);
             }
             event.cancel();
         }
-    });
+    }
 
     @Override
     public CompoundTag toTag() {

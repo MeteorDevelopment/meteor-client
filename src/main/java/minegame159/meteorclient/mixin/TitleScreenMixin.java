@@ -1,8 +1,7 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
-
 package minegame159.meteorclient.mixin;
 
 import com.g00fy2.versioncompare.Version;
@@ -80,9 +79,9 @@ public class TitleScreenMixin extends Screen {
             Utils.firstTimeTitleScreen = false;
             MeteorClient.LOG.info("Checking latest version of Meteor Client");
 
-            MeteorExecutor.execute(() -> HttpUtils.getLines("http://meteorclient.com:8082/api/version", s -> {
+            MeteorExecutor.execute(() -> HttpUtils.getLines("http://meteorclient.com/api/version", s -> {
                 Version latestVer = new Version(s);
-                if (latestVer.isHigherThan(Config.INSTANCE.version)) MinecraftClient.getInstance().openScreen(new NewUpdateScreen(latestVer));
+                if (latestVer.isHigherThan(Config.get().version)) MinecraftClient.getInstance().openScreen(new NewUpdateScreen(latestVer));
             }));
         }
     }

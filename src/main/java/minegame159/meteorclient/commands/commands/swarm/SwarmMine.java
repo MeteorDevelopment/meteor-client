@@ -7,7 +7,7 @@ package minegame159.meteorclient.commands.commands.swarm;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import minegame159.meteorclient.commands.Command;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.combat.Swarm;
 import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.command.CommandSource;
@@ -28,16 +28,16 @@ public class SwarmMine extends Command {
                 .then(argument("block", BlockStateArgumentType.blockState())
                         .executes(context -> {
                             try {
-                                Swarm swarm = ModuleManager.INSTANCE.get(Swarm.class);
+                                Swarm swarm = Modules.get().get(Swarm.class);
                                 if (swarm.isActive()) {
                                     if (swarm.currentMode == Swarm.Mode.Queen && swarm.server != null)
                                         swarm.server.sendMessage(context.getInput());
                                     if (swarm.currentMode != Swarm.Mode.Queen) {
                                         swarm.targetBlock = context.getArgument("block",BlockStateArgument.class).getBlockState();
-                                    } else ChatUtils.moduleError(ModuleManager.INSTANCE.get(Swarm.class),"Null block");
+                                    } else ChatUtils.moduleError(Modules.get().get(Swarm.class),"Null block");
                                 }
                             } catch (Exception e) {
-                                ChatUtils.moduleError(ModuleManager.INSTANCE.get(Swarm.class),"Error in baritone command. " + e.getClass().getSimpleName());
+                                ChatUtils.moduleError(Modules.get().get(Swarm.class),"Error in baritone command. " + e.getClass().getSimpleName());
                             }
                             return SINGLE_SUCCESS;
                         })

@@ -58,7 +58,7 @@ public class WDropbox<T extends Enum<?>> extends WWidget {
     protected void onCalculateSize(GuiRenderer renderer) {
         root.calculateSize(RENDERER);
 
-        double s = GuiConfig.INSTANCE.guiScale;
+        double s = GuiConfig.get().guiScale;
         valueNameWidth = renderer.textWidth(valueName);
         width = 6 * s + root.width + 4 * s + renderer.textHeight() + 6 * s;
         height = 6 * s + renderer.textHeight() + 6 * s;
@@ -142,8 +142,8 @@ public class WDropbox<T extends Enum<?>> extends WWidget {
 
         if (valueNameWidth == -1) valueNameWidth = renderer.textWidth(valueName);
 
-        renderer.text(valueName, x + 6 + (root.width - valueNameWidth) / 2, y + 6, false, GuiConfig.INSTANCE.text);
-        renderer.triangle(x + 6 + root.width + 4, y + 6 + renderer.textHeight() / 4, renderer.textHeight(), 0, GuiConfig.INSTANCE.separator);
+        renderer.text(valueName, x + 6 + (root.width - valueNameWidth) / 2, y + 6, false, GuiConfig.get().text);
+        renderer.triangle(x + 6 + root.width + 4, y + 6 + renderer.textHeight() / 4, renderer.textHeight(), 0, GuiConfig.get().separator);
 
         if (open) {
             renderer.post(() -> {
@@ -194,15 +194,15 @@ public class WDropbox<T extends Enum<?>> extends WWidget {
         protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
             if (mouseOver) renderer.setCursorStyle(CursorStyle.Click);
 
-            Color color = GuiConfig.INSTANCE.background;
-            if (mouseOver || WDropbox.this.value == value) color = GuiConfig.INSTANCE.backgroundHovered;
+            Color color = GuiConfig.get().background;
+            if (mouseOver || WDropbox.this.value == value) color = GuiConfig.get().backgroundHovered;
 
             int preAlpha = color.a;
             color.a = 255;
             renderer.quad(Region.FULL, x + 1, y, width + a - 2, height, color);
             color.a = preAlpha;
 
-            renderer.text(text, x + 6 + 1, y + 6 + 1, false, GuiConfig.INSTANCE.text);
+            renderer.text(text, x + 6 + 1, y + 6 + 1, false, GuiConfig.get().text);
         }
     }
 
@@ -212,7 +212,7 @@ public class WDropbox<T extends Enum<?>> extends WWidget {
 
         @Override
         protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
-            Color color = GuiConfig.INSTANCE.outline;
+            Color color = GuiConfig.get().outline;
             int preAlpha = color.a;
             color.a = 255;
 

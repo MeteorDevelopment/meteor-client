@@ -7,13 +7,12 @@ package minegame159.meteorclient.modules.player;
 
 //Created by squidoodly 03/06/2020
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.combat.CrystalAura;
 import minegame159.meteorclient.modules.combat.KillAura;
 import minegame159.meteorclient.settings.BoolSetting;
@@ -29,6 +28,7 @@ public class AutoGap extends Module {
         Regeneration,
         Constant
     }
+
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     public AutoGap(){
@@ -78,11 +78,11 @@ public class AutoGap extends Module {
     private boolean wasAutoEatOn = false;
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
-        if(mc.options.keyUse.isPressed() && !wasThis && ModuleManager.INSTANCE.get(AutoEat.class).isActive() && preferAutoEat.get()){
+    private void onTick(TickEvent.Post event) {
+        if(mc.options.keyUse.isPressed() && !wasThis && Modules.get().get(AutoEat.class).isActive() && preferAutoEat.get()){
             return;
-        }else if(mc.options.keyUse.isPressed() && wasThis && ModuleManager.INSTANCE.get(AutoEat.class).isActive() && !preferAutoEat.get()){
-            ModuleManager.INSTANCE.get(AutoEat.class).toggle();
+        }else if(mc.options.keyUse.isPressed() && wasThis && Modules.get().get(AutoEat.class).isActive() && !preferAutoEat.get()){
+            Modules.get().get(AutoEat.class).toggle();
             wasAutoEatOn = true;
         }
         if (mode.get() == Mode.Constant && (mc.player.getMainHandStack().getItem() == Items.GOLDEN_APPLE
@@ -101,15 +101,15 @@ public class AutoGap extends Module {
                 ((IKeyBinding) mc.options.keyUse).setPressed(false);
                 wasThis = false;
                 if(wasAutoEatOn){
-                    ModuleManager.INSTANCE.get(AutoEat.class).toggle();
+                    Modules.get().get(AutoEat.class).toggle();
                     wasAutoEatOn = false;
                 }
                 if(wasKillActive){
-                    ModuleManager.INSTANCE.get(KillAura.class).toggle();
+                    Modules.get().get(KillAura.class).toggle();
                     wasKillActive = false;
                 }
                 if(wasCrystalActive){
-                    ModuleManager.INSTANCE.get(CrystalAura.class).toggle();
+                    Modules.get().get(CrystalAura.class).toggle();
                     wasCrystalActive = false;
                 }
                 mc.player.inventory.selectedSlot = prevSlot;
@@ -146,11 +146,11 @@ public class AutoGap extends Module {
                     mc.player.inventory.selectedSlot = egapSlot;
                 }
                 if (disableAuras.get()) {
-                    if (ModuleManager.INSTANCE.get(KillAura.class).isActive()) {
+                    if (Modules.get().get(KillAura.class).isActive()) {
                         wasKillActive = true;
-                        ModuleManager.INSTANCE.get(KillAura.class).toggle();
+                        Modules.get().get(KillAura.class).toggle();
                     }
-                    if (ModuleManager.INSTANCE.get(CrystalAura.class).isActive()) {
+                    if (Modules.get().get(CrystalAura.class).isActive()) {
                         wasCrystalActive = true;
                     }
                 }
@@ -158,7 +158,7 @@ public class AutoGap extends Module {
                 wasThis = true;
             }
         }
-    });
+    }
 
     public boolean rightClickThings() {
         return !isActive() || !wasThis;

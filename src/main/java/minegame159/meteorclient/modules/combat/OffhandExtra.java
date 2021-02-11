@@ -7,14 +7,13 @@ package minegame159.meteorclient.modules.combat;
 
 //Created by squidoodly 25/04/2020
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.player.RightClickEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
@@ -35,33 +34,13 @@ public class OffhandExtra extends Module {
     }
     
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgExtra = settings.createGroup("Extras");
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("mode")
             .description("Changes what item that will go into your offhand.")
             .defaultValue(Mode.EGap)
             .onChanged(mode -> currentMode = mode)
-            .build()
-    );
-
-    private final Setting<Boolean> sword = sgGeneral.add(new BoolSetting.Builder()
-            .name("sword-gap")
-            .description("Changes the mode to EGap if you are holding a sword in your main hand.")
-            .defaultValue(false)
-            .build()
-    );
-
-    private final Setting<Boolean> offhandCrystal = sgGeneral.add(new BoolSetting.Builder()
-            .name("offhand-crystal-on-gap")
-            .description("Changes the mode to Crystal if you are holding an enchanted golden apple in your main hand.")
-            .defaultValue(false)
-            .build()
-    );
-
-    private final Setting<Boolean> offhandCA = sgGeneral.add(new BoolSetting.Builder()
-            .name("offhand-crystal-on-ca")
-            .description("Changes the mode to Crystal when Crystal Aura is on.")
-            .defaultValue(false)
             .build()
     );
 
@@ -102,6 +81,29 @@ public class OffhandExtra extends Module {
             .build()
     );
 
+    // Extras
+
+    private final Setting<Boolean> sword = sgExtra.add(new BoolSetting.Builder()
+            .name("sword-gap")
+            .description("Changes the mode to EGap if you are holding a sword in your main hand.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> offhandCrystal = sgExtra.add(new BoolSetting.Builder()
+            .name("offhand-crystal-on-gap")
+            .description("Changes the mode to Crystal if you are holding an enchanted golden apple in your main hand.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> offhandCA = sgExtra.add(new BoolSetting.Builder()
+            .name("offhand-crystal-on-ca")
+            .description("Changes the mode to Crystal when Crystal Aura is on.")
+            .defaultValue(false)
+            .build()
+    );
+
     public OffhandExtra() {
         super(Category.Combat, "offhand-extra", "Allows you to use specified items in your offhand. REQUIRES AutoTotem to be on smart mode.");
     }
@@ -118,8 +120,8 @@ public class OffhandExtra extends Module {
 
     @Override
     public void onDeactivate() {
-        assert mc.player != null;
-        if (ModuleManager.INSTANCE.get(AutoTotem.class).isActive() && mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING) {
+        if (mc.world == null || mc.player == null) return;
+        if (Modules.get().get(AutoTotem.class).isActive() && mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING) {
             InvUtils.FindItemResult result = InvUtils.findItemWithCount(Items.TOTEM_OF_UNDYING);
             if (result.slot != -1) {
                 doMove(result.slot);
@@ -128,17 +130,17 @@ public class OffhandExtra extends Module {
     }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         assert mc.player != null;
         currentMode = mode.get();
 
         if (mc.currentScreen != null && ((!(mc.currentScreen instanceof InventoryScreen) && !(mc.currentScreen instanceof WidgetScreen)) || !asimov.get())) return;
         if (!mc.player.isUsingItem()) isClicking = false;
-        if (ModuleManager.INSTANCE.get(AutoTotem.class).getLocked()) return;
+        if (Modules.get().get(AutoTotem.class).getLocked()) return;
 
         if ((mc.player.getMainHandStack().getItem() instanceof SwordItem || mc.player.getMainHandStack().getItem() instanceof AxeItem) && sword.get()) currentMode = Mode.EGap;
         else if (mc.player.getMainHandStack().getItem() instanceof EnchantedGoldenAppleItem && offhandCrystal.get()) currentMode = Mode.Crystal;
-        else if (ModuleManager.INSTANCE.isActive(CrystalAura.class) && offhandCA.get()) currentMode = Mode.Crystal;
+        else if (Modules.get().isActive(CrystalAura.class) && offhandCA.get()) currentMode = Mode.Crystal;
 
         if ((asimov.get() || noTotems) && mc.player.getOffHandStack().getItem() != getItem()) {
             int result = findSlot(getItem());
@@ -171,18 +173,18 @@ public class OffhandExtra extends Module {
             }
 
         }
-    });
+    }
 
     @EventHandler
-    private final Listener<RightClickEvent> onRightClick = new Listener<>(event -> {
+    private void onRightClick(RightClickEvent event) {
         assert mc.player != null;
         if (mc.currentScreen != null) return;
-        if (ModuleManager.INSTANCE.get(AutoTotem.class).getLocked() || !canMove()) return;
+        if (Modules.get().get(AutoTotem.class).getLocked() || !canMove()) return;
         if ((mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING || (mc.player.getHealth() + mc.player.getAbsorptionAmount() > health.get())
                && (mc.player.getOffHandStack().getItem() != getItem()) && !(mc.currentScreen instanceof HandledScreen<?>))) {
             if (mc.player.getMainHandStack().getItem() instanceof SwordItem && sword.get()) currentMode = Mode.EGap;
             else if (mc.player.getMainHandStack().getItem() instanceof EnchantedGoldenAppleItem && offhandCrystal.get()) currentMode = Mode.Crystal;
-            else if (ModuleManager.INSTANCE.isActive(CrystalAura.class) && offhandCA.get()) currentMode = Mode.Crystal;
+            else if (Modules.get().isActive(CrystalAura.class) && offhandCA.get()) currentMode = Mode.Crystal;
             if (mc.player.getOffHandStack().getItem() == getItem()) return;
             isClicking = true;
             Item item = getItem();
@@ -201,7 +203,7 @@ public class OffhandExtra extends Module {
             }
             currentMode = mode.get();
         }
-    });
+    }
 
     private Item getItem(){
         Item item = Items.TOTEM_OF_UNDYING;

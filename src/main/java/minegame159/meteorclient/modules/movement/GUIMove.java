@@ -5,14 +5,13 @@
 
 package minegame159.meteorclient.modules.movement;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.mixininterface.ICreativeInventoryScreen;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.render.Freecam;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
@@ -23,7 +22,6 @@ import net.minecraft.item.ItemGroup;
 import org.lwjgl.glfw.GLFW;
 
 public class GUIMove extends Module {
-
     public enum Screens {
         GUI,
         Inventory,
@@ -33,8 +31,8 @@ public class GUIMove extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Screens> screens = sgGeneral.add(new EnumSetting.Builder<Screens>()
-            .name("screens")
-            .description("Which screens to move in.")
+            .name("gUIs")
+            .description("Which GUIs to move in.")
             .defaultValue(Screens.Inventory)
             .build()
     );
@@ -62,7 +60,7 @@ public class GUIMove extends Module {
 
     private final Setting<Boolean> arrowsRotate = sgGeneral.add(new BoolSetting.Builder()
             .name("arrows-rotate")
-            .description("Allows you to use arrow keys to rotate while in GUIs.")
+            .description("Allows you to use your arrow keys to rotate while in GUIs.")
             .defaultValue(true)
             .build()
     );
@@ -80,7 +78,7 @@ public class GUIMove extends Module {
     }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Pre event) {
         if (!skip()) {
             switch (screens.get()) {
                 case GUI:
@@ -94,7 +92,7 @@ public class GUIMove extends Module {
                     break;
             }
         }
-    });
+    }
 
     public void tick() {
         if (!isActive() || skip()) return;
@@ -143,6 +141,6 @@ public class GUIMove extends Module {
     }
 
     private boolean skip() {
-        return mc.currentScreen == null || ModuleManager.INSTANCE.isActive(Freecam.class) || (mc.currentScreen instanceof CreativeInventoryScreen && ((ICreativeInventoryScreen) mc.currentScreen).getSelectedTab() == ItemGroup.SEARCH.getIndex()) || mc.currentScreen instanceof ChatScreen || mc.currentScreen instanceof SignEditScreen || mc.currentScreen instanceof AnvilScreen || mc.currentScreen instanceof AbstractCommandBlockScreen || mc.currentScreen instanceof StructureBlockScreen;
+        return mc.currentScreen == null || Modules.get().isActive(Freecam.class) || (mc.currentScreen instanceof CreativeInventoryScreen && ((ICreativeInventoryScreen) mc.currentScreen).getSelectedTab() == ItemGroup.SEARCH.getIndex()) || mc.currentScreen instanceof ChatScreen || mc.currentScreen instanceof SignEditScreen || mc.currentScreen instanceof AnvilScreen || mc.currentScreen instanceof AbstractCommandBlockScreen || mc.currentScreen instanceof StructureBlockScreen;
     }
 }

@@ -5,11 +5,8 @@
 
 package minegame159.meteorclient.gui.screens.topbar;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.meteor.FriendListChangedEvent;
 import minegame159.meteorclient.friends.Friend;
-import minegame159.meteorclient.friends.FriendManager;
+import minegame159.meteorclient.friends.Friends;
 import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.ColorSetting;
@@ -21,6 +18,8 @@ import minegame159.meteorclient.utils.render.color.SettingColor;
 public class TopBarFriends extends TopBarWindowScreen {
     public TopBarFriends() {
         super(TopBarType.Friends);
+
+        refreshWidgetsOnInit = true;
     }
 
     @Override
@@ -31,13 +30,14 @@ public class TopBarFriends extends TopBarWindowScreen {
         SettingGroup sgNeutral = s.createGroup("Neutral");
         SettingGroup sgTrusted = s.createGroup("Trusted");
 
-        //Enemies
+        // Enemies
+
         sgEnemy.add(new BoolSetting.Builder()
                 .name("show-in-tracers")
                 .description("Whether to show enemies in tracers.")
                 .defaultValue(true)
-                .onChanged(aBoolean -> FriendManager.INSTANCE.showEnemies = aBoolean)
-                .onModuleActivated(booleanSetting -> booleanSetting.set(FriendManager.INSTANCE.showEnemies))
+                .onChanged(aBoolean -> Friends.get().showEnemies = aBoolean)
+                .onModuleActivated(booleanSetting -> booleanSetting.set(Friends.get().showEnemies))
                 .build()
         );
 
@@ -45,18 +45,19 @@ public class TopBarFriends extends TopBarWindowScreen {
                 .name("color")
                 .description("The color used to show enemies in ESP and Tracers.")
                 .defaultValue(new SettingColor(204, 0, 0))
-                .onChanged(FriendManager.INSTANCE.enemyColor::set)
-                .onModuleActivated(colorSetting -> colorSetting.set(FriendManager.INSTANCE.enemyColor))
+                .onChanged(Friends.get().enemyColor::set)
+                .onModuleActivated(colorSetting -> colorSetting.set(Friends.get().enemyColor))
                 .build()
         );
 
-        //Neutral
+        // Neutral
+
         sgNeutral.add(new BoolSetting.Builder()
                 .name("show-in-tracers")
                 .description("Whether to show neutrals in tracers.")
                 .defaultValue(true)
-                .onChanged(aBoolean -> FriendManager.INSTANCE.showNeutral = aBoolean)
-                .onModuleActivated(booleanSetting -> booleanSetting.set(FriendManager.INSTANCE.showNeutral))
+                .onChanged(aBoolean -> Friends.get().showNeutral = aBoolean)
+                .onModuleActivated(booleanSetting -> booleanSetting.set(Friends.get().showNeutral))
                 .build()
         );
 
@@ -64,8 +65,8 @@ public class TopBarFriends extends TopBarWindowScreen {
                 .name("color")
                 .description("The color used to show neutrals in ESP and Tracers.")
                 .defaultValue(new SettingColor(60, 240,240))
-                .onChanged(FriendManager.INSTANCE.neutralColor::set)
-                .onModuleActivated(colorSetting -> colorSetting.set(FriendManager.INSTANCE.neutralColor))
+                .onChanged(Friends.get().neutralColor::set)
+                .onModuleActivated(colorSetting -> colorSetting.set(Friends.get().neutralColor))
                 .build()
         );
 
@@ -73,18 +74,19 @@ public class TopBarFriends extends TopBarWindowScreen {
                 .name("attack")
                 .description("Whether to attack neutrals.")
                 .defaultValue(false)
-                .onChanged(aBoolean -> FriendManager.INSTANCE.attackNeutral = aBoolean)
-                .onModuleActivated(booleanSetting -> booleanSetting.set(FriendManager.INSTANCE.attackNeutral))
+                .onChanged(aBoolean -> Friends.get().attackNeutral = aBoolean)
+                .onModuleActivated(booleanSetting -> booleanSetting.set(Friends.get().attackNeutral))
                 .build()
         );
 
-        //Trusted
+        // Trusted
+
         sgTrusted.add(new BoolSetting.Builder()
                 .name("show-in-tracers")
                 .description("Whether to show trusted in tracers.")
                 .defaultValue(true)
-                .onChanged(aBoolean -> FriendManager.INSTANCE.showTrusted = aBoolean)
-                .onModuleActivated(booleanSetting -> booleanSetting.set(FriendManager.INSTANCE.showTrusted))
+                .onChanged(aBoolean -> Friends.get().showTrusted = aBoolean)
+                .onModuleActivated(booleanSetting -> booleanSetting.set(Friends.get().showTrusted))
                 .build()
         );
 
@@ -92,8 +94,8 @@ public class TopBarFriends extends TopBarWindowScreen {
                 .name("color")
                 .description("The color used to show trusted in ESP and Tracers.")
                 .defaultValue(new SettingColor(57, 247, 47))
-                .onChanged(FriendManager.INSTANCE.trustedColor::set)
-                .onModuleActivated(colorSetting -> colorSetting.set(FriendManager.INSTANCE.trustedColor))
+                .onChanged(Friends.get().trustedColor::set)
+                .onModuleActivated(colorSetting -> colorSetting.set(Friends.get().trustedColor))
                 .build()
         );
 
@@ -103,14 +105,19 @@ public class TopBarFriends extends TopBarWindowScreen {
         // Friends
         WSection section = add(new WSection("Friends", true)).fillX().expandX().getWidget();
 
-        for (Friend friend : FriendManager.INSTANCE) {
+        for (Friend friend : Friends.get()) {
             section.add(new WLabel(friend.name));
 
             WDropbox<FriendType> typeSetting = section.add(new WDropbox<>(friend.type)).getWidget();
             typeSetting.action = () -> friend.type = typeSetting.getValue();
 
             WMinus remove = section.add(new WMinus()).getWidget();
-            remove.action = () -> FriendManager.INSTANCE.remove(friend);
+            remove.action = () -> {
+                Friends.get().remove(friend);
+
+                clear();
+                initWidgets();
+            };
 
             section.row();
         }
@@ -122,13 +129,7 @@ public class TopBarFriends extends TopBarWindowScreen {
         WPlus add = t.add(new WPlus()).getWidget();
         add.action = () -> {
             String name = username.getText().trim();
-            if (!name.isEmpty()) FriendManager.INSTANCE.add(new Friend(name));
+            if (!name.isEmpty()) Friends.get().add(new Friend(name));
         };
     }
-
-    @EventHandler
-    private final Listener<FriendListChangedEvent> onFriendListChanged = new Listener<>(event -> {
-        clear();
-        initWidgets();
-    });
 }

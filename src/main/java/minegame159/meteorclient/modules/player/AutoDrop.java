@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.modules.player;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
@@ -44,7 +43,7 @@ public class AutoDrop extends Module {
     }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         if (mc.currentScreen instanceof HandledScreen<?>) return;
 
         for (int i = excludeHotbar.get() ? 9 : 0; i < mc.player.inventory.size(); i++) {
@@ -52,5 +51,5 @@ public class AutoDrop extends Module {
                 InvUtils.clickSlot(InvUtils.invIndexToSlotId(i), 1, SlotActionType.THROW);
             }
         }
-    });
+    }
 }

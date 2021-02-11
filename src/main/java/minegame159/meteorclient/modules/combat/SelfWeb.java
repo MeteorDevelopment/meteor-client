@@ -5,34 +5,31 @@
 
 package minegame159.meteorclient.modules.combat;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.utils.player.RotationUtils;
+import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
 
 public class SelfWeb extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Boolean> doubles = sgGeneral.add(new BoolSetting.Builder()
-            .name("doubles")
+            .name("double-place")
             .description("Places webs in your upper hitbox as well.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> turnOff = sgGeneral.add(new BoolSetting.Builder()
-            .name("turn-off")
+            .name("auto-toggle")
             .description("Toggles off after placing the webs.")
             .defaultValue(true)
             .build()
@@ -50,28 +47,33 @@ public class SelfWeb extends Module {
     }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
-        int webSlot = -1;
+    private void onTick(TickEvent.Pre event) {
+        int slot = findSlot();
+        if (slot == -1) return;
+
+        BlockPos blockPos = mc.player.getBlockPos();
+        BlockUtils.place(blockPos, Hand.MAIN_HAND, slot, rotate.get(), 0);
+
+        if (doubles.get()) {
+            slot = findSlot();
+            if (slot == -1) return;
+
+            blockPos = mc.player.getBlockPos().add(0, 1, 0);
+            BlockUtils.place(blockPos, Hand.MAIN_HAND, slot, rotate.get(), 0);
+        }
+
+        if (turnOff.get()) toggle();
+    }
+
+    private int findSlot() {
         for (int i = 0; i < 9; i++) {
             Item item = mc.player.inventory.getStack(i).getItem();
 
             if (item == Items.COBWEB) {
-                webSlot = i;
-                break;
+                return i;
             }
         }
-        if (webSlot == -1) return;
 
-        int prevSlot = mc.player.inventory.selectedSlot;
-        mc.player.inventory.selectedSlot = webSlot;
-        BlockPos playerPos = mc.player.getBlockPos();
-
-        if (rotate.get()) RotationUtils.packetRotate(mc.player.getBlockPos());
-        mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.DOWN, playerPos, true));
-
-        if (doubles.get()) mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos(), Direction.DOWN, playerPos.add(0 ,1,0), true));
-
-        mc.player.inventory.selectedSlot = prevSlot;
-        if (turnOff.get()) toggle();
-    });
+        return -1;
+    }
 }

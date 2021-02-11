@@ -9,7 +9,7 @@ import baritone.api.BaritoneAPI;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import minegame159.meteorclient.commands.Command;
 import minegame159.meteorclient.commands.arguments.PlayerArgumentType;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.combat.Swarm;
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.player.PlayerEntity;
@@ -25,14 +25,14 @@ public class SwarmFollow extends Command {
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.then(literal("follow").executes(context -> {
-                    Swarm swarm = ModuleManager.INSTANCE.get(Swarm.class);
+                    Swarm swarm = Modules.get().get(Swarm.class);
                     if (swarm.currentMode == Swarm.Mode.Queen && swarm.server != null && mc.player != null) {
                         swarm.server.sendMessage(context.getInput() + " " + mc.player.getDisplayName().getString());
                     }
                     return SINGLE_SUCCESS;
                 }).then(argument("name", PlayerArgumentType.player()).executes(context -> {
                     PlayerEntity playerEntity = context.getArgument("name", PlayerEntity.class);
-                    Swarm swarm = ModuleManager.INSTANCE.get(Swarm.class);
+                    Swarm swarm = Modules.get().get(Swarm.class);
                     if (swarm.currentMode == Swarm.Mode.Queen && swarm.server != null) {
                         swarm.server.sendMessage(context.getInput());
                     } else {

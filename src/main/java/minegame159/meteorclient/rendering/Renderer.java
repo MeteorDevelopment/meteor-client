@@ -69,6 +69,10 @@ public class Renderer {
         quadWithLines(normal, lines, x, y, z, x, y, z + size, x + size, y, z + size, x + size, y, z, sideColor, lineColor, mode);
     }
 
+    public static void quadWithLinesHorizontal(MeshBuilder normal, MeshBuilder lines, double x1, double y, double z1, double x2, double z2, Color sideColor, Color lineColor, ShapeMode mode) {
+        quadWithLines(normal, lines, x1, y, z1, x1, y, z2, x2, y, z2, x2, y, z1, sideColor, lineColor, mode);
+    }
+
     public static void quadWithLinesVertical(MeshBuilder normal, MeshBuilder lines, double x1, double y1, double z1, double x2, double y2, double z2, Color sideColor, Color lineColor, ShapeMode mode) {
         quadWithLines(normal, lines, x1, y1, z1, x1, y2, z1, x2, y2, z2, x2, y1, z2, sideColor, lineColor, mode);
     }

@@ -7,8 +7,7 @@ package minegame159.meteorclient.modules.combat;
 
 //Created by squidoodly 07/08/2020
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.Category;
@@ -17,24 +16,22 @@ import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.Utils;
-import minegame159.meteorclient.utils.player.RotationUtils;
+import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.block.*;
 import net.minecraft.client.gui.screen.ingame.SignEditScreen;
 import net.minecraft.item.*;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 
 public class AntiBed extends Module {
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<Boolean> selfToggle = sgGeneral.add(new BoolSetting.Builder()
-            .name("self-toggle")
-            .description("Toggles AntiBed when finished.")
+    private final Setting<Boolean> autoToggle = sgGeneral.add(new BoolSetting.Builder()
+            .name("auto-toggle")
+            .description("Toggles AntiBed off when finished.")
             .defaultValue(false)
             .build()
     );
@@ -60,10 +57,12 @@ public class AntiBed extends Module {
             .build()
     );
 
-    public AntiBed(){super(Category.Combat, "anti-bed", "Prevents people from placing beds where you are standing.");}
-
     private int place = -1;
     private boolean closeScreen = false;
+
+    public AntiBed() {
+        super(Category.Combat, "anti-bed", "Prevents people from placing beds where you are standing.");
+    }
 
     @Override
     public void onDeactivate() {
@@ -71,40 +70,45 @@ public class AntiBed extends Module {
     }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Pre event) {
         if (closeScreen && mc.currentScreen instanceof SignEditScreen) {
             closeScreen = false;
             mc.player.closeScreen();
             return;
-        } else if (closeScreen) {
+        }
+        else if (closeScreen) {
             return;
         }
+
         if (!mc.world.getBlockState(mc.player.getBlockPos().up()).isAir()) return;
         if (onlyOnGround.get() && !mc.player.isOnGround()) return;
+
         if (place == 0) {
             place --;
-            mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(Utils.vec3d(mc.player.getBlockPos().up()), Direction.DOWN, mc.player.getBlockPos().up(), mc.player.isOnGround()));
-            ((IKeyBinding)mc.options.keySneak).setPressed(false);
-            if (rotate.get()) RotationUtils.packetRotate(mc.player.getBlockPos().up());
-            if (selfToggle.get()) this.toggle();
-        } else if (place > 0) {
+            place(mc.player.inventory.selectedSlot, true);
+        }
+        else if (place > 0) {
             place --;
         }
+
         for (int i = 0; i < 9; i++) {
             ItemStack itemStack = mc.player.inventory.getStack(i);
             Item item = itemStack.getItem();
             Block block = Block.getBlockFromItem(item);
+
             if (item == Items.STRING
                     || block instanceof TrapdoorBlock
                     || item == Items.COBWEB) {
-                place(i);
+                place(i, true);
                 return;
-            } else if (block instanceof SlabBlock) {
+            }
+            else if (block instanceof SlabBlock) {
                 mc.player.inventory.selectedSlot = i;
                 ((IKeyBinding)mc.options.keySneak).setPressed(true);
                 if (place == -1) place = 2;
                 return;
-            } else if (block instanceof DoorBlock) {
+            }
+            else if (block instanceof DoorBlock) {
                 if (autoCenter.get()) {
                     Vec3d playerVec = Utils.vec3d(mc.player.getBlockPos());
                     if (mc.player.getHorizontalFacing() == Direction.SOUTH) {
@@ -119,9 +123,10 @@ public class AntiBed extends Module {
                     mc.player.updatePosition(playerVec.x, playerVec.y, playerVec.z);
                     mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(playerVec.x, playerVec.y, playerVec.z, mc.player.isOnGround()));
                 }
-                place(i);
+                place(i, true);
                 return;
-            } else if (item == Items.LADDER) {
+            }
+            else if (item == Items.LADDER) {
                 if (autoCenter.get()) {
                     Vec3d playerVec = Utils.vec3d(mc.player.getBlockPos());
                     BlockPos blockPos = checkBlocks();
@@ -138,30 +143,25 @@ public class AntiBed extends Module {
                     mc.player.updatePosition(playerVec.x, playerVec.y, playerVec.z);
                     mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(playerVec.x, playerVec.y, playerVec.z, mc.player.isOnGround()));
                 }
-                place(i);
+                place(i, true);
                 return;
-            } else if (item instanceof BannerItem
+            }
+            else if (item instanceof BannerItem
                     || item == Items.LEVER || item == Items.TORCH
                     || item == Items.REDSTONE_TORCH || item instanceof SignItem
                     || item == Items.TRIPWIRE_HOOK || block instanceof StoneButtonBlock
                     || block instanceof WoodenButtonBlock) {
-                place(i);
+                place(i, true);
                 if (item instanceof SignItem) closeScreen = true;
                 return;
-            } else if (item == Items.SCAFFOLDING && itemStack.getCount() >= 2) {
-                int preSlot = mc.player.inventory.selectedSlot;
-                mc.player.inventory.selectedSlot = i;
-                boolean sneaking = mc.player.isSneaking();
-                mc.player.setSneaking(true);
-                mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(Utils.vec3d(mc.player.getBlockPos()), Direction.DOWN, mc.player.getBlockPos(), mc.player.isOnGround()));
-                mc.player.setSneaking(sneaking);
-                if (rotate.get()) RotationUtils.packetRotate(mc.player.getBlockPos());
-                mc.player.inventory.selectedSlot = preSlot;
-                place(i);
+            }
+            else if (item == Items.SCAFFOLDING && itemStack.getCount() >= 2) {
+                place(i, false);
+                place(i, true);
                 return;
             }
         }
-    });
+    }
 
     private BlockPos checkBlocks(){
         BlockPos blockPos = null;
@@ -177,15 +177,13 @@ public class AntiBed extends Module {
         return blockPos;
     }
 
-    private void place(int i){
-        int preSlot = mc.player.inventory.selectedSlot;
-        mc.player.inventory.selectedSlot = i;
-        boolean sneaking = mc.player.isSneaking();
-        mc.player.setSneaking(true);
-        if (rotate.get()) RotationUtils.packetRotate(mc.player.getBlockPos().up());
-        mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(Utils.vec3d(mc.player.getBlockPos().up()), Direction.DOWN, mc.player.getBlockPos().up(), mc.player.isOnGround()));
-        mc.player.setSneaking(sneaking);
-        mc.player.inventory.selectedSlot = preSlot;
-        if (selfToggle.get()) this.toggle();
+    private void place(int slot, boolean up) {
+        BlockPos blockPos;
+        if (up) blockPos = mc.player.getBlockPos().up();
+        else blockPos = mc.player.getBlockPos();
+
+        if (BlockUtils.place(blockPos, Hand.MAIN_HAND, slot, rotate.get(), 100)) {
+            if (autoToggle.get()) toggle();
+        }
     }
 }

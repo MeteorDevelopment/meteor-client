@@ -10,7 +10,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import minegame159.meteorclient.commands.Command;
 import minegame159.meteorclient.commands.arguments.ModuleArgumentType;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.combat.Swarm;
 import net.minecraft.command.CommandSource;
 
@@ -26,7 +26,7 @@ public class SwarmModuleToggle extends Command {
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.then(literal("module").then(argument("m", ModuleArgumentType.module()).then(argument("bool", BoolArgumentType.bool()).executes(context -> {
-            Swarm swarm = ModuleManager.INSTANCE.get(Swarm.class);
+            Swarm swarm = Modules.get().get(Swarm.class);
             if (swarm.currentMode == Swarm.Mode.Queen && swarm.server != null) {
                 swarm.server.sendMessage(context.getInput());
             } else {

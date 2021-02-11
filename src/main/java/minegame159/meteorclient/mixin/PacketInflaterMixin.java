@@ -1,6 +1,6 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.mixin;
@@ -9,7 +9,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.DecoderException;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.misc.AntiPacketKick;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.PacketInflater;
@@ -32,7 +32,7 @@ public class PacketInflaterMixin {
 
     @Inject(method = "decode", at = @At("HEAD"), cancellable = true)
     private void onDecode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, List<Object> list, CallbackInfo info) throws DataFormatException {
-        if (ModuleManager.INSTANCE.isActive(AntiPacketKick.class)) info.cancel();
+        if (Modules.get().isActive(AntiPacketKick.class)) info.cancel();
         else return;
 
         if (byteBuf.readableBytes() != 0) {

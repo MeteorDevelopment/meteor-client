@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.modules.movement;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixin.AbstractBlockAccessor;
 import minegame159.meteorclient.mixininterface.IVec3d;
@@ -34,7 +33,7 @@ public class Anchor extends Module {
 
     private final Setting<Integer> minPitch = sgGeneral.add(new IntSetting.Builder()
             .name("min-pitch")
-            .description("Minimum pitch at which anchor will work. (90 - -90)")
+            .description("The minimum pitch at which anchor will work.")
             .defaultValue(-90)
             .min(-90)
             .max(90)
@@ -45,14 +44,14 @@ public class Anchor extends Module {
 
     private final Setting<Boolean> cancelMove = sgGeneral.add(new BoolSetting.Builder()
             .name("cancel-jump-in-hole")
-            .description("Stops you from jumping when anchor is active and min pitch is met.")
+            .description("Prevents you from jumping when Anchor is active and Min Pitch is met.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> pull = sgGeneral.add(new BoolSetting.Builder()
             .name("pull")
-            .description("Whether to pull you faster into the hole.")
+            .description("The pull strength of Anchor.")
             .defaultValue(false)
             .build()
     );
@@ -87,10 +86,12 @@ public class Anchor extends Module {
     }
 
     @EventHandler
-    private final Listener<TickEvent.Pre> onPreTick = new Listener<>(event -> cancelJump = foundHole && cancelMove.get() && mc.player.pitch >= minPitch.get());
+    private void onPreTick(TickEvent.Pre event) {
+        cancelJump = foundHole && cancelMove.get() && mc.player.pitch >= minPitch.get();
+    }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onPostTick = new Listener<>(event -> {
+    private void onPostTick(TickEvent.Post event) {
         controlMovement = false;
 
         int x = MathHelper.floor(mc.player.getX());
@@ -132,7 +133,7 @@ public class Anchor extends Module {
 
             ((IVec3d) mc.player.getVelocity()).set(deltaX, mc.player.getVelocity().y - (pull.get() ? pullSpeed.get() : 0), deltaZ);
         }
-    });
+    }
 
     private boolean isHole(int x, int y, int z) {
         return isHoleBlock(x, y - 1, z) &&

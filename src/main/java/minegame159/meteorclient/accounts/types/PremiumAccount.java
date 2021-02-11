@@ -14,17 +14,11 @@ import com.mojang.authlib.yggdrasil.YggdrasilUserAuthentication;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.accounts.Account;
 import minegame159.meteorclient.accounts.AccountType;
-import minegame159.meteorclient.accounts.ProfileResponse;
-import minegame159.meteorclient.accounts.ProfileSkinResponse;
 import minegame159.meteorclient.mixininterface.IMinecraftClient;
 import minegame159.meteorclient.utils.misc.NbtException;
-import minegame159.meteorclient.utils.network.HttpUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.Session;
 import net.minecraft.nbt.CompoundTag;
-
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 
 public class PremiumAccount extends Account<PremiumAccount> {
     private static final Gson GSON = new Gson();
@@ -54,20 +48,11 @@ public class PremiumAccount extends Account<PremiumAccount> {
 
     @Override
     public boolean fetchHead() {
-        String skinUrl = null;
-        ProfileResponse response = HttpUtils.get("https://sessionserver.mojang.com/session/minecraft/profile/" + cache.uuid, ProfileResponse.class);
-
-        if (response != null) {
-            String encodedTexturesJson = response.getTextures();
-
-            if (encodedTexturesJson != null) {
-                ProfileSkinResponse skin = GSON.fromJson(new String(Base64.getDecoder().decode(encodedTexturesJson), StandardCharsets.UTF_8), ProfileSkinResponse.class);
-                if (skin.textures.SKIN != null) skinUrl = skin.textures.SKIN.url;
-            }
+        try {
+            return cache.makeHead("https://crafatar.com/avatars/" + cache.uuid + "?size=8&overlay&default=MHF_Steve");
+        } catch (Exception e) {
+            return false;
         }
-
-        if (skinUrl == null) skinUrl = "http://meteorclient.com/steve.png";
-        return cache.makeHead(skinUrl);
     }
 
     @Override
@@ -86,13 +71,14 @@ public class PremiumAccount extends Account<PremiumAccount> {
             MeteorClient.LOG.error("Failed to contact the authentication server.");
             return false;
         } catch (AuthenticationException e) {
-            if (e.getMessage().contains("Invalid username or password") || e.getMessage().contains("account migrated")) MeteorClient.LOG.error("Wrong password.");
+            if (e.getMessage().contains("Invalid username or password") || e.getMessage().contains("account migrated"))
+                MeteorClient.LOG.error("Wrong password.");
             else MeteorClient.LOG.error("Failed to contact the authentication server.");
             return false;
         }
     }
 
-    private YggdrasilUserAuthentication getAuth() {
+    public YggdrasilUserAuthentication getAuth() {
         YggdrasilUserAuthentication auth = (YggdrasilUserAuthentication) new YggdrasilAuthenticationService(((IMinecraftClient) MinecraftClient.getInstance()).getProxy(), "").createUserAuthentication(Agent.MINECRAFT);
 
         auth.setUsername(name);
@@ -118,5 +104,11 @@ public class PremiumAccount extends Account<PremiumAccount> {
         password = tag.getString("password");
 
         return this;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof PremiumAccount)) return false;
+        return ((PremiumAccount) o).name.equals(this.name);
     }
 }

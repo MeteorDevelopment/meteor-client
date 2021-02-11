@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.modules.render;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
@@ -125,7 +124,7 @@ public class StorageESP extends Module {
     }
 
     @EventHandler
-    private final Listener<RenderEvent> onRender = new Listener<>(event -> {
+    private void onRender(RenderEvent event) {
         count = 0;
 
         for (BlockEntity blockEntity : mc.world.blockEntities) {
@@ -161,7 +160,7 @@ public class StorageESP extends Module {
                     if (Dir.is(excludeDir, Dir.SOUTH)) z2 -= a;
                 }
 
-                double dist = mc.player.squaredDistanceTo(blockEntity.getPos().getX() + 1, blockEntity.getPos().getY() + 1, blockEntity.getPos().getZ() + 1);
+                double dist = mc.player.squaredDistanceTo(blockEntity.getPos().getX() + 0.5, blockEntity.getPos().getY() + 0.5, blockEntity.getPos().getZ() + 0.5);
                 double a = 1;
                 if (dist <= fadeDistance.get() * fadeDistance.get()) a = dist / (fadeDistance.get() * fadeDistance.get());
 
@@ -181,7 +180,7 @@ public class StorageESP extends Module {
                 count++;
             }
         }
-    });
+    }
 
     @Override
     public String getInfoString() {

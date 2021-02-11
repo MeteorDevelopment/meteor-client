@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.modules.combat;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
@@ -16,8 +15,8 @@ import minegame159.meteorclient.rendering.ShapeMode;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.player.PlayerUtils;
-import minegame159.meteorclient.utils.player.RotationUtils;
 import minegame159.meteorclient.utils.render.color.SettingColor;
+import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.ShapeContext;
 import net.minecraft.util.Hand;
@@ -27,11 +26,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SelfTrap extends Module {
-
-    public SelfTrap(){
-        super(Category.Combat, "self-trap", "Places obsidian above your head.");
-    }
-
     public enum TopMode {
         AntiFacePlace,
         Full,
@@ -46,6 +40,8 @@ public class SelfTrap extends Module {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgRender = settings.createGroup("Render");
+
+    // General
 
     private final Setting<TopMode> topPlacement = sgGeneral.add(new EnumSetting.Builder<TopMode>()
             .name("top-mode")
@@ -121,9 +117,13 @@ public class SelfTrap extends Module {
             .build()
     );
 
-    private List<BlockPos> placePositions = new ArrayList<>();
+    private final List<BlockPos> placePositions = new ArrayList<>();
     private boolean placed;
     private int delay;
+
+    public SelfTrap(){
+        super(Category.Combat, "self-trap", "Places obsidian above your head.");
+    }
 
     @Override
     public void onActivate() {
@@ -133,10 +133,10 @@ public class SelfTrap extends Module {
 
         if (center.get()) PlayerUtils.centerPlayer();
     }
-    @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
 
-        int slot = InvUtils.findItemInHotbar(Blocks.OBSIDIAN.asItem(), itemStack -> true);
+    @EventHandler
+    private void onTick(TickEvent.Pre event) {
+        int slot = InvUtils.findItemInHotbar(Blocks.OBSIDIAN.asItem());
 
         if (turnOff.get() && ((placed && placePositions.isEmpty()) || slot == -1)) {
             sendToggledMsg();
@@ -149,31 +149,28 @@ public class SelfTrap extends Module {
             return;
         }
 
-        placePositions = getPlacePos();
+        findPlacePos();
 
         if (delay >= delaySetting.get() && placePositions.size() > 0) {
-            int prevSlot = mc.player.inventory.selectedSlot;
-            mc.player.inventory.selectedSlot = slot;
+            BlockPos blockPos = placePositions.get(placePositions.size() - 1);
 
-
-            if (PlayerUtils.placeBlock(placePositions.get(placePositions.size()-1), Hand.MAIN_HAND)) {
-                if (rotate.get()) RotationUtils.packetRotate(placePositions.get(placePositions.size()-1));
-                placePositions.remove(placePositions.get(placePositions.size() - 1));
+            if (BlockUtils.place(blockPos, Hand.MAIN_HAND, slot, rotate.get(), 50)) {
+                placePositions.remove(blockPos);
                 placed = true;
             }
 
-            mc.player.inventory.selectedSlot = prevSlot;
             delay = 0;
-        } else delay++;
-    });
+        }
+        else delay++;
+    }
 
     @EventHandler
-    private final Listener<RenderEvent> onRender = new Listener<>(event -> {
+    private void onRender(RenderEvent event) {
         if (!render.get() || placePositions.isEmpty()) return;
         for (BlockPos pos : placePositions) Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, pos, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-    });
+    }
 
-    private List<BlockPos> getPlacePos() {
+    private void findPlacePos() {
         placePositions.clear();
         BlockPos pos = mc.player.getBlockPos();
 
@@ -197,8 +194,6 @@ public class SelfTrap extends Module {
         }
 
         if (bottomPlacement.get() == BottomMode.Single) add(pos.add(0, -1, 0));
-
-        return placePositions;
     }
 
 

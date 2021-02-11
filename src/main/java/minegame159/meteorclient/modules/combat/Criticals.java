@@ -7,8 +7,7 @@ package minegame159.meteorclient.modules.combat;
 
 //Updated by squidoodly 18/07/2020
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixininterface.IPlayerMoveC2SPacket;
@@ -56,7 +55,7 @@ public class Criticals extends Module {
     }
 
     @EventHandler
-    private final Listener<PacketEvent.Send> onSendPacket = new Listener<>(event -> {
+    private void onSendPacket(PacketEvent.Send event) {
 
         if (event.packet instanceof PlayerInteractEntityC2SPacket && ((PlayerInteractEntityC2SPacket) event.packet).getType() == PlayerInteractEntityC2SPacket.InteractionType.ATTACK) {
             if (skipCrit()) return;
@@ -66,10 +65,10 @@ public class Criticals extends Module {
             if (skipCrit()) return;
             doJumpModeSwing(event);
         }
-    });
+    }
 
     @EventHandler
-    private final Listener<TickEvent.Pre> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Pre event) {
         if (sendPackets) {
             if (sendTimer <= 0) {
                 sendPackets = false;
@@ -84,7 +83,7 @@ public class Criticals extends Module {
                 sendTimer--;
             }
         }
-    });
+    }
 
     private void doPacketMode() {
         double x = mc.player.getX();

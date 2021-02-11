@@ -1,11 +1,11 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.mixin;
 
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.misc.AutoBrewer;
 import net.minecraft.client.gui.screen.ingame.BrewingStandScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
@@ -24,12 +24,12 @@ public abstract class BrewingStandScreenMixin extends HandledScreen<BrewingStand
     public void tick() {
         super.tick();
 
-        if (ModuleManager.INSTANCE.isActive(AutoBrewer.class)) ModuleManager.INSTANCE.get(AutoBrewer.class).tick(handler);
+        if (Modules.get().isActive(AutoBrewer.class)) Modules.get().get(AutoBrewer.class).tick(handler);
     }
 
     @Override
     public void onClose() {
-        if (ModuleManager.INSTANCE.isActive(AutoBrewer.class)) ModuleManager.INSTANCE.get(AutoBrewer.class).onBrewingStandClose();
+        if (Modules.get().isActive(AutoBrewer.class)) Modules.get().get(AutoBrewer.class).onBrewingStandClose();
 
         super.onClose();
     }

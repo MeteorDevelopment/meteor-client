@@ -9,7 +9,6 @@ import minegame159.meteorclient.accounts.types.TheAlteningAccount;
 import minegame159.meteorclient.gui.screens.WindowScreen;
 import minegame159.meteorclient.gui.widgets.WButton;
 import minegame159.meteorclient.gui.widgets.WLabel;
-import minegame159.meteorclient.gui.widgets.WTextBox;
 
 public class AddTheAlteningAccountScreen extends WindowScreen {
     public AddTheAlteningAccountScreen() {
@@ -17,7 +16,7 @@ public class AddTheAlteningAccountScreen extends WindowScreen {
 
         // Token
         add(new WLabel("Token:"));
-        WTextBox token = add(new WTextBox("", 400)).getWidget();
+        WAccountField token = add(new WAccountField("", 400)).getWidget();
         token.setFocused(true);
         row();
 

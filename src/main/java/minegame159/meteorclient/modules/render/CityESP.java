@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.modules.render;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
@@ -15,9 +14,7 @@ import minegame159.meteorclient.rendering.ShapeMode;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.player.CityUtils;
 import minegame159.meteorclient.utils.render.color.SettingColor;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 
 public class CityESP extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -25,19 +22,12 @@ public class CityESP extends Module {
 
     // General
 
-    private final Setting<Integer> range = sgGeneral.add(new IntSetting.Builder()
+    private final Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()
             .name("range")
-            .description("The maximum range a city-able block will render.")
+            .description("The maximum range a city-able block will be found.")
             .defaultValue(5)
             .min(0)
             .sliderMax(20)
-            .build()
-    );
-
-    private final Setting<Boolean> checkBelow = sgGeneral.add(new BoolSetting.Builder()
-            .name("check-below")
-            .description("Checks if there is an obsidian or bedrock below the surrounded block for you to place crystals on.")
-            .defaultValue(true)
             .build()
     );
 
@@ -69,12 +59,11 @@ public class CityESP extends Module {
     }
 
     @EventHandler
-    private final Listener<RenderEvent> onRender = new Listener<>(event -> {
-        PlayerEntity target = CityUtils.getPlayerTarget();
-        BlockPos targetBlock = CityUtils.getTargetBlock(checkBelow.get());
+    private void onRender(RenderEvent event) {
+        BlockPos targetBlock = CityUtils.getTargetBlock(CityUtils.getPlayerTarget(range.get()));
 
-        if (target == null || targetBlock == null || MathHelper.sqrt(mc.player.squaredDistanceTo(targetBlock.getX(), targetBlock.getY(), targetBlock.getZ())) > range.get()) return;
+        if (targetBlock == null) return;
 
         Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, targetBlock, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-    });
+    }
 }

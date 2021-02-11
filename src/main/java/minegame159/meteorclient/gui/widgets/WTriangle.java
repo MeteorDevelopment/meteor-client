@@ -15,9 +15,9 @@ public class WTriangle extends WPressable {
     public double rotation;
 
     public WTriangle() {
-        color = GuiConfig.INSTANCE.background;
-        colorHovered = GuiConfig.INSTANCE.backgroundHovered;
-        colorPressed = GuiConfig.INSTANCE.backgroundPressed;
+        color = GuiConfig.get().background;
+        colorHovered = GuiConfig.get().backgroundHovered;
+        colorPressed = GuiConfig.get().backgroundPressed;
     }
 
     @Override

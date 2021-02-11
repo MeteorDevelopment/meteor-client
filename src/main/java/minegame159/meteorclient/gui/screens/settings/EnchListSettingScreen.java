@@ -8,6 +8,7 @@ package minegame159.meteorclient.gui.screens.settings;
 import minegame159.meteorclient.gui.widgets.WLabel;
 import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.utils.misc.Names;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.util.registry.Registry;
 
@@ -20,11 +21,11 @@ public class EnchListSettingScreen extends LeftRightListSettingScreen<Enchantmen
 
     @Override
     protected WWidget getValueWidget(Enchantment value) {
-        return new WLabel(value.getName(1).getString());
+        return new WLabel(getValueName(value));
     }
 
     @Override
     protected String getValueName(Enchantment value) {
-        return value.getName(1).getString();
+        return Names.get(value);
     }
 }

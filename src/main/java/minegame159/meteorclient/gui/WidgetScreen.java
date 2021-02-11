@@ -5,7 +5,6 @@
 
 package minegame159.meteorclient.gui;
 
-import me.zero.alpine.listener.Listenable;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.gui.renderer.GuiDebugRenderer;
 import minegame159.meteorclient.gui.renderer.GuiRenderer;
@@ -23,7 +22,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.LiteralText;
 import org.lwjgl.glfw.GLFW;
 
-public abstract class WidgetScreen extends Screen implements Listenable {
+public abstract class WidgetScreen extends Screen {
     private static final GuiRenderer GUI_RENDERER = new GuiRenderer();
     private static final GuiDebugRenderer GUI_DEBUG_RENDERER = new GuiDebugRenderer();
 
@@ -31,8 +30,9 @@ public abstract class WidgetScreen extends Screen implements Listenable {
     public final WWidget root;
 
     private final int prePostKeyEvents;
-    private boolean firstInit = true;
+    protected boolean firstInit = true;
     private boolean renderDebug = false;
+    private boolean closed, onClose;
 
     public boolean locked;
 
@@ -63,6 +63,8 @@ public abstract class WidgetScreen extends Screen implements Listenable {
         }
 
         loopWidget(root);
+
+        closed = false;
     }
 
     private void loopWidget(WWidget widget) {
@@ -166,14 +168,31 @@ public abstract class WidgetScreen extends Screen implements Listenable {
 
     @Override
     public void onClose() {
-        if (locked) return;
+        if (!locked) {
+            boolean preOnClose = onClose;
+            onClose = true;
 
-        Input.setCursorStyle(CursorStyle.Default);
+            removed();
 
-        MeteorClient.EVENT_BUS.unsubscribe(this);
-        GuiKeyEvents.postKeyEvents = prePostKeyEvents;
-        MinecraftClient.getInstance().openScreen(parent);
+            onClose = preOnClose;
+        }
     }
+
+    @Override
+    public void removed() {
+        if (!closed) {
+            closed = true;
+            onClosed();
+
+            Input.setCursorStyle(CursorStyle.Default);
+
+            MeteorClient.EVENT_BUS.unsubscribe(this);
+            GuiKeyEvents.postKeyEvents = prePostKeyEvents;
+            if (onClose) MinecraftClient.getInstance().openScreen(parent);
+        }
+    }
+
+    protected void onClosed() {}
 
     @Override
     public boolean shouldCloseOnEsc() {

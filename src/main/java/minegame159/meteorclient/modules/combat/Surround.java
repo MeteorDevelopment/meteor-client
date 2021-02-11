@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.modules.combat;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
@@ -14,9 +13,8 @@ import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.player.PlayerUtils;
-import minegame159.meteorclient.utils.player.RotationUtils;
+import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
@@ -68,6 +66,13 @@ public class Surround extends Module {
             .build()
     );
 
+    private final Setting<Boolean> disableOnYChange = sgGeneral.add(new BoolSetting.Builder()
+            .name("disable-on-y-change")
+            .description("Automatically disables when your y level (step, jumping, atc).")
+            .defaultValue(true)
+            .build()
+    );
+
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
             .name("rotate")
             .description("Automatically faces towards the obsidian being placed.")
@@ -75,7 +80,14 @@ public class Surround extends Module {
             .build()
     );
 
-    private int prevSlot;
+    private final Setting<Boolean> useEnderChests = sgGeneral.add(new BoolSetting.Builder()
+            .name("use-ender-chests")
+            .description("Will surround with ender chests if they are found in your hotbar.")
+            .defaultValue(false)
+            .build()
+    );
+
+    // TODO: Make a render for Surround monkeys.
     private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
     private boolean return_;
 
@@ -89,8 +101,8 @@ public class Surround extends Module {
     }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
-        if (disableOnJump.get() && mc.options.keyJump.isPressed()) {
+    private void onTick(TickEvent.Pre event) {
+        if ((disableOnJump.get() && (mc.options.keyJump.isPressed() || mc.player.input.jumping)) || (disableOnYChange.get() && mc.player.prevY < mc.player.getY())) {
             toggle();
             return;
         }
@@ -134,49 +146,37 @@ public class Surround extends Module {
         if (turnOff.get() && p1 && p2 && p3 && p4 && p5) {
             if (doubleHeightPlaced || !doubleHeight.get()) toggle();
         }
-    });
+    }
 
     private boolean place(int x, int y, int z) {
         setBlockPos(x, y, z);
-
         BlockState blockState = mc.world.getBlockState(blockPos);
-        boolean wasObby = blockState.getBlock() == Blocks.OBSIDIAN;
-        boolean placed = !blockState.getMaterial().isReplaceable();
 
-        if (!placed && findSlot()) {
-            if (rotate.get()) RotationUtils.packetRotate(blockPos);
-            placed = PlayerUtils.placeBlock(blockPos, Hand.MAIN_HAND);
-            resetSlot();
+        if (!blockState.getMaterial().isReplaceable()) return true;
 
-            boolean isObby = mc.world.getBlockState(blockPos).getBlock() == Blocks.OBSIDIAN;
-            if (!wasObby && isObby) return_ = true;
+        int slot = findSlot();
+        if (BlockUtils.place(blockPos, Hand.MAIN_HAND, slot, rotate.get(), 100)) {
+            return_ = true;
         }
 
-        return placed;
+        return false;
     }
 
     private void setBlockPos(int x, int y, int z) {
         blockPos.set(mc.player.getX() + x, mc.player.getY() + y, mc.player.getZ() + z);
     }
 
-    private boolean findSlot() {
-        prevSlot = mc.player.inventory.selectedSlot;
-
+    private int findSlot() {
         for (int i = 0; i < 9; i++) {
             Item item = mc.player.inventory.getStack(i).getItem();
 
             if (!(item instanceof BlockItem)) continue;
 
-            if (item == Items.OBSIDIAN) {
-                mc.player.inventory.selectedSlot = i;
-                return true;
+            if (item == Items.OBSIDIAN || (item == Items.ENDER_CHEST && useEnderChests.get())) {
+                return i;
             }
         }
 
-        return false;
-    }
-
-    private void resetSlot() {
-        mc.player.inventory.selectedSlot = prevSlot;
+        return -1;
     }
 }

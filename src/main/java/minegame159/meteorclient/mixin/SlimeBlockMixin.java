@@ -1,11 +1,11 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.mixin;
 
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.movement.NoSlow;
 import net.minecraft.block.SlimeBlock;
 import net.minecraft.client.MinecraftClient;
@@ -21,6 +21,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class SlimeBlockMixin {
     @Inject(method = "onSteppedOn", at = @At("HEAD"), cancellable = true)
     private void onSteppedOn(World world, BlockPos pos, Entity entity, CallbackInfo info) {
-        if (ModuleManager.INSTANCE.get(NoSlow.class).slimeBlock() && entity == MinecraftClient.getInstance().player) info.cancel();
+        if (Modules.get().get(NoSlow.class).slimeBlock() && entity == MinecraftClient.getInstance().player) info.cancel();
     }
 }

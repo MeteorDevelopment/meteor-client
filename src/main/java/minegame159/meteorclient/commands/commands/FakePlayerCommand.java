@@ -8,8 +8,9 @@ package minegame159.meteorclient.commands.commands;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import minegame159.meteorclient.commands.Command;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.player.FakePlayer;
+import minegame159.meteorclient.utils.entity.FakePlayerUtils;
 import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.command.CommandSource;
 
@@ -20,26 +21,26 @@ public class FakePlayerCommand extends Command {
         super("fake-player", "Manages fake players that you can use for testing.");
     }
 
-    public static FakePlayer fakePlayer = ModuleManager.INSTANCE.get(FakePlayer.class);
+    public static FakePlayer fakePlayer = Modules.get().get(FakePlayer.class);
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.then(literal("spawn").executes(context -> {
-            if (active()) fakePlayer.spawnFakePlayer(fakePlayer.getName(), fakePlayer.copyInv(), fakePlayer.setGlowing(), fakePlayer.getHealth());
+            if (active()) FakePlayerUtils.spawnFakePlayer();
             return SINGLE_SUCCESS;
         })).then(literal("remove").then(argument("id", IntegerArgumentType.integer()).executes(context -> {
             int id = context.getArgument("id", Integer.class);
-            if (active()) fakePlayer.removeFakePlayer(id);
+            if (active()) FakePlayerUtils.removeFakePlayer(id);
             return SINGLE_SUCCESS;
         }))).then(literal("clear").executes(context -> {
-            if (active()) fakePlayer.clearFakePlayers(true);
+            if (active()) FakePlayerUtils.clearFakePlayers();
             return SINGLE_SUCCESS;
         }));
     }
 
     private boolean active() {
-        if (!ModuleManager.INSTANCE.get(FakePlayer.class).isActive()) {
-            ChatUtils.moduleError(ModuleManager.INSTANCE.get(FakePlayer.class),"The FakePlayer module must be enabled to use this command.");
+        if (!Modules.get().get(FakePlayer.class).isActive()) {
+            ChatUtils.moduleError(Modules.get().get(FakePlayer.class),"The FakePlayer module must be enabled to use this command.");
             return false;
         }
         else return true;

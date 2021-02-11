@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.modules.combat;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.game.OpenScreenEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
@@ -14,8 +13,7 @@ import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.utils.player.PlayerUtils;
-import minegame159.meteorclient.utils.player.RotationUtils;
+import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.client.gui.screen.ingame.AnvilScreen;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
@@ -26,7 +24,7 @@ public class SelfAnvil extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
-            .name("Rotate")
+            .name("rotate")
             .description("Forces you to rotate upwards when placing the anvil.")
             .defaultValue(true)
             .build()
@@ -37,33 +35,31 @@ public class SelfAnvil extends Module {
     }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
-        int anvilSlot = -1;
+    private void onTick(TickEvent.Pre event) {
+        int slot = findSlot();
+        if (slot == -1) return;
+
+        BlockPos blockPos = mc.player.getBlockPos().add(0, 2, 0);
+
+        if (BlockUtils.place(blockPos, Hand.MAIN_HAND, slot, rotate.get(), 0)) {
+            toggle();
+        }
+    }
+
+    @EventHandler
+    private void onOpenScreen(OpenScreenEvent event) {
+        if (event.screen instanceof AnvilScreen) event.cancel();
+    }
+
+    private int findSlot() {
         for (int i = 0; i < 9; i++) {
             Item item = mc.player.inventory.getStack(i).getItem();
 
             if (item == Items.ANVIL || item == Items.CHIPPED_ANVIL || item == Items.DAMAGED_ANVIL) {
-                anvilSlot = i;
-                break;
+                return i;
             }
         }
-        if (anvilSlot == -1) return;
 
-        int prevSlot = mc.player.inventory.selectedSlot;
-
-        mc.player.inventory.selectedSlot = anvilSlot;
-        BlockPos playerPos = mc.player.getBlockPos();
-
-        if (rotate.get()) RotationUtils.packetRotate(playerPos.add(0, 2, 0));
-
-        PlayerUtils.placeBlock(playerPos.add(0, 2, 0), Hand.MAIN_HAND);
-
-        mc.player.inventory.selectedSlot = prevSlot;
-        toggle();
-    });
-
-    @EventHandler
-    private final Listener<OpenScreenEvent> onOpenScreen = new Listener<>(event -> {
-        if (event.screen instanceof AnvilScreen) event.cancel();
-    });
+        return -1;
+    }
 }

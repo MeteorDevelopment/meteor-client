@@ -8,14 +8,13 @@ package minegame159.meteorclient.modules.render;
 //Updated by squidoodly 03/07/2020
 //Updated by squidoodly 30/07/2020
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderEvent;
-import minegame159.meteorclient.friends.FriendManager;
+import minegame159.meteorclient.friends.Friends;
 import minegame159.meteorclient.mixininterface.IBakedQuad;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.player.FakePlayer;
 import minegame159.meteorclient.modules.player.NameProtect;
 import minegame159.meteorclient.rendering.DrawMode;
@@ -24,6 +23,7 @@ import minegame159.meteorclient.rendering.text.TextRenderer;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.entity.FakePlayerEntity;
+import minegame159.meteorclient.utils.entity.FakePlayerUtils;
 import minegame159.meteorclient.utils.render.NametagUtils;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.render.color.SettingColor;
@@ -48,8 +48,8 @@ import java.util.Map;
 
 public class Nametags extends Module {
     public enum Position {
-        ABOVE,
-        ON_TOP
+        Above,
+        OnTop
     }
 
     private static final MeshBuilder MB = new MeshBuilder(2048);
@@ -59,6 +59,8 @@ public class Nametags extends Module {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgColors = settings.createGroup("Colors");
+
+    // General
 
     private final Setting<Boolean> displayArmor = sgGeneral.add(new BoolSetting.Builder()
             .name("display-armor")
@@ -76,7 +78,7 @@ public class Nametags extends Module {
 
     private final Setting<Boolean> displayArmorEnchants = sgGeneral.add(new BoolSetting.Builder()
             .name("display-armor-enchants")
-            .description("Display armor enchantments.")
+            .description("Displays armor enchantments.")
             .defaultValue(true)
             .build()
     );
@@ -84,7 +86,7 @@ public class Nametags extends Module {
     private final Setting<Position> displayOnItem = sgGeneral.add(new EnumSetting.Builder<Position>()
             .name("enchantment-position")
             .description("Where the enchantments are rendered.")
-            .defaultValue(Position.ON_TOP)
+            .defaultValue(Position.OnTop)
             .build()
     );
 
@@ -122,11 +124,13 @@ public class Nametags extends Module {
     );
 
     private final Setting<Boolean> yourself = sgGeneral.add(new BoolSetting.Builder()
-            .name("yourself")
+            .name("self-nametag")
             .description("Displays a nametag on your player if you're in Freecam.")
             .defaultValue(true)
             .build()
     );
+
+    // Colors
 
     private final Setting<SettingColor> normalName = sgColors.add(new ColorSetting.Builder()
             .name("normal-color")
@@ -174,18 +178,16 @@ public class Nametags extends Module {
         super(Category.Render, "nametags", "Displays customizable nametags above players.");
     }
 
-    String name;
-
     @EventHandler
-    private final Listener<RenderEvent> onRender = new Listener<>(event -> {
+    private void onRender(RenderEvent event) {
         for (Entity entity : mc.world.getEntities()) {
-            boolean a = !ModuleManager.INSTANCE.isActive(Freecam.class);
+            boolean a = !Modules.get().isActive(Freecam.class);
             if (!(entity instanceof PlayerEntity) || (a && entity == mc.player) || (a && entity == mc.cameraEntity)) continue;
             if (!yourself.get() && entity.getUuid().equals(mc.player.getUuid())) continue;
 
             renderNametag(event, (PlayerEntity) entity);
         }
-    });
+    }
 
     private void renderNametag(RenderEvent event, PlayerEntity entity) {
         // Get ping
@@ -202,10 +204,11 @@ public class Nametags extends Module {
         int health = Math.round(entity.getHealth() + absorption);
         double healthPercentage = health / (entity.getMaxHealth() + absorption);
 
-        if (entity == mc.player && ModuleManager.INSTANCE.get(NameProtect.class).isActive()) {
-            name = ModuleManager.INSTANCE.get(NameProtect.class).getName(entity.getGameProfile().getName());
-        } else if (ModuleManager.INSTANCE.get(FakePlayer.class).isActive() && entity instanceof FakePlayerEntity && ModuleManager.INSTANCE.get(FakePlayer.class).showID()) {
-            name = entity.getGameProfile().getName() + " [" + ModuleManager.INSTANCE.get(FakePlayer.class).getID((FakePlayerEntity) entity) + "]";
+        String name;
+        if (entity == mc.player && Modules.get().get(NameProtect.class).isActive()) {
+            name = Modules.get().get(NameProtect.class).getName(entity.getGameProfile().getName());
+        } else if (Modules.get().get(FakePlayer.class).showID(entity)) {
+            name = entity.getGameProfile().getName() + " [" + FakePlayerUtils.getID((FakePlayerEntity) entity) + "]";
         } else name = entity.getGameProfile().getName();
 
         String healthText = " " + health;
@@ -256,6 +259,7 @@ public class Nametags extends Module {
         }
 
         // Setup size
+        TextRenderer.get().begin();
         double nameWidth = TextRenderer.get().getWidth(name);
         double healthWidth = TextRenderer.get().getWidth(healthText);
         double pingWidth = TextRenderer.get().getWidth(pingText);
@@ -376,7 +380,7 @@ public class Nametags extends Module {
 
         // Render name, health enchant and texts
         TextRenderer.get().begin(1, false, true);
-        Color nameColor = FriendManager.INSTANCE.getFriendColor(entity);
+        Color nameColor = Friends.get().getFriendColor(entity);
         double hX = TextRenderer.get().render(name, -widthHalf, 0, nameColor != null ? nameColor : normalName.get());
         hX = TextRenderer.get().render(healthText, hX, 0, healthColor);
         if (displayPing.get()) TextRenderer.get().render(pingText, hX, 0, pingColor.get());
@@ -399,7 +403,7 @@ public class Nametags extends Module {
                 double aW = armorWidths[i];
                 double enchantY = 0;
                 double addY = (armorHeight - enchantmentsToShow.size() * TextRenderer.get().getHeight()) / 2;
-                if (displayOnItem.get() == Position.ABOVE) {
+                if (displayOnItem.get() == Position.Above) {
                     addY -= 16;
                 }
 

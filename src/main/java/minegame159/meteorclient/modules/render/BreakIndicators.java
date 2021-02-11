@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.modules.render;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.mixininterface.IClientPlayerInteractionManager;
 import minegame159.meteorclient.modules.Category;
@@ -104,7 +103,7 @@ public class BreakIndicators extends Module {
     }
 
     @EventHandler
-    private final Listener<RenderEvent> onRender = new Listener<>(event -> {
+    private void onRender(RenderEvent event) {
         IClientPlayerInteractionManager iam;
         boolean smooth;
 
@@ -179,5 +178,5 @@ public class BreakIndicators extends Module {
 
             Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x1, y1, z1, x2, y2, z2, cSides, cLines, shapeMode.get(), 0);
         });
-    });
+    }
 }

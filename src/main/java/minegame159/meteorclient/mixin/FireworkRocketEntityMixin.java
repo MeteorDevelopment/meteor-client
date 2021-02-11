@@ -1,6 +1,11 @@
+/*
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
+ * Copyright (c) 2021 Meteor Development.
+ */
+
 package minegame159.meteorclient.mixin;
 
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.movement.ElytraBoost;
 import net.minecraft.entity.projectile.FireworkRocketEntity;
 import net.minecraft.util.hit.BlockHitResult;
@@ -21,14 +26,14 @@ public abstract class FireworkRocketEntityMixin {
 
     @Inject(method = "tick", at = @At("TAIL"))
     private void onTick(CallbackInfo info) {
-        if (ModuleManager.INSTANCE.get(ElytraBoost.class).isFirework((FireworkRocketEntity) (Object) this) && this.life > this.lifeTime) {
+        if (Modules.get().get(ElytraBoost.class).isFirework((FireworkRocketEntity) (Object) this) && this.life > this.lifeTime) {
             this.explodeAndRemove();
         }
     }
 
     @Inject(method = "onEntityHit", at = @At("HEAD"), cancellable = true)
     private void onEntityHit(EntityHitResult entityHitResult, CallbackInfo info) {
-        if (ModuleManager.INSTANCE.get(ElytraBoost.class).isFirework((FireworkRocketEntity) (Object) this)) {
+        if (Modules.get().get(ElytraBoost.class).isFirework((FireworkRocketEntity) (Object) this)) {
             this.explodeAndRemove();
             info.cancel();
         }
@@ -36,7 +41,7 @@ public abstract class FireworkRocketEntityMixin {
 
     @Inject(method = "onBlockHit", at = @At("HEAD"), cancellable = true)
     private void onBlockHit(BlockHitResult blockHitResult, CallbackInfo info) {
-        if (ModuleManager.INSTANCE.get(ElytraBoost.class).isFirework((FireworkRocketEntity) (Object) this)) {
+        if (Modules.get().get(ElytraBoost.class).isFirework((FireworkRocketEntity) (Object) this)) {
             this.explodeAndRemove();
             info.cancel();
         }

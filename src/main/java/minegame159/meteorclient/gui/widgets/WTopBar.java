@@ -58,15 +58,15 @@ public class WTopBar extends WTable {
 
         @Override
         protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
-            Color color = GuiConfig.INSTANCE.background;
-            if (pressed) color = GuiConfig.INSTANCE.backgroundPressed;
-            else if (mouseOver) color = GuiConfig.INSTANCE.backgroundHovered;
+            Color color = GuiConfig.get().background;
+            if (pressed) color = GuiConfig.get().backgroundPressed;
+            else if (mouseOver) color = GuiConfig.get().backgroundHovered;
 
             Screen screen = MinecraftClient.getInstance().currentScreen;
-            if (screen instanceof TopBarScreen && ((TopBarScreen) screen).type == type) color = GuiConfig.INSTANCE.backgroundPressed;
+            if (screen instanceof TopBarScreen && ((TopBarScreen) screen).type == type) color = GuiConfig.get().backgroundPressed;
 
             renderer.quad(Region.FULL, x, y, width, height, color);
-            renderer.text(name, x + 4, y + 4, false, GuiConfig.INSTANCE.text);
+            renderer.text(name, x + 4, y + 4, false, GuiConfig.get().text);
         }
     }
 }

@@ -6,14 +6,15 @@
 package minegame159.meteorclient.modules.render;
 
 import com.google.common.reflect.TypeToken;
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.render.RenderEvent;
+import meteordevelopment.orbit.EventHandler;
+import minegame159.meteorclient.events.render.Render2DEvent;
+import minegame159.meteorclient.mixin.ProjectileEntityAccessor;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.rendering.DrawMode;
 import minegame159.meteorclient.rendering.MeshBuilder;
 import minegame159.meteorclient.rendering.text.TextRenderer;
+import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
@@ -27,6 +28,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.HorseBaseEntity;
 import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.projectile.ProjectileEntity;
+import net.minecraft.util.math.Vec3d;
 
 import java.lang.reflect.Type;
 import java.util.HashMap;
@@ -51,6 +54,13 @@ public class EntityOwner extends Module {
             .build()
     );
 
+    private final Setting<Boolean> projectiles = sgGeneral.add(new BoolSetting.Builder()
+            .name("projectiles")
+            .description("Display owner names of projectiles.")
+            .defaultValue(false)
+            .build()
+    );
+
     private final Map<UUID, String> uuidToName = new HashMap<>();
 
     public EntityOwner() {
@@ -63,34 +73,43 @@ public class EntityOwner extends Module {
     }
 
     @EventHandler
-    private final Listener<RenderEvent> onRender = new Listener<>(event -> {
+    private void onRender2D(Render2DEvent event) {
         for (Entity entity : mc.world.getEntities()) {
-            UUID ownerUuid = null;
+            UUID ownerUuid;
+
             if (entity instanceof TameableEntity) ownerUuid = ((TameableEntity) entity).getOwnerUuid();
             else if (entity instanceof HorseBaseEntity) ownerUuid = ((HorseBaseEntity) entity).getOwnerUuid();
-            if (ownerUuid == null) continue;
+            else if (entity instanceof ProjectileEntity && projectiles.get()) ownerUuid = ((ProjectileEntityAccessor) entity).getOwnerUuid();
+            else continue;
 
-            String name = getOwnerName(ownerUuid);
-            renderNametag(event, entity, name);
+            if (ownerUuid != null) {
+                Vec3d pos = entity.getPos().add(0, entity.getEyeHeight(entity.getPose()) + 0.75, 0);
+
+                if (NametagUtils.to2D(pos, scale.get())) {
+                    renderNametag(pos, getOwnerName(ownerUuid));
+                }
+            }
         }
-    });
+    }
 
-    private void renderNametag(RenderEvent event, Entity entity, String name) {
-        NametagUtils.begin(event, entity, scale.get());
-        TextRenderer.get().begin(1, false, true);
+    private void renderNametag(Vec3d pos, String name) {
+        TextRenderer text = TextRenderer.get();
 
-        double w = TextRenderer.get().getWidth(name) / 2;
-        double h = TextRenderer.get().getHeight();
+        NametagUtils.begin(pos);
+        text.beginBig();
 
-        // Render background
+        double w = text.getWidth(name);
+
+        double x = -w / 2;
+        double y = -text.getHeight();
+
         MB.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
-        MB.quad(-w - 1, 0, 0, -w - 1, h, 0, w + 1, h, 0, w + 1, 0, 0, BACKGROUND);
+        MB.quad(x - 1, y - 1, w + 2, text.getHeight() + 2, BACKGROUND);
         MB.end();
 
-        // Render name text
-        TextRenderer.get().render(name, -w, 0, TEXT);
+        text.render(name, x, y, TEXT);
 
-        TextRenderer.get().end();
+        text.end();
         NametagUtils.end();
     }
 

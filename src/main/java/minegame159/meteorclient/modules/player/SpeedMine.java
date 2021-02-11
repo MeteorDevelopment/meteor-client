@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.modules.player;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixininterface.IStatusEffectInstance;
 import minegame159.meteorclient.modules.Category;
@@ -28,6 +27,7 @@ public class SpeedMine extends Module {
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+
     public final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("mode")
             .defaultValue(Mode.Normal)
@@ -48,7 +48,7 @@ public class SpeedMine extends Module {
     }
 
     @EventHandler
-    public final Listener<TickEvent.Post> onTick = new Listener<>(e -> {
+    public void onTick(TickEvent.Post event) {
         Mode mode = this.mode.get();
 
         if (mode == Mode.Haste1 || mode == Mode.Haste2) {
@@ -63,5 +63,5 @@ public class SpeedMine extends Module {
                 mc.player.addStatusEffect(new StatusEffectInstance(HASTE, 20, amplifier, false, false, false));
             }
         }
-    });
+    }
 }

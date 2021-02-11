@@ -6,31 +6,31 @@
 package minegame159.meteorclient.modules.misc;
 
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
-import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.player.RotationUtils;
+import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.player.Rotations;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.util.Hand;
-import net.minecraft.util.math.Vec3d;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class AutoBreed extends Module {
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
             .name("entities")
             .description("Entities to breed.")
-            .defaultValue(new Object2BooleanOpenHashMap<>(0))
+            .defaultValue(Utils.asObject2BooleanOpenHashMap(EntityType.HORSE, EntityType.DONKEY, EntityType.COW,
+                    EntityType.MOOSHROOM, EntityType.SHEEP, EntityType.PIG, EntityType.CHICKEN, EntityType.WOLF,
+                    EntityType.CAT, EntityType.OCELOT, EntityType.RABBIT, EntityType.LLAMA, EntityType.TURTLE,
+                    EntityType.PANDA, EntityType.FOX, EntityType.BEE, EntityType.STRIDER, EntityType.HOGLIN))
             .onlyAttackable()
             .build()
     );
@@ -44,7 +44,7 @@ public class AutoBreed extends Module {
     );
 
     private final Setting<Hand> hand = sgGeneral.add(new EnumSetting.Builder<Hand>()
-            .name("hand")
+            .name("hand-for-breeding")
             .description("The hand to use for breeding.")
             .defaultValue(Hand.MAIN_HAND)
             .build()
@@ -69,7 +69,7 @@ public class AutoBreed extends Module {
     }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Pre event) {
         for (Entity entity : mc.world.getEntities()) {
             AnimalEntity animal;
 
@@ -82,11 +82,13 @@ public class AutoBreed extends Module {
                     || mc.player.distanceTo(animal) > range.get()
                     || !animal.isBreedingItem(hand.get() == Hand.MAIN_HAND ? mc.player.getMainHandStack() : mc.player.getOffHandStack())) continue;
 
-            RotationUtils.packetRotate(new Vec3d(animal.getX(), animal.getY() + animal.getHeight() / 2, animal.getZ()));
-            mc.interactionManager.interactEntity(mc.player, animal, hand.get());
-            mc.player.swingHand(hand.get());
-            animalsFed.add(animal);
+            Rotations.rotate(Rotations.getYaw(entity), Rotations.getPitch(entity), -100, () -> {
+                mc.interactionManager.interactEntity(mc.player, animal, hand.get());
+                mc.player.swingHand(hand.get());
+                animalsFed.add(animal);
+            });
+
             return;
         }
-    });
+    }
 }

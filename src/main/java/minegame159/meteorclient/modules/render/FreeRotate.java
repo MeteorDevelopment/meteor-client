@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.modules.render;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
@@ -17,13 +16,15 @@ import net.minecraft.client.options.Perspective;
 import org.lwjgl.glfw.GLFW;
 
 public class FreeRotate extends Module {
-
     public enum Mode {
         Player,
         Camera
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgArrows = settings.createGroup("Arrows");
+
+    // General
 
     public final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("mode")
@@ -48,14 +49,16 @@ public class FreeRotate extends Module {
             .build()
     );
 
-    public final Setting<Boolean> arrows = sgGeneral.add(new BoolSetting.Builder()
+    // Arrows
+
+    public final Setting<Boolean> arrows = sgArrows.add(new BoolSetting.Builder()
             .name("arrows-control-opposite")
             .description("Allows you to control the other entities rotation with the arrow keys.")
             .defaultValue(true)
             .build()
     );
 
-    private final Setting<Double> arrowSpeed = sgGeneral.add(new DoubleSetting.Builder()
+    private final Setting<Double> arrowSpeed = sgArrows.add(new DoubleSetting.Builder()
             .name("arrow-speed")
             .description("Rotation speed with arrow keys.")
             .defaultValue(4)
@@ -95,7 +98,7 @@ public class FreeRotate extends Module {
     }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         if (arrows.get()) {
             for (int i = 0; i < (arrowSpeed.get() * 2); i++) {
                 switch (mode.get()) {
@@ -117,5 +120,5 @@ public class FreeRotate extends Module {
 
         mc.player.pitch = Utils.clamp(mc.player.pitch, -90, 90);
         cameraPitch = Utils.clamp(cameraPitch, -90, 90);
-    });
+    }
 }

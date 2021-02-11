@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.modules.misc;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.modules.Category;
@@ -58,7 +57,7 @@ public class Spam extends Module {
     }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         if (messages.isEmpty()) return;
 
         if (timer <= 0) {
@@ -76,7 +75,7 @@ public class Spam extends Module {
         } else {
             timer--;
         }
-    });
+    }
 
     @Override
     public WWidget getWidget() {

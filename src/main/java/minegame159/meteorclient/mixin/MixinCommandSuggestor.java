@@ -1,3 +1,8 @@
+/*
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
+ * Copyright (c) 2021 Meteor Development.
+ */
+
 package minegame159.meteorclient.mixin;
 
 import com.mojang.brigadier.CommandDispatcher;
@@ -5,7 +10,7 @@ import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.suggestion.Suggestions;
 import minegame159.meteorclient.Config;
-import minegame159.meteorclient.commands.CommandManager;
+import minegame159.meteorclient.commands.Commands;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.CommandSuggestor;
 import net.minecraft.client.gui.widget.TextFieldWidget;
@@ -42,15 +47,15 @@ public abstract class MixinCommandSuggestor {
             cancellable = true,
             locals = LocalCapture.CAPTURE_FAILHARD)
     public void onRefresh(CallbackInfo ci, String string, StringReader reader) {
-        String prefix = Config.INSTANCE.getPrefix();
+        String prefix = Config.get().getPrefix();
         int length = prefix.length();
         if (reader.canRead(length) && reader.getString().startsWith(prefix, reader.getCursor())) {
             reader.setCursor(reader.getCursor() + length);
             assert this.client.player != null;
             // Pretty much copy&paste from the refresh method
-            CommandDispatcher<CommandSource> commandDispatcher = CommandManager.getDispatcher();
+            CommandDispatcher<CommandSource> commandDispatcher = Commands.get().getDispatcher();
             if (this.parse == null) {
-                this.parse = commandDispatcher.parse(reader, CommandManager.getCommandSource());
+                this.parse = commandDispatcher.parse(reader, Commands.get().getCommandSource());
             }
 
             int cursor = textField.getCursor();

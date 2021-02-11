@@ -5,26 +5,22 @@
 
 package minegame159.meteorclient.waypoints;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listenable;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
+import meteordevelopment.orbit.EventPriority;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.game.GameJoinedEvent;
 import minegame159.meteorclient.events.game.GameLeftEvent;
-import minegame159.meteorclient.events.meteor.WaypointListChangedEvent;
 import minegame159.meteorclient.events.render.RenderEvent;
-import minegame159.meteorclient.rendering.DrawMode;
 import minegame159.meteorclient.rendering.Matrices;
-import minegame159.meteorclient.rendering.MeshBuilder;
 import minegame159.meteorclient.rendering.text.TextRenderer;
+import minegame159.meteorclient.systems.System;
+import minegame159.meteorclient.systems.Systems;
 import minegame159.meteorclient.utils.Utils;
-import minegame159.meteorclient.utils.files.Savable;
 import minegame159.meteorclient.utils.misc.NbtUtils;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.world.Dimension;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.Camera;
-import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.texture.AbstractTexture;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.NativeImageBackedTexture;
@@ -34,45 +30,68 @@ import net.minecraft.util.math.Vec3d;
 import java.io.*;
 import java.util.*;
 
-public class Waypoints extends Savable<Waypoints> implements Listenable, Iterable<Waypoint> {
-    public static final Map<String, AbstractTexture> ICONS = new HashMap<>();
-    public static final Waypoints INSTANCE = new Waypoints();
-
+public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
     private static final String[] BUILTIN_ICONS = { "Square", "Circle", "Triangle", "Star", "Diamond" };
-
-    private static final MeshBuilder MB = new MeshBuilder(128);
 
     private static final Color BACKGROUND = new Color(0, 0, 0, 75);
     private static final Color TEXT = new Color(255, 255, 255);
 
+    public final Map<String, AbstractTexture> icons = new HashMap<>();
+
     private List<Waypoint> waypoints = new ArrayList<>();
 
-    private Waypoints() {
+    public Waypoints() {
         super(null);
-        MeteorClient.EVENT_BUS.subscribe(this);
+    }
+
+    public static Waypoints get() {
+        return Systems.get(Waypoints.class);
+    }
+
+    @Override
+    public void init() {
+        File iconsFolder = new File(new File(MeteorClient.FOLDER, "waypoints"), "icons");
+        iconsFolder.mkdirs();
+
+        for (String builtinIcon : BUILTIN_ICONS) {
+            File iconFile = new File(iconsFolder, builtinIcon + ".png");
+            if (!iconFile.exists()) copyIcon(iconFile);
+        }
+
+        File[] files = iconsFolder.listFiles();
+        for (File file : files) {
+            if (file.getName().endsWith(".png")) {
+                try {
+                    String name = file.getName().replace(".png", "");
+                    AbstractTexture texture = new NativeImageBackedTexture(NativeImage.read(new FileInputStream(file)));
+                    icons.put(name, texture);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     public void add(Waypoint waypoint) {
         waypoints.add(waypoint);
-        MeteorClient.EVENT_BUS.post(WaypointListChangedEvent.get());
         save();
     }
 
     public void remove(Waypoint waypoint) {
         if (waypoints.remove(waypoint)) {
-            MeteorClient.EVENT_BUS.post(WaypointListChangedEvent.get());
             save();
         }
     }
 
     @EventHandler
-    private final Listener<GameJoinedEvent> onGameJoined = new Listener<>(event -> load());
+    private void onGameJoined(GameJoinedEvent event) {
+        load();
+    }
 
-    @EventHandler
-    private final Listener<GameLeftEvent> onGameDisconnected = new Listener<>(event -> {
-        save();
+    @EventHandler(priority = EventPriority.LOWEST)
+    private void onGameDisconnected(GameLeftEvent event) {
         waypoints.clear();
-    });
+    }
 
     private boolean checkDimension(Waypoint waypoint) {
         Dimension dimension = Utils.getDimension();
@@ -100,7 +119,7 @@ public class Waypoints extends Savable<Waypoints> implements Listenable, Iterabl
     }
 
     @EventHandler
-    private final Listener<RenderEvent> onRender = new Listener<>(event -> {
+    private void onRender(RenderEvent event) {
         for (Waypoint waypoint : this) {
             if (!waypoint.visible || !checkDimension(waypoint)) continue;
 
@@ -168,6 +187,7 @@ public class Waypoints extends Savable<Waypoints> implements Listenable, Iterabl
             double h = TextRenderer.get().getHeight();
 
             // TODO: I HATE EVERYTHING ABOUT HOW RENDERING ROTATING THINGS WORKS AND I CANNOT BE ASKED TO WORK THIS OUT, THE WHOLE THING NEEDS TO BE RECODED REEEEEEEEEEEEEEEEEEEE
+            // sounds like a personal problem
             /*MB.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
             MB.quad(-w - 1, -h + 1, 0, -w - 1, 9 - h, 0, w + 1, 9 - h, 0, w + 1, -h + 1, 0, BACKGROUND);
             MB.quad(-w2 - 1, 0, 0, -w2 - 1, 8, 0, w2 + 1, 8, 0, w2 + 1, 0, 0, BACKGROUND);
@@ -185,10 +205,11 @@ public class Waypoints extends Savable<Waypoints> implements Listenable, Iterabl
             BACKGROUND.a = preBgA;
             TEXT.a = preTextA;
         }
-    });
+    }
 
     @Override
     public File getFile() {
+        if (!Utils.canUpdate()) return null;
         return new File(new File(MeteorClient.FOLDER, "waypoints"), Utils.getWorldName() + ".nbt");
     }
 
@@ -211,30 +232,7 @@ public class Waypoints extends Savable<Waypoints> implements Listenable, Iterabl
         return waypoints.iterator();
     }
 
-    public static void loadIcons() {
-        File iconsFolder = new File(new File(MeteorClient.FOLDER, "waypoints"), "icons");
-        iconsFolder.mkdirs();
-
-        for (String builtinIcon : BUILTIN_ICONS) {
-            File iconFile = new File(iconsFolder, builtinIcon + ".png");
-            if (!iconFile.exists()) copyIcon(iconFile);
-        }
-
-        File[] files = iconsFolder.listFiles();
-        for (File file : files) {
-            if (file.getName().endsWith(".png")) {
-                try {
-                    String name = file.getName().replace(".png", "");
-                    AbstractTexture texture = new NativeImageBackedTexture(NativeImage.read(new FileInputStream(file)));
-                    ICONS.put(name, texture);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-
-    private static void copyIcon(File file) {
+    private void copyIcon(File file) {
         try {
             InputStream in = Waypoints.class.getResourceAsStream("/assets/meteor-client/waypoint-icons/" + file.getName());
             OutputStream out = new FileOutputStream(file);

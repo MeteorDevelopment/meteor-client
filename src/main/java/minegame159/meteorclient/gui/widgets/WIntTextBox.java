@@ -11,7 +11,8 @@ public class WIntTextBox extends WTextBox {
     public WIntTextBox(int value, double width) {
         super(Integer.toString(value), width);
 
-        this.value = value;
+        this.value = value - 1;
+        setValue(value);
     }
 
     @Override

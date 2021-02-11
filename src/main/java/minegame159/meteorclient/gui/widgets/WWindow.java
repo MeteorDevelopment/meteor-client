@@ -97,7 +97,7 @@ public class WWindow extends WTable {
     @Override
     protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
         if (expanded || animationProgress > 0) {
-            renderer.quad(Region.FULL, x, y + header.height, width, height - header.height, GuiConfig.INSTANCE.background);
+            renderer.quad(Region.FULL, x, y + header.height, width, height - header.height, GuiConfig.get().background);
         }
     }
 
@@ -128,7 +128,7 @@ public class WWindow extends WTable {
             triangle = add(new WTriangle()).pad(4).fillX().centerY().right().getWidget();
             triangle.action = () -> {
                 expanded = !expanded;
-                if (type != null) GuiConfig.INSTANCE.getWindowConfig(type).setExpanded(expanded);
+                if (type != null) GuiConfig.get().getWindowConfig(type).setExpanded(expanded);
             };
         }
 
@@ -149,7 +149,7 @@ public class WWindow extends WTable {
             if (mouseOver) {
                 if (button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) {
                     expanded = !expanded;
-                    if (type != null) GuiConfig.INSTANCE.getWindowConfig(type).setExpanded(expanded);
+                    if (type != null) GuiConfig.get().getWindowConfig(type).setExpanded(expanded);
                     return true;
                 } else if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
                     dragging = true;
@@ -190,7 +190,7 @@ public class WWindow extends WTable {
         protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
             if (mouseOver) renderer.setCursorStyle(CursorStyle.Click);
 
-            renderer.quad(Region.FULL, x, y, width, height, GuiConfig.INSTANCE.accent);
+            renderer.quad(Region.FULL, x, y, width, height, GuiConfig.get().accent);
 
             if (expanded) animationProgress += delta / 4;
             else animationProgress -= delta / 4;

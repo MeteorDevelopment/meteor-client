@@ -6,8 +6,8 @@
 package minegame159.meteorclient.commands.commands;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.commands.Command;
+import minegame159.meteorclient.systems.Systems;
 import net.minecraft.command.CommandSource;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
@@ -20,7 +20,7 @@ public class Reload extends Command {
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.executes(context -> {
-            MeteorClient.INSTANCE.load();
+            Systems.load();
 
             return SINGLE_SUCCESS;
         });

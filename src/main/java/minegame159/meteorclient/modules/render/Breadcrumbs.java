@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.modules.render;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
@@ -75,7 +74,7 @@ public class Breadcrumbs extends Module {
     }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         if (lastDimension != mc.world.getDimension()) {
             for (Section sec : sections) sectionPool.free(sec);
             sections.clear();
@@ -94,12 +93,12 @@ public class Breadcrumbs extends Module {
         }
 
         lastDimension = mc.world.getDimension();
-    });
+    }
 
     @EventHandler
-    private final Listener<RenderEvent> onRender = new Listener<>(event -> {
+    private void onRender(RenderEvent event) {
         for (Section section : sections) section.render();
-    });
+    }
 
     private boolean isFarEnough(double x, double y, double z) {
         return Math.abs(mc.player.getX() - x) >= sectionLength.get() || Math.abs(mc.player.getY() - y) >= sectionLength.get() || Math.abs(mc.player.getZ() - z) >= sectionLength.get();

@@ -1,6 +1,6 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.mixin;
@@ -21,7 +21,6 @@ public class SplashTextResourceSupplierMixin {
     private void onApply(List<String> list, ResourceManager resourceManager, Profiler profiler, CallbackInfo info) {
         list.add("Meteor on Crack!");
         list.add("Star Meteor Client on GitHub!");
-        list.add("All hail Meteor!");
         list.add("Based utility mod.");
         list.add("based");
         list.add(":EZ:");
@@ -34,5 +33,7 @@ public class SplashTextResourceSupplierMixin {
         list.add("https://bigrat.monster");
         list.add("snale moment");
         list.add("inertia moment");
+        list.add("squidoodly based god");
+        list.add("r/squidoodly");
     }
 }

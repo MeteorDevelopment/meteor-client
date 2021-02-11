@@ -7,12 +7,11 @@ package minegame159.meteorclient.modules.render;
 
 //Created by squidoodly 24/12/2020
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.game.GetTooltipEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -76,9 +75,8 @@ public class ShulkerPeek extends Module {
     );
 
     @EventHandler
-    private final Listener<GetTooltipEvent> onGetTooltip = new Listener<>(event -> {
+    private void onGetTooltip(GetTooltipEvent event) {
         if (mode.get() != Mode.Tooltip) return;
-        if (!Utils.isShulker(event.itemStack.getItem())) return;
 
         CompoundTag compoundTag = event.itemStack.getSubTag("BlockEntityTag");
         if (compoundTag != null) {
@@ -88,7 +86,7 @@ public class ShulkerPeek extends Module {
                 int totalItemStacks = 0;
                 int displaysItemStacks = 0;
 
-                if (ModuleManager.INSTANCE.get(this.getClass()).isActive()) {
+                if (Modules.get().get(this.getClass()).isActive()) {
                     Map<Text, Integer> itemCounts = new HashMap<>();
                     for (ItemStack itemStack : itemStacks) {
                         if (!itemStack.isEmpty()) {
@@ -149,5 +147,5 @@ public class ShulkerPeek extends Module {
                 event.list.add(new LiteralText("Press " + Formatting.YELLOW + Utils.getKeyName(KeyBindingHelper.getBoundKeyOf(KeyBinds.SHULKER_PEEK).getCode()) + Formatting.RESET + " to peek"));
             }
         }
-    });
+    }
 }

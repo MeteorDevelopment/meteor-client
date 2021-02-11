@@ -6,13 +6,12 @@
 package minegame159.meteorclient.modules.player;
 
 import baritone.api.BaritoneAPI;
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.combat.CrystalAura;
 import minegame159.meteorclient.modules.combat.KillAura;
 import minegame159.meteorclient.settings.BoolSetting;
@@ -29,23 +28,24 @@ public class AutoEat extends Module {
     private final SettingGroup sgHunger = settings.createGroup("Hunger");
 
     // General
+
     private final Setting<Boolean> egaps = sgGeneral.add(new BoolSetting.Builder()
             .name("egaps")
-            .description("Eat enchanted golden apples.")
+            .description("Eats enchanted golden apples.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> gaps = sgGeneral.add(new BoolSetting.Builder()
             .name("gaps")
-            .description("Eat golden apples.")
+            .description("Eats golden apples.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> chorus = sgGeneral.add(new BoolSetting.Builder()
             .name("chorus")
-            .description("Eat chorus fruit.")
+            .description("Eats chorus fruit.")
             .defaultValue(false)
             .build()
     );
@@ -65,15 +65,16 @@ public class AutoEat extends Module {
     );
 
     // Hunger
+
     private final Setting<Boolean> autoHunger = sgHunger.add(new BoolSetting.Builder()
-            .name("auto-hunger")
+            .name("auto-eat")
             .description("Automatically eats whenever it can.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Integer> minHunger = sgHunger.add(new IntSetting.Builder()
-            .name("hunger")
+            .name("min-hunger")
             .description("The level of hunger you eat at.")
             .defaultValue(17)
             .min(1)
@@ -104,7 +105,7 @@ public class AutoEat extends Module {
     }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         if (mc.player.abilities.creativeMode) return;
         if (isEating && !mc.player.getMainHandStack().getItem().isFood()) ((IKeyBinding) mc.options.keyUse).setPressed(false);
 
@@ -150,11 +151,11 @@ public class AutoEat extends Module {
                 mc.interactionManager.stopUsingItem(mc.player);
                 ((IKeyBinding) mc.options.keyUse).setPressed(false);
                 if(wasKillActive){
-                    ModuleManager.INSTANCE.get(KillAura.class).toggle();
+                    Modules.get().get(KillAura.class).toggle();
                     wasKillActive = false;
                 }
                 if(wasCrystalActive){
-                    ModuleManager.INSTANCE.get(CrystalAura.class).toggle();
+                    Modules.get().get(CrystalAura.class).toggle();
                     wasCrystalActive = false;
                 }
                 if (preSelectedSlot != -1) mc.player.inventory.selectedSlot = preSelectedSlot;
@@ -169,11 +170,11 @@ public class AutoEat extends Module {
 
             if (!mc.player.isUsingItem()) {
                 if (disableAuras.get()) {
-                    if (ModuleManager.INSTANCE.get(KillAura.class).isActive()) {
+                    if (Modules.get().get(KillAura.class).isActive()) {
                         wasKillActive = true;
-                        ModuleManager.INSTANCE.get(KillAura.class).toggle();
+                        Modules.get().get(KillAura.class).toggle();
                     }
-                    if (ModuleManager.INSTANCE.get(CrystalAura.class).isActive()) {
+                    if (Modules.get().get(CrystalAura.class).isActive()) {
                         wasCrystalActive = true;
                     }
                 }
@@ -202,7 +203,7 @@ public class AutoEat extends Module {
                 wasThis = true;
             }
         }
-    });
+    }
 
     public boolean rightClickThings() {
         return !isActive() || !isEating;

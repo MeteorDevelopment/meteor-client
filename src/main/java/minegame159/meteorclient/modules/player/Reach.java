@@ -16,7 +16,7 @@ public class Reach extends Module {
 
     private final Setting<Double> reach = sg.add(new DoubleSetting.Builder()
             .name("reach")
-            .description("Your reach.")
+            .description("Your reach modifier.")
             .defaultValue(5)
             .min(0)
             .sliderMax(6)

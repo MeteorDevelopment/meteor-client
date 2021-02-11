@@ -5,10 +5,10 @@
 
 package minegame159.meteorclient.modules.misc;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.events.world.PlaySoundEvent;
+import io.netty.channel.Channel;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
+import minegame159.meteorclient.mixin.ClientConnectionAccessor;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
@@ -53,16 +53,15 @@ public class OffhandCrash extends Module {
     private static final PlayerActionC2SPacket PACKET = new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.SWAP_ITEM_WITH_OFFHAND, new BlockPos(0, 0, 0) , Direction.UP);
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         if (doCrash.get()) {
-            for(int i = 0; i < speed.get(); ++i) mc.player.networkHandler.sendPacket(PACKET);
+            Channel channel = ((ClientConnectionAccessor) mc.player.networkHandler.getConnection()).getChannel();
+            for (int i = 0; i < speed.get(); ++i) channel.write(PACKET);
+            channel.flush();
         }
-    });
+    }
 
-    @EventHandler
-    private final Listener<PlaySoundEvent> onPlaySound = new Listener<>(event -> {
-        if (antiCrash.get() && event.sound.getId().toString().equals("minecraft:item.armor.equip_generic")){
-            event.cancel();
-        }
-    });
+    public boolean isAntiCrash() {
+        return isActive() && antiCrash.get();
+    }
 }

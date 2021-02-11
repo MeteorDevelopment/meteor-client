@@ -5,7 +5,6 @@
 
 package minegame159.meteorclient.modules;
 
-import me.zero.alpine.listener.Listenable;
 import minegame159.meteorclient.Config;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.meteor.ModuleBindChangedEvent;
@@ -27,7 +26,7 @@ import net.minecraft.util.Formatting;
 
 import java.util.Objects;
 
-public abstract class Module implements Listenable, ISerializable<Module> {
+public abstract class Module implements ISerializable<Module> {
     protected final MinecraftClient mc;
 
     public final Category category;
@@ -80,7 +79,7 @@ public abstract class Module implements Listenable, ISerializable<Module> {
     public void toggle(boolean onActivateDeactivate) {
         if (!active) {
             active = true;
-            ModuleManager.INSTANCE.addActive(this);
+            Modules.get().addActive(this);
 
             for (SettingGroup sg : settings) {
                 for (Setting setting : sg) {
@@ -95,7 +94,7 @@ public abstract class Module implements Listenable, ISerializable<Module> {
         }
         else {
             active = false;
-            ModuleManager.INSTANCE.removeActive(this);
+            Modules.get().removeActive(this);
 
             if (onActivateDeactivate) {
                 MeteorClient.EVENT_BUS.unsubscribe(this);
@@ -158,7 +157,7 @@ public abstract class Module implements Listenable, ISerializable<Module> {
     }
 
     public void sendToggledMsg() {
-        if (Config.INSTANCE.chatCommandsInfo) ChatUtils.info(42069, "Toggled (highlight)%s(default) %s(default).", title, isActive() ? Formatting.GREEN + "on" : Formatting.RED + "off");
+        if (Config.get().chatCommandsInfo) ChatUtils.info(42069, "Toggled (highlight)%s(default) %s(default).", title, isActive() ? Formatting.GREEN + "on" : Formatting.RED + "off");
     }
 
     public void setKey(int key, boolean postEvent) {

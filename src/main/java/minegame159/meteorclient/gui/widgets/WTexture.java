@@ -23,8 +23,8 @@ public class WTexture extends WWidget {
 
     @Override
     protected void onCalculateSize(GuiRenderer renderer) {
-        super.width = width * 2 * GuiConfig.INSTANCE.guiScale;
-        super.height = height * 2 * GuiConfig.INSTANCE.guiScale;
+        super.width = width * 2 * GuiConfig.get().guiScale;
+        super.height = height * 2 * GuiConfig.get().guiScale;
     }
 
     @Override

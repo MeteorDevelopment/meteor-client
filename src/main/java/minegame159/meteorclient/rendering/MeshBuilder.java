@@ -128,6 +128,10 @@ public class MeshBuilder {
         pos(x4, y4, z4).color(startColor).endVertex();
     }
 
+    public void gradientQuad(double x, double y, double width, double height, Color startColor, Color endColor) {
+        gradientQuad(x, y, 0, x + width, y, 0, x + width, y + height, 0, x, y + height, 0,startColor, endColor);
+    }
+
     public void texQuad(double x, double y, double width, double height, double srcX, double srcY, double srcWidth, double srcHeight, Color color1, Color color2, Color color3, Color color4) {
         pos(x, y, 0).texture(srcX, srcY).color(color1).endVertex();
         pos(x + width, y, 0).texture(srcX + srcWidth, srcY).color(color2).endVertex();
@@ -149,11 +153,11 @@ public class MeshBuilder {
         if (Dir.is(excludeDir, Dir.EAST)) quad(x2, y1, z1, x2, y2, z1, x2, y2, z2, x2, y1, z2, color); // Right
     }
 
-    public void gradientBoxSides(double x1, double y1, double z1, double x2, double y2, double z2, Color startColor, Color endColor) {
-        gradientQuad(x1, y1, z1, x1, y2, z1, x2, y2, z1, x2, y1, z1, startColor, endColor); // Front
-        gradientQuad(x1, y1, z2, x1, y2, z2, x2, y2, z2, x2, y1, z2, startColor, endColor); // Back
-        gradientQuad(x1, y1, z1, x1, y2, z1, x1, y2, z2, x1, y1, z2, startColor, endColor); // Left
-        gradientQuad(x2, y1, z1, x2, y2, z1, x2, y2, z2, x2, y1, z2, startColor, endColor); // Right
+    public void gradientBoxSides(double x1, double y, double z1, double x2, double z2, double height, Color startColor, Color endColor, boolean reverse) {
+        gradientQuad(x1, y, z1, x1, y + height, z1, x2, y + height, z1, x2, y, z1, reverse ? endColor : startColor, reverse ? startColor : endColor);
+        gradientQuad(x1, y, z2, x1, y + height, z2, x2, y + height, z2, x2, y, z2, reverse ? endColor : startColor, reverse ? startColor : endColor);
+        gradientQuad(x1, y, z1, x1, y + height, z1, x1, y + height, z2, x1, y, z2, reverse ? endColor : startColor, reverse ? startColor : endColor);
+        gradientQuad(x2, y, z1, x2, y + height, z1, x2, y + height, z2, x2, y, z2, reverse ? endColor : startColor, reverse ? startColor : endColor);
     }
 
     // LINES
@@ -183,5 +187,16 @@ public class MeshBuilder {
         if (Dir.is(excludeDir, Dir.WEST)) line(x1, y2, z1, x1, y2, z2, color);
         if (Dir.is(excludeDir, Dir.EAST)) line(x2, y1, z1, x2, y1, z2, color);
         if (Dir.is(excludeDir, Dir.EAST)) line(x2, y2, z1, x2, y2, z2, color);
+    }
+
+    public void boxEdges(double x, double y, double width, double height, Color color) {
+        boxEdges(x,y, 0, x + width, y + height, 0, color, 0);
+    }
+
+    public void gradientVerticalBox(double x, double y, double z, double x2, double z2, double height, Color startColor, Color endColor, boolean reverse) {
+        gradientLine(x, y, z, x, y + height, z, reverse ? endColor : startColor, reverse ? startColor : endColor);
+        gradientLine(x2, y, z, x2, y + height, z, reverse ? endColor : startColor, reverse ? startColor : endColor);
+        gradientLine(x, y, z2, x, y + height, z2, reverse ? endColor : startColor, reverse ? startColor : endColor);
+        gradientLine(x2, y, z2, x2, y + height, z2, reverse ? endColor : startColor, reverse ? startColor : endColor);
     }
 }

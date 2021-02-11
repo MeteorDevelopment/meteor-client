@@ -8,15 +8,14 @@ package minegame159.meteorclient.modules.player;
 import baritone.api.BaritoneAPI;
 import baritone.api.pathing.goals.GoalBlock;
 import com.google.common.collect.Lists;
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.game.GameJoinedEvent;
 import minegame159.meteorclient.events.game.GameLeftEvent;
 import minegame159.meteorclient.events.meteor.ActiveModulesChangedEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.combat.AutoLog;
 import minegame159.meteorclient.modules.movement.GUIMove;
 import minegame159.meteorclient.modules.movement.Jesus;
@@ -36,7 +35,6 @@ import java.util.List;
  */
 
 public class InfinityMiner extends Module {
-
     public enum Mode {
         Target,
         Repair,
@@ -146,7 +144,7 @@ public class InfinityMiner extends Module {
 
     @SuppressWarnings("unused")
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         try {
             if (mc.player == null) return;
             if (!baritoneRunning && currentMode == Mode.Still) {
@@ -191,17 +189,17 @@ public class InfinityMiner extends Module {
             }
         } catch (Exception ignored) {
         }
-    });
+    }
 
     @SuppressWarnings("unused")
     @EventHandler
-    private final Listener<ActiveModulesChangedEvent> moduleChange = new Listener<>(event -> {
+    private void moduleChange(ActiveModulesChangedEvent event) {
         if (!BLOCKER) {
             for (Module module : getToggleModules()) {
                 if (module != null && !module.isActive()) originalSettings.remove(module.name);
             }
         }
-    });
+    }
 
     private void baritoneRequestMineTargetBlock() {
         try {
@@ -245,15 +243,15 @@ public class InfinityMiner extends Module {
 
     private List<Module> getToggleModules() {
         return Lists.newArrayList(
-                ModuleManager.INSTANCE.get(Jesus.class),
-                ModuleManager.INSTANCE.get(NoBreakDelay.class),
-                ModuleManager.INSTANCE.get(AntiHunger.class),
-                ModuleManager.INSTANCE.get(AutoEat.class),
-                ModuleManager.INSTANCE.get(NoFall.class),
-                ModuleManager.INSTANCE.get(AutoLog.class),
-                ModuleManager.INSTANCE.get(AutoTool.class),
-                ModuleManager.INSTANCE.get(AutoDrop.class),
-                ModuleManager.INSTANCE.get(GUIMove.class)
+                Modules.get().get(Jesus.class),
+                Modules.get().get(NoBreakDelay.class),
+                Modules.get().get(AntiHunger.class),
+                Modules.get().get(AutoEat.class),
+                Modules.get().get(NoFall.class),
+                Modules.get().get(AutoLog.class),
+                Modules.get().get(AutoTool.class),
+                Modules.get().get(AutoDrop.class),
+                Modules.get().get(GUIMove.class)
         );
     }
 
@@ -268,22 +266,21 @@ public class InfinityMiner extends Module {
 
     @SuppressWarnings("unused")
     @EventHandler
-    private final Listener<GameLeftEvent> onGameDisconnect = new Listener<>(event -> {
+    private void onGameDisconnect(GameLeftEvent event) {
         baritoneRequestStop();
         if (!BaritoneAPI.getSettings().mineScanDroppedItems.value)
             BaritoneAPI.getSettings().mineScanDroppedItems.value = true;
         if (this.isActive()) this.toggle();
-    });
+    }
 
     @SuppressWarnings("unused")
     @EventHandler
-    private final Listener<GameJoinedEvent> onGameJoin = new Listener<>(event -> {
+    private void onGameJoin(GameJoinedEvent event) {
         baritoneRequestStop();
         if (!BaritoneAPI.getSettings().mineScanDroppedItems.value)
             BaritoneAPI.getSettings().mineScanDroppedItems.value = true;
         if (this.isActive()) this.toggle();
-    });
-
+    }
 
     public Mode getMode() {
         return currentMode;
@@ -303,5 +300,22 @@ public class InfinityMiner extends Module {
 
     private int getCurrentDamage() {
         return (mc.player != null) ? mc.player.getMainHandStack().getItem().getMaxDamage() - mc.player.getMainHandStack().getDamage() : -1;
+    }
+
+    @Override
+    public String getInfoString() {
+        switch (getMode()) {
+            case Home:
+                int[] coords = getHomeCoords();
+                return "Heading Home: " + coords[0] + " " + coords[1] + " " + coords[2];
+            case Target:
+                return "Mining: " + getCurrentTarget().getName().getString();
+            case Repair:
+                return "Repair-Mining: " + getCurrentTarget().getName().getString();
+            case Still:
+                return "Resting";
+            default:
+                return "";
+        }
     }
 }

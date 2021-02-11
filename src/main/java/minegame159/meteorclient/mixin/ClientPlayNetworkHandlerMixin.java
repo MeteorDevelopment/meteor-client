@@ -1,6 +1,6 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.mixin;
@@ -14,7 +14,7 @@ import minegame159.meteorclient.events.packets.ContainerSlotUpdateEvent;
 import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.events.packets.PlaySoundPacketEvent;
 import minegame159.meteorclient.events.world.ChunkDataEvent;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.movement.Velocity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
@@ -50,18 +50,16 @@ public abstract class ClientPlayNetworkHandlerMixin {
     @Inject(at = @At("TAIL"), method = "onGameJoin")
     private void onGameJoinTail(GameJoinS2CPacket packet, CallbackInfo info) {
         if (worldNotNull) {
-            MeteorClient.IS_DISCONNECTING = true;
             MeteorClient.EVENT_BUS.post(GameLeftEvent.get());
         }
 
-        MeteorClient.IS_DISCONNECTING = false;
         MeteorClient.EVENT_BUS.post(GameJoinedEvent.get());
     }
 
     @Inject(at = @At("HEAD"), method = "sendPacket", cancellable = true)
     private void onSendPacketHead(Packet<?> packet, CallbackInfo info) {
-        PacketEvent.Send event = PacketEvent.Send.get(packet);
-        MeteorClient.EVENT_BUS.post(event);
+        PacketEvent.Send event = MeteorClient.EVENT_BUS.post(PacketEvent.Send.get(packet));
+
         if (event.isCancelled()) info.cancel();
     }
 
@@ -99,8 +97,13 @@ public abstract class ClientPlayNetworkHandlerMixin {
         double deltaY = vec3d.y - player.getVelocity().y;
         double deltaZ = vec3d.z - player.getVelocity().z;
 
-        Velocity velocity = ModuleManager.INSTANCE.get(Velocity.class);
-        player.setVelocity(player.getVelocity().x + deltaX * velocity.getHorizontal(), player.getVelocity().y + deltaY * velocity.getVertical(), player.getVelocity().z + deltaZ * velocity.getHorizontal());
+        Velocity velocity = Modules.get().get(Velocity.class);
+
+        player.setVelocity(
+                player.getVelocity().x + deltaX * velocity.getHorizontal(),
+                player.getVelocity().y + deltaY * velocity.getVertical(),
+                player.getVelocity().z + deltaZ * velocity.getHorizontal()
+        );
     }
 
     @Inject(method = "onItemPickupAnimation", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/world/ClientWorld;getEntityById(I)Lnet/minecraft/entity/Entity;", ordinal = 0))

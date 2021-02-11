@@ -48,10 +48,20 @@ public class GuiRenderer {
         mb.texture = true;
     }
 
+    public void beginFontScale() {
+        TextRenderer.get().begin(GuiConfig.get().guiScale, true, false);
+    }
+
+    public void endFontScale() {
+        TextRenderer.get().end();
+    }
+
     public void begin(boolean root) {
         mb.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR_TEXTURE);
 
         if (root) {
+            beginFontScale();
+
             Window window = MinecraftClient.getInstance().getWindow();
             beginScissor(0, 0, window.getFramebufferWidth(), window.getFramebufferHeight(), false);
 
@@ -70,7 +80,9 @@ public class GuiRenderer {
         MinecraftClient.getInstance().getTextureManager().bindTexture(TEXTURE);
         mb.end();
 
-        TextRenderer.get().begin(GuiConfig.INSTANCE.guiScale);
+        boolean a = TextRenderer.get().isBuilding();
+        if (a) endFontScale();
+        TextRenderer.get().begin(GuiConfig.get().guiScale);
         for (Text text : texts) {
             if (!text.title) {
                 text.render();
@@ -79,7 +91,7 @@ public class GuiRenderer {
         }
         TextRenderer.get().end();
 
-        TextRenderer.get().begin(1.22222222 * GuiConfig.INSTANCE.guiScale);
+        TextRenderer.get().begin(1.22222222 * GuiConfig.get().guiScale);
         for (Text text : texts) {
             if (text.title) {
                 text.render();
@@ -88,17 +100,20 @@ public class GuiRenderer {
         }
         TextRenderer.get().end();
         texts.clear();
+        if (a) beginFontScale();
 
         if (root) {
+            endFontScale();
+
             if (tooltipWidth > 0) {
                 mb.texture = false;
                 mb.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
-                mb.quad(mouseX + 8, mouseY + 8, tooltipWidth + 8, textHeight() + 8, GuiConfig.INSTANCE.background);
+                mb.quad(mouseX + 8, mouseY + 8, tooltipWidth + 8, textHeight() + 8, GuiConfig.get().background);
                 mb.end();
                 mb.texture = true;
 
-                TextRenderer.get().begin(GuiConfig.INSTANCE.guiScale);
-                TextRenderer.get().render(tooltip, mouseX + 8 + 4, mouseY + 8 + 4, GuiConfig.INSTANCE.text);
+                TextRenderer.get().begin(GuiConfig.get().guiScale);
+                TextRenderer.get().render(tooltip, mouseX + 8 + 4, mouseY + 8 + 4, GuiConfig.get().text);
                 TextRenderer.get().end();
 
                 tooltip = null;
@@ -174,15 +189,15 @@ public class GuiRenderer {
     }
 
     public void background(WWidget widget, boolean hovered, boolean pressed) {
-        Color background = GuiConfig.INSTANCE.background;
-        Color outline = GuiConfig.INSTANCE.outline;
+        Color background = GuiConfig.get().background;
+        Color outline = GuiConfig.get().outline;
 
         if (pressed) {
-            background = GuiConfig.INSTANCE.backgroundPressed;
-            outline = GuiConfig.INSTANCE.outlinePressed;
+            background = GuiConfig.get().backgroundPressed;
+            outline = GuiConfig.get().outlinePressed;
         } else if (hovered) {
-            background = GuiConfig.INSTANCE.backgroundHovered;
-            outline = GuiConfig.INSTANCE.outlineHovered;
+            background = GuiConfig.get().backgroundHovered;
+            outline = GuiConfig.get().outlineHovered;
         }
 
         quad(Region.FULL, widget.x, widget.y, widget.width, widget.height, background);

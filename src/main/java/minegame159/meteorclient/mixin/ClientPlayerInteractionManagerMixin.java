@@ -1,6 +1,6 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.mixin;
@@ -11,16 +11,13 @@ import minegame159.meteorclient.events.entity.player.BreakBlockEvent;
 import minegame159.meteorclient.events.entity.player.InteractItemEvent;
 import minegame159.meteorclient.events.entity.player.StartBreakingBlockEvent;
 import minegame159.meteorclient.mixininterface.IClientPlayerInteractionManager;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.misc.Nuker;
-import minegame159.meteorclient.modules.movement.ElytraBoost;
 import minegame159.meteorclient.modules.player.NoBreakDelay;
 import minegame159.meteorclient.modules.player.Reach;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.FireworkItem;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
@@ -49,35 +46,33 @@ public abstract class ClientPlayerInteractionManagerMixin implements IClientPlay
 
     @Inject(method = "attackEntity", at = @At("HEAD"), cancellable = true)
     private void onAttackEntity(PlayerEntity player, Entity target, CallbackInfo info) {
+        AttackEntityEvent event = MeteorClient.EVENT_BUS.post(AttackEntityEvent.get(target));
 
-        AttackEntityEvent event = AttackEntityEvent.get(target);
-        MeteorClient.EVENT_BUS.post(event);
         if (event.isCancelled()) info.cancel();
     }
 
     @Inject(method = "attackBlock", at = @At("HEAD"), cancellable = true)
     private void onAttackBlock(BlockPos blockPos, Direction direction, CallbackInfoReturnable<Boolean> info) {
-        StartBreakingBlockEvent event = StartBreakingBlockEvent.get(blockPos, direction);
-        MeteorClient.EVENT_BUS.post(event);
+        StartBreakingBlockEvent event = MeteorClient.EVENT_BUS.post(StartBreakingBlockEvent.get(blockPos, direction));
 
         if (event.isCancelled()) info.cancel();
     }
 
     @Inject(method = "getReachDistance", at = @At("HEAD"), cancellable = true)
     private void onGetReachDistance(CallbackInfoReturnable<Float> info) {
-        if (ModuleManager.INSTANCE.isActive(Reach.class)) info.setReturnValue(ModuleManager.INSTANCE.get(Reach.class).getReach());
+        if (Modules.get().isActive(Reach.class)) info.setReturnValue(Modules.get().get(Reach.class).getReach());
     }
 
     @Redirect(method = "updateBlockBreakingProgress", at = @At(value = "FIELD", target = "Lnet/minecraft/client/network/ClientPlayerInteractionManager;blockBreakingCooldown:I", opcode = Opcodes.PUTFIELD))
     private void onMethod_2902SetField_3716Proxy(ClientPlayerInteractionManager interactionManager, int value) {
-        if (ModuleManager.INSTANCE.isActive(Nuker.class)) value = 0;
-        if (ModuleManager.INSTANCE.isActive(NoBreakDelay.class)) value = 0;
+        if (Modules.get().isActive(Nuker.class)) value = 0;
+        if (Modules.get().isActive(NoBreakDelay.class)) value = 0;
         blockBreakingCooldown = value;
     }
 
     @Redirect(method = "attackBlock", at = @At(value = "FIELD", target = "Lnet/minecraft/client/network/ClientPlayerInteractionManager;blockBreakingCooldown:I", opcode = Opcodes.PUTFIELD))
     private void onAttackBlockSetField_3719Proxy(ClientPlayerInteractionManager interactionManager, int value) {
-        if (ModuleManager.INSTANCE.isActive(Nuker.class)) value = 0;
+        if (Modules.get().isActive(Nuker.class)) value = 0;
         blockBreakingCooldown = value;
     }
 
@@ -88,7 +83,7 @@ public abstract class ClientPlayerInteractionManagerMixin implements IClientPlay
 
     @Inject(method = "interactItem", at = @At("HEAD"), cancellable = true)
     private void onInteractItem(PlayerEntity player, World world, Hand hand, CallbackInfoReturnable<ActionResult> info) {
-        InteractItemEvent event = MeteorClient.postEvent(InteractItemEvent.get(hand));
+        InteractItemEvent event = MeteorClient.EVENT_BUS.post(InteractItemEvent.get(hand));
         if (event.toReturn != null) info.setReturnValue(event.toReturn);
     }
 

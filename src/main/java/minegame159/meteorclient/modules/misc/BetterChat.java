@@ -7,18 +7,17 @@ package minegame159.meteorclient.modules.misc;
 
 import it.unimi.dsi.fastutil.chars.Char2CharArrayMap;
 import it.unimi.dsi.fastutil.chars.Char2CharMap;
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
-import minegame159.meteorclient.commands.CommandManager;
-import minegame159.meteorclient.commands.commands.Ignore;
+import meteordevelopment.orbit.EventHandler;
+import minegame159.meteorclient.commands.Commands;
 import minegame159.meteorclient.commands.commands.Say;
 import minegame159.meteorclient.events.entity.player.SendMessageEvent;
 import minegame159.meteorclient.friends.Friend;
-import minegame159.meteorclient.friends.FriendManager;
+import minegame159.meteorclient.friends.Friends;
 import minegame159.meteorclient.mixininterface.IChatHudLine;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.systems.Ignores;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.client.gui.hud.ChatHudLine;
@@ -31,10 +30,18 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class BetterChat extends Module {
+    private final SettingGroup sgAnnoy = settings.createGroup("Annoy");
+    private final SettingGroup sgAntiSpam = settings.createGroup("Anti Spam");
+    private final SettingGroup sgChatProtect = settings.createGroup("Chat Protect");
+    private final SettingGroup sgFancyChat = settings.createGroup("Fancy Chat");
+    private final SettingGroup sgIgnore = settings.createGroup("Ignore");
+    private final SettingGroup sgLongerChat = settings.createGroup("Longer Chat");
+    private final SettingGroup sgPrefix = settings.createGroup("Prefix");
+    private final SettingGroup sgSuffix = settings.createGroup("Suffix");
+    // private final SettingGroup sgFriendColor = settings.createGroup("Friend Color");
+
 
     // Annoy
-
-    private final SettingGroup sgAnnoy = settings.createGroup("Annoy");
 
     private final Setting<Boolean> annoyEnabled = sgAnnoy.add(new BoolSetting.Builder()
             .name("annoy-enabled")
@@ -45,8 +52,6 @@ public class BetterChat extends Module {
 
     // Anti Spam
 
-    private final SettingGroup sgAntiSpam = settings.createGroup("Anti Spam");
-
     private final Setting<Boolean> antiSpamEnabled = sgAntiSpam.add(new BoolSetting.Builder()
             .name("anti-spam-enabled")
             .description("Enables the anti-spam.")
@@ -55,7 +60,7 @@ public class BetterChat extends Module {
     );
 
     private final Setting<Integer> antiSpamDepth = sgAntiSpam.add(new IntSetting.Builder()
-            .name("anti-spam-depth")
+            .name("depth")
             .description("How many chat messages to check for duplicate messages.")
             .defaultValue(4)
             .min(1)
@@ -64,15 +69,36 @@ public class BetterChat extends Module {
     );
 
     private final Setting<Boolean> antiSpamMoveToBottom = sgAntiSpam.add(new BoolSetting.Builder()
-            .name("anti-spam-move-to-bottom")
+            .name("move-to-bottom")
             .description("Moves any duplicate messages to the bottom of the chat.")
             .defaultValue(true)
             .build()
     );
 
-    // Fancy Chat
+    // Chat Protect
 
-    private final SettingGroup sgFancyChat = settings.createGroup("Fancy Chat");
+    private final Setting<Boolean> coordsProtectionEnabled = sgChatProtect.add(new BoolSetting.Builder()
+            .name("coords-protection-enabled")
+            .description("Prevents you from sending messages in chat that may contain coordinates.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Boolean> disableAllMessages = sgChatProtect.add(new BoolSetting.Builder()
+            .name("disable-all-messages")
+            .description("Prevents you from essentially being able to send messages in chat.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> disableButton = sgChatProtect.add(new BoolSetting.Builder()
+            .name("disable-button")
+            .description("Adds a button to the warning to send a message to the chat in any way.")
+            .defaultValue(true)
+            .build()
+    );
+
+    // Fancy Chat
 
     private final Setting<Boolean> fancyEnabled = sgFancyChat.add(new BoolSetting.Builder()
             .name("fancy-chat-enabled")
@@ -84,8 +110,6 @@ public class BetterChat extends Module {
 
     // Ignore
 
-    private final SettingGroup sgIgnore = settings.createGroup("Ignore");
-
     private final Setting<Boolean> ignoreEnabled = sgIgnore.add(new BoolSetting.Builder()
             .name("ignore-enabled")
             .description("Ignores player defined by the .ignore command.")
@@ -95,8 +119,6 @@ public class BetterChat extends Module {
 
     // Longer Chat
 
-    private final SettingGroup sgLongerChat = settings.createGroup("Longer Chat");
-
     private final Setting<Boolean> longerChatEnabled = sgLongerChat.add(new BoolSetting.Builder()
             .name("longer-chat-enabled")
             .description("Extends chat length.")
@@ -105,7 +127,7 @@ public class BetterChat extends Module {
     );
 
     private final Setting<Integer> longerChatLines = sgLongerChat.add(new IntSetting.Builder()
-            .name("longer-chat-lines")
+            .name("extra-lines")
             .description("The amount of extra chat lines.")
             .defaultValue(1000)
             .min(100)
@@ -113,34 +135,7 @@ public class BetterChat extends Module {
             .build()
     );
 
-    // Protection TODO: Find a better name for this.
-
-    private final SettingGroup sgProtection = settings.createGroup("Protection");
-
-    private final Setting<Boolean> coordsProtectionEnabled = sgProtection.add(new BoolSetting.Builder()
-            .name("coords-protection-enabled")
-            .description("Prevents you from sending messages in chat that may contain coordinates.")
-            .defaultValue(true)
-            .build()
-    );
-
-    private final Setting<Boolean> disableAllMessages = sgProtection.add(new BoolSetting.Builder()
-            .name("disable-all-messages")
-            .description("Prevents you from essentially being able to send messages in chat.")
-            .defaultValue(false)
-            .build()
-    );
-
-    private final Setting<Boolean> disableButton = sgProtection.add(new BoolSetting.Builder()
-            .name("disable-button")
-            .description("Adds a button to the warning to send a message to the chat in any way.")
-            .defaultValue(true)
-            .build()
-    );
-
     // Prefix
-
-    private final SettingGroup sgPrefix = settings.createGroup("Prefix");
 
     private final Setting<Boolean> prefixEnabled = sgPrefix.add(new BoolSetting.Builder()
             .name("prefix-enabled")
@@ -150,29 +145,27 @@ public class BetterChat extends Module {
     );
 
     private final Setting<String> prefixText = sgPrefix.add(new StringSetting.Builder()
-            .name("prefix-text")
+            .name("text")
             .description("The text to add as your prefix.")
             .defaultValue("> ")
             .build()
     );
 
     private final Setting<Boolean> prefixSmallCaps = sgPrefix.add(new BoolSetting.Builder()
-            .name("prefix-small-caps")
+            .name("small-caps")
             .description("Uses a small font.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> prefixRandom = sgPrefix.add(new BoolSetting.Builder()
-            .name("prefix-random")
+            .name("random-number")
             .description("Example: <msg> (538)")
             .defaultValue(false)
             .build()
     );
 
     // Suffix
-
-    private final SettingGroup sgSuffix = settings.createGroup("Suffix");
 
     private final Setting<Boolean> suffixEnabled = sgSuffix.add(new BoolSetting.Builder()
             .name("suffix-enabled")
@@ -183,28 +176,28 @@ public class BetterChat extends Module {
 
 
     private final Setting<String> suffixText = sgSuffix.add(new StringSetting.Builder()
-            .name("suffix-text")
+            .name("text")
             .description("The text to add as your suffix.")
             .defaultValue(" | Meteor on Crack!")
             .build()
     );
 
     private final Setting<Boolean> suffixSmallCaps = sgSuffix.add(new BoolSetting.Builder()
-            .name("suffix-small-caps")
+            .name("small-caps")
             .description("Uses a small font.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> suffixRandom = sgSuffix.add(new BoolSetting.Builder()
-            .name("suffix-random")
+            .name("random")
             .description("Example: <msg> (538)")
             .defaultValue(false)
             .build()
     );
 
     // Friend Color
-    /*private final SettingGroup sgFriendColor = settings.createGroup("Friend Color");
+    /*
 
     private final Setting<Boolean> friendColorEnabled = sgFriendColor.add(new BoolSetting.Builder()
             .name("friend-color-enabled")
@@ -239,7 +232,7 @@ public class BetterChat extends Module {
     }
 
     @EventHandler
-    private final Listener<SendMessageEvent> onSendMessage = new Listener<>(event -> {
+    private void onSendMessage(SendMessageEvent event) {
         String message = event.msg;
 
         if (annoyEnabled.get())
@@ -252,7 +245,7 @@ public class BetterChat extends Module {
 
         if (disableAllMessages.get()) {
             sendWarningMessage(message,
-                    "You are trying to send a message to the global chat! ",  // TODO: grammar
+                    "You are trying to send a message to the global chat! ",
                     "Send your message to the global chat:");
             event.cancel();
             return;
@@ -260,14 +253,14 @@ public class BetterChat extends Module {
 
         if (coordsProtectionEnabled.get() && containsCoordinates(message)) {
             sendWarningMessage(message,
-                    "It looks like there are coordinates in your message! ",  // TODO: grammar: Maybe should make this message shorter, so that the entire message with the button fits on one line
+                    "It looks like there are coordinates in your message! ",
                     "Send your message to the global chat even if there are coordinates:");
             event.cancel();
             return;
         }
 
         event.msg = message;
-    });
+    }
 
     // ANTI SPAM
 
@@ -330,7 +323,7 @@ public class BetterChat extends Module {
     // IGNORE
 
     private boolean ignoreOnMsg(String message) {
-        for (String name : Ignore.ignoredPlayers) {
+        for (String name : Ignores.get()) {
             if (message.contains("<" + name + ">")) {
                 return true;
             }
@@ -352,7 +345,7 @@ public class BetterChat extends Module {
     // FRIEND COLOR
 
     private boolean friendColorOnMsg(String message) {
-        List<Friend> friends = FriendManager.INSTANCE.getAll();
+        List<Friend> friends = Friends.get().getAll();
         boolean hadFriends = false;
 
         for (Friend friend : friends) {
@@ -458,7 +451,7 @@ public class BetterChat extends Module {
                 .withFormatting(Formatting.DARK_RED)
                 .withClickEvent(new ClickEvent(
                         ClickEvent.Action.RUN_COMMAND,
-                        CommandManager.get(Say.class).toString(message)
+                        Commands.get().get(Say.class).toString(message)
                 ))
                 .withHoverEvent(new HoverEvent(
                         HoverEvent.Action.SHOW_TEXT,

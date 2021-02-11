@@ -1,11 +1,11 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.mixin;
 
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.misc.AutoSmelter;
 import net.minecraft.client.gui.screen.ingame.AbstractFurnaceScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
@@ -26,13 +26,13 @@ public abstract class AbstractFurnaceScreenMixin<T extends AbstractFurnaceScreen
 
     @Inject(method = "tick", at = @At("TAIL"))
     private void onTick(CallbackInfo info) {
-        if (ModuleManager.INSTANCE.isActive(AutoSmelter.class)) ModuleManager.INSTANCE.get(AutoSmelter.class).tick(handler);
+        if (Modules.get().isActive(AutoSmelter.class)) Modules.get().get(AutoSmelter.class).tick(handler);
     }
 
     @Override
     public void onClose() {
         super.onClose();
 
-        if (ModuleManager.INSTANCE.isActive(AutoSmelter.class)) ModuleManager.INSTANCE.get(AutoSmelter.class).onFurnaceClose();
+        if (Modules.get().isActive(AutoSmelter.class)) Modules.get().get(AutoSmelter.class).onFurnaceClose();
     }
 }

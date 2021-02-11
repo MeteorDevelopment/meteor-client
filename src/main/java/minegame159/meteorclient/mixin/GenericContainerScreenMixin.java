@@ -1,11 +1,11 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.mixin;
 
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.misc.AutoSteal;
 import minegame159.meteorclient.utils.render.MeteorButtonWidget;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
@@ -27,7 +27,7 @@ public abstract class GenericContainerScreenMixin extends HandledScreen<GenericC
     protected void init() {
         super.init();
 
-        AutoSteal autoSteal = ModuleManager.INSTANCE.get(AutoSteal.class);
+        AutoSteal autoSteal = Modules.get().get(AutoSteal.class);
 
         if (autoSteal.isActive() && autoSteal.getStealButtonEnabled())
             addButton(new MeteorButtonWidget(x + backgroundWidth - 88, y + 3, 40, 12, new LiteralText("Steal"), button -> steal(handler)));
@@ -39,10 +39,10 @@ public abstract class GenericContainerScreenMixin extends HandledScreen<GenericC
     }
 
     private void steal(GenericContainerScreenHandler handler) {
-        ModuleManager.INSTANCE.get(AutoSteal.class).stealAsync(handler);
+        Modules.get().get(AutoSteal.class).stealAsync(handler);
     }
 
     private void dump(GenericContainerScreenHandler handler) {
-        ModuleManager.INSTANCE.get(AutoSteal.class).dumpAsync(handler);
+        Modules.get().get(AutoSteal.class).dumpAsync(handler);
     }
 }

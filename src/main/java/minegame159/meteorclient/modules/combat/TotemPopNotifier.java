@@ -7,12 +7,11 @@ package minegame159.meteorclient.modules.combat;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.game.GameJoinedEvent;
 import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.friends.FriendManager;
+import minegame159.meteorclient.friends.Friends;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
@@ -81,20 +80,20 @@ public class TotemPopNotifier extends Module {
     }
 
     @EventHandler
-    private final Listener<GameJoinedEvent> onGameJoin = new Listener<>(event -> {
+    private void onGameJoin(GameJoinedEvent event) {
         totemPops.clear();
         chatIds.clear();
-    });
+    }
 
     @EventHandler
-    private final Listener<PacketEvent.Receive> onReceivePacket = new Listener<>(event -> {
+    private void onReceivePacket(PacketEvent.Receive event) {
         if (!(event.packet instanceof EntityStatusS2CPacket)) return;
 
         EntityStatusS2CPacket p = (EntityStatusS2CPacket) event.packet;
         if (p.getStatus() != 35) return;
 
         Entity entity = p.getEntity(mc.world);
-        if (entity == null || (entity.equals(mc.player) && ignoreOwn.get()) || (!FriendManager.INSTANCE.attack((PlayerEntity) entity) && ignoreFriend.get())) return;
+        if (entity == null || (entity.equals(mc.player) && ignoreOwn.get()) || (!Friends.get().attack((PlayerEntity) entity) && ignoreFriend.get())) return;
 
         synchronized (totemPops) {
             int pops = totemPops.getOrDefault(entity.getUuid(), 0);
@@ -105,10 +104,10 @@ public class TotemPopNotifier extends Module {
             if (announce.get()) mc.player.sendChatMessage(msg);
             else ChatUtils.info(getChatId(entity), "(highlight)%s (default)popped (highlight)%d (default)%s.", entity.getName().getString(), pops, pops == 1 ? "totem" : "totems");
         }
-    });
+    }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Post event) {
         synchronized (totemPops) {
             for (PlayerEntity player : mc.world.getPlayers()) {
                 if (!totemPops.containsKey(player.getUuid())) continue;
@@ -125,7 +124,7 @@ public class TotemPopNotifier extends Module {
                 }
             }
         }
-    });
+    }
 
     private int getChatId(Entity entity) {
         return chatIds.computeIntIfAbsent(entity.getUuid(), value -> random.nextInt());

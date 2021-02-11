@@ -1,6 +1,6 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.mixin;
@@ -25,7 +25,7 @@ public abstract class ItemStackMixin {
     @Inject(method = "getTooltip", at = @At("TAIL"), locals = LocalCapture.CAPTURE_FAILSOFT)
     private void onGetTooltip(PlayerEntity player, TooltipContext context, CallbackInfoReturnable<List<Text>> info, List<Text> list) {
         if (Utils.canUpdate()) {
-            MeteorClient.postEvent(GetTooltipEvent.get((ItemStack) (Object) this, list));
+            MeteorClient.EVENT_BUS.post(GetTooltipEvent.get((ItemStack) (Object) this, list));
         }
     }
 }

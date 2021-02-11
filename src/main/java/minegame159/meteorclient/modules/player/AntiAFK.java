@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.modules.player;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.mixininterface.IKeyBinding;
@@ -14,7 +13,7 @@ import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
-import minegame159.meteorclient.utils.player.RotationUtils;
+import minegame159.meteorclient.utils.player.Rotations;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -25,7 +24,6 @@ import java.util.List;
 import java.util.Random;
 
 public class AntiAFK extends Module {
-
     public enum SpinMode {
         Server,
         Client
@@ -86,7 +84,7 @@ public class AntiAFK extends Module {
 
     private final Setting<Boolean> disco = sgActions.add(new BoolSetting.Builder()
             .name("disco")
-            .description("Sneaks.")
+            .description("Sneaks and unsneaks quickly.")
             .defaultValue(false)
             .build());
 
@@ -141,9 +139,8 @@ public class AntiAFK extends Module {
     }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Pre event) {
         if (Utils.canUpdate()) {
-
             //Spin
             if (spin.get()) {
                 prevYaw += spinSpeed.get();
@@ -152,7 +149,7 @@ public class AntiAFK extends Module {
                         mc.player.yaw = prevYaw;
                         break;
                     case Server:
-                        RotationUtils.packetRotate(prevYaw, pitch.get().floatValue());
+                        Rotations.rotate(prevYaw, pitch.get(), -15, null);
                         break;
                 }
             }
@@ -198,9 +195,8 @@ public class AntiAFK extends Module {
                 strafeTimer = 0;
             } else
                 strafeTimer++;
-
         }
-    });
+    }
 
     @Override
     public WWidget getWidget() {

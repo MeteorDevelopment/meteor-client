@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.modules.combat;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.Category;
@@ -33,7 +32,7 @@ public class BowSpam extends Module {
     );
 
     private final Setting<Boolean> onlyWhenHoldingRightClick = sgGeneral.add(new BoolSetting.Builder()
-            .name("only-when-holding-right-click")
+            .name("when-holding-right-click")
             .description("Works only when holding right click.")
             .defaultValue(false)
             .build()
@@ -58,9 +57,7 @@ public class BowSpam extends Module {
     }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
-        assert mc.player != null;
-        assert mc.interactionManager != null;
+    private void onTick(TickEvent.Post event) {
         if (InvUtils.findItemWithCount(Items.ARROW).slot == -1) return;
         if (!onlyWhenHoldingRightClick.get() || mc.options.keyUse.isPressed()) {
             boolean isBow = mc.player.getMainHandStack().getItem() == Items.BOW;
@@ -83,7 +80,7 @@ public class BowSpam extends Module {
                 wasHoldingRightClick = false;
             }
         }
-    });
+    }
 
     private void setPressed(boolean pressed) {
         ((IKeyBinding) mc.options.keyUse).setPressed(pressed);

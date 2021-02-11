@@ -1,6 +1,6 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.mixin;
@@ -74,7 +74,12 @@ public abstract class BookEditScreenMixin extends Screen {
             String clipboard = GLFW.glfwGetClipboardString(MinecraftClient.getInstance().getWindow().getHandle());
             if (clipboard == null) return;
 
-            byte[] bytes = Base64.getDecoder().decode(clipboard);
+            byte[] bytes;
+            try {
+                bytes = Base64.getDecoder().decode(clipboard);
+            } catch (IllegalArgumentException ignored) {
+                return;
+            }
             DataInputStream in = new DataInputStream(new ByteArrayInputStream(bytes));
 
             try {

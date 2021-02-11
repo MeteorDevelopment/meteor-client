@@ -7,8 +7,7 @@ package minegame159.meteorclient.modules.combat;
 
 //Created by squidoodly 13/07/2020
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
@@ -43,7 +42,7 @@ public class Auto32K extends Module {
         Dispenser
     }
 
-    public Auto32K(){super(Category.Combat, "auto32k", "Automatically attacks other players with a 32k weapon.");}
+    public Auto32K(){super(Category.Combat, "auto-32k", "Automatically attacks other players with a 32k weapon.");}
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
@@ -79,7 +78,7 @@ public class Auto32K extends Module {
 
     private final Setting<Boolean> autoMove = sgGeneral.add(new BoolSetting.Builder()
             .name("auto-move")
-            .description("Moves the sword for you.")
+            .description("Moves the 32K into your inventory automatically.")
             .defaultValue(true)
             .build()
     );
@@ -100,8 +99,8 @@ public class Auto32K extends Module {
     }
 
     @EventHandler
-    private final Listener<TickEvent.Post> onTick = new Listener<>(event -> {
-        if(phase <= 7) {
+    private void onTick(TickEvent.Post event) {
+        if (phase <= 7) {
             if (mode.get() == Mode.Hopper) {
                 int shulkerSlot = InvUtils.findItemWithCount(Items.SHULKER_BOX).slot;
                 int hopperSlot = InvUtils.findItemWithCount(Items.HOPPER).slot;
@@ -238,7 +237,7 @@ public class Auto32K extends Module {
                 }
             }else this.toggle();
         }
-    });
+    }
 
     private List<BlockPos> findValidBlocksHopper(){
         Iterator<BlockPos> allBlocks = getRange(mc.player.getBlockPos(), placeRange.get()).iterator();

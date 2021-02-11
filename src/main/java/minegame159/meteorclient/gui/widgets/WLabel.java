@@ -27,7 +27,7 @@ public class WLabel extends WWidget {
         this.lines = new ArrayList<>(1);
         this.shadow = shadow;
 
-        this.color = GuiConfig.INSTANCE.text;
+        this.color = GuiConfig.get().text;
 
         this.text = text;
         lines.add(text);

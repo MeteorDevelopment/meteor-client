@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.modules.misc;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.game.OpenScreenEvent;
 import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.mixininterface.ISignEditScreen;
@@ -29,14 +28,14 @@ public class AutoSign extends Module {
     }
 
     @EventHandler
-    private final Listener<PacketEvent.Send> onSendPacket = new Listener<>(event -> {
+    private void onSendPacket(PacketEvent.Send event) {
         if (!(event.packet instanceof UpdateSignC2SPacket)) return;
 
         text = ((UpdateSignC2SPacket) event.packet).getText();
-    });
+    }
 
     @EventHandler
-    private final Listener<OpenScreenEvent> onOpenScreen = new Listener<>(event -> {
+    private void onOpenScreen(OpenScreenEvent event) {
         if (!(event.screen instanceof SignEditScreen) || text == null) return;
 
         SignBlockEntity sign = ((ISignEditScreen) event.screen).getSign();
@@ -44,5 +43,5 @@ public class AutoSign extends Module {
         mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(sign.getPos(), text[0], text[1], text[2], text[3]));
 
         event.cancel();
-    });
+    }
 }

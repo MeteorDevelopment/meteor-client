@@ -19,7 +19,7 @@ public class WQuad extends WWidget {
 
     @Override
     protected void onCalculateSize(GuiRenderer renderer) {
-        double s = GuiConfig.INSTANCE.guiScale;
+        double s = GuiConfig.get().guiScale;
         width = 6 * s + renderer.textHeight() + 6 * s;
         height = 6 * s + renderer.textHeight() + 6 * s;
     }

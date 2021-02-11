@@ -53,7 +53,7 @@ public class StatusEffectSetting extends Setting<Object2IntMap<StatusEffect>> {
 
     @Override
     protected String generateUsage() {
-        //TODO: Look up nigger
+        //TODO: Look up retard
         return "(highlight)not implemented";
     }
 

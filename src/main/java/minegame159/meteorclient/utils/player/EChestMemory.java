@@ -5,7 +5,7 @@
 
 package minegame159.meteorclient.utils.player;
 
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.game.OpenScreenEvent;
 import minegame159.meteorclient.events.world.BlockActivateEvent;
@@ -24,15 +24,16 @@ public class EChestMemory {
     public static final DefaultedList<ItemStack> ITEMS = DefaultedList.ofSize(27, ItemStack.EMPTY);
 
     public static void init() {
-        MeteorClient.EVENT_BUS.subscribe(onBlockActivate);
-        MeteorClient.EVENT_BUS.subscribe(onOpenScreenEvent);
+        MeteorClient.EVENT_BUS.subscribe(EChestMemory.class);
     }
 
-    private static final Listener<BlockActivateEvent> onBlockActivate = new Listener<>(event -> {
+    @EventHandler
+    private static void onBlockActivate(BlockActivateEvent event) {
         if (event.blockState.getBlock() instanceof EnderChestBlock && echestOpenedState == 0) echestOpenedState = 1;
-    });
+    }
 
-    private static final Listener<OpenScreenEvent> onOpenScreenEvent = new Listener<>(event -> {
+    @EventHandler
+    private static void onOpenScreenEvent(OpenScreenEvent event) {
         if (echestOpenedState == 1 && event.screen instanceof GenericContainerScreen) {
             echestOpenedState = 2;
             return;
@@ -49,5 +50,5 @@ public class EChestMemory {
         }
 
         echestOpenedState = 0;
-    });
+    }
 }

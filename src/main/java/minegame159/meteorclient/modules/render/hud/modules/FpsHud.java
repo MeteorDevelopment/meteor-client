@@ -10,7 +10,7 @@ import minegame159.meteorclient.modules.render.hud.HUD;
 
 public class FpsHud extends DoubleTextHudModule {
     public FpsHud(HUD hud) {
-        super(hud, "fps", "Displays your FPS.", "Fps: ");
+        super(hud, "fps", "Displays your FPS.", "FPS: ");
     }
 
     @Override

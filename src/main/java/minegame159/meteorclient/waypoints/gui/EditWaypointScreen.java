@@ -137,8 +137,8 @@ public class EditWaypointScreen extends WindowScreen {
 
         // Save
         add(new WButton("Save")).fillX().expandX().getWidget().action = () -> {
-            if (newWaypoint) Waypoints.INSTANCE.add(waypoint);
-            else Waypoints.INSTANCE.save();
+            if (newWaypoint) Waypoints.get().add(waypoint);
+            else Waypoints.get().save();
 
             onClose();
         };

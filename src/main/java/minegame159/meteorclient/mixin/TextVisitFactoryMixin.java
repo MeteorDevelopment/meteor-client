@@ -1,11 +1,11 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.mixin;
 
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.player.NameProtect;
 import net.minecraft.client.font.TextVisitFactory;
 import org.spongepowered.asm.mixin.Mixin;
@@ -21,7 +21,7 @@ public abstract class TextVisitFactoryMixin {
                     "visitFormatted(Ljava/lang/String;ILnet/minecraft/text/Style;Lnet/minecraft/text/CharacterVisitor;)Z"},
             index = 0)
     private static String adjustText(String text) {
-        if (ModuleManager.INSTANCE != null) return ModuleManager.INSTANCE.get(NameProtect.class).replaceName(text);
+        if (Modules.get() != null) return Modules.get().get(NameProtect.class).replaceName(text);
         else return text;
     }
 }

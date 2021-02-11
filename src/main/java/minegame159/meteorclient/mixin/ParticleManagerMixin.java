@@ -1,13 +1,13 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.world.ParticleEvent;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.misc.Nuker;
 import minegame159.meteorclient.modules.render.NoRender;
 import net.minecraft.block.BlockState;
@@ -26,17 +26,17 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class ParticleManagerMixin {
     @Inject(method = "addParticle(Lnet/minecraft/particle/ParticleEffect;DDDDDD)Lnet/minecraft/client/particle/Particle;", at = @At("HEAD"), cancellable = true)
     private void onAddParticle(ParticleEffect parameters, double x, double y, double z, double velocityX, double velocityY, double velocityZ, CallbackInfoReturnable<Particle> info) {
-        ParticleEvent event = MeteorClient.postEvent(ParticleEvent.get(parameters));
+        ParticleEvent event = MeteorClient.EVENT_BUS.post(ParticleEvent.get(parameters));
         if (event.isCancelled()) info.cancel();
     }
 
     @Inject(method = "addBlockBreakParticles", at = @At("HEAD"), cancellable = true)
     private void onAddBlockBreakParticles(BlockPos blockPos, BlockState state, CallbackInfo info) {
-        if (ModuleManager.INSTANCE.get(Nuker.class).noParticles() || ModuleManager.INSTANCE.get(NoRender.class).noBlockBreakParticles()) info.cancel();
+        if (Modules.get().get(Nuker.class).noParticles() || Modules.get().get(NoRender.class).noBlockBreakParticles()) info.cancel();
     }
 
     @Inject(method = "addBlockBreakingParticles", at = @At("HEAD"), cancellable = true)
     private void onAddBlockBreakingParticles(BlockPos blockPos, Direction direction, CallbackInfo info) {
-        if (ModuleManager.INSTANCE.get(Nuker.class).noParticles() || ModuleManager.INSTANCE.get(NoRender.class).noBlockBreakParticles()) info.cancel();
+        if (Modules.get().get(Nuker.class).noParticles() || Modules.get().get(NoRender.class).noBlockBreakParticles()) info.cancel();
     }
 }

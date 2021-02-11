@@ -109,7 +109,7 @@ public class ChatUtils {
         message.append(getPrefix(prefix, type));
         message.append(msg);
 
-        if (!Config.INSTANCE.deleteChatCommandsInfo) id = 0;
+        if (!Config.get().deleteChatCommandsInfo) id = 0;
 
         ((IChatHud) mc.inGameHud.getChatHud()).add(message, id);
     }

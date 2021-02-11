@@ -1,17 +1,18 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.mixin;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.render.EChestPreview;
+import minegame159.meteorclient.modules.render.ItemHighlight;
 import minegame159.meteorclient.modules.render.ShulkerPeek;
-import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.input.KeyBinds;
 import minegame159.meteorclient.utils.player.EChestMemory;
+import minegame159.meteorclient.utils.render.RenderUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.screen.Screen;
@@ -60,9 +61,7 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
     private void onRender(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo info) {
         if (focusedSlot != null && !focusedSlot.getStack().isEmpty()) {
             // Shulker Preview
-            if (ModuleManager.INSTANCE.isActive(ShulkerPeek.class) && Utils.isShulker(focusedSlot.getStack().getItem())
-                    && ((KeyBinds.SHULKER_PEEK.isPressed() && ModuleManager.INSTANCE.get(ShulkerPeek.class).mode.get() == ShulkerPeek.Mode.Tooltip)
-                    || (ModuleManager.INSTANCE.get(ShulkerPeek.class).mode.get() == ShulkerPeek.Mode.Always))) {
+            if (Modules.get().isActive(ShulkerPeek.class) && ((KeyBinds.SHULKER_PEEK.isPressed() && Modules.get().get(ShulkerPeek.class).mode.get() == ShulkerPeek.Mode.Tooltip) || (Modules.get().get(ShulkerPeek.class).mode.get() == ShulkerPeek.Mode.Always))) {
                 CompoundTag compoundTag = focusedSlot.getStack().getSubTag("BlockEntityTag");
                 if (compoundTag != null) {
                     if (compoundTag.contains("Items", 9)) {
@@ -75,19 +74,22 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
             }
 
             // EChest preview
-            if (focusedSlot.getStack().getItem() == Items.ENDER_CHEST && ModuleManager.INSTANCE.isActive(EChestPreview.class)) {
+            if (focusedSlot.getStack().getItem() == Items.ENDER_CHEST && Modules.get().isActive(EChestPreview.class)) {
                 draw(matrices, EChestMemory.ITEMS, mouseX, mouseY);
             }
         }
     }
 
+    private boolean hasItems(ItemStack itemStack) {
+        CompoundTag compoundTag = itemStack.getSubTag("BlockEntityTag");
+        return compoundTag != null && compoundTag.contains("Items", 9);
+    }
+
     @Inject(method = "drawMouseoverTooltip", at = @At("HEAD"), cancellable = true)
     private void onDrawMouseoverTooltip(MatrixStack matrices, int x, int y, CallbackInfo info) {
         if (focusedSlot != null && !focusedSlot.getStack().isEmpty()) {
-            if (ModuleManager.INSTANCE.isActive(ShulkerPeek.class) && Utils.isShulker(focusedSlot.getStack().getItem())
-                    && ((KeyBinds.SHULKER_PEEK.isPressed() && ModuleManager.INSTANCE.get(ShulkerPeek.class).mode.get() == ShulkerPeek.Mode.Tooltip)
-                    || (ModuleManager.INSTANCE.get(ShulkerPeek.class).mode.get() == ShulkerPeek.Mode.Always))) info.cancel();
-            else if (focusedSlot.getStack().getItem() == Items.ENDER_CHEST && ModuleManager.INSTANCE.isActive(EChestPreview.class)) info.cancel();
+            if (Modules.get().isActive(ShulkerPeek.class) && hasItems(focusedSlot.getStack()) && ((KeyBinds.SHULKER_PEEK.isPressed() && Modules.get().get(ShulkerPeek.class).mode.get() == ShulkerPeek.Mode.Tooltip) || (Modules.get().get(ShulkerPeek.class).mode.get() == ShulkerPeek.Mode.Always))) info.cancel();
+            else if (focusedSlot.getStack().getItem() == Items.ENDER_CHEST && Modules.get().isActive(EChestPreview.class)) info.cancel();
         }
     }
 
@@ -102,7 +104,7 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
         int row = 0;
         int i = 0;
         for (ItemStack itemStack : itemStacks) {
-            drawItem(itemStack, mouseX + 6 + 8 + i * 18, mouseY + 6 + 7 + row * 18);
+            RenderUtils.drawItem(itemStack, mouseX + 6 + 8 + i * 18, mouseY + 6 + 7 + row * 18, true);
 
             i++;
             if (i >= 9) {
@@ -115,16 +117,17 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
         RenderSystem.enableDepthTest();
     }
 
-    private void drawItem(ItemStack itemStack, int x, int y) {
-        mc.getItemRenderer().renderGuiItemIcon(itemStack, x, y);
-        mc.getItemRenderer().renderGuiItemOverlay(mc.textRenderer, itemStack, x, y, null);
-    }
-
     private void drawBackground(MatrixStack matrices, int x, int y) {
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        mc.getTextureManager().bindTexture(ModuleManager.INSTANCE.get(ShulkerPeek.class).bgMode.get() == ShulkerPeek.BackgroundMode.Light ? LIGHT : DARK);
+        mc.getTextureManager().bindTexture(Modules.get().get(ShulkerPeek.class).bgMode.get() == ShulkerPeek.BackgroundMode.Light ? LIGHT : DARK);
         int width = 176;
         int height = 67;
         DrawableHelper.drawTexture(matrices, x, y, 0, 0, 0, width, height, height, width);
+    }
+
+    @Inject(method = "drawSlot", at = @At("HEAD"))
+    private void onDrawSlot(MatrixStack matrices, Slot slot, CallbackInfo info) {
+        int color = Modules.get().get(ItemHighlight.class).getColor(slot.getStack());
+        if (color != -1) fill(matrices, slot.x, slot.y, slot.x + 16, slot.y + 16, color);
     }
 }

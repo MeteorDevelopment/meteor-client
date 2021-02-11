@@ -5,12 +5,11 @@
 
 package minegame159.meteorclient.modules.player;
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.ModuleManager;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.misc.AutoMountBypassDupe;
 import net.minecraft.entity.passive.AbstractDonkeyEntity;
 import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
@@ -23,13 +22,9 @@ public class MountBypass extends Module {
     }
 
     @EventHandler
-    private final Listener<PacketEvent.Send> onSendPacket = new Listener<>(event -> {
-        if (ModuleManager.INSTANCE.isActive(AutoMountBypassDupe.class)) return;
-
-        onSendPacket(event);
-    });
-
     public void onSendPacket(PacketEvent.Send event) {
+        if (Modules.get().isActive(AutoMountBypassDupe.class)) return;
+
         if (dontCancel) {
             dontCancel = false;
             return;

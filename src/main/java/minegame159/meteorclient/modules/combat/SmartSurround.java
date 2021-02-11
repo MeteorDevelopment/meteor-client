@@ -7,8 +7,7 @@ package minegame159.meteorclient.modules.combat;
 
 //Created by squidoodly 15/04/2020
 
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.EntityAddedEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
@@ -17,7 +16,9 @@ import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.utils.player.*;
+import minegame159.meteorclient.utils.player.ChatUtils;
+import minegame159.meteorclient.utils.player.DamageCalcUtils;
+import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.BlockItem;
@@ -25,6 +26,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.RaycastContext;
 
 public class SmartSurround extends Module {
@@ -32,7 +34,7 @@ public class SmartSurround extends Module {
 
     private final Setting<Boolean> onlyObsidian = sgGeneral.add(new BoolSetting.Builder()
             .name("only-obsidian")
-            .description("Only whitelists obsidian to be used.")
+            .description("Only uses Obsidian as a surround block.")
             .defaultValue(false)
             .build()
     );
@@ -45,20 +47,16 @@ public class SmartSurround extends Module {
     );
 
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
-            .name("Rotate")
-            .description("Forces you to rotate towards the block being placed.")
+            .name("rotate")
+            .description("Forces you to rotate towards the blocks being placed.")
             .defaultValue(true)
             .build()
     );
 
     private int oldSlot;
-
     private int slot = -1;
-
     private int rPosX;
-
     private int rPosZ;
-
     private Entity crystal;
 
     public SmartSurround(){
@@ -66,7 +64,7 @@ public class SmartSurround extends Module {
     }
 
     @EventHandler
-    private final Listener<EntityAddedEvent> onSpawn = new Listener<>(event -> {
+    private void onSpawn(EntityAddedEvent event) {
         crystal = event.entity;
 
         if (event.entity.getType() == EntityType.END_CRYSTAL) {
@@ -97,10 +95,10 @@ public class SmartSurround extends Module {
                 rPosZ = mc.player.getBlockPos().getZ() - event.entity.getBlockPos().getZ();
             }
         }
-    });
+    }
 
     @EventHandler
-    private final  Listener<TickEvent.Post> onTick = new Listener<>(event -> {
+    private void onTick(TickEvent.Pre event) {
         if (slot != -1) {
             if ((rPosX >= 2) && (rPosZ == 0)) {
                 placeObi(rPosX - 1, 0, crystal);
@@ -129,11 +127,11 @@ public class SmartSurround extends Module {
                 mc.player.inventory.selectedSlot = oldSlot;
             }
         }
-    });
+    }
 
     private void placeObi(int x, int z, Entity crystal) {
-        if (rotate.get()) RotationUtils.packetRotate(crystal.getBlockPos().add(x, -1, z));
-        PlayerUtils.placeBlock(crystal.getBlockPos().add(x, -1, z), Hand.MAIN_HAND);
+        BlockPos blockPos = crystal.getBlockPos().add(x, -1, z);
+        BlockUtils.place(blockPos, Hand.MAIN_HAND, slot, rotate.get(), 100);
     }
 
     private int findObiInHotbar() {

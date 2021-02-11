@@ -8,16 +8,17 @@ package minegame159.meteorclient.modules.combat;
 import baritone.api.BaritoneAPI;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
-import me.zero.alpine.listener.EventHandler;
-import me.zero.alpine.listener.Listener;
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.friends.FriendManager;
+import minegame159.meteorclient.friends.Friends;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.entity.EntityUtils;
+import minegame159.meteorclient.utils.entity.SortPriority;
 import minegame159.meteorclient.utils.entity.Target;
 import minegame159.meteorclient.utils.player.PlayerUtils;
-import minegame159.meteorclient.utils.player.RotationUtils;
+import minegame159.meteorclient.utils.player.Rotations;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -31,24 +32,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class KillAura extends Module {
-    public enum Priority {
-        LowestDistance,
-        HighestDistance,
-        LowestHealth,
-        HighestHealth
-    }
-
     public enum OnlyWith {
         Sword,
         Axe,
         SwordOrAxe,
         Any
-    }
-
-    public enum RotationDirection {
-        Eyes,
-        Chest,
-        Feet
     }
 
     public enum RotationMode {
@@ -58,8 +46,8 @@ public class KillAura extends Module {
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgRotations = settings.createGroup("Rotations");
     private final SettingGroup sgDelay = settings.createGroup("Delay");
-    private final SettingGroup sgRandomDelay = settings.createGroup("Random Delay");
 
     // General
 
@@ -68,6 +56,8 @@ public class KillAura extends Module {
             .description("The maximum range the entity can be to attack it.")
             .defaultValue(4)
             .min(0)
+            .max(6)
+            .sliderMax(6)
             .build()
     );
 
@@ -79,10 +69,10 @@ public class KillAura extends Module {
             .build()
     );
 
-    private final Setting<Priority> priority = sgGeneral.add(new EnumSetting.Builder<Priority>()
+    private final Setting<SortPriority> priority = sgGeneral.add(new EnumSetting.Builder<SortPriority>()
             .name("priority")
             .description("What type of entities to target.")
-            .defaultValue(Priority.LowestHealth)
+            .defaultValue(SortPriority.LowestHealth)
             .build()
     );
 
@@ -138,17 +128,26 @@ public class KillAura extends Module {
             .build()
     );
 
-    private final Setting<RotationMode> rotationMode = sgGeneral.add(new EnumSetting.Builder<RotationMode>()
+    private final Setting<Boolean> targetMultiple = sgGeneral.add(new BoolSetting.Builder()
+            .name("target-multiple")
+            .description("Target multiple entities at once")
+            .defaultValue(false)
+            .build()
+    );
+
+    // Rotations
+
+    private final Setting<RotationMode> rotationMode = sgRotations.add(new EnumSetting.Builder<RotationMode>()
             .name("rotation-mode")
             .description("Determines when you should rotate towards the target.")
             .defaultValue(RotationMode.OnHit)
             .build()
     );
 
-    private final Setting<RotationDirection> rotationDirection = sgGeneral.add(new EnumSetting.Builder<RotationDirection>()
+    private final Setting<Target> rotationDirection = sgRotations.add(new EnumSetting.Builder<Target>()
             .name("rotation-direction")
             .description("The direction to use for rotating towards the enemy.")
-            .defaultValue(RotationDirection.Eyes)
+            .defaultValue(Target.Head)
             .build()
     );
 
@@ -170,16 +169,14 @@ public class KillAura extends Module {
             .build()
     );
 
-    // Random Hit Delay
-
-    private final Setting<Boolean> randomDelayEnabled = sgRandomDelay.add(new BoolSetting.Builder()
+    private final Setting<Boolean> randomDelayEnabled = sgDelay.add(new BoolSetting.Builder()
             .name("random-delay-enabled")
             .description("Adds a random delay between hits to attempt to bypass anti-cheats.")
             .defaultValue(false)
             .build()
     );
 
-    private final Setting<Integer> randomDelayMax = sgRandomDelay.add(new IntSetting.Builder()
+    private final Setting<Integer> randomDelayMax = sgDelay.add(new IntSetting.Builder()
             .name("random-delay-max")
             .description("The maximum value for random delay.")
             .defaultValue(4)
@@ -190,10 +187,10 @@ public class KillAura extends Module {
 
     private int hitDelayTimer;
     private int randomDelayTimer;
-    private LivingEntity target;
     private boolean wasPathing;
+    private boolean canAttack;
 
-    private final List<LivingEntity> entityList = new ArrayList<>();
+    private final List<Entity> entityList = new ArrayList<>();
 
     public KillAura() {
         super(Category.Combat, "kill-aura", "Attacks specified entities around you.");
@@ -203,39 +200,57 @@ public class KillAura extends Module {
     public void onDeactivate() {
         hitDelayTimer = 0;
         randomDelayTimer = 0;
-        target = null;
+        entityList.clear();
     }
 
     @EventHandler
-    private final Listener<TickEvent.Pre> onPreTick = new Listener<>(event -> target = null);
+    private void onTick(TickEvent.Pre event) {
 
-    @EventHandler
-    private final Listener<TickEvent.Post> onPostTick = new Listener<>(event -> {
-        findEntity();
-        if (target == null) return;
-
-        if (rotationMode.get() == RotationMode.Always) packetRotate(target);
-        attack(target);
-    });
-
-    public void packetRotate(LivingEntity entity) {
-        switch (rotationDirection.get()) {
-            case Eyes:  RotationUtils.packetRotate(entity, Target.Head); break;
-            case Chest: RotationUtils.packetRotate(entity); break;
-            case Feet:  RotationUtils.packetRotate(entity, Target.Feet); break;
+        if (mc.player.isDead() || !mc.player.isAlive() || !itemInHand()) {
+            entityList.clear();
+            return;
         }
-    }
+        entityList.clear();
+        EntityUtils.getList(entity -> {
+            if (entity == mc.player || entity == mc.cameraEntity) return false;
+            if ((entity instanceof LivingEntity && ((LivingEntity) entity).isDead()) || !entity.isAlive()) return false;
+            if (entity.distanceTo(mc.player) > range.get()) return false;
+            if (!entities.get().getBoolean(entity.getType())) return false;
+            if (!nametagged.get() && entity.hasCustomName()) return false;
+            if (!ignoreWalls.get() && !PlayerUtils.canSeeEntity(entity)) return false;
+            if (entity instanceof PlayerEntity) {
+                if (((PlayerEntity) entity).isCreative()) return false;
+                if (!friends.get() && !Friends.get().attack((PlayerEntity) entity)) return false;
+            }
+            return !(entity instanceof AnimalEntity) || babies.get() || !((AnimalEntity) entity).isBaby();
+        }, priority.get(), entityList);
 
-    private void attack(LivingEntity entity) {
-        if (entity == null) return;
+        if (!targetMultiple.get() && !entityList.isEmpty())
+            entityList.subList(1, entityList.size()).clear();
 
-        if (smartDelay.get()) if (mc.player.getAttackCooldownProgress(0.5f) < 1) return;
+        if (entityList.isEmpty()) {
+            if (wasPathing){
+                BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume");
+                wasPathing = false;
+            }
+            return;
+        }
 
+        if (pauseOnCombat.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing() && !wasPathing) {
+            BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("pause");
+            wasPathing = true;
+        }
+
+        if (smartDelay.get() && mc.player.getAttackCooldownProgress(0.5f) < 1) {
+            return;
+        }
+
+        if (hitDelayTimer >= 0) {
+            hitDelayTimer--;
+            return;
+        }
         else {
-            if (hitDelayTimer >= 0) {
-                hitDelayTimer--;
-                return;
-            } else hitDelayTimer = hitDelay.get();
+            hitDelayTimer = hitDelay.get();
         }
 
         if (randomDelayEnabled.get()) {
@@ -247,54 +262,34 @@ public class KillAura extends Module {
             }
         }
 
-        if (Math.random() > hitChance.get() / 100) return;
-
-        if (rotationMode.get() == RotationMode.OnHit) packetRotate(entity);
-
-        mc.interactionManager.attackEntity(mc.player, entity);
-        mc.player.swingHand(Hand.MAIN_HAND);
+        for (Entity target : entityList) {
+            if (attack(target) && rotationMode.get() == RotationMode.Always) {
+                Rotations.rotate(Rotations.getYaw(target), Rotations.getPitch(target, rotationDirection.get()), () -> {
+                    if (canAttack) hitEntity(target);
+                });
+            }
+        }
     }
 
-    private void findEntity() {
-        if (mc.player.isDead() || !mc.player.isAlive()) return;
-        if (!itemInHand()) return;
+    private boolean attack(Entity target) {
+        canAttack = false;
 
-        for (Entity e : mc.world.getEntities()) {
-            if (!(e instanceof LivingEntity)) continue;
-            LivingEntity entity = (LivingEntity) e;
+        if (Math.random() > hitChance.get() / 100) return false;
 
-            if (entity == mc.player || entity == mc.cameraEntity) continue;
-            if (entity.isDead() || !entity.isAlive()) continue;
-            if (entity.distanceTo(mc.player) > range.get()) continue;
-            if (!entities.get().getBoolean(entity.getType())) continue;
-            if (!nametagged.get() && entity.hasCustomName()) continue;
-            if (!ignoreWalls.get() && PlayerUtils.canSeeEntity(entity)) continue;
-
-            if (entity instanceof PlayerEntity) {
-                if (((PlayerEntity) entity).isCreative()) continue;
-                if (!friends.get() && !FriendManager.INSTANCE.attack((PlayerEntity) entity)) continue;
-            }
-
-            if (entity instanceof AnimalEntity) if (!babies.get() && entity.isBaby()) continue;
-
-            entityList.add(entity);
+        if (rotationMode.get() == RotationMode.None) {
+            hitEntity(target);
+        }
+        else {
+            Rotations.rotate(Rotations.getYaw(target), Rotations.getPitch(target, rotationDirection.get()), () -> hitEntity(target));
         }
 
-        if (entityList.size() > 0) {
-            entityList.sort(this::sort);
-            target = entityList.get(0);
-            entityList.clear();
+        canAttack = true;
+        return true;
+    }
 
-            if (pauseOnCombat.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing() && !wasPathing) {
-                BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("pause");
-                wasPathing = true;
-            }
-        } else {
-            if (wasPathing){
-                BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume");
-                wasPathing = false;
-            }
-        }
+    private void hitEntity(Entity target) {
+        mc.interactionManager.attackEntity(mc.player, target);
+        mc.player.swingHand(Hand.MAIN_HAND);
     }
 
     private boolean itemInHand() {
@@ -306,65 +301,14 @@ public class KillAura extends Module {
         }
     }
 
-    private int sort(LivingEntity e1, LivingEntity e2) {
-        switch (priority.get()) {
-            case LowestDistance:  return Double.compare(e1.distanceTo(mc.player), e2.distanceTo(mc.player));
-            case HighestDistance: return invertSort(Double.compare(e1.distanceTo(mc.player), e2.distanceTo(mc.player)));
-            case LowestHealth:    return Float.compare(e1.getHealth(), e2.getHealth());
-            case HighestHealth:   return invertSort(Float.compare(e1.getHealth(), e2.getHealth()));
-            default:              return 0;
-        }
-    }
-
-    private int invertSort(int sort) {
-        if (sort == 0) return 0;
-        return sort > 0 ? -1 : 1;
-    }
-
     @Override
     public String getInfoString() {
-        if (target != null && target instanceof PlayerEntity) return target.getEntityName();
-        if (target != null) return target.getType().getName().getString();
+        if (!entityList.isEmpty()) {
+            Entity targetFirst = entityList.get(0);
+            if (targetFirst instanceof PlayerEntity)
+                return targetFirst.getEntityName();
+            return targetFirst.getType().getName().getString();
+        }
         return null;
     }
-
-        /*@EventHandler
-    private final Listener<PacketEvent.Send> onSendPacket = new Listener<>(event -> {
-        if (movePacket != null) return;
-
-        if (event.packet instanceof PlayerMoveC2SPacket.PositionOnly) {
-            event.cancel();
-
-            PlayerMoveC2SPacket.PositionOnly p = (PlayerMoveC2SPacket.PositionOnly) event.packet;
-
-            mc.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.Both(
-                    p.getX(mc.player.getX()),
-                    p.getY(mc.player.getY()),
-                    p.getZ(mc.player.getZ()),
-                    mc.player.yaw,
-                    mc.player.pitch,
-                    p.isOnGround()
-            ));
-        } else if (event.packet instanceof PlayerMoveC2SPacket) {
-            movePacket = (PlayerMoveC2SPacket) event.packet;
-
-            rotatePacket();
-        }
-    });*/
-
-    /*@EventHandler
-    private final Listener<PacketSentEvent> onPacketSent = new Listener<>(event -> {
-        if (event.packet == movePacket) attack();
-    });
-
-    @EventHandler
-    private final Listener<TickEvent.Post> onPostTick = new Listener<>(event -> {
-        if (movePacket == null) {
-            mc.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.LookOnly(
-                    mc.player.yaw,
-                    mc.player.pitch,
-                    mc.player.isOnGround()
-            ));
-        }
-    });*/
 }

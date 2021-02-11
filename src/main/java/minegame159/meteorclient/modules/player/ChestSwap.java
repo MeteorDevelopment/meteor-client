@@ -144,6 +144,6 @@ public class ChestSwap extends Module {
     @Override
     public void sendToggledMsg() {
         if (stayOn.get()) super.sendToggledMsg();
-        else if (Config.INSTANCE.chatCommandsInfo) ChatUtils.moduleInfo(this, "Triggered (highlight)%s(default).", title);
+        else if (Config.get().chatCommandsInfo) ChatUtils.moduleInfo(this, "Triggered (highlight)%s(default).", title);
     }
 }
