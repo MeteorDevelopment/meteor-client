@@ -415,6 +415,7 @@ public class Modules extends System<Modules> {
         addModule(new VoidESP());
         addModule(new Xray());
         addModule(new BossStack());
+        addModule(new ItemHighlight());
     }
 
     private void initMisc() {
