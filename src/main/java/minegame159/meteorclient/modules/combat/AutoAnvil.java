@@ -33,6 +33,14 @@ public class AutoAnvil extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgPlace = settings.createGroup("Place");
 
+    // This is the structure of antiStep
+    private final ArrayList<Vec3d> antiStepStructure = new ArrayList<Vec3d>() {{
+        add(new Vec3d(1, 2, 0));
+        add(new Vec3d(-1, 2, 0));
+        add(new Vec3d(0, 2, 1));
+        add(new Vec3d(0, 2, -1));
+    }};
+
     // General
 
     private final Setting<Boolean> toggleOnBreak = sgGeneral.add(new BoolSetting.Builder()
@@ -146,10 +154,11 @@ public class AutoAnvil extends Module {
 
     // Given a position, this function say if, that position, is surrounded by blocks
     private boolean isHole(BlockPos pos) {
-        return mc.world.getBlockState(new BlockPos(pos.getX() + 1, pos.getY(), pos.getZ())).getBlock().is(Blocks.AIR) ||
-                mc.world.getBlockState(new BlockPos(pos.getX() - 1, pos.getY(), pos.getZ())).getBlock().is(Blocks.AIR) ||
-                mc.world.getBlockState(new BlockPos(pos.getX(), pos.getY(), pos.getZ() + 1)).getBlock().is(Blocks.AIR) ||
-                mc.world.getBlockState(new BlockPos(pos.getX(), pos.getY(), pos.getZ() - 1)).getBlock().is(Blocks.AIR);
+        BlockPos.Mutable posStart = new BlockPos.Mutable(pos.getX(), pos.getY(), pos.getZ());
+        return mc.world.getBlockState(posStart.add(1,0,0)).getBlock().is(Blocks.AIR) ||
+                mc.world.getBlockState(posStart.add(-1,0,0)).getBlock().is(Blocks.AIR) ||
+                mc.world.getBlockState(posStart.add(0,0,1)).getBlock().is(Blocks.AIR) ||
+                mc.world.getBlockState(posStart.add(0,0,-1)).getBlock().is(Blocks.AIR);
 
     }
 
@@ -250,14 +259,6 @@ public class AutoAnvil extends Module {
             BlockUtils.place(blockPos, Hand.MAIN_HAND, slot, rotate.get(), 0, true);
         } else timer++;
     }
-
-    // This is the structure of antiStep
-    private final ArrayList<Vec3d> antiStepStructure = new ArrayList<Vec3d>() {{
-        add(new Vec3d(1, 2, 0));
-        add(new Vec3d(-1, 2, 0));
-        add(new Vec3d(0, 2, 1));
-        add(new Vec3d(0, 2, -1));
-    }};
 
     public int getFloorSlot() {
         int slot = -1;
