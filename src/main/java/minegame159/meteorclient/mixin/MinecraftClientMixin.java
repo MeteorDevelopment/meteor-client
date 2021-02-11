@@ -6,6 +6,7 @@
 package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.MeteorClient;
+import minegame159.meteorclient.events.entity.player.ItemUseCrosshairTargetEvent;
 import minegame159.meteorclient.events.game.GameLeftEvent;
 import minegame159.meteorclient.events.game.OpenScreenEvent;
 import minegame159.meteorclient.events.game.ResourcePacksReloadedEvent;
@@ -13,9 +14,6 @@ import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.gui.GuiKeyEvents;
 import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.mixininterface.IMinecraftClient;
-import minegame159.meteorclient.modules.Modules;
-import minegame159.meteorclient.modules.player.AutoEat;
-import minegame159.meteorclient.modules.player.AutoGap;
 import minegame159.meteorclient.utils.network.OnlinePlayers;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.Mouse;
@@ -25,10 +23,7 @@ import net.minecraft.client.util.Window;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.profiler.Profiler;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Mutable;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
@@ -63,6 +58,9 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
 
     @Shadow public abstract Profiler getProfiler();
 
+    @Unique private boolean doItemUseCalled;
+    @Unique private boolean rightClick;
+
     @Inject(method = "<init>", at = @At("TAIL"))
     private void onInit(CallbackInfo info) {
         MeteorClient.INSTANCE.onInitializeClient();
@@ -72,9 +70,14 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
     private void onPreTick(CallbackInfo info) {
         OnlinePlayers.update();
 
+        doItemUseCalled = false;
+
         getProfiler().push("meteor-client_pre_update");
         MeteorClient.EVENT_BUS.post(TickEvent.Pre.get());
         getProfiler().pop();
+
+        if (rightClick && !doItemUseCalled) doItemUse();
+        rightClick = false;
     }
 
     @Inject(at = @At("TAIL"), method = "tick")
@@ -83,7 +86,12 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
         MeteorClient.EVENT_BUS.post(TickEvent.Post.get());
         getProfiler().pop();
     }
-    
+
+    @Inject(method = "doItemUse", at = @At("HEAD"))
+    private void onDoItemUse(CallbackInfo info) {
+        doItemUseCalled = true;
+    }
+
     @Inject(method = "disconnect(Lnet/minecraft/client/gui/screen/Screen;)V", at = @At("HEAD"))
     private void onDisconnect(Screen screen, CallbackInfo info) {
         if (world != null) {
@@ -108,8 +116,7 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
 
     @Redirect(method = "doItemUse", at = @At(value = "FIELD", target = "Lnet/minecraft/client/MinecraftClient;crosshairTarget:Lnet/minecraft/util/hit/HitResult;", ordinal = 1))
     private HitResult doItemUseMinecraftClientCrosshairTargetProxy(MinecraftClient client) {
-        if (Modules.get().get(AutoEat.class).rightClickThings() && Modules.get().get(AutoGap.class).rightClickThings()) return client.crosshairTarget;
-        return null;
+        return MeteorClient.EVENT_BUS.post(ItemUseCrosshairTargetEvent.get(client.crosshairTarget)).target;
     }
 
     @ModifyVariable(method = "reloadResources", at = @At("STORE"), ordinal = 0)
@@ -118,6 +125,8 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
         return completableFuture;
     }
 
+    // Interface
+
     @Override
     public void leftClick() {
         doAttack();
@@ -125,7 +134,7 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
 
     @Override
     public void rightClick() {
-        doItemUse();
+        rightClick = true;
     }
 
     @Override
