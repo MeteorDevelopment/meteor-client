@@ -173,7 +173,7 @@ public class Swarm extends Module {
 
     public void idle() {
         currentMode = Mode.Idle;
-        if (Modules.get().get(InfinityMiner.class).isActive())
+        if (Modules.get().isActive(InfinityMiner.class))
             Modules.get().get(InfinityMiner.class).toggle();
         if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing())
             BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();

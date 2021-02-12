@@ -1,6 +1,8 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ *
+ *  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
+ *  * Copyright (c) 2021 Meteor Development.
+ *
  */
 
 package minegame159.meteorclient.modules.combat;
@@ -23,6 +25,6 @@ public class AntiFriendHit extends Module {
 
     @EventHandler
     private void onAttackEntity(AttackEntityEvent event) {
-        if (event.entity instanceof PlayerEntity && Modules.get().get(AntiFriendHit.class).isActive() && !Friends.get().attack((PlayerEntity) event.entity)) event.cancel();
+        if (event.entity instanceof PlayerEntity && Modules.get().isActive(AntiFriendHit.class) && !Friends.get().attack((PlayerEntity) event.entity)) event.cancel();
     }
 }

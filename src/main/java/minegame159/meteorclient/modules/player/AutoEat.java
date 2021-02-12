@@ -1,6 +1,8 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ *
+ *  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
+ *  * Copyright (c) 2021 Meteor Development.
+ *
  */
 
 package minegame159.meteorclient.modules.player;
@@ -170,11 +172,11 @@ public class AutoEat extends Module {
 
             if (!mc.player.isUsingItem()) {
                 if (disableAuras.get()) {
-                    if (Modules.get().get(KillAura.class).isActive()) {
+                    if (Modules.get().isActive(KillAura.class)) {
                         wasKillActive = true;
                         Modules.get().get(KillAura.class).toggle();
                     }
-                    if (Modules.get().get(CrystalAura.class).isActive()) {
+                    if (Modules.get().isActive(CrystalAura.class)) {
                         wasCrystalActive = true;
                     }
                 }

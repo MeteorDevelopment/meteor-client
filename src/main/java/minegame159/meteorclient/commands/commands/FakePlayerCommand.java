@@ -1,6 +1,8 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ *
+ *  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
+ *  * Copyright (c) 2021 Meteor Development.
+ *
  */
 
 package minegame159.meteorclient.commands.commands;
@@ -39,7 +41,7 @@ public class FakePlayerCommand extends Command {
     }
 
     private boolean active() {
-        if (!Modules.get().get(FakePlayer.class).isActive()) {
+        if (!Modules.get().isActive(FakePlayer.class)) {
             ChatUtils.moduleError(Modules.get().get(FakePlayer.class),"The FakePlayer module must be enabled to use this command.");
             return false;
         }

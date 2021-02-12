@@ -1,6 +1,8 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ *
+ *  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
+ *  * Copyright (c) 2021 Meteor Development.
+ *
  */
 
 package minegame159.meteorclient.modules.combat;
@@ -103,7 +105,7 @@ public class AutoTotem extends Module {
         InvUtils.FindItemResult result = InvUtils.findItemWithCount(Items.TOTEM_OF_UNDYING);
 
         if (result.count <= 0) {
-            if (!Modules.get().get(OffhandExtra.class).isActive() && fallback.get()) {
+            if (!Modules.get().isActive(OffhandExtra.class) && fallback.get()) {
                 Modules.get().get(OffhandExtra.class).toggle();
             }
 
@@ -157,8 +159,8 @@ public class AutoTotem extends Module {
                 }
             }
         }
-        if(!Modules.get().get(NoFall.class).isActive() && mc.player.fallDistance > 3){
-            double damage =mc.player.fallDistance * 0.5;
+        if(!Modules.get().isActive(NoFall.class) && mc.player.fallDistance > 3){
+            double damage = mc.player.fallDistance * 0.5;
             if(damage > damageTaken){
                 damageTaken = damage;
             }

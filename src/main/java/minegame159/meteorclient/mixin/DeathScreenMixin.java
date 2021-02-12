@@ -1,6 +1,8 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ *
+ *  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
+ *  * Copyright (c) 2021 Meteor Development.
+ *
  */
 
 package minegame159.meteorclient.mixin;
@@ -28,7 +30,7 @@ public class DeathScreenMixin extends Screen {
 
     @Inject(method = "init", at = @At("HEAD"))
     protected void init(CallbackInfo ci) {
-        if (Modules.get().get(BypassDeathScreen.class).isActive()) {
+        if (Modules.get().isActive(BypassDeathScreen.class)) {
             this.addButton(new ButtonWidget(this.width / 2 - 100, this.height / 4 + 48, 200, 20, new LiteralText("Ghost Spectate"), (buttonWidgetx) -> {
 //                ChatUtils.info("You gay nigga 3");
                 Modules.get().get(BypassDeathScreen.class).shouldBypass = true;

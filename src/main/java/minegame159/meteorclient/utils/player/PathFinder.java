@@ -1,6 +1,8 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ *
+ *  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
+ *  * Copyright (c) 2021 Meteor Development.
+ *
  */
 
 package minegame159.meteorclient.utils.player;
@@ -8,8 +10,6 @@ package minegame159.meteorclient.utils.player;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.entity.player.PlayerMoveEvent;
-import minegame159.meteorclient.modules.Modules;
-import minegame159.meteorclient.modules.movement.Step;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -61,7 +61,6 @@ public class PathFinder {
 
     public PathBlock getNextPathBlock() {
         PathBlock nextBlock = new PathBlock(new BlockPos(getNextStraightPos()));
-        double stepHeight = (Modules.get().get(Step.class).isActive()) ? Modules.get().get(Step.class).height.get() : 0;
         if (isSolidFloor(nextBlock.blockPos) && isAirAbove(nextBlock.blockPos)) {
             return nextBlock;
         } else if (!isSolidFloor(nextBlock.blockPos) && isAirAbove(nextBlock.blockPos)) {
