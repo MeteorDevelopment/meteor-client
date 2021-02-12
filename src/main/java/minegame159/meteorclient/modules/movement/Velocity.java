@@ -7,14 +7,38 @@ package minegame159.meteorclient.modules.movement;
 
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 
 public class Velocity extends Module {
-    private final SettingGroup sg = settings.getDefaultGroup();
+    private final SettingGroup sgDefault = settings.getDefaultGroup();
 
-    private final Setting<Double> horizontal = sg.add(new DoubleSetting.Builder()
+    public final Setting<Boolean> explosions = sgDefault.add(new BoolSetting.Builder()
+            .name("explosions")
+            .description("Modifies your knockback from explosions.")
+            .defaultValue(true)
+            .build()
+    );
+
+/*
+    public final Setting<Boolean> liquids = sgDefault.add(new BoolSetting.Builder()
+            .name("liquids")
+            .description("Modifies the amount you are pushed by flowing liquids.")
+            .defaultValue(true)
+            .build()
+    );
+*/
+
+    public final Setting<Boolean> entities = sgDefault.add(new BoolSetting.Builder()
+            .name("entities")
+            .description("Modifies the amount of knockback you take from entities and attacks.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Double> horizontal = sgDefault.add(new DoubleSetting.Builder()
             .name("horizontal-multiplier")
             .description("How much velocity you will take horizontally.")
             .defaultValue(0)
@@ -23,7 +47,7 @@ public class Velocity extends Module {
             .build()
     );
 
-    private final Setting<Double> vertical = sg.add(new DoubleSetting.Builder()
+    private final Setting<Double> vertical = sgDefault.add(new DoubleSetting.Builder()
             .name("vertical-multiplier")
             .description("How much velocity you will take vertically.")
             .defaultValue(0)

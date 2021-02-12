@@ -14,23 +14,21 @@ import minegame159.meteorclient.events.packets.ContainerSlotUpdateEvent;
 import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.events.packets.PlaySoundPacketEvent;
 import minegame159.meteorclient.events.world.ChunkDataEvent;
+import minegame159.meteorclient.mixininterface.IExplosionS2CPacket;
 import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.movement.Velocity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.network.Packet;
 import net.minecraft.network.packet.s2c.play.*;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.chunk.WorldChunk;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
@@ -89,21 +87,14 @@ public abstract class ClientPlayNetworkHandlerMixin {
         MeteorClient.EVENT_BUS.post(EntityDestroyEvent.get(client.world.getEntityById(j)));
     }
 
-    @Redirect(method = "onExplosion", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;setVelocity(Lnet/minecraft/util/math/Vec3d;)V"))
-    private void onExplosionVec3dAddProxy(ClientPlayerEntity player, Vec3d vec3d) {
-        if (player != client.player) player.setVelocity(vec3d);
+    @Inject(method = "onExplosion", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/NetworkThreadUtils;forceMainThread(Lnet/minecraft/network/Packet;Lnet/minecraft/network/listener/PacketListener;Lnet/minecraft/util/thread/ThreadExecutor;)V", shift = At.Shift.AFTER))
+    private void onExplosionVelocity(ExplosionS2CPacket packet, CallbackInfo ci) {
+        Velocity velocity = Modules.get().get(Velocity.class); //Velocity for explosions
+        if (!velocity.explosions.get()) return;
 
-        double deltaX = vec3d.x - player.getVelocity().x;
-        double deltaY = vec3d.y - player.getVelocity().y;
-        double deltaZ = vec3d.z - player.getVelocity().z;
-
-        Velocity velocity = Modules.get().get(Velocity.class);
-
-        player.setVelocity(
-                player.getVelocity().x + deltaX * velocity.getHorizontal(),
-                player.getVelocity().y + deltaY * velocity.getVertical(),
-                player.getVelocity().z + deltaZ * velocity.getHorizontal()
-        );
+        ((IExplosionS2CPacket) packet).setVelocityX((float) (packet.getPlayerVelocityX() * velocity.getHorizontal()));
+        ((IExplosionS2CPacket) packet).setVelocityY((float) (packet.getPlayerVelocityY() * velocity.getVertical()));
+        ((IExplosionS2CPacket) packet).setVelocityZ((float) (packet.getPlayerVelocityZ() * velocity.getHorizontal()));
     }
 
     @Inject(method = "onItemPickupAnimation", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/world/ClientWorld;getEntityById(I)Lnet/minecraft/entity/Entity;", ordinal = 0))
