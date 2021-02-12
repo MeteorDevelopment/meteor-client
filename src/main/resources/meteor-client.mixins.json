@@ -71,7 +71,6 @@
     "LightmapTextureManagerMixin",
     "LivingEntityMixin",
     "LivingEntityRendererMixin",
-    "LookBehaviourAccessor",
     "Matrix4fMixin",
     "MinecraftClientAccessor",
     "MinecraftClientMixin",

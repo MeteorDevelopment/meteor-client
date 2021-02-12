@@ -6,8 +6,9 @@
 package minegame159.meteorclient.utils.player;
 
 import baritone.api.BaritoneAPI;
-import minegame159.meteorclient.mixin.LookBehaviourAccessor;
+import baritone.api.utils.Rotation;
 import minegame159.meteorclient.mixininterface.IVec3d;
+import minegame159.meteorclient.utils.misc.BaritoneUtils;
 import minegame159.meteorclient.utils.misc.Vector2;
 import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.client.MinecraftClient;
@@ -82,10 +83,10 @@ public class PlayerUtils {
 
     public static Vec3d getHorizontalVelocity(double bps) {
         float yaw = mc.player.yaw;
+
         if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing()) {
-            if (((LookBehaviourAccessor) BaritoneAPI.getProvider().getPrimaryBaritone().getLookBehavior()).getTarget() != null) {
-                yaw = ((LookBehaviourAccessor) BaritoneAPI.getProvider().getPrimaryBaritone().getLookBehavior()).getTarget().getYaw();
-            }
+            Rotation target = BaritoneUtils.getTarget();
+            if (target != null) yaw = target.getYaw();
         }
 
         Vec3d forward = Vec3d.fromPolar(0, yaw);
