@@ -1,6 +1,8 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ *
+ *  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
+ *  * Copyright (c) 2021 Meteor Development.
+ *
  */
 
 package minegame159.meteorclient.modules.combat;
@@ -162,7 +164,7 @@ public class AutoLog extends Module {
         }
 
         // Check for fall distance with water check
-        if (!Modules.get().get(NoFall.class).isActive() && mc.player.fallDistance > 3) {
+        if (!Modules.get().isActive(NoFall.class) && mc.player.fallDistance > 3) {
             double damage = mc.player.fallDistance * 0.5;
 
             BlockPos.Mutable blockPos = mc.player.getBlockPos().mutableCopy();

@@ -1,6 +1,8 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ *
+ *  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
+ *  * Copyright (c) 2021 Meteor Development.
+ *
  */
 
 package minegame159.meteorclient.mixin;
@@ -102,7 +104,7 @@ public abstract class EntityMixin {
 
     @Inject(method = "isInvisibleTo(Lnet/minecraft/entity/player/PlayerEntity;)Z", at = @At("HEAD"), cancellable = true)
     private void isInvisibleToCanceller(PlayerEntity player, CallbackInfoReturnable<Boolean> info) {
-        if (Modules.get().get(ESP.class).isActive() && Modules.get().get(ESP.class).showInvis.get()) info.setReturnValue(false);
+        if (Modules.get().isActive(ESP.class) && Modules.get().get(ESP.class).showInvis.get()) info.setReturnValue(false);
     }
 
     @Inject(method = "getTargetingMargin", at = @At("HEAD"), cancellable = true)

@@ -1,6 +1,8 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ *
+ *  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
+ *  * Copyright (c) 2021 Meteor Development.
+ *
  */
 
 package minegame159.meteorclient.modules.render.hud.modules;
@@ -22,7 +24,7 @@ public class SpeedHud extends DoubleTextHudModule {
         double tZ = Math.abs(mc.player.getZ() - mc.player.prevZ);
         double length = Math.sqrt(tX * tX + tZ * tZ);
 
-        if (Modules.get().get(Timer.class).isActive()){
+        if (Modules.get().isActive(Timer.class)){
             length *= Modules.get().get(Timer.class).getMultiplier();
         }
 

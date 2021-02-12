@@ -1,6 +1,8 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ *
+ *  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
+ *  * Copyright (c) 2021 Meteor Development.
+ *
  */
 
 package minegame159.meteorclient.commands.commands.swarm;
@@ -30,7 +32,7 @@ public class SwarmCloseConnections extends Command {
                             swarm.currentMode = Swarm.Mode.Idle;
                             if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing())
                                 BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
-                            if (Modules.get().get(Swarm.class).isActive())
+                            if (Modules.get().isActive(Swarm.class))
                                 Modules.get().get(Swarm.class).toggle();
                         }
                     } catch (Exception ignored) {

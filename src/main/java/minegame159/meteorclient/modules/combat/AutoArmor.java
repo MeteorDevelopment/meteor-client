@@ -1,6 +1,8 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ *
+ *  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
+ *  * Copyright (c) 2021 Meteor Development.
+ *
  */
 
 package minegame159.meteorclient.modules.combat;
@@ -207,7 +209,7 @@ public class AutoArmor extends Module {
             currentToughness = 0;
             currentUnbreaking = 0;
             currentMending = 0;
-            if ((ignoreElytra.get() || Modules.get().get(ChestSwap.class).isActive()) && itemStack.getItem() == Items.ELYTRA) continue;
+            if ((ignoreElytra.get() || Modules.get().isActive(ChestSwap.class)) && itemStack.getItem() == Items.ELYTRA) continue;
             if (EnchantmentHelper.hasBindingCurse(itemStack)) continue;
             if (itemStack.getItem() instanceof ArmorItem) {
                 if (a == 1 && bProtLegs.get()) {
