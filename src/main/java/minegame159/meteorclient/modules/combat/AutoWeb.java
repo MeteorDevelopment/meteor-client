@@ -88,11 +88,11 @@ public class AutoWeb extends Module {
 
         if (target != null) {
             BlockPos targetPos = target.getBlockPos();
-            BlockUtils.place(targetPos, Hand.MAIN_HAND, slot, rotate.get(), 0);
+            BlockUtils.place(targetPos, Hand.MAIN_HAND, slot, rotate.get(), 0, false);
 
             if (doubles.get()) {
                 targetPos = targetPos.add(0, 1, 0);
-                BlockUtils.place(targetPos, Hand.MAIN_HAND, InvUtils.findItemInHotbar(Items.COBWEB), rotate.get(), 0);
+                BlockUtils.place(targetPos, Hand.MAIN_HAND, InvUtils.findItemInHotbar(Items.COBWEB), rotate.get(), 0, false);
             }
         }
     }

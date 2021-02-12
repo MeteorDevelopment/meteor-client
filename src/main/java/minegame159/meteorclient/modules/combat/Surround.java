@@ -155,7 +155,7 @@ public class Surround extends Module {
         if (!blockState.getMaterial().isReplaceable()) return true;
 
         int slot = findSlot();
-        if (BlockUtils.place(blockPos, Hand.MAIN_HAND, slot, rotate.get(), 100)) {
+        if (BlockUtils.place(blockPos, Hand.MAIN_HAND, slot, rotate.get(), 100, true)) {
             return_ = true;
         }
 

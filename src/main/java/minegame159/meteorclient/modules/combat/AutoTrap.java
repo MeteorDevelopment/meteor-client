@@ -168,7 +168,7 @@ public class AutoTrap extends Module {
         if (delay >= delaySetting.get() && placePositions.size() > 0) {
             BlockPos blockPos = placePositions.get(placePositions.size() - 1);
 
-            if (BlockUtils.place(blockPos, Hand.MAIN_HAND, slot, rotate.get(), 50)) {
+            if (BlockUtils.place(blockPos, Hand.MAIN_HAND, slot, rotate.get(), 50, true)) {
                 placePositions.remove(blockPos);
                 placed = true;
             }
