@@ -12,10 +12,10 @@ import minegame159.meteorclient.events.game.OpenScreenEvent;
 import minegame159.meteorclient.events.meteor.KeyEvent;
 import minegame159.meteorclient.events.world.ChunkOcclusionEvent;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.misc.Vec3;
 import minegame159.meteorclient.utils.misc.input.KeyAction;
 import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.Rotations;
@@ -79,8 +79,8 @@ public class Freecam extends Module {
             .build()
     );
 
-    public final Vec3d pos = new Vec3d(0, 0, 0);
-    public final Vec3d prevPos = new Vec3d(0, 0, 0);
+    public final Vec3 pos = new Vec3();
+    public final Vec3 prevPos = new Vec3();
 
     public float yaw, pitch;
     public float prevYaw, prevPitch;
@@ -96,8 +96,8 @@ public class Freecam extends Module {
         yaw = mc.player.yaw;
         pitch = mc.player.pitch;
 
-        ((IVec3d) pos).set(mc.gameRenderer.getCamera().getPos());
-        ((IVec3d) prevPos).set(mc.gameRenderer.getCamera().getPos());
+        pos.set(mc.gameRenderer.getCamera().getPos());
+        prevPos.set(mc.gameRenderer.getCamera().getPos());
 
         prevYaw = yaw;
         prevPitch = pitch;
@@ -122,7 +122,7 @@ public class Freecam extends Module {
     private void onOpenScreen(OpenScreenEvent event) {
         unpress();
 
-        ((IVec3d) prevPos).set(pos);
+        prevPos.set(pos);
         prevYaw = yaw;
         prevPitch = pitch;
     }
@@ -209,8 +209,8 @@ public class Freecam extends Module {
             velY -= s * speed.get();
         }
 
-        ((IVec3d) prevPos).set(pos);
-        ((IVec3d) pos).set(pos.x + velX, pos.y + velY, pos.z + velZ);
+        prevPos.set(pos);
+        pos.set(pos.x + velX, pos.y + velY, pos.z + velZ);
     }
 
     @EventHandler

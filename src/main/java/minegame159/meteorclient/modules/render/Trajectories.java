@@ -18,6 +18,7 @@ import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.Pool;
+import minegame159.meteorclient.utils.misc.Vec3;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.item.*;
 import net.minecraft.util.hit.BlockHitResult;
@@ -53,8 +54,10 @@ public class Trajectories extends Module {
             .build()
     );
 
-    private final Pool<Vec3d> vec3ds = new Pool<>(() -> new Vec3d(0, 0, 0));
-    private final List<Vec3d> path = new ArrayList<>();
+    private final Vec3d vec3d = new Vec3d(0, 0, 0);
+
+    private final Pool<Vec3> vec3s = new Pool<>(Vec3::new);
+    private final List<Vec3> path = new ArrayList<>();
 
     private boolean hitQuad, hitQuadHorizontal;
     private double hitQuadX1, hitQuadY1, hitQuadZ1, hitQuadX2, hitQuadY2, hitQuadZ2;
@@ -73,8 +76,8 @@ public class Trajectories extends Module {
 
         calculatePath(event.tickDelta, item);
 
-        Vec3d lastPoint = null;
-        for (Vec3d point : path) {
+        Vec3 lastPoint = null;
+        for (Vec3 point : path) {
             if (lastPoint != null) Renderer.LINES.line(lastPoint.x, lastPoint.y, lastPoint.z, point.x, point.y, point.z, lineColor.get());
             lastPoint = point;
         }
@@ -87,7 +90,7 @@ public class Trajectories extends Module {
 
     private void calculatePath(float tickDelta, Item item) {
         // Clear path and target
-        for (Vec3d point : path) vec3ds.free(point);
+        for (Vec3 point : path) vec3s.free(point);
         path.clear();
 
         // Calculate starting position
@@ -138,7 +141,7 @@ public class Trajectories extends Module {
 
         while (true) {
             // Add to path
-            Vec3d pos = addToPath(x, y, z);
+            Vec3 pos = addToPath(x, y, z);
 
             // Apply motion
             x += velocityX * 0.1;
@@ -161,7 +164,8 @@ public class Trajectories extends Module {
             if (!mc.world.getChunkManager().isChunkLoaded(chunkX, chunkZ)) break;
 
             // Check for collision
-            RaycastContext context = new RaycastContext(eyesPos, pos, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player);
+            ((IVec3d) vec3d).set(pos);
+            RaycastContext context = new RaycastContext(eyesPos, vec3d, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player);
             lastHitResult = mc.world.raycast(context);
             if (lastHitResult.getType() != HitResult.Type.MISS) break;
         }
@@ -208,9 +212,9 @@ public class Trajectories extends Module {
         return 0.03;
     }
 
-    private Vec3d addToPath(double x, double y, double z) {
-        Vec3d point = vec3ds.get();
-        ((IVec3d) point).set(x, y, z);
+    private Vec3 addToPath(double x, double y, double z) {
+        Vec3 point = vec3s.get();
+        point.set(x, y, z);
         path.add(point);
 
         return point;

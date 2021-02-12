@@ -9,7 +9,6 @@ import com.google.common.reflect.TypeToken;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.Render2DEvent;
 import minegame159.meteorclient.mixin.ProjectileEntityAccessor;
-import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.rendering.DrawMode;
@@ -19,6 +18,7 @@ import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.utils.misc.Vec3;
 import minegame159.meteorclient.utils.network.HttpUtils;
 import minegame159.meteorclient.utils.network.MeteorExecutor;
 import minegame159.meteorclient.utils.network.UuidNameHistoryResponseItem;
@@ -30,7 +30,6 @@ import net.minecraft.entity.passive.HorseBaseEntity;
 import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
-import net.minecraft.util.math.Vec3d;
 
 import java.lang.reflect.Type;
 import java.util.HashMap;
@@ -62,7 +61,7 @@ public class EntityOwner extends Module {
             .build()
     );
 
-    private final Vec3d pos = new Vec3d(0, 0, 0);
+    private final Vec3 pos = new Vec3();
     private final Map<UUID, String> uuidToName = new HashMap<>();
 
     public EntityOwner() {
@@ -85,8 +84,8 @@ public class EntityOwner extends Module {
             else continue;
 
             if (ownerUuid != null) {
-                Vec3d p = entity.getPos();
-                ((IVec3d) pos).set(p.x, p.y + entity.getEyeHeight(entity.getPose()) + 0.75, p.z);
+                pos.set(entity, event.tickDelta);
+                pos.add(0, entity.getEyeHeight(entity.getPose()) + 0.75, 0);
 
                 if (NametagUtils.to2D(pos, scale.get())) {
                     renderNametag(getOwnerName(ownerUuid));
