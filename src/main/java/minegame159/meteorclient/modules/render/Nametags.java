@@ -13,7 +13,6 @@ import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.Render2DEvent;
 import minegame159.meteorclient.friends.Friends;
-import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.Modules;
@@ -27,6 +26,7 @@ import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.entity.EntityUtils;
 import minegame159.meteorclient.utils.entity.FakePlayerEntity;
 import minegame159.meteorclient.utils.entity.FakePlayerUtils;
+import minegame159.meteorclient.utils.misc.Vec3;
 import minegame159.meteorclient.utils.render.NametagUtils;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.render.color.SettingColor;
@@ -40,7 +40,6 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.decoration.ItemFrameEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.GameMode;
 
@@ -271,7 +270,7 @@ public class Nametags extends Module {
             .build()
     );
 
-    private final Vec3d pos = new Vec3d(0, 0, 0);
+    private final Vec3 pos = new Vec3();
 
     private final double[] itemWidths = new double[6];
     private final Color RED = new Color(255, 15, 15);
@@ -294,8 +293,8 @@ public class Nametags extends Module {
                 if (!yourself.get() && entity == mc.player) continue;
             }
 
-            Vec3d p = entity.getPos();
-            ((IVec3d) pos).set(p.x, p.y + getHeight(entity), p.z);
+            pos.set(entity, event.tickDelta);
+            pos.add(0, getHeight(entity), 0);
 
             if (NametagUtils.to2D(pos, scale.get())) {
                 if (type == EntityType.PLAYER) renderNametagPlayer((PlayerEntity) entity);

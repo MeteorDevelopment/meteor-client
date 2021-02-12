@@ -15,7 +15,6 @@ import minegame159.meteorclient.events.render.Render2DEvent;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.friends.Friends;
-import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.rendering.Renderer;
@@ -24,6 +23,7 @@ import minegame159.meteorclient.rendering.text.TextRenderer;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.Pool;
+import minegame159.meteorclient.utils.misc.Vec3;
 import minegame159.meteorclient.utils.player.*;
 import minegame159.meteorclient.utils.render.NametagUtils;
 import minegame159.meteorclient.utils.render.color.SettingColor;
@@ -1082,7 +1082,7 @@ public class CrystalAura extends Module {
         return mc.world.getBlockState(pos).isAir() && mc.world.getOtherEntities(null, new Box(pos.getX(), pos.getY(), pos.getZ(), pos.getX() + 1.0D, pos.getY() + 2.0D, pos.getZ() + 1.0D)).isEmpty();
     }
 
-    private static final Vec3d pos = new Vec3d(0, 0, 0);
+    private static final Vec3 pos = new Vec3();
 
     private class RenderBlock {
         private int x, y, z;
@@ -1108,14 +1108,13 @@ public class CrystalAura extends Module {
 
         public void render2D() {
             if (renderDamage.get()) {
-                ((IVec3d) pos).set(x + 0.5, y + 0.5, z + 0.5);
+                pos.set(x + 0.5, y + 0.5, z + 0.5);
 
                 if (NametagUtils.to2D(pos, damageScale.get())) {
                     NametagUtils.begin(pos);
                     TextRenderer.get().begin(1, false, true);
 
                     String damageText = String.valueOf(Math.round(damage));
-
 
                     switch (roundDamage.get()) {
                         case 0:
