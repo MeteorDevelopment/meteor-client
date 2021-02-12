@@ -45,16 +45,13 @@ public abstract class EntityMixin {
 
     @Redirect(method = "setVelocityClient", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;setVelocity(DDD)V"))
     private void setVelocityClientEntiySetVelocityProxy(Entity entity, double x, double y, double z) {
-        if (((Object) this) == MinecraftClient.getInstance().player) {
+        Velocity velocity = Modules.get().get(Velocity.class);
 
-            Velocity velocity = Modules.get().get(Velocity.class);
-            entity.setVelocity(
-                    entity.getVelocity().x + x * velocity.getHorizontal(),
-                    entity.getVelocity().y + y * velocity.getVertical(),
-                    entity.getVelocity().z + z * velocity.getHorizontal()
-            );
+        if (entity == MinecraftClient.getInstance().player && velocity.entities.get()) {
+            entity.setVelocity(x * velocity.getHorizontal(), y * velocity.getVertical(),z * velocity.getHorizontal());
+        } else {
+            entity.setVelocity(x, y, z);
         }
-        else entity.setVelocity(x, y, z);
     }
 
     @Inject(method = "getJumpVelocityMultiplier", at = @At("HEAD"), cancellable = true)
@@ -71,9 +68,10 @@ public abstract class EntityMixin {
 
     @Redirect(method = "addVelocity", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/Vec3d;add(DDD)Lnet/minecraft/util/math/Vec3d;"))
     private Vec3d addVelocityVec3dAddProxy(Vec3d vec3d, double x, double y, double z) {
-        if ((Object) this != MinecraftClient.getInstance().player || Utils.isReleasingTrident) return vec3d.add(x, y, z);
-
         Velocity velocity = Modules.get().get(Velocity.class);
+
+        if ((Object) this != MinecraftClient.getInstance().player || Utils.isReleasingTrident || !velocity.entities.get()) return vec3d.add(x, y, z);
+
         return vec3d.add(x * velocity.getHorizontal(), y * velocity.getVertical(), z * velocity.getHorizontal());
     }
 
