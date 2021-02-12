@@ -34,15 +34,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ClientPlayerInteractionManager.class)
 public abstract class ClientPlayerInteractionManagerMixin implements IClientPlayerInteractionManager {
-    @Shadow protected abstract void syncSelectedSlot();
-
     @Shadow private int blockBreakingCooldown;
 
-    @Shadow private float currentBreakingProgress;
-
-    @Shadow private BlockPos currentBreakingPos;
-
-    @Shadow public abstract ActionResult interactItem(PlayerEntity player, World world, Hand hand);
+    @Shadow protected abstract void syncSelectedSlot();
 
     @Inject(method = "attackEntity", at = @At("HEAD"), cancellable = true)
     private void onAttackEntity(PlayerEntity player, Entity target, CallbackInfo info) {
@@ -90,15 +84,5 @@ public abstract class ClientPlayerInteractionManagerMixin implements IClientPlay
     @Override
     public void syncSelectedSlot2() {
         syncSelectedSlot();
-    }
-
-    @Override
-    public double getBreakingProgress() {
-        return currentBreakingProgress;
-    }
-
-    @Override
-    public BlockPos getCurrentBreakingBlockPos() {
-        return currentBreakingPos;
     }
 }

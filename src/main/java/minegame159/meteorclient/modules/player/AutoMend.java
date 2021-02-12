@@ -109,7 +109,7 @@ public class AutoMend extends Module {
         else if (EnchantmentHelper.getLevel(Enchantments.MENDING, mc.player.getOffHandStack()) == 0) replaceItem(false);
 
         if(armourSlots.get()) {
-            if(Modules.get().get(AutoArmor.class).isActive()) {
+            if(Modules.get().isActive(AutoArmor.class)) {
                 ChatUtils.moduleWarning(this, "Cannot use armor slots while AutoArmor is active. Please disable AutoArmor and try again. Disabling Use Armor Slots.");
                 armourSlots.set(false);
             }

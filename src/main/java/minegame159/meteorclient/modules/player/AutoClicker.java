@@ -7,7 +7,6 @@ package minegame159.meteorclient.modules.player;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.EnumSetting;
@@ -62,14 +61,14 @@ public class AutoClicker extends Module {
     @Override
     public void onActivate() {
         timer = 0;
-        ((IKeyBinding)mc.options.keyAttack).setPressed(false);
-        ((IKeyBinding)mc.options.keyUse).setPressed(false);
+        mc.options.keyAttack.setPressed(false);
+        mc.options.keyUse.setPressed(false);
     }
 
     @Override
     public void onDeactivate() {
-        ((IKeyBinding)mc.options.keyAttack).setPressed(false);
-        ((IKeyBinding)mc.options.keyUse).setPressed(false);
+        mc.options.keyAttack.setPressed(false);
+        mc.options.keyUse.setPressed(false);
     }
 
     @EventHandler
@@ -78,10 +77,10 @@ public class AutoClicker extends Module {
             case Hold:
                 switch (button.get()) {
                     case Left:
-                        ((IKeyBinding)mc.options.keyAttack).setPressed(true);
+                        mc.options.keyAttack.setPressed(true);
                         break;
                     case Right:
-                        ((IKeyBinding)mc.options.keyUse).setPressed(true);
+                        mc.options.keyUse.setPressed(true);
                         break;
                 }
                 break;

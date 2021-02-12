@@ -316,9 +316,7 @@ public class Modules extends System<Modules> {
         addModule(new AntiHunger());
         addModule(new AutoClicker());
         addModule(new AutoDrop());
-        addModule(new AutoEat());
         addModule(new AutoFish());
-        addModule(new AutoGap());
         addModule(new AutoMend());
         addModule(new AutoMount());
         addModule(new AutoReplenish());
@@ -348,6 +346,8 @@ public class Modules extends System<Modules> {
         addModule(new SpeedMine());
         addModule(new Trail());
         addModule(new XCarry());
+        addModule(new AutoGap());
+        addModule(new AutoEat());
     }
 
     private void initMovement() {

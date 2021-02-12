@@ -10,7 +10,6 @@ import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.friends.Friends;
-import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
@@ -18,12 +17,12 @@ import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.entity.EntityUtils;
 import minegame159.meteorclient.utils.entity.SortPriority;
 import minegame159.meteorclient.utils.entity.Target;
+import minegame159.meteorclient.utils.misc.Vec3;
 import minegame159.meteorclient.utils.player.PlayerUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
 
 public class AimAssist extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -91,7 +90,7 @@ public class AimAssist extends Module {
             .build()
     );
 
-    private final Vec3d vec3d1 = new Vec3d(0, 0, 0);
+    private final Vec3 vec3d1 = new Vec3();
     private Entity target;
 
     public AimAssist() {
@@ -120,7 +119,7 @@ public class AimAssist extends Module {
     }
 
     private void aim(Entity target, double delta, boolean instant) {
-        setVec3dToTargetPoint(vec3d1, target);
+        setVec3dToTargetPoint(vec3d1, target, delta);
 
         double deltaX = vec3d1.x - mc.player.getX();
         double deltaZ = vec3d1.z - mc.player.getZ();
@@ -154,11 +153,12 @@ public class AimAssist extends Module {
         }
     }
 
-    private void setVec3dToTargetPoint(Vec3d vec3d, Entity entity) {
+    private void setVec3dToTargetPoint(Vec3 vec, Entity entity, double tickDelta) {
+        vec.set(entity, tickDelta);
+
         switch (bodyTarget.get()) {
-            case Head: ((IVec3d) vec3d).set(entity.getX(), entity.getY() + entity.getEyeHeight(entity.getPose()), entity.getZ()); break;
-            case Body: ((IVec3d) vec3d).set(entity.getX(), entity.getY() + entity.getEyeHeight(entity.getPose()) / 2, entity.getZ()); break;
-            case Feet: ((IVec3d) vec3d).set(entity.getX(), entity.getY(), entity.getZ()); break;
+            case Head: vec.add(0, entity.getEyeHeight(entity.getPose()), 0); break;
+            case Body: vec.add(0, entity.getEyeHeight(entity.getPose()) / 2, 0); break;
         }
     }
 
@@ -166,6 +166,7 @@ public class AimAssist extends Module {
     public String getInfoString() {
         if (target != null && target instanceof PlayerEntity) return target.getEntityName();
         if (target != null) return target.getType().getName().getString();
+
         return null;
     }
 }

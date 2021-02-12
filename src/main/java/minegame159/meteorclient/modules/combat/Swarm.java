@@ -1,6 +1,6 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.modules.combat;
@@ -171,7 +171,7 @@ public class Swarm extends Module {
 
     public void idle() {
         currentMode = Mode.Idle;
-        if (Modules.get().get(InfinityMiner.class).isActive())
+        if (Modules.get().isActive(InfinityMiner.class))
             Modules.get().get(InfinityMiner.class).toggle();
         if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing())
             BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();

@@ -3,10 +3,14 @@
  * Copyright (c) 2021 Meteor Development.
  */
 
-package minegame159.meteorclient.mixininterface;
+package minegame159.meteorclient.mixin;
 
 import net.minecraft.client.font.TextHandler;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-public interface ITextHandler {
+@Mixin(TextHandler.class)
+public interface TextHandlerAccessor {
+    @Accessor("widthRetriever")
     TextHandler.WidthRetriever getWidthRetriever();
 }

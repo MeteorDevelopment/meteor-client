@@ -162,7 +162,7 @@ public class AutoLog extends Module {
         }
 
         // Check for fall distance with water check
-        if (!Modules.get().get(NoFall.class).isActive() && mc.player.fallDistance > 3) {
+        if (!Modules.get().isActive(NoFall.class) && mc.player.fallDistance > 3) {
             double damage = mc.player.fallDistance * 0.5;
 
             BlockPos.Mutable blockPos = mc.player.getBlockPos().mutableCopy();
