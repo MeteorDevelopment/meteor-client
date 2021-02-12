@@ -1,214 +1,243 @@
 /*
- *
- *  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- *  * Copyright (c) 2021 Meteor Development.
- *
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.modules.player;
 
 import baritone.api.BaritoneAPI;
 import meteordevelopment.orbit.EventHandler;
+import meteordevelopment.orbit.EventPriority;
 import minegame159.meteorclient.events.entity.player.ItemUseCrosshairTargetEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.Modules;
+import minegame159.meteorclient.modules.combat.AnchorAura;
+import minegame159.meteorclient.modules.combat.BedAura;
 import minegame159.meteorclient.modules.combat.CrystalAura;
 import minegame159.meteorclient.modules.combat.KillAura;
-import minegame159.meteorclient.settings.BoolSetting;
-import minegame159.meteorclient.settings.IntSetting;
-import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.utils.player.InvUtils;
+import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.Utils;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
-import net.minecraft.util.Hand;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class AutoEat extends Module {
+    private static final Class<? extends Module>[] AURAS = new Class[] { KillAura.class, CrystalAura.class, AnchorAura.class, BedAura.class };
+
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgHunger = settings.createGroup("Hunger");
 
     // General
 
-    private final Setting<Boolean> egaps = sgGeneral.add(new BoolSetting.Builder()
-            .name("egaps")
-            .description("Eats enchanted golden apples.")
-            .defaultValue(false)
+    private final Setting<List<Item>> blacklist = sgGeneral.add(new ItemListSetting.Builder()
+            .name("blacklist")
+            .description("Which items to not eat.")
+            .defaultValue(getDefaultBlacklist())
+            .filter(Item::isFood)
             .build()
     );
 
-    private final Setting<Boolean> gaps = sgGeneral.add(new BoolSetting.Builder()
-            .name("gaps")
-            .description("Eats golden apples.")
-            .defaultValue(false)
-            .build()
-    );
-
-    private final Setting<Boolean> chorus = sgGeneral.add(new BoolSetting.Builder()
-            .name("chorus")
-            .description("Eats chorus fruit.")
-            .defaultValue(false)
-            .build()
-    );
-
-    private final Setting<Boolean> noBad = sgGeneral.add(new BoolSetting.Builder()
-            .name("filter-negative-effects")
-            .description("Filters out food items that give you negative potion effects.")
+    private final Setting<Boolean> pauseAuras = sgGeneral.add(new BoolSetting.Builder()
+            .name("pause-auras")
+            .description("Pauses all auras when eating.")
             .defaultValue(true)
             .build()
     );
 
-    private final Setting<Boolean> disableAuras = sgGeneral.add(new BoolSetting.Builder()
-            .name("disable-auras")
-            .description("Disable all auras when using this module.")
-            .defaultValue(false)
+    private final Setting<Boolean> pauseBaritone = sgGeneral.add(new BoolSetting.Builder()
+            .name("pause-baritone")
+            .description("Pause baritone when eating.")
+            .defaultValue(true)
             .build()
     );
 
     // Hunger
 
-    private final Setting<Boolean> autoHunger = sgHunger.add(new BoolSetting.Builder()
-            .name("auto-eat")
-            .description("Automatically eats whenever it can.")
-            .defaultValue(true)
-            .build()
-    );
-
-    private final Setting<Integer> minHunger = sgHunger.add(new IntSetting.Builder()
-            .name("min-hunger")
+    private final Setting<Integer> hungerThreshold = sgHunger.add(new IntSetting.Builder()
+            .name("hunger-threshold")
             .description("The level of hunger you eat at.")
-            .defaultValue(17)
+            .defaultValue(16)
             .min(1)
             .max(19)
+            .sliderMin(1)
             .sliderMax(19)
             .build()
     );
 
-    private boolean wasKillActive = false;
-    private boolean wasCrystalActive = false;
-    private boolean isEating;
-    private int preSelectedSlot, preFoodLevel;
-    private int slot;
-    private boolean wasThis = false;
+    private boolean eating;
+    private int slot, prevSlot;
+
+    private final List<Class<? extends Module>> wasAura = new ArrayList<>();
+    private boolean wasBaritone;
 
     public AutoEat() {
-        super(Category.Player, "auto-eat", "Automatically eats food.");
+        super(Category.Player, "new-auto-eat", "Automatically eats food.");
     }
 
     @Override
     public void onDeactivate() {
-        if (isEating) {
-            mc.options.keyUse.setPressed(false);
-            isEating = false;
-            if (preSelectedSlot != -1) mc.player.inventory.selectedSlot = preSelectedSlot;
-            if (wasThis) BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume"); wasThis = false;
-        }
+        if (eating) stopEating();
     }
 
-    @EventHandler
-    private void onTick(TickEvent.Post event) {
-        if (mc.player.abilities.creativeMode) return;
-        if (isEating && !mc.player.getMainHandStack().getItem().isFood()) mc.options.keyUse.setPressed(false);
+    @EventHandler(priority = EventPriority.LOW)
+    private void onTick(TickEvent.Pre event) {
+        // Skip if Auto Gap is already eating
+        if (Modules.get().get(AutoGap.class).isEating()) return;
 
-        slot = -1;
-        int bestHunger = -1;
+        if (eating) {
+            // If we are eating check if we should still be still eating
+            if (shouldEat()) {
+                // Check if the item in current slot is not food
+                if (!mc.player.inventory.getStack(slot).isFood()) {
+                    // If not try finding a new slot
+                    int slot = findSlot();
 
-        for (int i = 0; i < 9; i++) {
-            Item item = mc.player.inventory.getStack(i).getItem();
-            if (!item.isFood()) continue;
-            if (noBad.get()) {
-                if (item == Items.POISONOUS_POTATO || item == Items.PUFFERFISH || item == Items.CHICKEN
-                        || item == Items.ROTTEN_FLESH || item == Items.SPIDER_EYE || item == Items.SUSPICIOUS_STEW) continue;
-            }
-
-            if (item == Items.ENCHANTED_GOLDEN_APPLE && item.getFoodComponent().getHunger() > bestHunger) {
-                if (egaps.get()) {
-                    bestHunger = item.getFoodComponent().getHunger();
-                    slot = i;
-                }
-            } else if (item == Items.GOLDEN_APPLE && item.getFoodComponent().getHunger() > bestHunger) {
-                if (gaps.get()) {
-                    bestHunger = item.getFoodComponent().getHunger();
-                    slot = i;
-                }
-            } else if (item == Items.CHORUS_FRUIT && item.getFoodComponent().getHunger() > bestHunger) {
-                if (chorus.get()) {
-                    bestHunger = item.getFoodComponent().getHunger();
-                    slot = i;
-                }
-            } else if (item.getFoodComponent().getHunger() > bestHunger) {
-                bestHunger = item.getFoodComponent().getHunger();
-                slot = i;
-            }
-        }
-        if(mc.player.getOffHandStack().isFood() && mc.player.getOffHandStack().getItem().getFoodComponent().getHunger() > bestHunger){
-            bestHunger = mc.player.getOffHandStack().getItem().getFoodComponent().getHunger();
-            slot = InvUtils.OFFHAND_SLOT;
-        }
-
-        if (isEating) {
-            if (mc.player.getHungerManager().getFoodLevel() > preFoodLevel || slot == -1) {
-                isEating = false;
-                mc.interactionManager.stopUsingItem(mc.player);
-                mc.options.keyUse.setPressed(false);
-                if(wasKillActive){
-                    Modules.get().get(KillAura.class).toggle();
-                    wasKillActive = false;
-                }
-                if(wasCrystalActive){
-                    Modules.get().get(CrystalAura.class).toggle();
-                    wasCrystalActive = false;
-                }
-                if (preSelectedSlot != -1) mc.player.inventory.selectedSlot = preSelectedSlot;
-                if (wasThis) BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume"); wasThis = false;
-
-                return;
-            }
-
-            if(slot != InvUtils.OFFHAND_SLOT) {
-                mc.player.inventory.selectedSlot = slot;
-            }
-
-            if (!mc.player.isUsingItem()) {
-                if (disableAuras.get()) {
-                    if (Modules.get().isActive(KillAura.class)) {
-                        wasKillActive = true;
-                        Modules.get().get(KillAura.class).toggle();
+                    // If no valid slot was found then stop eating
+                    if (slot == -1) {
+                        stopEating();
+                        return;
                     }
-                    if (Modules.get().isActive(CrystalAura.class)) {
-                        wasCrystalActive = true;
+                    // Otherwise change to the new slot
+                    else {
+                        changeSlot(slot);
                     }
                 }
 
-                mc.options.keyUse.setPressed(true);
-                if (slot == InvUtils.OFFHAND_SLOT) {
-                    mc.interactionManager.interactItem(mc.player, mc.world, Hand.OFF_HAND);
-                } else {
-                    mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
-                }
+                // Continue eating
+                eat();
             }
-
-            return;
+            // If we shouldn't be eating anymore then stop
+            else {
+                stopEating();
+            }
         }
+        else {
+            // If we are not eating check if we should start eating
+            if (shouldEat()) {
+                // Try to find a valid slot
+                slot = findSlot();
 
-        if (slot != -1 && (20 - mc.player.getHungerManager().getFoodLevel() >= bestHunger && autoHunger.get()) || (20 - mc.player.getHungerManager().getFoodLevel() >= minHunger.get() && autoHunger.get())) {
-            preSelectedSlot = mc.player.inventory.selectedSlot;
-            if(slot != InvUtils.OFFHAND_SLOT && slot != -1) {
-                mc.player.inventory.selectedSlot = slot;
-            }
-            isEating = true;
-            preFoodLevel = mc.player.getHungerManager().getFoodLevel();
-
-            if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing()) {
-                BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("pause");
-                wasThis = true;
+                // If slot was found then start eating
+                if (slot != -1) startEating();
             }
         }
     }
 
     @EventHandler
     private void onItemUseCrosshairTarget(ItemUseCrosshairTargetEvent event) {
-        if (isActive() && isEating) event.target = null;
+        if (eating) event.target = null;
+    }
+
+    private void startEating() {
+        prevSlot = mc.player.inventory.selectedSlot;
+        eat();
+
+        // Pause auras
+        wasAura.clear();
+        if (pauseAuras.get()) {
+            for (Class<? extends Module> klass : AURAS) {
+                Module module = Modules.get().get(klass);
+
+                if (module.isActive()) {
+                    wasAura.add(klass);
+                    module.toggle();
+                }
+            }
+        }
+
+        // Pause baritone
+        wasBaritone = false;
+        if (pauseBaritone.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing()) {
+            wasBaritone = true;
+            BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("pause");
+        }
+    }
+
+    private void eat() {
+        changeSlot(slot);
+        setPressed(true);
+        if (!mc.player.isUsingItem()) Utils.rightClick();
+
+        eating = true;
+    }
+
+    private void stopEating() {
+        changeSlot(prevSlot);
+        setPressed(false);
+
+        eating = false;
+
+        // Resume auras
+        if (pauseAuras.get()) {
+            for (Class<? extends Module> klass : AURAS) {
+                Module module = Modules.get().get(klass);
+
+                if (wasAura.contains(klass) && !module.isActive()) {
+                    module.toggle();
+                }
+            }
+        }
+
+        // Resume baritone
+        if (pauseBaritone.get() && wasBaritone) {
+            BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume");
+        }
+    }
+
+    private void setPressed(boolean pressed) {
+        mc.options.keyUse.setPressed(pressed);
+    }
+
+    private void changeSlot(int slot) {
+        mc.player.inventory.selectedSlot = slot;
+        this.slot = slot;
+    }
+
+    private boolean shouldEat() {
+        return mc.player.getHungerManager().getFoodLevel() <= hungerThreshold.get();
+    }
+
+    private int findSlot() {
+        int slot = -1;
+        int bestHunger = -1;
+
+        for (int i = 0; i < 9; i++) {
+            // Skip if item isn't food
+            Item item = mc.player.inventory.getStack(i).getItem();
+            if (!item.isFood()) continue;
+
+            // Check if hunger value is better
+            int hunger = item.getFoodComponent().getHunger();
+            if (hunger > bestHunger) {
+                // Skip if item is in blacklist
+                if (blacklist.get().contains(item)) continue;
+
+                // Select the current item
+                slot = i;
+                bestHunger = hunger;
+            }
+        }
+
+        return slot;
+    }
+
+    private static List<Item> getDefaultBlacklist() {
+        List<Item> l = new ArrayList<>(9);
+
+        l.add(Items.ENCHANTED_GOLDEN_APPLE);
+        l.add(Items.GOLDEN_APPLE);
+        l.add(Items.CHORUS_FRUIT);
+        l.add(Items.POISONOUS_POTATO);
+        l.add(Items.PUFFERFISH);
+        l.add(Items.CHICKEN);
+        l.add(Items.ROTTEN_FLESH);
+        l.add(Items.SPIDER_EYE);
+        l.add(Items.SUSPICIOUS_STEW);
+
+        return l;
     }
 }

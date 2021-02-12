@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public abstract class LeftRightListSettingScreen<T> extends WindowScreen {
-    private final Setting<List<T>> setting;
+    protected final Setting<List<T>> setting;
     private final WTextBox filter;
 
     private String filterText = "";

@@ -9,21 +9,24 @@ package minegame159.meteorclient.gui.screens.settings;
 
 import minegame159.meteorclient.gui.widgets.WItemWithLabel;
 import minegame159.meteorclient.gui.widgets.WWidget;
-import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.ItemListSetting;
 import minegame159.meteorclient.utils.misc.Names;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.util.registry.Registry;
 
-import java.util.List;
+import java.util.function.Predicate;
 
 public class ItemListSettingScreen extends LeftRightListSettingScreen<Item> {
-    public ItemListSettingScreen(Setting<List<Item>> setting) {
+    public ItemListSettingScreen(ItemListSetting setting) {
         super("Select items", setting, Registry.ITEM);
     }
 
     @Override
     protected boolean includeValue(Item value) {
+        Predicate<Item> filter = ((ItemListSetting) setting).filter;
+        if (filter != null && !filter.test(value)) return false;
+
         return value != Items.AIR;
     }
 
