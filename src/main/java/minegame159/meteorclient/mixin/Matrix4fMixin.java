@@ -1,10 +1,15 @@
+/*
+ *
+ *  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
+ *  * Copyright (c) 2021 Meteor Development.
+ *
+ */
+
 package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.mixininterface.IMatrix4f;
 import minegame159.meteorclient.utils.misc.Vec4;
-import net.fabricmc.loader.util.sat4j.core.Vec;
 import net.minecraft.util.math.Matrix4f;
-import net.minecraft.util.math.Quaternion;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 

@@ -1,3 +1,10 @@
+/*
+ *
+ *  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
+ *  * Copyright (c) 2021 Meteor Development.
+ *
+ */
+
 package minegame159.meteorclient.utils.world;
 
 import minegame159.meteorclient.mixininterface.IVec3d;
@@ -76,17 +83,14 @@ public class BlockUtils {
     }
 
     public static boolean isClickable(Block block) {
-        boolean clickable = false;
-
-        if (block instanceof CraftingTableBlock
+        boolean clickable = block instanceof CraftingTableBlock
                 || block instanceof AnvilBlock
                 || block instanceof AbstractButtonBlock
                 || block instanceof AbstractPressurePlateBlock
                 || block instanceof BlockWithEntity
                 || block instanceof FenceGateBlock
                 || block instanceof DoorBlock
-                || block instanceof TrapdoorBlock
-        ) clickable = true;
+                || block instanceof TrapdoorBlock;
 
         return clickable;
     }
