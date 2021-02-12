@@ -288,7 +288,7 @@ public class AnchorAura extends Module {
             if (placePos != null) {
                 mc.player.setSneaking(false);
                 mc.options.keySneak.setPressed(false);
-                BlockUtils.place(placePos, Hand.MAIN_HAND, anchorSlot, (rotationMode.get() == RotationMode.Place || rotationMode.get() == RotationMode.Both), 50);
+                BlockUtils.place(placePos, Hand.MAIN_HAND, anchorSlot, (rotationMode.get() == RotationMode.Place || rotationMode.get() == RotationMode.Both), 50, false);
                 placeDelayLeft = 0;
             }
         }

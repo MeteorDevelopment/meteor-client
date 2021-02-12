@@ -84,7 +84,7 @@ public class LiquidFiller extends Module {
 
                     PlaceIn placeIn = placeInLiquids.get();
                     if (placeIn == PlaceIn.Both || (placeIn == PlaceIn.Lava && liquid == Blocks.LAVA) || (placeIn == PlaceIn.Water && liquid == Blocks.WATER)) {
-                        if (BlockUtils.place(blockPos, Hand.MAIN_HAND, slot, rotate.get(), 0)) {
+                        if (BlockUtils.place(blockPos, Hand.MAIN_HAND, slot, rotate.get(), 0, true)) {
                             BlockIterator.disableCurrent();
                         }
                     }

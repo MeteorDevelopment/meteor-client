@@ -181,7 +181,7 @@ public class AntiBed extends Module {
         if (up) blockPos = mc.player.getBlockPos().up();
         else blockPos = mc.player.getBlockPos();
 
-        if (BlockUtils.place(blockPos, Hand.MAIN_HAND, slot, rotate.get(), 100)) {
+        if (BlockUtils.place(blockPos, Hand.MAIN_HAND, slot, rotate.get(), 100, true)) {
             if (autoToggle.get()) toggle();
         }
     }
