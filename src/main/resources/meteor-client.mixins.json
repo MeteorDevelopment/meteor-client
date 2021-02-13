@@ -48,7 +48,6 @@
     "EntityMixin",
     "EntityRenderDispatcherMixin",
     "EntityRendererMixin",
-    "ExplosionMixin",
     "ExplosionS2CPacketMixin",
     "FireworkRocketEntityMixin",
     "FireworksSparkParticleMixin",

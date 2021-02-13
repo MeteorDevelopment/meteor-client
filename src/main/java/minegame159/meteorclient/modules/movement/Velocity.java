@@ -15,6 +15,13 @@ import minegame159.meteorclient.settings.SettingGroup;
 public class Velocity extends Module {
     private final SettingGroup sgDefault = settings.getDefaultGroup();
 
+    public final Setting<Boolean> entities = sgDefault.add(new BoolSetting.Builder()
+            .name("entities")
+            .description("Modifies the amount of knockback you take from entities and attacks.")
+            .defaultValue(true)
+            .build()
+    );
+
     public final Setting<Boolean> explosions = sgDefault.add(new BoolSetting.Builder()
             .name("explosions")
             .description("Modifies your knockback from explosions.")
@@ -22,19 +29,10 @@ public class Velocity extends Module {
             .build()
     );
 
-/*
     public final Setting<Boolean> liquids = sgDefault.add(new BoolSetting.Builder()
             .name("liquids")
             .description("Modifies the amount you are pushed by flowing liquids.")
-            .defaultValue(true)
-            .build()
-    );
-*/
-
-    public final Setting<Boolean> entities = sgDefault.add(new BoolSetting.Builder()
-            .name("entities")
-            .description("Modifies the amount of knockback you take from entities and attacks.")
-            .defaultValue(true)
+            .defaultValue(false)
             .build()
     );
 

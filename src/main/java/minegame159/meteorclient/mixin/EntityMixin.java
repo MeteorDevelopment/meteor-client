@@ -24,8 +24,10 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MovementType;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.fluid.FluidState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -43,15 +45,39 @@ public abstract class EntityMixin {
 
     @Shadow protected abstract BlockPos getVelocityAffectingPos();
 
-    @Redirect(method = "setVelocityClient", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;setVelocity(DDD)V"))
-    private void setVelocityClientEntiySetVelocityProxy(Entity entity, double x, double y, double z) {
-        Velocity velocity = Modules.get().get(Velocity.class);
+    @Shadow public abstract void setVelocity(double x, double y, double z);
 
-        if (entity == MinecraftClient.getInstance().player && velocity.entities.get()) {
-            entity.setVelocity(x * velocity.getHorizontal(), y * velocity.getVertical(),z * velocity.getHorizontal());
-        } else {
-            entity.setVelocity(x, y, z);
+    @Inject(method = "setVelocityClient", at = @At("HEAD"), cancellable = true)
+    private void onSetVelocityClient(double x, double y, double z, CallbackInfo info) {
+        PlayerEntity player = MinecraftClient.getInstance().player;
+        if (((Object) this) != player) return;
+
+        Velocity velocity = Modules.get().get(Velocity.class);
+        if (!velocity.isActive() || !velocity.entities.get()) return;
+
+        double deltaX = x - player.getVelocity().x;
+        double deltaY = y - player.getVelocity().y;
+        double deltaZ = z - player.getVelocity().z;
+
+        setVelocity(
+                player.getVelocity().x + deltaX * velocity.getHorizontal(),
+                player.getVelocity().y + deltaY * velocity.getVertical(),
+                player.getVelocity().z + deltaZ * velocity.getHorizontal()
+        );
+
+        info.cancel();
+    }
+
+    @Redirect(method = "updateMovementInFluid", at = @At(value = "INVOKE", target = "Lnet/minecraft/fluid/FluidState;getVelocity(Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/util/math/Vec3d;"))
+    private Vec3d updateMovementInFluidFluidStateGetVelocity(FluidState state, BlockView world, BlockPos pos) {
+        Vec3d vec = state.getVelocity(world, pos);
+
+        Velocity velocity = Modules.get().get(Velocity.class);
+        if (velocity.isActive() && velocity.liquids.get()) {
+            vec = vec.multiply(velocity.getHorizontal(), velocity.getVertical(), velocity.getHorizontal());
         }
+
+        return vec;
     }
 
     @Inject(method = "getJumpVelocityMultiplier", at = @At("HEAD"), cancellable = true)
