@@ -18,7 +18,7 @@ public class Input {
     private static CursorStyle lastCursorStyle = CursorStyle.Default;
 
     public static void setKeyState(int key, boolean pressed) {
-        if (key < keys.length) keys[key] = pressed;
+        if (key >= 0 && key < keys.length) keys[key] = pressed;
     }
 
     public static void setKeyState(KeyBinding key, boolean pressed) {
