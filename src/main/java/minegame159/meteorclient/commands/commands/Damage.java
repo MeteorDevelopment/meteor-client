@@ -14,10 +14,10 @@ import minegame159.meteorclient.utils.player.ChatUtils;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
-public class Dmg extends Command {
+public class Damage extends Command {
 
-    public Dmg() {
-        super("dmg", "Damages self");
+    public Damage() {
+        super("damage", "Damages self");
     }
 
     @Override
@@ -28,13 +28,13 @@ public class Dmg extends Command {
                 ChatUtils.error("You are in creative");
                 return SINGLE_SUCCESS;
             }
-            DamagePlayer(amount);
+            damagePlayer(amount);
             return SINGLE_SUCCESS;
         }));
 
     }
     
-    private void DamagePlayer(int amount) {
+    private void damagePlayer(int amount) {
         Vec3d pos = mc.player.getPos();
         NoFall nofall = Modules.get().get(NoFall.class);
         boolean nofallEnabled = nofall.isActive();

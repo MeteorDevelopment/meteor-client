@@ -75,13 +75,10 @@ public class Plugins extends Command {
                         }
                     }
                 }
-                ;
                 Collections.sort(plugins);
 
                 if (!plugins.isEmpty()) {
-                    String s = "Plugins \u00A77(\u00A78" + plugins.size() + "\u00A77): \u00A7c"
-                            + Strings.join((String[]) plugins.toArray(new String[0]), "\u00A77, \u00A7c");
-                    ChatUtils.info("\u00A7a" + s);
+                    ChatUtils.info("Plugins (%d): %s ", plugins.size(), Strings.join((String[]) plugins.toArray(new String[0]), ", "));
                 } else {
                     ChatUtils.error("No plugins found.");
                 }

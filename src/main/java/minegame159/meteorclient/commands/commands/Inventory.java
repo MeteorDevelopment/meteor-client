@@ -12,10 +12,10 @@ import minegame159.meteorclient.commands.arguments.PlayerArgumentType;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
-public class InvSee extends Command {
+public class Inventory extends Command {
 
-    public InvSee() {
-        super("invsee", "Allows you to see parts of another player's inventory.");
+    public Inventory() {
+        super("inventory", "Allows you to see parts of another player's inventory.");
     }
 
     @Override

@@ -44,14 +44,14 @@ public class Commands extends System<Commands> {
         add(new HClip());
         add(new ClearChat());
         add(new Dismount());
-        add(new Dmg());
+        add(new Damage());
         add(new Drop());
         add(new Enchant());
         add(new FakePlayerCommand());
         add(new Friend());
         add(new Help());
         add(new Ignore());
-        add(new InvSee());
+        add(new Inventory());
         add(new NBT());
         add(new Panic());
         add(new Peek());
