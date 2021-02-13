@@ -4,6 +4,7 @@
 build
 out
 run
+bin
 logs
 .circleci/discordwebhook/node_modules
 *.iws
