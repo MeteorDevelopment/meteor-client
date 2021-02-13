@@ -102,7 +102,7 @@ public class AimAssist extends Module {
         target = EntityUtils.get(entity -> {
             if (!entity.isAlive()) return false;
             if (mc.player.distanceTo(entity) >= range.get()) return false;
-            if (PlayerUtils.canSeeEntity(entity)|| ignoreWalls.get()) return false;
+            if (!ignoreWalls.get() && !PlayerUtils.canSeeEntity(entity)) return false;
             if (entity == mc.player || !entities.get().getBoolean(entity.getType())) return false;
 
             if (entity instanceof PlayerEntity && !friends.get()) {
