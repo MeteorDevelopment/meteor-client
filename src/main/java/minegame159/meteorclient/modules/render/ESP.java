@@ -23,6 +23,7 @@ import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.util.math.Box;
+import net.minecraft.util.math.MathHelper;
 
 public class ESP extends Module {
     //private static final Identifier BOX2D = new Identifier("meteor-client", "box2d.png");
@@ -155,9 +156,9 @@ public class ESP extends Module {
         sideColor.a *= a;
 
         if (a >= 0.075) {
-            double x = (entity.getX() - entity.prevX) * event.tickDelta;
-            double y = (entity.getY() - entity.prevY) * event.tickDelta;
-            double z = (entity.getZ() - entity.prevZ) * event.tickDelta;
+            double x = MathHelper.lerp(event.tickDelta, entity.lastRenderX, entity.getX());
+            double y = MathHelper.lerp(event.tickDelta, entity.lastRenderY, entity.getY());
+            double z = MathHelper.lerp(event.tickDelta, entity.lastRenderZ, entity.getZ());
 
             Box box = entity.getBoundingBox();
             Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x + box.minX, y + box.minY, z + box.minZ, x + box.maxX, y + box.maxY, z + box.maxZ, sideColor, lineColor, shapeMode.get(), 0);

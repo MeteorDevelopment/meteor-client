@@ -6,6 +6,7 @@
 package minegame159.meteorclient.utils.misc;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 
 public class Vec3 {
@@ -30,9 +31,9 @@ public class Vec3 {
     }
 
     public void set(Entity entity, double tickDelta) {
-        x = entity.getX() + (entity.getX() - entity.prevX) * tickDelta;
-        y = entity.getY() + (entity.getY() - entity.prevY) * tickDelta;
-        z = entity.getZ() + (entity.getZ() - entity.prevZ) * tickDelta;
+        x = MathHelper.lerp(tickDelta, entity.lastRenderX, entity.getX());
+        y = MathHelper.lerp(tickDelta, entity.lastRenderY, entity.getY());
+        z = MathHelper.lerp(tickDelta, entity.lastRenderZ, entity.getZ());
     }
 
     public void add(double x, double y, double z) {
