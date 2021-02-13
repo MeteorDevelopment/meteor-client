@@ -35,6 +35,7 @@ import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
+import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
@@ -408,14 +409,14 @@ public class CrystalAura extends Module {
             .build()
     );
 
-    private final Setting<Boolean> noSwing = sgMisc.add(new BoolSetting.Builder()
-            .name("no-swing")
-            .description("Stops your hand from swinging client-side.")
+    // Render
+
+    private final Setting<Boolean> swing = sgRender.add(new BoolSetting.Builder()
+            .name("swing")
+            .description("Renders your swing client-side.")
             .defaultValue(true)
             .build()
     );
-
-    // Render
 
     private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
             .name("render")
@@ -806,7 +807,8 @@ public class CrystalAura extends Module {
     private void attackCrystal(EndCrystalEntity entity, int preSlot) {
         mc.interactionManager.attackEntity(mc.player, entity);
         if (removeCrystals.get()) removalQueue.add(entity.getEntityId());
-        if (!noSwing.get()) mc.player.swingHand(getHand());
+        if (swing.get()) mc.player.swingHand(getHand());
+        else mc.player.networkHandler.sendPacket(new HandSwingC2SPacket(getHand()));
         mc.player.inventory.selectedSlot = preSlot;
         if (heldCrystal != null && entity.getBlockPos().equals(heldCrystal.getBlockPos())) {
             heldCrystal = null;
@@ -875,11 +877,13 @@ public class CrystalAura extends Module {
                     blockPos.getZ() + 0.5 + direction.getVector().getZ() * 1.0 / 2.0) : block.add(0.5, 1.0, 0.5));
             Rotations.rotate(rotation[0], rotation[1], 25, () -> {
                 mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(mc.player.getPos(), direction, blockPos, false));
-                if (!noSwing.get()) mc.player.swingHand(hand);
+                if (swing.get()) mc.player.swingHand(hand);
+                else mc.player.networkHandler.sendPacket(new HandSwingC2SPacket(hand));
             });
         } else {
             mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(mc.player.getPos(), direction, new BlockPos(block), false));
-            if (!noSwing.get()) mc.player.swingHand(hand);
+            if (swing.get()) mc.player.swingHand(hand);
+            else mc.player.networkHandler.sendPacket(new HandSwingC2SPacket(hand));
         }
 
         if (render.get()) {
