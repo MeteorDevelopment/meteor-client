@@ -19,7 +19,7 @@ import net.minecraft.entity.mob.EndermanEntity;
 import net.minecraft.util.math.Vec3d;
 
 public class EndermanLook extends Module {
-    public enum Mode{
+    public enum Mode {
         LookAt,
         LookAway
     }
@@ -43,8 +43,7 @@ public class EndermanLook extends Module {
             if (mc.player.abilities.creativeMode || !shouldLook()) return;
 
             Rotations.rotate(mc.player.yaw, 90, -75, null);
-        }
-        else {
+        } else {
             for (Entity entity : mc.world.getEntities()) {
                 if (!(entity instanceof EndermanEntity)) continue;
                 EndermanEntity enderman = (EndermanEntity) entity;

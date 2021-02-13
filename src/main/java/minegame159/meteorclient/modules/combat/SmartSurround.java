@@ -59,7 +59,7 @@ public class SmartSurround extends Module {
     private int rPosZ;
     private Entity crystal;
 
-    public SmartSurround(){
+    public SmartSurround() {
         super(Category.Combat, "smart-surround", "Attempts to save you from crystals automatically.");
     }
 

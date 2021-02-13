@@ -65,7 +65,7 @@ public class WKeybind extends WTable {
     }
 
     private void setLabelToKey() {
-        label.setText(appendBindText(key == -1 ? "None" :  Utils.getKeyName(key)));
+        label.setText(appendBindText(key == -1 ? "None" : Utils.getKeyName(key)));
     }
 
     private String appendBindText(String text) {

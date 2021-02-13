@@ -102,7 +102,7 @@ public class AimAssist extends Module {
         target = EntityUtils.get(entity -> {
             if (!entity.isAlive()) return false;
             if (mc.player.distanceTo(entity) >= range.get()) return false;
-            if (!ignoreWalls.get() && !PlayerUtils.canSeeEntity(entity)) return false;
+            if (!ignoreWalls.get() && !PlayerUtils.canSeeEntity(entity) ) return false;
             if (entity == mc.player || !entities.get().getBoolean(entity.getType())) return false;
 
             if (entity instanceof PlayerEntity && !friends.get()) {
@@ -110,7 +110,7 @@ public class AimAssist extends Module {
             }
 
             return true;
-            }, priority.get());
+        }, priority.get());
     }
 
     @EventHandler
@@ -135,7 +135,8 @@ public class AimAssist extends Module {
         } else {
             deltaAngle = MathHelper.wrapDegrees(angle - mc.player.yaw);
             toRotate = speed.get() * (deltaAngle >= 0 ? 1 : -1) * delta;
-            if ((toRotate >= 0 && toRotate > deltaAngle) || (toRotate < 0 && toRotate < deltaAngle)) toRotate = deltaAngle;
+            if ((toRotate >= 0 && toRotate > deltaAngle) || (toRotate < 0 && toRotate < deltaAngle))
+                toRotate = deltaAngle;
             mc.player.yaw += toRotate;
         }
 
@@ -148,7 +149,8 @@ public class AimAssist extends Module {
         } else {
             deltaAngle = MathHelper.wrapDegrees(angle - mc.player.pitch);
             toRotate = speed.get() * (deltaAngle >= 0 ? 1 : -1) * delta;
-            if ((toRotate >= 0 && toRotate > deltaAngle) || (toRotate < 0 && toRotate < deltaAngle)) toRotate = deltaAngle;
+            if ((toRotate >= 0 && toRotate > deltaAngle) || (toRotate < 0 && toRotate < deltaAngle))
+                toRotate = deltaAngle;
             mc.player.pitch += toRotate;
         }
     }
@@ -157,8 +159,12 @@ public class AimAssist extends Module {
         vec.set(entity, tickDelta);
 
         switch (bodyTarget.get()) {
-            case Head: vec.add(0, entity.getEyeHeight(entity.getPose()), 0); break;
-            case Body: vec.add(0, entity.getEyeHeight(entity.getPose()) / 2, 0); break;
+            case Head:
+                vec.add(0, entity.getEyeHeight(entity.getPose()), 0);
+                break;
+            case Body:
+                vec.add(0, entity.getEyeHeight(entity.getPose()) / 2, 0);
+                break;
         }
     }
 

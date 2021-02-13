@@ -5,6 +5,7 @@
 
 package minegame159.meteorclient.mixin;
 
+import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.utils.render.Outlines;
 import net.minecraft.client.gl.JsonGlProgram;
 import net.minecraft.util.Identifier;
@@ -17,7 +18,7 @@ public class JsonGlProgramMixin {
     @ModifyVariable(method = "<init>", at = @At("STORE"))
     private Identifier onInitNewIdentifierModifyVariable(Identifier identifier) {
         if (Outlines.loadingOutlineShader && identifier.getPath().equals("shaders/program/my_entity_outline.json")) {
-            return new Identifier("meteor-client", identifier.getPath());
+            return new Identifier(MeteorClient.ID, identifier.getPath());
         }
 
         return identifier;
@@ -26,7 +27,7 @@ public class JsonGlProgramMixin {
     @ModifyVariable(method = "getShader", at = @At("STORE"))
     private static Identifier onGetShaderNewIdentifierModifyVariable(Identifier identifier) {
         if (Outlines.loadingOutlineShader && identifier.getPath().equals("shaders/program/my_entity_sobel.fsh")) {
-            return new Identifier("meteor-client", identifier.getPath());
+            return new Identifier(MeteorClient.ID, identifier.getPath());
         }
 
         return identifier;

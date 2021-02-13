@@ -58,10 +58,14 @@ public class AutoJump extends Module {
 
     private boolean jump() {
         switch (jumpIf.get()) {
-            case Sprinting: return mc.player.isSprinting() && (mc.player.forwardSpeed != 0 || mc.player.sidewaysSpeed != 0);
-            case Walking:   return mc.player.forwardSpeed != 0 || mc.player.sidewaysSpeed != 0;
-            case Always:    return true;
-            default:        return false;
+            case Sprinting:
+                return mc.player.isSprinting() && (mc.player.forwardSpeed != 0 || mc.player.sidewaysSpeed != 0);
+            case Walking:
+                return mc.player.forwardSpeed != 0 || mc.player.sidewaysSpeed != 0;
+            case Always:
+                return true;
+            default:
+                return false;
         }
     }
 

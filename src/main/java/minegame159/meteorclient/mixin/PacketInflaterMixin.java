@@ -26,9 +26,12 @@ import java.util.zip.Inflater;
 
 @Mixin(PacketInflater.class)
 public class PacketInflaterMixin {
-    @Shadow private int compressionThreshold;
+    @Shadow
+    private int compressionThreshold;
 
-    @Shadow @Final private Inflater inflater;
+    @Shadow
+    @Final
+    private Inflater inflater;
 
     @Inject(method = "decode", at = @At("HEAD"), cancellable = true)
     private void onDecode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, List<Object> list, CallbackInfo info) throws DataFormatException {

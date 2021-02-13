@@ -20,9 +20,12 @@ public class BoundingBox implements ISerializable<BoundingBox> {
 
     public double alignX(double width) {
         switch (this.x) {
-            default:     return 0;
-            case Center: return this.width / 2.0 - width / 2.0;
-            case Right:  return this.width - width;
+            default:
+                return 0;
+            case Center:
+                return this.width / 2.0 - width / 2.0;
+            case Right:
+                return this.width - width;
         }
     }
 
@@ -86,7 +89,7 @@ public class BoundingBox implements ISerializable<BoundingBox> {
 
         if (x == AlignmentX.Left && xOffset < 0) xOffset = 0;
         else if (x == AlignmentX.Right && xOffset > 0) xOffset = 0;
-        
+
         // Y
         switch (y) {
             case Top: {
@@ -141,17 +144,23 @@ public class BoundingBox implements ISerializable<BoundingBox> {
 
     public int getX() {
         switch (x) {
-            default:     return xOffset;
-            case Center: return (int) Math.round(Utils.getWindowWidth() / 2.0 - width / 2.0 + xOffset);
-            case Right:  return Utils.getWindowWidth() - width + xOffset;
+            default:
+                return xOffset;
+            case Center:
+                return (int) Math.round(Utils.getWindowWidth() / 2.0 - width / 2.0 + xOffset);
+            case Right:
+                return Utils.getWindowWidth() - width + xOffset;
         }
     }
 
     public int getY() {
         switch (y) {
-            default:     return yOffset;
-            case Center: return (int) Math.round(Utils.getWindowHeight() / 2.0 - height / 2.0 + yOffset);
-            case Bottom: return Utils.getWindowHeight() - height + yOffset;
+            default:
+                return yOffset;
+            case Center:
+                return (int) Math.round(Utils.getWindowHeight() / 2.0 - height / 2.0 + yOffset);
+            case Bottom:
+                return Utils.getWindowHeight() - height + yOffset;
         }
     }
 

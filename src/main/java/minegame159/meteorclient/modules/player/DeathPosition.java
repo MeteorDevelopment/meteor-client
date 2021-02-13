@@ -105,7 +105,7 @@ public class DeathPosition extends Module {
 
     private void path() {
         if (deathPos.isEmpty() && mc.player != null) {
-            ChatUtils.moduleWarning(this,"No latest death found.");
+            ChatUtils.moduleWarning(this, "No latest death found.");
         } else {
             if (mc.world != null) {
                 double x = deathPos.get("x"), z = deathPos.get("z");

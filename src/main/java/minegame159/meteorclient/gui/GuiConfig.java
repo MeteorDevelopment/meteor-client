@@ -86,7 +86,7 @@ public class GuiConfig implements ISerializable<GuiConfig> {
     public static GuiConfig get() {
         return Config.get().guiConfig;
     }
-    
+
     private SettingColor createColor(int r, int g, int b, int a) {
         SettingColor color = new SettingColor(r, g, b, a);
         RainbowColors.add(color);
@@ -174,7 +174,8 @@ public class GuiConfig implements ISerializable<GuiConfig> {
         if (tag.contains("guiScale")) guiScale = tag.getDouble("guiScale");
         if (tag.contains("scrollSensitivity")) scrollSensitivity = tag.getDouble("scrollSensitivity");
 
-        if (tag.contains("moduleNameAlignment")) moduleNameAlignment = AlignmentX.valueOf(tag.getString("moduleNameAlignment"));
+        if (tag.contains("moduleNameAlignment"))
+            moduleNameAlignment = AlignmentX.valueOf(tag.getString("moduleNameAlignment"));
 
         read(tag, "text", text);
         read(tag, "windowHeaderText", windowHeaderText);

@@ -48,7 +48,8 @@ public class ModuleListSetting extends Setting<List<Module>> {
                 Module module = Modules.get().get(value.trim());
                 if (module != null) modules.add(module);
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
 
         return modules;
     }

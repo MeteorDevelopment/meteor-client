@@ -48,14 +48,14 @@ public class EnumSetting<T extends Enum<?>> extends Setting<T> {
 
     @Override
     protected String generateUsage() {
-        String usage = "";
+        StringBuilder usage = new StringBuilder();
 
         for (int i = 0; i < values.length; i++) {
-            if (i > 0) usage += " (default)or ";
-            usage += "(highlight)" + values[i];
+            if (i > 0) usage.append(" (default)or ");
+            usage.append("(highlight)").append(values[i]);
         }
 
-        return usage;
+        return usage.toString();
     }
 
     @Override

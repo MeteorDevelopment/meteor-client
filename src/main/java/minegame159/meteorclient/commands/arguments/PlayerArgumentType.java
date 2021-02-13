@@ -27,7 +27,7 @@ public class PlayerArgumentType implements ArgumentType<PlayerEntity> {
 
     static {
         if (MinecraftClient.getInstance().world != null) {
-           EXAMPLES = MinecraftClient.getInstance().world.getPlayers()
+            EXAMPLES = MinecraftClient.getInstance().world.getPlayers()
                     .stream()
                     .limit(3)
                     .map(playerEntity -> playerEntity.getDisplayName().asString())
@@ -46,15 +46,15 @@ public class PlayerArgumentType implements ArgumentType<PlayerEntity> {
     @Override
     public PlayerEntity parse(StringReader reader) throws CommandSyntaxException {
         String argument = reader.readString();
-        PlayerEntity playerEntity = null;
-        for (PlayerEntity p : MinecraftClient.getInstance().world.getPlayers()) {
-            if (p.getDisplayName().asString().equalsIgnoreCase(argument)) {
-                playerEntity = p;
-                break;
+        if (MinecraftClient.getInstance().world == null) {
+            throw NO_SUCH_PLAYER.create(argument);
+        }
+        for (PlayerEntity player : MinecraftClient.getInstance().world.getPlayers()) {
+            if (player.getDisplayName().asString().equalsIgnoreCase(argument)) {
+                return player;
             }
         }
-        if (playerEntity == null) throw NO_SUCH_PLAYER.create(argument);
-        return playerEntity;
+        throw NO_SUCH_PLAYER.create(argument);
     }
 
     @Override

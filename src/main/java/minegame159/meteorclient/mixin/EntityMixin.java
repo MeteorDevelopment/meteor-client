@@ -39,11 +39,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(Entity.class)
 public abstract class EntityMixin {
-    @Shadow public World world;
+    @Shadow
+    public World world;
 
-    @Shadow public abstract BlockPos getBlockPos();
+    @Shadow
+    public abstract BlockPos getBlockPos();
 
-    @Shadow protected abstract BlockPos getVelocityAffectingPos();
+    @Shadow
+    protected abstract BlockPos getVelocityAffectingPos();
 
     @Shadow public abstract void setVelocity(double x, double y, double z);
 
@@ -119,14 +122,16 @@ public abstract class EntityMixin {
 
     @Redirect(method = "getVelocityMultiplier", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;getBlock()Lnet/minecraft/block/Block;"))
     private Block getVelocityMultiplierGetBlockProxy(BlockState blockState) {
-        if (blockState.getBlock() == Blocks.SOUL_SAND && Modules.get().get(NoSlow.class).soulSand()) return Blocks.STONE;
+        if (blockState.getBlock() == Blocks.SOUL_SAND && Modules.get().get(NoSlow.class).soulSand())
+            return Blocks.STONE;
         return blockState.getBlock();
     }
 
 
     @Inject(method = "isInvisibleTo(Lnet/minecraft/entity/player/PlayerEntity;)Z", at = @At("HEAD"), cancellable = true)
     private void isInvisibleToCanceller(PlayerEntity player, CallbackInfoReturnable<Boolean> info) {
-        if (Modules.get().isActive(ESP.class) && Modules.get().get(ESP.class).showInvis.get()) info.setReturnValue(false);
+        if (Modules.get().isActive(ESP.class) && Modules.get().get(ESP.class).showInvis.get())
+            info.setReturnValue(false);
     }
 
     @Inject(method = "getTargetingMargin", at = @At("HEAD"), cancellable = true)

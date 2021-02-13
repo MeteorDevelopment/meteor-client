@@ -42,7 +42,8 @@ public class EntityOwner extends Module {
 
     private static final Color BACKGROUND = new Color(0, 0, 0, 75);
     private static final Color TEXT = new Color(255, 255, 255);
-    private static final Type RESPONSE_TYPE = new TypeToken<List<UuidNameHistoryResponseItem>>() {}.getType();
+    private static final Type RESPONSE_TYPE = new TypeToken<List<UuidNameHistoryResponseItem>>() {
+    }.getType();
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
@@ -80,7 +81,8 @@ public class EntityOwner extends Module {
 
             if (entity instanceof TameableEntity) ownerUuid = ((TameableEntity) entity).getOwnerUuid();
             else if (entity instanceof HorseBaseEntity) ownerUuid = ((HorseBaseEntity) entity).getOwnerUuid();
-            else if (entity instanceof ProjectileEntity && projectiles.get()) ownerUuid = ((ProjectileEntityAccessor) entity).getOwnerUuid();
+            else if (entity instanceof ProjectileEntity && projectiles.get())
+                ownerUuid = ((ProjectileEntityAccessor) entity).getOwnerUuid();
             else continue;
 
             if (ownerUuid != null) {

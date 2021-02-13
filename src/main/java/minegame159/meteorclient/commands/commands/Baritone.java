@@ -14,6 +14,7 @@ import net.minecraft.command.CommandSource;
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
 public class Baritone extends Command {
+
     public Baritone() {
         super("b", "Baritone.");
     }

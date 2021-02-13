@@ -74,8 +74,7 @@ public class AntiBed extends Module {
             closeScreen = false;
             mc.player.closeScreen();
             return;
-        }
-        else if (closeScreen) {
+        } else if (closeScreen) {
             return;
         }
 
@@ -83,11 +82,10 @@ public class AntiBed extends Module {
         if (onlyOnGround.get() && !mc.player.isOnGround()) return;
 
         if (place == 0) {
-            place --;
+            place--;
             place(mc.player.inventory.selectedSlot, true);
-        }
-        else if (place > 0) {
-            place --;
+        } else if (place > 0) {
+            place--;
         }
 
         for (int i = 0; i < 9; i++) {
@@ -100,14 +98,12 @@ public class AntiBed extends Module {
                     || item == Items.COBWEB) {
                 place(i, true);
                 return;
-            }
-            else if (block instanceof SlabBlock) {
+            } else if (block instanceof SlabBlock) {
                 mc.player.inventory.selectedSlot = i;
-                mc.options.keySneak.setPressed(true);
+                 mc.options.keySneak.setPressed(true);
                 if (place == -1) place = 2;
                 return;
-            }
-            else if (block instanceof DoorBlock) {
+            } else if (block instanceof DoorBlock) {
                 if (autoCenter.get()) {
                     Vec3d playerVec = Utils.vec3d(mc.player.getBlockPos());
                     if (mc.player.getHorizontalFacing() == Direction.SOUTH) {
@@ -124,8 +120,7 @@ public class AntiBed extends Module {
                 }
                 place(i, true);
                 return;
-            }
-            else if (item == Items.LADDER) {
+            } else if (item == Items.LADDER) {
                 if (autoCenter.get()) {
                     Vec3d playerVec = Utils.vec3d(mc.player.getBlockPos());
                     BlockPos blockPos = checkBlocks();
@@ -144,8 +139,7 @@ public class AntiBed extends Module {
                 }
                 place(i, true);
                 return;
-            }
-            else if (item instanceof BannerItem
+            } else if (item instanceof BannerItem
                     || item == Items.LEVER || item == Items.TORCH
                     || item == Items.REDSTONE_TORCH || item instanceof SignItem
                     || item == Items.TRIPWIRE_HOOK || block instanceof StoneButtonBlock
@@ -153,8 +147,7 @@ public class AntiBed extends Module {
                 place(i, true);
                 if (item instanceof SignItem) closeScreen = true;
                 return;
-            }
-            else if (item == Items.SCAFFOLDING && itemStack.getCount() >= 2) {
+            } else if (item == Items.SCAFFOLDING && itemStack.getCount() >= 2) {
                 place(i, false);
                 place(i, true);
                 return;
@@ -162,7 +155,7 @@ public class AntiBed extends Module {
         }
     }
 
-    private BlockPos checkBlocks(){
+    private BlockPos checkBlocks() {
         BlockPos blockPos = null;
         if (!mc.world.getBlockState(mc.player.getBlockPos().add(0, 1, 1)).isAir()) {
             blockPos = mc.player.getBlockPos().add(0, 1, 1);

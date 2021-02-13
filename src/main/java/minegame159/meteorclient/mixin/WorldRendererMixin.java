@@ -31,11 +31,16 @@ import javax.annotation.Nullable;
 
 @Mixin(WorldRenderer.class)
 public abstract class WorldRendererMixin {
-    @Shadow protected abstract void renderEntity(Entity entity, double cameraX, double cameraY, double cameraZ, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers);
+    @Shadow
+    protected abstract void renderEntity(Entity entity, double cameraX, double cameraY, double cameraZ, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers);
 
-    @Shadow @Nullable private Framebuffer entityOutlinesFramebuffer;
+    @Shadow
+    @Nullable
+    private Framebuffer entityOutlinesFramebuffer;
 
-    @Shadow @Final private MinecraftClient client;
+    @Shadow
+    @Final
+    private MinecraftClient client;
 
     @Inject(method = "loadEntityOutlineShader", at = @At("TAIL"))
     private void onLoadEntityOutlineShader(CallbackInfo info) {
@@ -88,7 +93,7 @@ public abstract class WorldRendererMixin {
             this.entityOutlinesFramebuffer = fbo;
         }
     }
-    
+
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/OutlineVertexConsumerProvider;draw()V"))
     private void onRender(MatrixStack matrices, float tickDelta, long limitTime, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightmapTextureManager lightmapTextureManager, Matrix4f matrix4f, CallbackInfo info) {
         Outlines.endRender(tickDelta);
@@ -109,10 +114,10 @@ public abstract class WorldRendererMixin {
     @Inject(method = "setBlockBreakingInfo", at = @At("HEAD"), cancellable = true)
     private void onBlockBreakingInfo(int entityId, BlockPos pos, int stage, CallbackInfo ci) {
         BreakIndicators bi = Modules.get().get(BreakIndicators.class);
-        if(!bi.isActive())
+        if (!bi.isActive())
             return;
 
-        if(!bi.multiple.get() && entityId != client.player.getEntityId())
+        if (!bi.multiple.get() && entityId != client.player.getEntityId())
             return;
 
         if (0 <= stage && stage <= 8) {
@@ -128,10 +133,11 @@ public abstract class WorldRendererMixin {
             bi.blocks.remove(entityId);
         }
     }
+
     @Inject(method = "removeBlockBreakingInfo", at = @At("TAIL"))
     private void onBlockBreakingInfoRemoval(BlockBreakingInfo info, CallbackInfo ci) {
         BreakIndicators bi = Modules.get().get(BreakIndicators.class);
-        if(!bi.isActive())
+        if (!bi.isActive())
             return;
 
         bi.blocks.values().removeIf(info::equals);
@@ -142,7 +148,7 @@ public abstract class WorldRendererMixin {
     @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/entity/EntityRenderDispatcher;shouldRender(Lnet/minecraft/entity/Entity;Lnet/minecraft/client/render/Frustum;DDD)Z"))
     private <E extends Entity> boolean shouldRenderRedirect(EntityRenderDispatcher entityRenderDispatcher, E entity, Frustum frustum, double x, double y, double z) {
         Chams chams = Modules.get().get(Chams.class);
-        if(chams.isActive() && chams.throughWalls.get()) {
+        if (chams.isActive() && chams.throughWalls.get()) {
             return true;
         } else {
             return entityRenderDispatcher.shouldRender(entity, frustum, x, y, z);

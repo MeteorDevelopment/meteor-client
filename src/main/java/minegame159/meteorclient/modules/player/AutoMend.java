@@ -28,7 +28,7 @@ import net.minecraft.screen.slot.SlotActionType;
 
 public class AutoMend extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    
+
     private final Setting<Boolean> swords = sgGeneral.add(new BoolSetting.Builder()
             .name("swords")
             .description("Moves swords.")
@@ -66,26 +66,26 @@ public class AutoMend extends Module {
 
             break;
         }
-        if(!mc.player.getOffHandStack().isDamaged() && removeFinished.get() && mc.player.inventory.getEmptySlot() != -1){
+        if (!mc.player.getOffHandStack().isDamaged() && removeFinished.get() && mc.player.inventory.getEmptySlot() != -1) {
             InvUtils.clickSlot(InvUtils.OFFHAND_SLOT, 0, SlotActionType.PICKUP);
             InvUtils.clickSlot(InvUtils.invIndexToSlotId(mc.player.inventory.getEmptySlot()), 0, SlotActionType.PICKUP);
         }
     }
 
-    private boolean checkSlot(ItemStack itemStack, int slot){
+    private boolean checkSlot(ItemStack itemStack, int slot) {
         boolean correct = false;
-        if(slot == 5 && ((ArmorItem) itemStack.getItem()).getSlotType() == EquipmentSlot.HEAD) correct = true;
-        else if(slot == 6 && ((ArmorItem) itemStack.getItem()).getSlotType() == EquipmentSlot.CHEST) correct = true;
-        else if(slot == 7 && ((ArmorItem) itemStack.getItem()).getSlotType() == EquipmentSlot.LEGS) correct = true;
-        else if(slot == 8 && ((ArmorItem) itemStack.getItem()).getSlotType() == EquipmentSlot.FEET) correct = true;
+        if (slot == 5 && ((ArmorItem) itemStack.getItem()).getSlotType() == EquipmentSlot.HEAD) correct = true;
+        else if (slot == 6 && ((ArmorItem) itemStack.getItem()).getSlotType() == EquipmentSlot.CHEST) correct = true;
+        else if (slot == 7 && ((ArmorItem) itemStack.getItem()).getSlotType() == EquipmentSlot.LEGS) correct = true;
+        else if (slot == 8 && ((ArmorItem) itemStack.getItem()).getSlotType() == EquipmentSlot.FEET) correct = true;
         return correct;
     }
 
-    private void replaceArmour(int slot, boolean empty){
+    private void replaceArmour(int slot, boolean empty) {
         for (int i = 0; i < mc.player.inventory.main.size(); i++) {
             ItemStack itemStack = mc.player.inventory.getStack(i);
-            if(!(itemStack.getItem() instanceof ArmorItem)) continue;
-            if(!checkSlot(mc.player.inventory.getStack(i), slot)) continue;
+            if (!(itemStack.getItem() instanceof ArmorItem)) continue;
+            if (!checkSlot(mc.player.inventory.getStack(i), slot)) continue;
             if (EnchantmentHelper.getLevel(Enchantments.MENDING, itemStack) == 0 || !itemStack.isDamaged()) continue;
 
             InvUtils.clickSlot(InvUtils.invIndexToSlotId(i), 0, SlotActionType.PICKUP);
@@ -94,7 +94,7 @@ public class AutoMend extends Module {
 
             break;
         }
-        if(!mc.player.inventory.getStack(39 - (slot - 5)).isDamaged() && removeFinished.get() && mc.player.inventory.getEmptySlot() != -1){
+        if (!mc.player.inventory.getStack(39 - (slot - 5)).isDamaged() && removeFinished.get() && mc.player.inventory.getEmptySlot() != -1) {
             InvUtils.clickSlot(slot, 0, SlotActionType.PICKUP);
             InvUtils.clickSlot(InvUtils.invIndexToSlotId(mc.player.inventory.getEmptySlot()), 0, SlotActionType.PICKUP);
         }
@@ -108,15 +108,16 @@ public class AutoMend extends Module {
         else if (!mc.player.getOffHandStack().isDamaged()) replaceItem(false);
         else if (EnchantmentHelper.getLevel(Enchantments.MENDING, mc.player.getOffHandStack()) == 0) replaceItem(false);
 
-        if(armourSlots.get()) {
-            if(Modules.get().isActive(AutoArmor.class)) {
+        if (armourSlots.get()) {
+            if (Modules.get().isActive(AutoArmor.class)) {
                 ChatUtils.moduleWarning(this, "Cannot use armor slots while AutoArmor is active. Please disable AutoArmor and try again. Disabling Use Armor Slots.");
                 armourSlots.set(false);
             }
             for (int i = 5; i < 9; i++) {
                 if (mc.player.inventory.getStack(39 - (i - 5)).isEmpty()) replaceArmour(i, true);
                 else if (!mc.player.inventory.getStack(39 - (i - 5)).isDamaged()) replaceArmour(i, false);
-                else if (EnchantmentHelper.getLevel(Enchantments.MENDING, mc.player.inventory.getStack(39 - (i - 5))) == 0) replaceArmour(i, false);
+                else if (EnchantmentHelper.getLevel(Enchantments.MENDING, mc.player.inventory.getStack(39 - (i - 5))) == 0)
+                    replaceArmour(i, false);
             }
         }
     }

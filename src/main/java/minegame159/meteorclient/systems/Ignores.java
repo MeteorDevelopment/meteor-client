@@ -26,9 +26,6 @@ public class Ignores extends System<Ignores> implements Iterable<String> {
         return Systems.get(Ignores.class);
     }
 
-    @Override
-    public void init() {}
-
     public void add(String ignore) {
         list.add(ignore);
     }

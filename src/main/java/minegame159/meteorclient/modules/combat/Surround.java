@@ -30,7 +30,7 @@ public class Surround extends Module {
             .defaultValue(false)
             .build()
     );
-    
+
     private final Setting<Boolean> onlyOnGround = sgGeneral.add(new BoolSetting.Builder()
             .name("only-on-ground")
             .description("Works only when you standing on blocks.")

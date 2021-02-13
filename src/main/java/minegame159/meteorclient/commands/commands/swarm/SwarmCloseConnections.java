@@ -16,8 +16,8 @@ import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
 public class SwarmCloseConnections extends Command {
 
-    public SwarmCloseConnections(){
-        super("swarm","(highlight)close(default) - Close all network connections and cancel all tasks.");
+    public SwarmCloseConnections() {
+        super("swarm", "(highlight)close(default) - Close all network connections and cancel all tasks.");
     }
 
     @Override
@@ -25,7 +25,7 @@ public class SwarmCloseConnections extends Command {
         builder.then(literal("close").executes(context -> {
                     try {
                         Swarm swarm = Modules.get().get(Swarm.class);
-                        if(swarm.isActive()) {
+                        if (swarm.isActive()) {
                             swarm.closeAllServerConnections();
                             swarm.currentMode = Swarm.Mode.Idle;
                             if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing())

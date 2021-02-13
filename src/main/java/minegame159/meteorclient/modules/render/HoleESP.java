@@ -232,9 +232,7 @@ public class HoleESP extends Module {
                 if (bedrocks == 5) holes.add(holePool.get().set(blockPos, singleBedrock.get(), Direction.UP));
                 else if (obbys == 5) holes.add(holePool.get().set(blockPos, singleObsidian.get(), Direction.UP));
                 else holes.add(holePool.get().set(blockPos, singleMixed.get(), Direction.UP));
-            }
-
-            else if (obbys + bedrocks == 4 && airs == 1 && doubles.get()) {
+            } else if (obbys + bedrocks == 4 && airs == 1 && doubles.get()) {
                 int[] doubleResult = checkArround(blockPos.offset(currentDir), currentDir.getOpposite());
 
                 if (doubleResult[0] == 4 && bedrocks == 4) holes.add(holePool.get().set(blockPos, doubleBedrock.get(), currentDir));
@@ -288,11 +286,20 @@ public class HoleESP extends Module {
     private void onRender(RenderEvent event) {
         for (Hole hole : holes) {
             switch (renderMode.get()) {
-                case Flat:          drawFlat(hole); break;
-                case Box:           drawBox(hole, false); break;
-                case BoxBelow:      drawBox(hole, true); break;
-                case ReverseGlow:
-                case Glow:          drawBoxGlowDirection(hole, (renderMode.get() == Mode.ReverseGlow)); break;
+                case Flat:
+                    drawFlat(hole);
+                    break;
+                case Box:
+                    drawBox(hole, false);
+                    break;
+                case BoxBelow:
+                    drawBox(hole, true);
+                    break;
+                case  ReverseGlow:
+
+                case Glow:
+                    drawBoxGlowDirection(hole, (renderMode.get() == Mode.ReverseGlow));
+                    break;
             }
         }
     }
@@ -302,11 +309,21 @@ public class HoleESP extends Module {
         int y = hole.blockPos.getY();
         int z = hole.blockPos.getZ();
         switch (hole.direction) {
-            case UP:    Renderer.quadWithLinesHorizontal(Renderer.NORMAL, Renderer.LINES, x, y, z, 1, hole.colorSides, hole.colorLines, shapeMode.get()); break;
-            case NORTH: Renderer.quadWithLinesHorizontal(Renderer.NORMAL, Renderer.LINES, x, y, z + 1, x + 1, z - 1, hole.colorSides, hole.colorLines, shapeMode.get()); break;
-            case SOUTH: Renderer.quadWithLinesHorizontal(Renderer.NORMAL, Renderer.LINES, x, y, z, x + 1, z + 2, hole.colorSides, hole.colorLines, shapeMode.get()); break;
-            case EAST:  Renderer.quadWithLinesHorizontal(Renderer.NORMAL, Renderer.LINES, x, y, z, x + 2, z + 1, hole.colorSides, hole.colorLines, shapeMode.get()); break;
-            case WEST:  Renderer.quadWithLinesHorizontal(Renderer.NORMAL, Renderer.LINES, x + 1, y, z, x - 1, z + 1, hole.colorSides, hole.colorLines, shapeMode.get()); break;
+            case UP:
+                Renderer.quadWithLinesHorizontal(Renderer.NORMAL, Renderer.LINES, x, y, z, 1, hole.colorSides, hole.colorLines, shapeMode.get());
+                break;
+            case NORTH:
+                Renderer.quadWithLinesHorizontal(Renderer.NORMAL, Renderer.LINES, x, y, z + 1, x + 1, z - 1, hole.colorSides, hole.colorLines, shapeMode.get());
+                break;
+            case SOUTH:
+                Renderer.quadWithLinesHorizontal(Renderer.NORMAL, Renderer.LINES, x, y, z, x + 1, z + 2, hole.colorSides, hole.colorLines, shapeMode.get());
+                break;
+            case EAST:
+                Renderer.quadWithLinesHorizontal(Renderer.NORMAL, Renderer.LINES, x, y, z, x + 2, z + 1, hole.colorSides, hole.colorLines, shapeMode.get());
+                break;
+            case WEST:
+                Renderer.quadWithLinesHorizontal(Renderer.NORMAL, Renderer.LINES, x + 1, y, z, x - 1, z + 1, hole.colorSides, hole.colorLines, shapeMode.get());
+                break;
         }
     }
 
@@ -315,11 +332,21 @@ public class HoleESP extends Module {
         int y = down ? hole.blockPos.getY() - 1 : hole.blockPos.getY();
         int z = hole.blockPos.getZ();
         switch (hole.direction) {
-            case UP:    Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, down ? hole.blockPos.down() : hole.blockPos, hole.colorSides, hole.colorLines, shapeMode.get(), 0); break;
-            case NORTH: Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x, y, z + 1, x + 1, y + 1, z - 1, hole.colorSides, hole.colorLines, shapeMode.get(), 0); break;
-            case SOUTH: Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x, y, z, x + 1, y + 1, z + 2, hole.colorSides, hole.colorLines, shapeMode.get(), 0); break;
-            case EAST:  Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x, y, z, x + 2, y + 1, z + 1, hole.colorSides, hole.colorLines, shapeMode.get(), 0); break;
-            case WEST:  Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x + 1, y, z, x - 1, y + 1,z + 1, hole.colorSides, hole.colorLines, shapeMode.get(), 0); break;
+            case UP:
+                Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, down ? hole.blockPos.down() : hole.blockPos, hole.colorSides, hole.colorLines, shapeMode.get(), 0);
+                break;
+            case NORTH:
+                Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x, y, z + 1, x + 1, y + 1, z - 1, hole.colorSides, hole.colorLines, shapeMode.get(), 0);
+                break;
+            case SOUTH:
+                Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x, y, z, x + 1, y + 1, z + 2, hole.colorSides, hole.colorLines, shapeMode.get(), 0);
+                break;
+            case EAST:
+                Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x, y, z, x + 2, y + 1, z + 1, hole.colorSides, hole.colorLines, shapeMode.get(), 0);
+                break;
+            case WEST:
+                Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x + 1, y, z, x - 1, y + 1, z + 1, hole.colorSides, hole.colorLines, shapeMode.get(), 0);
+                break;
         }
     }
 
@@ -328,18 +355,29 @@ public class HoleESP extends Module {
         int y = hole.blockPos.getY();
         int z = hole.blockPos.getZ();
         switch (hole.direction) {
-            case UP:    drawGlowSimple(x, y, z, x + 1, z + 1, hole.colorSides, hole.colorLines, reverse); break;
-            case NORTH: drawGlowSimple(x, y, z + 1, x + 1, z - 1, hole.colorSides, hole.colorLines, reverse); break;
-            case SOUTH: drawGlowSimple(x, y, z, x + 1, z + 2, hole.colorSides, hole.colorLines, reverse); break;
-            case EAST:  drawGlowSimple(x, y, z, x + 2, z + 1, hole.colorSides, hole.colorLines, reverse); break;
-            case WEST:  drawGlowSimple(x + 1, y, z, x - 1, z + 1, hole.colorSides, hole.colorLines, reverse); break;
+            case UP:
+                drawGlowSimple(x, y, z, x + 1, z + 1, hole.colorSides, hole.colorLines, reverse);
+                break;
+            case NORTH:
+                drawGlowSimple(x, y, z + 1, x + 1, z - 1, hole.colorSides, hole.colorLines, reverse);
+                break;
+            case SOUTH:
+                drawGlowSimple(x, y, z, x + 1, z + 2, hole.colorSides, hole.colorLines, reverse);
+                break;
+            case EAST:
+                drawGlowSimple(x, y, z, x + 2, z + 1, hole.colorSides, hole.colorLines, reverse);
+                break;
+            case WEST:
+                drawGlowSimple(x + 1, y, z, x - 1, z + 1, hole.colorSides, hole.colorLines, reverse);
+                break;
         }
     }
 
     private void drawGlowSimple(double x1, double y, double z1, double x2, double z2, Color colorSides, Color colorLines, boolean reverse) {
         if (shapeMode.get() != ShapeMode.Lines) Renderer.NORMAL.gradientBoxSides(x1, y, z1, x2, z2, glowHeight.get(), colorLines, transparent, reverse);
         if (shapeMode.get() != ShapeMode.Sides) {
-            if (drawOpposite.get()) Renderer.quadWithLinesHorizontal(Renderer.NORMAL, Renderer.LINES, x1, reverse ? y : y + glowHeight.get(), z1, x2, z2, colorSides, colorLines, ShapeMode.Lines);
+            if (drawOpposite.get())
+                Renderer.quadWithLinesHorizontal(Renderer.NORMAL, Renderer.LINES, x1, reverse ? y : y + glowHeight.get(), z1, x2, z2, colorSides, colorLines, ShapeMode.Lines);
             Renderer.quadWithLinesHorizontal(Renderer.NORMAL, Renderer.LINES, x1, reverse ? y + glowHeight.get() : y, z1, x2, z2, colorSides, colorLines, ShapeMode.Lines);
             Renderer.LINES.gradientVerticalBox(x1, y, z1, x2, z2, glowHeight.get(), colorLines, transparent, reverse);
         }

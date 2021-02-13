@@ -26,7 +26,7 @@ public class Sprint extends Module {
     public Sprint() {
         super(Category.Movement, "sprint", "Automatically sprints.");
     }
-    
+
     @Override
     public void onDeactivate() {
         mc.player.setSprinting(false);

@@ -31,7 +31,7 @@ public class ChatUtils {
 
     //No prefix
 
-    private static void message(int id,  Formatting color, String msg, Object... args) {
+    private static void message(int id, Formatting color, String msg, Object... args) {
         sendMsg(id, null, PrefixType.None, formatMsg(msg, color, args), color);
     }
 

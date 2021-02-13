@@ -196,13 +196,13 @@ public class Search extends Module {
     private void onRender(RenderEvent event) {
         synchronized (chunks) {
             toRemove.clear();
-            
+
             for (long key : chunks.keySet()) {
                 MyChunk chunk = chunks.get(key);
                 if (chunk.shouldBeDeleted()) toRemove.add(key);
                 else chunk.render(event);
             }
-            
+
             for (long key : toRemove) {
                 chunks.remove(key);
             }

@@ -29,9 +29,11 @@ import java.util.Base64;
 
 @Mixin(BookScreen.class)
 public class BookScreenMixin extends Screen {
-    @Shadow private BookScreen.Contents contents;
+    @Shadow
+    private BookScreen.Contents contents;
 
-    @Shadow private int pageIndex;
+    @Shadow
+    private int pageIndex;
 
     public BookScreenMixin(Text title) {
         super(title);
@@ -41,7 +43,8 @@ public class BookScreenMixin extends Screen {
     private void onInit(CallbackInfo info) {
         addButton(new ButtonWidget(4, 4, 70, 16, new LiteralText("Copy"), button -> {
             ListTag listTag = new ListTag();
-            for (int i = 0; i < contents.getPageCount(); i++) listTag.add(StringTag.of(contents.getPage(i).getString()));
+            for (int i = 0; i < contents.getPageCount(); i++)
+                listTag.add(StringTag.of(contents.getPage(i).getString()));
 
             CompoundTag tag = new CompoundTag();
             tag.put("pages", listTag);

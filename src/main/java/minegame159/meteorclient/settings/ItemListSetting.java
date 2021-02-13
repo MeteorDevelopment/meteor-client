@@ -53,7 +53,8 @@ public class ItemListSetting extends Setting<List<Item>> {
                     if (filter == null || filter.test(item)) items.add(item);
                 }
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
 
         return items;
     }

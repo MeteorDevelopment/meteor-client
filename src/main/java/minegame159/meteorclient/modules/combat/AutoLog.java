@@ -36,7 +36,7 @@ import net.minecraft.util.math.Vec3d;
 
 public class AutoLog extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    
+
     private final Setting<Integer> health = sgGeneral.add(new IntSetting.Builder()
             .name("health")
             .description("Automatically disconnects when health is lower or equal to this value.")
@@ -74,7 +74,7 @@ public class AutoLog extends Module {
             .defaultValue(false)
             .build()
     );
-    
+
     private final Setting<Integer> range = sgGeneral.add(new IntSetting.Builder()
             .name("range")
             .description("How close a crystal has to be to you before you disconnect.")
@@ -111,23 +111,23 @@ public class AutoLog extends Module {
         }
         if (mc.player.getHealth() <= health.get()) {
             mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(new LiteralText("[AutoLog] Health was lower than " + health.get() + ".")));
-            if(smartToggle.get()) {
+            if (smartToggle.get()) {
                 this.toggle();
                 enableHealthListener();
             }
         }
 
-        if(smart.get() && mc.player.getHealth() + mc.player.getAbsorptionAmount() - getHealthReduction() < health.get()){
+        if (smart.get() && mc.player.getHealth() + mc.player.getAbsorptionAmount() - getHealthReduction() < health.get()) {
             mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(new LiteralText("[AutoLog] Health was going to be lower than " + health.get() + ".")));
             if (toggleOff.get()) this.toggle();
         }
 
         for (Entity entity : mc.world.getEntities()) {
-            if(entity instanceof PlayerEntity && entity.getUuid() != mc.player.getUuid()) {
+            if (entity instanceof PlayerEntity && entity.getUuid() != mc.player.getUuid()) {
                 if (onlyTrusted.get() && entity != mc.player && Friends.get().notTrusted((PlayerEntity) entity)) {
-                        mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(new LiteralText("[AutoLog] A non-trusted player appeared in your render distance.")));
-                        if (toggleOff.get()) this.toggle();
-                        break;
+                    mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(new LiteralText("[AutoLog] A non-trusted player appeared in your render distance.")));
+                    if (toggleOff.get()) this.toggle();
+                    break;
                 }
                 if (mc.player.distanceTo(entity) < 8 && instantDeath.get() && DamageCalcUtils.getSwordDamage((PlayerEntity) entity, true)
                         > mc.player.getHealth() + mc.player.getAbsorptionAmount()) {
@@ -212,16 +212,17 @@ public class AutoLog extends Module {
                     && mc.player.getHealth() >= health.get()) {
                 toggle();
                 disableHealthListener();
-           }
+            }
         }
     }
 
     private final StaticListener staticListener = new StaticListener();
 
-    private void enableHealthListener(){
+    private void enableHealthListener() {
         MeteorClient.EVENT_BUS.subscribe(staticListener);
     }
-    private void disableHealthListener(){
+
+    private void disableHealthListener() {
         MeteorClient.EVENT_BUS.unsubscribe(staticListener);
     }
 }

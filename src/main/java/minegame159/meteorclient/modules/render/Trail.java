@@ -42,7 +42,8 @@ public class Trail extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if (pause.get() && mc.player.input.movementForward == 0f && mc.player.input.movementSideways == 0f && !mc.options.keyJump.isPressed()) return;
+        if (pause.get() && mc.player.input.movementForward == 0f && mc.player.input.movementSideways == 0f && !mc.options.keyJump.isPressed())
+            return;
         for (ParticleEffect particleEffect : particles.get()) {
             mc.world.addParticle(particleEffect, mc.player.getX(), mc.player.getY(), mc.player.getZ(), 0, 0, 0);
         }

@@ -15,5 +15,7 @@ import java.util.Set;
 @Mixin(HoeItem.class)
 public interface HoeItemAccessor {
     @Accessor("EFFECTIVE_BLOCKS")
-    static Set<Block> getEffectiveBlocks() { return null; }
+    static Set<Block> getEffectiveBlocks() {
+        return null;
+    }
 }

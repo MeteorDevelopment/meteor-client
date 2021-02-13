@@ -46,7 +46,7 @@ public class ShulkerPeek extends Module {
         Dark
     }
 
-    public ShulkerPeek(){
+    public ShulkerPeek() {
         super(Category.Render, "shulker-peek", "Allows you to see what is inside Shulker Boxes without placing them.");
     }
 

@@ -80,13 +80,13 @@ public class InvUtils {
 
     @EventHandler(priority = EventPriority.LOWEST)
     private static void onTick(TickEvent.Pre event) {
-        if (mc.world == null || mc.player == null || mc.player.abilities.creativeMode){
+        if (mc.world == null || mc.player == null || mc.player.abilities.creativeMode) {
             currentQueue.clear();
             moveQueue.clear();
             return;
         }
 
-        if (!mc.player.inventory.getCursorStack().isEmpty() && mc.currentScreen == null && mc.player.currentScreenHandler.getStacks().size() > 44){
+        if (!mc.player.inventory.getCursorStack().isEmpty() && mc.currentScreen == null && mc.player.currentScreenHandler.getStacks().size() > 44) {
             int slot = mc.player.inventory.getEmptySlot();
             if (slot == -1) findItemWithCount(mc.player.inventory.getCursorStack().getItem());
             if (slot != -1) clickSlot(invIndexToSlotId(slot), 0, SlotActionType.PICKUP);
@@ -105,14 +105,14 @@ public class InvUtils {
         }
     }
 
-    public static void addSlots(List<Integer> slots, Class<? extends Module> klass){
+    public static void addSlots(List<Integer> slots, Class<? extends Module> klass) {
         if (moveQueue.contains(new CustomPair(klass, slots)) || currentQueue.containsAll(slots)) return;
 
         if (klass == AutoTotem.class) {
             moveQueue.removeIf(pair -> pair.getRight().contains(45));
         }
 
-        if (!moveQueue.isEmpty() && canMove(klass)){
+        if (!moveQueue.isEmpty() && canMove(klass)) {
             moveQueue.addFirst(new CustomPair(klass, slots));
         } else {
             moveQueue.add(new CustomPair(klass, slots));
@@ -121,18 +121,18 @@ public class InvUtils {
         onTick(new TickEvent.Pre());
     }
 
-    public static boolean canMove(Class<? extends Module> klass){
+    public static boolean canMove(Class<? extends Module> klass) {
         return getPrio(moveQueue.peek().getLeft()) < getPrio(klass);
     }
 
-    private static int getPrio(Class<? extends Module> klass){
+    private static int getPrio(Class<? extends Module> klass) {
         if (klass == null) return -1;
         return klass.getAnnotation(Priority.class).priority();
     }
 
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.TYPE)
-    public @interface Priority{
+    public @interface Priority {
         int priority() default -1;
     }
 

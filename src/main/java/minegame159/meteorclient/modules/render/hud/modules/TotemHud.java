@@ -14,8 +14,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 
 public class TotemHud extends HudModule {
-    public TotemHud(HUD hud) { super(hud, "totems", "Displays the amount of totems in your inventory."); }
-
+    public TotemHud(HUD hud) {
+        super(hud, "totems", "Displays the amount of totems in your inventory.");
+    }
 
 
     @Override
@@ -28,9 +29,9 @@ public class TotemHud extends HudModule {
         double x = box.getX() / hud.totemCountScale.get();
         double y = box.getY() / hud.totemCountScale.get();
 
-        if(mc.player == null || mc.currentScreen instanceof HudEditorScreen) {
+        if (mc.player == null || mc.currentScreen instanceof HudEditorScreen) {
             RenderUtils.drawItem(Items.TOTEM_OF_UNDYING.getDefaultStack(), (int) x, (int) y, hud.totemCountScale.get(), true);
-        } else if(InvUtils.findItemWithCount(Items.TOTEM_OF_UNDYING).count > 0) {
+        } else if (InvUtils.findItemWithCount(Items.TOTEM_OF_UNDYING).count > 0) {
             RenderUtils.drawItem(new ItemStack(Items.TOTEM_OF_UNDYING, InvUtils.findItemWithCount(Items.TOTEM_OF_UNDYING).count), (int) x, (int) y, hud.totemCountScale.get(), true);
         }
     }

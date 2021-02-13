@@ -54,9 +54,11 @@ public class ParticleEffectListSetting extends Setting<List<ParticleEffect>> {
                 else id = new Identifier("minecraft", val);
                 ParticleType<?> particleType = Registry.PARTICLE_TYPE.get(id);
 
-                if (Registry.PARTICLE_TYPE.containsId(id) && particleType instanceof ParticleEffect) particleTypes.add((ParticleEffect) particleType);
+                if (Registry.PARTICLE_TYPE.containsId(id) && particleType instanceof ParticleEffect)
+                    particleTypes.add((ParticleEffect) particleType);
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
 
         return particleTypes;
     }

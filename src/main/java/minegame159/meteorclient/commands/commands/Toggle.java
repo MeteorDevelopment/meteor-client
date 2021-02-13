@@ -15,7 +15,6 @@ import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
 public class Toggle extends Command {
 
-
     public Toggle() {
         super("toggle", "Toggles a module.");
     }
@@ -31,12 +30,14 @@ public class Toggle extends Command {
                 }).then(literal("on")
                         .executes(context -> {
                             Module m = context.getArgument("module", Module.class);
-                            if (!m.isActive()) m.toggle(); m.sendToggledMsg();
+                            if (!m.isActive()) m.toggle();
+                            m.sendToggledMsg();
                             return SINGLE_SUCCESS;
                         })).then(literal("off")
                         .executes(context -> {
                             Module m = context.getArgument("module", Module.class);
-                            if (m.isActive()) m.toggle(); m.sendToggledMsg();
+                            if (m.isActive()) m.toggle();
+                            m.sendToggledMsg();
                             return SINGLE_SUCCESS;
                         })
                 )

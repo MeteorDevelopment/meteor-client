@@ -5,8 +5,6 @@
 
 package minegame159.meteorclient.commands.commands;
 
-//Created by squidoodly 18/04/2020
-
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import minegame159.meteorclient.commands.Command;
@@ -18,6 +16,7 @@ import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 public class Say extends Command {
 
     public Say() {
+        // Created by squidoodly 18/04/2020
         super("say", "Sends messages in chat.");
     }
 

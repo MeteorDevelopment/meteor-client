@@ -289,8 +289,9 @@ public class Nametags extends Module {
             EntityType<?> type = entity.getType();
 
             if (type == EntityType.PLAYER) {
-                if (notFreecamActive && entity == mc.cameraEntity) continue;
-                if (!yourself.get() && entity == mc.player) continue;
+                if (notFreecamActive && entity == mc.cameraEntity)
+                continue;
+            if (!yourself.get() && entity== mc.player) continue;
             }
 
             pos.set(entity, event.tickDelta);
@@ -564,7 +565,7 @@ public class Nametags extends Module {
         NametagUtils.end();
     }
 
-    private List<Enchantment> setDefualtList(){
+    private List<Enchantment> setDefualtList() {
         List<Enchantment> ench = new ArrayList<>();
         for (Enchantment enchantment : Registry.ENCHANTMENT) {
             ench.add(enchantment);

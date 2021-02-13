@@ -81,5 +81,4 @@ public class Drop extends Command {
     private interface PlayerConsumer {
         void accept(ClientPlayerEntity player) throws CommandSyntaxException;
     }
-
 }

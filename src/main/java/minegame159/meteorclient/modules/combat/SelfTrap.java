@@ -121,7 +121,7 @@ public class SelfTrap extends Module {
     private boolean placed;
     private int delay;
 
-    public SelfTrap(){
+    public SelfTrap() {
         super(Category.Combat, "self-trap", "Places obsidian above your head.");
     }
 
@@ -160,14 +160,14 @@ public class SelfTrap extends Module {
             }
 
             delay = 0;
-        }
-        else delay++;
+        } else delay++;
     }
 
     @EventHandler
     private void onRender(RenderEvent event) {
         if (!render.get() || placePositions.isEmpty()) return;
-        for (BlockPos pos : placePositions) Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, pos, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+        for (BlockPos pos : placePositions)
+            Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, pos, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
     }
 
     private void findPlacePos() {
@@ -198,6 +198,7 @@ public class SelfTrap extends Module {
 
 
     private void add(BlockPos blockPos) {
-        if (!placePositions.contains(blockPos) && mc.world.getBlockState(blockPos).getMaterial().isReplaceable() && mc.world.canPlace(Blocks.OBSIDIAN.getDefaultState(), blockPos, ShapeContext.absent())) placePositions.add(blockPos);
+        if (!placePositions.contains(blockPos) && mc.world.getBlockState(blockPos).getMaterial().isReplaceable() && mc.world.canPlace(Blocks.OBSIDIAN.getDefaultState(), blockPos, ShapeContext.absent()))
+            placePositions.add(blockPos);
     }
 }

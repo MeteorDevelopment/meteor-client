@@ -12,6 +12,7 @@ import net.minecraft.command.CommandSource;
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
 public class ClearChat extends Command {
+
     public ClearChat() {
         super("clear-chat", "Clears your chat.");
     }

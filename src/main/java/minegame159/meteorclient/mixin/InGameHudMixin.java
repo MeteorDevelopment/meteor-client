@@ -27,13 +27,18 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(InGameHud.class)
 public abstract class InGameHudMixin {
-    @Shadow private int scaledWidth;
+    @Shadow
+    private int scaledWidth;
 
-    @Shadow private int scaledHeight;
+    @Shadow
+    private int scaledHeight;
 
-    @Shadow @Final private MinecraftClient client;
+    @Shadow
+    @Final
+    private MinecraftClient client;
 
-    @Shadow public abstract void clear();
+    @Shadow
+    public abstract void clear();
 
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerInventory;getArmorStack(I)Lnet/minecraft/item/ItemStack;"))
     private void onRender(MatrixStack matrixStack, float tickDelta, CallbackInfo info) {

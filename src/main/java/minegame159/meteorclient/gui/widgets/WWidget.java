@@ -17,7 +17,7 @@ public abstract class WWidget {
 
     public double x, y;
     public double width, height;
-    
+
     private double frozenWidth = -1;
 
     public String tooltip;
@@ -57,8 +57,10 @@ public abstract class WWidget {
 
     public void move(double deltaX, double deltaY, boolean callMouseMoved) {
         move(this, deltaX, deltaY, callMouseMoved);
-        if (callMouseMoved) mouseMoved(MinecraftClient.getInstance().mouse.getX(), MinecraftClient.getInstance().mouse.getY());
+        if (callMouseMoved)
+            mouseMoved(MinecraftClient.getInstance().mouse.getX(), MinecraftClient.getInstance().mouse.getY());
     }
+
     protected void move(WWidget widget, double deltaX, double deltaY, boolean callMouseMoved) {
         widget.x += deltaX;
         widget.y += deltaY;
@@ -71,14 +73,15 @@ public abstract class WWidget {
         }
     }
 
-    protected void onMoved(double deltaX, double deltaY, boolean callMouseMoved) {}
+    protected void onMoved(double deltaX, double deltaY, boolean callMouseMoved) {
+    }
 
     public void freezeWidth() {
         frozenWidth = width;
     }
 
     protected void calculateSize(GuiRenderer renderer) {
-        for (Cell cell : cells) cell.widget.calculateSize(renderer);
+        for (Cell<?> cell : cells) cell.widget.calculateSize(renderer);
         onCalculateSize(renderer);
 
         if (frozenWidth != -1) {
@@ -89,6 +92,7 @@ public abstract class WWidget {
         width = Math.round(width);
         height = Math.round(height);
     }
+
     protected void onCalculateSize(GuiRenderer renderer) {
         width = 0;
         height = 0;
@@ -104,8 +108,9 @@ public abstract class WWidget {
         y = Math.round(y);
 
         onCalculateWidgetPositions();
-        for (Cell cell : cells) cell.widget.calculateWidgetPositions();
+        for (Cell<?> cell : cells) cell.widget.calculateWidgetPositions();
     }
+
     protected void onCalculateWidgetPositions() {
         for (Cell<?> cell : cells) {
             cell.x = x + cell.padLeft;
@@ -126,10 +131,13 @@ public abstract class WWidget {
         }
         if (mouseOver && mouseOverTimer >= 1 && tooltip != null) renderer.tooltip = tooltip;
     }
+
     protected void onRenderWidget(WWidget widget, GuiRenderer renderer, double mouseX, double mouseY, double delta) {
         widget.render(renderer, mouseX, mouseY, delta);
     }
-    protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {}
+
+    protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
+    }
 
     public WWidget getRoot() {
         return parent != null ? parent.getRoot() : (this instanceof WRoot ? this : null);
@@ -160,7 +168,9 @@ public abstract class WWidget {
         if (!preMouseOver && mouseOver) mouseOverTimer = 0;
         onMouseMoved(mouseX, mouseY);
     }
-    protected void onMouseMoved(double mouseX, double mouseY) {}
+
+    protected void onMouseMoved(double mouseX, double mouseY) {
+    }
 
     public boolean mouseClicked(boolean used, int button) {
         try {
@@ -169,10 +179,14 @@ public abstract class WWidget {
                     if (cell.getWidget().mouseClicked(used, button)) used = true;
                 }
             }
-        } catch (ConcurrentModificationException ignored) {}
+        } catch (ConcurrentModificationException ignored) {
+        }
         return onMouseClicked(used, button);
     }
-    protected boolean onMouseClicked(boolean used, int button) { return used; }
+
+    protected boolean onMouseClicked(boolean used, int button) {
+        return used;
+    }
 
     public boolean mouseReleased(boolean used, int button) {
         try {
@@ -181,10 +195,14 @@ public abstract class WWidget {
                     if (cell.getWidget().mouseReleased(used, button)) used = true;
                 }
             }
-        } catch (ConcurrentModificationException ignored) {}
+        } catch (ConcurrentModificationException ignored) {
+        }
         return onMouseReleased(used, button);
     }
-    protected boolean onMouseReleased(boolean used, int button) { return used; }
+
+    protected boolean onMouseReleased(boolean used, int button) {
+        return used;
+    }
 
     public boolean mouseScrolled(double amount) {
         for (Cell<?> cell : cells) {
@@ -194,7 +212,10 @@ public abstract class WWidget {
         }
         return onMouseScrolled(amount);
     }
-    protected boolean onMouseScrolled(double amount) { return false; }
+
+    protected boolean onMouseScrolled(double amount) {
+        return false;
+    }
 
     public boolean keyPressed(int key, int mods) {
         for (Cell<?> cell : cells) {
@@ -204,7 +225,10 @@ public abstract class WWidget {
         }
         return onKeyPressed(key, mods);
     }
-    protected boolean onKeyPressed(int key, int mods) { return false; }
+
+    protected boolean onKeyPressed(int key, int mods) {
+        return false;
+    }
 
     public boolean keyRepeated(int key, int mods) {
         for (Cell<?> cell : cells) {
@@ -214,7 +238,10 @@ public abstract class WWidget {
         }
         return onKeyRepeated(key, mods);
     }
-    protected boolean onKeyRepeated(int key, int mods) { return false; }
+
+    protected boolean onKeyRepeated(int key, int mods) {
+        return false;
+    }
 
     public boolean charTyped(char c, int key) {
         for (Cell<?> cell : cells) {
@@ -224,5 +251,8 @@ public abstract class WWidget {
         }
         return onCharTyped(c, key);
     }
-    protected boolean onCharTyped(char c, int key) { return false; }
+
+    protected boolean onCharTyped(char c, int key) {
+        return false;
+    }
 }

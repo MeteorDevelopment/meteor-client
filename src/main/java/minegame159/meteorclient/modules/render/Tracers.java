@@ -139,7 +139,8 @@ public class Tracers extends Module {
         count = 0;
 
         for (Entity entity : mc.world.getEntities()) {
-            if ((!Modules.get().isActive(Freecam.class) && entity == mc.player) || !entities.get().getBoolean(entity.getType()) || (!showInvis.get() && entity.isInvisible())) continue;
+            if ((!Modules.get().isActive(Freecam.class) && entity == mc.player) || !entities.get().getBoolean(entity.getType()) || (!showInvis.get() && entity.isInvisible()))
+                continue;
             if (FakePlayerUtils.isFakePlayerOutOfRenderDistance(entity)) continue;
 
             Color color = EntityUtils.getEntityColor(entity, playersColor.get(), animalsColor.get(), waterAnimalsColor.get(), monstersColor.get(), ambientColor.get(), miscColor.get(), useNameColor.get());

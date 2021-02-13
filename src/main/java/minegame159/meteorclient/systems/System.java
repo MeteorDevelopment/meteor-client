@@ -23,7 +23,8 @@ public abstract class System<T> implements ISerializable<T> {
         }
     }
 
-    public void init() {}
+    public void init() {
+    }
 
     public void save(File folder) {
         File file = getFile();
@@ -33,7 +34,7 @@ public abstract class System<T> implements ISerializable<T> {
         if (tag == null) return;
 
         try {
-            File tempFile = File.createTempFile("meteor-client", file.getName());
+            File tempFile = File.createTempFile(MeteorClient.ID, file.getName());
             NbtIo.write(tag, tempFile);
 
             if (folder != null) file = new File(folder, file.getName());
@@ -45,6 +46,7 @@ public abstract class System<T> implements ISerializable<T> {
             e.printStackTrace();
         }
     }
+
     public void save() {
         save(null);
     }
@@ -63,6 +65,7 @@ public abstract class System<T> implements ISerializable<T> {
             e.printStackTrace();
         }
     }
+
     public void load() {
         load(null);
     }

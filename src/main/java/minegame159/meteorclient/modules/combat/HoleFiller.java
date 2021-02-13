@@ -125,10 +125,12 @@ public class HoleFiller extends Module {
                     if (itemStack.getItem() == Items.COBWEB) return i;
                     break;
                 case Both:
-                    if (itemStack.getItem() == Items.COBWEB || itemStack.getItem() == Items.OBSIDIAN || itemStack.getItem() == Items.CRYING_OBSIDIAN) return i;
+                    if (itemStack.getItem() == Items.COBWEB || itemStack.getItem() == Items.OBSIDIAN || itemStack.getItem() == Items.CRYING_OBSIDIAN)
+                        return i;
                     break;
                 case Any:
-                    if (itemStack.getItem() instanceof BlockItem && ((BlockItem) itemStack.getItem()).getBlock().getDefaultState().isFullCube(mc.world, blockPos)) return i;
+                    if (itemStack.getItem() instanceof BlockItem && ((BlockItem) itemStack.getItem()).getBlock().getDefaultState().isFullCube(mc.world, blockPos))
+                        return i;
                     break;
             }
         }

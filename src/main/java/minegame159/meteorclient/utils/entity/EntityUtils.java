@@ -39,11 +39,16 @@ public class EntityUtils {
         }
 
         switch (entity.getType().getSpawnGroup()) {
-            case CREATURE:       return animals;
-            case WATER_CREATURE: return waterAnmals;
-            case MONSTER:        return monsters;
-            case AMBIENT:        return ambient;
-            case MISC:           return misc;
+            case CREATURE:
+                return animals;
+            case WATER_CREATURE:
+                return waterAnmals;
+            case MONSTER:
+                return monsters;
+            case AMBIENT:
+                return ambient;
+            case MISC:
+                return misc;
         }
 
         return Utils.WHITE;
@@ -73,11 +78,16 @@ public class EntityUtils {
 
     private static int sort(Entity e1, Entity e2, SortPriority priority) {
         switch (priority) {
-            case LowestDistance:  return Double.compare(e1.distanceTo(mc.player), e2.distanceTo(mc.player));
-            case HighestDistance: return invertSort(Double.compare(e1.distanceTo(mc.player), e2.distanceTo(mc.player)));
-            case LowestHealth:    return sortHealth(e1, e2);
-            case HighestHealth:   return invertSort(sortHealth(e1, e2));
-            default:              return 0;
+            case LowestDistance:
+                return Double.compare(e1.distanceTo(mc.player), e2.distanceTo(mc.player));
+            case HighestDistance:
+                return invertSort(Double.compare(e1.distanceTo(mc.player), e2.distanceTo(mc.player)));
+            case LowestHealth:
+                return sortHealth(e1, e2);
+            case HighestHealth:
+                return invertSort(sortHealth(e1, e2));
+            default:
+                return 0;
         }
     }
 

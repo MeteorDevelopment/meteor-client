@@ -14,7 +14,6 @@ import net.minecraft.client.util.Session;
 public class CrackedAccount extends Account<CrackedAccount> {
     public CrackedAccount(String name) {
         super(AccountType.Cracked, name);
-
     }
 
     @Override

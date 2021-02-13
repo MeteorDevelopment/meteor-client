@@ -33,13 +33,18 @@ import java.util.List;
 
 @Mixin(BookEditScreen.class)
 public abstract class BookEditScreenMixin extends Screen {
-    @Shadow @Final private List<String> pages;
+    @Shadow
+    @Final
+    private List<String> pages;
 
-    @Shadow private int currentPage;
+    @Shadow
+    private int currentPage;
 
-    @Shadow private boolean dirty;
+    @Shadow
+    private boolean dirty;
 
-    @Shadow protected abstract void updateButtons();
+    @Shadow
+    protected abstract void updateButtons();
 
     public BookEditScreenMixin(Text title) {
         super(title);
@@ -88,7 +93,7 @@ public abstract class BookEditScreenMixin extends Screen {
                 ListTag listTag = tag.getList("pages", 8).copy();
 
                 pages.clear();
-                for(int i = 0; i < listTag.size(); ++i) {
+                for (int i = 0; i < listTag.size(); ++i) {
                     pages.add(listTag.getString(i));
                 }
 

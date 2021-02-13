@@ -93,7 +93,8 @@ public class TotemPopNotifier extends Module {
         if (p.getStatus() != 35) return;
 
         Entity entity = p.getEntity(mc.world);
-        if (entity == null || (entity.equals(mc.player) && ignoreOwn.get()) || (!Friends.get().attack((PlayerEntity) entity) && ignoreFriend.get())) return;
+        if (entity == null || (entity.equals(mc.player) && ignoreOwn.get()) || (!Friends.get().attack((PlayerEntity) entity) && ignoreFriend.get()))
+            return;
 
         synchronized (totemPops) {
             int pops = totemPops.getOrDefault(entity.getUuid(), 0);
@@ -102,7 +103,8 @@ public class TotemPopNotifier extends Module {
             String msg = popMessage.get().replace("{player}", entity.getName().getString()).replace("{pops}", String.valueOf(pops)).replace("{totems}", (pops == 1 ? "totem" : "totems"));
 
             if (announce.get()) mc.player.sendChatMessage(msg);
-            else ChatUtils.info(getChatId(entity), "(highlight)%s (default)popped (highlight)%d (default)%s.", entity.getName().getString(), pops, pops == 1 ? "totem" : "totems");
+            else
+                ChatUtils.info(getChatId(entity), "(highlight)%s (default)popped (highlight)%d (default)%s.", entity.getName().getString(), pops, pops == 1 ? "totem" : "totems");
         }
     }
 
@@ -118,7 +120,8 @@ public class TotemPopNotifier extends Module {
                     String msg = deathMessage.get().replace("{player}", player.getName().getString()).replace("{pops}", String.valueOf(pops)).replace("{totems}", (pops == 1 ? "totem" : "totems"));
 
                     if (announce.get()) mc.player.sendChatMessage(msg);
-                    else ChatUtils.info(getChatId(player), "(highlight)%s (default)died after popping (highlight)%d (default)%s.", player.getName().getString(), pops, pops == 1 ? "totem" : "totems");
+                    else
+                        ChatUtils.info(getChatId(player), "(highlight)%s (default)died after popping (highlight)%d (default)%s.", player.getName().getString(), pops, pops == 1 ? "totem" : "totems");
 
                     chatIds.removeInt(player.getUuid());
                 }

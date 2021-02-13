@@ -55,7 +55,7 @@ public class AirJump extends Module {
             mc.player.jump();
             level = mc.player.getBlockPos().getY();
         }
-        if ((event.action == KeyAction.Press || (event.action == KeyAction.Repeat && onHold.get())) && mc.options.keySneak.matchesKey(event.key, 0)){
+        if ((event.action == KeyAction.Press || (event.action == KeyAction.Repeat && onHold.get())) && mc.options.keySneak.matchesKey(event.key, 0)) {
             level -= 1;
         }
     }
@@ -63,7 +63,7 @@ public class AirJump extends Module {
     @EventHandler
     private void onTick(TickEvent.Post event) {
         if (Modules.get().isActive(Freecam.class) || (!onGround.get() && mc.player.isOnGround())) return;
-        if (maintainY.get() && mc.player.getBlockPos().getY() == level){
+        if (maintainY.get() && mc.player.getBlockPos().getY() == level) {
             mc.player.jump();
         }
     }

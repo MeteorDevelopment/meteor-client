@@ -30,7 +30,6 @@ public class SwarmInfinityMiner extends Command {
         if (!infinityMiner.isActive()) infinityMiner.toggle();
     }
 
-
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.then(literal("im").executes(context -> {

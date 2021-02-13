@@ -23,7 +23,7 @@ import net.minecraft.item.Items;
 import net.minecraft.util.Hand;
 
 public class MiddleClickExtra extends Module {
-    public enum Mode{
+    public enum Mode {
         Pearl(Items.ENDER_PEARL),
         Bow(Items.ARROW),
         Gap(Items.GOLDEN_APPLE),
@@ -32,10 +32,12 @@ public class MiddleClickExtra extends Module {
 
         private final Item item;
 
-        Mode(Item item){this.item = item;}
+        Mode(Item item) {
+            this.item = item;
+        }
     }
 
-    public MiddleClickExtra(){
+    public MiddleClickExtra() {
         super(Category.Player, "middle-click-extra", "Lets you use items when you middle click. Works the same as Middle Click Friend.");
     }
 
@@ -64,7 +66,7 @@ public class MiddleClickExtra extends Module {
     @EventHandler
     private void onMiddleMouse(MiddleMouseButtonEvent event) {
         InvUtils.FindItemResult result;
-        switch(mode.get()){
+        switch (mode.get()) {
             case Pearl: {
                 result = InvUtils.findItemWithCount(Items.ENDER_PEARL);
                 if (result.slot <= 8 && result.slot != -1) {
@@ -76,7 +78,8 @@ public class MiddleClickExtra extends Module {
                     ChatUtils.moduleWarning(this, "Unable to find specified item.");
                 }
                 break;
-            }case Gap: {
+            }
+            case Gap: {
                 result = InvUtils.findItemWithCount(Items.GOLDEN_APPLE);
                 if (result.slot <= 8 && result.slot != -1) {
                     preSlot = mc.player.inventory.selectedSlot;
@@ -84,11 +87,12 @@ public class MiddleClickExtra extends Module {
                     preCount = result.count;
                     mc.options.keyUse.setPressed(true);
                     wasUsing = true;
-                } else if(notify.get()) {
+                } else if (notify.get()) {
                     ChatUtils.moduleWarning(this, "Unable to find specified item.");
                 }
                 break;
-            }case EGap:{
+            }
+            case EGap: {
                 result = InvUtils.findItemWithCount(Items.ENCHANTED_GOLDEN_APPLE);
                 if (result.slot <= 8 && result.slot != -1) {
                     preSlot = mc.player.inventory.selectedSlot;
@@ -96,11 +100,12 @@ public class MiddleClickExtra extends Module {
                     preCount = result.count;
                     mc.options.keyUse.setPressed(true);
                     wasUsing = true;
-                } else if(notify.get()) {
+                } else if (notify.get()) {
                     ChatUtils.moduleWarning(this, "Unable to find selected item.");
                 }
                 break;
-            }case Bow:{
+            }
+            case Bow: {
                 result = InvUtils.findItemWithCount(Items.BOW);
                 if (result.slot <= 8 && result.slot != -1) {
                     preSlot = mc.player.inventory.selectedSlot;
@@ -108,11 +113,12 @@ public class MiddleClickExtra extends Module {
                     result = InvUtils.findItemWithCount(Items.ARROW);
                     preCount = result.count;
                     wasUsing = true;
-                } else if(notify.get()) {
+                } else if (notify.get()) {
                     ChatUtils.moduleWarning(this, "Unable to find specified item.");
                 }
                 break;
-            }case Rod: {
+            }
+            case Rod: {
                 result = InvUtils.findItemWithCount(Items.FISHING_ROD);
                 if (result.slot <= 8 && result.slot != -1) {
                     preSlot = mc.player.inventory.selectedSlot;
@@ -130,7 +136,7 @@ public class MiddleClickExtra extends Module {
     private void onTick(TickEvent.Post event) {
         if (!wasUsing) return;
 
-        if (preCount > InvUtils.findItemWithCount(mode.get().item).count || (mc.player.getMainHandStack().getItem() != mode.get().item && (mode.get() == Mode.Bow && mc.player.getMainHandStack().getItem() != Items.BOW))){
+        if (preCount > InvUtils.findItemWithCount(mode.get().item).count || (mc.player.getMainHandStack().getItem() != mode.get().item && (mode.get() == Mode.Bow && mc.player.getMainHandStack().getItem() != Items.BOW))) {
             mc.options.keyUse.setPressed(false);
             mc.player.inventory.selectedSlot = preSlot;
             wasUsing = false;

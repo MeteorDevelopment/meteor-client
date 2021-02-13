@@ -20,6 +20,7 @@ import minegame159.meteorclient.modules.combat.KillAura;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 
 import java.util.ArrayList;
@@ -208,7 +209,7 @@ public class AutoEat extends Module {
         for (int i = 0; i < 9; i++) {
             // Skip if item isn't food
             Item item = mc.player.inventory.getStack(i).getItem();
-            if (!item.isFood()) continue;
+            if (!item.isFood() || item.getFoodComponent() == null) continue;
 
             // Check if hunger value is better
             int hunger = item.getFoodComponent().getHunger();

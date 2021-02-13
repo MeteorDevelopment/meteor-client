@@ -23,7 +23,7 @@ import net.minecraft.util.Hand;
 
 public class AutoShearer extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    
+
     private final Setting<Double> distance = sgGeneral.add(new DoubleSetting.Builder()
             .name("distance")
             .description("The maximum distance the sheep have to be to be sheared.")
@@ -64,17 +64,18 @@ public class AutoShearer extends Module {
         entity = null;
 
         for (Entity entity : mc.world.getEntities()) {
-            if (!(entity instanceof SheepEntity) || ((SheepEntity) entity).isSheared() || ((SheepEntity) entity).isBaby() || mc.player.distanceTo(entity) > distance.get()) continue;
+            if (!(entity instanceof SheepEntity) || ((SheepEntity) entity).isSheared() || ((SheepEntity) entity).isBaby() || mc.player.distanceTo(entity) > distance.get())
+                continue;
 
             boolean findNewShears = false;
             if (mc.player.inventory.getMainHandStack().getItem() instanceof ShearsItem) {
-                if (antiBreak.get() && mc.player.inventory.getMainHandStack().getDamage() >= mc.player.inventory.getMainHandStack().getMaxDamage() - 1) findNewShears = true;
-            }
-            else if (mc.player.inventory.offHand.get(0).getItem() instanceof ShearsItem) {
-                if (antiBreak.get() && mc.player.inventory.offHand.get(0).getDamage() >= mc.player.inventory.offHand.get(0).getMaxDamage() - 1) findNewShears = true;
+                if (antiBreak.get() && mc.player.inventory.getMainHandStack().getDamage() >= mc.player.inventory.getMainHandStack().getMaxDamage() - 1)
+                    findNewShears = true;
+            } else if (mc.player.inventory.offHand.get(0).getItem() instanceof ShearsItem) {
+                if (antiBreak.get() && mc.player.inventory.offHand.get(0).getDamage() >= mc.player.inventory.offHand.get(0).getMaxDamage() - 1)
+                    findNewShears = true;
                 else offHand = true;
-            }
-            else {
+            } else {
                 findNewShears = true;
             }
 
@@ -91,7 +92,8 @@ public class AutoShearer extends Module {
             if (foundShears) {
                 this.entity = entity;
 
-                if (rotate.get()) Rotations.rotate(Rotations.getYaw(entity), Rotations.getPitch(entity), -100, this::interact);
+                if (rotate.get())
+                    Rotations.rotate(Rotations.getYaw(entity), Rotations.getPitch(entity), -100, this::interact);
                 else interact();
 
                 return;

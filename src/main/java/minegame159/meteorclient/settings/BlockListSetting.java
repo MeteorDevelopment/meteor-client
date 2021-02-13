@@ -52,7 +52,8 @@ public class BlockListSetting extends Setting<List<Block>> {
                 else id = new Identifier("minecraft", val);
                 if (Registry.BLOCK.containsId(id)) blocks.add(Registry.BLOCK.get(id));
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
 
         return blocks;
     }

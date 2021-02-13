@@ -33,7 +33,7 @@ public class EntityRenderDispatcherMixin {
         if ((noRender.noItems() && entity instanceof ItemEntity)
                 || (noRender.noFallingBlocks() && entity instanceof FallingBlockEntity)
                 || (noRender.noArmorStands() && entity instanceof ArmorStandEntity)
-                || ( noRender.noXpOrbs() && entity instanceof ExperienceOrbEntity)
+                || (noRender.noXpOrbs() && entity instanceof ExperienceOrbEntity)
         ) info.cancel();
     }
 

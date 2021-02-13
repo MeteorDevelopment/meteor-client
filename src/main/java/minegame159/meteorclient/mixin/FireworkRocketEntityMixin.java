@@ -18,11 +18,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(FireworkRocketEntity.class)
 public abstract class FireworkRocketEntityMixin {
-    @Shadow protected abstract void explodeAndRemove();
+    @Shadow
+    protected abstract void explodeAndRemove();
 
-    @Shadow private int life;
+    @Shadow
+    private int life;
 
-    @Shadow private int lifeTime;
+    @Shadow
+    private int lifeTime;
 
     @Inject(method = "tick", at = @At("TAIL"))
     private void onTick(CallbackInfo info) {

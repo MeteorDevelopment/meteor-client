@@ -16,6 +16,7 @@ import net.minecraft.util.math.Vec3d;
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
 public class HClip extends Command {
+
     public HClip() {
         super("hclip", "Lets you clip through blocks horizontally.");
     }

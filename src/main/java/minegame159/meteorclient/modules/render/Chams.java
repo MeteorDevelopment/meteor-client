@@ -24,7 +24,7 @@ public class Chams extends Module {
     private final SettingGroup sgColors = settings.createGroup("Colors");
 
     // General
-    
+
     private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
             .name("entities")
             .description("Select entities to show through walls.")
@@ -107,7 +107,7 @@ public class Chams extends Module {
 
     @EventHandler
     private void onPreRender(RenderLivingEntityEvent.Pre event) {
-        if(shouldRender(event.entity) && throughWalls.get()) {
+        if (shouldRender(event.entity) && throughWalls.get()) {
             GL11.glEnable(GL11.GL_POLYGON_OFFSET_FILL);
             GL11.glPolygonOffset(1.0f, -1000000.0f);
         }
@@ -115,7 +115,7 @@ public class Chams extends Module {
 
     @EventHandler
     private void onPostRender(RenderLivingEntityEvent.Post event) {
-        if(shouldRender(event.entity) && throughWalls.get()) {
+        if (shouldRender(event.entity) && throughWalls.get()) {
             GL11.glPolygonOffset(1.0f, 1000000.0f);
             GL11.glDisable(GL11.GL_POLYGON_OFFSET_FILL);
         }
@@ -125,6 +125,6 @@ public class Chams extends Module {
     private void onInvokeRender(RenderLivingEntityEvent.Invoke event) {
         if (shouldRender(event.entity) && colored.get()) event.setCancelled(true);
         Color color = EntityUtils.getEntityColor(event.entity, playersColor.get(), animalsColor.get(), waterAnimalsColor.get(), monstersColor.get(), ambientColor.get(), miscColor.get(), useNameColor.get());
-        event.model.render(event.matrices, event.vertices, event.light, event.overlay, (float)color.r/255f, (float)color.g/255f, (float)color.b/255f, (float)color.a/255f);
+        event.model.render(event.matrices, event.vertices, event.light, event.overlay, (float) color.r / 255f, (float) color.g / 255f, (float) color.b / 255f, (float) color.a / 255f);
     }
 }

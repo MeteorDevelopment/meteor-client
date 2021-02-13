@@ -46,7 +46,7 @@ public class Trajectories extends Module {
             .defaultValue(new SettingColor(255, 150, 0, 35))
             .build()
     );
-    
+
     private final Setting<SettingColor> lineColor = sgGeneral.add(new ColorSetting.Builder()
             .name("line-color")
             .description("The line color.")
@@ -78,13 +78,16 @@ public class Trajectories extends Module {
 
         Vec3 lastPoint = null;
         for (Vec3 point : path) {
-            if (lastPoint != null) Renderer.LINES.line(lastPoint.x, lastPoint.y, lastPoint.z, point.x, point.y, point.z, lineColor.get());
+            if (lastPoint != null)
+                Renderer.LINES.line(lastPoint.x, lastPoint.y, lastPoint.z, point.x, point.y, point.z, lineColor.get());
             lastPoint = point;
         }
 
         if (hitQuad) {
-            if (hitQuadHorizontal) Renderer.quadWithLinesHorizontal(Renderer.NORMAL, Renderer.LINES, hitQuadX1, hitQuadY1, hitQuadZ1, 0.5, sideColor.get(), lineColor.get(), shapeMode.get());
-            else Renderer.quadWithLinesVertical(Renderer.NORMAL, Renderer.LINES, hitQuadX1, hitQuadY1, hitQuadZ1, hitQuadX2, hitQuadY2, hitQuadZ2, sideColor.get(), lineColor.get(), shapeMode.get());
+            if (hitQuadHorizontal)
+                Renderer.quadWithLinesHorizontal(Renderer.NORMAL, Renderer.LINES, hitQuadX1, hitQuadY1, hitQuadZ1, 0.5, sideColor.get(), lineColor.get(), shapeMode.get());
+            else
+                Renderer.quadWithLinesVertical(Renderer.NORMAL, Renderer.LINES, hitQuadX1, hitQuadY1, hitQuadZ1, hitQuadX2, hitQuadY2, hitQuadZ2, sideColor.get(), lineColor.get(), shapeMode.get());
         }
     }
 
@@ -117,11 +120,11 @@ public class Trajectories extends Module {
         velocityZ /= velocity;
 
         // Apply bow charge
-        if(item instanceof RangedWeaponItem) {
+        if (item instanceof RangedWeaponItem) {
             float bowPower = (72000 - mc.player.getItemUseTimeLeft()) / 20.0f;
             bowPower = (bowPower * bowPower + bowPower * 2.0f) / 3.0f;
 
-            if(bowPower > 1 || bowPower <= 0.1F) bowPower = 1;
+            if (bowPower > 1 || bowPower <= 0.1F) bowPower = 1;
 
             bowPower *= 3F;
             velocityX *= bowPower;
@@ -204,10 +207,10 @@ public class Trajectories extends Module {
     }
 
     private double getProjectileGravity(Item item) {
-        if(item instanceof BowItem || item instanceof CrossbowItem) return 0.05;
-        if(item instanceof PotionItem) return 0.4;
-        if(item instanceof FishingRodItem) return 0.15;
-        if(item instanceof TridentItem) return 0.015;
+        if (item instanceof BowItem || item instanceof CrossbowItem) return 0.05;
+        if (item instanceof PotionItem) return 0.4;
+        if (item instanceof FishingRodItem) return 0.15;
+        if (item instanceof TridentItem) return 0.015;
 
         return 0.03;
     }

@@ -129,7 +129,7 @@ public class MeshBuilder {
     }
 
     public void gradientQuad(double x, double y, double width, double height, Color startColor, Color endColor) {
-        gradientQuad(x, y, 0, x + width, y, 0, x + width, y + height, 0, x, y + height, 0,startColor, endColor);
+        gradientQuad(x, y, 0, x + width, y, 0, x + width, y + height, 0, x, y + height, 0, startColor, endColor);
     }
 
     public void texQuad(double x, double y, double width, double height, double srcX, double srcY, double srcWidth, double srcHeight, Color color1, Color color2, Color color3, Color color4) {
@@ -190,7 +190,7 @@ public class MeshBuilder {
     }
 
     public void boxEdges(double x, double y, double width, double height, Color color) {
-        boxEdges(x,y, 0, x + width, y + height, 0, color, 0);
+        boxEdges(x, y, 0, x + width, y + height, 0, color, 0);
     }
 
     public void gradientVerticalBox(double x, double y, double z, double x2, double z2, double height, Color startColor, Color endColor, boolean reverse) {

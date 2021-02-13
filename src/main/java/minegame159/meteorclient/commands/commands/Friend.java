@@ -26,6 +26,7 @@ import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 import static net.minecraft.command.CommandSource.suggestMatching;
 
 public class Friend extends Command {
+
     public Friend() {
         super("friend", "Manages friends.");
     }
@@ -38,9 +39,9 @@ public class Friend extends Command {
                             minegame159.meteorclient.friends.Friend friend =
                                     context.getArgument("friend", minegame159.meteorclient.friends.Friend.class);
                             if (Friends.get().add(friend)) {
-                                ChatUtils.prefixInfo("Friends","Added (highlight)%s (default)to friends.", friend.name);
+                                ChatUtils.prefixInfo("Friends", "Added (highlight)%s (default)to friends.", friend.name);
                             } else {
-                                ChatUtils.prefixError("Friends","That person is already your friend.");
+                                ChatUtils.prefixError("Friends", "That person is already your friend.");
                             }
 
                             return SINGLE_SUCCESS;
@@ -50,7 +51,7 @@ public class Friend extends Command {
                             minegame159.meteorclient.friends.Friend friend =
                                     context.getArgument("friend", minegame159.meteorclient.friends.Friend.class);
                             if (Friends.get().remove(friend)) {
-                                ChatUtils.prefixInfo("Friends","Removed (highlight)%s (default)from friends.", friend.name);
+                                ChatUtils.prefixInfo("Friends", "Removed (highlight)%s (default)from friends.", friend.name);
                             } else {
                                 ChatUtils.prefixError("Friends", "That person is not your friend.");
                             }
@@ -58,7 +59,7 @@ public class Friend extends Command {
                             return SINGLE_SUCCESS;
                         })))
                 .then(literal("list").executes(context -> {
-                    ChatUtils.prefixInfo("Friends","You have (highlight)%d (default)friends:", Friends.get().count());
+                    ChatUtils.prefixInfo("Friends", "You have (highlight)%d (default)friends:", Friends.get().count());
 
                     for (minegame159.meteorclient.friends.Friend friend : Friends.get()) {
                         ChatUtils.info(" - (highlight)%s", friend.name);
@@ -91,5 +92,4 @@ public class Friend extends Command {
             return Arrays.asList("086", "seasnail8169", "squidoodly");
         }
     }
-
 }

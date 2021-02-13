@@ -9,7 +9,6 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.fluid.Fluid;
 
 public class CanWalkOnFluidEvent {
-
     private static final CanWalkOnFluidEvent INSTANCE = new CanWalkOnFluidEvent();
 
     public LivingEntity entity;

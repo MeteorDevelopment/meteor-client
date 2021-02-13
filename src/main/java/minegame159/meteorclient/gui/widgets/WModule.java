@@ -61,8 +61,7 @@ public class WModule extends WPressable {
         if (module.isActive()) {
             animationMultiplier1 = 1;
             animationMultiplier2 = 1;
-        }
-        else {
+        } else {
             animationMultiplier1 = -1;
             animationMultiplier2 = -1;
         }
@@ -78,7 +77,7 @@ public class WModule extends WPressable {
         animationProgress2 += delta / 10 * animationMultiplier2;
         animationProgress2 = Utils.clamp(animationProgress2, 0, 1);
 
-        if (animationProgress1 > 0  || animationProgress2 > 0) {
+        if (animationProgress1 > 0 || animationProgress2 > 0) {
             renderer.quad(Region.FULL, x, y, width * animationProgress1, height, GuiConfig.get().moduleBackground);
             renderer.quad(Region.FULL, x, y + height * (1 - animationProgress2), 2 * GuiConfig.get().guiScale, height * animationProgress2, GuiConfig.get().accent);
         }
@@ -90,7 +89,7 @@ public class WModule extends WPressable {
                 nameX += GuiConfig.get().moduleNameAlignmentPadding;
                 break;
             case Center:
-                nameX += + width / 2 - titleWidth / 2;
+                nameX += +width / 2 - titleWidth / 2;
                 break;
             case Right:
                 nameX = (nameX + width - titleWidth) - GuiConfig.get().moduleNameAlignmentPadding;

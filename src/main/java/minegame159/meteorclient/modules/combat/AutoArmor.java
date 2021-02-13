@@ -35,7 +35,7 @@ import java.util.List;
 
 @InvUtils.Priority(priority = Integer.MAX_VALUE - 1)
 public class AutoArmor extends Module {
-    public enum Prot{
+    public enum Prot {
         Protection(Enchantments.PROTECTION),
         Blast_Protection(Enchantments.BLAST_PROTECTION),
         Fire_Protection(Enchantments.FIRE_PROTECTION),
@@ -48,7 +48,9 @@ public class AutoArmor extends Module {
         }
     }
 
-    public AutoArmor(){super(Category.Combat, "auto-armor", "Automatically manages and equips your armor for you.");}
+    public AutoArmor() {
+        super(Category.Combat, "auto-armor", "Automatically manages and equips your armor for you.");
+    }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgDelay = settings.createGroup("Delay");
@@ -185,7 +187,7 @@ public class AutoArmor extends Module {
             didSkip = true;
         }
         if (delayLeft > 0) {
-            delayLeft --;
+            delayLeft--;
             return;
         } else {
             delayLeft = delay.get();
@@ -207,7 +209,8 @@ public class AutoArmor extends Module {
             currentToughness = 0;
             currentUnbreaking = 0;
             currentMending = 0;
-            if ((ignoreElytra.get() || Modules.get().isActive(ChestSwap.class)) && itemStack.getItem() == Items.ELYTRA) continue;
+            if ((ignoreElytra.get() || Modules.get().isActive(ChestSwap.class)) && itemStack.getItem() == Items.ELYTRA)
+                continue;
             if (EnchantmentHelper.hasBindingCurse(itemStack)) continue;
             if (itemStack.getItem() instanceof ArmorItem) {
                 if (a == 1 && bProtLegs.get()) {
@@ -241,7 +244,7 @@ public class AutoArmor extends Module {
         }
     }
 
-    private int getItemScore(ItemStack itemStack){
+    private int getItemScore(ItemStack itemStack) {
         int score = 0;
         if (antiBreak.get() && (itemStack.getMaxDamage() - itemStack.getDamage()) <= breakDurability.get()) return 0;
         for (Enchantment ench : avoidEnch.get()) if (EnchantmentHelper.getLevel(ench, itemStack) > 0) return -10;
@@ -253,7 +256,8 @@ public class AutoArmor extends Module {
         score += 2 * (((ArmorItem) itemStack.getItem()).getProtection() - currentArmour);
         score += 2 * (((ArmorItem) itemStack.getItem()).method_26353() - currentToughness);
         score += EnchantmentHelper.getLevel(Enchantments.UNBREAKING, itemStack) - currentUnbreaking;
-        if (preferMending.get() && (EnchantmentHelper.getLevel(Enchantments.MENDING, itemStack) - currentMending) > 0) score += weight.get();
+        if (preferMending.get() && (EnchantmentHelper.getLevel(Enchantments.MENDING, itemStack) - currentMending) > 0)
+            score += weight.get();
         return score;
     }
 

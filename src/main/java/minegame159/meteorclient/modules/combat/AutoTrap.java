@@ -129,7 +129,7 @@ public class AutoTrap extends Module {
     private boolean placed;
     private int delay;
 
-    public AutoTrap(){
+    public AutoTrap() {
         super(Category.Combat, "auto-trap", "Traps people in an obsidian box to prevent them from moving.");
     }
 
@@ -180,7 +180,8 @@ public class AutoTrap extends Module {
     @EventHandler
     private void onRender(RenderEvent event) {
         if (!render.get() || placePositions.isEmpty()) return;
-        for (BlockPos pos : placePositions) Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, pos, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+        for (BlockPos pos : placePositions)
+            Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, pos, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
     }
 
     private void findPlacePos(PlayerEntity target) {
@@ -226,11 +227,12 @@ public class AutoTrap extends Module {
 
 
     private void add(BlockPos blockPos) {
-        if (!placePositions.contains(blockPos) && mc.world.getBlockState(blockPos).getMaterial().isReplaceable() && mc.world.canPlace(Blocks.OBSIDIAN.getDefaultState(), blockPos, ShapeContext.absent())) placePositions.add(blockPos);
+        if (!placePositions.contains(blockPos) && mc.world.getBlockState(blockPos).getMaterial().isReplaceable() && mc.world.canPlace(Blocks.OBSIDIAN.getDefaultState(), blockPos, ShapeContext.absent()))
+            placePositions.add(blockPos);
     }
 
     private PlayerEntity findTarget() {
-        for (PlayerEntity player : mc.world.getPlayers()){
+        for (PlayerEntity player : mc.world.getPlayers()) {
             if (player == mc.player || !Friends.get().attack(player) || !player.isAlive()) continue;
             if (target == null) target = player;
             else if (mc.player.distanceTo(player) < mc.player.distanceTo(target)) target = player;

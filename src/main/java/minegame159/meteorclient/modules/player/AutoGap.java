@@ -138,8 +138,8 @@ public class AutoGap extends Module {
                     int slot = findSlot();
 
                     // If no valid slot was found then stop eating
-                    if (slot == -1) {
-                        stopEating();
+        if (slot == -1)  {
+            stopEating();
                         return;
                     }
                     // Otherwise change to the new slot
@@ -240,8 +240,7 @@ public class AutoGap extends Module {
 
     private boolean shouldEat() {
         requiresEGap = false;
-
-        if (always.get()) return true;
+            if (always.get()) return true;
         if (shouldEatPotions()) return true;
         return shouldEatHealth();
     }
@@ -253,7 +252,8 @@ public class AutoGap extends Module {
         if (potionsRegeneration.get() && !effects.containsKey(StatusEffects.REGENERATION)) return true;
 
         // Fire resistance
-        if (potionsFireResistance.get() && !effects.containsKey(StatusEffects.FIRE_RESISTANCE)) {
+        if (potionsFireResistance.get() && !effects.containsKey(StatusEffects.FIRE_RESISTANCE))
+               {
             requiresEGap = true;
             return true;
         }
@@ -279,10 +279,8 @@ public class AutoGap extends Module {
         if (requiresEGap) preferEGap = true;
 
         int slot = -1;
-        Item currentItem = null;
-
-        for (int i = 0; i < 9; i++) {
-            // Skip if item stack is empty
+        Item currentItem = null;    for (int i = 0; i < 9; i++) {
+               // Skip if item stack is empty
             ItemStack stack = mc.player.inventory.getStack(i);
             if (stack.isEmpty()) continue;
 
@@ -290,9 +288,8 @@ public class AutoGap extends Module {
             if (isNotGapOrEGap(stack)) continue;
             Item item = stack.getItem();
 
-            // If this is the first apple found then set it without looking at preferEGap setting
-            if (currentItem == null) {
-                slot = i;
+            // If this is the first apple found then set it without looking at preferEGap setting if (currentItem == null) {
+                    slot = i;
                 currentItem = item;
             }
             else {

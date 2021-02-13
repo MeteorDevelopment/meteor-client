@@ -23,6 +23,7 @@ public class AntiFriendHit extends Module {
 
     @EventHandler
     private void onAttackEntity(AttackEntityEvent event) {
-        if (event.entity instanceof PlayerEntity && Modules.get().isActive(AntiFriendHit.class) && !Friends.get().attack((PlayerEntity) event.entity)) event.cancel();
+        if (event.entity instanceof PlayerEntity && Modules.get().isActive(AntiFriendHit.class) && !Friends.get().attack((PlayerEntity) event.entity))
+            event.cancel();
     }
 }

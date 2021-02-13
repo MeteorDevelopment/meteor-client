@@ -8,7 +8,7 @@
 ![GitHub contributors](https://img.shields.io/github/contributors/MeteorDevelopment/meteor-client)
 ![CircleCI](https://circleci.com/gh/MeteorDevelopment/meteor-client/tree/master.svg?style=svg)
 
-Minecraft fabric utility mod for the latest Minecraft version.  
+Minecraft Fabric utility mod for the latest Minecraft version.  
 Join our [Discord](https://discord.gg/bBGQZvd).
 
 ## Installation

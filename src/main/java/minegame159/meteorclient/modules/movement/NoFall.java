@@ -21,12 +21,12 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.Direction;
 
 public class NoFall extends Module {
-    public enum Mode{
+    public enum Mode {
         Packet,
         AirPlace
     }
 
-    public enum PlaceMode{
+    public enum PlaceMode {
         BeforeDeath,
         BeforeDamage
     }
@@ -81,21 +81,21 @@ public class NoFall extends Module {
                         }
                     }
                 }
-            } else if (mode.get() == Mode.Packet){
-                if(((IPlayerMoveC2SPacket) event.packet).getTag() != 1337) {
+            } else if (mode.get() == Mode.Packet) {
+                if (((IPlayerMoveC2SPacket) event.packet).getTag() != 1337) {
                     ((PlayerMoveC2SPacketAccessor) event.packet).setOnGround(true);
                 }
             } else if ((placeMode.get() == PlaceMode.BeforeDamage && mc.player.fallDistance > 2)
-                    || (placeMode.get() == PlaceMode.BeforeDeath && ((mc.player.getHealth() + mc.player.getAbsorptionAmount()) < mc.player.fallDistance))){
+                    || (placeMode.get() == PlaceMode.BeforeDeath && ((mc.player.getHealth() + mc.player.getAbsorptionAmount()) < mc.player.fallDistance))) {
                 int slot = -1;
                 int preSlot;
-                for (int i = 0; i < 9; i++){
-                    if (mc.player.inventory.getStack(i).getItem() instanceof BlockItem){
+                for (int i = 0; i < 9; i++) {
+                    if (mc.player.inventory.getStack(i).getItem() instanceof BlockItem) {
                         slot = i;
                         break;
                     }
                 }
-                if (slot != -1){
+                if (slot != -1) {
                     preSlot = mc.player.inventory.selectedSlot;
                     mc.player.inventory.selectedSlot = slot;
                     mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos().add(0, -1, 0), Direction.UP, mc.player.getBlockPos().down(), false));

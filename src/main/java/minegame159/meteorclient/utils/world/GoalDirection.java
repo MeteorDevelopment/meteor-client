@@ -23,7 +23,7 @@ public class GoalDirection implements Goal {
     }
 
     public void recalculate(Vec3d origin) {
-        float theta = (float)Math.toRadians(yaw);
+        float theta = (float) Math.toRadians(yaw);
         x = (int) Math.floor(origin.x - (double) MathHelper.sin(theta) * 100);
         z = (int) Math.floor(origin.z + (double) MathHelper.cos(theta) * 100);
     }

@@ -47,7 +47,8 @@ public class EXPThrower extends Module {
             int set = 0;
 
             for (int i = 0; i < 4; i++) {
-                if (!mc.player.inventory.armor.get(i).isEmpty() && EnchantmentHelper.getLevel(Enchantments.MENDING, mc.player.inventory.getArmorStack(i)) == 1) set++;
+                if (!mc.player.inventory.armor.get(i).isEmpty() && EnchantmentHelper.getLevel(Enchantments.MENDING, mc.player.inventory.getArmorStack(i)) == 1)
+                    set++;
                 if (!mc.player.inventory.armor.get(i).isDamaged()) count++;
             }
             if (count == set && set != 0) {

@@ -175,14 +175,17 @@ public class Nuker extends Module {
             if (!lastBlockPos.equals(pos)) {
                 // Im not proud of this but it works so shut the fuck up
                 try {
-                    if (rotate.get()) Rotations.rotate(Rotations.getYaw(pos), Rotations.getPitch(pos), -50, () -> cancelMine(pos));
+                    if (rotate.get())
+                        Rotations.rotate(Rotations.getYaw(pos), Rotations.getPitch(pos), -50, () -> cancelMine(pos));
                     else cancelMine(pos);
-                } catch (Exception ignored) {}
+                } catch (Exception ignored) {
+                }
             }
 
             // Break block
             lastBlockPos.set(pos);
-            if (rotate.get()) Rotations.rotate(Rotations.getYaw(pos), Rotations.getPitch(pos), -50, () -> normalMine(pos));
+            if (rotate.get())
+                Rotations.rotate(Rotations.getYaw(pos), Rotations.getPitch(pos), -50, () -> normalMine(pos));
             else normalMine(pos);
 
             breaking = true;

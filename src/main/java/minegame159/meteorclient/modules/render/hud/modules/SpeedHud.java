@@ -22,7 +22,7 @@ public class SpeedHud extends DoubleTextHudModule {
         double tZ = Math.abs(mc.player.getZ() - mc.player.prevZ);
         double length = Math.sqrt(tX * tX + tZ * tZ);
 
-        if (Modules.get().isActive(Timer.class)){
+        if (Modules.get().isActive(Timer.class)) {
             length *= Modules.get().get(Timer.class).getMultiplier();
         }
 

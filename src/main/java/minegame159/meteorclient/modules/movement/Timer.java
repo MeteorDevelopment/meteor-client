@@ -27,6 +27,7 @@ public class Timer extends Module {
     public Timer() {
         super(Category.Movement, "timer", "Changes the speed of everything in your game.");
     }
+
     // If you put your timer to 0.1 you're a dumbass.
     public double getMultiplier() {
         return isActive() ? speed.get() : 1;

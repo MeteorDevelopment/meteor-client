@@ -100,10 +100,14 @@ public class ArmorHud extends HudModule {
     private ItemStack getItem(int i) {
         if (mc.player == null || mc.currentScreen instanceof HudEditorScreen) {
             switch (i) {
-                default: return Items.NETHERITE_BOOTS.getDefaultStack();
-                case 1:  return Items.NETHERITE_LEGGINGS.getDefaultStack();
-                case 2:  return Items.NETHERITE_CHESTPLATE.getDefaultStack();
-                case 3:  return Items.NETHERITE_HELMET.getDefaultStack();
+                default:
+                    return Items.NETHERITE_BOOTS.getDefaultStack();
+                case 1:
+                    return Items.NETHERITE_LEGGINGS.getDefaultStack();
+                case 2:
+                    return Items.NETHERITE_CHESTPLATE.getDefaultStack();
+                case 3:
+                    return Items.NETHERITE_HELMET.getDefaultStack();
             }
         }
         return mc.player.inventory.getArmorStack(i);

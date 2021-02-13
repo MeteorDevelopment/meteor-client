@@ -2,7 +2,6 @@
   "schemaVersion": 1,
   "id": "meteor-client",
   "version": "${version}",
-
   "name": "Meteor Client",
   "description": "Based utility mod.",
   "authors": [
@@ -16,10 +15,8 @@
     "sources": "https://github.com/MeteorDevelopment/meteor-client",
     "discord": "https://meteorclient.com/discord"
   },
-
   "license": "GPL-3.0",
   "icon": "assets/meteor-client/icon.png",
-
   "environment": "client",
   "entrypoints": {
     "client": [
@@ -30,13 +27,10 @@
     "meteor-client.mixins.json",
     "meteor-client-sodium.mixins.json"
   ],
-
   "accessWidener": "meteor-client.accesswidener",
-
   "custom": {
     "meteor-client:devbuild": "@devbuild@"
   },
-
   "depends": {
     "fabricloader": ">=0.7.4",
     "fabric": "*",

@@ -75,12 +75,13 @@ public class AirPlace extends Module {
 
     @Override
     public void onActivate() {
-        target = mc.player.getBlockPos().add(4, 2,0); //lol funni
+        target = mc.player.getBlockPos().add(4, 2, 0); //lol funni
     }
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if (!(mc.crosshairTarget instanceof BlockHitResult) || !(mc.player.getMainHandStack().getItem() instanceof BlockItem)) return;
+        if (!(mc.crosshairTarget instanceof BlockHitResult) || !(mc.player.getMainHandStack().getItem() instanceof BlockItem))
+            return;
 
         target = ((BlockHitResult) mc.crosshairTarget).getBlockPos();
 

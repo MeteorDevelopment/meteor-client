@@ -129,11 +129,11 @@ public class AutoTotem extends Module {
         return totemCountString;
     }
 
-    private void moveTotem(InvUtils.FindItemResult result){
+    private void moveTotem(InvUtils.FindItemResult result) {
         assert mc.player != null;
         boolean empty = mc.player.getOffHandStack().isEmpty();
         List<Integer> slots = new ArrayList<>();
-        if(mc.player.inventory.getCursorStack().getItem() != Items.TOTEM_OF_UNDYING) {
+        if (mc.player.inventory.getCursorStack().getItem() != Items.TOTEM_OF_UNDYING) {
             slots.add(InvUtils.invIndexToSlotId(result.slot));
         }
         slots.add(InvUtils.invIndexToSlotId(InvUtils.OFFHAND_SLOT));
@@ -141,25 +141,25 @@ public class AutoTotem extends Module {
         InvUtils.addSlots(slots, this.getClass());
     }
 
-    private double getHealthReduction(){
+    private double getHealthReduction() {
         assert mc.world != null;
         assert mc.player != null;
         double damageTaken = 0;
         if (mc.player.abilities.creativeMode) return damageTaken;
-        for(Entity entity : mc.world.getEntities()){
-            if(entity instanceof EndCrystalEntity && damageTaken < DamageCalcUtils.crystalDamage(mc.player, entity.getPos())){
+        for (Entity entity : mc.world.getEntities()) {
+            if (entity instanceof EndCrystalEntity && damageTaken < DamageCalcUtils.crystalDamage(mc.player, entity.getPos())) {
                 damageTaken = DamageCalcUtils.crystalDamage(mc.player, entity.getPos());
-            }else if(entity instanceof PlayerEntity && damageTaken < DamageCalcUtils.getSwordDamage((PlayerEntity) entity, true)){
-                if(Friends.get().notTrusted((PlayerEntity) entity) && mc.player.getPos().distanceTo(entity.getPos()) < 5){
-                    if(((PlayerEntity) entity).getActiveItem().getItem() instanceof SwordItem){
+            } else if (entity instanceof PlayerEntity && damageTaken < DamageCalcUtils.getSwordDamage((PlayerEntity) entity, true)) {
+                if (Friends.get().notTrusted((PlayerEntity) entity) && mc.player.getPos().distanceTo(entity.getPos()) < 5) {
+                    if (((PlayerEntity) entity).getActiveItem().getItem() instanceof SwordItem) {
                         damageTaken = DamageCalcUtils.getSwordDamage((PlayerEntity) entity, true);
                     }
                 }
             }
         }
-        if(!Modules.get().isActive(NoFall.class) && mc.player.fallDistance > 3){
+        if (!Modules.get().isActive(NoFall.class) && mc.player.fallDistance > 3) {
             double damage = mc.player.fallDistance * 0.5;
-            if(damage > damageTaken){
+            if (damage > damageTaken) {
                 damageTaken = damage;
             }
         }
@@ -173,20 +173,20 @@ public class AutoTotem extends Module {
         return damageTaken;
     }
 
-    private double getHealth(){
+    private double getHealth() {
         assert mc.player != null;
         return mc.player.getHealth() + mc.player.getAbsorptionAmount();
     }
 
-    public boolean getLocked(){
+    public boolean getLocked() {
         return locked;
     }
 
-    private boolean isLow(){
+    private boolean isLow() {
         return getHealth() < health.get() || (getHealth() - getHealthReduction()) < health.get();
     }
 
-    private boolean elytraMove(){
+    private boolean elytraMove() {
         return elytraHold.get() && mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() == Items.ELYTRA && mc.player.isFallFlying();
     }
 

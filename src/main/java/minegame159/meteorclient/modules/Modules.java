@@ -448,7 +448,7 @@ public class Modules extends System<Modules> {
 
     public static class ModuleRegistry extends Registry<Module> {
         public ModuleRegistry() {
-            super(RegistryKey.ofRegistry(new Identifier("meteor-client", "modules")), Lifecycle.stable());
+            super(RegistryKey.ofRegistry(new Identifier(MeteorClient.ID, "modules")), Lifecycle.stable());
         }
 
         @Nullable

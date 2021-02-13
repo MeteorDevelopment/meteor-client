@@ -115,17 +115,21 @@ public class AutoTool extends Module {
         for (int i = 0; i < 9; i++) {
             ItemStack itemStack = mc.player.inventory.getStack(i);
 
-            if (!isEffectiveOn(itemStack.getItem(), blockState) || shouldStopUsing(itemStack) || !(itemStack.getItem() instanceof ToolItem)) continue;
+            if (!isEffectiveOn(itemStack.getItem(), blockState) || shouldStopUsing(itemStack) || !(itemStack.getItem() instanceof ToolItem))
+                continue;
 
-            if (silkTouchForEnderChest.get() && blockState.getBlock() == Blocks.ENDER_CHEST && EnchantmentHelper.getLevel(Enchantments.SILK_TOUCH, itemStack) == 0) continue;
+            if (silkTouchForEnderChest.get() && blockState.getBlock() == Blocks.ENDER_CHEST && EnchantmentHelper.getLevel(Enchantments.SILK_TOUCH, itemStack) == 0)
+                continue;
 
             score += Math.round(itemStack.getMiningSpeedMultiplier(blockState));
             score += EnchantmentHelper.getLevel(Enchantments.UNBREAKING, itemStack);
             score += EnchantmentHelper.getLevel(Enchantments.EFFICIENCY, itemStack);
 
             if (preferMending.get()) score += EnchantmentHelper.getLevel(Enchantments.MENDING, itemStack);
-            if (prefer.get() == EnchantPreference.Fortune) score += EnchantmentHelper.getLevel(Enchantments.FORTUNE, itemStack);
-            if (prefer.get() == EnchantPreference.SilkTouch) score += EnchantmentHelper.getLevel(Enchantments.SILK_TOUCH, itemStack);
+            if (prefer.get() == EnchantPreference.Fortune)
+                score += EnchantmentHelper.getLevel(Enchantments.FORTUNE, itemStack);
+            if (prefer.get() == EnchantPreference.SilkTouch)
+                score += EnchantmentHelper.getLevel(Enchantments.SILK_TOUCH, itemStack);
 
             if (score > bestScore) {
                 bestScore = score;

@@ -117,13 +117,13 @@ public class AutoMountBypassDupe extends Module {
         }
 
         if (slots == -1) {
-            if (entity.hasChest() || mc.player.getMainHandStack().getItem() == Items.CHEST){
+            if (entity.hasChest() || mc.player.getMainHandStack().getItem() == Items.CHEST) {
                 mc.player.networkHandler.sendPacket(new PlayerInteractEntityC2SPacket(entity, Hand.MAIN_HAND, mc.player.isSneaking()));
             } else {
                 int slot = InvUtils.findItemWithCount(Items.CHEST).slot;
                 if (slot != -1 && slot < 9) {
-                    mc.player.inventory.selectedSlot  = slot;
-                 } else {
+                    mc.player.inventory.selectedSlot = slot;
+                } else {
                     ChatUtils.moduleError(this, "Cannot find chest in your hotbar... disabling.");
                     this.toggle();
                 }
@@ -152,7 +152,7 @@ public class AutoMountBypassDupe extends Module {
             }
         } else if (!(mc.currentScreen instanceof HorseScreen)) {
             mc.player.openRidingInventory();
-        } else if (slots > 0 ) {
+        } else if (slots > 0) {
             if (slotsToMove.isEmpty()) {
                 boolean empty = true;
                 for (int i = 2; i <= slots; i++) {
@@ -165,7 +165,8 @@ public class AutoMountBypassDupe extends Module {
                     for (int i = slots + 2; i < mc.player.currentScreenHandler.getStacks().size(); i++) {
                         if (!(mc.player.currentScreenHandler.getStacks().get(i).isEmpty())) {
                             if (mc.player.currentScreenHandler.getSlot(i).getStack().getItem() == Items.CHEST) continue;
-                            if (!(mc.player.currentScreenHandler.getSlot(i).getStack().getItem() instanceof BlockItem && ((BlockItem) mc.player.currentScreenHandler.getSlot(i).getStack().getItem()).getBlock() instanceof ShulkerBoxBlock) && shulkersOnly.get()) continue;
+                            if (!(mc.player.currentScreenHandler.getSlot(i).getStack().getItem() instanceof BlockItem && ((BlockItem) mc.player.currentScreenHandler.getSlot(i).getStack().getItem()).getBlock() instanceof ShulkerBoxBlock) && shulkersOnly.get())
+                                continue;
                             slotsToMove.add(i);
 
                             if (slotsToMove.size() >= slots) break;
@@ -186,10 +187,10 @@ public class AutoMountBypassDupe extends Module {
         }
     }
 
-    private int getInvSize(Entity e){
+    private int getInvSize(Entity e) {
         if (!(e instanceof AbstractDonkeyEntity)) return -1;
 
-        if (!((AbstractDonkeyEntity)e).hasChest()) return 0;
+        if (!((AbstractDonkeyEntity) e).hasChest()) return 0;
 
         if (e instanceof LlamaEntity) {
             return 3 * ((LlamaEntity) e).getStrength();

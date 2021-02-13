@@ -31,7 +31,7 @@ import java.io.*;
 import java.util.*;
 
 public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
-    private static final String[] BUILTIN_ICONS = { "Square", "Circle", "Triangle", "Star", "Diamond" };
+    private static final String[] BUILTIN_ICONS = {"Square", "Circle", "Triangle", "Star", "Diamond"};
 
     private static final Color BACKGROUND = new Color(0, 0, 0, 75);
     private static final Color TEXT = new Color(255, 255, 255);
@@ -133,7 +133,7 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
             double dist = Utils.distanceToCamera(x, y, z);
             if (dist > waypoint.maxVisibleDistance) continue;
             double scale = 0.01 * waypoint.scale;
-            if(dist > 8) scale *= dist / 8;
+            if (dist > 8) scale *= dist / 8;
 
             double a = 1;
             if (dist < 10) {

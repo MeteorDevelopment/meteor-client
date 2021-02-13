@@ -28,7 +28,7 @@ public class LiquidFiller extends Module {
         Both
     }
 
-    private final SettingGroup sgGeneral  = settings.getDefaultGroup();
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<PlaceIn> placeInLiquids = sgGeneral.add(new EnumSetting.Builder<PlaceIn>()
             .name("place-in")
@@ -69,7 +69,7 @@ public class LiquidFiller extends Module {
             .build()
     );
 
-    public LiquidFiller(){
+    public LiquidFiller() {
         super(Category.Misc, "liquid-filler", "Places blocks inside of liquid source blocks within range of you.");
     }
 
@@ -96,7 +96,7 @@ public class LiquidFiller extends Module {
     private int findSlot() {
         int slot = -1;
 
-        for (int i = 0; i < 9; i++){
+        for (int i = 0; i < 9; i++) {
             ItemStack block = mc.player.inventory.getStack(i);
             if ((block.getItem() instanceof BlockItem) && whitelist.get().contains(Block.getBlockFromItem(block.getItem()))) {
                 slot = i;

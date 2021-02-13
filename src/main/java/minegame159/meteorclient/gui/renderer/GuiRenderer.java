@@ -7,6 +7,7 @@ package minegame159.meteorclient.gui.renderer;
 
 import it.unimi.dsi.fastutil.Stack;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.gui.GuiConfig;
 import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.rendering.DrawMode;
@@ -30,7 +31,7 @@ import static org.lwjgl.opengl.GL11.*;
 
 public class GuiRenderer {
     private static final Color WHITE = new Color(255, 255, 255);
-    private static final Identifier TEXTURE = new Identifier("meteor-client", "gui.png");
+    private static final Identifier TEXTURE = new Identifier(MeteorClient.ID, "gui.png");
 
     private final MeshBuilder mb = new MeshBuilder();
 
@@ -68,6 +69,7 @@ public class GuiRenderer {
             cursorStyle = CursorStyle.Default;
         }
     }
+
     public void begin() {
         begin(false);
     }
@@ -123,6 +125,7 @@ public class GuiRenderer {
             Input.setCursorStyle(cursorStyle);
         }
     }
+
     public void end() {
         end(false);
     }
@@ -153,6 +156,7 @@ public class GuiRenderer {
             scissor.apply();
         }
     }
+
     public void beginScissor(double x, double y, double width, double height) {
         beginScissor(x, y, width, height, true);
     }
@@ -184,6 +188,7 @@ public class GuiRenderer {
         mb.pos(x + width, y + height, 0).color(color3).texture(region.x + region.width, region.y + region.height).endVertex();
         mb.pos(x, y + height, 0).color(color4).texture(region.x, region.y + region.height).endVertex();
     }
+
     public void quad(Region region, double x, double y, double width, double height, Color color) {
         quad(region, x, y, width, height, color, color, color, color);
     }
@@ -206,10 +211,11 @@ public class GuiRenderer {
         quad(Region.FULL, widget.x, widget.y + 2, 2, widget.height - 4, outline);
         quad(Region.FULL, widget.x + widget.width - 2, widget.y + 2, 2, widget.height - 4, outline);
     }
+
     public void background(WWidget widget, boolean pressed) {
         background(widget, widget.mouseOver, pressed);
     }
-    
+
     public void triangle(double x, double y, double size, double rotation, Color color) {
         double rad = Math.toRadians(rotation);
         double cos = Math.cos(rad);
@@ -235,12 +241,15 @@ public class GuiRenderer {
     public void text(String text, double x, double y, boolean shadow, Color color) {
         texts.add(textPool.get().set(text, x, y, shadow, color, false));
     }
+
     public double textWidth(String text, int length) {
         return TextRenderer.get().getWidth(text, length);
     }
+
     public double textWidth(String text) {
         return TextRenderer.get().getWidth(text);
     }
+
     public double textHeight() {
         return TextRenderer.get().getHeight();
     }
@@ -248,9 +257,11 @@ public class GuiRenderer {
     public void title(String text, double x, double y, Color color) {
         texts.add(textPool.get().set(text, x, y, false, color, true));
     }
+
     public double titleWidth(String text) {
         return TextRenderer.get().getWidth(text) * 1.22222222;
     }
+
     public double titleHeight() {
         return TextRenderer.get().getHeight() * 1.22222222;
     }

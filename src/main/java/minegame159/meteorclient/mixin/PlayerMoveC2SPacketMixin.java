@@ -12,11 +12,17 @@ import org.spongepowered.asm.mixin.Unique;
 
 @Mixin(PlayerMoveC2SPacket.class)
 public class PlayerMoveC2SPacketMixin implements IPlayerMoveC2SPacket {
-    @Unique private int tag;
+    @Unique
+    private int tag;
 
     @Override
-    public void setTag(int tag) { this.tag = tag; }
+    public void setTag(int tag) {
+        this.tag = tag;
+    }
 
     @Override
-    public int getTag() { return this.tag; }
+    public int getTag() {
+        return this.tag;
+    }
+
 }

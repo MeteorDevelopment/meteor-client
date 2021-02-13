@@ -48,7 +48,8 @@ public class DisconnectedScreenMixin extends ScreenMixin {
                 Utils.mc.openScreen(new ConnectScreen(new MultiplayerScreen(new TitleScreen()), Utils.mc, Modules.get().get(AutoReconnect.class).lastServerInfo));
             } else {
                 time--;
-                if (reconnectBtn != null) ((AbstractButtonWidgetAccessor) reconnectBtn).setText(new LiteralText(String.format("Reconnecting in %.1f", time / 20f)));
+                if (reconnectBtn != null)
+                    ((AbstractButtonWidgetAccessor) reconnectBtn).setText(new LiteralText(String.format("Reconnecting in %.1f", time / 20f)));
             }
         }
     }

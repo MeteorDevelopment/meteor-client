@@ -116,12 +116,13 @@ public class ActiveModulesHud extends HudModule {
 
             color = rainbow;
         }
-        
+
         renderer.text(module.title, x, y, color);
 
         if (hud.activeInfo.get()) {
             String info = module.getInfoString();
-            if (info != null) renderer.text(info, x + renderer.textWidth(module.title) + renderer.textWidth(" "), y, hud.secondaryColor.get());
+            if (info != null)
+                renderer.text(info, x + renderer.textWidth(module.title) + renderer.textWidth(" "), y, hud.secondaryColor.get());
         }
     }
 

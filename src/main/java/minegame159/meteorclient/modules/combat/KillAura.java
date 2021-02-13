@@ -229,7 +229,7 @@ public class KillAura extends Module {
             entityList.subList(1, entityList.size()).clear();
 
         if (entityList.isEmpty()) {
-            if (wasPathing){
+            if (wasPathing) {
                 BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume");
                 wasPathing = false;
             }
@@ -278,8 +278,7 @@ public class KillAura extends Module {
 
         if (rotationMode.get() == RotationMode.None) {
             hitEntity(target);
-        }
-        else {
+        } else {
             Rotations.rotate(Rotations.getYaw(target), Rotations.getPitch(target, rotationDirection.get()), () -> hitEntity(target));
         }
 
@@ -293,11 +292,15 @@ public class KillAura extends Module {
     }
 
     private boolean itemInHand() {
-        switch(onlyWith.get()){
-            case Axe:        return mc.player.getMainHandStack().getItem() instanceof AxeItem;
-            case Sword:      return mc.player.getMainHandStack().getItem() instanceof SwordItem;
-            case SwordOrAxe: return mc.player.getMainHandStack().getItem() instanceof AxeItem || mc.player.getMainHandStack().getItem() instanceof SwordItem;
-            default:         return true;
+        switch (onlyWith.get()) {
+            case Axe:
+                return mc.player.getMainHandStack().getItem() instanceof AxeItem;
+            case Sword:
+                return mc.player.getMainHandStack().getItem() instanceof SwordItem;
+            case SwordOrAxe:
+                return mc.player.getMainHandStack().getItem() instanceof AxeItem || mc.player.getMainHandStack().getItem() instanceof SwordItem;
+            default:
+                return true;
         }
     }
 

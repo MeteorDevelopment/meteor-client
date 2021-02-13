@@ -31,7 +31,7 @@ public class HttpUtils {
             return conn.getInputStream();
         } catch (SocketTimeoutException ignored) {
             return null;
-        } catch (IOException  e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
 

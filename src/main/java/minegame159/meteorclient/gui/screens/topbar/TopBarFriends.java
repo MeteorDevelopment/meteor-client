@@ -64,7 +64,7 @@ public class TopBarFriends extends TopBarWindowScreen {
         sgNeutral.add(new ColorSetting.Builder()
                 .name("color")
                 .description("The color used to show neutrals in ESP and Tracers.")
-                .defaultValue(new SettingColor(60, 240,240))
+                .defaultValue(new SettingColor(60, 240, 240))
                 .onChanged(Friends.get().neutralColor::set)
                 .onModuleActivated(colorSetting -> colorSetting.set(Friends.get().neutralColor))
                 .build()

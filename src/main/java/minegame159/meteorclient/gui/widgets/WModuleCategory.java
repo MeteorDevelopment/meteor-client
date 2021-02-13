@@ -28,11 +28,16 @@ public class WModuleCategory extends WWindow {
 
     private static GuiConfig.WindowType get(Category category) {
         switch (category) {
-            case Combat:   return GuiConfig.WindowType.Combat;
-            case Player:   return GuiConfig.WindowType.Player;
-            case Movement: return GuiConfig.WindowType.Movement;
-            case Render:   return GuiConfig.WindowType.Render;
-            case Misc:     return GuiConfig.WindowType.Misc;
+            case Combat:
+                return GuiConfig.WindowType.Combat;
+            case Player:
+                return GuiConfig.WindowType.Player;
+            case Movement:
+                return GuiConfig.WindowType.Movement;
+            case Render:
+                return GuiConfig.WindowType.Render;
+            case Misc:
+                return GuiConfig.WindowType.Misc;
         }
 
         return null;

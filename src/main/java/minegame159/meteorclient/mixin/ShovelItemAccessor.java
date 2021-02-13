@@ -15,5 +15,7 @@ import java.util.Set;
 @Mixin(ShovelItem.class)
 public interface ShovelItemAccessor {
     @Accessor("EFFECTIVE_BLOCKS")
-    static Set<Block> getEffectiveBlocks() { return null; }
+    static Set<Block> getEffectiveBlocks() {
+        return null;
+    }
 }

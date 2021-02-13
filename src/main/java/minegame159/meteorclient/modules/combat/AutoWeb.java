@@ -64,7 +64,8 @@ public class AutoWeb extends Module {
         }
 
         for (PlayerEntity player : mc.world.getPlayers()) {
-            if (player == mc.player || !Friends.get().attack(player) || !player.isAlive() || mc.player.distanceTo(player) > range.get()) continue;
+            if (player == mc.player || !Friends.get().attack(player) || !player.isAlive() || mc.player.distanceTo(player) > range.get())
+                continue;
 
             if (target == null) {
                 target = player;

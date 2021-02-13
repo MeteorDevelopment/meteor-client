@@ -5,7 +5,6 @@
 
 package minegame159.meteorclient.commands.commands;
 
-//Created by squidoodly 01/07/2020
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -17,7 +16,9 @@ import net.minecraft.command.CommandSource;
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
 public class Ignore extends Command {
+
     public Ignore() {
+        // Created by squidoodly 01/07/2020
         super("ignore", "Lets you ignore messages from specific players.");
     }
 
@@ -27,15 +28,15 @@ public class Ignore extends Command {
             String username = context.getArgument("username", String.class);
 
             if (Ignores.get().remove(username)) {
-                ChatUtils.prefixInfo("Ignore","Removed (highlight)%s (default)from list of ignored people.", username);
+                ChatUtils.prefixInfo("Ignore", "Removed (highlight)%s (default)from list of ignored people.", username);
             } else {
                 Ignores.get().add(username);
-                ChatUtils.prefixInfo("Ignore","Added (highlight)%s (default)to list of ignored people.", username);
+                ChatUtils.prefixInfo("Ignore", "Added (highlight)%s (default)to list of ignored people.", username);
             }
 
             return SINGLE_SUCCESS;
         })).executes(context -> {
-            ChatUtils.prefixInfo("Ignore","Ignoring (highlight)%d (default)people:", Ignores.get().count());
+            ChatUtils.prefixInfo("Ignore", "Ignoring (highlight)%d (default)people:", Ignores.get().count());
             for (String player : Ignores.get()) {
                 ChatUtils.info("- (highlight)%s", player);
             }

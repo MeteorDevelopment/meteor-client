@@ -22,7 +22,6 @@ public class SwarmModuleToggle extends Command {
         super("swarm", "(highlight)module <module> <true/false>(default) - Toggle a module on or off.");
     }
 
-
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.then(literal("module").then(argument("m", ModuleArgumentType.module()).then(argument("bool", BoolArgumentType.bool()).executes(context -> {

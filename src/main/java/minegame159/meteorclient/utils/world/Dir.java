@@ -17,13 +17,20 @@ public class Dir {
 
     public static byte get(Direction dir) {
         switch (dir) {
-            case UP:    return UP;
-            case DOWN:  return DOWN;
-            case NORTH: return NORTH;
-            case SOUTH: return SOUTH;
-            case WEST:  return WEST;
-            case EAST:  return EAST;
-            default:    return 0;
+            case UP:
+                return UP;
+            case DOWN:
+                return DOWN;
+            case NORTH:
+                return NORTH;
+            case SOUTH:
+                return SOUTH;
+            case WEST:
+                return WEST;
+            case EAST:
+                return EAST;
+            default:
+                return 0;
         }
     }
 

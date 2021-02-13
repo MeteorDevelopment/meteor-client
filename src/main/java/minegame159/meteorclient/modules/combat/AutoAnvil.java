@@ -176,7 +176,8 @@ public class AutoAnvil extends Module {
 
         // find enemy
         for (PlayerEntity player : mc.world.getPlayers()) {
-            if (player == mc.player || !Friends.get().attack(player) || !player.isAlive() || mc.player.distanceTo(player) > range.get() || isHole(player.getBlockPos())) continue;
+            if (player == mc.player || !Friends.get().attack(player) || !player.isAlive() || mc.player.distanceTo(player) > range.get() || isHole(player.getBlockPos()))
+                continue;
 
             if (target == null) target = player;
             else if (mc.player.distanceTo(target) > mc.player.distanceTo(player)) target = player;
@@ -184,7 +185,8 @@ public class AutoAnvil extends Module {
 
         if (target == null) {
             for (FakePlayerEntity player : FakePlayerUtils.getPlayers().keySet()) {
-                if (!Friends.get().attack(player) || !player.isAlive() || mc.player.distanceTo(player) > range.get() || isHole(player.getBlockPos())) continue;
+                if (!Friends.get().attack(player) || !player.isAlive() || mc.player.distanceTo(player) > range.get() || isHole(player.getBlockPos()))
+                    continue;
 
                 if (target == null) target = player;
                 else if (mc.player.distanceTo(target) > mc.player.distanceTo(player)) target = player;

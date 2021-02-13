@@ -16,6 +16,7 @@ import net.minecraft.command.CommandSource;
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
 public class Bind extends Command {
+
     public Bind() {
         super("bind", "Binds a module to a specified key.");
     }
@@ -26,7 +27,7 @@ public class Bind extends Command {
                 .executes(context -> {
                     Module m = context.getArgument("module", Module.class);
 
-                    ChatUtils.prefixInfo("KeyBinds","Press a key you want this module to be bound to.");
+                    ChatUtils.prefixInfo("KeyBinds", "Press a key you want this module to be bound to.");
                     Modules.get().setModuleToBind(m);
 
                     return SINGLE_SUCCESS;

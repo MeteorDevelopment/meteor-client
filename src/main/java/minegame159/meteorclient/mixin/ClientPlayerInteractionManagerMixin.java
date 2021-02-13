@@ -34,9 +34,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ClientPlayerInteractionManager.class)
 public abstract class ClientPlayerInteractionManagerMixin implements IClientPlayerInteractionManager {
-    @Shadow private int blockBreakingCooldown;
+    @Shadow
+    private int blockBreakingCooldown;
 
-    @Shadow protected abstract void syncSelectedSlot();
+    @Shadow
+    protected abstract void syncSelectedSlot();
 
     @Inject(method = "attackEntity", at = @At("HEAD"), cancellable = true)
     private void onAttackEntity(PlayerEntity player, Entity target, CallbackInfo info) {

@@ -36,8 +36,7 @@ public class BlockUtils {
             side = Direction.UP;
             neighbour = blockPos;
             ((IVec3d) hitPos).set(blockPos);
-        }
-        else {
+        } else {
             neighbour = blockPos.offset(side.getOpposite());
             ((IVec3d) hitPos).set(neighbour.getX() + 0.5 + side.getOffsetX() * 0.5, neighbour.getY() + 0.5 + side.getOffsetY() * 0.5, neighbour.getZ() + 0.5 + side.getOffsetZ() * 0.5);
         }
@@ -45,11 +44,11 @@ public class BlockUtils {
         if (rotate) {
             Direction s = side;
             Rotations.rotate(Rotations.getYaw(hitPos), Rotations.getPitch(hitPos), priority, () -> place(slot, hitPos, hand, s, neighbour, swing, swap, swapBack));
-        }
-        else place(slot, hitPos, hand, side, neighbour, swing, swap, swapBack);
+        } else place(slot, hitPos, hand, side, neighbour, swing, swap, swapBack);
 
         return true;
     }
+
     public static boolean place(BlockPos blockPos, Hand hand, int slot, boolean rotate, int priority, boolean checkEntity) {
         return place(blockPos, hand, slot, rotate, priority, true, checkEntity, true, true);
     }
@@ -104,7 +103,8 @@ public class BlockUtils {
             BlockState state = mc.world.getBlockState(neighbor);
 
             // Check if neighbour isn't empty
-            if (state.isAir() || isClickable(state.getBlock())) continue;
+            if (state.isAir() || isClickable(state.getBlock()))
+                continue;
 
             // Check if neighbour is a fluid
             if (!state.getFluidState().isEmpty()) continue;

@@ -233,7 +233,9 @@ public class AnchorAura extends Module {
             .build()
     );
 
-    public AnchorAura() {super(Category.Combat, "anchor-aura", "Automatically places and breaks Respawn Anchors to harm entities.");}
+    public AnchorAura() {
+        super(Category.Combat, "anchor-aura", "Automatically places and breaks Respawn Anchors to harm entities.");
+    }
 
     private int placeDelayLeft;
     private int breakDelayLeft;
@@ -262,7 +264,8 @@ public class AnchorAura extends Module {
         if (PlayerUtils.shouldPause(pauseOnMine.get(), pauseOnEat.get(), pauseOnDrink.get())) return;
         if (EntityUtils.getTotalHealth(mc.player) <= minHealth.get()) return;
 
-        if (EntityUtils.isInvalid(target, targetRange.get())) target = EntityUtils.getPlayerTarget(targetRange.get(), priority.get(), false);
+        if (EntityUtils.isInvalid(target, targetRange.get()))
+            target = EntityUtils.getPlayerTarget(targetRange.get(), priority.get(), false);
         if (target == null) return;
 
         int anchorSlot = InvUtils.findItemInHotbar(Items.RESPAWN_ANCHOR);
@@ -316,7 +319,7 @@ public class AnchorAura extends Module {
     }
 
     private BlockPos findPlacePos(BlockPos targetPlacePos) {
-        switch (placePositions.get()){
+        switch (placePositions.get()) {
             case All:
                 if (isValidPlace(targetPlacePos.down())) return targetPlacePos.down();
                 else if (isValidPlace(targetPlacePos.up(2))) return targetPlacePos.up(2);
@@ -337,7 +340,7 @@ public class AnchorAura extends Module {
                 else if (isValidPlace(targetPlacePos.up(2))) return targetPlacePos.up(2);
                 break;
         }
-        return null ;
+        return null;
     }
 
     private BlockPos findBreakPos(BlockPos targetPos) {
@@ -354,11 +357,11 @@ public class AnchorAura extends Module {
         return null;
     }
 
-    private boolean getDamagePlace(BlockPos pos){
+    private boolean getDamagePlace(BlockPos pos) {
         return placeMode.get() == Safety.Suicide || DamageCalcUtils.bedDamage(mc.player, Utils.vec3d(pos.add(0.5, 0.5, 0.5))) <= maxDamage.get();
     }
 
-    private boolean getDamageBreak(BlockPos pos){
+    private boolean getDamageBreak(BlockPos pos) {
         return breakMode.get() == Safety.Suicide || DamageCalcUtils.anchorDamage(mc.player, Utils.vec3d(pos.add(0.5, 0.5, 0.5))) <= maxDamage.get();
     }
 

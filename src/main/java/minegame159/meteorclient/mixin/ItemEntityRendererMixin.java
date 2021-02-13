@@ -23,8 +23,12 @@ import java.util.Random;
 
 @Mixin(ItemEntityRenderer.class)
 public abstract class ItemEntityRendererMixin {
-    @Shadow @Final private Random random;
-    @Shadow @Final private ItemRenderer itemRenderer;
+    @Shadow
+    @Final
+    private Random random;
+    @Shadow
+    @Final
+    private ItemRenderer itemRenderer;
 
     @Inject(method = "render", at = @At("HEAD"), cancellable = true)
     private void render(ItemEntity itemEntity, float f, float g, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, CallbackInfo ci) {

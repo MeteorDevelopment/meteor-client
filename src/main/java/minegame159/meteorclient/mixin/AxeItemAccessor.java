@@ -16,8 +16,12 @@ import java.util.Set;
 @Mixin(AxeItem.class)
 public interface AxeItemAccessor {
     @Accessor("field_23139")
-    static Set<Material> getEffectiveMaterials() { return null; }
+    static Set<Material> getEffectiveMaterials() {
+        return null;
+    }
 
     @Accessor("EFFECTIVE_BLOCKS")
-    static Set<Block> getEffectiveBlocks() { return null; }
+    static Set<Block> getEffectiveBlocks() {
+        return null;
+    }
 }

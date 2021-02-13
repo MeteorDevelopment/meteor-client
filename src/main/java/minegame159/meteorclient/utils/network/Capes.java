@@ -5,6 +5,7 @@
 
 package minegame159.meteorclient.utils.network;
 
+import minegame159.meteorclient.MeteorClient;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.NativeImageBackedTexture;
@@ -16,8 +17,8 @@ import java.io.InputStream;
 import java.util.*;
 
 public class Capes {
-    private static final String CAPE_OWNERS_URL = "http://meteorclient.com/api/capeowners";
-    private static final String CAPES_URL = "http://meteorclient.com/api/capes";
+    private static final String CAPE_OWNERS_URL = "https://meteorclient.com/api/capeowners";
+    private static final String CAPES_URL = "https://meteorclient.com/api/capes";
 
     private static final Map<UUID, String> OWNERS = new HashMap<>();
     private static final Map<String, String> URLS = new HashMap<>();
@@ -96,7 +97,7 @@ public class Capes {
         private int retryTimer;
 
         public Cape(String name) {
-            super("meteor-client", "capes/" + name);
+            super(MeteorClient.ID, "capes/" + name);
 
             this.name = name;
         }

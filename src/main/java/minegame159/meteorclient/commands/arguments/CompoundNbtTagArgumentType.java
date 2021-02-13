@@ -33,8 +33,7 @@ public class CompoundNbtTagArgumentType implements ArgumentType<CompoundTag> {
         while (reader.canRead()) {
             if (reader.peek() == '{') {
                 open++;
-            }
-            else if (reader.peek() == '}') {
+            } else if (reader.peek() == '}') {
                 open--;
             }
             if (open == 0)

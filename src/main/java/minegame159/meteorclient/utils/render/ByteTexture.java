@@ -53,5 +53,6 @@ public class ByteTexture extends AbstractTexture {
     }
 
     @Override
-    public void load(ResourceManager manager) throws IOException {}
+    public void load(ResourceManager manager) throws IOException {
+    }
 }

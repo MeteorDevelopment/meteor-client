@@ -22,6 +22,7 @@ public class ClipAtLedgeEvent {
     public boolean isSet() {
         return set;
     }
+
     public boolean isClip() {
         return clip;
     }

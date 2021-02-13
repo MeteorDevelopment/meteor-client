@@ -44,7 +44,7 @@ public class Reset extends Command {
                     Module module = context.getArgument("module", Module.class);
 
                     module.setKey(-1);
-                    ChatUtils.prefixInfo("KeyBinds","This bind has been reset.");
+                    ChatUtils.prefixInfo("KeyBinds", "This bind has been reset.");
 
                     return SINGLE_SUCCESS;
                 }))

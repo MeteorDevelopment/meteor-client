@@ -18,12 +18,12 @@ import net.minecraft.item.AxeItem;
 import net.minecraft.item.SwordItem;
 
 public class AutoWeapon extends Module {
-    public enum Weapon{
+    public enum Weapon {
         Sword,
         Axe
     }
 
-    public AutoWeapon(){
+    public AutoWeapon() {
         super(Category.Combat, "auto-weapon", "Finds the best weapon to use in your hotbar.");
     }
 
@@ -55,7 +55,7 @@ public class AutoWeapon extends Module {
         mc.player.inventory.selectedSlot = getBestWeapon();
     }
 
-    private int getBestWeapon(){
+    private int getBestWeapon() {
         int slotS = mc.player.inventory.selectedSlot;
         int slotA = mc.player.inventory.selectedSlot;
         int slot = mc.player.inventory.selectedSlot;
@@ -63,33 +63,33 @@ public class AutoWeapon extends Module {
         double damageA = 0;
         double currentDamageS;
         double currentDamageA;
-        for(int i = 0; i < 9; i++){
-            if(mc.player.inventory.getStack(i).getItem() instanceof SwordItem
-                    && (!antiBreak.get() || (mc.player.inventory.getStack(i).getMaxDamage() - mc.player.inventory.getStack(i).getDamage()) > 10)){
+        for (int i = 0; i < 9; i++) {
+            if (mc.player.inventory.getStack(i).getItem() instanceof SwordItem
+                    && (!antiBreak.get() || (mc.player.inventory.getStack(i).getMaxDamage() - mc.player.inventory.getStack(i).getDamage()) > 10)) {
                 currentDamageS = ((SwordItem) mc.player.inventory.getStack(i).getItem()).getMaterial().getAttackDamage() + EnchantmentHelper.getAttackDamage(mc.player.inventory.getStack(i), EntityGroup.DEFAULT) + 2;
-                if(currentDamageS > damageS){
+                if (currentDamageS > damageS) {
                     damageS = currentDamageS;
                     slotS = i;
                 }
             }
         }
-        for(int i = 0; i < 9; i++){
-            if(mc.player.inventory.getStack(i).getItem() instanceof AxeItem
-                    && (!antiBreak.get() || (mc.player.inventory.getStack(i).getMaxDamage() - mc.player.inventory.getStack(i).getDamage()) > 10)){
+        for (int i = 0; i < 9; i++) {
+            if (mc.player.inventory.getStack(i).getItem() instanceof AxeItem
+                    && (!antiBreak.get() || (mc.player.inventory.getStack(i).getMaxDamage() - mc.player.inventory.getStack(i).getDamage()) > 10)) {
                 currentDamageA = ((AxeItem) mc.player.inventory.getStack(i).getItem()).getMaterial().getAttackDamage() + EnchantmentHelper.getAttackDamage(mc.player.inventory.getStack(i), EntityGroup.DEFAULT) + 2;
-                if(currentDamageA > damageA){
+                if (currentDamageA > damageA) {
                     damageA = currentDamageA;
                     slotA = i;
                 }
             }
         }
-        if(weapon.get() == Weapon.Sword && threshold.get() > damageA - damageS){
+        if (weapon.get() == Weapon.Sword && threshold.get() > damageA - damageS) {
             slot = slotS;
-        }else if(weapon.get() == Weapon.Axe && threshold.get() > damageS - damageA){
+        } else if (weapon.get() == Weapon.Axe && threshold.get() > damageS - damageA) {
             slot = slotA;
-        }else if(weapon.get() == Weapon.Sword && threshold.get() < damageA - damageS){
+        } else if (weapon.get() == Weapon.Sword && threshold.get() < damageA - damageS) {
             slot = slotA;
-        }else if(weapon.get() == Weapon.Axe && threshold.get() < damageS - damageA){
+        } else if (weapon.get() == Weapon.Axe && threshold.get() < damageS - damageA) {
             slot = slotS;
         }
         return slot;

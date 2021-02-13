@@ -18,17 +18,17 @@ public class ProfileUtils {
     private static final File FOLDER = new File(MeteorClient.FOLDER, "profiles");
 
     public static List<String> getProfiles() {
-      String[] children = FOLDER.list();
-      List<String> profiles = new ArrayList<>(0);
+        String[] children = FOLDER.list();
+        List<String> profiles = new ArrayList<>(0);
 
-      if (children != null) {
-          for (String child : children) {
-              File file = new File(child);
-              if (!child.contains(".")) profiles.add(file.getName());
-          }
-      }
+        if (children != null) {
+            for (String child : children) {
+                File file = new File(child);
+                if (!child.contains(".")) profiles.add(file.getName());
+            }
+        }
 
-      return profiles;
+        return profiles;
     }
 
     public static boolean isProfile(String profile) {

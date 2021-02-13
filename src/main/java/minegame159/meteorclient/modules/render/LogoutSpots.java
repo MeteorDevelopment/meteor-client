@@ -151,7 +151,8 @@ public class LogoutSpots extends Module {
     private void onTick(TickEvent.Post event) {
         if (mc.getNetworkHandler().getPlayerList().size() != lastPlayerList.size()) {
             for (PlayerListEntry entry : lastPlayerList) {
-                if (mc.getNetworkHandler().getPlayerList().stream().anyMatch(playerListEntry -> playerListEntry.getProfile().equals(entry.getProfile()))) continue;
+                if (mc.getNetworkHandler().getPlayerList().stream().anyMatch(playerListEntry -> playerListEntry.getProfile().equals(entry.getProfile())))
+                    continue;
 
                 for (PlayerEntity player : lastPlayers) {
                     if (player.getUuid().equals(entry.getProfile().getId())) {
@@ -237,8 +238,10 @@ public class LogoutSpots extends Module {
             double healthPercentage = (double) health / maxHealth;
 
             // Render quad
-            if (fullHeight.get()) Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x, y, z, x + xWidth, y + height, z + zWidth, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            else Renderer.quadWithLinesHorizontal(Renderer.NORMAL, Renderer.LINES, x, y, z, xWidth, sideColor.get(), lineColor.get(), shapeMode.get());
+            if (fullHeight.get())
+                Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x, y, z, x + xWidth, y + height, z + zWidth, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            else
+                Renderer.quadWithLinesHorizontal(Renderer.NORMAL, Renderer.LINES, x, y, z, xWidth, sideColor.get(), lineColor.get(), shapeMode.get());
 
             // Get health color
             Color healthColor;
@@ -248,7 +251,7 @@ public class LogoutSpots extends Module {
 
             // Setup the rotation
             Matrices.push();
-            Matrices.translate(x + xWidth / 2 - event.offsetX, y + (fullHeight.get() ? (height + 0.5) : 0.5)  - event.offsetY, z + zWidth / 2 - event.offsetZ);
+            Matrices.translate(x + xWidth / 2 - event.offsetX, y + (fullHeight.get() ? (height + 0.5) : 0.5) - event.offsetY, z + zWidth / 2 - event.offsetZ);
             Matrices.rotate(-camera.getYaw(), 0, 1, 0);
             Matrices.rotate(camera.getPitch(), 1, 0, 0);
             Matrices.scale(-scale, -scale, scale);

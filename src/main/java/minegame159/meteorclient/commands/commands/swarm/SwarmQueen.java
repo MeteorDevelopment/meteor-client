@@ -19,7 +19,6 @@ public class SwarmQueen extends Command {
         super("swarm", "(highlight)queen (default)- Start a new swarm as the Queen.");
     }
 
-
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.then(literal("queen").executes(context -> {

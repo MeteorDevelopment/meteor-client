@@ -208,7 +208,8 @@ public class WDropbox<T extends Enum<?>> extends WWidget {
 
     private static class WTableRoot extends WTable implements WRoot {
         @Override
-        public void invalidate() {}
+        public void invalidate() {
+        }
 
         @Override
         protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {

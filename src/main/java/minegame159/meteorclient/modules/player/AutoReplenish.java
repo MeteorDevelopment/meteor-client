@@ -75,7 +75,7 @@ public class AutoReplenish extends Module {
     private boolean prevHadOpenScreen;
     private int tickDelayLeft;
 
-    public AutoReplenish(){
+    public AutoReplenish() {
         super(Category.Player, "auto-replenish", "Automatically refills items in your hotbar, main hand, or offhand.");
 
         for (int i = 0; i < items.length; i++) items[i] = new ItemStack(Items.AIR);
@@ -111,8 +111,7 @@ public class AutoReplenish extends Module {
                 ItemStack stack = mc.player.getOffHandStack();
                 checkSlot(InvUtils.OFFHAND_SLOT, stack);
             }
-        }
-        else {
+        } else {
             tickDelayLeft--;
         }
     }

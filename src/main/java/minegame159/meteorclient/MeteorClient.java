@@ -46,6 +46,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.File;
 
 public class MeteorClient implements ClientModInitializer {
+    public static final String ID = "meteor-client";
     public static MeteorClient INSTANCE;
     public static final IEventBus EVENT_BUS = new EventBus();
     public static final File FOLDER = new File(FabricLoader.getInstance().getGameDir().toString(), "meteor-client");
@@ -127,7 +128,8 @@ public class MeteorClient implements ClientModInitializer {
     private void onKey(KeyEvent event) {
         // Click GUI
         if (event.action == KeyAction.Press && event.key == KeyBindingHelper.getBoundKeyOf(KeyBinds.OPEN_CLICK_GUI).getCode()) {
-            if ((!Utils.canUpdate() && !(mc.currentScreen instanceof WidgetScreen) && !(mc.currentScreen instanceof HudEditorScreen)) || mc.currentScreen == null) openClickGui();
+            if ((!Utils.canUpdate() && !(mc.currentScreen instanceof WidgetScreen) && !(mc.currentScreen instanceof HudEditorScreen)) || mc.currentScreen == null)
+                openClickGui();
         }
 
         // Shulker Peek

@@ -24,7 +24,9 @@ import net.minecraft.item.SpawnEggItem;
 import net.minecraft.util.Hand;
 
 public class AutoMount extends Module {
-    public AutoMount(){super(Category.Misc, "auto-mount", "Automatically mounts entities.");}
+    public AutoMount() {
+        super(Category.Misc, "auto-mount", "Automatically mounts entities.");
+    }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgMount = settings.createGroup("Mount");
@@ -107,7 +109,7 @@ public class AutoMount extends Module {
     private void onTick(TickEvent.Pre event) {
         if (mc.player.hasVehicle()) return;
 
-        for (Entity entity : mc.world.getEntities()){
+        for (Entity entity : mc.world.getEntities()) {
             if (mc.player.distanceTo(entity) > 4) continue;
 
             if (mc.player.getMainHandStack().getItem() instanceof SpawnEggItem) return;
@@ -133,7 +135,8 @@ public class AutoMount extends Module {
     }
 
     private void interact(Entity entity) {
-        if (rotate.get()) Rotations.rotate(Rotations.getYaw(entity), Rotations.getPitch(entity), -100, () -> mc.interactionManager.interactEntity(mc.player, entity, Hand.MAIN_HAND));
+        if (rotate.get())
+            Rotations.rotate(Rotations.getYaw(entity), Rotations.getPitch(entity), -100, () -> mc.interactionManager.interactEntity(mc.player, entity, Hand.MAIN_HAND));
         else mc.interactionManager.interactEntity(mc.player, entity, Hand.MAIN_HAND);
     }
 }

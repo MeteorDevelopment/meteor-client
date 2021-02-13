@@ -276,9 +276,11 @@ public class Freecam extends Module {
     public double getX(float tickDelta) {
         return MathHelper.lerp(tickDelta, prevPos.x, pos.x);
     }
+
     public double getY(float tickDelta) {
         return MathHelper.lerp(tickDelta, prevPos.y, pos.y);
     }
+
     public double getZ(float tickDelta) {
         return MathHelper.lerp(tickDelta, prevPos.z, pos.z);
     }
@@ -286,6 +288,7 @@ public class Freecam extends Module {
     public double getYaw(float tickDelta) {
         return MathHelper.lerp(tickDelta, prevYaw, yaw);
     }
+
     public double getPitch(float tickDelta) {
         return MathHelper.lerp(tickDelta, prevPitch, pitch);
     }

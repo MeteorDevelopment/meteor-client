@@ -21,8 +21,8 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
-    public static final BlockEntityType<?>[] STORAGE_BLOCKS = { BlockEntityType.FURNACE, BlockEntityType.CHEST, BlockEntityType.TRAPPED_CHEST, BlockEntityType.ENDER_CHEST, BlockEntityType.DISPENSER, BlockEntityType.DROPPER, BlockEntityType.HOPPER, BlockEntityType.SHULKER_BOX, BlockEntityType.BARREL, BlockEntityType.SMOKER, BlockEntityType.BLAST_FURNACE };
-    public static final String[] STORAGE_BLOCK_NAMES = { "Furnace", "Chest", "Trapped Chest", "Ender Chest", "Dispenser", "Dropper", "Hopper", "Shulker Box", "Barrel", "Smoker", "Blast Furnace" };
+    public static final BlockEntityType<?>[] STORAGE_BLOCKS = {BlockEntityType.FURNACE, BlockEntityType.CHEST, BlockEntityType.TRAPPED_CHEST, BlockEntityType.ENDER_CHEST, BlockEntityType.DISPENSER, BlockEntityType.DROPPER, BlockEntityType.HOPPER, BlockEntityType.SHULKER_BOX, BlockEntityType.BARREL, BlockEntityType.SMOKER, BlockEntityType.BLAST_FURNACE};
+    public static final String[] STORAGE_BLOCK_NAMES = {"Furnace", "Chest", "Trapped Chest", "Ender Chest", "Dispenser", "Dropper", "Hopper", "Shulker Box", "Barrel", "Smoker", "Blast Furnace"};
 
     public StorageBlockListSetting(String name, String description, List<BlockEntityType<?>> defaultValue, Consumer<List<BlockEntityType<?>>> onChanged, Consumer<Setting<List<BlockEntityType<?>>>> onModuleActivated) {
         super(name, description, defaultValue, onChanged, onModuleActivated);
@@ -55,7 +55,8 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
                 else id = new Identifier("minecraft", val);
                 if (Registry.BLOCK_ENTITY_TYPE.containsId(id)) blocks.add(Registry.BLOCK_ENTITY_TYPE.get(id));
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
 
         return blocks;
     }

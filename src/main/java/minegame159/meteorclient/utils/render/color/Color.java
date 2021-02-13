@@ -125,32 +125,36 @@ public class Color implements ISerializable<Color> {
     public static int fromRGBA(int r, int g, int b, int a) {
         return (r << 16) + (g << 8) + (b) + (a << 24);
     }
+
     public static int toRGBAR(int color) {
         return (color >> 16) & 0x000000FF;
     }
+
     public static int toRGBAG(int color) {
         return (color >> 8) & 0x000000FF;
     }
+
     public static int toRGBAB(int color) {
         return (color) & 0x000000FF;
     }
+
     public static int toRGBAA(int color) {
         return (color >> 24) & 0x000000FF;
     }
 
     public static Color fromHsv(double h, double s, double v) {
-        double      hh, p, q, t, ff;
-        int        i;
-        double      r, g, b;
+        double hh, p, q, t, ff;
+        int i;
+        double r, g, b;
 
-        if(s <= 0.0) {       // < is bogus, just shuts up warnings
+        if (s <= 0.0) {       // < is bogus, just shuts up warnings
             r = v;
             g = v;
             b = v;
             return new Color((int) (r * 255), (int) (g * 255), (int) (b * 255), 255);
         }
         hh = h;
-        if(hh >= 360.0) hh = 0.0;
+        if (hh >= 360.0) hh = 0.0;
         hh /= 60.0;
         i = (int) hh;
         ff = hh - i;
@@ -158,7 +162,7 @@ public class Color implements ISerializable<Color> {
         q = v * (1.0 - (s * ff));
         t = v * (1.0 - (s * (1.0 - ff)));
 
-        switch(i) {
+        switch (i) {
             case 0:
                 r = v;
                 g = t;

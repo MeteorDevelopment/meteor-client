@@ -30,7 +30,7 @@ public class AutoWalk extends Module {
         Left,
         Right
     }
-    
+
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()

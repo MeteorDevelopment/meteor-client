@@ -34,9 +34,11 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 @Mixin(ClientPlayNetworkHandler.class)
 public abstract class ClientPlayNetworkHandlerMixin {
-    @Shadow private MinecraftClient client;
+    @Shadow
+    private MinecraftClient client;
 
-    @Shadow private ClientWorld world;
+    @Shadow
+    private ClientWorld world;
 
     private boolean worldNotNull;
 

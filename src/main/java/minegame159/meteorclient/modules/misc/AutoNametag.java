@@ -28,7 +28,7 @@ public class AutoNametag extends Module {
             .defaultValue(new Object2BooleanOpenHashMap<>(0))
             .build()
     );
-    
+
     private final Setting<Double> distance = sgGeneral.add(new DoubleSetting.Builder()
             .name("distance")
             .description("The maximum distance a nametagged entity can be to be nametagged.")
@@ -62,13 +62,13 @@ public class AutoNametag extends Module {
         entity = null;
 
         for (Entity entity : mc.world.getEntities()) {
-            if (!entities.get().getBoolean(entity.getType()) || entity.hasCustomName() || mc.player.distanceTo(entity) > distance.get()) continue;
+            if (!entities.get().getBoolean(entity.getType()) || entity.hasCustomName() || mc.player.distanceTo(entity) > distance.get())
+                continue;
 
             boolean findNametag = true;
             if (mc.player.inventory.getMainHandStack().getItem() instanceof NameTagItem) {
                 findNametag = false;
-            }
-            else if (mc.player.inventory.offHand.get(0).getItem() instanceof NameTagItem) {
+            } else if (mc.player.inventory.offHand.get(0).getItem() instanceof NameTagItem) {
                 findNametag = false;
                 offHand = true;
             }
@@ -89,7 +89,8 @@ public class AutoNametag extends Module {
             if (foundNametag) {
                 this.entity = entity;
 
-                if (rotate.get()) Rotations.rotate(Rotations.getYaw(entity), Rotations.getPitch(entity), -100, this::interact);
+                if (rotate.get())
+                    Rotations.rotate(Rotations.getYaw(entity), Rotations.getPitch(entity), -100, this::interact);
                 else interact();
 
                 return;

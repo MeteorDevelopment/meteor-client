@@ -27,14 +27,14 @@ public class Main {
                 JOptionPane.YES_NO_CANCEL_OPTION,
                 JOptionPane.ERROR_MESSAGE,
                 null,
-                new String[] { "Open Fabric link", "Open Fabric API link", "Open mods folder" },
+                new String[]{"Open Fabric link", "Open Fabric API link", "Open mods folder"},
                 null
         );
 
         if (option == 0) {
-            openUrl("http://fabricmc.net");
+            openUrl("https://fabricmc.net");
         } else if (option == 1) {
-            openUrl("http://www.curseforge.com/minecraft/mc-mods/fabric-api");
+            openUrl("https://www.curseforge.com/minecraft/mc-mods/fabric-api");
         } else if (option == 2) {
             String os = System.getProperty("os.name").toLowerCase();
 
@@ -42,17 +42,17 @@ public class Main {
                 if (os.contains("win")) {
                     if (Desktop.getDesktop().isSupported(Desktop.Action.OPEN)) {
                         String path = System.getenv("AppData") + "/.minecraft/mods";
-                        new File(path).mkdirs();
+                        if (!new File(path).mkdirs()) throw new IOException();
                         Desktop.getDesktop().open(new File(path));
                     }
                 } else if (os.contains("mac")) {
                     String path = System.getProperty("user.home") + "/Library/Application Support/minecraft/mods";
-                    new File(path).mkdirs();
+                    if (!new File(path).mkdirs()) throw new IOException();
                     ProcessBuilder pb = new ProcessBuilder("open", path);
-                    Process process = pb.start();
+                    pb.start();
                 } else if (os.contains("nix") || os.contains("nux")) {
                     String path = System.getProperty("user.home") + "/.minecraft";
-                    new File(path).mkdirs();
+                    if (!new File(path).mkdirs()) throw new IOException();
                     Runtime.getRuntime().exec("xdg-open \"" + path + "\"");
                 }
             } catch (IOException e) {

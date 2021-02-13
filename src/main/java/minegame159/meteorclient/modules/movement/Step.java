@@ -27,7 +27,7 @@ public class Step extends Module {
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    
+
     public final Setting<Double> height = sgGeneral.add(new DoubleSetting.Builder()
             .name("height")
             .description("Step height.")
@@ -79,7 +79,7 @@ public class Step extends Module {
     private void onTick(TickEvent.Post event) {
         boolean work = (activeWhen.get() == ActiveWhen.Always) || (activeWhen.get() == ActiveWhen.Sneaking && mc.player.isSneaking()) || (activeWhen.get() == ActiveWhen.NotSneaking && !mc.player.isSneaking());
         mc.player.setBoundingBox(mc.player.getBoundingBox().offset(0, 1, 0));
-        if (work && (!safeStep.get() || (getHealth() > stepHealth.get() && getHealth() - getExplosionDamage() > stepHealth.get()))){
+        if (work && (!safeStep.get() || (getHealth() > stepHealth.get() && getHealth() - getExplosionDamage() > stepHealth.get()))) {
             mc.player.stepHeight = height.get().floatValue();
         } else {
             mc.player.stepHeight = prevStepHeight;
@@ -94,12 +94,12 @@ public class Step extends Module {
         BaritoneAPI.getSettings().assumeStep.value = prevBaritoneAssumeStep;
     }
 
-    private float getHealth(){
+    private float getHealth() {
         assert mc.player != null;
         return mc.player.getHealth() + mc.player.getAbsorptionAmount();
     }
 
-    private double getExplosionDamage(){
+    private double getExplosionDamage() {
         assert mc.player != null;
         assert mc.world != null;
         Optional<EndCrystalEntity> crystal = Streams.stream(mc.world.getEntities())

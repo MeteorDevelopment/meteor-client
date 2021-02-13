@@ -28,7 +28,8 @@ public class Config extends System<Config> {
     public Config() {
         super("config");
 
-        devBuild = FabricLoader.getInstance().getModContainer("meteor-client").get().getMetadata().getCustomValue("meteor-client:devbuild").getAsString();
+        FabricLoader.getInstance().getModContainer(MeteorClient.ID)
+                .ifPresent(modContainer -> devBuild = modContainer.getMetadata().getCustomValue("meteor-client:devbuild").getAsString());
     }
 
     public static Config get() {

@@ -116,10 +116,10 @@ public class Flight extends Module {
 
     @EventHandler
     private void onPostTick(TickEvent.Post event) {
-        if (antiKickMode.get() == AntiKickMode.Normal && delayLeft > 0) delayLeft --;
+        if (antiKickMode.get() == AntiKickMode.Normal && delayLeft > 0) delayLeft--;
 
         else if (antiKickMode.get() == AntiKickMode.Normal && delayLeft <= 0 && offLeft > 0) {
-            offLeft --;
+            offLeft--;
 
             if (mode.get() == Mode.Abilities) {
                 mc.player.abilities.flying = false;
@@ -129,9 +129,7 @@ public class Flight extends Module {
             }
 
             return;
-        }
-
-        else if (antiKickMode.get() == AntiKickMode.Normal && delayLeft <=0 && offLeft <= 0) {
+        } else if (antiKickMode.get() == AntiKickMode.Normal && delayLeft <= 0 && offLeft <= 0) {
             delayLeft = delay.get();
             offLeft = offTime.get();
         }
@@ -152,7 +150,8 @@ public class Flight extends Module {
                 Vec3d initialVelocity = mc.player.getVelocity();
 
                 if (mc.options.keyJump.isPressed()) mc.player.setVelocity(initialVelocity.add(0, speed.get() * 5f, 0));
-                if (mc.options.keySneak.isPressed()) mc.player.setVelocity(initialVelocity.subtract(0, speed.get() * 5f, 0));
+                if (mc.options.keySneak.isPressed())
+                    mc.player.setVelocity(initialVelocity.subtract(0, speed.get() * 5f, 0));
                 break;
             case Abilities:
                 if (mc.player.isSpectator()) return;

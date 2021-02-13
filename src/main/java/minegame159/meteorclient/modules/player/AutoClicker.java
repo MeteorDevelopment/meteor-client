@@ -33,7 +33,7 @@ public class AutoClicker extends Module {
             .name("mode")
             .description("The method of clicking.")
             .defaultValue(Mode.Press)
-            .build() 
+            .build()
     );
 
     private final Setting<Button> button = sgGeneral.add(new EnumSetting.Builder<Button>()
@@ -61,14 +61,14 @@ public class AutoClicker extends Module {
     @Override
     public void onActivate() {
         timer = 0;
-        mc.options.keyAttack.setPressed(false);
-        mc.options.keyUse.setPressed(false);
+         mc.options.keyAttack.setPressed(false);
+         mc.options.keyUse.setPressed(false);
     }
 
     @Override
     public void onDeactivate() {
-        mc.options.keyAttack.setPressed(false);
-        mc.options.keyUse.setPressed(false);
+         mc.options.keyAttack.setPressed(false);
+         mc.options.keyUse.setPressed(false);
     }
 
     @EventHandler
@@ -77,10 +77,10 @@ public class AutoClicker extends Module {
             case Hold:
                 switch (button.get()) {
                     case Left:
-                        mc.options.keyAttack.setPressed(true);
+                         mc.options.keyAttack.setPressed(true);
                         break;
                     case Right:
-                        mc.options.keyUse.setPressed(true);
+                         mc.options.keyUse.setPressed(true);
                         break;
                 }
                 break;

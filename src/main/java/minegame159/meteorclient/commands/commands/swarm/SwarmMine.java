@@ -33,11 +33,11 @@ public class SwarmMine extends Command {
                                     if (swarm.currentMode == Swarm.Mode.Queen && swarm.server != null)
                                         swarm.server.sendMessage(context.getInput());
                                     if (swarm.currentMode != Swarm.Mode.Queen) {
-                                        swarm.targetBlock = context.getArgument("block",BlockStateArgument.class).getBlockState();
-                                    } else ChatUtils.moduleError(Modules.get().get(Swarm.class),"Null block");
+                                        swarm.targetBlock = context.getArgument("block", BlockStateArgument.class).getBlockState();
+                                    } else ChatUtils.moduleError(Modules.get().get(Swarm.class), "Null block");
                                 }
                             } catch (Exception e) {
-                                ChatUtils.moduleError(Modules.get().get(Swarm.class),"Error in baritone command. " + e.getClass().getSimpleName());
+                                ChatUtils.moduleError(Modules.get().get(Swarm.class), "Error in baritone command. " + e.getClass().getSimpleName());
                             }
                             return SINGLE_SUCCESS;
                         })

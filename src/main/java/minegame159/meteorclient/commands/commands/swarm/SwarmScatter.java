@@ -20,25 +20,24 @@ import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
 public class SwarmScatter extends Command {
 
-    public SwarmScatter(){
-        super("swarm","(highlight)scatter(default) - Send them running.");
+    public SwarmScatter() {
+        super("swarm", "(highlight)scatter(default) - Send them running.");
     }
-
 
     public void scatter() {
         scatter(100);
     }
 
-    public void scatter(int radius){
-        if(mc.player != null) {
+    public void scatter(int radius) {
+        if (mc.player != null) {
             Random random = new Random();
             double a = random.nextDouble() * 2 * Math.PI;
             double r = radius * Math.sqrt(random.nextDouble());
             double x = mc.player.getX() + r * Math.cos(a);
             double z = mc.player.getZ() + r * Math.sin(a);
-            if(BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing())
+            if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing())
                 BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
-            BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalXZ((int)x,(int)z));
+            BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalXZ((int) x, (int) z));
         }
     }
 
@@ -46,23 +45,21 @@ public class SwarmScatter extends Command {
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.then(literal("scatter").executes(context -> {
             Swarm swarm = Modules.get().get(Swarm.class);
-            if(swarm.isActive()){
-                if(swarm.currentMode == Swarm.Mode.Queen && swarm.server != null){
+            if (swarm.isActive()) {
+                if (swarm.currentMode == Swarm.Mode.Queen && swarm.server != null) {
                     swarm.server.sendMessage(context.getInput());
-                }
-                else{
+                } else {
                     scatter();
                 }
             }
             return SINGLE_SUCCESS;
         }).then(argument("radius", IntegerArgumentType.integer()).executes(context -> {
             Swarm swarm = Modules.get().get(Swarm.class);
-            if(swarm.isActive()){
-                if(swarm.currentMode == Swarm.Mode.Queen && swarm.server != null){
+            if (swarm.isActive()) {
+                if (swarm.currentMode == Swarm.Mode.Queen && swarm.server != null) {
                     swarm.server.sendMessage(context.getInput());
-                }
-                else{
-                    scatter(context.getArgument("radius",Integer.class));
+                } else {
+                    scatter(context.getArgument("radius", Integer.class));
                 }
             }
             return SINGLE_SUCCESS;

@@ -27,22 +27,21 @@ public class AntiAnvil extends Module {
             .build()
     );
 
-    public AntiAnvil(){
+    public AntiAnvil() {
         super(Category.Combat, "anti-anvil", "Automatically prevents Auto Anvil by placing obsidian above you.");
     }
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        for (int i = 2; i <= mc.interactionManager.getReachDistance() + 2; i++){
-            if (mc.world.getBlockState(mc.player.getBlockPos().add(0, i, 0)).getBlock() == Blocks.ANVIL && mc.world.getBlockState(mc.player.getBlockPos().add(0, i - 1, 0)).isAir()){
+        for (int i = 2; i <= mc.interactionManager.getReachDistance() + 2; i++) {
+            if (mc.world.getBlockState(mc.player.getBlockPos().add(0, i, 0)).getBlock() == Blocks.ANVIL && mc.world.getBlockState(mc.player.getBlockPos().add(0, i - 1, 0)).isAir()) {
                 int slot = InvUtils.findItemWithCount(Items.OBSIDIAN).slot;
                 boolean stop = false;
 
                 if (slot != 1 && slot < 9) {
                     firstThing(i, slot);
                     stop = true;
-                }
-                else if (mc.player.getOffHandStack().getItem() == Items.OBSIDIAN){
+                } else if (mc.player.getOffHandStack().getItem() == Items.OBSIDIAN) {
                     firstThing(i, -1);
                     stop = true;
                 }
@@ -58,7 +57,8 @@ public class AntiAnvil extends Module {
     }
 
     private void doThing(int i, int slot) {
-        if (slot != -1) PlayerUtils.placeBlock(mc.player.getBlockPos().add(0, i - 2, 0), slot, InvUtils.getHand(Items.OBSIDIAN));
-        else PlayerUtils.placeBlock(mc.player.getBlockPos().add(0, i - 2, 0),  InvUtils.getHand(Items.OBSIDIAN));
+        if (slot != -1)
+            PlayerUtils.placeBlock(mc.player.getBlockPos().add(0, i - 2, 0), slot, InvUtils.getHand(Items.OBSIDIAN));
+        else PlayerUtils.placeBlock(mc.player.getBlockPos().add(0, i - 2, 0), InvUtils.getHand(Items.OBSIDIAN));
     }
 }

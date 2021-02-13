@@ -81,7 +81,8 @@ public class FreeRotate extends Module {
         cameraPitch = mc.player.pitch;
         prePers = mc.options.getPerspective();
 
-        if (prePers != Perspective.THIRD_PERSON_BACK &&  togglePerpective.get()) mc.options.setPerspective(Perspective.THIRD_PERSON_BACK);
+        if (prePers != Perspective.THIRD_PERSON_BACK && togglePerpective.get())
+            mc.options.setPerspective(Perspective.THIRD_PERSON_BACK);
     }
 
     @Override

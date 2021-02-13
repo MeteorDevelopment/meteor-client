@@ -81,11 +81,11 @@ public class HUD extends Module {
     // Active Modules
 
     public final Setting<ActiveModulesHud.Sort> activeModulesSort = sgActiveModules.add(new EnumSetting.Builder<ActiveModulesHud.Sort>()
-            .name("active-modules-sort")
-            .description("How to sort active modules.")
-            .defaultValue(ActiveModulesHud.Sort.Biggest)
+                    .name("active-modules-sort")
+                    .description("How to sort active modules.")
+                    .defaultValue(ActiveModulesHud.Sort.Biggest)
 //            .onChanged(sort -> activeModulesHud.recalculate())
-            .build()
+                    .build()
     );
 
     public final Setting<Boolean> activeInfo = sgActiveModules.add(new BoolSetting.Builder()

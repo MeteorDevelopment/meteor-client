@@ -27,7 +27,7 @@ public class PathFinder {
     private PathBlock currentPathBlock;
     private final MinecraftClient mc;
 
-    public PathFinder(){
+    public PathFinder() {
         mc = MinecraftClient.getInstance();
     }
 
@@ -157,7 +157,7 @@ public class PathFinder {
     }
 
     public void lookAtDestination(PathBlock pathBlock) {
-        if(mc.player != null) {
+        if (mc.player != null) {
             mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, new Vec3d(pathBlock.blockPos.getX(), pathBlock.blockPos.getY() + mc.player.getStandingEyeHeight(), pathBlock.blockPos.getZ()));
         }
     }

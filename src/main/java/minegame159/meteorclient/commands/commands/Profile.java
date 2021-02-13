@@ -34,13 +34,12 @@ public class Profile extends Command {
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
-
         builder.then(literal("load")
                 .then(argument("profile", ProfileArgumentType.profile()).executes(context -> {
                     String profile = context.getArgument("profile", String.class);
 
                     ProfileUtils.load(profile);
-                    ChatUtils.prefixInfo("Profiles","Loaded profile (highlight)" + profile + "(default).");
+                    ChatUtils.prefixInfo("Profiles", "Loaded profile (highlight)" + profile + "(default).");
 
                     return SINGLE_SUCCESS;
                 })));
@@ -50,7 +49,7 @@ public class Profile extends Command {
                     String profile = context.getArgument("name", String.class);
 
                     ProfileUtils.save(profile);
-                    ChatUtils.prefixInfo("Profiles","Saved profile (highlight)" + profile + "(default).");
+                    ChatUtils.prefixInfo("Profiles", "Saved profile (highlight)" + profile + "(default).");
 
                     return SINGLE_SUCCESS;
                 })));
@@ -60,7 +59,7 @@ public class Profile extends Command {
                     String profile = context.getArgument("profile", String.class);
 
                     ProfileUtils.delete(profile);
-                    ChatUtils.prefixInfo("Profiles","Deleted profile (highlight)" + profile + "(default).");
+                    ChatUtils.prefixInfo("Profiles", "Deleted profile (highlight)" + profile + "(default).");
 
                     return SINGLE_SUCCESS;
                 })));

@@ -15,7 +15,7 @@ public class OnlinePlayers {
 
         if (time - lastPingTime > 5 * 60 * 1000) {
             MeteorExecutor.execute(() -> {
-                String url = "http://meteorclient.com/api/online/ping";
+                String url = "https://meteorclient.com/api/online/ping";
 
                 String uuid = MinecraftClient.getInstance().getSession().getUuid();
                 if (uuid != null && !uuid.isEmpty()) url += "?uuid=" + uuid;
@@ -28,6 +28,6 @@ public class OnlinePlayers {
     }
 
     public static void leave() {
-        MeteorExecutor.execute(() -> HttpUtils.post("http://meteorclient.com/api/online/leave"));
+        MeteorExecutor.execute(() -> HttpUtils.post("https://meteorclient.com/api/online/leave"));
     }
 }

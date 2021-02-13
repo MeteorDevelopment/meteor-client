@@ -13,7 +13,8 @@ public class WDoubleEdit extends WTable {
 
     public WDoubleEdit(double value, double sliderMin, double sliderMax, int decimalPlaces, boolean noSlider, double sliderWidth) {
         textBox = add(new WDoubleTextBox(value, 60, decimalPlaces)).getWidget();
-        if (!noSlider) slider = add(new WSlider(value, sliderMin, sliderMax, sliderWidth)).fillX().expandX().getWidget();
+        if (!noSlider)
+            slider = add(new WSlider(value, sliderMin, sliderMax, sliderWidth)).fillX().expandX().getWidget();
 
         textBox.action = () -> {
             if (slider != null) slider.value = textBox.getValue();

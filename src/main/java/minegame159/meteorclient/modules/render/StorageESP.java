@@ -106,12 +106,14 @@ public class StorageESP extends Module {
 
         if (!storageBlocks.get().contains(blockEntity.getType())) return;
 
-        if (blockEntity instanceof TrappedChestBlockEntity) lineColor.set(trappedChest.get()); // Must come before ChestBlockEntity as it is the superclass of TrappedChestBlockEntity
+        if (blockEntity instanceof TrappedChestBlockEntity)
+            lineColor.set(trappedChest.get()); // Must come before ChestBlockEntity as it is the superclass of TrappedChestBlockEntity
         else if (blockEntity instanceof ChestBlockEntity) lineColor.set(chest.get());
         else if (blockEntity instanceof BarrelBlockEntity) lineColor.set(barrel.get());
         else if (blockEntity instanceof ShulkerBoxBlockEntity) lineColor.set(shulker.get());
         else if (blockEntity instanceof EnderChestBlockEntity) lineColor.set(enderChest.get());
-        else if (blockEntity instanceof FurnaceBlockEntity || blockEntity instanceof DispenserBlockEntity || blockEntity instanceof HopperBlockEntity) lineColor.set(other.get());
+        else if (blockEntity instanceof FurnaceBlockEntity || blockEntity instanceof DispenserBlockEntity || blockEntity instanceof HopperBlockEntity)
+            lineColor.set(other.get());
         else return;
 
         render = true;
@@ -162,7 +164,8 @@ public class StorageESP extends Module {
 
                 double dist = mc.player.squaredDistanceTo(blockEntity.getPos().getX() + 0.5, blockEntity.getPos().getY() + 0.5, blockEntity.getPos().getZ() + 0.5);
                 double a = 1;
-                if (dist <= fadeDistance.get() * fadeDistance.get()) a = dist / (fadeDistance.get() * fadeDistance.get());
+                if (dist <= fadeDistance.get() * fadeDistance.get())
+                    a = dist / (fadeDistance.get() * fadeDistance.get());
 
                 int prevLineA = lineColor.a;
                 int prevSideA = sideColor.a;

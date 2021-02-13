@@ -174,7 +174,7 @@ public class NoRender extends Module {
             .defaultValue(false)
             .build()
     );
-    
+
     private final Setting<Boolean> noSkylightUpdates = sgGeneral.add(new BoolSetting.Builder()
             .name("no-skylight-updates")
             .description("Disables rendering of skylight updates. Useful for lag machines")
@@ -284,7 +284,7 @@ public class NoRender extends Module {
     public boolean noEatParticles() {
         return isActive() && noEatParticles.get();
     }
-    
+
     public boolean noSkylightUpdates() {
         return isActive() && noSkylightUpdates.get();
     }

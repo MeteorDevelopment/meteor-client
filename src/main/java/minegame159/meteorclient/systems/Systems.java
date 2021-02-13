@@ -61,6 +61,7 @@ public class Systems {
 
         MeteorClient.LOG.info("Saved in {} milliseconds", java.lang.System.currentTimeMillis() - start);
     }
+
     public static void save() {
         save(null);
     }
@@ -81,9 +82,11 @@ public class Systems {
 
         MeteorClient.LOG.info("Loaded in {} milliseconds", java.lang.System.currentTimeMillis() - start);
     }
+
     public static void load(File folder) {
         load(false, folder);
     }
+
     public static void load() {
         load(null);
     }

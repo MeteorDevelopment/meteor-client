@@ -19,7 +19,6 @@ public class SwarmSlave extends Command {
         super("swarm", "(highlight)slave (default)- Slave this account to the Queen.");
     }
 
-
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.then(literal("slave").executes(context -> {

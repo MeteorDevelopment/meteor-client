@@ -21,6 +21,7 @@ public class MiddleClickFriend extends Module {
     @EventHandler
     private void onMiddleMouseButton(MiddleMouseButtonEvent event) {
         if (mc.currentScreen != null) return;
-        if (mc.targetedEntity instanceof PlayerEntity) Friends.get().addOrRemove(new Friend((PlayerEntity) mc.targetedEntity));
+        if (mc.targetedEntity instanceof PlayerEntity)
+            Friends.get().addOrRemove(new Friend((PlayerEntity) mc.targetedEntity));
     }
 }

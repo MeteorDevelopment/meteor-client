@@ -239,7 +239,7 @@ public class BedAura extends Module {
 
     private Stage stage;
 
-    public BedAura(){
+    public BedAura() {
         super(Category.Combat, "bed-aura", "Automatically places and explodes beds in the Nether and End.");
     }
 
@@ -319,7 +319,7 @@ public class BedAura extends Module {
         Hand hand = InvUtils.getHand(itemStack -> itemStack.getItem() instanceof BedItem);
         if (hand == null) return;
 
-        Rotations.rotate(yawFromDir(direction), mc.player.pitch, () -> BlockUtils.place(pos, hand, slot, false, 100, !noSwing.get(), true, autoSwitch.get(), swapBack.get()));
+         Rotations.rotate(yawFromDir(direction), mc.player.pitch, () -> BlockUtils.place(pos, hand, slot, false, 100, !noSwing.get(), true, autoSwitch.get(), swapBack.get()));
     }
 
     private void breakBed(BlockPos pos) {
@@ -398,19 +398,23 @@ public class BedAura extends Module {
         if (InvUtils.findItemInHotbar(itemStack -> itemStack.getItem() instanceof BedItem) == -1) {
             int slot = InvUtils.findItemInMain(itemStack -> itemStack.getItem() instanceof BedItem);
             List<Integer> slots = new ArrayList<>();
-            slots.add(InvUtils.invIndexToSlotId(autoMoveSlot.get()-1));
+            slots.add(InvUtils.invIndexToSlotId(autoMoveSlot.get() - 1));
             slots.add(InvUtils.invIndexToSlotId(slot));
-            slots.add(InvUtils.invIndexToSlotId(autoMoveSlot.get()-1));
+            slots.add(InvUtils.invIndexToSlotId(autoMoveSlot.get() - 1));
             InvUtils.addSlots(slots, this.getClass());
         }
     }
 
     private float yawFromDir(Direction direction) {
         switch (direction) {
-            case EAST:  return 90;
-            case NORTH: return 0;
-            case SOUTH: return 180;
-            case WEST:  return -90;
+            case EAST:
+                return 90;
+            case NORTH:
+                return 0;
+            case SOUTH:
+                return 180;
+            case WEST:
+                return -90;
         }
         return 0;
     }

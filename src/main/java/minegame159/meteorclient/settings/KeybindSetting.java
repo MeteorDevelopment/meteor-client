@@ -32,7 +32,8 @@ public class KeybindSetting extends Setting<Integer> {
     private void onKey(KeyEvent event) {
         ((WKeybind) widget).onKey(event.key);
 
-        if (event.action == KeyAction.Release && event.key == get() && module.isActive() && action != null) action.run();
+        if (event.action == KeyAction.Release && event.key == get() && module.isActive() && action != null)
+            action.run();
     }
 
     @Override

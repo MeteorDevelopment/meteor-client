@@ -65,7 +65,8 @@ public class ItemByteSize extends Module {
     }
 
     public String bytesToString(int count) {
-        if (useKbIfBigEnoughEnabled.get() && count >= getKbSize()) return String.format("%.2f kb", count / (float) getKbSize());
+        if (useKbIfBigEnoughEnabled.get() && count >= getKbSize())
+            return String.format("%.2f kb", count / (float) getKbSize());
         return String.format("%d bytes", count);
     }
 }

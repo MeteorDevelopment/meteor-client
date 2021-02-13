@@ -23,7 +23,7 @@ import java.util.List;
 
 public class AutoDrop extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    
+
     private final Setting<List<Item>> items = sgGeneral.add(new ItemListSetting.Builder()
             .name("items")
             .description("Items to drop.")

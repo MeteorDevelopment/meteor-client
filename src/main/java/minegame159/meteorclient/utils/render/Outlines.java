@@ -5,6 +5,7 @@
 
 package minegame159.meteorclient.utils.render;
 
+import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.mixin.WorldRendererAccessor;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.Framebuffer;
@@ -33,7 +34,7 @@ public class Outlines {
             }
 
             loadingOutlineShader = true;
-            outlinesShader = new ShaderEffect(mc.getTextureManager(), mc.getResourceManager(), mc.getFramebuffer(), new Identifier("meteor-client", "shaders/post/my_entity_outline.json"));
+            outlinesShader = new ShaderEffect(mc.getTextureManager(), mc.getResourceManager(), mc.getFramebuffer(), new Identifier(MeteorClient.ID, "shaders/post/my_entity_outline.json"));
             outlinesShader.setupDimensions(mc.getWindow().getFramebufferWidth(), mc.getWindow().getFramebufferHeight());
             outlinesFbo = outlinesShader.getSecondaryTarget("final");
             vertexConsumerProvider = new OutlineVertexConsumerProvider(mc.getBufferBuilders().getEntityVertexConsumers());

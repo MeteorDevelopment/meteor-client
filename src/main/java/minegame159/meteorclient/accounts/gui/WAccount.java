@@ -19,7 +19,8 @@ public class WAccount extends WTable {
 
         // Name
         WLabel name = add(new WLabel(account.getUsername())).getWidget();
-        if (MinecraftClient.getInstance().getSession().getUsername().equalsIgnoreCase(account.getUsername())) name.color = GuiConfig.get().loggedInText;
+        if (MinecraftClient.getInstance().getSession().getUsername().equalsIgnoreCase(account.getUsername()))
+            name.color = GuiConfig.get().loggedInText;
 
         // Account Type
         WLabel type = add(new WLabel("(" + account.getType() + ")")).fillX().right().getWidget();

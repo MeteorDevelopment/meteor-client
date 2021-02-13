@@ -138,8 +138,7 @@ public class AutoFish extends Module {
                 Utils.rightClick();
                 ticksToRightClick = ticksThrow.get();
                 ticksData = 1;
-            }
-            else if (ticksData == 1) {
+            } else if (ticksData == 1) {
                 Utils.rightClick();
                 ticksEnabled = false;
             }

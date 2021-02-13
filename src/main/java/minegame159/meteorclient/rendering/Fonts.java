@@ -13,11 +13,13 @@ import java.io.*;
 public class Fonts {
     public static void reset() {
         File[] files = MeteorClient.FOLDER.exists() ? MeteorClient.FOLDER.listFiles() : new File[0];
-        if (files != null) {
-            for (File file : files) {
-                if (file.getName().endsWith(".ttf") || file.getName().endsWith(".TTF")) {
-                    file.delete();
-                }
+        if (files == null) {
+            return;
+        }
+        for (File file : files) {
+            String fileName = file.getName().toLowerCase();
+            if (fileName.endsWith(".ttf")) {
+                file.delete();
             }
         }
     }
@@ -37,9 +39,11 @@ public class Fonts {
         if (fontFile == null) {
             try {
                 fontFile = new File(MeteorClient.FOLDER, "JetBrainsMono-Regular.ttf");
-                fontFile.getParentFile().mkdirs();
+                if (!fontFile.getParentFile().mkdirs())
+                    throw new IOException("meteor-client directory could not be created");
 
                 InputStream in = MeteorClient.class.getResourceAsStream("/assets/meteor-client/JetBrainsMono-Regular.ttf");
+                if (in == null) throw new IOException("JetbrainsMono-Regular.ttf could not be found");
                 OutputStream out = new FileOutputStream(fontFile);
 
                 byte[] bytes = new byte[255];

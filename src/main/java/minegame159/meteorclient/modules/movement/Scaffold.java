@@ -97,7 +97,8 @@ public class Scaffold extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        if (fastTower.get() && !mc.world.getBlockState(setPos(0, -1, 0)).getMaterial().isReplaceable() && mc.options.keyJump.isPressed() && findSlot(mc.world.getBlockState(setPos(0, -1, 0))) != -1 && mc.player.sidewaysSpeed == 0 &&mc.player.forwardSpeed == 0) mc.player.jump();
+        if (fastTower.get() && !mc.world.getBlockState(setPos(0, -1, 0)).getMaterial().isReplaceable() && mc.options.keyJump.isPressed() && findSlot(mc.world.getBlockState(setPos(0, -1, 0))) != -1 && mc.player.sidewaysSpeed == 0 && mc.player.forwardSpeed == 0)
+            mc.player.jump();
         blockState = mc.world.getBlockState(setPos(0, -1, 0));
         if (!blockState.getMaterial().isReplaceable()) return;
 
@@ -125,33 +126,33 @@ public class Scaffold extends Module {
 
             // Forward
             for (int j = 0; j < count; j++) {
-                if (!findBlock()) return;
+                if (noBlocksLeft()) return;
                 place(setPos(j - countHalf, -1, i), slot);
             }
             // Backward
             for (int j = 0; j < count; j++) {
-                if (!findBlock()) return;
+                if (noBlocksLeft()) return;
                 place(setPos(j - countHalf, -1, -i), slot);
             }
             // Right
             for (int j = 0; j < count; j++) {
-                if (!findBlock()) return;
+                if (noBlocksLeft()) return;
                 place(setPos(i, -1, j - countHalf), slot);
             }
             // Left
             for (int j = 0; j < count; j++) {
-                if (!findBlock()) return;
+                if (noBlocksLeft()) return;
                 place(setPos(-i, -1, j - countHalf), slot);
             }
 
             // Diagonals
-            if (!findBlock()) return;
+            if (noBlocksLeft()) return;
             place(setPos(-i, -1, i), slot);
-            if (!findBlock()) return;
+            if (noBlocksLeft()) return;
             place(setPos(i, -1, i), slot);
-            if (!findBlock()) return;
+            if (noBlocksLeft()) return;
             place(setPos(-i, -1, -i), slot);
-            if (!findBlock()) return;
+            if (noBlocksLeft()) return;
             place(setPos(i, -1, -i), slot);
         }
     }
@@ -166,16 +167,16 @@ public class Scaffold extends Module {
         if (safeWalk.get()) event.setClip(true);
     }
 
-    private boolean findBlock() {
+    private boolean noBlocksLeft() {
         if (mc.player.inventory.getStack(slot).isEmpty()) {
             slot = findSlot(blockState);
             if (slot == -1) {
                 if (selfToggle.get()) this.toggle();
-                return false;
+                return true;
             }
         }
 
-        return true;
+        return false;
     }
 
     private void place(BlockPos blockPos, int slot) {

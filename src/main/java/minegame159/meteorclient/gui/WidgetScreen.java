@@ -194,7 +194,8 @@ public abstract class WidgetScreen extends Screen {
         }
     }
 
-    protected void onClosed() {}
+    protected void onClosed() {
+    }
 
     @Override
     public boolean shouldCloseOnEsc() {

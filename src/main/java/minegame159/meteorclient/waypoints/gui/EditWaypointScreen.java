@@ -35,9 +35,15 @@ public class EditWaypointScreen extends WindowScreen {
             this.waypoint.actualDimension = Utils.getDimension();
 
             switch (Utils.getDimension()) {
-                case Overworld: this.waypoint.overworld = true; break;
-                case Nether:    this.waypoint.nether = true; break;
-                case End:       this.waypoint.end = true; break;
+                case Overworld:
+                    this.waypoint.overworld = true;
+                    break;
+                case Nether:
+                    this.waypoint.nether = true;
+                    break;
+                case End:
+                    this.waypoint.end = true;
+                    break;
             }
         }
 

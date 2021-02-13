@@ -69,12 +69,16 @@ public abstract class Module implements ISerializable<Module> {
     public void doAction(boolean onActivateDeactivate) {
         toggle(onActivateDeactivate);
     }
+
     public void doAction() {
         doAction(true);
     }
 
-    public void onActivate() {}
-    public void onDeactivate() {}
+    public void onActivate() {
+    }
+
+    public void onDeactivate() {
+    }
 
     public void toggle(boolean onActivateDeactivate) {
         if (!active) {
@@ -91,8 +95,7 @@ public abstract class Module implements ISerializable<Module> {
                 MeteorClient.EVENT_BUS.subscribe(this);
                 onActivate();
             }
-        }
-        else {
+        } else {
             active = false;
             Modules.get().removeActive(this);
 
@@ -102,6 +105,7 @@ public abstract class Module implements ISerializable<Module> {
             }
         }
     }
+
     public void toggle() {
         toggle(true);
     }
@@ -157,13 +161,15 @@ public abstract class Module implements ISerializable<Module> {
     }
 
     public void sendToggledMsg() {
-        if (Config.get().chatCommandsInfo) ChatUtils.info(42069, "Toggled (highlight)%s(default) %s(default).", title, isActive() ? Formatting.GREEN + "on" : Formatting.RED + "off");
+        if (Config.get().chatCommandsInfo)
+            ChatUtils.info(42069, "Toggled (highlight)%s(default) %s(default).", title, isActive() ? Formatting.GREEN + "on" : Formatting.RED + "off");
     }
 
     public void setKey(int key, boolean postEvent) {
         this.key = key;
         if (postEvent) MeteorClient.EVENT_BUS.post(ModuleBindChangedEvent.get(this));
     }
+
     public void setKey(int key) {
         setKey(key, true);
     }

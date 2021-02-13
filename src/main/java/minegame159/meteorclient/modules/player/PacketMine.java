@@ -157,7 +157,8 @@ public class PacketMine extends Module {
         }
 
         public void mine() {
-            if (rotate.get()) Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), 50, this::sendMinePackets);
+            if (rotate.get())
+                Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), 50, this::sendMinePackets);
             else sendMinePackets();
         }
 
@@ -169,8 +170,7 @@ public class PacketMine extends Module {
 
                     mining = true;
                 }
-            }
-            else {
+            } else {
                 timer--;
             }
         }

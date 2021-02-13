@@ -29,7 +29,7 @@ public class EntityTypeListSetting extends Setting<Object2BooleanMap<EntityType<
 
         this.onlyAttackable = onlyAttackable;
         value = new Object2BooleanOpenHashMap<>(defaultValue);
-        
+
         widget = new WButton("Select");
         ((WButton) widget).action = () -> MinecraftClient.getInstance().openScreen(new EntityTypeListSettingScreen(this));
     }

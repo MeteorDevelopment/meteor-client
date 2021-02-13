@@ -12,7 +12,8 @@ import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(HorseBaseEntity.class)
 public abstract class HorseBaseEntityMixin implements IHorseBaseEntity {
-    @Shadow protected abstract void setHorseFlag(int bitmask, boolean flag);
+    @Shadow
+    protected abstract void setHorseFlag(int bitmask, boolean flag);
 
     @Override
     public void setSaddled(boolean saddled) {

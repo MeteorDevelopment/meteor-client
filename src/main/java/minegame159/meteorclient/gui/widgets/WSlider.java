@@ -45,7 +45,7 @@ public class WSlider extends WWidget {
         if (used) return false;
 
         if (mouseOver) {
-            double valueWidth = lastMouseX - (x + getHandleSize()/2);
+            double valueWidth = lastMouseX - (x + getHandleSize() / 2);
             value = (valueWidth / (width - getHandleSize())) * (max - min) + min;
             if (action != null) action.accept(this);
 
@@ -67,10 +67,10 @@ public class WSlider extends WWidget {
         double valuePercentage = (value - min) / (max - min);
         double valueWidth = valuePercentage * (width - getHandleSize());
 
-        double x = this.x + getHandleSize()/2 + valueWidth - height / 2;
-        handleMouseOver =  mouseX >= x && mouseX <= x + height && mouseY >= y && mouseY <= y + height;
+        double x = this.x + getHandleSize() / 2 + valueWidth - height / 2;
+        handleMouseOver = mouseX >= x && mouseX <= x + height && mouseY >= y && mouseY <= y + height;
 
-        boolean mouseOverX = mouseX >= this.x + getHandleSize()/2 && mouseX <= this.x + getHandleSize()/2 + width - getHandleSize();
+        boolean mouseOverX = mouseX >= this.x + getHandleSize() / 2 && mouseX <= this.x + getHandleSize() / 2 + width - getHandleSize();
         mouseOver = mouseOverX && mouseY >= this.y && mouseY <= this.y + height;
 
         if (dragging) {
@@ -81,10 +81,10 @@ public class WSlider extends WWidget {
                 value = (valueWidth / (width - getHandleSize())) * (max - min) + min;
                 if (action != null) action.accept(this);
             } else {
-                if (value > min && mouseX < this.x + getHandleSize()/2) {
+                if (value > min && mouseX < this.x + getHandleSize() / 2) {
                     value = min;
                     if (action != null) action.accept(this);
-                } else if (value < max && mouseX > this.x + getHandleSize()/2 + width - getHandleSize()) {
+                } else if (value < max && mouseX > this.x + getHandleSize() / 2 + width - getHandleSize()) {
                     value = max;
                     if (action != null) action.accept(this);
                 }
@@ -102,8 +102,8 @@ public class WSlider extends WWidget {
 
         double s = GuiConfig.get().guiScale;
 
-        renderer.quad(Region.FULL, x + getHandleSize()/2, y + 6 * s, valueWidth, 3 * s, GuiConfig.get().sliderLeft);
-        renderer.quad(Region.FULL, x + getHandleSize()/2 + valueWidth, y + 6 * s, width - valueWidth - getHandleSize(), 3 * s, GuiConfig.get().sliderRight);
+        renderer.quad(Region.FULL, x + getHandleSize() / 2, y + 6 * s, valueWidth, 3 * s, GuiConfig.get().sliderLeft);
+        renderer.quad(Region.FULL, x + getHandleSize() / 2 + valueWidth, y + 6 * s, width - valueWidth - getHandleSize(), 3 * s, GuiConfig.get().sliderRight);
 
         Color handleColor;
         if (dragging) handleColor = GuiConfig.get().sliderHandlePressed;

@@ -6,6 +6,7 @@
 package minegame159.meteorclient.utils.render;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import minegame159.meteorclient.MeteorClient;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.widget.AbstractPressableButtonWidget;
@@ -15,9 +16,10 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
 public class MeteorButtonWidget extends AbstractPressableButtonWidget {
-    public static final Identifier BUTTON_TEXTURE = new Identifier("meteor-client", "meteor-button.png");
+    public static final Identifier BUTTON_TEXTURE = new Identifier(MeteorClient.ID, "meteor-button.png");
 
-    public static final MeteorButtonWidget.TooltipSupplier EMPTY = (button, matrices, mouseX, mouseY) -> {};
+    public static final MeteorButtonWidget.TooltipSupplier EMPTY = (button, matrices, mouseX, mouseY) -> {
+    };
     protected final MeteorButtonWidget.PressAction onPress;
     protected final MeteorButtonWidget.TooltipSupplier tooltipSupplier;
 

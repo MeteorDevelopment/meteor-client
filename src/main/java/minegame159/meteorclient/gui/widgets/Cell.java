@@ -33,14 +33,17 @@ public class Cell<T extends WWidget> {
         spaceTop = space;
         return this;
     }
+
     public Cell<T> spaceRight(double space) {
         spaceRight = space;
         return this;
     }
+
     public Cell<T> spaceBottom(double space) {
         spaceBottom = space;
         return this;
     }
+
     public Cell<T> spaceLeft(double space) {
         spaceLeft = space;
         return this;
@@ -51,11 +54,13 @@ public class Cell<T extends WWidget> {
         spaceLeft = space;
         return this;
     }
+
     public Cell<T> spaceVertical(double space) {
         spaceTop = space;
         spaceBottom = space;
         return this;
     }
+
     public Cell<T> space(double space) {
         spaceTop = spaceRight = spaceBottom = spaceLeft = space;
         return this;
@@ -67,14 +72,17 @@ public class Cell<T extends WWidget> {
         padTop = pad;
         return this;
     }
+
     public Cell<T> padRight(double pad) {
         padRight = pad;
         return this;
     }
+
     public Cell<T> padBottom(double pad) {
         padBottom = pad;
         return this;
     }
+
     public Cell<T> padLeft(double pad) {
         padLeft = pad;
         return this;
@@ -84,10 +92,12 @@ public class Cell<T extends WWidget> {
         padRight = padLeft = pad;
         return this;
     }
+
     public Cell<T> padVertical(double pad) {
         padTop = padBottom = pad;
         return this;
     }
+
     public Cell<T> pad(double pad) {
         padTop = padRight = padBottom = padLeft = pad;
         return this;
@@ -99,6 +109,7 @@ public class Cell<T extends WWidget> {
         expandX = true;
         return this;
     }
+
     public Cell<T> expandY() {
         expandY = true;
         return this;
@@ -117,10 +128,12 @@ public class Cell<T extends WWidget> {
         alignX = AlignmentX.Right;
         return this;
     }
+
     public Cell<T> centerX() {
         alignX = AlignmentX.Center;
         return this;
     }
+
     public Cell<T> left() {
         alignX = AlignmentX.Left;
         return this;
@@ -130,10 +143,12 @@ public class Cell<T extends WWidget> {
         alignY = AlignmentY.Top;
         return this;
     }
+
     public Cell<T> centerY() {
         alignY = AlignmentY.Center;
         return this;
     }
+
     public Cell<T> bottom() {
         alignY = AlignmentY.Bottom;
         return this;
@@ -170,9 +185,15 @@ public class Cell<T extends WWidget> {
             widget.width = width;
         } else {
             switch (alignX) {
-                case Left:   widget.x = x; break;
-                case Center: widget.x = x + width / 2 - widget.width / 2; break;
-                case Right:  widget.x = x + width - widget.width; break;
+                case Left:
+                    widget.x = x;
+                    break;
+                case Center:
+                    widget.x = x + width / 2 - widget.width / 2;
+                    break;
+                case Right:
+                    widget.x = x + width - widget.width;
+                    break;
             }
         }
 
@@ -181,16 +202,32 @@ public class Cell<T extends WWidget> {
             widget.height = height;
         } else {
             switch (alignY) {
-                case Top:    widget.y = y; break;
-                case Center: widget.y = y + height / 2 - widget.height / 2; break;
-                case Bottom: widget.y = y + height - widget.height; break;
+                case Top:
+                    widget.y = y;
+                    break;
+                case Center:
+                    widget.y = y + height / 2 - widget.height / 2;
+                    break;
+                case Bottom:
+                    widget.y = y + height - widget.height;
+                    break;
             }
         }
     }
 
-    public double getX() { return x; }
-    public double getY() { return y; }
+    public double getX() {
+        return x;
+    }
 
-    public double getWidth() { return width; }
-    public double getHeight() { return height; }
+    public double getY() {
+        return y;
+    }
+
+    public double getWidth() {
+        return width;
+    }
+
+    public double getHeight() {
+        return height;
+    }
 }

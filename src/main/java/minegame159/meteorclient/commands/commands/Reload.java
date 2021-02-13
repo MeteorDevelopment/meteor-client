@@ -13,6 +13,7 @@ import net.minecraft.command.CommandSource;
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
 public class Reload extends Command {
+
     public Reload() {
         super("reload", "Reloads the config, modules, friends, macros and accounts.");
     }

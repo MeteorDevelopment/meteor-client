@@ -58,6 +58,7 @@ public abstract class Setting<T> implements ISerializable<T> {
             changed();
         }
     }
+
     public void reset() {
         reset(true);
     }

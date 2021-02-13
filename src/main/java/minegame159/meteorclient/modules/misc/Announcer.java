@@ -388,10 +388,12 @@ public class Announcer extends Module {
         }
 
         @Override
-        void reset() {}
+        void reset() {
+        }
 
         @Override
-        void tick() {}
+        void tick() {
+        }
 
         @EventHandler
         private void onOpenScreen(OpenScreenEvent event) {

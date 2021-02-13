@@ -55,7 +55,7 @@ public class StashFinder extends Module {
             .min(1)
             .build()
     );
-    
+
     private final Setting<Integer> minimumDistance = sgGeneral.add(new IntSetting.Builder()
             .name("minimum-distance")
             .description("The minimum distance you must be from spawn to record a certain chunk.")
@@ -142,7 +142,7 @@ public class StashFinder extends Module {
                         }
                     });
                 } else
-                    ChatUtils.moduleInfo(this,"(highlight)Found stash.");
+                    ChatUtils.moduleInfo(this, "(highlight)Found stash.");
             }
         }
     }
@@ -206,7 +206,8 @@ public class StashFinder extends Module {
         if (file.exists()) {
             try {
                 FileReader reader = new FileReader(file);
-                chunks = GSON.fromJson(reader, new TypeToken<List<Chunk>>() {}.getType());
+                chunks = GSON.fromJson(reader, new TypeToken<List<Chunk>>() {
+                }.getType());
                 reader.close();
 
                 for (Chunk chunk : chunks) chunk.calculatePos();

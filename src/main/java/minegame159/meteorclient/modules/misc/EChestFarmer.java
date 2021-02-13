@@ -33,11 +33,11 @@ import net.minecraft.util.math.Direction;
 public class EChestFarmer extends Module {
     private static final BlockState ENDER_CHEST = Blocks.ENDER_CHEST.getDefaultState();
 
-    public EChestFarmer(){
+    public EChestFarmer() {
         super(Category.Misc, "EChest-farmer", "Places and mines Ender Chests where you're looking.");
     }
 
-    private final SettingGroup sgGeneral  = settings.getDefaultGroup();
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Integer> amount = sgGeneral.add(new IntSetting.Builder()
             .name("target-amount")
@@ -67,7 +67,7 @@ public class EChestFarmer extends Module {
     );
 
     private boolean stop = false;
-    private int numLeft = Math.floorDiv(amount.get() , 8);
+    private int numLeft = Math.floorDiv(amount.get(), 8);
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
@@ -82,7 +82,7 @@ public class EChestFarmer extends Module {
         }
         InvUtils.FindItemResult itemResult = InvUtils.findItemWithCount(Items.ENDER_CHEST);
         int slot = -1;
-        if(itemResult.count != 0 && itemResult.slot < 9 && itemResult.slot != -1) {
+        if (itemResult.count != 0 && itemResult.slot < 9 && itemResult.slot != -1) {
             for (int i = 0; i < 9; i++) {
                 if (Modules.get().get(AutoTool.class).isEffectiveOn(mc.player.inventory.getStack(i).getItem(), ENDER_CHEST)
                         && EnchantmentHelper.getLevel(Enchantments.SILK_TOUCH, mc.player.inventory.getStack(i)) == 0) {
@@ -92,18 +92,18 @@ public class EChestFarmer extends Module {
             if (slot != -1 && itemResult.slot != -1 && itemResult.slot < 9) {
                 if (mc.crosshairTarget.getType() != HitResult.Type.BLOCK) return;
                 BlockPos pos = ((BlockHitResult) mc.crosshairTarget).getBlockPos();
-                if(mc.world.getBlockState(pos).getBlock() == Blocks.ENDER_CHEST){
+                if (mc.world.getBlockState(pos).getBlock() == Blocks.ENDER_CHEST) {
                     if (mc.player.inventory.selectedSlot != slot) {
                         mc.player.inventory.selectedSlot = slot;
                     }
                     mc.interactionManager.updateBlockBreakingProgress(pos, Direction.UP);
                     numLeft -= 1;
-                    if(numLeft == 0){
+                    if (numLeft == 0) {
                         stop = true;
                     }
                 } else if (mc.world.getBlockState(pos.up()).getBlock() == Blocks.AIR) {
                     if (mc.player.inventory.selectedSlot != itemResult.slot)
-                    mc.player.inventory.selectedSlot = itemResult.slot;
+                        mc.player.inventory.selectedSlot = itemResult.slot;
                     PlayerUtils.placeBlock(pos.up(), Hand.MAIN_HAND);
                 }
 

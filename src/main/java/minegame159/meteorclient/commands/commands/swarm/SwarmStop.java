@@ -16,14 +16,14 @@ import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 public class SwarmStop extends Command {
 
     public SwarmStop() {
-        super("swarm","(highlight)stop(default) - Stop all current tasks.");
+        super("swarm", "(highlight)stop(default) - Stop all current tasks.");
     }
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.then(literal("stop").executes(context -> {
             Swarm swarm = Modules.get().get(Swarm.class);
-            if(swarm.isActive()) {
+            if (swarm.isActive()) {
                 if (swarm.currentMode == Swarm.Mode.Queen && swarm.server != null) {
                     swarm.server.sendMessage(context.getInput());
                 } else {

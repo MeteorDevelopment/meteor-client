@@ -17,7 +17,8 @@ import net.minecraft.command.CommandSource;
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
 public class FakePlayerCommand extends Command {
-    public FakePlayerCommand(){
+
+    public FakePlayerCommand() {
         super("fake-player", "Manages fake players that you can use for testing.");
     }
 
@@ -40,9 +41,8 @@ public class FakePlayerCommand extends Command {
 
     private boolean active() {
         if (!Modules.get().isActive(FakePlayer.class)) {
-            ChatUtils.moduleError(Modules.get().get(FakePlayer.class),"The FakePlayer module must be enabled to use this command.");
+            ChatUtils.moduleError(Modules.get().get(FakePlayer.class), "The FakePlayer module must be enabled to use this command.");
             return false;
-        }
-        else return true;
+        } else return true;
     }
 }

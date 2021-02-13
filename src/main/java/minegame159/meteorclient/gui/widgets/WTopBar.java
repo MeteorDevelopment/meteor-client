@@ -63,7 +63,8 @@ public class WTopBar extends WTable {
             else if (mouseOver) color = GuiConfig.get().backgroundHovered;
 
             Screen screen = MinecraftClient.getInstance().currentScreen;
-            if (screen instanceof TopBarScreen && ((TopBarScreen) screen).type == type) color = GuiConfig.get().backgroundPressed;
+            if (screen instanceof TopBarScreen && ((TopBarScreen) screen).type == type)
+                color = GuiConfig.get().backgroundPressed;
 
             renderer.quad(Region.FULL, x, y, width, height, color);
             renderer.text(name, x + 4, y + 4, false, GuiConfig.get().text);

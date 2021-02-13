@@ -15,7 +15,7 @@ public class WAccountField extends WTextBox {
 
     @Override
     protected boolean addChar(char c) {
-        if(c != ' ') {
+        if (c != ' ') {
             return super.addChar(c);
         }
         return false;

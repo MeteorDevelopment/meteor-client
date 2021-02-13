@@ -16,7 +16,7 @@ import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 
 public class ColorSettingScreen extends WindowScreen {
-    private static final Color[] HUE_COLORS = { new Color(255, 0, 0), new Color(255, 255, 0), new Color(0, 255, 0), new Color(0, 255, 255), new Color(0, 0, 255), new Color(255, 0, 255), new Color(255, 0, 0) };
+    private static final Color[] HUE_COLORS = {new Color(255, 0, 0), new Color(255, 255, 0), new Color(0, 255, 0), new Color(0, 255, 255), new Color(0, 0, 255), new Color(255, 0, 255), new Color(255, 0, 0)};
     private static final Color WHITE = new Color(255, 255, 255);
     private static final Color BLACK = new Color(0, 0, 0);
 
@@ -147,7 +147,7 @@ public class ColorSettingScreen extends WindowScreen {
         double b = 0;
         boolean calculated = false;
 
-        if(brightnessQuad.saturation <= 0.0) {
+        if (brightnessQuad.saturation <= 0.0) {
             r = brightnessQuad.value;
             g = brightnessQuad.value;
             b = brightnessQuad.value;
@@ -245,9 +245,9 @@ public class ColorSettingScreen extends WindowScreen {
             double delta = max - min;
 
             value = max / 255;
-            if(delta == 0){
+            if (delta == 0) {
                 saturation = 0;
-            }else {
+            } else {
                 saturation = delta / max;
             }
 
@@ -344,7 +344,8 @@ public class ColorSettingScreen extends WindowScreen {
 
             Color color = GuiConfig.get().colorEditHandle;
             if (dragging) color = GuiConfig.get().colorEditHandlePressed;
-            else if (mouseX >= x + handleX - 1 && mouseX <= x + handleX + 1 && mouseY >= y + handleY - 1 && mouseY <= y + handleY + 1) color = GuiConfig.get().colorEditHandleHovered;
+            else if (mouseX >= x + handleX - 1 && mouseX <= x + handleX + 1 && mouseY >= y + handleY - 1 && mouseY <= y + handleY + 1)
+                color = GuiConfig.get().colorEditHandleHovered;
 
             renderer.quad(Region.FULL, x + handleX - 1, y + handleY - 1, 2, 2, color);
         }
@@ -374,10 +375,10 @@ public class ColorSettingScreen extends WindowScreen {
             double min, max, delta;
 
             min = Math.min(c.r, c.g);
-            min = min  < c.b ? min  : c.b;
+            min = min < c.b ? min : c.b;
 
             max = Math.max(c.r, c.g);
-            max = max  > c.b ? max  : c.b;
+            max = max > c.b ? max : c.b;
 
             delta = max - min;
             if (delta < 0.00001) {
@@ -429,7 +430,7 @@ public class ColorSettingScreen extends WindowScreen {
             int i;
 
             hh = hueAngle;
-            if(hh >= 360.0) hh = 0.0;
+            if (hh >= 360.0) hh = 0.0;
             hh /= 60.0;
             i = (int) hh;
             ff = hh - i;
@@ -441,7 +442,7 @@ public class ColorSettingScreen extends WindowScreen {
             double g;
             double b;
 
-            switch(i) {
+            switch (i) {
                 case 0:
                     r = 1;
                     g = t;
@@ -542,7 +543,8 @@ public class ColorSettingScreen extends WindowScreen {
 
             Color color = GuiConfig.get().colorEditHandle;
             if (dragging) color = GuiConfig.get().colorEditHandlePressed;
-            else if (mouseX >= x + handleX - 1 && mouseX <= x + handleX + 1 && mouseY >= y && mouseY <= y + height) color = GuiConfig.get().colorEditHandleHovered;
+            else if (mouseX >= x + handleX - 1 && mouseX <= x + handleX + 1 && mouseY >= y && mouseY <= y + height)
+                color = GuiConfig.get().colorEditHandleHovered;
 
             renderer.quad(Region.FULL, x + handleX - 1, y, 2, height, color);
         }

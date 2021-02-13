@@ -46,7 +46,7 @@ public class CustomFOV extends Module {
 
     @Override
     public void onDeactivate() {
-     mc.options.fov = _fov;
+        mc.options.fov = _fov;
     }
 
     public CustomFOV() {

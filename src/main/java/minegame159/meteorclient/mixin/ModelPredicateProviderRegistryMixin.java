@@ -22,7 +22,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class ModelPredicateProviderRegistryMixin {
     @Redirect(method = "call(Lnet/minecraft/item/ItemStack;Lnet/minecraft/client/world/ClientWorld;Lnet/minecraft/entity/LivingEntity;)F", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/LivingEntity;yaw:F"))
     private float callLivingEntityGetYaw(LivingEntity entity) {
-        if (Modules.get().isActive(Freecam.class)) return MinecraftClient.getInstance().gameRenderer.getCamera().getYaw();
+        if (Modules.get().isActive(Freecam.class))
+            return MinecraftClient.getInstance().gameRenderer.getCamera().getYaw();
         return entity.yaw;
     }
 

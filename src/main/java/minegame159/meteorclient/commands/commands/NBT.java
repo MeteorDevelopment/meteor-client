@@ -23,6 +23,7 @@ import net.minecraft.util.Formatting;
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
 public class NBT extends Command {
+
     public NBT() {
         super("nbt", "Modifies NBT data for an item, example: .nbt add {display:{Name:'{\"text\":\"$cRed Name\"}'}}");
     }
@@ -58,7 +59,7 @@ public class NBT extends Command {
         builder.then(literal("get").executes(s -> {
             ItemStack stack = mc.player.inventory.getMainHandStack();
             if (stack == null) {
-                ChatUtils.prefixError("NBT","You must hold an item in your main hand.");
+                ChatUtils.prefixError("NBT", "You must hold an item in your main hand.");
             } else {
                 CompoundTag tag = stack.getTag();
                 String nbt = tag == null ? "none" : tag.asString();
@@ -86,11 +87,11 @@ public class NBT extends Command {
         builder.then(literal("copy").executes(s -> {
             ItemStack stack = mc.player.inventory.getMainHandStack();
             if (stack == null) {
-                ChatUtils.prefixError("NBT","You must hold an item in your main hand.");
+                ChatUtils.prefixError("NBT", "You must hold an item in your main hand.");
             } else {
                 CompoundTag tag = stack.getTag();
                 if (tag == null)
-                    ChatUtils.prefixError("NBT","No NBT data on this item.");
+                    ChatUtils.prefixError("NBT", "No NBT data on this item.");
                 else {
                     mc.keyboard.setClipboard(tag.toString());
                     BaseText nbt = new LiteralText("NBT");
@@ -118,12 +119,12 @@ public class NBT extends Command {
 
     private boolean validBasic(ItemStack stack) {
         if (!mc.player.abilities.creativeMode) {
-            ChatUtils.prefixError("NBT","Creative mode only.");
+            ChatUtils.prefixError("NBT", "Creative mode only.");
             return false;
         }
 
         if (stack == null) {
-            ChatUtils.prefixError("NBT","You must hold an item in your main hand.");
+            ChatUtils.prefixError("NBT", "You must hold an item in your main hand.");
             return false;
         }
         return true;

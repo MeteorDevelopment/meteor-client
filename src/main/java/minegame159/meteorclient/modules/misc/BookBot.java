@@ -39,13 +39,14 @@ import java.util.stream.IntStream;
 public class BookBot extends Module {
     private static final int LINE_WIDTH = 113;
 
-    public enum Mode{ // Edna Mode
+    public enum Mode { // Edna Mode
         File,
         Random,
         Ascii
     }
+
     //Didn't add it to the module list cuz I didn't know if it was gonna work.
-    public BookBot(){
+    public BookBot() {
         super(Category.Misc, "book-bot", "Writes an amount of books full of characters or from a file."); //Grammar who? / too ez.
     }
 
@@ -130,21 +131,21 @@ public class BookBot extends Module {
     @EventHandler
     private void onTick(TickEvent.Post event) {
         // Make sure we aren't in the inventory.
-        if(mc.currentScreen instanceof HandledScreen<?>) return;
+        if (mc.currentScreen instanceof HandledScreen<?>) return;
         // If there are no books left to write we are done.
-        if(booksLeft <= 0){
+        if (booksLeft <= 0) {
             toggle();
             return;
         }
         //If the player isn't holding a book
-        if(mc.player.getMainHandStack().getItem() != Items.WRITABLE_BOOK){
+        if (mc.player.getMainHandStack().getItem() != Items.WRITABLE_BOOK) {
             // Find one
             InvUtils.FindItemResult itemResult = InvUtils.findItemWithCount(Items.WRITABLE_BOOK);
             // If it's in their hotbar then just switch to it (no need to switch back later)
             if (itemResult.slot <= 8 && itemResult.slot != -1) {
                 mc.player.inventory.selectedSlot = itemResult.slot;
                 ((IClientPlayerInteractionManager) mc.interactionManager).syncSelectedSlot2();
-            } else if (itemResult.slot > 8){ //Else if it's in their inventory then swap their current item with the writable book
+            } else if (itemResult.slot > 8) { //Else if it's in their inventory then swap their current item with the writable book
                 InvUtils.clickSlot(InvUtils.invIndexToSlotId(itemResult.slot), 0, SlotActionType.PICKUP);
                 InvUtils.clickSlot(InvUtils.invIndexToSlotId(mc.player.inventory.selectedSlot), 0, SlotActionType.PICKUP);
                 InvUtils.clickSlot(InvUtils.invIndexToSlotId(itemResult.slot), 0, SlotActionType.PICKUP);
@@ -153,25 +154,25 @@ public class BookBot extends Module {
                 return;
             }
         }
-        if(ticksLeft <= 0){
+        if (ticksLeft <= 0) {
             ticksLeft = delay.get();
-        }else{
+        } else {
             ticksLeft -= 50;
             return;
         }
-        if(mode.get() == Mode.Random){
+        if (mode.get() == Mode.Random) {
             // Generates a random stream of integers??
             IntStream charGenerator = RANDOM.ints(0x80, 0x10ffff - 0x800).map(i -> i < 0xd800 ? i : i + 0x800);
             stream = charGenerator.limit(23000).iterator();
             firstChar = true;
             writeBook();
-        }else if(mode.get() == Mode.Ascii){
+        } else if (mode.get() == Mode.Ascii) {
             // Generates a random stream of integers??
             IntStream charGenerator = RANDOM.ints(0x20, 0x7f);
             stream = charGenerator.limit(35000).iterator();
             firstChar = true;
             writeBook();
-        }else if(mode.get() == Mode.File){
+        } else if (mode.get() == Mode.File) {
             if (firstTime) {
                 //Fetch the file and initialise the IntList
                 File file = new File(MeteorClient.FOLDER, fileName.get());

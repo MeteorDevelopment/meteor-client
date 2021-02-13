@@ -80,7 +80,8 @@ public class AutoBreed extends Module {
                     || (animal.isBaby() && !ignoreBabies.get())
                     || animalsFed.contains(animal)
                     || mc.player.distanceTo(animal) > range.get()
-                    || !animal.isBreedingItem(hand.get() == Hand.MAIN_HAND ? mc.player.getMainHandStack() : mc.player.getOffHandStack())) continue;
+                    || !animal.isBreedingItem(hand.get() == Hand.MAIN_HAND ? mc.player.getMainHandStack() : mc.player.getOffHandStack()))
+                continue;
 
             Rotations.rotate(Rotations.getYaw(entity), Rotations.getPitch(entity), -100, () -> {
                 mc.interactionManager.interactEntity(mc.player, animal, hand.get());

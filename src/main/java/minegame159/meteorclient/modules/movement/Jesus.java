@@ -127,7 +127,7 @@ public class Jesus extends Module {
             .defaultValue(true)
             .build()
     );
-// make it so that you can customize the amount of time the effect has left for this to work if that makes sense.
+    // make it so that you can customize the amount of time the effect has left for this to work if that makes sense.
     private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
 
     private int tickTimer = 10;
@@ -208,7 +208,8 @@ public class Jesus extends Module {
         if (!(packet instanceof PlayerMoveC2SPacket.PositionOnly || packet instanceof PlayerMoveC2SPacket.Both)) return;
 
         // Check inWater, fallDistance and if over liquid
-        if (mc.player.isTouchingWater() || mc.player.isInLava() || mc.player.fallDistance > 3f || !isOverLiquid()) return;
+        if (mc.player.isTouchingWater() || mc.player.isInLava() || mc.player.fallDistance > 3f || !isOverLiquid())
+            return;
 
         // If not actually moving, cancel packet
         if (mc.player.input.movementForward == 0 && mc.player.input.movementSideways == 0) {

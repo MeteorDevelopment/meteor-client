@@ -9,9 +9,10 @@ import minegame159.meteorclient.modules.Module;
 
 import java.util.List;
 
-public class CustomPair{
+public class CustomPair {
     private final Class<? extends Module> left;
     private final List<Integer> right;
+
     public CustomPair(Class<? extends Module> left, List<Integer> right) {
         this.left = left;
         this.right = right;

@@ -58,7 +58,7 @@ public class ModuleInfoHud extends HudModule {
         renderer.text(module.title, x, y, hud.primaryColor.get());
 
         String info = getModuleInfo(module);
-        renderer.text(info,x + renderer.textWidth(module.title) + renderer.textWidth(" "), y, module.isActive() ? hud.moduleInfoOnColor.get() : hud.moduleInfoOffColor.get());
+        renderer.text(info, x + renderer.textWidth(module.title) + renderer.textWidth(" "), y, module.isActive() ? hud.moduleInfoOnColor.get() : hud.moduleInfoOffColor.get());
     }
 
     private double getModuleWidth(HudRenderer renderer, Module module) {

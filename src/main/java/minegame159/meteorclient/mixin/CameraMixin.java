@@ -24,9 +24,11 @@ import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
 @Mixin(Camera.class)
 public abstract class CameraMixin {
-    @Shadow private boolean thirdPerson;
+    @Shadow
+    private boolean thirdPerson;
 
-    @Unique private float tickDelta;
+    @Unique
+    private float tickDelta;
 
     @Inject(method = "clipToSpace", at = @At("HEAD"), cancellable = true)
     private void onClipToSpace(double desiredCameraDistance, CallbackInfoReturnable<Double> info) {

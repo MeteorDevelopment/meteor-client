@@ -32,7 +32,8 @@ public abstract class WPressable extends WWidget {
         return mouseOver && !used;
     }
 
-    protected void onAction(int button) {}
+    protected void onAction(int button) {
+    }
 
     protected boolean runAction() {
         return true;

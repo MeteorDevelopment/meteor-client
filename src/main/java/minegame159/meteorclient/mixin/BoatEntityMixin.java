@@ -19,9 +19,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(BoatEntity.class)
 public class BoatEntityMixin {
-    @Shadow private boolean pressingLeft;
+    @Shadow
+    private boolean pressingLeft;
 
-    @Shadow private boolean pressingRight;
+    @Shadow
+    private boolean pressingRight;
 
     @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/vehicle/BoatEntity;move(Lnet/minecraft/entity/MovementType;Lnet/minecraft/util/math/Vec3d;)V"))
     private void onTickInvokeMove(CallbackInfo info) {

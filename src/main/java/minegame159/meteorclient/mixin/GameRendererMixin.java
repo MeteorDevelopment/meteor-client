@@ -40,11 +40,15 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 @Mixin(GameRenderer.class)
 public abstract class GameRendererMixin {
-    @Shadow @Final private MinecraftClient client;
+    @Shadow
+    @Final
+    private MinecraftClient client;
 
-    @Shadow public abstract void updateTargetedEntity(float tickDelta);
+    @Shadow
+    public abstract void updateTargetedEntity(float tickDelta);
 
-    @Shadow public abstract void reset();
+    @Shadow
+    public abstract void reset();
 
     private boolean a = false;
 
@@ -64,7 +68,7 @@ public abstract class GameRendererMixin {
         a = true;
     }
 
-    @Inject(method = "renderWorld", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiler/Profiler;swap(Ljava/lang/String;)V", args = { "ldc=hand" }), locals = LocalCapture.CAPTURE_FAILSOFT)
+    @Inject(method = "renderWorld", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiler/Profiler;swap(Ljava/lang/String;)V", args = {"ldc=hand"}), locals = LocalCapture.CAPTURE_FAILSOFT)
     private void onRenderWorld(float tickDelta, long limitTime, MatrixStack matrix, CallbackInfo info, boolean bl, Camera camera, MatrixStack matrixStack2, Matrix4f matrix4f) {
         if (!Utils.canUpdate()) return;
 

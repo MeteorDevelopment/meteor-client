@@ -99,7 +99,6 @@ public class EditMacroScreen extends WindowScreen {
         return "Key: " + (macro.key == -1 ? "none" : Utils.getKeyName(macro.key));
     }
 
-    @SuppressWarnings("unused")
     @EventHandler(priority = EventPriority.HIGHEST + 2)
     private void onKey(KeyEvent event) {
         if (waitingForKey) {

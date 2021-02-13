@@ -195,10 +195,11 @@ public class Quiver extends Module {
         boolean hasSpeed = mc.player.getActiveStatusEffects().containsKey(StatusEffects.SPEED);
 
         for (int i = 35; i >= 0; i--) {
-            if (mc.player.inventory.getStack(i).getItem() != Items.TIPPED_ARROW || i == mc.player.inventory.selectedSlot) continue;
+            if (mc.player.inventory.getStack(i).getItem() != Items.TIPPED_ARROW || i == mc.player.inventory.selectedSlot)
+                continue;
 
             if (checkEffects.get()) {
-                if (isType("effect.minecraft.strength", i) && !hasStrength)  arrowSlotMap.put(ArrowType.Strength, i);
+                if (isType("effect.minecraft.strength", i) && !hasStrength) arrowSlotMap.put(ArrowType.Strength, i);
                 else if (isType("effect.minecraft.speed", i) && !hasSpeed) arrowSlotMap.put(ArrowType.Speed, i);
             } else {
                 if (isType("effect.minecraft.strength", i)) arrowSlotMap.put(ArrowType.Strength, i);

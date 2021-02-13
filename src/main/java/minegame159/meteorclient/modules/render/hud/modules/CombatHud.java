@@ -132,8 +132,7 @@ public class CombatHud extends HudModule {
                 if (naked) {
                     friendText = "Naked";
                     friendColor = GREEN;
-                }
-                else {
+                } else {
                     boolean threat = false;
 
                     for (int position = 5; position >= 0; position--) {
@@ -209,7 +208,8 @@ public class CombatHud extends HudModule {
                 Map<Enchantment, Integer> enchantmentsToShow = new HashMap<>();
 
                 for (Enchantment enchantment : hud.combatInfoDisplayedEnchantments.get()) {
-                    if (enchantments.containsKey(enchantment)) enchantmentsToShow.put(enchantment, enchantments.get(enchantment));
+                    if (enchantments.containsKey(enchantment))
+                        enchantmentsToShow.put(enchantment, enchantments.get(enchantment));
                 }
 
                 for (Enchantment enchantment : enchantmentsToShow.keySet()) {
@@ -217,7 +217,7 @@ public class CombatHud extends HudModule {
 
                     double enchX = (armorX + 8) - (TextRenderer.get().getWidth(enchantName) / 2);
 
-                    TextRenderer.get().render(enchantName, enchX, armorY, enchantment.isCursed() ? RED :  hud.combatInfoEnchantmentTextColor.get());
+                    TextRenderer.get().render(enchantName, enchX, armorY, enchantment.isCursed() ? RED : hud.combatInfoEnchantmentTextColor.get());
                     armorY += TextRenderer.get().getHeight();
                 }
                 slot--;
@@ -281,12 +281,18 @@ public class CombatHud extends HudModule {
     private ItemStack getItem(int i) {
         if (mc.currentScreen instanceof HudEditorScreen) {
             switch (i) {
-                case 0:  return Items.END_CRYSTAL.getDefaultStack();
-                case 1:  return Items.NETHERITE_BOOTS.getDefaultStack();
-                case 2:  return Items.NETHERITE_LEGGINGS.getDefaultStack();
-                case 3:  return Items.NETHERITE_CHESTPLATE.getDefaultStack();
-                case 4:  return Items.NETHERITE_HELMET.getDefaultStack();
-                case 5:  return Items.TOTEM_OF_UNDYING.getDefaultStack();
+                case 0:
+                    return Items.END_CRYSTAL.getDefaultStack();
+                case 1:
+                    return Items.NETHERITE_BOOTS.getDefaultStack();
+                case 2:
+                    return Items.NETHERITE_LEGGINGS.getDefaultStack();
+                case 3:
+                    return Items.NETHERITE_CHESTPLATE.getDefaultStack();
+                case 4:
+                    return Items.NETHERITE_HELMET.getDefaultStack();
+                case 5:
+                    return Items.TOTEM_OF_UNDYING.getDefaultStack();
             }
         }
 

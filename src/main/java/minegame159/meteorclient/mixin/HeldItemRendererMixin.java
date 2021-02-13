@@ -35,12 +35,14 @@ public abstract class HeldItemRendererMixin {
         if (module.isActive()) {
             if (hand == Hand.OFF_HAND && !mc.player.getOffHandStack().isEmpty()) {
                 if (!module.noSwing.get()) {
-                    if (module.offSwing.get() != 1 && module.offSwing.get() != 0) return module.offSwing.get().floatValue();
+                    if (module.offSwing.get() != 1 && module.offSwing.get() != 0)
+                        return module.offSwing.get().floatValue();
                 } else return module.offSwing.get().floatValue();
             }
             if (hand == Hand.MAIN_HAND && !mc.player.getMainHandStack().isEmpty()) {
                 if (!module.noSwing.get()) {
-                    if (module.mainSwing.get() != 1 && module.mainSwing.get() != 0) return module.mainSwing.get().floatValue();
+                    if (module.mainSwing.get() != 1 && module.mainSwing.get() != 0)
+                        return module.mainSwing.get().floatValue();
                 } else return module.mainSwing.get().floatValue();
             }
         }

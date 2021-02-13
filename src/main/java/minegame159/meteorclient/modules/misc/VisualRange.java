@@ -57,7 +57,8 @@ public class VisualRange extends Module {
 
     @EventHandler
     private void onEntityAdded(EntityAddedEvent event) {
-        if (event.entity.equals(mc.player) || !(event.entity instanceof PlayerEntity) || !Friends.get().attack((PlayerEntity) event.entity) && ignoreFriends.get() || (event.entity instanceof FakePlayerEntity && ignoreFakes.get())) return;
+        if (event.entity.equals(mc.player) || !(event.entity instanceof PlayerEntity) || !Friends.get().attack((PlayerEntity) event.entity) && ignoreFriends.get() || (event.entity instanceof FakePlayerEntity && ignoreFakes.get()))
+            return;
 
         String enter = enterMessage.get().replace("{player}", ((PlayerEntity) event.entity).getGameProfile().getName());
         ChatUtils.moduleInfo(this, enter);
@@ -65,7 +66,8 @@ public class VisualRange extends Module {
 
     @EventHandler
     private void onEntityRemoved(EntityRemovedEvent event) {
-        if (event.entity.equals(mc.player) || !(event.entity instanceof PlayerEntity) || !Friends.get().attack((PlayerEntity) event.entity) && ignoreFriends.get() || (event.entity instanceof FakePlayerEntity && ignoreFakes.get())) return;
+        if (event.entity.equals(mc.player) || !(event.entity instanceof PlayerEntity) || !Friends.get().attack((PlayerEntity) event.entity) && ignoreFriends.get() || (event.entity instanceof FakePlayerEntity && ignoreFakes.get()))
+            return;
 
         String leave = leaveMessage.get().replace("{player}", ((PlayerEntity) event.entity).getGameProfile().getName());
         ChatUtils.moduleInfo(this, leave);

@@ -41,13 +41,15 @@ public class ClickTP extends Module {
         if (mc.options.keyUse.isPressed()) {
             HitResult hitResult = mc.player.raycast(maxDistance.get(), 1f / 20f, false);
 
-            if (hitResult.getType() == HitResult.Type.ENTITY && mc.player.interact(((EntityHitResult) hitResult).getEntity(), Hand.MAIN_HAND) != ActionResult.PASS) return;
+            if (hitResult.getType() == HitResult.Type.ENTITY && mc.player.interact(((EntityHitResult) hitResult).getEntity(), Hand.MAIN_HAND) != ActionResult.PASS)
+                return;
 
             if (hitResult.getType() == HitResult.Type.BLOCK) {
                 BlockPos pos = ((BlockHitResult) hitResult).getBlockPos();
                 Direction side = ((BlockHitResult) hitResult).getSide();
 
-                if (mc.world.getBlockState(pos).onUse(mc.world, mc.player, Hand.MAIN_HAND, (BlockHitResult) hitResult) != ActionResult.PASS) return;
+                if (mc.world.getBlockState(pos).onUse(mc.world, mc.player, Hand.MAIN_HAND, (BlockHitResult) hitResult) != ActionResult.PASS)
+                    return;
 
                 mc.player.updatePosition(pos.getX() + 0.5 + side.getOffsetX(), pos.getY() + side.getOffsetY(), pos.getZ() + 0.5 + side.getOffsetZ());
             }

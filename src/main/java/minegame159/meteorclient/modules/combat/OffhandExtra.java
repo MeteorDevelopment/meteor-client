@@ -26,13 +26,13 @@ import java.util.List;
 
 @InvUtils.Priority(priority = 1)
 public class OffhandExtra extends Module {
-    public enum Mode{
+    public enum Mode {
         EGap,
         Gap,
         EXP,
         Crystal,
     }
-    
+
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgExtra = settings.createGroup("Extras");
 
@@ -134,18 +134,21 @@ public class OffhandExtra extends Module {
         assert mc.player != null;
         currentMode = mode.get();
 
-        if (mc.currentScreen != null && ((!(mc.currentScreen instanceof InventoryScreen) && !(mc.currentScreen instanceof WidgetScreen)) || !asimov.get())) return;
+        if (mc.currentScreen != null && ((!(mc.currentScreen instanceof InventoryScreen) && !(mc.currentScreen instanceof WidgetScreen)) || !asimov.get()))
+            return;
         if (!mc.player.isUsingItem()) isClicking = false;
         if (Modules.get().get(AutoTotem.class).getLocked()) return;
 
-        if ((mc.player.getMainHandStack().getItem() instanceof SwordItem || mc.player.getMainHandStack().getItem() instanceof AxeItem) && sword.get()) currentMode = Mode.EGap;
-        else if (mc.player.getMainHandStack().getItem() instanceof EnchantedGoldenAppleItem && offhandCrystal.get()) currentMode = Mode.Crystal;
+        if ((mc.player.getMainHandStack().getItem() instanceof SwordItem || mc.player.getMainHandStack().getItem() instanceof AxeItem) && sword.get())
+            currentMode = Mode.EGap;
+        else if (mc.player.getMainHandStack().getItem() instanceof EnchantedGoldenAppleItem && offhandCrystal.get())
+            currentMode = Mode.Crystal;
         else if (Modules.get().isActive(CrystalAura.class) && offhandCA.get()) currentMode = Mode.Crystal;
 
         if ((asimov.get() || noTotems) && mc.player.getOffHandStack().getItem() != getItem()) {
             int result = findSlot(getItem());
             if (result == -1 && mc.player.getOffHandStack().getItem() != getItem()) {
-                if (currentMode != mode.get()){
+                if (currentMode != mode.get()) {
                     currentMode = mode.get();
                     if (mc.player.getOffHandStack().getItem() != getItem()) {
                         result = findSlot(getItem());
@@ -181,9 +184,10 @@ public class OffhandExtra extends Module {
         if (mc.currentScreen != null) return;
         if (Modules.get().get(AutoTotem.class).getLocked() || !canMove()) return;
         if ((mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING || (mc.player.getHealth() + mc.player.getAbsorptionAmount() > health.get())
-               && (mc.player.getOffHandStack().getItem() != getItem()) && !(mc.currentScreen instanceof HandledScreen<?>))) {
+                && (mc.player.getOffHandStack().getItem() != getItem()) && !(mc.currentScreen instanceof HandledScreen<?>))) {
             if (mc.player.getMainHandStack().getItem() instanceof SwordItem && sword.get()) currentMode = Mode.EGap;
-            else if (mc.player.getMainHandStack().getItem() instanceof EnchantedGoldenAppleItem && offhandCrystal.get()) currentMode = Mode.Crystal;
+            else if (mc.player.getMainHandStack().getItem() instanceof EnchantedGoldenAppleItem && offhandCrystal.get())
+                currentMode = Mode.Crystal;
             else if (Modules.get().isActive(CrystalAura.class) && offhandCA.get()) currentMode = Mode.Crystal;
             if (mc.player.getOffHandStack().getItem() == getItem()) return;
             isClicking = true;
@@ -205,7 +209,7 @@ public class OffhandExtra extends Module {
         }
     }
 
-    private Item getItem(){
+    private Item getItem() {
         Item item = Items.TOTEM_OF_UNDYING;
         if (currentMode == Mode.EGap) {
             item = Items.ENCHANTED_GOLDEN_APPLE;
@@ -223,18 +227,18 @@ public class OffhandExtra extends Module {
         noTotems = set;
     }
 
-    private boolean canMove(){
+    private boolean canMove() {
         assert mc.player != null;
         return mc.player.getMainHandStack().getItem() != Items.BOW
                 && mc.player.getMainHandStack().getItem() != Items.TRIDENT
                 && mc.player.getMainHandStack().getItem() != Items.CROSSBOW;
     }
 
-    private void doMove(int slot){
+    private void doMove(int slot) {
         assert mc.player != null;
         boolean empty = mc.player.getOffHandStack().isEmpty();
         List<Integer> slots = new ArrayList<>();
-        if(mc.player.inventory.getCursorStack().getItem() != Items.TOTEM_OF_UNDYING) {
+        if (mc.player.inventory.getCursorStack().getItem() != Items.TOTEM_OF_UNDYING) {
             slots.add(InvUtils.invIndexToSlotId(slot));
         }
         slots.add(InvUtils.invIndexToSlotId(InvUtils.OFFHAND_SLOT));
@@ -242,14 +246,14 @@ public class OffhandExtra extends Module {
         InvUtils.addSlots(slots, this.getClass());
     }
 
-    private int findSlot(Item item){
+    private int findSlot(Item item) {
         assert mc.player != null;
-        for (int i = 9; i < mc.player.inventory.size(); i++){
-            if (mc.player.inventory.getStack(i).getItem() == item){
+        for (int i = 9; i < mc.player.inventory.size(); i++) {
+            if (mc.player.inventory.getStack(i).getItem() == item) {
                 return i;
             }
         }
-        if (hotBar.get()){
+        if (hotBar.get()) {
             return InvUtils.findItemWithCount(item).slot;
         }
         return -1;

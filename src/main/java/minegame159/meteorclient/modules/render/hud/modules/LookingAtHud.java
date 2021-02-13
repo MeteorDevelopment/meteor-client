@@ -19,8 +19,10 @@ public class LookingAtHud extends DoubleTextHudModule {
     protected String getRight() {
         if (mc.crosshairTarget == null || mc.world == null) return "";
 
-        if (mc.crosshairTarget.getType() == HitResult.Type.BLOCK) return mc.world.getBlockState(((BlockHitResult) mc.crosshairTarget).getBlockPos()).getBlock().getName().getString();
-        else if (mc.crosshairTarget.getType() == HitResult.Type.ENTITY) return ((EntityHitResult) mc.crosshairTarget).getEntity().getDisplayName().getString();
+        if (mc.crosshairTarget.getType() == HitResult.Type.BLOCK)
+            return mc.world.getBlockState(((BlockHitResult) mc.crosshairTarget).getBlockPos()).getBlock().getName().getString();
+        else if (mc.crosshairTarget.getType() == HitResult.Type.ENTITY)
+            return ((EntityHitResult) mc.crosshairTarget).getEntity().getDisplayName().getString();
         return "";
     }
 }

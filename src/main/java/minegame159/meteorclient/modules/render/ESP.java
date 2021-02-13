@@ -26,7 +26,6 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
 
 public class ESP extends Module {
-    //private static final Identifier BOX2D = new Identifier("meteor-client", "box2d.png");
     private static final MeshBuilder MB = new MeshBuilder(128);
 
     public enum Mode {
@@ -173,7 +172,8 @@ public class ESP extends Module {
         count = 0;
 
         for (Entity entity : mc.world.getEntities()) {
-            if ((!Modules.get().isActive(Freecam.class) && entity == mc.player) || !entities.get().getBoolean(entity.getType())) continue;
+            if ((!Modules.get().isActive(Freecam.class) && entity == mc.player) || !entities.get().getBoolean(entity.getType()))
+                continue;
             if (FakePlayerUtils.isFakePlayerOutOfRenderDistance(entity)) continue;
 
             if (mode.get() == Mode.Box) render(event, entity, getColor(entity));

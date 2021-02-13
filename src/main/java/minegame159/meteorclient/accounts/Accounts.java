@@ -30,9 +30,6 @@ public class Accounts extends System<Accounts> implements Iterable<Account<?>> {
         return Systems.get(Accounts.class);
     }
 
-    @Override
-    public void init() {}
-
     public void add(Account<?> account) {
         accounts.add(account);
         save();

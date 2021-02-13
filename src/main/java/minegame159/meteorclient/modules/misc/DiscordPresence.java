@@ -93,12 +93,12 @@ public class DiscordPresence extends Module {
         else return null;
     }
 
-    private String getServer(){
+    private String getServer() {
         if (mc.isInSingleplayer()) return "SinglePlayer";
         else return Utils.getWorldName();
     }
 
-    private String getName(){
+    private String getName() {
         return mc.player.getGameProfile().getName();
     }
 

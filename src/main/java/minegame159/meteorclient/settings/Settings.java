@@ -52,6 +52,7 @@ public class Settings implements ISerializable<Settings>, Iterable<SettingGroup>
         groups.add(group);
         return group;
     }
+
     public SettingGroup createGroup(String name) {
         return createGroup(name, true);
     }
@@ -72,6 +73,7 @@ public class Settings implements ISerializable<Settings>, Iterable<SettingGroup>
 
         return table;
     }
+
     public WTable createTable() {
         return createTable(true);
     }

@@ -27,7 +27,7 @@ public class MouseMixin {
     private void onMouseButton(long window, int button, int action, int mods, CallbackInfo info) {
         if (button == GLFW.GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW.GLFW_PRESS) {
             MeteorClient.EVENT_BUS.post(MiddleMouseButtonEvent.get());
-        } else if((button == GLFW.GLFW_MOUSE_BUTTON_2) && (action == GLFW.GLFW_PRESS)) {
+        } else if ((button == GLFW.GLFW_MOUSE_BUTTON_2) && (action == GLFW.GLFW_PRESS)) {
             MeteorClient.EVENT_BUS.post(RightClickEvent.get());
         }
     }
@@ -47,7 +47,8 @@ public class MouseMixin {
         if (freeRotate.cameraMode()) {
             freeRotate.cameraYaw += x / freeRotate.sensitivity.get().floatValue();
             freeRotate.cameraPitch += (y * invert) / freeRotate.sensitivity.get().floatValue();
-            if (Math.abs(freeRotate.cameraPitch) > 90.0F) freeRotate.cameraPitch = freeRotate.cameraPitch > 0.0F ? 90.0F : -90.0F;
+            if (Math.abs(freeRotate.cameraPitch) > 90.0F)
+                freeRotate.cameraPitch = freeRotate.cameraPitch > 0.0F ? 90.0F : -90.0F;
         }
     }
 }
