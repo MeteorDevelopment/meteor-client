@@ -17,8 +17,10 @@ import minegame159.meteorclient.modules.Module;
 
 public class GhostHand extends Module {
 
+    private final List<BlockPos> posList = new ArrayList<>();
+
     public GhostHand() {
-        super(Category.Player, "ghost-hand", "Opens Containers Through Walls");
+        super(Category.Player, "ghost-hand", "Opens containers through walls.");
     }
     
     @EventHandler
@@ -26,10 +28,8 @@ public class GhostHand extends Module {
         if (!mc.options.keyUse.isPressed() || mc.player.isSneaking()) return;
 
         for (BlockEntity b : mc.world.blockEntities) {
-            if (new BlockPos(mc.player.raycast(4.25, mc.getTickDelta(), false).getPos()).equals(b.getPos())) return;
+            if (new BlockPos(mc.player.raycast(mc.interactionManager.getReachDistance(), mc.getTickDelta(), false).getPos()).equals(b.getPos())) return;
         }
-
-        List<BlockPos> posList = new ArrayList<>();
 
         Vec3d nextPos = new Vec3d(0, 0, 0.1)
                 .rotateX(-(float) Math.toRadians(mc.player.pitch))
@@ -48,5 +48,7 @@ public class GhostHand extends Module {
                 }
             }
         }
+
+        posList.clear();
     }
 }
