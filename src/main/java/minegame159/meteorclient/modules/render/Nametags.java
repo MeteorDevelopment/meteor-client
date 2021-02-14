@@ -161,6 +161,13 @@ public class Nametags extends Module {
             .build()
     );
 
+    private final Setting<Boolean> tryFilterAntiCheatBots = sgPlayers.add(new BoolSetting.Builder()
+            .name("filter-AC-bots")
+            .description("Attempts to filter out anti-cheat bots to help de-clutter the screen.")
+            .defaultValue(true)
+            .build()
+    );
+
     private final Setting<SettingColor> normalName = sgPlayers.add(new ColorSetting.Builder()
             .name("normal-color")
             .description("The color of people not in your Friends List.")
@@ -315,11 +322,15 @@ public class Nametags extends Module {
     }
 
     private void renderNametagPlayer(PlayerEntity entity) {
+        // Gamemode
+        GameMode gm = EntityUtils.getGameMode(entity);
+
+        if (gm == null && tryFilterAntiCheatBots.get())
+            return;
+
         TextRenderer text = TextRenderer.get();
         NametagUtils.begin(pos);
 
-        // Gamemode
-        GameMode gm = EntityUtils.getGameMode(entity);
         String gmText = "ERR";
         if (gm != null) {
             switch (gm) {
