@@ -329,6 +329,7 @@ public class Modules extends System<Modules> {
         addModule(new EndermanLook());
         addModule(new FakePlayer());
         addModule(new FastUse());
+        addModule(new GhostHand());
         addModule(new InfinityMiner());
         addModule(new LiquidInteract());
         addModule(new MiddleClickExtra());
