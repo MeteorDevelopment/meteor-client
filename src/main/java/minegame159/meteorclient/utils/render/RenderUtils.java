@@ -19,7 +19,6 @@ import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 
 public class RenderUtils {
@@ -55,9 +54,9 @@ public class RenderUtils {
     }
 
     public static void drawTracerToEntity(RenderEvent event, Entity entity, Color color, Target target, boolean stem) {
-        double x = MathHelper.lerp(event.tickDelta, entity.lastRenderX, entity.getX());
-        double y = MathHelper.lerp(event.tickDelta, entity.lastRenderY, entity.getY());
-        double z = MathHelper.lerp(event.tickDelta, entity.lastRenderZ, entity.getZ());
+        double x = entity.prevX + (entity.getX() - entity.prevX) * event.tickDelta;
+        double y = entity.prevY + (entity.getY() - entity.prevY) * event.tickDelta;
+        double z = entity.prevZ + (entity.getZ() - entity.prevZ) * event.tickDelta;
 
         double height = entity.getBoundingBox().maxY - entity.getBoundingBox().minY;
         if (target == Target.Head) y += height;
