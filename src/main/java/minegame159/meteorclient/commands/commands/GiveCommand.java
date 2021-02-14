@@ -37,7 +37,7 @@ public class GiveCommand extends Command {
 	{
 		for(int i = 0; i < 9; i++)
 		{
-			if(!mc.player.inventory.getStack(i).isEmpty())continue;
+			if(!mc.player.inventory.getStack(i).isEmpty()) continue;
 			
 			mc.player.networkHandler.sendPacket(new CreativeInventoryActionC2SPacket(36 + i, stack));
             return;
