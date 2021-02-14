@@ -39,7 +39,8 @@ public class BlockUtils {
         }
         else {
             neighbour = blockPos.offset(side.getOpposite());
-            ((IVec3d) hitPos).set(neighbour.getX() + 0.5 + side.getOffsetX() * 0.5, neighbour.getY() + 0.5 + side.getOffsetY() * 0.5, neighbour.getZ() + 0.5 + side.getOffsetZ() * 0.5);
+            // The Y is not 0.5 but 0.6 for allowing "antiAnchor" placement. This should not damage any other modules
+            ((IVec3d) hitPos).set(neighbour.getX() + 0.5 + side.getOffsetX() * 0.5, neighbour.getY() + 0.6 + side.getOffsetY() * 0.5, neighbour.getZ() + 0.5 + side.getOffsetZ() * 0.5);
         }
 
         if (rotate) {
