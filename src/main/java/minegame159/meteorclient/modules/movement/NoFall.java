@@ -104,4 +104,9 @@ public class NoFall extends Module {
             }
         }
     }
+
+    @Override
+    public String getInfoString() {
+        return mode.get().name();
+    }
 }
