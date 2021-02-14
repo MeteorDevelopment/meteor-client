@@ -279,6 +279,7 @@ public class Modules extends System<Modules> {
         addModule(new AimAssist());
         addModule(new AnchorAura());
         addModule(new AntiAnvil());
+        addModule(new AntiAnchor());
         addModule(new AntiBed());
         addModule(new AntiFriendHit());
         addModule(new Auto32K());
@@ -329,6 +330,7 @@ public class Modules extends System<Modules> {
         addModule(new EndermanLook());
         addModule(new FakePlayer());
         addModule(new FastUse());
+        addModule(new GhostHand());
         addModule(new InfinityMiner());
         addModule(new LiquidInteract());
         addModule(new MiddleClickExtra());
