@@ -49,6 +49,7 @@ public class Commands extends System<Commands> {
         add(new Enchant());
         add(new FakePlayerCommand());
         add(new Friend());
+        add(new GiveCommand());
         add(new Help());
         add(new Ignore());
         add(new Inventory());
