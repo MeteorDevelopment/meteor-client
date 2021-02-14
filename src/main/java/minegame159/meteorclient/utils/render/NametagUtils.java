@@ -67,7 +67,7 @@ public class NametagUtils {
     }
 
     public static void end() {
-        Matrices.pop();
+        glPopMatrix();
     }
 
     private static double getScale(Vec3d pos) {
