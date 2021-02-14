@@ -404,10 +404,10 @@ public class Nametags extends Module {
             for (int i = 0; i < 6; i++) {
                 ItemStack itemStack = getItem(entity, i);
 
-                // Setting up widths
-                if (itemWidths[i] == 0) itemWidths[i] = 32;
+                if (itemStack.isEmpty()) continue;
 
-                if (!itemStack.isEmpty()) hasItems = true;
+                hasItems = true;
+                if (itemWidths[i] == 0) itemWidths[i] = 32;
 
                 if (displayItemEnchants.get()) {
                     Map<Enchantment, Integer> enchantments = EnchantmentHelper.get(itemStack);
@@ -440,53 +440,55 @@ public class Nametags extends Module {
             for (int i = 0; i < 6; i++) {
                 ItemStack stack = getItem(entity, i);
 
-                glPushMatrix();
-                glScaled(2, 2, 1);
+                if (!stack.isEmpty()) {
+                    glPushMatrix();
+                    glScaled(2.5, 2.5, 1);
 
-                mc.getItemRenderer().renderGuiItemIcon(stack, (int) (x / 2), (int) (y / 2));
-                mc.getItemRenderer().renderGuiItemOverlay(mc.textRenderer, stack, (int) (x / 2), (int) (y / 2));
+                    mc.getItemRenderer().renderGuiItemIcon(stack, (int) (x / 2.5), (int) (y / 2.5));
+                    mc.getItemRenderer().renderGuiItemOverlay(mc.textRenderer, stack, (int) (x / 2.5), (int) (y / 2.5));
 
-                glPopMatrix();
+                    glPopMatrix();
 
-                if (maxEnchantCount > 0 && displayItemEnchants.get()) {
-                    text.begin(0.5 * enchantTextScale.get(), false, true);
+                    if (maxEnchantCount > 0 && displayItemEnchants.get()) {
+                        text.begin(0.5 * enchantTextScale.get(), false, true);
 
-                    Map<Enchantment, Integer> enchantments = EnchantmentHelper.get(stack);
-                    Map<Enchantment, Integer> enchantmentsToShow = new HashMap<>();
-                    for (Enchantment enchantment : displayedEnchantments.get()) {
-                        if (enchantments.containsKey(enchantment)) {
-                            enchantmentsToShow.put(enchantment, enchantments.get(enchantment));
+                        Map<Enchantment, Integer> enchantments = EnchantmentHelper.get(stack);
+                        Map<Enchantment, Integer> enchantmentsToShow = new HashMap<>();
+                        for (Enchantment enchantment : displayedEnchantments.get()) {
+                            if (enchantments.containsKey(enchantment)) {
+                                enchantmentsToShow.put(enchantment, enchantments.get(enchantment));
+                            }
                         }
-                    }
 
-                    double aW = itemWidths[i];
-                    double enchantY = 0;
+                        double aW = itemWidths[i];
+                        double enchantY = 0;
 
-                    double addY = 0;
-                    switch (enchantPos.get()) {
-                        case Above: addY = -((enchantmentsToShow.size() + 1) * text.getHeight()); break;
-                        case OnTop: addY = (itemsHeight - enchantmentsToShow.size() * text.getHeight()) / 2; break;
-                    }
-
-                    double enchantX = x;
-
-                    for (Enchantment enchantment : enchantmentsToShow.keySet()) {
-                        String enchantName = Utils.getEnchantSimpleName(enchantment, enchantLength.get()) + " " + enchantmentsToShow.get(enchantment);
-
-                        Color enchantColor = enchantmentTextColor.get();
-                        if (enchantment.isCursed()) enchantColor = RED;
-
+                        double addY = 0;
                         switch (enchantPos.get()) {
-                            case Above: enchantX = x + (aW / 2) - (text.getWidth(enchantName) / 2); break;
-                            case OnTop: enchantX = x + (aW - text.getWidth(enchantName)) / 2; break;
+                            case Above: addY = -((enchantmentsToShow.size() + 1) * text.getHeight()); break;
+                            case OnTop: addY = (itemsHeight - enchantmentsToShow.size() * text.getHeight()) / 2; break;
                         }
 
-                        text.render(enchantName, enchantX, y + addY + enchantY, enchantColor);
+                        double enchantX = x;
 
-                        enchantY += text.getHeight();
+                        for (Enchantment enchantment : enchantmentsToShow.keySet()) {
+                            String enchantName = Utils.getEnchantSimpleName(enchantment, enchantLength.get()) + " " + enchantmentsToShow.get(enchantment);
+
+                            Color enchantColor = enchantmentTextColor.get();
+                            if (enchantment.isCursed()) enchantColor = RED;
+
+                            switch (enchantPos.get()) {
+                                case Above: enchantX = x + (aW / 2) - (text.getWidth(enchantName) / 2); break;
+                                case OnTop: enchantX = x + (aW - text.getWidth(enchantName)) / 2; break;
+                            }
+
+                            text.render(enchantName, enchantX, y + addY + enchantY, enchantColor);
+
+                            enchantY += text.getHeight();
+                        }
+
+                        text.end();
                     }
-
-                    text.end();
                 }
 
                 x += itemWidths[i];
