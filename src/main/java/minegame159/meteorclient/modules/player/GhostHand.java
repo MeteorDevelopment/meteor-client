@@ -35,7 +35,7 @@ public class GhostHand extends Module {
                 .rotateX(-(float) Math.toRadians(mc.player.pitch))
                 .rotateY(-(float) Math.toRadians(mc.player.yaw));
 
-        for (int i = 1; i < 50; i++) {
+        for (int i = 1; i < mc.interactionManager.getReachDistance()*10; i++) {
             BlockPos curPos = new BlockPos(mc.player.getCameraPosVec(mc.getTickDelta()).add(nextPos.multiply(i)));
             if (posList.contains(curPos)) continue;
             posList.add(curPos);
