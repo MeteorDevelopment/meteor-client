@@ -15,7 +15,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.nbt.CompoundTag;
 
 public class Config extends System<Config> {
-    public final Version version = new Version("0.4.0");
+    public final Version version = new Version("0.4.1");
     public String devBuild;
     private String prefix = ".";
     public GuiConfig guiConfig = new GuiConfig();
