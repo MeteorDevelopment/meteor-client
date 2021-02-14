@@ -11,6 +11,7 @@ import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import minegame159.meteorclient.events.entity.EntityRemovedEvent;
 import minegame159.meteorclient.events.entity.player.SendMovementPacketsEvent;
+import minegame159.meteorclient.events.render.Render2DEvent;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.friends.Friends;
@@ -22,6 +23,7 @@ import minegame159.meteorclient.rendering.text.TextRenderer;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.Pool;
+import minegame159.meteorclient.utils.misc.Vec3;
 import minegame159.meteorclient.utils.player.*;
 import minegame159.meteorclient.utils.render.NametagUtils;
 import minegame159.meteorclient.utils.render.color.SettingColor;
@@ -33,6 +35,7 @@ import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
+import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
@@ -406,14 +409,14 @@ public class CrystalAura extends Module {
             .build()
     );
 
-    private final Setting<Boolean> noSwing = sgMisc.add(new BoolSetting.Builder()
-            .name("no-swing")
-            .description("Stops your hand from swinging client-side.")
+    // Render
+
+    private final Setting<Boolean> swing = sgRender.add(new BoolSetting.Builder()
+            .name("swing")
+            .description("Renders your swing client-side.")
             .defaultValue(true)
             .build()
     );
-
-    // Render
 
     private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
             .name("render")
@@ -690,10 +693,19 @@ public class CrystalAura extends Module {
 
     @EventHandler
     private void onRender(RenderEvent event) {
-        if (render.get()) {
-            for (RenderBlock renderBlock : renderBlocks) {
-                renderBlock.render(renderDamage.get(), event);
-            }
+        if (!render.get()) return;
+
+        for (RenderBlock renderBlock : renderBlocks) {
+            renderBlock.render3D();
+        }
+    }
+
+    @EventHandler
+    private void onRender2D(Render2DEvent event) {
+        if (!render.get()) return;
+
+        for (RenderBlock renderBlock : renderBlocks) {
+            renderBlock.render2D();
         }
     }
 
@@ -795,7 +807,8 @@ public class CrystalAura extends Module {
     private void attackCrystal(EndCrystalEntity entity, int preSlot) {
         mc.interactionManager.attackEntity(mc.player, entity);
         if (removeCrystals.get()) removalQueue.add(entity.getEntityId());
-        if (!noSwing.get()) mc.player.swingHand(getHand());
+        if (swing.get()) mc.player.swingHand(getHand());
+        else mc.player.networkHandler.sendPacket(new HandSwingC2SPacket(getHand()));
         mc.player.inventory.selectedSlot = preSlot;
         if (heldCrystal != null && entity.getBlockPos().equals(heldCrystal.getBlockPos())) {
             heldCrystal = null;
@@ -864,11 +877,13 @@ public class CrystalAura extends Module {
                     blockPos.getZ() + 0.5 + direction.getVector().getZ() * 1.0 / 2.0) : block.add(0.5, 1.0, 0.5));
             Rotations.rotate(rotation[0], rotation[1], 25, () -> {
                 mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(mc.player.getPos(), direction, blockPos, false));
-                if (!noSwing.get()) mc.player.swingHand(hand);
+                if (swing.get()) mc.player.swingHand(hand);
+                else mc.player.networkHandler.sendPacket(new HandSwingC2SPacket(hand));
             });
         } else {
             mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(mc.player.getPos(), direction, new BlockPos(block), false));
-            if (!noSwing.get()) mc.player.swingHand(hand);
+            if (swing.get()) mc.player.swingHand(hand);
+            else mc.player.networkHandler.sendPacket(new HandSwingC2SPacket(hand));
         }
 
         if (render.get()) {
@@ -1071,6 +1086,8 @@ public class CrystalAura extends Module {
         return mc.world.getBlockState(pos).isAir() && mc.world.getOtherEntities(null, new Box(pos.getX(), pos.getY(), pos.getZ(), pos.getX() + 1.0D, pos.getY() + 2.0D, pos.getZ() + 1.0D)).isEmpty();
     }
 
+    private static final Vec3 pos = new Vec3();
+
     private class RenderBlock {
         private int x, y, z;
         private int timer;
@@ -1089,37 +1106,42 @@ public class CrystalAura extends Module {
             return false;
         }
 
-        public void render(boolean showDamage, RenderEvent event) {
+        public void render3D() {
             Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x, y, z, 1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+        }
 
-            if (showDamage) {
-                NametagUtils.begin(event, x + 0.5, y + 0.5, z + 0.5, damageScale.get(), Utils.distanceToCamera(x, y, z));
-                TextRenderer.get().begin(1, false, true);
+        public void render2D() {
+            if (renderDamage.get()) {
+                pos.set(x + 0.5, y + 0.5, z + 0.5);
 
-                String damageText = String.valueOf(Math.round(damage));
+                if (NametagUtils.to2D(pos, damageScale.get())) {
+                    NametagUtils.begin(pos);
+                    TextRenderer.get().begin(1, false, true);
 
+                    String damageText = String.valueOf(Math.round(damage));
 
-                switch (roundDamage.get()) {
-                    case 0:
-                        damageText = String.valueOf(Math.round(damage));
-                        break;
-                    case 1:
-                        damageText = String.valueOf(Math.round(damage * 10.0) / 10.0);
-                        break;
-                    case 2:
-                        damageText = String.valueOf(Math.round(damage * 100.0) / 100.0);
-                        break;
-                    case 3:
-                        damageText = String.valueOf(Math.round(damage * 1000.0) / 1000.0);
-                        break;
+                    switch (roundDamage.get()) {
+                        case 0:
+                            damageText = String.valueOf(Math.round(damage));
+                            break;
+                        case 1:
+                            damageText = String.valueOf(Math.round(damage * 10.0) / 10.0);
+                            break;
+                        case 2:
+                            damageText = String.valueOf(Math.round(damage * 100.0) / 100.0);
+                            break;
+                        case 3:
+                            damageText = String.valueOf(Math.round(damage * 1000.0) / 1000.0);
+                            break;
+                    }
+
+                    double w = TextRenderer.get().getWidth(damageText) / 2;
+
+                    TextRenderer.get().render(damageText, -w, 0, damageColor.get());
+
+                    TextRenderer.get().end();
+                    NametagUtils.end();
                 }
-
-                double w = TextRenderer.get().getWidth(damageText) / 2;
-
-                TextRenderer.get().render(damageText, -w, 0, damageColor.get());
-
-                TextRenderer.get().end();
-                NametagUtils.endOld();
             }
         }
     }

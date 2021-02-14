@@ -7,7 +7,7 @@ package minegame159.meteorclient.modules.player;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.packets.PacketEvent;
-import minegame159.meteorclient.mixininterface.IBlockHitResult;
+import minegame159.meteorclient.mixin.BlockHitResultAccessor;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
@@ -24,7 +24,7 @@ public class BuildHeight extends Module {
 
         PlayerInteractBlockC2SPacket p = (PlayerInteractBlockC2SPacket) event.packet;
         if (p.getBlockHitResult().getPos().y >= 255 && p.getBlockHitResult().getSide() == Direction.UP) {
-            ((IBlockHitResult) p.getBlockHitResult()).setSide(Direction.DOWN);
+            ((BlockHitResultAccessor) p.getBlockHitResult()).setSide(Direction.DOWN);
         }
     }
 }

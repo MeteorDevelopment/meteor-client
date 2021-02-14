@@ -3,7 +3,6 @@
  * Copyright (c) 2021 Meteor Development.
  */
 
-
 package minegame159.meteorclient.mixin;
 
 import net.minecraft.block.AbstractBlock;

@@ -30,7 +30,7 @@ public class SwarmCloseConnections extends Command {
                             swarm.currentMode = Swarm.Mode.Idle;
                             if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing())
                                 BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
-                            if (Modules.get().get(Swarm.class).isActive())
+                            if (Modules.get().isActive(Swarm.class))
                                 Modules.get().get(Swarm.class).toggle();
                         }
                     } catch (Exception ignored) {

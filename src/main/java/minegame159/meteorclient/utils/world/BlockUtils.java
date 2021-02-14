@@ -1,3 +1,8 @@
+/*
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
+ * Copyright (c) 2021 Meteor Development.
+ */
+
 package minegame159.meteorclient.utils.world;
 
 import minegame159.meteorclient.mixininterface.IVec3d;
@@ -17,8 +22,11 @@ public class BlockUtils {
     private static final MinecraftClient mc = MinecraftClient.getInstance();
     private static final Vec3d hitPos = new Vec3d(0, 0, 0);
 
-    public static boolean place(BlockPos blockPos, Hand hand, int slot, boolean rotate, int priority, boolean swing, boolean swap, boolean swapBack) {
-        if (slot == -1 || !canPlace(blockPos)) return false;
+    public static boolean place(BlockPos blockPos, Hand hand, int slot, boolean rotate, int priority, boolean swing, boolean checkEntity, boolean swap, boolean swapBack) {
+        if (!checkEntity) {
+            if (!mc.world.getBlockState(blockPos).getMaterial().isReplaceable()) return false;
+        }
+        else if (slot == -1 || !canPlace(blockPos)) return false;
 
         Direction side = getPlaceSide(blockPos);
         BlockPos neighbour;
@@ -42,8 +50,8 @@ public class BlockUtils {
 
         return true;
     }
-    public static boolean place(BlockPos blockPos, Hand hand, int slot, boolean rotate, int priority) {
-        return place(blockPos, hand, slot, rotate, priority, true, true, true);
+    public static boolean place(BlockPos blockPos, Hand hand, int slot, boolean rotate, int priority, boolean checkEntity) {
+        return place(blockPos, hand, slot, rotate, priority, true, checkEntity, true, true);
     }
 
     private static void place(int slot, Vec3d hitPos, Hand hand, Direction side, BlockPos neighbour, boolean swing, boolean swap, boolean swapBack) {
@@ -76,17 +84,14 @@ public class BlockUtils {
     }
 
     public static boolean isClickable(Block block) {
-        boolean clickable = false;
-
-        if (block instanceof CraftingTableBlock
+        boolean clickable = block instanceof CraftingTableBlock
                 || block instanceof AnvilBlock
                 || block instanceof AbstractButtonBlock
                 || block instanceof AbstractPressurePlateBlock
                 || block instanceof BlockWithEntity
                 || block instanceof FenceGateBlock
                 || block instanceof DoorBlock
-                || block instanceof TrapdoorBlock
-        ) clickable = true;
+                || block instanceof TrapdoorBlock;
 
         return clickable;
     }

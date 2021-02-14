@@ -5,7 +5,6 @@
 
 package minegame159.meteorclient.mixin;
 
-import minegame159.meteorclient.mixininterface.IChatHud;
 import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.misc.BetterChat;
 import net.minecraft.client.gui.hud.ChatHud;
@@ -23,12 +22,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.List;
 
 @Mixin(ChatHud.class)
-public abstract class ChatHudMixin implements IChatHud {
+public abstract class ChatHudMixin {
     @Shadow @Final private List<ChatHudLine<OrderedText>> visibleMessages;
 
     @Shadow @Final private List<ChatHudLine<Text>> messages;
-
-    @Shadow protected abstract void addMessage(Text message, int messageId);
 
     @Inject(at = @At("HEAD"), method = "addMessage(Lnet/minecraft/text/Text;IIZ)V", cancellable = true)
     private void onAddMessage(Text message, int messageId, int timestamp, boolean bl, CallbackInfo info) {
@@ -42,10 +39,5 @@ public abstract class ChatHudMixin implements IChatHud {
     private int addMessageListSizeProxy(List<ChatHudLine> list) {
         BetterChat betterChat = Modules.get().get(BetterChat.class);
         return betterChat.isLongerChat() && betterChat.getChatLength() > 100 ? 1 : list.size();
-    }
-
-    @Override
-    public void add(Text message, int messageId) {
-        this.addMessage(message, messageId);
     }
 }

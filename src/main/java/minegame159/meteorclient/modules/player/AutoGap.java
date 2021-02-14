@@ -1,3 +1,8 @@
+/*
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
+ * Copyright (c) 2021 Meteor Development.
+ */
+
 package minegame159.meteorclient.modules.player;
 
 import baritone.api.BaritoneAPI;
@@ -127,7 +132,7 @@ public class AutoGap extends Module {
         if (eating) {
             // If we are eating check if we should still be still eating
             if (shouldEat()) {
-                // Check if the item in current slot is gap or egap
+                // Check if the item in current slot is not gap or egap
                 if (isNotGapOrEGap(mc.player.inventory.getStack(slot))) {
                     // If not try finding a new slot
                     int slot = findSlot();
@@ -320,5 +325,9 @@ public class AutoGap extends Module {
     private boolean isNotGapOrEGap(ItemStack stack) {
         Item item = stack.getItem();
         return item != Items.GOLDEN_APPLE && item != Items.ENCHANTED_GOLDEN_APPLE;
+    }
+
+    public boolean isEating() {
+        return isActive() && eating;
     }
 }

@@ -9,7 +9,6 @@ import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.entity.player.PlayerMoveEvent;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
@@ -172,7 +171,7 @@ public class ElytraFly extends Module {
 
     @Override
     public void onDeactivate() {
-        if (moveForward.get()) ((IKeyBinding) mc.options.keyForward).setPressed(false);
+        if (moveForward.get()) mc.options.keyForward.setPressed(false);
 
         if (chestSwap.get() == ChestSwapMode.Always && mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() == Items.ELYTRA) {
             Modules.get().get(ChestSwap.class).swap();
@@ -216,7 +215,7 @@ public class ElytraFly extends Module {
             } else ((IVec3d) event.movement).set(currentMode.velX, currentMode.velY, currentMode.velZ);
         } else {
             if (currentMode.lastForwardPressed) {
-                ((IKeyBinding) mc.options.keyForward).setPressed(false);
+                mc.options.keyForward.setPressed(false);
                 currentMode.lastForwardPressed = false;
             }
         }

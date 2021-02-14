@@ -1,3 +1,8 @@
+/*
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
+ * Copyright (c) 2021 Meteor Development.
+ */
+
 package minegame159.meteorclient.modules.render.hud.modules;
 
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -33,7 +38,6 @@ import java.util.Map;
 
 public class CombatHud extends HudModule {
     private final Color GREEN = new Color(15, 255, 15);
-    private final Color ORANGE = new Color(255, 150, 15);
     private final Color RED = new Color(255, 15, 15);
     private final Color BLACK = new Color(0, 0, 0, 255);
 

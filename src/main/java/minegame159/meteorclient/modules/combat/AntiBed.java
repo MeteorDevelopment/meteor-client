@@ -9,7 +9,6 @@ package minegame159.meteorclient.modules.combat;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
@@ -104,7 +103,7 @@ public class AntiBed extends Module {
             }
             else if (block instanceof SlabBlock) {
                 mc.player.inventory.selectedSlot = i;
-                ((IKeyBinding)mc.options.keySneak).setPressed(true);
+                mc.options.keySneak.setPressed(true);
                 if (place == -1) place = 2;
                 return;
             }
@@ -182,7 +181,7 @@ public class AntiBed extends Module {
         if (up) blockPos = mc.player.getBlockPos().up();
         else blockPos = mc.player.getBlockPos();
 
-        if (BlockUtils.place(blockPos, Hand.MAIN_HAND, slot, rotate.get(), 100)) {
+        if (BlockUtils.place(blockPos, Hand.MAIN_HAND, slot, rotate.get(), 100, true)) {
             if (autoToggle.get()) toggle();
         }
     }

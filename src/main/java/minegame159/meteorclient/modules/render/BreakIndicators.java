@@ -7,7 +7,7 @@ package minegame159.meteorclient.modules.render;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderEvent;
-import minegame159.meteorclient.mixininterface.IClientPlayerInteractionManager;
+import minegame159.meteorclient.mixin.ClientPlayerInteractionManagerAccessor;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.rendering.Renderer;
@@ -104,11 +104,11 @@ public class BreakIndicators extends Module {
 
     @EventHandler
     private void onRender(RenderEvent event) {
-        IClientPlayerInteractionManager iam;
+        ClientPlayerInteractionManagerAccessor iam;
         boolean smooth;
 
         if (smoothAnim.get()) {
-            iam = (IClientPlayerInteractionManager) mc.interactionManager;
+            iam = (ClientPlayerInteractionManagerAccessor) mc.interactionManager;
             BlockPos pos = iam.getCurrentBreakingBlockPos();
             smooth = pos != null && iam.getBreakingProgress() > 0;
 

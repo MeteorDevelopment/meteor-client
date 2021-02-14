@@ -1,6 +1,6 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2020 Meteor Development.
+ * Copyright (c) 2021 Meteor Development.
  */
 
 package minegame159.meteorclient.settings;
@@ -19,12 +19,16 @@ import net.minecraft.util.registry.Registry;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public class ItemListSetting extends Setting<List<Item>> {
-    public ItemListSetting(String name, String description, List<Item> defaultValue, Consumer<List<Item>> onChanged, Consumer<Setting<List<Item>>> onModuleActivated) {
+    public final Predicate<Item> filter;
+
+    public ItemListSetting(String name, String description, List<Item> defaultValue, Consumer<List<Item>> onChanged, Consumer<Setting<List<Item>>> onModuleActivated, Predicate<Item> filter) {
         super(name, description, defaultValue, onChanged, onModuleActivated);
 
-        value = new ArrayList<>(defaultValue);
+        this.value = new ArrayList<>(defaultValue);
+        this.filter = filter;
 
         widget = new WButton("Select");
         ((WButton) widget).action = () -> MinecraftClient.getInstance().openScreen(new ItemListSettingScreen(this));
@@ -39,9 +43,15 @@ public class ItemListSetting extends Setting<List<Item>> {
             for (String value : values) {
                 String val = value.trim();
                 Identifier id;
+
                 if (val.contains(":")) id = new Identifier(val);
                 else id = new Identifier("minecraft", val);
-                if (Registry.ITEM.containsId(id)) items.add(Registry.ITEM.get(id));
+
+                if (Registry.ITEM.containsId(id)) {
+                    Item item = Registry.ITEM.get(id);
+
+                    if (filter == null || filter.test(item)) items.add(item);
+                }
             }
         } catch (Exception ignored) {}
 
@@ -91,7 +101,9 @@ public class ItemListSetting extends Setting<List<Item>> {
 
         ListTag valueTag = tag.getList("value", 8);
         for (Tag tagI : valueTag) {
-            get().add(Registry.ITEM.get(new Identifier(tagI.asString())));
+            Item item = Registry.ITEM.get(new Identifier(tagI.asString()));
+
+            if (filter == null || filter.test(item)) get().add(item);
         }
 
         changed();
@@ -103,6 +115,7 @@ public class ItemListSetting extends Setting<List<Item>> {
         private List<Item> defaultValue;
         private Consumer<List<Item>> onChanged;
         private Consumer<Setting<List<Item>>> onModuleActivated;
+        private Predicate<Item> filter;
 
         public Builder name(String name) {
             this.name = name;
@@ -129,8 +142,13 @@ public class ItemListSetting extends Setting<List<Item>> {
             return this;
         }
 
+        public Builder filter(Predicate<Item> filter) {
+            this.filter = filter;
+            return this;
+        }
+
         public ItemListSetting build() {
-            return new ItemListSetting(name, description, defaultValue, onChanged, onModuleActivated);
+            return new ItemListSetting(name, description, defaultValue, onChanged, onModuleActivated, filter);
         }
     }
 }

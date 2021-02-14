@@ -5,7 +5,6 @@
 
 package minegame159.meteorclient.modules.movement.elytrafly;
 
-import minegame159.meteorclient.mixininterface.IKeyBinding;
 import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.client.MinecraftClient;
@@ -84,7 +83,7 @@ public class ElytraFlightMode {
     }
 
     public void handleAutopilot() {
-        if (settings.moveForward.get()) if (mc.player.getY() < settings.autoPilotMinimumHeight.get()) ((IKeyBinding) mc.options.keyForward).setPressed(true);
+        if (settings.moveForward.get()) if (mc.player.getY() < settings.autoPilotMinimumHeight.get()) mc.options.keyForward.setPressed(true);
         lastForwardPressed = true;
         if (settings.useFireworks.get()) {
             int slot = InvUtils.findItemInHotbar(Items.FIREWORK_ROCKET);

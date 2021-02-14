@@ -14,7 +14,7 @@ import com.mojang.authlib.yggdrasil.YggdrasilUserAuthentication;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.accounts.Account;
 import minegame159.meteorclient.accounts.AccountType;
-import minegame159.meteorclient.mixininterface.IMinecraftClient;
+import minegame159.meteorclient.mixin.MinecraftClientAccessor;
 import minegame159.meteorclient.utils.misc.NbtException;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.Session;
@@ -79,7 +79,7 @@ public class PremiumAccount extends Account<PremiumAccount> {
     }
 
     public YggdrasilUserAuthentication getAuth() {
-        YggdrasilUserAuthentication auth = (YggdrasilUserAuthentication) new YggdrasilAuthenticationService(((IMinecraftClient) MinecraftClient.getInstance()).getProxy(), "").createUserAuthentication(Agent.MINECRAFT);
+        YggdrasilUserAuthentication auth = (YggdrasilUserAuthentication) new YggdrasilAuthenticationService(((MinecraftClientAccessor) MinecraftClient.getInstance()).getProxy(), "").createUserAuthentication(Agent.MINECRAFT);
 
         auth.setUsername(name);
         auth.setPassword(password);

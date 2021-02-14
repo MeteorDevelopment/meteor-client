@@ -7,7 +7,7 @@ package minegame159.meteorclient.modules.player;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.mixininterface.IMinecraftClient;
+import minegame159.meteorclient.mixin.MinecraftClientAccessor;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
@@ -54,11 +54,12 @@ public class FastUse extends Module {
     private void onTick(TickEvent.Post event) {
         switch (mode.get()) {
             case All:
-                ((IMinecraftClient) mc).setItemUseCooldown(0);
+                ((MinecraftClientAccessor) mc).setItemUseCooldown(0);
                 break;
             case Some:
-                if (exp.get() && (mc.player.getMainHandStack().getItem() == Items.EXPERIENCE_BOTTLE || mc.player.getOffHandStack().getItem() == Items.EXPERIENCE_BOTTLE)) ((IMinecraftClient) mc).setItemUseCooldown(0);
-                if (blocks.get() && mc.player.getMainHandStack().getItem() instanceof BlockItem || mc.player.getOffHandStack().getItem() instanceof BlockItem) ((IMinecraftClient) mc).setItemUseCooldown(0);
+                if ((exp.get() && (mc.player.getMainHandStack().getItem() == Items.EXPERIENCE_BOTTLE || mc.player.getOffHandStack().getItem() == Items.EXPERIENCE_BOTTLE))
+                        || (blocks.get() && mc.player.getMainHandStack().getItem() instanceof BlockItem || mc.player.getOffHandStack().getItem() instanceof BlockItem))
+                    ((MinecraftClientAccessor) mc).setItemUseCooldown(0);
                 break;
         }
     }
