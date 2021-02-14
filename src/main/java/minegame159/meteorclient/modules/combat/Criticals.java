@@ -126,4 +126,9 @@ public class Criticals extends Module {
         if (!mc.player.isOnGround()) return true;
         return !a;
     }
+
+    @Override
+    public String getInfoString() {
+        return mode.get().name();
+    }
 }
