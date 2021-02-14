@@ -125,7 +125,7 @@ public class Nametags extends Module {
     private final Setting<List<Enchantment>> displayedEnchantments = sgPlayers.add(new EnchListSetting.Builder()
             .name("displayed-enchantments")
             .description("The enchantments that are shown on nametags.")
-            .defaultValue(setDefualtList())
+            .defaultValue(setDefaultList())
             .build()
     );
 
@@ -562,18 +562,6 @@ public class Nametags extends Module {
         text.end();
 
         NametagUtils.end();
-    }
-
-    private ItemStack getItemStack(PlayerEntity entity, int i)
-    {
-        ItemStack itemStack;
-        if (i == 4) // Off hand
-            itemStack = entity.getOffHandStack();
-        else if (i == 5) // Main hand
-            itemStack = entity.getMainHandStack();
-        else
-            itemStack = entity.inventory.armor.get(i);
-        return itemStack;
     }
 
     private List<Enchantment> setDefaultList(){
