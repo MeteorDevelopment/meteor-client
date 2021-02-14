@@ -45,6 +45,12 @@ public class Flight extends Module {
             .min(0.0)
             .build()
     );
+    private final Setting<Boolean> verticalSpeedMatch = sgGeneral.add(new BoolSetting.Builder()
+            .name("vertical-speed-match")
+            .description("Matches your vertical speed to your horizontal speed, otherwise uses vanilla ratio.")
+            .defaultValue(false)
+            .build()
+    );
 
     // Anti Kick
 
@@ -151,8 +157,8 @@ public class Flight extends Module {
                 mc.player.setVelocity(0, 0, 0);
                 Vec3d initialVelocity = mc.player.getVelocity();
 
-                if (mc.options.keyJump.isPressed()) mc.player.setVelocity(initialVelocity.add(0, speed.get() * 5f, 0));
-                if (mc.options.keySneak.isPressed()) mc.player.setVelocity(initialVelocity.subtract(0, speed.get() * 5f, 0));
+                if (mc.options.keyJump.isPressed()) mc.player.setVelocity(initialVelocity.add(0, speed.get() * (verticalSpeedMatch.get() ? 10f : 5f), 0));
+                if (mc.options.keySneak.isPressed()) mc.player.setVelocity(initialVelocity.subtract(0, speed.get() * (verticalSpeedMatch.get() ? 10f : 5f), 0));
                 break;
             case Abilities:
                 if (mc.player.isSpectator()) return;
