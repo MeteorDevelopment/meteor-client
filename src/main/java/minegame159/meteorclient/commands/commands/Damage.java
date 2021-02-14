@@ -24,8 +24,12 @@ public class Damage extends Command {
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.then(argument("damage", IntegerArgumentType.integer(1, 7)).executes(context -> {
             int amount = context.getArgument("damage", Integer.class);
-            if (mc.player.abilities.creativeMode) {
-                ChatUtils.error("You are in creative");
+            if (mc.player.abilities.invulnerable) {
+                ChatUtils.error("You are in invulnerable.");
+                return SINGLE_SUCCESS;
+            }
+            if (Modules.get().get(NoFall.class).isActive()) {
+                ChatUtils.error("Disable No Fall first");
                 return SINGLE_SUCCESS;
             }
             damagePlayer(amount);
