@@ -29,7 +29,7 @@ public class Damage extends Command {
                 return SINGLE_SUCCESS;
             }
             if (Modules.get().get(NoFall.class).isActive()) {
-                ChatUtils.error("Disable No Fall first");
+                ChatUtils.error("Disable No Fall first.");
                 return SINGLE_SUCCESS;
             }
             damagePlayer(amount);
