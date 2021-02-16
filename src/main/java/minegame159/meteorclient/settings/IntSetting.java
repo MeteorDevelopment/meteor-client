@@ -47,21 +47,6 @@ public class IntSetting extends Setting<Integer> {
     }
 
     @Override
-    protected String generateUsage() {
-        String usage = "(highlight)";
-
-        if (min == null) usage += "inf";
-        else usage += min;
-
-        usage += " (default)- (highlight)";
-
-        if (max == null) usage += "inf";
-        else usage += max;
-
-        return usage;
-    }
-
-    @Override
     public CompoundTag toTag() {
         CompoundTag tag = saveGeneral();
         tag.putInt("value", get());

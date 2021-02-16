@@ -45,15 +45,12 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
     @Override
     protected List<BlockEntityType<?>> parseImpl(String str) {
         String[] values = str.split(",");
-        List<BlockEntityType<?>> blocks = new ArrayList<>(1);
+        List<BlockEntityType<?>> blocks = new ArrayList<>(values.length);
 
         try {
             for (String value : values) {
-                String val = value.trim();
-                Identifier id;
-                if (val.contains(":")) id = new Identifier(val);
-                else id = new Identifier("minecraft", val);
-                if (Registry.BLOCK_ENTITY_TYPE.containsId(id)) blocks.add(Registry.BLOCK_ENTITY_TYPE.get(id));
+                BlockEntityType<?> block = parseId(Registry.BLOCK_ENTITY_TYPE, value);
+                if (block != null) blocks.add(block);
             }
         } catch (Exception ignored) {}
 
@@ -71,8 +68,8 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
     }
 
     @Override
-    protected String generateUsage() {
-        return "(highlight)storage block id(default)(chest, minecraft:ender_chest, etc)";
+    public Iterable<Identifier> getIdentifierSuggestions() {
+        return Registry.BLOCK_ENTITY_TYPE.getIds();
     }
 
     @Override

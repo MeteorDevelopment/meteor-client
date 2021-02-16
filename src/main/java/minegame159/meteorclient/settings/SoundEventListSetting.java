@@ -42,15 +42,14 @@ public class SoundEventListSetting extends Setting<List<SoundEvent>> {
     @Override
     protected List<SoundEvent> parseImpl(String str) {
         String[] values = str.split(",");
-        List<SoundEvent> sounds = new ArrayList<>(1);
+        List<SoundEvent> sounds = new ArrayList<>(values.length);
 
-        for (String value : values) {
-            String val = value.trim();
-            Identifier id;
-            if (val.contains(":")) id = new Identifier(val);
-            else id = new Identifier("minecraft", val);
-            sounds.add(Registry.SOUND_EVENT.get(id));
-        }
+        try {
+            for (String value : values) {
+                SoundEvent sound = parseId(Registry.SOUND_EVENT, value);
+                if (sound != null) sounds.add(sound);
+            }
+        } catch (Exception ignored) {}
 
         return sounds;
     }
@@ -66,8 +65,8 @@ public class SoundEventListSetting extends Setting<List<SoundEvent>> {
     }
 
     @Override
-    protected String generateUsage() {
-        return "(highlight)sound id (default)(block_anvil_hit, minecraft:entity_bat_hurt, etc)";
+    public Iterable<Identifier> getIdentifierSuggestions() {
+        return Registry.SOUND_EVENT.getIds();
     }
 
     @Override

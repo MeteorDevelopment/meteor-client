@@ -5,12 +5,16 @@
 
 package minegame159.meteorclient.settings;
 
+import com.google.common.collect.ImmutableList;
 import minegame159.meteorclient.gui.widgets.WCheckbox;
 import net.minecraft.nbt.CompoundTag;
 
+import java.util.List;
 import java.util.function.Consumer;
 
 public class BoolSetting extends Setting<Boolean> {
+    private static final List<String> SUGGESTIONS = ImmutableList.of("true", "false", "toggle");
+
     private BoolSetting(String name, String description, Boolean defaultValue, Consumer<Boolean> onChanged, Consumer<Setting<Boolean>> onModuleActivated) {
         super(name, description, defaultValue, onChanged, onModuleActivated);
 
@@ -37,8 +41,8 @@ public class BoolSetting extends Setting<Boolean> {
     }
 
     @Override
-    protected String generateUsage() {
-        return "(highlight)true(default), (highlight)false (default)or (highlight)toggle";
+    public List<String> getSuggestions() {
+        return SUGGESTIONS;
     }
 
     @Override

@@ -74,6 +74,7 @@ public class Commands extends System<Commands> {
         add(new SwarmStop());
         add(new SwarmCloseConnections());
         add(new Toggle());
+        add(new SettingCommand());
     }
 
     public void dispatch(String message) throws CommandSyntaxException {

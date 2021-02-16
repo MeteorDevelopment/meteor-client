@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class ParticleEffectListSetting extends Setting<List<ParticleEffect>> {
+    private static List<Identifier> suggestions;
 
     public ParticleEffectListSetting(String name, String description, List<ParticleEffect> defaultValue, Consumer<List<ParticleEffect>> onChanged, Consumer<Setting<List<ParticleEffect>>> onModuleActivated) {
         super(name, description, defaultValue, onChanged, onModuleActivated);
@@ -44,17 +45,12 @@ public class ParticleEffectListSetting extends Setting<List<ParticleEffect>> {
     @Override
     protected List<ParticleEffect> parseImpl(String str) {
         String[] values = str.split(",");
-        List<ParticleEffect> particleTypes = new ArrayList<>(1);
+        List<ParticleEffect> particleTypes = new ArrayList<>(values.length);
 
         try {
             for (String value : values) {
-                String val = value.trim();
-                Identifier id;
-                if (val.contains(":")) id = new Identifier(val);
-                else id = new Identifier("minecraft", val);
-                ParticleType<?> particleType = Registry.PARTICLE_TYPE.get(id);
-
-                if (Registry.PARTICLE_TYPE.containsId(id) && particleType instanceof ParticleEffect) particleTypes.add((ParticleEffect) particleType);
+                ParticleType<?> particleType = parseId(Registry.PARTICLE_TYPE, value);
+                if (particleType instanceof ParticleEffect) particleTypes.add((ParticleEffect) particleType);
             }
         } catch (Exception ignored) {}
 
@@ -72,8 +68,17 @@ public class ParticleEffectListSetting extends Setting<List<ParticleEffect>> {
     }
 
     @Override
-    protected String generateUsage() {
-        return "(highlight)particle id (default)(hearts, minecraft:clouds, etc)";
+    public Iterable<Identifier> getIdentifierSuggestions() {
+        if (suggestions == null) {
+            suggestions = new ArrayList<>(Registry.PARTICLE_TYPE.getIds().size());
+
+            for (Identifier id : Registry.PARTICLE_TYPE.getIds()) {
+                ParticleType<?> particleType = Registry.PARTICLE_TYPE.get(id);
+                if (particleType instanceof ParticleEffect) suggestions.add(id);
+            }
+        }
+
+        return suggestions;
     }
 
     @Override

@@ -44,15 +44,12 @@ public class EnchListSetting extends Setting<List<Enchantment>>{
     @Override
     protected List<Enchantment> parseImpl(String str) {
         String[] values = str.split(",");
-        List<Enchantment> enchs = new ArrayList<>(1);
+        List<Enchantment> enchs = new ArrayList<>(values.length);
 
         try {
             for (String value : values) {
-                String val = value.trim();
-                Identifier id;
-                if (val.contains(":")) id = new Identifier(val);
-                else id = new Identifier("minecraft", val);
-                if (Registry.ENCHANTMENT.containsId(id)) enchs.add(Registry.ENCHANTMENT.get(id));
+                Enchantment ench = parseId(Registry.ENCHANTMENT, value);
+                if (ench != null) enchs.add(ench);
             }
         } catch (Exception ignored) {}
 
@@ -68,7 +65,9 @@ public class EnchListSetting extends Setting<List<Enchantment>>{
     protected boolean isValueValid(List<Enchantment> value) { return true; }
 
     @Override
-    protected String generateUsage() { return "(highlight)enchantment id (default)(sharpness, minecraft:protection, etc)";}
+    public Iterable<Identifier> getIdentifierSuggestions() {
+        return Registry.ENCHANTMENT.getIds();
+    }
 
     @Override
     public CompoundTag toTag() {

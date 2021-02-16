@@ -37,7 +37,11 @@ public class KeybindSetting extends Setting<Integer> {
 
     @Override
     protected Integer parseImpl(String str) {
-        return -1;
+        try {
+            return Integer.parseInt(str.trim());
+        } catch (NumberFormatException ignored) {
+            return null;
+        }
     }
 
     @Override
@@ -48,11 +52,6 @@ public class KeybindSetting extends Setting<Integer> {
     @Override
     protected boolean isValueValid(Integer value) {
         return true;
-    }
-
-    @Override
-    protected String generateUsage() {
-        return "not implemented";
     }
 
     @Override
