@@ -12,10 +12,10 @@ import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.player.InvUtils;
-import minegame159.meteorclient.utils.player.PlayerUtils;
-import minegame159.meteorclient.utils.player.Rotations;
+import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.Items;
+import net.minecraft.util.Hand;
 
 public class AntiAnvil extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -39,11 +39,11 @@ public class AntiAnvil extends Module {
                 boolean stop = false;
 
                 if (slot != 1 && slot < 9) {
-                    firstThing(i, slot);
+                    place(i, slot);
                     stop = true;
                 }
                 else if (mc.player.getOffHandStack().getItem() == Items.OBSIDIAN){
-                    firstThing(i, -1);
+                    place(i, -1);
                     stop = true;
                 }
 
@@ -52,13 +52,7 @@ public class AntiAnvil extends Module {
         }
     }
 
-    private void firstThing(int i, int slot) {
-        if (rotate.get()) Rotations.rotate(mc.player.yaw, -90, 15, () -> doThing(i, slot));
-        else doThing(i, slot);
-    }
-
-    private void doThing(int i, int slot) {
-        if (slot != -1) PlayerUtils.placeBlock(mc.player.getBlockPos().add(0, i - 2, 0), slot, InvUtils.getHand(Items.OBSIDIAN));
-        else PlayerUtils.placeBlock(mc.player.getBlockPos().add(0, i - 2, 0),  InvUtils.getHand(Items.OBSIDIAN));
+    private void place(int i, int slot) {
+        BlockUtils.place(mc.player.getBlockPos().add(0, i - 2, 0), Hand.MAIN_HAND, slot == -1 ? 0 : slot, rotate.get(), 15, true, true, slot != -1, slot != -1);
     }
 }
