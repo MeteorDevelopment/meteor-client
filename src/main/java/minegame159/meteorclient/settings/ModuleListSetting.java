@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class ModuleListSetting extends Setting<List<Module>> {
+    private static List<String> suggestions;
+
     public ModuleListSetting(String name, String description, List<Module> defaultValue, Consumer<List<Module>> onChanged, Consumer<Setting<List<Module>>> onModuleActivated) {
         super(name, description, defaultValue, onChanged, onModuleActivated);
 
@@ -41,7 +43,7 @@ public class ModuleListSetting extends Setting<List<Module>> {
     @Override
     protected List<Module> parseImpl(String str) {
         String[] values = str.split(",");
-        List<Module> modules = new ArrayList<>(1);
+        List<Module> modules = new ArrayList<>(values.length);
 
         try {
             for (String value : values) {
@@ -64,8 +66,13 @@ public class ModuleListSetting extends Setting<List<Module>> {
     }
 
     @Override
-    protected String generateUsage() {
-        return "(highlight)module name (default)(kill-aura, speed, etc)";
+    public List<String> getSuggestions() {
+        if (suggestions == null) {
+            suggestions = new ArrayList<>(Modules.get().getAll().size());
+            for (Module module : Modules.get().getAll()) suggestions.add(module.name);
+        }
+
+        return suggestions;
     }
 
     @Override

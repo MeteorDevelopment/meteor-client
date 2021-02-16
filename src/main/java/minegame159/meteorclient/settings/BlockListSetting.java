@@ -42,15 +42,12 @@ public class BlockListSetting extends Setting<List<Block>> {
     @Override
     protected List<Block> parseImpl(String str) {
         String[] values = str.split(",");
-        List<Block> blocks = new ArrayList<>(1);
+        List<Block> blocks = new ArrayList<>(values.length);
 
         try {
             for (String value : values) {
-                String val = value.trim();
-                Identifier id;
-                if (val.contains(":")) id = new Identifier(val);
-                else id = new Identifier("minecraft", val);
-                if (Registry.BLOCK.containsId(id)) blocks.add(Registry.BLOCK.get(id));
+                Block block = parseId(Registry.BLOCK, value);
+                if (block != null) blocks.add(block);
             }
         } catch (Exception ignored) {}
 
@@ -68,8 +65,8 @@ public class BlockListSetting extends Setting<List<Block>> {
     }
 
     @Override
-    protected String generateUsage() {
-        return "(highlight)block id (default)(dirt, minecraft:stone, etc)";
+    public Iterable<Identifier> getIdentifierSuggestions() {
+        return Registry.BLOCK.getIds();
     }
 
     @Override
