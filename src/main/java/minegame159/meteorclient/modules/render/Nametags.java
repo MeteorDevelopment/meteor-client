@@ -37,6 +37,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.TntEntity;
 import net.minecraft.entity.decoration.ItemFrameEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -300,6 +301,7 @@ public class Nametags extends Module {
                 if (type == EntityType.PLAYER) renderNametagPlayer((PlayerEntity) entity);
                 else if (type == EntityType.ITEM) renderNametagItem(((ItemEntity) entity).getStack());
                 else if (type == EntityType.ITEM_FRAME) renderNametagItem(((ItemFrameEntity) entity).getHeldItemStack());
+                else if (type == EntityType.TNT) renderTntNametag((TntEntity) entity);
                 else if (entity instanceof LivingEntity) renderGenericNametag((LivingEntity) entity);
             }
         }
@@ -563,6 +565,29 @@ public class Nametags extends Module {
         NametagUtils.end();
     }
 
+    private void renderTntNametag(TntEntity entity) {
+        TextRenderer text = TextRenderer.get();
+        NametagUtils.begin(pos);
+
+        String fuseText = ticksToTime(entity.getFuseTimer());
+
+        double width = text.getWidth(fuseText);
+        double heightDown = text.getHeight();
+
+        double widthHalf = width / 2;
+
+        drawBg(-widthHalf, -heightDown, width, heightDown);
+
+        text.beginBig();
+        double hX = -widthHalf;
+        double hY = -heightDown;
+
+        text.render(fuseText, hX, hY, otherNameColor.get());
+        text.end();
+
+        NametagUtils.end();
+    }
+
     private List<Enchantment> setDefualtList(){
         List<Enchantment> ench = new ArrayList<>();
         for (Enchantment enchantment : Registry.ENCHANTMENT) {
@@ -587,5 +612,19 @@ public class Nametags extends Module {
         Renderer.NORMAL.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
         Renderer.NORMAL.quad(x - 1, y - 1, width + 2, height + 2, background.get());
         Renderer.NORMAL.end();
+    }
+
+    private static String ticksToTime(int ticks){
+        if(ticks > 20*3600){
+            int h = ticks/20/3600;
+            return h+" h";
+        } else if(ticks > 20*60){
+            int m = ticks/20/60;
+            return m+" m";
+        } else {
+            int s = ticks / 20;
+            int ms = (ticks % 20) / 2;
+            return s+"."+ms+" s";
+        }
     }
 }
