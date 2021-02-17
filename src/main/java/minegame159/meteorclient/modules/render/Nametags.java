@@ -26,6 +26,7 @@ import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.entity.EntityUtils;
 import minegame159.meteorclient.utils.entity.FakePlayerEntity;
 import minegame159.meteorclient.utils.entity.FakePlayerUtils;
+import minegame159.meteorclient.utils.misc.MeteorPlayers;
 import minegame159.meteorclient.utils.misc.Vec3;
 import minegame159.meteorclient.utils.render.NametagUtils;
 import minegame159.meteorclient.utils.render.color.Color;
@@ -141,6 +142,13 @@ public class Nametags extends Module {
             .build()
     );
 
+    private final Setting<Boolean> displayMeteor = sgPlayers.add(new BoolSetting.Builder()
+            .name("meteor")
+            .description("Shows if the player is using Meteor.")
+            .defaultValue(true)
+            .build()
+    );
+
     private final Setting<Boolean> displayGameMode = sgPlayers.add(new BoolSetting.Builder()
             .name("gamemode")
             .description("Shows the player's GameMode.")
@@ -166,6 +174,13 @@ public class Nametags extends Module {
             .name("normal-color")
             .description("The color of people not in your Friends List.")
             .defaultValue(new SettingColor(255, 255, 255))
+            .build()
+    );
+
+    private final Setting<SettingColor> meteorColor = sgPlayers.add(new ColorSetting.Builder()
+            .name("meteor-color")
+            .description("The color of M when the player is using Meteor.")
+            .defaultValue(new SettingColor(135, 0, 255))
             .build()
     );
 
@@ -316,12 +331,16 @@ public class Nametags extends Module {
         return height;
     }
 
-    private void renderNametagPlayer(PlayerEntity entity) {
+    private void renderNametagPlayer(PlayerEntity player) {
         TextRenderer text = TextRenderer.get();
         NametagUtils.begin(pos);
 
+        // Using Meteor
+        String usingMeteor = "";
+        if (displayMeteor.get() && MeteorPlayers.get(player)) usingMeteor = "M ";
+
         // Gamemode
-        GameMode gm = EntityUtils.getGameMode(entity);
+        GameMode gm = EntityUtils.getGameMode(player);
         String gmText = "ERR";
         if (gm != null) {
             switch (gm) {
@@ -336,20 +355,20 @@ public class Nametags extends Module {
 
         // Name
         String name;
-        Color nameColor = Friends.get().getFriendColor(entity);
+        Color nameColor = Friends.get().getFriendColor(player);
 
-        if (entity == mc.player) name = Modules.get().get(NameProtect.class).getName(entity.getGameProfile().getName());
-        else name = entity.getGameProfile().getName();
+        if (player == mc.player) name = Modules.get().get(NameProtect.class).getName(player.getGameProfile().getName());
+        else name = player.getGameProfile().getName();
 
-        if (Modules.get().get(FakePlayer.class).showID(entity)) {
-            name += " [" + FakePlayerUtils.getID((FakePlayerEntity) entity) + "]";
+        if (Modules.get().get(FakePlayer.class).showID(player)) {
+            name += " [" + FakePlayerUtils.getID((FakePlayerEntity) player) + "]";
         }
         name = name + " ";
 
         // Health
-        float absorption = entity.getAbsorptionAmount();
-        int health = Math.round(entity.getHealth() + absorption);
-        double healthPercentage = health / (entity.getMaxHealth() + absorption);
+        float absorption = player.getAbsorptionAmount();
+        int health = Math.round(player.getHealth() + absorption);
+        double healthPercentage = health / (player.getMaxHealth() + absorption);
 
         String healthText = String.valueOf(health);
         Color healthColor;
@@ -359,14 +378,15 @@ public class Nametags extends Module {
         else healthColor = healthStage1.get();
 
         // Ping
-        int ping = EntityUtils.getPing(entity);
+        int ping = EntityUtils.getPing(player);
         String pingText = " [" + ping + "ms]";
 
         // Distance
-        double dist = Math.round(Utils.distanceToCamera(entity) * 10.0) / 10.0;
+        double dist = Math.round(Utils.distanceToCamera(player) * 10.0) / 10.0;
         String distText = " " + dist + "m";
 
         // Calc widths
+        double usingMeteorWidth = text.getWidth(usingMeteor);
         double gmWidth = text.getWidth(gmText);
         double nameWidth = text.getWidth(name);
         double healthWidth = text.getWidth(healthText);
@@ -374,6 +394,7 @@ public class Nametags extends Module {
         double distWidth = text.getWidth(distText);
         double width = nameWidth + healthWidth;
 
+        if (displayMeteor.get()) width += usingMeteorWidth;
         if (displayGameMode.get()) width += gmWidth;
         if (displayPing.get()) width += pingWidth;
         if (displayDistance.get()) width += distWidth;
@@ -387,6 +408,8 @@ public class Nametags extends Module {
         text.beginBig();
         double hX = -widthHalf;
         double hY = -heightDown;
+
+        if (displayMeteor.get()) hX = text.render(usingMeteor, hX, hY, meteorColor.get());
 
         if (displayGameMode.get()) hX = text.render(gmText, hX, hY, gmColor.get());
         hX = text.render(name, hX, hY, nameColor != null ? nameColor : normalName.get());
@@ -403,7 +426,7 @@ public class Nametags extends Module {
             int maxEnchantCount = 0;
 
             for (int i = 0; i < 6; i++) {
-                ItemStack itemStack = getItem(entity, i);
+                ItemStack itemStack = getItem(player, i);
 
                 // Setting up widths
                 if (itemWidths[i] == 0) itemWidths[i] = 32;
@@ -439,7 +462,7 @@ public class Nametags extends Module {
 
             //Rendering items and enchants
             for (int i = 0; i < 6; i++) {
-                ItemStack stack = getItem(entity, i);
+                ItemStack stack = getItem(player, i);
 
                 glPushMatrix();
                 glScaled(2, 2, 1);

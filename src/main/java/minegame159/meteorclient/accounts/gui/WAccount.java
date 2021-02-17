@@ -10,6 +10,7 @@ import minegame159.meteorclient.accounts.Accounts;
 import minegame159.meteorclient.gui.GuiConfig;
 import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.utils.network.MeteorExecutor;
+import minegame159.meteorclient.utils.network.OnlinePlayers;
 import net.minecraft.client.MinecraftClient;
 
 public class WAccount extends WTable {
@@ -37,6 +38,7 @@ public class WAccount extends WTable {
                     name.setText(account.getUsername());
 
                     Accounts.get().save();
+                    OnlinePlayers.forcePing();
 
                     screen.clear();
                     screen.initWidgets();
