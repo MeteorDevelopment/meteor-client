@@ -35,4 +35,4 @@ We would appreciate if you donated to us through [PayPal](https://paypal.me/Mine
 The [Fabric Team](https://github.com/FabricMC) for [Fabric](https://github.com/FabricMC/fabric-loader) and [Yarn](https://github.com/FabricMC/yarn)
 
 ## License
-If you are making a custom version of Meteor Client or using its features you are **required** to disclose the source code, state changes, use the same license and follow the [license terms](https://github.com/MeteorDevelopment/meteor-client/blob/master/LICENSE).
+If you are making a custom version of Meteor Client or using its features you are **required to publicly disclose the source code**, state changes, use the same license and follow the [license terms](https://github.com/MeteorDevelopment/meteor-client/blob/master/LICENSE).
