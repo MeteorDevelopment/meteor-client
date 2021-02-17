@@ -11,6 +11,7 @@ import minegame159.meteorclient.gui.screens.settings.EntityTypeListSettingScreen
 import minegame159.meteorclient.gui.widgets.WButton;
 import minegame159.meteorclient.utils.entity.EntityUtils;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.EntityType;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -19,6 +20,8 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 public class EntityTypeListSetting extends Setting<Object2BooleanMap<EntityType<?>>> {
@@ -45,7 +48,17 @@ public class EntityTypeListSetting extends Setting<Object2BooleanMap<EntityType<
 
     @Override
     protected Object2BooleanMap<EntityType<?>> parseImpl(String str) {
-        return new Object2BooleanOpenHashMap<>();
+        String[] values = str.split(",");
+        Object2BooleanMap<EntityType<?>> entities = new Object2BooleanOpenHashMap<>(values.length);
+
+        try {
+            for (String value : values) {
+                EntityType<?> entity = parseId(Registry.ENTITY_TYPE, value);
+                if (entity != null) entities.put(entity, true);
+            }
+        } catch (Exception ignored) {}
+
+        return entities;
     }
 
     @Override
@@ -58,10 +71,9 @@ public class EntityTypeListSetting extends Setting<Object2BooleanMap<EntityType<
         return true;
     }
 
-    // TODO
     @Override
-    protected String generateUsage() {
-        return "(highlight)entity type (default)(pig, minecraft:zombie, etc)";
+    public Iterable<Identifier> getIdentifierSuggestions() {
+        return Registry.ENTITY_TYPE.getIds();
     }
 
     @Override

@@ -35,7 +35,7 @@ public class BlockUtils {
         if (side == null) {
             side = Direction.UP;
             neighbour = blockPos;
-            ((IVec3d) hitPos).set(blockPos);
+            ((IVec3d) hitPos).set(blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5);
         }
         else {
             neighbour = blockPos.offset(side.getOpposite());

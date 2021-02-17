@@ -5,6 +5,7 @@
 
 package minegame159.meteorclient.settings;
 
+import com.google.common.collect.ImmutableList;
 import minegame159.meteorclient.gui.screens.settings.ColorSettingScreen;
 import minegame159.meteorclient.gui.widgets.WButton;
 import minegame159.meteorclient.gui.widgets.WQuad;
@@ -13,9 +14,12 @@ import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.nbt.CompoundTag;
 
+import java.util.List;
 import java.util.function.Consumer;
 
 public class ColorSetting extends Setting<SettingColor> {
+    private static final List<String> SUGGESTIONS = ImmutableList.of("0 0 0 255", "225 25 25 255", "25 225 25 255", "25 25 225 255", "255 255 255 255");
+
     private final WQuad quad;
 
     public ColorSetting(String name, String description, SettingColor defaultValue, Consumer<SettingColor> onChanged, Consumer<Setting<SettingColor>> onModuleActivated) {
@@ -63,8 +67,8 @@ public class ColorSetting extends Setting<SettingColor> {
     }
 
     @Override
-    protected String generateUsage() {
-        return "(highlight)0-255 0-255 0-255 0-255";
+    public List<String> getSuggestions() {
+        return SUGGESTIONS;
     }
 
     @Override

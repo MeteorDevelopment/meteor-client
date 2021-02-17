@@ -9,16 +9,21 @@ import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.utils.misc.ISerializable;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.Registry;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public abstract class Setting<T> implements ISerializable<T> {
+    private static final List<String> NO_SUGGESTIONS = new ArrayList<>(0);
+
     public final String name, title, description;
-    private String usage;
 
     protected final T defaultValue;
     protected T value;
@@ -90,12 +95,13 @@ public abstract class Setting<T> implements ISerializable<T> {
 
     protected abstract boolean isValueValid(T value);
 
-    public String getUsage() {
-        if (usage == null) usage = generateUsage();
-        return usage;
+    public Iterable<Identifier> getIdentifierSuggestions() {
+        return null;
     }
 
-    protected abstract String generateUsage();
+    public List<String> getSuggestions() {
+        return NO_SUGGESTIONS;
+    }
 
     protected CompoundTag saveGeneral() {
         CompoundTag tag = new CompoundTag();
@@ -119,5 +125,16 @@ public abstract class Setting<T> implements ISerializable<T> {
     @Override
     public int hashCode() {
         return Objects.hash(name);
+    }
+
+    public static <T> T parseId(Registry<T> registry, String name) {
+        name = name.trim();
+
+        Identifier id;
+        if (name.contains(":")) id = new Identifier(name);
+        else id = new Identifier("minecraft", name);
+        if (registry.containsId(id)) return registry.get(id);
+
+        return null;
     }
 }

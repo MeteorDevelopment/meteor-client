@@ -18,7 +18,7 @@ import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.player.InvUtils;
-import minegame159.meteorclient.utils.player.PlayerUtils;
+import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -70,7 +70,7 @@ public class EChestFarmer extends Module {
     private int numLeft = Math.floorDiv(amount.get() , 8);
 
     @EventHandler
-    private void onTick(TickEvent.Post event) {
+    private void onTick(TickEvent.Pre event) {
         if (lowerAmount.get() < InvUtils.findItemWithCount(Items.OBSIDIAN).count) stop = false;
         if (stop && !disableOnAmount.get()) {
             stop = false;
@@ -102,9 +102,7 @@ public class EChestFarmer extends Module {
                         stop = true;
                     }
                 } else if (mc.world.getBlockState(pos.up()).getBlock() == Blocks.AIR) {
-                    if (mc.player.inventory.selectedSlot != itemResult.slot)
-                    mc.player.inventory.selectedSlot = itemResult.slot;
-                    PlayerUtils.placeBlock(pos.up(), Hand.MAIN_HAND);
+                    BlockUtils.place(pos.up(), Hand.MAIN_HAND, itemResult.slot, false, 0, true);
                 }
 
             }

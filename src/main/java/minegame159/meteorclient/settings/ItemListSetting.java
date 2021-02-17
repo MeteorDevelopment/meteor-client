@@ -37,21 +37,12 @@ public class ItemListSetting extends Setting<List<Item>> {
     @Override
     protected List<Item> parseImpl(String str) {
         String[] values = str.split(",");
-        List<Item> items = new ArrayList<>(1);
+        List<Item> items = new ArrayList<>(values.length);
 
         try {
             for (String value : values) {
-                String val = value.trim();
-                Identifier id;
-
-                if (val.contains(":")) id = new Identifier(val);
-                else id = new Identifier("minecraft", val);
-
-                if (Registry.ITEM.containsId(id)) {
-                    Item item = Registry.ITEM.get(id);
-
-                    if (filter == null || filter.test(item)) items.add(item);
-                }
+                Item item = parseId(Registry.ITEM, value);
+                if (item != null && (filter == null || filter.test(item))) items.add(item);
             }
         } catch (Exception ignored) {}
 
@@ -78,8 +69,8 @@ public class ItemListSetting extends Setting<List<Item>> {
     }
 
     @Override
-    protected String generateUsage() {
-        return "(highlight)item id (default)(dirt, minecraft:stone, etc)";
+    public Iterable<Identifier> getIdentifierSuggestions() {
+        return Registry.ITEM.getIds();
     }
 
     @Override
