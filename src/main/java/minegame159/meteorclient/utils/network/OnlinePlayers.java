@@ -27,6 +27,10 @@ public class OnlinePlayers {
         }
     }
 
+    public static void forcePing() {
+        lastPingTime = 0;
+    }
+
     public static void leave() {
         MeteorExecutor.execute(() -> HttpUtils.post("http://meteorclient.com/api/online/leave"));
     }
