@@ -11,6 +11,7 @@ import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.player.Rotations;
 import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.block.*;
@@ -44,7 +45,7 @@ public class AntiAnchor extends Module {
         if (   mc.world.getBlockState(mc.player.getBlockPos().add(0, 2, 0)).getBlock() == Blocks.RESPAWN_ANCHOR
                 && mc.world.getBlockState(mc.player.getBlockPos().add(0, 1, 0)).getBlock() == Blocks.AIR){
             // Get the block of the slab
-            int slot = getFloorSlot();
+            int slot = InvUtils.findItemInHotbar(itemStack -> Block.getBlockFromItem(itemStack.getItem()) instanceof net.minecraft.block.SlabBlock);
             if (slot != -1) {
 
                 // Start sneaking (we have to sneak for placing the slab between us and the anchor)
@@ -57,22 +58,6 @@ public class AntiAnchor extends Module {
 
         }
 
-    }
-
-    public int getFloorSlot() {
-        // Iterate for the whole inventory
-        for (int i = 0; i < 9; i++) {
-            // Get the item
-            Item item = mc.player.inventory.getStack(i).getItem();
-
-            // Check if it's a slab
-            if (Block.getBlockFromItem(item) instanceof net.minecraft.block.SlabBlock) {
-                // Return the value
-                return i;
-            }
-        }
-        // Default value
-        return -1;
     }
 
     private void rotateCheck(int slot) {
