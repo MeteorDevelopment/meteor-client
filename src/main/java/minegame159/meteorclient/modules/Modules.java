@@ -422,6 +422,7 @@ public class Modules extends System<Modules> {
 
     private void initMisc() {
         addModule(new Announcer());
+        addModule(new AntiBot());
         addModule(new AntiPacketKick());
         addModule(new AutoBreed());
         addModule(new AutoBrewer());
