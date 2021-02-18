@@ -10,6 +10,7 @@ import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.settings.Settings;
 import minegame159.meteorclient.settings.StringSetting;
+import minegame159.meteorclient.utils.network.OnlinePlayers;
 
 public class TopBarConfig extends TopBarWindowScreen {
     public TopBarConfig() {
@@ -65,7 +66,10 @@ public class TopBarConfig extends TopBarWindowScreen {
                 .name("send-data-to-api")
                 .description("If checked, your UUID will be send to Meteor's servers.")
                 .defaultValue(true)
-                .onChanged(aBoolean -> Config.get().sendDataToApi = aBoolean)
+                .onChanged(aBoolean -> {
+                    Config.get().sendDataToApi = aBoolean;
+                    OnlinePlayers.forcePing();
+                })
                 .onModuleActivated(booleanSetting -> booleanSetting.set(Config.get().sendDataToApi))
                 .build()
         );
