@@ -61,6 +61,15 @@ public class TopBarConfig extends TopBarWindowScreen {
                 .build()
         );
 
+        sgGeneral.add(new BoolSetting.Builder()
+                .name("send-data-to-api")
+                .description("If checked, your UUID will be send to Meteor's servers.")
+                .defaultValue(true)
+                .onChanged(aBoolean -> Config.get().sendDataToApi = aBoolean)
+                .onModuleActivated(booleanSetting -> booleanSetting.set(Config.get().sendDataToApi))
+                .build()
+        );
+
         add(s.createTable()).fillX().expandX();
     }
 }
