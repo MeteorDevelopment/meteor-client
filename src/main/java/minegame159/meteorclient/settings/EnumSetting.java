@@ -9,10 +9,14 @@ import minegame159.meteorclient.gui.widgets.WDropbox;
 import net.minecraft.nbt.CompoundTag;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 public class EnumSetting<T extends Enum<?>> extends Setting<T> {
     private T[] values;
+
+    private final List<String> suggestions;
 
     public EnumSetting(String name, String description, T defaultValue, Consumer<T> onChanged, Consumer<Setting<T>> onModuleActivated) {
         super(name, description, defaultValue, onChanged, onModuleActivated);
@@ -22,6 +26,9 @@ public class EnumSetting<T extends Enum<?>> extends Setting<T> {
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             e.printStackTrace();
         }
+
+        suggestions = new ArrayList<>(values.length);
+        for (T value : values) suggestions.add(value.toString());
 
         widget = new WDropbox<>(get());
         ((WDropbox<T>) widget).action = () -> set(((WDropbox<T>) widget).getValue());
@@ -47,15 +54,8 @@ public class EnumSetting<T extends Enum<?>> extends Setting<T> {
     }
 
     @Override
-    protected String generateUsage() {
-        String usage = "";
-
-        for (int i = 0; i < values.length; i++) {
-            if (i > 0) usage += " (default)or ";
-            usage += "(highlight)" + values[i];
-        }
-
-        return usage;
+    public List<String> getSuggestions() {
+        return suggestions;
     }
 
     @Override

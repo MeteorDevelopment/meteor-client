@@ -37,8 +37,21 @@ public class StatusEffectSetting extends Setting<Object2IntMap<StatusEffect>> {
 
     @Override
     protected Object2IntMap<StatusEffect> parseImpl(String str) {
-        // TODO: I know this is wrong but im too lazy and nobody is going to use chat commands for packet canceller anyway
-        return Utils.createStatusEffectMap();
+        String[] values = str.split(",");
+        Object2IntMap<StatusEffect> effects = Utils.createStatusEffectMap();
+
+        try {
+            for (String value : values) {
+                String[] split = value.split(" ");
+
+                StatusEffect effect = parseId(Registry.STATUS_EFFECT, split[0]);
+                int level = Integer.parseInt(split[1]);
+
+                effects.put(effect, level);
+            }
+        } catch (Exception ignored) {}
+
+        return effects;
     }
 
     @Override
@@ -49,12 +62,6 @@ public class StatusEffectSetting extends Setting<Object2IntMap<StatusEffect>> {
     @Override
     protected boolean isValueValid(Object2IntMap<StatusEffect> value) {
         return true;
-    }
-
-    @Override
-    protected String generateUsage() {
-        //TODO: Look up retard
-        return "(highlight)not implemented";
     }
 
     @Override

@@ -47,11 +47,6 @@ public class StringSetting extends Setting<String> {
     }
 
     @Override
-    protected String generateUsage() {
-        return "(highlight)<text>";
-    }
-
-    @Override
     public CompoundTag toTag() {
         CompoundTag tag = saveGeneral();
         tag.putString("value", get());

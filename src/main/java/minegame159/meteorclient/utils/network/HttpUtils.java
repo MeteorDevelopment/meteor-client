@@ -7,26 +7,31 @@ package minegame159.meteorclient.utils.network;
 
 import com.google.gson.Gson;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.net.SocketTimeoutException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.function.Consumer;
 
 public class HttpUtils {
     private static final Gson GSON = new Gson();
 
-    private static InputStream request(String method, String url) {
+    private static InputStream request(String method, String url, String body) {
         try {
             HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
             conn.setRequestMethod(method);
             conn.setConnectTimeout(2500);
             conn.setReadTimeout(2500);
             conn.setRequestProperty("User-Agent", "Meteor Client");
+
+            if (body != null) {
+                byte[] bytes = body.getBytes(StandardCharsets.UTF_8);
+                conn.setRequestProperty("Content-Length", Integer.toString(bytes.length));
+                conn.setDoOutput(true);
+                conn.getOutputStream().write(bytes);
+            }
 
             return conn.getInputStream();
         } catch (SocketTimeoutException ignored) {
@@ -39,11 +44,14 @@ public class HttpUtils {
     }
 
     public static InputStream get(String url) {
-        return request("GET", url);
+        return request("GET", url, null);
     }
 
+    public static InputStream post(String url, String body) {
+        return request("POST", url, body);
+    }
     public static InputStream post(String url) {
-        return request("POST", url);
+        return post(url, null);
     }
 
     public static void getLines(String url, Consumer<String> callback) {

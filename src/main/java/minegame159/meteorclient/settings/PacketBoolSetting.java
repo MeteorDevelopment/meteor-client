@@ -7,6 +7,7 @@ package minegame159.meteorclient.settings;
 
 import it.unimi.dsi.fastutil.objects.Object2BooleanArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
+import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import minegame159.meteorclient.gui.screens.settings.PacketBoolSettingScreen;
 import minegame159.meteorclient.gui.widgets.WButton;
 import minegame159.meteorclient.utils.network.PacketUtils;
@@ -14,9 +15,13 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Packet;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 public class PacketBoolSetting extends Setting<Object2BooleanMap<Class<? extends Packet<?>>>> {
+    private static List<String> suggestions;
+
     public PacketBoolSetting(String name, String description, Object2BooleanMap<Class<? extends Packet<?>>> defaultValue, Consumer<Object2BooleanMap<Class<? extends Packet<?>>>> onChanged, Consumer<Setting<Object2BooleanMap<Class<? extends Packet<?>>>>> onModuleActivated) {
         super(name, description, defaultValue, onChanged, onModuleActivated);
 
@@ -37,8 +42,17 @@ public class PacketBoolSetting extends Setting<Object2BooleanMap<Class<? extends
 
     @Override
     protected Object2BooleanMap<Class<? extends Packet<?>>> parseImpl(String str) {
-        // TODO: I know this is wrong but im too lazy and nobody is going to use chat commands for packet canceller anyway
-        return new Object2BooleanArrayMap<>();
+        String[] values = str.split(",");
+        Object2BooleanMap<Class<? extends Packet<?>>> packets = new Object2BooleanOpenHashMap<>(values.length);
+
+        try {
+            for (String value : values) {
+                Class<? extends Packet<?>> packet = PacketUtils.getPacket(value.trim());
+                if (packet != null) packets.put(packet, true);
+            }
+        } catch (Exception ignored) {}
+
+        return packets;
     }
 
     @Override
@@ -52,9 +66,20 @@ public class PacketBoolSetting extends Setting<Object2BooleanMap<Class<? extends
     }
 
     @Override
-    protected String generateUsage() {
-        //TODO: Look up retard
-        return "(highlight)not implemented";
+    public List<String> getSuggestions() {
+        if (suggestions == null) {
+            suggestions = new ArrayList<>(PacketUtils.getC2SPackets().size() + PacketUtils.getS2CPackets().size());
+
+            for (Class<? extends Packet<?>> packet : PacketUtils.getC2SPackets()) {
+                suggestions.add(PacketUtils.getName(packet));
+            }
+
+            for (Class<? extends Packet<?>> packet : PacketUtils.getS2CPackets()) {
+                suggestions.add(PacketUtils.getName(packet));
+            }
+        }
+
+        return suggestions;
     }
 
     @Override

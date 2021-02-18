@@ -32,11 +32,7 @@ public class BlockSetting extends Setting<Block> {
 
     @Override
     protected Block parseImpl(String str) {
-        Identifier id;
-        if (str.contains(":")) id = new Identifier(str);
-        else id = new Identifier("minecraft", str);
-
-        return Registry.BLOCK.get(id);
+        return parseId(Registry.BLOCK, str);
     }
 
     @Override
@@ -50,8 +46,8 @@ public class BlockSetting extends Setting<Block> {
     }
 
     @Override
-    protected String generateUsage() {
-        return "(highlight)block id (default)(dirt, minecraft:stone, etc)";
+    public Iterable<Identifier> getIdentifierSuggestions() {
+        return Registry.BLOCK.getIds();
     }
 
     @Override
