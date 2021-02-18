@@ -64,7 +64,7 @@ public class TopBarConfig extends TopBarWindowScreen {
         sgGeneral.add(new BoolSetting.Builder()
                 .name("send-data-to-api")
                 .description("If checked, your UUID will be send to Meteor's servers.")
-                .defaultValue(Config.get().sendDataToApi)
+                .defaultValue(true)
                 .onChanged(aBoolean -> Config.get().sendDataToApi = aBoolean)
                 .onModuleActivated(booleanSetting -> booleanSetting.set(Config.get().sendDataToApi))
                 .build()
