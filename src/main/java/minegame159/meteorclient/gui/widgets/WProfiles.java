@@ -13,9 +13,7 @@ public class WProfiles extends WWindow {
         super("Profiles", GuiConfig.get().getWindowConfig(GuiConfig.WindowType.Profiles).isExpanded(), true);
         type = GuiConfig.WindowType.Profiles;
 
-        action = () -> {
-            GuiConfig.get().getWindowConfig(type).setPos(x, y);
-        };
+        action = () -> getWindowConfig().setPos(x, y);
 
         initWidgets();
     }

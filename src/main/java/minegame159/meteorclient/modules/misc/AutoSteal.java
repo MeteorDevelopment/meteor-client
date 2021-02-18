@@ -5,7 +5,7 @@
 
 package minegame159.meteorclient.modules.misc;
 
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.IntSetting;
@@ -21,10 +21,6 @@ import net.minecraft.screen.slot.SlotActionType;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class AutoSteal extends Module {
-    public AutoSteal() {
-        super(Category.Misc, "auto-steal", "Automatically dumps or steals from storage blocks.");
-    }
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgDelays = settings.createGroup("Delay");
 
@@ -78,6 +74,10 @@ public class AutoSteal extends Module {
             .defaultValue(50)
             .build()
     );
+
+    public AutoSteal() {
+        super(Categories.Misc, "auto-steal", "Automatically dumps or steals from storage blocks.");
+    }
 
     private void checkAutoSettings() {
         if (autoStealEnabled.get() && autoDumpEnabled.get()) {

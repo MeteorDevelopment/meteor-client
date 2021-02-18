@@ -8,7 +8,7 @@ package minegame159.meteorclient.modules.player;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixin.ItemStackAccessor;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.combat.AutoTotem;
@@ -76,7 +76,7 @@ public class AutoReplenish extends Module {
     private int tickDelayLeft;
 
     public AutoReplenish(){
-        super(Category.Player, "auto-replenish", "Automatically refills items in your hotbar, main hand, or offhand.");
+        super(Categories.Player, "auto-replenish", "Automatically refills items in your hotbar, main hand, or offhand.");
 
         for (int i = 0; i < items.length; i++) items[i] = new ItemStack(Items.AIR);
     }

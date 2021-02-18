@@ -7,7 +7,7 @@ package minegame159.meteorclient.modules.misc;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.PlaySoundEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
@@ -28,7 +28,7 @@ public class SoundBlocker extends Module {
     );
 
     public SoundBlocker() {
-        super(Category.Misc, "sound-blocker", "Cancels out selected sounds.");
+        super(Categories.Misc, "sound-blocker", "Cancels out selected sounds.");
     }
 
     @EventHandler

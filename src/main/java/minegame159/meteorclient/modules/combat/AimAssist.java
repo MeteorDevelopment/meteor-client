@@ -10,7 +10,7 @@ import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.friends.Friends;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
@@ -94,7 +94,7 @@ public class AimAssist extends Module {
     private Entity target;
 
     public AimAssist() {
-        super(Category.Combat, "aim-assist", "Automatically aims at entities.");
+        super(Categories.Combat, "aim-assist", "Automatically aims at entities.");
     }
 
     @EventHandler

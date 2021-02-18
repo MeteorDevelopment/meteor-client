@@ -8,7 +8,7 @@ package minegame159.meteorclient.modules.player;
 import minegame159.meteorclient.gui.widgets.WButton;
 import minegame159.meteorclient.gui.widgets.WTable;
 import minegame159.meteorclient.gui.widgets.WWidget;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.entity.FakePlayerEntity;
@@ -16,7 +16,6 @@ import minegame159.meteorclient.utils.entity.FakePlayerUtils;
 import net.minecraft.entity.player.PlayerEntity;
 
 public class FakePlayer extends Module {
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     public final Setting<String> name = sgGeneral.add(new StringSetting.Builder()
@@ -57,7 +56,7 @@ public class FakePlayer extends Module {
     );
 
     public FakePlayer() {
-        super(Category.Player, "fake-player", "Spawns a client-side fake player for testing usages.");
+        super(Categories.Player, "fake-player", "Spawns a client-side fake player for testing usages.");
     }
 
     @Override

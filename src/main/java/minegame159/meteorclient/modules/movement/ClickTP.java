@@ -7,7 +7,7 @@ package minegame159.meteorclient.modules.movement;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -31,7 +31,7 @@ public class ClickTP extends Module {
     );
 
     public ClickTP() {
-        super(Category.Movement, "click-tp", "Teleports you to the block you click on.");
+        super(Categories.Movement, "click-tp", "Teleports you to the block you click on.");
     }
 
     @EventHandler

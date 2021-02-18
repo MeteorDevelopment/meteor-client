@@ -8,7 +8,7 @@ package minegame159.meteorclient.modules.combat;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.game.OpenScreenEvent;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -31,7 +31,7 @@ public class SelfAnvil extends Module {
     );
 
     public SelfAnvil() {
-        super(Category.Combat, "self-anvil", "Automatically places an anvil on you to prevent other players from going into your hole.");
+        super(Categories.Combat, "self-anvil", "Automatically places an anvil on you to prevent other players from going into your hole.");
     }
 
     @EventHandler

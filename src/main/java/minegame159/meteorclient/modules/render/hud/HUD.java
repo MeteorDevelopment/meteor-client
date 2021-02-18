@@ -11,7 +11,7 @@ import minegame159.meteorclient.gui.widgets.WButton;
 import minegame159.meteorclient.gui.widgets.WLabel;
 import minegame159.meteorclient.gui.widgets.WTable;
 import minegame159.meteorclient.gui.widgets.WWidget;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.combat.*;
@@ -436,7 +436,7 @@ public class HUD extends Module {
     public final List<HudModule> modules = new ArrayList<>();
 
     public HUD() {
-        super(Category.Render, "HUD", "In game overlay.");
+        super(Categories.Render, "HUD", "In game overlay.");
 
         init();
     }

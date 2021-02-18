@@ -8,14 +8,14 @@ package minegame159.meteorclient.modules.player;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.mixin.BlockHitResultAccessor;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
 import net.minecraft.util.math.Direction;
 
 public class BuildHeight extends Module {
     public BuildHeight() {
-        super(Category.Player, "build-height", "Allows you to interact with objects at the build limit.");
+        super(Categories.Player, "build-height", "Allows you to interact with objects at the build limit.");
     }
 
     @EventHandler

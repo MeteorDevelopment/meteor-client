@@ -8,7 +8,7 @@ package minegame159.meteorclient.modules.misc;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.world.ConnectToServerEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -29,7 +29,7 @@ public class AutoReconnect extends Module {
     public ServerInfo lastServerInfo;
 
     public AutoReconnect() {
-        super(Category.Misc, "auto-reconnect", "Automatically reconnects when disconnected from a server.");
+        super(Categories.Misc, "auto-reconnect", "Automatically reconnects when disconnected from a server.");
         MeteorClient.EVENT_BUS.subscribe(new StaticListener());
     }
 

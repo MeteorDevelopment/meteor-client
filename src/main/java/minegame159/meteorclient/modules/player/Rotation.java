@@ -7,7 +7,7 @@ package minegame159.meteorclient.modules.player;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.EnumSetting;
@@ -20,7 +20,6 @@ public class Rotation extends Module {
         Simple,
         None
     }
-
 
     private final SettingGroup sgYaw = settings.createGroup("Yaw");
     private final SettingGroup sgPitch = settings.createGroup("Pitch");
@@ -64,7 +63,7 @@ public class Rotation extends Module {
     );
 
     public Rotation() {
-        super(Category.Player, "rotation", "Changes/locks your yaw and pitch.");
+        super(Categories.Player, "rotation", "Changes/locks your yaw and pitch.");
     }
 
     @Override

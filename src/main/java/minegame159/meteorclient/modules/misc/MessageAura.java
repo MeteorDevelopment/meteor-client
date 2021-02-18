@@ -11,7 +11,7 @@ import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.EntityAddedEvent;
 import minegame159.meteorclient.friends.Friend;
 import minegame159.meteorclient.friends.Friends;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -20,10 +20,6 @@ import minegame159.meteorclient.settings.StringSetting;
 import net.minecraft.entity.player.PlayerEntity;
 
 public class MessageAura extends Module {
-    public MessageAura() {
-        super(Category.Misc, "message-aura", "Sends a specified message to any player that enters render distance.");
-    }
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<String> message = sgGeneral.add(new StringSetting.Builder()
@@ -39,6 +35,10 @@ public class MessageAura extends Module {
             .defaultValue(false)
             .build()
     );
+
+    public MessageAura() {
+        super(Categories.Misc, "message-aura", "Sends a specified message to any player that enters render distance.");
+    }
 
     @EventHandler
     private void onEntityAdded(EntityAddedEvent event) {

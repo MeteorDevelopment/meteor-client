@@ -7,7 +7,7 @@ package minegame159.meteorclient.modules.player;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -34,7 +34,7 @@ public class EndermanLook extends Module {
     );
 
     public EndermanLook() {
-        super(Category.Player, "enderman-look", "Either looks at all Endermen or prevents you from looking at Endermen.");
+        super(Categories.Player, "enderman-look", "Either looks at all Endermen or prevents you from looking at Endermen.");
     }
 
     @EventHandler

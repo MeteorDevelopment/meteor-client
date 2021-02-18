@@ -13,7 +13,7 @@ import minegame159.meteorclient.events.entity.player.PickItemsEvent;
 import minegame159.meteorclient.events.entity.player.PlaceBlockEvent;
 import minegame159.meteorclient.events.game.OpenScreenEvent;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import net.minecraft.block.Block;
@@ -33,7 +33,7 @@ public class Announcer extends Module {
     };
 
     public Announcer() {
-        super(Category.Misc, "announcer", "Announces specified actions into chat.");
+        super(Categories.Misc, "announcer", "Announces specified actions into chat.");
     }
 
     @Override

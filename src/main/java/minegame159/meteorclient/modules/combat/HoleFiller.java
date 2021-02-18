@@ -7,7 +7,7 @@ package minegame159.meteorclient.modules.combat;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.world.BlockIterator;
@@ -75,7 +75,7 @@ public class HoleFiller extends Module {
     private int tickDelayLeft;
 
     public HoleFiller() {
-        super(Category.Combat, "hole-filler", "Fills holes with specified blocks.");
+        super(Categories.Combat, "hole-filler", "Fills holes with specified blocks.");
     }
 
     @Override

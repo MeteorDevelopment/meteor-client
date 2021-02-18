@@ -12,7 +12,7 @@ import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixininterface.IPlayerMoveC2SPacket;
 import minegame159.meteorclient.mixininterface.IVec3d;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -38,7 +38,7 @@ public class Criticals extends Module {
     );
 
     public Criticals() {
-        super(Category.Combat, "criticals", "Performs critical attacks when you hit your target.");
+        super(Categories.Combat, "criticals", "Performs critical attacks when you hit your target.");
     }
 
     private PlayerInteractEntityC2SPacket attackPacket;

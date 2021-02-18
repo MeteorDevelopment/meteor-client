@@ -8,7 +8,7 @@ package minegame159.meteorclient.modules.movement;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixininterface.IVec3d;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -38,7 +38,7 @@ public class ReverseStep extends Module {
     );
 
     public ReverseStep() {
-        super(Category.Movement, "reverse-step", "Allows you to fall down blocks at a greater speed.");
+        super(Categories.Movement, "reverse-step", "Allows you to fall down blocks at a greater speed.");
     }
 
     @EventHandler

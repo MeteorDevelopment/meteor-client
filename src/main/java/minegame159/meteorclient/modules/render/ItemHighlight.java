@@ -5,7 +5,7 @@
 
 package minegame159.meteorclient.modules.render;
 
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.ColorSetting;
 import minegame159.meteorclient.settings.ItemListSetting;
@@ -36,7 +36,7 @@ public class ItemHighlight extends Module {
     );
 
     public ItemHighlight() {
-        super(Category.Render, "item-highlight", "Highlights selected items when in guis");
+        super(Categories.Render, "item-highlight", "Highlights selected items when in guis");
     }
 
     public int getColor(ItemStack stack) {

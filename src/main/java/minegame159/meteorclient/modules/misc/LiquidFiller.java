@@ -7,7 +7,7 @@ package minegame159.meteorclient.modules.misc;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.world.BlockIterator;
@@ -70,7 +70,7 @@ public class LiquidFiller extends Module {
     );
 
     public LiquidFiller(){
-        super(Category.Misc, "liquid-filler", "Places blocks inside of liquid source blocks within range of you.");
+        super(Categories.Misc, "liquid-filler", "Places blocks inside of liquid source blocks within range of you.");
     }
 
     @EventHandler

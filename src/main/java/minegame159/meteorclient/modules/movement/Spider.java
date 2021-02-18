@@ -7,7 +7,7 @@ package minegame159.meteorclient.modules.movement;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -26,7 +26,7 @@ public class Spider extends Module {
     );
 
     public Spider() {
-        super(Category.Movement, "spider", "Allows you to climb walls like a spider.");
+        super(Categories.Movement, "spider", "Allows you to climb walls like a spider.");
     }
 
     @EventHandler

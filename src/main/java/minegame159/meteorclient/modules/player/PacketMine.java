@@ -9,7 +9,7 @@ import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.player.StartBreakingBlockEvent;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.rendering.ShapeMode;
@@ -51,7 +51,6 @@ public class PacketMine extends Module {
             .build()
     );
 
-
     // Render
 
     private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
@@ -86,7 +85,7 @@ public class PacketMine extends Module {
     private final List<MyBlock> blocks = new ArrayList<>();
 
     public PacketMine() {
-        super(Category.Player, "packet-mine", "Sends packets to mine blocks without the mining animation.");
+        super(Categories.Player, "packet-mine", "Sends packets to mine blocks without the mining animation.");
     }
 
     @Override

@@ -19,7 +19,7 @@ import minegame159.meteorclient.gui.widgets.WButton;
 import minegame159.meteorclient.gui.widgets.WLabel;
 import minegame159.meteorclient.gui.widgets.WTable;
 import minegame159.meteorclient.gui.widgets.WWidget;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.player.InfinityMiner;
@@ -46,10 +46,6 @@ import java.util.List;
  */
 
 public class Swarm extends Module {
-    public Swarm() {
-        super(Category.Combat, "Swarm", "I Am... The Swarm.");
-    }
-
     public enum Mode {
         Queen,
         Slave,
@@ -71,6 +67,10 @@ public class Swarm extends Module {
             .sliderMin(1)
             .sliderMax(65535)
             .build());
+
+    public Swarm() {
+        super(Categories.Combat, "Swarm", "I Am... The Swarm.");
+    }
 
     public SwarmServer server;
     public SwarmClient client;

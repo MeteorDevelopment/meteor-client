@@ -5,6 +5,8 @@
 
 package minegame159.meteorclient;
 
-public interface MeteorApi {
-    void onInitialize();
+public abstract class MeteorAddon {
+    public abstract void onInitialize();
+
+    public void onRegisterCategories() {}
 }

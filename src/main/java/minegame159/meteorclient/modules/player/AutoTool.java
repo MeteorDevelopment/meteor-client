@@ -15,7 +15,7 @@ import minegame159.meteorclient.mixin.AxeItemAccessor;
 import minegame159.meteorclient.mixin.HoeItemAccessor;
 import minegame159.meteorclient.mixin.PickaxeItemAccessor;
 import minegame159.meteorclient.mixin.ShovelItemAccessor;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import net.minecraft.block.Block;
@@ -84,7 +84,7 @@ public class AutoTool extends Module {
     );
 
     public AutoTool() {
-        super(Category.Player, "auto-tool", "Automatically switches to the most effective tool when performing an action.");
+        super(Categories.Player, "auto-tool", "Automatically switches to the most effective tool when performing an action.");
     }
 
     private static final Set<Material> EMPTY_MATERIALS = new HashSet<>(0);

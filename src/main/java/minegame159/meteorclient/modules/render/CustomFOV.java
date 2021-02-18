@@ -7,7 +7,7 @@ package minegame159.meteorclient.modules.render;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -26,6 +26,10 @@ public class CustomFOV extends Module {
     );
 
     private float _fov;
+
+    public CustomFOV() {
+        super(Categories.Render, "custom-fov", "Allows your FOV to be more customizable.");
+    }
 
     @Override
     public void onActivate() {
@@ -47,9 +51,5 @@ public class CustomFOV extends Module {
     @Override
     public void onDeactivate() {
      mc.options.fov = _fov;
-    }
-
-    public CustomFOV() {
-        super(Category.Render, "custom-fov", "Allows your FOV to be more customizable.");
     }
 }

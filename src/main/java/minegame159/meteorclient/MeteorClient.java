@@ -14,6 +14,7 @@ import minegame159.meteorclient.events.meteor.KeyEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.gui.screens.topbar.TopBarModules;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.misc.DiscordPresence;
 import minegame159.meteorclient.modules.render.hud.HudEditorScreen;
@@ -46,6 +47,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MeteorClient implements ClientModInitializer {
@@ -71,6 +73,11 @@ public class MeteorClient implements ClientModInitializer {
 
         LOG.info("Initializing Meteor Client");
 
+        List<MeteorAddon> addons = new ArrayList<>();
+        for (EntrypointContainer<MeteorAddon> entrypoint : FabricLoader.getInstance().getEntrypointContainers("meteor", MeteorAddon.class)) {
+            addons.add(entrypoint.getEntrypoint());
+        }
+
         mc = MinecraftClient.getInstance();
         Utils.mc = mc;
         EntityUtils.mc = mc;
@@ -93,6 +100,12 @@ public class MeteorClient implements ClientModInitializer {
         Names.init();
         MeteorPlayers.init();
 
+        // Register categories
+        Modules.REGISTERING_CATEGORIES = true;
+        Categories.register();
+        addons.forEach(MeteorAddon::onRegisterCategories);
+        Modules.REGISTERING_CATEGORIES = false;
+
         Systems.init();
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -103,11 +116,8 @@ public class MeteorClient implements ClientModInitializer {
         EVENT_BUS.subscribe(this);
         EVENT_BUS.post(new ClientInitialisedEvent()); // TODO: This is there just for compatibility
 
-        // Call custom 'meteor' entrypoint
-        List<EntrypointContainer<MeteorApi>> entrypoints = FabricLoader.getInstance().getEntrypointContainers("meteor", MeteorApi.class);
-        for (EntrypointContainer<MeteorApi> entrypoint : entrypoints) {
-            entrypoint.getEntrypoint().onInitialize();
-        }
+        // Call onInitialize for addons
+        addons.forEach(MeteorAddon::onInitialize);
 
         Systems.load();
     }

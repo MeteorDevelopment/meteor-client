@@ -6,7 +6,7 @@ package minegame159.meteorclient.modules.combat;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -15,7 +15,6 @@ import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.player.Rotations;
 import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.block.*;
-import net.minecraft.item.Item;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.util.Hand;
 
@@ -32,7 +31,7 @@ public class AntiAnchor extends Module {
 
     // Constructor
     public AntiAnchor(){
-        super(Category.Combat, "anti-anchor", "Automatically prevents Anchor Aura by placing a slab on your head.");
+        super(Categories.Combat, "anti-anchor", "Automatically prevents Anchor Aura by placing a slab on your head.");
     }
 
     @EventHandler

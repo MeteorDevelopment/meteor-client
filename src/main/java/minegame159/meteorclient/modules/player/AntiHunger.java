@@ -9,7 +9,7 @@ import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixin.PlayerMoveC2SPacketAccessor;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -39,7 +39,7 @@ public class AntiHunger extends Module {
     private boolean ignorePacket;
 
     public AntiHunger() {
-        super(Category.Player, "anti-hunger", "Reduces (does NOT remove) hunger consumption.");
+        super(Categories.Player, "anti-hunger", "Reduces (does NOT remove) hunger consumption.");
     }
 
     @Override

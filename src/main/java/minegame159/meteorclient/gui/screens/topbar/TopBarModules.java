@@ -33,7 +33,7 @@ public class TopBarModules extends TopBarScreen {
 
     private static class WWindowController extends WWidget {
         public WWindowController() {
-            for (Category category : Modules.CATEGORIES) {
+            for (Category category : Modules.loopCategories()) {
                 add(new WModuleCategory(category));
             }
 
@@ -59,7 +59,7 @@ public class TopBarModules extends TopBarScreen {
                 double screenWidth = MinecraftClient.getInstance().getWindow().getFramebufferWidth();
                 double screenHeight = MinecraftClient.getInstance().getWindow().getFramebufferHeight();
 
-                GuiConfig.WindowConfig config = GuiConfig.get().getWindowConfig(((WWindow) cell.getWidget()).type);
+                GuiConfig.WindowConfig config = ((WWindow) cell.getWidget()).getWindowConfig();
                 if (config.getX() != -1) {
                     cellX = config.getX();
                     cellY = config.getY();

@@ -8,7 +8,7 @@ package minegame159.meteorclient.modules.render;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.mixin.ClientPlayerInteractionManagerAccessor;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.rendering.ShapeMode;
@@ -94,7 +94,7 @@ public class BreakIndicators extends Module {
     private final Color cLines = new Color();
 
     public BreakIndicators() {
-        super(Category.Render, "break-indicators", "Renders the progress of a block being broken.");
+        super(Categories.Render, "break-indicators", "Renders the progress of a block being broken.");
     }
 
     @Override

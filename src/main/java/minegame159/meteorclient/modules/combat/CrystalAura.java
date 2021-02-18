@@ -15,7 +15,7 @@ import minegame159.meteorclient.events.render.Render2DEvent;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.friends.Friends;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.rendering.ShapeMode;
@@ -489,7 +489,7 @@ public class CrystalAura extends Module {
     );
 
     public CrystalAura() {
-        super(Category.Combat, "crystal-aura", "Automatically places and breaks crystals to damage other players.");
+        super(Categories.Combat, "crystal-aura", "Automatically places and breaks crystals to damage other players.");
     }
 
     private int preSlot;

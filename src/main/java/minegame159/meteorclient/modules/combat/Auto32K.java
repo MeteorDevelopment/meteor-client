@@ -9,7 +9,7 @@ package minegame159.meteorclient.modules.combat;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
@@ -42,7 +42,9 @@ public class Auto32K extends Module {
         Dispenser
     }
 
-    public Auto32K(){super(Category.Combat, "auto-32k", "Automatically attacks other players with a 32k weapon.");}
+    public Auto32K(){
+        super(Categories.Combat, "auto-32k", "Automatically attacks other players with a 32k weapon.");
+    }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 

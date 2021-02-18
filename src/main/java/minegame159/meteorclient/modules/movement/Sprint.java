@@ -7,7 +7,7 @@ package minegame159.meteorclient.modules.movement;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -24,7 +24,7 @@ public class Sprint extends Module {
     );
 
     public Sprint() {
-        super(Category.Movement, "sprint", "Automatically sprints.");
+        super(Categories.Movement, "sprint", "Automatically sprints.");
     }
     
     @Override

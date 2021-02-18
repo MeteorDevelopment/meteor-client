@@ -7,7 +7,7 @@ package minegame159.meteorclient.modules.player;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.ItemListSetting;
@@ -39,7 +39,7 @@ public class AutoDrop extends Module {
     );
 
     public AutoDrop() {
-        super(Category.Player, "auto-drop", "Automatically drops specified items.");
+        super(Categories.Player, "auto-drop", "Automatically drops specified items.");
     }
 
     @EventHandler

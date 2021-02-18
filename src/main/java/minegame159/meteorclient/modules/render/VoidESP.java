@@ -8,7 +8,7 @@ package minegame159.meteorclient.modules.render;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.rendering.ShapeMode;
@@ -77,11 +77,11 @@ public class VoidESP extends Module {
             .build()
     );
 
-    public VoidESP() {
-        super(Category.Render, "void-esp", "Renders holes in bedrock layers that lead to the void.");
-    }
-
     private final List<BlockPos> voidHoles = new ArrayList<>();
+
+    public VoidESP() {
+        super(Categories.Render, "void-esp", "Renders holes in bedrock layers that lead to the void.");
+    }
 
     private void getHoles(int searchRange, int holeHeight) {
         voidHoles.clear();

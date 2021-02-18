@@ -12,7 +12,7 @@ import minegame159.meteorclient.events.game.OpenScreenEvent;
 import minegame159.meteorclient.events.meteor.KeyEvent;
 import minegame159.meteorclient.events.world.ChunkOcclusionEvent;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.misc.Vec3;
@@ -88,7 +88,7 @@ public class Freecam extends Module {
     private boolean forward, backward, right, left, up, down;
 
     public Freecam() {
-        super(Category.Render, "freecam", "Makes you fly out of your body.");
+        super(Categories.Render, "freecam", "Makes you fly out of your body.");
     }
 
     @Override

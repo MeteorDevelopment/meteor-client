@@ -9,7 +9,7 @@ package minegame159.meteorclient.modules.combat;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -60,7 +60,7 @@ public class AntiBed extends Module {
     private boolean closeScreen = false;
 
     public AntiBed() {
-        super(Category.Combat, "anti-bed", "Prevents people from placing beds where you are standing.");
+        super(Categories.Combat, "anti-bed", "Prevents people from placing beds where you are standing.");
     }
 
     @Override

@@ -6,13 +6,16 @@
 package minegame159.meteorclient.gui;
 
 import minegame159.meteorclient.Config;
+import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.utils.misc.ISerializable;
-import minegame159.meteorclient.utils.misc.NbtUtils;
 import minegame159.meteorclient.utils.misc.Vector2;
 import minegame159.meteorclient.utils.render.AlignmentX;
 import minegame159.meteorclient.utils.render.color.RainbowColors;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -81,7 +84,7 @@ public class GuiConfig implements ISerializable<GuiConfig> {
     public boolean collapseListSettingScreen = true;
     public int countListSettingScreen = 20;
 
-    private Map<WindowType, WindowConfig> windowConfigs = new HashMap<>();
+    private final Map<WindowType, WindowConfig> windowConfigs = new HashMap<>();
 
     public static GuiConfig get() {
         return Config.get().guiConfig;
@@ -99,6 +102,11 @@ public class GuiConfig implements ISerializable<GuiConfig> {
 
     public void clearWindowConfigs() {
         windowConfigs.clear();
+
+        for (Category category : Modules.loopCategories()) {
+            category.windowConfig = new WindowConfig();
+        }
+
         Config.get().save();
     }
 
@@ -164,9 +172,21 @@ public class GuiConfig implements ISerializable<GuiConfig> {
         tag.put("editHovered", editHovered.toTag());
         tag.put("editPressed", editPressed.toTag());
 
-        tag.put("windowConfigs", NbtUtils.mapToTag(windowConfigs));
+        ListTag windowConfigsTag = new ListTag();
+        for (WindowType type : windowConfigs.keySet()) writeWindowConfig(windowConfigsTag, type, windowConfigs.get(type), null);
+        for (Category category : Modules.loopCategories()) writeWindowConfig(windowConfigsTag, WindowType.Category, category.windowConfig, category);
+        tag.put("windowConfigs", windowConfigsTag);
 
         return tag;
+    }
+
+    private void writeWindowConfig(ListTag listTag, WindowType type, WindowConfig config, Category category) {
+        CompoundTag tag = config.toTag();
+
+        tag.putString("type", type.name());
+        if (category != null) tag.putInt("id", category.hashCode());
+
+        listTag.add(tag);
     }
 
     @Override
@@ -229,7 +249,23 @@ public class GuiConfig implements ISerializable<GuiConfig> {
         read(tag, "editHovered", editHovered);
         read(tag, "editPressed", editPressed);
 
-        windowConfigs = NbtUtils.mapFromTag(tag.getCompound("windowConfigs"), WindowType::valueOf, tag1 -> new WindowConfig().fromTag((CompoundTag) tag1));
+        Tag windowConfigsTag = tag.get("windowConfigs");
+        windowConfigs.clear();
+
+        if (windowConfigsTag instanceof ListTag) {
+            for (Tag t : (ListTag) windowConfigsTag) {
+                CompoundTag windowConfigTag = ((CompoundTag) t);
+
+                WindowType type = WindowType.valueOf(windowConfigTag.getString("type"));
+                if (type == WindowType.Category) {
+                    Category category = Modules.getCategoryByHash(windowConfigTag.getInt("id"));
+                    if (category != null) category.windowConfig.fromTag(windowConfigTag);
+                }
+                else {
+                    windowConfigs.put(type, new WindowConfig().fromTag(windowConfigTag));
+                }
+            }
+        }
 
         return this;
     }
@@ -239,11 +275,7 @@ public class GuiConfig implements ISerializable<GuiConfig> {
     }
 
     public enum WindowType {
-        Combat,
-        Player,
-        Movement,
-        Render,
-        Misc,
+        Category,
         Setting,
         Profiles,
         Search
