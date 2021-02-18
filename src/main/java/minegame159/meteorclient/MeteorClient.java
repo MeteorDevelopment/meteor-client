@@ -37,6 +37,7 @@ import minegame159.meteorclient.utils.world.BlockIterator;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.entrypoint.EntrypointContainer;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.options.KeyBinding;
@@ -45,6 +46,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
+import java.util.List;
 
 public class MeteorClient implements ClientModInitializer {
     public static MeteorClient INSTANCE;
@@ -99,7 +101,13 @@ public class MeteorClient implements ClientModInitializer {
         }));
 
         EVENT_BUS.subscribe(this);
-        EVENT_BUS.post(new ClientInitialisedEvent());
+        EVENT_BUS.post(new ClientInitialisedEvent()); // TODO: This is there just for compatibility
+
+        // Call custom 'meteor' entrypoint
+        List<EntrypointContainer<MeteorApi>> entrypoints = FabricLoader.getInstance().getEntrypointContainers("meteor", MeteorApi.class);
+        for (EntrypointContainer<MeteorApi> entrypoint : entrypoints) {
+            entrypoint.getEntrypoint().onInitialize();
+        }
     }
 
     private void openClickGui() {

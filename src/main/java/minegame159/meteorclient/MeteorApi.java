@@ -3,8 +3,8 @@
  * Copyright (c) 2021 Meteor Development.
  */
 
-package minegame159.meteorclient.events.meteor;
+package minegame159.meteorclient;
 
-@Deprecated
-public class ClientInitialisedEvent {
+public interface MeteorApi {
+    void onInitialize();
 }
