@@ -108,6 +108,8 @@ public class MeteorClient implements ClientModInitializer {
         for (EntrypointContainer<MeteorApi> entrypoint : entrypoints) {
             entrypoint.getEntrypoint().onInitialize();
         }
+
+        Systems.load();
     }
 
     private void openClickGui() {
