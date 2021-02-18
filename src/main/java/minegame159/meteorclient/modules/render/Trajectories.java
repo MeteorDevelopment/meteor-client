@@ -8,7 +8,7 @@ package minegame159.meteorclient.modules.render;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.mixininterface.IVec3d;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.rendering.ShapeMode;
@@ -63,7 +63,7 @@ public class Trajectories extends Module {
     private double hitQuadX1, hitQuadY1, hitQuadZ1, hitQuadX2, hitQuadY2, hitQuadZ2;
 
     public Trajectories() {
-        super(Category.Render, "trajectories", "Predicts the trajectory of throwable items.");
+        super(Categories.Render, "trajectories", "Predicts the trajectory of throwable items.");
     }
 
     @EventHandler

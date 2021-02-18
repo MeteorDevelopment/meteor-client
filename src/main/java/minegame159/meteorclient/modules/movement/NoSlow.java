@@ -5,7 +5,7 @@
 
 package minegame159.meteorclient.modules.movement;
 
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -43,7 +43,7 @@ public class NoSlow extends Module {
     );
 
     public NoSlow() {
-        super(Category.Movement, "no-slow", "Allows you to move normally when using objects that will slow you.");
+        super(Categories.Movement, "no-slow", "Allows you to move normally when using objects that will slow you.");
     }
 
     public boolean items() {

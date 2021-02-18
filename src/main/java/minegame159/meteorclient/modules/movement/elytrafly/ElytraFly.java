@@ -10,7 +10,7 @@ import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.entity.player.PlayerMoveEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixininterface.IVec3d;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.movement.elytrafly.modes.Packet;
@@ -157,7 +157,7 @@ public class ElytraFly extends Module {
     private ElytraFlightMode currentMode;
 
     public ElytraFly() {
-        super(Category.Movement, "ElytraFly", "Gives you more control over your elytra.");
+        super(Categories.Movement, "ElytraFly", "Gives you more control over your elytra.");
     }
 
     @Override

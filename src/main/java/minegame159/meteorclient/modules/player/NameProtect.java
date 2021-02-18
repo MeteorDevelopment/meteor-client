@@ -5,14 +5,13 @@
 
 package minegame159.meteorclient.modules.player;
 
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.settings.StringSetting;
 
 public class NameProtect extends Module {
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<String> name = sgGeneral.add(new StringSetting.Builder()
@@ -22,11 +21,11 @@ public class NameProtect extends Module {
             .build()
     );
 
-    public NameProtect() {
-        super(Category.Player, "name-protect", "Hides your name client-side.");
-    }
-
     private String username = "If you see this, something is wrong.";
+
+    public NameProtect() {
+        super(Categories.Player, "name-protect", "Hides your name client-side.");
+    }
 
     @Override
     public void onActivate() {

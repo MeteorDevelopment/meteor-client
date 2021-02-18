@@ -6,7 +6,7 @@
 package minegame159.meteorclient.modules.player;
 
 import minegame159.meteorclient.Config;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.EnumSetting;
@@ -48,7 +48,7 @@ public class ChestSwap extends Module {
     );
 
     public ChestSwap() {
-        super(Category.Player, "chest-swap", "Automatically swaps between a chestplate and an elytra.");
+        super(Categories.Player, "chest-swap", "Automatically swaps between a chestplate and an elytra.");
     }
 
     @Override

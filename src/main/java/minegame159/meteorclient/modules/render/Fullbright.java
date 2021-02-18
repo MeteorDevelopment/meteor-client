@@ -8,13 +8,13 @@ package minegame159.meteorclient.modules.render;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import net.minecraft.client.MinecraftClient;
 
 public class Fullbright extends Module {
     public Fullbright() {
-        super(Category.Render, "fullbright", "Lights up your world!");
+        super(Categories.Render, "fullbright", "Lights up your world!");
 
         MeteorClient.EVENT_BUS.subscribe(StaticListener.class);
     }

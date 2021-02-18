@@ -8,7 +8,7 @@ package minegame159.meteorclient.modules.render;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.settings.*;
@@ -56,7 +56,7 @@ public class Breadcrumbs extends Module {
     private DimensionType lastDimension;
 
     public Breadcrumbs() {
-        super(Category.Render, "breadcrumbs", "Displays a trail behind where you have walked.");
+        super(Categories.Render, "breadcrumbs", "Displays a trail behind where you have walked.");
     }
 
     @Override

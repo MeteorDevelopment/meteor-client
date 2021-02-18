@@ -10,7 +10,7 @@ import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.EntityAddedEvent;
 import minegame159.meteorclient.friends.Friends;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.EntityTypeListSetting;
@@ -45,7 +45,7 @@ public class EntityLogger extends Module {
     );
 
     public EntityLogger() {
-        super(Category.Misc, "entity-logger", "Sends a client-side chat alert if a specified entity appears in render distance.");
+        super(Categories.Misc, "entity-logger", "Sends a client-side chat alert if a specified entity appears in render distance.");
     }
 
     @EventHandler

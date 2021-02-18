@@ -7,6 +7,8 @@ package minegame159.meteorclient.utils.network;
 
 import net.minecraft.client.MinecraftClient;
 
+import minegame159.meteorclient.Config;
+
 public class OnlinePlayers {
     private static long lastPingTime;
 
@@ -18,7 +20,7 @@ public class OnlinePlayers {
                 String url = "http://meteorclient.com/api/online/ping";
 
                 String uuid = MinecraftClient.getInstance().getSession().getUuid();
-                if (uuid != null && !uuid.isEmpty()) url += "?uuid=" + uuid;
+                if (uuid != null && !uuid.isEmpty() && Config.get().sendDataToApi) url += "?uuid=" + uuid;
 
                 HttpUtils.post(url);
             });

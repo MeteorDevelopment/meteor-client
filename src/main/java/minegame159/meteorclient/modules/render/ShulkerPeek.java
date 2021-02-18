@@ -9,7 +9,7 @@ package minegame159.meteorclient.modules.render;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.game.GetTooltipEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.settings.EnumSetting;
@@ -47,7 +47,7 @@ public class ShulkerPeek extends Module {
     }
 
     public ShulkerPeek(){
-        super(Category.Render, "shulker-peek", "Allows you to see what is inside Shulker Boxes without placing them.");
+        super(Categories.Render, "shulker-peek", "Allows you to see what is inside Shulker Boxes without placing them.");
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();

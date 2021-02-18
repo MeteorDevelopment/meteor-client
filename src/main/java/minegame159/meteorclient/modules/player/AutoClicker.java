@@ -7,7 +7,7 @@ package minegame159.meteorclient.modules.player;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.IntSetting;
@@ -27,7 +27,6 @@ public class AutoClicker extends Module {
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("mode")
@@ -55,7 +54,7 @@ public class AutoClicker extends Module {
     private int timer;
 
     public AutoClicker() {
-        super(Category.Player, "auto-clicker", "Automatically clicks.");
+        super(Categories.Player, "auto-clicker", "Automatically clicks.");
     }
 
     @Override

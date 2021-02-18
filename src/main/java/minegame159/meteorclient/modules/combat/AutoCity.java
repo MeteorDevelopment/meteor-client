@@ -5,7 +5,7 @@
 
 package minegame159.meteorclient.modules.combat;
 
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.DoubleSetting;
@@ -59,7 +59,7 @@ public class AutoCity extends Module {
     );
 
     public AutoCity() {
-        super(Category.Combat, "auto-city", "Automatically cities a target by mining the nearest obsidian next to them.");
+        super(Categories.Combat, "auto-city", "Automatically cities a target by mining the nearest obsidian next to them.");
     }
 
     private PlayerEntity target;

@@ -8,7 +8,7 @@ package minegame159.meteorclient.modules.misc;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
@@ -60,7 +60,7 @@ public class AutoBreed extends Module {
     private final List<Entity> animalsFed = new ArrayList<>();
 
     public AutoBreed() {
-        super(Category.Misc, "auto-breed", "Automatically breeds specified animals.");
+        super(Categories.Misc, "auto-breed", "Automatically breeds specified animals.");
     }
 
     @Override

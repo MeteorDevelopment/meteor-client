@@ -9,7 +9,7 @@ package minegame159.meteorclient.modules.misc;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -24,8 +24,6 @@ import net.minecraft.item.SpawnEggItem;
 import net.minecraft.util.Hand;
 
 public class AutoMount extends Module {
-    public AutoMount(){super(Category.Misc, "auto-mount", "Automatically mounts entities.");}
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgMount = settings.createGroup("Mount");
 
@@ -102,6 +100,10 @@ public class AutoMount extends Module {
             .defaultValue(false)
             .build()
     );
+
+    public AutoMount() {
+        super(Categories.Misc, "auto-mount", "Automatically mounts entities.");
+    }
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {

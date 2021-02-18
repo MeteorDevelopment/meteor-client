@@ -7,7 +7,7 @@ package minegame159.meteorclient.modules.combat;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -28,7 +28,7 @@ public class Trigger extends Module {
     );
 
     public Trigger() {
-        super(Category.Combat, "trigger", "Automatically swings when you look at entities.");
+        super(Categories.Combat, "trigger", "Automatically swings when you look at entities.");
     }
 
     private Entity target;

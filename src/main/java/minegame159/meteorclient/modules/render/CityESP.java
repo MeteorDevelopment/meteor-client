@@ -7,7 +7,7 @@ package minegame159.meteorclient.modules.render;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.rendering.ShapeMode;
@@ -55,7 +55,7 @@ public class CityESP extends Module {
     );
 
     public CityESP() {
-        super(Category.Render, "city-esp", "Displays blocks that can be broken in order to city another player.");
+        super(Categories.Render, "city-esp", "Displays blocks that can be broken in order to city another player.");
     }
 
     @EventHandler

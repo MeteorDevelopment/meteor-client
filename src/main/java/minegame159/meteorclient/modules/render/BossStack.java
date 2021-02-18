@@ -7,7 +7,7 @@ package minegame159.meteorclient.modules.render;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderBossBarEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.DoubleSetting;
@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.WeakHashMap;
 
 public class BossStack extends Module {
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     public final Setting<Boolean> stack = sgGeneral.add(new BoolSetting.Builder()
@@ -49,7 +48,7 @@ public class BossStack extends Module {
     public static final WeakHashMap<ClientBossBar, Integer> barMap = new WeakHashMap<>();
 
     public BossStack() {
-        super(Category.Render, "boss-stack", "Stacks boss bars to make your HUD less cluttered.");
+        super(Categories.Render, "boss-stack", "Stacks boss bars to make your HUD less cluttered.");
     }
 
     @EventHandler

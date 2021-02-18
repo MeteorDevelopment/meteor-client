@@ -10,7 +10,7 @@ import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.EntityAddedEvent;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.rendering.*;
 import minegame159.meteorclient.rendering.text.TextRenderer;
@@ -103,7 +103,7 @@ public class LogoutSpots extends Module {
     private Dimension lastDimension;
 
     public LogoutSpots() {
-        super(Category.Render, "logout-spots", "Displays a box where another player has logged out at.");
+        super(Categories.Render, "logout-spots", "Displays a box where another player has logged out at.");
         lineColor.changed();
     }
 

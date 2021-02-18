@@ -5,7 +5,7 @@
 
 package minegame159.meteorclient.modules.render;
 
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.DoubleSetting;
@@ -13,7 +13,6 @@ import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 
 public class HandView extends Module {
-
     private final SettingGroup sgDefault = settings.getDefaultGroup();
     private final SettingGroup sgSwing = settings.createGroup("Swing");
 
@@ -124,6 +123,6 @@ public class HandView extends Module {
     );
 
     public HandView() {
-        super(Category.Render, "hand-view", "Alters the way items are rendered in your hands.");
+        super(Categories.Render, "hand-view", "Alters the way items are rendered in your hands.");
     }
 }

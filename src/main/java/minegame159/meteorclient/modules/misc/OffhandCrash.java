@@ -9,7 +9,7 @@ import io.netty.channel.Channel;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixin.ClientConnectionAccessor;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.IntSetting;
@@ -46,9 +46,8 @@ public class OffhandCrash extends Module {
     );
 
     public OffhandCrash() {
-        super(Category.Misc, "offhand-crash", "An exploit that can crash other players by swapping back and forth between your main hand and offhand..");
+        super(Categories.Misc, "offhand-crash", "An exploit that can crash other players by swapping back and forth between your main hand and offhand..");
     }
-
 
     private static final PlayerActionC2SPacket PACKET = new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.SWAP_ITEM_WITH_OFFHAND, new BlockPos(0, 0, 0) , Direction.UP);
 

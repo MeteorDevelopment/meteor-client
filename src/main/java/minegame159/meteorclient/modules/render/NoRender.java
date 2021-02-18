@@ -5,7 +5,7 @@
 
 package minegame159.meteorclient.modules.render;
 
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -190,7 +190,7 @@ public class NoRender extends Module {
     );
 
     public NoRender() {
-        super(Category.Render, "no-render", "Disables certain animations or overlays from rendering.");
+        super(Categories.Render, "no-render", "Disables certain animations or overlays from rendering.");
     }
 
     public boolean noHurtCam() {

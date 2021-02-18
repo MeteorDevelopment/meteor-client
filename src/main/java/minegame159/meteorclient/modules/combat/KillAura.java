@@ -11,7 +11,7 @@ import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.friends.Friends;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.entity.EntityUtils;
@@ -193,7 +193,7 @@ public class KillAura extends Module {
     private final List<Entity> entityList = new ArrayList<>();
 
     public KillAura() {
-        super(Category.Combat, "kill-aura", "Attacks specified entities around you.");
+        super(Categories.Combat, "kill-aura", "Attacks specified entities around you.");
     }
 
     @Override

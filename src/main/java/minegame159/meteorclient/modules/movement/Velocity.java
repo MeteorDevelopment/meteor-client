@@ -5,7 +5,7 @@
 
 package minegame159.meteorclient.modules.movement;
 
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.DoubleSetting;
@@ -55,7 +55,7 @@ public class Velocity extends Module {
     );
 
     public Velocity() {
-        super(Category.Movement, "velocity", "Prevents you from being moved by external forces.");
+        super(Categories.Movement, "velocity", "Prevents you from being moved by external forces.");
     }
 
     public double getHorizontal() {

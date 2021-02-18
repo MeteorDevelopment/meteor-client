@@ -8,7 +8,7 @@ package minegame159.meteorclient.modules.movement;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.meteor.KeyEvent;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.render.Freecam;
@@ -18,10 +18,6 @@ import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.misc.input.KeyAction;
 
 public class AirJump extends Module {
-    public AirJump() {
-        super(Category.Movement, "air-jump", "Lets you jump in the air.");
-    }
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Boolean> maintainY = sgGeneral.add(new BoolSetting.Builder()
@@ -45,6 +41,9 @@ public class AirJump extends Module {
             .build()
     );
 
+    public AirJump() {
+        super(Categories.Movement, "air-jump", "Lets you jump in the air.");
+    }
 
     private int level = 0;
 

@@ -3,6 +3,7 @@ package minegame159.meteorclient.modules.player;
 import java.util.ArrayList;
 import java.util.List;
 
+import minegame159.meteorclient.modules.Categories;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -12,15 +13,13 @@ import net.minecraft.util.math.Vec3d;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
 
 public class GhostHand extends Module {
-
     private final List<BlockPos> posList = new ArrayList<>();
 
     public GhostHand() {
-        super(Category.Player, "ghost-hand", "Opens containers through walls.");
+        super(Categories.Player, "ghost-hand", "Opens containers through walls.");
     }
     
     @EventHandler

@@ -8,7 +8,7 @@ package minegame159.meteorclient.modules.combat;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.friends.Friends;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.DoubleSetting;
@@ -49,7 +49,7 @@ public class AutoWeb extends Module {
     );
 
     public AutoWeb() {
-        super(Category.Combat, "auto-web", "Automatically places webs on other players.");
+        super(Categories.Combat, "auto-web", "Automatically places webs on other players.");
     }
 
     private PlayerEntity target = null;

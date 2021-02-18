@@ -6,7 +6,7 @@ package minegame159.meteorclient.modules.combat;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -28,7 +28,7 @@ public class AntiAnvil extends Module {
     );
 
     public AntiAnvil(){
-        super(Category.Combat, "anti-anvil", "Automatically prevents Auto Anvil by placing obsidian above you.");
+        super(Categories.Combat, "anti-anvil", "Automatically prevents Auto Anvil by placing obsidian above you.");
     }
 
     @EventHandler

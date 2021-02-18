@@ -10,7 +10,7 @@ import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import minegame159.meteorclient.events.packets.PacketEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.PacketBoolSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -44,7 +44,7 @@ public class PacketCanceller extends Module {
     );
 
     public PacketCanceller() {
-        super(Category.Misc, "packet-canceller", "Allows you to cancel certain packets.");
+        super(Categories.Misc, "packet-canceller", "Allows you to cancel certain packets.");
     }
 
     @EventHandler(priority = EventPriority.HIGHEST + 1)

@@ -9,7 +9,7 @@ import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.mixin.PlayerMoveC2SPacketAccessor;
 import minegame159.meteorclient.mixininterface.IPlayerMoveC2SPacket;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import net.minecraft.entity.EquipmentSlot;
@@ -29,10 +29,6 @@ public class NoFall extends Module {
     public enum PlaceMode{
         BeforeDeath,
         BeforeDamage
-    }
-
-    public NoFall() {
-        super(Category.Movement, "no-fall", "Prevents you from taking fall damage.");
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -66,6 +62,10 @@ public class NoFall extends Module {
             .defaultValue(PlaceMode.BeforeDeath)
             .build()
     );
+
+    public NoFall() {
+        super(Categories.Movement, "no-fall", "Prevents you from taking fall damage.");
+    }
 
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
