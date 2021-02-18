@@ -8,7 +8,7 @@ package minegame159.meteorclient.modules.player;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.gui.widgets.*;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
@@ -26,10 +26,6 @@ public class AntiAFK extends Module {
     public enum SpinMode {
         Server,
         Client
-    }
-
-    public AntiAFK() {
-        super(Category.Player, "anti-afk", "Performs different actions to prevent getting kicked for AFK reasons.");
     }
 
     private final SettingGroup sgActions = settings.createGroup("Actions");
@@ -131,6 +127,10 @@ public class AntiAFK extends Module {
     private final Random random = new Random();
 
     private float prevYaw;
+
+    public AntiAFK() {
+        super(Categories.Player, "anti-afk", "Performs different actions to prevent getting kicked for AFK reasons.");
+    }
 
     @Override
     public void onActivate() {

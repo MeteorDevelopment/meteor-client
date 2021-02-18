@@ -7,7 +7,7 @@ package minegame159.meteorclient.modules.combat;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.IntSetting;
@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 
 public class Quiver extends Module {
-
     public enum ArrowType {
         Strength,
         Speed
@@ -62,7 +61,7 @@ public class Quiver extends Module {
     );
 
     public Quiver() {
-        super(Category.Combat, "quiver", "Automatically shoots positive effect arrows at you.");
+        super(Categories.Combat, "quiver", "Automatically shoots positive effect arrows at you.");
     }
 
     private boolean shooting;

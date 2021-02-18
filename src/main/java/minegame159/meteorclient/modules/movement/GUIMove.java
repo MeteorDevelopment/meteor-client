@@ -9,7 +9,7 @@ import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.mixin.CreativeInventoryScreenAccessor;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.render.Freecam;
@@ -74,7 +74,7 @@ public class GUIMove extends Module {
     );
 
     public GUIMove() {
-        super(Category.Movement, "gui-move", "Allows you to perform various actions while in GUIs.");
+        super(Categories.Movement, "gui-move", "Allows you to perform various actions while in GUIs.");
     }
 
     @EventHandler

@@ -9,7 +9,7 @@ import baritone.api.BaritoneAPI;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -67,7 +67,7 @@ public class AutoWalk extends Module {
     private GoalDirection goal;
 
     public AutoWalk() {
-        super(Category.Movement, "auto-walk", "Automatically walks forward.");
+        super(Categories.Movement, "auto-walk", "Automatically walks forward.");
     }
 
     @Override

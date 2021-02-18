@@ -9,7 +9,7 @@ import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixin.AbstractBlockAccessor;
 import minegame159.meteorclient.mixininterface.IVec3d;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
@@ -76,7 +76,7 @@ public class Anchor extends Module {
     public double deltaX, deltaZ;
 
     public Anchor() {
-        super(Category.Movement, "anchor", "Helps you get into holes by stopping your movement completely over a hole.");
+        super(Categories.Movement, "anchor", "Helps you get into holes by stopping your movement completely over a hole.");
     }
 
     @Override

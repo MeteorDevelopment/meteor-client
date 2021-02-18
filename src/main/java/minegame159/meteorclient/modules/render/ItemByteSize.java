@@ -7,7 +7,7 @@ package minegame159.meteorclient.modules.render;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.game.GetTooltipEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.settings.BoolSetting;
@@ -44,7 +44,7 @@ public class ItemByteSize extends Module {
     );
 
     public ItemByteSize() {
-        super(Category.Render, "item-byte-size", "Displays an item's size in bytes in the tooltip.");
+        super(Categories.Render, "item-byte-size", "Displays an item's size in bytes in the tooltip.");
     }
 
     @EventHandler

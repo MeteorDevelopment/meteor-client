@@ -5,7 +5,7 @@
 
 package minegame159.meteorclient.modules.player;
 
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -24,7 +24,7 @@ public class Reach extends Module {
     );
 
     public Reach() {
-        super(Category.Player, "reach", "Gives you super long arms.");
+        super(Categories.Player, "reach", "Gives you super long arms.");
     }
 
     public float getReach() {

@@ -8,7 +8,7 @@ package minegame159.meteorclient.modules.render;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -27,11 +27,11 @@ public class TimeChanger extends Module {
             .build()
     );
 
-    public TimeChanger() {
-        super(Category.Render, "time-changer", "Makes you able to set a custom time.");
-    }
-
     long oldTime;
+
+    public TimeChanger() {
+        super(Categories.Render, "time-changer", "Makes you able to set a custom time.");
+    }
 
     @Override
     public void onActivate() {

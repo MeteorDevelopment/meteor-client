@@ -8,7 +8,7 @@ package minegame159.meteorclient.modules.render;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.settings.*;
@@ -131,7 +131,7 @@ public class Tracers extends Module {
     private int count;
 
     public Tracers() {
-        super(Category.Render, "tracers", "Displays tracer lines to specified entities.");
+        super(Categories.Render, "tracers", "Displays tracer lines to specified entities.");
     }
 
     @EventHandler

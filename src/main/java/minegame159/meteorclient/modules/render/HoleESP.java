@@ -9,7 +9,7 @@ import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixin.AbstractBlockAccessor;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.rendering.ShapeMode;
@@ -164,7 +164,7 @@ public class HoleESP extends Module {
     private final Color transparent = new Color(0, 0, 0, 0);
 
     public HoleESP() {
-        super(Category.Render, "hole-esp", "Displays Safe holes that you will take less damage in.");
+        super(Categories.Render, "hole-esp", "Displays Safe holes that you will take less damage in.");
     }
 
     @EventHandler

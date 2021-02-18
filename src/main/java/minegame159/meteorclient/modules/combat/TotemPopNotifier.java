@@ -12,7 +12,7 @@ import minegame159.meteorclient.events.game.GameJoinedEvent;
 import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.friends.Friends;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -70,7 +70,7 @@ public class TotemPopNotifier extends Module {
     private final Random random = new Random();
 
     public TotemPopNotifier() {
-        super(Category.Combat, "totem-pop-notifier", "Sends a chat message when a player either pops a totem or dies.");
+        super(Categories.Combat, "totem-pop-notifier", "Sends a chat message when a player either pops a totem or dies.");
     }
 
     @Override

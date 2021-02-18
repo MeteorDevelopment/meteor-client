@@ -9,13 +9,13 @@ import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.meteor.MiddleMouseButtonEvent;
 import minegame159.meteorclient.friends.Friend;
 import minegame159.meteorclient.friends.Friends;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import net.minecraft.entity.player.PlayerEntity;
 
 public class MiddleClickFriend extends Module {
     public MiddleClickFriend() {
-        super(Category.Misc, "middle-click-friend", "Adds or removes a player as a friend via middle click.");
+        super(Categories.Misc, "middle-click-friend", "Adds or removes a player as a friend via middle click.");
     }
 
     @EventHandler

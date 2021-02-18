@@ -8,7 +8,7 @@ package minegame159.meteorclient.modules.movement;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 
@@ -17,7 +17,7 @@ import java.util.List;
 
 public class Blink extends Module {
     public Blink() {
-        super(Category.Movement, "blink", "Allows you to essentially teleport while suspending motion updates.");
+        super(Categories.Movement, "blink", "Allows you to essentially teleport while suspending motion updates.");
     }
 
     private final List<PlayerMoveC2SPacket> packets = new ArrayList<>();

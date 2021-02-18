@@ -5,7 +5,7 @@
 
 package minegame159.meteorclient.modules.misc;
 
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.PotionSetting;
@@ -49,7 +49,7 @@ public class AutoBrewer extends Module {
     private int timer;
 
     public AutoBrewer() {
-        super(Category.Misc, "auto-brewer", "Automatically brews specified potions.");
+        super(Categories.Misc, "auto-brewer", "Automatically brews specified potions.");
     }
 
     @Override

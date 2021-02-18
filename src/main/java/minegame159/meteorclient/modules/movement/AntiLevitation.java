@@ -5,7 +5,7 @@
 
 package minegame159.meteorclient.modules.movement;
 
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -22,7 +22,7 @@ public class AntiLevitation extends Module {
     );
 
     public AntiLevitation() {
-        super(Category.Movement, "anti-levitation", "Prevents the levitation effect from working.");
+        super(Categories.Movement, "anti-levitation", "Prevents the levitation effect from working.");
     }
 
     public boolean isApplyGravity() {

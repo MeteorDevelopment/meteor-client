@@ -9,7 +9,7 @@ import baritone.api.BaritoneAPI;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.player.ItemUseCrosshairTargetEvent;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.combat.AnchorAura;
@@ -119,7 +119,7 @@ public class AutoGap extends Module {
     private boolean wasBaritone;
 
     public AutoGap() {
-        super(Category.Player, "auto-gap", "Automatically eats Gaps or E-Gaps.");
+        super(Categories.Player, "auto-gap", "Automatically eats Gaps or E-Gaps.");
     }
 
     @Override

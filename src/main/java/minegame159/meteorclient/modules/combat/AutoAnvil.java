@@ -9,7 +9,7 @@ import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.game.OpenScreenEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.friends.Friends;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.entity.FakePlayerEntity;
@@ -135,7 +135,7 @@ public class AutoAnvil extends Module {
     );
 
     public AutoAnvil() {
-        super(Category.Combat, "auto-anvil", "Automatically places anvils above players to destroy helmets.");
+        super(Categories.Combat, "auto-anvil", "Automatically places anvils above players to destroy helmets.");
     }
 
     private PlayerEntity target;

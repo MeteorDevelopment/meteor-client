@@ -9,7 +9,7 @@ package minegame159.meteorclient.modules.misc;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.player.AutoTool;
@@ -32,10 +32,6 @@ import net.minecraft.util.math.Direction;
 
 public class EChestFarmer extends Module {
     private static final BlockState ENDER_CHEST = Blocks.ENDER_CHEST.getDefaultState();
-
-    public EChestFarmer(){
-        super(Category.Misc, "EChest-farmer", "Places and mines Ender Chests where you're looking.");
-    }
 
     private final SettingGroup sgGeneral  = settings.getDefaultGroup();
 
@@ -68,6 +64,10 @@ public class EChestFarmer extends Module {
 
     private boolean stop = false;
     private int numLeft = Math.floorDiv(amount.get() , 8);
+
+    public EChestFarmer(){
+        super(Categories.Misc, "EChest-farmer", "Places and mines Ender Chests where you're looking.");
+    }
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {

@@ -7,7 +7,7 @@ package minegame159.meteorclient.modules.combat;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -43,7 +43,7 @@ public class SelfWeb extends Module {
     );
 
     public SelfWeb() {
-        super(Category.Combat, "self-web", "Automatically places webs on you.");
+        super(Categories.Combat, "self-web", "Automatically places webs on you.");
     }
 
     @EventHandler

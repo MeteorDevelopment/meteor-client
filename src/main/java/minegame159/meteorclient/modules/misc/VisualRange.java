@@ -9,7 +9,7 @@ import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.EntityAddedEvent;
 import minegame159.meteorclient.events.entity.EntityRemovedEvent;
 import minegame159.meteorclient.friends.Friends;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -52,7 +52,7 @@ public class VisualRange extends Module {
 
 
     public VisualRange() {
-        super(Category.Misc, "visual-range", "Notifies you when a player enters/leaves your visual range.");
+        super(Categories.Misc, "visual-range", "Notifies you when a player enters/leaves your visual range.");
     }
 
     @EventHandler

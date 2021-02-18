@@ -8,7 +8,7 @@ package minegame159.meteorclient.modules.movement;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.player.InteractItemEvent;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
@@ -59,7 +59,7 @@ public class ElytraBoost extends Module {
     private final List<FireworkRocketEntity> fireworks = new ArrayList<>();
 
     public ElytraBoost() {
-        super(Category.Movement, "elytra-boost", "Boosts your elytra as if you used a firework.");
+        super(Categories.Movement, "elytra-boost", "Boosts your elytra as if you used a firework.");
     }
 
     @Override

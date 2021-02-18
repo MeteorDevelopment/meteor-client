@@ -9,7 +9,7 @@ import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.friends.Friends;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.movement.NoFall;
@@ -100,7 +100,7 @@ public class AutoLog extends Module {
     );
 
     public AutoLog() {
-        super(Category.Combat, "auto-log", "Automatically disconnects you when certain requirements are met.");
+        super(Categories.Combat, "auto-log", "Automatically disconnects you when certain requirements are met.");
     }
 
     @EventHandler

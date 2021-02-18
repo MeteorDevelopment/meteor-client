@@ -49,8 +49,10 @@ import javax.annotation.Nullable;
 import java.util.*;
 
 public class Modules extends System<Modules> {
-    public static final Category[] CATEGORIES = {Category.Combat, Category.Player, Category.Movement, Category.Render, Category.Misc};
     public static final ModuleRegistry REGISTRY = new ModuleRegistry();
+
+    private static final List<Category> CATEGORIES = new ArrayList<>();
+    public static boolean REGISTERING_CATEGORIES;
 
     private final Map<Class<? extends Module>, Module> modules = new HashMap<>();
     private final Map<Category, List<Module>> groups = new HashMap<>();
@@ -79,6 +81,24 @@ public class Modules extends System<Modules> {
         for (List<Module> modules : groups.values()) {
             modules.sort(Comparator.comparing(o -> o.title));
         }
+    }
+
+    public static void registerCategory(Category category) {
+        if (!REGISTERING_CATEGORIES) throw new RuntimeException("Modules.registerCategory - Cannot register category outside of onRegisterCategories callback.");
+
+        CATEGORIES.add(category);
+    }
+
+    public static Iterable<Category> loopCategories() {
+        return CATEGORIES;
+    }
+
+    public static Category getCategoryByHash(int hash) {
+        for (Category category : CATEGORIES) {
+            if (category.hashCode() == hash) return category;
+        }
+
+        return null;
     }
 
     @SuppressWarnings("unchecked")
@@ -261,6 +281,10 @@ public class Modules extends System<Modules> {
     // INIT MODULES
 
     public void addModule(Module module) {
+        if (!CATEGORIES.contains(module.category)) {
+            throw new RuntimeException("Modules.addModule - Module's category was not registered.");
+        }
+
         modules.put(module.getClass(), module);
         getGroup(module.category).add(module);
 

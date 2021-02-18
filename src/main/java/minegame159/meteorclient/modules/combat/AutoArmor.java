@@ -9,7 +9,7 @@ package minegame159.meteorclient.modules.combat;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.player.ChestSwap;
@@ -48,7 +48,9 @@ public class AutoArmor extends Module {
         }
     }
 
-    public AutoArmor(){super(Category.Combat, "auto-armor", "Automatically manages and equips your armor for you.");}
+    public AutoArmor() {
+        super(Categories.Combat, "auto-armor", "Automatically manages and equips your armor for you.");
+    }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgDelay = settings.createGroup("Delay");

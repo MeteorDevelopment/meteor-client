@@ -30,7 +30,7 @@ public class CrashReportMixin {
                 sb.append("Dev Build: ").append(Config.get().devBuild).append("\n");
             }
 
-            for (Category category : Modules.CATEGORIES) {
+            for (Category category : Modules.loopCategories()) {
                 List<Module> modules = Modules.get().getGroup(category);
                 boolean active = false;
                 for (Module module : modules) {

@@ -5,7 +5,7 @@
 
 package minegame159.meteorclient.modules.player;
 
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -23,7 +23,7 @@ public class NoMiningTrace extends Module {
     );
 
     public NoMiningTrace() {
-        super(Category.Player, "no-mining-trace", "Allows you to mine blocks through entities.");
+        super(Categories.Player, "no-mining-trace", "Allows you to mine blocks through entities.");
     }
 
     public boolean canWork() {

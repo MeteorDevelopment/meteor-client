@@ -9,7 +9,7 @@ import com.google.common.reflect.TypeToken;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.Render2DEvent;
 import minegame159.meteorclient.mixin.ProjectileEntityAccessor;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.rendering.DrawMode;
 import minegame159.meteorclient.rendering.MeshBuilder;
@@ -65,7 +65,7 @@ public class EntityOwner extends Module {
     private final Map<UUID, String> uuidToName = new HashMap<>();
 
     public EntityOwner() {
-        super(Category.Render, "entity-owner", "Displays the name of the player who owns the entity you're looking at.");
+        super(Categories.Render, "entity-owner", "Displays the name of the player who owns the entity you're looking at.");
     }
 
     @Override

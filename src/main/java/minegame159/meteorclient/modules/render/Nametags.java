@@ -13,7 +13,7 @@ import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.Render2DEvent;
 import minegame159.meteorclient.friends.Friends;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.player.FakePlayer;
@@ -293,7 +293,7 @@ public class Nametags extends Module {
     private final Map<Enchantment, Integer> enchantmentsToShowScale = new HashMap<>();
 
     public Nametags() {
-        super(Category.Render, "nametags", "Displays customizable nametags above players.");
+        super(Categories.Render, "nametags", "Displays customizable nametags above players.");
     }
 
     @EventHandler

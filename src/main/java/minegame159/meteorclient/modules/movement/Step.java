@@ -9,7 +9,7 @@ import baritone.api.BaritoneAPI;
 import com.google.common.collect.Streams;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.player.DamageCalcUtils;
@@ -63,7 +63,7 @@ public class Step extends Module {
     private boolean prevBaritoneAssumeStep;
 
     public Step() {
-        super(Category.Movement, "step", "Allows you to walk up full blocks instantly.");
+        super(Categories.Movement, "step", "Allows you to walk up full blocks instantly.");
     }
 
     @Override

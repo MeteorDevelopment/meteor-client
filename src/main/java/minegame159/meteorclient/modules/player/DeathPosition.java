@@ -13,7 +13,7 @@ import minegame159.meteorclient.gui.widgets.WButton;
 import minegame159.meteorclient.gui.widgets.WLabel;
 import minegame159.meteorclient.gui.widgets.WTable;
 import minegame159.meteorclient.gui.widgets.WWidget;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -43,7 +43,7 @@ public class DeathPosition extends Module {
     private final WLabel label = new WLabel("No latest death found.");
 
     public DeathPosition() {
-        super(Category.Player, "death-position", "Sends you the coordinates to your latest death.");
+        super(Categories.Player, "death-position", "Sends you the coordinates to your latest death.");
     }
 
     private final Map<String, Double> deathPos = new HashMap<>();

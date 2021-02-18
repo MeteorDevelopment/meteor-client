@@ -13,7 +13,7 @@ import club.minnced.discord.rpc.DiscordRichPresence;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.Config;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
@@ -40,7 +40,7 @@ public class DiscordPresence extends Module {
     );
 
     public DiscordPresence() {
-        super(Category.Misc, "discord-presence", "Displays a RPC for you on Discord to show that you're playing Meteor Client!");
+        super(Categories.Misc, "discord-presence", "Displays a RPC for you on Discord to show that you're playing Meteor Client!");
     }
 
     private static final DiscordRichPresence rpc = new DiscordRichPresence();

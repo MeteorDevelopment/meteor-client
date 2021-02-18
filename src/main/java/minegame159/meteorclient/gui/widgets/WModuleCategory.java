@@ -12,10 +12,11 @@ import minegame159.meteorclient.modules.Modules;
 
 public class WModuleCategory extends WWindow {
     public WModuleCategory(Category category) {
-        super(category.toString(), GuiConfig.get().getWindowConfig(get(category)).isExpanded(), true);
-        type = get(category);
+        super(category.toString(), category.windowConfig.isExpanded(), true);
+        this.type = GuiConfig.WindowType.Category;
+        this.category = category;
 
-        action = () -> GuiConfig.get().getWindowConfig(type).setPos(x, y);
+        action = () -> getWindowConfig().setPos(x, y);
 
         pad(0);
         getDefaultCell().space(0);
@@ -24,17 +25,5 @@ public class WModuleCategory extends WWindow {
             add(new WModule(module)).fillX().expandX();
             row();
         }
-    }
-
-    private static GuiConfig.WindowType get(Category category) {
-        switch (category) {
-            case Combat:   return GuiConfig.WindowType.Combat;
-            case Player:   return GuiConfig.WindowType.Player;
-            case Movement: return GuiConfig.WindowType.Movement;
-            case Render:   return GuiConfig.WindowType.Render;
-            case Misc:     return GuiConfig.WindowType.Misc;
-        }
-
-        return null;
     }
 }

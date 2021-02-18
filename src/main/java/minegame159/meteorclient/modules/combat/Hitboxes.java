@@ -6,7 +6,7 @@
 package minegame159.meteorclient.modules.combat;
 
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.EntityTypeListSetting;
@@ -34,7 +34,7 @@ public class Hitboxes extends Module {
     );
 
     public Hitboxes() {
-        super(Category.Combat, "hitboxes", "Expands an entity's hitboxes.");
+        super(Categories.Combat, "hitboxes", "Expands an entity's hitboxes.");
     }
 
     public double getEntityValue(Entity entity) {

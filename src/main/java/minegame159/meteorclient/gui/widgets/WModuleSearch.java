@@ -19,7 +19,7 @@ public class WModuleSearch extends WWindow {
         super("Search", GuiConfig.get().getWindowConfig(GuiConfig.WindowType.Search).isExpanded(), true);
         type = GuiConfig.WindowType.Search;
 
-        action = () -> GuiConfig.get().getWindowConfig(type).setPos(x, y);
+        action = () -> getWindowConfig().setPos(x, y);
 
         filter = new WTextBox(filter != null ? filter.getText() : "", 140);
         filter.action = () -> {

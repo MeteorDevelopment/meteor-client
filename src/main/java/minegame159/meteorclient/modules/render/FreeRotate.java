@@ -7,7 +7,7 @@ package minegame159.meteorclient.modules.render;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
@@ -67,7 +67,7 @@ public class FreeRotate extends Module {
     );
 
     public FreeRotate() {
-        super(Category.Render, "free-rotate", "Allows more rotation options in third person.");
+        super(Categories.Render, "free-rotate", "Allows more rotation options in third person.");
     }
 
     public float cameraYaw;

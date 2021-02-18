@@ -7,7 +7,7 @@ package minegame159.meteorclient.modules.combat;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -92,7 +92,7 @@ public class Surround extends Module {
     private boolean return_;
 
     public Surround() {
-        super(Category.Combat, "surround", "Surrounds you in blocks to prevent you from taking lots of damage.");
+        super(Categories.Combat, "surround", "Surrounds you in blocks to prevent you from taking lots of damage.");
     }
 
     @Override
