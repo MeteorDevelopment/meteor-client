@@ -13,7 +13,6 @@ public class OnlinePlayers {
     private static long lastPingTime;
 
     public static void update() {
-        if (!Config.get().sendDataToApi) return;
         long time = System.currentTimeMillis();
 
         if (time - lastPingTime > 5 * 60 * 1000) {
@@ -21,7 +20,7 @@ public class OnlinePlayers {
                 String url = "http://meteorclient.com/api/online/ping";
 
                 String uuid = MinecraftClient.getInstance().getSession().getUuid();
-                if (uuid != null && !uuid.isEmpty()) url += "?uuid=" + uuid;
+                if (uuid != null && !uuid.isEmpty() && Config.get().sendDataToApi) url += "?uuid=" + uuid;
 
                 HttpUtils.post(url);
             });
@@ -35,7 +34,6 @@ public class OnlinePlayers {
     }
 
     public static void leave() {
-        if (!Config.get().sendDataToApi) return;
         MeteorExecutor.execute(() -> HttpUtils.post("http://meteorclient.com/api/online/leave"));
     }
 }
