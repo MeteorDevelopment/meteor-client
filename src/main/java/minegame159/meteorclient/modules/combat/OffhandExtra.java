@@ -21,8 +21,7 @@ import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.item.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 @InvUtils.Priority(priority = 1)
 public class OffhandExtra extends Module {
@@ -124,7 +123,7 @@ public class OffhandExtra extends Module {
         if (Modules.get().isActive(AutoTotem.class) && mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING) {
             InvUtils.FindItemResult result = InvUtils.findItemWithCount(Items.TOTEM_OF_UNDYING);
             if (result.slot != -1) {
-                doMove(result.slot);
+                InvUtils.addSlots(Arrays.asList(45, result.slot), this.getClass());
             }
         }
     }
@@ -150,7 +149,7 @@ public class OffhandExtra extends Module {
                     if (mc.player.getOffHandStack().getItem() != getItem()) {
                         result = findSlot(getItem());
                         if (result != -1) {
-                            doMove(result);
+                            InvUtils.addSlots(Arrays.asList(45, result), this.getClass());
                             return;
                         }
                     }
@@ -163,13 +162,13 @@ public class OffhandExtra extends Module {
                 return;
             }
             if (mc.player.getOffHandStack().getItem() != getItem() && replace.get()) {
-                doMove(result);
+                InvUtils.addSlots(Arrays.asList(45, result), this.getClass());
                 sentMessage = false;
             }
         } else if (!asimov.get() && !isClicking && mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING) {
             int result = findSlot(Items.TOTEM_OF_UNDYING);
             if (result != -1) {
-                doMove(result);
+                InvUtils.addSlots(Arrays.asList(45, result), this.getClass());
             }
 
         }
@@ -198,7 +197,7 @@ public class OffhandExtra extends Module {
                 return;
             }
             if (mc.player.getOffHandStack().getItem() != item && mc.player.getMainHandStack().getItem() != item && replace.get()) {
-                doMove(result);
+                InvUtils.addSlots(Arrays.asList(45, result), this.getClass());
                 sentMessage = false;
             }
             currentMode = mode.get();
@@ -233,14 +232,7 @@ public class OffhandExtra extends Module {
 
     private void doMove(int slot){
         assert mc.player != null;
-        boolean empty = mc.player.getOffHandStack().isEmpty();
-        List<Integer> slots = new ArrayList<>();
-        if(mc.player.inventory.getCursorStack().getItem() != Items.TOTEM_OF_UNDYING) {
-            slots.add(InvUtils.invIndexToSlotId(slot));
-        }
-        slots.add(InvUtils.invIndexToSlotId(InvUtils.OFFHAND_SLOT));
-        if (!empty) slots.add(InvUtils.invIndexToSlotId(slot));
-        InvUtils.addSlots(slots, this.getClass());
+
     }
 
     private int findSlot(Item item){
