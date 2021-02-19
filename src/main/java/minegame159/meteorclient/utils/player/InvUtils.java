@@ -86,7 +86,7 @@ public class InvUtils {
             return;
         }
 
-        if (!mc.player.inventory.getCursorStack().isEmpty() && mc.currentScreen == null && mc.player.currentScreenHandler.getStacks().size() > 44){
+        if (!mc.player.inventory.getCursorStack().isEmpty() && mc.currentScreen == null && mc.player.currentScreenHandler.getStacks().size() == 46){
             int slot = mc.player.inventory.getEmptySlot();
             if (slot == -1) findItemWithCount(mc.player.inventory.getCursorStack().getItem());
             if (slot != -1) clickSlot(invIndexToSlotId(slot), 0, SlotActionType.PICKUP);
@@ -98,7 +98,7 @@ public class InvUtils {
                 currentQueue.addAll(pair.getRight());
             }
 
-            if (mc.player.currentScreenHandler.getStacks().size() > 44) {
+            if (mc.player.currentScreenHandler.getStacks().size() == 46) {
                 currentQueue.forEach(slot -> clickSlot(slot, 0, SlotActionType.PICKUP));
                 currentQueue.clear();
             }

@@ -95,7 +95,7 @@ public class AutoReplenish extends Module {
         }
 
         prevHadOpenScreen = mc.currentScreen != null;
-        if (mc.player.currentScreenHandler.getStacks().size() < 45 || mc.currentScreen != null) return;
+        if (mc.player.currentScreenHandler.getStacks().size() != 46 || mc.currentScreen != null) return;
 
         if (tickDelayLeft <= 0) {
             tickDelayLeft = tickDelay.get();

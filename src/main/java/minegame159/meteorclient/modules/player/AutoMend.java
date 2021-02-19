@@ -102,7 +102,7 @@ public class AutoMend extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if (mc.player.currentScreenHandler.getStacks().size() < 45) return;
+        if (mc.player.currentScreenHandler.getStacks().size() != 46) return;
 
         if (mc.player.getOffHandStack().isEmpty()) replaceItem(true);
         else if (!mc.player.getOffHandStack().isDamaged()) replaceItem(false);
