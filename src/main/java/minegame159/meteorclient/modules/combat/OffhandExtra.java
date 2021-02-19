@@ -227,7 +227,8 @@ public class OffhandExtra extends Module {
         assert mc.player != null;
         return mc.player.getMainHandStack().getItem() != Items.BOW
                 && mc.player.getMainHandStack().getItem() != Items.TRIDENT
-                && mc.player.getMainHandStack().getItem() != Items.CROSSBOW;
+                && mc.player.getMainHandStack().getItem() != Items.CROSSBOW
+                && !mc.player.getMainHandStack().getItem().isFood();
     }
 
     private void doMove(int slot){
