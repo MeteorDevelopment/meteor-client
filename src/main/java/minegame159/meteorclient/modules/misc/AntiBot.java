@@ -2,7 +2,7 @@ package minegame159.meteorclient.modules.misc;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -25,7 +25,7 @@ public class AntiBot extends Module {
 
 	public AntiBot()
 	{
-		super(Category.Misc, "anti-bot", "Detects and removes bots.");
+		super(Categories.Misc, "anti-bot", "Detects and removes bots.");
 	}
 
 	@EventHandler
