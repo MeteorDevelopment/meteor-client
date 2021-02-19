@@ -99,7 +99,9 @@ public class InvUtils {
             }
 
             if (mc.player.currentScreenHandler.getStacks().size() == 46) {
-                currentQueue.forEach(slot -> clickSlot(slot, 0, SlotActionType.PICKUP));
+                int slot = currentQueue.remove();
+                int slot1 = currentQueue.remove();
+                clickSlot(slot, slot1, SlotActionType.SWAP);
                 currentQueue.clear();
             }
         }
@@ -109,7 +111,7 @@ public class InvUtils {
         if (moveQueue.contains(new CustomPair(klass, slots)) || currentQueue.containsAll(slots)) return;
 
         if (klass == AutoTotem.class) {
-            moveQueue.removeIf(pair -> pair.getRight().contains(45));
+            moveQueue.removeIf(pair -> pair.getRight().contains(40));
         }
 
         if (!moveQueue.isEmpty() && canMove(klass)){

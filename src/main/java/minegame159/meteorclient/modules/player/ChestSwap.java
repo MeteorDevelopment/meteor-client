@@ -19,8 +19,7 @@ import net.minecraft.item.ArmorItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 @InvUtils.Priority(priority = 0)
 public class ChestSwap extends Module {
@@ -132,13 +131,7 @@ public class ChestSwap extends Module {
 
     private void equip(int slot) {
         int chestSlot = 8 - 2;
-        slot = InvUtils.invIndexToSlotId(slot);
-
-        List<Integer> slots = new ArrayList<>();
-        slots.add(InvUtils.invIndexToSlotId(slot));
-        slots.add(chestSlot);
-        slots.add(InvUtils.invIndexToSlotId(slot));
-        InvUtils.addSlots(slots, this.getClass());
+        InvUtils.addSlots(Arrays.asList(chestSlot, slot), this.getClass());
     }
 
     @Override

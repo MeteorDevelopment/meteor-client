@@ -30,8 +30,7 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 @InvUtils.Priority(priority = 0)
 public class BedAura extends Module {
@@ -396,11 +395,7 @@ public class BedAura extends Module {
     private void doAutoMove() {
         if (InvUtils.findItemInHotbar(itemStack -> itemStack.getItem() instanceof BedItem) == -1) {
             int slot = InvUtils.findItemInMain(itemStack -> itemStack.getItem() instanceof BedItem);
-            List<Integer> slots = new ArrayList<>();
-            slots.add(InvUtils.invIndexToSlotId(autoMoveSlot.get()-1));
-            slots.add(InvUtils.invIndexToSlotId(slot));
-            slots.add(InvUtils.invIndexToSlotId(autoMoveSlot.get()-1));
-            InvUtils.addSlots(slots, this.getClass());
+            InvUtils.addSlots(Arrays.asList(slot, autoMoveSlot.get() - 1), this.getClass());
         }
     }
 

@@ -36,8 +36,7 @@ import net.minecraft.item.Items;
 import net.minecraft.item.SwordItem;
 import net.minecraft.util.math.Vec3d;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 @InvUtils.Priority(priority = Integer.MAX_VALUE)
 public class AutoTotem extends Module {
@@ -115,7 +114,7 @@ public class AutoTotem extends Module {
             if (mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING && (!smart.get()
                     || isLow() || elytraMove())) {
                 locked = true;
-                moveTotem(result);
+                InvUtils.addSlots(Arrays.asList(45, result.slot), this.getClass());
             } else if (smart.get() && !isLow() && !elytraMove()) {
                 locked = false;
             }
@@ -127,18 +126,6 @@ public class AutoTotem extends Module {
     @Override
     public String getInfoString() {
         return totemCountString;
-    }
-
-    private void moveTotem(InvUtils.FindItemResult result){
-        assert mc.player != null;
-        boolean empty = mc.player.getOffHandStack().isEmpty();
-        List<Integer> slots = new ArrayList<>();
-        if(mc.player.inventory.getCursorStack().getItem() != Items.TOTEM_OF_UNDYING) {
-            slots.add(InvUtils.invIndexToSlotId(result.slot));
-        }
-        slots.add(InvUtils.invIndexToSlotId(InvUtils.OFFHAND_SLOT));
-        if (!empty) slots.add(InvUtils.invIndexToSlotId(result.slot));
-        InvUtils.addSlots(slots, this.getClass());
     }
 
     private double getHealthReduction(){

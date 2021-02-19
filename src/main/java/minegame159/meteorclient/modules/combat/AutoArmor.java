@@ -31,6 +31,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @InvUtils.Priority(priority = Integer.MAX_VALUE - 1)
@@ -231,12 +232,7 @@ public class AutoArmor extends Module {
                 }
             }
             if (bestSlot > -1) {
-                List<Integer> slots = new ArrayList<>();
-                slots.add(InvUtils.invIndexToSlotId(bestSlot));
-                //Work out what slot ID is needed for this to work properly.
-                slots.add(8 - a);
-                slots.add(InvUtils.invIndexToSlotId(bestSlot));
-                InvUtils.addSlots(slots, this.getClass());
+                InvUtils.addSlots(Arrays.asList(8 - a, bestSlot), this.getClass());
                 if (pause.get()) break;
             }
             mode.set(preMode);
