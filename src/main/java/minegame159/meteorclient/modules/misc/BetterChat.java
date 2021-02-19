@@ -14,7 +14,7 @@ import minegame159.meteorclient.events.entity.player.SendMessageEvent;
 import minegame159.meteorclient.friends.Friend;
 import minegame159.meteorclient.friends.Friends;
 import minegame159.meteorclient.mixin.ChatHudLineAccessor;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.Ignores;
@@ -220,7 +220,7 @@ public class BetterChat extends Module {
 
 
     public BetterChat() {
-        super(Category.Misc, "better-chat", "Improves your chat experience in various ways.");
+        super(Categories.Misc, "better-chat", "Improves your chat experience in various ways.");
     }
 
     public boolean onMsg(String message, int messageId, int timestamp, List<ChatHudLine<Text>> messages, List<ChatHudLine<OrderedText>> visibleMessages) {

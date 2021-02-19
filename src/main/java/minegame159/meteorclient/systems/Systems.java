@@ -43,7 +43,6 @@ public class Systems {
         for (System<?> system : systems.values()) {
             if (system != config) system.init();
         }
-        load(true, null);
     }
 
     private static System<?> add(System<?> system) {
@@ -69,20 +68,17 @@ public class Systems {
         preLoadTasks.add(task);
     }
 
-    private static void load(boolean loadConfig, File folder) {
+    public static void load(File folder) {
         MeteorClient.LOG.info("Loading");
         long start = java.lang.System.currentTimeMillis();
 
         for (Runnable task : preLoadTasks) task.run();
 
         for (System<?> system : systems.values()) {
-            if (loadConfig || system != config) system.load(folder);
+            if (system != config) system.load(folder);
         }
 
         MeteorClient.LOG.info("Loaded in {} milliseconds", java.lang.System.currentTimeMillis() - start);
-    }
-    public static void load(File folder) {
-        load(false, folder);
     }
     public static void load() {
         load(null);

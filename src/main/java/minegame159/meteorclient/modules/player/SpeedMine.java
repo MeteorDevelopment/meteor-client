@@ -8,7 +8,7 @@ package minegame159.meteorclient.modules.player;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixin.StatusEffectInstanceAccessor;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.EnumSetting;
@@ -19,7 +19,6 @@ import net.minecraft.entity.effect.StatusEffectInstance;
 import static net.minecraft.entity.effect.StatusEffects.HASTE;
 
 public class SpeedMine extends Module {
-
     public enum Mode {
         Normal,
         Haste1,
@@ -44,7 +43,7 @@ public class SpeedMine extends Module {
     );
 
     public SpeedMine() {
-        super(Category.Player, "speed-mine", "Allows you to quickly mine blocks.");
+        super(Categories.Player, "speed-mine", "Allows you to quickly mine blocks.");
     }
 
     @EventHandler

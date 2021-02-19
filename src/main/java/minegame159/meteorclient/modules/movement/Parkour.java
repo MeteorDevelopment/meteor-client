@@ -7,7 +7,7 @@ package minegame159.meteorclient.modules.movement;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.shape.VoxelShape;
@@ -16,7 +16,7 @@ import java.util.stream.Stream;
 
 public class Parkour extends Module {
     public Parkour() {
-        super(Category.Movement, "parkour", "Automatically jumps at the edges of blocks.");
+        super(Categories.Movement, "parkour", "Automatically jumps at the edges of blocks.");
     }
 
     @EventHandler

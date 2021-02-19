@@ -8,6 +8,7 @@ package minegame159.meteorclient.gui.widgets;
 import minegame159.meteorclient.gui.GuiConfig;
 import minegame159.meteorclient.gui.renderer.GuiRenderer;
 import minegame159.meteorclient.gui.renderer.Region;
+import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.CursorStyle;
 import org.lwjgl.glfw.GLFW;
@@ -15,6 +16,7 @@ import org.lwjgl.glfw.GLFW;
 public class WWindow extends WTable {
     public Runnable action;
     public GuiConfig.WindowType type;
+    public Category category;
 
     private final WHeader header;
     private final WTable table;
@@ -40,6 +42,11 @@ public class WWindow extends WTable {
 
     public WWindow(String title, boolean expanded) {
         this(title, expanded, false);
+    }
+
+    public GuiConfig.WindowConfig getWindowConfig() {
+        if (type == GuiConfig.WindowType.Category) return category.windowConfig;
+        return GuiConfig.get().getWindowConfig(type);
     }
 
     @Override
@@ -128,7 +135,7 @@ public class WWindow extends WTable {
             triangle = add(new WTriangle()).pad(4).fillX().centerY().right().getWidget();
             triangle.action = () -> {
                 expanded = !expanded;
-                if (type != null) GuiConfig.get().getWindowConfig(type).setExpanded(expanded);
+                getWindowConfig().setExpanded(expanded);
             };
         }
 
@@ -149,7 +156,7 @@ public class WWindow extends WTable {
             if (mouseOver) {
                 if (button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) {
                     expanded = !expanded;
-                    if (type != null) GuiConfig.get().getWindowConfig(type).setExpanded(expanded);
+                    getWindowConfig().setExpanded(expanded);
                     return true;
                 } else if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
                     dragging = true;

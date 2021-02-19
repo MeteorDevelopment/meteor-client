@@ -3,8 +3,10 @@
  * Copyright (c) 2021 Meteor Development.
  */
 
-package minegame159.meteorclient.events.meteor;
+package minegame159.meteorclient;
 
-@Deprecated
-public class ClientInitialisedEvent {
+public abstract class MeteorAddon {
+    public abstract void onInitialize();
+
+    public void onRegisterCategories() {}
 }

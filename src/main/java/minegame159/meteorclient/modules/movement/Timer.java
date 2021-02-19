@@ -5,7 +5,7 @@
 
 package minegame159.meteorclient.modules.movement;
 
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -25,7 +25,7 @@ public class Timer extends Module {
     );
 
     public Timer() {
-        super(Category.Movement, "timer", "Changes the speed of everything in your game.");
+        super(Categories.Movement, "timer", "Changes the speed of everything in your game.");
     }
     // If you put your timer to 0.1 you're a dumbass.
     public double getMultiplier() {

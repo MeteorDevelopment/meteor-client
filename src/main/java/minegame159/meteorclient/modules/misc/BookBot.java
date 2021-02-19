@@ -12,7 +12,7 @@ import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixin.TextHandlerAccessor;
 import minegame159.meteorclient.mixininterface.IClientPlayerInteractionManager;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.player.ChatUtils;
@@ -43,10 +43,6 @@ public class BookBot extends Module {
         File,
         Random,
         Ascii
-    }
-    //Didn't add it to the module list cuz I didn't know if it was gonna work.
-    public BookBot(){
-        super(Category.Misc, "book-bot", "Writes an amount of books full of characters or from a file."); //Grammar who? / too ez.
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();//Obligatory comment.
@@ -112,6 +108,10 @@ public class BookBot extends Module {
     private final StringBuilder pageSb = new StringBuilder();
     private final StringBuilder lineSb = new StringBuilder();
     private String fileString;
+
+    public BookBot(){
+        super(Categories.Misc, "book-bot", "Writes an amount of books full of characters or from a file."); //Grammar who? / too ez.
+    }
 
     @Override
     public void onActivate() { //WHY THE FUCK DOES OnActivate NOT CORRECT TO onActivate? Fucking retard.

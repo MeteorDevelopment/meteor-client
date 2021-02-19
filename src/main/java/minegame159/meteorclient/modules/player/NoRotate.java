@@ -8,14 +8,13 @@ package minegame159.meteorclient.modules.player;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.mixin.PlayerPositionLookS2CPacketAccessor;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
 
 public class NoRotate extends Module {
-
     public NoRotate() {
-        super(Category.Player, "no-rotate", "Attempts to block rotations sent from server to client.");
+        super(Categories.Player, "no-rotate", "Attempts to block rotations sent from server to client.");
     }
 
     @EventHandler

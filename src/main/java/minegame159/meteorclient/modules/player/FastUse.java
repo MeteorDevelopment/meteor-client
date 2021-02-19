@@ -8,7 +8,7 @@ package minegame159.meteorclient.modules.player;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixin.MinecraftClientAccessor;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.EnumSetting;
@@ -47,7 +47,7 @@ public class FastUse extends Module {
     );
 
     public FastUse() {
-        super(Category.Player, "fast-use", "Allows you to use items at very high speeds.");
+        super(Categories.Player, "fast-use", "Allows you to use items at very high speeds.");
     }
 
     @EventHandler

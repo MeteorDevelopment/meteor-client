@@ -8,7 +8,7 @@ package minegame159.meteorclient.modules.misc;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.gui.widgets.*;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.IntSetting;
@@ -47,7 +47,7 @@ public class Spam extends Module {
     private int messageI;
 
     public Spam() {
-        super(Category.Misc, "spam", "Spams specified messages in chat.");
+        super(Categories.Misc, "spam", "Spams specified messages in chat.");
     }
 
     @Override

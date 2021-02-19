@@ -8,7 +8,7 @@ package minegame159.meteorclient.modules.render;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.RenderLivingEntityEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
@@ -98,7 +98,7 @@ public class Chams extends Module {
     );
 
     public Chams() {
-        super(Category.Render, "chams", "Renders entities through walls.");
+        super(Categories.Render, "chams", "Renders entities through walls.");
     }
 
     public boolean shouldRender(Entity entity) {

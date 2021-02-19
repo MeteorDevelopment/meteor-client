@@ -9,7 +9,7 @@ package minegame159.meteorclient.modules.combat;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.player.AttackEntityEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -24,7 +24,7 @@ public class AutoWeapon extends Module {
     }
 
     public AutoWeapon(){
-        super(Category.Combat, "auto-weapon", "Finds the best weapon to use in your hotbar.");
+        super(Categories.Combat, "auto-weapon", "Finds the best weapon to use in your hotbar.");
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();

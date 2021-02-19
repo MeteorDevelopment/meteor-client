@@ -13,7 +13,7 @@ import minegame159.meteorclient.events.game.GameJoinedEvent;
 import minegame159.meteorclient.events.game.GameLeftEvent;
 import minegame159.meteorclient.events.meteor.ActiveModulesChangedEvent;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.combat.AutoLog;
@@ -88,11 +88,6 @@ public class InfinityMiner extends Module {
             .defaultValue(false)
             .build());
 
-
-    public InfinityMiner() {
-        super(Category.Player, "infinity-miner", "Allows you to essentially mine forever.");
-    }
-
     private Mode currentMode = Mode.Still;
     private Mode secondaryMode;
     private boolean baritoneRunning = false;
@@ -101,6 +96,10 @@ public class InfinityMiner extends Module {
     private int playerZ;
     private final HashMap<String, Boolean> originalSettings = new HashMap<>();
     private volatile Boolean BLOCKER = false;
+
+    public InfinityMiner() {
+        super(Categories.Player, "infinity-miner", "Allows you to essentially mine forever.");
+    }
 
     @Override
     public void onActivate() {

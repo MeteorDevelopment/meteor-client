@@ -7,7 +7,7 @@ package minegame159.meteorclient.modules.movement;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.player.JumpVelocityMultiplierEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -25,7 +25,7 @@ public class HighJump extends Module {
     );
 
     public HighJump() {
-        super(Category.Movement, "high-jump", "Makes you jump higher than normal.");
+        super(Categories.Movement, "high-jump", "Makes you jump higher than normal.");
     }
 
     @EventHandler

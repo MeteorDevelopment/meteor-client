@@ -8,7 +8,7 @@ package minegame159.meteorclient.modules.combat;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.rendering.ShapeMode;
@@ -122,7 +122,7 @@ public class SelfTrap extends Module {
     private int delay;
 
     public SelfTrap(){
-        super(Category.Combat, "self-trap", "Places obsidian above your head.");
+        super(Categories.Combat, "self-trap", "Places obsidian above your head.");
     }
 
     @Override

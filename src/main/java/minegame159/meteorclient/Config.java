@@ -25,6 +25,8 @@ public class Config extends System<Config> {
     public boolean chatCommandsInfo = true;
     public boolean deleteChatCommandsInfo = true;
 
+    public boolean sendDataToApi = true;
+
     public Config() {
         super("config");
 
@@ -54,6 +56,7 @@ public class Config extends System<Config> {
         tag.put("guiConfig", guiConfig.toTag());
         tag.putBoolean("chatCommandsInfo", chatCommandsInfo);
         tag.putBoolean("deleteChatCommandsInfo", deleteChatCommandsInfo);
+        tag.putBoolean("sendDataToApi", sendDataToApi);
 
         return tag;
     }
@@ -65,6 +68,7 @@ public class Config extends System<Config> {
         if (tag.contains("customFont")) customFont = tag.getBoolean("customFont");
         chatCommandsInfo = !tag.contains("chatCommandsInfo") || tag.getBoolean("chatCommandsInfo");
         deleteChatCommandsInfo = !tag.contains("deleteChatCommandsInfo") || tag.getBoolean("deleteChatCommandsInfo");
+        sendDataToApi = !tag.contains("sendDataToApi") || tag.getBoolean("sendDataToApi");
 
         // In 0.2.9 the default font was changed, detect when people load up 0.2.9 for the first time
         Version lastVer = new Version(tag.getString("version"));

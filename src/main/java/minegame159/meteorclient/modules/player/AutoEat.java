@@ -10,7 +10,7 @@ import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import minegame159.meteorclient.events.entity.player.ItemUseCrosshairTargetEvent;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.combat.AnchorAura;
@@ -75,7 +75,7 @@ public class AutoEat extends Module {
     private boolean wasBaritone;
 
     public AutoEat() {
-        super(Category.Player, "auto-eat", "Automatically eats food.");
+        super(Categories.Player, "auto-eat", "Automatically eats food.");
     }
 
     @Override

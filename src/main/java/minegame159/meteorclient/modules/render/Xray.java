@@ -9,7 +9,7 @@ import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderBlockEntityEvent;
 import minegame159.meteorclient.events.world.AmbientOcclusionEvent;
 import minegame159.meteorclient.events.world.ChunkOcclusionEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BlockListSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -41,7 +41,7 @@ public class Xray extends Module {
     );
 
     public Xray() {
-        super(Category.Render, "xray", "Only renders specified blocks. Good for mining.");
+        super(Categories.Render, "xray", "Only renders specified blocks. Good for mining.");
     }
 
     @Override

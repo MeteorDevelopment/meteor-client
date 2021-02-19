@@ -10,7 +10,7 @@ package minegame159.meteorclient.modules.player;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.meteor.MiddleMouseButtonEvent;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.EnumSetting;
@@ -23,7 +23,7 @@ import net.minecraft.item.Items;
 import net.minecraft.util.Hand;
 
 public class MiddleClickExtra extends Module {
-    public enum Mode{
+    public enum Mode {
         Pearl(Items.ENDER_PEARL),
         Bow(Items.ARROW),
         Gap(Items.GOLDEN_APPLE),
@@ -33,10 +33,6 @@ public class MiddleClickExtra extends Module {
         private final Item item;
 
         Mode(Item item){this.item = item;}
-    }
-
-    public MiddleClickExtra(){
-        super(Category.Player, "middle-click-extra", "Lets you use items when you middle click. Works the same as Middle Click Friend.");
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -60,6 +56,10 @@ public class MiddleClickExtra extends Module {
     private boolean wasUsing = false;
     private int preSlot;
     private int preCount;
+
+    public MiddleClickExtra(){
+        super(Categories.Player, "middle-click-extra", "Lets you use items when you middle click. Works the same as Middle Click Friend.");
+    }
 
     @EventHandler
     private void onMiddleMouse(MiddleMouseButtonEvent event) {

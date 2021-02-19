@@ -12,7 +12,7 @@ package minegame159.meteorclient.modules.combat;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.friends.Friends;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.movement.NoFall;
@@ -87,7 +87,7 @@ public class AutoTotem extends Module {
     private boolean locked = false;
 
     public AutoTotem() {
-        super(Category.Combat, "auto-totem", "Automatically equips totems in your offhand.");
+        super(Categories.Combat, "auto-totem", "Automatically equips totems in your offhand.");
     }
 
     @Override

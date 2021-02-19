@@ -9,7 +9,7 @@ import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.friends.Friends;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.rendering.ShapeMode;
@@ -130,7 +130,7 @@ public class AutoTrap extends Module {
     private int delay;
 
     public AutoTrap(){
-        super(Category.Combat, "auto-trap", "Traps people in an obsidian box to prevent them from moving.");
+        super(Categories.Combat, "auto-trap", "Traps people in an obsidian box to prevent them from moving.");
     }
 
     @Override

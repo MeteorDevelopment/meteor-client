@@ -9,7 +9,7 @@ import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixin.PlayerMoveC2SPacketAccessor;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
@@ -82,7 +82,7 @@ public class Flight extends Module {
     );
 
     public Flight() {
-        super(Category.Movement, "flight", "FLYYYY! No Fall is recommended with this module.");
+        super(Categories.Movement, "flight", "FLYYYY! No Fall is recommended with this module.");
     }
 
     private int delayLeft = delay.get();

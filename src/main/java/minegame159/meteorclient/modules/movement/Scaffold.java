@@ -8,7 +8,7 @@ package minegame159.meteorclient.modules.movement;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.player.ClipAtLedgeEvent;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.world.BlockUtils;
@@ -86,7 +86,7 @@ public class Scaffold extends Module {
     private double lastSneakingY;
 
     public Scaffold() {
-        super(Category.Movement, "scaffold", "Automatically places blocks under you.");
+        super(Categories.Movement, "scaffold", "Automatically places blocks under you.");
     }
 
     @Override

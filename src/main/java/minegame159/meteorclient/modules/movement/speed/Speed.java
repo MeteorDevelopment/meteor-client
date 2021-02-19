@@ -9,7 +9,7 @@ import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.player.PlayerMoveEvent;
 import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.movement.AutoJump;
 import minegame159.meteorclient.modules.movement.speed.modes.NCP;
@@ -116,7 +116,7 @@ public class Speed extends Module {
     private SpeedMode currentMode;
 
     public Speed() {
-        super(Category.Movement, "speed", "Modifies your movement speed when moving on the ground.");
+        super(Categories.Movement, "speed", "Modifies your movement speed when moving on the ground.");
     }
 
     @Override

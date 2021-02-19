@@ -8,7 +8,7 @@ package minegame159.meteorclient.modules.movement;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.LivingEntityMoveEvent;
 import minegame159.meteorclient.mixininterface.IVec3d;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.DoubleSetting;
@@ -45,7 +45,7 @@ public class EntitySpeed extends Module {
     );
 
     public EntitySpeed() {
-        super(Category.Movement, "entity-speed", "Makes you go faster when riding entities.");
+        super(Categories.Movement, "entity-speed", "Makes you go faster when riding entities.");
     }
 
     @EventHandler

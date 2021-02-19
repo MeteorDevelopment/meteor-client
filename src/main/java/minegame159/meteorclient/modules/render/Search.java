@@ -12,7 +12,7 @@ import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.events.world.ChunkDataEvent;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.settings.*;
@@ -102,7 +102,7 @@ public class Search extends Module {
     private DimensionType lastDimension;
 
     public Search() {
-        super(Category.Render, "search", "Searches for specified blocks.");
+        super(Categories.Render, "search", "Searches for specified blocks.");
     }
 
     @Override

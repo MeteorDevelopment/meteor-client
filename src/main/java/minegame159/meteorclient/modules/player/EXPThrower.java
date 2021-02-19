@@ -7,7 +7,7 @@ package minegame159.meteorclient.modules.player;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -37,7 +37,7 @@ public class EXPThrower extends Module {
     );
 
     public EXPThrower() {
-        super(Category.Player, "exp-thrower", "Automatically throws XP bottles in your hotbar.");
+        super(Categories.Player, "exp-thrower", "Automatically throws XP bottles in your hotbar.");
     }
 
     @EventHandler

@@ -8,7 +8,7 @@ package minegame159.meteorclient.modules.movement;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixininterface.IVec3d;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.EnumSetting;
@@ -53,7 +53,7 @@ public class AutoJump extends Module {
     );
 
     public AutoJump() {
-        super(Category.Movement, "auto-jump", "Automatically jumps.");
+        super(Categories.Movement, "auto-jump", "Automatically jumps.");
     }
 
     private boolean jump() {

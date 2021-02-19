@@ -11,7 +11,7 @@ package minegame159.meteorclient.modules.combat;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.rendering.ShapeMode;
@@ -35,7 +35,6 @@ import java.util.List;
 
 @InvUtils.Priority(priority = 0)
 public class BedAura extends Module {
-
     private enum Stage {
         Placing,
         Breaking
@@ -240,7 +239,7 @@ public class BedAura extends Module {
     private Stage stage;
 
     public BedAura(){
-        super(Category.Combat, "bed-aura", "Automatically places and explodes beds in the Nether and End.");
+        super(Categories.Combat, "bed-aura", "Automatically places and explodes beds in the Nether and End.");
     }
 
     @Override

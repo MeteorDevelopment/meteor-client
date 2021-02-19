@@ -11,7 +11,7 @@ import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixin.ClientPlayerEntityAccessor;
 import minegame159.meteorclient.mixininterface.IHorseBaseEntity;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -31,7 +31,7 @@ public class EntityControl extends Module {
     );
 
     public EntityControl() {
-        super(Category.Movement, "entity-control", "Lets you control rideable entities without a saddle.");
+        super(Categories.Movement, "entity-control", "Lets you control rideable entities without a saddle.");
     }
 
     @Override

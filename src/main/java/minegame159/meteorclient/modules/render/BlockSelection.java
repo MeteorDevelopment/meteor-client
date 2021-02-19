@@ -7,7 +7,7 @@ package minegame159.meteorclient.modules.render;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.rendering.ShapeMode;
@@ -51,7 +51,7 @@ public class BlockSelection extends Module {
     );
 
     public BlockSelection() {
-        super(Category.Render, "block-selection", "Modifies how your block selection is rendered.");
+        super(Categories.Render, "block-selection", "Modifies how your block selection is rendered.");
     }
 
     @EventHandler

@@ -7,7 +7,7 @@ package minegame159.meteorclient.modules.misc;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
@@ -97,7 +97,7 @@ public class Nuker extends Module {
     private boolean hasLastBlockPos;
 
     public Nuker() {
-        super(Category.Misc, "nuker", "Breaks a large amount of specified blocks around you.");
+        super(Categories.Misc, "nuker", "Breaks a large amount of specified blocks around you.");
     }
 
     @Override

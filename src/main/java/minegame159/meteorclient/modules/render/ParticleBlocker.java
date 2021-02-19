@@ -7,7 +7,7 @@ package minegame159.meteorclient.modules.render;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.ParticleEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.ParticleEffectListSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -28,7 +28,7 @@ public class ParticleBlocker extends Module {
     );
 
     public ParticleBlocker() {
-        super(Category.Render, "particle-blocker", "Stops specified particles from rendering.");
+        super(Categories.Render, "particle-blocker", "Stops specified particles from rendering.");
     }
 
     @EventHandler

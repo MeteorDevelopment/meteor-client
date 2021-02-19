@@ -8,7 +8,7 @@ package minegame159.meteorclient.modules.player;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.rendering.ShapeMode;
@@ -70,7 +70,7 @@ public class AirPlace extends Module {
     private BlockPos target;
 
     public AirPlace() {
-        super(Category.Player, "air-place", "Places a block where your crosshair is pointing at.");
+        super(Categories.Player, "air-place", "Places a block where your crosshair is pointing at.");
     }
 
     @Override

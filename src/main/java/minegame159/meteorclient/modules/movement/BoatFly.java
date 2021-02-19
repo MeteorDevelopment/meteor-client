@@ -9,7 +9,7 @@ import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.BoatMoveEvent;
 import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.mixininterface.IVec3d;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.DoubleSetting;
@@ -56,7 +56,7 @@ public class BoatFly extends Module {
     );
 
     public BoatFly() {
-        super(Category.Movement, "boat-fly", "Transforms your boat into a plane.");
+        super(Categories.Movement, "boat-fly", "Transforms your boat into a plane.");
     }
 
     @EventHandler

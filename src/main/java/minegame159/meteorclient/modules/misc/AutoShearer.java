@@ -7,7 +7,7 @@ package minegame159.meteorclient.modules.misc;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.modules.Category;
+import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.DoubleSetting;
@@ -51,7 +51,7 @@ public class AutoShearer extends Module {
     private boolean offHand;
 
     public AutoShearer() {
-        super(Category.Misc, "auto-shearer", "Automatically shears sheep.");
+        super(Categories.Misc, "auto-shearer", "Automatically shears sheep.");
     }
 
     @Override
