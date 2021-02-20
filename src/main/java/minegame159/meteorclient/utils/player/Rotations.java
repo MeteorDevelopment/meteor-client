@@ -6,6 +6,7 @@
 package minegame159.meteorclient.utils.player;
 
 import meteordevelopment.orbit.EventHandler;
+import minegame159.meteorclient.Config;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.entity.player.SendMovementPacketsEvent;
 import minegame159.meteorclient.events.world.TickEvent;
@@ -31,6 +32,10 @@ public class Rotations {
     private static final List<Rotation> rotations = new ArrayList<>();
     private static float preYaw, prePitch;
     private static int i = 0;
+
+    private static Rotation lastRotation;
+    private static int lastRotationTimer;
+    private static boolean sentLastRotation;
 
     public static void init() {
         MeteorClient.EVENT_BUS.subscribe(Rotations.class);
@@ -58,20 +63,48 @@ public class Rotations {
 
     @EventHandler
     private static void onSendMovementPacketsPre(SendMovementPacketsEvent.Pre event) {
-        if (!rotations.isEmpty() && mc.cameraEntity == mc.player) {
+        if (mc.cameraEntity != mc.player) return;
+        sentLastRotation = false;
+
+        if (!rotations.isEmpty()) {
+            if (lastRotation != null) freeLastRotation();
+
             Rotation rotation = rotations.get(i);
+            setupMovementPacketRotation(rotation);
 
-            preYaw = mc.player.yaw;
-            prePitch = mc.player.pitch;
+            if (rotations.size() == 1) lastRotation = rotation;
+            else rotationPool.free(rotation);
 
-            mc.player.yaw = (float) rotation.yaw;
-            mc.player.pitch = (float) rotation.pitch;
-
-            setCamRotation(rotation.yaw, rotation.pitch);
-
-            rotationPool.free(rotation);
             i++;
         }
+        else if (lastRotation != null) {
+            if (lastRotationTimer >= Config.get().rotationHoldTicks) {
+                freeLastRotation();
+            }
+            else {
+                setupMovementPacketRotation(lastRotation);
+                sentLastRotation = true;
+
+                lastRotationTimer++;
+            }
+        }
+    }
+
+    private static void setupMovementPacketRotation(Rotation rotation) {
+        preYaw = mc.player.yaw;
+        prePitch = mc.player.pitch;
+
+        mc.player.yaw = (float) rotation.yaw;
+        mc.player.pitch = (float) rotation.pitch;
+
+        setCamRotation(rotation.yaw, rotation.pitch);
+    }
+
+    private static void freeLastRotation() {
+        rotationPool.free(lastRotation);
+
+        lastRotation = null;
+        lastRotationTimer = 0;
     }
 
     @EventHandler
@@ -80,8 +113,7 @@ public class Rotations {
             if (mc.cameraEntity == mc.player) {
                 rotations.get(i - 1).runCallback();
 
-                mc.player.yaw = preYaw;
-                mc.player.pitch = prePitch;
+                resetPreRotation();
             }
 
             for (; i < rotations.size(); i++) {
@@ -90,12 +122,21 @@ public class Rotations {
                 setCamRotation(rotation.yaw, rotation.pitch);
                 rotation.sendPacket();
 
-                rotationPool.free(rotation);
+                if (i == rotations.size() - 1) lastRotation = rotation;
+                else rotationPool.free(rotation);
             }
 
             rotations.clear();
             i = 0;
         }
+        else if (sentLastRotation) {
+            resetPreRotation();
+        }
+    }
+
+    private static void resetPreRotation() {
+        mc.player.yaw = preYaw;
+        mc.player.pitch = prePitch;
     }
 
     @EventHandler

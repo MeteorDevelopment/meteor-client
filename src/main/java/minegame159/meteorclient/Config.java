@@ -27,6 +27,8 @@ public class Config extends System<Config> {
 
     public boolean sendDataToApi = true;
 
+    public int rotationHoldTicks = 9;
+
     public Config() {
         super("config");
 
