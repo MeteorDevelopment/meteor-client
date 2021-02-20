@@ -9,14 +9,15 @@ import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.ISerializable;
 import minegame159.meteorclient.utils.render.AlignmentX;
 import minegame159.meteorclient.utils.render.AlignmentY;
+import net.minecraft.nbt.AbstractNumberTag;
 import net.minecraft.nbt.CompoundTag;
 
 public class BoundingBox implements ISerializable<BoundingBox> {
     public AlignmentX x = AlignmentX.Left;
     public AlignmentY y = AlignmentY.Top;
 
-    public int xOffset, yOffset;
-    public int width, height;
+    public double xOffset, yOffset;
+    public double width, height;
 
     public double alignX(double width) {
         switch (this.x) {
@@ -35,8 +36,8 @@ public class BoundingBox implements ISerializable<BoundingBox> {
     }
 
     public void addPos(double deltaX, double deltaY) {
-        xOffset += (int) Math.round(deltaX);
-        yOffset += (int) Math.round(deltaY);
+        xOffset += (deltaX);
+        yOffset += (deltaY);
 
         double xPos = getX();
         double yPos = getY();
@@ -49,7 +50,7 @@ public class BoundingBox implements ISerializable<BoundingBox> {
                 if (xPos >= c - width / 2.0) {
                     // Module is closer to center than left
                     x = AlignmentX.Center;
-                    xOffset = (int) Math.round(-c / 2.0 + xPos - c + width / 2.0);
+                    xOffset = (-c / 2.0 + xPos - c + width / 2.0);
                 }
 
                 break;
@@ -61,11 +62,11 @@ public class BoundingBox implements ISerializable<BoundingBox> {
                 if (xPos > cRight - width / 2.0) {
                     // Module is closer to right than center
                     x = AlignmentX.Right;
-                    xOffset = (int) Math.round(-(c - width) + (c - (Utils.getWindowWidth() - xPos)));
+                    xOffset = (-(c - width) + (c - (Utils.getWindowWidth() - xPos)));
                 } else if (xPos < c - width / 2.0) {
                     // Module is closer to left than center
                     x = AlignmentX.Left;
-                    xOffset = (int) Math.round(xPos);
+                    xOffset = (xPos);
                 }
 
                 break;
@@ -77,7 +78,7 @@ public class BoundingBox implements ISerializable<BoundingBox> {
                 if (xPos <= cLeft - width / 2.0) {
                     // Module is closer to center than right
                     x = AlignmentX.Center;
-                    xOffset = (int) Math.round(-c / 2.0 + xPos - c + width / 2.0);
+                    xOffset = (-c / 2.0 + xPos - c + width / 2.0);
                 }
 
                 break;
@@ -95,7 +96,7 @@ public class BoundingBox implements ISerializable<BoundingBox> {
                 if (yPos >= c - height / 2.0) {
                     // Module is closer to center than top
                     y = AlignmentY.Center;
-                    yOffset = (int) Math.round(-c / 2.0 + yPos - c + height / 2.0);
+                    yOffset = (-c / 2.0 + yPos - c + height / 2.0);
                 }
 
                 break;
@@ -107,11 +108,11 @@ public class BoundingBox implements ISerializable<BoundingBox> {
                 if (yPos > cBottom - height / 2.0) {
                     // Module is closer to bottom than center
                     y = AlignmentY.Bottom;
-                    yOffset = (int) Math.round(-(c - height) + (c - (Utils.getWindowHeight() - yPos)));
+                    yOffset = (-(c - height) + (c - (Utils.getWindowHeight() - yPos)));
                 } else if (yPos < c - height / 2.0) {
                     // Module is closer to top than center
                     y = AlignmentY.Top;
-                    yOffset = (int) Math.round(yPos);
+                    yOffset = (yPos);
                 }
 
                 break;
@@ -123,7 +124,7 @@ public class BoundingBox implements ISerializable<BoundingBox> {
                 if (yPos <= cLeft - height / 2.0) {
                     // Module is closer to center than bottom
                     y = AlignmentY.Center;
-                    yOffset = (int) Math.round(-c / 2.0 + yPos - c + height / 2.0);
+                    yOffset = (-c / 2.0 + yPos - c + height / 2.0);
                 }
 
                 break;
@@ -135,29 +136,29 @@ public class BoundingBox implements ISerializable<BoundingBox> {
     }
 
     public void setSize(double width, double height) {
-        this.width = (int) Math.round(width);
-        this.height = (int) Math.round(height);
+        this.width = (width);
+        this.height = (height);
     }
 
-    public int getX() {
+    public double getX() {
         switch (x) {
             default:     return xOffset;
-            case Center: return (int) Math.round(Utils.getWindowWidth() / 2.0 - width / 2.0 + xOffset);
+            case Center: return (Utils.getWindowWidth() / 2.0 - width / 2.0 + xOffset);
             case Right:  return Utils.getWindowWidth() - width + xOffset;
         }
     }
 
-    public int getY() {
+    public double getY() {
         switch (y) {
             default:     return yOffset;
-            case Center: return (int) Math.round(Utils.getWindowHeight() / 2.0 - height / 2.0 + yOffset);
+            case Center: return (Utils.getWindowHeight() / 2.0 - height / 2.0 + yOffset);
             case Bottom: return Utils.getWindowHeight() - height + yOffset;
         }
     }
 
     public boolean isOver(double x, double y) {
-        int sx = getX();
-        int sy = getY();
+        double sx = getX();
+        double sy = getY();
 
         return x >= sx && x <= sx + width && y >= sy && y <= sy + height;
     }
@@ -168,8 +169,8 @@ public class BoundingBox implements ISerializable<BoundingBox> {
 
         tag.putString("x", x.name());
         tag.putString("y", y.name());
-        tag.putInt("xOffset", xOffset);
-        tag.putInt("yOffset", yOffset);
+        tag.putDouble("xOffset", xOffset);
+        tag.putDouble("yOffset", yOffset);
 
         return tag;
     }
@@ -178,8 +179,10 @@ public class BoundingBox implements ISerializable<BoundingBox> {
     public BoundingBox fromTag(CompoundTag tag) {
         x = AlignmentX.valueOf(tag.getString("x"));
         y = AlignmentY.valueOf(tag.getString("y"));
-        xOffset = tag.getInt("xOffset");
-        yOffset = tag.getInt("yOffset");
+
+        // It's done this way because before 0.4.2 they were stored as ints
+        xOffset = ((AbstractNumberTag) tag.get("xOffset")).getDouble();
+        yOffset = ((AbstractNumberTag) tag.get("yOffset")).getDouble();
 
         return this;
     }

@@ -8,14 +8,14 @@ package minegame159.meteorclient.modules.render.hud.modules;
 import minegame159.meteorclient.modules.render.hud.HUD;
 import net.minecraft.client.network.PlayerListEntry;
 
-public class PingHud extends DoubleTextHudModule {
+public class PingHud extends DoubleTextHudElement {
     public PingHud(HUD hud) {
         super(hud, "ping", "Displays your ping.", "Ping: ");
     }
 
     @Override
     protected String getRight() {
-        if (mc.getNetworkHandler() == null || mc.player == null) return "0";
+        if (isInEditor()) return "0";
 
         PlayerListEntry playerListEntry = mc.getNetworkHandler().getPlayerListEntry(mc.player.getUuid());
 

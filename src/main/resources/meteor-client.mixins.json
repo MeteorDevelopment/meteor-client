@@ -105,7 +105,9 @@
     "TridentItemMixin",
     "Vec3dMixin",
     "WorldRendererAccessor",
-    "WorldRendererMixin"
+    "WorldRendererMixin",
+    "DimensionTypeAccessor",
+    "DefaultSkinHelperMixin"
   ],
   "injectors": {
     "defaultRequire": 1

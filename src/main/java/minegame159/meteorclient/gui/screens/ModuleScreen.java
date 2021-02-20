@@ -29,12 +29,15 @@ public class ModuleScreen extends WindowScreen {
         add(new WLabel(module.description));
         row();
 
+        // Settings
         if (module.settings.sizeGroups() > 0) {
             add(module.settings.createTable(false)).fillX().expandX().getWidget();
-        } else {
+        }
+        else {
             add(new WHorizontalSeparator());
         }
 
+        // Custom widget
         WWidget customWidget = module.getWidget();
         if (customWidget != null) {
             if (module.settings.sizeGroups() > 0) {

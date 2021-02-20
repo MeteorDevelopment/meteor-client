@@ -288,15 +288,7 @@ public class Modules extends System<Modules> {
         modules.put(module.getClass(), module);
         getGroup(module.category).add(module);
 
-        for (SettingGroup group : module.settings) {
-            for (Setting<?> setting : group) {
-                setting.module = module;
-
-                if (setting instanceof ColorSetting) {
-                    RainbowColors.addSetting((Setting<SettingColor>) setting);
-                }
-            }
-        }
+        module.settings.registerColorSettings(module);
     }
 
     private void initCombat() {

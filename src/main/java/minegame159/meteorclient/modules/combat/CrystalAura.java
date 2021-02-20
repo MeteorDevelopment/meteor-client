@@ -673,21 +673,26 @@ public class CrystalAura extends Module {
                     }
                 }
             }
+
             if (bestBlock != null && ((bestDamage >= minDamage.get() && !locked) || shouldFacePlace)) {
                 if (switchMode.get() != SwitchMode.None) doSwitch();
                 if (mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL) return;
+
                 if (!smartDelay.get()) {
                     placeDelayLeft = placeDelay.get();
                     placeBlock(bestBlock, getHand());
-                }else if (smartDelay.get() && (placeDelayLeft <= 0 || bestDamage - lastDamage > healthDifference.get()
-                        || (spamFacePlace.get() && shouldFacePlace))) {
+                }
+                else if (smartDelay.get() && (placeDelayLeft <= 0 || bestDamage - lastDamage > healthDifference.get() || (spamFacePlace.get() && shouldFacePlace))) {
                     lastDamage = bestDamage;
                     placeBlock(bestBlock, getHand());
+
                     if (placeDelayLeft <= 0) placeDelayLeft = 10;
                 }
             }
-            if (switchMode.get() == SwitchMode.Spoof && preSlot != mc.player.inventory.selectedSlot && preSlot != -1)
+
+            if (switchMode.get() == SwitchMode.Spoof && preSlot != mc.player.inventory.selectedSlot && preSlot != -1) {
                 mc.player.inventory.selectedSlot = preSlot;
+            }
         }
     }
 

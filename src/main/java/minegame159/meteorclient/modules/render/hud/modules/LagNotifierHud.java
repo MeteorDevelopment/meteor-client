@@ -6,12 +6,10 @@
 package minegame159.meteorclient.modules.render.hud.modules;
 
 import minegame159.meteorclient.modules.render.hud.HUD;
-import minegame159.meteorclient.modules.render.hud.HudEditorScreen;
-import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.world.TickRate;
 
-public class LagNotifierHud extends DoubleTextHudModule {
+public class LagNotifierHud extends DoubleTextHudElement {
     private static final Color RED = new Color(225, 45, 45);
     private static final Color AMBER = new Color(235, 158, 52);
     private static final Color YELLOW = new Color(255, 255, 5);
@@ -22,7 +20,7 @@ public class LagNotifierHud extends DoubleTextHudModule {
 
     @Override
     protected String getRight() {
-        if (!Utils.canUpdate()) {
+        if (isInEditor()) {
             rightColor = RED;
             visible = true;
             return "4,3";
@@ -34,7 +32,7 @@ public class LagNotifierHud extends DoubleTextHudModule {
         else if (timeSinceLastTick > 3) rightColor = AMBER;
         else rightColor = YELLOW;
 
-        visible = timeSinceLastTick >= 1f || mc.currentScreen instanceof HudEditorScreen;
+        visible = timeSinceLastTick >= 1f;
         return String.format("%.1f", timeSinceLastTick);
     }
 }

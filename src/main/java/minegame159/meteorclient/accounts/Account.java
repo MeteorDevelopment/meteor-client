@@ -54,6 +54,7 @@ public abstract class Account<T extends Account<?>> implements ISerializable<T> 
 
     protected void setSession(Session session) {
         ((MinecraftClientAccessor) MinecraftClient.getInstance()).setSession(session);
+        MinecraftClient.getInstance().getSessionProperties().clear();
     }
 
     @Override

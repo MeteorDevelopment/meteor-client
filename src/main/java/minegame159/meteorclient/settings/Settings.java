@@ -6,8 +6,11 @@
 package minegame159.meteorclient.settings;
 
 import minegame159.meteorclient.gui.widgets.WTable;
+import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.utils.misc.ISerializable;
 import minegame159.meteorclient.utils.misc.NbtUtils;
+import minegame159.meteorclient.utils.render.color.RainbowColors;
+import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -74,6 +77,18 @@ public class Settings implements ISerializable<Settings>, Iterable<SettingGroup>
     }
     public WTable createTable() {
         return createTable(true);
+    }
+
+    public void registerColorSettings(Module module) {
+        for (SettingGroup group : this) {
+            for (Setting<?> setting : group) {
+                setting.module = module;
+
+                if (setting instanceof ColorSetting) {
+                    RainbowColors.addSetting((Setting<SettingColor>) setting);
+                }
+            }
+        }
     }
 
     @Override

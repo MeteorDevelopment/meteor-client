@@ -7,14 +7,14 @@ package minegame159.meteorclient.modules.render.hud.modules;
 
 import minegame159.meteorclient.modules.render.hud.HUD;
 
-public class TimeHud extends DoubleTextHudModule {
+public class TimeHud extends DoubleTextHudElement {
     public TimeHud(HUD hud) {
         super(hud, "time", "Displays the world time.", "Time: ");
     }
 
     @Override
     protected String getRight() {
-        if (mc.world == null) return "00:00";
+        if (isInEditor()) return "00:00";
 
         int ticks = (int) (mc.world.getTimeOfDay() % 24000);
         ticks += 6000;

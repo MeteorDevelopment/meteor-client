@@ -149,6 +149,8 @@ public abstract class WidgetScreen extends Screen {
         // Apply projection without scaling
         Utils.unscaledProjection();
 
+        onRenderBefore(delta);
+
         Matrices.begin(new MatrixStack());
 
         // Render gui
@@ -161,6 +163,8 @@ public abstract class WidgetScreen extends Screen {
         // Apply back original scaled projection
         Utils.scaledProjection();
     }
+
+    protected void onRenderBefore(float delta) {}
 
     @Override
     public void resize(MinecraftClient client, int width, int height) {
