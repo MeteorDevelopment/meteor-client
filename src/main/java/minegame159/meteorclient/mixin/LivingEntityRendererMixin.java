@@ -12,6 +12,7 @@ import minegame159.meteorclient.modules.render.Freecam;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.player.Rotations;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
@@ -22,6 +23,7 @@ import net.minecraft.client.render.entity.model.EntityModel;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.scoreboard.AbstractTeam;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -76,5 +78,13 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
     public float changePitch(float oldValue, LivingEntity entity) {
         if (entity.equals(Utils.mc.player) && Rotations.rotationTimer < 10) return Rotations.serverPitch;
         return oldValue;
+    }
+
+    // Player model rendering in main menu
+
+    @Redirect(method = "hasLabel", at = @At(value = "INVOKE", target = "net.minecraft.client.network.ClientPlayerEntity.getScoreboardTeam()Lnet/minecraft/scoreboard/AbstractTeam;"))
+    private AbstractTeam hasLabelClientPlayerEntityGetScoreboardTeamProxy(ClientPlayerEntity player) {
+        if (player == null) return null;
+        return player.getScoreboardTeam();
     }
 }

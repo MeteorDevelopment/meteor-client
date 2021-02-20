@@ -9,6 +9,7 @@ public enum TopBarType {
     Modules(TopBarModules::new),
     Config(TopBarConfig::new),
     Gui(TopBarGui::new),
+    Hud(TopBarHud::new, true),
     Friends(TopBarFriends::new),
     Macros(TopBarMacros::new),
     Baritone(TopBarBaritone::new),
@@ -18,13 +19,19 @@ public enum TopBarType {
         TopBarScreen create();
     }
 
-    private final TopBarScreenFactory topBarScreenFactory;
+    private final TopBarScreenFactory factory;
+    public final boolean closeToParent;
 
-    TopBarType(TopBarScreenFactory topBarScreenFactory) {
-        this.topBarScreenFactory = topBarScreenFactory;
+    TopBarType(TopBarScreenFactory factory, boolean closeToParent) {
+        this.factory = factory;
+        this.closeToParent = closeToParent;
+    }
+
+    TopBarType(TopBarScreenFactory factory) {
+        this(factory, false);
     }
 
     public TopBarScreen createScreen() {
-        return topBarScreenFactory.create();
+        return factory.create();
     }
 }

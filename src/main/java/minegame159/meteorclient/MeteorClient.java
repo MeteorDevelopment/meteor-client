@@ -13,17 +13,18 @@ import minegame159.meteorclient.events.meteor.ClientInitialisedEvent;
 import minegame159.meteorclient.events.meteor.KeyEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.gui.WidgetScreen;
+import minegame159.meteorclient.gui.screens.topbar.TopBarHud;
 import minegame159.meteorclient.gui.screens.topbar.TopBarModules;
 import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.misc.DiscordPresence;
-import minegame159.meteorclient.modules.render.hud.HudEditorScreen;
 import minegame159.meteorclient.rendering.Fonts;
 import minegame159.meteorclient.rendering.Matrices;
 import minegame159.meteorclient.rendering.text.CustomTextRenderer;
 import minegame159.meteorclient.systems.Systems;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.entity.EntityUtils;
+import minegame159.meteorclient.utils.misc.FakeClientPlayer;
 import minegame159.meteorclient.utils.misc.MeteorPlayers;
 import minegame159.meteorclient.utils.misc.Names;
 import minegame159.meteorclient.utils.misc.input.KeyAction;
@@ -99,6 +100,7 @@ public class MeteorClient implements ClientModInitializer {
         Rotations.init();
         Names.init();
         MeteorPlayers.init();
+        FakeClientPlayer.init();
 
         // Register categories
         Modules.REGISTERING_CATEGORIES = true;
@@ -149,7 +151,7 @@ public class MeteorClient implements ClientModInitializer {
     private void onKey(KeyEvent event) {
         // Click GUI
         if (event.action == KeyAction.Press && event.key == KeyBindingHelper.getBoundKeyOf(KeyBinds.OPEN_CLICK_GUI).getCode()) {
-            if ((!Utils.canUpdate() && !(mc.currentScreen instanceof WidgetScreen) && !(mc.currentScreen instanceof HudEditorScreen)) || mc.currentScreen == null) openClickGui();
+            if ((!Utils.canUpdate() && !(mc.currentScreen instanceof WidgetScreen) && !(mc.currentScreen instanceof TopBarHud)) || mc.currentScreen == null) openClickGui();
         }
 
         // Shulker Peek

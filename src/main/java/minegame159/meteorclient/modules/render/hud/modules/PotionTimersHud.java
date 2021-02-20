@@ -13,7 +13,7 @@ import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffectUtil;
 
-public class PotionTimersHud extends HudModule {
+public class PotionTimersHud extends HudElement {
     private final Color color = new Color();
 
     public PotionTimersHud(HUD hud) {
@@ -22,7 +22,7 @@ public class PotionTimersHud extends HudModule {
 
     @Override
     public void update(HudRenderer renderer) {
-        if (mc.player == null) {
+        if (isInEditor()) {
             box.setSize(renderer.textWidth("Potion Timers 0:00"), renderer.textHeight());
             return;
         }
@@ -47,7 +47,7 @@ public class PotionTimersHud extends HudModule {
         double x = box.getX();
         double y = box.getY();
 
-        if (mc.player == null) {
+        if (isInEditor()) {
             renderer.text("Potion Timers 0:00", x, y, color);
             return;
         }
