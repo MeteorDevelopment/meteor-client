@@ -85,6 +85,7 @@ public class HUD extends Module {
         topLeft.add(new SpeedHud(this));
         topLeft.add(new BiomeHud(this));
         topLeft.add(new TimeHud(this));
+        topLeft.add(new ServerHud(this));
         topLeft.add(new DurabilityHud(this));
         topLeft.add(new BreakingBlockHud(this));
         topLeft.add(new LookingAtHud(this));
