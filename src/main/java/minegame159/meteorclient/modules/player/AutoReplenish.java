@@ -19,10 +19,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-@InvUtils.Priority(priority = 1)
 public class AutoReplenish extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
@@ -161,12 +159,12 @@ public class AutoReplenish extends Module {
             }
         }
 
-        return slot;
+        return InvUtils.invIndexToSlotId(slot);
     }
 
     private void addSlots(int to, int from) {
         if (to == -1 || from == -1) return;
-        InvUtils.addSlots(Arrays.asList(to, from), this.getClass());
+        InvUtils.addSlots(1, InvUtils.invIndexToSlotId(to), from, 1);
     }
 
     private void fillItems() {

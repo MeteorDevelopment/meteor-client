@@ -19,9 +19,6 @@ import net.minecraft.item.ArmorItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 
-import java.util.Arrays;
-
-@InvUtils.Priority(priority = 0)
 public class ChestSwap extends Module {
     public enum Chestplate {
         Diamond,
@@ -131,7 +128,7 @@ public class ChestSwap extends Module {
 
     private void equip(int slot) {
         int chestSlot = 8 - 2;
-        InvUtils.addSlots(Arrays.asList(chestSlot, slot), this.getClass());
+        InvUtils.addSlots(2, chestSlot, slot, 0);
     }
 
     @Override
