@@ -181,6 +181,8 @@ public class GuiConfig implements ISerializable<GuiConfig> {
     }
 
     private void writeWindowConfig(ListTag listTag, WindowType type, WindowConfig config, Category category) {
+        if (listTag == null || type == null || config == null) return;
+
         CompoundTag tag = config.toTag();
 
         tag.putString("type", type.name());
