@@ -23,7 +23,6 @@ import minegame159.meteorclient.modules.movement.speed.Speed;
 import minegame159.meteorclient.modules.player.*;
 import minegame159.meteorclient.modules.render.*;
 import minegame159.meteorclient.modules.render.hud.HUD;
-import minegame159.meteorclient.settings.ColorSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.systems.System;
@@ -33,8 +32,6 @@ import minegame159.meteorclient.utils.misc.input.Input;
 import minegame159.meteorclient.utils.misc.input.KeyAction;
 import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
-import minegame159.meteorclient.utils.render.color.RainbowColors;
-import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -328,6 +325,7 @@ public class Modules extends System<Modules> {
 
     private void initPlayer() {
         addModule(new AirPlace());
+        addModule(new AutoPot());
         addModule(new AntiAFK());
         addModule(new AntiCactus());
         addModule(new AntiHunger());
