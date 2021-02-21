@@ -8,9 +8,9 @@ package minegame159.meteorclient.modules.render.hud.modules;
 import minegame159.meteorclient.modules.render.hud.HUD;
 import minegame159.meteorclient.utils.Utils;
 
-public class ServerHud extends DoubleTextHudModule {
+public class ServerHud extends DoubleTextHudElement {
     public ServerHud(HUD hud) {
-        super(hud, "time", "Displays the server you're currently in.", "Server: ");
+        super(hud, "server", "Displays the server you're currently.", "Server: ");
     }
 
     @Override
