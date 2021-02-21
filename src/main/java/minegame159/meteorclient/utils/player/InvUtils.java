@@ -8,19 +8,15 @@ package minegame159.meteorclient.utils.player;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.combat.AutoTotem;
+import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.Hand;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.function.Predicate;
 
 public class InvUtils {
@@ -28,8 +24,7 @@ public class InvUtils {
     private static final MinecraftClient mc = MinecraftClient.getInstance();
 
     private static final FindItemResult findItemResult = new FindItemResult();
-    private static final Deque<CustomPair> moveQueue = new ArrayDeque<>();
-    private static final Queue<Integer> currentQueue = new LinkedList<>();
+    private static final Deque<Long> moveQueue = new ArrayDeque<>();
 
     public static void clickSlot(int slot, int button, SlotActionType action) {
         mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, slot, button, action, mc.player);
@@ -81,61 +76,51 @@ public class InvUtils {
     @EventHandler(priority = EventPriority.LOWEST)
     private static void onTick(TickEvent.Pre event) {
         if (mc.world == null || mc.player == null || mc.player.abilities.creativeMode){
-            currentQueue.clear();
             moveQueue.clear();
             return;
         }
 
         if (!mc.player.inventory.getCursorStack().isEmpty() && mc.currentScreen == null && mc.player.currentScreenHandler.getStacks().size() == 46){
-            int slot = mc.player.inventory.getEmptySlot();
-            if (slot == -1) findItemWithCount(mc.player.inventory.getCursorStack().getItem());
+            int slot = findItemWithCount(mc.player.inventory.getCursorStack().getItem()).slot;
+            if (slot == -1) slot = mc.player.inventory.getEmptySlot();
             if (slot != -1) clickSlot(invIndexToSlotId(slot), 0, SlotActionType.PICKUP);
         }
 
         if (!moveQueue.isEmpty()) {
-            if (currentQueue.isEmpty()) {
-                CustomPair pair = moveQueue.remove();
-                currentQueue.addAll(pair.getRight());
-            }
-
             if (mc.player.currentScreenHandler.getStacks().size() == 46) {
-                int slot = currentQueue.remove();
-                int slot1 = currentQueue.remove();
-                clickSlot(slot, slot1, SlotActionType.SWAP);
-                currentQueue.clear();
+                Long movement = moveQueue.remove();
+                switch (unpackLongMode(movement)) {
+                    case 1:
+                        clickSlot(unpackLongFrom(movement), 0, SlotActionType.PICKUP);
+                        clickSlot(unpackLongTo(movement), 0, SlotActionType.PICKUP);
+                        clickSlot(unpackLongFrom(movement), 0, SlotActionType.PICKUP);
+                        break;
+                    case 2:
+                        clickSlot(unpackLongTo(movement), unpackLongFrom(movement), SlotActionType.SWAP);
+                        break;
+                }
             }
         }
     }
 
-    public static void addSlots(List<Integer> slots, Class<? extends Module> klass){
-        if (moveQueue.contains(new CustomPair(klass, slots)) || currentQueue.containsAll(slots)) return;
+    public static void addSlots(int mode, int to, int from, int prio){
+        Long action = Utils.packLong(mode, to, from, prio);
+        if (moveQueue.contains(action)) return;
 
-        if (klass == AutoTotem.class) {
-            moveQueue.removeIf(pair -> pair.getRight().contains(40));
-        }
+        moveQueue.removeIf(entry -> (actionContains(entry, unpackLongTo(action)) || actionContains(entry, unpackLongFrom(action))) && canMove(entry, action));
 
-        if (!moveQueue.isEmpty() && canMove(klass)){
-            moveQueue.addFirst(new CustomPair(klass, slots));
+        boolean isEmpty = moveQueue.isEmpty();
+        if (moveQueue.isEmpty() || canMove(moveQueue.peek(), action)){
+            moveQueue.addFirst(action);
         } else {
-            moveQueue.add(new CustomPair(klass, slots));
+            moveQueue.add(action);
         }
 
-        onTick(new TickEvent.Pre());
+        if (isEmpty) onTick(new TickEvent.Pre());
     }
 
-    public static boolean canMove(Class<? extends Module> klass){
-        return getPrio(moveQueue.peek().getLeft()) < getPrio(klass);
-    }
-
-    private static int getPrio(Class<? extends Module> klass){
-        if (klass == null) return -1;
-        return klass.getAnnotation(Priority.class).priority();
-    }
-
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.TYPE)
-    public @interface Priority{
-        int priority() default -1;
+    public static boolean canMove(Long first, Long action){
+        return unpackLongPrio(first) < unpackLongPrio(action);
     }
 
     //Whole
@@ -187,5 +172,25 @@ public class InvUtils {
 
     public static void swap(int slot) {
         if (slot != mc.player.inventory.selectedSlot && slot >= 0 && slot < 9) mc.player.inventory.selectedSlot = slot;
+    }
+
+    private static boolean actionContains(long l, int i){
+        return i == unpackLongTo(l) || i == unpackLongFrom(l);
+    }
+
+    private static int unpackLongMode(long l) {
+        return Utils.unpackLong1(l);
+    }
+
+    private static int unpackLongTo(long l) {
+        return Utils.unpackLong2(l);
+    }
+
+    private static int unpackLongFrom(long l) {
+        return Utils.unpackLong3(l);
+    }
+
+    private static int unpackLongPrio(long l) {
+        return Utils.unpackLong4(l);
     }
 }

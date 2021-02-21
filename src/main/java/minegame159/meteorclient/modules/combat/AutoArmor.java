@@ -5,8 +5,6 @@
 
 package minegame159.meteorclient.modules.combat;
 
-//Rewritten by squidoodly 25/07/2020
-
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Categories;
@@ -31,10 +29,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-@InvUtils.Priority(priority = Integer.MAX_VALUE - 1)
 public class AutoArmor extends Module {
     public enum Prot{
         Protection(Enchantments.PROTECTION),
@@ -232,7 +228,7 @@ public class AutoArmor extends Module {
                 }
             }
             if (bestSlot > -1) {
-                InvUtils.addSlots(Arrays.asList(8 - a, bestSlot), this.getClass());
+                InvUtils.addSlots(2, 8 - a, bestSlot, 999);
                 if (pause.get()) break;
             }
             mode.set(preMode);

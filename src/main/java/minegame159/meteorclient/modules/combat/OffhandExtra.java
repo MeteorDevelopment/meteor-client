@@ -5,8 +5,6 @@
 
 package minegame159.meteorclient.modules.combat;
 
-//Created by squidoodly 25/04/2020
-
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.player.RightClickEvent;
 import minegame159.meteorclient.events.world.TickEvent;
@@ -21,9 +19,6 @@ import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.item.*;
 
-import java.util.Arrays;
-
-@InvUtils.Priority(priority = 1)
 public class OffhandExtra extends Module {
     public enum Mode{
         EGap,
@@ -123,7 +118,7 @@ public class OffhandExtra extends Module {
         if (Modules.get().isActive(AutoTotem.class) && mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING) {
             InvUtils.FindItemResult result = InvUtils.findItemWithCount(Items.TOTEM_OF_UNDYING);
             if (result.slot != -1) {
-                InvUtils.addSlots(Arrays.asList(45, result.slot), this.getClass());
+                InvUtils.addSlots(2, 45, result.slot, 1);
             }
         }
     }
@@ -149,7 +144,7 @@ public class OffhandExtra extends Module {
                     if (mc.player.getOffHandStack().getItem() != getItem()) {
                         result = findSlot(getItem());
                         if (result != -1) {
-                            InvUtils.addSlots(Arrays.asList(45, result), this.getClass());
+                            InvUtils.addSlots(2, 45, result, 1);
                             return;
                         }
                     }
@@ -162,13 +157,13 @@ public class OffhandExtra extends Module {
                 return;
             }
             if (mc.player.getOffHandStack().getItem() != getItem() && replace.get()) {
-                InvUtils.addSlots(Arrays.asList(45, result), this.getClass());
+                InvUtils.addSlots(2, 45, result, 1);
                 sentMessage = false;
             }
         } else if (!asimov.get() && !isClicking && mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING) {
             int result = findSlot(Items.TOTEM_OF_UNDYING);
             if (result != -1) {
-                InvUtils.addSlots(Arrays.asList(45, result), this.getClass());
+                InvUtils.addSlots(2, 45, result, 1);
             }
 
         }
@@ -197,7 +192,7 @@ public class OffhandExtra extends Module {
                 return;
             }
             if (mc.player.getOffHandStack().getItem() != item && mc.player.getMainHandStack().getItem() != item && replace.get()) {
-                InvUtils.addSlots(Arrays.asList(45, result), this.getClass());
+                InvUtils.addSlots(2, 45, result, 1);
                 sentMessage = false;
             }
             currentMode = mode.get();

@@ -5,10 +5,6 @@
 
 package minegame159.meteorclient.modules.combat;
 
-//Updated by squidoodly 24/04/2020
-//Updated by squidoodly 19/06/2020
-//Updated by squidoodly 30/12/2020
-
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.friends.Friends;
@@ -36,9 +32,6 @@ import net.minecraft.item.Items;
 import net.minecraft.item.SwordItem;
 import net.minecraft.util.math.Vec3d;
 
-import java.util.Arrays;
-
-@InvUtils.Priority(priority = Integer.MAX_VALUE)
 public class AutoTotem extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
@@ -114,7 +107,7 @@ public class AutoTotem extends Module {
             if (mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING && (!smart.get()
                     || isLow() || elytraMove())) {
                 locked = true;
-                InvUtils.addSlots(Arrays.asList(45, result.slot), this.getClass());
+                InvUtils.addSlots(2, 45, result.slot, 1000);
             } else if (smart.get() && !isLow() && !elytraMove()) {
                 locked = false;
             }

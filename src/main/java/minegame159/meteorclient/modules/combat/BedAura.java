@@ -5,9 +5,6 @@
 
 package minegame159.meteorclient.modules.combat;
 
-// Created by squidoodly 03/06/2020
-// Updated by squidoodly 19/06/2020
-
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.events.world.TickEvent;
@@ -30,9 +27,6 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 
-import java.util.Arrays;
-
-@InvUtils.Priority(priority = 0)
 public class BedAura extends Module {
     private enum Stage {
         Placing,
@@ -395,7 +389,7 @@ public class BedAura extends Module {
     private void doAutoMove() {
         if (InvUtils.findItemInHotbar(itemStack -> itemStack.getItem() instanceof BedItem) == -1) {
             int slot = InvUtils.findItemInMain(itemStack -> itemStack.getItem() instanceof BedItem);
-            InvUtils.addSlots(Arrays.asList(slot, autoMoveSlot.get() - 1), this.getClass());
+            InvUtils.addSlots(2, slot, autoMoveSlot.get() - 1, 0);
         }
     }
 
