@@ -10,18 +10,15 @@ import minegame159.meteorclient.utils.Utils;
 
 public class ServerHud extends DoubleTextHudElement {
     public ServerHud(HUD hud) {
-        super(hud, "server", "Displays the server you're currently.", "Server: ");
+        super(hud, "server", "Displays the server you're currently in.", "Server: ");
     }
 
     @Override
     protected String getRight() {
-        if (mc.world == null) return "Null";
+        if (!Utils.canUpdate()) return "None";
 
-        if (mc.isInSingleplayer()) return "Singleplayer";
-        else return Utils.getWorldName();
+        return Utils.getWorldName();
     }
-
-
 }
 
 
