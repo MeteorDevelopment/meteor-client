@@ -64,26 +64,17 @@ public class AutoPot extends Module {
     );
     private int slot, prevSlot;
     private boolean drinking;
-
     private final List<Class<? extends Module>> wasAura = new ArrayList<>();
     private boolean wasBaritone;
-
     public AutoPot() {
-        super(Categories.Player, "auto-pot", "Has Ez Sex with your mother");
+        super(Categories.Player, "auto-pot", "Automatically Drinks Potions");
     }
     //Gilded's first module, lets see how much i'll die making this
-    //Future Gilded here, I died several times, i don't even remember
-    //Mingame don't kill me too hard
-    //Thamk mimgam for gud autogap cod, ez sked
-    //Also ty snele for nice quiver code
     //TODO:Rework everything to accept all pots
-    //Todo: Make check for stronker healing pot and strength pot
-
     @Override
     public void onDeactivate() {
         if (drinking) stopDrinking();
     }
-
     @EventHandler
     private void onTick(TickEvent.Pre event) {
         if (whatToDrink.get() == Mode.Healing) {
@@ -98,7 +89,6 @@ public class AutoPot extends Module {
             if (drinking) {
                 if (ShouldDrinkHealth()) {
                     if (isNotPotion(mc.player.inventory.getStack(slot))) {
-
                         slot = HealingpotionSlot();
                         if (slot == -1) {
                             ChatUtils.moduleInfo(this, "Ran out of Pots while drinking");
@@ -123,7 +113,6 @@ public class AutoPot extends Module {
                 if (slot != -1) {
                     startDrinking();
                 }
-
             }
             if (drinking) {
                 if (ShouldDrinkStrength()) {
@@ -144,21 +133,16 @@ public class AutoPot extends Module {
             }
             }
         }
-
-
-
     @EventHandler
     private void onItemUseCrosshairTarget(ItemUseCrosshairTargetEvent event) {
         if (drinking) event.target = null;
     }
-
     private void setPressed(boolean pressed) {
         mc.options.keyUse.setPressed(pressed);
     }
 private void startDrinking() {
         prevSlot = mc.player.inventory.selectedSlot;
         drink();
-
         // Pause auras
         wasAura.clear();
         if (pauseAuras.get()) {
@@ -171,7 +155,6 @@ private void startDrinking() {
                 }
             }
         }
-
         // Pause baritone
         wasBaritone = false;
         if (pauseBaritone.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing()) {
@@ -203,7 +186,6 @@ private void drink() {
                 }
             }
         }
-
         // Resume baritone
         if (pauseBaritone.get() && wasBaritone) {
             BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume");
@@ -218,7 +200,6 @@ private void changeSlot(int slot) {
         this.slot = slot;
     }
 //Sunk 7 hours into these checks, if i die blame checks
-
     private int HealingpotionSlot() {
         int slot = -1;
         for (int i = 0; i < 9; i++) {
@@ -239,7 +220,6 @@ private void changeSlot(int slot) {
         }
         return slot;
     }
-
             private int StrengthpotionSlot () {
                 int slot = -1;
 
@@ -265,7 +245,6 @@ private void changeSlot(int slot) {
 private boolean isNotPotion(ItemStack stack) {
         Item item = stack.getItem();
         return item != Items.POTION;
-
     }
     private boolean ShouldDrinkHealth(){
          if (truehealth() < health.get()) return true;
@@ -279,9 +258,6 @@ private boolean ShouldDrinkStrength(){
         Map<StatusEffect, StatusEffectInstance> effects = mc.player.getActiveStatusEffects();
     return !effects.containsKey(StatusEffects.STRENGTH);
 }
-//maybe i should get mimgam to fix the bug
-//already fixed it myself ez
-
         }
 
 
