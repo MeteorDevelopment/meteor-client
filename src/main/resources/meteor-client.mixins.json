@@ -107,7 +107,10 @@
     "WorldRendererAccessor",
     "WorldRendererMixin",
     "DimensionTypeAccessor",
-    "DefaultSkinHelperMixin"
+    "DefaultSkinHelperMixin",
+    "BiomeColorsMixin",
+    "FluidRendererMixin",
+    "LightningEntityRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

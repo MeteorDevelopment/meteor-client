@@ -148,4 +148,27 @@ public abstract class WorldRendererMixin {
             return entityRenderDispatcher.shouldRender(entity, frustum, x, y, z);
         }
     }
+
+    /**
+     * @author Walaryne
+     */
+    @Inject(method = "renderEndSky", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/Tessellator;draw()V"))
+    private void onRenderEndSkyDraw(MatrixStack matrices, CallbackInfo info) {
+        Ambience ambience = Modules.get().get(Ambience.class);
+
+        if (ambience.enderCustomSkyColor.get()) {
+            Color customEndSkyColor = ambience.endSkyColor.get();
+
+            Tessellator tessellator = Tessellator.getInstance();
+            BufferBuilder bufferBuilder = tessellator.getBuffer();
+            Matrix4f matrix4f = matrices.peek().getModel();
+
+            bufferBuilder.clear();
+
+            bufferBuilder.vertex(matrix4f, -100.0F, -100.0F, -100.0F).texture(0.0F, 0.0F).color(customEndSkyColor.r, customEndSkyColor.g, customEndSkyColor.b, 255).next();
+            bufferBuilder.vertex(matrix4f, -100.0F, -100.0F, 100.0F).texture(0.0F, 16.0F).color(customEndSkyColor.r, customEndSkyColor.g, customEndSkyColor.b, 255).next();
+            bufferBuilder.vertex(matrix4f, 100.0F, -100.0F, 100.0F).texture(16.0F, 16.0F).color(customEndSkyColor.r, customEndSkyColor.g, customEndSkyColor.b, 255).next();
+            bufferBuilder.vertex(matrix4f, 100.0F, -100.0F, -100.0F).texture(16.0F, 0.0F).color(customEndSkyColor.r, customEndSkyColor.g, customEndSkyColor.b, 255).next();
+        }
+    }
 }
