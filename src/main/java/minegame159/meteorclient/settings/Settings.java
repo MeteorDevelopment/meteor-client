@@ -91,6 +91,16 @@ public class Settings implements ISerializable<Settings>, Iterable<SettingGroup>
         }
     }
 
+    public void unregisterColorSettings() {
+        for (SettingGroup group : this) {
+            for (Setting<?> setting : group) {
+                if (setting instanceof ColorSetting) {
+                    RainbowColors.removeSetting((Setting<SettingColor>) setting);
+                }
+            }
+        }
+    }
+
     @Override
     public Iterator<SettingGroup> iterator() {
         return groups.iterator();
