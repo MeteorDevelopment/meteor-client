@@ -121,6 +121,7 @@ public class MeteorClient implements ClientModInitializer {
         // Call onInitialize for addons
         addons.forEach(MeteorAddon::onInitialize);
 
+        Modules.get().sortModules();
         Systems.load();
     }
 
