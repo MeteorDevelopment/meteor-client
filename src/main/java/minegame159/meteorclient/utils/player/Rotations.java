@@ -61,13 +61,22 @@ public class Rotations {
         rotate(yaw, pitch, 0, null);
     }
 
+    public static void resetLastRotation() {
+        if (lastRotation != null) {
+            rotationPool.free(lastRotation);
+
+            lastRotation = null;
+            lastRotationTimer = 0;
+        }
+    }
+
     @EventHandler
     private static void onSendMovementPacketsPre(SendMovementPacketsEvent.Pre event) {
         if (mc.cameraEntity != mc.player) return;
         sentLastRotation = false;
 
         if (!rotations.isEmpty()) {
-            if (lastRotation != null) freeLastRotation();
+            if (lastRotation != null) resetLastRotation();
 
             Rotation rotation = rotations.get(i);
             setupMovementPacketRotation(rotation);
@@ -79,7 +88,7 @@ public class Rotations {
         }
         else if (lastRotation != null) {
             if (lastRotationTimer >= Config.get().rotationHoldTicks) {
-                freeLastRotation();
+                resetLastRotation();
             }
             else {
                 setupMovementPacketRotation(lastRotation);
@@ -98,13 +107,6 @@ public class Rotations {
         mc.player.pitch = (float) rotation.pitch;
 
         setCamRotation(rotation.yaw, rotation.pitch);
-    }
-
-    private static void freeLastRotation() {
-        rotationPool.free(lastRotation);
-
-        lastRotation = null;
-        lastRotationTimer = 0;
     }
 
     @EventHandler
