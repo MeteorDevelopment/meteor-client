@@ -23,7 +23,6 @@ import minegame159.meteorclient.modules.movement.speed.Speed;
 import minegame159.meteorclient.modules.player.*;
 import minegame159.meteorclient.modules.render.*;
 import minegame159.meteorclient.modules.render.hud.HUD;
-import minegame159.meteorclient.settings.ColorSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.systems.System;
@@ -33,8 +32,6 @@ import minegame159.meteorclient.utils.misc.input.Input;
 import minegame159.meteorclient.utils.misc.input.KeyAction;
 import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
-import minegame159.meteorclient.utils.render.color.RainbowColors;
-import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -47,6 +44,7 @@ import org.lwjgl.glfw.GLFW;
 
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class Modules extends System<Modules> {
     public static final ModuleRegistry REGISTRY = new ModuleRegistry();
@@ -280,188 +278,207 @@ public class Modules extends System<Modules> {
 
     // INIT MODULES
 
-    public void addModule(Module module) {
+    public void add(Module module) {
+        // Check if the module's category is registered
         if (!CATEGORIES.contains(module.category)) {
             throw new RuntimeException("Modules.addModule - Module's category was not registered.");
         }
 
+        // Remove the previous module with the same name
+        AtomicReference<Module> removedModule = new AtomicReference<>();
+        if (modules.values().removeIf(module1 -> {
+            removedModule.set(module1);
+            module1.settings.unregisterColorSettings();
+            return module1.name.equals(module.name);
+        })) {
+            getGroup(removedModule.get().category).remove(removedModule.get());
+        }
+
+        // Add the module
         modules.put(module.getClass(), module);
         getGroup(module.category).add(module);
 
+        // Register color settings for the module
         module.settings.registerColorSettings(module);
     }
 
+    /** Only for backwards compatibility **/
+    @Deprecated
+    public void addModule(Module module) {
+        add(module);
+    }
+
     private void initCombat() {
-        addModule(new AimAssist());
-        addModule(new AnchorAura());
-        addModule(new AntiAnvil());
-        addModule(new AntiAnchor());
-        addModule(new AntiBed());
-        addModule(new AntiFriendHit());
-        addModule(new Auto32K());
-        addModule(new AutoAnvil());
-        addModule(new AutoArmor());
-        addModule(new AutoCity());
-        addModule(new AutoLog());
-        addModule(new AutoTotem());
-        addModule(new AutoTrap());
-        addModule(new AutoWeapon());
-        addModule(new AutoWeb());
-        addModule(new BedAura());
-        addModule(new BowSpam());
-        addModule(new Criticals());
-        addModule(new CrystalAura());
-        addModule(new Hitboxes());
-        addModule(new HoleFiller());
-        addModule(new KillAura());
-        addModule(new OffhandExtra());
-        addModule(new Quiver());
-        addModule(new SelfAnvil());
-        addModule(new SelfTrap());
-        addModule(new SelfWeb());
-        addModule(new SmartSurround());
-        addModule(new Surround());
-        addModule(new Swarm());
-        addModule(new TotemPopNotifier());
-        addModule(new Trigger());
+        add(new AimAssist());
+        add(new AnchorAura());
+        add(new AntiAnvil());
+        add(new AntiAnchor());
+        add(new AntiBed());
+        add(new AntiFriendHit());
+        add(new Auto32K());
+        add(new AutoAnvil());
+        add(new AutoArmor());
+        add(new AutoCity());
+        add(new AutoLog());
+        add(new AutoTotem());
+        add(new AutoTrap());
+        add(new AutoWeapon());
+        add(new AutoWeb());
+        add(new BedAura());
+        add(new BowSpam());
+        add(new Criticals());
+        add(new CrystalAura());
+        add(new Hitboxes());
+        add(new HoleFiller());
+        add(new KillAura());
+        add(new OffhandExtra());
+        add(new Quiver());
+        add(new SelfAnvil());
+        add(new SelfTrap());
+        add(new SelfWeb());
+        add(new SmartSurround());
+        add(new Surround());
+        add(new Swarm());
+        add(new TotemPopNotifier());
+        add(new Trigger());
     }
 
     private void initPlayer() {
-        addModule(new AirPlace());
-        addModule(new AntiAFK());
-        addModule(new AntiCactus());
-        addModule(new AntiHunger());
-        addModule(new AutoClicker());
-        addModule(new AutoDrop());
-        addModule(new AutoFish());
-        addModule(new AutoMend());
-        addModule(new AutoMount());
-        addModule(new AutoReplenish());
-        addModule(new AutoRespawn());
-        addModule(new AutoTool());
-        addModule(new BuildHeight());
-        addModule(new ChestSwap());
-        addModule(new DeathPosition());
-        addModule(new EXPThrower());
-        addModule(new EndermanLook());
-        addModule(new FakePlayer());
-        addModule(new FastUse());
-        addModule(new GhostHand());
-        addModule(new InfinityMiner());
-        addModule(new LiquidInteract());
-        addModule(new MiddleClickExtra());
-        addModule(new MountBypass());
-        addModule(new NameProtect());
-        addModule(new NoBreakDelay());
-        addModule(new NoInteract());
-        addModule(new NoMiningTrace());
-        addModule(new NoRotate());
-        addModule(new PacketMine());
-        addModule(new Portals());
-        addModule(new PotionSpoof());
-        addModule(new Reach());
-        addModule(new Rotation());
-        addModule(new SpeedMine());
-        addModule(new Trail());
-        addModule(new XCarry());
-        addModule(new AutoGap());
-        addModule(new AutoEat());
+        add(new AirPlace());
+        add(new AntiAFK());
+        add(new AntiCactus());
+        add(new AntiHunger());
+        add(new AutoClicker());
+        add(new AutoDrop());
+        add(new AutoFish());
+        add(new AutoMend());
+        add(new AutoMount());
+        add(new AutoReplenish());
+        add(new AutoRespawn());
+        add(new AutoTool());
+        add(new BuildHeight());
+        add(new ChestSwap());
+        add(new DeathPosition());
+        add(new EXPThrower());
+        add(new EndermanLook());
+        add(new FakePlayer());
+        add(new FastUse());
+        add(new GhostHand());
+        add(new InfinityMiner());
+        add(new LiquidInteract());
+        add(new MiddleClickExtra());
+        add(new MountBypass());
+        add(new NameProtect());
+        add(new NoBreakDelay());
+        add(new NoInteract());
+        add(new NoMiningTrace());
+        add(new NoRotate());
+        add(new PacketMine());
+        add(new Portals());
+        add(new PotionSpoof());
+        add(new Reach());
+        add(new Rotation());
+        add(new SpeedMine());
+        add(new Trail());
+        add(new XCarry());
+        add(new AutoGap());
+        add(new AutoEat());
     }
 
     private void initMovement() {
-        addModule(new AirJump());
-        addModule(new Anchor());
-        addModule(new AntiLevitation());
-        addModule(new AutoJump());
-        addModule(new Sprint());
-        addModule(new AutoWalk());
-        addModule(new Blink());
-        addModule(new BoatFly());
-        addModule(new ClickTP());
-        addModule(new ElytraBoost());
-        addModule(new ElytraFly());
-        addModule(new EntityControl());
-        addModule(new EntitySpeed());
-        addModule(new FastClimb());
-        addModule(new Flight());
-        addModule(new GUIMove());
-        addModule(new HighJump());
-        addModule(new Jesus());
-        addModule(new NoFall());
-        addModule(new NoSlow());
-        addModule(new Parkour());
-        addModule(new ReverseStep());
-        addModule(new SafeWalk());
-        addModule(new Scaffold());
-        addModule(new Speed());
-        addModule(new Spider());
-        addModule(new Step());
-        addModule(new Timer());
-        addModule(new Velocity());
+        add(new AirJump());
+        add(new Anchor());
+        add(new AntiLevitation());
+        add(new AutoJump());
+        add(new Sprint());
+        add(new AutoWalk());
+        add(new Blink());
+        add(new BoatFly());
+        add(new ClickTP());
+        add(new ElytraBoost());
+        add(new ElytraFly());
+        add(new EntityControl());
+        add(new EntitySpeed());
+        add(new FastClimb());
+        add(new Flight());
+        add(new GUIMove());
+        add(new HighJump());
+        add(new Jesus());
+        add(new NoFall());
+        add(new NoSlow());
+        add(new Parkour());
+        add(new ReverseStep());
+        add(new SafeWalk());
+        add(new Scaffold());
+        add(new Speed());
+        add(new Spider());
+        add(new Step());
+        add(new Timer());
+        add(new Velocity());
     }
 
     private void initRender() {
-        addModule(new BlockSelection());
-        addModule(new Breadcrumbs());
-        addModule(new BreakIndicators());
-        addModule(new CameraClip());
-        addModule(new Chams());
-        addModule(new CityESP());
-        addModule(new CustomFOV());
-        addModule(new EChestPreview());
-        addModule(new ESP());
-        addModule(new EntityOwner());
-        addModule(new FreeRotate());
-        addModule(new Freecam());
-        addModule(new Fullbright());
-        addModule(new HUD());
-        addModule(new HandView());
-        addModule(new HoleESP());
-        addModule(new ItemByteSize());
-        addModule(new ItemPhysics());
-        addModule(new LogoutSpots());
-        addModule(new Nametags());
-        addModule(new NoRender());
-        addModule(new ParticleBlocker());
-        addModule(new Search());
-        addModule(new ShulkerPeek());
-        addModule(new StorageESP());
-        addModule(new TimeChanger());
-        addModule(new Tracers());
-        addModule(new Trajectories());
-        addModule(new UnfocusedCPU());
-        addModule(new VoidESP());
-        addModule(new Xray());
-        addModule(new BossStack());
-        addModule(new ItemHighlight());
+        add(new BlockSelection());
+        add(new Breadcrumbs());
+        add(new BreakIndicators());
+        add(new CameraClip());
+        add(new Chams());
+        add(new CityESP());
+        add(new CustomFOV());
+        add(new EChestPreview());
+        add(new ESP());
+        add(new EntityOwner());
+        add(new FreeRotate());
+        add(new Freecam());
+        add(new Fullbright());
+        add(new HUD());
+        add(new HandView());
+        add(new HoleESP());
+        add(new ItemByteSize());
+        add(new ItemPhysics());
+        add(new LogoutSpots());
+        add(new Nametags());
+        add(new NoRender());
+        add(new ParticleBlocker());
+        add(new Search());
+        add(new ShulkerPeek());
+        add(new StorageESP());
+        add(new TimeChanger());
+        add(new Tracers());
+        add(new Trajectories());
+        add(new UnfocusedCPU());
+        add(new VoidESP());
+        add(new Xray());
+        add(new BossStack());
+        add(new ItemHighlight());
     }
 
     private void initMisc() {
-        addModule(new Announcer());
-        addModule(new AntiPacketKick());
-        addModule(new AutoBreed());
-        addModule(new AutoBrewer());
-        addModule(new AutoNametag());
-        addModule(new AutoReconnect());
-        addModule(new AutoShearer());
-        addModule(new AutoSign());
-        addModule(new AutoSmelter());
-        addModule(new AutoSteal());
-        addModule(new BetterChat());
-        addModule(new BookBot());
-        addModule(new DiscordPresence());
-        addModule(new EChestFarmer());
-        addModule(new EntityLogger());
-        addModule(new LiquidFiller());
-        addModule(new MessageAura());
-        addModule(new MiddleClickFriend());
-        addModule(new Nuker());
-        addModule(new OffhandCrash());
-        addModule(new PacketCanceller());
-        addModule(new SoundBlocker());
-        addModule(new Spam());
-        addModule(new StashFinder());
-        addModule(new VisualRange());
+        add(new Announcer());
+        add(new AntiPacketKick());
+        add(new AutoBreed());
+        add(new AutoBrewer());
+        add(new AutoNametag());
+        add(new AutoReconnect());
+        add(new AutoShearer());
+        add(new AutoSign());
+        add(new AutoSmelter());
+        add(new AutoSteal());
+        add(new BetterChat());
+        add(new BookBot());
+        add(new DiscordPresence());
+        add(new EChestFarmer());
+        add(new EntityLogger());
+        add(new LiquidFiller());
+        add(new MessageAura());
+        add(new MiddleClickFriend());
+        add(new Nuker());
+        add(new OffhandCrash());
+        add(new PacketCanceller());
+        add(new SoundBlocker());
+        add(new Spam());
+        add(new StashFinder());
+        add(new VisualRange());
     }
 
     public static class ModuleRegistry extends Registry<Module> {
