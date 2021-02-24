@@ -458,6 +458,7 @@ public class Modules extends System<Modules> {
         add(new Xray());
         add(new BossStack());
         add(new ItemHighlight());
+        add(new Ambience());
     }
 
     private void initMisc() {

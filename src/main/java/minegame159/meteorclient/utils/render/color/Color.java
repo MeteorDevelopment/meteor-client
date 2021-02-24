@@ -7,6 +7,7 @@ package minegame159.meteorclient.utils.render.color;
 
 import minegame159.meteorclient.utils.misc.ISerializable;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.math.Vec3d;
 
 public class Color implements ISerializable<Color> {
     public int r, g, b, a;
@@ -86,8 +87,8 @@ public class Color implements ISerializable<Color> {
         else if (a > 255) a = 255;
     }
 
-    public boolean isZero() {
-        return r == 0 && g == 0 && b == 0 && a == 0;
+    public Vec3d getVec3d() {
+        return new Vec3d(r / 255.0, g / 255.0, b / 255.0);
     }
 
     public int getPacked() {

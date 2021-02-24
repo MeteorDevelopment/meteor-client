@@ -4,7 +4,8 @@
   "compatibilityLevel": "JAVA_8",
   "client": [
     "SodiumBlockOcculsionCacheMixin",
-    "SodiumBlockRendererMixin"
+    "SodiumBlockRendererMixin",
+    "SodiumFluidRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1
