@@ -5,6 +5,7 @@
 
 package minegame159.meteorclient.modules.misc;
 
+import com.google.common.collect.Lists;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Categories;
@@ -13,12 +14,12 @@ import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.world.BlockIterator;
 import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.BlockItem;
-import net.minecraft.item.ItemStack;
+import net.minecraft.item.Item;
 import net.minecraft.util.Hand;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class LiquidFiller extends Module {
@@ -55,10 +56,18 @@ public class LiquidFiller extends Module {
             .build()
     );
 
+    private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
+            .name("delay")
+            .description("Delay between actions in ticks.")
+            .defaultValue(1)
+            .min(0)
+            .build()
+    );
+
     private final Setting<List<Block>> whitelist = sgGeneral.add(new BlockListSetting.Builder()
             .name("block-whitelist")
             .description("The allowed blocks that it will use to fill up the liquid.")
-            .defaultValue(new ArrayList<>(0))
+            .defaultValue(getDefaultWhitelist())
             .build()
     );
 
@@ -69,41 +78,78 @@ public class LiquidFiller extends Module {
             .build()
     );
 
+    private int timer;
+
     public LiquidFiller(){
         super(Categories.Misc, "liquid-filler", "Places blocks inside of liquid source blocks within range of you.");
     }
 
+    @Override
+    public void onActivate() {
+        timer = 0;
+    }
+
     @EventHandler
     private void onTick(TickEvent.Pre event) {
+        // Update timer according to delay
+        if (timer < delay.get()) {
+            timer++;
+            return;
+        }
+        else {
+            timer = 0;
+        }
+
+        // Find slot with a block
         int slot = findSlot();
+        if (slot == -1) return;
 
-        if (slot != -1) {
-            BlockIterator.register(horizontalRadius.get(), verticalRadius.get(), (blockPos, blockState) -> {
-                if (blockState.getFluidState().getLevel() == 8 && blockState.getFluidState().isStill()) {
-                    Block liquid = blockState.getBlock();
+        // Loop blocks around the player
+        BlockIterator.register(horizontalRadius.get(), verticalRadius.get(), (blockPos, blockState) -> {
+            // Check if the block a source liquid block
+            if (isSource(blockState)) {
+                Block liquid = blockState.getBlock();
 
-                    PlaceIn placeIn = placeInLiquids.get();
-                    if (placeIn == PlaceIn.Both || (placeIn == PlaceIn.Lava && liquid == Blocks.LAVA) || (placeIn == PlaceIn.Water && liquid == Blocks.WATER)) {
-                        if (BlockUtils.place(blockPos, Hand.MAIN_HAND, slot, rotate.get(), 0, true)) {
-                            BlockIterator.disableCurrent();
-                        }
+                PlaceIn placeIn = placeInLiquids.get();
+                if (placeIn == PlaceIn.Both || (placeIn == PlaceIn.Lava && liquid == Blocks.LAVA) || (placeIn == PlaceIn.Water && liquid == Blocks.WATER)) {
+                    // Place block
+                    if (BlockUtils.place(blockPos, Hand.MAIN_HAND, slot, rotate.get(), 0, true)) {
+                        BlockIterator.disableCurrent();
                     }
                 }
-            });
-        }
+            }
+        });
+    }
+
+    private boolean isSource(BlockState blockState) {
+        return blockState.getFluidState().getLevel() == 8 && blockState.getFluidState().isStill();
     }
 
     private int findSlot() {
         int slot = -1;
 
-        for (int i = 0; i < 9; i++){
-            ItemStack block = mc.player.inventory.getStack(i);
-            if ((block.getItem() instanceof BlockItem) && whitelist.get().contains(Block.getBlockFromItem(block.getItem()))) {
+        for (int i = 0; i < 9; i++) {
+            Item item = mc.player.inventory.getStack(i).getItem();
+
+            // Check if the item is a block and if it is in the whitelist and return it
+            if (item instanceof BlockItem && whitelist.get().contains(((BlockItem) item).getBlock())) {
                 slot = i;
                 break;
             }
         }
 
         return slot;
+    }
+
+    private List<Block> getDefaultWhitelist() {
+        return Lists.newArrayList(
+                Blocks.DIRT,
+                Blocks.COBBLESTONE,
+                Blocks.STONE,
+                Blocks.NETHERRACK,
+                Blocks.DIORITE,
+                Blocks.GRANITE,
+                Blocks.ANDESITE
+        );
     }
 }
