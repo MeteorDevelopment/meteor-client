@@ -102,7 +102,7 @@ public class Commands extends System<Commands> {
         }
     }
 
-    private void add(Command command) {
+    public void add(Command command) {
         command.registerTo(DISPATCHER);
         commands.add(command);
         commandInstances.put(command.getClass(), command);
