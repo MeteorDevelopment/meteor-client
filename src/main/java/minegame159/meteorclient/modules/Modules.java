@@ -75,7 +75,9 @@ public class Modules extends System<Modules> {
         initMovement();
         initRender();
         initMisc();
+    }
 
+    public void sortModules() {
         for (List<Module> modules : groups.values()) {
             modules.sort(Comparator.comparing(o -> o.title));
         }
@@ -287,9 +289,14 @@ public class Modules extends System<Modules> {
         // Remove the previous module with the same name
         AtomicReference<Module> removedModule = new AtomicReference<>();
         if (modules.values().removeIf(module1 -> {
-            removedModule.set(module1);
-            module1.settings.unregisterColorSettings();
-            return module1.name.equals(module.name);
+            if (module1.name.equals(module.name)) {
+                removedModule.set(module1);
+                module1.settings.unregisterColorSettings();
+                
+                return true;
+            }
+            
+            return false;
         })) {
             getGroup(removedModule.get().category).remove(removedModule.get());
         }
