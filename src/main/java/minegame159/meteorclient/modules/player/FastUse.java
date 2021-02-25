@@ -54,7 +54,7 @@ public class FastUse extends Module {
                 if(mc.player.getMainHandStack().getItem() instanceof EndCrystalItem || mc.player.getOffHandStack().getItem() instanceof EndCrystalItem)
                     setClickDelay();
                 break;
-            case ExpAndCrystal:
+            case Both:
                 assert mc.player != null;
                 if(mc.player.getMainHandStack().getItem() instanceof EndCrystalItem || mc.player.getMainHandStack().getItem() instanceof ExperienceBottleItem ||
                         mc.player.getOffHandStack().getItem() instanceof EndCrystalItem || mc.player.getOffHandStack().getItem() instanceof ExperienceBottleItem)
