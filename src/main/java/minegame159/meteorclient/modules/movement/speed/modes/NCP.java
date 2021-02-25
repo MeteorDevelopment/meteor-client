@@ -20,6 +20,8 @@ public class NCP extends SpeedMode {
         super(SpeedModes.NCP);
     }
 
+    private long timer = 0L;
+
     @Override
     public void onMove(PlayerMoveEvent event) {
         switch (stage) {
@@ -45,6 +47,15 @@ public class NCP extends SpeedMode {
         }
 
         speed = Math.max(speed, getDefaultSpeed());
+
+        if (settings.ncpSpeedLimit.get()) {
+            if (System.currentTimeMillis() - timer > 2500L) {
+                timer = System.currentTimeMillis();
+            }
+
+            speed = Math.min(speed, System.currentTimeMillis() - timer > 1250L ? 0.44D : 0.43D);
+        }
+
         Vector2 change = PlayerUtils.transformStrafe(speed);
 
         double velX = change.x;
