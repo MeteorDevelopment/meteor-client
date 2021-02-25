@@ -8,14 +8,14 @@ package minegame159.meteorclient.modules.player;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixin.MinecraftClientAccessor;
-import minegame159.meteorclient.modules.Categories;
+import minegame159.meteorclient.mixininterface.IMinecraftClient;
+import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.Items;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.item.*;
 
 public class FastUse extends Module {
     public enum Item {
