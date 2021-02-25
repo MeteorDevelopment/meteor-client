@@ -7,23 +7,31 @@ package minegame159.meteorclient.modules.movement;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.packets.PacketEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixin.PlayerMoveC2SPacketAccessor;
 import minegame159.meteorclient.mixininterface.IPlayerMoveC2SPacket;
 import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.entity.EntityUtils;
+import minegame159.meteorclient.utils.player.InvUtils;
+import minegame159.meteorclient.utils.player.Rotations;
+import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.fluid.Fluids;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.Direction;
+import net.minecraft.util.hit.HitResult;
+import net.minecraft.world.RaycastContext;
 
 public class NoFall extends Module {
-    public enum Mode{
+    public enum Mode {
         Packet,
-        AirPlace
+        AirPlace,
+        Bucket
     }
 
     public enum PlaceMode{
@@ -63,8 +71,15 @@ public class NoFall extends Module {
             .build()
     );
 
+    private boolean placedWater;
+
     public NoFall() {
         super(Categories.Movement, "no-fall", "Prevents you from taking fall damage.");
+    }
+
+    @Override
+    public void onActivate() {
+        placedWater = false;
     }
 
     @EventHandler
@@ -73,6 +88,7 @@ public class NoFall extends Module {
 
         if (event.packet instanceof PlayerMoveC2SPacket) {
             if (elytra.get() && (mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() == Items.ELYTRA && mc.options.keyJump.isPressed() || mc.player.isFallFlying())) {
+                // Elytra block damage
                 for (int i = 0; i <= Math.ceil(height.get()); i++) {
                     if (!mc.world.getBlockState(mc.player.getBlockPos().add(0, -i, 0)).getMaterial().isReplaceable()) {
                         if (mc.player.getBlockPos().add(0, -i, 0).getY() + 1 + height.get() >= mc.player.getPos().getY()) {
@@ -81,32 +97,68 @@ public class NoFall extends Module {
                         }
                     }
                 }
-            } else if (mode.get() == Mode.Packet){
-                if(((IPlayerMoveC2SPacket) event.packet).getTag() != 1337) {
+            }
+            else if (mode.get() == Mode.Packet) {
+                // Packet mode
+                if (((IPlayerMoveC2SPacket) event.packet).getTag() != 1337) {
                     ((PlayerMoveC2SPacketAccessor) event.packet).setOnGround(true);
-                }
-            } else if ((placeMode.get() == PlaceMode.BeforeDamage && mc.player.fallDistance > 2)
-                    || (placeMode.get() == PlaceMode.BeforeDeath && ((mc.player.getHealth() + mc.player.getAbsorptionAmount()) < mc.player.fallDistance))){
-                int slot = -1;
-                int preSlot;
-                for (int i = 0; i < 9; i++){
-                    if (mc.player.inventory.getStack(i).getItem() instanceof BlockItem){
-                        slot = i;
-                        break;
-                    }
-                }
-                if (slot != -1){
-                    preSlot = mc.player.inventory.selectedSlot;
-                    mc.player.inventory.selectedSlot = slot;
-                    mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(mc.player.getPos().add(0, -1, 0), Direction.UP, mc.player.getBlockPos().down(), false));
-                    mc.player.inventory.selectedSlot = preSlot;
                 }
             }
         }
     }
 
+    @EventHandler
+    private void onTick(TickEvent.Pre event) {
+        if (mc.player.abilities.creativeMode) return;
+
+        if (mode.get() == Mode.AirPlace && ((placeMode.get() == PlaceMode.BeforeDamage && mc.player.fallDistance > 2) || (placeMode.get() == PlaceMode.BeforeDeath && ((mc.player.getHealth() + mc.player.getAbsorptionAmount()) < mc.player.fallDistance)))) {
+            // Air Place mode
+            int slot = InvUtils.findItemInHotbar(itemStack -> itemStack.getItem() instanceof BlockItem);
+
+            if (slot != -1) {
+                BlockUtils.place(mc.player.getBlockPos().down(), Hand.MAIN_HAND, slot, true, 10, true);
+            }
+        }
+        else if (mode.get() == Mode.Bucket) {
+            // Bucket mode
+            if (placedWater) {
+                // Remove water
+                int slot = InvUtils.findItemInHotbar(Items.BUCKET);
+
+                if (slot != -1 && mc.player.getBlockState().getFluidState().getFluid() == Fluids.WATER) {
+                    useBucket(slot, false);
+                }
+            }
+            else if (mc.player.fallDistance > 3 && !EntityUtils.isAboveWater(mc.player)) {
+                // Place water
+                int slot = InvUtils.findItemInHotbar(Items.WATER_BUCKET);
+
+                if (slot != -1) {
+                    BlockHitResult result = mc.world.raycast(new RaycastContext(mc.player.getPos(), mc.player.getPos().subtract(0, 5, 0), RaycastContext.ShapeType.OUTLINE, RaycastContext.FluidHandling.NONE, mc.player));
+
+                    if (result != null && result.getType() == HitResult.Type.BLOCK) {
+                        useBucket(slot, true);
+                    }
+                }
+            }
+        }
+
+        if (mc.player.fallDistance == 0) placedWater = false;
+    }
+
+    private void useBucket(int slot, boolean setPlacedWater) {
+        Rotations.rotate(mc.player.yaw, 90, 10, true, () -> {
+            int preSlot = mc.player.inventory.selectedSlot;
+            mc.player.inventory.selectedSlot = slot;
+            mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
+            mc.player.inventory.selectedSlot = preSlot;
+
+            placedWater = setPlacedWater;
+        });
+    }
+
     @Override
     public String getInfoString() {
-        return mode.get().name();
+        return mode.get().toString();
     }
 }

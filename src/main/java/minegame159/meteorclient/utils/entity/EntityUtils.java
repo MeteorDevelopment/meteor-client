@@ -9,12 +9,16 @@ import minegame159.meteorclient.friends.Friends;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.text.TextUtils;
 import minegame159.meteorclient.utils.render.color.Color;
+import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.fluid.Fluid;
+import net.minecraft.fluid.Fluids;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.GameMode;
 
 import java.util.ArrayList;
@@ -129,5 +133,24 @@ public class EntityUtils {
         PlayerListEntry playerListEntry = mc.getNetworkHandler().getPlayerListEntry(player.getUuid());
         if (playerListEntry == null) return null;
         return playerListEntry.getGameMode();
+    }
+
+    public static boolean isAboveWater(Entity entity) {
+        BlockPos.Mutable blockPos = entity.getBlockPos().mutableCopy();
+
+        for (int i = 0; i < 64; i++) {
+            BlockState state = mc.world.getBlockState(blockPos);
+
+            if (state.getMaterial().blocksMovement()) break;
+
+            Fluid fluid = state.getFluidState().getFluid();
+            if (fluid == Fluids.WATER || fluid == Fluids.FLOWING_WATER) {
+                return true;
+            }
+
+            blockPos.move(0, -1, 0);
+        }
+
+        return false;
     }
 }
