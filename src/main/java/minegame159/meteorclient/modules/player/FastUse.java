@@ -18,19 +18,19 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.*;
 
 public class FastUse extends Module {
-    public enum Item {
+    public enum Mode {
         All,
         Exp,
         Crystal,
-        ExpAndCrystal
+        Both
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<FastUse.Item> itemChoose = sgGeneral.add(new EnumSetting.Builder<FastUse.Item>()
-            .name("Which item")
-            .description(".")
-            .defaultValue(FastUse.Item.All)
+    private final Setting<Mode> itemChoose = sgGeneral.add(new EnumSetting.Builder<Mode>()
+            .name("Mode")
+            .description("Which items to fast use.")
+            .defaultValue(Mode.All)
             .build()
     );
 
