@@ -18,31 +18,19 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.item.Items;
 
 public class FastUse extends Module {
-    public enum Mode {
+    public enum Item {
         All,
-        Some
+        Exp,
+        Crystal,
+        ExpAndCrystal
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
-            .name("mode")
-            .description("Which items to fast use.")
-            .defaultValue(Mode.All)
-            .build()
-    );
-
-    private final Setting<Boolean> exp = sgGeneral.add(new BoolSetting.Builder()
-            .name("xP")
-            .description("Fast-throws XP bottles if the mode is \"Some\".")
-            .defaultValue(false)
-            .build()
-    );
-
-    private final Setting<Boolean> blocks = sgGeneral.add(new BoolSetting.Builder()
-            .name("blocks")
-            .description("Fast-places blocks if the mode is \"Some\".")
-            .defaultValue(false)
+    private final Setting<CustomFastUse.Item> itemChoose = sgGeneral.add(new EnumSetting.Builder<CustomFastUse.Item>()
+            .name("Which item")
+            .description(".")
+            .defaultValue(CustomFastUse.Item.All)
             .build()
     );
 
@@ -52,15 +40,30 @@ public class FastUse extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        switch (mode.get()) {
+            switch(itemChoose.get()) {
             case All:
-                ((MinecraftClientAccessor) mc).setItemUseCooldown(0);
+                setClickDelay();
                 break;
-            case Some:
-                if ((exp.get() && (mc.player.getMainHandStack().getItem() == Items.EXPERIENCE_BOTTLE || mc.player.getOffHandStack().getItem() == Items.EXPERIENCE_BOTTLE))
-                        || (blocks.get() && mc.player.getMainHandStack().getItem() instanceof BlockItem || mc.player.getOffHandStack().getItem() instanceof BlockItem))
-                    ((MinecraftClientAccessor) mc).setItemUseCooldown(0);
+            case Exp:
+                assert mc.player != null;
+                if(mc.player.getMainHandStack().getItem() instanceof ExperienceBottleItem || mc.player.getOffHandStack().getItem() instanceof ExperienceBottleItem)
+                    setClickDelay();
+                break;
+            case Crystal:
+                assert mc.player != null;
+                if(mc.player.getMainHandStack().getItem() instanceof EndCrystalItem || mc.player.getOffHandStack().getItem() instanceof EndCrystalItem)
+                    setClickDelay();
+                break;
+            case ExpAndCrystal:
+                assert mc.player != null;
+                if(mc.player.getMainHandStack().getItem() instanceof EndCrystalItem || mc.player.getMainHandStack().getItem() instanceof ExperienceBottleItem ||
+                        mc.player.getOffHandStack().getItem() instanceof EndCrystalItem || mc.player.getOffHandStack().getItem() instanceof ExperienceBottleItem)
+                    setClickDelay();
                 break;
         }
+    }
+    
+        private void setClickDelay() {
+        ((MinecraftClientAccessor) mc).setItemUseCooldown(0);
     }
 }
