@@ -27,10 +27,10 @@ public class FastUse extends Module {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<CustomFastUse.Item> itemChoose = sgGeneral.add(new EnumSetting.Builder<CustomFastUse.Item>()
+    private final Setting<FastUse.Item> itemChoose = sgGeneral.add(new EnumSetting.Builder<FastUse.Item>()
             .name("Which item")
             .description(".")
-            .defaultValue(CustomFastUse.Item.All)
+            .defaultValue(FastUse.Item.All)
             .build()
     );
 
