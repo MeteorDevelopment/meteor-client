@@ -79,13 +79,12 @@ public class Rotations {
         sentLastRotation = false;
 
         if (!rotations.isEmpty()) {
-            if (lastRotation != null) resetLastRotation();
+            resetLastRotation();
 
             Rotation rotation = rotations.get(i);
             setupMovementPacketRotation(rotation);
 
-            if (rotations.size() == 1) lastRotation = rotation;
-            else rotationPool.free(rotation);
+            if (rotations.size() > 1) rotationPool.free(rotation);
 
             i++;
         }
@@ -120,6 +119,8 @@ public class Rotations {
         if (!rotations.isEmpty()) {
             if (mc.cameraEntity == mc.player) {
                 rotations.get(i - 1).runCallback();
+
+                if (rotations.size() == 1) lastRotation = rotations.get(i - 1);
 
                 resetPreRotation();
             }
