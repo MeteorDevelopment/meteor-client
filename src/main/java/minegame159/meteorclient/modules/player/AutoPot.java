@@ -88,6 +88,7 @@ public class AutoPot extends Module {
     }
     //Gilded's first module, lets see how much i'll die making this
     //TODO:Rework everything to accept all pots
+    //TODO: Does strength work better if you throw it up? will check.
     @Override
     public void onDeactivate() {
         if (drinking) stopDrinking();
@@ -148,7 +149,7 @@ public class AutoPot extends Module {
         }
         if (Strength.get()) {
             if (ShouldDrinkStrength()) {
-                //Heal Pot Slot
+                //Strength Pot Slot
                 int slot = StrengthpotionSlot();
                 //Slot Not Invalid
                 if (slot != -1) {
