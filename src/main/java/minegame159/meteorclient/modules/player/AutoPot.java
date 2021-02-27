@@ -145,7 +145,7 @@ public class AutoPot extends Module {
                 }
             }
         }
-        if (Strength.get() == true) {
+        if (Strength.get()) {
             if (ShouldDrinkStrength()) {
                 //Heal Pot Slot
                 int slot = StrengthpotionSlot();
