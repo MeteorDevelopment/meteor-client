@@ -25,6 +25,7 @@ public class FakePlayerEntity extends OtherClientPlayerEntity {
         copyPositionAndRotation(player);
         copyPlayerModel(player, this);
         copyRotation();
+        copyAttributes();
         resetCapeMovement();
         setHealth(health);
 
@@ -44,6 +45,10 @@ public class FakePlayerEntity extends OtherClientPlayerEntity {
     private void copyRotation() {
         headYaw = player.headYaw;
         bodyYaw = player.bodyYaw;
+    }
+
+    private void copyAttributes() {
+        getAttributes().setFrom(player.getAttributes());
     }
 
     private void resetCapeMovement() {
