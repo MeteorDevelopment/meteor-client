@@ -91,6 +91,7 @@ public class AutoPot extends Module {
     @Override
     public void onDeactivate() {
         if (drinking) stopDrinking();
+        if (splashing) stopSplashing();
     }
     @EventHandler
     private void onTick(TickEvent.Pre event) {
