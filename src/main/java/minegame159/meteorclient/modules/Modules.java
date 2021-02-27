@@ -390,6 +390,7 @@ public class Modules extends System<Modules> {
         add(new XCarry());
         add(new AutoGap());
         add(new AutoEat());
+        add(new AutoPot());
     }
 
     private void initMovement() {
