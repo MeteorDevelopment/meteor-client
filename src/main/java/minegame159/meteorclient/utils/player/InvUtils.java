@@ -61,7 +61,7 @@ public class InvUtils {
     }
 
     public static int invIndexToSlotId(int invIndex) {
-        if (invIndex < 9) return 44 - (8 - invIndex);
+        if (invIndex < 9 && invIndex != -1) return 44 - (8 - invIndex);
         return invIndex;
     }
 
