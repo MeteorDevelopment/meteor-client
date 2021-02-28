@@ -110,7 +110,8 @@
     "DefaultSkinHelperMixin",
     "BiomeColorsMixin",
     "FluidRendererMixin",
-    "LightningEntityRendererMixin"
+    "LightningEntityRendererMixin",
+    "ExplosionMixin"
   ],
   "injectors": {
     "defaultRequire": 1

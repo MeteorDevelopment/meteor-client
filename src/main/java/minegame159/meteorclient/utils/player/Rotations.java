@@ -64,7 +64,7 @@ public class Rotations {
         rotate(yaw, pitch, 0, null);
     }
 
-    public static void resetLastRotation() {
+    private static void resetLastRotation() {
         if (lastRotation != null) {
             rotationPool.free(lastRotation);
 
