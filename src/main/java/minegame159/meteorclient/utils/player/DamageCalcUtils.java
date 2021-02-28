@@ -22,7 +22,6 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Items;
-import net.minecraft.item.SwordItem;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.explosion.Explosion;
@@ -101,7 +100,6 @@ public class DamageCalcUtils {
         // Get sword damage
         double damage = 0;
         if (charged) {
-            ((SwordItem) entity.getActiveItem().getItem()).getAttackDamage();
             if (entity.getActiveItem().getItem() == Items.DIAMOND_SWORD) {
                 damage += 7;
             } else if (entity.getActiveItem().getItem() == Items.GOLDEN_SWORD) {
