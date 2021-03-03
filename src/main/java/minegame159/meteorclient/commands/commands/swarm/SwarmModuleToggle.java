@@ -11,7 +11,7 @@ import minegame159.meteorclient.commands.Command;
 import minegame159.meteorclient.commands.arguments.ModuleArgumentType;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.Modules;
-import minegame159.meteorclient.modules.combat.Swarm;
+import minegame159.meteorclient.modules.misc.Swarm;
 import net.minecraft.command.CommandSource;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;

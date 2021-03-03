@@ -3,7 +3,7 @@
  * Copyright (c) 2021 Meteor Development.
  */
 
-package minegame159.meteorclient.modules.combat;
+package minegame159.meteorclient.modules.misc;
 
 import baritone.api.BaritoneAPI;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -39,7 +39,6 @@ import java.net.Socket;
 import java.util.Arrays;
 import java.util.List;
 
-
 /**
  * @author Inclemental
  * Special thanks to Eli for lending me the test account. Love you bud.
@@ -69,7 +68,7 @@ public class Swarm extends Module {
             .build());
 
     public Swarm() {
-        super(Categories.Combat, "Swarm", "I Am... The Swarm.");
+        super(Categories.Misc, "Swarm", "I Am... The Swarm.");
     }
 
     public SwarmServer server;

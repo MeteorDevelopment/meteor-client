@@ -9,7 +9,7 @@ import baritone.api.BaritoneAPI;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import minegame159.meteorclient.commands.Command;
 import minegame159.meteorclient.modules.Modules;
-import minegame159.meteorclient.modules.combat.Swarm;
+import minegame159.meteorclient.modules.misc.Swarm;
 import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.command.CommandSource;
 

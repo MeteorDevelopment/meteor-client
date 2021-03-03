@@ -9,7 +9,7 @@ import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import minegame159.meteorclient.commands.Command;
 import minegame159.meteorclient.modules.Modules;
-import minegame159.meteorclient.modules.combat.Swarm;
+import minegame159.meteorclient.modules.misc.Swarm;
 import minegame159.meteorclient.modules.player.InfinityMiner;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.BlockStateArgument;
