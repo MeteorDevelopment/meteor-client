@@ -49,6 +49,16 @@ public class Scaffold extends Module {
             .sliderMax(7)
             .build()
     );
+    
+        private final Setting<Integer> verticalRange = sgGeneral.add(new IntSetting.Builder()
+            .name("vertical-range")
+            .description("The vertical range of your scaffold.")
+            .defaultValue(1)
+            .min(1)
+            .sliderMin(1)
+            .sliderMax(7)
+            .build()
+    );
 
     private final Setting<List<Block>> blackList = sgGeneral.add(new BlockListSetting.Builder()
             .name("blacklist")
@@ -118,6 +128,12 @@ public class Scaffold extends Module {
 
         if (mc.player.input.sneaking) this.lastWasSneaking = false;
 
+       //Place blocks below you if the vertical-range is bigger than 1
+        for (int r = 1;r < verticalRange.get(); r++) {
+            if (!findBlock()) return;
+            place(setPos(0, -1 -r, 0), slot);
+        }
+
         // Place blocks around if radius is bigger than 1
         for (int i = 1; i < radius.get(); i++) {
             int count = 1 + (i - 1) * 2;
@@ -127,32 +143,74 @@ public class Scaffold extends Module {
             for (int j = 0; j < count; j++) {
                 if (!findBlock()) return;
                 place(setPos(j - countHalf, -1, i), slot);
+
+                for (int r = 1; r < verticalRange.get(); r++) {
+                    if (!findBlock()) return;
+                    place(setPos(j - countHalf, -1 -r, i), slot);
+                }
             }
+
             // Backward
             for (int j = 0; j < count; j++) {
                 if (!findBlock()) return;
                 place(setPos(j - countHalf, -1, -i), slot);
+
+                for (int r = 1; r < verticalRange.get(); r++) {
+                    if (!findBlock()) return;
+                    place(setPos(j - countHalf, -1 -r, -i), slot);
+                }
             }
+
             // Right
             for (int j = 0; j < count; j++) {
                 if (!findBlock()) return;
                 place(setPos(i, -1, j - countHalf), slot);
+
+                for (int r = 1; r < verticalRange.get(); r++) {
+                    if (!findBlock()) return;
+                    place(setPos(i, -1 -r, j - countHalf), slot);
+                }
             }
+
             // Left
             for (int j = 0; j < count; j++) {
                 if (!findBlock()) return;
                 place(setPos(-i, -1, j - countHalf), slot);
+
+                for (int r = 1; r < verticalRange.get(); r++) {
+                    if (!findBlock()) return;
+                    place(setPos(-i, -1 -r, j - countHalf), slot);
+                }
             }
 
             // Diagonals
             if (!findBlock()) return;
             place(setPos(-i, -1, i), slot);
+            for (int r = 1; r < verticalRange.get(); r++) {
+                if (!findBlock()) return;
+                place(setPos(-i , -1 -r, i), slot);
+            }
+
             if (!findBlock()) return;
             place(setPos(i, -1, i), slot);
+            for (int r = 1; r < verticalRange.get(); r++) {
+                if (!findBlock()) return;
+                place(setPos(i, -1 -r, i), slot);
+            }
+
             if (!findBlock()) return;
             place(setPos(-i, -1, -i), slot);
+            for (int r = 1; r < verticalRange.get(); r++) {
+                if (!findBlock()) return;
+                place(setPos(-i, -1 -r, -i), slot);
+            }
+
             if (!findBlock()) return;
             place(setPos(i, -1, -i), slot);
+            for (int r = 1; r < verticalRange.get(); r++) {
+                if (!findBlock()) return;
+                place(setPos(i, -1 -r, -i), slot);
+            }
         }
     }
 
