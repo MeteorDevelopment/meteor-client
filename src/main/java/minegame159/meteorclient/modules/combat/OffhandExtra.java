@@ -25,6 +25,7 @@ public class OffhandExtra extends Module {
         Gap,
         EXP,
         Crystal,
+        Shield
     }
     
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -150,7 +151,7 @@ public class OffhandExtra extends Module {
                     }
                 }
                 if (!sentMessage) {
-                    ChatUtils.moduleWarning(this, "None of the chosen item found.");
+                    ChatUtils.moduleWarning(this, "Chosen item not found." + (selfToggle.get() ? " Disabling." : ""));
                     sentMessage = true;
                 }
                 if (selfToggle.get()) this.toggle();
@@ -185,7 +186,7 @@ public class OffhandExtra extends Module {
             int result = findSlot(item);
             if (result == -1 && mc.player.getOffHandStack().getItem() != getItem()) {
                 if (!sentMessage) {
-                    ChatUtils.moduleWarning(this, "None of the chosen item found.");
+                    ChatUtils.moduleWarning(this, "Chosen item not found." + (selfToggle.get() ? " Disabling." : ""));
                     sentMessage = true;
                 }
                 if (selfToggle.get()) this.toggle();
@@ -201,14 +202,22 @@ public class OffhandExtra extends Module {
 
     private Item getItem(){
         Item item = Items.TOTEM_OF_UNDYING;
-        if (currentMode == Mode.EGap) {
-            item = Items.ENCHANTED_GOLDEN_APPLE;
-        } else if (currentMode == Mode.Gap) {
-            item = Items.GOLDEN_APPLE;
-        } else if (currentMode == Mode.Crystal) {
-            item = Items.END_CRYSTAL;
-        } else if (currentMode == Mode.EXP) {
-            item = Items.EXPERIENCE_BOTTLE;
+        switch (currentMode) {
+            case EGap:
+                item = Items.ENCHANTED_GOLDEN_APPLE;
+                break;
+            case EXP:
+                item = Items.EXPERIENCE_BOTTLE;
+                break;
+            case Gap:
+                item = Items.GOLDEN_APPLE;
+                break;
+            case Crystal:
+                item = Items.END_CRYSTAL;
+                break;
+            case Shield:
+                item = Items.SHIELD;
+                break;
         }
         return item;
     }
@@ -225,11 +234,6 @@ public class OffhandExtra extends Module {
                 && !mc.player.getMainHandStack().getItem().isFood();
     }
 
-    private void doMove(int slot){
-        assert mc.player != null;
-
-    }
-
     private int findSlot(Item item){
         assert mc.player != null;
         for (int i = 9; i < mc.player.inventory.size(); i++){
@@ -237,9 +241,7 @@ public class OffhandExtra extends Module {
                 return i;
             }
         }
-        if (hotBar.get()){
-            return InvUtils.findItemWithCount(item).slot;
-        }
+        if (hotBar.get()) return InvUtils.findItemWithCount(item).slot;
         return -1;
     }
 
