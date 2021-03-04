@@ -42,7 +42,6 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.entrypoint.EntrypointContainer;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.options.KeyBinding;
 import net.minecraft.client.util.math.MatrixStack;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -154,9 +153,5 @@ public class MeteorClient implements ClientModInitializer {
         if (event.action == KeyAction.Press && event.key == KeyBindingHelper.getBoundKeyOf(KeyBinds.OPEN_CLICK_GUI).getCode()) {
             if ((!Utils.canUpdate() && !(mc.currentScreen instanceof WidgetScreen) && !(mc.currentScreen instanceof TopBarHud)) || mc.currentScreen == null) openClickGui();
         }
-
-        // Shulker Peek
-        KeyBinding shulkerPeek = KeyBinds.SHULKER_PEEK;
-        shulkerPeek.setPressed(shulkerPeek.matchesKey(event.key, 0) && event.action != KeyAction.Release);
     }
 }
