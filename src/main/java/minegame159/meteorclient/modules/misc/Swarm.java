@@ -9,8 +9,7 @@ import baritone.api.BaritoneAPI;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.commands.Commands;
-import minegame159.meteorclient.commands.commands.swarm.SwarmQueen;
-import minegame159.meteorclient.commands.commands.swarm.SwarmSlave;
+import minegame159.meteorclient.commands.commands.SwarmCommand;
 import minegame159.meteorclient.events.game.GameJoinedEvent;
 import minegame159.meteorclient.events.game.GameLeftEvent;
 import minegame159.meteorclient.events.world.TickEvent;
@@ -459,7 +458,7 @@ public class Swarm extends Module {
                 "same computer however with some additional configuration it will work across your local network",
                 "or the broader internet.",
                 "",
-                String.format("All swarm commands should be proceeded by \"%s\"", Commands.get().get(SwarmQueen.class).toString())
+                String.format("All swarm commands should be proceeded by \"%s\"", Commands.get().get(SwarmCommand.class).toString())
         );
     }
 
@@ -491,7 +490,7 @@ public class Swarm extends Module {
                 " Pick an instance of Minecraft to be your queen account.",
                 " Ensure the swarm module is enabled.",
                 " Then click the, button labeled 'Run Server(Q)' under the Swarm config menu.", String.format(
-                        " You may also enter the command \"%s\".", Commands.get().get(SwarmQueen.class).toString("queen"))
+                        " You may also enter the command \"%s\".", Commands.get().get(SwarmCommand.class).toString("queen"))
         );
     }
 
@@ -499,7 +498,7 @@ public class Swarm extends Module {
         return Arrays.asList(
                 "Connecting your slaves:",
                 " For each slave account, assuming you correctly configured the ip and port", String.format(
-                        " in Step 1 simply press the button labeled 'Connect (S)', or enter the command \"%s\"", Commands.get().get(SwarmSlave.class).toString("slave"))
+                        " in Step 1 simply press the button labeled 'Connect (S)', or enter the command \"%s\"", Commands.get().get(SwarmCommand.class).toString("slave"))
         );
     }
 
