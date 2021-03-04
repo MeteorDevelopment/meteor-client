@@ -12,13 +12,9 @@ import minegame159.meteorclient.events.game.GetTooltipEvent;
 import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.Modules;
-import minegame159.meteorclient.settings.EnumSetting;
-import minegame159.meteorclient.settings.IntSetting;
-import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
-import minegame159.meteorclient.utils.misc.input.KeyBinds;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import minegame159.meteorclient.utils.misc.input.Input;
 import net.minecraft.inventory.Inventories;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
@@ -34,6 +30,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT_ALT;
 
 public class ShulkerPeek extends Module {
     public enum Mode {
@@ -56,6 +54,13 @@ public class ShulkerPeek extends Module {
             .name("mode")
             .description("The way to display the shulker info.")
             .defaultValue(Mode.Always)
+            .build()
+    );
+
+    private final Setting<Integer> keybind = sgGeneral.add(new KeybindSetting.Builder()
+            .name("keybind")
+            .description("Keybind for Tooltip mode.")
+            .defaultValue(GLFW_KEY_LEFT_ALT)
             .build()
     );
 
@@ -83,6 +88,7 @@ public class ShulkerPeek extends Module {
             if (compoundTag.contains("Items", 9)) {
                 DefaultedList<ItemStack> itemStacks = DefaultedList.ofSize(27, ItemStack.EMPTY);
                 Inventories.fromTag(compoundTag, itemStacks);
+
                 int totalItemStacks = 0;
                 int displaysItemStacks = 0;
 
@@ -124,7 +130,8 @@ public class ShulkerPeek extends Module {
                         text.append(" x").append(String.valueOf(itemCount.getRight()));
                         event.list.add(text);
                     }
-                } else {
+                }
+                else {
                     for (ItemStack itemStack : itemStacks) {
                         if (!itemStack.isEmpty()) {
                             totalItemStacks++;
@@ -144,8 +151,12 @@ public class ShulkerPeek extends Module {
                 }
 
                 event.list.add(new LiteralText(""));
-                event.list.add(new LiteralText("Press " + Formatting.YELLOW + Utils.getKeyName(KeyBindingHelper.getBoundKeyOf(KeyBinds.SHULKER_PEEK).getCode()) + Formatting.RESET + " to peek"));
+                event.list.add(new LiteralText("Press " + Formatting.YELLOW + Utils.getKeyName(keybind.get()) + Formatting.RESET + " to peek"));
             }
         }
+    }
+
+    public boolean isPressed() {
+        return Input.isPressed(keybind.get());
     }
 }
