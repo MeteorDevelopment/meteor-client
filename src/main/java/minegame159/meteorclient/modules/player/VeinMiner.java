@@ -57,7 +57,7 @@ public class VeinMiner extends Module {
             .description("Amount of iterations used to scan for similar blocks")
             .defaultValue(3)
             .min(1)
-            .sliderMax(8)
+            .sliderMax(15)
             .build()
     );
 
@@ -101,6 +101,7 @@ public class VeinMiner extends Module {
 
     private final Pool<MyBlock> blockPool = new Pool<>(MyBlock::new);
     private final List<MyBlock> blocks = new ArrayList<>();
+    private final List<BlockPos> foundBlockPositions = new ArrayList<>();
 
     public VeinMiner() {
         super(Categories.Player, "vein-miner", "Mines all nearby blocks with this type");
@@ -110,6 +111,7 @@ public class VeinMiner extends Module {
     public void onDeactivate() {
         for (MyBlock block : blocks) blockPool.free(block);
         blocks.clear();
+        foundBlockPositions.clear();
     }
 
     private boolean isMiningBlock(BlockPos pos) {
@@ -124,6 +126,8 @@ public class VeinMiner extends Module {
     private void onStartBreakingBlock(StartBreakingBlockEvent event) {
 
         if (mc.world.getBlockState(event.blockPos).getHardness(mc.world, event.blockPos) < 0) return;
+
+        foundBlockPositions.clear();
 
         if (!isMiningBlock(event.blockPos)) {
             MyBlock block = blockPool.get();
@@ -216,13 +220,14 @@ public class VeinMiner extends Module {
 
     private void mineNearbyBlocks(Item item, BlockPos pos, Direction dir, int depth) {
         if (depth<=0) return;
+        if (foundBlockPositions.contains(pos)) return;
+        foundBlockPositions.add(pos);
         if (Utils.distance(mc.player.getX() - 0.5, mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()), mc.player.getZ() - 0.5, pos.getX(), pos.getY(), pos.getZ()) > mc.interactionManager.getReachDistance()) return;
         for(Vec3i neighbourOffset: blockNeighbours) {
             BlockPos neighbour = pos.add(neighbourOffset);
             if (mc.world.getBlockState(neighbour).getBlock().asItem() == item) {
                 MyBlock block = blockPool.get();
                 block.set(neighbour,dir);
-                if (blocks.contains(block));
                 blocks.add(block);
                 mineNearbyBlocks(item, neighbour, dir, depth-1);
             }
