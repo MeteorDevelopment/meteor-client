@@ -29,21 +29,27 @@ import net.minecraft.util.math.Vec3i;
 import net.minecraft.util.shape.VoxelShape;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+
+import com.google.common.collect.Sets;
 
 public class VeinMiner extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgRender = settings.createGroup("Render");
 
-    private final List<Vec3i> blockNeighbours = Arrays.asList(
-        new Vec3i(1,0,0), new Vec3i(-1,0,0),
-        new Vec3i(0,1,0), new Vec3i(0,-1,0),
-        new Vec3i(0,0,1), new Vec3i(0,0,-1),
-        new Vec3i(1,1,0), new Vec3i(1,-1,0),
-        new Vec3i(1,0,1), new Vec3i(1,0,-1),
-        new Vec3i(-1,1,0), new Vec3i(-1,-1,0),
-        new Vec3i(-1,0,1), new Vec3i(-1,0,-1)
+    private final Set<Vec3i> blockNeighbours = Sets.newHashSet(
+        new Vec3i(1,-1,1),new Vec3i(0,-1,1),new Vec3i(-1,-1,1),
+        new Vec3i(1,-1,0),new Vec3i(0,-1,0),new Vec3i(-1,-1,0),
+        new Vec3i(1,-1,-1),new Vec3i(0,-1,-1),new Vec3i(-1,-1,-1),
+
+        new Vec3i(1,0,1),new Vec3i(0,0,1),new Vec3i(-1,0,1),
+        new Vec3i(1,0,0),/*new Vec3i(0,0,0),*/new Vec3i(-1,0,0),
+        new Vec3i(1,0,-1),new Vec3i(0,0,-1),new Vec3i(-1,0,-1),
+
+        new Vec3i(1,1,1),new Vec3i(0,1,1),new Vec3i(-1,1,1),
+        new Vec3i(1,1,0),new Vec3i(0,1,0),new Vec3i(-1,1,0),
+        new Vec3i(1,1,-1),new Vec3i(0,1,-1),new Vec3i(-1,1,-1)
     );
 
     // General
