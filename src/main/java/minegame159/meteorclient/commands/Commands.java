@@ -8,9 +8,9 @@ package minegame159.meteorclient.commands;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import minegame159.meteorclient.commands.commands.*;
 import minegame159.meteorclient.systems.System;
 import minegame159.meteorclient.systems.Systems;
+import minegame159.meteorclient.utils.misc.ClassFinder;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientCommandSource;
 import net.minecraft.command.CommandSource;
@@ -37,33 +37,7 @@ public class Commands extends System<Commands> {
 
     @Override
     public void init() {
-        add(new Baritone());
-        add(new Bind());
-        add(new VClip());
-        add(new HClip());
-        add(new ClearChat());
-        add(new Dismount());
-        add(new Damage());
-        add(new Drop());
-        add(new Enchant());
-        add(new FakePlayerCommand());
-        add(new Friend());
-        add(new Help());
-        add(new Ignore());
-        add(new Inventory());
-        add(new NBT());
-        add(new Panic());
-        add(new Peek());
-        add(new Plugins());
-        add(new Profile());
-        add(new Reload());
-        add(new Reset());
-        add(new Say());
-        add(new Server());
-        add(new SwarmCommand());
-        add(new Toggle());
-        add(new SettingCommand());
-        add(new Gamemode());
+        addAll("minegame159.meteorclient.commands");
     }
 
     public void dispatch(String message) throws CommandSyntaxException {
@@ -100,6 +74,17 @@ public class Commands extends System<Commands> {
         command.registerTo(DISPATCHER);
         commands.add(command);
         commandInstances.put(command.getClass(), command);
+    }
+
+    /** Adds all commands in the specified package */
+    public void addAll(String packageName) {
+        for (Class<?> klass : ClassFinder.findSubTypesOf(packageName, Command.class)) {
+            try {
+                add((Command) klass.newInstance());
+            } catch (InstantiationException | IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public int getCount() {
