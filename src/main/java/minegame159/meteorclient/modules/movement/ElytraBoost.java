@@ -12,6 +12,7 @@ import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.misc.Keybind;
 import net.minecraft.entity.projectile.FireworkRocketEntity;
 import net.minecraft.item.FireworkItem;
 import net.minecraft.item.ItemStack;
@@ -49,7 +50,7 @@ public class ElytraBoost extends Module {
             .build()
     );
 
-    private final Setting<Integer> keybind = sgGeneral.add(new KeybindSetting.Builder()
+    private final Setting<Keybind> keybind = sgGeneral.add(new KeybindSetting.Builder()
             .name("keybind")
             .description("The keybind to boost.")
             .action(this::boost)

@@ -8,16 +8,16 @@ package minegame159.meteorclient.macros;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import minegame159.meteorclient.events.meteor.KeyEvent;
+import minegame159.meteorclient.events.meteor.MouseButtonEvent;
 import minegame159.meteorclient.gui.screens.WindowScreen;
 import minegame159.meteorclient.gui.widgets.*;
-import minegame159.meteorclient.utils.Utils;
 
 public class EditMacroScreen extends WindowScreen {
     private final Macro macro;
     private final boolean isNewMacro;
 
-    private WLabel keyLabel;
-    private boolean waitingForKey;
+    private WKeybind keybind;
+    private boolean binding;
 
     public EditMacroScreen(Macro m) {
         super(m == null ? "Create Macro" : "Edit Macro", true);
@@ -29,31 +29,30 @@ public class EditMacroScreen extends WindowScreen {
 
     private void initWidgets(Macro m) {
         // Name
-        add(new WLabel("Name:"));
-        WTextBox name = add(new WTextBox(m == null ? "" : macro.name, 400)).fillX().expandX().getWidget();
+        WTable t = add(new WTable()).getWidget();
+
+        t.add(new WLabel("Name:"));
+        WTextBox name = t.add(new WTextBox(m == null ? "" : macro.name, 400)).fillX().expandX().getWidget();
         name.setFocused(true);
         name.action = () -> macro.name = name.getText().trim();
-        row();
+        t.row();
 
         // Messages
-        add(new WLabel("Messages:")).padTop(4).top();
-        WTable lines = add(new WTable()).getWidget();
+        t.add(new WLabel("Messages:")).padTop(4).top();
+        WTable lines = t.add(new WTable()).getWidget();
         fillMessagesTable(lines);
         row();
 
         // Key
-        keyLabel = add(new WLabel(getKeyLabelText())).getWidget();
-        add(new WButton("Set key")).getWidget().action = () -> {
-            waitingForKey = true;
-            keyLabel.setText(getKeyLabelText());
-        };
+        keybind = add(new WKeybind(macro.keybind)).getWidget();
+        keybind.actionOnSet = () -> binding = true;
         row();
 
         // Apply
         WButton apply = add(new WButton(isNewMacro ? "Add" : "Apply")).fillX().expandX().getWidget();
         apply.action = () -> {
             if (isNewMacro) {
-                if (macro.name != null && !macro.name.isEmpty() && macro.messages.size() > 0 && macro.key != -1) {
+                if (macro.name != null && !macro.name.isEmpty() && macro.messages.size() > 0 && macro.keybind.isSet()) {
                     Macros.get().add(macro);
                     onClose();
                 }
@@ -94,18 +93,24 @@ public class EditMacroScreen extends WindowScreen {
         }
     }
 
-    private String getKeyLabelText() {
-        if (waitingForKey) return "Press any key";
-        return "Key: " + (macro.key == -1 ? "none" : Utils.getKeyName(macro.key));
+    @EventHandler(priority = EventPriority.HIGHEST)
+    private void onKey(KeyEvent event) {
+        if (onAction(true, event.key)) event.cancel();
     }
 
-    @SuppressWarnings("unused")
-    @EventHandler(priority = EventPriority.HIGHEST + 2)
-    private void onKey(KeyEvent event) {
-        if (waitingForKey) {
-            waitingForKey = false;
-            macro.key = event.key;
-            keyLabel.setText(getKeyLabelText());
+    @EventHandler(priority = EventPriority.HIGHEST)
+    private void onButton(MouseButtonEvent event) {
+        if (onAction(false, event.button)) event.cancel();
+    }
+
+    private boolean onAction(boolean isKey, int value) {
+        if (binding) {
+            keybind.onAction(isKey, value);
+
+            binding = false;
+            return true;
         }
+
+        return false;
     }
 }

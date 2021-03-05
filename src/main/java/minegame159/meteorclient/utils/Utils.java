@@ -287,6 +287,16 @@ public class Utils {
         }
     }
 
+    public static String getButtonName(int button) {
+        switch (button) {
+            case -1: return "Unknown";
+            case 0:  return "Mouse Left";
+            case 1:  return "Mouse Right";
+            case 2:  return "Mouse Middle";
+            default: return "Mouse " + button;
+        }
+    }
+
     public static byte[] readBytes(File file) {
         try {
             InputStream in = new FileInputStream(file);

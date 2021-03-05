@@ -5,7 +5,7 @@
 
 package minegame159.meteorclient.gui.widgets;
 
-import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.misc.Keybind;
 
 public class WKeybind extends WTable {
     public Runnable action;
@@ -14,11 +14,11 @@ public class WKeybind extends WTable {
     private final WLabel label;
     private final boolean addBindText;
 
-    private int key;
+    private final Keybind keybind;
     private boolean listening;
 
-    public WKeybind(int key, boolean addBindText) {
-        this.key = key;
+    public WKeybind(Keybind keybind, boolean addBindText) {
+        this.keybind = keybind;
         this.addBindText = addBindText;
 
         label = add(new WLabel("")).getWidget();
@@ -27,45 +27,44 @@ public class WKeybind extends WTable {
 
         set.action = () -> {
             listening = true;
-            label.setText(appendBindText("Press any key"));
+            label.setText(appendBindText("Press any key or mouse button"));
 
             if (actionOnSet != null) actionOnSet.run();
         };
 
         reset.action = () -> {
-            set(-1);
+            keybind.set(true, -1);
+            reset();
 
             if (action != null) action.run();
         };
 
-        setLabelToKey();
+        refreshLabel();
     }
 
-    public WKeybind(int key) {
-        this(key, true);
+    public WKeybind(Keybind keybind) {
+        this(keybind, true);
     }
 
-    public void onKey(int key) {
-        if (listening) {
-            set(key);
+    public boolean onAction(boolean isKey, int value) {
+        if (listening && keybind.canBindTo(isKey, value)) {
+            keybind.set(isKey, value);
+            reset();
 
             if (action != null) action.run();
+            return true;
         }
+
+        return false;
     }
 
-    public void set(int key) {
-        this.key = key;
+    public void reset() {
         listening = false;
-
-        setLabelToKey();
+        refreshLabel();
     }
 
-    public int get() {
-        return key;
-    }
-
-    private void setLabelToKey() {
-        label.setText(appendBindText(key == -1 ? "None" :  Utils.getKeyName(key)));
+    private void refreshLabel() {
+        label.setText(appendBindText(keybind.toString()));
     }
 
     private String appendBindText(String text) {
