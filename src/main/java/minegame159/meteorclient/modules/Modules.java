@@ -37,6 +37,7 @@ import org.lwjgl.glfw.GLFW;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.lang.reflect.InvocationTargetException;
 
 public class Modules extends System<Modules> {
     public static final ModuleRegistry REGISTRY = new ModuleRegistry();
@@ -307,8 +308,8 @@ public class Modules extends System<Modules> {
     public void addAll(String packageName) {
         for (Class<?> klass : ClassFinder.findSubTypesOf(packageName, Module.class)) {
             try {
-                add((Module) klass.newInstance());
-            } catch (InstantiationException | IllegalAccessException e) {
+                add((Module) klass.getDeclaredConstructor().newInstance());
+            } catch (InstantiationException | InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
                 e.printStackTrace();
             }
         }
