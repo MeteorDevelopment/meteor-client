@@ -16,12 +16,20 @@ import minegame159.meteorclient.events.meteor.ActiveModulesChangedEvent;
 import minegame159.meteorclient.events.meteor.KeyEvent;
 import minegame159.meteorclient.events.meteor.ModuleBindChangedEvent;
 import minegame159.meteorclient.events.meteor.MouseButtonEvent;
+import minegame159.meteorclient.modules.combat.*;
+import minegame159.meteorclient.modules.misc.*;
+import minegame159.meteorclient.modules.movement.Timer;
+import minegame159.meteorclient.modules.movement.*;
+import minegame159.meteorclient.modules.movement.elytrafly.ElytraFly;
+import minegame159.meteorclient.modules.movement.speed.Speed;
+import minegame159.meteorclient.modules.player.*;
+import minegame159.meteorclient.modules.render.*;
+import minegame159.meteorclient.modules.render.hud.HUD;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.systems.System;
 import minegame159.meteorclient.systems.Systems;
 import minegame159.meteorclient.utils.Utils;
-import minegame159.meteorclient.utils.misc.ClassFinder;
 import minegame159.meteorclient.utils.misc.input.Input;
 import minegame159.meteorclient.utils.misc.input.KeyAction;
 import minegame159.meteorclient.utils.player.ChatUtils;
@@ -62,7 +70,11 @@ public class Modules extends System<Modules> {
 
     @Override
     public void init() {
-        addAll("minegame159.meteorclient.modules");
+        initCombat();
+        initPlayer();
+        initMovement();
+        initRender();
+        initMisc();
     }
 
     public void sortModules() {
@@ -329,15 +341,178 @@ public class Modules extends System<Modules> {
         add(module);
     }
 
-    /** Adds all modules in the specified package */
-    public void addAll(String packageName) {
-        for (Class<?> klass : ClassFinder.findSubTypesOf(packageName, Module.class)) {
-            try {
-                add((Module) klass.newInstance());
-            } catch (InstantiationException | IllegalAccessException e) {
-                e.printStackTrace();
-            }
-        }
+    private void initCombat() {
+        add(new AimAssist());
+        add(new AnchorAura());
+        add(new AntiAnvil());
+        add(new AntiAnchor());
+        add(new AntiBed());
+        add(new AntiFriendHit());
+        add(new Auto32K());
+        add(new AutoAnvil());
+        add(new AutoArmor());
+        add(new AutoCity());
+        add(new AutoLog());
+        add(new AutoTotem());
+        add(new AutoTrap());
+        add(new AutoWeapon());
+        add(new AutoWeb());
+        add(new BedAura());
+        add(new BowSpam());
+        add(new Criticals());
+        add(new CrystalAura());
+        add(new Hitboxes());
+        add(new HoleFiller());
+        add(new KillAura());
+        add(new OffhandExtra());
+        add(new Quiver());
+        add(new SelfAnvil());
+        add(new SelfTrap());
+        add(new SelfWeb());
+        add(new SmartSurround());
+        add(new Surround());
+        add(new Swarm());
+        add(new TotemPopNotifier());
+        add(new Trigger());
+    }
+
+    private void initPlayer() {
+        add(new AirPlace());
+        add(new AntiAFK());
+        add(new AntiCactus());
+        add(new AntiHunger());
+        add(new AutoClicker());
+        add(new AutoDrop());
+        add(new AutoFish());
+        add(new AutoMend());
+        add(new AutoMount());
+        add(new AutoReplenish());
+        add(new AutoRespawn());
+        add(new AutoTool());
+        add(new BuildHeight());
+        add(new ChestSwap());
+        add(new DeathPosition());
+        add(new EXPThrower());
+        add(new EndermanLook());
+        add(new FakePlayer());
+        add(new FastUse());
+        add(new GhostHand());
+        add(new InfinityMiner());
+        add(new LiquidInteract());
+        add(new MiddleClickExtra());
+        add(new MountBypass());
+        add(new NameProtect());
+        add(new NoBreakDelay());
+        add(new NoInteract());
+        add(new NoMiningTrace());
+        add(new NoRotate());
+        add(new PacketMine());
+        add(new Portals());
+        add(new PotionSpoof());
+        add(new Reach());
+        add(new Rotation());
+        add(new SpeedMine());
+        add(new Trail());
+        add(new XCarry());
+        add(new AutoGap());
+        add(new AutoEat());
+    }
+
+    private void initMovement() {
+        add(new AirJump());
+        add(new Anchor());
+        add(new AntiLevitation());
+        add(new AutoJump());
+        add(new Sprint());
+        add(new AutoWalk());
+        add(new Blink());
+        add(new BoatFly());
+        add(new ClickTP());
+        add(new ElytraBoost());
+        add(new ElytraFly());
+        add(new EntityControl());
+        add(new EntitySpeed());
+        add(new FastClimb());
+        add(new Flight());
+        add(new GUIMove());
+        add(new HighJump());
+        add(new Jesus());
+        add(new NoFall());
+        add(new NoSlow());
+        add(new Parkour());
+        add(new ReverseStep());
+        add(new SafeWalk());
+        add(new Scaffold());
+        add(new Speed());
+        add(new Spider());
+        add(new Step());
+        add(new Timer());
+        add(new Velocity());
+    }
+
+    private void initRender() {
+        add(new BlockSelection());
+        add(new Breadcrumbs());
+        add(new BreakIndicators());
+        add(new CameraClip());
+        add(new Chams());
+        add(new CityESP());
+        add(new CustomFOV());
+        add(new EChestPreview());
+        add(new ESP());
+        add(new EntityOwner());
+        add(new FreeRotate());
+        add(new Freecam());
+        add(new Fullbright());
+        add(new HUD());
+        add(new HandView());
+        add(new HoleESP());
+        add(new ItemByteSize());
+        add(new ItemPhysics());
+        add(new LogoutSpots());
+        add(new Nametags());
+        add(new NoRender());
+        add(new ParticleBlocker());
+        add(new Search());
+        add(new ShulkerPeek());
+        add(new StorageESP());
+        add(new TimeChanger());
+        add(new Tracers());
+        add(new Trajectories());
+        add(new UnfocusedCPU());
+        add(new VoidESP());
+        add(new Xray());
+        add(new BossStack());
+        add(new ItemHighlight());
+        add(new Ambience());
+    }
+
+    private void initMisc() {
+        add(new Announcer());
+        add(new AntiPacketKick());
+        add(new AutoBreed());
+        add(new AutoBrewer());
+        add(new AutoNametag());
+        add(new AutoReconnect());
+        add(new AutoShearer());
+        add(new AutoSign());
+        add(new AutoSmelter());
+        add(new AutoSteal());
+        add(new BetterChat());
+        add(new BookBot());
+        add(new DiscordPresence());
+        add(new EChestFarmer());
+        add(new EntityLogger());
+        add(new LiquidFiller());
+        add(new MessageAura());
+        add(new MiddleClickFriend());
+        add(new Nuker());
+        add(new OffhandCrash());
+        add(new PacketCanceller());
+        add(new SoundBlocker());
+        add(new Spam());
+        add(new StashFinder());
+        add(new VisualRange());
     }
 
     public static class ModuleRegistry extends Registry<Module> {
