@@ -513,6 +513,7 @@ public class Modules extends System<Modules> {
         add(new Spam());
         add(new StashFinder());
         add(new VisualRange());
+        add(new VeinMiner());
     }
 
     public static class ModuleRegistry extends Registry<Module> {
