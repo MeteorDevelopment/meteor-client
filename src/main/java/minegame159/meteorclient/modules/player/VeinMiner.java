@@ -20,8 +20,6 @@ import minegame159.meteorclient.utils.player.Rotations;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
-import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
-import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -56,21 +54,13 @@ public class VeinMiner extends Module {
 
     private final Setting<Integer> depth = sgGeneral.add(new IntSetting.Builder()
             .name("depth")
-            .description("Amount of iterations")
+            .description("Amount of iterations used to scan for similar blocks")
             .defaultValue(3)
             .min(1)
             .sliderMax(8)
             .build()
     );
 
-    private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
-            .name("delay")
-            .description("Delay between mining blocks in ticks.")
-            .defaultValue(1)
-            .min(0)
-            .sliderMax(10)
-            .build()
-    );
 
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
             .name("rotate")
@@ -132,7 +122,6 @@ public class VeinMiner extends Module {
 
     @EventHandler
     private void onStartBreakingBlock(StartBreakingBlockEvent event) {
-        event.cancel();
 
         if (mc.world.getBlockState(event.blockPos).getHardness(mc.world, event.blockPos) < 0) return;
 
@@ -140,7 +129,7 @@ public class VeinMiner extends Module {
             MyBlock block = blockPool.get();
             block.set(event);
             blocks.add(block);
-            findNearbyBlocks(block,event.direction);
+            mineNearbyBlocks(block.originalBlock.asItem(),event.blockPos,event.direction,depth.get());
         }
     }
 
@@ -162,14 +151,12 @@ public class VeinMiner extends Module {
         public BlockPos blockPos;
         public Direction direction;
         public Block originalBlock;
-        public int timer;
         public boolean mining;
 
         public void set(StartBreakingBlockEvent event) {
             this.blockPos = event.blockPos;
             this.direction = event.direction;
             this.originalBlock = mc.world.getBlockState(blockPos).getBlock();
-            this.timer = delay.get();
             this.mining = false;
         }
 
@@ -177,39 +164,31 @@ public class VeinMiner extends Module {
             this.blockPos = pos;
             this.direction = dir;
             this.originalBlock = mc.world.getBlockState(pos).getBlock();
-            this.timer = delay.get();
             this.mining = false;
         }
 
         public boolean shouldRemove() {
             boolean remove = mc.world.getBlockState(blockPos).getBlock() != originalBlock || Utils.distance(mc.player.getX() - 0.5, mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()), mc.player.getZ() - 0.5, blockPos.getX() + direction.getOffsetX(), blockPos.getY() + direction.getOffsetY(), blockPos.getZ() + direction.getOffsetZ()) > mc.interactionManager.getReachDistance();
 
-
             if (remove) {
-                mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK, blockPos, direction));
-                mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
+                mc.interactionManager.cancelBlockBreaking();
+                mc.player.swingHand(Hand.MAIN_HAND);
             }
 
             return remove;
         }
 
         public void mine() {
-            if (rotate.get()) Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), 50, this::sendMinePackets);
-            else sendMinePackets();
+            if (!mining) {
+                mc.player.swingHand(Hand.MAIN_HAND);
+                mining = true;
+            }
+            if (rotate.get()) Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), 50, this::updateBlockBreakingProgress);
+            else updateBlockBreakingProgress();
         }
 
-        private void sendMinePackets() {
-            if (timer <= 0) {
-                if (!mining) {
-                    mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
-                    mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
-
-                    mining = true;
-                }
-            }
-            else {
-                timer--;
-            }
+        private void updateBlockBreakingProgress() {
+            mc.interactionManager.updateBlockBreakingProgress(blockPos, direction);
         }
 
         public void render() {
@@ -235,11 +214,7 @@ public class VeinMiner extends Module {
         }
     }
 
-    private void findNearbyBlocks(MyBlock block , Direction dir) {
-        Item item = block.originalBlock.asItem();
-        _findNearbyBlocks(item, block.blockPos, dir, depth.get());
-    }
-    private void _findNearbyBlocks(Item item, BlockPos pos, Direction dir, int depth) {
+    private void mineNearbyBlocks(Item item, BlockPos pos, Direction dir, int depth) {
         if (depth<=0) return;
         if (Utils.distance(mc.player.getX() - 0.5, mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()), mc.player.getZ() - 0.5, pos.getX(), pos.getY(), pos.getZ()) > mc.interactionManager.getReachDistance()) return;
         for(Vec3i neighbourOffset: blockNeighbours) {
@@ -247,8 +222,9 @@ public class VeinMiner extends Module {
             if (mc.world.getBlockState(neighbour).getBlock().asItem() == item) {
                 MyBlock block = blockPool.get();
                 block.set(neighbour,dir);
+                if (blocks.contains(block));
                 blocks.add(block);
-                _findNearbyBlocks(item, block.blockPos, dir, depth-1);
+                mineNearbyBlocks(item, neighbour, dir, depth-1);
             }
         }
     }
