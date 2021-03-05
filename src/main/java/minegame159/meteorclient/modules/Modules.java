@@ -14,6 +14,8 @@ import minegame159.meteorclient.events.game.GameLeftEvent;
 import minegame159.meteorclient.events.game.OpenScreenEvent;
 import minegame159.meteorclient.events.meteor.ActiveModulesChangedEvent;
 import minegame159.meteorclient.events.meteor.KeyEvent;
+import minegame159.meteorclient.events.meteor.ModuleBindChangedEvent;
+import minegame159.meteorclient.events.meteor.MouseButtonEvent;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.systems.System;
@@ -50,8 +52,6 @@ public class Modules extends System<Modules> {
 
     private final List<Module> active = new ArrayList<>();
     private Module moduleToBind;
-
-    public boolean onKeyOnlyBinding = false;
 
     public Modules() {
         super("modules");
@@ -122,10 +122,6 @@ public class Modules extends System<Modules> {
         }
     }
 
-    public void setModuleToBind(Module moduleToBind) {
-        this.moduleToBind = moduleToBind;
-    }
-
     public List<Pair<Module, Integer>> searchTitles(String text) {
         List<Pair<Module, Integer>> modules = new ArrayList<>();
 
@@ -174,29 +170,59 @@ public class Modules extends System<Modules> {
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST + 1)
-    private void onKey(KeyEvent event) {
-        if (event.action == KeyAction.Repeat) return;
+    // Binding
 
-        // Check if binding module
-        if (event.action == KeyAction.Press && moduleToBind != null) {
-            moduleToBind.setKey(event.key);
-            ChatUtils.prefixInfo("KeyBinds", "Module (highlight)%s (default)bound to (highlight)%s(default).", moduleToBind.title, Utils.getKeyName(event.key));
+    public void setModuleToBind(Module moduleToBind) {
+        this.moduleToBind = moduleToBind;
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    private void onKeyBinding(KeyEvent event) {
+        if (onBinding(true, event.key)) event.cancel();
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    private void onButtonBinding(MouseButtonEvent event) {
+        if (onBinding(false, event.button)) event.cancel();
+    }
+
+    private boolean onBinding(boolean isKey, int value) {
+        if (moduleToBind != null && moduleToBind.keybind.canBindTo(isKey, value)) {
+            moduleToBind.keybind.set(isKey, value);
+            ChatUtils.prefixInfo("KeyBinds", "Module (highlight)%s (default)bound to (highlight)%s(default).", moduleToBind.title, moduleToBind.keybind);
+            MeteorClient.EVENT_BUS.post(ModuleBindChangedEvent.get(moduleToBind));
+
             moduleToBind = null;
-            event.cancel();
-            return;
+            return true;
         }
 
-        // Find module bound to that key
-        if (!onKeyOnlyBinding && MinecraftClient.getInstance().currentScreen == null && !Input.isPressed(GLFW.GLFW_KEY_F3)) {
+        return false;
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
+    private void onKey(KeyEvent event) {
+        if (event.action == KeyAction.Repeat) return;
+        onAction(true, event.key, event.action == KeyAction.Press);
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
+    private void onMouseButton(MouseButtonEvent event) {
+        if (event.action == KeyAction.Repeat) return;
+        onAction(false, event.button, event.action == KeyAction.Press);
+    }
+
+    private void onAction(boolean isKey, int value, boolean isPress) {
+        if (MinecraftClient.getInstance().currentScreen == null && !Input.isKeyPressed(GLFW.GLFW_KEY_F3)) {
             for (Module module : modules.values()) {
-                if (module.getKey() == event.key && (event.action == KeyAction.Press || module.toggleOnKeyRelease)) {
+                if (module.keybind.matches(isKey, value) && (isPress || module.toggleOnKeyRelease)) {
                     module.doAction();
                     module.sendToggledMsg();
                 }
             }
         }
     }
+
+    // End of binding
 
     @EventHandler(priority = EventPriority.HIGHEST + 1)
     private void onOpenScreen(OpenScreenEvent event) {

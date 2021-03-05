@@ -6,18 +6,21 @@
 package minegame159.meteorclient.modules.combat;
 
 import meteordevelopment.orbit.EventHandler;
-import minegame159.meteorclient.events.entity.player.RightClickEvent;
+import minegame159.meteorclient.events.meteor.MouseButtonEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.misc.input.KeyAction;
 import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.item.*;
+
+import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_RIGHT;
 
 public class OffhandExtra extends Module {
     public enum Mode{
@@ -171,12 +174,13 @@ public class OffhandExtra extends Module {
     }
 
     @EventHandler
-    private void onRightClick(RightClickEvent event) {
-        assert mc.player != null;
+    private void onMouseButton(MouseButtonEvent event) {
+        if (event.action != KeyAction.Press || event.button != GLFW_MOUSE_BUTTON_RIGHT) return;
+
         if (mc.currentScreen != null) return;
         if (Modules.get().get(AutoTotem.class).getLocked() || !canMove()) return;
         if ((mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING || (mc.player.getHealth() + mc.player.getAbsorptionAmount() > health.get())
-               && (mc.player.getOffHandStack().getItem() != getItem()) && !(mc.currentScreen instanceof HandledScreen<?>))) {
+                && (mc.player.getOffHandStack().getItem() != getItem()) && !(mc.currentScreen instanceof HandledScreen<?>))) {
             if (mc.player.getMainHandStack().getItem() instanceof SwordItem && sword.get()) currentMode = Mode.EGap;
             else if (mc.player.getMainHandStack().getItem() instanceof EnchantedGoldenAppleItem && offhandCrystal.get()) currentMode = Mode.Crystal;
             else if (Modules.get().isActive(CrystalAura.class) && offhandCA.get()) currentMode = Mode.Crystal;

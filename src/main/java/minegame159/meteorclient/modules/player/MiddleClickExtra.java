@@ -10,7 +10,7 @@ package minegame159.meteorclient.modules.player;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.player.FinishUsingItem;
 import minegame159.meteorclient.events.entity.player.StoppedUsingItemEvent;
-import minegame159.meteorclient.events.meteor.MiddleMouseButtonEvent;
+import minegame159.meteorclient.events.meteor.MouseButtonEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
@@ -18,12 +18,15 @@ import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.utils.misc.input.KeyAction;
 import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.item.BowItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.util.Hand;
+
+import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_MIDDLE;
 
 public class MiddleClickExtra extends Module {
     private enum Type {
@@ -81,7 +84,9 @@ public class MiddleClickExtra extends Module {
     }
 
     @EventHandler
-    private void onMiddleMouseButton(MiddleMouseButtonEvent event) {
+    private void onMouseButton(MouseButtonEvent event) {
+        if (event.action != KeyAction.Press || event.button != GLFW_MOUSE_BUTTON_MIDDLE) return;
+
         InvUtils.FindItemResult result = InvUtils.findItemWithCount(mode.get().item);
 
         if (result.slot == -1 || result.slot > 8) {

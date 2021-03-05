@@ -124,10 +124,10 @@ public class GUIMove extends Module {
 
         if (arrowsRotate.get()) {
             for (int i = 0; i < (rotateSpeed.get() * 2); i++) {
-                if (Input.isPressed(GLFW.GLFW_KEY_LEFT)) mc.player.yaw -= 0.5;
-                if (Input.isPressed(GLFW.GLFW_KEY_RIGHT)) mc.player.yaw += 0.5;
-                if (Input.isPressed(GLFW.GLFW_KEY_UP)) mc.player.pitch -= 0.5;
-                if (Input.isPressed(GLFW.GLFW_KEY_DOWN)) mc.player.pitch += 0.5;
+                if (Input.isKeyPressed(GLFW.GLFW_KEY_LEFT)) mc.player.yaw -= 0.5;
+                if (Input.isKeyPressed(GLFW.GLFW_KEY_RIGHT)) mc.player.yaw += 0.5;
+                if (Input.isKeyPressed(GLFW.GLFW_KEY_UP)) mc.player.pitch -= 0.5;
+                if (Input.isKeyPressed(GLFW.GLFW_KEY_DOWN)) mc.player.pitch += 0.5;
             }
 
             mc.player.pitch = Utils.clamp(mc.player.pitch, -90, 90);

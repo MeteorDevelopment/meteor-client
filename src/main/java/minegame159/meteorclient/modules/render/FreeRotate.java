@@ -103,16 +103,16 @@ public class FreeRotate extends Module {
             for (int i = 0; i < (arrowSpeed.get() * 2); i++) {
                 switch (mode.get()) {
                     case Player:
-                        if (Input.isPressed(GLFW.GLFW_KEY_LEFT)) cameraYaw -= 0.5;
-                        if (Input.isPressed(GLFW.GLFW_KEY_RIGHT)) cameraYaw += 0.5;
-                        if (Input.isPressed(GLFW.GLFW_KEY_UP)) cameraPitch -= 0.5;
-                        if (Input.isPressed(GLFW.GLFW_KEY_DOWN)) cameraPitch += 0.5;
+                        if (Input.isKeyPressed(GLFW.GLFW_KEY_LEFT)) cameraYaw -= 0.5;
+                        if (Input.isKeyPressed(GLFW.GLFW_KEY_RIGHT)) cameraYaw += 0.5;
+                        if (Input.isKeyPressed(GLFW.GLFW_KEY_UP)) cameraPitch -= 0.5;
+                        if (Input.isKeyPressed(GLFW.GLFW_KEY_DOWN)) cameraPitch += 0.5;
                         break;
                     case Camera:
-                        if (Input.isPressed(GLFW.GLFW_KEY_LEFT)) mc.player.yaw -= 0.5;
-                        if (Input.isPressed(GLFW.GLFW_KEY_RIGHT)) mc.player.yaw += 0.5;
-                        if (Input.isPressed(GLFW.GLFW_KEY_UP)) mc.player.pitch -= 0.5;
-                        if (Input.isPressed(GLFW.GLFW_KEY_DOWN)) mc.player.pitch += 0.5;
+                        if (Input.isKeyPressed(GLFW.GLFW_KEY_LEFT)) mc.player.yaw -= 0.5;
+                        if (Input.isKeyPressed(GLFW.GLFW_KEY_RIGHT)) mc.player.yaw += 0.5;
+                        if (Input.isKeyPressed(GLFW.GLFW_KEY_UP)) mc.player.pitch -= 0.5;
+                        if (Input.isKeyPressed(GLFW.GLFW_KEY_DOWN)) mc.player.pitch += 0.5;
                         break;
                 }
             }

@@ -13,8 +13,7 @@ import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.Utils;
-import minegame159.meteorclient.utils.misc.input.Input;
+import minegame159.meteorclient.utils.misc.Keybind;
 import net.minecraft.inventory.Inventories;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
@@ -57,10 +56,10 @@ public class ShulkerPeek extends Module {
             .build()
     );
 
-    private final Setting<Integer> keybind = sgGeneral.add(new KeybindSetting.Builder()
+    private final Setting<Keybind> keybind = sgGeneral.add(new KeybindSetting.Builder()
             .name("keybind")
             .description("Keybind for Tooltip mode.")
-            .defaultValue(GLFW_KEY_LEFT_ALT)
+            .defaultValue(Keybind.fromKey(GLFW_KEY_LEFT_ALT))
             .build()
     );
 
@@ -151,12 +150,12 @@ public class ShulkerPeek extends Module {
                 }
 
                 event.list.add(new LiteralText(""));
-                event.list.add(new LiteralText("Press " + Formatting.YELLOW + Utils.getKeyName(keybind.get()) + Formatting.RESET + " to peek"));
+                event.list.add(new LiteralText("Press " + Formatting.YELLOW + keybind + Formatting.RESET + " to peek"));
             }
         }
     }
 
     public boolean isPressed() {
-        return Input.isPressed(keybind.get());
+        return keybind.get().isPressed();
     }
 }
