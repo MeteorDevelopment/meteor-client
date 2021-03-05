@@ -38,7 +38,6 @@ public class Commands extends System<Commands> {
     @Override
     public void init() {
         add(new Baritone());
-        add(new Bind());
         add(new VClip());
         add(new HClip());
         add(new ClearChat());
