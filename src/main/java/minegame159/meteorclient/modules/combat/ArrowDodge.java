@@ -25,16 +25,17 @@ public class ArrowDodge extends Module {
             new Vec3d(1, 0, -1), new Vec3d(0, 0, -1), new Vec3d(-1, 0, -1)
     );
 
-    public ArrowDodge() {
-        super(Categories.Combat, "arrow-dodge", "Tries to dodge arrows coming at you");
-    }
-
-    public enum MoveType {
-        Client, Packet
-    }
-
-    private final SettingGroup sgMovement = settings.createGroup("Movement");
     private final SettingGroup sgDefault = settings.getDefaultGroup();
+    private final SettingGroup sgMovement = settings.createGroup("Movement");
+
+    private final Setting<Integer> arrowLookahead = sgDefault.add(new IntSetting.Builder()
+        .name("arrow-lookahead")
+        .description("How many steps into the future should be taken into consideration when deciding the direction")
+        .defaultValue(500)
+        .min(1)
+        .max(750)
+        .build()
+    );
 
     private final Setting<MoveType> moveType = sgMovement.add(new EnumSetting.Builder<MoveType>()
         .name("move-type")
@@ -52,14 +53,13 @@ public class ArrowDodge extends Module {
             .build()
     );
 
-    private final Setting<Integer> arrowLookahead = sgDefault.add(new IntSetting.Builder()
-            .name("arrow-lookahead")
-            .description("How many steps into the future should be taken into consideration when deciding the direction")
-            .defaultValue(500)
-            .min(1)
-            .max(750)
-            .build()
-    );
+    public ArrowDodge() {
+        super(Categories.Combat, "arrow-dodge", "Tries to dodge arrows coming at you");
+    }
+
+    public enum MoveType {
+        Client, Packet
+    }
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
