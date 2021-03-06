@@ -80,6 +80,15 @@ public class TopBarConfig extends TopBarWindowScreen {
                 .build()
         );
 
+        sgGeneral.add(new BoolSetting.Builder()
+                .name("title-screen-credits")
+                .description("Show Meteor credits on title screen")
+                .defaultValue(true)
+                .onChanged(aBool -> Config.get().titleScreenCredits = aBool)
+                .onModuleActivated(boolSetting -> boolSetting.set(Config.get().titleScreenCredits))
+                .build()
+        );
+
         add(s.createTable()).fillX().expandX();
     }
 }
