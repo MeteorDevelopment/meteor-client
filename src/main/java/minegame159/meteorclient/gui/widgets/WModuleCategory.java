@@ -5,8 +5,6 @@
 
 package minegame159.meteorclient.gui.widgets;
 
-import net.minecraft.item.ItemStack;
-
 import minegame159.meteorclient.gui.GuiConfig;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Module;
