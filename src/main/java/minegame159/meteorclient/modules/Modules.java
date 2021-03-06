@@ -348,6 +348,7 @@ public class Modules extends System<Modules> {
         add(new AntiAnchor());
         add(new AntiBed());
         add(new AntiFriendHit());
+        add(new ArrowDodge());
         add(new Auto32K());
         add(new AutoAnvil());
         add(new AutoArmor());
@@ -416,6 +417,7 @@ public class Modules extends System<Modules> {
         add(new XCarry());
         add(new AutoGap());
         add(new AutoEat());
+        add(new VeinMiner());
     }
 
     private void initMovement() {
@@ -516,7 +518,6 @@ public class Modules extends System<Modules> {
         add(new Spam());
         add(new StashFinder());
         add(new VisualRange());
-        add(new VeinMiner());
     }
 
     public static class ModuleRegistry extends Registry<Module> {
