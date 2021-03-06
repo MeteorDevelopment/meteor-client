@@ -141,12 +141,7 @@ public abstract class WorldRendererMixin {
 
     @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/entity/EntityRenderDispatcher;shouldRender(Lnet/minecraft/entity/Entity;Lnet/minecraft/client/render/Frustum;DDD)Z"))
     private <E extends Entity> boolean shouldRenderRedirect(EntityRenderDispatcher entityRenderDispatcher, E entity, Frustum frustum, double x, double y, double z) {
-        Chams chams = Modules.get().get(Chams.class);
-        if(chams.isActive() && chams.throughWalls.get()) {
-            return true;
-        } else {
-            return entityRenderDispatcher.shouldRender(entity, frustum, x, y, z);
-        }
+        return Modules.get().isActive(Chams.class) || entityRenderDispatcher.shouldRender(entity, frustum, x, y, z);
     }
 
     /**

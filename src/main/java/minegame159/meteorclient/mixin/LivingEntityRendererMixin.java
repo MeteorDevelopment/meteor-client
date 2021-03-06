@@ -6,62 +6,56 @@
 package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.entity.RenderLivingEntityEvent;
+import minegame159.meteorclient.events.entity.RenderEntityEvent;
+import minegame159.meteorclient.mixininterface.ILivingEntityRenderer;
 import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.render.Freecam;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.player.Rotations;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.entity.EntityRenderDispatcher;
-import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
-import net.minecraft.client.render.entity.feature.FeatureRendererContext;
+import net.minecraft.client.render.entity.feature.FeatureRenderer;
 import net.minecraft.client.render.entity.model.EntityModel;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.scoreboard.AbstractTeam;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(LivingEntityRenderer.class)
-public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extends EntityModel<T>> extends EntityRenderer<T> implements FeatureRendererContext<T, M> {
-    public LivingEntityRendererMixin(EntityRenderDispatcher dispatcher) {
-        super(dispatcher);
-    }
+import java.util.List;
 
+@Mixin(LivingEntityRenderer.class)
+public abstract class LivingEntityRendererMixin implements ILivingEntityRenderer {
+    //Freecam
     @Redirect(method = "hasLabel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/MinecraftClient;getCameraEntity()Lnet/minecraft/entity/Entity;"))
     private Entity hasLabelGetCameraEntityProxy(MinecraftClient mc) {
         if (Modules.get().isActive(Freecam.class)) return null;
         return mc.getCameraEntity();
     }
 
-    @SuppressWarnings("UnresolvedMixinReference")
-    @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/entity/model/EntityModel;render(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumer;IIFFFF)V"))
-    private void redirectRender(EntityModel<LivingEntity> model, MatrixStack matrices, VertexConsumer vertices, int light, int overlay, float red, float green, float blue, float alpha, LivingEntity entity) {
-        RenderLivingEntityEvent.Invoke event = MeteorClient.EVENT_BUS.post(RenderLivingEntityEvent.Invoke.get(model, matrices, vertices, light, overlay, red, green, blue, alpha, entity));
-        if (!event.isCancelled()) model.render(matrices, vertices, light, overlay, red, green, blue, alpha);
-    }
-
+    //Chams
     @Inject(method = "render", at = @At("HEAD"), cancellable = true)
-    public void renderPre(T livingEntity, float f, float g, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, CallbackInfo ci) {
-        RenderLivingEntityEvent.Pre event = MeteorClient.EVENT_BUS.post(RenderLivingEntityEvent.Pre.get(livingEntity));
+    public void renderPre(LivingEntity entity, float yaw, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, CallbackInfo ci) {
+        RenderEntityEvent.Pre event = MeteorClient.EVENT_BUS.post(RenderEntityEvent.Pre.get(entity));
         if (event.isCancelled()) ci.cancel();
     }
 
     @Inject(method = "render", at = @At("RETURN"), cancellable = true)
-    public void renderPost(T livingEntity, float f, float g, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, CallbackInfo ci) {
-        RenderLivingEntityEvent.Post event = MeteorClient.EVENT_BUS.post(RenderLivingEntityEvent.Post.get(livingEntity));
+    public void renderPost(LivingEntity entity, float yaw, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, CallbackInfo ci) {
+        RenderEntityEvent.Post event = MeteorClient.EVENT_BUS.post(RenderEntityEvent.Post.get(entity));
         if (event.isCancelled()) ci.cancel();
     }
 
+    //3rd Person Rotation
     @ModifyVariable(method = "render", ordinal = 2, at = @At(value = "STORE", ordinal = 0))
     public float changeYaw(float oldValue, LivingEntity entity) {
         if (entity.equals(Utils.mc.player) && Rotations.rotationTimer < 10) return Rotations.serverYaw;
@@ -81,10 +75,43 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
     }
 
     // Player model rendering in main menu
-
     @Redirect(method = "hasLabel", at = @At(value = "INVOKE", target = "net.minecraft.client.network.ClientPlayerEntity.getScoreboardTeam()Lnet/minecraft/scoreboard/AbstractTeam;"))
     private AbstractTeam hasLabelClientPlayerEntityGetScoreboardTeamProxy(ClientPlayerEntity player) {
         if (player == null) return null;
         return player.getScoreboardTeam();
+    }
+
+    //Model Tweaks
+    @Shadow protected EntityModel<Entity> model;
+    @Shadow protected abstract void setupTransforms(LivingEntity entity, MatrixStack matrices, float animationProgress, float bodyYaw, float tickDelta);
+    @Shadow protected abstract void scale(LivingEntity entity, MatrixStack matrices, float amount);
+    @Shadow protected abstract boolean isVisible(LivingEntity entity);
+    @Shadow protected abstract float getAnimationCounter(LivingEntity entity, float tickDelta);
+    @Shadow @Final protected List<FeatureRenderer<LivingEntity, EntityModel<LivingEntity>>> features;
+
+    @Inject(method = "render", at = @At("HEAD"), cancellable = true)
+    private void render(LivingEntity livingEntity, float f, float g, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, CallbackInfo ci) {
+        RenderEntityEvent.LiveEntity event = MeteorClient.EVENT_BUS.post(RenderEntityEvent.LiveEntity.get(model, livingEntity, features, f, g, matrixStack, vertexConsumerProvider, i));
+        if (event.isCancelled()) ci.cancel();
+    }
+
+    @Override
+    public void setupTransformsInterface(LivingEntity entity, MatrixStack matrices, float animationProgress, float bodyYaw, float tickDelta) {
+        setupTransforms(entity, matrices, animationProgress, bodyYaw, tickDelta);
+    }
+
+    @Override
+    public void scaleInterface(LivingEntity entity, MatrixStack matrices, float amount) {
+        scale(entity, matrices, amount);
+    }
+
+    @Override
+    public boolean isVisibleInterface(LivingEntity entity) {
+        return isVisible(entity);
+    }
+
+    @Override
+    public float getAnimationCounterInterface(LivingEntity entity, float tickDelta) {
+        return getAnimationCounter(entity, tickDelta);
     }
 }
