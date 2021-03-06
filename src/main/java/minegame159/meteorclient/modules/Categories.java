@@ -8,11 +8,11 @@ package minegame159.meteorclient.modules;
 import net.minecraft.item.Items;
 
 public class Categories {
-    public static final Category Combat = new Category("Combat",Items.GOLDEN_SWORD.getDefaultStack());
-    public static final Category Player = new Category("Player",Items.ARMOR_STAND.getDefaultStack());
-    public static final Category Movement = new Category("Movement",Items.DIAMOND_BOOTS.getDefaultStack());
-    public static final Category Render = new Category("Render",Items.GLASS.getDefaultStack());
-    public static final Category Misc = new Category("Misc",Items.LAVA_BUCKET.getDefaultStack());
+    public static final Category Combat = new Category("Combat", Items.GOLDEN_SWORD.getDefaultStack());
+    public static final Category Player = new Category("Player", Items.ARMOR_STAND.getDefaultStack());
+    public static final Category Movement = new Category("Movement", Items.DIAMOND_BOOTS.getDefaultStack());
+    public static final Category Render = new Category("Render", Items.GLASS.getDefaultStack());
+    public static final Category Misc = new Category("Misc", Items.LAVA_BUCKET.getDefaultStack());
 
     public static void register() {
         Modules.registerCategory(Combat);

@@ -486,6 +486,7 @@ public class Modules extends System<Modules> {
         add(new ItemHighlight());
         add(new Ambience());
         add(new ModelTweaks());
+        add(new LightOverlay());
     }
 
     private void initMisc() {
