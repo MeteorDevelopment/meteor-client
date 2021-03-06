@@ -34,6 +34,7 @@ public class ArrowDodge extends Module {
     }
 
     private final SettingGroup sgMovement = settings.createGroup("Movement");
+    private final SettingGroup sgDefault = settings.getDefaultGroup();
 
     private final Setting<MoveType> moveType = sgMovement.add(new EnumSetting.Builder<MoveType>()
         .name("move-type")
@@ -51,7 +52,7 @@ public class ArrowDodge extends Module {
             .build()
     );
 
-    private final Setting<Integer> arrowLookahead = sgMovement.add(new IntSetting.Builder()
+    private final Setting<Integer> arrowLookahead = sgDefault.add(new IntSetting.Builder()
             .name("arrow-lookahead")
             .description("How many steps into the future should be taken into consideration when deciding the direction")
             .defaultValue(500)
