@@ -5,12 +5,14 @@
 
 package minegame159.meteorclient.gui.widgets;
 
+import net.minecraft.item.Items;
+
 import minegame159.meteorclient.gui.GuiConfig;
 import minegame159.meteorclient.utils.files.ProfileUtils;
 
 public class WProfiles extends WWindow {
     public WProfiles() {
-        super("Profiles", GuiConfig.get().getWindowConfig(GuiConfig.WindowType.Profiles).isExpanded(), true);
+        super("Profiles", GuiConfig.get().getWindowConfig(GuiConfig.WindowType.Profiles).isExpanded(), true, (GuiConfig.get().displayIcons?Items.BOOKSHELF.getDefaultStack():null));
         type = GuiConfig.WindowType.Profiles;
 
         action = () -> getWindowConfig().setPos(x, y);

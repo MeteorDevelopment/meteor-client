@@ -70,6 +70,15 @@ public class TopBarGui extends TopBarWindowScreen {
                 .build()
         );
 
+        sg.add(new BoolSetting.Builder()
+                .name("display-icons")
+                .description("Display icons on titlebars of modules in the Click GUI.")
+                .defaultValue(false)
+                .onChanged(aBool -> GuiConfig.get().displayIcons = aBool)
+                .onModuleActivated(boolSetting -> boolSetting.set(GuiConfig.get().displayIcons))
+                .build()
+        );
+
 
         SettingGroup sgColors = s.createGroup("Colors");
 
