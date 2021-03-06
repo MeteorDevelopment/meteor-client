@@ -485,6 +485,7 @@ public class Modules extends System<Modules> {
         add(new BossStack());
         add(new ItemHighlight());
         add(new Ambience());
+        add(new ModelTweaks());
     }
 
     private void initMisc() {
