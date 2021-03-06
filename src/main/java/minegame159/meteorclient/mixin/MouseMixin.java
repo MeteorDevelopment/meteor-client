@@ -7,6 +7,7 @@ package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.meteor.MouseButtonEvent;
+import minegame159.meteorclient.events.meteor.MouseScrollEvent;
 import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.render.FreeRotate;
 import minegame159.meteorclient.modules.render.Freecam;
@@ -30,6 +31,11 @@ public class MouseMixin {
         Input.setButtonState(button, action != GLFW_RELEASE);
 
         if (MeteorClient.EVENT_BUS.post(MouseButtonEvent.get(button, KeyAction.get(action))).isCancelled()) info.cancel();
+    }
+
+    @Inject(method = "onMouseScroll", at = @At("HEAD"), cancellable = true)
+    private void onMouseScroll(long window, double horizontal, double vertical, CallbackInfo info) {
+        if (MeteorClient.EVENT_BUS.post(MouseScrollEvent.get(vertical)).isCancelled()) info.cancel();
     }
 
     @Redirect(method = "updateMouse", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;changeLookDirection(DD)V"))
