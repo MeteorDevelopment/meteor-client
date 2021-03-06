@@ -29,19 +29,6 @@ public class WWindow extends WTable {
     private boolean expanded;
     private double animationProgress;
 
-    public WWindow(String title, boolean expanded, boolean scrollOnlyWhenMouseOver) {
-        this.expanded = expanded;
-        this.animationProgress = expanded ? 1 : 0;
-
-        defaultCell.space(0);
-
-        header = super.add(new WHeader(title)).fillX().expandX().getWidget();
-        super.row();
-
-        table = super.add(new WView(scrollOnlyWhenMouseOver)).fillX().expandX().getWidget().add(new WTable()).fillX().expandX().getWidget();
-        table.pad(8);
-    }
-
     public WWindow(String title, boolean expanded, boolean scrollOnlyWhenMouseOver, ItemStack icon) {
         this.expanded = expanded;
         this.animationProgress = expanded ? 1 : 0;
@@ -53,6 +40,9 @@ public class WWindow extends WTable {
 
         table = super.add(new WView(scrollOnlyWhenMouseOver)).fillX().expandX().getWidget().add(new WTable()).fillX().expandX().getWidget();
         table.pad(8);
+    }
+    public WWindow(String title, boolean expanded, boolean scrollOnlyWhenMouseOver) {
+        this(title, expanded, scrollOnlyWhenMouseOver, null);
     }
 
     public WWindow(String title, boolean expanded) {
@@ -145,7 +135,7 @@ public class WWindow extends WTable {
         public WHeader(String title) {
             this.title = title;
 
-            add(new WTitle(title)).pad(4).fillX().centerX();
+            add(new WTitle(title)).pad(4).fillX().centerXY();
 
             triangle = add(new WTriangle()).pad(4).fillX().centerY().right().getWidget();
             triangle.action = () -> {
@@ -155,15 +145,7 @@ public class WWindow extends WTable {
         }
 
         public WHeader(String title, ItemStack icon) {
-            this.title = title;
-
-            add(new WTitle(title)).pad(4).fillX().centerX().centerY();
-
-            triangle = add(new WTriangle()).pad(4).fillX().centerY().right().getWidget();
-            triangle.action = () -> {
-                expanded = !expanded;
-                getWindowConfig().setExpanded(expanded);
-            };
+            this(title);
             
             if (icon != null) {
                 add(new WItem(icon)).pad(4).fillX().centerY().left().getWidget();
