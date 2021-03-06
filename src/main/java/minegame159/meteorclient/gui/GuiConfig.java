@@ -23,6 +23,7 @@ import java.util.Map;
 public class GuiConfig implements ISerializable<GuiConfig> {
     public double guiScale = 1;
     public double scrollSensitivity = 1;
+    public boolean displayIcons = false;
 
     public AlignmentX moduleNameAlignment = AlignmentX.Center;
     public double moduleNameAlignmentPadding = 7;
@@ -116,6 +117,7 @@ public class GuiConfig implements ISerializable<GuiConfig> {
 
         tag.putDouble("guiScale", guiScale);
         tag.putDouble("scrollSensitivity", scrollSensitivity);
+        tag.putBoolean("displayIcons", displayIcons);
 
         tag.putString("moduleNameAlignment", moduleNameAlignment.name());
 
@@ -195,6 +197,7 @@ public class GuiConfig implements ISerializable<GuiConfig> {
     public GuiConfig fromTag(CompoundTag tag) {
         if (tag.contains("guiScale")) guiScale = tag.getDouble("guiScale");
         if (tag.contains("scrollSensitivity")) scrollSensitivity = tag.getDouble("scrollSensitivity");
+        if (tag.contains("displayIcons")) displayIcons = tag.getBoolean("displayIcons");
 
         if (tag.contains("moduleNameAlignment")) moduleNameAlignment = AlignmentX.valueOf(tag.getString("moduleNameAlignment"));
 
