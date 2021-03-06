@@ -14,23 +14,7 @@ import minegame159.meteorclient.modules.Modules;
 
 public class WModuleCategory extends WWindow {
     public WModuleCategory(Category category) {
-        super(category.toString(), category.windowConfig.isExpanded(), true);
-        this.type = GuiConfig.WindowType.Category;
-        this.category = category;
-
-        action = () -> getWindowConfig().setPos(x, y);
-
-        pad(0);
-        getDefaultCell().space(0);
-
-        for (Module module : Modules.get().getGroup(category)) {
-            add(new WModule(module)).fillX().expandX();
-            row();
-        }
-    }
-
-    public WModuleCategory(Category category, ItemStack icon) {
-        super(category.toString(), category.windowConfig.isExpanded(), true, icon);
+        super(category.toString(), category.windowConfig.isExpanded(), true, GuiConfig.get().displayIcons ? category.icon : null);
         this.type = GuiConfig.WindowType.Category;
         this.category = category;
 

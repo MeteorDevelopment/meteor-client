@@ -6,16 +6,22 @@
 package minegame159.meteorclient.modules;
 
 import minegame159.meteorclient.gui.GuiConfig;
+import net.minecraft.item.ItemStack;
 
 public class Category {
     public final String name;
+    public final ItemStack icon;
     private final int nameHash;
 
     public GuiConfig.WindowConfig windowConfig = new GuiConfig.WindowConfig();
 
-    public Category(String name) {
+    public Category(String name, ItemStack icon) {
         this.name = name;
         this.nameHash = name.hashCode();
+        this.icon = icon;
+    }
+    public Category(String name) {
+        this(name, null);
     }
 
     @Override

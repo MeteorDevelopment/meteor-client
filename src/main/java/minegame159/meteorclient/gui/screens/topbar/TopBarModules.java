@@ -8,12 +8,9 @@ package minegame159.meteorclient.gui.screens.topbar;
 import minegame159.meteorclient.gui.GuiConfig;
 import minegame159.meteorclient.gui.renderer.GuiRenderer;
 import minegame159.meteorclient.gui.widgets.*;
-import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Category;
 import minegame159.meteorclient.modules.Modules;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 
 public class TopBarModules extends TopBarScreen {
     public TopBarModules() {
@@ -37,7 +34,7 @@ public class TopBarModules extends TopBarScreen {
     private static class WWindowController extends WWidget {
         public WWindowController() {
             for (Category category : Modules.loopCategories()) {
-                add(new WModuleCategory(category, getIcon(category)));
+                add(new WModuleCategory(category));
             }
 
             add(new WProfiles());
@@ -88,16 +85,6 @@ public class TopBarModules extends TopBarScreen {
                 cellX += cell.width + 4;
                 cell.alignWidget();
             }
-        }
-
-        private ItemStack getIcon(Category category) {
-            if (!GuiConfig.get().displayIcons) return null;
-            if (category == Categories.Combat) return Items.GOLDEN_SWORD.getDefaultStack();
-            else if (category == Categories.Player) return Items.ARMOR_STAND.getDefaultStack();
-            else if (category == Categories.Movement) return Items.DIAMOND_BOOTS.getDefaultStack();
-            else if (category == Categories.Render) return Items.GLASS.getDefaultStack();
-            else if (category == Categories.Misc) return Items.LAVA_BUCKET.getDefaultStack();
-            else return null;
         }
     }
 }
