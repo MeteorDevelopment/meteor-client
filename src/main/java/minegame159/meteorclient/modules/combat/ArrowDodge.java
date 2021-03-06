@@ -19,16 +19,14 @@ import net.minecraft.util.shape.VoxelShapes;
 import java.util.*;
 
 public class ArrowDodge extends Module {
-    private final List<Vec3d> possibleMoveDirections = Arrays.asList(
-            new Vec3d(1, 0, 1), new Vec3d(0, 0, 1), new Vec3d(-1, 0, 1),
-            new Vec3d(1, 0, 0), new Vec3d(-1, 0, 0),
-            new Vec3d(1, 0, -1), new Vec3d(0, 0, -1), new Vec3d(-1, 0, -1)
-    );
+    public enum MoveType {
+        Client, Packet
+    }
 
-    private final SettingGroup sgDefault = settings.getDefaultGroup();
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgMovement = settings.createGroup("Movement");
 
-    private final Setting<Integer> arrowLookahead = sgDefault.add(new IntSetting.Builder()
+    private final Setting<Integer> arrowLookahead = sgGeneral.add(new IntSetting.Builder()
         .name("arrow-lookahead")
         .description("How many steps into the future should be taken into consideration when deciding the direction")
         .defaultValue(500)
@@ -53,12 +51,14 @@ public class ArrowDodge extends Module {
             .build()
     );
 
+    private final List<Vec3d> possibleMoveDirections = Arrays.asList(
+        new Vec3d(1, 0, 1), new Vec3d(0, 0, 1), new Vec3d(-1, 0, 1),
+        new Vec3d(1, 0, 0), new Vec3d(-1, 0, 0),
+        new Vec3d(1, 0, -1), new Vec3d(0, 0, -1), new Vec3d(-1, 0, -1)
+    );
+
     public ArrowDodge() {
         super(Categories.Combat, "arrow-dodge", "Tries to dodge arrows coming at you");
-    }
-
-    public enum MoveType {
-        Client, Packet
     }
 
     @EventHandler
