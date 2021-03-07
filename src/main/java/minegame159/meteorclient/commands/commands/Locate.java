@@ -1,6 +1,5 @@
 package minegame159.meteorclient.commands.commands;
 
-import baritone.Baritone;
 import baritone.api.BaritoneAPI;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.orbit.EventHandler;
@@ -92,13 +91,13 @@ public class Locate extends Command {
             CompoundTag tag = stack.getTag();
             ListTag nbt1 = (ListTag) tag.get("Decorations");
             if (nbt1 == null) {
-                ChatUtils.prefixError("Locate","Couldn't locate the cross. Are you holding a (highlight)woodland explorer map(default)?");
+                ChatUtils.prefixError("Locate","Couldn't locate the mansion. Are you holding a (highlight)woodland explorer map(default)?");
                 return SINGLE_SUCCESS;
             }
 
             CompoundTag iconNBT = nbt1.getCompound(0);
             if (iconNBT == null) {
-                ChatUtils.prefixError("Locate","Couldn't locate the cross. Are you holding a (highlight)woodland explorer map(default)?");
+                ChatUtils.prefixError("Locate","Couldn't locate the mansion. Are you holding a (highlight)woodland explorer map(default)?");
                 return SINGLE_SUCCESS;
             }
 
@@ -253,8 +252,9 @@ public class Locate extends Command {
             return;
         }
         BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("stop");
+        MeteorClient.EVENT_BUS.unsubscribe(this);
         Vec3d pos = new Vec3d(intersection[0],0,intersection[1]);
-        BaseText msg = new LiteralText("Stronghold located at ");
+        BaseText msg = new LiteralText("Stronghold roughly located at ");
         msg.append(ChatUtils.formatCoords(pos));
         msg.append(".");
         ChatUtils.info("Locate", msg);
