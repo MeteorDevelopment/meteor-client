@@ -24,11 +24,22 @@ public class Timer extends Module {
             .build()
     );
 
+    private double override = -1;
+
     public Timer() {
         super(Categories.Movement, "timer", "Changes the speed of everything in your game.");
     }
-    // If you put your timer to 0.1 you're a dumbass.
+
     public double getMultiplier() {
-        return isActive() ? speed.get() : 1;
+        if (isActive()) {
+            if (override != -1) return override;
+            else return speed.get();
+        } else {
+            return 1;
+        }
+    }
+
+    public void setOverride(double override) {
+        this.override = override;
     }
 }
