@@ -518,6 +518,7 @@ public class Modules extends System<Modules> {
         add(new Spam());
         add(new StashFinder());
         add(new VisualRange());
+        add(new VanillaSpoof());
     }
 
     public static class ModuleRegistry extends Registry<Module> {

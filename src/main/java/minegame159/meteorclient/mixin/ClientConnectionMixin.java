@@ -41,4 +41,16 @@ public class ClientConnectionMixin {
     private void exceptionCaught(ChannelHandlerContext context, Throwable throwable, CallbackInfo ci) {
         if (throwable instanceof IOException && Modules.get().isActive(AntiPacketKick.class)) ci.cancel();
     }
+
+    @Inject(at = @At("HEAD"), method = "send(Lnet/minecraft/network/Packet;)V", cancellable = true)
+    private void onSendPacketHead(Packet<?> packet, CallbackInfo info) {
+        PacketEvent.Send event = MeteorClient.EVENT_BUS.post(PacketEvent.Send.get(packet));
+
+        if (event.isCancelled()) info.cancel();
+    }
+
+    @Inject(method = "send(Lnet/minecraft/network/Packet;)V", at = @At("TAIL"))
+    private void onSendPacketTail(Packet<?> packet, CallbackInfo info) {
+        MeteorClient.EVENT_BUS.post(PacketEvent.Sent.get(packet));
+    }
 }

@@ -112,7 +112,8 @@
     "TridentItemMixin",
     "Vec3dMixin",
     "WorldRendererAccessor",
-    "WorldRendererMixin"
+    "WorldRendererMixin",
+    "CustomPayloadC2SPacketAccessor"
   ],
   "injectors": {
     "defaultRequire": 1
