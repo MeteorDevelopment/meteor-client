@@ -13,7 +13,6 @@ import minegame159.meteorclient.events.meteor.ClientInitialisedEvent;
 import minegame159.meteorclient.events.meteor.KeyEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.gui.WidgetScreen;
-import minegame159.meteorclient.gui.screens.topbar.TopBarHud;
 import minegame159.meteorclient.gui.screens.topbar.TopBarModules;
 import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Modules;
@@ -151,7 +150,7 @@ public class MeteorClient implements ClientModInitializer {
     private void onKey(KeyEvent event) {
         // Click GUI
         if (event.action == KeyAction.Press && event.key == KeyBindingHelper.getBoundKeyOf(KeyBinds.OPEN_CLICK_GUI).getCode()) {
-            if ((!Utils.canUpdate() && !(mc.currentScreen instanceof WidgetScreen) && !(mc.currentScreen instanceof TopBarHud)) || mc.currentScreen == null) openClickGui();
+            if (!Utils.canUpdate() && !(mc.currentScreen instanceof WidgetScreen) || mc.currentScreen == null) openClickGui();
         }
     }
 }
