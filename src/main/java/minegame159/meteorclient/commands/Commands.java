@@ -50,6 +50,7 @@ public class Commands extends System<Commands> {
         add(new Help());
         add(new Ignore());
         add(new Inventory());
+        add(new Locate());
         add(new NBT());
         add(new Panic());
         add(new Peek());
