@@ -9,10 +9,9 @@ import minegame159.meteorclient.Config;
 import minegame159.meteorclient.mixin.ChatHudAccessor;
 import minegame159.meteorclient.modules.Module;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.text.BaseText;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.Text;
+import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.math.Vec3d;
 
 public class ChatUtils {
     private static final MinecraftClient mc = MinecraftClient.getInstance();
@@ -79,16 +78,32 @@ public class ChatUtils {
         sendMsg(0, module.title, PrefixType.Module, formatMsg(msg, color, args), color);
     }
 
+    private static void moduleMessage(Formatting color, Module module, Text msg) {
+        sendMsg(0, module.title, PrefixType.Module, msg);
+    }
+
     public static void moduleInfo(Module module, String msg, Object... args) {
         moduleMessage(Formatting.GRAY, module, msg, args);
+    }
+
+    public static void moduleInfo(Module module, Text msg) {
+        moduleMessage(Formatting.GRAY, module, msg);
     }
 
     public static void moduleWarning(Module module, String msg, Object... args) {
         moduleMessage(Formatting.YELLOW, module, msg, args);
     }
 
+    public static void moduleWarning(Module module, Text msg) {
+        moduleMessage(Formatting.YELLOW, module, msg);
+    }
+
     public static void moduleError(Module module, String msg, Object... args) {
         moduleMessage(Formatting.RED, module, msg, args);
+    }
+
+    public static void moduleError(Module module, Text msg) {
+        moduleMessage(Formatting.RED, module, msg);
     }
 
     private static void sendMsg(int id, String prefix, PrefixType type, String msg, Formatting color) {
@@ -114,6 +129,24 @@ public class ChatUtils {
         ((ChatHudAccessor) mc.inGameHud.getChatHud()).add(message, id);
     }
 
+    public static BaseText formatCoords(Vec3d pos) {
+        String coordsString = String.format("(highlight)(underline)%.0f, %.0f, %.0f(default)",pos.x,pos.y,pos.z);
+        coordsString = formatMsg(coordsString,Formatting.GRAY);
+        BaseText coordsText = new LiteralText(coordsString);
+        coordsText.setStyle(coordsText.getStyle()
+                .withFormatting(Formatting.UNDERLINE)
+                .withClickEvent(new ClickEvent(
+                        ClickEvent.Action.RUN_COMMAND,
+                        String.format("%sb goto %d %d %d", Config.get().getPrefix(), (int)pos.x, (int)pos.y, (int)pos.z)
+                ))
+                .withHoverEvent(new HoverEvent(
+                        HoverEvent.Action.SHOW_TEXT,
+                        new LiteralText("Set as Baritone goal")
+                ))
+        );
+        return coordsText;
+    }
+
     private static BaseText getPrefix(String title, PrefixType type) {
         BaseText meteor = new LiteralText("Meteor");
         meteor.setStyle(meteor.getStyle().withFormatting(Formatting.BLUE));
@@ -135,10 +168,11 @@ public class ChatUtils {
         return prefix;
     }
 
-    private static String formatMsg(String format, Formatting defaultColor, Object... args) {
+    public static String formatMsg(String format, Formatting defaultColor, Object... args) {
         String msg = String.format(format, args);
         msg = msg.replaceAll("\\(default\\)", defaultColor.toString());
         msg = msg.replaceAll("\\(highlight\\)", Formatting.WHITE.toString());
+        msg = msg.replaceAll("\\(underline\\)", Formatting.UNDERLINE.toString());
 
         return msg;
     }
