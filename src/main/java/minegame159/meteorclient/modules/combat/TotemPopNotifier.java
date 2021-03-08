@@ -17,7 +17,6 @@ import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.settings.StringSetting;
 import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -27,40 +26,27 @@ import java.util.Random;
 import java.util.UUID;
 
 public class TotemPopNotifier extends Module {
+
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<Boolean> announce = sgGeneral.add(new BoolSetting.Builder()
-            .name("announce-in-chat")
-            .description("Sends a chat message for everyone to see instead of a client-side alert.")
+    private final Setting<Boolean> own = sgGeneral.add(new BoolSetting.Builder()
+            .name("own")
+            .description("Notifies you of your own totem pops.")
             .defaultValue(false)
             .build()
     );
 
-    private final Setting<Boolean> ignoreOwn = sgGeneral.add(new BoolSetting.Builder()
-            .name("ignore-own")
-            .description("Doesn't announce your own totem pops.")
+    private final Setting<Boolean> friends = sgGeneral.add(new BoolSetting.Builder()
+            .name("friends")
+            .description("Notifies you of your friends totem pops.")
             .defaultValue(true)
             .build()
     );
 
-    private final Setting<Boolean> ignoreFriend = sgGeneral.add(new BoolSetting.Builder()
-            .name("ignore-friend")
-            .description("Doesn't announce your friend's totem pops.")
+    private final Setting<Boolean> others = sgGeneral.add(new BoolSetting.Builder()
+            .name("others")
+            .description("Notifies you of other players totem pops.")
             .defaultValue(true)
-            .build()
-    );
-
-    private final Setting<String> popMessage = sgGeneral.add(new StringSetting.Builder()
-            .name("pop-message")
-            .description("Chat alert to send when a player pops.")
-            .defaultValue("EZ pops. {player} just popped {pops} {totems}. Meteor on Crack!")
-            .build()
-    );
-
-    private final Setting<String> deathMessage = sgGeneral.add(new StringSetting.Builder()
-            .name("death-message")
-            .description("Chat alert to send on a player's death.")
-            .defaultValue("EZZZ. {player} just died after popping {pops} {totems}. Meteor on Crack!")
             .build()
     );
 
@@ -93,16 +79,18 @@ public class TotemPopNotifier extends Module {
         if (p.getStatus() != 35) return;
 
         Entity entity = p.getEntity(mc.world);
-        if (entity == null || (entity.equals(mc.player) && ignoreOwn.get()) || (!Friends.get().attack((PlayerEntity) entity) && ignoreFriend.get())) return;
+
+        if (entity == null
+                || (entity.equals(mc.player) && !own.get())
+                || (Friends.get().attack(((PlayerEntity) entity)) && !others.get())
+                || (!Friends.get().attack(((PlayerEntity) entity)) && !friends.get())
+        ) return;
 
         synchronized (totemPops) {
             int pops = totemPops.getOrDefault(entity.getUuid(), 0);
             totemPops.put(entity.getUuid(), ++pops);
 
-            String msg = popMessage.get().replace("{player}", entity.getName().getString()).replace("{pops}", String.valueOf(pops)).replace("{totems}", (pops == 1 ? "totem" : "totems"));
-
-            if (announce.get()) mc.player.sendChatMessage(msg);
-            else ChatUtils.info(getChatId(entity), "(highlight)%s (default)popped (highlight)%d (default)%s.", entity.getName().getString(), pops, pops == 1 ? "totem" : "totems");
+            ChatUtils.info(getChatId(entity), "(highlight)%s (default)popped (highlight)%d (default)%s.", ((PlayerEntity) entity).getGameProfile().getName(), pops, pops == 1 ? "totem" : "totems");
         }
     }
 
@@ -115,11 +103,7 @@ public class TotemPopNotifier extends Module {
                 if (player.deathTime > 0 || player.getHealth() <= 0) {
                     int pops = totemPops.removeInt(player.getUuid());
 
-                    String msg = deathMessage.get().replace("{player}", player.getName().getString()).replace("{pops}", String.valueOf(pops)).replace("{totems}", (pops == 1 ? "totem" : "totems"));
-
-                    if (announce.get()) mc.player.sendChatMessage(msg);
-                    else ChatUtils.info(getChatId(player), "(highlight)%s (default)died after popping (highlight)%d (default)%s.", player.getName().getString(), pops, pops == 1 ? "totem" : "totems");
-
+                    ChatUtils.info(getChatId(player), "(highlight)%s (default)died after popping (highlight)%d (default)%s.", player.getGameProfile().getName(), pops, pops == 1 ? "totem" : "totems");
                     chatIds.removeInt(player.getUuid());
                 }
             }
