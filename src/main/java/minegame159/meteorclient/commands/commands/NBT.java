@@ -5,7 +5,9 @@
 
 package minegame159.meteorclient.commands.commands;
 
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import minegame159.meteorclient.Config;
 import minegame159.meteorclient.commands.Command;
 import minegame159.meteorclient.commands.arguments.CompoundNbtTagArgumentType;
 import minegame159.meteorclient.utils.player.ChatUtils;
@@ -32,9 +34,15 @@ public class NBT extends Command {
         builder.then(literal("add").then(argument("nbt_data", CompoundNbtTagArgumentType.nbtTag()).executes(s -> {
             ItemStack stack = mc.player.inventory.getMainHandStack();
             if (validBasic(stack)) {
-                CompoundTag tag = s.getArgument("nbt_data", CompoundTag.class);
-                stack.getTag().copyFrom(tag);
-                setStack(stack);
+                CompoundTag tag = CompoundNbtTagArgumentType.getTag(s, "nbt_data");
+                CompoundTag source = stack.getTag();
+
+                if (tag != null && source != null) {
+                    stack.getTag().copyFrom(tag);
+                    setStack(stack);
+                } else {
+                    ChatUtils.prefixError("NBT", "Some of the NBT data could not be found, try using: " + Config.get().getPrefix() + "nbt set {nbt}");
+                }
             }
             return SINGLE_SUCCESS;
         })));
@@ -58,7 +66,7 @@ public class NBT extends Command {
         builder.then(literal("get").executes(s -> {
             ItemStack stack = mc.player.inventory.getMainHandStack();
             if (stack == null) {
-                ChatUtils.prefixError("NBT","You must hold an item in your main hand.");
+                ChatUtils.prefixError("NBT", "You must hold an item in your main hand.");
             } else {
                 CompoundTag tag = stack.getTag();
                 String nbt = tag == null ? "none" : tag.asString();
@@ -110,6 +118,18 @@ public class NBT extends Command {
             }
             return SINGLE_SUCCESS;
         }));
+        builder.then(literal("count").then(argument("count", IntegerArgumentType.integer(-127, 127)).executes(context -> {
+            ItemStack stack = mc.player.inventory.getMainHandStack();
+
+            if (validBasic(stack)) {
+                int count = IntegerArgumentType.getInteger(context, "count");
+                stack.setCount(count);
+                setStack(stack);
+                ChatUtils.prefixInfo("NBT", "Set mainhand stack count to " + count + ".");
+            }
+
+            return SINGLE_SUCCESS;
+        })));
     }
 
     private void setStack(ItemStack stack) {

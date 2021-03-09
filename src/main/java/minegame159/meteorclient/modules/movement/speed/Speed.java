@@ -58,6 +58,13 @@ public class Speed extends Module {
             .build()
     );
 
+    public final Setting<Boolean> ncpSpeedLimit = sgNCP.add(new BoolSetting.Builder()
+            .name("speed-limit")
+            .description("Limits your speed on servers with very strict anticheats.")
+            .defaultValue(false)
+            .build()
+    );
+
     //Vanilla
 
     public final Setting<Double> speed = sgVanilla.add(new DoubleSetting.Builder()

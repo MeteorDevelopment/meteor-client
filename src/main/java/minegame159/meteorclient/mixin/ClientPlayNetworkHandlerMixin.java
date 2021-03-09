@@ -11,7 +11,6 @@ import minegame159.meteorclient.events.entity.player.PickItemsEvent;
 import minegame159.meteorclient.events.game.GameJoinedEvent;
 import minegame159.meteorclient.events.game.GameLeftEvent;
 import minegame159.meteorclient.events.packets.ContainerSlotUpdateEvent;
-import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.events.packets.PlaySoundPacketEvent;
 import minegame159.meteorclient.events.world.ChunkDataEvent;
 import minegame159.meteorclient.mixininterface.IExplosionS2CPacket;
@@ -22,7 +21,6 @@ import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
-import net.minecraft.network.Packet;
 import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.world.chunk.WorldChunk;
 import org.spongepowered.asm.mixin.Mixin;
@@ -52,18 +50,6 @@ public abstract class ClientPlayNetworkHandlerMixin {
         }
 
         MeteorClient.EVENT_BUS.post(GameJoinedEvent.get());
-    }
-
-    @Inject(at = @At("HEAD"), method = "sendPacket", cancellable = true)
-    private void onSendPacketHead(Packet<?> packet, CallbackInfo info) {
-        PacketEvent.Send event = MeteorClient.EVENT_BUS.post(PacketEvent.Send.get(packet));
-
-        if (event.isCancelled()) info.cancel();
-    }
-
-    @Inject(method = "sendPacket", at = @At("TAIL"))
-    private void onSendPacketTail(Packet<?> packet, CallbackInfo info) {
-        MeteorClient.EVENT_BUS.post(PacketEvent.Sent.get(packet));
     }
 
     @Inject(at = @At("HEAD"), method = "onPlaySound")

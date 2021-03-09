@@ -49,7 +49,7 @@ public class WTopBar extends WTable {
                 double mouseX = mc.mouse.getX();
                 double mouseY = mc.mouse.getY();
 
-                if (screen != null) screen.onClose();
+                if (screen != null && !type.closeToParent) screen.onClose();
                 mc.openScreen(type.createScreen());
 
                 GLFW.glfwSetCursorPos(mc.getWindow().getHandle(), mouseX, mouseY);

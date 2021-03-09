@@ -43,13 +43,13 @@ public class Reset extends Command {
                 .then(argument("module", ModuleArgumentType.module()).executes(context -> {
                     Module module = context.getArgument("module", Module.class);
 
-                    module.setKey(-1);
+                    module.keybind.set(true, -1);
                     ChatUtils.prefixInfo("KeyBinds","This bind has been reset.");
 
                     return SINGLE_SUCCESS;
                 }))
                 .then(literal("all").executes(context -> {
-                    Modules.get().getAll().forEach(module -> module.setKey(-1));
+                    Modules.get().getAll().forEach(module -> module.keybind.set(true, -1));
                     return SINGLE_SUCCESS;
                 }))
         );

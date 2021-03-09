@@ -7,7 +7,6 @@ package minegame159.meteorclient.modules;
 
 import minegame159.meteorclient.Config;
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.meteor.ModuleBindChangedEvent;
 import minegame159.meteorclient.events.meteor.ModuleVisibilityChangedEvent;
 import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.gui.screens.ModuleScreen;
@@ -17,6 +16,7 @@ import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.settings.Settings;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.ISerializable;
+import minegame159.meteorclient.utils.misc.Keybind;
 import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.client.MinecraftClient;
@@ -42,7 +42,7 @@ public abstract class Module implements ISerializable<Module> {
 
     public boolean serialize = true;
 
-    private int key = -1;
+    public final Keybind keybind = Keybind.fromKey(-1);
     public boolean toggleOnKeyRelease = false;
 
     public Module(Category category, String name, String description) {
@@ -116,7 +116,7 @@ public abstract class Module implements ISerializable<Module> {
         CompoundTag tag = new CompoundTag();
 
         tag.putString("name", name);
-        tag.putInt("key", key);
+        tag.put("keybind", keybind.toTag());
         tag.putBoolean("toggleOnKeyRelease", toggleOnKeyRelease);
         tag.put("settings", settings.toTag());
 
@@ -129,7 +129,9 @@ public abstract class Module implements ISerializable<Module> {
     @Override
     public Module fromTag(CompoundTag tag) {
         // General
-        key = tag.getInt("key");
+        if (tag.contains("key")) keybind.set(true, tag.getInt("key"));
+        else keybind.fromTag(tag.getCompound("keybind"));
+
         toggleOnKeyRelease = tag.getBoolean("toggleOnKeyRelease");
 
         // Settings
@@ -158,18 +160,6 @@ public abstract class Module implements ISerializable<Module> {
 
     public void sendToggledMsg() {
         if (Config.get().chatCommandsInfo) ChatUtils.info(42069, "Toggled (highlight)%s(default) %s(default).", title, isActive() ? Formatting.GREEN + "on" : Formatting.RED + "off");
-    }
-
-    public void setKey(int key, boolean postEvent) {
-        this.key = key;
-        if (postEvent) MeteorClient.EVENT_BUS.post(ModuleBindChangedEvent.get(this));
-    }
-    public void setKey(int key) {
-        setKey(key, true);
-    }
-
-    public int getKey() {
-        return key;
     }
 
     @Override

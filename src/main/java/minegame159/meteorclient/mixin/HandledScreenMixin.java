@@ -10,7 +10,6 @@ import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.render.EChestPreview;
 import minegame159.meteorclient.modules.render.ItemHighlight;
 import minegame159.meteorclient.modules.render.ShulkerPeek;
-import minegame159.meteorclient.utils.misc.input.KeyBinds;
 import minegame159.meteorclient.utils.player.EChestMemory;
 import minegame159.meteorclient.utils.render.RenderUtils;
 import net.minecraft.client.MinecraftClient;
@@ -61,8 +60,11 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
     private void onRender(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo info) {
         if (focusedSlot != null && !focusedSlot.getStack().isEmpty()) {
             // Shulker Preview
-            if (Modules.get().isActive(ShulkerPeek.class) && ((KeyBinds.SHULKER_PEEK.isPressed() && Modules.get().get(ShulkerPeek.class).mode.get() == ShulkerPeek.Mode.Tooltip) || (Modules.get().get(ShulkerPeek.class).mode.get() == ShulkerPeek.Mode.Always))) {
+            ShulkerPeek shulkerPeek = Modules.get().get(ShulkerPeek.class);
+
+            if (shulkerPeek.isActive() && ((shulkerPeek.isPressed() && shulkerPeek.mode.get() == ShulkerPeek.Mode.Tooltip) || (shulkerPeek.mode.get() == ShulkerPeek.Mode.Always))) {
                 CompoundTag compoundTag = focusedSlot.getStack().getSubTag("BlockEntityTag");
+
                 if (compoundTag != null) {
                     if (compoundTag.contains("Items", 9)) {
                         DefaultedList<ItemStack> itemStacks = DefaultedList.ofSize(27, ItemStack.EMPTY);
@@ -88,7 +90,9 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
     @Inject(method = "drawMouseoverTooltip", at = @At("HEAD"), cancellable = true)
     private void onDrawMouseoverTooltip(MatrixStack matrices, int x, int y, CallbackInfo info) {
         if (focusedSlot != null && !focusedSlot.getStack().isEmpty()) {
-            if (Modules.get().isActive(ShulkerPeek.class) && hasItems(focusedSlot.getStack()) && ((KeyBinds.SHULKER_PEEK.isPressed() && Modules.get().get(ShulkerPeek.class).mode.get() == ShulkerPeek.Mode.Tooltip) || (Modules.get().get(ShulkerPeek.class).mode.get() == ShulkerPeek.Mode.Always))) info.cancel();
+            ShulkerPeek shulkerPeek = Modules.get().get(ShulkerPeek.class);
+
+            if (shulkerPeek.isPressed() && hasItems(focusedSlot.getStack()) && ((shulkerPeek.isPressed() && shulkerPeek.mode.get() == ShulkerPeek.Mode.Tooltip) || (shulkerPeek.mode.get() == ShulkerPeek.Mode.Always))) info.cancel();
             else if (focusedSlot.getStack().getItem() == Items.ENDER_CHEST && Modules.get().isActive(EChestPreview.class)) info.cancel();
         }
     }

@@ -17,13 +17,13 @@ import minegame159.meteorclient.gui.screens.topbar.TopBarModules;
 import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.misc.DiscordPresence;
-import minegame159.meteorclient.modules.render.hud.HudEditorScreen;
 import minegame159.meteorclient.rendering.Fonts;
 import minegame159.meteorclient.rendering.Matrices;
 import minegame159.meteorclient.rendering.text.CustomTextRenderer;
 import minegame159.meteorclient.systems.Systems;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.entity.EntityUtils;
+import minegame159.meteorclient.utils.misc.FakeClientPlayer;
 import minegame159.meteorclient.utils.misc.MeteorPlayers;
 import minegame159.meteorclient.utils.misc.Names;
 import minegame159.meteorclient.utils.misc.input.KeyAction;
@@ -41,7 +41,6 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.entrypoint.EntrypointContainer;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.options.KeyBinding;
 import net.minecraft.client.util.math.MatrixStack;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -99,6 +98,7 @@ public class MeteorClient implements ClientModInitializer {
         Rotations.init();
         Names.init();
         MeteorPlayers.init();
+        FakeClientPlayer.init();
 
         // Register categories
         Modules.REGISTERING_CATEGORIES = true;
@@ -119,6 +119,7 @@ public class MeteorClient implements ClientModInitializer {
         // Call onInitialize for addons
         addons.forEach(MeteorAddon::onInitialize);
 
+        Modules.get().sortModules();
         Systems.load();
     }
 
@@ -149,11 +150,7 @@ public class MeteorClient implements ClientModInitializer {
     private void onKey(KeyEvent event) {
         // Click GUI
         if (event.action == KeyAction.Press && event.key == KeyBindingHelper.getBoundKeyOf(KeyBinds.OPEN_CLICK_GUI).getCode()) {
-            if ((!Utils.canUpdate() && !(mc.currentScreen instanceof WidgetScreen) && !(mc.currentScreen instanceof HudEditorScreen)) || mc.currentScreen == null) openClickGui();
+            if (!Utils.canUpdate() && !(mc.currentScreen instanceof WidgetScreen) || mc.currentScreen == null) openClickGui();
         }
-
-        // Shulker Peek
-        KeyBinding shulkerPeek = KeyBinds.SHULKER_PEEK;
-        shulkerPeek.setPressed(shulkerPeek.matchesKey(event.key, 0) && event.action != KeyAction.Release);
     }
 }

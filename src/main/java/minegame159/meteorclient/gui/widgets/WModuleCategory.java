@@ -12,7 +12,7 @@ import minegame159.meteorclient.modules.Modules;
 
 public class WModuleCategory extends WWindow {
     public WModuleCategory(Category category) {
-        super(category.toString(), category.windowConfig.isExpanded(), true);
+        super(category.toString(), category.windowConfig.isExpanded(), true, GuiConfig.get().displayIcons ? category.icon : null);
         this.type = GuiConfig.WindowType.Category;
         this.category = category;
 
@@ -26,4 +26,5 @@ public class WModuleCategory extends WWindow {
             row();
         }
     }
+
 }

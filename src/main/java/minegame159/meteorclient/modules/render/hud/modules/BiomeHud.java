@@ -14,7 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-public class BiomeHud extends DoubleTextHudModule {
+public class BiomeHud extends DoubleTextHudElement {
     private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
 
     public BiomeHud(HUD hud) {
@@ -23,7 +23,7 @@ public class BiomeHud extends DoubleTextHudModule {
 
     @Override
     protected String getRight() {
-        if (mc.player == null || mc.world == null) return "";
+        if (isInEditor()) return "Plains";
 
         blockPos.set(mc.player.getX(), mc.player.getY(), mc.player.getZ());
         Identifier id = mc.world.getRegistryManager().get(Registry.BIOME_KEY).getId(mc.world.getBiome(blockPos));

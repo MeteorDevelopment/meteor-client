@@ -9,7 +9,6 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import minegame159.meteorclient.commands.commands.*;
-import minegame159.meteorclient.commands.commands.swarm.*;
 import minegame159.meteorclient.systems.System;
 import minegame159.meteorclient.systems.Systems;
 import net.minecraft.client.MinecraftClient;
@@ -39,7 +38,6 @@ public class Commands extends System<Commands> {
     @Override
     public void init() {
         add(new Baritone());
-        add(new Bind());
         add(new VClip());
         add(new HClip());
         add(new ClearChat());
@@ -52,6 +50,7 @@ public class Commands extends System<Commands> {
         add(new Help());
         add(new Ignore());
         add(new Inventory());
+        add(new Locate());
         add(new NBT());
         add(new Panic());
         add(new Peek());
@@ -61,20 +60,10 @@ public class Commands extends System<Commands> {
         add(new Reset());
         add(new Say());
         add(new Server());
-        add(new SwarmModuleToggle());
-        add(new SwarmQueen());
-        add(new SwarmSlave());
-        add(new SwarmEscape());
-        add(new SwarmGoto());
-        add(new SwarmFollow());
-        add(new SwarmScatter());
-        add(new SwarmMine());
-        add(new SwarmInfinityMiner());
-        add(new SwarmRelease());
-        add(new SwarmStop());
-        add(new SwarmCloseConnections());
+        add(new SwarmCommand());
         add(new Toggle());
         add(new SettingCommand());
+        add(new Gamemode());
     }
 
     public void dispatch(String message) throws CommandSyntaxException {
@@ -102,7 +91,12 @@ public class Commands extends System<Commands> {
         }
     }
 
-    private void add(Command command) {
+    public void add(Command command) {
+        // Remove the previous command with the same name
+        commands.removeIf(command1 -> command1.getName().equals(command.getName()));
+        commandInstances.values().removeIf(command1 -> command1.getName().equals(command.getName()));
+
+        // Add the command
         command.registerTo(DISPATCHER);
         commands.add(command);
         commandInstances.put(command.getClass(), command);

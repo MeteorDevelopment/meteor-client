@@ -5,32 +5,30 @@
 
 package minegame159.meteorclient.modules.combat;
 
-//Created by squidoodly 25/04/2020
-
 import meteordevelopment.orbit.EventHandler;
-import minegame159.meteorclient.events.entity.player.RightClickEvent;
+import minegame159.meteorclient.events.meteor.MouseButtonEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.misc.input.KeyAction;
 import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.item.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_RIGHT;
 
-@InvUtils.Priority(priority = 1)
 public class OffhandExtra extends Module {
     public enum Mode{
         EGap,
         Gap,
         EXP,
         Crystal,
+        Shield
     }
     
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -124,7 +122,7 @@ public class OffhandExtra extends Module {
         if (Modules.get().isActive(AutoTotem.class) && mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING) {
             InvUtils.FindItemResult result = InvUtils.findItemWithCount(Items.TOTEM_OF_UNDYING);
             if (result.slot != -1) {
-                doMove(result.slot);
+                InvUtils.addSlots(2, 45, result.slot, 1);
             }
         }
     }
@@ -150,38 +148,39 @@ public class OffhandExtra extends Module {
                     if (mc.player.getOffHandStack().getItem() != getItem()) {
                         result = findSlot(getItem());
                         if (result != -1) {
-                            doMove(result);
+                            InvUtils.addSlots(2, 45, result, 1);
                             return;
                         }
                     }
                 }
                 if (!sentMessage) {
-                    ChatUtils.moduleWarning(this, "None of the chosen item found.");
+                    ChatUtils.moduleWarning(this, "Chosen item not found." + (selfToggle.get() ? " Disabling." : ""));
                     sentMessage = true;
                 }
                 if (selfToggle.get()) this.toggle();
                 return;
             }
             if (mc.player.getOffHandStack().getItem() != getItem() && replace.get()) {
-                doMove(result);
+                InvUtils.addSlots(2, 45, result, 1);
                 sentMessage = false;
             }
         } else if (!asimov.get() && !isClicking && mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING) {
             int result = findSlot(Items.TOTEM_OF_UNDYING);
             if (result != -1) {
-                doMove(result);
+                InvUtils.addSlots(2, 45, result, 1);
             }
 
         }
     }
 
     @EventHandler
-    private void onRightClick(RightClickEvent event) {
-        assert mc.player != null;
+    private void onMouseButton(MouseButtonEvent event) {
+        if (event.action != KeyAction.Press || event.button != GLFW_MOUSE_BUTTON_RIGHT) return;
+
         if (mc.currentScreen != null) return;
         if (Modules.get().get(AutoTotem.class).getLocked() || !canMove()) return;
         if ((mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING || (mc.player.getHealth() + mc.player.getAbsorptionAmount() > health.get())
-               && (mc.player.getOffHandStack().getItem() != getItem()) && !(mc.currentScreen instanceof HandledScreen<?>))) {
+                && (mc.player.getOffHandStack().getItem() != getItem()) && !(mc.currentScreen instanceof HandledScreen<?>))) {
             if (mc.player.getMainHandStack().getItem() instanceof SwordItem && sword.get()) currentMode = Mode.EGap;
             else if (mc.player.getMainHandStack().getItem() instanceof EnchantedGoldenAppleItem && offhandCrystal.get()) currentMode = Mode.Crystal;
             else if (Modules.get().isActive(CrystalAura.class) && offhandCA.get()) currentMode = Mode.Crystal;
@@ -191,14 +190,14 @@ public class OffhandExtra extends Module {
             int result = findSlot(item);
             if (result == -1 && mc.player.getOffHandStack().getItem() != getItem()) {
                 if (!sentMessage) {
-                    ChatUtils.moduleWarning(this, "None of the chosen item found.");
+                    ChatUtils.moduleWarning(this, "Chosen item not found." + (selfToggle.get() ? " Disabling." : ""));
                     sentMessage = true;
                 }
                 if (selfToggle.get()) this.toggle();
                 return;
             }
             if (mc.player.getOffHandStack().getItem() != item && mc.player.getMainHandStack().getItem() != item && replace.get()) {
-                doMove(result);
+                InvUtils.addSlots(2, 45, result, 1);
                 sentMessage = false;
             }
             currentMode = mode.get();
@@ -207,14 +206,22 @@ public class OffhandExtra extends Module {
 
     private Item getItem(){
         Item item = Items.TOTEM_OF_UNDYING;
-        if (currentMode == Mode.EGap) {
-            item = Items.ENCHANTED_GOLDEN_APPLE;
-        } else if (currentMode == Mode.Gap) {
-            item = Items.GOLDEN_APPLE;
-        } else if (currentMode == Mode.Crystal) {
-            item = Items.END_CRYSTAL;
-        } else if (currentMode == Mode.EXP) {
-            item = Items.EXPERIENCE_BOTTLE;
+        switch (currentMode) {
+            case EGap:
+                item = Items.ENCHANTED_GOLDEN_APPLE;
+                break;
+            case EXP:
+                item = Items.EXPERIENCE_BOTTLE;
+                break;
+            case Gap:
+                item = Items.GOLDEN_APPLE;
+                break;
+            case Crystal:
+                item = Items.END_CRYSTAL;
+                break;
+            case Shield:
+                item = Items.SHIELD;
+                break;
         }
         return item;
     }
@@ -227,19 +234,8 @@ public class OffhandExtra extends Module {
         assert mc.player != null;
         return mc.player.getMainHandStack().getItem() != Items.BOW
                 && mc.player.getMainHandStack().getItem() != Items.TRIDENT
-                && mc.player.getMainHandStack().getItem() != Items.CROSSBOW;
-    }
-
-    private void doMove(int slot){
-        assert mc.player != null;
-        boolean empty = mc.player.getOffHandStack().isEmpty();
-        List<Integer> slots = new ArrayList<>();
-        if(mc.player.inventory.getCursorStack().getItem() != Items.TOTEM_OF_UNDYING) {
-            slots.add(InvUtils.invIndexToSlotId(slot));
-        }
-        slots.add(InvUtils.invIndexToSlotId(InvUtils.OFFHAND_SLOT));
-        if (!empty) slots.add(InvUtils.invIndexToSlotId(slot));
-        InvUtils.addSlots(slots, this.getClass());
+                && mc.player.getMainHandStack().getItem() != Items.CROSSBOW
+                && !mc.player.getMainHandStack().getItem().isFood();
     }
 
     private int findSlot(Item item){
@@ -249,9 +245,7 @@ public class OffhandExtra extends Module {
                 return i;
             }
         }
-        if (hotBar.get()){
-            return InvUtils.findItemWithCount(item).slot;
-        }
+        if (hotBar.get()) return InvUtils.findItemWithCount(item).slot;
         return -1;
     }
 

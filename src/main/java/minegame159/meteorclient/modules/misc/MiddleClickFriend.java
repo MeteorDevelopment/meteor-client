@@ -6,12 +6,15 @@
 package minegame159.meteorclient.modules.misc;
 
 import meteordevelopment.orbit.EventHandler;
-import minegame159.meteorclient.events.meteor.MiddleMouseButtonEvent;
+import minegame159.meteorclient.events.meteor.MouseButtonEvent;
 import minegame159.meteorclient.friends.Friend;
 import minegame159.meteorclient.friends.Friends;
 import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.utils.misc.input.KeyAction;
 import net.minecraft.entity.player.PlayerEntity;
+
+import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_MIDDLE;
 
 public class MiddleClickFriend extends Module {
     public MiddleClickFriend() {
@@ -19,8 +22,9 @@ public class MiddleClickFriend extends Module {
     }
 
     @EventHandler
-    private void onMiddleMouseButton(MiddleMouseButtonEvent event) {
-        if (mc.currentScreen != null) return;
-        if (mc.targetedEntity instanceof PlayerEntity) Friends.get().addOrRemove(new Friend((PlayerEntity) mc.targetedEntity));
+    private void onMouseButton(MouseButtonEvent event) {
+        if (event.action == KeyAction.Press && event.button == GLFW_MOUSE_BUTTON_MIDDLE && mc.currentScreen == null) {
+            if (mc.targetedEntity instanceof PlayerEntity) Friends.get().addOrRemove(new Friend((PlayerEntity) mc.targetedEntity));
+        }
     }
 }

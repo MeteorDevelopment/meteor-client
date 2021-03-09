@@ -9,7 +9,7 @@ import minegame159.meteorclient.modules.render.hud.HUD;
 import minegame159.meteorclient.modules.render.hud.HudRenderer;
 import minegame159.meteorclient.utils.render.color.Color;
 
-public abstract class DoubleTextHudModule extends HudModule {
+public abstract class DoubleTextHudElement extends HudElement {
     protected Color rightColor;
     protected boolean visible = true;
 
@@ -18,7 +18,7 @@ public abstract class DoubleTextHudModule extends HudModule {
 
     private double leftWidth;
 
-    public DoubleTextHudModule(HUD hud, String name, String description, String left) {
+    public DoubleTextHudElement(HUD hud, String name, String description, String left) {
         super(hud, name, description);
         this.rightColor = hud.secondaryColor.get();
         this.left = left;
@@ -36,8 +36,8 @@ public abstract class DoubleTextHudModule extends HudModule {
     public void render(HudRenderer renderer) {
         if (!visible) return;
 
-        int x = box.getX();
-        int y = box.getY();
+        double x = box.getX();
+        double y = box.getY();
 
         renderer.text(left, x, y, hud.primaryColor.get());
         renderer.text(right, x + leftWidth, y, rightColor);

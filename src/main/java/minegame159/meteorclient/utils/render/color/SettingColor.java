@@ -20,8 +20,18 @@ public class SettingColor extends Color {
         super(r, g, b);
     }
 
+    public SettingColor(int r, int g, int b, double rainbowSpeed) {
+        this(r, g, b, 255, rainbowSpeed);
+    }
+
     public SettingColor(int r, int g, int b, int a) {
         super(r, g, b, a);
+    }
+
+    public SettingColor(int r, int g, int b, int a, double rainbowSpeed) {
+        super(r, g, b, a);
+
+        this.rainbowSpeed = rainbowSpeed;
     }
 
     public SettingColor(SettingColor color) {

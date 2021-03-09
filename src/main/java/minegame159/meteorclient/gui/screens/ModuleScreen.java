@@ -29,12 +29,15 @@ public class ModuleScreen extends WindowScreen {
         add(new WLabel(module.description));
         row();
 
+        // Settings
         if (module.settings.sizeGroups() > 0) {
             add(module.settings.createTable(false)).fillX().expandX().getWidget();
-        } else {
+        }
+        else {
             add(new WHorizontalSeparator());
         }
 
+        // Custom widget
         WWidget customWidget = module.getWidget();
         if (customWidget != null) {
             if (module.settings.sizeGroups() > 0) {
@@ -53,19 +56,15 @@ public class ModuleScreen extends WindowScreen {
         }
 
         // Bind
-        keybind = add(new WKeybind(module.getKey())).getWidget();
+        keybind = add(new WKeybind(module.keybind)).getWidget();
         keybind.actionOnSet = () -> Modules.get().setModuleToBind(module);
-        keybind.action = () -> module.setKey(keybind.get());
         row();
 
         // Toggle on key release
         WTable tokrTable = add(new WTable()).fillX().expandX().getWidget();
         tokrTable.add(new WLabel("Toggle on key release:"));
         WCheckbox toggleOnKeyRelease = tokrTable.add(new WCheckbox(module.toggleOnKeyRelease)).getWidget();
-        toggleOnKeyRelease.action = () -> {
-            module.toggleOnKeyRelease = toggleOnKeyRelease.checked;
-            Modules.get().save();
-        };
+        toggleOnKeyRelease.action = () -> module.toggleOnKeyRelease = toggleOnKeyRelease.checked;
         row();
 
         add(new WHorizontalSeparator());
@@ -91,8 +90,6 @@ public class ModuleScreen extends WindowScreen {
 
     @EventHandler
     private void onModuleBindChanged(ModuleBindChangedEvent event) {
-        if (event.module == module) {
-            keybind.set(event.module.getKey());
-        }
+        keybind.reset();
     }
 }

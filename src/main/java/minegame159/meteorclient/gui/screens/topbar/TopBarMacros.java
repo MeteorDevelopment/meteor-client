@@ -12,7 +12,6 @@ import minegame159.meteorclient.gui.widgets.WTable;
 import minegame159.meteorclient.macros.EditMacroScreen;
 import minegame159.meteorclient.macros.Macro;
 import minegame159.meteorclient.macros.Macros;
-import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 
 public class TopBarMacros extends TopBarWindowScreen {
@@ -29,7 +28,7 @@ public class TopBarMacros extends TopBarWindowScreen {
             WTable t = add(new WTable()).getWidget();
 
             for (Macro macro : Macros.get()) {
-                t.add(new WLabel(macro.name + " (" + Utils.getKeyName(macro.key) + ")"));
+                t.add(new WLabel(macro.name + " (" + macro.keybind + ")"));
 
                 WButton edit = t.add(new WButton(WButton.ButtonRegion.Edit)).getWidget();
                 edit.action = () -> MinecraftClient.getInstance().openScreen(new EditMacroScreen(macro));
