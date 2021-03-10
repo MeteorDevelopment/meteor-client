@@ -14,6 +14,8 @@ import minegame159.meteorclient.mixininterface.IPlayerMoveC2SPacket;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.Modules;
+import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
@@ -37,6 +39,13 @@ public class Criticals extends Module {
             .build()
     );
 
+    private final Setting<Boolean> onlyOnKA = sgGeneral.add(new BoolSetting.Builder()
+            .name("only-on-ka")
+            .description("Will only deal critical hits if kill aura is enabled.")
+            .defaultValue(false)
+            .build()
+    );
+
     public Criticals() {
         super(Categories.Combat, "criticals", "Performs critical attacks when you hit your target.");
     }
@@ -56,7 +65,8 @@ public class Criticals extends Module {
 
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
-
+        boolean kaActive = Modules.get().isActive(KillAura.class);
+        if (onlyOnKA.get() && !kaActive) return;
         if (event.packet instanceof PlayerInteractEntityC2SPacket && ((PlayerInteractEntityC2SPacket) event.packet).getType() == PlayerInteractEntityC2SPacket.InteractionType.ATTACK) {
             if (skipCrit()) return;
             if (mode.get() == Mode.Packet) doPacketMode();
