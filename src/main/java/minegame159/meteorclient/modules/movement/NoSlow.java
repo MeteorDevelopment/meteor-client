@@ -54,8 +54,24 @@ public class NoSlow extends Module {
 
     private boolean shouldSneak = false;
 
+    private final ClientCommandC2SPacket START = new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY);
+    private final ClientCommandC2SPacket STOP = new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY);
+
     public NoSlow() {
         super(Categories.Movement, "no-slow", "Allows you to move normally when using objects that will slow you.");
+    }
+
+    @EventHandler
+    public void onPreTick(TickEvent.Pre event) {
+        if (!airStrict.get()) return;
+
+        if (mc.player.isUsingItem()) {
+            mc.player.networkHandler.sendPacket(START);
+            shouldSneak = true;
+        } else if (shouldSneak && !mc.player.isUsingItem()) {
+            mc.player.networkHandler.sendPacket(STOP);
+            shouldSneak = false;
+        }
     }
 
     public boolean items() {
@@ -72,18 +88,5 @@ public class NoSlow extends Module {
 
     public boolean slimeBlock() {
         return isActive() && slimeBlock.get();
-    }
-
-    @EventHandler
-    public void onPreTick(TickEvent.Pre event) {
-        assert mc.player != null;
-        assert !airStrict.get();
-        if (mc.player.isUsingItem()) {
-            mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY)); // Sends a sneaking packet
-            shouldSneak = true;
-        } else if (shouldSneak && !mc.player.isUsingItem()) {
-            mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY)); // Sends a stop sneaking packet
-            shouldSneak = false;
-        }
     }
 }
