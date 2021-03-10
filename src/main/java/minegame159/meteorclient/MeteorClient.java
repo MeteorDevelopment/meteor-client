@@ -30,6 +30,7 @@ import minegame159.meteorclient.utils.misc.input.KeyBinds;
 import minegame159.meteorclient.utils.network.Capes;
 import minegame159.meteorclient.utils.network.MeteorExecutor;
 import minegame159.meteorclient.utils.network.OnlinePlayers;
+import minegame159.meteorclient.utils.network.OptifineCapes;
 import minegame159.meteorclient.utils.player.EChestMemory;
 import minegame159.meteorclient.utils.player.Rotations;
 import minegame159.meteorclient.utils.render.color.RainbowColors;
@@ -134,6 +135,7 @@ public class MeteorClient implements ClientModInitializer {
     @EventHandler
     private void onTick(TickEvent.Post event) {
         Capes.tick();
+        OptifineCapes.tick();
 
         if (screenToOpen != null && mc.currentScreen == null) {
             mc.openScreen(screenToOpen);

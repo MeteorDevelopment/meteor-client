@@ -7,6 +7,7 @@ package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.utils.misc.FakeClientPlayer;
 import minegame159.meteorclient.utils.network.Capes;
+import minegame159.meteorclient.utils.network.OptifineCapes;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.network.PlayerListEntry;
@@ -22,6 +23,7 @@ public class AbstractClientPlayerEntityMixin {
     @Inject(method = "getCapeTexture", at = @At("HEAD"), cancellable = true)
     private void onGetCapeTexture(CallbackInfoReturnable<Identifier> info) {
         Identifier id = Capes.get((PlayerEntity) (Object) this);
+        if(id == null) id = OptifineCapes.get((PlayerEntity) (Object) this);
         if (id != null) info.setReturnValue(id);
     }
 

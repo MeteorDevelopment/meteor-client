@@ -7,7 +7,10 @@ package minegame159.meteorclient.utils.network;
 
 import com.google.gson.Gson;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.net.SocketTimeoutException;
@@ -18,7 +21,7 @@ import java.util.function.Consumer;
 public class HttpUtils {
     private static final Gson GSON = new Gson();
 
-    private static InputStream request(String method, String url, String body) {
+    public static HttpURLConnection connect(String method, String url, String body) {
         try {
             HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
             conn.setRequestMethod(method);
@@ -33,7 +36,7 @@ public class HttpUtils {
                 conn.getOutputStream().write(bytes);
             }
 
-            return conn.getInputStream();
+            return conn;
         } catch (SocketTimeoutException ignored) {
             return null;
         } catch (IOException  e) {
@@ -41,6 +44,16 @@ public class HttpUtils {
         }
 
         return null;
+    }
+
+    private static InputStream request(String method, String url, String body) {
+        try {
+            HttpURLConnection conn = connect(method, url, body);
+            return conn != null ? conn.getInputStream() : null;
+        } catch (IOException  e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     public static InputStream get(String url) {

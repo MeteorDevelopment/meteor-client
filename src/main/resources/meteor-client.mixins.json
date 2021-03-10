@@ -104,6 +104,7 @@
     "ShulkerBoxScreenMixin",
     "SignBlockEntityRendererMixin",
     "SignEditScreenAccessor",
+    "SkinOptionsScreenMixin",
     "SlimeBlockMixin",
     "SoundSystemMixin",
     "SplashTextResourceSupplierMixin",
