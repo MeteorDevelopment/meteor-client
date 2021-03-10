@@ -54,11 +54,17 @@ public class NoSlow extends Module {
 
     private boolean shouldSneak = false;
 
-    private final ClientCommandC2SPacket START = new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY);
-    private final ClientCommandC2SPacket STOP = new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY);
+    private ClientCommandC2SPacket START;
+    private ClientCommandC2SPacket STOP;
 
     public NoSlow() {
         super(Categories.Movement, "no-slow", "Allows you to move normally when using objects that will slow you.");
+    }
+
+    @Override
+    public void onActivate() {
+        START = new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY);
+        STOP = new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY);
     }
 
     @EventHandler
