@@ -107,7 +107,7 @@ public class AutoTotem extends Module {
             if (mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING && (!smart.get()
                     || isLow() || elytraMove())) {
                 locked = true;
-                InvUtils.addSlots(2, 45, result.slot, 1000);
+                InvUtils.addSlots(1, 45, InvUtils.invIndexToSlotId(result.slot), 1000);
             } else if (smart.get() && !isLow() && !elytraMove()) {
                 locked = false;
             }

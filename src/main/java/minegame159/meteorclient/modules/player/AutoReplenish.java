@@ -164,7 +164,7 @@ public class AutoReplenish extends Module {
 
     private void addSlots(int to, int from) {
         if (to == -1 || from == -1) return;
-        InvUtils.addSlots(1, InvUtils.invIndexToSlotId(to), from, 1);
+        InvUtils.addSlots(1, InvUtils.invIndexToSlotId(to), InvUtils.invIndexToSlotId(from), 1);
     }
 
     private void fillItems() {

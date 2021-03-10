@@ -25,6 +25,7 @@ public class InvUtils {
 
     private static final FindItemResult findItemResult = new FindItemResult();
     private static final Deque<Long> moveQueue = new ArrayDeque<>();
+    private static Long currentMove;
 
     public static void clickSlot(int slot, int button, SlotActionType action) {
         mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, slot, button, action, mc.player);
@@ -88,17 +89,10 @@ public class InvUtils {
 
         if (!moveQueue.isEmpty()) {
             if (mc.player.currentScreenHandler.getStacks().size() == 46) {
-                Long movement = moveQueue.remove();
-                switch (unpackLongMode(movement)) {
-                    case 1:
-                        clickSlot(unpackLongFrom(movement), 0, SlotActionType.PICKUP);
-                        clickSlot(unpackLongTo(movement), 0, SlotActionType.PICKUP);
-                        clickSlot(unpackLongFrom(movement), 0, SlotActionType.PICKUP);
-                        break;
-                    case 2:
-                        clickSlot(unpackLongTo(movement), unpackLongFrom(movement), SlotActionType.SWAP);
-                        break;
-                }
+                currentMove = moveQueue.remove();
+                clickSlot(unpackLongFrom(currentMove), 0, SlotActionType.PICKUP);
+                clickSlot(unpackLongTo(currentMove), 0, SlotActionType.PICKUP);
+                clickSlot(unpackLongFrom(currentMove), 0, SlotActionType.PICKUP);
             }
         }
     }
