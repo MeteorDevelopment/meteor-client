@@ -83,7 +83,7 @@ public class ElytraFlightMode {
     }
 
     public void handleAutopilot() {
-        if (settings.moveForward.get()) if (mc.player.getY() < settings.autoPilotMinimumHeight.get()) mc.options.keyForward.setPressed(true);
+        if (settings.moveForward.get()) if (mc.player.getY() > settings.autoPilotMinimumHeight.get()) mc.options.keyForward.setPressed(true);
         lastForwardPressed = true;
         if (settings.useFireworks.get()) {
             int slot = InvUtils.findItemInHotbar(Items.FIREWORK_ROCKET);
