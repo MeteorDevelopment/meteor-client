@@ -27,7 +27,7 @@ import net.minecraft.util.math.Vec3d;
 
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 
-public class Baconator extends Module {
+public class Flamethrower extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Double> distance = sgGeneral.add(new DoubleSetting.Builder()
@@ -78,8 +78,8 @@ public class Baconator extends Module {
     private int preSlot;
     private int ticks = 0;
 
-    public Baconator() {
-        super(Categories.Misc, "baconator", "Ignites every alive piece of food.");
+    public Flamethrower() {
+        super(Categories.Misc, "flamethrower", "Ignites every alive piece of food.");
     }
 
     @Override
