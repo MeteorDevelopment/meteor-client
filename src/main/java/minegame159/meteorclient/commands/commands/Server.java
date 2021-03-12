@@ -4,6 +4,8 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 
 import net.minecraft.client.network.ServerInfo;
 import net.minecraft.command.CommandSource;
+import net.minecraft.text.BaseText;
+import net.minecraft.text.LiteralText;
 
 import minegame159.meteorclient.commands.Command;
 import minegame159.meteorclient.utils.player.ChatUtils;
@@ -24,13 +26,22 @@ public class Server extends Command {
                 return SINGLE_SUCCESS;
             }
             ServerInfo server = mc.getCurrentServerEntry();
-            ChatUtils.info("IP: %s", server.address);
-            ChatUtils.info("Version: %s", server.version.asString());
-            ChatUtils.info("Protocol Version: %d", server.protocolVersion);
+
+            ChatUtils.prefixInfo("Server","IP: %s", server.address);
+            ChatUtils.prefixInfo("Server","Type: %s", mc.player.getServerBrand());
+
+            BaseText motd = new LiteralText("Motd: ");
+            motd.append(server.label);
+            ChatUtils.info("Server", motd);
+            
+            BaseText version = new LiteralText("Version: ");
+            version.append(server.version);
+            ChatUtils.info("Server",version);
+            
+            ChatUtils.prefixInfo("Server","Protocol version: %d", server.protocolVersion);
             
             return SINGLE_SUCCESS;
         });
-
     }
     
 }
