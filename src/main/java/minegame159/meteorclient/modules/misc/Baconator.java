@@ -45,10 +45,24 @@ public class Baconator extends Module {
         .build()
     );
 
+    private final Setting<Boolean> putOutFire = sgGeneral.add(new BoolSetting.Builder()
+        .name("put-out-fire")
+        .description("Tries to put out the fire when animal is low health, so the items don't burn.")
+        .defaultValue(true)
+        .build()
+    );
+
     private final Setting<Integer> tickInterval = sgGeneral.add(new IntSetting.Builder()
         .name("tick-interval")
         .defaultValue(5)
         .build()
+    );
+
+    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
+            .name("rotate")
+            .description("Automatically faces towards the animal roasted.")
+            .defaultValue(true)
+            .build()
     );
 
     private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
@@ -105,9 +119,8 @@ public class Baconator extends Module {
             if (foundFlintAndSteel) {
                 this.entity = entity;
 
-                // if (rotate.get()) Rotations.rotate(Rotations.getYaw(entity),
-                // Rotations.getPitch(entity), -100, this::interact);
-                interact();
+                if (rotate.get()) Rotations.rotate(Rotations.getYaw(entity), Rotations.getPitch(entity), -100, this::interact);
+                else interact();
 
                 return;
             }
@@ -121,7 +134,7 @@ public class Baconator extends Module {
         if (block.is(Blocks.GRASS))  mc.interactionManager.attackBlock(entity.getBlockPos(), Direction.DOWN);
         LivingEntity animal = (LivingEntity) entity;
 
-        if (animal.getHealth() < 1) {
+        if (putOutFire.get() && animal.getHealth() < 1) {
             mc.interactionManager.attackBlock(entity.getBlockPos(), Direction.DOWN);
             mc.interactionManager.attackBlock(entity.getBlockPos().west(), Direction.DOWN);
             mc.interactionManager.attackBlock(entity.getBlockPos().east(), Direction.DOWN);
