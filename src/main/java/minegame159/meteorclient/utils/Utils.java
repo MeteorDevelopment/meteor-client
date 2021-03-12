@@ -9,12 +9,20 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.mixin.MinecraftClientAccessor;
 import minegame159.meteorclient.mixin.MinecraftServerAccessor;
 import minegame159.meteorclient.mixininterface.IMinecraftClient;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.world.Dimension;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.AddServerScreen;
+import net.minecraft.client.gui.screen.CustomizeBuffetLevelScreen;
+import net.minecraft.client.gui.screen.CustomizeFlatLevelScreen;
+import net.minecraft.client.gui.screen.DirectConnectScreen;
+import net.minecraft.client.gui.screen.PresetsScreen;
+import net.minecraft.client.gui.screen.VideoOptionsScreen;
+import net.minecraft.client.gui.screen.options.OptionsScreen;
 import net.minecraft.client.network.ServerInfo;
 import net.minecraft.client.options.ServerList;
 import net.minecraft.client.render.Camera;
@@ -325,6 +333,18 @@ public class Utils {
 
     public static boolean canUpdate() {
         return mc != null && (mc.world != null || mc.player != null);
+    }
+
+    public static boolean isBlacklistedScreen() {
+        if (mc.currentScreen instanceof WidgetScreen) return true;
+        else if (mc.currentScreen instanceof AddServerScreen) return true;
+        else if (mc.currentScreen instanceof DirectConnectScreen) return true;
+        else if (mc.currentScreen instanceof CustomizeBuffetLevelScreen) return true;
+        else if (mc.currentScreen instanceof CustomizeFlatLevelScreen) return true;
+        else if (mc.currentScreen instanceof PresetsScreen) return true;
+        else if (mc.currentScreen instanceof OptionsScreen) return true;
+        else if (mc.currentScreen instanceof VideoOptionsScreen) return true;
+        return false;
     }
 
     public static int random(int min, int max) {
