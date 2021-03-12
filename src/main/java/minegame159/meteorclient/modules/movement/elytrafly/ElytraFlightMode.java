@@ -5,6 +5,7 @@
 
 package minegame159.meteorclient.modules.movement.elytrafly;
 
+import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.client.MinecraftClient;
@@ -49,6 +50,10 @@ public class ElytraFlightMode {
             }
         }
     }
+
+    public void onPacketSend(PacketEvent.Send event) {}
+
+    public void onPlayerMove() {}
 
     public void onActivate() {
         lastJumpPressed = false;
