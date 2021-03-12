@@ -12,6 +12,7 @@ import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.player.InvUtils;
+import minegame159.meteorclient.utils.player.Rotations;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
@@ -119,7 +120,7 @@ public class Flamethrower extends Module {
             if (foundFlintAndSteel) {
                 this.entity = entity;
 
-                if (rotate.get()) Rotations.rotate(Rotations.getYaw(entity), Rotations.getPitch(entity), -100, this::interact);
+                if (rotate.get()) Rotations.rotate(Rotations.getYaw(entity.getBlockPos()), Rotations.getPitch(entity.getBlockPos()), -100, this::interact);
                 else interact();
 
                 return;
