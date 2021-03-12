@@ -34,11 +34,7 @@ import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.ItemEntity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.TntEntity;
+import net.minecraft.entity.*;
 import net.minecraft.entity.decoration.ItemFrameEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -96,6 +92,23 @@ public class Nametags extends Module {
     private final Setting<Boolean> displayItems = sgPlayers.add(new BoolSetting.Builder()
             .name("display-items")
             .description("Displays armor and hand items above the name tags.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Double> itemSpacing = sgPlayers.add(new DoubleSetting.Builder()
+            .name("item-spacing")
+            .description("The spacing between items.")
+            .defaultValue(2)
+            .min(0)
+            .sliderMax(5)
+            .max(10)
+            .build()
+    );
+
+    private final Setting<Boolean> ignoreEmpty = sgPlayers.add(new BoolSetting.Builder()
+            .name("ignore-empty")
+            .description("Doesn't add spacing where an empty item stack would be.")
             .defaultValue(true)
             .build()
     );
@@ -429,7 +442,7 @@ public class Nametags extends Module {
                 ItemStack itemStack = getItem(player, i);
 
                 // Setting up widths
-                if (itemWidths[i] == 0) itemWidths[i] = 32;
+                if (itemWidths[i] == 0 && (!ignoreEmpty.get() || !itemStack.isEmpty())) itemWidths[i] = 32 + itemSpacing.get();
 
                 if (!itemStack.isEmpty()) hasItems = true;
 
@@ -638,10 +651,10 @@ public class Nametags extends Module {
     }
 
     private static String ticksToTime(int ticks){
-        if(ticks > 20*3600){
+        if (ticks > 20*3600){
             int h = ticks/20/3600;
             return h+" h";
-        } else if(ticks > 20*60){
+        } else if (ticks > 20*60){
             int m = ticks/20/60;
             return m+" m";
         } else {

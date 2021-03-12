@@ -5,11 +5,14 @@
 
 package minegame159.meteorclient.modules.movement;
 
+import meteordevelopment.orbit.EventHandler;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
+import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 
 public class NoSlow extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -42,8 +45,39 @@ public class NoSlow extends Module {
             .build()
     );
 
+    private final Setting<Boolean> airStrict = sgGeneral.add(new BoolSetting.Builder()
+            .name("air-strict")
+            .description("Will attempt to bypass anti-cheats like 2b2t's. Only works while in air.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private boolean shouldSneak = false;
+
+    private ClientCommandC2SPacket START;
+    private ClientCommandC2SPacket STOP;
+
     public NoSlow() {
         super(Categories.Movement, "no-slow", "Allows you to move normally when using objects that will slow you.");
+    }
+
+    @Override
+    public void onActivate() {
+        START = new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY);
+        STOP = new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY);
+    }
+
+    @EventHandler
+    public void onPreTick(TickEvent.Pre event) {
+        if (!airStrict.get()) return;
+
+        if (mc.player.isUsingItem()) {
+            mc.player.networkHandler.sendPacket(START);
+            shouldSneak = true;
+        } else if (shouldSneak && !mc.player.isUsingItem()) {
+            mc.player.networkHandler.sendPacket(STOP);
+            shouldSneak = false;
+        }
     }
 
     public boolean items() {

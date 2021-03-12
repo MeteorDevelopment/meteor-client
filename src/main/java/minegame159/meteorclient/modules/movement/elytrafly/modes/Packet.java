@@ -5,6 +5,7 @@
 
 package minegame159.meteorclient.modules.movement.elytrafly.modes;
 
+import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.modules.movement.elytrafly.ElytraFlightMode;
 import minegame159.meteorclient.modules.movement.elytrafly.ElytraFlightModes;
 import net.minecraft.item.Items;
@@ -18,6 +19,12 @@ public class Packet extends ElytraFlightMode {
 
     public Packet() {
         super(ElytraFlightModes.Packet);
+    }
+
+    @Override
+    public void onDeactivate() {
+        mc.player.abilities.flying = false;
+        mc.player.abilities.allowFlying = false;
     }
 
     @Override
@@ -43,5 +50,19 @@ public class Packet extends ElytraFlightMode {
         mc.player.setVelocity(vec3d);
         mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.START_FALL_FLYING));
         mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket(true));
+    }
+
+    //Walalalalalalalalalalalala
+    @Override
+    public void onPacketSend(PacketEvent.Send event) {
+        if (event.packet instanceof PlayerMoveC2SPacket) {
+            mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.START_FALL_FLYING));
+        }
+    }
+
+    @Override
+    public void onPlayerMove() {
+        mc.player.abilities.flying = true;
+        mc.player.abilities.setFlySpeed(settings.horizontalSpeed.get().floatValue() / 20);
     }
 }
