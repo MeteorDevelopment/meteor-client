@@ -22,7 +22,7 @@ public class Server extends Command {
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.executes(context -> {
             if(mc.isIntegratedServerRunning()) {
-                ChatUtils.info("Singleplayer");
+                ChatUtils.prefixInfo("Server","Singleplayer");
                 return SINGLE_SUCCESS;
             }
             ServerInfo server = mc.getCurrentServerEntry();
