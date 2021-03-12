@@ -31,7 +31,7 @@ public class Baconator extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Double> distance = sgGeneral.add(new DoubleSetting.Builder().name("distance")
-            .description("The maximum distance the aniaml has to be to be roasted.").min(0.0).defaultValue(5.0)
+            .description("The maximum distance the animal has to be to be roasted.").min(0.0).defaultValue(5.0)
             .build());
 
     private final Setting<Boolean> antiBreak = sgGeneral.add(new BoolSetting.Builder().name("anti-break")
