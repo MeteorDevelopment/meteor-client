@@ -94,6 +94,7 @@ public class Flamethrower extends Module {
         ticks++;
         for (Entity entity : mc.world.getEntities()) {
             if (!entities.get().getBoolean(entity.getType()) || mc.player.distanceTo(entity) > distance.get()) continue;
+            if (entity == mc.player) continue;
 
             boolean findNewFlintAndSteel = false;
             if (mc.player.inventory.getMainHandStack().getItem() instanceof FlintAndSteelItem) {
