@@ -11,7 +11,7 @@ import minegame159.meteorclient.modules.render.hud.HUD;
 // Gilded moment ez
 // Gilded did monky code so I fixed :coool: - MineGame159
 
-public class RotationHud extends DoubleTextHudModule {
+public class RotationHud extends DoubleTextHudElement {
     public RotationHud(HUD hud) {
         super(hud, "rotation", "Displays your rotation.", "");
     }

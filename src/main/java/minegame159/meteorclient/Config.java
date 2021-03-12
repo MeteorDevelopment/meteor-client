@@ -15,7 +15,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.nbt.CompoundTag;
 
 public class Config extends System<Config> {
-    public final Version version = new Version("0.4.1");
+    public final Version version = new Version("0.4.2");
     public String devBuild;
     private String prefix = ".";
     public GuiConfig guiConfig = new GuiConfig();
@@ -26,6 +26,9 @@ public class Config extends System<Config> {
     public boolean deleteChatCommandsInfo = true;
 
     public boolean sendDataToApi = true;
+    public boolean titleScreenCredits = true;
+
+    public int rotationHoldTicks = 9;
 
     public Config() {
         super("config");
@@ -57,6 +60,7 @@ public class Config extends System<Config> {
         tag.putBoolean("chatCommandsInfo", chatCommandsInfo);
         tag.putBoolean("deleteChatCommandsInfo", deleteChatCommandsInfo);
         tag.putBoolean("sendDataToApi", sendDataToApi);
+        tag.putBoolean("titleScreenCredits", titleScreenCredits);
 
         return tag;
     }
@@ -69,6 +73,7 @@ public class Config extends System<Config> {
         chatCommandsInfo = !tag.contains("chatCommandsInfo") || tag.getBoolean("chatCommandsInfo");
         deleteChatCommandsInfo = !tag.contains("deleteChatCommandsInfo") || tag.getBoolean("deleteChatCommandsInfo");
         sendDataToApi = !tag.contains("sendDataToApi") || tag.getBoolean("sendDataToApi");
+        titleScreenCredits = !tag.contains("titleScreenCredits") || tag.getBoolean("titleScreenCredits");
 
         // In 0.2.9 the default font was changed, detect when people load up 0.2.9 for the first time
         Version lastVer = new Version(tag.getString("version"));

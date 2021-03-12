@@ -24,6 +24,8 @@ public class BlockIterator {
     private static final Pool<Callback> callbackPool = new Pool<>(Callback::new);
     private static final List<Callback> callbacks = new ArrayList<>();
 
+    private static final List<Runnable> afterCallbacks = new ArrayList<>();
+
     private static final BlockPos.Mutable blockPos = new BlockPos.Mutable();
     private static int hRadius, vRadius;
 
@@ -72,6 +74,9 @@ public class BlockIterator {
 
         for (Callback callback : callbacks) callbackPool.free(callback);
         callbacks.clear();
+
+        for (Runnable callback : afterCallbacks) callback.run();
+        afterCallbacks.clear();
     }
 
     public static void register(int horizontalRadius, int verticalRadius, BiConsumer<BlockPos, BlockState> function) {
@@ -89,6 +94,10 @@ public class BlockIterator {
 
     public static void disableCurrent() {
         disableCurrent = true;
+    }
+
+    public static void after(Runnable callback) {
+        afterCallbacks.add(callback);
     }
 
     private static class Callback {

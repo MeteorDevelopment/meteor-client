@@ -7,6 +7,7 @@ package minegame159.meteorclient.commands.arguments;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
+import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.StringNbtReader;
@@ -47,6 +48,10 @@ public class CompoundNbtTagArgumentType implements ArgumentType<CompoundTag> {
                 .replace("$", "\u00a7")
                 .replace("\u00a7\u00a7", "$")
         );
+    }
+
+    public static CompoundTag getTag(final CommandContext<?> context, String name) {
+        return context.getArgument(name, CompoundTag.class);
     }
 
     public Collection<String> getExamples() {

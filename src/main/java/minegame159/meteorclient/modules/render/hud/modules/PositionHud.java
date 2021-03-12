@@ -9,7 +9,7 @@ import minegame159.meteorclient.modules.render.hud.HUD;
 import minegame159.meteorclient.modules.render.hud.HudRenderer;
 import minegame159.meteorclient.utils.Utils;
 
-public class PositionHud extends HudModule {
+public class PositionHud extends HudElement {
     private final String left1 = "Pos: ";
     private double left1Width;
     private String right1;
@@ -27,7 +27,7 @@ public class PositionHud extends HudModule {
         left1Width = renderer.textWidth(left1);
         left2 = null;
 
-        if (mc.player == null) {
+        if (isInEditor()) {
             right1 = "0,0 0,0 0,0";
             box.setSize(left1Width + renderer.textWidth(right1), renderer.textHeight() * 2 + 2);
             return;
@@ -63,8 +63,8 @@ public class PositionHud extends HudModule {
 
     @Override
     public void render(HudRenderer renderer) {
-        int x = box.getX();
-        int y = box.getY();
+        double x = box.getX();
+        double y = box.getY();
 
         if (left2 != null) {
             renderer.text(left2, x, y, hud.primaryColor.get());

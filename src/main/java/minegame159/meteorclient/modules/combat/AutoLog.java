@@ -18,16 +18,14 @@ import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.entity.EntityUtils;
 import minegame159.meteorclient.utils.player.DamageCalcUtils;
 import minegame159.meteorclient.utils.world.Dimension;
-import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BedBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.fluid.Fluids;
 import net.minecraft.item.SwordItem;
 import net.minecraft.network.packet.s2c.play.DisconnectS2CPacket;
 import net.minecraft.text.LiteralText;
@@ -165,24 +163,7 @@ public class AutoLog extends Module {
         if (!Modules.get().isActive(NoFall.class) && mc.player.fallDistance > 3) {
             double damage = mc.player.fallDistance * 0.5;
 
-            BlockPos.Mutable blockPos = mc.player.getBlockPos().mutableCopy();
-            boolean aboveWater = false;
-
-            for (int i = 0; i < 64; i++) {
-                BlockState state = mc.world.getBlockState(blockPos);
-
-                if (state.getMaterial().blocksMovement()) break;
-
-                Fluid fluid = state.getFluidState().getFluid();
-                if (fluid == Fluids.WATER || fluid == Fluids.FLOWING_WATER) {
-                    aboveWater = true;
-                    break;
-                }
-
-                blockPos.move(0, -1, 0);
-            }
-
-            if (damage > damageTaken && !aboveWater) {
+            if (damage > damageTaken && !EntityUtils.isAboveWater(mc.player)) {
                 damageTaken = damage;
             }
         }

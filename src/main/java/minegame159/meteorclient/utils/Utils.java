@@ -287,6 +287,16 @@ public class Utils {
         }
     }
 
+    public static String getButtonName(int button) {
+        switch (button) {
+            case -1: return "Unknown";
+            case 0:  return "Mouse Left";
+            case 1:  return "Mouse Right";
+            case 2:  return "Mouse Middle";
+            default: return "Mouse " + button;
+        }
+    }
+
     public static byte[] readBytes(File file) {
         try {
             InputStream in = new FileInputStream(file);
@@ -420,5 +430,25 @@ public class Utils {
         for (T item : checked)
             map.put(item, true);
         return new Object2BooleanOpenHashMap<T>(map);
+    }
+
+    public static long packLong(int v1, int v2, int v3, int v4) {
+        return ((long) v1 << 48) + ((long) v2 << 32) + ((long) v3 << 16) + (v4);
+    }
+
+    public static int unpackLong1(long l) {
+        return (int) ((l >> 48) & 0x000000000000FFFF);
+    }
+
+    public static int unpackLong2(long l) {
+        return (int) ((l >> 32) & 0x000000000000FFFF);
+    }
+
+    public static int unpackLong3(long l) {
+        return (int) ((l >> 16) & 0x000000000000FFFF);
+    }
+
+    public static int unpackLong4(long l) {
+        return (int) ((l) & 0x000000000000FFFF);
     }
 }

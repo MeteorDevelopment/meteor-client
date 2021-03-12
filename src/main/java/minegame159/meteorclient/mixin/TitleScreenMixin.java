@@ -89,6 +89,7 @@ public class TitleScreenMixin extends Screen {
 
     @Inject(method = "render", at = @At("TAIL"))
     private void onRender(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo info) {
+        if (!Config.get().titleScreenCredits) return;
         prevWidth = 0;
         textRenderer.drawWithShadow(matrices, text1, width - fullLength - 3, 3, WHITE);
         prevWidth += text1Length;

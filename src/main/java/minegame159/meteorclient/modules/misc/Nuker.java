@@ -47,6 +47,14 @@ public class Nuker extends Module {
             .build()
     );
 
+    private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
+            .name("delay")
+            .description("Delay between mining blocks in ticks.")
+            .defaultValue(0)
+            .min(0)
+            .build()
+    );
+
     private final Setting<List<Block>> selectedBlocks = sgGeneral.add(new BlockListSetting.Builder()
             .name("selected-blocks")
             .description("The certain type of blocks you want to mine.")
@@ -95,9 +103,15 @@ public class Nuker extends Module {
     private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
     private final BlockPos.Mutable lastBlockPos = new BlockPos.Mutable();
     private boolean hasLastBlockPos;
+    private int timer;
 
     public Nuker() {
         super(Categories.Misc, "nuker", "Breaks a large amount of specified blocks around you.");
+    }
+
+    @Override
+    public void onActivate() {
+        timer = 0;
     }
 
     @Override
@@ -108,12 +122,22 @@ public class Nuker extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
+        // Mine last block if not null
         if (hasLastBlockPos && mc.world.getBlockState(lastBlockPos).getBlock() != Blocks.AIR) {
             mc.interactionManager.updateBlockBreakingProgress(lastBlockPos, Direction.UP);
             return;
         }
 
         hasLastBlockPos = false;
+
+        // Update timer according to delay
+        if (timer < delay.get()) {
+            timer++;
+            return;
+        }
+        else {
+            timer = 0;
+        }
 
         // Calculate stuff
         double pX = mc.player.getX() - 0.5;
@@ -182,8 +206,8 @@ public class Nuker extends Module {
 
             // Break block
             lastBlockPos.set(pos);
-            if (rotate.get()) Rotations.rotate(Rotations.getYaw(pos), Rotations.getPitch(pos), -50, () -> normalMine(pos));
-            else normalMine(pos);
+            if (rotate.get()) Rotations.rotate(Rotations.getYaw(pos), Rotations.getPitch(pos), -50, () -> mine(pos));
+            else mine(pos);
 
             breaking = true;
             hasLastBlockPos = true;
@@ -197,7 +221,7 @@ public class Nuker extends Module {
         blocks.clear();
     }
 
-    private void normalMine(BlockPos pos) {
+    private void mine(BlockPos pos) {
         if (mc.interactionManager != null && mc.player != null) {
             mc.interactionManager.updateBlockBreakingProgress(pos, Direction.UP);
             mc.player.swingHand(Hand.MAIN_HAND);
@@ -206,8 +230,11 @@ public class Nuker extends Module {
 
     private void cancelMine(BlockPos pos) {
         mc.interactionManager.cancelBlockBreaking();
-        mc.interactionManager.attackBlock(pos, Direction.UP);
-        mc.player.swingHand(Hand.MAIN_HAND);
+
+        if (pos != null) {
+            mc.interactionManager.attackBlock(pos, Direction.UP);
+            mc.player.swingHand(Hand.MAIN_HAND);
+        }
     }
 
     public boolean noParticles() {

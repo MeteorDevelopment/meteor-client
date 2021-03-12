@@ -6,39 +6,59 @@
 package minegame159.meteorclient.settings;
 
 import meteordevelopment.orbit.EventHandler;
+import meteordevelopment.orbit.EventPriority;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.meteor.KeyEvent;
+import minegame159.meteorclient.events.meteor.MouseButtonEvent;
 import minegame159.meteorclient.gui.widgets.WKeybind;
+import minegame159.meteorclient.utils.misc.Keybind;
 import minegame159.meteorclient.utils.misc.input.KeyAction;
 import net.minecraft.nbt.CompoundTag;
 
 import java.util.function.Consumer;
 
-public class KeybindSetting extends Setting<Integer> {
+public class KeybindSetting extends Setting<Keybind> {
     private final Runnable action;
 
-    public KeybindSetting(String name, String description, Integer defaultValue, Consumer<Integer> onChanged, Consumer<Setting<Integer>> onModuleActivated, Runnable action) {
+    public KeybindSetting(String name, String description, Keybind defaultValue, Consumer<Keybind> onChanged, Consumer<Setting<Keybind>> onModuleActivated, Runnable action) {
         super(name, description, defaultValue, onChanged, onModuleActivated);
 
         this.action = action;
 
         widget = new WKeybind(get(), false);
-        ((WKeybind) widget).action = () -> set(((WKeybind) widget).get());
+        ((WKeybind) widget).action = this::changed;
 
         MeteorClient.EVENT_BUS.subscribe(this);
     }
 
-    @EventHandler
-    private void onKey(KeyEvent event) {
-        ((WKeybind) widget).onKey(event.key);
+    @EventHandler(priority = EventPriority.HIGHEST)
+    private void onKeyBinding(KeyEvent event) {
+        if (((WKeybind) widget).onAction(true, event.key)) event.cancel();
+    }
 
-        if (event.action == KeyAction.Release && event.key == get() && module.isActive() && action != null) action.run();
+    @EventHandler(priority = EventPriority.HIGHEST)
+    private void onMouseButtonBinding(MouseButtonEvent event) {
+        if (((WKeybind) widget).onAction(false, event.button)) event.cancel();
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
+    private void onKey(KeyEvent event) {
+        if (event.action == KeyAction.Release && get().matches(true, event.key) && module.isActive() && action != null) {
+            action.run();
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
+    private void onMouseButton(MouseButtonEvent event) {
+        if (event.action == KeyAction.Release && get().matches(false ,event.button) && module.isActive() && action != null) {
+            action.run();
+        }
     }
 
     @Override
-    protected Integer parseImpl(String str) {
+    protected Keybind parseImpl(String str) {
         try {
-            return Integer.parseInt(str.trim());
+            return Keybind.fromKey(Integer.parseInt(str.trim()));
         } catch (NumberFormatException ignored) {
             return null;
         }
@@ -46,33 +66,31 @@ public class KeybindSetting extends Setting<Integer> {
 
     @Override
     public void resetWidget() {
-        ((WKeybind) widget).set(get());
+        ((WKeybind) widget).reset();
     }
 
     @Override
-    protected boolean isValueValid(Integer value) {
+    protected boolean isValueValid(Keybind value) {
         return true;
     }
 
     @Override
     public CompoundTag toTag() {
-        CompoundTag tag = saveGeneral();
-        tag.putInt("key", get());
-        return tag;
+        return get().toTag();
     }
 
     @Override
-    public Integer fromTag(CompoundTag tag) {
-        set(tag.getInt("key"));
+    public Keybind fromTag(CompoundTag tag) {
+        get().fromTag(tag);
 
         return get();
     }
 
     public static class Builder {
         private String name = "undefined", description = "";
-        private Integer defaultValue = -1;
-        private Consumer<Integer> onChanged;
-        private Consumer<Setting<Integer>> onModuleActivated;
+        private Keybind defaultValue = Keybind.fromKey(-1);
+        private Consumer<Keybind> onChanged;
+        private Consumer<Setting<Keybind>> onModuleActivated;
         private Runnable action;
 
         public Builder name(String name) {
@@ -85,17 +103,17 @@ public class KeybindSetting extends Setting<Integer> {
             return this;
         }
 
-        public Builder defaultValue(int defaultValue) {
+        public Builder defaultValue(Keybind defaultValue) {
             this.defaultValue = defaultValue;
             return this;
         }
 
-        public Builder onChanged(Consumer<Integer> onChanged) {
+        public Builder onChanged(Consumer<Keybind> onChanged) {
             this.onChanged = onChanged;
             return this;
         }
 
-        public Builder onModuleActivated(Consumer<Setting<Integer>> onModuleActivated) {
+        public Builder onModuleActivated(Consumer<Setting<Keybind>> onModuleActivated) {
             this.onModuleActivated = onModuleActivated;
             return this;
         }

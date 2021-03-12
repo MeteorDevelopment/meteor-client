@@ -22,6 +22,8 @@ import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.waypoints.Waypoint;
 import minegame159.meteorclient.waypoints.Waypoints;
+import net.minecraft.text.BaseText;
+import net.minecraft.text.LiteralText;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -60,7 +62,11 @@ public class DeathPosition extends Module {
             label.setText(String.format("Latest death: %.1f, %.1f, %.1f", mc.player.getX(), mc.player.getY(), mc.player.getZ()));
 
             String time = dateFormat.format(new Date());
-            ChatUtils.moduleInfo(this, "Died at (highlight)%.0f(default), (highlight)%.0f(default), (highlight)%.0f (default)on (highlight)%s(default).", mc.player.getX(), mc.player.getY(), mc.player.getZ(), time);
+            //ChatUtils.moduleInfo(this, "Died at (highlight)%.0f(default), (highlight)%.0f(default), (highlight)%.0f (default)on (highlight)%s(default).", mc.player.getX(), mc.player.getY(), mc.player.getZ(), time);
+            BaseText msg = new LiteralText("Died at ");
+            msg.append(ChatUtils.formatCoords(mc.player.getPos()));
+            msg.append(".");
+            ChatUtils.moduleInfo(this,msg);
 
             // Create waypoint
             if (createWaypoint.get()) {

@@ -5,6 +5,7 @@
 
 package minegame159.meteorclient.mixin;
 
+import minegame159.meteorclient.Config;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.entity.player.ItemUseCrosshairTargetEvent;
 import minegame159.meteorclient.events.game.GameLeftEvent;
@@ -31,6 +32,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import javax.annotation.Nullable;
 import java.util.concurrent.CompletableFuture;
@@ -114,6 +116,11 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
     private CompletableFuture<Void> onReloadResourcesNewCompletableFuture(CompletableFuture<Void> completableFuture) {
         completableFuture.thenRun(() -> MeteorClient.EVENT_BUS.post(ResourcePacksReloadedEvent.get()));
         return completableFuture;
+    }
+
+    @Inject(method = "getWindowTitle", at = @At("HEAD"), cancellable = true)
+    private void getTitle(CallbackInfoReturnable<String> cir) {
+        if (Config.get() != null) cir.setReturnValue("Meteor Client " + Config.get().version.getOriginalString());
     }
 
     // Interface
