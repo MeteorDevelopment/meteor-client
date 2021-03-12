@@ -30,20 +30,35 @@ import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 public class Baconator extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<Double> distance = sgGeneral.add(new DoubleSetting.Builder().name("distance")
-            .description("The maximum distance the animal has to be to be roasted.").min(0.0).defaultValue(5.0)
-            .build());
+    private final Setting<Double> distance = sgGeneral.add(new DoubleSetting.Builder()
+        .name("distance")
+        .description("The maximum distance the animal has to be to be roasted.")
+        .min(0.0)
+        .defaultValue(5.0)
+        .build()
+    );
 
-    private final Setting<Boolean> antiBreak = sgGeneral.add(new BoolSetting.Builder().name("anti-break")
-            .description("Prevents flint and steel from being broken.").defaultValue(false).build());
+    private final Setting<Boolean> antiBreak = sgGeneral.add(new BoolSetting.Builder()
+        .name("anti-break")
+        .description("Prevents flint and steel from being broken.")
+        .defaultValue(false)
+        .build()
+    );
 
-    private final Setting<Integer> tickInterval = sgGeneral.add(new IntSetting.Builder().name("tick-interval").defaultValue(5).build());
+    private final Setting<Integer> tickInterval = sgGeneral.add(new IntSetting.Builder()
+        .name("tick-interval")
+        .defaultValue(5)
+        .build()
+    );
 
-    private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral
-            .add(new EntityTypeListSetting.Builder().name("entities").description("Entities to cook.")
-                    .defaultValue(Utils.asObject2BooleanOpenHashMap(EntityType.PIG, EntityType.COW, EntityType.SHEEP,
-                            EntityType.CHICKEN, EntityType.RABBIT))
-                    .build());
+    private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
+            .name("entities")
+            .description("Entities to cook.")
+            .defaultValue(Utils.asObject2BooleanOpenHashMap(
+                EntityType.PIG, EntityType.COW, EntityType.SHEEP,
+                EntityType.CHICKEN, EntityType.RABBIT))
+            .build()
+    );
 
     private Entity entity;
     private int preSlot;
@@ -67,12 +82,10 @@ public class Baconator extends Module {
 
             boolean findNewFlintAndSteel = false;
             if (mc.player.inventory.getMainHandStack().getItem() instanceof FlintAndSteelItem) {
-                if (antiBreak.get() && mc.player.inventory.getMainHandStack()
-                        .getDamage() >= mc.player.inventory.getMainHandStack().getMaxDamage() - 1)
+                if (antiBreak.get() && mc.player.inventory.getMainHandStack().getDamage() >= mc.player.inventory.getMainHandStack().getMaxDamage() - 1)
                     findNewFlintAndSteel = true;
             } else if (mc.player.inventory.offHand.get(0).getItem() instanceof FlintAndSteelItem) {
-                if (antiBreak.get() && mc.player.inventory.offHand.get(0)
-                        .getDamage() >= mc.player.inventory.offHand.get(0).getMaxDamage() - 1)
+                if (antiBreak.get() && mc.player.inventory.offHand.get(0).getDamage() >= mc.player.inventory.offHand.get(0).getMaxDamage() - 1)
                     findNewFlintAndSteel = true;
             } else {
                 findNewFlintAndSteel = true;
@@ -80,8 +93,8 @@ public class Baconator extends Module {
 
             boolean foundFlintAndSteel = !findNewFlintAndSteel;
             if (findNewFlintAndSteel) {
-                int slot = InvUtils.findItemInHotbar(Items.FLINT_AND_STEEL, itemStack -> (!antiBreak.get()
-                        || (antiBreak.get() && itemStack.getDamage() < itemStack.getMaxDamage() - 1)));
+                int slot = InvUtils.findItemInHotbar(Items.FLINT_AND_STEEL,
+                    itemStack -> (!antiBreak.get() || (antiBreak.get() && itemStack.getDamage() < itemStack.getMaxDamage() - 1)));
 
                 if (slot != -1) {
                     mc.player.inventory.selectedSlot = slot;
@@ -104,10 +117,8 @@ public class Baconator extends Module {
     private void interact() {
         Block block = mc.world.getBlockState(entity.getBlockPos()).getBlock();
         Block bottom = mc.world.getBlockState(entity.getBlockPos().down()).getBlock();
-        if (block.is(Blocks.WATER) || bottom.is(Blocks.GRASS_PATH))
-            return;
-        if (block.is(Blocks.GRASS))
-            mc.interactionManager.attackBlock(entity.getBlockPos(), Direction.DOWN);
+        if (block.is(Blocks.WATER) || bottom.is(Blocks.GRASS_PATH)) return;
+        if (block.is(Blocks.GRASS))  mc.interactionManager.attackBlock(entity.getBlockPos(), Direction.DOWN);
         LivingEntity animal = (LivingEntity) entity;
 
         if (animal.getHealth() < 1) {
