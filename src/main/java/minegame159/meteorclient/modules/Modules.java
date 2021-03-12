@@ -503,6 +503,7 @@ public class Modules extends System<Modules> {
         add(new AutoSign());
         add(new AutoSmelter());
         add(new AutoSteal());
+        add(new Flamethrower());
         add(new BetterChat());
         add(new BookBot());
         add(new DiscordPresence());
