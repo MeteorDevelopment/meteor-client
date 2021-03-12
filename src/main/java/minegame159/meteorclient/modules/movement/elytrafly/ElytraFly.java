@@ -8,6 +8,7 @@ package minegame159.meteorclient.modules.movement.elytrafly;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.entity.player.PlayerMoveEvent;
+import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Categories;
@@ -21,6 +22,7 @@ import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.ElytraItem;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
+import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.math.Vec3d;
 
 public class ElytraFly extends Module {
@@ -113,7 +115,23 @@ public class ElytraFly extends Module {
             .build()
     );
 
+    private final Setting<Boolean> instaDrop = sgDefault.add(new BoolSetting.Builder()
+            .name("insta-drop")
+            .description("Makes you drop out of flight instantly.")
+            .defaultValue(false)
+            .build()
+    );
+
+
     // Autopilot
+
+    private final Setting<Boolean> enableAutopilot = sgAutopilot.add(new BoolSetting.Builder()
+            .name("enable-autopilot")
+            .description("Use autopilot.")
+            .defaultValue(false)
+            .build()
+    );
+
 
     public final Setting<Boolean> useFireworks = sgAutopilot.add(new BoolSetting.Builder()
             .name("use-fireworks")
@@ -157,7 +175,7 @@ public class ElytraFly extends Module {
     private ElytraFlightMode currentMode;
 
     public ElytraFly() {
-        super(Categories.Movement, "ElytraFly", "Gives you more control over your elytra.");
+        super(Categories.Movement, "elytra-fly", "Gives you more control over your elytra.");
     }
 
     @Override
@@ -178,6 +196,12 @@ public class ElytraFly extends Module {
         } else if (chestSwap.get() == ChestSwapMode.WaitForGround) {
             enableGroundListener();
         }
+
+        if (mc.player.isFallFlying() && instaDrop.get()) {
+            enableInstaDropListener();
+        }
+
+        currentMode.onDeactivate();
     }
 
     @EventHandler
@@ -200,7 +224,9 @@ public class ElytraFly extends Module {
             }
 
             currentMode.handleFallMultiplier();
-            currentMode.handleAutopilot();
+            if (enableAutopilot.get()) {
+                currentMode.handleAutopilot();
+            }
             currentMode.handleHorizontalSpeed();
             currentMode.handleVerticalSpeed();
 
@@ -213,6 +239,8 @@ public class ElytraFly extends Module {
                     ((IVec3d) event.movement).set(0, currentMode.velY, 0);
                 }
             } else ((IVec3d) event.movement).set(currentMode.velX, currentMode.velY, currentMode.velZ);
+
+            currentMode.onPlayerMove();
         } else {
             if (currentMode.lastForwardPressed) {
                 mc.options.keyForward.setPressed(false);
@@ -226,6 +254,11 @@ public class ElytraFly extends Module {
         currentMode.onTick();
     }
 
+    @EventHandler
+    private void onPacketSend(PacketEvent.Send event) {
+        currentMode.onPacketSend(event);
+    }
+
     private void onModeChanged(ElytraFlightModes mode) {
         switch (mode) {
             case Vanilla:   currentMode = new Vanilla(); break;
@@ -233,12 +266,8 @@ public class ElytraFly extends Module {
         }
     }
 
-    @Override
-    public String getInfoString() {
-        return currentMode.getHudString();
-    }
-
-    private class StaticListener {
+    //Ground
+    private class StaticGroundListener {
         @EventHandler
         private void chestSwapGroundListener(PlayerMoveEvent event) {
             if (mc.player != null && mc.player.isOnGround()) {
@@ -250,13 +279,41 @@ public class ElytraFly extends Module {
         }
     }
 
-    private final StaticListener staticListener = new StaticListener();
+    private final StaticGroundListener staticGroundListener = new StaticGroundListener();
 
     protected void enableGroundListener() {
-        MeteorClient.EVENT_BUS.subscribe(staticListener);
+        MeteorClient.EVENT_BUS.subscribe(staticGroundListener);
     }
 
     protected void disableGroundListener() {
-        MeteorClient.EVENT_BUS.unsubscribe(staticListener);
+        MeteorClient.EVENT_BUS.unsubscribe(staticGroundListener);
+    }
+
+    //Drop
+    private class StaticInstaDropListener {
+        @EventHandler
+        private void onInstadropTick(TickEvent.Post event) {
+            if (mc.player.isFallFlying()) {
+                mc.player.setVelocity(0, 0, 0);
+                mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket(true));
+            } else {
+                disableInstaDropListener();
+            }
+        }
+    }
+
+    private final StaticInstaDropListener staticInstadropListener = new StaticInstaDropListener();
+
+    protected void enableInstaDropListener() {
+        MeteorClient.EVENT_BUS.subscribe(staticInstadropListener);
+    }
+
+    protected void disableInstaDropListener() {
+        MeteorClient.EVENT_BUS.unsubscribe(staticInstadropListener);
+    }
+
+    @Override
+    public String getInfoString() {
+        return currentMode.getHudString();
     }
 }
