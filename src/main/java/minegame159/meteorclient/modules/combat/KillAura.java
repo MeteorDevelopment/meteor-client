@@ -189,6 +189,7 @@ public class KillAura extends Module {
     private int randomDelayTimer;
     private boolean wasPathing;
     private boolean canAttack;
+    private Entity target;
 
     private final List<Entity> entityList = new ArrayList<>();
 
@@ -201,6 +202,7 @@ public class KillAura extends Module {
         hitDelayTimer = 0;
         randomDelayTimer = 0;
         entityList.clear();
+        target = null;
     }
 
     @EventHandler
@@ -273,7 +275,7 @@ public class KillAura extends Module {
 
     private boolean attack(Entity target) {
         canAttack = false;
-
+        this.target = target;
         if (Math.random() > hitChance.get() / 100) return false;
 
         if (rotationMode.get() == RotationMode.None) {
@@ -311,4 +313,9 @@ public class KillAura extends Module {
         }
         return null;
     }
+
+    public Entity getTarget() {
+        return target;
+    }
+
 }

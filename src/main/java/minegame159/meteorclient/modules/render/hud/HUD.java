@@ -100,6 +100,7 @@ public class HUD extends Module {
         // Top Right
         topRight = new HudElementLayer(RENDERER, elements, AlignmentX.Right, AlignmentY.Top, 2, 2);
         topRight.add(new ActiveModulesHud(this));
+        topRight.add(new PlayersHud(this));
 
         // Bottom Left
         bottomLeft = new HudElementLayer(RENDERER, elements, AlignmentX.Left, AlignmentY.Bottom, 2, 2);
