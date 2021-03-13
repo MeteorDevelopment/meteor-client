@@ -3,7 +3,7 @@
  * Copyright (c) 2021 Meteor Development.
  */
 
-package minegame159.meteorclient.modules.misc;
+package minegame159.meteorclient.modules.world;
 
 import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
@@ -49,7 +49,7 @@ public class AutoBrewer extends Module {
     private int timer;
 
     public AutoBrewer() {
-        super(Categories.Misc, "auto-brewer", "Automatically brews specified potions.");
+        super(Categories.World, "auto-brewer", "Automatically brews specified potions.");
     }
 
     @Override

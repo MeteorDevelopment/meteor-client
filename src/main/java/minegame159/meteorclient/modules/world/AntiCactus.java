@@ -3,13 +3,13 @@
  * Copyright (c) 2021 Meteor Development.
  */
 
-package minegame159.meteorclient.modules.player;
+package minegame159.meteorclient.modules.world;
 
 import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 
 public class AntiCactus extends Module {
     public AntiCactus() {
-        super(Categories.Player, "anti-cactus", "Prevents you from taking damage from cacti.");
+        super(Categories.World, "anti-cactus", "Prevents you from taking damage from cacti.");
     }
 }

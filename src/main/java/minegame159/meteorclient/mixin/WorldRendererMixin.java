@@ -7,6 +7,7 @@ package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.render.*;
+import minegame159.meteorclient.modules.world.Ambience;
 import minegame159.meteorclient.utils.render.Outlines;
 import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.block.BlockState;

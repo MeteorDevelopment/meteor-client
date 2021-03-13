@@ -3,7 +3,7 @@
  * Copyright (c) 2021 Meteor Development.
  */
 
-package minegame159.meteorclient.modules.misc;
+package minegame159.meteorclient.modules.world;
 
 //Created by squidoodly 16/07/2020
 
@@ -102,7 +102,7 @@ public class AutoMount extends Module {
     );
 
     public AutoMount() {
-        super(Categories.Misc, "auto-mount", "Automatically mounts entities.");
+        super(Categories.World, "auto-mount", "Automatically mounts entities.");
     }
 
     @EventHandler

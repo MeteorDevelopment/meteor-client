@@ -3,7 +3,7 @@
  * Copyright (c) 2021 Meteor Development.
  */
 
-package minegame159.meteorclient.modules.player;
+package minegame159.meteorclient.modules.world;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.packets.PacketEvent;
@@ -15,7 +15,7 @@ import net.minecraft.util.math.Direction;
 
 public class BuildHeight extends Module {
     public BuildHeight() {
-        super(Categories.Player, "build-height", "Allows you to interact with objects at the build limit.");
+        super(Categories.World, "build-height", "Allows you to interact with objects at the build limit.");
     }
 
     @EventHandler

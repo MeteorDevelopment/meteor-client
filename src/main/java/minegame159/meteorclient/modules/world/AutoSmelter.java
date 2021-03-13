@@ -3,7 +3,7 @@
  * Copyright (c) 2021 Meteor Development.
  */
 
-package minegame159.meteorclient.modules.misc;
+package minegame159.meteorclient.modules.world;
 
 import minegame159.meteorclient.mixin.AbstractFurnaceScreenHandlerAccessor;
 import minegame159.meteorclient.modules.Categories;
@@ -20,7 +20,7 @@ public class AutoSmelter extends Module {
     private boolean waitingForItemsToSmelt;
 
     public AutoSmelter() {
-        super(Categories.Misc, "auto-smelter", "Automatically smelts all items in your inventory that can be smelted.");
+        super(Categories.World, "auto-smelter", "Automatically smelts all items in your inventory that can be smelted.");
     }
 
     @Override

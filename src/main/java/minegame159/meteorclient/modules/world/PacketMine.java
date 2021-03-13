@@ -3,7 +3,7 @@
  * Copyright (c) 2021 Meteor Development.
  */
 
-package minegame159.meteorclient.modules.player;
+package minegame159.meteorclient.modules.world;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.player.StartBreakingBlockEvent;
@@ -85,7 +85,7 @@ public class PacketMine extends Module {
     private final List<MyBlock> blocks = new ArrayList<>();
 
     public PacketMine() {
-        super(Categories.Player, "packet-mine", "Sends packets to mine blocks without the mining animation.");
+        super(Categories.World, "packet-mine", "Sends packets to mine blocks without the mining animation.");
     }
 
     @Override

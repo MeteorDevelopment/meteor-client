@@ -3,7 +3,7 @@
  * Copyright (c) 2021 Meteor Development.
  */
 
-package minegame159.meteorclient.modules.misc;
+package minegame159.meteorclient.modules.world;
 
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
@@ -45,7 +45,7 @@ public class EntityLogger extends Module {
     );
 
     public EntityLogger() {
-        super(Categories.Misc, "entity-logger", "Sends a client-side chat alert if a specified entity appears in render distance.");
+        super(Categories.World, "entity-logger", "Sends a client-side chat alert if a specified entity appears in render distance.");
     }
 
     @EventHandler

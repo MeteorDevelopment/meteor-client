@@ -9,7 +9,7 @@ import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.entity.EntityAddedEvent;
 import minegame159.meteorclient.events.entity.EntityRemovedEvent;
 import minegame159.meteorclient.modules.Modules;
-import minegame159.meteorclient.modules.render.Ambience;
+import minegame159.meteorclient.modules.world.Ambience;
 import minegame159.meteorclient.modules.render.Search;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.render.SkyProperties;

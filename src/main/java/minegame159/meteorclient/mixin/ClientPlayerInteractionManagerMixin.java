@@ -12,7 +12,7 @@ import minegame159.meteorclient.events.entity.player.InteractItemEvent;
 import minegame159.meteorclient.events.entity.player.StartBreakingBlockEvent;
 import minegame159.meteorclient.mixininterface.IClientPlayerInteractionManager;
 import minegame159.meteorclient.modules.Modules;
-import minegame159.meteorclient.modules.misc.Nuker;
+import minegame159.meteorclient.modules.world.Nuker;
 import minegame159.meteorclient.modules.player.NoBreakDelay;
 import minegame159.meteorclient.modules.player.Reach;
 import net.minecraft.client.network.ClientPlayerInteractionManager;

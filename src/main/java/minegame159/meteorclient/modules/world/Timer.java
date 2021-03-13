@@ -3,7 +3,7 @@
  * Copyright (c) 2021 Meteor Development.
  */
 
-package minegame159.meteorclient.modules.movement;
+package minegame159.meteorclient.modules.world;
 
 import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
@@ -27,7 +27,7 @@ public class Timer extends Module {
     private double override = -1;
 
     public Timer() {
-        super(Categories.Movement, "timer", "Changes the speed of everything in your game.");
+        super(Categories.World, "timer", "Changes the speed of everything in your game.");
     }
 
     public double getMultiplier() {
