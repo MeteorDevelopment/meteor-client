@@ -167,6 +167,7 @@ public class Tracers extends Module {
 
     @EventHandler
     private void onRender(RenderEvent event) {
+        count = 0;
         for (Entity entity : mc.world.getEntities()) {
             if(mc.player.distanceTo(entity) > maxDist.get()) continue;
             if(entity instanceof PlayerEntity) if(Friends.get().contains(Friends.get().get((PlayerEntity) entity))) if(!Friends.get().show((PlayerEntity) entity)) continue;
