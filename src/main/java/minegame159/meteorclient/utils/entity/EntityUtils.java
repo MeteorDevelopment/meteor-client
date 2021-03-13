@@ -10,6 +10,7 @@ import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.text.TextUtils;
 import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.entity.Entity;
@@ -152,5 +153,28 @@ public class EntityUtils {
         }
 
         return false;
+    }
+
+    public static boolean isInRenderDistance(Entity entity) {
+        if (entity == null) return false;
+        return isInRenderDistance(entity.getX(), entity.getZ());
+    }
+
+    public static boolean isInRenderDistance(BlockEntity entity) {
+        if (entity == null) return false;
+        return isInRenderDistance(entity.getPos().getX(), entity.getPos().getZ());
+    }
+
+    public static boolean isInRenderDistance(BlockPos pos) {
+        if (pos == null) return false;
+        return isInRenderDistance(pos.getX(), pos.getZ());
+    }
+
+    public static boolean isInRenderDistance(double posX, double posZ) {
+        double x = Math.abs(mc.gameRenderer.getCamera().getPos().x - posX);
+        double z = Math.abs(mc.gameRenderer.getCamera().getPos().z - posZ);
+        double d = (mc.options.viewDistance + 1) * 16;
+
+        return x < d && z < d;
     }
 }

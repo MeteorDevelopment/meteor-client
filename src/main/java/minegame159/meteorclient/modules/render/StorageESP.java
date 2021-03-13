@@ -12,6 +12,8 @@ import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.rendering.ShapeMode;
 import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.entity.EntityUtils;
+import minegame159.meteorclient.utils.render.RenderUtils;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import minegame159.meteorclient.utils.world.Dir;
@@ -31,6 +33,13 @@ public class StorageESP extends Module {
             .name("storage-blocks")
             .description("Select the storage blocks to display.")
             .defaultValue(Arrays.asList(StorageBlockListSetting.STORAGE_BLOCKS))
+            .build()
+    );
+
+    private final Setting<Boolean> tracers = sgGeneral.add(new BoolSetting.Builder()
+            .name("tracers")
+            .description("Draws tracers to storage blocks.")
+            .defaultValue(false)
             .build()
     );
 
@@ -128,7 +137,7 @@ public class StorageESP extends Module {
         count = 0;
 
         for (BlockEntity blockEntity : mc.world.blockEntities) {
-            if (blockEntity.isRemoved()) continue;
+            if (blockEntity.isRemoved() || !EntityUtils.isInRenderDistance(blockEntity)) continue;
 
             getTileEntityColor(blockEntity);
 
@@ -173,6 +182,8 @@ public class StorageESP extends Module {
                 if (a >= 0.075) {
                     Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x1, y1, z1, x2, y2, z2, sideColor, lineColor, shapeMode.get(), excludeDir);
                 }
+
+                if (tracers.get()) RenderUtils.drawTracerToBlockEntity(blockEntity, lineColor, event);
 
                 lineColor.a = prevLineA;
                 sideColor.a = prevSideA;
