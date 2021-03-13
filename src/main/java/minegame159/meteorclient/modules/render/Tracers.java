@@ -159,23 +159,14 @@ public class Tracers extends Module {
     );
 
     private int count;
-    private int perf;
 
     public Tracers() {
         super(Categories.Render, "tracers", "Displays tracer lines to specified entities.");
     }
 
-    @Override
-    public void onActivate() {
-        perf = 0;
-    }
 
     @EventHandler
     private void onRender(RenderEvent event) {
-        count = 0;
-        perf++;
-        if(perf < 1) return;
-        perf = 0;
         for (Entity entity : mc.world.getEntities()) {
             if(mc.player.distanceTo(entity) > maxDist.get()) continue;
             if(entity instanceof PlayerEntity) if(Friends.get().contains(Friends.get().get((PlayerEntity) entity))) if(!Friends.get().show((PlayerEntity) entity)) continue;
