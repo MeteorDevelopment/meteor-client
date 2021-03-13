@@ -3,7 +3,7 @@
  * Copyright (c) 2021 Meteor Development.
  */
 
-package minegame159.meteorclient.modules.player;
+package minegame159.meteorclient.modules.world;
 
 import baritone.api.BaritoneAPI;
 import baritone.api.pathing.goals.GoalBlock;
@@ -20,6 +20,7 @@ import minegame159.meteorclient.modules.combat.AutoLog;
 import minegame159.meteorclient.modules.movement.GUIMove;
 import minegame159.meteorclient.modules.movement.Jesus;
 import minegame159.meteorclient.modules.movement.NoFall;
+import minegame159.meteorclient.modules.player.*;
 import minegame159.meteorclient.settings.*;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
@@ -98,7 +99,7 @@ public class InfinityMiner extends Module {
     private volatile Boolean BLOCKER = false;
 
     public InfinityMiner() {
-        super(Categories.Player, "infinity-miner", "Allows you to essentially mine forever.");
+        super(Categories.World, "infinity-miner", "Allows you to essentially mine forever.");
     }
 
     @Override

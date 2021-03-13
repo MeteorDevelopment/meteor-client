@@ -18,13 +18,14 @@ import minegame159.meteorclient.events.meteor.ModuleBindChangedEvent;
 import minegame159.meteorclient.events.meteor.MouseButtonEvent;
 import minegame159.meteorclient.modules.combat.*;
 import minegame159.meteorclient.modules.misc.*;
-import minegame159.meteorclient.modules.movement.Timer;
 import minegame159.meteorclient.modules.movement.*;
 import minegame159.meteorclient.modules.movement.elytrafly.ElytraFly;
 import minegame159.meteorclient.modules.movement.speed.Speed;
 import minegame159.meteorclient.modules.player.*;
 import minegame159.meteorclient.modules.render.*;
 import minegame159.meteorclient.modules.render.hud.HUD;
+import minegame159.meteorclient.modules.world.*;
+import minegame159.meteorclient.modules.world.Timer;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.systems.System;
@@ -74,6 +75,7 @@ public class Modules extends System<Modules> {
         initPlayer();
         initMovement();
         initRender();
+        initWorld();
         initMisc();
     }
 
@@ -380,34 +382,27 @@ public class Modules extends System<Modules> {
     private void initPlayer() {
         add(new AirPlace());
         add(new AntiAFK());
-        add(new AntiCactus());
         add(new AntiHunger());
         add(new AutoClicker());
         add(new AutoDrop());
         add(new AutoFish());
         add(new AutoMend());
-        add(new AutoMount());
         add(new AutoReplenish());
         add(new AutoRespawn());
         add(new AutoTool());
-        add(new BuildHeight());
         add(new ChestSwap());
         add(new DeathPosition());
         add(new EXPThrower());
-        add(new EndermanLook());
         add(new FakePlayer());
         add(new FastUse());
         add(new GhostHand());
-        add(new InfinityMiner());
         add(new LiquidInteract());
         add(new MiddleClickExtra());
-        add(new MountBypass());
         add(new NameProtect());
         add(new NoBreakDelay());
         add(new NoInteract());
         add(new NoMiningTrace());
         add(new NoRotate());
-        add(new PacketMine());
         add(new Portals());
         add(new PotionSpoof());
         add(new Reach());
@@ -417,7 +412,6 @@ public class Modules extends System<Modules> {
         add(new XCarry());
         add(new AutoGap());
         add(new AutoEat());
-        add(new VeinMiner());
     }
 
     private void initMovement() {
@@ -448,7 +442,6 @@ public class Modules extends System<Modules> {
         add(new Speed());
         add(new Spider());
         add(new Step());
-        add(new Timer());
         add(new Velocity());
     }
 
@@ -486,38 +479,50 @@ public class Modules extends System<Modules> {
         add(new Xray());
         add(new BossStack());
         add(new ItemHighlight());
-        add(new Ambience());
         add(new ModelTweaks());
         add(new LightOverlay());
         add(new Zoom());
     }
 
-    private void initMisc() {
-        add(new Announcer());
-        add(new AntiPacketKick());
+    private void initWorld() {
+        add(new Ambience());
+        add(new AntiCactus());
         add(new AutoBreed());
         add(new AutoBrewer());
+        add(new AutoMount());
         add(new AutoNametag());
-        add(new AutoReconnect());
         add(new AutoShearer());
         add(new AutoSign());
         add(new AutoSmelter());
         add(new AutoSteal());
+        add(new BuildHeight());
+        add(new EChestFarmer());
+        add(new EndermanLook());
+        add(new EntityLogger());
         add(new Flamethrower());
+        add(new InfinityMiner());
+        add(new Nuker());
+        add(new LiquidFiller());
+        add(new MountBypass());
+        add(new PacketMine());
+        add(new StashFinder());
+        add(new Timer());
+        add(new VeinMiner());
+    }
+
+    private void initMisc() {
+        add(new Announcer());
+        add(new AntiPacketKick());
+        add(new AutoReconnect());
         add(new BetterChat());
         add(new BookBot());
         add(new DiscordPresence());
-        add(new EChestFarmer());
-        add(new EntityLogger());
-        add(new LiquidFiller());
         add(new MessageAura());
         add(new MiddleClickFriend());
-        add(new Nuker());
         add(new OffhandCrash());
         add(new PacketCanceller());
         add(new SoundBlocker());
         add(new Spam());
-        add(new StashFinder());
         add(new VisualRange());
         add(new VanillaSpoof());
     }

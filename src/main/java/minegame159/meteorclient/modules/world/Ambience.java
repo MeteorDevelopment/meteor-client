@@ -3,7 +3,7 @@
  * Copyright (c) 2021 Meteor Development.
  */
 
-package minegame159.meteorclient.modules.render;
+package minegame159.meteorclient.modules.world;
 
 import minegame159.meteorclient.gui.widgets.WButton;
 import minegame159.meteorclient.gui.widgets.WTable;
@@ -152,7 +152,7 @@ public class Ambience extends Module {
     );
 
     public Ambience() {
-        super(Categories.Render, "ambience", "Change the color of various pieces of the environment.");
+        super(Categories.World, "ambience", "Change the color of various pieces of the environment.");
     }
 
     @Override

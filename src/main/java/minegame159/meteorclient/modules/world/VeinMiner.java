@@ -3,7 +3,7 @@
  * Copyright (c) 2021 Meteor Development.
  */
 
-package minegame159.meteorclient.modules.player;
+package minegame159.meteorclient.modules.world;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.player.StartBreakingBlockEvent;
@@ -104,7 +104,7 @@ public class VeinMiner extends Module {
     private final List<BlockPos> foundBlockPositions = new ArrayList<>();
 
     public VeinMiner() {
-        super(Categories.Player, "vein-miner", "Mines all nearby blocks with this type");
+        super(Categories.World, "vein-miner", "Mines all nearby blocks with this type");
     }
 
     @Override
