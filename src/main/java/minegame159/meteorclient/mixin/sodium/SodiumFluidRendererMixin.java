@@ -7,11 +7,10 @@ package minegame159.meteorclient.mixin.sodium;
 
 import me.jellysquid.mods.sodium.client.model.light.LightPipeline;
 import me.jellysquid.mods.sodium.client.model.quad.ModelQuadView;
-import me.jellysquid.mods.sodium.client.model.quad.ModelQuadViewMutable;
 import me.jellysquid.mods.sodium.client.render.pipeline.FluidRenderer;
 import me.jellysquid.mods.sodium.client.util.color.ColorARGB;
 import minegame159.meteorclient.modules.Modules;
-import minegame159.meteorclient.modules.render.Ambience;
+import minegame159.meteorclient.modules.world.Ambience;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.BlockRenderView;

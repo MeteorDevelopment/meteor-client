@@ -3,7 +3,7 @@
  * Copyright (c) 2021 Meteor Development.
  */
 
-package minegame159.meteorclient.modules.misc;
+package minegame159.meteorclient.modules.world;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
@@ -106,7 +106,7 @@ public class Nuker extends Module {
     private int timer;
 
     public Nuker() {
-        super(Categories.Misc, "nuker", "Breaks a large amount of specified blocks around you.");
+        super(Categories.World, "nuker", "Breaks a large amount of specified blocks around you.");
     }
 
     @Override

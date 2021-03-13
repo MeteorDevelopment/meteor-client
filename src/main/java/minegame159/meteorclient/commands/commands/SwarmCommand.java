@@ -16,7 +16,7 @@ import minegame159.meteorclient.commands.arguments.PlayerArgumentType;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.misc.Swarm;
-import minegame159.meteorclient.modules.player.InfinityMiner;
+import minegame159.meteorclient.modules.world.InfinityMiner;
 import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.BlockStateArgument;

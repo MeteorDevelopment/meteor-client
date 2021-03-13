@@ -3,7 +3,7 @@
  * Copyright (c) 2021 Meteor Development.
  */
 
-package minegame159.meteorclient.modules.misc;
+package minegame159.meteorclient.modules.world;
 
 import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
@@ -76,7 +76,7 @@ public class AutoSteal extends Module {
     );
 
     public AutoSteal() {
-        super(Categories.Misc, "auto-steal", "Automatically dumps or steals from storage blocks.");
+        super(Categories.World, "auto-steal", "Automatically dumps or steals from storage blocks.");
     }
 
     private void checkAutoSettings() {

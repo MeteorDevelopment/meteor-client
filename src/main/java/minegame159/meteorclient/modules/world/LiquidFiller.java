@@ -3,7 +3,7 @@
  * Copyright (c) 2021 Meteor Development.
  */
 
-package minegame159.meteorclient.modules.misc;
+package minegame159.meteorclient.modules.world;
 
 import com.google.common.collect.Lists;
 import meteordevelopment.orbit.EventHandler;
@@ -81,7 +81,7 @@ public class LiquidFiller extends Module {
     private int timer;
 
     public LiquidFiller(){
-        super(Categories.Misc, "liquid-filler", "Places blocks inside of liquid source blocks within range of you.");
+        super(Categories.World, "liquid-filler", "Places blocks inside of liquid source blocks within range of you.");
     }
 
     @Override

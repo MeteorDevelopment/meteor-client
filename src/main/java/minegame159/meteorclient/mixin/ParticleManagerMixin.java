@@ -8,7 +8,7 @@ package minegame159.meteorclient.mixin;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.world.ParticleEvent;
 import minegame159.meteorclient.modules.Modules;
-import minegame159.meteorclient.modules.misc.Nuker;
+import minegame159.meteorclient.modules.world.Nuker;
 import minegame159.meteorclient.modules.render.NoRender;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.particle.Particle;
