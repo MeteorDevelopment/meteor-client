@@ -66,7 +66,7 @@ public class ClientWorldMixin {
     private void onGetSkyProperties(CallbackInfoReturnable<SkyProperties> info) {
         Ambience ambience = Modules.get().get(Ambience.class);
 
-        if (ambience.enderMode.get()) {
+        if (ambience.isActive() && ambience.enderMode.get()) {
             info.setReturnValue(ambience.enderCustomSkyColor.get() ? customSky : endSky);
         }
     }
