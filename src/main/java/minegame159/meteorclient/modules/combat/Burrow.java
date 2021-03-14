@@ -18,6 +18,7 @@ import minegame159.meteorclient.utils.misc.input.KeyAction;
 import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.player.PlayerUtils;
+import minegame159.meteorclient.utils.player.Rotations;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
@@ -101,6 +102,13 @@ public class Burrow extends Module {
             .build()
     );
 
+    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
+            .name("rotate")
+            .description("Faces the block you place server-side.")
+            .defaultValue(true)
+            .build()
+    );
+
     private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
 
     private int prevSlot;
@@ -180,6 +188,7 @@ public class Burrow extends Module {
 
             mc.player.inventory.selectedSlot = slot;
 
+            if (rotate.get()) Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos));
             mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(Utils.vec3d(blockPos), Direction.UP, blockPos, false));
             mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
 
