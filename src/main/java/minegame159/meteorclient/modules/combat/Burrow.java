@@ -188,9 +188,8 @@ public class Burrow extends Module {
 
             mc.player.inventory.selectedSlot = slot;
 
-            if (rotate.get()) Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos));
-            mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(Utils.vec3d(blockPos), Direction.UP, blockPos, false));
-            mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
+            if (rotate.get()) Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), this::placeBlock);
+            else placeBlock();
 
             mc.player.inventory.selectedSlot = prevSlot;
 
@@ -202,6 +201,11 @@ public class Burrow extends Module {
 
             toggle();
         }
+    }
+
+    private void placeBlock() {
+        mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(Utils.vec3d(blockPos), Direction.UP, blockPos, false));
+        mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
     }
 
     @EventHandler
