@@ -7,7 +7,7 @@ package minegame159.meteorclient.gui.screens;
 
 import minegame159.meteorclient.gui.widgets.WHorizontalSeparator;
 import minegame159.meteorclient.gui.widgets.WLabel;
-import minegame159.meteorclient.modules.misc.StashFinder;
+import minegame159.meteorclient.modules.world.StashFinder;
 
 public class StashFinderChunkScreen extends WindowScreen {
     public StashFinderChunkScreen(StashFinder.Chunk chunk) {

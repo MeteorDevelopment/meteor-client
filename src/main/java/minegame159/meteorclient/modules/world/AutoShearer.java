@@ -3,7 +3,7 @@
  * Copyright (c) 2021 Meteor Development.
  */
 
-package minegame159.meteorclient.modules.misc;
+package minegame159.meteorclient.modules.world;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
@@ -51,7 +51,7 @@ public class AutoShearer extends Module {
     private boolean offHand;
 
     public AutoShearer() {
-        super(Categories.Misc, "auto-shearer", "Automatically shears sheep.");
+        super(Categories.World, "auto-shearer", "Automatically shears sheep.");
     }
 
     @Override

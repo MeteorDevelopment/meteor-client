@@ -3,7 +3,7 @@
  * Copyright (c) 2021 Meteor Development.
  */
 
-package minegame159.meteorclient.modules.misc;
+package minegame159.meteorclient.modules.world;
 
 //Created by squidoodly 20/06/2020
 
@@ -66,7 +66,7 @@ public class EChestFarmer extends Module {
     private int numLeft = Math.floorDiv(amount.get() , 8);
 
     public EChestFarmer(){
-        super(Categories.Misc, "EChest-farmer", "Places and mines Ender Chests where you're looking.");
+        super(Categories.World, "EChest-farmer", "Places and mines Ender Chests where you're looking.");
     }
 
     @EventHandler

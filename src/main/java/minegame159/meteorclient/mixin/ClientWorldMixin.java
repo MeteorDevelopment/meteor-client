@@ -9,7 +9,7 @@ import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.entity.EntityAddedEvent;
 import minegame159.meteorclient.events.entity.EntityRemovedEvent;
 import minegame159.meteorclient.modules.Modules;
-import minegame159.meteorclient.modules.render.Ambience;
+import minegame159.meteorclient.modules.world.Ambience;
 import minegame159.meteorclient.modules.render.Search;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.render.SkyProperties;
@@ -66,7 +66,7 @@ public class ClientWorldMixin {
     private void onGetSkyProperties(CallbackInfoReturnable<SkyProperties> info) {
         Ambience ambience = Modules.get().get(Ambience.class);
 
-        if (ambience.enderMode.get()) {
+        if (ambience.isActive() && ambience.enderMode.get()) {
             info.setReturnValue(ambience.enderCustomSkyColor.get() ? customSky : endSky);
         }
     }

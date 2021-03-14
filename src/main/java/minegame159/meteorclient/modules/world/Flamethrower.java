@@ -1,4 +1,4 @@
-package minegame159.meteorclient.modules.misc;
+package minegame159.meteorclient.modules.world;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
@@ -19,7 +19,6 @@ import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.FlintAndSteelItem;
 import net.minecraft.item.Items;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -53,6 +52,13 @@ public class Flamethrower extends Module {
         .build()
     );
 
+    private final Setting<Boolean> targetBabies = sgGeneral.add(new BoolSetting.Builder()
+        .name("target-babies")
+        .description("If checked babies will also be killed.")
+        .defaultValue(false)
+        .build()
+    );
+
     private final Setting<Integer> tickInterval = sgGeneral.add(new IntSetting.Builder()
         .name("tick-interval")
         .defaultValue(5)
@@ -80,7 +86,7 @@ public class Flamethrower extends Module {
     private int ticks = 0;
 
     public Flamethrower() {
-        super(Categories.Misc, "flamethrower", "Ignites every alive piece of food.");
+        super(Categories.World, "flamethrower", "Ignites every alive piece of food.");
     }
 
     @Override
@@ -94,30 +100,13 @@ public class Flamethrower extends Module {
         ticks++;
         for (Entity entity : mc.world.getEntities()) {
             if (!entities.get().getBoolean(entity.getType()) || mc.player.distanceTo(entity) > distance.get()) continue;
+            if (entity.isFireImmune()) continue;
+            if (entity == mc.player) continue;
+            if (!targetBabies.get() && entity instanceof LivingEntity && ((LivingEntity)entity).isBaby()) continue;
 
-            boolean findNewFlintAndSteel = false;
-            if (mc.player.inventory.getMainHandStack().getItem() instanceof FlintAndSteelItem) {
-                if (antiBreak.get() && mc.player.inventory.getMainHandStack().getDamage() >= mc.player.inventory.getMainHandStack().getMaxDamage() - 1)
-                    findNewFlintAndSteel = true;
-            } else if (mc.player.inventory.offHand.get(0).getItem() instanceof FlintAndSteelItem) {
-                if (antiBreak.get() && mc.player.inventory.offHand.get(0).getDamage() >= mc.player.inventory.offHand.get(0).getMaxDamage() - 1)
-                    findNewFlintAndSteel = true;
-            } else {
-                findNewFlintAndSteel = true;
-            }
+            boolean success = selectSlot();
 
-            boolean foundFlintAndSteel = !findNewFlintAndSteel;
-            if (findNewFlintAndSteel) {
-                int slot = InvUtils.findItemInHotbar(Items.FLINT_AND_STEEL,
-                    itemStack -> (!antiBreak.get() || (antiBreak.get() && itemStack.getDamage() < itemStack.getMaxDamage() - 1)));
-
-                if (slot != -1) {
-                    mc.player.inventory.selectedSlot = slot;
-                    foundFlintAndSteel = true;
-                }
-            }
-
-            if (foundFlintAndSteel) {
+            if (success) {
                 this.entity = entity;
 
                 if (rotate.get()) Rotations.rotate(Rotations.getYaw(entity.getBlockPos()), Rotations.getPitch(entity.getBlockPos()), -100, this::interact);
@@ -131,7 +120,7 @@ public class Flamethrower extends Module {
     private void interact() {
         Block block = mc.world.getBlockState(entity.getBlockPos()).getBlock();
         Block bottom = mc.world.getBlockState(entity.getBlockPos().down()).getBlock();
-        if (block.is(Blocks.WATER) || bottom.is(Blocks.GRASS_PATH)) return;
+        if (block.is(Blocks.WATER) || bottom.is(Blocks.WATER) || bottom.is(Blocks.GRASS_PATH)) return;
         if (block.is(Blocks.GRASS))  mc.interactionManager.attackBlock(entity.getBlockPos(), Direction.DOWN);
         LivingEntity animal = (LivingEntity) entity;
 
@@ -142,14 +131,40 @@ public class Flamethrower extends Module {
             mc.interactionManager.attackBlock(entity.getBlockPos().north(), Direction.DOWN);
             mc.interactionManager.attackBlock(entity.getBlockPos().south(), Direction.DOWN);
         } else {
-            if (ticks >= tickInterval.get()) {
+            if (ticks >= tickInterval.get() && !entity.isOnFire()) {
                 mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(
                     entity.getPos().subtract(new Vec3d(0, 1, 0)), Direction.UP, entity.getBlockPos().down(), false));
                 ticks = 0;
             }
-
         }
 
         mc.player.inventory.selectedSlot = preSlot;
+    }
+    
+    private boolean selectSlot() {
+        preSlot = mc.player.inventory.selectedSlot;
+
+        boolean findNewFlintAndSteel = false;
+        if (mc.player.inventory.getMainHandStack().getItem() == Items.FLINT_AND_STEEL) {
+            if (antiBreak.get() && mc.player.inventory.getMainHandStack().getDamage() >= mc.player.inventory.getMainHandStack().getMaxDamage() - 1)
+                findNewFlintAndSteel = true;
+        } else if (mc.player.inventory.offHand.get(0).getItem() == Items.FLINT_AND_STEEL) {
+            if (antiBreak.get() && mc.player.inventory.offHand.get(0).getDamage() >= mc.player.inventory.offHand.get(0).getMaxDamage() - 1)
+                findNewFlintAndSteel = true;
+        } else {
+            findNewFlintAndSteel = true;
+        }
+
+        boolean foundFlintAndSteel = !findNewFlintAndSteel;
+        if (findNewFlintAndSteel) {
+            int slot = InvUtils.findItemInHotbar(Items.FLINT_AND_STEEL,
+                itemStack -> (!antiBreak.get() || (antiBreak.get() && itemStack.getDamage() < itemStack.getMaxDamage() - 1)));
+
+            if (slot != -1) {
+                mc.player.inventory.selectedSlot = slot;
+                foundFlintAndSteel = true;
+            }
+        }
+        return foundFlintAndSteel;
     }
 }

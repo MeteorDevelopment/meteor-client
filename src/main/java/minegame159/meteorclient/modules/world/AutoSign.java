@@ -3,7 +3,7 @@
  * Copyright (c) 2021 Meteor Development.
  */
 
-package minegame159.meteorclient.modules.misc;
+package minegame159.meteorclient.modules.world;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.game.OpenScreenEvent;
@@ -19,7 +19,7 @@ public class AutoSign extends Module {
     private String[] text;
 
     public AutoSign() {
-        super(Categories.Misc, "auto-sign", "Automatically writes signs. The first sign's text will be used.");
+        super(Categories.World, "auto-sign", "Automatically writes signs. The first sign's text will be used.");
     }
 
     @Override

@@ -6,7 +6,7 @@
 package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.modules.Modules;
-import minegame159.meteorclient.modules.misc.AutoBrewer;
+import minegame159.meteorclient.modules.world.AutoBrewer;
 import net.minecraft.client.gui.screen.ingame.BrewingStandScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.entity.player.PlayerInventory;
