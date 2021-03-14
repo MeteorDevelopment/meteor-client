@@ -30,6 +30,8 @@ public class Config extends System<Config> {
 
     public int rotationHoldTicks = 9;
 
+    public boolean windowTitle = false;
+
     public Config() {
         super("config");
 
@@ -61,6 +63,7 @@ public class Config extends System<Config> {
         tag.putBoolean("deleteChatCommandsInfo", deleteChatCommandsInfo);
         tag.putBoolean("sendDataToApi", sendDataToApi);
         tag.putBoolean("titleScreenCredits", titleScreenCredits);
+        tag.putBoolean("windowTitle", windowTitle);
 
         return tag;
     }
@@ -74,6 +77,7 @@ public class Config extends System<Config> {
         deleteChatCommandsInfo = !tag.contains("deleteChatCommandsInfo") || tag.getBoolean("deleteChatCommandsInfo");
         sendDataToApi = !tag.contains("sendDataToApi") || tag.getBoolean("sendDataToApi");
         titleScreenCredits = !tag.contains("titleScreenCredits") || tag.getBoolean("titleScreenCredits");
+        windowTitle = !tag.contains("windowTitle") || tag.getBoolean("windowTitle");
 
         // In 0.2.9 the default font was changed, detect when people load up 0.2.9 for the first time
         Version lastVer = new Version(tag.getString("version"));

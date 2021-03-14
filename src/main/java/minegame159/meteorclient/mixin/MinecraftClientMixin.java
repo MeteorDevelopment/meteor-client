@@ -37,7 +37,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import javax.annotation.Nullable;
 import java.util.concurrent.CompletableFuture;
 
-@Mixin(MinecraftClient.class)
+@Mixin(value = MinecraftClient.class, priority = 1001)
 public abstract class MinecraftClientMixin implements IMinecraftClient {
     @Shadow public ClientWorld world;
 
@@ -116,6 +116,11 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
     private CompletableFuture<Void> onReloadResourcesNewCompletableFuture(CompletableFuture<Void> completableFuture) {
         completableFuture.thenRun(() -> MeteorClient.EVENT_BUS.post(ResourcePacksReloadedEvent.get()));
         return completableFuture;
+    }
+
+    @Inject(method = "getWindowTitle", at = @At("HEAD"), cancellable = true)
+    private void getTitle(CallbackInfoReturnable<String> cir) {
+        if (Config.get() != null && Config.get().windowTitle) cir.setReturnValue("Meteor Client " + Config.get().version.getOriginalString());
     }
 
     // Interface
