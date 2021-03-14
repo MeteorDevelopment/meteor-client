@@ -24,8 +24,8 @@ import minegame159.meteorclient.modules.movement.speed.Speed;
 import minegame159.meteorclient.modules.player.*;
 import minegame159.meteorclient.modules.render.*;
 import minegame159.meteorclient.modules.render.hud.HUD;
-import minegame159.meteorclient.modules.world.*;
 import minegame159.meteorclient.modules.world.Timer;
+import minegame159.meteorclient.modules.world.*;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.systems.System;
@@ -377,6 +377,7 @@ public class Modules extends System<Modules> {
         add(new Swarm());
         add(new TotemPopNotifier());
         add(new Trigger());
+        add(new Burrow());
     }
 
     private void initPlayer() {
