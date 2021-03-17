@@ -216,12 +216,10 @@ public class KillAura extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-
-        if (mc.player.isDead() || !mc.player.isAlive() || !itemInHand()) {
-            entityList.clear();
-            return;
-        }
         entityList.clear();
+
+        if (mc.player.isDead() || !mc.player.isAlive() || !itemInHand()) return;
+
         EntityUtils.getList(entity -> {
             if (entity == mc.player || entity == mc.cameraEntity) return false;
             if ((entity instanceof LivingEntity && ((LivingEntity) entity).isDead()) || !entity.isAlive()) return false;
@@ -240,7 +238,7 @@ public class KillAura extends Module {
             entityList.subList(1, entityList.size()).clear();
 
         if (entityList.isEmpty()) {
-            if (wasPathing){
+            if (wasPathing) {
                 BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume");
                 wasPathing = false;
             }
@@ -287,6 +285,7 @@ public class KillAura extends Module {
     private boolean attack(Entity target) {
         canAttack = false;
         this.target = target;
+
         if (Math.random() > hitChance.get() / 100) return false;
 
         if (rotationMode.get() == RotationMode.None || rotationMode.get() == RotationMode.Always) {
@@ -312,7 +311,7 @@ public class KillAura extends Module {
     }
 
     private boolean itemInHand() {
-        switch(onlyWith.get()){
+        switch(onlyWith.get()) {
             case Axe:        return mc.player.getMainHandStack().getItem() instanceof AxeItem;
             case Sword:      return mc.player.getMainHandStack().getItem() instanceof SwordItem;
             case Both:       return mc.player.getMainHandStack().getItem() instanceof AxeItem || mc.player.getMainHandStack().getItem() instanceof SwordItem;
@@ -324,8 +323,7 @@ public class KillAura extends Module {
     public String getInfoString() {
         if (!entityList.isEmpty()) {
             Entity targetFirst = entityList.get(0);
-            if (targetFirst instanceof PlayerEntity)
-                return targetFirst.getEntityName();
+            if (targetFirst instanceof PlayerEntity) return targetFirst.getEntityName();
             return targetFirst.getType().getName().getString();
         }
         return null;
