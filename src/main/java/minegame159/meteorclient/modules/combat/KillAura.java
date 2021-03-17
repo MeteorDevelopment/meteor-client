@@ -25,6 +25,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.AxeItem;
+import net.minecraft.item.Item;
 import net.minecraft.item.SwordItem;
 import net.minecraft.util.Hand;
 
@@ -35,8 +36,14 @@ public class KillAura extends Module {
     public enum OnlyWith {
         Sword,
         Axe,
-        SwordOrAxe,
+        Both,
         Any
+    }
+
+    public enum AutoSwitch {
+        None,
+        Sword,
+        Axe
     }
 
     public enum RotationMode {
@@ -80,6 +87,13 @@ public class KillAura extends Module {
             .name("only-with")
             .description("Only attacks an entity when a specified item is in your hand.")
             .defaultValue(OnlyWith.Any)
+            .build()
+    );
+
+    private final Setting<AutoSwitch> autoSwitch = sgGeneral.add(new EnumSetting.Builder<AutoSwitch>()
+            .name("auto-switch")
+            .description("Switches to an axe or a sword when attacking the target.")
+            .defaultValue(AutoSwitch.None)
             .build()
     );
 
@@ -243,6 +257,10 @@ public class KillAura extends Module {
             wasPathing = true;
         }
 
+        if (rotationMode.get() == RotationMode.Always && target != null) {
+            Rotations.rotate(Rotations.getYaw(target), Rotations.getPitch(target));
+        }
+
         if (smartDelay.get() && mc.player.getAttackCooldownProgress(0.5f) < 1) {
             return;
         }
@@ -265,10 +283,8 @@ public class KillAura extends Module {
         }
 
         for (Entity target : entityList) {
-            if (attack(target) && rotationMode.get() == RotationMode.Always) {
-                Rotations.rotate(Rotations.getYaw(target), Rotations.getPitch(target, rotationDirection.get()), () -> {
-                    if (canAttack) hitEntity(target);
-                });
+            if (attack(target) && (canAttack)) {
+                hitEntity(target);
             }
         }
     }
@@ -278,7 +294,7 @@ public class KillAura extends Module {
         this.target = target;
         if (Math.random() > hitChance.get() / 100) return false;
 
-        if (rotationMode.get() == RotationMode.None) {
+        if (rotationMode.get() == RotationMode.None || rotationMode.get() == RotationMode.Always) {
             hitEntity(target);
         }
         else {
@@ -290,6 +306,7 @@ public class KillAura extends Module {
     }
 
     private void hitEntity(Entity target) {
+        if (autoSwitch.get() != AutoSwitch.None && getWeaponSlot() != -1) mc.player.inventory.selectedSlot = getWeaponSlot();
         mc.interactionManager.attackEntity(mc.player, target);
         mc.player.swingHand(Hand.MAIN_HAND);
     }
@@ -298,9 +315,22 @@ public class KillAura extends Module {
         switch(onlyWith.get()){
             case Axe:        return mc.player.getMainHandStack().getItem() instanceof AxeItem;
             case Sword:      return mc.player.getMainHandStack().getItem() instanceof SwordItem;
-            case SwordOrAxe: return mc.player.getMainHandStack().getItem() instanceof AxeItem || mc.player.getMainHandStack().getItem() instanceof SwordItem;
+            case Both:       return mc.player.getMainHandStack().getItem() instanceof AxeItem || mc.player.getMainHandStack().getItem() instanceof SwordItem;
             default:         return true;
         }
+    }
+
+    private int getWeaponSlot() {
+        int slot = -1;
+        for (int i = 0; i < 9; i++) {
+            Item item = mc.player.inventory.getStack(i).getItem();
+
+            if ((item instanceof SwordItem && autoSwitch.get() == AutoSwitch.Sword) || (item instanceof AxeItem && autoSwitch.get() == AutoSwitch.Axe)) {
+                slot = i;
+                break;
+            }
+        }
+        return slot;
     }
 
     @Override
@@ -317,5 +347,4 @@ public class KillAura extends Module {
     public Entity getTarget() {
         return target;
     }
-
 }
