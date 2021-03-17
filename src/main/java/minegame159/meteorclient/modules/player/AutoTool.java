@@ -38,13 +38,6 @@ public class AutoTool extends Module {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<Boolean> useBestTool = sgGeneral.add(new BoolSetting.Builder()
-            .name("use-best-tool")
-            .description("Whether or not to use the best tool.")
-            .defaultValue(true)
-            .build()
-    );
-    
     private final Setting<EnchantPreference> prefer = sgGeneral.add(new EnumSetting.Builder<EnchantPreference>()
             .name("prefer")
             .description("Either to prefer Silk Touch, Fortune, or none.")
@@ -116,41 +109,32 @@ public class AutoTool extends Module {
         
         if (blockState.getHardness(mc.world, event.blockPos) < 0 || blockState.isAir()) return;
         
-        if (useBestTool.get()) {
-            int bestScore = -1;
-            int score = 0;
-            int bestSlot = -1;
-            for (int i = 0; i < 9; i++) {
-                ItemStack itemStack = mc.player.inventory.getStack(i);
-    
-                if (!isEffectiveOn(itemStack.getItem(), blockState) || shouldStopUsing(itemStack) || !(itemStack.getItem() instanceof ToolItem)) continue;
-    
-                if (silkTouchForEnderChest.get() && blockState.getBlock() == Blocks.ENDER_CHEST && EnchantmentHelper.getLevel(Enchantments.SILK_TOUCH, itemStack) == 0) continue;
-    
-                score += Math.round(itemStack.getMiningSpeedMultiplier(blockState));
-                score += EnchantmentHelper.getLevel(Enchantments.UNBREAKING, itemStack);
-                score += EnchantmentHelper.getLevel(Enchantments.EFFICIENCY, itemStack);
-    
-                if (preferMending.get()) score += EnchantmentHelper.getLevel(Enchantments.MENDING, itemStack);
-                if (prefer.get() == EnchantPreference.Fortune) score += EnchantmentHelper.getLevel(Enchantments.FORTUNE, itemStack);
-                if (prefer.get() == EnchantPreference.SilkTouch) score += EnchantmentHelper.getLevel(Enchantments.SILK_TOUCH, itemStack);
-    
-                if (score > bestScore) {
-                    bestScore = score;
-                    bestSlot = i;
-                }
-            }
-            if (bestSlot != -1) {
-                if (prevSlot == -1) prevSlot = mc.player.inventory.selectedSlot;
-                mc.player.inventory.selectedSlot = bestSlot;
+        int bestScore = -1;
+        int score = 0;
+        int bestSlot = -1;
+        for (int i = 0; i < 9; i++) {
+            ItemStack itemStack = mc.player.inventory.getStack(i);
+
+            if (!isEffectiveOn(itemStack.getItem(), blockState) || shouldStopUsing(itemStack) || !(itemStack.getItem() instanceof ToolItem)) continue;
+
+            if (silkTouchForEnderChest.get() && blockState.getBlock() == Blocks.ENDER_CHEST && EnchantmentHelper.getLevel(Enchantments.SILK_TOUCH, itemStack) == 0) continue;
+
+            score += Math.round(itemStack.getMiningSpeedMultiplier(blockState));
+            score += EnchantmentHelper.getLevel(Enchantments.UNBREAKING, itemStack);
+            score += EnchantmentHelper.getLevel(Enchantments.EFFICIENCY, itemStack);
+
+            if (preferMending.get()) score += EnchantmentHelper.getLevel(Enchantments.MENDING, itemStack);
+            if (prefer.get() == EnchantPreference.Fortune) score += EnchantmentHelper.getLevel(Enchantments.FORTUNE, itemStack);
+            if (prefer.get() == EnchantPreference.SilkTouch) score += EnchantmentHelper.getLevel(Enchantments.SILK_TOUCH, itemStack);
+
+            if (score > bestScore) {
+                bestScore = score;
+                bestSlot = i;
             }
         }
-
-        ItemStack currentStack = mc.player.inventory.getStack(mc.player.inventory.selectedSlot);
-
-        if (shouldStopUsing(currentStack) && currentStack.getItem() instanceof ToolItem) {
-            mc.options.keyAttack.setPressed(false);
-            event.setCancelled(true);
+        if (bestSlot != -1) {
+            if (prevSlot == -1) prevSlot = mc.player.inventory.selectedSlot;
+            mc.player.inventory.selectedSlot = bestSlot;
         }
     }
 
