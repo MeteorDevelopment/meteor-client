@@ -41,12 +41,6 @@ public class KillAura extends Module {
         Any
     }
 
-    public enum AutoSwitch {
-        None,
-        Sword,
-        Axe
-    }
-
     public enum RotationMode {
         Always,
         OnHit,
@@ -91,10 +85,10 @@ public class KillAura extends Module {
             .build()
     );
 
-    private final Setting<AutoSwitch> autoSwitch = sgGeneral.add(new EnumSetting.Builder<AutoSwitch>()
+    private final Setting<Boolean> autoSwitch = sgGeneral.add(new BoolSetting.Builder()
             .name("auto-switch")
             .description("Switches to an axe or a sword when attacking the target.")
-            .defaultValue(AutoSwitch.None)
+            .defaultValue(false)
             .build()
     );
 
@@ -308,13 +302,11 @@ public class KillAura extends Module {
 
     private void hitEntity(Entity target) {
         int slot = InvUtils.findItemInHotbar(itemStack -> {
-                    Item item = itemStack.getItem();
-                    if (item instanceof SwordItem && autoSwitch.get() == AutoSwitch.Sword) return true;
-                    else if (item instanceof AxeItem && autoSwitch.get() == AutoSwitch.Axe) return true;
-                    return false;
-                }
+                Item item = itemStack.getItem();
+                return ((item instanceof SwordItem || item instanceof AxeItem) && autoSwitch.get());
+            }
         );
-        if (autoSwitch.get() != AutoSwitch.None && slot != -1) mc.player.inventory.selectedSlot = slot;
+        if (autoSwitch.get() && slot != -1) mc.player.inventory.selectedSlot = slot;
         mc.interactionManager.attackEntity(mc.player, target);
         mc.player.swingHand(Hand.MAIN_HAND);
     }
