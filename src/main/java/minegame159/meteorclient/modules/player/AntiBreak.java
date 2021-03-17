@@ -4,7 +4,6 @@ import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import minegame159.meteorclient.events.entity.player.AttackEntityEvent;
 import minegame159.meteorclient.events.entity.player.StartBreakingBlockEvent;
-import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
@@ -31,13 +30,6 @@ public class AntiBreak extends Module{
     private final Setting<Boolean> toolSave = sgGeneral.add(new BoolSetting.Builder()
         .name("tool-save")
         .description("Whether or not to save a tool from breaking.")
-        .defaultValue(true)
-        .build()
-    );
-
-    private final Setting<Boolean> armorSave = sgGeneral.add(new BoolSetting.Builder()
-        .name("armor-save")
-        .description("Whether or not to save armor from breaking.")
         .defaultValue(true)
         .build()
     );
