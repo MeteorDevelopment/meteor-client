@@ -349,7 +349,7 @@ public class Modules extends System<Modules> {
         add(new AntiAnvil());
         add(new AntiAnchor());
         add(new AntiBed());
-        add(new AntiFriendHit());
+        add(new AntiHit());
         add(new ArrowDodge());
         add(new Auto32K());
         add(new AutoAnvil());
