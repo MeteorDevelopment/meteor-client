@@ -17,6 +17,7 @@ import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.entity.EntityUtils;
 import minegame159.meteorclient.utils.entity.SortPriority;
 import minegame159.meteorclient.utils.entity.Target;
+import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.player.PlayerUtils;
 import minegame159.meteorclient.utils.player.Rotations;
 import net.minecraft.entity.Entity;
@@ -306,7 +307,14 @@ public class KillAura extends Module {
     }
 
     private void hitEntity(Entity target) {
-        if (autoSwitch.get() != AutoSwitch.None && getWeaponSlot() != -1) mc.player.inventory.selectedSlot = getWeaponSlot();
+        int slot = InvUtils.findItemInHotbar(itemStack -> {
+                    Item item = itemStack.getItem();
+                    if (item instanceof SwordItem && autoSwitch.get() == AutoSwitch.Sword) return true;
+                    else if (item instanceof AxeItem && autoSwitch.get() == AutoSwitch.Axe) return true;
+                    return false;
+                }
+        );
+        if (autoSwitch.get() != AutoSwitch.None && slot != -1) mc.player.inventory.selectedSlot = slot;
         mc.interactionManager.attackEntity(mc.player, target);
         mc.player.swingHand(Hand.MAIN_HAND);
     }
@@ -318,19 +326,6 @@ public class KillAura extends Module {
             case Both:       return mc.player.getMainHandStack().getItem() instanceof AxeItem || mc.player.getMainHandStack().getItem() instanceof SwordItem;
             default:         return true;
         }
-    }
-
-    private int getWeaponSlot() {
-        int slot = -1;
-        for (int i = 0; i < 9; i++) {
-            Item item = mc.player.inventory.getStack(i).getItem();
-
-            if ((item instanceof SwordItem && autoSwitch.get() == AutoSwitch.Sword) || (item instanceof AxeItem && autoSwitch.get() == AutoSwitch.Axe)) {
-                slot = i;
-                break;
-            }
-        }
-        return slot;
     }
 
     @Override
