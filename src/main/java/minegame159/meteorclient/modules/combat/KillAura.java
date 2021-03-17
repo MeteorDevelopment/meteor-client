@@ -258,7 +258,7 @@ public class KillAura extends Module {
         }
 
         if (rotationMode.get() == RotationMode.Always && target != null) {
-            Rotations.rotate(Rotations.getYaw(target), Rotations.getPitch(target));
+            Rotations.rotate(Rotations.getYaw(target), Rotations.getPitch(target, rotationDirection.get()));
         }
 
         if (smartDelay.get() && mc.player.getAttackCooldownProgress(0.5f) < 1) {
