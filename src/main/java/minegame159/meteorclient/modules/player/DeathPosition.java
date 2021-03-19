@@ -35,6 +35,11 @@ private int damagedplayerY;
 private int damagedplayerZ;
 
 public class DeathPosition extends Module {
+    
+    private int damagedplayerX;
+    private int damagedplayerY;
+    private int damagedplayerZ;
+    
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Boolean> createWaypoint = sgGeneral.add(new BoolSetting.Builder()
@@ -63,16 +68,16 @@ public class DeathPosition extends Module {
         if (event.entity.getUuid() != null && event.entity.getUuid().equals(mc.player.getUuid())) {
             damagedplayerX = floor(mc.player.getX());
             damagedplayerY = floor(mc.player.getY());
-            damagedplayerZ = floor(mc.player.getZ());
+            damagedplayerZ = floor(mc.player.getZ()); }
 
         if (event.entity.getHealth() <= 0) {
             deathPos.put("x", damagedplayerX);
             deathPos.put("z", damagedplayerZ);
-            label.setText(String.format("Latest death: %.1f, %.1f, %.1f", damagedplayerX, damagedplayerY, damagedplayerZ);
+            label.setText(String.format("Latest death: %.1f, %.1f, %.1f", damagedplayerX, damagedplayerY, damagedplayerZ));
 
             String time = dateFormat.format(new Date());
             ChatUtils.moduleInfo(this, "Died at (highlight)%.0f(default), (highlight)%.0f(default), (highlight)%.0f (default)on (highlight)%s(default).", damagedplayerX, damagedplayerY, damagedplayerZ, time);
-            BaseText msg = new LiteralText("Died at ");
+            //BaseText msg = new LiteralText("Died at ");
             //msg.append(ChatUtils.formatCoords(mc.player.getPos()));
             msg.append(".");
             ChatUtils.moduleInfo(this,msg);
