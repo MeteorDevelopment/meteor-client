@@ -75,7 +75,7 @@ public class DeathPosition extends Module {
             String time = dateFormat.format(new Date());
             //ChatUtils.moduleInfo(this, "Died at (highlight)%.0f(default), (highlight)%.0f(default), (highlight)%.0f (default)on (highlight)%s(default).", damagedplayerX, damagedplayerY, damagedplayerZ, time);
             BaseText msg = new LiteralText("Died at ");
-            msg.append(ChatUtils.formatCoords(new Vec3d(damagedplayerX, damagedplayerY,damagedplayerZ ))))
+            msg.append(ChatUtils.formatCoords(new Vec3d(damagedplayerX, damagedplayerY,damagedplayerZ )));
             msg.append(".");
             ChatUtils.moduleInfo(this,msg);
 
