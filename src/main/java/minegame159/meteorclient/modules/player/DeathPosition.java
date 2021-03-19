@@ -73,11 +73,11 @@ public class DeathPosition extends Module {
             label.setText(String.format("Latest death: %.1f, %.1f, %.1f", damagedplayerX, damagedplayerY, damagedplayerZ));
 
             String time = dateFormat.format(new Date());
-            ChatUtils.moduleInfo(this, "Died at (highlight)%.0f(default), (highlight)%.0f(default), (highlight)%.0f (default)on (highlight)%s(default).", damagedplayerX, damagedplayerY, damagedplayerZ, time);
-            //BaseText msg = new LiteralText("Died at ");
-            //msg.append(ChatUtils.formatCoords(mc.player.getPos()));
-            //msg.append(".");
-            //ChatUtils.moduleInfo(this,msg);
+            //ChatUtils.moduleInfo(this, "Died at (highlight)%.0f(default), (highlight)%.0f(default), (highlight)%.0f (default)on (highlight)%s(default).", damagedplayerX, damagedplayerY, damagedplayerZ, time);
+            BaseText msg = new LiteralText("Died at ");
+            msg.append(ChatUtils.formatCoords(new Vec3d(damagedplayerX, damagedplayerY,damagedplayerZ ))))
+            msg.append(".");
+            ChatUtils.moduleInfo(this,msg);
 
             // Create waypoint
             if (createWaypoint.get()) {
