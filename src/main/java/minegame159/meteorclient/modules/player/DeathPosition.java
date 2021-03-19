@@ -76,8 +76,8 @@ public class DeathPosition extends Module {
             ChatUtils.moduleInfo(this, "Died at (highlight)%.0f(default), (highlight)%.0f(default), (highlight)%.0f (default)on (highlight)%s(default).", damagedplayerX, damagedplayerY, damagedplayerZ, time);
             //BaseText msg = new LiteralText("Died at ");
             //msg.append(ChatUtils.formatCoords(mc.player.getPos()));
-            msg.append(".");
-            ChatUtils.moduleInfo(this,msg);
+            //msg.append(".");
+            //ChatUtils.moduleInfo(this,msg);
 
             // Create waypoint
             if (createWaypoint.get()) {
