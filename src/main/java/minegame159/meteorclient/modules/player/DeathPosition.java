@@ -30,9 +30,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-private int damagedplayerX;
-private int damagedplayerY;
-private int damagedplayerZ;
 
 public class DeathPosition extends Module {
     
