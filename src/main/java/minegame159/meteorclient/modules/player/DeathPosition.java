@@ -33,12 +33,7 @@ import java.util.Map;
 
 
 public class DeathPosition extends Module {
-    
-    private double damagedplayerX;
-    private double damagedplayerY;
-    private double damagedplayerZ;
-    
-    
+
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Boolean> createWaypoint = sgGeneral.add(new BoolSetting.Builder()
@@ -52,14 +47,17 @@ public class DeathPosition extends Module {
 
     private final WLabel label = new WLabel("No latest death found.");
 
+    private final Map<String, Double> deathPos = new HashMap<>();
+    private Waypoint waypoint;
+
+    private double damagedplayerX;
+    private double damagedplayerY;
+    private double damagedplayerZ;
+
     public DeathPosition() {
         super(Categories.Player, "death-position", "Sends you the coordinates to your latest death.");
     }
 
-    private final Map<String, Double> deathPos = new HashMap<>();
-    private Waypoint waypoint;
-
-    @SuppressWarnings("unused")
     @EventHandler
     private void onTookDamage(TookDamageEvent event) {
         if (mc.player == null) return;
