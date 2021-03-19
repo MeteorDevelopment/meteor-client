@@ -62,12 +62,12 @@ public class DeathPosition extends Module {
     private void onTookDamage(TookDamageEvent event) {
         if (mc.player == null) return;
         
-        if (event.entity.getUuid() != null && event.entity.getUuid().equals(mc.player.getUuid())) {
+        if (event.entity.getUuid() != null && event.entity.getUuid().equals(mc.player.getUuid()) && event.entity.getHealth() >= 0) {
             damagedplayerX = mc.player.getX();
             damagedplayerY = mc.player.getY();
             damagedplayerZ = mc.player.getZ(); }
 
-        if (event.entity.getHealth() <= 0) {
+        if (event.entity.getUuid() != null && event.entity.getUuid().equals(mc.player.getUuid()) && event.entity.getHealth() <= 0) {
             deathPos.put("x", damagedplayerX);
             deathPos.put("z", damagedplayerZ);
             label.setText(String.format("Latest death: %.1f, %.1f, %.1f", damagedplayerX, damagedplayerY, damagedplayerZ));
