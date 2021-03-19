@@ -6,6 +6,7 @@
 package minegame159.meteorclient.modules.player;
 
 import baritone.api.BaritoneAPI;
+import net.minecraft.util.math.Vec3d;
 import baritone.api.pathing.goals.GoalXZ;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.TookDamageEvent;
@@ -36,7 +37,7 @@ public class DeathPosition extends Module {
     private double damagedplayerX;
     private double damagedplayerY;
     private double damagedplayerZ;
-    Vec3d damagedcords = new Vec3d(damagedplayerX, damagedplayerY, damagedplayerZ);
+    
     
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
@@ -76,6 +77,7 @@ public class DeathPosition extends Module {
             String time = dateFormat.format(new Date());
             //ChatUtils.moduleInfo(this, "Died at (highlight)%.0f(default), (highlight)%.0f(default), (highlight)%.0f (default)on (highlight)%s(default).", damagedplayerX, damagedplayerY, damagedplayerZ, time);
             BaseText msg = new LiteralText("Died at ");
+            Vec3d damagedcords = new Vec3d(damagedplayerX, damagedplayerY, damagedplayerZ);
             msg.append(ChatUtils.formatCoords(damagedcords));
             msg.append(".");
             ChatUtils.moduleInfo(this,msg);
