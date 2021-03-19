@@ -519,6 +519,7 @@ public class Modules extends System<Modules> {
         add(new BetterChat());
         add(new BookBot());
         add(new DiscordPresence());
+        add(new MapPreview());
         add(new MessageAura());
         add(new MiddleClickFriend());
         add(new OffhandCrash());
