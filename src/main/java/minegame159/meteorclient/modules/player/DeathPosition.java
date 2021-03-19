@@ -33,9 +33,9 @@ import java.util.Map;
 
 public class DeathPosition extends Module {
     
-    private int damagedplayerX;
-    private int damagedplayerY;
-    private int damagedplayerZ;
+    private double damagedplayerX;
+    private double damagedplayerY;
+    private double damagedplayerZ;
     
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
@@ -63,9 +63,9 @@ public class DeathPosition extends Module {
         if (mc.player == null) return;
         
         if (event.entity.getUuid() != null && event.entity.getUuid().equals(mc.player.getUuid())) {
-            damagedplayerX = floor(mc.player.getX());
-            damagedplayerY = floor(mc.player.getY());
-            damagedplayerZ = floor(mc.player.getZ()); }
+            damagedplayerX = mc.player.getX();
+            damagedplayerY = mc.player.getY();
+            damagedplayerZ = mc.player.getZ(); }
 
         if (event.entity.getHealth() <= 0) {
             deathPos.put("x", damagedplayerX);
