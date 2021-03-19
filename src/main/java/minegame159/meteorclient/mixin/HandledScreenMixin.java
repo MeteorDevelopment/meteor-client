@@ -145,6 +145,7 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
 
     private void drawMapPreview(MatrixStack matrices, ItemStack stack, int x, int y, int dimensions)
     {
+        GL11.glEnable(GL11.GL_BLEND);
         RenderSystem.pushMatrix();
         RenderSystem.disableLighting();
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
