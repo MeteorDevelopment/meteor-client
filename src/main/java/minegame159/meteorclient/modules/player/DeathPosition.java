@@ -6,6 +6,7 @@
 package minegame159.meteorclient.modules.player;
 
 import baritone.api.BaritoneAPI;
+import net.minecraft.util.math.Vec3d;
 import baritone.api.pathing.goals.GoalXZ;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.TookDamageEvent;
@@ -30,7 +31,14 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+
 public class DeathPosition extends Module {
+    
+    private double damagedplayerX;
+    private double damagedplayerY;
+    private double damagedplayerZ;
+    
+    
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Boolean> createWaypoint = sgGeneral.add(new BoolSetting.Builder()
@@ -55,16 +63,22 @@ public class DeathPosition extends Module {
     @EventHandler
     private void onTookDamage(TookDamageEvent event) {
         if (mc.player == null) return;
+        
+        if (event.entity.getUuid() != null && event.entity.getUuid().equals(mc.player.getUuid()) && event.entity.getHealth() >= 0) {
+            damagedplayerX = mc.player.getX();
+            damagedplayerY = mc.player.getY();
+            damagedplayerZ = mc.player.getZ(); }
 
         if (event.entity.getUuid() != null && event.entity.getUuid().equals(mc.player.getUuid()) && event.entity.getHealth() <= 0) {
-            deathPos.put("x", mc.player.getX());
-            deathPos.put("z", mc.player.getZ());
-            label.setText(String.format("Latest death: %.1f, %.1f, %.1f", mc.player.getX(), mc.player.getY(), mc.player.getZ()));
+            deathPos.put("x", damagedplayerX);
+            deathPos.put("z", damagedplayerZ);
+            label.setText(String.format("Latest death: %.1f, %.1f, %.1f", damagedplayerX, damagedplayerY, damagedplayerZ));
 
             String time = dateFormat.format(new Date());
-            //ChatUtils.moduleInfo(this, "Died at (highlight)%.0f(default), (highlight)%.0f(default), (highlight)%.0f (default)on (highlight)%s(default).", mc.player.getX(), mc.player.getY(), mc.player.getZ(), time);
+            //ChatUtils.moduleInfo(this, "Died at (highlight)%.0f(default), (highlight)%.0f(default), (highlight)%.0f (default)on (highlight)%s(default).", damagedplayerX, damagedplayerY, damagedplayerZ, time);
             BaseText msg = new LiteralText("Died at ");
-            msg.append(ChatUtils.formatCoords(mc.player.getPos()));
+            Vec3d damagedcords = new Vec3d(damagedplayerX, damagedplayerY, damagedplayerZ);
+            msg.append(ChatUtils.formatCoords(damagedcords));
             msg.append(".");
             ChatUtils.moduleInfo(this,msg);
 
@@ -73,9 +87,9 @@ public class DeathPosition extends Module {
                 waypoint = new Waypoint();
                 waypoint.name = "Death " + time;
 
-                waypoint.x = (int) mc.player.getX();
-                waypoint.y = (int) mc.player.getY() + 2;
-                waypoint.z = (int) mc.player.getZ();
+                waypoint.x = (int) damagedplayerX;
+                waypoint.y = (int) damagedplayerY + 2;
+                waypoint.z = (int) damagedplayerZ;
                 waypoint.maxVisibleDistance = Integer.MAX_VALUE;
                 waypoint.actualDimension = Utils.getDimension();
 
@@ -114,7 +128,7 @@ public class DeathPosition extends Module {
             ChatUtils.moduleWarning(this,"No latest death found.");
         } else {
             if (mc.world != null) {
-                double x = deathPos.get("x"), z = deathPos.get("z");
+                double x = damagedplayerX, z = damagedplayerZ;
                 if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing())
                     BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
                 BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalXZ((int) x, (int) z));
