@@ -31,7 +31,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-
 public class DeathPosition extends Module {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
