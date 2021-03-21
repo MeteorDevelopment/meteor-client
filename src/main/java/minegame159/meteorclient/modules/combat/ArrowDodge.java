@@ -90,7 +90,7 @@ public class ArrowDodge extends Module {
                         Vec3d velocity = direction.multiply(speed);
                         boolean isValid = true;
                         for (Box futureArrowHitbox: futureArrowHitboxes) {
-                            Box newPlayerPos = moveBox(playerHitbox,velocity);
+                            Box newPlayerPos = playerHitbox.offset(velocity);
                             if (futureArrowHitbox.intersects(newPlayerPos)) {
                                 isValid = false;
                                 break;
@@ -131,9 +131,5 @@ public class ArrowDodge extends Module {
             mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(newPos.x,newPos.y, newPos.z, false));
             mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(newPos.x,newPos.y - 0.01, newPos.z, true));
         }
-    }
-
-    private Box moveBox(Box box, Vec3d offset) {
-        return new Box(new Vec3d(box.minX, box.minY, box.minZ).add(offset.x, offset.y, offset.z), new Vec3d(box.maxX, box.maxY, box.maxZ).add(offset.x, offset.y, offset.z));
     }
 }
