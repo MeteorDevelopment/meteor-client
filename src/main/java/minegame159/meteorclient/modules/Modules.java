@@ -16,15 +16,7 @@ import minegame159.meteorclient.events.meteor.ActiveModulesChangedEvent;
 import minegame159.meteorclient.events.meteor.KeyEvent;
 import minegame159.meteorclient.events.meteor.ModuleBindChangedEvent;
 import minegame159.meteorclient.events.meteor.MouseButtonEvent;
-import minegame159.meteorclient.modules.combat.*;
-import minegame159.meteorclient.modules.misc.*;
-import minegame159.meteorclient.modules.movement.Timer;
-import minegame159.meteorclient.modules.movement.*;
-import minegame159.meteorclient.modules.movement.elytrafly.ElytraFly;
-import minegame159.meteorclient.modules.movement.speed.Speed;
-import minegame159.meteorclient.modules.player.*;
-import minegame159.meteorclient.modules.render.*;
-import minegame159.meteorclient.modules.render.hud.HUD;
+import minegame159.meteorclient.modules.*;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.systems.System;
@@ -74,6 +66,7 @@ public class Modules extends System<Modules> {
         initPlayer();
         initMovement();
         initRender();
+        initWorld();
         initMisc();
     }
 
@@ -347,7 +340,7 @@ public class Modules extends System<Modules> {
         add(new AntiAnvil());
         add(new AntiAnchor());
         add(new AntiBed());
-        add(new AntiFriendHit());
+        add(new AntiHit());
         add(new ArrowDodge());
         add(new Auto32K());
         add(new AutoAnvil());
@@ -375,39 +368,33 @@ public class Modules extends System<Modules> {
         add(new Swarm());
         add(new TotemPopNotifier());
         add(new Trigger());
+        add(new Burrow());
     }
 
     private void initPlayer() {
         add(new AirPlace());
         add(new AntiAFK());
-        add(new AntiCactus());
         add(new AntiHunger());
         add(new AutoClicker());
         add(new AutoDrop());
         add(new AutoFish());
         add(new AutoMend());
-        add(new AutoMount());
         add(new AutoReplenish());
         add(new AutoRespawn());
         add(new AutoTool());
-        add(new BuildHeight());
         add(new ChestSwap());
         add(new DeathPosition());
         add(new EXPThrower());
-        add(new EndermanLook());
         add(new FakePlayer());
         add(new FastUse());
         add(new GhostHand());
-        add(new InfinityMiner());
         add(new LiquidInteract());
         add(new MiddleClickExtra());
-        add(new MountBypass());
         add(new NameProtect());
         add(new NoBreakDelay());
         add(new NoInteract());
         add(new NoMiningTrace());
         add(new NoRotate());
-        add(new PacketMine());
         add(new Portals());
         add(new PotionSpoof());
         add(new Reach());
@@ -417,7 +404,6 @@ public class Modules extends System<Modules> {
         add(new XCarry());
         add(new AutoGap());
         add(new AutoEat());
-        add(new VeinMiner());
     }
 
     private void initMovement() {
@@ -448,7 +434,6 @@ public class Modules extends System<Modules> {
         add(new Speed());
         add(new Spider());
         add(new Step());
-        add(new Timer());
         add(new Velocity());
     }
 
@@ -486,39 +471,55 @@ public class Modules extends System<Modules> {
         add(new Xray());
         add(new BossStack());
         add(new ItemHighlight());
-        add(new Ambience());
         add(new ModelTweaks());
         add(new LightOverlay());
         add(new Zoom());
     }
 
+    private void initWorld() {
+        add(new Ambience());
+        add(new AntiCactus());
+        add(new AutoBreed());
+        add(new AutoBrewer());
+        add(new AutoMount());
+        add(new AutoNametag());
+        add(new AutoShearer());
+        add(new AutoSign());
+        add(new AutoSmelter());
+        add(new AutoSteal());
+        add(new BuildHeight());
+        add(new EChestFarmer());
+        add(new EndermanLook());
+        add(new EntityLogger());
+        add(new Flamethrower());
+        add(new InfinityMiner());
+        add(new Nuker());
+        add(new LiquidFiller());
+        add(new MountBypass());
+        add(new PacketMine());
+        add(new StashFinder());
+        add(new Timer());
+        add(new VeinMiner());
+        add(new InstaMine());
+    }
+
     private void initMisc() {
-        addModule(new Announcer());
-        addModule(new AntiBot());
-        addModule(new AntiPacketKick());
-        addModule(new AutoBreed());
-        addModule(new AutoBrewer());
-        addModule(new AutoNametag());
-        addModule(new AutoReconnect());
-        addModule(new AutoShearer());
-        addModule(new AutoSign());
-        addModule(new AutoSmelter());
-        addModule(new AutoSteal());
-        addModule(new BetterChat());
-        addModule(new BookBot());
-        addModule(new DiscordPresence());
-        addModule(new EChestFarmer());
-        addModule(new EntityLogger());
-        addModule(new LiquidFiller());
-        addModule(new MessageAura());
-        addModule(new MiddleClickFriend());
-        addModule(new Nuker());
-        addModule(new OffhandCrash());
-        addModule(new PacketCanceller());
-        addModule(new SoundBlocker());
-        addModule(new Spam());
-        addModule(new StashFinder());
-        addModule(new VisualRange());
+        add(new Announcer());
+        add(new AntiPacketKick());
+        add(new AutoReconnect());
+        add(new BetterChat());
+        add(new BookBot());
+        add(new DiscordPresence());
+        add(new MapPreview());
+        add(new MessageAura());
+        add(new MiddleClickFriend());
+        add(new OffhandCrash());
+        add(new PacketCanceller());
+        add(new SoundBlocker());
+        add(new Spam());
+        add(new VisualRange());
+        add(new VanillaSpoof());
+        add(new AntiBot());
     }
 
     public static class ModuleRegistry extends Registry<Module> {
