@@ -9,7 +9,6 @@ import baritone.api.BaritoneAPI;
 import net.minecraft.util.math.Vec3d;
 import baritone.api.pathing.goals.GoalXZ;
 import meteordevelopment.orbit.EventHandler;
-import minegame159.meteorclient.events.entity.TookDamageEvent;
 import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.gui.widgets.WButton;
 import minegame159.meteorclient.gui.widgets.WLabel;
@@ -45,6 +44,12 @@ public class DeathPosition extends Module {
             .build()
     );
 
+    private final Setting<Boolean> showTimestamp = sgGeneral.add(new BoolSetting.Builder()
+            .name("show-timestamp")
+            .description("Show timestamp in chat.")
+            .defaultValue(true)
+            .build()
+    );
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
 
     private final WLabel label = new WLabel("No latest death found.");
@@ -65,15 +70,6 @@ public class DeathPosition extends Module {
             if (packet.getHealth() <= 0) {
                 onDeath();
             }
-        }
-    }
-
-    @EventHandler
-    private void onTookDamage(TookDamageEvent event) {
-        if (mc.player == null) return;
-
-        if (event.entity.getUuid() != null && event.entity.getUuid().equals(mc.player.getUuid()) && event.entity.getHealth() <= 0) {
-            onDeath();
         }
     }
 
@@ -100,7 +96,7 @@ public class DeathPosition extends Module {
         //ChatUtils.moduleInfo(this, "Died at (highlight)%.0f(default), (highlight)%.0f(default), (highlight)%.0f (default)on (highlight)%s(default).", damagedplayerX, damagedplayerY, damagedplayerZ, time);
         BaseText msg = new LiteralText("Died at ");
         msg.append(ChatUtils.formatCoords(dmgPos));
-        msg.append(String.format(" on %s.", time));
+        msg.append(showTimestamp.get() ? String.format(" on %s.", time) : ".");
         ChatUtils.moduleInfo(this,msg);
 
         // Create waypoint
