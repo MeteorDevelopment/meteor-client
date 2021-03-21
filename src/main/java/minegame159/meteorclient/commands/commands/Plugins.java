@@ -87,7 +87,7 @@ public class Plugins extends Command {
             }
 
         } catch (Exception e) {
-            ChatUtils.error("En arror occurred while trying to find plugins");
+            ChatUtils.error("An error occurred while trying to find plugins");
             ticks = 0;
             MeteorClient.EVENT_BUS.unsubscribe(this);
         }
