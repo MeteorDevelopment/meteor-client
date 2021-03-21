@@ -11,9 +11,10 @@ import net.minecraft.entity.projectile.ProjectileEntity;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
-
+import minegame159.meteorclient.mixin.ProjectileInGroundAccessor;
 import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
+
 import net.minecraft.util.shape.VoxelShapes;
 
 import java.util.*;
@@ -51,6 +52,13 @@ public class ArrowDodge extends Module {
             .build()
     );
 
+    private final Setting<Boolean> groundCheck = sgGeneral.add(new BoolSetting.Builder()
+        .name("ground-check")
+        .description("Tries to prevent you from falling to your death.")
+        .defaultValue(true)
+        .build()
+    );
+
     private final List<Vec3d> possibleMoveDirections = Arrays.asList(
         new Vec3d(1, 0, 1), new Vec3d(0, 0, 1), new Vec3d(-1, 0, 1),
         new Vec3d(1, 0, 0), new Vec3d(-1, 0, 0),
@@ -72,7 +80,7 @@ public class ArrowDodge extends Module {
         for (Entity e : mc.world.getEntities()) {
             if (!(e instanceof ProjectileEntity)) continue;
             if (((ProjectileEntity)e).getOwner() == mc.player) continue;
-            if (e instanceof PersistentProjectileEntity && ((PersistentProjectileEntity)e).isOnGround()) continue;
+            if (e instanceof PersistentProjectileEntity && ((ProjectileInGroundAccessor)e).getInGround()) continue;
 
             List<Box> futureArrowHitboxes = new ArrayList<>();
 
@@ -89,6 +97,7 @@ public class ArrowDodge extends Module {
                     boolean didMove = false;
                     for (Vec3d direction: possibleMoveDirections) {
                         Vec3d velocity = direction.multiply(speed);
+                        BlockPos blockPos = null;
                         boolean isValid = true;
                         for (Box futureArrowHitbox: futureArrowHitboxes) {
                             Box newPlayerPos = playerHitbox.offset(velocity);
@@ -96,10 +105,15 @@ public class ArrowDodge extends Module {
                                 isValid = false;
                                 break;
                             }
-                            BlockPos blockPos = mc.player.getBlockPos().add(velocity.x,velocity.y,velocity.z);
+                            blockPos = mc.player.getBlockPos().add(velocity.x,velocity.y,velocity.z);
                             if (mc.world.getBlockState(blockPos).getCollisionShape(mc.world,blockPos) != VoxelShapes.empty()) {
                                 isValid = false;
                                 break;
+                            }
+                        }
+                        if (isValid && groundCheck.get() && blockPos != null) {
+                            if (mc.world.getBlockState(blockPos.down()).getCollisionShape(mc.world, blockPos.down()) == VoxelShapes.empty()) {
+                                isValid = false;
                             }
                         }
                         if (isValid) {

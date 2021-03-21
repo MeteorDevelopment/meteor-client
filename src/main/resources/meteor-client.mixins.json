@@ -94,6 +94,7 @@
     "PlayerMoveC2SPacketMixin",
     "PlayerPositionLookS2CPacketAccessor",
     "ProjectileEntityAccessor",
+    "ProjectileInGroundAccessor",
     "RenderTickCounterMixin",
     "ScreenMixin",
     "ShovelItemAccessor",
