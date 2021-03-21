@@ -8,23 +8,20 @@ package minegame159.meteorclient.modules.render;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderEvent;
+import minegame159.meteorclient.friends.Friends;
 import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.entity.EntityUtils;
-import minegame159.meteorclient.utils.entity.FakePlayerUtils;
 import minegame159.meteorclient.utils.entity.Target;
 import minegame159.meteorclient.utils.render.RenderUtils;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.render.color.SettingColor;
-import net.minecraft.block.entity.BarrelBlockEntity;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.ChestBlockEntity;
-import net.minecraft.block.entity.ShulkerBoxBlockEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.player.PlayerEntity;
 
 public class Tracers extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -40,15 +37,6 @@ public class Tracers extends Module {
             .build()
     );
 
-    private final Setting<Boolean> storage = sgGeneral.add(new BoolSetting.Builder()
-            .name("storage")
-            .description("Displays storage blocks.")
-            .defaultValue(false)
-            .build()
-    );
-
-    // Appearance
-
     private final Setting<Target> target = sgAppearance.add(new EnumSetting.Builder<Target>()
             .name("target")
             .description("What part of the entity to target.")
@@ -63,6 +51,15 @@ public class Tracers extends Module {
             .build()
     );
 
+    private final Setting<Integer> maxDist = sgAppearance.add(new IntSetting.Builder()
+            .name("max-distance")
+            .description("Maximum distance for tracers to show.")
+            .defaultValue(256)
+            .min(0)
+            .sliderMax(256)
+            .build()
+    );
+
     public final Setting<Boolean> showInvis = sgGeneral.add(new BoolSetting.Builder()
             .name("show-invisible")
             .description("Shows invisibile entities.")
@@ -71,6 +68,13 @@ public class Tracers extends Module {
     );
 
     // Colors
+
+    public final Setting<Boolean> distance = sgColors.add(new BoolSetting.Builder()
+            .name("distance-colors")
+            .description("Changes the color of tracers depending on distance.")
+            .defaultValue(false)
+            .build()
+    );
 
     public final Setting<Boolean> useNameColor = sgColors.add(new BoolSetting.Builder()
             .name("use-name-color")
@@ -121,14 +125,8 @@ public class Tracers extends Module {
             .build()
     );
 
-    private final Setting<SettingColor> storageColor = sgColors.add(new ColorSetting.Builder()
-            .name("storage-color")
-            .description("The storage color.")
-            .defaultValue(new SettingColor(255, 160, 0, 127))
-            .build()
-    );
-
     private int count;
+    private final Color distanceColor = new Color(255, 255, 255);
 
     public Tracers() {
         super(Categories.Render, "tracers", "Displays tracer lines to specified entities.");
@@ -137,26 +135,65 @@ public class Tracers extends Module {
     @EventHandler
     private void onRender(RenderEvent event) {
         count = 0;
-
         for (Entity entity : mc.world.getEntities()) {
-            if ((!Modules.get().isActive(Freecam.class) && entity == mc.player) || !entities.get().getBoolean(entity.getType()) || (!showInvis.get() && entity.isInvisible())) continue;
-            if (FakePlayerUtils.isFakePlayerOutOfRenderDistance(entity)) continue;
+            if (mc.player.distanceTo(entity) > maxDist.get()
+                    || (entity instanceof PlayerEntity && Friends.get().get(((PlayerEntity) entity)) != null && !Friends.get().show((PlayerEntity) entity))
+                    || (!Modules.get().isActive(Freecam.class) && entity == mc.player)
+                    || !entities.get().getBoolean(entity.getType())
+                    || (!showInvis.get() && entity.isInvisible())
+                    || !EntityUtils.isInRenderDistance(entity)
+            ) continue;
 
-            Color color = EntityUtils.getEntityColor(entity, playersColor.get(), animalsColor.get(), waterAnimalsColor.get(), monstersColor.get(), ambientColor.get(), miscColor.get(), useNameColor.get());
+            Color color;
+
+            if (!distance.get()
+                    || !(entity instanceof PlayerEntity)
+                    || Friends.get().contains(Friends.get().get((PlayerEntity) entity))) {
+                color = EntityUtils.getEntityColor(
+                        entity,
+                        playersColor.get(),
+                        animalsColor.get(),
+                        waterAnimalsColor.get(),
+                        monstersColor.get(),
+                        ambientColor.get(),
+                        miscColor.get(),
+                        useNameColor.get()
+                );
+            }
+            else {
+                color = getColorFromDistance((PlayerEntity) entity);
+            }
+
             RenderUtils.drawTracerToEntity(event, entity, color, target.get(), stem.get());
             count++;
         }
-
-        if (storage.get()) {
-            for (BlockEntity blockEntity : mc.world.blockEntities) {
-                if (blockEntity.isRemoved()) continue;
-                if (blockEntity instanceof ChestBlockEntity || blockEntity instanceof BarrelBlockEntity || blockEntity instanceof ShulkerBoxBlockEntity) {
-                    RenderUtils.drawTracerToBlockEntity(blockEntity, storageColor.get(), event);
-                    count++;
-                }
-            }
-        }
     }
+
+    private Color getColorFromDistance(PlayerEntity player) {
+        //Credit to Icy from Stackoverflow
+        double distance = mc.player.distanceTo(player);
+        double percent = distance / 60;
+
+        if (percent < 0 || percent > 1) {
+            distanceColor.set(0, 255, 0, 255);
+            return distanceColor;
+        }
+
+        int r, g;
+
+        if (percent < 0.5) {
+            r = 255;
+            g = (int) (255 * percent / 0.5);  //closer to 0.5, closer to yellow (255,255,0)
+        }
+        else {
+            g = 255;
+            r = 255 - (int) (255 * (percent - 0.5) / 0.5); //closer to 1.0, closer to green (0,255,0)
+        }
+
+        distanceColor.set(r, g, 0, 255);
+        return distanceColor;
+    }
+
 
     @Override
     public String getInfoString() {

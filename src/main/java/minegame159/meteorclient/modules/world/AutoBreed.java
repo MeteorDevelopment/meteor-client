@@ -3,7 +3,7 @@
  * Copyright (c) 2021 Meteor Development.
  */
 
-package minegame159.meteorclient.modules.misc;
+package minegame159.meteorclient.modules.world;
 
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import meteordevelopment.orbit.EventHandler;
@@ -60,7 +60,7 @@ public class AutoBreed extends Module {
     private final List<Entity> animalsFed = new ArrayList<>();
 
     public AutoBreed() {
-        super(Categories.Misc, "auto-breed", "Automatically breeds specified animals.");
+        super(Categories.World, "auto-breed", "Automatically breeds specified animals.");
     }
 
     @Override

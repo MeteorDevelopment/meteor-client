@@ -89,6 +89,15 @@ public class TopBarConfig extends TopBarWindowScreen {
                 .build()
         );
 
+        sgGeneral.add(new BoolSetting.Builder()
+                .name("window-title")
+                .description("Show Meteor in the window title.")
+                .defaultValue(false)
+                .onChanged(aBool -> Config.get().windowTitle = aBool)
+                .onModuleActivated(boolSetting -> boolSetting.set(Config.get().windowTitle))
+                .build()
+        );
+
         add(s.createTable()).fillX().expandX();
     }
 }

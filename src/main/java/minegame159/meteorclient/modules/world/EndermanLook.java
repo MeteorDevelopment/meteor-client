@@ -3,7 +3,7 @@
  * Copyright (c) 2021 Meteor Development.
  */
 
-package minegame159.meteorclient.modules.player;
+package minegame159.meteorclient.modules.world;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
@@ -34,7 +34,7 @@ public class EndermanLook extends Module {
     );
 
     public EndermanLook() {
-        super(Categories.Player, "enderman-look", "Either looks at all Endermen or prevents you from looking at Endermen.");
+        super(Categories.World, "enderman-look", "Either looks at all Endermen or prevents you from looking at Endermen.");
     }
 
     @EventHandler

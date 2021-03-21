@@ -210,4 +210,12 @@ public class PlayerUtils {
 
         return new Vector2(velX, velZ);
     }
+
+    public static boolean isInHole() {
+        return !mc.world.getBlockState(mc.player.getBlockPos().add(1, 0, 0)).isAir()
+                && !mc.world.getBlockState(mc.player.getBlockPos().add(-1, 0, 0)).isAir()
+                && !mc.world.getBlockState(mc.player.getBlockPos().add(0, 0, 1)).isAir()
+                && !mc.world.getBlockState(mc.player.getBlockPos().add(0, 0, -1)).isAir()
+                && !mc.world.getBlockState(mc.player.getBlockPos().add(0, -1, 0)).isAir();
+    }
 }
