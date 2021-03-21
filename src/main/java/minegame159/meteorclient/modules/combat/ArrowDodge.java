@@ -1,13 +1,13 @@
 package minegame159.meteorclient.modules.combat;
 
-import com.google.common.collect.Sets;
 import minegame159.meteorclient.settings.*;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.projectile.ArrowEntity;
+import net.minecraft.entity.projectile.PersistentProjectileEntity;
+import net.minecraft.entity.projectile.ProjectileEntity;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
@@ -70,8 +70,9 @@ public class ArrowDodge extends Module {
         Double speed = moveSpeed.get();
 
         for (Entity e : mc.world.getEntities()) {
-            if (!(e instanceof ArrowEntity) || e.age > 50) continue;
-            if (((ArrowEntity)e).getOwner() == mc.player) continue;
+            if (!(e instanceof ProjectileEntity)) continue;
+            if (((ProjectileEntity)e).getOwner() == mc.player) continue;
+            if (e instanceof PersistentProjectileEntity && ((PersistentProjectileEntity)e).isOnGround()) continue;
 
             List<Box> futureArrowHitboxes = new ArrayList<>();
 
