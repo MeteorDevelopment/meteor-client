@@ -14,9 +14,9 @@ import minegame159.meteorclient.settings.SettingGroup;
 public class Timer extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
-            .name("speed")
-            .description("Speed multiplier.")
+    private final Setting<Double> multiplier = sgGeneral.add(new DoubleSetting.Builder()
+            .name("multiplier")
+            .description("The timer multiplier amount.")
             .defaultValue(1)
             .min(0.1)
             .sliderMin(0.1)
@@ -24,19 +24,15 @@ public class Timer extends Module {
             .build()
     );
 
-    private double override = -1;
+    public static final double OFF = 1;
+    private double override = 1;
 
     public Timer() {
         super(Categories.World, "timer", "Changes the speed of everything in your game.");
     }
 
     public double getMultiplier() {
-        if (isActive()) {
-            if (override != -1) return override;
-            else return speed.get();
-        } else {
-            return 1;
-        }
+        return override != OFF ? override : (isActive() ? multiplier.get() : OFF);
     }
 
     public void setOverride(double override) {
