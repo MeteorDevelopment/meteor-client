@@ -71,6 +71,7 @@ public class ArrowDodge extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
+        if (mc.player == null) return;
         Box playerHitbox = mc.player.getBoundingBox();
         if (playerHitbox == null) return;
         playerHitbox = playerHitbox.expand(0.6);
@@ -85,7 +86,7 @@ public class ArrowDodge extends Module {
             List<Box> futureArrowHitboxes = new ArrayList<>();
 
             for (int i = 0; i < arrowLookahead.get(); i++) {
-                Vec3d nextPos = e.getPos().add(e.getVelocity().multiply(i / 5));
+                Vec3d nextPos = e.getPos().add(e.getVelocity().multiply(i / 5.0f));
                 futureArrowHitboxes.add(new Box(
                         nextPos.subtract(e.getBoundingBox().getXLength() / 2, 0, e.getBoundingBox().getZLength() / 2),
                         nextPos.add(e.getBoundingBox().getXLength() / 2, e.getBoundingBox().getYLength(), e.getBoundingBox().getZLength() / 2)));
@@ -97,26 +98,7 @@ public class ArrowDodge extends Module {
                     boolean didMove = false;
                     for (Vec3d direction: possibleMoveDirections) {
                         Vec3d velocity = direction.multiply(speed);
-                        BlockPos blockPos = null;
-                        boolean isValid = true;
-                        for (Box futureArrowHitbox: futureArrowHitboxes) {
-                            Box newPlayerPos = playerHitbox.offset(velocity);
-                            if (futureArrowHitbox.intersects(newPlayerPos)) {
-                                isValid = false;
-                                break;
-                            }
-                            blockPos = mc.player.getBlockPos().add(velocity.x,velocity.y,velocity.z);
-                            if (mc.world.getBlockState(blockPos).getCollisionShape(mc.world,blockPos) != VoxelShapes.empty()) {
-                                isValid = false;
-                                break;
-                            }
-                        }
-                        if (isValid && groundCheck.get() && blockPos != null) {
-                            if (mc.world.getBlockState(blockPos.down()).getCollisionShape(mc.world, blockPos.down()) == VoxelShapes.empty()) {
-                                isValid = false;
-                            }
-                        }
-                        if (isValid) {
+                        if (isValid(velocity, futureArrowHitboxes, playerHitbox)) {
                             move(velocity);
                             didMove=true;
                             break;
@@ -146,5 +128,23 @@ public class ArrowDodge extends Module {
             mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(newPos.x,newPos.y, newPos.z, false));
             mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(newPos.x,newPos.y - 0.01, newPos.z, true));
         }
+    }
+
+    private boolean isValid(Vec3d velocity, List<Box> futureArrowHitboxes, Box playerHitbox) {
+        BlockPos blockPos = null;
+        for (Box futureArrowHitbox: futureArrowHitboxes) {
+            Box newPlayerPos = playerHitbox.offset(velocity);
+            if (futureArrowHitbox.intersects(newPlayerPos)) {
+                return false;
+            }
+            blockPos = mc.player.getBlockPos().add(velocity.x,velocity.y,velocity.z);
+            if (mc.world.getBlockState(blockPos).getCollisionShape(mc.world,blockPos) != VoxelShapes.empty()) {
+                return false;
+            }
+        }
+        if ( groundCheck.get() && blockPos != null) {
+            return mc.world.getBlockState(blockPos.down()).getCollisionShape(mc.world, blockPos.down()) != VoxelShapes.empty();
+        }
+        return true;
     }
 }
