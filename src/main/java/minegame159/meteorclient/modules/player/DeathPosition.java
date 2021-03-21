@@ -91,7 +91,7 @@ public class DeathPosition extends Module {
     }
 
     private void onDeath() {
-        if (dmgPos==null) dmgPos = mc.player.getPos();
+        dmgPos = mc.player.getPos();
         deathPos.put("x", dmgPos.x);
         deathPos.put("z", dmgPos.z);
         label.setText(String.format("Latest death: %.1f, %.1f, %.1f", dmgPos.x, dmgPos.y, dmgPos.z));
@@ -100,7 +100,7 @@ public class DeathPosition extends Module {
         //ChatUtils.moduleInfo(this, "Died at (highlight)%.0f(default), (highlight)%.0f(default), (highlight)%.0f (default)on (highlight)%s(default).", damagedplayerX, damagedplayerY, damagedplayerZ, time);
         BaseText msg = new LiteralText("Died at ");
         msg.append(ChatUtils.formatCoords(dmgPos));
-        msg.append(String.format(" on %s. Git gud.", time));
+        msg.append(String.format(" on %s.", time));
         ChatUtils.moduleInfo(this,msg);
 
         // Create waypoint
