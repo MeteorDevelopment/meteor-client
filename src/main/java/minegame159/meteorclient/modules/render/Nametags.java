@@ -140,7 +140,7 @@ public class Nametags extends Module {
     private final Setting<List<Enchantment>> displayedEnchantments = sgPlayers.add(new EnchListSetting.Builder()
             .name("displayed-enchantments")
             .description("The enchantments that are shown on nametags.")
-            .defaultValue(setDefualtList())
+            .defaultValue(setDefaultList())
             .build()
     );
 
@@ -624,7 +624,7 @@ public class Nametags extends Module {
         NametagUtils.end();
     }
 
-    private List<Enchantment> setDefualtList(){
+    private List<Enchantment> setDefaultList(){
         List<Enchantment> ench = new ArrayList<>();
         for (Enchantment enchantment : Registry.ENCHANTMENT) {
             ench.add(enchantment);
