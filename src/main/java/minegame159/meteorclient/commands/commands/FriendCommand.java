@@ -13,6 +13,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import minegame159.meteorclient.commands.Command;
+import minegame159.meteorclient.friends.Friend;
 import minegame159.meteorclient.friends.Friends;
 import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.command.CommandSource;
@@ -26,6 +27,7 @@ import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 import static net.minecraft.command.CommandSource.suggestMatching;
 
 public class FriendCommand extends Command {
+
     public FriendCommand() {
         super("friend", "Manages friends.");
     }
@@ -35,48 +37,43 @@ public class FriendCommand extends Command {
         builder.then(literal("add")
                 .then(argument("friend", FriendArgumentType.friend())
                         .executes(context -> {
-                            minegame159.meteorclient.friends.Friend friend =
-                                    context.getArgument("friend", minegame159.meteorclient.friends.Friend.class);
-                            if (Friends.get().add(friend)) {
-                                ChatUtils.prefixInfo("Friends","Added (highlight)%s (default)to friends.", friend.name);
-                            } else {
-                                ChatUtils.prefixError("Friends","That person is already your friend.");
-                            }
+                            Friend friend = FriendArgumentType.getFriend(context, "friend");
+
+                            if (Friends.get().add(friend)) ChatUtils.prefixInfo("Friends","Added (highlight)%s (default)to friends.", friend.name);
+                            else ChatUtils.prefixError("Friends","That person is already your friend.");
 
                             return SINGLE_SUCCESS;
                         })))
                 .then(literal("remove").then(argument("friend", FriendArgumentType.friend())
                         .executes(context -> {
-                            minegame159.meteorclient.friends.Friend friend =
-                                    context.getArgument("friend", minegame159.meteorclient.friends.Friend.class);
-                            if (Friends.get().remove(friend)) {
-                                ChatUtils.prefixInfo("Friends","Removed (highlight)%s (default)from friends.", friend.name);
-                            } else {
-                                ChatUtils.prefixError("Friends", "That person is not your friend.");
-                            }
+                            Friend friend = FriendArgumentType.getFriend(context, "friend");
+
+                            if (Friends.get().remove(friend)) ChatUtils.prefixInfo("Friends","Removed (highlight)%s (default)from friends.", friend.name);
+                            else ChatUtils.prefixError("Friends", "That person is not your friend.");
 
                             return SINGLE_SUCCESS;
                         })))
                 .then(literal("list").executes(context -> {
                     ChatUtils.prefixInfo("Friends","You have (highlight)%d (default)friends:", Friends.get().count());
-
-                    for (minegame159.meteorclient.friends.Friend friend : Friends.get()) {
-                        ChatUtils.info(" - (highlight)%s", friend.name);
-                    }
+                    Friends.get().forEach(friend-> ChatUtils.info(" - (highlight)%s", friend.name));
 
                     return SINGLE_SUCCESS;
                 }));
     }
 
-    private static class FriendArgumentType implements ArgumentType<minegame159.meteorclient.friends.Friend> {
+    private static class FriendArgumentType implements ArgumentType<Friend> {
 
         public static FriendArgumentType friend() {
             return new FriendArgumentType();
         }
 
         @Override
-        public minegame159.meteorclient.friends.Friend parse(StringReader reader) throws CommandSyntaxException {
-            return new minegame159.meteorclient.friends.Friend(reader.readString());
+        public Friend parse(StringReader reader) throws CommandSyntaxException {
+            return new Friend(reader.readString());
+        }
+
+        public static Friend getFriend(CommandContext<?> context, String name) {
+            return context.getArgument(name, Friend.class);
         }
 
         @Override
@@ -87,8 +84,7 @@ public class FriendCommand extends Command {
 
         @Override
         public Collection<String> getExamples() {
-            // :)
-            return Arrays.asList("086", "seasnail8169", "squidoodly");
+            return Arrays.asList("seasnail8169", "MineGame159");
         }
     }
 
