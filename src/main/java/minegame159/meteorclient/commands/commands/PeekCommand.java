@@ -21,12 +21,12 @@ import net.minecraft.text.Text;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
-public class Peek extends Command {
+public class PeekCommand extends Command {
     private static final ItemStack[] ITEMS = new ItemStack[27];
     private static final SimpleCommandExceptionType NOT_HOLDING_SHULKER_BOX =
             new SimpleCommandExceptionType(new LiteralText("You must be holding a shulker box."));
 
-    public Peek() {
+    public PeekCommand() {
         super("peek", "Lets you see what's inside shulker boxes.");
     }
 

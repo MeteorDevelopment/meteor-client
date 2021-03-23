@@ -19,7 +19,7 @@ import static minegame159.meteorclient.commands.arguments.SettingArgumentType.ge
 
 public class SettingCommand extends Command {
     public SettingCommand() {
-        super("s", "Allows you to view and change module settings.");
+        super("settings", "Allows you to view and change module settings.", "s");
     }
 
     @Override

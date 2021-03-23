@@ -1,3 +1,8 @@
+/*
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
+ * Copyright (c) 2021 Meteor Development.
+ */
+
 package minegame159.meteorclient.commands.commands;
 
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -13,10 +18,9 @@ import net.minecraft.util.math.Vec3d;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
-public class Damage extends Command {
-
-    public Damage() {
-        super("damage", "Damages self");
+public class DamageCommand extends Command {
+    public DamageCommand() {
+        super("damage", "Damages self", "dmg");
     }
 
     @Override

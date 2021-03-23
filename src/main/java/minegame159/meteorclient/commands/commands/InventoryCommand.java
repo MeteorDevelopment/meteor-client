@@ -1,21 +1,23 @@
+/*
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
+ * Copyright (c) 2021 Meteor Development.
+ */
+
 package minegame159.meteorclient.commands.commands;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-
+import minegame159.meteorclient.MeteorClient;
+import minegame159.meteorclient.commands.Command;
+import minegame159.meteorclient.commands.arguments.PlayerArgumentType;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.player.PlayerEntity;
 
-import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.commands.Command;
-import minegame159.meteorclient.commands.arguments.PlayerArgumentType;
-
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
-public class Inventory extends Command {
-
-    public Inventory() {
-        super("inventory", "Allows you to see parts of another player's inventory.");
+public class InventoryCommand extends Command {
+    public InventoryCommand() {
+        super("inventory", "Allows you to see parts of another player's inventory.", "inv");
     }
 
     @Override

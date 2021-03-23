@@ -26,9 +26,9 @@ import java.util.concurrent.CompletableFuture;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
-public class Profile extends Command {
+public class ProfileCommand extends Command {
 
-    public Profile() {
+    public ProfileCommand() {
         super("profile", "Loads and saves profiles.");
     }
 
