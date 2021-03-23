@@ -24,13 +24,13 @@ import net.minecraft.util.registry.Registry;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
-public class Drop extends Command {
+public class DropCommand extends Command {
     private static final SimpleCommandExceptionType NOT_SPECTATOR =
             new SimpleCommandExceptionType(new LiteralText("Can't drop items while in spectator."));
     private static final DynamicCommandExceptionType NO_SUCH_ITEM =
             new DynamicCommandExceptionType(o -> new LiteralText("No such item " + o + "!"));
 
-    public Drop() {
+    public DropCommand() {
         super("drop", "Automatically drops specified items.");
     }
 

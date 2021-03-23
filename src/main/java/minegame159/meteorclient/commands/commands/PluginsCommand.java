@@ -1,23 +1,23 @@
+/*
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
+ * Copyright (c) 2021 Meteor Development.
+ */
+
 package minegame159.meteorclient.commands.commands;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
-
-import net.minecraft.command.CommandSource;
-
+import joptsimple.internal.Strings;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.commands.Command;
 import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.utils.player.ChatUtils;
-
-import net.minecraft.network.packet.s2c.play.CommandSuggestionsS2CPacket;
-
-import joptsimple.internal.Strings;
-
+import net.minecraft.command.CommandSource;
 import net.minecraft.network.packet.c2s.play.RequestCommandCompletionsC2SPacket;
+import net.minecraft.network.packet.s2c.play.CommandSuggestionsS2CPacket;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,11 +25,11 @@ import java.util.List;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
-public class Plugins extends Command {
+public class PluginsCommand extends Command {
 
     private Integer ticks = 0;
 
-    public Plugins() {
+    public PluginsCommand() {
         super("plugins", "Tries to get the server plugins.");
     }
 
@@ -78,7 +78,7 @@ public class Plugins extends Command {
                 Collections.sort(plugins);
 
                 if (!plugins.isEmpty()) {
-                    ChatUtils.info("Plugins (%d): %s ", plugins.size(), Strings.join((String[]) plugins.toArray(new String[0]), ", "));
+                    ChatUtils.info("Plugins (%d): %s ", plugins.size(), Strings.join(plugins.toArray(new String[0]), ", "));
                 } else {
                     ChatUtils.error("No plugins found.");
                 }

@@ -5,27 +5,26 @@
 
 package minegame159.meteorclient.commands.commands;
 
-//Created by squidoodly 18/04/2020
-
+import baritone.api.BaritoneAPI;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import minegame159.meteorclient.commands.Command;
 import net.minecraft.command.CommandSource;
-import net.minecraft.network.packet.c2s.play.ChatMessageC2SPacket;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
-public class Say extends Command {
-
-    public Say() {
-        super("say", "Sends messages in chat.");
+public class BaritoneCommand extends Command {
+    public BaritoneCommand() {
+        super("baritone", "Executes baritone commands.", "b");
     }
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
-        builder.then(argument("message", StringArgumentType.greedyString()).executes(context -> {
-            mc.getNetworkHandler().sendPacket(new ChatMessageC2SPacket(context.getArgument("message", String.class)));
-            return SINGLE_SUCCESS;
-        }));
+        builder.then(argument("command", StringArgumentType.greedyString())
+                .executes(context -> {
+                    String command = context.getArgument("command", String.class);
+                    BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute(command);
+                    return SINGLE_SUCCESS;
+                }));
     }
 }
