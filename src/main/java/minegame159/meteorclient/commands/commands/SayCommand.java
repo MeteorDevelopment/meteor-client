@@ -5,25 +5,27 @@
 
 package minegame159.meteorclient.commands.commands;
 
+//Created by squidoodly 18/04/2020
+
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import minegame159.meteorclient.commands.Command;
-import minegame159.meteorclient.commands.Commands;
-import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.command.CommandSource;
+import net.minecraft.network.packet.c2s.play.ChatMessageC2SPacket;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
-public class Help extends Command {
-    public Help() {
-        super("help", "List of all commands.");
+public class SayCommand extends Command {
+
+    public SayCommand() {
+        super("say", "Sends messages in chat.");
     }
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
-        builder.executes(context -> {
-            ChatUtils.info("--- List of all (highlight)%d(default) commands ---", Commands.get().getCount());
-            Commands.get().forEach(command -> ChatUtils.info("(highlight)%s(default): %s", command.getName(), command.getDescription()));
+        builder.then(argument("message", StringArgumentType.greedyString()).executes(context -> {
+            mc.getNetworkHandler().sendPacket(new ChatMessageC2SPacket(context.getArgument("message", String.class)));
             return SINGLE_SUCCESS;
-        });
+        }));
     }
 }

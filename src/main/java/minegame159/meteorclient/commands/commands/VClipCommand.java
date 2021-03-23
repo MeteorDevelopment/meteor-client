@@ -14,8 +14,8 @@ import net.minecraft.command.CommandSource;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
-public class VClip extends Command {
-    public VClip() {
+public class VClipCommand extends Command {
+    public VClipCommand() {
         super("vclip", "Lets you clip through blocks vertically.");
     }
 

@@ -1,3 +1,8 @@
+/*
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
+ * Copyright (c) 2021 Meteor Development.
+ */
+
 package minegame159.meteorclient.commands.commands;
 
 import baritone.api.BaritoneAPI;
@@ -29,27 +34,30 @@ import java.util.List;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
-public class Locate extends Command {
+public class LocateCommand extends Command {
 
     private Vec3d firstStart;
     private Vec3d firstEnd;
     private Vec3d secondStart;
     private Vec3d secondEnd;
+
     private final List<Block> netherFortressBlocks = Arrays.asList(
             Blocks.NETHER_BRICKS,
             Blocks.NETHER_BRICK_FENCE,
             Blocks.NETHER_WART
     );
+
     private final List<Block> monumentBlocks = Arrays.asList(
             Blocks.PRISMARINE_BRICKS,
             Blocks.SEA_LANTERN,
             Blocks.DARK_PRISMARINE
     );
+
     private  final List<Block> strongholdBlocks = Arrays.asList(
             Blocks.END_PORTAL_FRAME
     );
 
-    public Locate() {
+    public LocateCommand() {
         super("locate", "Locates structures");
     }
 

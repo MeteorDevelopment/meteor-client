@@ -9,7 +9,7 @@ import it.unimi.dsi.fastutil.chars.Char2CharArrayMap;
 import it.unimi.dsi.fastutil.chars.Char2CharMap;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.commands.Commands;
-import minegame159.meteorclient.commands.commands.Say;
+import minegame159.meteorclient.commands.commands.SayCommand;
 import minegame159.meteorclient.events.entity.player.SendMessageEvent;
 import minegame159.meteorclient.friends.Friend;
 import minegame159.meteorclient.friends.Friends;
@@ -451,7 +451,7 @@ public class BetterChat extends Module {
                 .withFormatting(Formatting.DARK_RED)
                 .withClickEvent(new ClickEvent(
                         ClickEvent.Action.RUN_COMMAND,
-                        Commands.get().get(Say.class).toString(message)
+                        Commands.get().get(SayCommand.class).toString(message)
                 ))
                 .withHoverEvent(new HoverEvent(
                         HoverEvent.Action.SHOW_TEXT,

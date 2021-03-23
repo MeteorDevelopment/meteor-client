@@ -16,8 +16,8 @@ import net.minecraft.command.CommandSource;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
-public class Ignore extends Command {
-    public Ignore() {
+public class IgnoreCommand extends Command {
+    public IgnoreCommand() {
         super("ignore", "Lets you ignore messages from specific players.");
     }
 

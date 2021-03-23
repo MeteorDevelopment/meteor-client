@@ -13,11 +13,11 @@ import net.minecraft.command.CommandSource;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
-public class Toggle extends Command {
+public class ToggleCommand extends Command {
 
 
-    public Toggle() {
-        super("toggle", "Toggles a module.");
+    public ToggleCommand() {
+        super("toggle", "Toggles a module.", "t");
     }
 
     @Override

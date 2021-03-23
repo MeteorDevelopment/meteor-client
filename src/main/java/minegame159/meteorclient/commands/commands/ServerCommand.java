@@ -1,21 +1,24 @@
+/*
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
+ * Copyright (c) 2021 Meteor Development.
+ */
+
 package minegame159.meteorclient.commands.commands;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-
+import minegame159.meteorclient.commands.Command;
+import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.client.network.ServerInfo;
 import net.minecraft.command.CommandSource;
 import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.text.BaseText;
 import net.minecraft.text.LiteralText;
 
-import minegame159.meteorclient.commands.Command;
-import minegame159.meteorclient.utils.player.ChatUtils;
-
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
-public class Server extends Command {
+public class ServerCommand extends Command {
 
-    public Server() {
+    public ServerCommand() {
         super("server", "Prints server information");
     }
 

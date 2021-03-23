@@ -25,8 +25,8 @@ import java.util.stream.Collectors;
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 import static net.minecraft.command.CommandSource.suggestMatching;
 
-public class Friend extends Command {
-    public Friend() {
+public class FriendCommand extends Command {
+    public FriendCommand() {
         super("friend", "Manages friends.");
     }
 
