@@ -104,8 +104,7 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
     private void onDrawMouseoverTooltip(MatrixStack matrices, int x, int y, CallbackInfo info) {
         if (focusedSlot != null && !focusedSlot.getStack().isEmpty()) {
             ShulkerPeek shulkerPeek = Modules.get().get(ShulkerPeek.class);
-
-            if (shulkerPeek.isPressed() && hasItems(focusedSlot.getStack()) && ((shulkerPeek.isPressed() && shulkerPeek.mode.get() == ShulkerPeek.Mode.Tooltip) || (shulkerPeek.mode.get() == ShulkerPeek.Mode.Always))) info.cancel();
+            if (Modules.get().isActive(ShulkerPeek.class) && hasItems(focusedSlot.getStack()) && ((shulkerPeek.isPressed() && Modules.get().get(ShulkerPeek.class).mode.get() == ShulkerPeek.Mode.Tooltip) || (Modules.get().get(ShulkerPeek.class).mode.get() == ShulkerPeek.Mode.Always))) info.cancel();
             else if (focusedSlot.getStack().getItem() == Items.ENDER_CHEST && Modules.get().isActive(EChestPreview.class)) info.cancel();
             else if (focusedSlot.getStack().getItem() == Items.FILLED_MAP && Modules.get().isActive(MapPreview.class)) info.cancel();
         }
