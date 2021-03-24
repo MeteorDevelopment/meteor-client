@@ -13,15 +13,21 @@ import minegame159.meteorclient.Config;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.CommandSource;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 public abstract class Command {
     protected static MinecraftClient mc;
 
     private final String name;
     private final String description;
+    private final List<String> aliases = new ArrayList<>();
 
-    public Command(String name, String description) {
+    public Command(String name, String description, String... aliases) {
         this.name = name;
         this.description = description;
+        Collections.addAll(this.aliases, aliases);
         mc = MinecraftClient.getInstance();
     }
 
@@ -35,8 +41,13 @@ public abstract class Command {
     }
 
     public final void registerTo(CommandDispatcher<CommandSource> dispatcher) {
-        LiteralArgumentBuilder<CommandSource> builder = LiteralArgumentBuilder.literal(this.name);
-        this.build(builder);
+        register(dispatcher, name);
+        for (String alias : aliases) register(dispatcher, alias);
+    }
+
+    public void register(CommandDispatcher<CommandSource> dispatcher, String name) {
+        LiteralArgumentBuilder<CommandSource> builder = LiteralArgumentBuilder.literal(name);
+        build(builder);
         dispatcher.register(builder);
     }
 
@@ -50,8 +61,10 @@ public abstract class Command {
         return description;
     }
 
-    // Generate proper command-string to execute.
-    // For example: CommandManager.get(Say.class).toString("raw_message") -> ".say raw_message".
+    public List<String> getAliases() {
+        return aliases;
+    }
+
     public String toString() {
         return Config.get().getPrefix() + name;
     }

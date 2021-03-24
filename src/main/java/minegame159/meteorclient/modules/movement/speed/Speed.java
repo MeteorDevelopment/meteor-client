@@ -11,10 +11,13 @@ import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.movement.AutoJump;
 import minegame159.meteorclient.modules.movement.speed.modes.NCP;
 import minegame159.meteorclient.modules.movement.speed.modes.Vanilla;
+import minegame159.meteorclient.modules.world.Timer;
 import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.player.PlayerUtils;
 import net.minecraft.entity.MovementType;
 import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
 
@@ -33,6 +36,16 @@ public class Speed extends Module {
             .build()
     );
 
+    public final Setting<Double> timer = sgDefault.add(new DoubleSetting.Builder()
+            .name("timer")
+            .description("Timer override.")
+            .defaultValue(1)
+            .min(0.01)
+            .sliderMin(0.01)
+            .sliderMax(10)
+            .build()
+    );
+
     public final Setting<Boolean> inLiquids = sgDefault.add(new BoolSetting.Builder()
             .name("in-liquids")
             .description("Uses speed when in lava or water.")
@@ -43,24 +56,6 @@ public class Speed extends Module {
     public final Setting<Boolean> whenSneaking = sgDefault.add(new BoolSetting.Builder()
             .name("when-sneaking")
             .description("Uses speed when sneaking.")
-            .defaultValue(false)
-            .build()
-    );
-
-    //NCP
-
-    public final Setting<Double> ncpSpeed = sgNCP.add(new DoubleSetting.Builder()
-            .name("speed")
-            .description("How fast you go.")
-            .defaultValue(1.6)
-            .min(0)
-            .sliderMax(3)
-            .build()
-    );
-
-    public final Setting<Boolean> ncpSpeedLimit = sgNCP.add(new BoolSetting.Builder()
-            .name("speed-limit")
-            .description("Limits your speed on servers with very strict anticheats.")
             .defaultValue(false)
             .build()
     );
@@ -120,6 +115,25 @@ public class Speed extends Module {
             .build()
     );
 
+
+    //NCP
+
+    public final Setting<Double> ncpSpeed = sgNCP.add(new DoubleSetting.Builder()
+            .name("speed")
+            .description("How fast you go.")
+            .defaultValue(1.6)
+            .min(0)
+            .sliderMax(3)
+            .build()
+    );
+
+    public final Setting<Boolean> ncpSpeedLimit = sgNCP.add(new BoolSetting.Builder()
+            .name("speed-limit")
+            .description("Limits your speed on servers with very strict anticheats.")
+            .defaultValue(false)
+            .build()
+    );
+
     private SpeedMode currentMode;
 
     public Speed() {
@@ -133,6 +147,7 @@ public class Speed extends Module {
 
     @Override
     public void onDeactivate() {
+        Modules.get().get(Timer.class).setOverride(Timer.OFF);
         currentMode.onDeactivate();
     }
 
@@ -142,6 +157,8 @@ public class Speed extends Module {
         if (!whenSneaking.get() && mc.player.isSneaking()) return;
         if (onlyOnGround.get() && !mc.player.isOnGround()) return;
         if (!inLiquids.get() && (mc.player.isTouchingWater() || mc.player.isInLava())) return;
+
+        Modules.get().get(Timer.class).setOverride(PlayerUtils.isMoving() ? timer.get() : Timer.OFF);
 
         currentMode.onMove(event);
     }

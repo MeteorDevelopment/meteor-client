@@ -1,19 +1,20 @@
 package minegame159.meteorclient.modules.combat;
 
-import com.google.common.collect.Sets;
 import minegame159.meteorclient.settings.*;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.projectile.ArrowEntity;
+import net.minecraft.entity.projectile.PersistentProjectileEntity;
+import net.minecraft.entity.projectile.ProjectileEntity;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
-
+import minegame159.meteorclient.mixin.ProjectileInGroundAccessor;
 import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
+
 import net.minecraft.util.shape.VoxelShapes;
 
 import java.util.*;
@@ -51,6 +52,13 @@ public class ArrowDodge extends Module {
             .build()
     );
 
+    private final Setting<Boolean> groundCheck = sgGeneral.add(new BoolSetting.Builder()
+        .name("ground-check")
+        .description("Tries to prevent you from falling to your death.")
+        .defaultValue(true)
+        .build()
+    );
+
     private final List<Vec3d> possibleMoveDirections = Arrays.asList(
         new Vec3d(1, 0, 1), new Vec3d(0, 0, 1), new Vec3d(-1, 0, 1),
         new Vec3d(1, 0, 0), new Vec3d(-1, 0, 0),
@@ -63,6 +71,7 @@ public class ArrowDodge extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
+        if (mc.player == null) return;
         Box playerHitbox = mc.player.getBoundingBox();
         if (playerHitbox == null) return;
         playerHitbox = playerHitbox.expand(0.6);
@@ -70,13 +79,14 @@ public class ArrowDodge extends Module {
         Double speed = moveSpeed.get();
 
         for (Entity e : mc.world.getEntities()) {
-            if (!(e instanceof ArrowEntity) || e.age > 50) continue;
-            if (((ArrowEntity)e).getOwner() == mc.player) continue;
+            if (!(e instanceof ProjectileEntity)) continue;
+            if (((ProjectileEntity)e).getOwner() == mc.player) continue;
+            if (e instanceof PersistentProjectileEntity && ((ProjectileInGroundAccessor)e).getInGround()) continue;
 
             List<Box> futureArrowHitboxes = new ArrayList<>();
 
             for (int i = 0; i < arrowLookahead.get(); i++) {
-                Vec3d nextPos = e.getPos().add(e.getVelocity().multiply(i / 5));
+                Vec3d nextPos = e.getPos().add(e.getVelocity().multiply(i / 5.0f));
                 futureArrowHitboxes.add(new Box(
                         nextPos.subtract(e.getBoundingBox().getXLength() / 2, 0, e.getBoundingBox().getZLength() / 2),
                         nextPos.add(e.getBoundingBox().getXLength() / 2, e.getBoundingBox().getYLength(), e.getBoundingBox().getZLength() / 2)));
@@ -88,20 +98,7 @@ public class ArrowDodge extends Module {
                     boolean didMove = false;
                     for (Vec3d direction: possibleMoveDirections) {
                         Vec3d velocity = direction.multiply(speed);
-                        boolean isValid = true;
-                        for (Box futureArrowHitbox: futureArrowHitboxes) {
-                            Box newPlayerPos = moveBox(playerHitbox,velocity);
-                            if (futureArrowHitbox.intersects(newPlayerPos)) {
-                                isValid = false;
-                                break;
-                            }
-                            BlockPos blockPos = mc.player.getBlockPos().add(velocity.x,velocity.y,velocity.z);
-                            if (mc.world.getBlockState(blockPos).getCollisionShape(mc.world,blockPos) != VoxelShapes.empty()) {
-                                isValid = false;
-                                break;
-                            }
-                        }
-                        if (isValid) {
+                        if (isValid(velocity, futureArrowHitboxes, playerHitbox)) {
                             move(velocity);
                             didMove=true;
                             break;
@@ -133,7 +130,21 @@ public class ArrowDodge extends Module {
         }
     }
 
-    private Box moveBox(Box box, Vec3d offset) {
-        return new Box(new Vec3d(box.minX, box.minY, box.minZ).add(offset.x, offset.y, offset.z), new Vec3d(box.maxX, box.maxY, box.maxZ).add(offset.x, offset.y, offset.z));
+    private boolean isValid(Vec3d velocity, List<Box> futureArrowHitboxes, Box playerHitbox) {
+        BlockPos blockPos = null;
+        for (Box futureArrowHitbox: futureArrowHitboxes) {
+            Box newPlayerPos = playerHitbox.offset(velocity);
+            if (futureArrowHitbox.intersects(newPlayerPos)) {
+                return false;
+            }
+            blockPos = mc.player.getBlockPos().add(velocity.x,velocity.y,velocity.z);
+            if (mc.world.getBlockState(blockPos).getCollisionShape(mc.world,blockPos) != VoxelShapes.empty()) {
+                return false;
+            }
+        }
+        if ( groundCheck.get() && blockPos != null) {
+            return mc.world.getBlockState(blockPos.down()).getCollisionShape(mc.world, blockPos.down()) != VoxelShapes.empty();
+        }
+        return true;
     }
 }

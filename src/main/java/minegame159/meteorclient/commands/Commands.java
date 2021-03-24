@@ -37,33 +37,33 @@ public class Commands extends System<Commands> {
 
     @Override
     public void init() {
-        add(new Baritone());
-        add(new VClip());
-        add(new HClip());
-        add(new ClearChat());
-        add(new Dismount());
-        add(new Damage());
-        add(new Drop());
-        add(new Enchant());
+        add(new BaritoneCommand());
+        add(new VClipCommand());
+        add(new HClipCommand());
+        add(new ClearChatCommand());
+        add(new DismountCommand());
+        add(new DamageCommand());
+        add(new DropCommand());
+        add(new EnchantCommand());
         add(new FakePlayerCommand());
-        add(new Friend());
-        add(new Help());
-        add(new Ignore());
-        add(new Inventory());
-        add(new Locate());
-        add(new NBT());
-        add(new Panic());
-        add(new Peek());
-        add(new Plugins());
-        add(new Profile());
-        add(new Reload());
-        add(new Reset());
-        add(new Say());
-        add(new Server());
+        add(new FriendCommand());
+        add(new HelpCommand());
+//        add(new IgnoreCommand());
+        add(new InventoryCommand());
+        add(new LocateCommand());
+        add(new NbtCommand());
+        add(new PanicCommand());
+        add(new PeekCommand());
+        add(new PluginsCommand());
+        add(new ProfileCommand());
+        add(new ReloadCommand());
+        add(new ResetCommand());
+        add(new SayCommand());
+        add(new ServerCommand());
         add(new SwarmCommand());
-        add(new Toggle());
+        add(new ToggleCommand());
         add(new SettingCommand());
-        add(new Gamemode());
+        add(new GamemodeCommand());
     }
 
     public void dispatch(String message) throws CommandSyntaxException {
@@ -72,8 +72,6 @@ public class Commands extends System<Commands> {
 
     public void dispatch(String message, CommandSource source) throws CommandSyntaxException {
         ParseResults<CommandSource> results = DISPATCHER.parse(message, source);
-        // `results` carries information about whether or not the command failed to parse, which path was took, etc.
-        // it might be useful to inspect later, before executing.
         DISPATCHER.execute(results);
     }
 
@@ -92,11 +90,9 @@ public class Commands extends System<Commands> {
     }
 
     public void add(Command command) {
-        // Remove the previous command with the same name
         commands.removeIf(command1 -> command1.getName().equals(command.getName()));
         commandInstances.values().removeIf(command1 -> command1.getName().equals(command.getName()));
 
-        // Add the command
         command.registerTo(DISPATCHER);
         commands.add(command);
         commandInstances.put(command.getClass(), command);

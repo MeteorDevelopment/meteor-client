@@ -189,12 +189,12 @@ public class CombatHud extends HudElement {
             if (isInEditor()) playerEntity = FakeClientPlayer.getPlayer();
             else playerEntity = EntityUtils.getPlayerTarget(range.get(), SortPriority.LowestDistance, ignoreFriends.get());
 
+            if (playerEntity == null) return;
+
             // Background
             Renderer.NORMAL.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
             Renderer.NORMAL.quad(x, y, box.width, box.height, backgroundColor.get());
             Renderer.NORMAL.end();
-
-            if (playerEntity == null) return;
 
             // Player Model
             InventoryScreen.drawEntity(

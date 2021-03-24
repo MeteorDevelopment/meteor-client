@@ -17,6 +17,7 @@ import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.entity.EntityUtils;
 import minegame159.meteorclient.utils.entity.SortPriority;
 import minegame159.meteorclient.utils.entity.Target;
+import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.player.PlayerUtils;
 import minegame159.meteorclient.utils.player.Rotations;
 import net.minecraft.entity.Entity;
@@ -25,6 +26,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.AxeItem;
+import net.minecraft.item.Item;
 import net.minecraft.item.SwordItem;
 import net.minecraft.util.Hand;
 
@@ -35,7 +37,7 @@ public class KillAura extends Module {
     public enum OnlyWith {
         Sword,
         Axe,
-        SwordOrAxe,
+        Both,
         Any
     }
 
@@ -80,6 +82,13 @@ public class KillAura extends Module {
             .name("only-with")
             .description("Only attacks an entity when a specified item is in your hand.")
             .defaultValue(OnlyWith.Any)
+            .build()
+    );
+
+    private final Setting<Boolean> autoSwitch = sgGeneral.add(new BoolSetting.Builder()
+            .name("auto-switch")
+            .description("Switches to an axe or a sword when attacking the target.")
+            .defaultValue(false)
             .build()
     );
 
@@ -189,6 +198,7 @@ public class KillAura extends Module {
     private int randomDelayTimer;
     private boolean wasPathing;
     private boolean canAttack;
+    private Entity target;
 
     private final List<Entity> entityList = new ArrayList<>();
 
@@ -201,16 +211,15 @@ public class KillAura extends Module {
         hitDelayTimer = 0;
         randomDelayTimer = 0;
         entityList.clear();
+        target = null;
     }
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-
-        if (mc.player.isDead() || !mc.player.isAlive() || !itemInHand()) {
-            entityList.clear();
-            return;
-        }
         entityList.clear();
+
+        if (mc.player.isDead() || !mc.player.isAlive() || !itemInHand()) return;
+
         EntityUtils.getList(entity -> {
             if (entity == mc.player || entity == mc.cameraEntity) return false;
             if ((entity instanceof LivingEntity && ((LivingEntity) entity).isDead()) || !entity.isAlive()) return false;
@@ -229,7 +238,7 @@ public class KillAura extends Module {
             entityList.subList(1, entityList.size()).clear();
 
         if (entityList.isEmpty()) {
-            if (wasPathing){
+            if (wasPathing) {
                 BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume");
                 wasPathing = false;
             }
@@ -239,6 +248,10 @@ public class KillAura extends Module {
         if (pauseOnCombat.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing() && !wasPathing) {
             BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("pause");
             wasPathing = true;
+        }
+
+        if (rotationMode.get() == RotationMode.Always && target != null) {
+            Rotations.rotate(Rotations.getYaw(target), Rotations.getPitch(target, rotationDirection.get()));
         }
 
         if (smartDelay.get() && mc.player.getAttackCooldownProgress(0.5f) < 1) {
@@ -263,20 +276,19 @@ public class KillAura extends Module {
         }
 
         for (Entity target : entityList) {
-            if (attack(target) && rotationMode.get() == RotationMode.Always) {
-                Rotations.rotate(Rotations.getYaw(target), Rotations.getPitch(target, rotationDirection.get()), () -> {
-                    if (canAttack) hitEntity(target);
-                });
+            if (attack(target) && (canAttack)) {
+                hitEntity(target);
             }
         }
     }
 
     private boolean attack(Entity target) {
         canAttack = false;
+        this.target = target;
 
         if (Math.random() > hitChance.get() / 100) return false;
 
-        if (rotationMode.get() == RotationMode.None) {
+        if (rotationMode.get() == RotationMode.None || rotationMode.get() == RotationMode.Always) {
             hitEntity(target);
         }
         else {
@@ -288,15 +300,21 @@ public class KillAura extends Module {
     }
 
     private void hitEntity(Entity target) {
+        int slot = InvUtils.findItemInHotbar(itemStack -> {
+                Item item = itemStack.getItem();
+                return ((item instanceof SwordItem || item instanceof AxeItem) && autoSwitch.get());
+            }
+        );
+        if (autoSwitch.get() && slot != -1) mc.player.inventory.selectedSlot = slot;
         mc.interactionManager.attackEntity(mc.player, target);
         mc.player.swingHand(Hand.MAIN_HAND);
     }
 
     private boolean itemInHand() {
-        switch(onlyWith.get()){
+        switch(onlyWith.get()) {
             case Axe:        return mc.player.getMainHandStack().getItem() instanceof AxeItem;
             case Sword:      return mc.player.getMainHandStack().getItem() instanceof SwordItem;
-            case SwordOrAxe: return mc.player.getMainHandStack().getItem() instanceof AxeItem || mc.player.getMainHandStack().getItem() instanceof SwordItem;
+            case Both:       return mc.player.getMainHandStack().getItem() instanceof AxeItem || mc.player.getMainHandStack().getItem() instanceof SwordItem;
             default:         return true;
         }
     }
@@ -305,10 +323,13 @@ public class KillAura extends Module {
     public String getInfoString() {
         if (!entityList.isEmpty()) {
             Entity targetFirst = entityList.get(0);
-            if (targetFirst instanceof PlayerEntity)
-                return targetFirst.getEntityName();
+            if (targetFirst instanceof PlayerEntity) return targetFirst.getEntityName();
             return targetFirst.getType().getName().getString();
         }
         return null;
+    }
+
+    public Entity getTarget() {
+        return target;
     }
 }
