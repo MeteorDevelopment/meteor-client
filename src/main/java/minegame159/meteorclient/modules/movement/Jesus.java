@@ -18,6 +18,7 @@ import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.utils.entity.EntityUtils;
 import net.minecraft.block.Material;
 import net.minecraft.enchantment.ProtectionEnchantment;
 import net.minecraft.entity.effect.StatusEffects;
@@ -30,6 +31,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
+import net.minecraft.world.GameMode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -243,7 +245,9 @@ public class Jesus extends Module {
         return walkOnWater.get() &&
                 !(disableOnSneakForWater.get() && mc.options.keySneak.isPressed()) &&
                 !(dipIntoWater.get() && mc.player.fallDistance > dipIntoWaterHeight.get()) &&
-                !(dipIntoWaterIfBurning.get() && mc.player.isOnFire());
+                !(dipIntoWaterIfBurning.get() && mc.player.isOnFire()) &&
+                !(EntityUtils.getGameMode(mc.player) == GameMode.SPECTATOR) &&
+                !(mc.player.abilities.flying);
     }
 
     private boolean lavaIsSafe() {
@@ -257,7 +261,9 @@ public class Jesus extends Module {
         return walkOnLava.get() &&
                 !((disableOnSneakForLava.get() || lavaIsSafe()) && mc.options.keySneak.isPressed()) &&
                 !(dipIntoLava.get() && mc.player.fallDistance > dipIntoLavaHeight.get()) &&
-                !(lavaIsSafe() && mc.player.fallDistance > 3);
+                !(lavaIsSafe() && mc.player.fallDistance > 3) &&
+                !(EntityUtils.getGameMode(mc.player) == GameMode.SPECTATOR) &&
+                !(mc.player.abilities.flying);
     }
 
     private boolean isOverLiquid() {
