@@ -1,7 +1,7 @@
 ---
 name: Suggestion
 about: Suggest an idea for meteor
-title: "[SUGGESTION]"
+title: "[Suggestion]"
 labels: enhancement
 assignees: ''
 
