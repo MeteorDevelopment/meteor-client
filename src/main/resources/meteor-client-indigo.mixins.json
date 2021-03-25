@@ -1,0 +1,11 @@
+{
+  "required": true,
+  "package": "minegame159.meteorclient.mixin.indigo",
+  "compatibilityLevel": "JAVA_8",
+  "client": [
+    "AbstractQuadRendererMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
