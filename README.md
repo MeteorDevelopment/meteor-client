@@ -1,5 +1,5 @@
 # Meteor Client
-![Discord](https://img.shields.io/discord/689197705683140636)
+![Discord](https://img.shields.io/discord/689197705683140636?logo=discord)
 [![CodeFactor](https://www.codefactor.io/repository/github/meteordevelopment/meteor-client/badge)](https://www.codefactor.io/repository/github/meteordevelopment/meteor-client)
 ![GitHub last commit](https://img.shields.io/github/last-commit/MeteorDevelopment/meteor-client)
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/w/MeteorDevelopment/meteor-client)
@@ -24,7 +24,7 @@ You can find dev builds at [circleci](https://app.circleci.com/pipelines/github/
 ## Older Versions
 If you want to connect to servers that run older version you can download [multiconnect](https://www.curseforge.com/minecraft/mc-mods/multiconnect).
 
-## Donation
+## Donations
 We would appreciate if you donated to us through [PayPal](https://paypal.me/MineGame159). Include your Discord tag so we can give you donator role and contact you. Minimum for donator role is 5$.
 
 ## Thank you
