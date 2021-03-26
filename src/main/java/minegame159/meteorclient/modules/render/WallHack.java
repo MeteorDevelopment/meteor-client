@@ -20,7 +20,11 @@ public class WallHack extends Module {
             .min(1)
             .max(255)
             .sliderMax(255)
-            .onChanged(onChanged -> mc.worldRenderer.reload())
+            .onChanged(onChanged -> {
+                if(this.isActive()) {
+                    mc.worldRenderer.reload();
+                }
+            })
             .build()
     );
 
@@ -28,7 +32,11 @@ public class WallHack extends Module {
             .name("blocks")
             .description("What blocks should be targeted for Wall Hack.")
             .defaultValue(new ArrayList<>())
-            .onChanged(onChanged -> mc.worldRenderer.reload())
+            .onChanged(onChanged -> {
+                if(this.isActive()) {
+                    mc.worldRenderer.reload();
+                }
+            })
             .build()
     );
 
