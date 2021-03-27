@@ -483,6 +483,7 @@ public class Modules extends System<Modules> {
         add(new ModelTweaks());
         add(new LightOverlay());
         add(new Zoom());
+        add(new WallHack());
     }
 
     private void initWorld() {

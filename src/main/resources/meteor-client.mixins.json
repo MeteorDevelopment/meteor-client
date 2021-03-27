@@ -44,6 +44,7 @@
     "CobwebBlockMixin",
     "CrashReportMixin",
     "CreativeInventoryScreenAccessor",
+    "CustomPayloadC2SPacketAccessor",
     "DefaultSkinHelperMixin",
     "DimensionTypeAccessor",
     "DisconnectedScreenMixin",
@@ -95,6 +96,7 @@
     "PlayerPositionLookS2CPacketAccessor",
     "ProjectileEntityAccessor",
     "ProjectileInGroundAccessor",
+    "RenderLayersMixin",
     "RenderTickCounterMixin",
     "ScreenMixin",
     "ShovelItemAccessor",
@@ -113,8 +115,7 @@
     "TridentItemMixin",
     "Vec3dMixin",
     "WorldRendererAccessor",
-    "WorldRendererMixin",
-    "CustomPayloadC2SPacketAccessor"
+    "WorldRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

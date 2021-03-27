@@ -1,5 +1,5 @@
 ---
-name: Bug report
+name: Bug
 about: Create a bug report to help us improve or fix the client.
 title: "[Bug]"
 labels: bug
