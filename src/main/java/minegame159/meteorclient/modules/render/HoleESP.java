@@ -96,6 +96,13 @@ public class HoleESP extends Module {
             .build()
     );
 
+    private final Setting<Boolean> webs = sgGeneral.add(new BoolSetting.Builder()
+            .name("ignore-webs")
+            .description("Ignores holes that have webs inside of them")
+            .defaultValue(true)
+            .build()
+    );
+
     //Glow
 
     private final Setting<Double> glowHeight = sgGlow.add(new DoubleSetting.Builder()
@@ -176,6 +183,8 @@ public class HoleESP extends Module {
             blockPos.set(blockPos1);
 
             if ((ignoreOwn.get() && (mc.player.getBlockPos().equals(blockPos))) || isBlocked(blockPos)) return;
+
+            if(webs.get() && mc.world.getBlockState(blockPos).getBlock().is(Blocks.COBWEB)) return;
 
 //            for (Hole hole : holes) {
 //                if (hole.blockPos == blockPos
