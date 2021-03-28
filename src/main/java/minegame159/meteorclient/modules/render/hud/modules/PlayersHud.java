@@ -70,7 +70,7 @@ public class PlayersHud extends HudElement {
             Color color = Friends.get().contains(Friends.get().get(entity)) ? Friends.get().getFriendColor(entity) : hud.secondaryColor.get();
             renderer.text(entity.getEntityName(), x, y, color);
 
-            if (coords.get()) renderer.text(String.format("[%1$s, %2$s, %3$s]", Double.toString(Math.floor(entity.getX())), Double.toString(Math.floor(entity.getY())), Double.toString(Math.floor(entity.getZ()))), x + 5 + renderer.textWidth(entity.getEntityName()), y, hud.secondaryColor.get());
+            if (coords.get()) renderer.text(String.format("[%1$s, %2$s, %3$s]", Long.toString((long) Math.floor(entity.getX())), Long.toString((long) Math.floor(entity.getY())), Long.toString((long) Math.floor(entity.getZ()))), x + 5 + renderer.textWidth(entity.getEntityName()), y, hud.secondaryColor.get());
         }
 
     }
