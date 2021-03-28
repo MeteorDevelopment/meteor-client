@@ -97,9 +97,9 @@ public class HoleESP extends Module {
     );
 
     private final Setting<Boolean> webs = sgGeneral.add(new BoolSetting.Builder()
-            .name("ignore-webs")
-            .description("Ignores holes that have webs inside of them")
-            .defaultValue(true)
+            .name("webs")
+            .description("Whether to show holes that have webs inside of them.")
+            .defaultValue(false)
             .build()
     );
 
@@ -184,7 +184,7 @@ public class HoleESP extends Module {
 
             if ((ignoreOwn.get() && (mc.player.getBlockPos().equals(blockPos))) || isBlocked(blockPos)) return;
 
-            if(webs.get() && mc.world.getBlockState(blockPos).getBlock().is(Blocks.COBWEB)) return;
+            if(!webs.get() && mc.world.getBlockState(blockPos).getBlock().is(Blocks.COBWEB)) return;
 
 //            for (Hole hole : holes) {
 //                if (hole.blockPos == blockPos
