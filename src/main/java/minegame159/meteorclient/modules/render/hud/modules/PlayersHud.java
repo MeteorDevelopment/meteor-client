@@ -7,7 +7,7 @@ import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.render.color.Color;
-import net.minecraft.entity.Entity;
+import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 
 public class PlayersHud extends HudElement {
@@ -17,6 +17,13 @@ public class PlayersHud extends HudElement {
     private final Setting<Boolean> friends = sgGeneral.add(new BoolSetting.Builder()
             .name("display-friends")
             .description("Whether to show friends or not.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Boolean> coords = sgGeneral.add(new BoolSetting.Builder()
+            .name("show-coords")
+            .description("Whether to show coordinates of players or not.")
             .defaultValue(true)
             .build()
     );
@@ -34,10 +41,11 @@ public class PlayersHud extends HudElement {
         height += renderer.textHeight();
         int i = 0;
         if(mc.world == null) return;
-        for (Entity entity : mc.world.getEntities()) {
-            if (!(entity instanceof PlayerEntity) || entity.equals(mc.player)) continue;
-            if (!friends.get() && Friends.get().contains(Friends.get().get((PlayerEntity) entity))) continue;
-            width = Math.max(width, getModuleWidth(renderer, (PlayerEntity) entity));
+        for (AbstractClientPlayerEntity e : mc.world.getPlayers()) {
+            PlayerEntity entity = e;
+            if (entity.equals(mc.player)) continue;
+            if (!friends.get() && Friends.get().contains(Friends.get().get(entity))) continue;
+            width = Math.max(width, getModuleWidth(renderer, entity));
             height += renderer.textHeight();
             if (i > 0) height += 2;
             i++;
@@ -54,18 +62,21 @@ public class PlayersHud extends HudElement {
         renderer.text("Players:", x, y, hud.primaryColor.get());
 
         if(mc.world == null) return;
-        for (Entity entity : mc.world.getEntities()) {
-            if (!(entity instanceof PlayerEntity) || entity.equals(mc.player)) continue;
-            if (!friends.get() && Friends.get().contains(Friends.get().get((PlayerEntity) entity))) continue;
+        for (AbstractClientPlayerEntity p : mc.world.getPlayers()) {
+            PlayerEntity entity = p;
+            if (entity.equals(mc.player)) continue;
+            if (!friends.get() && Friends.get().contains(Friends.get().get(entity))) continue;
 
             y += 2 + renderer.textHeight();
-            Color color = Friends.get().contains(Friends.get().get((PlayerEntity) entity)) ? Friends.get().getFriendColor((PlayerEntity) entity) : hud.secondaryColor.get();
+            Color color = Friends.get().contains(Friends.get().get(entity)) ? Friends.get().getFriendColor(entity) : hud.secondaryColor.get();
             renderer.text(entity.getEntityName(), x, y, color);
+
+            if (coords.get()) renderer.text(String.format("[%1$s, %2$s, %3$s]", Double.toString(Math.floor(entity.getX())), Double.toString(Math.floor(entity.getY())), Double.toString(Math.floor(entity.getZ()))), x + 5 + renderer.textWidth(entity.getEntityName()), y, hud.secondaryColor.get());
         }
 
     }
 
     private double getModuleWidth(HudRenderer renderer, PlayerEntity player) {
-        return renderer.textWidth(player.getEntityName());
+        return renderer.textWidth(player.getEntityName() + ((coords.get()) ? 5 + renderer.textWidth(String.format("[%1$s, %2$s, %3$s]", Double.toString(Math.floor(player.getX())), Double.toString(Math.floor(player.getY())), Double.toString(Math.floor(player.getZ())))): ""));
     }
 }
