@@ -4,6 +4,7 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.exceptions.AuthenticationException;
 import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.client.gui.screen.ConfirmChatLinkScreen;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.options.SkinOptionsScreen;
 import net.minecraft.client.gui.widget.AbstractButtonWidget;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -21,7 +22,11 @@ import java.util.List;
 import java.util.Random;
 
 @Mixin(SkinOptionsScreen.class)
-public class SkinOptionsScreenMixin extends ScreenMixin {
+public class SkinOptionsScreenMixin extends Screen {
+
+    protected SkinOptionsScreenMixin(Text title) {
+        super(title);
+    }
 
     @Inject(method = "init", at = @At("TAIL"))
     private void onInit(CallbackInfo callback) {
