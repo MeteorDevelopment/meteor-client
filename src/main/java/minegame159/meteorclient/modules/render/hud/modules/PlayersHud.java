@@ -7,10 +7,12 @@ import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.render.color.Color;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 
 public class PlayersHud extends HudElement {
+
+    private double longestName = 0;
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
@@ -36,18 +38,18 @@ public class PlayersHud extends HudElement {
     public void update(HudRenderer renderer) {
         double width = renderer.textWidth("Players:");
         double height = renderer.textHeight();
-        box.setSize(renderer.textWidth("Players:"), renderer.textHeight());
+        box.setSize(width, height);
 
         int i = 0;
         if(mc.world == null) return;
-        for (AbstractClientPlayerEntity e : mc.world.getPlayers()) {
-            PlayerEntity entity = e;
-            if (entity.equals(mc.player)) continue;
-            if (!friends.get() && Friends.get().contains(Friends.get().get(entity))) continue;
-            width = Math.max(width, getModuleWidth(renderer, entity));
+        for (Entity entity : mc.world.getEntities()) {
+            if (!(entity instanceof PlayerEntity) || entity.equals(mc.player)) continue;
+            if (!friends.get() && Friends.get().contains(Friends.get().get((PlayerEntity) entity))) continue;
+            width = Math.max(width, getModuleWidth(renderer, (PlayerEntity) entity));
             height += renderer.textHeight();
             if (i > 0) height += 2;
             i++;
+            longestName = Math.max(longestName, renderer.textWidth(entity.getEntityName()));
         }
 
         box.setSize(width, height);
@@ -61,21 +63,25 @@ public class PlayersHud extends HudElement {
         renderer.text("Players:", x, y, hud.primaryColor.get());
 
         if(mc.world == null) return;
-        for (AbstractClientPlayerEntity p : mc.world.getPlayers()) {
-            PlayerEntity entity = p;
-            if (entity.equals(mc.player)) continue;
-            if (!friends.get() && Friends.get().contains(Friends.get().get(entity))) continue;
+        for (Entity entity : mc.world.getEntities()) {
+            if (!(entity instanceof PlayerEntity) || entity.equals(mc.player)) continue;
+            if (!friends.get() && Friends.get().contains(Friends.get().get((PlayerEntity) entity))) continue;
 
             y += 2 + renderer.textHeight();
-            Color color = Friends.get().contains(Friends.get().get(entity)) ? Friends.get().getFriendColor(entity) : hud.secondaryColor.get();
+            Color color = Friends.get().contains(Friends.get().get((PlayerEntity) entity)) ? Friends.get().getFriendColor((PlayerEntity) entity) : hud.secondaryColor.get();
             renderer.text(entity.getEntityName(), x, y, color);
 
-            if (coords.get()) renderer.text(String.format("[%1$s, %2$s, %3$s]", Long.toString((long) Math.floor(entity.getX())), Long.toString((long) Math.floor(entity.getY())), Long.toString((long) Math.floor(entity.getZ()))), x + 5 + renderer.textWidth(entity.getEntityName()), y, hud.secondaryColor.get());
+            if (coords.get()) {
+                long playerX = (long) Math.floor(entity.getX());
+                long playerY = (long) Math.floor(entity.getY());
+                long playerZ = (long) Math.floor(entity.getZ());
+                renderer.text(String.format("[%1$d, %2$d, %3$d]", playerX, playerY, playerZ), x + longestName + 5, y, hud.secondaryColor.get());
+            }
         }
 
     }
 
     private double getModuleWidth(HudRenderer renderer, PlayerEntity player) {
-        return renderer.textWidth(player.getEntityName() + ((coords.get()) ? 5 + renderer.textWidth(String.format("[%1$s, %2$s, %3$s]", Double.toString(Math.floor(player.getX())), Double.toString(Math.floor(player.getY())), Double.toString(Math.floor(player.getZ())))): ""));
+        return renderer.textWidth(player.getEntityName() + ((coords.get()) ? 5 + renderer.textWidth(String.format("[%1$d, %2$d, %3$d]", (long) Math.floor(player.getX()), (long) Math.floor(player.getY()), (long) Math.floor(player.getZ()))) : ""));
     }
 }
