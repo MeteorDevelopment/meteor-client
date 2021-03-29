@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class Slippy extends Module {
+    
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     public final Setting<Double> slippness = sgGeneral.add(new DoubleSetting.Builder()
@@ -21,7 +22,7 @@ public class Slippy extends Module {
             .build()
     );
 
-    private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
+    public final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
             .name("ignored blocks")
             .description("Decide which blocks not to slip on")
             .defaultValue(Collections.emptyList())
@@ -29,11 +30,7 @@ public class Slippy extends Module {
     );
 
     public Slippy(){
-        super(Categories.Movement, "Slippy", "Makes blocks you step on act slippery");
+        super(Categories.Movement, "slippy", "Makes blocks slippery like ice.");
     }
-
-    public List<Block> getUnSlippedBlocks(){
-        return blocks.get();
-    }
-
+    
 }
