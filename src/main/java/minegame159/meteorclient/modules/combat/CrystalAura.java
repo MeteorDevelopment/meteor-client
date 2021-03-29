@@ -13,6 +13,7 @@ import minegame159.meteorclient.events.entity.EntityRemovedEvent;
 import minegame159.meteorclient.events.entity.player.SendMovementPacketsEvent;
 import minegame159.meteorclient.events.render.Render2DEvent;
 import minegame159.meteorclient.events.render.RenderEvent;
+import minegame159.meteorclient.events.world.PlaySoundEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.friends.Friends;
 import minegame159.meteorclient.modules.Categories;
@@ -36,6 +37,8 @@ import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
 import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
+import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
+import net.minecraft.sound.SoundCategory;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
@@ -67,6 +70,11 @@ public class CrystalAura extends Module {
         Auto,
         Spoof,
         None
+    }
+
+    public enum FastHitMode {
+        Sound,
+        Hit
     }
 
     private final SettingGroup sgPlace = settings.createGroup("Place");
@@ -259,10 +267,10 @@ public class CrystalAura extends Module {
             .build()
     );
 
-    private final Setting<Boolean> removeCrystals = sgBreak.add(new BoolSetting.Builder()
+    private final Setting<FastHitMode> fastHitMode = sgBreak.add(new EnumSetting.Builder<FastHitMode>()
             .name("fast-hit")
-            .description("Removes end crystals from the world as soon as it is hit. May cause desync on strict anticheats.")
-            .defaultValue(true)
+            .description("Mode to use for the crystals to be removed from the world.")
+            .defaultValue(FastHitMode.Hit)
             .build()
     );
 
@@ -550,8 +558,10 @@ public class CrystalAura extends Module {
 
     @EventHandler(priority = EventPriority.HIGH)
     private void onTick(TickEvent.Post event) {
-        removalQueue.forEach(id -> mc.world.removeEntity(id));
-        removalQueue.clear();
+        if (fastHitMode.get() == FastHitMode.Hit) {
+            removalQueue.forEach(id -> mc.world.removeEntity(id));
+            removalQueue.clear();
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGH)
@@ -714,6 +724,14 @@ public class CrystalAura extends Module {
         }
     }
 
+    @EventHandler(priority = EventPriority.HIGH)
+    private void onPlaySound(PlaySoundEvent event) {
+        if (event.sound.getCategory().getName().equals(SoundCategory.BLOCKS.getName()) && event.sound.getId().getPath().equals("entity.generic.explode") && fastHitMode.get() == FastHitMode.Sound) {
+            removalQueue.forEach(id -> mc.world.removeEntity(id));
+            removalQueue.clear();
+        }
+    }
+
     private Stream<Entity> getCrystalStream() {
         return Streams.stream(mc.world.getEntities())
                 .filter(entity -> entity instanceof EndCrystalEntity)
@@ -811,7 +829,7 @@ public class CrystalAura extends Module {
 
     private void attackCrystal(EndCrystalEntity entity, int preSlot) {
         mc.interactionManager.attackEntity(mc.player, entity);
-        if (removeCrystals.get()) removalQueue.add(entity.getEntityId());
+        removalQueue.add(entity.getEntityId());
         if (swing.get()) mc.player.swingHand(getHand());
         else mc.player.networkHandler.sendPacket(new HandSwingC2SPacket(getHand()));
         mc.player.inventory.selectedSlot = preSlot;
@@ -881,12 +899,12 @@ public class CrystalAura extends Module {
                     blockPos.getY() + 0.5 + direction.getVector().getY() * 1.0 / 2.0,
                     blockPos.getZ() + 0.5 + direction.getVector().getZ() * 1.0 / 2.0) : block.add(0.5, 1.0, 0.5));
             Rotations.rotate(rotation[0], rotation[1], 25, () -> {
-                mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(mc.player.getPos(), direction, blockPos, false));
+                mc.player.networkHandler.sendPacket(new PlayerInteractBlockC2SPacket(hand, new BlockHitResult(mc.player.getPos(), direction, new BlockPos(block), false)));
                 if (swing.get()) mc.player.swingHand(hand);
                 else mc.player.networkHandler.sendPacket(new HandSwingC2SPacket(hand));
             });
         } else {
-            mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(mc.player.getPos(), direction, new BlockPos(block), false));
+            mc.player.networkHandler.sendPacket(new PlayerInteractBlockC2SPacket(hand, new BlockHitResult(mc.player.getPos(), direction, new BlockPos(block), false)));
             if (swing.get()) mc.player.swingHand(hand);
             else mc.player.networkHandler.sendPacket(new HandSwingC2SPacket(hand));
         }
@@ -1181,4 +1199,4 @@ public class CrystalAura extends Module {
         return null;
     }
 }
-// holy shit 1000 lines
+// holy shit 1200 lines
