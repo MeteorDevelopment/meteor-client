@@ -29,7 +29,7 @@ public class Slippy extends Module {
             .build()
     );
 
-    public Slippy(){
+    public Slippy() {
         super(Categories.Movement, "slippy", "Makes blocks slippery like ice.");
     }
     
