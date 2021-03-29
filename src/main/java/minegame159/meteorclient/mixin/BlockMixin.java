@@ -40,7 +40,7 @@ public abstract class BlockMixin extends AbstractBlock implements ItemConvertibl
         Block block = (Block) (Object) this;
 
         if (slippy.isActive() && !slippy.getUnSlippedBlocks().contains(block)){
-            info.setReturnValue(slippy.getSlippnessValue());
+            info.setReturnValue(slippy.slippness.get().floatValue());
         }
     }
 }

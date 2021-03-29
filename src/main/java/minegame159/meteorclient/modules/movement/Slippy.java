@@ -11,7 +11,7 @@ import java.util.List;
 public class Slippy extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<Double> slippness = sgGeneral.add(new DoubleSetting.Builder()
+    public final Setting<Double> slippness = sgGeneral.add(new DoubleSetting.Builder()
             .name("slippness")
             .description("Decide how slippery blocks should be")
             .min(0.0)
@@ -32,13 +32,8 @@ public class Slippy extends Module {
         super(Categories.Movement, "Slippy", "Makes blocks you step on act slippery");
     }
 
-    public Float getSlippnessValue(){
-        return Float.parseFloat(this.slippness.get()+"F");
-    }
-
     public List<Block> getUnSlippedBlocks(){
         return blocks.get();
     }
-
 
 }
