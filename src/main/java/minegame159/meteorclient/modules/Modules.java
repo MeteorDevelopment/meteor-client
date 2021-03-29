@@ -442,6 +442,7 @@ public class Modules extends System<Modules> {
         add(new Scaffold());
         add(new Speed());
         add(new Spider());
+        add(new Slippy());
         add(new Step());
         add(new Velocity());
     }

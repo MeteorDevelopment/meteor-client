@@ -6,6 +6,7 @@
 package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.modules.Modules;
+import minegame159.meteorclient.modules.movement.Slippy;
 import minegame159.meteorclient.modules.render.Xray;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
@@ -21,6 +22,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(Block.class)
 public abstract class BlockMixin extends AbstractBlock implements ItemConvertible {
+    
     public BlockMixin(Settings settings) {
         super(settings);
     }
@@ -33,4 +35,15 @@ public abstract class BlockMixin extends AbstractBlock implements ItemConvertibl
             info.setReturnValue(xray.modifyDrawSide(state, view, pos, facing, info.getReturnValueZ()));
         }
     }
+    
+    @Inject(method = "getSlipperiness", at = @At("RETURN"), cancellable = true)
+    public void getSlipperiness(CallbackInfoReturnable<Float> info) {
+        Slippy slippy = Modules.get().get(Slippy.class);
+        Block block = (Block) (Object) this;
+
+        if (slippy.isActive() && !slippy.blocks.get().contains(block)) {
+            info.setReturnValue(slippy.slippness.get().floatValue());
+        }
+    }
+    
 }
