@@ -28,7 +28,7 @@ import net.minecraft.util.math.Vec3d;
 public class Fish extends Module {
 
     public Fish() {
-        super(Categories.Movement, "fish", "Disables underwater gravity.")
+        super(Categories.Movement, "fish", "Disables underwater gravity.");
     }
 
     ClientPlayerEntity player = MC.player;
