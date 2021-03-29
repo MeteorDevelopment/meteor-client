@@ -72,7 +72,7 @@ public class CrystalAura extends Module {
         None
     }
 
-    public enum FastHitMode {
+    public enum CancelCrystalMode {
         Sound,
         Hit
     }
@@ -267,10 +267,10 @@ public class CrystalAura extends Module {
             .build()
     );
 
-    private final Setting<FastHitMode> fastHitMode = sgBreak.add(new EnumSetting.Builder<FastHitMode>()
-            .name("fast-hit")
+    private final Setting<CancelCrystalMode> cancelCrystalMode = sgBreak.add(new EnumSetting.Builder<CancelCrystalMode>()
+            .name("cancel-crystal")
             .description("Mode to use for the crystals to be removed from the world.")
-            .defaultValue(FastHitMode.Hit)
+            .defaultValue(CancelCrystalMode.Hit)
             .build()
     );
 
@@ -558,7 +558,7 @@ public class CrystalAura extends Module {
 
     @EventHandler(priority = EventPriority.HIGH)
     private void onTick(TickEvent.Post event) {
-        if (fastHitMode.get() == FastHitMode.Hit) {
+        if (cancelCrystalMode.get() == CancelCrystalMode.Hit) {
             removalQueue.forEach(id -> mc.world.removeEntity(id));
             removalQueue.clear();
         }
@@ -726,7 +726,7 @@ public class CrystalAura extends Module {
 
     @EventHandler(priority = EventPriority.HIGH)
     private void onPlaySound(PlaySoundEvent event) {
-        if (event.sound.getCategory().getName().equals(SoundCategory.BLOCKS.getName()) && event.sound.getId().getPath().equals("entity.generic.explode") && fastHitMode.get() == FastHitMode.Sound) {
+        if (event.sound.getCategory().getName().equals(SoundCategory.BLOCKS.getName()) && event.sound.getId().getPath().equals("entity.generic.explode") && cancelCrystalMode.get() == CancelCrystalMode.Sound) {
             removalQueue.forEach(id -> mc.world.removeEntity(id));
             removalQueue.clear();
         }
