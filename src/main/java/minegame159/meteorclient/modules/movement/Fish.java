@@ -36,7 +36,7 @@ public class Fish extends Module {
 
 
 
-    if(!(mc.player.isTouchingWater() || mc.options.keySneak.isPressed())
+    if mc.options.keySneak.isPressed()
         return;
 
     mc.player.setVelocity(initialVelocity.add(0, 0.005, 0));
