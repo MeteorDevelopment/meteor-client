@@ -17,13 +17,9 @@
 
 package minegame159.meteorclient.modules.movement;
 
-import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.events.entity.player.PlayerMoveEvent;
-import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.server.network.ServerPlayNetworkHandler;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.*;
 
 
 
@@ -36,8 +32,9 @@ public class Fish extends Module {
 
 
 
-    if mc.options.keySneak.isPressed()
+    if (mc.options.keySneak.isPressed()) {
         return;
+    }
 
     mc.player.setVelocity(initialVelocity.add(0, 0.005, 0));
 
