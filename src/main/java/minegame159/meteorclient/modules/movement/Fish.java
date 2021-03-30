@@ -20,6 +20,7 @@ package minegame159.meteorclient.modules.movement;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.events.entity.player.PlayerMoveEvent;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.util.math.Vec3d;
 
@@ -31,7 +32,10 @@ public class Fish extends Module {
         super(Categories.Movement, "fish", "Disables underwater gravity.");
     }
 
-    public void onUpdate() {
+    player.setVelocity(velocity.x, velocity.y + 0.005, velocity.z);
+
+    @EventHandler
+    private void PlayerMoveEvent(PlayerMoveEvent event){
         ClientPlayerEntity player = MC.player;
         if(!player.isWet() || player.isSneaking())
             return;
@@ -39,4 +43,5 @@ public class Fish extends Module {
         Vec3d velocity = player.getVelocity();
         player.setVelocity(velocity.x, velocity.y + 0.005, velocity.z);
     }
+
 }
