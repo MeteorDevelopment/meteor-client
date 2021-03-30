@@ -4,9 +4,11 @@ import minegame159.meteorclient.friends.Friends;
 import minegame159.meteorclient.modules.render.hud.HUD;
 import minegame159.meteorclient.modules.render.hud.HudRenderer;
 import minegame159.meteorclient.settings.BoolSetting;
+import minegame159.meteorclient.settings.ColorSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.utils.render.color.Color;
+import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 
@@ -27,6 +29,13 @@ public class PlayersHud extends HudElement {
             .name("show-coords")
             .description("Whether to show coordinates of players or not.")
             .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<SettingColor> coordinateColors = sgGeneral.add(new ColorSetting.Builder()
+            .name("coord-colors")
+            .description("Color used for the player coords.")
+            .defaultValue(new SettingColor(255, 25, 25, 255))
             .build()
     );
 
@@ -75,7 +84,7 @@ public class PlayersHud extends HudElement {
                 long playerX = (long) Math.floor(entity.getX());
                 long playerY = (long) Math.floor(entity.getY());
                 long playerZ = (long) Math.floor(entity.getZ());
-                renderer.text(String.format("[%1$d, %2$d, %3$d]", playerX, playerY, playerZ), x + longestName + 5, y, hud.secondaryColor.get());
+                renderer.text(String.format("[%1$d, %2$d, %3$d]", playerX, playerY, playerZ), x + longestName + 5, y, coordinateColors.get());
             }
         }
 
