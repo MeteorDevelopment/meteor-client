@@ -32,16 +32,15 @@ public class Fish extends Module {
         super(Categories.Movement, "fish", "Disables underwater gravity.");
     }
 
-    player.setVelocity(velocity.x, velocity.y + 0.005, velocity.z);
 
     @EventHandler
     private void PlayerMoveEvent(PlayerMoveEvent event){
         ClientPlayerEntity player = MC.player;
-        if(!player.isWet() || player.isSneaking())
+        if(!(mc.player.isTouchingWater() || mc.options.keySneak.isPressed())())
             return;
 
         Vec3d velocity = player.getVelocity();
-        player.setVelocity(velocity.x, velocity.y + 0.005, velocity.z);
+        mc.player.setVelocity = (velocity.x, velocity.y + 0.005, velocity.z);
     }
 
 }
