@@ -26,7 +26,7 @@ public class PlayersHud extends HudElement {
     private final Setting<Boolean> coords = sgGeneral.add(new BoolSetting.Builder()
             .name("show-coords")
             .description("Whether to show coordinates of players or not.")
-            .defaultValue(true)
+            .defaultValue(false)
             .build()
     );
 
