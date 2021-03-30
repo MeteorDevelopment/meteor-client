@@ -19,24 +19,35 @@ package minegame159.meteorclient.modules.movement;
 
 import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.events.world.TickEvent;
+import com.google.common.eventbus.Subscribe;
 import net.minecraft.*;
+import net.minecraft.entity.Entity;
 
 
 
 
 public class Fish extends Module {
 
+    // Decriptions for the ClickGUI
     public Fish() {
         super(Categories.Movement, "fish", "Disables underwater gravity.");
     }
 
+    @Subscribe
+    //On every single tick, check these things:
+    private void onTick(TickEvent.Post event) {
 
+        // If the sneak key is pressed, keep gravity because you want to go down.
+        if (mc.options.keySneak.isPressed()) {
+            return;
+        }
 
-    if (mc.options.keySneak.isPressed()) {
-        return;
+        //If in water, set upwards velocity equal to downwards velocity, in order to stay stable.
+        if (mc.player.isTouchingWater()) {
+            e.setVelocity(e.getVelocity().x, 0.005, e.getVelocity().z);
+        }
     }
-
-    mc.player.setVelocity(initialVelocity.add(0, 0.005, 0));
 
 
 }
