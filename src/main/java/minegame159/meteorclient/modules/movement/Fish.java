@@ -21,8 +21,10 @@ import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.events.entity.player.PlayerMoveEvent;
-import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.util.math.Vec3d;
+
 
 
 
@@ -33,14 +35,11 @@ public class Fish extends Module {
     }
 
 
-    @EventHandler
-    private void PlayerMoveEvent(PlayerMoveEvent event){
-        ClientPlayerEntity player = MC.player;
-        if(!(mc.player.isTouchingWater() || mc.options.keySneak.isPressed())())
-            return;
 
-        Vec3d velocity = player.getVelocity();
-        mc.player.setVelocity = (velocity.x, velocity.y + 0.005, velocity.z);
-    }
+    if(!(mc.player.isTouchingWater() || mc.options.keySneak.isPressed())
+        return;
+
+    mc.player.setVelocity(initialVelocity.add(0, 0.005, 0));
+
 
 }
