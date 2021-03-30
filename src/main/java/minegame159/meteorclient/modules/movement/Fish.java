@@ -45,7 +45,7 @@ public class Fish extends Module {
 
         //If in water, set upwards velocity equal to downwards velocity, in order to stay stable.
         if (mc.player.isTouchingWater()) {
-            e.setVelocity(e.getVelocity().x, 0.005, e.getVelocity().z);
+            entity.setVelocity(entity.getVelocity().x, 0.005, entity.getVelocity().z);
         }
     }
 
