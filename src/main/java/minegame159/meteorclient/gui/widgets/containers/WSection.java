@@ -21,13 +21,16 @@ public abstract class WSection extends WVerticalList {
     protected double animProgress;
 
     private WHeader header;
+    protected final WWidget headerWidget;
+
     private double actualWidth, actualHeight;
     private double forcedHeight = -1;
     private boolean firstTime = true;
 
-    public WSection(String title, boolean expanded) {
+    public WSection(String title, boolean expanded, WWidget headerWidget) {
         this.title = title;
         this.expanded = expanded;
+        this.headerWidget = headerWidget;
 
         animProgress = expanded ? 1 : 0;
     }
@@ -46,6 +49,10 @@ public abstract class WSection extends WVerticalList {
     }
 
     protected abstract WHeader createHeader();
+
+    public void setExpanded(boolean expanded) {
+        this.expanded = expanded;
+    }
 
     public boolean isExpanded() {
         return expanded;
@@ -126,7 +133,7 @@ public abstract class WSection extends WVerticalList {
         }
 
         protected void onClick() {
-            expanded = !expanded;
+            setExpanded(!expanded);
 
             if (action != null) action.run();
         }

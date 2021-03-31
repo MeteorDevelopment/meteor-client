@@ -124,7 +124,10 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
         return w(new WTable());
     }
 
-    public abstract WSection section(String title, boolean expanded);
+    public abstract WSection section(String title, boolean expanded, WWidget headerWidget);
+    public WSection section(String title, boolean expanded) {
+        return section(title, expanded, null);
+    }
     public WSection section(String title) {
         return section(title, true);
     }
