@@ -10,46 +10,72 @@ import net.minecraft.client.texture.AbstractTexture;
 import net.minecraft.client.texture.TextureUtil;
 import net.minecraft.resource.ResourceManager;
 import org.lwjgl.BufferUtils;
+import org.lwjgl.stb.STBImageResize;
 
 import java.io.IOException;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
-import static org.lwjgl.opengl.GL11C.*;
+import static org.lwjgl.opengl.GL30C.*;
 
 public class ByteTexture extends AbstractTexture {
-    public ByteTexture(int width, int height, byte[] data, boolean text) {
-        if (!RenderSystem.isOnRenderThread()) {
-            RenderSystem.recordRenderCall(() -> upload(width, height, data, text));
-        } else {
-            upload(width, height, data, text);
+    public enum Format {
+        A,
+        RGB,
+        RGBA;
+
+        public int toOpenGL() {
+            switch (this) {
+                case A:    return GL_ALPHA;
+                case RGB:  return GL_RGB;
+                case RGBA: return GL_RGBA;
+            }
+
+            return 0;
         }
     }
 
-    public ByteTexture(int width, int height, ByteBuffer buffer, boolean text) {
-        if (!RenderSystem.isOnRenderThread()) {
-            RenderSystem.recordRenderCall(() -> upload(width, height, buffer, text));
-        } else {
-            upload(width, height, buffer, text);
+    public enum Filter {
+        Nearest,
+        Linear;
+
+        public int toOpenGL() {
+            return this == Nearest ? GL_NEAREST : GL_LINEAR;
         }
     }
 
-    private void upload(int width, int height, byte[] data, boolean text) {
+    public ByteTexture(int width, int height, byte[] data, Format format, Filter filterMin, Filter filterMag) {
+        if (!RenderSystem.isOnRenderThread()) {
+            RenderSystem.recordRenderCall(() -> upload(width, height, data, format, filterMin, filterMag));
+        } else {
+            upload(width, height, data, format, filterMin, filterMag);
+        }
+    }
+
+    public ByteTexture(int width, int height, ByteBuffer buffer, Format format, Filter filterMin, Filter filterMag) {
+        if (!RenderSystem.isOnRenderThread()) {
+            RenderSystem.recordRenderCall(() -> upload(width, height, buffer, format, filterMin, filterMag));
+        } else {
+            upload(width, height, buffer, format, filterMin, filterMag);
+        }
+    }
+
+    private void upload(int width, int height, byte[] data, Format format, Filter filterMin, Filter filterMag) {
         ByteBuffer buffer = BufferUtils.createByteBuffer(data.length).put(data);
         ((Buffer) buffer).flip();
 
-        upload(width, height, buffer, text);
+        upload(width, height, buffer, format, filterMin, filterMag);
     }
 
-    private void upload(int width, int height, ByteBuffer buffer, boolean text) {
+    private void upload(int width, int height, ByteBuffer buffer, Format format, Filter filterMin, Filter filterMag) {
         TextureUtil.allocate(getGlId(), width, height);
         bindTexture();
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, text ? GL_LINEAR : GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, text ? GL_LINEAR : GL_NEAREST);
-        glTexImage2D(GL_TEXTURE_2D, 0, text ? GL_ALPHA : GL_RGB, width, height, 0, text ? GL_ALPHA : GL_RGB, GL_UNSIGNED_BYTE, buffer);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filterMin.toOpenGL());
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filterMag.toOpenGL());
+        glTexImage2D(GL_TEXTURE_2D, 0, format.toOpenGL(), width, height, 0, format.toOpenGL(), GL_UNSIGNED_BYTE, buffer);
     }
 
     @Override

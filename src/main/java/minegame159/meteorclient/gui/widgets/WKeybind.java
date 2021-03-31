@@ -5,13 +5,15 @@
 
 package minegame159.meteorclient.gui.widgets;
 
+import minegame159.meteorclient.gui.widgets.containers.WHorizontalList;
+import minegame159.meteorclient.gui.widgets.pressable.WButton;
 import minegame159.meteorclient.utils.misc.Keybind;
 
-public class WKeybind extends WTable {
+public class WKeybind extends WHorizontalList {
     public Runnable action;
     public Runnable actionOnSet;
 
-    private final WLabel label;
+    private WLabel label;
     private final boolean addBindText;
 
     private final Keybind keybind;
@@ -20,18 +22,21 @@ public class WKeybind extends WTable {
     public WKeybind(Keybind keybind, boolean addBindText) {
         this.keybind = keybind;
         this.addBindText = addBindText;
+    }
 
-        label = add(new WLabel("")).getWidget();
-        WButton set = add(new WButton("Set")).getWidget();
-        WButton reset = add(new WButton("Reset")).getWidget();
+    @Override
+    public void init() {
+        label = add(theme.label("")).widget();
 
+        WButton set = add(theme.button("Set")).widget();
         set.action = () -> {
             listening = true;
-            label.setText(appendBindText("Press any key or mouse button"));
+            label.set(appendBindText("Press any key or mouse button"));
 
             if (actionOnSet != null) actionOnSet.run();
         };
 
+        WButton reset = add(theme.button("Reset")).widget();
         reset.action = () -> {
             keybind.set(true, -1);
             reset();
@@ -40,10 +45,6 @@ public class WKeybind extends WTable {
         };
 
         refreshLabel();
-    }
-
-    public WKeybind(Keybind keybind) {
-        this(keybind, true);
     }
 
     public boolean onAction(boolean isKey, int value) {
@@ -64,7 +65,7 @@ public class WKeybind extends WTable {
     }
 
     private void refreshLabel() {
-        label.setText(appendBindText(keybind.toString()));
+        label.set(appendBindText(keybind.toString()));
     }
 
     private String appendBindText(String text) {

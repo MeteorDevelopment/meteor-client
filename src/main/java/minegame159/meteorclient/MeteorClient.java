@@ -12,12 +12,16 @@ import minegame159.meteorclient.events.game.GameLeftEvent;
 import minegame159.meteorclient.events.meteor.ClientInitialisedEvent;
 import minegame159.meteorclient.events.meteor.KeyEvent;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.gui.screens.topbar.TopBarModules;
+import minegame159.meteorclient.gui.GuiThemes;
+import minegame159.meteorclient.gui.renderer.GuiRenderer;
+import minegame159.meteorclient.gui.tabs.Tabs;
 import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.misc.DiscordPresence;
+import minegame159.meteorclient.rendering.Blur;
 import minegame159.meteorclient.rendering.Fonts;
 import minegame159.meteorclient.rendering.Matrices;
+import minegame159.meteorclient.rendering.gl.PostProcessRenderer;
 import minegame159.meteorclient.rendering.text.CustomTextRenderer;
 import minegame159.meteorclient.systems.Systems;
 import minegame159.meteorclient.utils.Utils;
@@ -98,6 +102,10 @@ public class MeteorClient implements ClientModInitializer {
         Names.init();
         MeteorPlayers.init();
         FakeClientPlayer.init();
+        PostProcessRenderer.init();
+        Blur.init();
+        Tabs.init();
+        GuiThemes.init();
 
         // Register categories
         Modules.REGISTERING_CATEGORIES = true;
@@ -110,6 +118,7 @@ public class MeteorClient implements ClientModInitializer {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             Systems.save();
             OnlinePlayers.leave();
+            GuiThemes.save();
         }));
 
         EVENT_BUS.subscribe(this);
@@ -120,10 +129,13 @@ public class MeteorClient implements ClientModInitializer {
 
         Modules.get().sortModules();
         Systems.load();
+
+        GuiRenderer.init();
+        GuiThemes.postInit();
     }
 
     private void openClickGui() {
-        mc.openScreen(new TopBarModules());
+        Tabs.get().get(0).openScreen(GuiThemes.get());
     }
 
     @EventHandler

@@ -8,6 +8,7 @@ package minegame159.meteorclient.rendering;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.events.render.RenderEvent;
+import minegame159.meteorclient.gui.renderer.packer.TextureRegion;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.world.Dir;
 import net.minecraft.client.render.BufferBuilder;
@@ -20,8 +21,12 @@ public class MeshBuilder {
     private final BufferBuilder buffer;
     private double offsetX, offsetY, offsetZ;
 
+    public double alpha = 1;
+
     public boolean depthTest = false;
     public boolean texture = false;
+
+    private int count;
 
     public MeshBuilder(int initialCapacity) {
         buffer = new BufferBuilder(initialCapacity);
@@ -43,35 +48,39 @@ public class MeshBuilder {
         }
 
         buffer.begin(drawMode.toOpenGl(), format);
+        count = 0;
     }
 
     public void end() {
-        glPushMatrix();
-        RenderSystem.multMatrix(Matrices.getTop());
-
-        RenderSystem.enableBlend();
-        RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA);
-        if (depthTest) RenderSystem.enableDepthTest();
-        else RenderSystem.disableDepthTest();
-        RenderSystem.disableAlphaTest();
-        if (texture) RenderSystem.enableTexture();
-        else RenderSystem.disableTexture();
-        RenderSystem.disableLighting();
-        RenderSystem.disableCull();
-        glEnable(GL_LINE_SMOOTH);
-        RenderSystem.lineWidth(1);
-        RenderSystem.color4f(1, 1, 1, 1);
-        GlStateManager.shadeModel(GL_SMOOTH);
-
         buffer.end();
-        BufferRenderer.draw(buffer);
 
-        RenderSystem.enableAlphaTest();
-        RenderSystem.enableDepthTest();
-        RenderSystem.enableTexture();
-        glDisable(GL_LINE_SMOOTH);
+        //if (count > 0) {
+            glPushMatrix();
+            RenderSystem.multMatrix(Matrices.getTop());
 
-        glPopMatrix();
+            RenderSystem.enableBlend();
+            RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA);
+            if (depthTest) RenderSystem.enableDepthTest();
+            else RenderSystem.disableDepthTest();
+            RenderSystem.disableAlphaTest();
+            if (texture) RenderSystem.enableTexture();
+            else RenderSystem.disableTexture();
+            RenderSystem.disableLighting();
+            RenderSystem.disableCull();
+            glEnable(GL_LINE_SMOOTH);
+            RenderSystem.lineWidth(1);
+            RenderSystem.color4f(1, 1, 1, 1);
+            GlStateManager.shadeModel(GL_SMOOTH);
+
+            BufferRenderer.draw(buffer);
+
+            RenderSystem.enableAlphaTest();
+            RenderSystem.enableDepthTest();
+            RenderSystem.enableTexture();
+            glDisable(GL_LINE_SMOOTH);
+
+            glPopMatrix();
+        //}
     }
 
     public boolean isBuilding() {
@@ -84,22 +93,23 @@ public class MeshBuilder {
     }
 
     public MeshBuilder texture(double x, double y) {
-        buffer.texture((float) (x + offsetX), (float) (y + offsetY));
+        buffer.texture((float) x, (float) y);
         return this;
     }
 
     public MeshBuilder color(Color color) {
-        buffer.color(color.r, color.g, color.b, color.a);
+        buffer.color(color.r / 255f, color.g / 255f, color.b / 255f, color.a / 255f * (float) alpha);
         return this;
     }
 
     public MeshBuilder color(int color) {
-        buffer.color(Color.toRGBAR(color), Color.toRGBAG(color), Color.toRGBAB(color), Color.toRGBAA(color));
+        buffer.color(Color.toRGBAR(color) / 255f, Color.toRGBAG(color) / 255f, Color.toRGBAB(color) / 255f, Color.toRGBAA(color) / 255f * (float) alpha);
         return this;
     }
 
     public void endVertex() {
         buffer.next();
+        count++;
     }
 
     // NORMAL
@@ -132,14 +142,24 @@ public class MeshBuilder {
         gradientQuad(x, y, 0, x + width, y, 0, x + width, y + height, 0, x, y + height, 0,startColor, endColor);
     }
 
-    public void texQuad(double x, double y, double width, double height, double srcX, double srcY, double srcWidth, double srcHeight, Color color1, Color color2, Color color3, Color color4) {
-        pos(x, y, 0).texture(srcX, srcY).color(color1).endVertex();
-        pos(x + width, y, 0).texture(srcX + srcWidth, srcY).color(color2).endVertex();
-        pos(x + width, y + height, 0).texture(srcX + srcWidth, srcY + srcHeight).color(color3).endVertex();
+    public void quad(double x, double y, double width, double height, Color cTopLeft, Color cTopRight, Color cBottomRight, Color cBottomLeft) {
+        pos(x, y, 0).color(cTopLeft).endVertex();
+        pos(x + width, y, 0).color(cTopRight).endVertex();
+        pos(x + width, y + height, 0).color(cBottomRight).endVertex();
 
-        pos(x, y, 0).texture(srcX, srcY).color(color1).endVertex();
-        pos(x + width, y + height, 0).texture(srcX + srcWidth, srcY + srcHeight).color(color3).endVertex();
-        pos(x, y + height, 0).texture(srcX, srcY + srcHeight).color(color4).endVertex();
+        pos(x, y, 0).color(cTopLeft).endVertex();
+        pos(x + width, y + height, 0).color(cBottomRight).endVertex();
+        pos(x, y + height, 0).color(cBottomLeft).endVertex();
+    }
+
+    public void texQuad(double x, double y, double width, double height, TextureRegion tex, Color color) {
+        pos(x, y, 0).color(color).texture(tex.x1, tex.y1).endVertex();
+        pos(x + width, y, 0).color(color).texture(tex.x2, tex.y1).endVertex();
+        pos(x + width, y + height, 0).color(color).texture(tex.x2, tex.y2).endVertex();
+
+        pos(x, y, 0).color(color).texture(tex.x1, tex.y1).endVertex();
+        pos(x + width, y + height, 0).color(color).texture(tex.x2, tex.y2).endVertex();
+        pos(x, y + height, 0).color(color).texture(tex.x1, tex.y2).endVertex();
     }
 
     public void boxSides(double x1, double y1, double z1, double x2, double y2, double z2, Color color, int excludeDir) {

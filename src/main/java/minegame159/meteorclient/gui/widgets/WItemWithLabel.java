@@ -5,7 +5,7 @@
 
 package minegame159.meteorclient.gui.widgets;
 
-import minegame159.meteorclient.utils.misc.Names;
+import minegame159.meteorclient.gui.widgets.containers.WHorizontalList;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffectUtil;
 import net.minecraft.item.ItemStack;
@@ -14,19 +14,22 @@ import net.minecraft.potion.PotionUtil;
 
 import java.util.List;
 
-public class WItemWithLabel extends WTable {
+public class WItemWithLabel extends WHorizontalList {
     private ItemStack itemStack;
-    private final WItem item;
-    private final WLabel label;
+    private final String name;
+
+    private WItem item;
+    private WLabel label;
 
     public WItemWithLabel(ItemStack itemStack, String name) {
         this.itemStack = itemStack;
-        this.item = add(new WItem(itemStack)).getWidget();
-        this.label = add(new WLabel(name + getStringToAppend())).getWidget();
+        this.name = name;
     }
 
-    public WItemWithLabel(ItemStack itemStack) {
-        this(itemStack, Names.get(itemStack.getItem()));
+    @Override
+    public void init() {
+        item = add(theme.item(itemStack)).widget();
+        label = add(theme.label(name + getStringToAppend())).widget();
     }
 
     private String getStringToAppend() {
@@ -46,10 +49,10 @@ public class WItemWithLabel extends WTable {
     public void set(ItemStack itemStack) {
         this.itemStack = itemStack;
         item.itemStack = itemStack;
-        label.setText(itemStack.getName().getString() + getStringToAppend());
+        label.set(itemStack.getName().getString() + getStringToAppend());
     }
 
     public String getLabelText() {
-        return label.getText();
+        return label == null ? name : label.get();
     }
 }

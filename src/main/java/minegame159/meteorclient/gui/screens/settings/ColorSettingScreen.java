@@ -5,11 +5,16 @@
 
 package minegame159.meteorclient.gui.screens.settings;
 
-import minegame159.meteorclient.gui.GuiConfig;
+import minegame159.meteorclient.gui.GuiTheme;
+import minegame159.meteorclient.gui.WindowScreen;
 import minegame159.meteorclient.gui.renderer.GuiRenderer;
-import minegame159.meteorclient.gui.renderer.Region;
-import minegame159.meteorclient.gui.screens.WindowScreen;
-import minegame159.meteorclient.gui.widgets.*;
+import minegame159.meteorclient.gui.widgets.WQuad;
+import minegame159.meteorclient.gui.widgets.WWidget;
+import minegame159.meteorclient.gui.widgets.containers.WHorizontalList;
+import minegame159.meteorclient.gui.widgets.containers.WTable;
+import minegame159.meteorclient.gui.widgets.input.WDoubleEdit;
+import minegame159.meteorclient.gui.widgets.input.WIntEdit;
+import minegame159.meteorclient.gui.widgets.pressable.WButton;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.render.color.Color;
@@ -32,56 +37,66 @@ public class ColorSettingScreen extends WindowScreen {
     private final WIntEdit rItb, gItb, bItb, aItb;
     private final WDoubleEdit rainbowSpeed;
 
-    public ColorSettingScreen(Setting<SettingColor> setting) {
-        super("Select Color", true);
+    public ColorSettingScreen(GuiTheme theme, Setting<SettingColor> setting) {
+        super(theme, "Select Color");
         this.setting = setting;
 
-        displayQuad = add(new WQuad(setting.get())).fillX().expandX().getWidget();
-        row();
+        // Top
+        displayQuad = add(theme.quad(setting.get())).expandX().widget();
 
-        brightnessQuad = add(new WBrightnessQuad()).fillX().expandX().getWidget();
-        row();
+        brightnessQuad = add(new WBrightnessQuad()).expandX().widget();
 
-        hueQuad = add(new WHueQuad()).fillX().expandX().getWidget();
-        row();
+        hueQuad = add(new WHueQuad()).expandX().widget();
 
-        WTable rgbaTable = add(new WTable()).fillX().expandX().getWidget();
-        row();
+        // RGBA
+        WTable rgbaTable = add(theme.table()).expandX().widget();
 
-        rgbaTable.add(new WLabel("R:"));
-        rItb = rgbaTable.add(new WIntEdit(setting.get().r, 0, 255)).getWidget();
+        rgbaTable.add(theme.label("R:"));
+        rItb = rgbaTable.add(theme.intEdit(setting.get().r, 0, 255)).expandX().widget();
+        rItb.min = 0;
+        rItb.max = 255;
         rItb.action = this::rgbaChanged;
         rgbaTable.row();
 
-        rgbaTable.add(new WLabel("G:"));
-        gItb = rgbaTable.add(new WIntEdit(setting.get().g, 0, 255)).getWidget();
+        rgbaTable.add(theme.label("G:"));
+        gItb = rgbaTable.add(theme.intEdit(setting.get().g, 0, 255)).expandX().widget();
+        gItb.min = 0;
+        gItb.max = 255;
         gItb.action = this::rgbaChanged;
         rgbaTable.row();
 
-        rgbaTable.add(new WLabel("B:"));
-        bItb = rgbaTable.add(new WIntEdit(setting.get().b, 0, 255)).getWidget();
+        rgbaTable.add(theme.label("B:"));
+        bItb = rgbaTable.add(theme.intEdit(setting.get().b, 0, 255)).expandX().widget();
+        bItb.min = 0;
+        bItb.max = 255;
         bItb.action = this::rgbaChanged;
         rgbaTable.row();
 
-        rgbaTable.add(new WLabel("A:"));
-        aItb = rgbaTable.add(new WIntEdit(setting.get().a, 0, 255)).getWidget();
+        rgbaTable.add(theme.label("A:"));
+        aItb = rgbaTable.add(theme.intEdit(setting.get().a, 0, 255)).expandX().widget();
+        aItb.min = 0;
+        aItb.max = 255;
         aItb.action = this::rgbaChanged;
 
-        WTable rainbowTable = add(new WTable()).fillX().expandX().getWidget();
-        row();
-        rainbowTable.add(new WLabel("Rainbow: "));
-        rainbowSpeed = rainbowTable.add(new WDoubleEdit(setting.get().rainbowSpeed, 0, 0.025, 4, false, 75)).fillX().expandX().getWidget();
+        // Rainbow
+        WHorizontalList rainbowList = add(theme.horizontalList()).expandX().widget();
+        rainbowList.add(theme.label("Rainbow: "));
+        rainbowSpeed = theme.doubleEdit(setting.get().rainbowSpeed, 0, 0.025);
+        rainbowSpeed.min = 0.0;
         rainbowSpeed.action = () -> {
             setting.get().rainbowSpeed = rainbowSpeed.get();
             setting.changed();
         };
+        rainbowSpeed.small = true;
+        rainbowList.add(rainbowSpeed).expandX();
 
-        WTable bottomTable = add(new WTable()).fillX().expandX().getWidget();
+        // Bottom
+        WHorizontalList bottomList = add(theme.horizontalList()).expandX().widget();
 
-        WButton backButton = bottomTable.add(new WButton("Back")).fillX().expandX().getWidget();
+        WButton backButton = bottomList.add(theme.button("Back")).expandX().widget();
         backButton.action = this::onClose;
 
-        WButton resetButton = bottomTable.add(new WButton(WButton.ButtonRegion.Reset)).getWidget();
+        WButton resetButton = bottomList.add(theme.button(GuiRenderer.RESET)).widget();
         resetButton.action = () -> {
             setting.reset();
             setFromSetting();
@@ -93,11 +108,13 @@ public class ColorSettingScreen extends WindowScreen {
     }
 
     private void setFromSetting() {
-        rItb.set(setting.get().r);
-        gItb.set(setting.get().g);
-        bItb.set(setting.get().b);
-        aItb.set(setting.get().a);
-        rainbowSpeed.set(setting.get().rainbowSpeed);
+        SettingColor c = setting.get();
+
+        if (c.r != rItb.get()) rItb.set(c.r);
+        if (c.g != gItb.get()) gItb.set(c.g);
+        if (c.b != bItb.get()) bItb.set(c.b);
+        if (c.a != aItb.get()) aItb.set(c.a);
+        if (c.rainbowSpeed != rainbowSpeed.get()) rainbowSpeed.set(c.rainbowSpeed);
 
         displayQuad.color.set(setting.get());
         hueQuad.calculateFromSetting(true);
@@ -229,9 +246,11 @@ public class ColorSettingScreen extends WindowScreen {
         double fixedHeight = -1;
 
         @Override
-        protected void onCalculateSize(GuiRenderer renderer) {
-            width = 100 * GuiConfig.get().guiScale;
-            height = 100 * GuiConfig.get().guiScale;
+        protected void onCalculateSize() {
+            double s = theme.scale(75);
+
+            width = s;
+            height = s;
 
             if (fixedHeight != -1) {
                 height = fixedHeight;
@@ -272,7 +291,7 @@ public class ColorSettingScreen extends WindowScreen {
         }
 
         @Override
-        protected boolean onMouseClicked(boolean used, int button) {
+        public boolean onMouseClicked(double mouseX, double mouseY, int button, boolean used) {
             if (used) return false;
 
             if (mouseOver) {
@@ -289,36 +308,36 @@ public class ColorSettingScreen extends WindowScreen {
         }
 
         @Override
-        protected boolean onMouseReleased(boolean used, int button) {
+        public boolean onMouseReleased(double mouseX, double mouseY, int button) {
             if (dragging) {
                 dragging = false;
             }
 
-            return mouseOver && !used;
+            return false;
         }
 
         @Override
-        protected void onMouseMoved(double x, double y) {
+        public void onMouseMoved(double mouseX, double mouseY, double lastMouseX, double lastMouseY) {
             if (dragging) {
-                if (x >= this.x && x <= this.x + width) {
-                    handleX += x - lastMouseX;
+                if (mouseX >= this.x && mouseX <= this.x + width) {
+                    handleX += mouseX - lastMouseX;
                 } else {
-                    if (handleX > 0 && x < this.x) handleX = 0;
-                    else if (handleX < width && x > this.x + width) handleX = width;
+                    if (handleX > 0 && mouseX < this.x) handleX = 0;
+                    else if (handleX < width && mouseX > this.x + width) handleX = width;
                 }
 
-                if (y >= this.y && y <= this.y + height) {
-                    handleY += y - lastMouseY;
+                if (mouseY >= this.y && mouseY <= this.y + height) {
+                    handleY += mouseY - lastMouseY;
                 } else {
-                    if (handleY > 0 && y < this.y) handleY = 0;
-                    else if (handleY < height && y > this.y + height) handleY = height;
+                    if (handleY > 0 && mouseY < this.y) handleY = 0;
+                    else if (handleY < height && mouseY > this.y + height) handleY = height;
                 }
 
                 handleMoved();
             }
 
-            lastMouseX = x;
-            lastMouseY = y;
+            this.lastMouseX = mouseX;
+            this.lastMouseY = mouseY;
         }
 
         void handleMoved() {
@@ -340,13 +359,10 @@ public class ColorSettingScreen extends WindowScreen {
 
             hueQuad.calculateColor();
 
-            renderer.quad(Region.FULL, x, y, width, height, WHITE, hueQuad.color, BLACK, BLACK);
+            renderer.quad(x, y, width, height, WHITE, hueQuad.color, BLACK, BLACK);
 
-            Color color = GuiConfig.get().colorEditHandle;
-            if (dragging) color = GuiConfig.get().colorEditHandlePressed;
-            else if (mouseX >= x + handleX - 1 && mouseX <= x + handleX + 1 && mouseY >= y + handleY - 1 && mouseY <= y + handleY + 1) color = GuiConfig.get().colorEditHandleHovered;
-
-            renderer.quad(Region.FULL, x + handleX - 1, y + handleY - 1, 2, 2, color);
+            double s = theme.scale(2);
+            renderer.quad(x + handleX - s / 2, y + handleY - s / 2, s, s, WHITE);
         }
     }
 
@@ -362,9 +378,9 @@ public class ColorSettingScreen extends WindowScreen {
         private boolean calculateHandleXOnLayout;
 
         @Override
-        protected void onCalculateSize(GuiRenderer renderer) {
-            width = 100 * GuiConfig.get().guiScale;
-            height = 10 * GuiConfig.get().guiScale;
+        protected void onCalculateSize() {
+            width = theme.scale(75);
+            height = theme.scale(10);
         }
 
         void calculateFromSetting(boolean calculateNow) {
@@ -482,7 +498,7 @@ public class ColorSettingScreen extends WindowScreen {
         }
 
         @Override
-        protected boolean onMouseClicked(boolean used, int button) {
+        public boolean onMouseClicked(double mouseX, double mouseY, int button, boolean used) {
             if (used) return false;
 
             if (mouseOver) {
@@ -499,30 +515,30 @@ public class ColorSettingScreen extends WindowScreen {
         }
 
         @Override
-        protected boolean onMouseReleased(boolean used, int button) {
+        public boolean onMouseReleased(double mouseX, double mouseY, int button) {
             if (dragging) {
                 dragging = false;
             }
 
-            return mouseOver && !used;
+            return mouseOver;
         }
 
         @Override
-        protected void onMouseMoved(double x, double y) {
+        public void onMouseMoved(double mouseX, double mouseY, double lastMouseX, double lastMouseY) {
             if (dragging) {
-                if (x >= this.x && x <= this.x + width) {
-                    handleX += x - lastMouseX;
+                if (mouseX >= this.x && mouseX <= this.x + width) {
+                    handleX += mouseX - lastMouseX;
                     handleX = Utils.clamp(handleX, 0, width);
                 } else {
-                    if (handleX > 0 && x < this.x) handleX = 0;
-                    else if (handleX < width && x > this.x + width) handleX = width;
+                    if (handleX > 0 && mouseX < this.x) handleX = 0;
+                    else if (handleX < width && mouseX > this.x + width) handleX = width;
                 }
 
                 calculateHueAngleFromHandleX();
                 hsvChanged();
             }
 
-            lastMouseX = x;
+            this.lastMouseX = mouseX;
         }
 
         void calculateHueAngleFromHandleX() {
@@ -536,15 +552,12 @@ public class ColorSettingScreen extends WindowScreen {
             double sectionX = x;
 
             for (int i = 0; i < HUE_COLORS.length - 1; i++) {
-                renderer.quad(Region.FULL, sectionX, y, sectionWidth, height, HUE_COLORS[i], HUE_COLORS[i + 1], HUE_COLORS[i + 1], HUE_COLORS[i]);
+                renderer.quad(sectionX, y, sectionWidth, height, HUE_COLORS[i], HUE_COLORS[i + 1], HUE_COLORS[i + 1], HUE_COLORS[i]);
                 sectionX += sectionWidth;
             }
 
-            Color color = GuiConfig.get().colorEditHandle;
-            if (dragging) color = GuiConfig.get().colorEditHandlePressed;
-            else if (mouseX >= x + handleX - 1 && mouseX <= x + handleX + 1 && mouseY >= y && mouseY <= y + height) color = GuiConfig.get().colorEditHandleHovered;
-
-            renderer.quad(Region.FULL, x + handleX - 1, y, 2, height, color);
+            double s = theme.scale(2);
+            renderer.quad(x + handleX - s / 2, y, s, height, WHITE);
         }
     }
 }

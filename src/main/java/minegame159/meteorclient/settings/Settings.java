@@ -5,7 +5,6 @@
 
 package minegame159.meteorclient.settings;
 
-import minegame159.meteorclient.gui.widgets.WTable;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.utils.misc.ISerializable;
 import minegame159.meteorclient.utils.misc.NbtUtils;
@@ -21,7 +20,7 @@ import java.util.List;
 
 public class Settings implements ISerializable<Settings>, Iterable<SettingGroup> {
     private SettingGroup defaultGroup;
-    private final List<SettingGroup> groups = new ArrayList<>(1);
+    public final List<SettingGroup> groups = new ArrayList<>(1);
 
     public Setting<?> get(String name) {
         for (SettingGroup sg : this) {
@@ -57,26 +56,6 @@ public class Settings implements ISerializable<Settings>, Iterable<SettingGroup>
     }
     public SettingGroup createGroup(String name) {
         return createGroup(name, true);
-    }
-
-    public WTable createTable(boolean activate) {
-        WTable table = new WTable();
-
-        for (SettingGroup sg : this) {
-            for (Setting<?> setting : sg) {
-                if (activate) setting.onActivated();
-                setting.resetWidget();
-            }
-        }
-
-        for (SettingGroup group : groups) {
-            group.fillTable(table);
-        }
-
-        return table;
-    }
-    public WTable createTable() {
-        return createTable(true);
     }
 
     public void registerColorSettings(Module module) {

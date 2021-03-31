@@ -16,6 +16,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.item.Item;
 import net.minecraft.particle.ParticleEffect;
+import net.minecraft.particle.ParticleType;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.ChatUtil;
@@ -31,7 +32,7 @@ public class Names {
     private static final Map<Block, String> blockNames = new HashMap<>(128);
     private static final Map<Enchantment, String> enchantmentNames = new HashMap<>(16);
     private static final Map<EntityType<?>, String> entityTypeNames = new HashMap<>(64);
-    private static final Map<ParticleEffect, String> particleEffectNames = new HashMap<>(64);
+    private static final Map<ParticleType<?>, String> particleTypesNames = new HashMap<>(64);
     private static final Map<Identifier, String> soundNames = new HashMap<>(64);
 
     public static void init() {
@@ -45,7 +46,7 @@ public class Names {
         blockNames.clear();
         enchantmentNames.clear();
         entityTypeNames.clear();
-        particleEffectNames.clear();
+        particleTypesNames.clear();
         soundNames.clear();
     }
 
@@ -69,8 +70,9 @@ public class Names {
         return entityTypeNames.computeIfAbsent(entityType, entityType1 -> ChatUtil.stripTextFormat(entityType1.getName().getString()));
     }
 
-    public static String get(ParticleEffect effect) {
-        return particleEffectNames.computeIfAbsent(effect, effect1 -> WordUtils.capitalize(effect1.asString().substring(10).replace("_", " ")));
+    public static String get(ParticleType<?> type) {
+        if (!(type instanceof ParticleEffect)) return "";
+        return particleTypesNames.computeIfAbsent(type, effect1 -> WordUtils.capitalize(((ParticleEffect) effect1).asString().substring(10).replace("_", " ")));
     }
 
     public static String getSoundName(Identifier id) {

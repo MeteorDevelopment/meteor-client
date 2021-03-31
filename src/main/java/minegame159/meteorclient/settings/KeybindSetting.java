@@ -19,26 +19,24 @@ import java.util.function.Consumer;
 
 public class KeybindSetting extends Setting<Keybind> {
     private final Runnable action;
+    public WKeybind widget;
 
     public KeybindSetting(String name, String description, Keybind defaultValue, Consumer<Keybind> onChanged, Consumer<Setting<Keybind>> onModuleActivated, Runnable action) {
         super(name, description, defaultValue, onChanged, onModuleActivated);
 
         this.action = action;
 
-        widget = new WKeybind(get(), false);
-        ((WKeybind) widget).action = this::changed;
-
         MeteorClient.EVENT_BUS.subscribe(this);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     private void onKeyBinding(KeyEvent event) {
-        if (((WKeybind) widget).onAction(true, event.key)) event.cancel();
+        if (widget != null && widget.onAction(true, event.key)) event.cancel();
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     private void onMouseButtonBinding(MouseButtonEvent event) {
-        if (((WKeybind) widget).onAction(false, event.button)) event.cancel();
+        if (widget != null && widget.onAction(false, event.button)) event.cancel();
     }
 
     @EventHandler(priority = EventPriority.HIGH)
@@ -62,11 +60,6 @@ public class KeybindSetting extends Setting<Keybind> {
         } catch (NumberFormatException ignored) {
             return null;
         }
-    }
-
-    @Override
-    public void resetWidget() {
-        ((WKeybind) widget).reset();
     }
 
     @Override

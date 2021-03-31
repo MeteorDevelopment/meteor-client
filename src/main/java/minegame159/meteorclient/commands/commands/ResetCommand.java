@@ -36,7 +36,8 @@ public class ResetCommand extends Command {
                     return SINGLE_SUCCESS;
                 }))
         ).then(literal("gui").executes(context -> {
-            Config.get().guiConfig.clearWindowConfigs();
+            // TODO
+            //Config.get().guiConfig.clearWindowConfigs();
             ChatUtils.info("The ClickGUI positioning has been reset.");
             return SINGLE_SUCCESS;
         })).then(literal("bind")

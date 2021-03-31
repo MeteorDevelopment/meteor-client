@@ -49,9 +49,12 @@ public class Friends extends System<Friends> implements Iterable<Friend> {
     }
 
     public boolean add(Friend friend) {
+        if (friend.name.isEmpty()) return false;
+
         if (!friends.contains(friend)) {
             friends.add(friend);
             save();
+
             return true;
         }
 

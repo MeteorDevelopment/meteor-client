@@ -52,7 +52,7 @@ public class AccountCache implements ISerializable<AccountCache> {
                 }
             }
 
-            headTexture = new ByteTexture(8, 8, head, false);
+            headTexture = new ByteTexture(8, 8, head, ByteTexture.Format.RGB, ByteTexture.Filter.Nearest, ByteTexture.Filter.Nearest);
             return true;
         } catch (Exception e) {
             MeteorClient.LOG.error("Failed to read skin url. (" + skinUrl + ")");

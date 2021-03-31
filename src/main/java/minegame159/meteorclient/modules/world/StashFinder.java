@@ -14,8 +14,13 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.world.ChunkDataEvent;
-import minegame159.meteorclient.gui.screens.StashFinderChunkScreen;
-import minegame159.meteorclient.gui.widgets.*;
+import minegame159.meteorclient.gui.GuiTheme;
+import minegame159.meteorclient.gui.WindowScreen;
+import minegame159.meteorclient.gui.widgets.WWidget;
+import minegame159.meteorclient.gui.widgets.containers.WTable;
+import minegame159.meteorclient.gui.widgets.containers.WVerticalList;
+import minegame159.meteorclient.gui.widgets.pressable.WButton;
+import minegame159.meteorclient.gui.widgets.pressable.WMinus;
 import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
@@ -148,15 +153,14 @@ public class StashFinder extends Module {
     }
 
     @Override
-    public WWidget getWidget() {
+    public WWidget getWidget(GuiTheme theme) {
         // Sort
         chunks.sort(Comparator.comparingInt(value -> -value.getTotal()));
 
-        WTable list = new WTable();
+        WVerticalList list = theme.verticalList();
 
         // Clear
-        WButton clear = list.add(new WButton("Clear")).getWidget();
-        list.row();
+        WButton clear = list.add(theme.button("Clear")).widget();
 
         WTable table = new WTable();
         if (chunks.size() > 0) list.add(table);
@@ -167,27 +171,27 @@ public class StashFinder extends Module {
         };
 
         // Chunks
-        fillTable(table);
+        fillTable(theme, table);
 
         return list;
     }
 
-    private void fillTable(WTable table) {
+    private void fillTable(GuiTheme theme, WTable table) {
         for (Chunk chunk : chunks) {
-            table.add(new WLabel("Pos: " + chunk.x + ", " + chunk.z));
-            table.add(new WLabel("Total: " + chunk.getTotal()));
+            table.add(theme.label("Pos: " + chunk.x + ", " + chunk.z));
+            table.add(theme.label("Total: " + chunk.getTotal()));
 
-            WButton open = table.add(new WButton("Open")).getWidget();
-            open.action = () -> mc.openScreen(new StashFinderChunkScreen(chunk));
+            WButton open = table.add(theme.button("Open")).widget();
+            open.action = () -> mc.openScreen(new ChunkScreen(theme, chunk));
 
-            WButton gotoBtn = table.add(new WButton("Goto")).getWidget();
+            WButton gotoBtn = table.add(theme.button("Goto")).widget();
             gotoBtn.action = () -> BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalXZ(chunk.x, chunk.z));
 
-            WMinus remove = table.add(new WMinus()).getWidget();
-            remove.action = () -> {
+            WMinus delete = table.add(theme.minus()).widget();
+            delete.action = () -> {
                 if (chunks.remove(chunk)) {
                     table.clear();
-                    fillTable(table);
+                    fillTable(theme, table);
 
                     saveJson();
                     saveCsv();
@@ -326,6 +330,50 @@ public class StashFinder extends Module {
         @Override
         public int hashCode() {
             return Objects.hash(chunkPos);
+        }
+    }
+
+    private static class ChunkScreen extends WindowScreen {
+        public ChunkScreen(GuiTheme theme, Chunk chunk) {
+            super(theme, "Chunk at " + chunk.x + ", " + chunk.z);
+
+            WTable t = add(theme.table()).expandX().widget();
+
+            // Total
+            t.add(theme.label("Total:"));
+            t.add(theme.label(chunk.getTotal() + ""));
+            t.row();
+
+            t.add(theme.horizontalSeparator()).expandX();
+            t.row();
+
+            // Separate
+            t.add(theme.label("Chests:"));
+            t.add(theme.label(chunk.chests + ""));
+            t.row();
+
+            t.add(theme.label("Barrels:"));
+            t.add(theme.label(chunk.barrels + ""));
+            t.row();
+
+            t.add(theme.label("Shulkers:"));
+            t.add(theme.label(chunk.shulkers + ""));
+            t.row();
+
+            t.add(theme.label("Ender Chests:"));
+            t.add(theme.label(chunk.enderChests + ""));
+            t.row();
+
+            t.add(theme.label("Furnaces:"));
+            t.add(theme.label(chunk.furnaces + ""));
+            t.row();
+
+            t.add(theme.label("Dispensers and droppers:"));
+            t.add(theme.label(chunk.dispensersDroppers + ""));
+            t.row();
+
+            t.add(theme.label("Hoppers:"));
+            t.add(theme.label(chunk.hoppers + ""));
         }
     }
 }

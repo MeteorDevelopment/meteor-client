@@ -20,9 +20,15 @@ public class VanillaTextRenderer implements TextRenderer {
     // Vanilla font is almost twice as small as our custom font (vanilla = 9, custom = 18)
     private double scale = 1.74;
     private boolean building;
+    private double alpha = 1;
 
     private VanillaTextRenderer() {
         // Use INSTANCE
+    }
+
+    @Override
+    public void setAlpha(double a) {
+        alpha = a;
     }
 
     @Override
@@ -54,11 +60,16 @@ public class VanillaTextRenderer implements TextRenderer {
         x += 0.5 * scale;
         y += 0.5 * scale;
 
+        int preA = color.a;
+        color.a = (int) ((color.a / 255 * alpha) * 255);
+
         RenderSystem.disableDepthTest();
         VertexConsumerProvider.Immediate immediate = VertexConsumerProvider.immediate(Tessellator.getInstance().getBuffer());
         double r = mr.draw(text, (float) (x / scale), (float) (y / scale), color.getPacked(), shadow, Matrices.getTop(), immediate, true, 0, 15728880);
         immediate.draw();
         RenderSystem.enableDepthTest();
+
+        color.a = preA;
 
         Matrices.pop();
         return r * scale;

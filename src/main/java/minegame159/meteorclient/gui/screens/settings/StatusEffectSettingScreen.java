@@ -6,11 +6,11 @@
 package minegame159.meteorclient.gui.screens.settings;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import minegame159.meteorclient.gui.screens.WindowScreen;
-import minegame159.meteorclient.gui.widgets.WIntTextBox;
-import minegame159.meteorclient.gui.widgets.WLabel;
-import minegame159.meteorclient.gui.widgets.WTable;
-import minegame159.meteorclient.gui.widgets.WTextBox;
+import minegame159.meteorclient.gui.GuiTheme;
+import minegame159.meteorclient.gui.WindowScreen;
+import minegame159.meteorclient.gui.widgets.containers.WTable;
+import minegame159.meteorclient.gui.widgets.input.WIntEdit;
+import minegame159.meteorclient.gui.widgets.input.WTextBox;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.utils.misc.Names;
 import net.minecraft.entity.effect.StatusEffect;
@@ -26,44 +26,46 @@ public class StatusEffectSettingScreen extends WindowScreen {
 
     private String filterText = "";
 
-    public StatusEffectSettingScreen(Setting<Object2IntMap<StatusEffect>> setting) {
-        super("Select Potions", true);
+    private WTable table;
+
+    public StatusEffectSettingScreen(GuiTheme theme, Setting<Object2IntMap<StatusEffect>> setting) {
+        super(theme, "Select potions");
 
         this.setting = setting;
 
         // Filter
-        filter = new WTextBox("", 200);
+        filter = add(theme.textBox("")).minWidth(400).expandX().widget();
         filter.setFocused(true);
         filter.action = () -> {
-            filterText = filter.getText().trim();
+            filterText = filter.get().trim();
 
-            clear();
+            table.clear();
             initWidgets();
         };
+
+        table = add(theme.table()).expandX().widget();
 
         initWidgets();
     }
 
     private void initWidgets() {
-        add(filter).fillX().expandX();
-        row();
-
         List<StatusEffect> statusEffects = new ArrayList<>(setting.get().keySet());
         statusEffects.sort(Comparator.comparing(Names::get));
-
-        WTable table = add(new WTable()).expandX().fillX().getWidget();
 
         for (StatusEffect statusEffect : statusEffects) {
             String name = Names.get(statusEffect);
             if (!StringUtils.containsIgnoreCase(name, filterText)) continue;
 
-            table.add(new WLabel(name));
-            WIntTextBox level = table.add(new WIntTextBox(setting.get().getInt(statusEffect), 50)).fillX().right().getWidget();
+            table.add(theme.label(name)).expandCellX();
+
+            WIntEdit level = theme.intEdit(setting.get().getInt(statusEffect), 0, 0);
+            level.hasSlider = false;
             level.action = () -> {
-                setting.get().put(statusEffect, level.getValue());
+                setting.get().put(statusEffect, level.get());
                 setting.changed();
             };
 
+            table.add(level).minWidth(50);
             table.row();
         }
     }

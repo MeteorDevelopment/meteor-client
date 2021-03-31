@@ -7,12 +7,12 @@ package minegame159.meteorclient.modules.render.hud;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.Render2DEvent;
+import minegame159.meteorclient.gui.GuiTheme;
 import minegame159.meteorclient.gui.screens.HudElementScreen;
-import minegame159.meteorclient.gui.screens.topbar.TopBarHud;
-import minegame159.meteorclient.gui.widgets.WButton;
-import minegame159.meteorclient.gui.widgets.WLabel;
-import minegame159.meteorclient.gui.widgets.WTable;
+import minegame159.meteorclient.gui.tabs.builtin.HudTab;
 import minegame159.meteorclient.gui.widgets.WWidget;
+import minegame159.meteorclient.gui.widgets.containers.WHorizontalList;
+import minegame159.meteorclient.gui.widgets.pressable.WButton;
 import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.render.hud.modules.*;
@@ -142,7 +142,7 @@ public class HUD extends Module {
         RENDERER.begin(scale.get(), event.tickDelta, false);
 
         for (HudElement element : elements) {
-            if (element.active || mc.currentScreen instanceof TopBarHud || mc.currentScreen instanceof HudElementScreen) {
+            if (element.active || HudTab.INSTANCE.isScreen(mc.currentScreen) || mc.currentScreen instanceof HudElementScreen) {
                 element.update(RENDERER);
                 element.render(RENDERER);
             }
@@ -152,19 +152,14 @@ public class HUD extends Module {
     }
 
     @Override
-    public WWidget getWidget() {
-        WTable table = new WTable();
+    public WWidget getWidget(GuiTheme theme) {
+        WHorizontalList list = theme.horizontalList();
 
-        WButton reset = table.add(new WButton("Reset")).getWidget();
+        WButton reset = list.add(theme.button("Reset")).widget();
         reset.action = this::align;
-        table.add(new WLabel("Resets positions (do this after changing scale)."));
-        table.row();
+        list.add(theme.label("Resets positions (do this after changing scale)."));
 
-        WButton editor = table.add(new WButton("Editor")).getWidget();
-        editor.action = () -> mc.openScreen(new TopBarHud());
-        table.add(new WLabel("Right click elements to open their settings."));
-
-        return table;
+        return list;
     }
 
     @Override

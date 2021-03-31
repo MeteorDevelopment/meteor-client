@@ -6,46 +6,36 @@
 package minegame159.meteorclient.gui.screens;
 
 import minegame159.meteorclient.events.render.Render2DEvent;
-import minegame159.meteorclient.gui.widgets.WCheckbox;
-import minegame159.meteorclient.gui.widgets.WHorizontalSeparator;
-import minegame159.meteorclient.gui.widgets.WLabel;
-import minegame159.meteorclient.gui.widgets.WTable;
+import minegame159.meteorclient.gui.GuiTheme;
+import minegame159.meteorclient.gui.WindowScreen;
+import minegame159.meteorclient.gui.widgets.containers.WHorizontalList;
+import minegame159.meteorclient.gui.widgets.pressable.WCheckbox;
 import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.render.hud.HUD;
 import minegame159.meteorclient.modules.render.hud.modules.HudElement;
-import minegame159.meteorclient.utils.Utils;
-import net.minecraft.client.util.math.MatrixStack;
+
+import static minegame159.meteorclient.utils.Utils.getWindowWidth;
 
 public class HudElementScreen extends WindowScreen {
-    private final HudElement element;
+    public HudElementScreen(GuiTheme theme, HudElement element) {
+        super(theme, element.title);
 
-    public HudElementScreen(HudElement element) {
-        super(element.title, true);
-        this.element = element;
-
-        initModules();
-    }
-
-    private void initModules() {
         // Description
-        add(new WLabel(element.description));
-        row();
+        add(theme.label(element.description, getWindowWidth() / 2.0));
 
         // Settings
         if (element.settings.sizeGroups() > 0) {
-            add(element.settings.createTable(false)).fillX().expandX().getWidget();
-            row();
+            add(theme.settings(element.settings)).expandX();
 
-            add(new WHorizontalSeparator());
-            row();
+            add(theme.horizontalSeparator()).expandX();
         }
 
         // Bottom
-        WTable bottomTable = add(new WTable()).fillX().expandX().getWidget();
+        WHorizontalList bottomList = add(theme.horizontalList()).expandX().widget();
 
         //   Active
-        bottomTable.add(new WLabel("Active:"));
-        WCheckbox active = bottomTable.add(new WCheckbox(element.active)).getWidget();
+        bottomList.add(theme.label("Active:"));
+        WCheckbox active = bottomList.add(theme.checkbox(element.active)).widget();
         active.action = () -> {
             if (element.active != active.checked) element.toggle();
         };

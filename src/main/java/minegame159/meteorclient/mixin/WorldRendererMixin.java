@@ -8,6 +8,7 @@ package minegame159.meteorclient.mixin;
 import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.render.*;
 import minegame159.meteorclient.modules.world.Ambience;
+import minegame159.meteorclient.rendering.Blur;
 import minegame159.meteorclient.utils.render.Outlines;
 import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.block.BlockState;
@@ -61,6 +62,11 @@ public abstract class WorldRendererMixin {
     @ModifyArg(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/WorldRenderer;setupTerrain(Lnet/minecraft/client/render/Camera;Lnet/minecraft/client/render/Frustum;ZIZ)V"), index = 4)
     private boolean renderSetupTerrainModifyArg(boolean spectator) {
         return Modules.get().isActive(Freecam.class) || spectator;
+    }
+
+    @Inject(method = "render", at = @At("TAIL"))
+    private void onRenderTail(MatrixStack matrices, float tickDelta, long limitTime, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightmapTextureManager lightmapTextureManager, Matrix4f matrix4f, CallbackInfo info) {
+        Blur.render();
     }
 
     // Outlines

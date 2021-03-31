@@ -13,11 +13,13 @@ import minegame159.meteorclient.commands.commands.SwarmCommand;
 import minegame159.meteorclient.events.game.GameJoinedEvent;
 import minegame159.meteorclient.events.game.GameLeftEvent;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.gui.screens.WindowScreen;
-import minegame159.meteorclient.gui.widgets.WButton;
+import minegame159.meteorclient.gui.GuiTheme;
+import minegame159.meteorclient.gui.WindowScreen;
 import minegame159.meteorclient.gui.widgets.WLabel;
-import minegame159.meteorclient.gui.widgets.WTable;
 import minegame159.meteorclient.gui.widgets.WWidget;
+import minegame159.meteorclient.gui.widgets.containers.WHorizontalList;
+import minegame159.meteorclient.gui.widgets.containers.WVerticalList;
+import minegame159.meteorclient.gui.widgets.pressable.WButton;
 import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.Modules;
@@ -29,7 +31,6 @@ import minegame159.meteorclient.settings.StringSetting;
 import minegame159.meteorclient.utils.network.MeteorExecutor;
 import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.block.BlockState;
-import net.minecraft.client.MinecraftClient;
 
 import javax.annotation.Nonnull;
 import java.io.*;
@@ -37,6 +38,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Arrays;
 import java.util.List;
+
+import static minegame159.meteorclient.utils.Utils.getWindowWidth;
 
 /**
  * @author Inclemental
@@ -89,34 +92,38 @@ public class Swarm extends Module {
     }
 
     @Override
-    public WWidget getWidget() {
-        WTable table = new WTable();
-        label = new WLabel("");
-        table.add(label);
+    public WWidget getWidget(GuiTheme theme) {
+        WVerticalList list = theme.verticalList();
+
+        // Status
+        label = list.add(theme.label("")).widget();
         setLabel();
-        table.row();
-        WTable table2 = new WTable();
-        WButton runServer = new WButton("Run Server (Q)");
+
+        // Buttons
+        WHorizontalList b = list.add(theme.horizontalList()).expandX().widget();
+
+        //   Run Server
+        WButton runServer = b.add(theme.button("Run Server (Q)")).expandX().widget();
         runServer.action = this::runServer;
-        table2.add(runServer);
-        WButton connect = new WButton("Connect (S)");
+
+        //   Connect
+        WButton connect = b.add(theme.button("Connect (S)")).expandX().widget();
         connect.action = this::runClient;
-        table2.add(connect);
-        WButton reset = new WButton("Reset");
+
+        //   Reset
+        WButton reset = b.add(theme.button("Rest")).expandX().widget();
         reset.action = () -> {
             ChatUtils.moduleInfo(this, "Closing all connections.");
             closeAllServerConnections();
             currentMode = Mode.Idle;
             setLabel();
         };
-        table2.add(reset);
-        table.add(table2);
-        table.row();
-        WButton guide = new WButton("Guide");
-        guide.action = () -> MinecraftClient.getInstance().openScreen(new SwarmHelpScreen());
-        table.add(guide);
-        table.row();
-        return table;
+
+        // Guide
+        WButton guide = list.add(theme.button("Guide")).expandX().widget();
+        guide.action = () -> mc.openScreen(new SwarmHelpScreen(theme));
+
+        return list;
     }
 
     public void runServer() {
@@ -156,8 +163,7 @@ public class Swarm extends Module {
     }
 
     private void setLabel() {
-        if (currentMode != null)
-            label.setText("Current Mode: " + currentMode);
+        if (currentMode != null) label.set("Current Mode: " + currentMode);
     }
 
     @SuppressWarnings("unused")
@@ -391,57 +397,35 @@ public class Swarm extends Module {
     }
 
     private class SwarmHelpScreen extends WindowScreen {
-        private final WTable textTable;
-        private final WButton introButton;
-        private final WButton ipConfigButton;
-        private final WButton queenButton;
-        private final WButton slaveButton;
+        private final WVerticalList list;
 
-        public SwarmHelpScreen() {
-            super("Swarm Help", true);
-            textTable = new WTable();
-            introButton = new WButton("(1) Introduction");
-            introButton.action = () -> {
-                buildTextTable(getSwarmGuideIntro());
-                initWidgets();
-            };
-            ipConfigButton = new WButton("(2) Configuration");
-            ipConfigButton.action = () -> {
-                buildTextTable(getSwarmGuideConfig());
-                initWidgets();
-            };
-            queenButton = new WButton("(3) Queen");
-            queenButton.action = () -> {
-                buildTextTable(getSwarmGuideQueen());
-                initWidgets();
-            };
-            slaveButton = new WButton("(4) Slave");
-            slaveButton.action = () -> {
-                buildTextTable(getSwarmGuideSlave());
-                initWidgets();
-            };
-            buildTextTable(getSwarmGuideIntro());
-            initWidgets();
+        public SwarmHelpScreen(GuiTheme theme) {
+            super(theme, "Swarm Help");
+
+            WHorizontalList b = add(theme.horizontalList()).expandX().widget();
+
+            WButton intro = b.add(theme.button("(1) Introduction")).expandX().widget();
+            intro.action = () -> fillTextList(getSwarmGuideIntro());
+
+            WButton config = b.add(theme.button("(2) Configuration")).expandX().widget();
+            config.action = () -> fillTextList(getSwarmGuideConfig());
+
+            WButton queen = b.add(theme.button("(3) Queen")).expandX().widget();
+            queen.action = () -> fillTextList(getSwarmGuideQueen());
+
+            WButton slave = b.add(theme.button("(4) Slave")).expandX().widget();
+            slave.action = () -> fillTextList(getSwarmGuideSlave());
+
+            list = add(theme.verticalList()).expandX().widget();
+            fillTextList(getSwarmGuideIntro());
         }
 
-        private void initWidgets() {
-            clear();
-            WTable table = new WTable();
-            table.add(introButton);
-            table.add(ipConfigButton);
-            table.add(queenButton);
-            table.add(slaveButton);
-            add(table);
-            row();
-            add(textTable);
-            row();
-        }
+        private void fillTextList(List<String> text) {
+            list.clear();
 
-        private void buildTextTable(List<String> text) {
-            textTable.clear();
             for (String s : text) {
-                textTable.add(new WLabel(s));
-                textTable.row();
+                if (s.isEmpty()) list.add(theme.label(""));
+                else list.add(theme.label(s, getWindowWidth() / 2.0));
             }
         }
     }
@@ -451,12 +435,9 @@ public class Swarm extends Module {
         return Arrays.asList(
                 "Welcome to Swarm!",
                 "",
-                "Swarm at its heart is a command tunnel which allows a controlling account, referred",
-                "to as the queen account, to control other accounts by means of a background server.",
+                "Swarm at its heart is a command tunnel which allows a controlling account, referred to as the queen account, to control other accounts by means of a background server.",
                 "",
-                "By default, Swarm is configured to work with multiple instances of Minecraft running on the",
-                "same computer however with some additional configuration it will work across your local network",
-                "or the broader internet.",
+                "By default, Swarm is configured to work with multiple instances of Minecraft running on the, same computer however with some additional configuration it will work across your local network or the broader internet.",
                 "",
                 String.format("All swarm commands should be proceeded by \"%s\"", Commands.get().get(SwarmCommand.class).toString())
         );
@@ -465,41 +446,31 @@ public class Swarm extends Module {
     private List<String> getSwarmGuideConfig() {
         return Arrays.asList(
                 "Localhost Connections:",
-                " If the Queen and Slave accounts are all being run on the same computer, there is no need to change anything",
-                " here if the configured port is not being used for anything else.",
+                "If the Queen and Slave accounts are all being run on the same computer, there is no need to change anything here if the configured port is not being used for anything else.",
                 "",
                 "Local Connections:",
-                " If the Queen and Slave accounts are not on the same computer, but on the same WiFi/Ethernet network,",
-                " you will need to change the ip-address on each Slave client to the IPv4/6 address of the computer the",
-                " Queen instance is running on. To find your IPv4 address on Windows, open CMD and enter the command ipconfig.",
+                "If the Queen and Slave accounts are not on the same computer, but on the same WiFi/Ethernet network, you will need to change the ip-address on each Slave client to the IPv4/6 address of the computer the Queen instance is running on. To find your IPv4 address on Windows, open CMD and enter the command ipconfig.",
                 "",
                 "Broad-Internet Connections:",
-                " If you are attempting to make a connection over the broader internet a port forward will be required on the",
-                " queen account. I will not cover how to perform a port forward, look it up. You will need administrator access",
-                " to your router. Route all traffic through your configured port to the IPv4 address of the computer which is",
-                " hosting the queen account. After you have successfully port-forwarded on the queen instance, change the ip",
-                " address of the slave accounts to the public-ip address of the queen account. To find your public-ip address",
-                " just google 'what is my ip'. NEVER SHARE YOUR PUBLIC IP WITH ANYONE YOU DO NOT TRUST. Assuming you setup",
-                " everything correctly, you may now proceed as usual."
+                "If you are attempting to make a connection over the broader internet a port forward will be required on the queen account. I will not cover how to perform a port forward, look it up. You will need administrator access to your router. Route all traffic through your configured port to the IPv4 address of the computer which is hosting the queen account. After you have successfully port-forwarded on the queen instance, change the ip address of the slave accounts to the public-ip address of the queen account. To find your public-ip address just google 'what is my ip'. NEVER SHARE YOUR PUBLIC IP WITH ANYONE YOU DO NOT TRUST. Assuming you setup everything correctly, you may now proceed as usual."
         );
     }
 
     private List<String> getSwarmGuideQueen() {
         return Arrays.asList(
                 "Setting up the Queen:",
-                " Pick an instance of Minecraft to be your queen account.",
-                " Ensure the swarm module is enabled.",
-                " Then click the, button labeled 'Run Server(Q)' under the Swarm config menu.", String.format(
-                        " You may also enter the command \"%s\".", Commands.get().get(SwarmCommand.class).toString("queen"))
+                "Pick an instance of Minecraft to be your queen account. Ensure the swarm module is enabled. Then click the, button labeled 'Run Server(Q)' under the Swarm config menu.",
+                "",
+                String.format("You may also enter the command \"%s\".", Commands.get().get(SwarmCommand.class).toString("queen"))
         );
     }
 
     private List<String> getSwarmGuideSlave() {
         return Arrays.asList(
                 "Connecting your slaves:",
-                " For each slave account, assuming you correctly configured the ip and port", String.format(
-                        " in Step 1 simply press the button labeled 'Connect (S)', or enter the command \"%s\"", Commands.get().get(SwarmCommand.class).toString("slave"))
+                "For each slave account, assuming you correctly configured the ip and port in Step 1 simply press the button labeled 'Connect (S)'.",
+                "",
+                String.format("You may also enter the command \"%s\".", Commands.get().get(SwarmCommand.class).toString("slave"))
         );
     }
-
 }

@@ -5,7 +5,7 @@
 
 package minegame159.meteorclient.mixin;
 
-import minegame159.meteorclient.accounts.gui.AccountsScreen;
+import minegame159.meteorclient.gui.GuiThemes;
 import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.modules.player.NameProtect;
 import minegame159.meteorclient.utils.render.color.Color;
@@ -42,7 +42,7 @@ public class MultiplayerScreenMixin extends Screen {
         loggedInAsLength = textRenderer.getWidth(loggedInAs);
 
         addButton(new ButtonWidget(this.width - 75 - 3, 3, 75, 20, new LiteralText("Accounts"), button -> {
-            client.openScreen(new AccountsScreen());
+            client.openScreen(GuiThemes.get().accountsScreen());
         }));
     }
 

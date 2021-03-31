@@ -10,10 +10,11 @@ import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
-import minegame159.meteorclient.settings.ParticleEffectListSetting;
+import minegame159.meteorclient.settings.ParticleTypeListSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import net.minecraft.particle.ParticleEffect;
+import net.minecraft.particle.ParticleType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +22,7 @@ import java.util.List;
 public class Trail extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<List<ParticleEffect>> particles = sgGeneral.add(new ParticleEffectListSetting.Builder()
+    private final Setting<List<ParticleType<?>>> particles = sgGeneral.add(new ParticleTypeListSetting.Builder()
             .name("particles")
             .description("Particles to draw.")
             .defaultValue(new ArrayList<>(0))
@@ -43,8 +44,8 @@ public class Trail extends Module {
     @EventHandler
     private void onTick(TickEvent.Post event) {
         if (pause.get() && mc.player.input.movementForward == 0f && mc.player.input.movementSideways == 0f && !mc.options.keyJump.isPressed()) return;
-        for (ParticleEffect particleEffect : particles.get()) {
-            mc.world.addParticle(particleEffect, mc.player.getX(), mc.player.getY(), mc.player.getZ(), 0, 0, 0);
+        for (ParticleType<?> particleType : particles.get()) {
+            mc.world.addParticle((ParticleEffect) particleType, mc.player.getX(), mc.player.getY(), mc.player.getZ(), 0, 0, 0);
         }
     }
 }

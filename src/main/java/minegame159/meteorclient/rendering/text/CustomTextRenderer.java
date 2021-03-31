@@ -42,6 +42,11 @@ public class CustomTextRenderer implements TextRenderer {
     }
 
     @Override
+    public void setAlpha(double a) {
+        mb.alpha = a;
+    }
+
+    @Override
     public void begin(double scale, boolean scaleOnly, boolean big) {
         if (building) throw new RuntimeException("CustomTextRenderer.begin() called twice");
 

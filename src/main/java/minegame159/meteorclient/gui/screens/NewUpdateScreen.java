@@ -7,33 +7,31 @@ package minegame159.meteorclient.gui.screens;
 
 import com.g00fy2.versioncompare.Version;
 import minegame159.meteorclient.Config;
-import minegame159.meteorclient.gui.widgets.WButton;
-import minegame159.meteorclient.gui.widgets.WHorizontalSeparator;
-import minegame159.meteorclient.gui.widgets.WLabel;
-import minegame159.meteorclient.gui.widgets.WTable;
+import minegame159.meteorclient.gui.GuiTheme;
+import minegame159.meteorclient.gui.WindowScreen;
+import minegame159.meteorclient.gui.widgets.containers.WHorizontalList;
+import minegame159.meteorclient.gui.widgets.containers.WTable;
 import net.minecraft.util.Util;
 
 public class NewUpdateScreen extends WindowScreen {
-    public NewUpdateScreen(Version latestVer) {
-        super("New Update", true);
+    public NewUpdateScreen(GuiTheme theme, Version latestVer) {
+        super(theme, "New Update");
 
-        add(new WLabel("A new version of Meteor has been released."));
-        row();
+        add(theme.label("A new version of Meteor has been released."));
 
-        add(new WHorizontalSeparator());
+        add(theme.horizontalSeparator()).expandX();
 
-        WTable versionsT = add(new WTable()).getWidget();
-        versionsT.add(new WLabel("Your version:"));
-        versionsT.add(new WLabel(Config.get().version.getOriginalString()));
+        WTable versionsT = add(theme.table()).widget();
+        versionsT.add(theme.label("Your version:"));
+        versionsT.add(theme.label(Config.get().version.getOriginalString()));
         versionsT.row();
-        versionsT.add(new WLabel("Latest version"));
-        versionsT.add(new WLabel(latestVer.getOriginalString()));
-        row();
+        versionsT.add(theme.label("Latest version"));
+        versionsT.add(theme.label(latestVer.getOriginalString()));
 
-        add(new WHorizontalSeparator());
+        add(theme.horizontalSeparator()).expandX();
 
-        WTable buttonsT = add(new WTable()).getWidget();
-        buttonsT.add(new WButton("Download " + latestVer.getOriginalString())).fillX().expandX().getWidget().action = () -> Util.getOperatingSystem().open("http://meteorclient.com/");
-        buttonsT.add(new WButton("OK")).fillX().expandX().getWidget().action = this::onClose;
+        WHorizontalList buttonsL = add(theme.horizontalList()).widget();
+        buttonsL.add(theme.button("Download " + latestVer.getOriginalString())).expandX().widget().action = () -> Util.getOperatingSystem().open("http://meteorclient.com/");
+        buttonsL.add(theme.button("OK")).expandX().widget().action = this::onClose;
     }
 }

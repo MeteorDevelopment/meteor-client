@@ -6,7 +6,6 @@
 package minegame159.meteorclient;
 
 import com.g00fy2.versioncompare.Version;
-import minegame159.meteorclient.gui.GuiConfig;
 import minegame159.meteorclient.rendering.Fonts;
 import minegame159.meteorclient.systems.System;
 import minegame159.meteorclient.systems.Systems;
@@ -18,7 +17,6 @@ public class Config extends System<Config> {
     public final Version version = new Version("0.4.2");
     public String devBuild;
     private String prefix = ".";
-    public GuiConfig guiConfig = new GuiConfig();
 
     public boolean customFont = true;
 
@@ -58,7 +56,6 @@ public class Config extends System<Config> {
         tag.putString("version", version.getOriginalString());
         tag.putString("prefix", prefix);
         tag.putBoolean("customFont", customFont);
-        tag.put("guiConfig", guiConfig.toTag());
         tag.putBoolean("chatCommandsInfo", chatCommandsInfo);
         tag.putBoolean("deleteChatCommandsInfo", deleteChatCommandsInfo);
         tag.putBoolean("sendDataToApi", sendDataToApi);
@@ -71,7 +68,6 @@ public class Config extends System<Config> {
     @Override
     public Config fromTag(CompoundTag tag) {
         prefix = tag.getString("prefix");
-        guiConfig.fromTag(tag.getCompound("guiConfig"));
         if (tag.contains("customFont")) customFont = tag.getBoolean("customFont");
         chatCommandsInfo = !tag.contains("chatCommandsInfo") || tag.getBoolean("chatCommandsInfo");
         deleteChatCommandsInfo = !tag.contains("deleteChatCommandsInfo") || tag.getBoolean("deleteChatCommandsInfo");

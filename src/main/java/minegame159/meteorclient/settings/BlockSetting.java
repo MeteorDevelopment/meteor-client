@@ -5,12 +5,7 @@
 
 package minegame159.meteorclient.settings;
 
-import minegame159.meteorclient.gui.screens.settings.BlockSettingScreen;
-import minegame159.meteorclient.gui.widgets.WButton;
-import minegame159.meteorclient.gui.widgets.WItem;
-import minegame159.meteorclient.gui.widgets.WTable;
 import net.minecraft.block.Block;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
@@ -18,26 +13,13 @@ import net.minecraft.util.registry.Registry;
 import java.util.function.Consumer;
 
 public class BlockSetting extends Setting<Block> {
-    private final WItem itemWidget;
-
     public BlockSetting(String name, String description, Block defaultValue, Consumer<Block> onChanged, Consumer<Setting<Block>> onModuleActivated) {
         super(name, description, defaultValue, onChanged, onModuleActivated);
-
-        WTable table = new WTable();
-        itemWidget = table.add(new WItem(get().asItem().getDefaultStack())).getWidget();
-        table.add(new WButton("Select")).getWidget().action = () -> MinecraftClient.getInstance().openScreen(new BlockSettingScreen(this));
-
-        widget = table;
     }
 
     @Override
     protected Block parseImpl(String str) {
         return parseId(Registry.BLOCK, str);
-    }
-
-    @Override
-    public void resetWidget() {
-        itemWidget.set(get().asItem().getDefaultStack());
     }
 
     @Override

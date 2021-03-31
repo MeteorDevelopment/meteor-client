@@ -5,11 +5,8 @@
 
 package minegame159.meteorclient.settings;
 
-import minegame159.meteorclient.gui.screens.settings.ModuleListSettingScreen;
-import minegame159.meteorclient.gui.widgets.WButton;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.Modules;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -26,18 +23,12 @@ public class ModuleListSetting extends Setting<List<Module>> {
         super(name, description, defaultValue, onChanged, onModuleActivated);
 
         value = new ArrayList<>(defaultValue);
-
-        widget = new WButton("Select");
-        ((WButton) widget).action = () -> MinecraftClient.getInstance().openScreen(new ModuleListSettingScreen(this));
     }
 
     @Override
     public void reset(boolean callbacks) {
         value = new ArrayList<>(defaultValue);
-        if (callbacks) {
-            resetWidget();
-            changed();
-        }
+        if (callbacks) changed();
     }
 
     @Override
@@ -53,11 +44,6 @@ public class ModuleListSetting extends Setting<List<Module>> {
         } catch (Exception ignored) {}
 
         return modules;
-    }
-
-    @Override
-    public void resetWidget() {
-
     }
 
     @Override

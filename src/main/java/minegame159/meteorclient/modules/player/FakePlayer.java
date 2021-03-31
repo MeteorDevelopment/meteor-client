@@ -5,9 +5,11 @@
 
 package minegame159.meteorclient.modules.player;
 
-import minegame159.meteorclient.gui.widgets.WButton;
-import minegame159.meteorclient.gui.widgets.WTable;
+import minegame159.meteorclient.gui.GuiTheme;
 import minegame159.meteorclient.gui.widgets.WWidget;
+import minegame159.meteorclient.gui.widgets.containers.WContainer;
+import minegame159.meteorclient.gui.widgets.containers.WHorizontalList;
+import minegame159.meteorclient.gui.widgets.pressable.WButton;
 import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
@@ -71,18 +73,16 @@ public class FakePlayer extends Module {
     }
 
     @Override
-    public WWidget getWidget() {
-        WTable table = new WTable();
+    public WWidget getWidget(GuiTheme theme) {
+        WHorizontalList w = theme.horizontalList();
 
-        WButton spawn = table.add(new WButton("Spawn")).getWidget();
+        WButton spawn = w.add(theme.button("Spawn")).widget();
         spawn.action = FakePlayerUtils::spawnFakePlayer;
 
-        WButton clear = table.add(new WButton("Clear")).getWidget();
-        clear.action = () -> {
-            if (isActive()) FakePlayerUtils.clearFakePlayers();
-        };
+        WButton clear = w.add(theme.button("Clear")).widget();
+        clear.action = FakePlayerUtils::clearFakePlayers;
 
-        return table;
+        return w;
     }
 
     public boolean showID(PlayerEntity entity) {
