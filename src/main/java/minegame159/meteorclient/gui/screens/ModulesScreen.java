@@ -60,7 +60,7 @@ public class ModulesScreen extends TabScreen {
         w.view.spacing = 0;
 
         for (Module module : Modules.get().getGroup(category)) {
-            w.add(theme.module(module)).expandX();
+            w.add(theme.module(module)).expandX().widget().tooltip = module.description;
         }
     }
 

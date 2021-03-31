@@ -236,8 +236,8 @@ public class MeteorGuiTheme extends GuiTheme {
     }
 
     @Override
-    public WSection section(String title, boolean expanded) {
-        return w(new WMeteorSection(title, expanded));
+    public WSection section(String title, boolean expanded, WWidget headerWidget) {
+        return w(new WMeteorSection(title, expanded, headerWidget));
     }
 
     @Override
