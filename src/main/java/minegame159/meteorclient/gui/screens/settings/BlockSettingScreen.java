@@ -5,56 +5,59 @@
 
 package minegame159.meteorclient.gui.screens.settings;
 
-import minegame159.meteorclient.gui.screens.WindowScreen;
-import minegame159.meteorclient.gui.widgets.*;
-import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.gui.GuiTheme;
+import minegame159.meteorclient.gui.WindowScreen;
+import minegame159.meteorclient.gui.widgets.WItemWithLabel;
+import minegame159.meteorclient.gui.widgets.containers.WTable;
+import minegame159.meteorclient.gui.widgets.input.WTextBox;
+import minegame159.meteorclient.gui.widgets.pressable.WButton;
+import minegame159.meteorclient.settings.BlockSetting;
 import net.minecraft.block.Block;
 import net.minecraft.util.registry.Registry;
 import org.apache.commons.lang3.StringUtils;
 
 public class BlockSettingScreen extends WindowScreen {
-    private final Setting<Block> setting;
+    private final BlockSetting setting;
+
     private final WTextBox filter;
+    private WTable table;
 
     private String filterText = "";
 
-    public BlockSettingScreen(Setting<Block> setting) {
-        super("Select Block", true);
+    public BlockSettingScreen(GuiTheme theme, BlockSetting setting) {
+        super(theme, "Select blocks");
 
         this.setting = setting;
 
-        // Filter
-        filter = new WTextBox("", 400);
+        filter = add(theme.textBox("")).minWidth(400).expandX().widget();
         filter.setFocused(true);
         filter.action = () -> {
-            filterText = filter.getText().trim();
+            filterText = filter.get().trim();
 
-            clear();
+            table.clear();
             initWidgets();
         };
+
+        table = add(theme.table()).expandX().widget();
 
         initWidgets();
     }
 
     private void initWidgets() {
-        add(filter).fillX().expandX();
-        row();
-
-        // Blocks
-        WTable table = add(new WTable()).getWidget();
         for (Block block : Registry.BLOCK) {
-            WItemWithLabel item = new WItemWithLabel(block.asItem().getDefaultStack());
+            WItemWithLabel item = theme.itemWithLabel(block.asItem().getDefaultStack());
             if (!filterText.isEmpty()) {
                 if (!StringUtils.containsIgnoreCase(item.getLabelText(), filterText)) continue;
             }
             table.add(item);
 
-            WButton select = table.add(new WButton("Select")).getWidget();
+            WButton select = table.add(theme.button("Select")).expandCellX().right().widget();
             select.action = () -> {
                 setting.set(block);
                 onClose();
             };
-            table.add(new WHorizontalSeparator());
+
+            table.row();
         }
     }
 }

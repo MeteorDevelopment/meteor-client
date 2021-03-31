@@ -9,10 +9,10 @@ import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.ParticleEvent;
 import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.settings.ParticleEffectListSetting;
+import minegame159.meteorclient.settings.ParticleTypeListSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
-import net.minecraft.particle.ParticleEffect;
+import net.minecraft.particle.ParticleType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +20,7 @@ import java.util.List;
 public class ParticleBlocker extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<List<ParticleEffect>> particles = sgGeneral.add(new ParticleEffectListSetting.Builder()
+    private final Setting<List<ParticleType<?>>> particles = sgGeneral.add(new ParticleTypeListSetting.Builder()
             .name("particles")
             .description("Particles to block.")
             .defaultValue(new ArrayList<>(0))

@@ -5,7 +5,7 @@
 
 package minegame159.meteorclient.gui.screens.settings;
 
-import minegame159.meteorclient.gui.widgets.WItemWithLabel;
+import minegame159.meteorclient.gui.GuiTheme;
 import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.mixin.IdentifierAccessor;
 import minegame159.meteorclient.settings.Setting;
@@ -20,8 +20,8 @@ import java.util.List;
 public class BlockListSettingScreen extends LeftRightListSettingScreen<Block> {
     private static final Identifier ID = new Identifier("minecraft", "");
 
-    public BlockListSettingScreen(Setting<List<Block>> setting) {
-        super("Select blocks", setting, Registry.BLOCK);
+    public BlockListSettingScreen(GuiTheme theme, Setting<List<Block>> setting) {
+        super(theme, "Select Blocks", setting, Registry.BLOCK);
     }
 
     @Override
@@ -31,7 +31,7 @@ public class BlockListSettingScreen extends LeftRightListSettingScreen<Block> {
 
     @Override
     protected WWidget getValueWidget(Block value) {
-        return new WItemWithLabel(value.asItem().getDefaultStack(), getValueName(value));
+        return theme.itemWithLabel(value.asItem().getDefaultStack(), getValueName(value));
     }
 
     @Override

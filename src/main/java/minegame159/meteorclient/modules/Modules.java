@@ -227,7 +227,7 @@ public class Modules extends System<Modules> {
     private void onAction(boolean isKey, int value, boolean isPress) {
         if (MinecraftClient.getInstance().currentScreen == null && !Input.isKeyPressed(GLFW.GLFW_KEY_F3)) {
             for (Module module : modules.values()) {
-                if (module.keybind.matches(isKey, value) && (isPress || module.toggleOnKeyRelease)) {
+                if (module.keybind.matches(isKey, value) && (isPress || module.toggleOnBindRelease)) {
                     module.doAction();
                     module.sendToggledMsg();
                 }
@@ -240,7 +240,7 @@ public class Modules extends System<Modules> {
     @EventHandler(priority = EventPriority.HIGHEST + 1)
     private void onOpenScreen(OpenScreenEvent event) {
         for (Module module : modules.values()) {
-            if (module.toggleOnKeyRelease) {
+            if (module.toggleOnBindRelease) {
                 if (module.isActive()) {
                     module.toggle();
                     module.sendToggledMsg();

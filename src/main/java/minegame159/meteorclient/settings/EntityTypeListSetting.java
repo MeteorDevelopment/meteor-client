@@ -7,11 +7,7 @@ package minegame159.meteorclient.settings;
 
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
-import minegame159.meteorclient.gui.screens.settings.EntityTypeListSettingScreen;
-import minegame159.meteorclient.gui.widgets.WButton;
 import minegame159.meteorclient.utils.entity.EntityUtils;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.EntityType;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -20,8 +16,6 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Consumer;
 
 public class EntityTypeListSetting extends Setting<Object2BooleanMap<EntityType<?>>> {
@@ -32,18 +26,12 @@ public class EntityTypeListSetting extends Setting<Object2BooleanMap<EntityType<
 
         this.onlyAttackable = onlyAttackable;
         value = new Object2BooleanOpenHashMap<>(defaultValue);
-        
-        widget = new WButton("Select");
-        ((WButton) widget).action = () -> MinecraftClient.getInstance().openScreen(new EntityTypeListSettingScreen(this));
     }
 
     @Override
     public void reset(boolean callbacks) {
         value = new Object2BooleanOpenHashMap<>(defaultValue);
-        if (callbacks) {
-            resetWidget();
-            changed();
-        }
+        if (callbacks) changed();
     }
 
     @Override
@@ -59,11 +47,6 @@ public class EntityTypeListSetting extends Setting<Object2BooleanMap<EntityType<
         } catch (Exception ignored) {}
 
         return entities;
-    }
-
-    @Override
-    public void resetWidget() {
-
     }
 
     @Override

@@ -6,7 +6,7 @@
 package minegame159.meteorclient.modules.render.hud.modules;
 
 import minegame159.meteorclient.gui.screens.HudElementScreen;
-import minegame159.meteorclient.gui.screens.topbar.TopBarHud;
+import minegame159.meteorclient.gui.tabs.builtin.HudTab;
 import minegame159.meteorclient.modules.render.hud.BoundingBox;
 import minegame159.meteorclient.modules.render.hud.HUD;
 import minegame159.meteorclient.modules.render.hud.HudRenderer;
@@ -46,7 +46,7 @@ public abstract class HudElement implements ISerializable<HudElement> {
     public abstract void render(HudRenderer renderer);
 
     protected boolean isInEditor() {
-        return mc.currentScreen instanceof TopBarHud || mc.currentScreen instanceof HudElementScreen || !Utils.canUpdate();
+        return HudTab.INSTANCE.isScreen(mc.currentScreen) || mc.currentScreen instanceof HudElementScreen || !Utils.canUpdate();
     }
 
     @Override

@@ -8,12 +8,18 @@ package minegame159.meteorclient.utils.render.color;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.world.TickEvent;
+import minegame159.meteorclient.gui.GuiThemes;
+import minegame159.meteorclient.gui.WidgetScreen;
+import minegame159.meteorclient.settings.ColorSetting;
 import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.waypoints.Waypoint;
 import minegame159.meteorclient.waypoints.Waypoints;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static minegame159.meteorclient.utils.Utils.mc;
 
 public class RainbowColors {
     private static final List<Setting<SettingColor>> colorSettings = new ArrayList<>();
@@ -46,6 +52,14 @@ public class RainbowColors {
 
         for (Waypoint waypoint : Waypoints.get()) {
             waypoint.color.update();
+        }
+
+        if (mc.currentScreen instanceof WidgetScreen) {
+            for (SettingGroup group : GuiThemes.get().settings) {
+                for (Setting<?> setting : group) {
+                    if (setting instanceof ColorSetting) ((SettingColor) setting.get()).update();
+                }
+            }
         }
     }
 }

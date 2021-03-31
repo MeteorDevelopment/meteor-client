@@ -8,6 +8,7 @@ package minegame159.meteorclient.mixin;
 import com.g00fy2.versioncompare.Version;
 import minegame159.meteorclient.Config;
 import minegame159.meteorclient.MeteorClient;
+import minegame159.meteorclient.gui.GuiThemes;
 import minegame159.meteorclient.gui.screens.NewUpdateScreen;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.network.HttpUtils;
@@ -82,7 +83,7 @@ public class TitleScreenMixin extends Screen {
 
             MeteorExecutor.execute(() -> HttpUtils.getLines("http://meteorclient.com/api/version", s -> {
                 Version latestVer = new Version(s);
-                if (latestVer.isHigherThan(Config.get().version)) MinecraftClient.getInstance().openScreen(new NewUpdateScreen(latestVer));
+                if (latestVer.isHigherThan(Config.get().version)) MinecraftClient.getInstance().openScreen(new NewUpdateScreen(GuiThemes.get(), latestVer));
             }));
         }
     }

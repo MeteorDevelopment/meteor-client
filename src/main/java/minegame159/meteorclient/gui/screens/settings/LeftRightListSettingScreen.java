@@ -5,8 +5,13 @@
 
 package minegame159.meteorclient.gui.screens.settings;
 
-import minegame159.meteorclient.gui.screens.WindowScreen;
-import minegame159.meteorclient.gui.widgets.*;
+import minegame159.meteorclient.gui.GuiTheme;
+import minegame159.meteorclient.gui.WindowScreen;
+import minegame159.meteorclient.gui.utils.Cell;
+import minegame159.meteorclient.gui.widgets.WWidget;
+import minegame159.meteorclient.gui.widgets.containers.WTable;
+import minegame159.meteorclient.gui.widgets.input.WTextBox;
+import minegame159.meteorclient.gui.widgets.pressable.WPressable;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.util.Pair;
@@ -23,29 +28,29 @@ public abstract class LeftRightListSettingScreen<T> extends WindowScreen {
 
     private String filterText = "";
 
-    public LeftRightListSettingScreen(String title, Setting<List<T>> setting, Registry<T> registry) {
-        super(title, true);
+    private WTable table;
+
+    public LeftRightListSettingScreen(GuiTheme theme, String title, Setting<List<T>> setting, Registry<T> registry) {
+        super(theme, title);
 
         this.setting = setting;
 
         // Filter
-        filter = new WTextBox("", 0);
+        filter = add(theme.textBox("")).minWidth(400).expandX().widget();
         filter.setFocused(true);
         filter.action = () -> {
-            filterText = filter.getText().trim();
+            filterText = filter.get().trim();
 
-            clear();
+            table.clear();
             initWidgets(registry);
         };
+
+        table = add(theme.table()).expandX().widget();
 
         initWidgets(registry);
     }
 
     private void initWidgets(Registry<T> registry) {
-        // Filter
-        add(filter).fillX().expandX();
-        row();
-
         // Left (all)
         WTable left = abc(pairs -> registry.forEach(t -> {
             if (skipValue(t) || setting.get().contains(t)) return;
@@ -59,7 +64,7 @@ public abstract class LeftRightListSettingScreen<T> extends WindowScreen {
             if (v != null) addValue(registry, v);
         });
 
-        if (left.getCells().size() > 0) add(new WVerticalSeparator());
+        if (left.cells.size() > 0) table.add(theme.verticalSeparator()).expandWidgetY();
 
         // Right (selected)
         abc(pairs -> {
@@ -82,7 +87,7 @@ public abstract class LeftRightListSettingScreen<T> extends WindowScreen {
             setting.get().add(value);
 
             setting.changed();
-            clear();
+            table.clear();
             initWidgets(registry);
         }
     }
@@ -90,20 +95,22 @@ public abstract class LeftRightListSettingScreen<T> extends WindowScreen {
     private void removeValue(Registry<T> registry, T value) {
         if (setting.get().remove(value)) {
             setting.changed();
-            clear();
+            table.clear();
             initWidgets(registry);
         }
     }
 
     private WTable abc(Consumer<List<Pair<T, Integer>>> addValues, boolean isLeft, Consumer<T> buttonAction) {
         // Create
-        WTable table = add(new WTable()).top().getWidget();
+        Cell<WTable> cell = this.table.add(theme.table()).top();
+        WTable table = cell.widget();
+
         Consumer<T> forEach = t -> {
             if (!includeValue(t)) return;
 
             table.add(getValueWidget(t));
 
-            WPressable button = table.add(isLeft ? new WPlus() : new WMinus()).getWidget();
+            WPressable button = table.add(isLeft ? theme.plus() : theme.minus()).expandCellX().right().widget();
             button.action = () -> buttonAction.accept(t);
 
             table.row();
@@ -114,6 +121,8 @@ public abstract class LeftRightListSettingScreen<T> extends WindowScreen {
         addValues.accept(values);
         if (!filterText.isEmpty()) values.sort(Comparator.comparingInt(value -> -value.getRight()));
         for (Pair<T, Integer> pair : values) forEach.accept(pair.getLeft());
+
+        if (table.cells.size() > 0) cell.expandX();
 
         return table;
     }

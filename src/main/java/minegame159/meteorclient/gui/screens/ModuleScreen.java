@@ -7,84 +7,73 @@ package minegame159.meteorclient.gui.screens;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.meteor.ModuleBindChangedEvent;
-import minegame159.meteorclient.gui.widgets.*;
+import minegame159.meteorclient.gui.GuiTheme;
+import minegame159.meteorclient.gui.WindowScreen;
+import minegame159.meteorclient.gui.utils.Cell;
+import minegame159.meteorclient.gui.widgets.WKeybind;
+import minegame159.meteorclient.gui.widgets.WWidget;
+import minegame159.meteorclient.gui.widgets.containers.WContainer;
+import minegame159.meteorclient.gui.widgets.containers.WHorizontalList;
+import minegame159.meteorclient.gui.widgets.pressable.WCheckbox;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.Modules;
 import minegame159.meteorclient.utils.Utils;
 
+import static minegame159.meteorclient.utils.Utils.getWindowWidth;
+
 public class ModuleScreen extends WindowScreen {
-    private final Module module;
+    private final WKeybind keybind;
 
-    private WKeybind keybind;
+    public ModuleScreen(GuiTheme theme, Module module) {
+        super(theme, module.title);
 
-    public ModuleScreen(Module module) {
-        super(module.title, true);
-        this.module = module;
-
-        initWidgets();
-    }
-
-    private void initWidgets() {
         // Description
-        add(new WLabel(module.description));
-        row();
+        add(theme.label(module.description, getWindowWidth() / 2.0));
 
         // Settings
-        if (module.settings.sizeGroups() > 0) {
-            add(module.settings.createTable(false)).fillX().expandX().getWidget();
-        }
-        else {
-            add(new WHorizontalSeparator());
+        if (module.settings.groups.size() > 0) {
+            add(theme.settings(module.settings)).expandX();
+
+            add(theme.horizontalSeparator()).expandX();
         }
 
         // Custom widget
-        WWidget customWidget = module.getWidget();
-        if (customWidget != null) {
-            if (module.settings.sizeGroups() > 0) {
-                row();
-                add(new WHorizontalSeparator());
-            }
+        WWidget widget = module.getWidget(theme);
+        if (widget != null) {
+            Cell<WWidget> cell = add(widget);
+            if (widget instanceof WContainer) cell.expandX();
 
-            Cell<WWidget> cell = add(customWidget);
-            if (customWidget instanceof WTable) cell.fillX().expandX();
-            row();
-        }
-
-        if (customWidget != null || module.settings.sizeGroups() > 0) {
-            row();
-            add(new WHorizontalSeparator());
+            add(theme.horizontalSeparator()).expandX();
         }
 
         // Bind
-        keybind = add(new WKeybind(module.keybind)).getWidget();
+        keybind = add(theme.keybind(module.keybind, true)).widget();
         keybind.actionOnSet = () -> Modules.get().setModuleToBind(module);
-        row();
 
-        // Toggle on key release
-        WTable tokrTable = add(new WTable()).fillX().expandX().getWidget();
-        tokrTable.add(new WLabel("Toggle on key release:"));
-        WCheckbox toggleOnKeyRelease = tokrTable.add(new WCheckbox(module.toggleOnKeyRelease)).getWidget();
-        toggleOnKeyRelease.action = () -> module.toggleOnKeyRelease = toggleOnKeyRelease.checked;
-        row();
+        // Toggle on bind release
+        WHorizontalList tobr = add(theme.horizontalList()).widget();
 
-        add(new WHorizontalSeparator());
+        tobr.add(theme.label("Toggle on bind release: "));
+        WCheckbox tobrC = tobr.add(theme.checkbox(module.toggleOnBindRelease)).widget();
+        tobrC.action = () -> module.toggleOnBindRelease = tobrC.checked;
+
+        add(theme.horizontalSeparator()).expandX();
 
         // Bottom
-        WTable bottomTable = add(new WTable()).fillX().expandX().getWidget();
+        WHorizontalList bottom = add(theme.horizontalList()).expandX().widget();
 
         //   Active
-        bottomTable.add(new WLabel("Active:"));
-        WCheckbox active = bottomTable.add(new WCheckbox(module.isActive())).getWidget();
+        bottom.add(theme.label("Active: "));
+        WCheckbox active = bottom.add(theme.checkbox(module.isActive())).expandCellX().widget();
         active.action = () -> {
             if (module.isActive() != active.checked) module.toggle(Utils.canUpdate());
         };
 
         //   Visible
-        bottomTable.add(new WLabel("Visible: ")).fillX().right().getWidget().tooltip = "Shows the module in the array list.";
-        WCheckbox visibleCheckbox = bottomTable.add(new WCheckbox(module.isVisible())).getWidget();
-        visibleCheckbox.tooltip = "Shows the module in the array list.";
-        visibleCheckbox.action = () -> {
-            if (module.isVisible() != visibleCheckbox.checked) module.setVisible(visibleCheckbox.checked);
+        bottom.add(theme.label("Visible: "));
+        WCheckbox visible = bottom.add(theme.checkbox(module.isVisible())).widget();
+        visible.action = () -> {
+            if (module.isVisible() != visible.checked) module.setVisible(visible.checked);
         };
     }
 

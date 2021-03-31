@@ -5,9 +5,6 @@
 
 package minegame159.meteorclient.settings;
 
-import minegame159.meteorclient.gui.screens.settings.SoundEventListSettingScreen;
-import minegame159.meteorclient.gui.widgets.WButton;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -24,19 +21,12 @@ public class SoundEventListSetting extends Setting<List<SoundEvent>> {
     public SoundEventListSetting(String name, String description, List<SoundEvent> defaultValue, Consumer<List<SoundEvent>> onChanged, Consumer<Setting<List<SoundEvent>>> onModuleActivated) {
         super(name, description, defaultValue, onChanged, onModuleActivated);
 
-        value = new ArrayList<>(defaultValue);
-
-        widget = new WButton("Select");
-        ((WButton) widget).action = () -> MinecraftClient.getInstance().openScreen(new SoundEventListSettingScreen(this));
-    }
+        value = new ArrayList<>(defaultValue); }
 
     @Override
     public void reset(boolean callbacks) {
         value = new ArrayList<>(defaultValue);
-        if (callbacks) {
-            resetWidget();
-            changed();
-        }
+        if (callbacks) changed();
     }
 
     @Override
@@ -52,11 +42,6 @@ public class SoundEventListSetting extends Setting<List<SoundEvent>> {
         } catch (Exception ignored) {}
 
         return sounds;
-    }
-
-    @Override
-    public void resetWidget() {
-
     }
 
     @Override

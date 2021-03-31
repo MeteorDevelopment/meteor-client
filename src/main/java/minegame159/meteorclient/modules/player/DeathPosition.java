@@ -6,14 +6,15 @@
 package minegame159.meteorclient.modules.player;
 
 import baritone.api.BaritoneAPI;
+import minegame159.meteorclient.gui.GuiTheme;
+import minegame159.meteorclient.gui.widgets.WLabel;
+import minegame159.meteorclient.gui.widgets.WWidget;
+import minegame159.meteorclient.gui.widgets.containers.WHorizontalList;
+import minegame159.meteorclient.gui.widgets.pressable.WButton;
 import net.minecraft.util.math.Vec3d;
 import baritone.api.pathing.goals.GoalXZ;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.packets.PacketEvent;
-import minegame159.meteorclient.gui.widgets.WButton;
-import minegame159.meteorclient.gui.widgets.WLabel;
-import minegame159.meteorclient.gui.widgets.WTable;
-import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
@@ -52,12 +53,12 @@ public class DeathPosition extends Module {
     );
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
 
-    private final WLabel label = new WLabel("No latest death found.");
-
     private final Map<String, Double> deathPos = new HashMap<>();
     private Waypoint waypoint;
 
     private Vec3d dmgPos;
+
+    private String labelText = "No latest death";
 
     public DeathPosition() {
         super(Categories.Player, "death-position", "Sends you the coordinates to your latest death.");
@@ -67,30 +68,36 @@ public class DeathPosition extends Module {
     private void onPacketReceive(PacketEvent.Receive event) {
         if (event.packet instanceof HealthUpdateS2CPacket) {
             HealthUpdateS2CPacket packet = (HealthUpdateS2CPacket) event.packet;
-            if (packet.getHealth() <= 0) {
-                onDeath();
-            }
+
+            if (packet.getHealth() <= 0) onDeath();
         }
     }
 
     @Override
-    public WWidget getWidget() {
-        WTable table = new WTable();
-        table.add(label);
-        WButton path = new WButton("Path");
-        table.add(path);
+    public WWidget getWidget(GuiTheme theme) {
+        WHorizontalList list = theme.horizontalList();
+
+        WLabel label = list.add(theme.label(labelText)).expandCellX().widget();
+
+        WButton path = list.add(theme.button("Path")).widget();
         path.action = this::path;
-        WButton clear = new WButton("Clear");
-        table.add(clear);
-        clear.action = this::clear;
-        return table;
+
+        WButton clear = list.add(theme.button("Clear")).widget();
+        clear.action = () -> {
+            Waypoints.get().remove(waypoint);
+            labelText = "No latest death";
+
+            label.set(labelText);
+        };
+
+        return list;
     }
 
     private void onDeath() {
         dmgPos = mc.player.getPos();
         deathPos.put("x", dmgPos.x);
         deathPos.put("z", dmgPos.z);
-        label.setText(String.format("Latest death: %.1f, %.1f, %.1f", dmgPos.x, dmgPos.y, dmgPos.z));
+        labelText = String.format("Latest death: %.1f, %.1f, %.1f", dmgPos.x, dmgPos.y, dmgPos.z);
 
         String time = dateFormat.format(new Date());
         //ChatUtils.moduleInfo(this, "Died at (highlight)%.0f(default), (highlight)%.0f(default), (highlight)%.0f (default)on (highlight)%s(default).", damagedplayerX, damagedplayerY, damagedplayerZ, time);
@@ -129,18 +136,16 @@ public class DeathPosition extends Module {
     private void path() {
         if (deathPos.isEmpty() && mc.player != null) {
             ChatUtils.moduleWarning(this,"No latest death found.");
-        } else {
+        }
+        else {
             if (mc.world != null) {
                 double x = dmgPos.x, z = dmgPos.z;
-                if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing())
+                if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing()) {
                     BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
+                }
+
                 BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalXZ((int) x, (int) z));
             }
         }
-    }
-
-    private void clear() {
-        Waypoints.get().remove(waypoint);
-        label.setText("No latest death.");
     }
 }

@@ -5,41 +5,37 @@
 
 package minegame159.meteorclient.settings;
 
-import minegame159.meteorclient.gui.screens.settings.StorageBlockListSettingScreen;
-import minegame159.meteorclient.gui.widgets.WButton;
+import com.mojang.serialization.Lifecycle;
 import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
+import net.minecraft.util.registry.RegistryKey;
+import org.apache.logging.log4j.core.util.ObjectArrayIterator;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
 
 public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
     public static final BlockEntityType<?>[] STORAGE_BLOCKS = { BlockEntityType.FURNACE, BlockEntityType.CHEST, BlockEntityType.TRAPPED_CHEST, BlockEntityType.ENDER_CHEST, BlockEntityType.DISPENSER, BlockEntityType.DROPPER, BlockEntityType.HOPPER, BlockEntityType.SHULKER_BOX, BlockEntityType.BARREL, BlockEntityType.SMOKER, BlockEntityType.BLAST_FURNACE };
-    public static final String[] STORAGE_BLOCK_NAMES = { "Furnace", "Chest", "Trapped Chest", "Ender Chest", "Dispenser", "Dropper", "Hopper", "Shulker Box", "Barrel", "Smoker", "Blast Furnace" };
+
+    public static final Registry<BlockEntityType<?>> REGISTRY = new SRegistry();
 
     public StorageBlockListSetting(String name, String description, List<BlockEntityType<?>> defaultValue, Consumer<List<BlockEntityType<?>>> onChanged, Consumer<Setting<List<BlockEntityType<?>>>> onModuleActivated) {
         super(name, description, defaultValue, onChanged, onModuleActivated);
 
         value = new ArrayList<>(defaultValue);
-
-        widget = new WButton("Select");
-        ((WButton) widget).action = () -> MinecraftClient.getInstance().openScreen(new StorageBlockListSettingScreen(this));
     }
 
     @Override
     public void reset(boolean callbacks) {
         value = new ArrayList<>(defaultValue);
-        if (callbacks) {
-            resetWidget();
-            changed();
-        }
+        if (callbacks) changed();
     }
 
     @Override
@@ -55,11 +51,6 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
         } catch (Exception ignored) {}
 
         return blocks;
-    }
-
-    @Override
-    public void resetWidget() {
-
     }
 
     @Override
@@ -133,6 +124,77 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
 
         public StorageBlockListSetting build() {
             return new StorageBlockListSetting(name, description, defaultValue, onChanged, onModuleActivated);
+        }
+    }
+
+    private static class SRegistry extends Registry<BlockEntityType<?>> {
+        public SRegistry() {
+            super(RegistryKey.ofRegistry(new Identifier("meteor-client", "storage-blocks")), Lifecycle.stable());
+        }
+
+        @Nullable
+        @Override
+        public Identifier getId(BlockEntityType<?> entry) {
+            return null;
+        }
+
+        @Override
+        public Optional<RegistryKey<BlockEntityType<?>>> getKey(BlockEntityType<?> entry) {
+            return Optional.empty();
+        }
+
+        @Override
+        public int getRawId(@Nullable BlockEntityType<?> entry) {
+            return 0;
+        }
+
+        @Nullable
+        @Override
+        public BlockEntityType<?> get(@Nullable RegistryKey<BlockEntityType<?>> key) {
+            return null;
+        }
+
+        @Nullable
+        @Override
+        public BlockEntityType<?> get(@Nullable Identifier id) {
+            return null;
+        }
+
+        @Override
+        protected Lifecycle getEntryLifecycle(BlockEntityType<?> object) {
+            return null;
+        }
+
+        @Override
+        public Lifecycle getLifecycle() {
+            return null;
+        }
+
+        @Override
+        public Set<Identifier> getIds() {
+            return null;
+        }
+
+        @Override
+        public Set<Map.Entry<RegistryKey<BlockEntityType<?>>, BlockEntityType<?>>> getEntries() {
+            return null;
+        }
+
+        @Override
+        public boolean containsId(Identifier id) {
+            return false;
+        }
+
+        @Nullable
+        @Override
+        public BlockEntityType<?> get(int index) {
+            return null;
+        }
+
+        @NotNull
+        @Override
+        public Iterator<BlockEntityType<?>> iterator() {
+            return new ObjectArrayIterator<>(STORAGE_BLOCKS);
         }
     }
 }

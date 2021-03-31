@@ -5,9 +5,10 @@
 
 package minegame159.meteorclient.modules.world;
 
-import minegame159.meteorclient.gui.widgets.WButton;
-import minegame159.meteorclient.gui.widgets.WTable;
+import minegame159.meteorclient.gui.GuiTheme;
 import minegame159.meteorclient.gui.widgets.WWidget;
+import minegame159.meteorclient.gui.widgets.containers.WHorizontalList;
+import minegame159.meteorclient.gui.widgets.pressable.WButton;
 import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
@@ -166,13 +167,15 @@ public class Ambience extends Module {
     }
 
     @Override
-    public WWidget getWidget() {
-        WTable table = new WTable();
+    public WWidget getWidget(GuiTheme theme) {
+        WHorizontalList list = theme.horizontalList();
 
-        WButton reloadWorld = table.add(new WButton("Reload World")).getWidget();
-        reloadWorld.action = () -> { if(mc.worldRenderer != null) { mc.worldRenderer.reload(); } };
+        WButton reloadWorld = list.add(theme.button("Reload World")).expandX().widget();
+        reloadWorld.action = () -> {
+            if (mc.worldRenderer != null) mc.worldRenderer.reload();
+        };
 
-        return table;
+        return list;
     }
 
     public static class Custom extends SkyProperties {

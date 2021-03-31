@@ -5,35 +5,56 @@
 
 package minegame159.meteorclient.gui.screens.settings;
 
-import minegame159.meteorclient.gui.screens.WindowScreen;
-import minegame159.meteorclient.gui.widgets.WCheckbox;
-import minegame159.meteorclient.gui.widgets.WLabel;
+import minegame159.meteorclient.gui.GuiTheme;
+import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.StorageBlockListSetting;
 import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.item.Item;
+import net.minecraft.item.Items;
 
 import java.util.List;
 
-public class StorageBlockListSettingScreen extends WindowScreen {
-    public StorageBlockListSettingScreen(Setting<List<BlockEntityType<?>>> setting) {
-        super("Select storage blocks", true);
+public class StorageBlockListSettingScreen extends LeftRightListSettingScreen<BlockEntityType<?>> {
+    public StorageBlockListSettingScreen(GuiTheme theme, Setting<List<BlockEntityType<?>>> setting) {
+        super(theme, "Select storage blocks", setting, StorageBlockListSetting.REGISTRY);
+    }
 
-        for (int i = 0; i < StorageBlockListSetting.STORAGE_BLOCKS.length; i++) {
-            BlockEntityType<?> type = StorageBlockListSetting.STORAGE_BLOCKS[i];
-            String name = StorageBlockListSetting.STORAGE_BLOCK_NAMES[i];
+    @Override
+    protected WWidget getValueWidget(BlockEntityType<?> value) {
+        Item item = Items.BARRIER;
 
-            add(new WLabel(name));
-            WCheckbox checkbox = add(new WCheckbox(setting.get().contains(type))).fillX().right().getWidget();
-            checkbox.action = () -> {
-                if (checkbox.checked && !setting.get().contains(type)) {
-                    setting.get().add(type);
-                    setting.changed();
-                } else if (!checkbox.checked && setting.get().remove(type)) {
-                    setting.changed();
-                }
-            };
+        if (value == BlockEntityType.FURNACE) item = Items.FURNACE;
+        else if (value == BlockEntityType.CHEST) item = Items.CHEST;
+        else if (value == BlockEntityType.TRAPPED_CHEST) item = Items.TRAPPED_CHEST;
+        else if (value == BlockEntityType.ENDER_CHEST) item = Items.ENDER_CHEST;
+        else if (value == BlockEntityType.DISPENSER) item = Items.DISPENSER;
+        else if (value == BlockEntityType.DROPPER) item = Items.DROPPER;
+        else if (value == BlockEntityType.HOPPER) item = Items.HOPPER;
+        else if (value == BlockEntityType.SHULKER_BOX) item = Items.SHULKER_BOX;
+        else if (value == BlockEntityType.BARREL) item = Items.BARREL;
+        else if (value == BlockEntityType.SMOKER) item = Items.SMOKER;
+        else if (value == BlockEntityType.BLAST_FURNACE) item = Items.BLAST_FURNACE;
 
-            row();
-        }
+        return theme.itemWithLabel(item.getDefaultStack(), getValueName(value));
+    }
+
+    @Override
+    protected String getValueName(BlockEntityType<?> value) {
+        String name = "Unknown";
+
+        if (value == BlockEntityType.FURNACE) name = "Furnace";
+        else if (value == BlockEntityType.CHEST) name = "Chest";
+        else if (value == BlockEntityType.TRAPPED_CHEST) name = "Trapped Chest";
+        else if (value == BlockEntityType.ENDER_CHEST) name = "Ender Chest";
+        else if (value == BlockEntityType.DISPENSER) name = "Dispenser";
+        else if (value == BlockEntityType.DROPPER) name = "Dropper";
+        else if (value == BlockEntityType.HOPPER) name = "Hopper";
+        else if (value == BlockEntityType.SHULKER_BOX) name = "Shulker Box";
+        else if (value == BlockEntityType.BARREL) name = "Barrel";
+        else if (value == BlockEntityType.SMOKER) name = "Smoker";
+        else if (value == BlockEntityType.BLAST_FURNACE) name = "Blast Furnace";
+
+        return name;
     }
 }

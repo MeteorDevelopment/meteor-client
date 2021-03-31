@@ -7,7 +7,12 @@ package minegame159.meteorclient.modules.misc;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.gui.widgets.*;
+import minegame159.meteorclient.gui.GuiTheme;
+import minegame159.meteorclient.gui.widgets.WWidget;
+import minegame159.meteorclient.gui.widgets.containers.WTable;
+import minegame159.meteorclient.gui.widgets.input.WTextBox;
+import minegame159.meteorclient.gui.widgets.pressable.WMinus;
+import minegame159.meteorclient.gui.widgets.pressable.WPlus;
 import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
@@ -78,43 +83,45 @@ public class Spam extends Module {
     }
 
     @Override
-    public WWidget getWidget() {
+    public WWidget getWidget(GuiTheme theme) {
         messages.removeIf(String::isEmpty);
 
-        WTable table = new WTable();
-        fillTable(table);
+        WTable table = theme.table();
+        fillTable(theme, table);
+
         return table;
     }
 
-    private void fillTable(WTable table) {
-        table.add(new WHorizontalSeparator("Messages"));
+    private void fillTable(GuiTheme theme, WTable table) {
+        table.add(theme.horizontalSeparator("Messages")).expandX();
+        table.row();
 
         // Messages
         for (int i = 0; i < messages.size(); i++) {
             int msgI = i;
             String message = messages.get(i);
 
-            WTextBox textBox = table.add(new WTextBox(message, 100)).fillX().expandX().getWidget();
-            textBox.action = () -> messages.set(msgI, textBox.getText());
+            WTextBox textBox = table.add(theme.textBox(message)).minWidth(100).expandX().widget();
+            textBox.action = () -> messages.set(msgI, textBox.get());
 
-            WMinus minus = table.add(new WMinus()).getWidget();
-            minus.action = () -> {
+            WMinus delete = table.add(theme.minus()).widget();
+            delete.action = () -> {
                 messages.remove(msgI);
 
                 table.clear();
-                fillTable(table);
+                fillTable(theme, table);
             };
 
             table.row();
         }
 
         // New Message
-        WPlus plus = table.add(new WPlus()).fillX().right().getWidget();
-        plus.action = () -> {
+        WPlus add = table.add(theme.plus()).expandCellX().right().widget();
+        add.action = () -> {
             messages.add("");
 
             table.clear();
-            fillTable(table);
+            fillTable(theme, table);
         };
     }
 

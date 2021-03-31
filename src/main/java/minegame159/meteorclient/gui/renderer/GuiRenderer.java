@@ -5,328 +5,267 @@
 
 package minegame159.meteorclient.gui.renderer;
 
-import it.unimi.dsi.fastutil.Stack;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import minegame159.meteorclient.gui.GuiConfig;
+import minegame159.meteorclient.gui.GuiTheme;
+import minegame159.meteorclient.gui.renderer.operations.TextOperation;
+import minegame159.meteorclient.gui.renderer.packer.GuiTexture;
+import minegame159.meteorclient.gui.renderer.packer.TexturePacker;
+import minegame159.meteorclient.gui.renderer.packer.TextureRegion;
 import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.rendering.DrawMode;
 import minegame159.meteorclient.rendering.MeshBuilder;
-import minegame159.meteorclient.rendering.text.TextRenderer;
-import minegame159.meteorclient.utils.misc.CursorStyle;
+import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.Pool;
-import minegame159.meteorclient.utils.misc.input.Input;
+import minegame159.meteorclient.utils.render.ByteTexture;
 import minegame159.meteorclient.utils.render.color.Color;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.texture.AbstractTexture;
-import net.minecraft.client.util.Window;
 import net.minecraft.util.Identifier;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
+import static minegame159.meteorclient.utils.Utils.getWindowHeight;
+import static minegame159.meteorclient.utils.Utils.getWindowWidth;
 import static org.lwjgl.opengl.GL11.*;
 
 public class GuiRenderer {
     private static final Color WHITE = new Color(255, 255, 255);
-    private static final Identifier TEXTURE = new Identifier("meteor-client", "gui.png");
+
+    private static final TexturePacker TEXTURE_PACKER = new TexturePacker();
+    private static ByteTexture TEXTURE;
+
+    public static GuiTexture CIRCLE;
+    public static GuiTexture TRIANGLE;
+    public static GuiTexture EDIT;
+    public static GuiTexture RESET;
+
+    public GuiTheme theme;
 
     private final MeshBuilder mb = new MeshBuilder();
+    private final MeshBuilder mbTex = new MeshBuilder();
 
-    private final Stack<Scissor> scissorStack = new ObjectArrayList<>();
     private final Pool<Scissor> scissorPool = new Pool<>(Scissor::new);
+    private final Stack<Scissor> scissorStack = new Stack<>();
 
-    private final List<Text> texts = new ArrayList<>();
-    private final Pool<Text> textPool = new Pool<>(Text::new);
+    private final Pool<TextOperation> textPool = new Pool<>(TextOperation::new);
+    private final List<TextOperation> texts = new ArrayList<>();
 
-    public String tooltip;
+    private final List<Runnable> postTasks = new ArrayList<>();
 
-    private CursorStyle cursorStyle;
+    public String tooltip, lastTooltip;
+    public WWidget tooltipWidget;
+    private double tooltipAnimProgress;
 
-    public GuiRenderer() {
-        mb.texture = true;
+    public static GuiTexture addTexture(Identifier id) {
+        return TEXTURE_PACKER.add(id);
     }
 
-    public void beginFontScale() {
-        TextRenderer.get().begin(GuiConfig.get().guiScale, true, false);
+    public static void init() {
+        CIRCLE = addTexture(new Identifier("meteor-client", "gui/circle.png"));
+        TRIANGLE = addTexture(new Identifier("meteor-client", "gui/triangle.png"));
+        EDIT = addTexture(new Identifier("meteor-client", "gui/edit.png"));
+        RESET = addTexture(new Identifier("meteor-client", "gui/reset.png"));
+
+        TEXTURE = TEXTURE_PACKER.pack();
     }
 
-    public void endFontScale() {
-        TextRenderer.get().end();
-    }
-
-    public void begin(boolean root) {
-        mb.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR_TEXTURE);
-
-        if (root) {
-            beginFontScale();
-
-            Window window = MinecraftClient.getInstance().getWindow();
-            beginScissor(0, 0, window.getFramebufferWidth(), window.getFramebufferHeight(), false);
-
-            cursorStyle = CursorStyle.Default;
-        }
-    }
     public void begin() {
-        begin(false);
+        glEnable(GL_SCISSOR_TEST);
+        scissorStart(0, 0, getWindowWidth(), getWindowHeight());
     }
 
-    public void end(boolean root) {
-        double mouseX = MinecraftClient.getInstance().mouse.getX();
-        double mouseY = MinecraftClient.getInstance().mouse.getY();
-        double tooltipWidth = tooltip != null ? textWidth(tooltip) : 0;
-
-        MinecraftClient.getInstance().getTextureManager().bindTexture(TEXTURE);
-        mb.end();
-
-        boolean a = TextRenderer.get().isBuilding();
-        if (a) endFontScale();
-        TextRenderer.get().begin(GuiConfig.get().guiScale);
-        for (Text text : texts) {
-            if (!text.title) {
-                text.render();
-                textPool.free(text);
-            }
-        }
-        TextRenderer.get().end();
-
-        TextRenderer.get().begin(1.22222222 * GuiConfig.get().guiScale);
-        for (Text text : texts) {
-            if (text.title) {
-                text.render();
-                textPool.free(text);
-            }
-        }
-        TextRenderer.get().end();
-        texts.clear();
-        if (a) beginFontScale();
-
-        if (root) {
-            endFontScale();
-
-            if (tooltipWidth > 0) {
-                mb.texture = false;
-                mb.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
-                mb.quad(mouseX + 8, mouseY + 8, tooltipWidth + 8, textHeight() + 8, GuiConfig.get().background);
-                mb.end();
-                mb.texture = true;
-
-                TextRenderer.get().begin(GuiConfig.get().guiScale);
-                TextRenderer.get().render(tooltip, mouseX + 8 + 4, mouseY + 8 + 4, GuiConfig.get().text);
-                TextRenderer.get().end();
-
-                tooltip = null;
-            }
-
-            endScissor();
-            Input.setCursorStyle(cursorStyle);
-        }
-    }
     public void end() {
-        end(false);
+        scissorEnd();
+
+        for (Runnable task : postTasks) task.run();
+        postTasks.clear();
+
+        glDisable(GL_SCISSOR_TEST);
     }
 
-    public void setCursorStyle(CursorStyle style) {
-        cursorStyle = style;
+    private void beginRender() {
+        mb.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
+        mbTex.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR_TEXTURE);
     }
 
-    public void beginScissor(double x, double y, double width, double height, boolean changeGlState) {
+    private void endRender() {
+        mb.end();
+        TEXTURE.bindTexture();
+        mbTex.texture = true;
+        mbTex.end();
+
+        // Normal text
+        theme.textRenderer().begin(theme.scale(1));
+        for (TextOperation text : texts) {
+            if (!text.title) text.run(textPool);
+        }
+        theme.textRenderer().end();
+
+        // Title text
+        theme.textRenderer().begin(theme.scale(1.25));
+        for (TextOperation text : texts) {
+            if (text.title) text.run(textPool);
+        }
+        theme.textRenderer().end();
+
+        texts.clear();
+    }
+
+    public void scissorStart(double x, double y, double width, double height) {
         if (!scissorStack.isEmpty()) {
-            Scissor parent = scissorStack.top();
+            Scissor parent = scissorStack.peek();
 
             if (x < parent.x) x = parent.x;
             else if (x + width > parent.x + parent.width) width -= (x + width) - (parent.x + parent.width);
 
             if (y < parent.y) y = parent.y;
             else if (y + height > parent.y + parent.height) height -= (y + height) - (parent.y + parent.height);
+
+            parent.apply();
+            endRender();
         }
 
-        Scissor scissor = scissorPool.get().set(x, y, width, height, changeGlState);
-        scissorStack.push(scissor);
-
-        if (changeGlState) {
-            end();
-            begin();
-
-            glEnable(GL_SCISSOR_TEST);
-            scissor.apply();
-        }
-    }
-    public void beginScissor(double x, double y, double width, double height) {
-        beginScissor(x, y, width, height, true);
+        scissorStack.push(scissorPool.get().set(x, y, width, height));
+        beginRender();
     }
 
-    public void endScissor() {
+    public void scissorEnd() {
         Scissor scissor = scissorStack.pop();
 
-        if (scissor.changeGlState) {
-            end();
-            for (Runnable task : scissor.postTasks) task.run();
+        scissor.apply();
+        endRender();
+        for (Runnable task : scissor.postTasks) task.run();
+        if (!scissorStack.isEmpty()) beginRender();
 
-            if (scissorStack.isEmpty() || !scissorStack.top().changeGlState) {
-                glDisable(GL_SCISSOR_TEST);
-            } else {
-                scissorStack.top().apply();
+        scissorPool.free(scissor);
+    }
+
+    public boolean renderTooltip(double mouseX, double mouseY, double delta) {
+        tooltipAnimProgress += (tooltip != null ? 1 : -1) * delta * 14;
+        tooltipAnimProgress = Utils.clamp(tooltipAnimProgress, 0, 1);
+
+        boolean toReturn = false;
+
+        if (tooltipAnimProgress > 0) {
+            if (tooltip != null && !tooltip.equals(lastTooltip)) {
+                tooltipWidget = theme.tooltip(tooltip);
+                tooltipWidget.init();
             }
+
+            tooltipWidget.move(-tooltipWidget.x + mouseX + 12, -tooltipWidget.y + mouseY + 12);
+
+            setAlpha(tooltipAnimProgress);
+
             begin();
-        } else {
-            for (Runnable task : scissor.postTasks) task.run();
-        }
-    }
+            tooltipWidget.render(this, mouseX, mouseY, delta);
+            end();
 
-    public void quad(Region region, double x, double y, double width, double height, Color color1, Color color2, Color color3, Color color4) {
-        mb.pos(x, y, 0).color(color1).texture(region.x, region.y).endVertex();
-        mb.pos(x + width, y, 0).color(color2).texture(region.x + region.width, region.y).endVertex();
-        mb.pos(x + width, y + height, 0).color(color3).texture(region.x + region.width, region.y + region.height).endVertex();
+            setAlpha(1);
 
-        mb.pos(x, y, 0).color(color1).texture(region.x, region.y).endVertex();
-        mb.pos(x + width, y + height, 0).color(color3).texture(region.x + region.width, region.y + region.height).endVertex();
-        mb.pos(x, y + height, 0).color(color4).texture(region.x, region.y + region.height).endVertex();
-    }
-    public void quad(Region region, double x, double y, double width, double height, Color color) {
-        quad(region, x, y, width, height, color, color, color, color);
-    }
-
-    public void background(WWidget widget, boolean hovered, boolean pressed) {
-        Color background = GuiConfig.get().background;
-        Color outline = GuiConfig.get().outline;
-
-        if (pressed) {
-            background = GuiConfig.get().backgroundPressed;
-            outline = GuiConfig.get().outlinePressed;
-        } else if (hovered) {
-            background = GuiConfig.get().backgroundHovered;
-            outline = GuiConfig.get().outlineHovered;
+            lastTooltip = tooltip;
+            toReturn = true;
         }
 
-        quad(Region.FULL, widget.x, widget.y, widget.width, widget.height, background);
-        quad(Region.FULL, widget.x, widget.y, widget.width, 2, outline);
-        quad(Region.FULL, widget.x, widget.y + widget.height - 2, widget.width, 2, outline);
-        quad(Region.FULL, widget.x, widget.y + 2, 2, widget.height - 4, outline);
-        quad(Region.FULL, widget.x + widget.width - 2, widget.y + 2, 2, widget.height - 4, outline);
+        tooltip = null;
+        return toReturn;
     }
-    public void background(WWidget widget, boolean pressed) {
-        background(widget, widget.mouseOver, pressed);
+
+    public void setAlpha(double a) {
+        mb.alpha = a;
+        mbTex.alpha = a;
+
+        theme.textRenderer().setAlpha(a);
     }
-    
-    public void triangle(double x, double y, double size, double rotation, Color color) {
+
+    public void tooltip(String text) {
+        tooltip = text;
+    }
+
+    public void quad(double x, double y, double width, double height, Color cTopLeft, Color cTopRight, Color cBottomRight, Color cBottomLeft) {
+        mb.quad(x, y, width, height, cTopLeft, cTopRight, cBottomRight, cBottomLeft);
+    }
+    public void quad(double x, double y, double width, double height, Color colorLeft, Color colorRight) {
+        quad(x, y, width, height, colorLeft, colorLeft, colorRight, colorLeft);
+    }
+    public void quad(double x, double y, double width, double height, Color color) {
+        quad(x, y, width, height, color, color);
+    }
+    public void quad(WWidget widget, Color color) {
+        quad(widget.x, widget.y, widget.width, widget.height, color);
+    }
+    public void quad(double x, double y, double width, double height, GuiTexture texture, Color color) {
+        mbTex.texQuad(x, y, width, height, texture.get(width, height), color);
+    }
+
+    public void rotatedQuad(double x, double y, double width, double height, double rotation, GuiTexture texture, Color color) {
+        TextureRegion region = texture.get(width, height);
+
         double rad = Math.toRadians(rotation);
         double cos = Math.cos(rad);
         double sin = Math.sin(rad);
 
-        double oX = x + size / 2;
-        double oY = y + size / 4;
+        double oX = x + width / 2;
+        double oY = y + height / 2;
 
-        double _x = ((x - oX) * cos) - ((y - oY) * sin) + oX;
-        double _y = ((y - oY) * cos) + ((x - oX) * sin) + oY;
-        mb.pos(_x, _y, 0).color(color).texture(Region.FULL.x, Region.FULL.y).endVertex();
+        double _x1 = ((x - oX) * cos) - ((y - oY) * sin) + oX;
+        double _y1 = ((y - oY) * cos) + ((x - oX) * sin) + oY;
+        mbTex.pos(_x1, _y1, 0).color(color).texture(region.x1, region.y1).endVertex();
 
-        _x = ((x + size - oX) * cos) - ((y - oY) * sin) + oX;
-        _y = ((y - oY) * cos) + ((x + size - oX) * sin) + oY;
-        mb.pos(_x, _y, 0).color(color).texture(Region.FULL.x + Region.FULL.width, Region.FULL.y).endVertex();
+        double _x = ((x + width - oX) * cos) - ((y - oY) * sin) + oX;
+        double _y = ((y - oY) * cos) + ((x + width - oX) * sin) + oY;
+        mbTex.pos(_x, _y, 0).color(color).texture(region.x2, region.y1).endVertex();
 
-        double v = y + size / 2 - oY;
-        _x = ((x + size / 2 - oX) * cos) - (v * sin) + oX;
-        _y = (v * cos) + ((x + size / 2 - oX) * sin) + oY;
-        mb.pos(_x, _y, 0).color(color).texture(Region.FULL.x + Region.FULL.width, Region.FULL.y + Region.FULL.height).endVertex();
-    }
+        double _x2 = ((x + width - oX) * cos) - ((y + height - oY) * sin) + oX;
+        double _y2 = ((y + height - oY) * cos) + ((x + width - oX) * sin) + oY;
+        mbTex.pos(_x2, _y2, 0).color(color).texture(region.x2, region.y2).endVertex();
 
-    public void text(String text, double x, double y, boolean shadow, Color color) {
-        texts.add(textPool.get().set(text, x, y, shadow, color, false));
-    }
-    public double textWidth(String text, int length) {
-        return TextRenderer.get().getWidth(text, length);
-    }
-    public double textWidth(String text) {
-        return TextRenderer.get().getWidth(text);
-    }
-    public double textHeight() {
-        return TextRenderer.get().getHeight();
+        mbTex.pos(_x1, _y1, 0).color(color).texture(region.x1, region.y1).endVertex();
+
+        mbTex.pos(_x2, _y2, 0).color(color).texture(region.x2, region.y2).endVertex();
+
+        _x = ((x - oX) * cos) - ((y + height - oY) * sin) + oX;
+        _y = ((y + height - oY) * cos) + ((x - oX) * sin) + oY;
+        mbTex.pos(_x, _y, 0).color(color).texture(region.x1, region.y2).endVertex();
     }
 
-    public void title(String text, double x, double y, Color color) {
-        texts.add(textPool.get().set(text, x, y, false, color, true));
-    }
-    public double titleWidth(String text) {
-        return TextRenderer.get().getWidth(text) * 1.22222222;
-    }
-    public double titleHeight() {
-        return TextRenderer.get().getHeight() * 1.22222222;
-    }
-
-    public void post(Runnable task) {
-        scissorStack.top().postTasks.add(task);
+    public void text(String text, double x, double y, Color color, boolean title) {
+        texts.add(getOp(textPool, x, y, color).set(text, theme.textRenderer(), title));
     }
 
     public void texture(double x, double y, double width, double height, double rotation, AbstractTexture texture) {
         post(() -> {
-            mb.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR_TEXTURE);
+            mbTex.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR_TEXTURE);
 
-            mb.pos(x, y, 0).color(WHITE).texture(0, 0).endVertex();
-            mb.pos(x + width, y, 0).color(WHITE).texture(1, 0).endVertex();
-            mb.pos(x + width, y + height, 0).color(WHITE).texture(1, 1).endVertex();
-            mb.pos(x, y, 0).color(WHITE).texture(0, 0).endVertex();
-            mb.pos(x + width, y + height, 0).color(WHITE).texture(1, 1).endVertex();
-            mb.pos(x, y + height, 0).color(WHITE).texture(0, 1).endVertex();
+            mbTex.pos(x, y, 0).color(WHITE).texture(0, 0).endVertex();
+            mbTex.pos(x + width, y, 0).color(WHITE).texture(1, 0).endVertex();
+            mbTex.pos(x + width, y + height, 0).color(WHITE).texture(1, 1).endVertex();
+            mbTex.pos(x, y, 0).color(WHITE).texture(0, 0).endVertex();
+            mbTex.pos(x + width, y + height, 0).color(WHITE).texture(1, 1).endVertex();
+            mbTex.pos(x, y + height, 0).color(WHITE).texture(0, 1).endVertex();
 
             texture.bindTexture();
             GL11.glPushMatrix();
             GL11.glTranslated(x + width / 2, y + height / 2, 0);
             GL11.glRotated(rotation, 0, 0, 1);
             GL11.glTranslated(-x - width / 2, -y - height / 2, 0);
-            mb.end();
+            mbTex.end();
             GL11.glPopMatrix();
         });
     }
 
-    private static class Scissor {
-        public int x, y;
-        public int width, height;
-
-        public boolean changeGlState;
-        public List<Runnable> postTasks = new ArrayList<>();
-
-        public Scissor set(double x, double y, double width, double height, boolean changeGlState) {
-            this.x = (int) Math.round(x);
-            this.y = (int) Math.round(y);
-            this.width = (int) Math.round(width);
-            this.height = (int) Math.round(height);
-            this.changeGlState = changeGlState;
-
-            if (this.width < 0) this.width = 0;
-            if (this.height < 0) this.height = 0;
-
-            postTasks.clear();
-
-            return this;
-        }
-
-        public void apply() {
-            glScissor(x, MinecraftClient.getInstance().getWindow().getFramebufferHeight() - y - height, width, height);
-        }
+    public void post(Runnable task) {
+        scissorStack.peek().postTasks.add(task);
     }
 
-    private static class Text {
-        public String text;
-        public double x, y;
-        public boolean shadow;
-        public Color color;
-        private boolean title;
+    public void absolutePost(Runnable task) {
+        postTasks.add(task);
+    }
 
-        public Text set(String text, double x, double y, boolean shadow, Color color, boolean title) {
-            this.text = text;
-            this.x = x;
-            this.y = y;
-            this.shadow = shadow;
-            this.color = color;
-            this.title = title;
-
-            return this;
-        }
-
-        public void render() {
-            TextRenderer.get().render(text, x, y, color, true);
-        }
+    private <T extends GuiRenderOperation<T>> T getOp(Pool<T> pool, double x, double y, Color color) {
+        T op = pool.get();
+        op.set(x, y, color);
+        return op;
     }
 }

@@ -14,6 +14,8 @@ public interface TextRenderer {
         return Config.get().customFont ? MeteorClient.FONT : VanillaTextRenderer.INSTANCE;
     }
 
+    void setAlpha(double a);
+
     void begin(double scale, boolean scaleOnly, boolean big);
     default void begin(double scale) { begin(scale, false, false); }
     default void begin() { begin(1, false, false); }

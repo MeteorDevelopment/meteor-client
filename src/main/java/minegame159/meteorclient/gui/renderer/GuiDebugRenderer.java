@@ -5,8 +5,9 @@
 
 package minegame159.meteorclient.gui.renderer;
 
-import minegame159.meteorclient.gui.widgets.Cell;
+import minegame159.meteorclient.gui.utils.Cell;
 import minegame159.meteorclient.gui.widgets.WWidget;
+import minegame159.meteorclient.gui.widgets.containers.WContainer;
 import minegame159.meteorclient.rendering.DrawMode;
 import minegame159.meteorclient.rendering.MeshBuilder;
 import minegame159.meteorclient.utils.render.color.Color;
@@ -19,6 +20,8 @@ public class GuiDebugRenderer {
     private final MeshBuilder mb = new MeshBuilder();
 
     public void render(WWidget widget) {
+        if (widget == null) return;
+
         mb.begin(null, DrawMode.Lines, VertexFormats.POSITION_COLOR);
         renderWidget(widget);
         mb.end();
@@ -27,9 +30,11 @@ public class GuiDebugRenderer {
     private void renderWidget(WWidget widget) {
         lineBox(widget.x, widget.y, widget.width, widget.height, WIDGET_COLOR);
 
-        for (Cell<?> cell : widget.getCells()) {
-            lineBox(cell.getX(), cell.getY(), cell.getWidth(), cell.getHeight(), CELL_COLOR);
-            renderWidget(cell.getWidget());
+        if (widget instanceof WContainer) {
+            for (Cell<?> cell : ((WContainer) widget).cells) {
+                lineBox(cell.x, cell.y, cell.width, cell.height, CELL_COLOR);
+                renderWidget(cell.widget());
+            }
         }
     }
 

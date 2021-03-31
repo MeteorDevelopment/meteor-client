@@ -6,12 +6,7 @@
 package minegame159.meteorclient.settings;
 
 import com.google.common.collect.ImmutableList;
-import minegame159.meteorclient.gui.screens.settings.ColorSettingScreen;
-import minegame159.meteorclient.gui.widgets.WButton;
-import minegame159.meteorclient.gui.widgets.WQuad;
-import minegame159.meteorclient.gui.widgets.WTable;
 import minegame159.meteorclient.utils.render.color.SettingColor;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.nbt.CompoundTag;
 
 import java.util.List;
@@ -20,20 +15,8 @@ import java.util.function.Consumer;
 public class ColorSetting extends Setting<SettingColor> {
     private static final List<String> SUGGESTIONS = ImmutableList.of("0 0 0 255", "225 25 25 255", "25 225 25 255", "25 25 225 255", "255 255 255 255");
 
-    private final WQuad quad;
-
     public ColorSetting(String name, String description, SettingColor defaultValue, Consumer<SettingColor> onChanged, Consumer<Setting<SettingColor>> onModuleActivated) {
         super(name, description, defaultValue, onChanged, onModuleActivated);
-
-        widget = new WTable();
-        quad = widget.add(new WQuad(get())).getWidget();
-
-        WButton button = widget.add(new WButton(WButton.ButtonRegion.Edit)).getWidget();
-        button.action = () -> {
-            ColorSettingScreen colorSettingScreen = new ColorSettingScreen(this);
-            colorSettingScreen.action = () -> quad.color = get();
-            MinecraftClient.getInstance().openScreen(colorSettingScreen);
-        };
     }
 
     @Override
@@ -48,16 +31,10 @@ public class ColorSetting extends Setting<SettingColor> {
 
     @Override
     public void reset(boolean callbacks) {
-        value = new SettingColor(defaultValue);
-        if (callbacks) {
-            resetWidget();
-            changed();
-        }
-    }
+        if (value == null) value = new SettingColor(defaultValue);
+        else value.set(defaultValue);
 
-    @Override
-    public void resetWidget() {
-        quad.color = get();
+        if (callbacks) changed();
     }
 
     @Override
