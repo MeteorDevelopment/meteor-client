@@ -431,6 +431,7 @@ public class Modules extends System<Modules> {
         add(new EntitySpeed());
         add(new FastClimb());
         add(new Flight());
+        add(new Fish());
         add(new GUIMove());
         add(new HighJump());
         add(new Jesus());
@@ -445,7 +446,6 @@ public class Modules extends System<Modules> {
         add(new Slippy());
         add(new Step());
         add(new Velocity());
-        add(new Fish());
     }
 
     private void initRender() {

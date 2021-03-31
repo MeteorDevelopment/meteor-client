@@ -17,25 +17,23 @@
 
 package minegame159.meteorclient.modules.movement;
 
+import meteordevelopment.orbit.EventHandler;
+import minegame159.meteorclient.events.world.TickEvent;
+import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.events.world.TickEvent;
-import com.google.common.eventbus.Subscribe;
-import net.minecraft.*;
-import net.minecraft.util.*;
-import net.minecraft.entity.Entity;
-
+import net.minecraft.util.math.Vec3d;
 
 
 
 public class Fish extends Module {
 
-    // Decriptions for the ClickGUI
+    // Descriptions for the ClickGUI
     public Fish() {
         super(Categories.Movement, "fish", "Disables underwater gravity.");
     }
 
-    @Subscribe
+    @EventHandler
     //On every single tick, check these things:
     private void onTick(TickEvent.Post event) {
 
@@ -46,9 +44,8 @@ public class Fish extends Module {
 
         //If in water, set upwards velocity equal to downwards velocity, in order to stay stable.
         if (mc.player.isTouchingWater()) {
-            playerIn.setVelocity(entity.getVelocity().x, 0.005, entity.getVelocity().z);
+            Vec3d velocity = mc.player.getVelocity();
+            ((IVec3d) velocity).set(velocity.x, 0.005, velocity.z);
         }
     }
-
-
 }
