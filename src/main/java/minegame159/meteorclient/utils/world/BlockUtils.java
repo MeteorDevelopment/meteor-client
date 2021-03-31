@@ -92,6 +92,7 @@ public class BlockUtils {
                 || block instanceof BlockWithEntity
                 || block instanceof FenceGateBlock
                 || block instanceof DoorBlock
+                || block instanceof NoteBlock
                 || block instanceof TrapdoorBlock;
 
         return clickable;
