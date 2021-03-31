@@ -120,6 +120,7 @@ public class FriendsTab extends Tab {
                     .build()
             );
 
+            s.onActivated();
             add(theme.settings(s)).expandX();
 
             // Friends
@@ -161,6 +162,8 @@ public class FriendsTab extends Tab {
                     table.clear();
                     fillTable(table);
                 };
+
+                table.row();
             }
         }
     }

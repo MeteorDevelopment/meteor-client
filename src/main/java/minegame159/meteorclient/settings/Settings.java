@@ -22,6 +22,14 @@ public class Settings implements ISerializable<Settings>, Iterable<SettingGroup>
     private SettingGroup defaultGroup;
     public final List<SettingGroup> groups = new ArrayList<>(1);
 
+    public void onActivated() {
+        for (SettingGroup group : groups) {
+            for (Setting<?> setting : group) {
+                setting.onActivated();
+            }
+        }
+    }
+
     public Setting<?> get(String name) {
         for (SettingGroup sg : this) {
             for (Setting<?> setting : sg) {
