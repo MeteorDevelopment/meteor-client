@@ -10,9 +10,6 @@ import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.meteor.ModuleVisibilityChangedEvent;
 import minegame159.meteorclient.gui.GuiTheme;
 import minegame159.meteorclient.gui.widgets.WWidget;
-import minegame159.meteorclient.gui.widgets.containers.WContainer;
-import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.settings.Settings;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.ISerializable;
@@ -73,11 +70,7 @@ public abstract class Module implements ISerializable<Module> {
             active = true;
             Modules.get().addActive(this);
 
-            for (SettingGroup sg : settings) {
-                for (Setting setting : sg) {
-                    if (setting.onModuleActivated != null) setting.onModuleActivated.accept(setting);
-                }
-            }
+            settings.onActivated();
 
             if (onActivateDeactivate) {
                 MeteorClient.EVENT_BUS.subscribe(this);

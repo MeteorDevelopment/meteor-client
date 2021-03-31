@@ -13,7 +13,7 @@ import static minegame159.meteorclient.utils.Utils.getWindowHeight;
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT;
 
 public abstract class WView extends WVerticalList {
-    public double maxHeight;
+    public double maxHeight = Double.MAX_VALUE;
     public boolean scrollOnlyWhenMouseOver = true;
     public boolean hasScrollBar = true;
 
@@ -27,8 +27,9 @@ public abstract class WView extends WVerticalList {
     protected boolean handleMouseOver;
     protected boolean handlePressed;
 
-    public WView() {
-        maxHeight = getWindowHeight() - 128;
+    @Override
+    public void init() {
+        maxHeight = getWindowHeight() - theme.scale(128);
     }
 
     @Override

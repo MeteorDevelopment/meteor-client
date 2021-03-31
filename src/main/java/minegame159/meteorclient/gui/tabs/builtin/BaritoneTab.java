@@ -133,6 +133,7 @@ public class BaritoneTab extends Tab {
                 add(theme.settings(getSettings(), filter.get().trim())).expandX();
             };
 
+            getSettings().onActivated();
             add(theme.settings(getSettings(), filter.get().trim())).expandX();
         }
 
