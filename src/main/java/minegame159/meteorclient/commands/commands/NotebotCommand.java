@@ -45,6 +45,11 @@ public class NotebotCommand extends Command {
             notebot.Pause();
             return SINGLE_SUCCESS;
         }));
+        builder.then(literal("resume").executes(ctx -> {
+            Notebot notebot = Modules.get().get(Notebot.class);
+            notebot.Pause();
+            return SINGLE_SUCCESS;
+        }));
         builder.then(literal("stop").executes(ctx -> {
             Notebot notebot = Modules.get().get(Notebot.class);
             notebot.Stop();
@@ -57,8 +62,11 @@ public class NotebotCommand extends Command {
                 ChatUtils.prefixError("Notebot","Invalid name");
             }
             Path path = MeteorClient.FOLDER.toPath().resolve(String.format("notebot/%s.txt",name));
+            if (!path.toFile().exists()) {
+                path = MeteorClient.FOLDER.toPath().resolve(String.format("notebot/%s.nbs",name));
+            }
             notebot.loadSong(path.toFile());
-            return  SINGLE_SUCCESS;
+            return SINGLE_SUCCESS;
         })));
         builder.then(literal("preview").then(argument("name", StringArgumentType.greedyString()).executes(ctx -> {
             Notebot notebot = Modules.get().get(Notebot.class);
@@ -67,6 +75,9 @@ public class NotebotCommand extends Command {
                 ChatUtils.prefixError("Notebot","Invalid name");
             }
             Path path = MeteorClient.FOLDER.toPath().resolve(String.format("notebot/%s.txt",name));
+            if (!path.toFile().exists()) {
+                path = MeteorClient.FOLDER.toPath().resolve(String.format("notebot/%s.nbs",name));
+            }
             notebot.previewSong(path.toFile());
             return  SINGLE_SUCCESS;
         })));
@@ -111,6 +122,10 @@ public class NotebotCommand extends Command {
     }
 
     private void saveRecording(Path path) {
+        if (song.size()<1) {
+            MeteorClient.EVENT_BUS.unsubscribe(this);
+            return;
+        }
         try {
             FileWriter file = new FileWriter(path.toFile());
             for (int i = 0; i < song.size()-1; i++) {

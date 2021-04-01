@@ -6,7 +6,6 @@ import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.gui.GuiTheme;
 import minegame159.meteorclient.gui.widgets.*;
-import minegame159.meteorclient.gui.widgets.containers.WHorizontalList;
 import minegame159.meteorclient.gui.widgets.containers.WTable;
 import minegame159.meteorclient.gui.widgets.pressable.WButton;
 import minegame159.meteorclient.modules.Categories;
@@ -14,6 +13,8 @@ import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.rendering.ShapeMode;
 import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.utils.notebot.NBSDecoder;
+import minegame159.meteorclient.utils.notebot.nbs.*;
 import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.player.Rotations;
@@ -125,10 +126,14 @@ public class Notebot extends Module {
 
     @Override
     public void onActivate() {
+        ticks=0;
+        resetVariables();
+    }
+
+    private void resetVariables() {
         currentNote=0;
         offset=0;
         lastKey=0;
-        ticks=0;
         isPlaying=false;
         stage=Stage.None;
         song.clear();
@@ -238,14 +243,13 @@ public class Notebot extends Module {
                 .getFileName()
                 .toString()
                 .replace(".txt","")
-                //.replace(".nbs","")
-                ;
+                .replace(".nbs","");
     }
 
     private boolean isValidFile(Path file) {
         String extension = FilenameUtils.getExtension(file.toFile().getName());
         if (extension.equals("txt")) return true;
-        //else if (extension.equals("nbs")) return true;
+        else if (extension.equals("nbs")) return true;
         return false;
     }
 
@@ -275,11 +279,16 @@ public class Notebot extends Module {
 
     public void Stop() {
         ChatUtils.moduleInfo(this, "Stopping.");
-        isPlaying = false;
-        currentNote = 0;
+        if (stage == Stage.SetUp || stage == Stage.Tune) {
+            resetVariables();
+        } else {
+            isPlaying = false;
+            currentNote = 0;
+        }
     }
 
     public void Disable() {
+        resetVariables();
         ChatUtils.moduleInfo(this, "Stopping.");
         if (!isActive()) toggle();
     }
@@ -288,13 +297,13 @@ public class Notebot extends Module {
         if (!isActive()) toggle();
         if (!loadFileToMap(file)) return;
         if (!setupBlocks()) return;
-        ChatUtils.moduleInfo(this, "Loading song.");
+        ChatUtils.moduleInfo(this, "Loading song \"%s\".", getFileLabel(file.toPath()));
     }
 
     public void previewSong(File file) {
         if (!isActive()) toggle();
         if (loadFileToMap(file)) {
-            ChatUtils.moduleInfo(this, "Song loaded.");
+            ChatUtils.moduleInfo(this, "Song \"%s\" loaded.",getFileLabel(file.toPath()));
             stage = Stage.Preview;
             Play();
         }
@@ -307,7 +316,7 @@ public class Notebot extends Module {
         }
         String extension = FilenameUtils.getExtension(file.getName());
         if (extension.equals("txt")) return loadTextFile(file);
-        //else if (extension.equals("nbs")) return loadNbsFile(file);
+        else if (extension.equals("nbs")) return loadNbsFile(file);
         return false;
     }
 
@@ -316,10 +325,10 @@ public class Notebot extends Module {
         try {
             data = Files.readAllLines(file.toPath());
         } catch (IOException e) {
-            ChatUtils.moduleError(this, "Error while reading the file");
+            ChatUtils.moduleError(this, "Error while reading \"%s\"",file.getName());
             return false;
         }
-        song.clear();
+        resetVariables();
         for (int i = 0; i < data.size(); i++) {
             String[] parts = data.get(i).split(":");
             if (parts.length<2) {
@@ -350,29 +359,44 @@ public class Notebot extends Module {
         return true;
     }
 
-    /*
+    
     private boolean loadNbsFile(File file) {
-        byte[] data;
-        try {
-            data = Files.readAllBytes(file.toPath());
-        } catch (IOException e) {
-            ChatUtils.moduleError(this, "Error while reading the file");
+        Song nbsSong = NBSDecoder.parse(file);
+        if (nbsSong == null) {
+            try {
+                byte bytes[] = Files.readAllBytes(file.toPath());
+                if (bytes[0] == 0 && bytes[1] == 0) {
+                    ChatUtils.moduleError(this, "Please use the OG format.");
+                } else {
+                    ChatUtils.moduleError(this, "Couldn't parse the file.");
+                }
+            } catch (IOException e) {
+                ChatUtils.moduleError(this, "Error while reading \"%s\"",file.getName());
+                return false;
+            }
+            
             return false;
         }
-        if (data[0] != 0 || data[1] != 0) {
-            ChatUtils.moduleError(this, "%s is using the old nbs format. Please convert to the new one", file.getName());
-            return false;
+        List<Layer> layers = new ArrayList<>(nbsSong.getLayerHashMap().values());
+        resetVariables();
+        for (Layer layer : layers) {
+            for (int tick : layer.getHashMap().keySet()) {
+                Note note = layer.getNote(tick);
+                tick *= nbsSong.getDelay();
+                if (note == null) continue;
+                byte instrument = note.getInstrument();
+                if (instrument == 2) continue;
+                if (instrument == 3) continue;
+                if (instrument == 4) continue;
+                int n = Byte.toUnsignedInt(note.getKey());
+                n -= 33; // amazing conversion
+                song.put(tick, n);
+                lastKey = tick;
+            }
         }
-        byte fileVersion = data[2];
-        byte instrumentCount = data[4];
-        if (instrumentCount!=0) {
-            ChatUtils.moduleError(this, "Only one instrument can be used.");
-            return false;
-        }
-
         return true;
     }
-    */
+    
 
     private void scanForNoteblocks() {
         if (mc.interactionManager==null || mc.world == null || mc.player == null) return;
