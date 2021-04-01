@@ -27,11 +27,9 @@ public class PlayersHud extends HudElement {
 
     @Override
     public void update(HudRenderer renderer) {
-        double width = 0;
-        double height = 0;
+        double width = renderer.textWidth("Players:");
+        double height = renderer.textHeight();
 
-        box.setSize(renderer.textWidth("Players:"), renderer.textHeight());
-        height += renderer.textHeight();
         int i = 0;
         if(mc.world == null) return;
         for (Entity entity : mc.world.getEntities()) {
