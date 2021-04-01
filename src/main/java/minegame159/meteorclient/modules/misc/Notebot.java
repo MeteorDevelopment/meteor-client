@@ -390,6 +390,10 @@ public class Notebot extends Module {
                 if (instrument == 4) continue;
                 int n = Byte.toUnsignedInt(note.getKey());
                 n -= 33; // amazing conversion
+                if (n<0 || n>24) {
+                    ChatUtils.moduleWarning(this, "Note at tick %d out of range.", tick);
+                    continue;
+                }
                 song.put(tick, n);
                 lastKey = tick;
             }
