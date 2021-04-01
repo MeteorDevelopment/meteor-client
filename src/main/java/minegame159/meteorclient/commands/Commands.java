@@ -64,6 +64,7 @@ public class Commands extends System<Commands> {
         add(new ToggleCommand());
         add(new SettingCommand());
         add(new GamemodeCommand());
+        add(new SaveMapCommand());
     }
 
     public void dispatch(String message) throws CommandSyntaxException {
