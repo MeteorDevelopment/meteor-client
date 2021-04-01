@@ -485,6 +485,7 @@ public class Modules extends System<Modules> {
         add(new LightOverlay());
         add(new Zoom());
         add(new WallHack());
+        add(new WaypointsModule());
     }
 
     private void initWorld() {

@@ -33,9 +33,9 @@ public class ModuleScreen extends WindowScreen {
         // Settings
         if (module.settings.groups.size() > 0) {
             add(theme.settings(module.settings)).expandX();
-
-            add(theme.horizontalSeparator()).expandX();
         }
+
+        add(theme.horizontalSeparator()).expandX();
 
         // Custom widget
         WWidget widget = module.getWidget(theme);
