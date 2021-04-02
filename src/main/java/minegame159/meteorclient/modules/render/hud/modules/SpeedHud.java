@@ -6,8 +6,8 @@
 package minegame159.meteorclient.modules.render.hud.modules;
 
 import minegame159.meteorclient.modules.Modules;
-import minegame159.meteorclient.modules.world.Timer;
 import minegame159.meteorclient.modules.render.hud.HUD;
+import minegame159.meteorclient.modules.world.Timer;
 
 public class SpeedHud extends DoubleTextHudElement {
     public SpeedHud(HUD hud) {

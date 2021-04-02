@@ -15,9 +15,9 @@ import minegame159.meteorclient.mixininterface.IMinecraftClient;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.world.Dimension;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
 import net.minecraft.client.gui.screen.world.SelectWorldScreen;
-import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.network.ServerInfo;
 import net.minecraft.client.options.ServerList;
 import net.minecraft.client.render.Camera;
@@ -333,8 +333,7 @@ public class Utils {
     public static boolean isWhitelistedScreen() {
         if (mc.currentScreen instanceof TitleScreen) return true;
         else if (mc.currentScreen instanceof MultiplayerScreen) return true;
-        else if (mc.currentScreen instanceof SelectWorldScreen) return true;
-        return false;
+        else return mc.currentScreen instanceof SelectWorldScreen;
     }
 
     public static int random(int min, int max) {

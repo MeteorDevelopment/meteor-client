@@ -5,6 +5,7 @@
 
 package minegame159.meteorclient.modules.world;
 
+import com.google.common.collect.Sets;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.player.StartBreakingBlockEvent;
 import minegame159.meteorclient.events.render.RenderEvent;
@@ -29,8 +30,6 @@ import net.minecraft.util.shape.VoxelShape;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-
-import com.google.common.collect.Sets;
 
 public class VeinMiner extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();

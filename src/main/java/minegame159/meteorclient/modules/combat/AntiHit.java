@@ -7,10 +7,6 @@ package minegame159.meteorclient.modules.combat;
 
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
-
-//Created by squidoodly 16/07/2020
-// Not empty class anymore :bruh: - notseanbased
-
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import minegame159.meteorclient.events.entity.player.AttackEntityEvent;
@@ -18,7 +14,10 @@ import minegame159.meteorclient.friends.Friends;
 import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.modules.Modules;
-import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.settings.BoolSetting;
+import minegame159.meteorclient.settings.EntityTypeListSetting;
+import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.SettingGroup;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
 
