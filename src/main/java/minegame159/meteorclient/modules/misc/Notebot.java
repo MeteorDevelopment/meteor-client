@@ -363,18 +363,7 @@ public class Notebot extends Module {
     private boolean loadNbsFile(File file) {
         Song nbsSong = NBSDecoder.parse(file);
         if (nbsSong == null) {
-            try {
-                byte bytes[] = Files.readAllBytes(file.toPath());
-                if (bytes[0] == 0 && bytes[1] == 0) {
-                    ChatUtils.moduleError(this, "Please use the OG format.");
-                } else {
-                    ChatUtils.moduleError(this, "Couldn't parse the file.");
-                }
-            } catch (IOException e) {
-                ChatUtils.moduleError(this, "Error while reading \"%s\"",file.getName());
-                return false;
-            }
-            
+            ChatUtils.moduleError(this, "Couldn't parse the file. Only classic and opennbs v5 are supported");
             return false;
         }
         List<Layer> layers = new ArrayList<>(nbsSong.getLayerHashMap().values());
