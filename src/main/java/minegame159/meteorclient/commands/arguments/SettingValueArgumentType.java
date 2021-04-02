@@ -15,7 +15,6 @@ import minegame159.meteorclient.settings.Setting;
 import net.minecraft.command.CommandSource;
 import net.minecraft.util.Identifier;
 
-import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 
 import static minegame159.meteorclient.commands.arguments.SettingArgumentType.getSetting;

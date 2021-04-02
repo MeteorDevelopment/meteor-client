@@ -6,15 +6,14 @@
 package minegame159.meteorclient.modules.player;
 
 import baritone.api.BaritoneAPI;
+import baritone.api.pathing.goals.GoalXZ;
+import meteordevelopment.orbit.EventHandler;
+import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.gui.GuiTheme;
 import minegame159.meteorclient.gui.widgets.WLabel;
 import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.gui.widgets.containers.WHorizontalList;
 import minegame159.meteorclient.gui.widgets.pressable.WButton;
-import net.minecraft.util.math.Vec3d;
-import baritone.api.pathing.goals.GoalXZ;
-import meteordevelopment.orbit.EventHandler;
-import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.BoolSetting;
@@ -24,10 +23,10 @@ import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.waypoints.Waypoint;
 import minegame159.meteorclient.waypoints.Waypoints;
-
 import net.minecraft.network.packet.s2c.play.HealthUpdateS2CPacket;
 import net.minecraft.text.BaseText;
 import net.minecraft.text.LiteralText;
+import net.minecraft.util.math.Vec3d;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;

@@ -7,7 +7,6 @@ package minegame159.meteorclient.modules.player;
 
 import minegame159.meteorclient.gui.GuiTheme;
 import minegame159.meteorclient.gui.widgets.WWidget;
-import minegame159.meteorclient.gui.widgets.containers.WContainer;
 import minegame159.meteorclient.gui.widgets.containers.WHorizontalList;
 import minegame159.meteorclient.gui.widgets.pressable.WButton;
 import minegame159.meteorclient.modules.Categories;

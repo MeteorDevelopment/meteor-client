@@ -10,7 +10,6 @@ import net.minecraft.client.texture.AbstractTexture;
 import net.minecraft.client.texture.TextureUtil;
 import net.minecraft.resource.ResourceManager;
 import org.lwjgl.BufferUtils;
-import org.lwjgl.stb.STBImageResize;
 
 import java.io.IOException;
 import java.nio.Buffer;

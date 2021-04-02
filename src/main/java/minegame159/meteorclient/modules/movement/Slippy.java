@@ -1,8 +1,16 @@
+/*
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
+ * Copyright (c) 2021 Meteor Development.
+ */
+
 package minegame159.meteorclient.modules.movement;
 
 import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.settings.BlockListSetting;
+import minegame159.meteorclient.settings.DoubleSetting;
+import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.SettingGroup;
 import net.minecraft.block.Block;
 
 import java.util.Collections;

@@ -9,9 +9,9 @@ import minegame159.meteorclient.accounts.Accounts;
 import minegame159.meteorclient.accounts.types.CrackedAccount;
 import minegame159.meteorclient.gui.GuiTheme;
 import minegame159.meteorclient.gui.WindowScreen;
-import minegame159.meteorclient.gui.widgets.pressable.WButton;
-import minegame159.meteorclient.gui.widgets.input.WTextBox;
 import minegame159.meteorclient.gui.widgets.containers.WTable;
+import minegame159.meteorclient.gui.widgets.input.WTextBox;
+import minegame159.meteorclient.gui.widgets.pressable.WButton;
 
 public class AddCrackedAccountScreen extends WindowScreen {
     public AddCrackedAccountScreen(GuiTheme theme) {
