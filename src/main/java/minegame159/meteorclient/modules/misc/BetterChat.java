@@ -17,7 +17,6 @@ import minegame159.meteorclient.mixin.ChatHudLineAccessor;
 import minegame159.meteorclient.modules.Categories;
 import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.systems.Ignores;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.client.gui.hud.ChatHudLine;
@@ -34,12 +33,9 @@ public class BetterChat extends Module {
     private final SettingGroup sgAntiSpam = settings.createGroup("Anti Spam");
     private final SettingGroup sgChatProtect = settings.createGroup("Chat Protect");
     private final SettingGroup sgFancyChat = settings.createGroup("Fancy Chat");
-    private final SettingGroup sgIgnore = settings.createGroup("Ignore");
     private final SettingGroup sgLongerChat = settings.createGroup("Longer Chat");
     private final SettingGroup sgPrefix = settings.createGroup("Prefix");
     private final SettingGroup sgSuffix = settings.createGroup("Suffix");
-    // private final SettingGroup sgFriendColor = settings.createGroup("Friend Color");
-
 
     // Annoy
 
@@ -104,16 +100,6 @@ public class BetterChat extends Module {
             .name("fancy-chat-enabled")
             .description("Makes your messages fancy!")
             .defaultValue(false)
-            .build()
-    );
-
-
-    // Ignore
-
-    private final Setting<Boolean> ignoreEnabled = sgIgnore.add(new BoolSetting.Builder()
-            .name("ignore-enabled")
-            .description("Ignores player defined by the .ignore command.")
-            .defaultValue(true)
             .build()
     );
 
@@ -225,10 +211,7 @@ public class BetterChat extends Module {
 
     public boolean onMsg(String message, int messageId, int timestamp, List<ChatHudLine<Text>> messages, List<ChatHudLine<OrderedText>> visibleMessages) {
         if (!isActive() || skipMessage) return false;
-
-        if (ignoreEnabled.get() && ignoreOnMsg(message)) return true;
         return antiSpamEnabled.get() && antiSpamOnMsg(message, messageId, timestamp, messages, visibleMessages);
-        //return friendColorEnabled.get() && friendColorOnMsg(message);
     }
 
     @EventHandler
@@ -318,18 +301,6 @@ public class BetterChat extends Module {
 
             return false;
         }
-    }
-
-    // IGNORE
-
-    private boolean ignoreOnMsg(String message) {
-        for (String name : Ignores.get()) {
-            if (message.contains("<" + name + ">")) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     // LONGER CHAT
