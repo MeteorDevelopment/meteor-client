@@ -15,8 +15,8 @@ import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.gui.widgets.containers.WContainer;
 import minegame159.meteorclient.gui.widgets.containers.WHorizontalList;
 import minegame159.meteorclient.gui.widgets.pressable.WCheckbox;
-import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.Modules;
+import minegame159.meteorclient.systems.modules.Module;
+import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.utils.Utils;
 
 import static minegame159.meteorclient.utils.Utils.getWindowWidth;

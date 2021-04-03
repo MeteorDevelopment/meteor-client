@@ -5,8 +5,8 @@
 
 package minegame159.meteorclient.utils.entity;
 
-import minegame159.meteorclient.modules.Modules;
-import minegame159.meteorclient.modules.player.FakePlayer;
+import minegame159.meteorclient.systems.modules.Modules;
+import minegame159.meteorclient.systems.modules.player.FakePlayer;
 import net.minecraft.client.MinecraftClient;
 
 import java.util.HashMap;

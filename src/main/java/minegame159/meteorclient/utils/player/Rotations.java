@@ -6,10 +6,10 @@
 package minegame159.meteorclient.utils.player;
 
 import meteordevelopment.orbit.EventHandler;
-import minegame159.meteorclient.Config;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.entity.player.SendMovementPacketsEvent;
 import minegame159.meteorclient.events.world.TickEvent;
+import minegame159.meteorclient.systems.config.Config;
 import minegame159.meteorclient.utils.entity.Target;
 import minegame159.meteorclient.utils.misc.Pool;
 import net.minecraft.client.MinecraftClient;

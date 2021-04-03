@@ -5,12 +5,12 @@
 
 package minegame159.meteorclient.gui.tabs.builtin;
 
-import minegame159.meteorclient.Config;
 import minegame159.meteorclient.gui.GuiTheme;
 import minegame159.meteorclient.gui.tabs.Tab;
 import minegame159.meteorclient.gui.tabs.TabScreen;
 import minegame159.meteorclient.gui.tabs.WindowTabScreen;
 import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.systems.config.Config;
 import minegame159.meteorclient.utils.network.OnlinePlayers;
 import net.minecraft.client.gui.screen.Screen;
 

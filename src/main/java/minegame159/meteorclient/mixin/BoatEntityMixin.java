@@ -7,8 +7,8 @@ package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.entity.BoatMoveEvent;
-import minegame159.meteorclient.modules.Modules;
-import minegame159.meteorclient.modules.movement.BoatFly;
+import minegame159.meteorclient.systems.modules.Modules;
+import minegame159.meteorclient.systems.modules.movement.BoatFly;
 import net.minecraft.entity.vehicle.BoatEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;

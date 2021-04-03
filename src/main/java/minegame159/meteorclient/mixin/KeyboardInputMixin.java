@@ -5,8 +5,8 @@
 
 package minegame159.meteorclient.mixin;
 
-import minegame159.meteorclient.modules.Modules;
-import minegame159.meteorclient.modules.movement.GUIMove;
+import minegame159.meteorclient.systems.modules.Modules;
+import minegame159.meteorclient.systems.modules.movement.GUIMove;
 import net.minecraft.client.input.KeyboardInput;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

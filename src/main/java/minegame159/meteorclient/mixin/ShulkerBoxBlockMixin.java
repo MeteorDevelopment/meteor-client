@@ -5,8 +5,8 @@
 
 package minegame159.meteorclient.mixin;
 
-import minegame159.meteorclient.modules.Modules;
-import minegame159.meteorclient.modules.render.ShulkerPeek;
+import minegame159.meteorclient.systems.modules.Modules;
+import minegame159.meteorclient.systems.modules.render.ShulkerPeek;
 import net.minecraft.block.ShulkerBoxBlock;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.item.ItemStack;

@@ -7,8 +7,8 @@ package minegame159.meteorclient.mixin;
 
 import com.google.common.base.MoreObjects;
 import com.mojang.blaze3d.platform.GlStateManager;
-import minegame159.meteorclient.modules.Modules;
-import minegame159.meteorclient.modules.render.HandView;
+import minegame159.meteorclient.systems.modules.Modules;
+import minegame159.meteorclient.systems.modules.render.HandView;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.AbstractClientPlayerEntity;

@@ -5,7 +5,7 @@
 
 package minegame159.meteorclient.utils.entity;
 
-import minegame159.meteorclient.friends.Friends;
+import minegame159.meteorclient.systems.friends.Friends;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.text.TextUtils;
 import minegame159.meteorclient.utils.render.color.Color;

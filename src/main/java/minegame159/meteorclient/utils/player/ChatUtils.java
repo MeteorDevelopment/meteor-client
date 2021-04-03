@@ -5,9 +5,9 @@
 
 package minegame159.meteorclient.utils.player;
 
-import minegame159.meteorclient.Config;
 import minegame159.meteorclient.mixin.ChatHudAccessor;
-import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.systems.config.Config;
+import minegame159.meteorclient.systems.modules.Module;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;

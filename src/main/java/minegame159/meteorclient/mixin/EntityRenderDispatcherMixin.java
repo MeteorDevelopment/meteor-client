@@ -6,9 +6,9 @@
 package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.mixininterface.IBox;
-import minegame159.meteorclient.modules.Modules;
-import minegame159.meteorclient.modules.combat.Hitboxes;
-import minegame159.meteorclient.modules.render.NoRender;
+import minegame159.meteorclient.systems.modules.Modules;
+import minegame159.meteorclient.systems.modules.combat.Hitboxes;
+import minegame159.meteorclient.systems.modules.render.NoRender;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;

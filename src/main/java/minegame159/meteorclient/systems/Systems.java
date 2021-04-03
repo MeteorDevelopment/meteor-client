@@ -5,14 +5,14 @@
 
 package minegame159.meteorclient.systems;
 
-import minegame159.meteorclient.Config;
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.accounts.Accounts;
-import minegame159.meteorclient.commands.Commands;
-import minegame159.meteorclient.friends.Friends;
-import minegame159.meteorclient.macros.Macros;
-import minegame159.meteorclient.modules.Modules;
-import minegame159.meteorclient.waypoints.Waypoints;
+import minegame159.meteorclient.systems.accounts.Accounts;
+import minegame159.meteorclient.systems.commands.Commands;
+import minegame159.meteorclient.systems.config.Config;
+import minegame159.meteorclient.systems.friends.Friends;
+import minegame159.meteorclient.systems.macros.Macros;
+import minegame159.meteorclient.systems.modules.Modules;
+import minegame159.meteorclient.systems.waypoints.Waypoints;
 
 import java.io.File;
 import java.util.ArrayList;

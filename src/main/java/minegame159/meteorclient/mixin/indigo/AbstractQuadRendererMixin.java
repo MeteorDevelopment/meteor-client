@@ -5,8 +5,8 @@
 
 package minegame159.meteorclient.mixin.indigo;
 
-import minegame159.meteorclient.modules.Modules;
-import minegame159.meteorclient.modules.render.WallHack;
+import minegame159.meteorclient.systems.modules.Modules;
+import minegame159.meteorclient.systems.modules.render.WallHack;
 import net.fabricmc.fabric.impl.client.indigo.renderer.mesh.MutableQuadViewImpl;
 import net.fabricmc.fabric.impl.client.indigo.renderer.render.AbstractQuadRenderer;
 import net.fabricmc.fabric.impl.client.indigo.renderer.render.BlockRenderInfo;

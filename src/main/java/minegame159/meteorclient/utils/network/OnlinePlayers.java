@@ -5,7 +5,7 @@
 
 package minegame159.meteorclient.utils.network;
 
-import minegame159.meteorclient.Config;
+import minegame159.meteorclient.systems.config.Config;
 import net.minecraft.client.MinecraftClient;
 
 public class OnlinePlayers {

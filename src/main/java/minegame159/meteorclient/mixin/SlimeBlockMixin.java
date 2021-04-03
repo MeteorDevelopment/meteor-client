@@ -5,8 +5,8 @@
 
 package minegame159.meteorclient.mixin;
 
-import minegame159.meteorclient.modules.Modules;
-import minegame159.meteorclient.modules.movement.NoSlow;
+import minegame159.meteorclient.systems.modules.Modules;
+import minegame159.meteorclient.systems.modules.movement.NoSlow;
 import net.minecraft.block.SlimeBlock;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;

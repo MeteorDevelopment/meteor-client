@@ -14,7 +14,7 @@ import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.game.GameLeftEvent;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.json.UUIDSerializer;
+import minegame159.meteorclient.utils.json.UUIDSerializer;
 import minegame159.meteorclient.utils.network.HttpUtils;
 import minegame159.meteorclient.utils.network.MeteorExecutor;
 import net.minecraft.entity.player.PlayerEntity;

@@ -7,10 +7,10 @@ package minegame159.meteorclient.utils.render;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.events.render.RenderEvent;
-import minegame159.meteorclient.modules.Modules;
-import minegame159.meteorclient.modules.render.FreeRotate;
-import minegame159.meteorclient.modules.render.Freecam;
 import minegame159.meteorclient.rendering.Renderer;
+import minegame159.meteorclient.systems.modules.Modules;
+import minegame159.meteorclient.systems.modules.render.FreeRotate;
+import minegame159.meteorclient.systems.modules.render.Freecam;
 import minegame159.meteorclient.utils.entity.Target;
 import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.block.entity.BlockEntity;

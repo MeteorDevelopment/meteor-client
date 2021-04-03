@@ -5,9 +5,9 @@
 
 package minegame159.meteorclient.mixin;
 
-import minegame159.meteorclient.modules.Modules;
-import minegame159.meteorclient.modules.movement.Slippy;
-import minegame159.meteorclient.modules.render.Xray;
+import minegame159.meteorclient.systems.modules.Modules;
+import minegame159.meteorclient.systems.modules.movement.Slippy;
+import minegame159.meteorclient.systems.modules.render.Xray;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
