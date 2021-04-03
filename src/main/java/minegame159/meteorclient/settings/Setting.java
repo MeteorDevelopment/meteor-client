@@ -5,7 +5,7 @@
 
 package minegame159.meteorclient.settings;
 
-import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.utils.misc.ISerializable;
 import minegame159.meteorclient.utils.misc.Lazy;
 import net.minecraft.nbt.CompoundTag;

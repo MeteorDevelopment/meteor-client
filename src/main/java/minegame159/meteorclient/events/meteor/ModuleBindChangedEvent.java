@@ -5,7 +5,7 @@
 
 package minegame159.meteorclient.events.meteor;
 
-import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.systems.modules.Module;
 
 public class ModuleBindChangedEvent {
     private static final ModuleBindChangedEvent INSTANCE = new ModuleBindChangedEvent();

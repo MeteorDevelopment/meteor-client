@@ -5,12 +5,12 @@
 
 package minegame159.meteorclient.gui.widgets;
 
-import minegame159.meteorclient.accounts.Account;
-import minegame159.meteorclient.accounts.Accounts;
 import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.gui.widgets.containers.WHorizontalList;
 import minegame159.meteorclient.gui.widgets.pressable.WButton;
 import minegame159.meteorclient.gui.widgets.pressable.WMinus;
+import minegame159.meteorclient.systems.accounts.Account;
+import minegame159.meteorclient.systems.accounts.Accounts;
 import minegame159.meteorclient.utils.network.MeteorExecutor;
 import minegame159.meteorclient.utils.network.OnlinePlayers;
 import minegame159.meteorclient.utils.render.color.Color;

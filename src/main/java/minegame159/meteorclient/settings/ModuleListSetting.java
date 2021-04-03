@@ -5,8 +5,8 @@
 
 package minegame159.meteorclient.settings;
 
-import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.Modules;
+import minegame159.meteorclient.systems.modules.Module;
+import minegame159.meteorclient.systems.modules.Modules;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;

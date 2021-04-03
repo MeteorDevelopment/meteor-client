@@ -13,8 +13,8 @@ import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.settings.ColorSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.waypoints.Waypoint;
-import minegame159.meteorclient.waypoints.Waypoints;
+import minegame159.meteorclient.systems.waypoints.Waypoint;
+import minegame159.meteorclient.systems.waypoints.Waypoints;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -6,11 +6,11 @@
 package minegame159.meteorclient.mixin;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import minegame159.meteorclient.modules.Modules;
-import minegame159.meteorclient.modules.misc.MapPreview;
-import minegame159.meteorclient.modules.render.EChestPreview;
-import minegame159.meteorclient.modules.render.ItemHighlight;
-import minegame159.meteorclient.modules.render.ShulkerPeek;
+import minegame159.meteorclient.systems.modules.Modules;
+import minegame159.meteorclient.systems.modules.misc.MapPreview;
+import minegame159.meteorclient.systems.modules.render.EChestPreview;
+import minegame159.meteorclient.systems.modules.render.ItemHighlight;
+import minegame159.meteorclient.systems.modules.render.ShulkerPeek;
 import minegame159.meteorclient.utils.player.EChestMemory;
 import minegame159.meteorclient.utils.render.RenderUtils;
 import net.minecraft.client.MinecraftClient;

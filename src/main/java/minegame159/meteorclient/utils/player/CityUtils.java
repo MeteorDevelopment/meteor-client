@@ -5,8 +5,8 @@
 
 package minegame159.meteorclient.utils.player;
 
-import minegame159.meteorclient.friends.Friends;
 import minegame159.meteorclient.mixin.AbstractBlockAccessor;
+import minegame159.meteorclient.systems.friends.Friends;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.entity.FakePlayerEntity;
 import minegame159.meteorclient.utils.entity.FakePlayerUtils;

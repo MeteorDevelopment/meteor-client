@@ -5,10 +5,10 @@
 
 package minegame159.meteorclient.gui.themes.meteor.widgets;
 
-import minegame159.meteorclient.accounts.Account;
 import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.gui.themes.meteor.MeteorWidget;
 import minegame159.meteorclient.gui.widgets.WAccount;
+import minegame159.meteorclient.systems.accounts.Account;
 import minegame159.meteorclient.utils.render.color.Color;
 
 public class WMeteorAccount extends WAccount implements MeteorWidget {

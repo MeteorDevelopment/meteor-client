@@ -10,9 +10,9 @@ import minegame159.meteorclient.gui.GuiTheme;
 import minegame159.meteorclient.gui.WindowScreen;
 import minegame159.meteorclient.gui.widgets.containers.WHorizontalList;
 import minegame159.meteorclient.gui.widgets.pressable.WCheckbox;
-import minegame159.meteorclient.modules.Modules;
-import minegame159.meteorclient.modules.render.hud.HUD;
-import minegame159.meteorclient.modules.render.hud.modules.HudElement;
+import minegame159.meteorclient.systems.modules.Modules;
+import minegame159.meteorclient.systems.modules.render.hud.HUD;
+import minegame159.meteorclient.systems.modules.render.hud.modules.HudElement;
 
 import static minegame159.meteorclient.utils.Utils.getWindowWidth;
 
