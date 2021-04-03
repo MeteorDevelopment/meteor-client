@@ -21,6 +21,12 @@ import java.util.ArrayList;
 
 public class CityUtils {
     private static final MinecraftClient mc = MinecraftClient.getInstance();
+    private static final BlockPos[] surround = {
+            new BlockPos(0, 0, -1),
+            new BlockPos(1, 0, 0),
+            new BlockPos(0, 0, 1),
+            new BlockPos(-1, 0, 0)
+    };
 
     public static PlayerEntity getPlayerTarget(double range) {
         if (mc.player.isDead()) return null;
@@ -111,11 +117,4 @@ public class CityUtils {
         if (toAdd == null) return new BlockPos(v.x, v.y, v.z);
         return new BlockPos(v.x, v.y, v.z).add(toAdd);
     }
-
-    private static final BlockPos[] surround = {
-            new BlockPos(0, 0, -1),
-            new BlockPos(1, 0, 0),
-            new BlockPos(0, 0, 1),
-            new BlockPos(-1, 0, 0)
-    };
 }

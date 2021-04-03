@@ -18,31 +18,6 @@ import java.nio.ByteBuffer;
 import static org.lwjgl.opengl.GL30C.*;
 
 public class ByteTexture extends AbstractTexture {
-    public enum Format {
-        A,
-        RGB,
-        RGBA;
-
-        public int toOpenGL() {
-            switch (this) {
-                case A:    return GL_ALPHA;
-                case RGB:  return GL_RGB;
-                case RGBA: return GL_RGBA;
-            }
-
-            return 0;
-        }
-    }
-
-    public enum Filter {
-        Nearest,
-        Linear;
-
-        public int toOpenGL() {
-            return this == Nearest ? GL_NEAREST : GL_LINEAR;
-        }
-    }
-
     public ByteTexture(int width, int height, byte[] data, Format format, Filter filterMin, Filter filterMag) {
         if (!RenderSystem.isOnRenderThread()) {
             RenderSystem.recordRenderCall(() -> upload(width, height, data, format, filterMin, filterMag));
@@ -79,4 +54,32 @@ public class ByteTexture extends AbstractTexture {
 
     @Override
     public void load(ResourceManager manager) throws IOException {}
+
+    public enum Format {
+        A,
+        RGB,
+        RGBA;
+
+        public int toOpenGL() {
+            switch (this) {
+                case A:
+                    return GL_ALPHA;
+                case RGB:
+                    return GL_RGB;
+                case RGBA:
+                    return GL_RGBA;
+            }
+
+            return 0;
+        }
+    }
+
+    public enum Filter {
+        Nearest,
+        Linear;
+
+        public int toOpenGL() {
+            return this == Nearest ? GL_NEAREST : GL_LINEAR;
+        }
+    }
 }

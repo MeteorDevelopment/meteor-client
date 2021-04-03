@@ -56,7 +56,7 @@ public class BlockIterator {
                     int dy = Math.abs(y - py);
                     int dz = Math.abs(z - pz);
 
-                    for (Iterator<Callback> it = callbacks.iterator(); it.hasNext();) {
+                    for (Iterator<Callback> it = callbacks.iterator(); it.hasNext(); ) {
                         Callback callback = it.next();
 
                         if (dx <= callback.hRadius && dy <= callback.vRadius && dz <= callback.hRadius) {

@@ -66,22 +66,14 @@ public class InvUtils {
         return invIndex;
     }
 
-    public static class FindItemResult {
-        public int slot, count;
-
-        public boolean found() {
-            return slot != -1;
-        }
-    }
-
     @EventHandler(priority = EventPriority.LOWEST)
     private static void onTick(TickEvent.Pre event) {
-        if (mc.world == null || mc.player == null || mc.player.abilities.creativeMode){
+        if (mc.world == null || mc.player == null || mc.player.abilities.creativeMode) {
             moveQueue.clear();
             return;
         }
 
-        if (!mc.player.inventory.getCursorStack().isEmpty() && mc.currentScreen == null && mc.player.currentScreenHandler.getStacks().size() == 46){
+        if (!mc.player.inventory.getCursorStack().isEmpty() && mc.currentScreen == null && mc.player.currentScreenHandler.getStacks().size() == 46) {
             int slot = findItemWithCount(mc.player.inventory.getCursorStack().getItem()).slot;
             if (slot == -1) slot = mc.player.inventory.getEmptySlot();
             if (slot != -1) clickSlot(invIndexToSlotId(slot), 0, SlotActionType.PICKUP);
@@ -97,14 +89,14 @@ public class InvUtils {
         }
     }
 
-    public static void addSlots(int mode, int to, int from, int prio){
+    public static void addSlots(int mode, int to, int from, int prio) {
         Long action = Utils.packLong(mode, to, from, prio);
         if (moveQueue.contains(action)) return;
 
         moveQueue.removeIf(entry -> (actionContains(entry, unpackLongTo(action)) || actionContains(entry, unpackLongFrom(action))) && canMove(entry, action));
 
         boolean isEmpty = moveQueue.isEmpty();
-        if (moveQueue.isEmpty() || canMove(moveQueue.peek(), action)){
+        if (moveQueue.isEmpty() || canMove(moveQueue.peek(), action)) {
             moveQueue.addFirst(action);
         } else {
             moveQueue.add(action);
@@ -113,7 +105,7 @@ public class InvUtils {
         if (isEmpty) onTick(new TickEvent.Pre());
     }
 
-    public static boolean canMove(Long first, Long action){
+    public static boolean canMove(Long first, Long action) {
         return unpackLongPrio(first) < unpackLongPrio(action);
     }
 
@@ -168,7 +160,7 @@ public class InvUtils {
         if (slot != mc.player.inventory.selectedSlot && slot >= 0 && slot < 9) mc.player.inventory.selectedSlot = slot;
     }
 
-    private static boolean actionContains(long l, int i){
+    private static boolean actionContains(long l, int i) {
         return i == unpackLongTo(l) || i == unpackLongFrom(l);
     }
 
@@ -186,5 +178,13 @@ public class InvUtils {
 
     private static int unpackLongPrio(long l) {
         return Utils.unpackLong4(l);
+    }
+
+    public static class FindItemResult {
+        public int slot, count;
+
+        public boolean found() {
+            return slot != -1;
+        }
     }
 }

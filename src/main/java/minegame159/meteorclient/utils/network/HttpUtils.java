@@ -39,7 +39,7 @@ public class HttpUtils {
             return conn.getInputStream();
         } catch (SocketTimeoutException ignored) {
             return null;
-        } catch (IOException  e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
@@ -53,6 +53,7 @@ public class HttpUtils {
     public static InputStream post(String url, String body) {
         return request("POST", url, body);
     }
+
     public static InputStream post(String url) {
         return post(url, null);
     }

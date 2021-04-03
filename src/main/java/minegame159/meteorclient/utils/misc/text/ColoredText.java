@@ -16,34 +16,29 @@ public class ColoredText {
     private final String text;
     private final Color color;
 
-    public ColoredText(String text, Color color)
-    {
+    public ColoredText(String text, Color color) {
         this.text = text;
         this.color = color;
     }
 
-    public String getText()
-    {
+    public String getText() {
         return text;
     }
 
-    public Color getColor()
-    {
+    public Color getColor() {
         return color;
     }
 
     @Override
-    public boolean equals(Object o)
-    {
+    public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        ColoredText that = (ColoredText)o;
+        ColoredText that = (ColoredText) o;
         return text.equals(that.text) && color.equals(that.color);
     }
 
     @Override
-    public int hashCode()
-    {
+    public int hashCode() {
         return Objects.hash(text, color);
     }
 }
