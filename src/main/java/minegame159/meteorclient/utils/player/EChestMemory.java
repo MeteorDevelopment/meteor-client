@@ -18,10 +18,9 @@ import net.minecraft.screen.GenericContainerScreenHandler;
 import net.minecraft.util.collection.DefaultedList;
 
 public class EChestMemory {
-    private static final MinecraftClient MC = MinecraftClient.getInstance();
-
-    private static int echestOpenedState;
     public static final DefaultedList<ItemStack> ITEMS = DefaultedList.ofSize(27, ItemStack.EMPTY);
+    private static final MinecraftClient MC = MinecraftClient.getInstance();
+    private static int echestOpenedState;
 
     public static void init() {
         MeteorClient.EVENT_BUS.subscribe(EChestMemory.class);

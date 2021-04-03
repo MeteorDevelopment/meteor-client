@@ -13,11 +13,11 @@ import net.minecraft.world.GameMode;
 public class PlayerListEntryFactory extends PlayerListS2CPacket {
     private static final PlayerListEntryFactory INSTANCE = new PlayerListEntryFactory();
 
-    private Entry _create(GameProfile profile, int latency, GameMode gameMode, Text displayName) {
-        return new Entry(profile, latency, gameMode, displayName);
-    }
-
     public static Entry create(GameProfile profile, int latency, GameMode gameMode, Text displayName) {
         return INSTANCE._create(profile, latency, gameMode, displayName);
+    }
+
+    private Entry _create(GameProfile profile, int latency, GameMode gameMode, Text displayName) {
+        return new Entry(profile, latency, gameMode, displayName);
     }
 }

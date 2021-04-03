@@ -17,6 +17,7 @@ public class Box {
         this.width = width;
         this.height = height;
     }
+
     public Box() {
         this(0, 0, 0, 0);
     }

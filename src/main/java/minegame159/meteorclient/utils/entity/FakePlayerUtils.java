@@ -27,7 +27,7 @@ public class FakePlayerUtils {
             ID++;
         }
     }
-    
+
     public static void removeFakePlayer(int id) {
         if (Modules.get().isActive(FakePlayer.class)) {
             if (players.isEmpty()) return;

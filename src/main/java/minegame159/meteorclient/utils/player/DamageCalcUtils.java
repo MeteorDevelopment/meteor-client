@@ -29,9 +29,8 @@ import net.minecraft.world.explosion.Explosion;
 import java.util.Objects;
 
 public class DamageCalcUtils {
-    public static MinecraftClient mc = MinecraftClient.getInstance();
-
     private static final Explosion explosion = new Explosion(null, null, 0, 0, 0, 6, false, Explosion.DestructionType.DESTROY);
+    public static MinecraftClient mc = MinecraftClient.getInstance();
 
     //Always Calculate damage, then armour, then enchantments, then potion effect
     public static double crystalDamage(LivingEntity player, Vec3d crystal) {
@@ -42,7 +41,7 @@ public class DamageCalcUtils {
         if (modDistance > 12) return 0;
 
         double exposure = Explosion.getExposure(crystal, player);
-        double impact = (1.0 - (modDistance/ 12.0)) * exposure;
+        double impact = (1.0 - (modDistance / 12.0)) * exposure;
         double damage = (impact * impact + impact) / 2 * 7 * (6 * 2) + 1;
 
         // Multiply damage by difficulty
@@ -56,7 +55,7 @@ public class DamageCalcUtils {
 
         // Reduce by enchants
         ((IExplosion) explosion).set(crystal, 6, false);
-        damage  = blastProtReduction(player, damage, explosion);
+        damage = blastProtReduction(player, damage, explosion);
 
         return damage < 0 ? 0 : damage;
     }
@@ -83,7 +82,7 @@ public class DamageCalcUtils {
 
         // Reduce by enchants
         ((IExplosion) explosion).set(bed, 5, true);
-        damage  = blastProtReduction(player, damage, explosion);
+        damage = blastProtReduction(player, damage, explosion);
 
         if (damage < 0) damage = 0;
         return damage;
@@ -122,7 +121,7 @@ public class DamageCalcUtils {
         }
 
         if (entity.getActiveStatusEffects().containsKey(StatusEffects.STRENGTH)) {
-            int strength =  Objects.requireNonNull(entity.getStatusEffect(StatusEffects.STRENGTH)).getAmplifier() + 1;
+            int strength = Objects.requireNonNull(entity.getStatusEffect(StatusEffects.STRENGTH)).getAmplifier() + 1;
             damage += 3 * strength;
         }
 

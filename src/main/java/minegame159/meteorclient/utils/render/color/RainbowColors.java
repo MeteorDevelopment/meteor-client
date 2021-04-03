@@ -32,6 +32,7 @@ public class RainbowColors {
     public static void addSetting(Setting<SettingColor> setting) {
         colorSettings.add(setting);
     }
+
     public static void removeSetting(Setting<SettingColor> setting) {
         colorSettings.remove(setting);
     }

@@ -22,7 +22,6 @@ import net.minecraft.client.network.ServerInfo;
 import net.minecraft.client.options.ServerList;
 import net.minecraft.client.render.Camera;
 import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.item.*;
@@ -52,15 +51,12 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 public class Utils {
-    public static MinecraftClient mc;
-
-    public static boolean firstTimeTitleScreen = true;
-    public static boolean isReleasingTrident;
-
+    public static final Color WHITE = new Color(255, 255, 255);
     private static final Random random = new Random();
     private static final DecimalFormat df;
-
-    public static final Color WHITE = new Color(255, 255, 255);
+    public static MinecraftClient mc;
+    public static boolean firstTimeTitleScreen = true;
+    public static boolean isReleasingTrident;
 
     static {
         df = new DecimalFormat("0");
@@ -149,30 +145,6 @@ public class Utils {
         Registry.STATUS_EFFECT.forEach(potion -> map.put(potion, 0));
 
         return map;
-    }
-
-    public static String getEnchantShortName(Enchantment enchantment) {
-        if (enchantment == Enchantments.FIRE_PROTECTION) return "F Prot";
-        if (enchantment == Enchantments.FEATHER_FALLING) return "Fea Fa";
-        if (enchantment == Enchantments.BLAST_PROTECTION) return "B Prot";
-        if (enchantment == Enchantments.PROJECTILE_PROTECTION) return "P Prot";
-        if (enchantment == Enchantments.AQUA_AFFINITY) return "Aqua A";
-        if (enchantment == Enchantments.THORNS) return "Thorns";
-        if (enchantment == Enchantments.DEPTH_STRIDER) return "Depth S";
-        if (enchantment == Enchantments.FROST_WALKER) return "Frost W";
-        if (enchantment == Enchantments.BINDING_CURSE) return "Curse B";
-        if (enchantment == Enchantments.SMITE) return "Smite";
-        if (enchantment == Enchantments.BANE_OF_ARTHROPODS) return "Bane A";
-        if (enchantment == Enchantments.FIRE_ASPECT) return "Fire A";
-        if (enchantment == Enchantments.SILK_TOUCH) return "Silk T";
-        if (enchantment == Enchantments.POWER) return "Power";
-        if (enchantment == Enchantments.PUNCH) return "Punch";
-        if (enchantment == Enchantments.FLAME) return "Flame";
-        if (enchantment == Enchantments.LUCK_OF_THE_SEA) return "Luck S";
-        if (enchantment == Enchantments.QUICK_CHARGE) return "Quick C";
-        if (enchantment == Enchantments.VANISHING_CURSE) return "Curse V";
-
-        return enchantment.getName(0).getString().substring(0, 4);
     }
 
     public static String getEnchantSimpleName(Enchantment enchantment, int length) {
@@ -322,6 +294,7 @@ public class Utils {
         Camera camera = mc.gameRenderer.getCamera();
         return Math.sqrt(camera.getPos().squaredDistanceTo(x, y, z));
     }
+
     public static double distanceToCamera(Entity entity) {
         return distanceToCamera(entity.getX(), entity.getY(), entity.getZ());
     }
@@ -339,6 +312,7 @@ public class Utils {
     public static int random(int min, int max) {
         return random.nextInt(max - min) + min;
     }
+
     public static double random(double min, double max) {
         return min + (max - min) * random.nextDouble();
     }
@@ -362,6 +336,7 @@ public class Utils {
         ((MinecraftClientAccessor) mc).leftClick();
         mc.options.keyAttack.setPressed(false);
     }
+
     public static void rightClick() {
         ((IMinecraftClient) mc).rightClick();
     }
@@ -389,11 +364,13 @@ public class Utils {
         if (value > max) return max;
         return value;
     }
+
     public static float clamp(float value, float min, float max) {
         if (value < min) return min;
         if (value > max) return max;
         return value;
     }
+
     public static double clamp(double value, double min, double max) {
         if (value < min) return min;
         if (value > max) return max;
@@ -408,8 +385,7 @@ public class Utils {
         if (!tag.contains("Enchantments", 9)) {
             listTag = new ListTag();
             tag.put("Enchantments", listTag);
-        }
-        else {
+        } else {
             listTag = tag.getList("Enchantments", 10);
         }
 
