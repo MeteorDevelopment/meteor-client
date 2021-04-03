@@ -38,7 +38,6 @@ public class Systems {
         add(new Macros());
         add(new Accounts());
         add(new Waypoints());
-        add(new Ignores());
 
         for (System<?> system : systems.values()) {
             if (system != config) system.init();
@@ -60,6 +59,7 @@ public class Systems {
 
         MeteorClient.LOG.info("Saved in {} milliseconds", java.lang.System.currentTimeMillis() - start);
     }
+
     public static void save() {
         save(null);
     }
@@ -80,6 +80,7 @@ public class Systems {
 
         MeteorClient.LOG.info("Loaded in {} milliseconds", java.lang.System.currentTimeMillis() - start);
     }
+
     public static void load() {
         load(null);
     }

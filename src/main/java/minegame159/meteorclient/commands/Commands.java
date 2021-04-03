@@ -48,7 +48,6 @@ public class Commands extends System<Commands> {
         add(new FakePlayerCommand());
         add(new FriendCommand());
         add(new HelpCommand());
-//        add(new IgnoreCommand());
         add(new InventoryCommand());
         add(new LocateCommand());
         add(new NbtCommand());
