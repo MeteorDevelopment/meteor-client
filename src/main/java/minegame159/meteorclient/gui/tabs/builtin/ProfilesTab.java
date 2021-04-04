@@ -255,7 +255,7 @@ public class ProfilesTab extends Tab {
                     remove.action = () -> {
                         profile.loadOnJoinIps.remove(ii);
 
-                        table.clear();
+                        clear();
                         initWidgets();
                     };
                 } else {
@@ -263,7 +263,7 @@ public class ProfilesTab extends Tab {
                     add.action = () -> {
                         profile.loadOnJoinIps.add("");
 
-                        table.clear();
+                        clear();
                         initWidgets();
                     };
                 }
