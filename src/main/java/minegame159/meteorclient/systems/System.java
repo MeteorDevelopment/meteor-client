@@ -45,6 +45,7 @@ public abstract class System<T> implements ISerializable<T> {
             e.printStackTrace();
         }
     }
+
     public void save() {
         save(null);
     }
@@ -63,6 +64,7 @@ public abstract class System<T> implements ISerializable<T> {
             e.printStackTrace();
         }
     }
+
     public void load() {
         load(null);
     }
@@ -70,7 +72,6 @@ public abstract class System<T> implements ISerializable<T> {
     public File getFile() {
         return file;
     }
-
 
     @Override
     public CompoundTag toTag() {
