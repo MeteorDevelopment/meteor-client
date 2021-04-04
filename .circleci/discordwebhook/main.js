@@ -9,13 +9,13 @@ const branch = process.argv[2]
 const version = process.argv[3]
 const build = process.argv[4]
 const compareUrl = process.argv[5]
-const success = process.argv[6] === "true"
 
 const downloadUrl = "https://meteorclient.com/download?devBuild=" + build
 
 axios
   .get(compareUrl)
   .then(res => {
+    let success = true
     let description = ""
 
     description += "**Branch:** " + branch

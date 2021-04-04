@@ -46,20 +46,10 @@ jobs:
       
       - node/install:
           install-yarn: true
-          when: always
 
       - run:
           name: Discord webhook
           command: |
             cd .circleci/discordwebhook
             yarn install
-            yarn start << pipeline.git.branch >> << pipeline.parameters.version >> $CIRCLE_BUILD_NUM https://api.github.com/repos/MeteorDevelopment/meteor-client/compare/<< pipeline.git.base_revision >>...<< pipeline.git.revision >> true
-          when: on_success
-
-      - run:
-          name: Discord webhook
-          command: |
-            cd .circleci/discordwebhook
-            yarn install
-            yarn start << pipeline.git.branch >> << pipeline.parameters.version >> $CIRCLE_BUILD_NUM https://api.github.com/repos/MeteorDevelopment/meteor-client/compare/<< pipeline.git.base_revision >>...<< pipeline.git.revision >> false
-          when: on_fail
+            yarn start << pipeline.git.branch >> << pipeline.parameters.version >> $CIRCLE_BUILD_NUM https://api.github.com/repos/MeteorDevelopment/meteor-client/compare/<< pipeline.git.base_revision >>...<< pipeline.git.revision >>
