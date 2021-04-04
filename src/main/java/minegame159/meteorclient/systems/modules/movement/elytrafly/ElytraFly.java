@@ -23,7 +23,10 @@ import net.minecraft.item.ElytraItem;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.RaycastContext;
 
 public class ElytraFly extends Module {
     public enum ChestSwapMode {
@@ -105,6 +108,24 @@ public class ElytraFly extends Module {
             .name("no-unloaded-chunks")
             .description("Stops you from going into unloaded chunks.")
             .defaultValue(true)
+            .build()
+    );
+
+    public final Setting<Boolean> noCrash = sgDefault.add(new BoolSetting.Builder()
+            .name("no-crash")
+            .description("Stops you from going into walls.")
+            .defaultValue(true)
+            .build()
+    );
+
+    public final Setting<Integer> crashLookAhead = sgDefault.add(new IntSetting.Builder()
+            .name("crash-look-ahead")
+            .description("Distance to look ahead when flying.")
+            .defaultValue(5)
+            .min(1)
+            .max(15)
+            .sliderMin(1)
+            .sliderMax(10)
             .build()
     );
 
@@ -245,6 +266,15 @@ public class ElytraFly extends Module {
             if (currentMode.lastForwardPressed) {
                 mc.options.keyForward.setPressed(false);
                 currentMode.lastForwardPressed = false;
+            }
+        }
+
+        if (noCrash.get()) {
+            Vec3d lookAheadPos = mc.player.getPos().add(mc.player.getVelocity().normalize().multiply(crashLookAhead.get()));
+            RaycastContext raycastContext = new RaycastContext(mc.player.getPos(), new Vec3d(lookAheadPos.getX(), mc.player.getY(), lookAheadPos.getZ()), RaycastContext.ShapeType.OUTLINE, RaycastContext.FluidHandling.NONE, mc.player);
+            BlockHitResult hitResult = mc.world.raycast(raycastContext);
+            if (hitResult != null && hitResult.getType() == HitResult.Type.BLOCK) {
+                ((IVec3d) event.movement).set(0, currentMode.velY, 0);
             }
         }
     }
