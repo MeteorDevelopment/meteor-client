@@ -12,6 +12,7 @@ import minegame159.meteorclient.systems.config.Config;
 import minegame159.meteorclient.systems.friends.Friends;
 import minegame159.meteorclient.systems.macros.Macros;
 import minegame159.meteorclient.systems.modules.Modules;
+import minegame159.meteorclient.systems.profiles.Profiles;
 import minegame159.meteorclient.systems.waypoints.Waypoints;
 
 import java.io.File;
@@ -38,6 +39,7 @@ public class Systems {
         add(new Macros());
         add(new Accounts());
         add(new Waypoints());
+        add(new Profiles());
 
         for (System<?> system : systems.values()) {
             if (system != config) system.init();
@@ -57,7 +59,7 @@ public class Systems {
 
         for (System<?> system : systems.values()) system.save(folder);
 
-        MeteorClient.LOG.info("Saved in {} milliseconds", java.lang.System.currentTimeMillis() - start);
+        MeteorClient.LOG.info("Saved in {} milliseconds.", java.lang.System.currentTimeMillis() - start);
     }
 
     public static void save() {
