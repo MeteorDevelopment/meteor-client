@@ -90,6 +90,7 @@ public class HUD extends Module {
         topLeft.add(new BreakingBlockHud(this));
         topLeft.add(new LookingAtHud(this));
         topLeft.add(new ModuleInfoHud(this));
+        topLeft.add(new TextRadarHud(this));
 
         // Top Center
         topCenter = new HudElementLayer(RENDERER, elements, AlignmentX.Center, AlignmentY.Top, 0, 2);
@@ -100,7 +101,7 @@ public class HUD extends Module {
         // Top Right
         topRight = new HudElementLayer(RENDERER, elements, AlignmentX.Right, AlignmentY.Top, 2, 2);
         topRight.add(new ActiveModulesHud(this));
-        topRight.add(new PlayersHud(this));
+
 
         // Bottom Left
         bottomLeft = new HudElementLayer(RENDERER, elements, AlignmentX.Left, AlignmentY.Bottom, 2, 2);
