@@ -38,6 +38,9 @@ public abstract class BlockMixin extends AbstractBlock implements ItemConvertibl
     
     @Inject(method = "getSlipperiness", at = @At("RETURN"), cancellable = true)
     public void getSlipperiness(CallbackInfoReturnable<Float> info) {
+        // For some retarded reason Tweakeroo calls this method before meteor is initialized
+        if (Modules.get() == null) return;
+
         Slippy slippy = Modules.get().get(Slippy.class);
         Block block = (Block) (Object) this;
 

@@ -17,7 +17,6 @@ import java.util.Collections;
 import java.util.List;
 
 public class Slippy extends Module {
-    
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     public final Setting<Double> slippness = sgGeneral.add(new DoubleSetting.Builder()
@@ -40,5 +39,4 @@ public class Slippy extends Module {
     public Slippy() {
         super(Categories.Movement, "slippy", "Makes blocks slippery like ice.");
     }
-    
 }
