@@ -34,6 +34,15 @@ public class Color implements ISerializable<Color> {
         validate();
     }
 
+    public Color(float r, float g, float b, float a) {
+        this.r = (int)(r*255);
+        this.g = (int)(g*255);
+        this.b = (int)(b*255);
+        this.a = (int)(a*255);
+
+        validate();
+    }
+
     public Color(int packed) {
         r = toRGBAR(packed);
         g = toRGBAG(packed);

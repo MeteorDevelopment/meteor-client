@@ -464,7 +464,6 @@ public class Modules extends System<Modules> {
         add(new HUD());
         add(new HandView());
         add(new HoleESP());
-        add(new ItemByteSize());
         add(new ItemPhysics());
         add(new LogoutSpots());
         add(new Nametags());

@@ -28,6 +28,10 @@ public class SettingColor extends Color {
         super(r, g, b, a);
     }
 
+    public SettingColor(float r, float g, float b, float a) {
+        super(r, g, b, a);
+    }
+
     public SettingColor(int r, int g, int b, int a, double rainbowSpeed) {
         super(r, g, b, a);
 
