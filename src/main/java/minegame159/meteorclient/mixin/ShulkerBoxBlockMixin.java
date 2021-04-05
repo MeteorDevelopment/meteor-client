@@ -23,6 +23,9 @@ import java.util.List;
 public class ShulkerBoxBlockMixin {
     @Inject(method = "appendTooltip", at = @At("HEAD"), cancellable = true)
     private void onAppendTooltip(ItemStack stack, BlockView view, List<Text> tooltip, TooltipContext options, CallbackInfo info) {
-        if (Modules.get() != null && Modules.get().isActive(BetterToolips.class) && Modules.get().get(BetterToolips.class).shulkers.get()) info.cancel();
+        if (Modules.get() == null) return;
+
+        BetterToolips tooltips = Modules.get().get(BetterToolips.class);
+        if (tooltips.isActive() && tooltips.previewShulkers()) info.cancel();
     }
 }
