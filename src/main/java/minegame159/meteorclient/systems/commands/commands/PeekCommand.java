@@ -45,7 +45,7 @@ public class PeekCommand extends Command {
         });
     }
 
-    private static class PeekShulkerBoxScreen extends ShulkerBoxScreen {
+    public static class PeekShulkerBoxScreen extends ShulkerBoxScreen {
         public PeekShulkerBoxScreen(ShulkerBoxScreenHandler handler, PlayerInventory inventory, Text title) {
             super(handler, inventory, title);
         }

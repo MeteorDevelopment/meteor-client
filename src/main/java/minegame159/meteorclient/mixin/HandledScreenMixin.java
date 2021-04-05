@@ -7,12 +7,12 @@ package minegame159.meteorclient.mixin;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.systems.modules.Modules;
-import minegame159.meteorclient.systems.modules.misc.MapPreview;
-import minegame159.meteorclient.systems.modules.render.EChestPreview;
+import minegame159.meteorclient.systems.modules.render.BetterToolips;
 import minegame159.meteorclient.systems.modules.render.ItemHighlight;
-import minegame159.meteorclient.systems.modules.render.ShulkerPeek;
+import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.player.EChestMemory;
 import minegame159.meteorclient.utils.render.RenderUtils;
+import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.screen.Screen;
@@ -21,12 +21,14 @@ import net.minecraft.client.gui.screen.ingame.ScreenHandlerProvider;
 import net.minecraft.client.render.*;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.inventory.Inventories;
+import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.FilledMapItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.map.MapState;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.screen.ScreenHandler;
+import net.minecraft.screen.ShulkerBoxScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -40,15 +42,20 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import javax.annotation.Nullable;
 
+import static minegame159.meteorclient.systems.commands.commands.PeekCommand.PeekShulkerBoxScreen;
+
 @Mixin(HandledScreen.class)
 public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen implements ScreenHandlerProvider<T> {
     @Shadow @Nullable protected Slot focusedSlot;
 
     @Shadow protected int x;
     @Shadow protected int y;
-    private static final Identifier LIGHT = new Identifier("meteor-client", "container_3x9.png");
-    private static final Identifier DARK = new Identifier("meteor-client", "container_3x9-dark.png");
+
+    private static final Identifier TEXTURE_CONTAINER_BACKGROUND = new Identifier("meteor-client", "container_3x9.png");
     private static final Identifier TEXTURE_MAP_BACKGROUND = new Identifier("textures/map/map_background.png");
+
+    private static final ItemStack[] ITEMS = new ItemStack[27];
+
     private static MinecraftClient mc;
 
     public HandledScreenMixin(Text title) {
@@ -63,31 +70,52 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
     @Inject(method = "render", at = @At("TAIL"))
     private void onRender(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo info) {
         if (focusedSlot != null && !focusedSlot.getStack().isEmpty()) {
+            BetterToolips toolips = Modules.get().get(BetterToolips.class);
+
             // Shulker Preview
-            ShulkerPeek shulkerPeek = Modules.get().get(ShulkerPeek.class);
-
-            if (shulkerPeek.isActive() && ((shulkerPeek.isPressed() && shulkerPeek.mode.get() == ShulkerPeek.Mode.Tooltip) || (shulkerPeek.mode.get() == ShulkerPeek.Mode.Always))) {
-                CompoundTag compoundTag = focusedSlot.getStack().getSubTag("BlockEntityTag");
-
-                if (compoundTag != null) {
-                    if (compoundTag.contains("Items", 9)) {
+            if (hasItems(focusedSlot.getStack()) && toolips.previewShulkers()) {
+                switch (toolips.shulkersDisplayMode.get()) {
+                    case Container:
+                        CompoundTag compoundTag = focusedSlot.getStack().getSubTag("BlockEntityTag");
                         DefaultedList<ItemStack> itemStacks = DefaultedList.ofSize(27, ItemStack.EMPTY);
                         Inventories.fromTag(compoundTag, itemStacks);
-
-                        draw(matrices, itemStacks, mouseX, mouseY);
-                    }
+                        draw(matrices, itemStacks, mouseX, mouseY, toolips.shulkersColor.get());
+                        break;
+                    case Screen:
+                        Utils.getItemsInContainerItem(focusedSlot.getStack(), ITEMS);
+                        mc.openScreen(new PeekShulkerBoxScreen(new ShulkerBoxScreenHandler(0, mc.player.inventory, new SimpleInventory(ITEMS)), mc.player.inventory, focusedSlot.getStack().getName()));
+                        break;
                 }
             }
 
             // EChest preview
-            if (focusedSlot.getStack().getItem() == Items.ENDER_CHEST && Modules.get().isActive(EChestPreview.class)) {
-                draw(matrices, EChestMemory.ITEMS, mouseX, mouseY);
+            if (focusedSlot.getStack().getItem() == Items.ENDER_CHEST && toolips.previewEChest()) {
+                switch (toolips.echestDisplayMode.get()) {
+                    case Container:
+                        draw(matrices, EChestMemory.ITEMS, mouseX, mouseY, toolips.echestColor.get());
+                        break;
+                    case Screen:
+                        for (int i = 0; i < EChestMemory.ITEMS.size(); i++) ITEMS[i] = EChestMemory.ITEMS.get(i);
+                        mc.openScreen(new PeekShulkerBoxScreen(new ShulkerBoxScreenHandler(0, mc.player.inventory, new SimpleInventory(ITEMS)), mc.player.inventory, focusedSlot.getStack().getName()));
+                        break;
+                }
             }
 
             // Map preview
-            if (focusedSlot.getStack().getItem() == Items.FILLED_MAP && Modules.get().isActive(MapPreview.class)) {
-                drawMapPreview(matrices, focusedSlot.getStack(), mouseX, mouseY, Modules.get().get(MapPreview.class).getScale());
+            if (focusedSlot.getStack().getItem() == Items.FILLED_MAP && toolips.previewMaps()) {
+                drawMapPreview(matrices, focusedSlot.getStack(), mouseX, mouseY, toolips.mapsScale.get() * 100);
             }
+        }
+    }
+
+    @Inject(method = "drawMouseoverTooltip", at = @At("HEAD"), cancellable = true)
+    private void onDrawMouseoverTooltip(MatrixStack matrices, int x, int y, CallbackInfo info) {
+        if (focusedSlot != null && !focusedSlot.getStack().isEmpty()) {
+            BetterToolips toolips = Modules.get().get(BetterToolips.class);
+
+            if (hasItems(focusedSlot.getStack()) && toolips.previewShulkers()) info.cancel();
+            else if (focusedSlot.getStack().getItem() == Items.ENDER_CHEST && toolips.previewEChest()) info.cancel();
+            else if (focusedSlot.getStack().getItem() == Items.FILLED_MAP && toolips.previewMaps()) info.cancel();
         }
     }
 
@@ -96,22 +124,14 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
         return compoundTag != null && compoundTag.contains("Items", 9);
     }
 
-    @Inject(method = "drawMouseoverTooltip", at = @At("HEAD"), cancellable = true)
-    private void onDrawMouseoverTooltip(MatrixStack matrices, int x, int y, CallbackInfo info) {
-        if (focusedSlot != null && !focusedSlot.getStack().isEmpty()) {
-            ShulkerPeek shulkerPeek = Modules.get().get(ShulkerPeek.class);
-            if (Modules.get().isActive(ShulkerPeek.class) && hasItems(focusedSlot.getStack()) && ((shulkerPeek.isPressed() && Modules.get().get(ShulkerPeek.class).mode.get() == ShulkerPeek.Mode.Tooltip) || (Modules.get().get(ShulkerPeek.class).mode.get() == ShulkerPeek.Mode.Always))) info.cancel();
-            else if (focusedSlot.getStack().getItem() == Items.ENDER_CHEST && Modules.get().isActive(EChestPreview.class)) info.cancel();
-            else if (focusedSlot.getStack().getItem() == Items.FILLED_MAP && Modules.get().isActive(MapPreview.class)) info.cancel();
-        }
-    }
-
-    private void draw(MatrixStack matrices, DefaultedList<ItemStack> itemStacks, int mouseX, int mouseY) {
+    private void draw(MatrixStack matrices, DefaultedList<ItemStack> itemStacks, int mouseX, int mouseY, Color color) {
         RenderSystem.disableLighting();
         RenderSystem.disableDepthTest();
         GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
 
-        drawBackground(matrices, mouseX + 6, mouseY + 6);
+        drawBackground(matrices, mouseX + 6, mouseY + 6, color);
+
+        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         DiffuseLighting.enable();
 
         int row = 0;
@@ -130,16 +150,13 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
         RenderSystem.enableDepthTest();
     }
 
-    private void drawBackground(MatrixStack matrices, int x, int y) {
-        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        mc.getTextureManager().bindTexture(Modules.get().get(ShulkerPeek.class).bgMode.get() == ShulkerPeek.BackgroundMode.Light ? LIGHT : DARK);
-        int width = 176;
-        int height = 67;
-        DrawableHelper.drawTexture(matrices, x, y, 0, 0, 0, width, height, height, width);
+    private void drawBackground(MatrixStack matrices, int x, int y, Color color) {
+        RenderSystem.color4f(color.r / 255F, color.g / 255F, color.b / 255F, color.a / 255F);
+        mc.getTextureManager().bindTexture(TEXTURE_CONTAINER_BACKGROUND);
+        DrawableHelper.drawTexture(matrices, x, y, 0, 0, 0, 176, 67, 67, 176);
     }
 
-    private void drawMapPreview(MatrixStack matrices, ItemStack stack, int x, int y, int dimensions)
-    {
+    private void drawMapPreview(MatrixStack matrices, ItemStack stack, int x, int y, int dimensions) {
         GL11.glEnable(GL11.GL_BLEND);
         RenderSystem.pushMatrix();
         RenderSystem.disableLighting();

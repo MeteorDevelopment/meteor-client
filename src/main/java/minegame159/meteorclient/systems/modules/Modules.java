@@ -456,7 +456,6 @@ public class Modules extends System<Modules> {
         add(new Chams());
         add(new CityESP());
         add(new CustomFOV());
-        add(new EChestPreview());
         add(new ESP());
         add(new EntityOwner());
         add(new FreeRotate());
@@ -472,7 +471,6 @@ public class Modules extends System<Modules> {
         add(new NoRender());
         add(new ParticleBlocker());
         add(new Search());
-        add(new ShulkerPeek());
         add(new StorageESP());
         add(new TimeChanger());
         add(new Tracers());
@@ -487,6 +485,7 @@ public class Modules extends System<Modules> {
         add(new Zoom());
         add(new WallHack());
         add(new WaypointsModule());
+        add(new BetterToolips());
     }
 
     private void initWorld() {
@@ -523,7 +522,6 @@ public class Modules extends System<Modules> {
         add(new BetterChat());
         add(new BookBot());
         add(new DiscordPresence());
-        add(new MapPreview());
         add(new MessageAura());
         add(new MiddleClickFriend());
         add(new OffhandCrash());
