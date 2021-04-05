@@ -56,7 +56,7 @@ public class Notebot extends Module {
     private final SettingGroup sgRender = settings.createGroup("Render",false);
 
     private final Setting<Integer> tickDelay = sgGeneral.add(new IntSetting.Builder()
-            .name("tickDelay")
+            .name("tick-delay")
             .description("The delay when loading a song.")
             .defaultValue(2)
             .min(0)
