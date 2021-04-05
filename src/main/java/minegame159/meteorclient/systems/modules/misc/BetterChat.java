@@ -103,6 +103,13 @@ public class BetterChat extends Module {
 
     // Longer Chat
 
+    private final Setting<Boolean> infiniteChatBox = sgLongerChat.add(new BoolSetting.Builder()
+            .name("infinite-chat-box")
+            .description("Lets you type infinitely long messages.")
+            .defaultValue(true)
+            .build()
+    );
+
     private final Setting<Boolean> longerChatEnabled = sgLongerChat.add(new BoolSetting.Builder()
             .name("longer-chat-enabled")
             .description("Extends chat length.")
@@ -292,6 +299,10 @@ public class BetterChat extends Module {
     }
 
     // LONGER CHAT
+
+    public boolean isInfiniteChatBox() {
+        return isActive() && infiniteChatBox.get();
+    }
 
     public boolean isLongerChat() {
         return longerChatEnabled.get();
