@@ -69,7 +69,7 @@ public class Friends extends System<Friends> implements Iterable<Friend> {
         return friends.contains(friend);
     }
 
-    private Friend get(String name) {
+    public Friend get(String name) {
         for (Friend friend : friends) {
             if (friend.name.equals(name)) {
                 return friend;
@@ -114,8 +114,7 @@ public class Friends extends System<Friends> implements Iterable<Friend> {
         }
     }
 
-    public Color getFriendColor(PlayerEntity player) {
-        Friend friend = get(player);
+    public Color getFriendColor(Friend friend) {
         if (friend == null) return null;
 
         Color color = null;
@@ -131,6 +130,10 @@ public class Friends extends System<Friends> implements Iterable<Friend> {
                 break;
         }
         return color;
+    }
+
+    public Color getFriendColor(PlayerEntity player) {
+        return getFriendColor(get(player));
     }
 
     public void addOrRemove(Friend friend) {

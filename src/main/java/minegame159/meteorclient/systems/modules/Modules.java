@@ -532,6 +532,7 @@ public class Modules extends System<Modules> {
         add(new VisualRange());
         add(new VanillaSpoof());
         add(new AntiBot());
+        add(new BetterTab());
     }
 
     public static class ModuleRegistry extends Registry<Module> {
