@@ -524,6 +524,7 @@ public class Modules extends System<Modules> {
         add(new DiscordPresence());
         add(new MessageAura());
         add(new MiddleClickFriend());
+        add(new Notebot());
         add(new OffhandCrash());
         add(new PacketCanceller());
         add(new SoundBlocker());
