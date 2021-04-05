@@ -19,6 +19,7 @@ import net.minecraft.entity.ExperienceOrbEntity;
 import net.minecraft.entity.FallingBlockEntity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.decoration.ArmorStandEntity;
+import net.minecraft.entity.vehicle.MinecartEntity;
 import net.minecraft.util.math.Box;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -39,6 +40,7 @@ public class EntityRenderDispatcherMixin {
                 || (noRender.noFallingBlocks() && entity instanceof FallingBlockEntity)
                 || (noRender.noArmorStands() && entity instanceof ArmorStandEntity)
                 || ( noRender.noXpOrbs() && entity instanceof ExperienceOrbEntity)
+                || (noRender.noMinecarts() && entity instanceof MinecartEntity)
         ) info.cancel();
     }
 
