@@ -5,6 +5,7 @@
 
 package minegame159.meteorclient.systems.modules.movement;
 
+import baritone.api.BaritoneAPI;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.events.world.TickEvent;
@@ -55,6 +56,13 @@ public class NoFall extends Module {
             .build()
     );
 
+    private final Setting<Boolean> baritone = sgGeneral.add(new BoolSetting.Builder()
+            .name("baritone-compatibility")
+            .description("Makes baritone assume you can fall 255 blocks without damage.")
+            .defaultValue(true)
+            .build()
+    );
+
     private final Setting<Double> height = sgGeneral.add(new DoubleSetting.Builder()
             .name("height")
             .description("How high you have to be off the ground for this to toggle on.")
@@ -72,6 +80,7 @@ public class NoFall extends Module {
     );
 
     private boolean placedWater;
+    private int fallHeightBaritone;
 
     public NoFall() {
         super(Categories.Movement, "no-fall", "Prevents you from taking fall damage.");
@@ -79,7 +88,18 @@ public class NoFall extends Module {
 
     @Override
     public void onActivate() {
+        if (baritone.get()) {
+            fallHeightBaritone = BaritoneAPI.getSettings().maxFallHeightNoWater.get();
+            BaritoneAPI.getSettings().maxFallHeightNoWater.value = 255;
+        }
         placedWater = false;
+    }
+
+    @Override
+    public void onDeactivate() {
+        if (baritone.get()) {
+            BaritoneAPI.getSettings().maxFallHeightNoWater.value = fallHeightBaritone;
+        }
     }
 
     @EventHandler
