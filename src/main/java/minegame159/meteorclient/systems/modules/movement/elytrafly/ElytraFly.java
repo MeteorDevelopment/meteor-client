@@ -269,7 +269,7 @@ public class ElytraFly extends Module {
             }
         }
 
-        if (noCrash.get()) {
+        if (noCrash.get() && mc.player.isFallFlying()) {
             Vec3d lookAheadPos = mc.player.getPos().add(mc.player.getVelocity().normalize().multiply(crashLookAhead.get()));
             RaycastContext raycastContext = new RaycastContext(mc.player.getPos(), new Vec3d(lookAheadPos.getX(), mc.player.getY(), lookAheadPos.getZ()), RaycastContext.ShapeType.OUTLINE, RaycastContext.FluidHandling.NONE, mc.player);
             BlockHitResult hitResult = mc.world.raycast(raycastContext);
