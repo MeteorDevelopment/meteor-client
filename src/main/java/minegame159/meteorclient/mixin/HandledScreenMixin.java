@@ -79,7 +79,7 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
                         CompoundTag compoundTag = focusedSlot.getStack().getSubTag("BlockEntityTag");
                         DefaultedList<ItemStack> itemStacks = DefaultedList.ofSize(27, ItemStack.EMPTY);
                         Inventories.fromTag(compoundTag, itemStacks);
-                        draw(matrices, itemStacks, mouseX, mouseY, toolips.shulkersColor.get());
+                        draw(matrices, itemStacks, mouseX, mouseY, toolips.getShulkerColor(focusedSlot.getStack()));
                         break;
                     case Screen:
                         Utils.getItemsInContainerItem(focusedSlot.getStack(), ITEMS);
@@ -181,7 +181,7 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
         buffer.vertex(x1, y1, z).texture(0.0f, 0.0f).next();
         tessellator.draw();
 
-        MapState mapState = FilledMapItem.getMapState(stack, mc.world);
+        MapState mapState = FilledMapItem.getOrCreateMapState(stack, mc.world);
 
         if (mapState != null)
         {
