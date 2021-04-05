@@ -1,4 +1,4 @@
-package minegame159.meteorclient.modules.misc;
+package minegame159.meteorclient.systems.modules.misc;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.MeteorClient;
@@ -8,8 +8,8 @@ import minegame159.meteorclient.gui.GuiTheme;
 import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.gui.widgets.containers.WTable;
 import minegame159.meteorclient.gui.widgets.pressable.WButton;
-import minegame159.meteorclient.modules.Categories;
-import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.systems.modules.Categories;
+import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.rendering.ShapeMode;
 import minegame159.meteorclient.settings.*;
