@@ -154,6 +154,13 @@ public class NoRender extends Module {
             .build()
     );
 
+    private final Setting<Boolean> noMinecarts = sgGeneral.add(new BoolSetting.Builder()
+            .name("no-minecarts")
+            .description("Disables rendering of minecarts.")
+            .defaultValue(false)
+            .build()
+    );
+
     private final Setting<Boolean> noGuiBackground = sgGeneral.add(new BoolSetting.Builder()
             .name("no-gui-background")
             .description("Disables rendering of the dark GUI background.")
@@ -271,6 +278,10 @@ public class NoRender extends Module {
 
     public boolean noArmorStands() {
         return isActive() && noArmorStands.get();
+    }
+
+    public boolean noMinecarts() {
+        return isActive() && noMinecarts.get();
     }
 
     public boolean noGuiBackground() {
