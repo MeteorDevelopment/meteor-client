@@ -13,8 +13,6 @@ import minegame159.meteorclient.mixin.ChatHudLineAccessor;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.commands.Commands;
 import minegame159.meteorclient.systems.commands.commands.SayCommand;
-import minegame159.meteorclient.systems.friends.Friend;
-import minegame159.meteorclient.systems.friends.Friends;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.utils.Utils;
@@ -182,16 +180,6 @@ public class BetterChat extends Module {
             .build()
     );
 
-    // Friend Color
-    /*
-
-    private final Setting<Boolean> friendColorEnabled = sgFriendColor.add(new BoolSetting.Builder()
-            .name("friend-color-enabled")
-            .description("Highlights friends with color in chat.")
-            .defaultValue(true)
-            .build()
-    );*/
-
     private boolean skipMessage;
 
     private static final Char2CharMap SMALL_CAPS = new Char2CharArrayMap();
@@ -311,30 +299,6 @@ public class BetterChat extends Module {
 
     public int getChatLength() {
         return longerChatLines.get();
-    }
-
-    // FRIEND COLOR
-
-    private boolean friendColorOnMsg(String message) {
-        List<Friend> friends = Friends.get().getAll();
-        boolean hadFriends = false;
-
-        for (Friend friend : friends) {
-            if (message.contains(friend.name)) {
-                message = message.replaceAll(friend.name, "§d" + friend.name + "§r");
-                hadFriends = true;
-            }
-        }
-
-        if (hadFriends) {
-            skipMessage = true;
-            Utils.sendMessage(message);
-            skipMessage = false;
-
-            return true;
-        }
-
-        return false;
     }
 
     // ANNOY
