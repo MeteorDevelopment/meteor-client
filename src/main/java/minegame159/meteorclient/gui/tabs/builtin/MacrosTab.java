@@ -51,6 +51,7 @@ public class MacrosTab extends Tab {
         protected void init() {
             super.init();
 
+            clear();
             initWidgets();
         }
 
