@@ -95,6 +95,11 @@ public class AntiAFK extends Module {
             .onChanged(aBoolean -> {
                 strafeTimer = 0;
                 direction = false;
+
+                if (isActive()) {
+                    mc.options.keyLeft.setPressed(false);
+                    mc.options.keyRight.setPressed(false);
+                }
             })
             .build());
 
@@ -141,6 +146,14 @@ public class AntiAFK extends Module {
     public void onActivate() {
         prevYaw = mc.player.yaw;
         timer = delay.get() * 20;
+    }
+
+    @Override
+    public void onDeactivate() {
+        if (strafe.get()) {
+            mc.options.keyLeft.setPressed(false);
+            mc.options.keyRight.setPressed(false);
+        }
     }
 
     @EventHandler
