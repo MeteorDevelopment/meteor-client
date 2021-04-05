@@ -18,8 +18,10 @@ import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.command.CommandSource;
 import net.minecraft.network.packet.c2s.play.RequestCommandCompletionsC2SPacket;
 import net.minecraft.network.packet.s2c.play.CommandSuggestionsS2CPacket;
+import net.minecraft.util.Formatting;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -27,6 +29,8 @@ import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
 public class PluginsCommand extends Command {
 
+    private static final List<String> ANTICHEAT_LIST = Arrays.asList(
+            "nocheatplus", "negativity", "warden", "horizon","illegalstack","coreprotect","exploitsx");
     private Integer ticks = 0;
 
     public PluginsCommand() {
@@ -76,6 +80,8 @@ public class PluginsCommand extends Command {
                     }
                 }
                 Collections.sort(plugins);
+                for (int i = 0; i < plugins.size(); i++)
+                    plugins.set(i, formatName(plugins.get(i)));
 
                 if (!plugins.isEmpty()) {
                     ChatUtils.info("Plugins (%d): %s ", plugins.size(), Strings.join(plugins.toArray(new String[0]), ", "));
@@ -91,5 +97,18 @@ public class PluginsCommand extends Command {
             ticks = 0;
             MeteorClient.EVENT_BUS.unsubscribe(this);
         }
+    }
+
+    private String formatName(String name) {
+        if (ANTICHEAT_LIST.contains(name)) {
+            return String.format("%s%s(default)", Formatting.RED, name);
+        }
+        else if (
+            name.contains("exploit") || 
+            name.contains("cheat") ||
+            name.contains("illegal")) {
+            return String.format("%s%s(default)", Formatting.RED, name);
+        }
+        return String.format("(highlight)%s(default)", name);
     }
 }
