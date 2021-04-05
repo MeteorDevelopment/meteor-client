@@ -17,6 +17,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShape;
 
 public class BlockSelection extends Module {
@@ -26,6 +27,13 @@ public class BlockSelection extends Module {
             .name("advanced")
             .description("Shows a more advanced outline on different types of shape blocks.")
             .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Boolean> oneSide = sgGeneral.add(new BoolSetting.Builder()
+            .name("one-side")
+            .description("Renders only the side you are looking at.")
+            .defaultValue(false)
             .build()
     );
 
@@ -58,23 +66,43 @@ public class BlockSelection extends Module {
     private void onRender(RenderEvent event) {
         if (mc.crosshairTarget == null || !(mc.crosshairTarget instanceof BlockHitResult)) return;
 
-        BlockPos pos = ((BlockHitResult) mc.crosshairTarget).getBlockPos();
-        BlockState state = mc.world.getBlockState(pos);
-        VoxelShape shape = state.getOutlineShape(mc.world, pos);
+        BlockHitResult result = (BlockHitResult) mc.crosshairTarget;
+
+        BlockPos bp = result.getBlockPos();
+        Direction side = result.getSide();
+
+        BlockState state = mc.world.getBlockState(bp);
+        VoxelShape shape = state.getOutlineShape(mc.world, bp);
 
         if (shape.isEmpty()) return;
         Box box = shape.getBoundingBox();
 
-        if (advanced.get()) {
-            for (Box b : shape.getBoundingBoxes()) {
-                render(pos, b);
+        if (oneSide.get()) {
+            if (side == Direction.UP || side == Direction.DOWN) {
+                Renderer.quadWithLinesHorizontal(Renderer.NORMAL, Renderer.LINES, bp.getX() + box.minX, bp.getY() + (side == Direction.DOWN ? box.minY : box.maxY), bp.getZ() + box.minZ, bp.getX() + box.maxX, bp.getZ() + box.maxZ, sideColor.get(), lineColor.get(), shapeMode.get());
             }
-        } else {
-            render(pos, box);
+            else if (side == Direction.SOUTH || side == Direction.NORTH) {
+                double z = side == Direction.NORTH ? box.minZ : box.maxZ;
+                Renderer.quadWithLinesVertical(Renderer.NORMAL, Renderer.LINES, bp.getX() + box.minX, bp.getY() + box.minY, bp.getZ() + z, bp.getX() + box.maxX, bp.getY() + box.maxY, bp.getZ() + z, sideColor.get(), lineColor.get(), shapeMode.get());
+            }
+            else {
+                double x = side == Direction.WEST ? box.minX : box.maxX;
+                Renderer.quadWithLinesVertical(Renderer.NORMAL, Renderer.LINES, bp.getX() + x, bp.getY() + box.minY, bp.getZ() + box.minZ, bp.getX() + x, bp.getY() + box.maxY, bp.getZ() + box.maxZ, sideColor.get(), lineColor.get(), shapeMode.get());
+            }
+        }
+        else {
+            if (advanced.get()) {
+                for (Box b : shape.getBoundingBoxes()) {
+                    render(bp, b);
+                }
+            }
+            else {
+                render(bp, box);
+            }
         }
     }
 
-    private void render(BlockPos pos, Box box) {
-        Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, pos.getX() + box.minX, pos.getY() + box.minY, pos.getZ() + box.minZ, pos.getX() + box.maxX, pos.getY() + box.maxY, pos.getZ() + box.maxZ, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+    private void render(BlockPos bp, Box box) {
+        Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, bp.getX() + box.minX, bp.getY() + box.minY, bp.getZ() + box.minZ, bp.getX() + box.maxX, bp.getY() + box.maxY, bp.getZ() + box.maxZ, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
     }
 }
