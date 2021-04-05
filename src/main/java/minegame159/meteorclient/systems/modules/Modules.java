@@ -445,6 +445,7 @@ public class Modules extends System<Modules> {
         add(new Slippy());
         add(new Step());
         add(new Velocity());
+        add(new AntiVoid());
     }
 
     private void initRender() {
