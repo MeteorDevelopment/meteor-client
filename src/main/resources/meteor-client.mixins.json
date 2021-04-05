@@ -30,6 +30,7 @@
     "ChatHudAccessor",
     "ChatHudLineAccessor",
     "ChatHudMixin",
+    "ChatScreenMixin",
     "ChunkOcclusionDataBuilderMixin",
     "ChunkSkyLightProviderMixin",
     "ClientConnectionAccessor",
