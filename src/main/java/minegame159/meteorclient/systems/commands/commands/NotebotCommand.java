@@ -1,14 +1,14 @@
-package minegame159.meteorclient.commands.commands;
+package minegame159.meteorclient.systems.commands.commands;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.commands.Command;
+import minegame159.meteorclient.systems.commands.Command;
 import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.modules.Modules;
-import minegame159.meteorclient.modules.misc.Notebot;
+import minegame159.meteorclient.systems.modules.Modules;
+import minegame159.meteorclient.systems.modules.misc.Notebot;
 
 import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.command.CommandSource;

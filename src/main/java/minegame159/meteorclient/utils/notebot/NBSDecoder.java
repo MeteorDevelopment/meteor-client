@@ -30,7 +30,7 @@ public class NBSDecoder {
         try {
             DataInputStream dis = new DataInputStream(inputStream);
             short length = readShort(dis);
-            if (length > 0) return parseClassic(dis, decodeFile, length);
+            if (length != 0) return parseClassic(dis, decodeFile, length);
             else return parseOpenNBS(dis, decodeFile);
         } catch (FileNotFoundException e) {
             LOG.error(e.getStackTrace());
