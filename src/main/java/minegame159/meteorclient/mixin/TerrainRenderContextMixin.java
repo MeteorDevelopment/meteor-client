@@ -5,8 +5,8 @@
 
 package minegame159.meteorclient.mixin;
 
-import minegame159.meteorclient.modules.Modules;
-import minegame159.meteorclient.modules.render.Xray;
+import minegame159.meteorclient.systems.modules.Modules;
+import minegame159.meteorclient.systems.modules.render.Xray;
 import net.fabricmc.fabric.impl.client.indigo.renderer.render.TerrainRenderContext;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.render.model.BakedModel;

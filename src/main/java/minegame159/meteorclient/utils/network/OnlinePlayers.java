@@ -5,9 +5,8 @@
 
 package minegame159.meteorclient.utils.network;
 
+import minegame159.meteorclient.systems.config.Config;
 import net.minecraft.client.MinecraftClient;
-
-import minegame159.meteorclient.Config;
 
 public class OnlinePlayers {
     private static long lastPingTime;

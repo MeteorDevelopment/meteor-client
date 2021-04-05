@@ -5,8 +5,6 @@
 
 package minegame159.meteorclient.gui.tabs.builtin;
 
-import minegame159.meteorclient.friends.Friend;
-import minegame159.meteorclient.friends.Friends;
 import minegame159.meteorclient.gui.GuiTheme;
 import minegame159.meteorclient.gui.tabs.Tab;
 import minegame159.meteorclient.gui.tabs.TabScreen;
@@ -22,6 +20,8 @@ import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.ColorSetting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.settings.Settings;
+import minegame159.meteorclient.systems.friends.Friend;
+import minegame159.meteorclient.systems.friends.Friends;
 import minegame159.meteorclient.utils.entity.FriendType;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.client.gui.screen.Screen;

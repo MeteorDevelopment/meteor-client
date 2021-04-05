@@ -21,8 +21,8 @@ import minegame159.meteorclient.gui.widgets.input.WTextBox;
 import minegame159.meteorclient.gui.widgets.pressable.WButton;
 import minegame159.meteorclient.gui.widgets.pressable.WMinus;
 import minegame159.meteorclient.gui.widgets.pressable.WPlus;
-import minegame159.meteorclient.macros.Macro;
-import minegame159.meteorclient.macros.Macros;
+import minegame159.meteorclient.systems.macros.Macro;
+import minegame159.meteorclient.systems.macros.Macros;
 import net.minecraft.client.gui.screen.Screen;
 
 import static minegame159.meteorclient.utils.Utils.mc;

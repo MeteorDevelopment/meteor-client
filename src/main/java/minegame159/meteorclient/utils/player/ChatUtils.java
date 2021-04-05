@@ -5,9 +5,9 @@
 
 package minegame159.meteorclient.utils.player;
 
-import minegame159.meteorclient.Config;
 import minegame159.meteorclient.mixin.ChatHudAccessor;
-import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.systems.config.Config;
+import minegame159.meteorclient.systems.modules.Module;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
@@ -16,21 +16,7 @@ import net.minecraft.util.math.Vec3d;
 public class ChatUtils {
     private static final MinecraftClient mc = MinecraftClient.getInstance();
 
-    private enum PrefixType {
-        Module(Formatting.AQUA),
-        Other(Formatting.LIGHT_PURPLE),
-        None(Formatting.RESET);
-
-        public Formatting color;
-
-        PrefixType(Formatting color) {
-            this.color = color;
-        }
-    }
-
-    //No prefix
-
-    private static void message(int id,  Formatting color, String msg, Object... args) {
+    private static void message(int id, Formatting color, String msg, Object... args) {
         sendMsg(id, null, PrefixType.None, formatMsg(msg, color, args), color);
     }
 
@@ -116,7 +102,6 @@ public class ChatUtils {
         sendMsg(id, prefix, type, message);
     }
 
-
     private static void sendMsg(int id, String prefix, PrefixType type, Text msg) {
         if (mc.world == null) return;
 
@@ -130,14 +115,14 @@ public class ChatUtils {
     }
 
     public static BaseText formatCoords(Vec3d pos) {
-        String coordsString = String.format("(highlight)(underline)%.0f, %.0f, %.0f(default)",pos.x,pos.y,pos.z);
-        coordsString = formatMsg(coordsString,Formatting.GRAY);
+        String coordsString = String.format("(highlight)(underline)%.0f, %.0f, %.0f(default)", pos.x, pos.y, pos.z);
+        coordsString = formatMsg(coordsString, Formatting.GRAY);
         BaseText coordsText = new LiteralText(coordsString);
         coordsText.setStyle(coordsText.getStyle()
                 .withFormatting(Formatting.UNDERLINE)
                 .withClickEvent(new ClickEvent(
                         ClickEvent.Action.RUN_COMMAND,
-                        String.format("%sb goto %d %d %d", Config.get().getPrefix(), (int)pos.x, (int)pos.y, (int)pos.z)
+                        String.format("%sb goto %d %d %d", Config.get().getPrefix(), (int) pos.x, (int) pos.y, (int) pos.z)
                 ))
                 .withHoverEvent(new HoverEvent(
                         HoverEvent.Action.SHOW_TEXT,
@@ -175,5 +160,17 @@ public class ChatUtils {
         msg = msg.replaceAll("\\(underline\\)", Formatting.UNDERLINE.toString());
 
         return msg;
+    }
+
+    private enum PrefixType {
+        Module(Formatting.AQUA),
+        Other(Formatting.LIGHT_PURPLE),
+        None(Formatting.RESET);
+
+        public Formatting color;
+
+        PrefixType(Formatting color) {
+            this.color = color;
+        }
     }
 }

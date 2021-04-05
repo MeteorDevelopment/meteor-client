@@ -7,8 +7,8 @@ package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.render.RenderBossBarEvent;
-import minegame159.meteorclient.modules.Modules;
-import minegame159.meteorclient.modules.render.NoRender;
+import minegame159.meteorclient.systems.modules.Modules;
+import minegame159.meteorclient.systems.modules.render.NoRender;
 import net.minecraft.client.gui.hud.BossBarHud;
 import net.minecraft.client.gui.hud.ClientBossBar;
 import net.minecraft.text.Text;

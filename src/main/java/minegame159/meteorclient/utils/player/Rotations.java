@@ -6,10 +6,10 @@
 package minegame159.meteorclient.utils.player;
 
 import meteordevelopment.orbit.EventHandler;
-import minegame159.meteorclient.Config;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.entity.player.SendMovementPacketsEvent;
 import minegame159.meteorclient.events.world.TickEvent;
+import minegame159.meteorclient.systems.config.Config;
 import minegame159.meteorclient.utils.entity.Target;
 import minegame159.meteorclient.utils.misc.Pool;
 import net.minecraft.client.MinecraftClient;
@@ -23,13 +23,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Rotations {
-    public static float serverYaw;
-    public static float serverPitch;
-    public static int rotationTimer;
-
     private static final MinecraftClient mc = MinecraftClient.getInstance();
     private static final Pool<Rotation> rotationPool = new Pool<>(Rotation::new);
     private static final List<Rotation> rotations = new ArrayList<>();
+    public static float serverYaw;
+    public static float serverPitch;
+    public static int rotationTimer;
     private static float preYaw, prePitch;
     private static int i = 0;
 
@@ -52,6 +51,7 @@ public class Rotations {
 
         rotations.add(i, rotation);
     }
+
     public static void rotate(double yaw, double pitch, int priority, Runnable callback) {
         rotate(yaw, pitch, priority, false, callback);
     }
@@ -87,12 +87,10 @@ public class Rotations {
             if (rotations.size() > 1) rotationPool.free(rotation);
 
             i++;
-        }
-        else if (lastRotation != null) {
+        } else if (lastRotation != null) {
             if (lastRotationTimer >= Config.get().rotationHoldTicks) {
                 resetLastRotation();
-            }
-            else {
+            } else {
                 setupMovementPacketRotation(lastRotation);
                 sentLastRotation = true;
 
@@ -139,8 +137,7 @@ public class Rotations {
 
             rotations.clear();
             i = 0;
-        }
-        else if (sentLastRotation) {
+        } else if (sentLastRotation) {
             resetPreRotation();
         }
     }
@@ -187,7 +184,10 @@ public class Rotations {
 
         return mc.player.pitch + MathHelper.wrapDegrees((float) -Math.toDegrees(Math.atan2(diffY, diffXZ)) - mc.player.pitch);
     }
-    public static double getPitch(Entity entity) { return getPitch(entity, Target.Body); }
+
+    public static double getPitch(Entity entity) {
+        return getPitch(entity, Target.Body);
+    }
 
     public static double getYaw(BlockPos pos) {
         return mc.player.yaw + MathHelper.wrapDegrees((float) Math.toDegrees(Math.atan2(pos.getZ() + 0.5 - mc.player.getZ(), pos.getX() + 0.5 - mc.player.getX())) - 90f - mc.player.yaw);

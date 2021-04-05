@@ -7,12 +7,13 @@ package minegame159.meteorclient.gui.themes.meteor.widgets;
 
 import minegame159.meteorclient.gui.renderer.GuiRenderer;
 import minegame159.meteorclient.gui.themes.meteor.MeteorWidget;
-import minegame159.meteorclient.gui.widgets.pressable.WTriangle;
+import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.gui.widgets.containers.WSection;
+import minegame159.meteorclient.gui.widgets.pressable.WTriangle;
 
 public class WMeteorSection extends WSection {
-    public WMeteorSection(String title, boolean expanded) {
-        super(title, expanded);
+    public WMeteorSection(String title, boolean expanded, WWidget headerWidget) {
+        super(title, expanded, headerWidget);
     }
 
     @Override
@@ -30,6 +31,8 @@ public class WMeteorSection extends WSection {
         @Override
         public void init() {
             add(theme.horizontalSeparator(title)).expandX();
+
+            if (headerWidget != null) add(headerWidget);
 
             triangle = new WHeaderTriangle();
             triangle.theme = theme;

@@ -14,7 +14,7 @@ import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.game.GameLeftEvent;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.json.UUIDSerializer;
+import minegame159.meteorclient.utils.json.UUIDSerializer;
 import minegame159.meteorclient.utils.network.HttpUtils;
 import minegame159.meteorclient.utils.network.MeteorExecutor;
 import net.minecraft.entity.player.PlayerEntity;
@@ -34,11 +34,10 @@ public class MeteorPlayers {
     private static final Object2BooleanMap<UUID> players = new Object2BooleanOpenHashMap<>();
 
     private static final List<UUID> toCheck = new ArrayList<>();
-    private static int checkTimer;
-
     private static final Gson gson = new GsonBuilder()
             .registerTypeAdapter(UUID.class, new UUIDSerializer())
             .create();
+    private static int checkTimer;
 
     public static void init() {
         MeteorClient.EVENT_BUS.subscribe(MeteorPlayers.class);
@@ -63,8 +62,7 @@ public class MeteorPlayers {
             checkTimer = 0;
 
             MeteorExecutor.execute(MeteorPlayers::check);
-        }
-        else {
+        } else {
             checkTimer++;
         }
     }

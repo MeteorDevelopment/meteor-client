@@ -10,7 +10,7 @@ import minegame159.meteorclient.gui.themes.meteor.MeteorGuiTheme;
 import minegame159.meteorclient.gui.themes.meteor.MeteorWidget;
 import minegame159.meteorclient.gui.utils.AlignmentX;
 import minegame159.meteorclient.gui.widgets.pressable.WPressable;
-import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.utils.Utils;
 
 import static minegame159.meteorclient.utils.Utils.mc;

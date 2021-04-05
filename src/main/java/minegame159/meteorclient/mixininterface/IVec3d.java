@@ -6,7 +6,6 @@
 package minegame159.meteorclient.mixininterface;
 
 import minegame159.meteorclient.utils.misc.Vec3;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 
 public interface IVec3d {

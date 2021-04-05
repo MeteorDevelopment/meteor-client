@@ -5,8 +5,8 @@
 
 package minegame159.meteorclient.mixin;
 
-import minegame159.meteorclient.modules.Modules;
-import minegame159.meteorclient.modules.world.Timer;
+import minegame159.meteorclient.systems.modules.Modules;
+import minegame159.meteorclient.systems.modules.world.Timer;
 import net.minecraft.client.render.RenderTickCounter;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;

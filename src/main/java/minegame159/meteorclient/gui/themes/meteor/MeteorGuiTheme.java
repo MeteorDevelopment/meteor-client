@@ -5,7 +5,6 @@
 
 package minegame159.meteorclient.gui.themes.meteor;
 
-import minegame159.meteorclient.accounts.Account;
 import minegame159.meteorclient.gui.DefaultSettingsWidgetFactory;
 import minegame159.meteorclient.gui.GuiTheme;
 import minegame159.meteorclient.gui.WidgetScreen;
@@ -25,9 +24,10 @@ import minegame159.meteorclient.gui.widgets.input.WDropdown;
 import minegame159.meteorclient.gui.widgets.input.WSlider;
 import minegame159.meteorclient.gui.widgets.input.WTextBox;
 import minegame159.meteorclient.gui.widgets.pressable.*;
-import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.rendering.text.TextRenderer;
 import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.systems.accounts.Account;
+import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 
@@ -236,8 +236,8 @@ public class MeteorGuiTheme extends GuiTheme {
     }
 
     @Override
-    public WSection section(String title, boolean expanded) {
-        return w(new WMeteorSection(title, expanded));
+    public WSection section(String title, boolean expanded, WWidget headerWidget) {
+        return w(new WMeteorSection(title, expanded, headerWidget));
     }
 
     @Override

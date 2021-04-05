@@ -20,41 +20,15 @@ import net.minecraft.util.math.Vec3d;
 import java.util.ArrayList;
 
 public class PathFinder {
-    private Entity target;
     private final static int PATH_AHEAD = 3;
-    private final ArrayList<PathBlock> path = new ArrayList<>(PATH_AHEAD);
     private final static int QUAD_1 = 1, QUAD_2 = 2, SOUTH = 0, NORTH = 180;
-    private PathBlock currentPathBlock;
+    private final ArrayList<PathBlock> path = new ArrayList<>(PATH_AHEAD);
     private final MinecraftClient mc;
+    private Entity target;
+    private PathBlock currentPathBlock;
 
-    public PathFinder(){
+    public PathFinder() {
         mc = MinecraftClient.getInstance();
-    }
-
-    public class PathBlock {
-        public final Block block;
-        public final BlockPos blockPos;
-        public final BlockState blockState;
-        public double yaw;
-
-        public PathBlock(Block b, BlockPos pos, BlockState state) {
-            block = b;
-            blockPos = pos;
-            blockState = state;
-        }
-
-        public PathBlock(Block b, BlockPos pos) {
-            block = b;
-            blockPos = pos;
-            blockState = getBlockStateAtPos(blockPos);
-        }
-
-        public PathBlock(BlockPos pos) {
-            blockPos = pos;
-            block = getBlockAtPos(pos);
-            blockState = getBlockStateAtPos(blockPos);
-        }
-
     }
 
     public PathBlock getNextPathBlock() {
@@ -157,7 +131,7 @@ public class PathFinder {
     }
 
     public void lookAtDestination(PathBlock pathBlock) {
-        if(mc.player != null) {
+        if (mc.player != null) {
             mc.player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, new Vec3d(pathBlock.blockPos.getX(), pathBlock.blockPos.getY() + mc.player.getStandingEyeHeight(), pathBlock.blockPos.getZ()));
         }
     }
@@ -192,5 +166,31 @@ public class PathFinder {
         path.clear();
         if (mc.options.keyForward.isPressed()) mc.options.keyForward.setPressed(false);
         MeteorClient.EVENT_BUS.unsubscribe(this);
+    }
+
+    public class PathBlock {
+        public final Block block;
+        public final BlockPos blockPos;
+        public final BlockState blockState;
+        public double yaw;
+
+        public PathBlock(Block b, BlockPos pos, BlockState state) {
+            block = b;
+            blockPos = pos;
+            blockState = state;
+        }
+
+        public PathBlock(Block b, BlockPos pos) {
+            block = b;
+            blockPos = pos;
+            blockState = getBlockStateAtPos(blockPos);
+        }
+
+        public PathBlock(BlockPos pos) {
+            blockPos = pos;
+            block = getBlockAtPos(pos);
+            blockState = getBlockStateAtPos(blockPos);
+        }
+
     }
 }

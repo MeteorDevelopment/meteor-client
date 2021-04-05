@@ -5,7 +5,6 @@
 
 package minegame159.meteorclient.gui;
 
-import minegame159.meteorclient.accounts.Account;
 import minegame159.meteorclient.gui.renderer.packer.GuiTexture;
 import minegame159.meteorclient.gui.screens.AccountsScreen;
 import minegame159.meteorclient.gui.screens.ModuleScreen;
@@ -18,9 +17,10 @@ import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.gui.widgets.containers.*;
 import minegame159.meteorclient.gui.widgets.input.*;
 import minegame159.meteorclient.gui.widgets.pressable.*;
-import minegame159.meteorclient.modules.Module;
 import minegame159.meteorclient.rendering.text.TextRenderer;
 import minegame159.meteorclient.settings.Settings;
+import minegame159.meteorclient.systems.accounts.Account;
+import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.utils.misc.ISerializable;
 import minegame159.meteorclient.utils.misc.Keybind;
 import minegame159.meteorclient.utils.misc.Names;
@@ -124,7 +124,10 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
         return w(new WTable());
     }
 
-    public abstract WSection section(String title, boolean expanded);
+    public abstract WSection section(String title, boolean expanded, WWidget headerWidget);
+    public WSection section(String title, boolean expanded) {
+        return section(title, expanded, null);
+    }
     public WSection section(String title) {
         return section(title, true);
     }

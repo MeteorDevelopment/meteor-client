@@ -6,10 +6,10 @@
 package minegame159.meteorclient.mixin;
 
 import com.g00fy2.versioncompare.Version;
-import minegame159.meteorclient.Config;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.gui.GuiThemes;
 import minegame159.meteorclient.gui.screens.NewUpdateScreen;
+import minegame159.meteorclient.systems.config.Config;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.network.HttpUtils;
 import minegame159.meteorclient.utils.network.MeteorExecutor;

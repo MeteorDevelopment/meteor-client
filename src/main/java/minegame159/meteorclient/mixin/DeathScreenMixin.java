@@ -8,8 +8,8 @@ package minegame159.meteorclient.mixin;
 //Created by squidoodly 21/05/2020 :bruh:
 // Did squidoodly put his name on everything???
 
-import minegame159.meteorclient.modules.Modules;
-import minegame159.meteorclient.modules.misc.BypassDeathScreen;
+import minegame159.meteorclient.systems.modules.Modules;
+import minegame159.meteorclient.systems.modules.misc.BypassDeathScreen;
 import net.minecraft.client.gui.screen.DeathScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;

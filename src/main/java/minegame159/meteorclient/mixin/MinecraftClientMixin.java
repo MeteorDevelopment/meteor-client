@@ -5,16 +5,16 @@
 
 package minegame159.meteorclient.mixin;
 
-import minegame159.meteorclient.Config;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.entity.player.ItemUseCrosshairTargetEvent;
 import minegame159.meteorclient.events.game.GameLeftEvent;
 import minegame159.meteorclient.events.game.OpenScreenEvent;
 import minegame159.meteorclient.events.game.ResourcePacksReloadedEvent;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.gui.GuiKeyEvents;
+import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.mixininterface.IMinecraftClient;
+import minegame159.meteorclient.systems.config.Config;
 import minegame159.meteorclient.utils.network.OnlinePlayers;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.Mouse;

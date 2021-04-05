@@ -5,7 +5,7 @@
 
 package minegame159.meteorclient.utils.entity;
 
-import minegame159.meteorclient.friends.Friends;
+import minegame159.meteorclient.systems.friends.Friends;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.text.TextUtils;
 import minegame159.meteorclient.utils.render.color.Color;
@@ -27,8 +27,8 @@ import java.util.List;
 import java.util.function.Predicate;
 
 public class EntityUtils {
-    public static MinecraftClient mc;
     private static final List<Entity> entities = new ArrayList<>();
+    public static MinecraftClient mc;
 
     public static boolean isAttackable(EntityType<?> type) {
         return type != EntityType.AREA_EFFECT_CLOUD && type != EntityType.ARROW && type != EntityType.FALLING_BLOCK && type != EntityType.FIREWORK_ROCKET && type != EntityType.ITEM && type != EntityType.LLAMA_SPIT && type != EntityType.SPECTRAL_ARROW && type != EntityType.ENDER_PEARL && type != EntityType.EXPERIENCE_BOTTLE && type != EntityType.POTION && type != EntityType.TRIDENT && type != EntityType.LIGHTNING_BOLT && type != EntityType.FISHING_BOBBER && type != EntityType.EXPERIENCE_ORB && type != EntityType.EGG;

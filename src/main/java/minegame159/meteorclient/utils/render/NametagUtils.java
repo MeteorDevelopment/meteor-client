@@ -21,11 +21,10 @@ public class NametagUtils {
     private static final Vec4 vec4 = new Vec4();
     private static final Vec4 mmMat4 = new Vec4();
     private static final Vec4 pmMat4 = new Vec4();
-
-    private static Matrix4f model;
-    private static Matrix4f projection;
     private static final Vec3 camera = new Vec3();
     private static final Vec3 cameraNegated = new Vec3();
+    private static Matrix4f model;
+    private static Matrix4f projection;
     private static double windowScale;
 
     private static double scale;

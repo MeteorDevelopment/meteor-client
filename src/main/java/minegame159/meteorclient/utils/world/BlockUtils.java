@@ -33,8 +33,7 @@ public class BlockUtils {
             side = Direction.UP;
             neighbour = blockPos;
             ((IVec3d) hitPos).set(blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5);
-        }
-        else {
+        } else {
             neighbour = blockPos.offset(side.getOpposite());
             // The Y is not 0.5 but 0.6 for allowing "antiAnchor" placement. This should not damage any other modules
             ((IVec3d) hitPos).set(neighbour.getX() + 0.5 + side.getOffsetX() * 0.5, neighbour.getY() + 0.6 + side.getOffsetY() * 0.5, neighbour.getZ() + 0.5 + side.getOffsetZ() * 0.5);
@@ -43,11 +42,11 @@ public class BlockUtils {
         if (rotate) {
             Direction s = side;
             Rotations.rotate(Rotations.getYaw(hitPos), Rotations.getPitch(hitPos), priority, () -> place(slot, hitPos, hand, s, neighbour, swing, swap, swapBack));
-        }
-        else place(slot, hitPos, hand, side, neighbour, swing, swap, swapBack);
+        } else place(slot, hitPos, hand, side, neighbour, swing, swap, swapBack);
 
         return true;
     }
+
     public static boolean place(BlockPos blockPos, Hand hand, int slot, boolean rotate, int priority, boolean checkEntities) {
         return place(blockPos, hand, slot, rotate, priority, true, checkEntities, true, true);
     }
@@ -80,6 +79,7 @@ public class BlockUtils {
         // Check if intersects entities
         return !checkEntities || mc.world.canPlace(Blocks.STONE.getDefaultState(), blockPos, ShapeContext.absent());
     }
+
     public static boolean canPlace(BlockPos blockPos) {
         return canPlace(blockPos, true);
     }

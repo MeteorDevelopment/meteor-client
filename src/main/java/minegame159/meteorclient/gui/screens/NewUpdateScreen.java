@@ -6,11 +6,11 @@
 package minegame159.meteorclient.gui.screens;
 
 import com.g00fy2.versioncompare.Version;
-import minegame159.meteorclient.Config;
 import minegame159.meteorclient.gui.GuiTheme;
 import minegame159.meteorclient.gui.WindowScreen;
 import minegame159.meteorclient.gui.widgets.containers.WHorizontalList;
 import minegame159.meteorclient.gui.widgets.containers.WTable;
+import minegame159.meteorclient.systems.config.Config;
 import net.minecraft.util.Util;
 
 public class NewUpdateScreen extends WindowScreen {
