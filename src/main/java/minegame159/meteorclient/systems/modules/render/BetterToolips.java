@@ -14,13 +14,21 @@ import minegame159.meteorclient.utils.misc.ByteCountDataOutput;
 import minegame159.meteorclient.utils.misc.Keybind;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.render.color.SettingColor;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.ShulkerBoxBlock;
+import net.minecraft.entity.effect.StatusEffect;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffectUtil;
 import net.minecraft.item.BlockItem;
+import net.minecraft.item.FoodComponent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.text.LiteralText;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.DyeColor;
 import net.minecraft.util.Formatting;
 
@@ -35,6 +43,7 @@ public class BetterToolips extends Module {
     private final SettingGroup sgEChest = settings.createGroup("EChest");
     private final SettingGroup sgMap = settings.createGroup("Map");
     private final SettingGroup sgByteSize = settings.createGroup("Byte Size");
+    private final SettingGroup sgOther = settings.createGroup("Other");
 
     // General
 
@@ -139,6 +148,20 @@ public class BetterToolips extends Module {
             .build()
     );
 
+    private final Setting<Boolean> statusEffects = sgOther.add(new BoolSetting.Builder()
+            .name("status-effects")
+            .description("Adds list of status effects to tooltips of food items.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Boolean> beehive = sgOther.add(new BoolSetting.Builder()
+        .name("beehive")
+        .description("Displays information about a beehive or bee nest.")
+        .defaultValue(true)
+        .build()
+    );
+
     public BetterToolips() {
         super(Categories.Render, "better-tooltips", "Displays more useful tooltips for certain items.");
     }
@@ -180,7 +203,7 @@ public class BetterToolips extends Module {
     }
 
     @EventHandler
-    private void appendTooltip(GetTooltipEvent.Append event) {
+    private void appendTooltip(GetTooltipEvent.Append event) { 
         // Item size tooltip
         if (byteSize.get()) {
             try {
@@ -200,6 +223,56 @@ public class BetterToolips extends Module {
             }
         }
 
+        // Status effects
+        if (statusEffects.get()) {
+            if (event.itemStack.getItem() == Items.SUSPICIOUS_STEW) {
+                CompoundTag tag = event.itemStack.getTag();
+                if (tag != null) {
+                    ListTag effects = tag.getList("Effects", 10);
+                    if (effects != null) {
+                        for (int i = 0; i < effects.size(); i++) {
+                            CompoundTag effectTag = effects.getCompound(i);
+                            byte effectId = effectTag.getByte("EffectId");
+                            int effectDuration = effectTag.contains("EffectDuration") ? effectTag.getInt("EffectDuration") : 160;
+                            StatusEffectInstance effect = new StatusEffectInstance(StatusEffect.byRawId(effectId), effectDuration, 0);
+                            event.list.add(1, getStatusText(effect));
+                        }
+                    }
+                }
+            }
+            else if (event.itemStack.getItem().isFood()) {
+                FoodComponent food = event.itemStack.getItem().getFoodComponent();
+                if (food != null) {
+                    food.getStatusEffects().forEach((e) -> {
+                        StatusEffectInstance effect = e.getFirst();
+                        event.list.add(1, getStatusText(effect));
+                    });
+                }
+            }
+        }
+
+        //Beehive
+        if (beehive.get()) {
+            if (event.itemStack.getItem() == Items.BEEHIVE || event.itemStack.getItem() == Items.BEE_NEST) {
+                CompoundTag tag = event.itemStack.getTag();
+                if (tag != null) {
+                    CompoundTag blockStateTag = tag.getCompound("BlockStateTag");
+                    if (blockStateTag != null) {
+                        int level = blockStateTag.getInt("honey_level");
+                        event.list.add(1, new LiteralText(String.format("%sHoney level: %s%d%s.", 
+                            Formatting.GRAY, Formatting.YELLOW, level, Formatting.GRAY)));
+                    }
+                    CompoundTag blockEntityTag = tag.getCompound("BlockEntityTag");
+                    if (blockEntityTag != null) {
+                        ListTag beesTag = blockEntityTag.getList("Bees", 10);
+                        event.list.add(1, new LiteralText(String.format("%sBees: %s%d%s.", 
+                            Formatting.GRAY, Formatting.YELLOW, beesTag.size(), Formatting.GRAY)));
+                    }
+                    
+                }
+            }
+        }
+
         // Hold to preview tooltip
         if (hasItems(event.itemStack) && shulkers.get() && !previewShulkers()
             || (event.itemStack.getItem() == Items.ENDER_CHEST && echest.get() && !previewEChest())
@@ -215,6 +288,20 @@ public class BetterToolips extends Module {
         if (hasItems(event.itemStack) && shulkers.get() && previewShulkers() || (event.itemStack.getItem() == Items.ENDER_CHEST && echest.get() && previewEChest())) {
             for (int s = 0; s < event.list.size(); ++s) event.y -= 10;
             event.y -= 4;
+        }
+    }
+
+    private MutableText getStatusText(StatusEffectInstance effect) {
+        MutableText text = new TranslatableText(effect.getTranslationKey());
+        if (effect.getAmplifier() != 0) {
+            text.append(String.format(" %d (%s)", effect.getAmplifier()+1, StatusEffectUtil.durationToString(effect, 1)));
+        } else {
+            text.append(String.format(" (%s)", StatusEffectUtil.durationToString(effect, 1)));
+        }
+        if (effect.getEffectType().isBeneficial()) {
+            return text.formatted(Formatting.BLUE);
+        } else {
+            return text.formatted(Formatting.RED);
         }
     }
 
