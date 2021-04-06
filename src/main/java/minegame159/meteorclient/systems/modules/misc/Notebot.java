@@ -529,6 +529,7 @@ public class Notebot extends Module {
 
     private void onTickPlay() {
         if (!isPlaying) return;
+        if (song == null) return;
         if (currentNote >= lastKey) {
             Stop();
             return;
@@ -543,15 +544,16 @@ public class Notebot extends Module {
     }
 
     private void playRotate() {
-        if (mc.interactionManager == null) {
-            currentNote++;
-            return;
-        }
-        int note = song.get(currentNote);
-        BlockPos pos = blockPositions.get(note);
+        if (mc.interactionManager == null) return;
+        try {
+            int note = song.get(currentNote);
+            BlockPos pos = blockPositions.get(note);
 
-        mc.interactionManager.attackBlock(pos,Direction.DOWN);
-        currentNote++;
+            mc.interactionManager.attackBlock(pos,Direction.DOWN);
+            currentNote++;
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
     }
 
     // Stolen from crystal aura :)
