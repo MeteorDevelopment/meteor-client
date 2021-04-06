@@ -64,6 +64,13 @@ public class Notebot extends Module {
             .build()
     );
 
+    private final Setting<Boolean> moveNotes = sgGeneral.add(new BoolSetting.Builder()
+        .name("move-notes")
+        .description("Move notes by one tick, if multiple notes supposed to play in one tick.")
+        .defaultValue(false)
+        .build()
+    );
+
     private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
             .name("render")
             .description("Whether or not to render the outline around the noteblocks.")
@@ -351,10 +358,14 @@ public class Notebot extends Module {
                 ChatUtils.moduleWarning(this, "Invalid character at line %d", i);
                 continue;
             }
-            if (i==data.size()-1) {
+            if (moveNotes.get() && song.containsKey(key)) {
+                song.put(key+1, val);
+                lastKey = key+1;
+            } else {
+                song.put(key,val);
                 lastKey = key;
             }
-            song.put(key,val);
+            
         }
         return true;
     }
@@ -383,8 +394,14 @@ public class Notebot extends Module {
                     ChatUtils.moduleWarning(this, "Note at tick %d out of range.", tick);
                     continue;
                 }
-                song.put(tick, n);
-                lastKey = tick;
+                if (moveNotes.get() && song.containsKey(tick)) {
+                    song.put(tick+1, n);
+                    lastKey = tick+1;
+                } else {
+                    song.put(tick,n);
+                    lastKey = tick;
+                }
+                
             }
         }
         return true;
