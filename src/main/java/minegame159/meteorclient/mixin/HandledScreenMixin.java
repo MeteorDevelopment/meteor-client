@@ -7,7 +7,7 @@ package minegame159.meteorclient.mixin;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.systems.modules.Modules;
-import minegame159.meteorclient.systems.modules.render.BetterToolips;
+import minegame159.meteorclient.systems.modules.render.BetterTooltips;
 import minegame159.meteorclient.systems.modules.render.ItemHighlight;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.player.EChestMemory;
@@ -44,7 +44,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import javax.annotation.Nullable;
 
 import static minegame159.meteorclient.systems.commands.commands.PeekCommand.PeekShulkerBoxScreen;
-import static minegame159.meteorclient.systems.modules.render.BetterToolips.hasItems;
+import static minegame159.meteorclient.systems.modules.render.BetterTooltips.hasItems;
 
 @Mixin(HandledScreen.class)
 public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen implements ScreenHandlerProvider<T> {
@@ -68,7 +68,7 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
     @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
     private void mouseClicked(double mouseX, double mouseY, int button, CallbackInfoReturnable<Boolean> cir) {
         if (button == GLFW.GLFW_MOUSE_BUTTON_MIDDLE && focusedSlot != null && !focusedSlot.getStack().isEmpty()) {
-            BetterToolips toolips = Modules.get().get(BetterToolips.class);
+            BetterTooltips toolips = Modules.get().get(BetterTooltips.class);
 
             if (hasItems(focusedSlot.getStack()) && toolips.middleClickOpen.get()) {
                 Utils.getItemsInContainerItem(focusedSlot.getStack(), ITEMS);
@@ -86,7 +86,7 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
     @Inject(method = "render", at = @At("TAIL"))
     private void onRender(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo info) {
         if (focusedSlot != null && !focusedSlot.getStack().isEmpty()) {
-            BetterToolips toolips = Modules.get().get(BetterToolips.class);
+            BetterTooltips toolips = Modules.get().get(BetterTooltips.class);
 
             // Shulker Preview
             if (hasItems(focusedSlot.getStack()) && toolips.previewShulkers()) {
@@ -112,7 +112,7 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
     @Inject(method = "drawMouseoverTooltip", at = @At("HEAD"), cancellable = true)
     private void onDrawMouseoverTooltip(MatrixStack matrices, int x, int y, CallbackInfo info) {
         if (focusedSlot != null && !focusedSlot.getStack().isEmpty()) {
-            BetterToolips toolips = Modules.get().get(BetterToolips.class);
+            BetterTooltips toolips = Modules.get().get(BetterTooltips.class);
 
             if (focusedSlot.getStack().getItem() == Items.FILLED_MAP && toolips.previewMaps()) info.cancel();
             else if ((hasItems(focusedSlot.getStack())
