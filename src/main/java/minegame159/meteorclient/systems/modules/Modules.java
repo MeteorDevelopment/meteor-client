@@ -484,7 +484,7 @@ public class Modules extends System<Modules> {
         add(new Zoom());
         add(new WallHack());
         add(new WaypointsModule());
-        add(new BetterToolips());
+        add(new BetterTooltips());
     }
 
     private void initWorld() {

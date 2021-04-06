@@ -36,7 +36,7 @@ import java.io.IOException;
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT_ALT;
 
-public class BetterToolips extends Module {
+public class BetterTooltips extends Module {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgShulker = settings.createGroup("Shulker");
@@ -162,7 +162,7 @@ public class BetterToolips extends Module {
         .build()
     );
 
-    public BetterToolips() {
+    public BetterTooltips() {
         super(Categories.Render, "better-tooltips", "Displays more useful tooltips for certain items.");
     }
 
