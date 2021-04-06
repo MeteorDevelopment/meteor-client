@@ -5,69 +5,73 @@
 
 package minegame159.meteorclient.systems.modules.render;
 
+import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.game.GetTooltipEvent;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
-import minegame159.meteorclient.systems.modules.Modules;
-import minegame159.meteorclient.utils.misc.Keybind;
 import minegame159.meteorclient.utils.misc.ByteCountDataOutput;
+import minegame159.meteorclient.utils.misc.Keybind;
+import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.render.color.SettingColor;
-import meteordevelopment.orbit.EventHandler;
-
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT_ALT;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT_SHIFT;
-
-import java.io.IOException;
-
 import net.minecraft.block.Block;
 import net.minecraft.block.ShulkerBoxBlock;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.DyeColor;
 import net.minecraft.util.Formatting;
 
+import java.io.IOException;
+
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT_ALT;
+
 public class BetterToolips extends Module {
 
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgShulker = settings.createGroup("Shulker");
     private final SettingGroup sgEChest = settings.createGroup("EChest");
     private final SettingGroup sgMap = settings.createGroup("Map");
     private final SettingGroup sgByteSize = settings.createGroup("Byte Size");
 
+    // General
 
-    // Shulker
-
-    public final Setting<Boolean> shulkers = sgShulker.add(new BoolSetting.Builder()
-            .name("shulker-preview")
-            .description("Shows a preview of a shulker box when hovering over it in an inventory.")
-            .defaultValue(true)
-            .build()
-    );
-
-    public final Setting<DisplayWhen> shulkersDisplayWhen = sgShulker.add(new EnumSetting.Builder<DisplayWhen>()
+    private final Setting<DisplayWhen> displayWhen = sgGeneral.add(new EnumSetting.Builder<DisplayWhen>()
             .name("display-when")
-            .description("When to display shulker previews.")
-            .defaultValue(DisplayWhen.Always)
-            .onModuleActivated(setting -> validateSettings())
-            .onChanged(value -> validateSettings())
+            .description("When to display previews.")
+            .defaultValue(DisplayWhen.Keybind)
             .build()
     );
 
-    private final Setting<Keybind> shulkersKeybind = sgShulker.add(new KeybindSetting.Builder()
+    private final Setting<Keybind> keybind = sgGeneral.add(new KeybindSetting.Builder()
             .name("keybind")
             .description("The bind for keybind mode.")
             .defaultValue(Keybind.fromKey(GLFW_KEY_LEFT_ALT))
             .build()
     );
 
-    public final Setting<DisplayMode> shulkersDisplayMode = sgShulker.add(new EnumSetting.Builder<DisplayMode>()
-            .name("display-mode")
-            .description("How to display shulker previews.")
-            .defaultValue(DisplayMode.Container)
-            .onModuleActivated(setting -> validateSettings())
-            .onChanged(value -> validateSettings())
+    public final Setting<Boolean> showVanilla = sgGeneral.add(new BoolSetting.Builder()
+            .name("show-vanilla")
+            .description("Displays the vanilla tooltip as well as the preview.")
+            .defaultValue(true)
+            .build()
+    );
+
+    public final Setting<Boolean> middleClickOpen = sgGeneral.add(new BoolSetting.Builder()
+            .name("middle-click-open")
+            .description("Opens a GUI window with the inventory of the storage block when you middle click the item.")
+            .defaultValue(true)
+            .build()
+    );
+
+    // Shulker
+
+    private final Setting<Boolean> shulkers = sgShulker.add(new BoolSetting.Builder()
+            .name("shulker-preview")
+            .description("Shows a preview of a shulker box when hovering over it in an inventory.")
+            .defaultValue(true)
             .build()
     );
 
@@ -80,8 +84,8 @@ public class BetterToolips extends Module {
 
     private final Setting<Boolean> shulkerColorFromType = sgShulker.add(new BoolSetting.Builder()
         .name("color-from-type")
-        .description("Color shulker preview according to its color.")
-        .defaultValue(false)
+        .description("Color shulker preview according to the shulkers color.")
+        .defaultValue(true)
         .build()
     );
 
@@ -94,67 +98,28 @@ public class BetterToolips extends Module {
             .build()
     );
 
-    public final Setting<DisplayWhen> echestDisplayWhen = sgEChest.add(new EnumSetting.Builder<DisplayWhen>()
-            .name("display-when")
-            .description("When to display echest previews.")
-            .defaultValue(DisplayWhen.Always)
-            .onModuleActivated(setting -> validateSettings())
-            .onChanged(value -> validateSettings())
-            .build()
-    );
-
-    private final Setting<Keybind> echestKeybind = sgEChest.add(new KeybindSetting.Builder()
-            .name("keybind")
-            .description("The bind for keybind mode.")
-            .defaultValue(Keybind.fromKey(GLFW_KEY_LEFT_ALT))
-            .build()
-    );
-
-    public final Setting<DisplayMode> echestDisplayMode = sgEChest.add(new EnumSetting.Builder<DisplayMode>()
-            .name("display-mode")
-            .description("How to display echest previews.")
-            .defaultValue(DisplayMode.Container)
-            .onModuleActivated(setting -> validateSettings())
-            .onChanged(value -> validateSettings())
-            .build()
-    );
-
     public final Setting<SettingColor> echestColor = sgEChest.add(new ColorSetting.Builder()
             .name("container-color")
-            .description("The color of the preview in container mode.")
-            .defaultValue(new SettingColor(255, 255, 255))
+            .description("The color of the echest preview in container mode.")
+            .defaultValue(new SettingColor(0, 50, 50))
             .build()
     );
 
     // Map
 
-    public final Setting<Boolean> maps = sgMap.add(new BoolSetting.Builder()
+    private final Setting<Boolean> maps = sgMap.add(new BoolSetting.Builder()
             .name("map-preview")
             .description("Shows a preview of a map when hovering over it in an inventory.")
             .defaultValue(true)
             .build()
     );
 
-    public final Setting<DisplayWhen> mapsDisplayWhen = sgMap.add(new EnumSetting.Builder<DisplayWhen>()
-            .name("display-when")
-            .description("When to display map previews.")
-            .defaultValue(DisplayWhen.Always)
-            .build()
-    );
-
-    private final Setting<Keybind> mapsKeybind = sgMap.add(new KeybindSetting.Builder()
-            .name("keybind")
-            .description("The bind for keybind mode.")
-            .defaultValue(Keybind.fromKey(GLFW_KEY_LEFT_ALT))
-            .build()
-    );
-
     public final Setting<Integer> mapsScale = sgMap.add(new IntSetting.Builder()
             .name("scale")
             .description("The scale of the map preview.")
-            .defaultValue(1)
+            .defaultValue(100)
             .min(1)
-            .sliderMax(5)
+            .sliderMax(500)
             .build()
     );
 
@@ -167,21 +132,6 @@ public class BetterToolips extends Module {
             .build()
     );
 
-    
-    public final Setting<DisplayWhen> byteSizeDisplayWhen = sgByteSize.add(new EnumSetting.Builder<DisplayWhen>()
-            .name("display-when")
-            .description("When to display byte size.")
-            .defaultValue(DisplayWhen.Always)
-            .build()
-    );
-
-    private final Setting<Keybind> byteSizeKeybind = sgByteSize.add(new KeybindSetting.Builder()
-            .name("keybind")
-            .description("The bind for keybind mode.")
-            .defaultValue(Keybind.fromKey(GLFW_KEY_LEFT_SHIFT))
-            .build()
-    );
-
     private final Setting<Boolean> useKbIfBigEnoughEnabled = sgByteSize.add(new BoolSetting.Builder()
             .name("use-kb-if-big-enough-enabled")
             .description("Uses KB instead of bytes if your item's size is larger or equal to 1KB.")
@@ -189,35 +139,27 @@ public class BetterToolips extends Module {
             .build()
     );
 
-    private final Setting<ByteDisplayMode> byteDisplayMode = sgByteSize.add(new EnumSetting.Builder<ByteDisplayMode>()
-            .name("byte-display-mode")
-            .description("Uses the standard mode (1KB to 1000b) OR true mode (1KB to 1024b).")
-            .defaultValue(ByteDisplayMode.True)
-            .build()
-    );
-
-
     public BetterToolips() {
         super(Categories.Render, "better-tooltips", "Displays more useful tooltips for certain items.");
     }
 
     public boolean previewShulkers() {
-        return isActive() && shulkers.get() && ((shulkersKeybind.get().isPressed() && shulkersDisplayWhen.get() == DisplayWhen.Keybind) || shulkersDisplayWhen.get() == DisplayWhen.Always);
+        return isActive() && isPressed() && shulkers.get();
     }
 
     public boolean previewEChest() {
-        return isActive() && echest.get() && ((echestKeybind.get().isPressed() && echestDisplayWhen.get() == DisplayWhen.Keybind) || echestDisplayWhen.get() == DisplayWhen.Always);
+        return isActive() && isPressed() && echest.get();
     }
 
     public boolean previewMaps() {
-        return isActive() && maps.get() && ((mapsKeybind.get().isPressed() && mapsDisplayWhen.get() == DisplayWhen.Keybind) || mapsDisplayWhen.get() == DisplayWhen.Always);
+        return isActive() && isPressed() && maps.get();
     }
 
-    private boolean displayByteSize() {
-        return isActive() && byteSize.get() && ((byteSizeKeybind.get().isPressed() && byteSizeDisplayWhen.get() == DisplayWhen.Keybind) || byteSizeDisplayWhen.get() == DisplayWhen.Always);
+    private boolean isPressed() {
+        return (keybind.get().isPressed() && displayWhen.get() == DisplayWhen.Keybind) || displayWhen.get() == DisplayWhen.Always;
     }
 
-    public SettingColor getShulkerColor(ItemStack shulkerItem) {
+    public Color getShulkerColor(ItemStack shulkerItem) {
         if (shulkerColorFromType.get()) {
             if (!(shulkerItem.getItem() instanceof BlockItem)) return shulkersColor.get();
             Block block = ((BlockItem) shulkerItem.getItem()).getBlock();
@@ -226,55 +168,58 @@ public class BetterToolips extends Module {
             DyeColor dye = shulkerBlock.getColor();
             if (dye == null) return shulkersColor.get();
             final float[] colors = dye.getColorComponents();
-            return new SettingColor(colors[0], colors[1], colors[2], 1f);
+            return new Color(colors[0], colors[1], colors[2], 1f);
         } else {
             return shulkersColor.get();
         }
     }
 
+    public static boolean hasItems(ItemStack itemStack) {
+        CompoundTag compoundTag = itemStack.getSubTag("BlockEntityTag");
+        return compoundTag != null && compoundTag.contains("Items", 9);
+    }
+
     @EventHandler
-    private void onGetTooltip(GetTooltipEvent event) {
-        if (displayByteSize()) {
+    private void appendTooltip(GetTooltipEvent.Append event) {
+        // Item size tooltip
+        if (byteSize.get()) {
             try {
                 event.itemStack.toTag(new CompoundTag()).write(ByteCountDataOutput.INSTANCE);
+
                 int byteCount = ByteCountDataOutput.INSTANCE.getCount();
+                String count;
+
                 ByteCountDataOutput.INSTANCE.reset();
+
+                if (useKbIfBigEnoughEnabled.get() && byteCount >= 1024) count = String.format("%.2f kb", byteCount / (float) 1024);
+                else count = String.format("%d bytes", byteCount);
     
-                event.list.add(new LiteralText(Formatting.GRAY + Modules.get().get(BetterToolips.class).bytesToString(byteCount)));
+                event.list.add(new LiteralText(Formatting.GRAY + count));
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-        
+
+        // Hold to preview tooltip
+        if (hasItems(event.itemStack) && shulkers.get() && !previewShulkers()
+            || (event.itemStack.getItem() == Items.ENDER_CHEST && echest.get() && !previewEChest())
+            || (event.itemStack.getItem() == Items.FILLED_MAP && maps.get() && !previewMaps())) {
+            event.list.add(new LiteralText(""));
+            event.list.add(new LiteralText("Hold " + Formatting.YELLOW + keybind + Formatting.RESET + " to preview"));
+        }
     }
 
-    public void validateSettings() {
-        if (shulkersDisplayMode.get() == DisplayMode.Screen && shulkersDisplayWhen.get() != DisplayWhen.Keybind) shulkersDisplayWhen.set(DisplayWhen.Keybind);
-        if (echestDisplayMode.get() == DisplayMode.Screen && echestDisplayWhen.get() != DisplayWhen.Keybind) echestDisplayWhen.set(DisplayWhen.Keybind);
-    }
-
-    private int getKbSize() {
-        return byteDisplayMode.get() == ByteDisplayMode.True ? 1024 : 1000;
-    }
-
-    public String bytesToString(int count) {
-        if (useKbIfBigEnoughEnabled.get() && count >= getKbSize()) return String.format("%.2f kb", count / (float) getKbSize());
-        return String.format("%d bytes", count);
+    @EventHandler
+    private void modifyTooltip(GetTooltipEvent.Modify event) {
+        // Moving vanilla tooltip up when container is rendered
+        if (hasItems(event.itemStack) && shulkers.get() && previewShulkers() || (event.itemStack.getItem() == Items.ENDER_CHEST && echest.get() && previewEChest())) {
+            for (int s = 0; s < event.list.size(); ++s) event.y -= 10;
+            event.y -= 4;
+        }
     }
 
     public enum DisplayWhen {
         Keybind,
         Always
-    }
-
-    public enum DisplayMode {
-        Container,
-//        Tooltip,
-        Screen
-    }
-
-    public enum ByteDisplayMode {
-        Standard,
-        True
     }
 }
