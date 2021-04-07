@@ -122,7 +122,7 @@ public class OffhandExtra extends Module {
         if (Modules.get().isActive(AutoTotem.class) && mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING) {
             InvUtils.FindItemResult result = InvUtils.findItemWithCount(Items.TOTEM_OF_UNDYING);
             if (result.slot != -1) {
-                InvUtils.addSlots(1, 45, InvUtils.invIndexToSlotId(result.slot), 1);
+                InvUtils.move().from(result.slot).toOffhand();
             }
         }
     }
@@ -148,7 +148,7 @@ public class OffhandExtra extends Module {
                     if (mc.player.getOffHandStack().getItem() != getItem()) {
                         result = findSlot(getItem());
                         if (result != -1) {
-                            InvUtils.addSlots(1, 45, InvUtils.invIndexToSlotId(result), 1);
+                            InvUtils.move().from(result).toOffhand();
                             return;
                         }
                     }
@@ -161,15 +161,14 @@ public class OffhandExtra extends Module {
                 return;
             }
             if (mc.player.getOffHandStack().getItem() != getItem() && replace.get()) {
-                InvUtils.addSlots(1, 45, InvUtils.invIndexToSlotId(result), 1);
+                InvUtils.move().from(result).toOffhand();
                 sentMessage = false;
             }
         } else if (!asimov.get() && !isClicking && mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING) {
             int result = findSlot(Items.TOTEM_OF_UNDYING);
             if (result != -1) {
-                InvUtils.addSlots(1, 45, InvUtils.invIndexToSlotId(result), 1);
+                InvUtils.move().from(result).toOffhand();
             }
-
         }
     }
 
@@ -197,7 +196,7 @@ public class OffhandExtra extends Module {
                 return;
             }
             if (mc.player.getOffHandStack().getItem() != item && mc.player.getMainHandStack().getItem() != item && replace.get()) {
-                InvUtils.addSlots(1, 45, InvUtils.invIndexToSlotId(result), 1);
+                InvUtils.move().from(result).toOffhand();
                 sentMessage = false;
             }
             currentMode = mode.get();

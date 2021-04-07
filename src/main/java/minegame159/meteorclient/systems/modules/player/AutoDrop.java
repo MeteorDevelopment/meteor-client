@@ -16,7 +16,6 @@ import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.item.Item;
-import net.minecraft.screen.slot.SlotActionType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +47,7 @@ public class AutoDrop extends Module {
 
         for (int i = excludeHotbar.get() ? 9 : 0; i < mc.player.inventory.size(); i++) {
             if (items.get().contains(mc.player.inventory.getStack(i).getItem())) {
-                InvUtils.clickSlot(InvUtils.invIndexToSlotId(i), 1, SlotActionType.THROW);
+                InvUtils.drop().slot(i);
             }
         }
     }

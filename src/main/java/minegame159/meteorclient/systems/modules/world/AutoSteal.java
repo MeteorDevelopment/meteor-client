@@ -11,12 +11,11 @@ import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
-import minegame159.meteorclient.utils.misc.ThreadUtils;
+import minegame159.meteorclient.utils.network.MeteorExecutor;
 import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.screen.GenericContainerScreenHandler;
 import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.slot.SlotActionType;
 
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -100,14 +99,18 @@ public class AutoSteal extends Module {
                 continue;
 
             int sleep = getSleepTime();
-            if (sleep > 0)
-                ThreadUtils.sleep(sleep);
+            if (sleep > 0) {
+                try {
+                    Thread.sleep(sleep);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
 
             // Exit if user closes screen
-            if (mc.currentScreen == null)
-                break;
+            if (mc.currentScreen == null) break;
 
-            InvUtils.clickSlot(i, 0, SlotActionType.QUICK_MOVE);
+            InvUtils.quickMove().slotId(i);
         }
     }
 
@@ -136,7 +139,7 @@ public class AutoSteal extends Module {
      * @param handler Passed in from {@link minegame159.meteorclient.mixin.GenericContainerScreenMixin}
      */
     public void stealAsync(ScreenHandler handler) {
-        ThreadUtils.runInThread(() -> steal(handler));
+        MeteorExecutor.execute(() -> steal(handler));
     }
 
     /**
@@ -145,7 +148,7 @@ public class AutoSteal extends Module {
      * @param handler Passed in from {@link minegame159.meteorclient.mixin.GenericContainerScreenMixin}
      */
     public void dumpAsync(ScreenHandler handler) {
-        ThreadUtils.runInThread(() -> dump(handler));
+        MeteorExecutor.execute(() -> dump(handler));
     }
 
     public boolean getStealButtonEnabled() {

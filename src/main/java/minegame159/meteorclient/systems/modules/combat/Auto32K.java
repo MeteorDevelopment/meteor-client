@@ -23,7 +23,6 @@ import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.*;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
@@ -168,8 +167,7 @@ public class Auto32K extends Module {
                     phase += 1;
                 }else if (phase == 4 && mc.currentScreen instanceof Generic3x3ContainerScreen) {
                     mc.player.getSpeed();
-                    InvUtils.clickSlot(InvUtils.invIndexToSlotId(shulkerSlot), 0, SlotActionType.PICKUP);
-                    InvUtils.clickSlot(4, 0, SlotActionType.PICKUP);
+                    InvUtils.move().from(shulkerSlot).toId(4);
                     phase += 1;
                 }else if (phase == 5 && mc.currentScreen instanceof Generic3x3ContainerScreen) {
                     mc.player.closeHandledScreen();
@@ -204,9 +202,7 @@ public class Auto32K extends Module {
                     }
                     for (int i = 1; i < 5; i++) {
                         if (mc.player.currentScreenHandler.getSlot(i).getStack().getItem() instanceof AirBlockItem) {
-                            InvUtils.clickSlot(InvUtils.invIndexToSlotId(slot) - 4, 0, SlotActionType.PICKUP);
-                            InvUtils.clickSlot(i, 1, SlotActionType.PICKUP);
-                            InvUtils.clickSlot(InvUtils.invIndexToSlotId(slot) - 4, 0, SlotActionType.PICKUP);
+                            InvUtils.move().from(slot - 4).toId(i);
                         }
                     }
                 }
@@ -223,15 +219,13 @@ public class Auto32K extends Module {
                         dropSlot = i;
                     }
                 }
-                if (dropSlot != -1) InvUtils.clickSlot(InvUtils.invIndexToSlotId(dropSlot), 0, SlotActionType.THROW);
+                if (dropSlot != -1) InvUtils.drop().slot(dropSlot);
                 if(autoMove.get() && manage){
                     int slot2 = mc.player.inventory.getEmptySlot();
                     if (slot2 < 9 && slot2 != -1 && EnchantmentHelper.getLevel(Enchantments.SHARPNESS, mc.player.currentScreenHandler.getSlot(0).getStack()) > 5) {
-                        InvUtils.clickSlot(0, 0, SlotActionType.PICKUP);
-                        InvUtils.clickSlot(InvUtils.invIndexToSlotId(slot2) - 4, 0, SlotActionType.PICKUP);
-                    } else if (EnchantmentHelper.getLevel(Enchantments.SHARPNESS, mc.player.currentScreenHandler.getSlot(0).getStack()) <= 5
-                            && mc.player.currentScreenHandler.getSlot(0).getStack().getItem() != Items.AIR) {
-                        InvUtils.clickSlot(0, 0, SlotActionType.THROW);
+                        InvUtils.move().fromId(0).to(slot2 - 4);
+                    } else if (EnchantmentHelper.getLevel(Enchantments.SHARPNESS, mc.player.currentScreenHandler.getSlot(0).getStack()) <= 5 && mc.player.currentScreenHandler.getSlot(0).getStack().getItem() != Items.AIR) {
+                        InvUtils.drop().slotId(0);
                     }
                 }
                 if(slot != -1) {

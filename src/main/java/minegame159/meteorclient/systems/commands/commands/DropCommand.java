@@ -17,7 +17,6 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
@@ -25,10 +24,8 @@ import net.minecraft.util.registry.Registry;
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
 public class DropCommand extends Command {
-    private static final SimpleCommandExceptionType NOT_SPECTATOR =
-            new SimpleCommandExceptionType(new LiteralText("Can't drop items while in spectator."));
-    private static final DynamicCommandExceptionType NO_SUCH_ITEM =
-            new DynamicCommandExceptionType(o -> new LiteralText("No such item " + o + "!"));
+    private static final SimpleCommandExceptionType NOT_SPECTATOR = new SimpleCommandExceptionType(new LiteralText("Can't drop items while in spectator."));
+    private static final DynamicCommandExceptionType NO_SUCH_ITEM = new DynamicCommandExceptionType(o -> new LiteralText("No such item " + o + "!"));
 
     public DropCommand() {
         super("drop", "Automatically drops specified items.");
@@ -37,20 +34,27 @@ public class DropCommand extends Command {
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.then(literal("hand").executes(context -> drop(player -> player.dropSelectedItem(true))))
-                .then(literal("offhand").executes(context -> drop(player -> InvUtils.clickSlot(InvUtils.invIndexToSlotId(InvUtils.OFFHAND_SLOT), 1, SlotActionType.THROW))))
+                .then(literal("offhand").executes(context -> drop(player -> {
+                    InvUtils.drop().slotOffhand();
+                })))
                 .then(literal("hotbar").executes(context -> drop(player -> {
                     for (int i = 0; i < 9; i++) {
-                        InvUtils.clickSlot(InvUtils.invIndexToSlotId(i), 1, SlotActionType.THROW);
+                        InvUtils.drop().slotHotbar(i);
                     }
                 })))
                 .then(literal("inventory").executes(context -> drop(player -> {
                     for (int i = 9; i < player.inventory.main.size(); i++) {
-                        InvUtils.clickSlot(InvUtils.invIndexToSlotId(i), 1, SlotActionType.THROW);
+                        InvUtils.drop().slotMain(i - 9);
                     }
                 })))
                 .then(literal("all").executes(context -> drop(player -> {
-                    for (int i = 0; i < player.inventory.main.size(); i++) {
-                        InvUtils.clickSlot(InvUtils.invIndexToSlotId(i), 1, SlotActionType.THROW);
+                    for (int i = 0; i < player.inventory.size(); i++) {
+                        InvUtils.drop().slot(i);
+                    }
+                })))
+                .then(literal("armor").executes(context -> drop(player -> {
+                    for (int i = 0; i < player.inventory.armor.size(); i++) {
+                        InvUtils.drop().slotArmor(i);
                     }
                 })))
                 .then(argument("item", StringArgumentType.string()).executes(context -> drop(player -> {
@@ -60,8 +64,7 @@ public class DropCommand extends Command {
 
                     for (int i = 0; i < player.inventory.main.size(); i++) {
                         ItemStack itemStack = player.inventory.main.get(i);
-                        if (itemStack.getItem() == item)
-                            InvUtils.clickSlot(InvUtils.invIndexToSlotId(i), 1, SlotActionType.THROW);
+                        if (itemStack.getItem() == item) InvUtils.drop().slot(i);
                     }
                 })));
     }

@@ -127,8 +127,7 @@ public class ChestSwap extends Module {
     }
 
     private void equip(int slot) {
-        int chestSlot = 8 - 2;
-        InvUtils.addSlots(1, chestSlot, InvUtils.invIndexToSlotId(slot), 0);
+        InvUtils.move().from(slot).toArmor(2);
     }
 
     @Override

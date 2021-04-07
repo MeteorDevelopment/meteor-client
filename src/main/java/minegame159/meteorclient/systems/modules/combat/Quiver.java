@@ -21,7 +21,6 @@ import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.potion.PotionUtil;
-import net.minecraft.screen.slot.SlotActionType;
 
 import java.util.HashMap;
 import java.util.List;
@@ -226,9 +225,7 @@ public class Quiver extends Module {
     }
 
     private void moveItems(int from, int to) {
-        InvUtils.clickSlot(InvUtils.invIndexToSlotId(from), 0, SlotActionType.PICKUP);
-        InvUtils.clickSlot(InvUtils.invIndexToSlotId(to), 0, SlotActionType.PICKUP);
-        InvUtils.clickSlot(InvUtils.invIndexToSlotId(from), 0, SlotActionType.PICKUP);
+        InvUtils.move().from(from).to(to);
     }
 
     private int findBow() {

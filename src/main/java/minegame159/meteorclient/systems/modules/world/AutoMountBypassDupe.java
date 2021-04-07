@@ -29,7 +29,6 @@ import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.Hand;
 import org.lwjgl.glfw.GLFW;
 
@@ -134,7 +133,7 @@ public class AutoMountBypassDupe extends Module {
                         mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(mc.player.yaw, 90, mc.player.isOnGround()));
                     }
                     for (int i : slotsToThrow) {
-                        InvUtils.clickSlot(i, 1, SlotActionType.THROW);
+                        InvUtils.drop().slotId(i);
                     }
                     slotsToThrow.clear();
                 } else {
@@ -179,7 +178,7 @@ public class AutoMountBypassDupe extends Module {
             }
 
             if (!slotsToMove.isEmpty()) {
-                for (int i : slotsToMove) InvUtils.clickSlot(i, 0, SlotActionType.QUICK_MOVE);
+                for (int i : slotsToMove) InvUtils.quickMove().slotId(i);
                 slotsToMove.clear();
             }
         }

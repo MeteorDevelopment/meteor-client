@@ -12,7 +12,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
-import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.Vec3d;
 
@@ -38,14 +37,12 @@ public class ElytraFlightMode {
     public void onTick() {
         if (settings.replace.get()) {
             ItemStack chestStack = mc.player.inventory.getArmorStack(2);
+
             if (chestStack.getItem() == Items.ELYTRA) {
                 if (chestStack.getMaxDamage() - chestStack.getDamage() <= settings.replaceDurability.get()) {
                     int slot = InvUtils.findItemInAll(Items.ELYTRA, stack -> stack.getMaxDamage() - stack.getDamage() > settings.replaceDurability.get());
-                    if (slot != -1) {
-                        InvUtils.clickSlot(slot, 0, SlotActionType.PICKUP);
-                        InvUtils.clickSlot(6, 0, SlotActionType.PICKUP);
-                        InvUtils.clickSlot(slot, 0, SlotActionType.PICKUP);
-                    }
+
+                    InvUtils.move().from(slot).toArmor(2);
                 }
             }
         }
