@@ -8,8 +8,14 @@ package minegame159.meteorclient.systems.commands.commands;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import minegame159.meteorclient.systems.commands.Command;
 import minegame159.meteorclient.systems.commands.Commands;
+import minegame159.meteorclient.systems.config.Config;
+import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.command.CommandSource;
+import net.minecraft.text.BaseText;
+import net.minecraft.text.ClickEvent;
+import net.minecraft.text.HoverEvent;
+import net.minecraft.text.LiteralText;
 import net.minecraft.util.Formatting;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
@@ -22,25 +28,44 @@ public class HelpCommand extends Command {
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.executes(context -> {
-            ChatUtils.info("--- List of all (highlight)%d(default) commands ---", Commands.get().getCount());
+            ChatUtils.info("--- All (highlight)%d(default) Commands ---", Commands.get().getCount());
 
-            Commands.get().forEach(command -> {
-                if (command.getAliases().size() >= 1) {
-                    StringBuilder sb = new StringBuilder();
+            BaseText commands = new LiteralText("");
 
-                    sb.append(Formatting.AQUA).append("[");
-                    command.getAliases().forEach(alias -> {
-                        sb.append(alias);
-                        if (!command.getAliases().get(command.getAliases().size() - 1).equals(alias)) sb.append(", ");
-                    });
-                    sb.append("]").append(Formatting.RESET);
+            for (Command command : Commands.get().getAll()) {
+                BaseText commandTooltip = new LiteralText("");
 
-                    ChatUtils.info("(highlight)%s %s(default): %s", command.getName(), sb.toString(), command.getDescription());
+                // Name
+                BaseText name = new LiteralText(Utils.nameToTitle(command.getName()));
+                commandTooltip.append(name.formatted(Formatting.BLUE, Formatting.BOLD)).append("\n");
+
+                // Aliases
+                BaseText aliases = new LiteralText(Config.get().getPrefix() + command.getName());
+                if (command.getAliases().size() > 0) {
+                    aliases.append(", ");
+                    for (String alias : command.getAliases()) {
+                        aliases.append(Config.get().getPrefix() + alias);
+                        if (!alias.equals(command.getAliases().get(command.getAliases().size() - 1))) aliases.append(", ");
+                    }
                 }
-                else {
-                    ChatUtils.info("(highlight)%s(default): %s", command.getName(), command.getDescription());
-                }
-            });
+                commandTooltip.append(aliases.formatted(Formatting.GRAY)).append("\n\n");
+
+                // Description
+                commandTooltip.append(command.getDescription()).formatted(Formatting.WHITE);
+
+                BaseText finalCommand = new LiteralText(Utils.nameToTitle(command.getName()));
+                if (command != Commands.get().getAll().get(Commands.get().getAll().size() - 1)) finalCommand.append(", ");
+                finalCommand.setStyle(finalCommand
+                        .getStyle()
+                        .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, commandTooltip))
+                        .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, Config.get().getPrefix() + command.getName()))
+                );
+
+                commands.append(finalCommand);
+            }
+
+            ChatUtils.info(commands);
+
             return SINGLE_SUCCESS;
         });
     }
