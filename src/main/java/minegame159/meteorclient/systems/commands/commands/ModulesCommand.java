@@ -18,10 +18,8 @@ import net.minecraft.util.Formatting;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
+@Command.Init(name = "modules", description = "Displays a list of all modules.", aliases = "features")
 public class ModulesCommand extends Command {
-    public ModulesCommand() {
-        super("modules", "Displays a list of all modules.", "features");
-    }
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {

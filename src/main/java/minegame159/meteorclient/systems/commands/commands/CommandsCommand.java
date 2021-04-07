@@ -20,10 +20,8 @@ import net.minecraft.util.Formatting;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
+@Command.Init(name = "commands", description = "List of all commands.", aliases = "help")
 public class CommandsCommand extends Command {
-    public CommandsCommand() {
-        super("help", "List of all commands.", "commands");
-    }
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
