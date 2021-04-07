@@ -133,10 +133,10 @@ public class AutoCity extends Module {
                 if (hand == Hand.MAIN_HAND) {
                     int crystalSlot = InvUtils.findItemInHotbar(Items.END_CRYSTAL);
                     int preSlot = mc.player.inventory.selectedSlot;
-                    InvUtils.swap(crystalSlot);
+                    mc.player.inventory.selectedSlot = crystalSlot;
                     ((IClientPlayerInteractionManager) mc.interactionManager).syncSelectedSlot2();
                     mc.player.networkHandler.sendPacket(new PlayerInteractBlockC2SPacket(hand, new BlockHitResult(mc.player.getPos(), Direction.UP, mineTarget, false)));
-                    InvUtils.swap(preSlot);
+                    mc.player.inventory.selectedSlot = preSlot;
                 } else if (hand == Hand.OFF_HAND) {
                     mc.player.networkHandler.sendPacket(new PlayerInteractBlockC2SPacket(hand, new BlockHitResult(mc.player.getPos(), Direction.UP, mineTarget, false)));
                 }
