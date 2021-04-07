@@ -27,6 +27,7 @@ import java.nio.ByteBuffer;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
+@Command.Init(name = "save-map", description = "Saves a map to an image.", aliases = "sm")
 public class SaveMapCommand extends Command {
     private static final SimpleCommandExceptionType MAP_NOT_FOUND = new SimpleCommandExceptionType(new LiteralText("You must be holding a filled map."));
     private static final SimpleCommandExceptionType OOPS = new SimpleCommandExceptionType(new LiteralText("Something went wrong."));
@@ -34,8 +35,6 @@ public class SaveMapCommand extends Command {
     private final PointerBuffer filters;
 
     public SaveMapCommand() {
-        super("save-map", "Saves a map to an image.", "sm");
-
         filters = BufferUtils.createPointerBuffer(1);
 
         ByteBuffer pngFilter = MemoryUtil.memASCII("*.png");

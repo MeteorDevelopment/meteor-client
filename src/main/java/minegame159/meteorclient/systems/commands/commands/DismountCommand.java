@@ -12,10 +12,8 @@ import net.minecraft.network.packet.c2s.play.PlayerInputC2SPacket;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
+@Command.Init(name = "dismount", description = "Dismounts you from entity you are riding.")
 public class DismountCommand extends Command {
-    public DismountCommand() {
-        super("dismount", "Dismounts you from entity you are riding.");
-    }
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
@@ -24,4 +22,5 @@ public class DismountCommand extends Command {
             return SINGLE_SUCCESS;
         });
     }
+
 }

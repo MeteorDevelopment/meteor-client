@@ -15,10 +15,8 @@ import net.minecraft.entity.player.PlayerEntity;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
+@Command.Init(name = "inventory", description = "Allows you to see parts of another player's inventory.", aliases = {"inv", "invsee"})
 public class InventoryCommand extends Command {
-    public InventoryCommand() {
-        super("inventory", "Allows you to see parts of another player's inventory.", "inv", "invsee");
-    }
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {

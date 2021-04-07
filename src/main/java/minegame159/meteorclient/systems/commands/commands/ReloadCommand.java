@@ -12,10 +12,8 @@ import net.minecraft.command.CommandSource;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
+@Command.Init(name = "reload", description = "Reloads the config, modules, friends, macros and accounts.")
 public class ReloadCommand extends Command {
-    public ReloadCommand() {
-        super("reload", "Reloads the config, modules, friends, macros and accounts.");
-    }
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
@@ -25,4 +23,5 @@ public class ReloadCommand extends Command {
             return SINGLE_SUCCESS;
         });
     }
+
 }

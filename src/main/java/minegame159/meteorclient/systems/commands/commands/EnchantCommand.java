@@ -21,12 +21,10 @@ import net.minecraft.util.registry.Registry;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
+@Command.Init(name = "enchant", description = "Enchants the item in your hand. REQUIRES Creative mode.")
 public class EnchantCommand extends Command {
-    private final static SimpleCommandExceptionType NOT_IN_CREATIVE = new SimpleCommandExceptionType(new LiteralText("You must be in creative mode to use this."));
 
-    public EnchantCommand() {
-        super("enchant", "Enchants the item in your hand. REQUIRES Creative mode.");
-    }
+    private final static SimpleCommandExceptionType NOT_IN_CREATIVE = new SimpleCommandExceptionType(new LiteralText("You must be in creative mode to use this."));
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
@@ -82,4 +80,5 @@ public class EnchantCommand extends Command {
         if (itemStack == null) itemStack = mc.player.getOffHandStack();
         return itemStack;
     }
+
 }

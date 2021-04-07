@@ -27,11 +27,8 @@ import java.util.concurrent.CompletableFuture;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
+@Command.Init(name = "profile", description = "Loads and saves profiles.", aliases = "profiles")
 public class ProfileCommand extends Command {
-
-    public ProfileCommand() {
-        super("profile", "Loads and saves profiles.");
-    }
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {

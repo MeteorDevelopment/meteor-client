@@ -21,14 +21,12 @@ import net.minecraft.text.Text;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
+@Command.Init(name = "peek", description = "Lets you see what's inside shulker boxes.", aliases = "preview")
 public class PeekCommand extends Command {
+
     private static final ItemStack[] ITEMS = new ItemStack[27];
     private static final SimpleCommandExceptionType NOT_HOLDING_SHULKER_BOX =
             new SimpleCommandExceptionType(new LiteralText("You must be holding a shulker box."));
-
-    public PeekCommand() {
-        super("peek", "Lets you see what's inside shulker boxes.");
-    }
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
@@ -60,4 +58,5 @@ public class PeekCommand extends Command {
             return false;
         }
     }
+
 }

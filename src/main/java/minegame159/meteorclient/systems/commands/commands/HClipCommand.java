@@ -15,10 +15,8 @@ import net.minecraft.util.math.Vec3d;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
+@Command.Init(name = "hclip", description = "Lets you clip through blocks horizontally.")
 public class HClipCommand extends Command {
-    public HClipCommand() {
-        super("hclip", "Lets you clip through blocks horizontally.");
-    }
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
@@ -33,4 +31,5 @@ public class HClipCommand extends Command {
             return SINGLE_SUCCESS;
         }));
     }
+
 }

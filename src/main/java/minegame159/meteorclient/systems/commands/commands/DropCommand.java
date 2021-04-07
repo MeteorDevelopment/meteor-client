@@ -24,15 +24,13 @@ import net.minecraft.util.registry.Registry;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
+@Command.Init(name = "drop", description = "Automatically drops specified items.")
 public class DropCommand extends Command {
+
     private static final SimpleCommandExceptionType NOT_SPECTATOR =
             new SimpleCommandExceptionType(new LiteralText("Can't drop items while in spectator."));
     private static final DynamicCommandExceptionType NO_SUCH_ITEM =
             new DynamicCommandExceptionType(o -> new LiteralText("No such item " + o + "!"));
-
-    public DropCommand() {
-        super("drop", "Automatically drops specified items.");
-    }
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {

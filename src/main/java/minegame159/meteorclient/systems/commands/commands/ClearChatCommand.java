@@ -11,10 +11,8 @@ import net.minecraft.command.CommandSource;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
+@Command.Init(name = "clear-chat", description = "Clears your chat.")
 public class ClearChatCommand extends Command {
-    public ClearChatCommand() {
-        super("clear-chat", "Clears your chat.");
-    }
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
@@ -23,4 +21,5 @@ public class ClearChatCommand extends Command {
             return SINGLE_SUCCESS;
         });
     }
+
 }

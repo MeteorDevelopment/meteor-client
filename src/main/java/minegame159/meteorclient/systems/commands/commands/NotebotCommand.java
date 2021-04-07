@@ -1,15 +1,19 @@
+/*
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
+ * Copyright (c) 2021 Meteor Development.
+ */
+
 package minegame159.meteorclient.systems.commands.commands;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.systems.commands.Command;
 import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.events.world.TickEvent;
+import minegame159.meteorclient.systems.commands.Command;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.misc.Notebot;
-
 import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.command.CommandSource;
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
@@ -24,14 +28,11 @@ import java.util.List;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
+@Command.Init(name = "notebot", description = "Allows you load notebot files.")
 public class NotebotCommand extends Command {
 
-    int ticks = -1;
-    List<List<Integer>> song = new ArrayList<>();
-
-    public NotebotCommand() {
-        super("notebot", "Allows you load notebot files");
-    }
+    private int ticks = -1;
+    private final List<List<Integer>> song = new ArrayList<>();
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {

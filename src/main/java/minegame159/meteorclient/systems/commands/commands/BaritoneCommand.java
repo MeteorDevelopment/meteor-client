@@ -13,10 +13,8 @@ import net.minecraft.command.CommandSource;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
+@Command.Init(name = "baritone", description = "Executes baritone commands.", aliases = "b")
 public class BaritoneCommand extends Command {
-    public BaritoneCommand() {
-        super("baritone", "Executes baritone commands.", "b");
-    }
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
@@ -27,4 +25,5 @@ public class BaritoneCommand extends Command {
                     return SINGLE_SUCCESS;
                 }));
     }
+
 }

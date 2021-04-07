@@ -26,11 +26,8 @@ import java.util.stream.Collectors;
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 import static net.minecraft.command.CommandSource.suggestMatching;
 
+@Command.Init(name = "friend", description = "Manages friends.", aliases = "friends")
 public class FriendCommand extends Command {
-
-    public FriendCommand() {
-        super("friend", "Manages friends.");
-    }
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {

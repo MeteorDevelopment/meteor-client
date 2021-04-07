@@ -17,10 +17,8 @@ import net.minecraft.command.CommandSource;
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 import static minegame159.meteorclient.systems.commands.arguments.SettingArgumentType.getSetting;
 
+@Command.Init(name = "settings", description = "Allows you to view and change module settings.", aliases = "s")
 public class SettingCommand extends Command {
-    public SettingCommand() {
-        super("settings", "Allows you to view and change module settings.", "s");
-    }
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
@@ -53,4 +51,5 @@ public class SettingCommand extends Command {
                 )
         );
     }
+
 }

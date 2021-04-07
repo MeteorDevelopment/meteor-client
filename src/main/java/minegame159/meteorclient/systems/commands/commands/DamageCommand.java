@@ -18,10 +18,8 @@ import net.minecraft.util.math.Vec3d;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
+@Command.Init(name = "damage", description = "Damages yourself with fall damage.", aliases = "dmg")
 public class DamageCommand extends Command {
-    public DamageCommand() {
-        super("damage", "Damages self", "dmg");
-    }
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
@@ -62,4 +60,5 @@ public class DamageCommand extends Command {
     private void sendPosistionPacket(double x, double y, double z, boolean onGround) {
         mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(x, y, z, onGround));
     }
+
 }

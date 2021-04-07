@@ -15,10 +15,8 @@ import java.util.ArrayList;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
+@Command.Init(name = "panic", description = "Disables all modules.")
 public class PanicCommand extends Command {
-    public PanicCommand() {
-        super("panic", "Disables all modules. DOES NOT remove keybinds.");
-    }
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
@@ -28,4 +26,5 @@ public class PanicCommand extends Command {
             return SINGLE_SUCCESS;
         });
     }
+
 }

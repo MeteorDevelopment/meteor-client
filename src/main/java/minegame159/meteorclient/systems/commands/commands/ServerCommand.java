@@ -16,11 +16,8 @@ import net.minecraft.text.LiteralText;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
+@Command.Init(name = "server", description = "Prints server information")
 public class ServerCommand extends Command {
-
-    public ServerCommand() {
-        super("server", "Prints server information");
-    }
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {

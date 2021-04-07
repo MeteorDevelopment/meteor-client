@@ -14,10 +14,8 @@ import net.minecraft.command.CommandSource;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
+@Command.Init(name = "vclip", description = "Lets you clip through blocks vertically.")
 public class VClipCommand extends Command {
-    public VClipCommand() {
-        super("vclip", "Lets you clip through blocks vertically.");
-    }
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
@@ -31,4 +29,5 @@ public class VClipCommand extends Command {
             return SINGLE_SUCCESS;
         }));
     }
+
 }

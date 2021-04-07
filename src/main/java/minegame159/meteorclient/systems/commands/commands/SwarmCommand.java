@@ -27,10 +27,8 @@ import java.util.Random;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
+@Command.Init(name = "swarm", description = "Sends commands to connected swarm accouns.")
 public class SwarmCommand extends Command {
-    public SwarmCommand() {
-        super("swarm", "Sends commands to connected swarm accouns.");
-    }
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
@@ -292,4 +290,5 @@ public class SwarmCommand extends Command {
             BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalXZ((int)x,(int)z));
         }
     }
+
 }

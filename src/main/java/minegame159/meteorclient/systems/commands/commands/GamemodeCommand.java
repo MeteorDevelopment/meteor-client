@@ -12,10 +12,8 @@ import net.minecraft.world.GameMode;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
+@Command.Init(name = "gamemode", description = "Changes your GameMode client-side.", aliases = "gm")
 public class GamemodeCommand extends Command {
-    public GamemodeCommand() {
-        super("gamemode", "Changes your gamemode client-side.", "gm");
-    }
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
@@ -30,4 +28,5 @@ public class GamemodeCommand extends Command {
             }));
         }
     }
+
 }

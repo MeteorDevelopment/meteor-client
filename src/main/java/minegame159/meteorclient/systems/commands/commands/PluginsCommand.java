@@ -27,15 +27,11 @@ import java.util.List;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
+@Command.Init(name = "plugins", description = "Tries to get the server plugins.")
 public class PluginsCommand extends Command {
 
-    private static final List<String> ANTICHEAT_LIST = Arrays.asList(
-            "nocheatplus", "negativity", "warden", "horizon","illegalstack","coreprotect","exploitsx");
+    private static final List<String> ANTICHEAT_LIST = Arrays.asList("nocheatplus", "negativity", "warden", "horizon", "illegalstack", "coreprotect", "exploitsx");
     private Integer ticks = 0;
-
-    public PluginsCommand() {
-        super("plugins", "Tries to get the server plugins.");
-    }
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
@@ -111,4 +107,5 @@ public class PluginsCommand extends Command {
         }
         return String.format("(highlight)%s(default)", name);
     }
+
 }

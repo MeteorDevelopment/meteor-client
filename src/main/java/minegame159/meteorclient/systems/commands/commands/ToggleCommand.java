@@ -13,12 +13,8 @@ import net.minecraft.command.CommandSource;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
+@Command.Init(name = "toggle", description = "Toggles a module.", aliases = "t")
 public class ToggleCommand extends Command {
-
-
-    public ToggleCommand() {
-        super("toggle", "Toggles a module.", "t");
-    }
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
@@ -42,4 +38,5 @@ public class ToggleCommand extends Command {
                 )
         );
     }
+
 }

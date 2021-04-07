@@ -34,6 +34,7 @@ import java.util.List;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
+@Command.Init(name = "locate", description = "Locates structures.")
 public class LocateCommand extends Command {
 
     private Vec3d firstStart;
@@ -56,10 +57,6 @@ public class LocateCommand extends Command {
     private  final List<Block> strongholdBlocks = Arrays.asList(
             Blocks.END_PORTAL_FRAME
     );
-
-    public LocateCommand() {
-        super("locate", "Locates structures");
-    }
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
@@ -281,4 +278,5 @@ public class LocateCommand extends Command {
 
         return new double[]{(b2 * c1 - b1 * c2) / delta, (a1 * c2 - a2 * c1) / delta};
     }
+
 }

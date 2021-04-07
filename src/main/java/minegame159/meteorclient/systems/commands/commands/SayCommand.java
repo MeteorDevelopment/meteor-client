@@ -15,11 +15,8 @@ import net.minecraft.network.packet.c2s.play.ChatMessageC2SPacket;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
+@Command.Init(name = "say", description = "Sends messages in chat.")
 public class SayCommand extends Command {
-
-    public SayCommand() {
-        super("say", "Sends messages in chat.");
-    }
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
@@ -28,4 +25,5 @@ public class SayCommand extends Command {
             return SINGLE_SUCCESS;
         }));
     }
+
 }
