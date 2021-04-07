@@ -20,8 +20,8 @@ import net.minecraft.util.Formatting;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
-public class HelpCommand extends Command {
-    public HelpCommand() {
+public class CommandsCommand extends Command {
+    public CommandsCommand() {
         super("help", "List of all commands.", "commands");
     }
 
@@ -36,14 +36,14 @@ public class HelpCommand extends Command {
                 BaseText commandTooltip = new LiteralText("");
 
                 // Name
-                BaseText name = new LiteralText(Utils.nameToTitle(command.getName()));
-                commandTooltip.append(name.formatted(Formatting.BLUE, Formatting.BOLD)).append("\n");
+                commandTooltip.append(new LiteralText(Utils.nameToTitle(command.getName())).formatted(Formatting.BLUE, Formatting.BOLD)).append("\n");
 
                 // Aliases
                 BaseText aliases = new LiteralText(Config.get().getPrefix() + command.getName());
                 if (command.getAliases().size() > 0) {
                     aliases.append(", ");
                     for (String alias : command.getAliases()) {
+                        if (alias.isEmpty()) continue;
                         aliases.append(Config.get().getPrefix() + alias);
                         if (!alias.equals(command.getAliases().get(command.getAliases().size() - 1))) aliases.append(", ");
                     }
@@ -51,10 +51,10 @@ public class HelpCommand extends Command {
                 commandTooltip.append(aliases.formatted(Formatting.GRAY)).append("\n\n");
 
                 // Description
-                commandTooltip.append(command.getDescription()).formatted(Formatting.WHITE);
+                commandTooltip.append(new LiteralText(command.getDescription()).formatted(Formatting.WHITE));
 
                 BaseText finalCommand = new LiteralText(Utils.nameToTitle(command.getName()));
-                if (command != Commands.get().getAll().get(Commands.get().getAll().size() - 1)) finalCommand.append(", ");
+                if (command != Commands.get().getAll().get(Commands.get().getAll().size() - 1)) finalCommand.append(new LiteralText(", ").formatted(Formatting.GRAY));
                 finalCommand.setStyle(finalCommand
                         .getStyle()
                         .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, commandTooltip))
@@ -69,4 +69,5 @@ public class HelpCommand extends Command {
             return SINGLE_SUCCESS;
         });
     }
+
 }

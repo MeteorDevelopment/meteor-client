@@ -43,7 +43,7 @@ public class Commands extends System<Commands> {
         add(new EnchantCommand());
         add(new FakePlayerCommand());
         add(new FriendCommand());
-        add(new HelpCommand());
+        add(new CommandsCommand());
         add(new InventoryCommand());
         add(new LocateCommand());
         add(new NbtCommand());
