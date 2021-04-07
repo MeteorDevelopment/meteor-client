@@ -13,30 +13,30 @@ import minegame159.meteorclient.systems.config.Config;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.CommandSource;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.util.Arrays;
 import java.util.List;
 
 public abstract class Command {
-    protected static MinecraftClient mc;
-
-    private final String name;
-    private final String description;
-    private final List<String> aliases = new ArrayList<>();
-
-    public Command(String name, String description, String... aliases) {
-        this.name = name;
-        this.description = description;
-        Collections.addAll(this.aliases, aliases);
-        mc = MinecraftClient.getInstance();
+    private Init getAnnotation() {
+        if (getClass().isAnnotationPresent(Init.class)) {
+            return getClass().getAnnotation(Init.class);
+        }
+        throw new IllegalStateException("No annotation found!");
     }
 
-    // Helper methods to painlessly infer the CommandSource generic type argument
+    protected static MinecraftClient mc = MinecraftClient.getInstance();
+
+    private final String name = getAnnotation().name();
+    private final String description = getAnnotation().description();
+    private final List<String> aliases = Arrays.asList(getAnnotation().aliases());
+
     protected static <T> RequiredArgumentBuilder<CommandSource, T> argument(final String name, final ArgumentType<T> type) {
         return RequiredArgumentBuilder.argument(name, type);
     }
 
-    protected static <T> LiteralArgumentBuilder<CommandSource> literal(final String name) {
+    protected static LiteralArgumentBuilder<CommandSource> literal(final String name) {
         return LiteralArgumentBuilder.literal(name);
     }
 
@@ -76,4 +76,12 @@ public abstract class Command {
 
         return base.toString();
     }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface Init {
+        String name();
+        String description();
+        String[] aliases() default "";
+    }
 }
+
