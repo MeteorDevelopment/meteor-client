@@ -34,7 +34,6 @@ import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.input.Input;
 import minegame159.meteorclient.utils.misc.input.KeyAction;
 import minegame159.meteorclient.utils.player.ChatUtils;
-import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -266,7 +265,6 @@ public class Modules extends System<Modules> {
                 MeteorClient.EVENT_BUS.subscribe(module);
                 module.onActivate();
             }
-            MeteorClient.EVENT_BUS.subscribe(new InvUtils());
         }
     }
 

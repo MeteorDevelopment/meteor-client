@@ -22,7 +22,6 @@ import net.minecraft.item.Items;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.network.packet.c2s.play.BookUpdateC2SPacket;
-import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.Style;
 
 import java.io.BufferedReader;
@@ -145,9 +144,7 @@ public class BookBot extends Module {
                 mc.player.inventory.selectedSlot = itemResult.slot;
                 ((IClientPlayerInteractionManager) mc.interactionManager).syncSelectedSlot2();
             } else if (itemResult.slot > 8){ //Else if it's in their inventory then swap their current item with the writable book
-                InvUtils.clickSlot(InvUtils.invIndexToSlotId(itemResult.slot), 0, SlotActionType.PICKUP);
-                InvUtils.clickSlot(InvUtils.invIndexToSlotId(mc.player.inventory.selectedSlot), 0, SlotActionType.PICKUP);
-                InvUtils.clickSlot(InvUtils.invIndexToSlotId(itemResult.slot), 0, SlotActionType.PICKUP);
+                InvUtils.move().from(itemResult.slot).toHotbar(mc.player.inventory.selectedSlot);
             } else { // Otherwise we are out and we can just wait for more books.
                 // I'm always waiting. Watching. Get more books. I dare you. :))))
                 return;

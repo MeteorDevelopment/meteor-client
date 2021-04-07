@@ -6,7 +6,6 @@
 package minegame159.meteorclient.utils.world;
 
 import minegame159.meteorclient.mixininterface.IVec3d;
-import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.player.Rotations;
 import net.minecraft.block.*;
 import net.minecraft.client.MinecraftClient;
@@ -53,7 +52,7 @@ public class BlockUtils {
 
     private static void place(int slot, Vec3d hitPos, Hand hand, Direction side, BlockPos neighbour, boolean swing, boolean swap, boolean swapBack) {
         int preSlot = mc.player.inventory.selectedSlot;
-        if (swap) InvUtils.swap(slot);
+        if (swap) mc.player.inventory.selectedSlot = slot;
 
         boolean wasSneaking = mc.player.input.sneaking;
         mc.player.input.sneaking = false;
@@ -64,7 +63,7 @@ public class BlockUtils {
 
         mc.player.input.sneaking = wasSneaking;
 
-        if (swapBack) InvUtils.swap(preSlot);
+        if (swapBack) mc.player.inventory.selectedSlot = preSlot;
     }
 
     public static boolean canPlace(BlockPos blockPos, boolean checkEntities) {

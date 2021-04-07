@@ -5,31 +5,45 @@
 
 package minegame159.meteorclient.utils.player;
 
-import meteordevelopment.orbit.EventHandler;
-import meteordevelopment.orbit.EventPriority;
-import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.utils.Utils;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.Hand;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
 import java.util.function.Predicate;
 
+import static minegame159.meteorclient.utils.Utils.mc;
+
 public class InvUtils {
-    public static final int OFFHAND_SLOT = 45;
-    private static final MinecraftClient mc = MinecraftClient.getInstance();
+    private static final Action ACTION = new Action();
 
     private static final FindItemResult findItemResult = new FindItemResult();
-    private static final Deque<Long> moveQueue = new ArrayDeque<>();
-    private static Long currentMove;
 
-    public static void clickSlot(int slot, int button, SlotActionType action) {
-        mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, slot, button, action, mc.player);
+    // Interactions
+
+    public static Action move() {
+        ACTION.type = SlotActionType.PICKUP;
+        ACTION.two = true;
+        return ACTION;
     }
+
+    public static Action click() {
+        ACTION.type = SlotActionType.PICKUP;
+        return ACTION;
+    }
+
+    public static Action quickMove() {
+        ACTION.type = SlotActionType.QUICK_MOVE;
+        return ACTION;
+    }
+
+    public static Action drop() {
+        ACTION.type = SlotActionType.THROW;
+        ACTION.data = 1;
+        return ACTION;
+    }
+
+    // Hand
 
     public static Hand getHand(Item item) {
         Hand hand = Hand.MAIN_HAND;
@@ -45,6 +59,8 @@ public class InvUtils {
         return hand;
     }
 
+    // Find item
+
     public static FindItemResult findItemWithCount(Item item) {
         findItemResult.slot = -1;
         findItemResult.count = 0;
@@ -59,54 +75,6 @@ public class InvUtils {
         }
 
         return findItemResult;
-    }
-
-    public static int invIndexToSlotId(int invIndex) {
-        if (invIndex < 9 && invIndex != -1) return 44 - (8 - invIndex);
-        return invIndex;
-    }
-
-    @EventHandler(priority = EventPriority.LOWEST)
-    private static void onTick(TickEvent.Pre event) {
-        if (mc.world == null || mc.player == null || mc.player.abilities.creativeMode) {
-            moveQueue.clear();
-            return;
-        }
-
-        if (!mc.player.inventory.getCursorStack().isEmpty() && mc.currentScreen == null && mc.player.currentScreenHandler.getStacks().size() == 46) {
-            int slot = findItemWithCount(mc.player.inventory.getCursorStack().getItem()).slot;
-            if (slot == -1) slot = mc.player.inventory.getEmptySlot();
-            if (slot != -1) clickSlot(invIndexToSlotId(slot), 0, SlotActionType.PICKUP);
-        }
-
-        if (!moveQueue.isEmpty()) {
-            if (mc.player.currentScreenHandler.getStacks().size() == 46) {
-                currentMove = moveQueue.remove();
-                clickSlot(unpackLongFrom(currentMove), 0, SlotActionType.PICKUP);
-                clickSlot(unpackLongTo(currentMove), 0, SlotActionType.PICKUP);
-                clickSlot(unpackLongFrom(currentMove), 0, SlotActionType.PICKUP);
-            }
-        }
-    }
-
-    public static void addSlots(int mode, int to, int from, int prio) {
-        Long action = Utils.packLong(mode, to, from, prio);
-        if (moveQueue.contains(action)) return;
-
-        moveQueue.removeIf(entry -> (actionContains(entry, unpackLongTo(action)) || actionContains(entry, unpackLongFrom(action))) && canMove(entry, action));
-
-        boolean isEmpty = moveQueue.isEmpty();
-        if (moveQueue.isEmpty() || canMove(moveQueue.peek(), action)) {
-            moveQueue.addFirst(action);
-        } else {
-            moveQueue.add(action);
-        }
-
-        if (isEmpty) onTick(new TickEvent.Pre());
-    }
-
-    public static boolean canMove(Long first, Long action) {
-        return unpackLongPrio(first) < unpackLongPrio(action);
     }
 
     //Whole
@@ -156,35 +124,136 @@ public class InvUtils {
         return -1;
     }
 
-    public static void swap(int slot) {
-        if (slot != mc.player.inventory.selectedSlot && slot >= 0 && slot < 9) mc.player.inventory.selectedSlot = slot;
-    }
-
-    private static boolean actionContains(long l, int i) {
-        return i == unpackLongTo(l) || i == unpackLongFrom(l);
-    }
-
-    private static int unpackLongMode(long l) {
-        return Utils.unpackLong1(l);
-    }
-
-    private static int unpackLongTo(long l) {
-        return Utils.unpackLong2(l);
-    }
-
-    private static int unpackLongFrom(long l) {
-        return Utils.unpackLong3(l);
-    }
-
-    private static int unpackLongPrio(long l) {
-        return Utils.unpackLong4(l);
-    }
-
     public static class FindItemResult {
         public int slot, count;
 
         public boolean found() {
             return slot != -1;
+        }
+    }
+
+    public static class Action {
+        private SlotActionType type = null;
+        private boolean two = false;
+        private int from = -1;
+        private int to = -1;
+        private int data = 0;
+
+        private boolean isRecursive = false;
+
+        private Action() {}
+
+        // From
+
+        public Action fromId(int id) {
+            from = id;
+            return this;
+        }
+
+        public Action from(int index) {
+            return fromId(SlotUtils.indexToId(index));
+        }
+
+        public Action fromHotbar(int i) {
+            return from(SlotUtils.HOTBAR_START + i);
+        }
+
+        public Action fromOffhand() {
+            return from(SlotUtils.OFFHAND);
+        }
+
+        public Action fromMain(int i) {
+            return from(SlotUtils.MAIN_START + i);
+        }
+
+        public Action fromArmor(int i) {
+            return from(SlotUtils.ARMOR_START + (3 - i));
+        }
+
+        // To
+
+        public void toId(int id) {
+            to = id;
+            run();
+        }
+
+        public void to(int index) {
+            toId(SlotUtils.indexToId(index));
+        }
+
+        public void toHotbar(int i) {
+            to(SlotUtils.HOTBAR_START + i);
+        }
+
+        public void toOffhand() {
+            to(SlotUtils.OFFHAND);
+        }
+
+        public void toMain(int i) {
+            to(SlotUtils.MAIN_START + i);
+        }
+
+        public void toArmor(int i) {
+            to(SlotUtils.ARMOR_START + (3 - i));
+        }
+
+        // Slot
+
+        public void slotId(int id) {
+            from = to = id;
+            run();
+        }
+
+        public void slot(int index) {
+            slotId(SlotUtils.indexToId(index));
+        }
+
+        public void slotHotbar(int i) {
+            slot(SlotUtils.HOTBAR_START + i);
+        }
+
+        public void slotOffhand() {
+            slot(SlotUtils.OFFHAND);
+        }
+
+        public void slotMain(int i) {
+            slot(SlotUtils.MAIN_START + i);
+        }
+
+        public void slotArmor(int i) {
+            slot(SlotUtils.ARMOR_START + (3 - i));
+        }
+
+        // Other
+
+        private void run() {
+            boolean hadEmptyCursor = mc.player.inventory.getCursorStack().isEmpty();
+
+            if (type != null && from != -1 && to != -1) {
+               click(from);
+               if (two) click(to);
+            }
+
+            SlotActionType preType = type;
+            boolean preTwo = two;
+            int preFrom = from;
+            int preTo = to;
+
+            type = null;
+            two = false;
+            from = -1;
+            to = -1;
+            data = 0;
+
+            if (!isRecursive && hadEmptyCursor && preType == SlotActionType.PICKUP && preTwo && (preFrom != -1 && preTo != -1) && !mc.player.inventory.getCursorStack().isEmpty()) {
+                isRecursive = true;
+                InvUtils.click().slotId(preFrom);
+                isRecursive = false;
+            }
+        }
+
+        private void click(int id) {
+            mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, id, data, type, mc.player);
         }
     }
 }

@@ -11,7 +11,6 @@ import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.screen.AbstractFurnaceScreenHandler;
-import net.minecraft.screen.slot.SlotActionType;
 
 public class AutoSmelter extends Module {
     private int step;
@@ -93,8 +92,7 @@ public class AutoSmelter extends Module {
             return true;
         }
 
-        InvUtils.clickSlot(slot, 0, SlotActionType.PICKUP);
-        InvUtils.clickSlot(0, 0, SlotActionType.PICKUP);
+        InvUtils.move().fromId(slot).toId(0);
 
         return false;
     }
@@ -102,7 +100,7 @@ public class AutoSmelter extends Module {
     private boolean checkFuel(AbstractFurnaceScreenHandler c) {
         if (c.getFuelProgress() <= 1 && !((AbstractFurnaceScreenHandlerAccessor) c).isFuel(c.slots.get(1).getStack())) {
             if (!c.slots.get(1).getStack().isEmpty()) {
-                InvUtils.clickSlot(1, 0, SlotActionType.QUICK_MOVE);
+                InvUtils.quickMove().slotId(1);
 
                 if (!c.slots.get(1).getStack().isEmpty()) {
                     ChatUtils.moduleError(this, "Your inventory is currently full... disabling.");
@@ -125,15 +123,14 @@ public class AutoSmelter extends Module {
                 return true;
             }
 
-            InvUtils.clickSlot(slot, 0, SlotActionType.PICKUP);
-            InvUtils.clickSlot(1, 0, SlotActionType.PICKUP);
+            InvUtils.move().fromId(slot).toId(1);
         }
 
         return false;
     }
 
     private boolean takeResults(AbstractFurnaceScreenHandler c) {
-        InvUtils.clickSlot(2, 0, SlotActionType.QUICK_MOVE);
+        InvUtils.quickMove().slotId(2);
 
         if (!c.slots.get(2).getStack().isEmpty()) {
             ChatUtils.moduleError(this, "Your inventory is full... disabling.");

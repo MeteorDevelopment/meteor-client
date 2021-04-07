@@ -24,7 +24,6 @@ import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.SwordItem;
-import net.minecraft.screen.slot.SlotActionType;
 
 public class AutoMend extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -60,15 +59,12 @@ public class AutoMend extends Module {
             if (EnchantmentHelper.getLevel(Enchantments.MENDING, itemStack) == 0 || !itemStack.isDamaged()) continue;
             if (!swords.get() && itemStack.getItem() instanceof SwordItem) continue;
 
-            InvUtils.clickSlot(InvUtils.invIndexToSlotId(i), 0, SlotActionType.PICKUP);
-            InvUtils.clickSlot(InvUtils.OFFHAND_SLOT, 0, SlotActionType.PICKUP);
-            if (!offhandEmpty) InvUtils.clickSlot(InvUtils.invIndexToSlotId(i), 0, SlotActionType.PICKUP);
+            InvUtils.move().from(i).toOffhand();
 
             break;
         }
         if(!mc.player.getOffHandStack().isDamaged() && removeFinished.get() && mc.player.inventory.getEmptySlot() != -1){
-            InvUtils.clickSlot(InvUtils.OFFHAND_SLOT, 0, SlotActionType.PICKUP);
-            InvUtils.clickSlot(InvUtils.invIndexToSlotId(mc.player.inventory.getEmptySlot()), 0, SlotActionType.PICKUP);
+            InvUtils.move().fromOffhand().to(mc.player.inventory.getEmptySlot());
         }
     }
 
@@ -88,15 +84,12 @@ public class AutoMend extends Module {
             if(!checkSlot(mc.player.inventory.getStack(i), slot)) continue;
             if (EnchantmentHelper.getLevel(Enchantments.MENDING, itemStack) == 0 || !itemStack.isDamaged()) continue;
 
-            InvUtils.clickSlot(InvUtils.invIndexToSlotId(i), 0, SlotActionType.PICKUP);
-            InvUtils.clickSlot(slot, 0, SlotActionType.PICKUP);
-            if (!empty) InvUtils.clickSlot(InvUtils.invIndexToSlotId(i), 0, SlotActionType.PICKUP);
+            InvUtils.move().from(i).toId(slot);
 
             break;
         }
         if(!mc.player.inventory.getStack(39 - (slot - 5)).isDamaged() && removeFinished.get() && mc.player.inventory.getEmptySlot() != -1){
-            InvUtils.clickSlot(slot, 0, SlotActionType.PICKUP);
-            InvUtils.clickSlot(InvUtils.invIndexToSlotId(mc.player.inventory.getEmptySlot()), 0, SlotActionType.PICKUP);
+            InvUtils.move().fromId(slot).to(mc.player.inventory.getEmptySlot());
         }
     }
 

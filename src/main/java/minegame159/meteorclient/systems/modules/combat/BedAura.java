@@ -389,7 +389,7 @@ public class BedAura extends Module {
     private void doAutoMove() {
         if (InvUtils.findItemInHotbar(itemStack -> itemStack.getItem() instanceof BedItem) == -1) {
             int slot = InvUtils.findItemInMain(itemStack -> itemStack.getItem() instanceof BedItem);
-            InvUtils.addSlots(1, InvUtils.invIndexToSlotId(autoMoveSlot.get() - 1), InvUtils.invIndexToSlotId(slot), 0);
+            InvUtils.move().from(slot).toHotbar(autoMoveSlot.get() - 1);
         }
     }
 

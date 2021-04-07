@@ -104,10 +104,9 @@ public class AutoTotem extends Module {
         } else {
             Modules.get().get(OffhandExtra.class).setTotems(false);
 
-            if (mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING && (!smart.get()
-                    || isLow() || elytraMove())) {
+            if (mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING && (!smart.get() || isLow() || elytraMove())) {
                 locked = true;
-                InvUtils.addSlots(1, 45, InvUtils.invIndexToSlotId(result.slot), 1000);
+                InvUtils.move().from(result.slot).toOffhand();
             } else if (smart.get() && !isLow() && !elytraMove()) {
                 locked = false;
             }

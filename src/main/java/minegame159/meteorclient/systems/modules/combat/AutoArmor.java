@@ -228,7 +228,7 @@ public class AutoArmor extends Module {
                 }
             }
             if (bestSlot > -1) {
-                InvUtils.addSlots(1, 8 - a, InvUtils.invIndexToSlotId(bestSlot), 999);
+                InvUtils.move().from(bestSlot).toArmor(a);
                 if (pause.get()) break;
             }
             mode.set(preMode);

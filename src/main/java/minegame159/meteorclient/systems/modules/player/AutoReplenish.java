@@ -14,6 +14,7 @@ import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.combat.AutoTotem;
 import minegame159.meteorclient.utils.player.InvUtils;
+import minegame159.meteorclient.utils.player.SlotUtils;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -108,7 +109,7 @@ public class AutoReplenish extends Module {
             // Offhand
             if (offhand.get() && !Modules.get().get(AutoTotem.class).getLocked()) {
                 ItemStack stack = mc.player.getOffHandStack();
-                checkSlot(InvUtils.OFFHAND_SLOT, stack);
+                checkSlot(SlotUtils.OFFHAND, stack);
             }
         }
         else {
@@ -159,12 +160,11 @@ public class AutoReplenish extends Module {
             }
         }
 
-        return InvUtils.invIndexToSlotId(slot);
+        return slot;
     }
 
     private void addSlots(int to, int from) {
-        if (to == -1 || from == -1) return;
-        InvUtils.addSlots(1, InvUtils.invIndexToSlotId(to), InvUtils.invIndexToSlotId(from), 1);
+        InvUtils.move().from(from).to(to);
     }
 
     private void fillItems() {
@@ -172,17 +172,17 @@ public class AutoReplenish extends Module {
             setItem(i, mc.player.inventory.getStack(i));
         }
 
-        setItem(InvUtils.OFFHAND_SLOT, mc.player.getOffHandStack());
+        setItem(SlotUtils.OFFHAND, mc.player.getOffHandStack());
     }
 
     private ItemStack getItem(int slot) {
-        if (slot == InvUtils.OFFHAND_SLOT) slot = 9;
+        if (slot == SlotUtils.OFFHAND) slot = 9;
 
         return items[slot];
     }
 
     private void setItem(int slot, ItemStack stack) {
-        if (slot == InvUtils.OFFHAND_SLOT) slot = 9;
+        if (slot == SlotUtils.OFFHAND) slot = 9;
 
         ItemStack s = items[slot];
         ((ItemStackAccessor) (Object) s).setItem(stack.getItem());

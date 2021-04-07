@@ -20,7 +20,6 @@ import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionUtil;
 import net.minecraft.potion.Potions;
 import net.minecraft.screen.BrewingStandScreenHandler;
-import net.minecraft.screen.slot.SlotActionType;
 
 public class AutoBrewer extends Module {
     public enum Modifier {
@@ -175,9 +174,7 @@ public class AutoBrewer extends Module {
     }
 
     private void moveOneItem(BrewingStandScreenHandler c, int from, int to) {
-        InvUtils.clickSlot(from, 0, SlotActionType.PICKUP);
-        InvUtils.clickSlot(to, 1, SlotActionType.PICKUP);
-        InvUtils.clickSlot(from, 0, SlotActionType.PICKUP);
+        InvUtils.move().fromId(from).toId(to);
     }
 
     private boolean insertWaterBottles(BrewingStandScreenHandler c) {
@@ -200,8 +197,7 @@ public class AutoBrewer extends Module {
                 return true;
             }
 
-            InvUtils.clickSlot(slot, 0, SlotActionType.PICKUP);
-            InvUtils.clickSlot(i, 0, SlotActionType.PICKUP);
+            InvUtils.move().fromId(slot).toId(i);
         }
 
         return false;
@@ -209,7 +205,7 @@ public class AutoBrewer extends Module {
 
     private boolean takePotions(BrewingStandScreenHandler c) {
         for (int i = 0; i < 3; i++) {
-            InvUtils.clickSlot(i, 0, SlotActionType.QUICK_MOVE);
+            InvUtils.quickMove().slotId(i);
 
             if (!c.slots.get(i).getStack().isEmpty()) {
                 ChatUtils.moduleError(this, "You do not have a sufficient amount of inventory space... disabling.");
