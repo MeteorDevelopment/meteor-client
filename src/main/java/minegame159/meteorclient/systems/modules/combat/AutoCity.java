@@ -5,6 +5,7 @@
 
 package minegame159.meteorclient.systems.modules.combat;
 
+import minegame159.meteorclient.mixininterface.IClientPlayerInteractionManager;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -20,7 +21,9 @@ import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
+import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
 import net.minecraft.util.Hand;
+import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
@@ -48,6 +51,13 @@ public class AutoCity extends Module {
             .name("chat-info")
             .description("Sends a client-side message if you city a player.")
             .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Boolean> crystal = sgGeneral.add(new BoolSetting.Builder()
+            .name("crystal")
+            .description("Places a crystal above the city block.")
+            .defaultValue(false)
             .build()
     );
 
@@ -115,6 +125,22 @@ public class AutoCity extends Module {
 
             if (rotate.get()) Rotations.rotate(Rotations.getYaw(mineTarget), Rotations.getPitch(mineTarget), () -> mine(mineTarget));
             else mine(mineTarget);
+
+            if (crystal.get()) {
+                if (!BlockUtils.canPlace(mineTarget, true)) return;
+                Hand hand = InvUtils.getHand(Items.END_CRYSTAL);
+
+                if (hand == Hand.MAIN_HAND) {
+                    int crystalSlot = InvUtils.findItemInHotbar(Items.END_CRYSTAL);
+                    int preSlot = mc.player.inventory.selectedSlot;
+                    mc.player.inventory.selectedSlot = crystalSlot;
+                    ((IClientPlayerInteractionManager) mc.interactionManager).syncSelectedSlot2();
+                    mc.player.networkHandler.sendPacket(new PlayerInteractBlockC2SPacket(hand, new BlockHitResult(mc.player.getPos(), Direction.UP, mineTarget, false)));
+                    mc.player.inventory.selectedSlot = preSlot;
+                } else if (hand == Hand.OFF_HAND) {
+                    mc.player.networkHandler.sendPacket(new PlayerInteractBlockC2SPacket(hand, new BlockHitResult(mc.player.getPos(), Direction.UP, mineTarget, false)));
+                }
+            }
         }
 
         this.toggle();
