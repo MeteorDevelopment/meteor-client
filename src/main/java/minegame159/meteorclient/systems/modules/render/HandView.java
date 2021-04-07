@@ -5,7 +5,6 @@
 
 package minegame159.meteorclient.systems.modules.render;
 
-import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
@@ -112,13 +111,6 @@ public class HandView extends Module {
             .defaultValue(0)
             .sliderMin(0)
             .sliderMax(1)
-            .build()
-    );
-
-    public final Setting<Boolean> noSwing = sgSwing.add(new BoolSetting.Builder()
-            .name("no-swing")
-            .description("Doesn't swing your hand if the two values above are 0 or 1.")
-            .defaultValue(false)
             .build()
     );
 
