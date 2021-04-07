@@ -32,6 +32,10 @@ public class ChatUtils {
         sendMsg(0, prefix, PrefixType.Other, msg);
     }
 
+    public static void info(Text msg) {
+        sendMsg(0, null, PrefixType.None, msg);
+    }
+
     public static void warning(String msg, Object... args) {
         message(0, Formatting.YELLOW, msg, args);
     }

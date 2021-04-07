@@ -15,11 +15,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientCommandSource;
 import net.minecraft.command.CommandSource;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Consumer;
+import java.util.*;
 
 public class Commands extends System<Commands> {
     private final CommandDispatcher<CommandSource> DISPATCHER = new CommandDispatcher<>();
@@ -65,6 +61,7 @@ public class Commands extends System<Commands> {
         add(new SettingCommand());
         add(new GamemodeCommand());
         add(new SaveMapCommand());
+        commands.sort(Comparator.comparing(Command::getName));
     }
 
     public void dispatch(String message) throws CommandSyntaxException {
@@ -103,8 +100,8 @@ public class Commands extends System<Commands> {
         return commands.size();
     }
 
-    public void forEach(Consumer<Command> consumer) {
-        commands.forEach(consumer);
+    public List<Command> getAll() {
+        return commands;
     }
 
     @SuppressWarnings("unchecked")
