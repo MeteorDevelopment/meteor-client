@@ -61,6 +61,7 @@ public class Commands extends System<Commands> {
         add(new SettingCommand());
         add(new GamemodeCommand());
         add(new SaveMapCommand());
+        add(new ModulesCommand());
         commands.sort(Comparator.comparing(Command::getName));
     }
 
@@ -108,4 +109,5 @@ public class Commands extends System<Commands> {
     public <T extends Command> T get(Class<T> klass) {
         return (T) commandInstances.get(klass);
     }
+
 }
