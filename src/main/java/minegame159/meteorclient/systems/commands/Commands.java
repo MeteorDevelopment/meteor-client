@@ -62,6 +62,8 @@ public class Commands extends System<Commands> {
         add(new GamemodeCommand());
         add(new SaveMapCommand());
         add(new ModulesCommand());
+        add(new BindsCommand());
+
         commands.sort(Comparator.comparing(Command::getName));
     }
 
