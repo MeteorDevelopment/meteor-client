@@ -246,7 +246,7 @@ public abstract class WidgetScreen extends Screen {
             });
 
             MeteorClient.EVENT_BUS.unsubscribe(this);
-            //GuiKeyEvents.postKeyEvents = prePostKeyEvents;
+            GuiKeyEvents.resetPostKeyEvents();
             if (onClose) mc.openScreen(parent);
         }
     }
