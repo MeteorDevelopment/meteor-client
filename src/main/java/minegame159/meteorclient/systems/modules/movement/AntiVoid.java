@@ -13,6 +13,7 @@ import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.systems.modules.Modules;
+import minegame159.meteorclient.utils.Utils;
 
 public class AntiVoid extends Module {
 
@@ -39,7 +40,7 @@ public class AntiVoid extends Module {
 
     @Override
     public void onDeactivate() {
-        if (!wasFlightEnabled && mode.get() == Mode.Flight) Modules.get().get(Flight.class).toggle();
+        if (!wasFlightEnabled && mode.get() == Mode.Flight && Utils.canUpdate()) Modules.get().get(Flight.class).toggle();
     }
 
     @EventHandler
