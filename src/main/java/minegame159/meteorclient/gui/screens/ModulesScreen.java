@@ -104,18 +104,18 @@ public class ModulesScreen extends TabScreen {
         c.add(w);
         w.view.scrollOnlyWhenMouseOver = true;
         w.view.hasScrollBar = false;
-        w.view.maxHeight -= 18;
+        w.view.maxHeight -= 20;
 
         WVerticalList l = theme.verticalList();
 
-        WTextBox text = w.add(theme.textBox("")).minWidth(140).widget();
+        WTextBox text = w.add(theme.textBox("")).minWidth(140).expandX().widget();
         text.setFocused(true);
         text.action = () -> {
             l.clear();
             createSearchW(l, text.get());
         };
 
-        w.add(l);
+        w.add(l).expandX();
         createSearchW(l, text.get());
     }
 
