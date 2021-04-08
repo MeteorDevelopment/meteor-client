@@ -29,7 +29,8 @@ public class PotionSaver extends Module {
     }
 
     public boolean shouldFreeze() {
-        return Utils.canUpdate() && isActive() && ((onlyWhenStationary.get() && !PlayerUtils.isMoving()) || !onlyWhenStationary.get())  && !mc.player.getStatusEffects().isEmpty();
+        if (!Utils.canUpdate()) return false;
+        return isActive() && ((onlyWhenStationary.get() && !PlayerUtils.isMoving()) || !onlyWhenStationary.get())  && !mc.player.getStatusEffects().isEmpty();
     }
 
 }

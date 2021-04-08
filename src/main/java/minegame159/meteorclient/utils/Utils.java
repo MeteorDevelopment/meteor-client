@@ -300,7 +300,7 @@ public class Utils {
     }
 
     public static boolean canUpdate() {
-        return mc != null && (mc.world != null || mc.player != null);
+        return mc != null && mc.world != null && mc.player != null;
     }
 
     public static boolean isWhitelistedScreen() {
