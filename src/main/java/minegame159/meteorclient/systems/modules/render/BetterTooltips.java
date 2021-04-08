@@ -14,7 +14,6 @@ import minegame159.meteorclient.utils.misc.ByteCountDataOutput;
 import minegame159.meteorclient.utils.misc.Keybind;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.render.color.SettingColor;
-
 import net.minecraft.block.Block;
 import net.minecraft.block.ShulkerBoxBlock;
 import net.minecraft.entity.effect.StatusEffect;
@@ -42,7 +41,6 @@ public class BetterTooltips extends Module {
     private final SettingGroup sgShulker = settings.createGroup("Shulker");
     private final SettingGroup sgEChest = settings.createGroup("EChest");
     private final SettingGroup sgMap = settings.createGroup("Map");
-    private final SettingGroup sgByteSize = settings.createGroup("Byte Size");
     private final SettingGroup sgOther = settings.createGroup("Other");
 
     // General
@@ -134,16 +132,9 @@ public class BetterTooltips extends Module {
 
     // Byte Size
 
-    public final Setting<Boolean> byteSize = sgByteSize.add(new BoolSetting.Builder()
+    public final Setting<Boolean> byteSize = sgOther.add(new BoolSetting.Builder()
             .name("byte-size")
             .description("Displays an item's size in bytes in the tooltip.")
-            .defaultValue(true)
-            .build()
-    );
-
-    private final Setting<Boolean> useKbIfBigEnoughEnabled = sgByteSize.add(new BoolSetting.Builder()
-            .name("use-kb-if-big-enough-enabled")
-            .description("Uses KB instead of bytes if your item's size is larger or equal to 1KB.")
             .defaultValue(true)
             .build()
     );
@@ -214,7 +205,7 @@ public class BetterTooltips extends Module {
 
                 ByteCountDataOutput.INSTANCE.reset();
 
-                if (useKbIfBigEnoughEnabled.get() && byteCount >= 1024) count = String.format("%.2f kb", byteCount / (float) 1024);
+                if (byteCount >= 1024) count = String.format("%.2f kb", byteCount / (float) 1024);
                 else count = String.format("%d bytes", byteCount);
     
                 event.list.add(new LiteralText(Formatting.GRAY + count));
