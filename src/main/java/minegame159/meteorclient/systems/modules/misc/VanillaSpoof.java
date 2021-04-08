@@ -15,6 +15,9 @@ import minegame159.meteorclient.systems.modules.Module;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.c2s.play.CustomPayloadC2SPacket;
 import net.minecraft.util.Identifier;
+import org.apache.commons.lang3.StringUtils;
+
+import java.nio.charset.StandardCharsets;
 
 public class VanillaSpoof extends Module {
     public VanillaSpoof() {
@@ -24,20 +27,17 @@ public class VanillaSpoof extends Module {
     }
 
     private class Listener {
-        private boolean skip = false;
-
         @EventHandler
         private void onPacketSend(PacketEvent.Send event) {
-            if (!isActive() || !(event.packet instanceof CustomPayloadC2SPacket) || skip) return;
-            Identifier id = ((CustomPayloadC2SPacketAccessor) event.packet).getChannel();
+            if (!isActive() || !(event.packet instanceof CustomPayloadC2SPacket)) return;
+            CustomPayloadC2SPacketAccessor packet = (CustomPayloadC2SPacketAccessor) event.packet;
+            Identifier id = packet.getChannel();
 
             if (id.equals(CustomPayloadC2SPacket.BRAND)) {
+                packet.setData(new PacketByteBuf(Unpooled.buffer()).writeString("vanilla"));
+            }
+            else if (StringUtils.containsIgnoreCase(packet.getData().toString(StandardCharsets.UTF_8), "fabric")) {
                 event.cancel();
-
-                skip = true;
-                MeteorClient.LOG.info("Spoofed vanilla client");
-                mc.getNetworkHandler().sendPacket(new CustomPayloadC2SPacket(CustomPayloadC2SPacket.BRAND, new PacketByteBuf(Unpooled.buffer()).writeString("vanilla")));
-                skip = false;
             }
         }
     }
