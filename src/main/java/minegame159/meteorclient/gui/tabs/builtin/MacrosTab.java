@@ -114,8 +114,8 @@ public class MacrosTab extends Tab {
             WTable lines = t.add(theme.table()).widget();
             fillMessagesTable(lines);
 
-            // Key
-            keybind = add(theme.keybind(macro.keybind, true)).widget();
+            // Bind
+            keybind = add(theme.keybind(macro.keybind)).expandX().widget();
             keybind.actionOnSet = () -> binding = true;
 
             // Apply
