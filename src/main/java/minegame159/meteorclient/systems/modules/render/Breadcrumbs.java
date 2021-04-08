@@ -33,7 +33,8 @@ public class Breadcrumbs extends Module {
             .name("max-sections")
             .description("The maximum number of sections.")
             .defaultValue(1000)
-            .min(0)
+            .min(1)
+            .sliderMin(1)
             .sliderMax(5000)
             .build()
     );
@@ -84,7 +85,8 @@ public class Breadcrumbs extends Module {
             section.set2();
 
             if (sections.size() >= maxSections.get()) {
-                sectionPool.free(sections.poll());
+                Section section = sections.poll();
+                if (section != null) sectionPool.free(section);
             }
 
             sections.add(section);
