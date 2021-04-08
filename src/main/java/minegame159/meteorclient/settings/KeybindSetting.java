@@ -79,6 +79,10 @@ public class KeybindSetting extends Setting<Keybind> {
         return get();
     }
 
+    public Keybind getDefault() {
+        return defaultValue;
+    }
+
     public static class Builder {
         private String name = "undefined", description = "";
         private Keybind defaultValue = Keybind.fromKey(-1);

@@ -28,6 +28,10 @@ public class Keybind implements ISerializable<Keybind> {
         return new Keybind(false, button);
     }
 
+    public int getValue() {
+        return value;
+    }
+
     public boolean isSet() {
         return value != -1;
     }
