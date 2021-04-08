@@ -49,8 +49,8 @@ public class MeteorGuiTheme extends GuiTheme {
             .name("scale")
             .description("Scale of the GUI.")
             .defaultValue(1)
-            .min(1)
-            .sliderMin(1)
+            .min(0.75)
+            .sliderMin(0.75)
             .sliderMax(4)
             .onSliderRelease()
             .onChanged(aDouble -> {
