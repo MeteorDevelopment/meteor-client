@@ -111,6 +111,7 @@
     "SoundSystemMixin",
     "SplashTextResourceSupplierMixin",
     "StatusEffectInstanceAccessor",
+    "StatusEffectInstanceMixin",
     "TerrainRenderContextMixin",
     "TextHandlerAccessor",
     "TextVisitFactoryMixin",
