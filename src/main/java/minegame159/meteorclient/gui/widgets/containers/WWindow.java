@@ -38,7 +38,6 @@ public abstract class WWindow extends WVerticalList {
     protected double movedX, movedY;
 
     private boolean propagateEventsExpanded;
-    private boolean firstTime = true;
 
     public WWindow(String title) {
         this.title = title;
@@ -81,28 +80,24 @@ public abstract class WWindow extends WVerticalList {
 
     @Override
     protected void onCalculateWidgetPositions() {
-        if (firstTime) {
-            if (id != null) {
-                WindowConfig config = theme.getWindowConfig(id);
+        if (id != null) {
+            WindowConfig config = theme.getWindowConfig(id);
 
-                if (config.x != -1) {
-                    x = config.x;
+            if (config.x != -1) {
+                x = config.x;
 
-                    if (x + width > getWindowWidth()) {
-                        x = getWindowWidth() - width;
-                    }
-                }
-
-                if (config.y != -1) {
-                    y = config.y;
-
-                    if (y + height > getWindowHeight()) {
-                        y = getWindowHeight() - height;
-                    }
+                if (x + width > getWindowWidth()) {
+                    x = getWindowWidth() - width;
                 }
             }
 
-            firstTime = false;
+            if (config.y != -1) {
+                y = config.y;
+
+                if (y + height > getWindowHeight()) {
+                    y = getWindowHeight() - height;
+                }
+            }
         }
 
         super.onCalculateWidgetPositions();

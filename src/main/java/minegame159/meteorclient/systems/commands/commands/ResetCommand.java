@@ -6,6 +6,7 @@
 package minegame159.meteorclient.systems.commands.commands;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import minegame159.meteorclient.gui.GuiThemes;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.systems.commands.Command;
 import minegame159.meteorclient.systems.commands.arguments.ModuleArgumentType;
@@ -35,8 +36,7 @@ public class ResetCommand extends Command {
                     return SINGLE_SUCCESS;
                 }))
         ).then(literal("gui").executes(context -> {
-            // TODO
-            //Config.get().guiConfig.clearWindowConfigs();
+            GuiThemes.get().clearWindowConfigs();
             ChatUtils.info("The ClickGUI positioning has been reset.");
             return SINGLE_SUCCESS;
         })).then(literal("bind")

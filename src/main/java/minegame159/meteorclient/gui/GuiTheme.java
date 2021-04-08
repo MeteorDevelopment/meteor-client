@@ -226,6 +226,10 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
         return config;
     }
 
+    public void clearWindowConfigs() {
+        windowConfigs.clear();
+    }
+
     protected <T extends WWidget> T w(T widget) {
         widget.theme = this;
         return widget;
