@@ -11,7 +11,6 @@ import minegame159.meteorclient.events.game.GameLeftEvent;
 import minegame159.meteorclient.events.game.OpenScreenEvent;
 import minegame159.meteorclient.events.game.ResourcePacksReloadedEvent;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.gui.GuiKeyEvents;
 import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.mixininterface.IMinecraftClient;
 import minegame159.meteorclient.systems.config.Config;
@@ -99,12 +98,7 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
         OpenScreenEvent event = OpenScreenEvent.get(screen);
         MeteorClient.EVENT_BUS.post(event);
 
-        if (event.isCancelled()) {
-            info.cancel();
-            return;
-        }
-
-        if (screen == null) GuiKeyEvents.resetPostKeyEvents();
+        if (event.isCancelled()) info.cancel();
     }
 
     @Redirect(method = "doItemUse", at = @At(value = "FIELD", target = "Lnet/minecraft/client/MinecraftClient;crosshairTarget:Lnet/minecraft/util/hit/HitResult;", ordinal = 1))
