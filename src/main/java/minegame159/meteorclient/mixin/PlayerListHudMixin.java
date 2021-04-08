@@ -20,7 +20,6 @@ import java.util.List;
 
 @Mixin(PlayerListHud.class)
 public class PlayerListHudMixin {
-
     @ModifyVariable(method = "render", at = @At(value = "INVOKE_ASSIGN", target = "Ljava/util/List;subList(II)Ljava/util/List;"))
     private List<PlayerListEntry> modifyCount(List<PlayerListEntry> list) {
         return list.subList(0, Math.min(list.size(), Modules.get().get(BetterTab.class).getTabSize()));
@@ -28,7 +27,7 @@ public class PlayerListHudMixin {
 
     @Inject(method = "getPlayerName", at = @At("HEAD"), cancellable = true)
     public void getPlayerName(PlayerListEntry playerListEntry, CallbackInfoReturnable<Text> info) {
-        info.setReturnValue(Modules.get().get(BetterTab.class).getPlayerName(playerListEntry));
+        BetterTab betterTab = Modules.get().get(BetterTab.class);
+        if (betterTab.isActive()) info.setReturnValue(betterTab.getPlayerName(playerListEntry));
     }
-
 }
