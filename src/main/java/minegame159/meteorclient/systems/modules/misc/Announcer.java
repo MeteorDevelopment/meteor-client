@@ -384,7 +384,7 @@ public class Announcer extends Module {
         );
 
         public OpenContainer() {
-            super("Open Container", "open-container-enabled", "Sends msg when you oopen containers.");
+            super("Open Container", "open-container-enabled", "Sends msg when you open containers.");
         }
 
         @Override
