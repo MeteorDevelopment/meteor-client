@@ -202,6 +202,7 @@ public class Utils {
         switch (key) {
             case GLFW.GLFW_KEY_UNKNOWN: return "Unknown";
             case GLFW.GLFW_KEY_ESCAPE: return "Esc";
+            case GLFW.GLFW_KEY_GRAVE_ACCENT: return "Grave Accent";
             case GLFW.GLFW_KEY_PRINT_SCREEN: return "Print Screen";
             case GLFW.GLFW_KEY_PAUSE: return "Pause";
             case GLFW.GLFW_KEY_INSERT: return "Insert";
