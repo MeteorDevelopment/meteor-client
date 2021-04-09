@@ -50,6 +50,16 @@ public class Scaffold extends Module {
             .build()
     );
 
+     private final Setting<Integer> verticalRadius = sgGeneral.add(new IntSetting.Builder()
+            .name("vertical-radius") 
+            .description("The vertical radius of your scaffold.")
+             .defaultValue(1)
+            .min(1)
+            .sliderMin(1)
+            .sliderMax(7)
+            .build()   
+    );                                                                  
+
     private final Setting<List<Block>> blackList = sgGeneral.add(new BlockListSetting.Builder()
             .name("blacklist")
             .description("Blacklists certain blocks from being used to scaffold.")
@@ -119,40 +129,42 @@ public class Scaffold extends Module {
         if (mc.player.input.sneaking) this.lastWasSneaking = false;
 
         // Place blocks around if radius is bigger than 1
-        for (int i = 1; i < radius.get(); i++) {
-            int count = 1 + (i - 1) * 2;
-            int countHalf = count / 2;
+        for (int v = 0; v < verticalRadius.get(); v++) {
+            for (int i = 1; i < radius.get(); i++) {
+                int count = 1 + (i - 1) * 2;
+                int countHalf = count / 2;
 
-            // Forward
-            for (int j = 0; j < count; j++) {
-                if (!findBlock()) return;
-                place(setPos(j - countHalf, -1, i), slot);
-            }
-            // Backward
-            for (int j = 0; j < count; j++) {
-                if (!findBlock()) return;
-                place(setPos(j - countHalf, -1, -i), slot);
-            }
-            // Right
-            for (int j = 0; j < count; j++) {
-                if (!findBlock()) return;
-                place(setPos(i, -1, j - countHalf), slot);
-            }
-            // Left
-            for (int j = 0; j < count; j++) {
-                if (!findBlock()) return;
-                place(setPos(-i, -1, j - countHalf), slot);
-            }
+                // Forward
+                for (int j = 0; j < count; j++) {
+                    if (!findBlock()) return;
+                    place(setPos(j - countHalf, -1 - v, i), slot);
+                }
+                // Backward
+                for (int j = 0; j < count; j++) {
+                    if (!findBlock()) return;
+                    place(setPos(j - countHalf, -1 - v, -i), slot);
+                }
+                // Right
+                for (int j = 0; j < count; j++) {
+                    if (!findBlock()) return;
+                    place(setPos(i, -1 - v, j - countHalf), slot);
+                }
+                // Left
+                for (int j = 0; j < count; j++) {
+                    if (!findBlock()) return;
+                    place(setPos(-i, -1 - v, j - countHalf), slot);
+                }
 
-            // Diagonals
-            if (!findBlock()) return;
-            place(setPos(-i, -1, i), slot);
-            if (!findBlock()) return;
-            place(setPos(i, -1, i), slot);
-            if (!findBlock()) return;
-            place(setPos(-i, -1, -i), slot);
-            if (!findBlock()) return;
-            place(setPos(i, -1, -i), slot);
+                // Diagonals
+                if (!findBlock()) return;
+                place(setPos(-i, -1 - v, i), slot);
+                if (!findBlock()) return;
+                place(setPos(i, -1 - v, i), slot);
+                if (!findBlock()) return;
+                place(setPos(-i, -1 - v, -i), slot);
+                if (!findBlock()) return;
+                place(setPos(i, -1 - v, -i), slot);
+            }
         }
     }
 
