@@ -323,7 +323,7 @@ public class ElytraFly extends Module {
     private class StaticInstaDropListener {
         @EventHandler
         private void onInstadropTick(TickEvent.Post event) {
-            if (mc.player.isFallFlying()) {
+            if (mc.player != null && mc.player.isFallFlying()) {
                 mc.player.setVelocity(0, 0, 0);
                 mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket(true));
             } else {
