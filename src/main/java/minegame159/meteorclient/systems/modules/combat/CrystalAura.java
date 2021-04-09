@@ -28,6 +28,7 @@ import minegame159.meteorclient.utils.misc.Vec3;
 import minegame159.meteorclient.utils.player.*;
 import minegame159.meteorclient.utils.render.NametagUtils;
 import minegame159.meteorclient.utils.render.color.SettingColor;
+import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -937,35 +938,30 @@ public class CrystalAura extends Module {
                 }
             }
         }
-        for(double i = playerPos.getX() - placeRange.get(); i < playerPos.getX() + placeRange.get(); i++){
-            for(double j = playerPos.getZ() - placeRange.get(); j < playerPos.getZ() + placeRange.get(); j++){
-                for(double k = playerPos.getY() - verticalRange.get(); k < playerPos.getY() + verticalRange.get(); k++){
-                    Vec3d pos = new Vec3d(Math.floor(i), Math.floor(k), Math.floor(j));
-                    if(isValid(new BlockPos(pos)) && getDamagePlace(new BlockPos(pos).up())){
-                        if (!oldPlace.get() || isEmpty(new BlockPos(pos.add(0, 2, 0)))) {
-                            if (!rayTrace.get() || pos.distanceTo(new Vec3d(mc.player.getX(), mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()), mc.player.getZ())) <= placeWallsRange.get() || rayTraceCheck(new BlockPos(pos), false) != null) {
-                                if (!multiTarget.get()) {
-                                    if (isEmpty(new BlockPos(pos)) && bestSupportDamage < DamageCalcUtils.crystalDamage(target, pos.add(0.5, 1, 0.5))) {
-                                        bestSupportBlock = pos;
-                                        bestSupportDamage = DamageCalcUtils.crystalDamage(target, pos.add(0.5, 1, 0.5));
-                                    } else if (!isEmpty(new BlockPos(pos)) && bestDamage < DamageCalcUtils.crystalDamage(target, pos.add(0.5, 1, 0.5))) {
-                                        bestBlock = pos;
-                                        bestDamage = DamageCalcUtils.crystalDamage(target, bestBlock.add(0.5, 1, 0.5));
-                                    }
-                                } else {
-                                    for (Entity entity : mc.world.getEntities()) {
-                                        if (entity != mc.player && entities.get().getBoolean(entity.getType()) && mc.player.distanceTo(entity) <= targetRange.get()
-                                                && entity.isAlive() && entity instanceof LivingEntity
-                                                && (!(entity instanceof PlayerEntity) || Friends.get().attack((PlayerEntity) entity))) {
-                                            crystalList.add(DamageCalcUtils.crystalDamage((LivingEntity) entity, pos.add(0.5, 1, 0.5)));
-                                        }
-                                    }
-                                    if (!crystalList.isEmpty()) {
-                                        crystalList.sort(Comparator.comparingDouble(Double::doubleValue));
-                                        crystalMap.put(new EndCrystalEntity(mc.world, pos.x, pos.y, pos.z), new ArrayList<>(crystalList));
-                                        crystalList.clear();
-                                    }
+        for (Vec3d pos : BlockUtils.getAreaAsVec3ds(playerPos, placeRange.get(), placeRange.get(), verticalRange.get(), true)) {
+            if (isValid(new BlockPos(pos)) && getDamagePlace(new BlockPos(pos).up())) {
+                if (!oldPlace.get() || isEmpty(new BlockPos(pos.add(0, 2, 0)))) {
+                    if (!rayTrace.get() || pos.distanceTo(new Vec3d(mc.player.getX(), mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()), mc.player.getZ())) <= placeWallsRange.get() || rayTraceCheck(new BlockPos(pos), false) != null) {
+                        if (!multiTarget.get()) {
+                            if (isEmpty(new BlockPos(pos)) && bestSupportDamage < DamageCalcUtils.crystalDamage(target, pos.add(0.5, 1, 0.5))) {
+                                bestSupportBlock = pos;
+                                bestSupportDamage = DamageCalcUtils.crystalDamage(target, pos.add(0.5, 1, 0.5));
+                            } else if (!isEmpty(new BlockPos(pos)) && bestDamage < DamageCalcUtils.crystalDamage(target, pos.add(0.5, 1, 0.5))) {
+                                bestBlock = pos;
+                                bestDamage = DamageCalcUtils.crystalDamage(target, bestBlock.add(0.5, 1, 0.5));
+                            }
+                        } else {
+                            for (Entity entity : mc.world.getEntities()) {
+                                if (entity != mc.player && entities.get().getBoolean(entity.getType()) && mc.player.distanceTo(entity) <= targetRange.get()
+                                        && entity.isAlive() && entity instanceof LivingEntity
+                                        && (!(entity instanceof PlayerEntity) || Friends.get().attack((PlayerEntity) entity))) {
+                                    crystalList.add(DamageCalcUtils.crystalDamage((LivingEntity) entity, pos.add(0.5, 1, 0.5)));
                                 }
+                            }
+                            if (!crystalList.isEmpty()) {
+                                crystalList.sort(Comparator.comparingDouble(Double::doubleValue));
+                                crystalMap.put(new EndCrystalEntity(mc.world, pos.x, pos.y, pos.z), new ArrayList<>(crystalList));
+                                crystalList.clear();
                             }
                         }
                     }
