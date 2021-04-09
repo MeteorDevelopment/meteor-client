@@ -23,6 +23,6 @@ public class WMeteorAccount extends WAccount implements MeteorWidget {
 
     @Override
     protected Color accountTypeColor() {
-        return theme().accountTypeColor.get();
+        return theme().textSecondaryColor.get();
     }
 }

@@ -26,9 +26,6 @@ public class Macros extends System<Macros> implements Iterable<Macro> {
         return Systems.get(Macros.class);
     }
 
-    @Override
-    public void init() {}
-
     public void add(Macro macro) {
         macros.add(macro);
         MeteorClient.EVENT_BUS.subscribe(macro);

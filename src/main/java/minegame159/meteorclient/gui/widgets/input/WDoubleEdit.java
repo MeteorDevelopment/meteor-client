@@ -29,7 +29,9 @@ public class WDoubleEdit extends WHorizontalList {
         this.value = value;
         this.sliderMin = sliderMin;
         this.sliderMax = sliderMax;
-    }
+
+        if (sliderMin == 0 && sliderMax == 0) noSlider = true;
+     }
 
     @Override
     public void init() {
