@@ -130,7 +130,7 @@ public class Scaffold extends Module {
         
         // Place blocks around if radius is bigger than 1
         for (int v = 0; v < verticalRadius.get(); v++) {
-            if(mc.player.getBlockPos.down(1 + v)getY() < 0) return;
+            if(mc.player.getBlockPos.down(1 + v).getY() < 0) return;
             
             place(mc.player.getBlockPos().down(-1 - v), slot);
             
