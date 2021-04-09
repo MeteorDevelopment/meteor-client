@@ -210,10 +210,12 @@ public class Modules extends System<Modules> {
 
     private boolean onBinding(boolean isKey, int value) {
         if (moduleToBind != null && moduleToBind.keybind.canBindTo(isKey, value)) {
-            moduleToBind.keybind.set(isKey, value);
-            ChatUtils.prefixInfo("KeyBinds", "Module (highlight)%s (default)bound to (highlight)%s(default).", moduleToBind.title, moduleToBind.keybind);
-            MeteorClient.EVENT_BUS.post(ModuleBindChangedEvent.get(moduleToBind));
+            if (value != GLFW.GLFW_KEY_ESCAPE) {
+                moduleToBind.keybind.set(isKey, value);
+                ChatUtils.prefixInfo("KeyBinds", "Module (highlight)%s (default)bound to (highlight)%s(default).", moduleToBind.title, moduleToBind.keybind);
+            }
 
+            MeteorClient.EVENT_BUS.post(ModuleBindChangedEvent.get(moduleToBind));
             moduleToBind = null;
             return true;
         }
