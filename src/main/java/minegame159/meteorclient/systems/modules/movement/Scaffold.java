@@ -124,12 +124,15 @@ public class Scaffold extends Module {
         slot = findSlot(blockState);
         if (slot == -1) return;
 
-        place(mc.player.getBlockPos().down(), slot);
+        
 
         if (mc.player.input.sneaking) this.lastWasSneaking = false;
 
         // Place blocks around if radius is bigger than 1
         for (int v = 0; v < verticalRadius.get(); v++) {
+            
+            place(mc.player.getBlockPos().down().add(0, -v, 0), slot);
+            
             for (int i = 1; i < radius.get(); i++) {
                 int count = 1 + (i - 1) * 2;
                 int countHalf = count / 2;
