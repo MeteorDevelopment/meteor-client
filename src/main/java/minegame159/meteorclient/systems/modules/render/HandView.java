@@ -5,6 +5,7 @@
 
 package minegame159.meteorclient.systems.modules.render;
 
+import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
@@ -111,6 +112,13 @@ public class HandView extends Module {
             .defaultValue(0)
             .sliderMin(0)
             .sliderMax(1)
+            .build()
+    );
+
+    public final Setting<Boolean> offhandSwing = sgSwing.add(new BoolSetting.Builder()
+            .name("offhand-swing")
+            .description("Makes you swing with your off-hand instead of your main-hand.")
+            .defaultValue(false)
             .build()
     );
 
