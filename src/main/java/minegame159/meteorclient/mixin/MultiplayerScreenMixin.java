@@ -8,6 +8,8 @@ package minegame159.meteorclient.mixin;
 import minegame159.meteorclient.gui.GuiThemes;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.player.NameProtect;
+import minegame159.meteorclient.systems.proxies.Proxies;
+import minegame159.meteorclient.systems.proxies.Proxy;
 import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
@@ -38,17 +40,35 @@ public class MultiplayerScreenMixin extends Screen {
         textColor2 = Color.fromRGBA(175, 175, 175, 255);
 
         loggedInAs = "Logged in as ";
-
         loggedInAsLength = textRenderer.getWidth(loggedInAs);
 
         addButton(new ButtonWidget(this.width - 75 - 3, 3, 75, 20, new LiteralText("Accounts"), button -> {
             client.openScreen(GuiThemes.get().accountsScreen());
         }));
+
+        addButton(new ButtonWidget(this.width - 75 - 3 - 75 - 2, 3, 75, 20, new LiteralText("Proxies"), button -> {
+            client.openScreen(GuiThemes.get().proxiesScreen());
+        }));
     }
 
     @Inject(method = "render", at = @At("TAIL"))
     private void onRender(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo info) {
-        textRenderer.drawWithShadow(matrices, loggedInAs, 3, 3, textColor1);
-        textRenderer.drawWithShadow(matrices, Modules.get().get(NameProtect.class).getName(client.getSession().getUsername()), 3 + loggedInAsLength, 3, textColor2);
+        float x = 3;
+        float y = 3;
+
+        // Logged in as
+        textRenderer.drawWithShadow(matrices, loggedInAs, x, y, textColor1);
+        textRenderer.drawWithShadow(matrices, Modules.get().get(NameProtect.class).getName(client.getSession().getUsername()), x + loggedInAsLength, y, textColor2);
+
+        y += textRenderer.fontHeight + 2;
+
+        // Proxy
+        Proxy proxy = Proxies.get().getEnabled();
+
+        String left = proxy != null ? "Using proxy " : "Not using a proxy";
+        String right = proxy != null ? proxy.ip + ":" + proxy.port : null;
+
+        textRenderer.drawWithShadow(matrices, left, x, y, textColor1);
+        if (right != null) textRenderer.drawWithShadow(matrices, right, x + textRenderer.getWidth(left), y, textColor2);
     }
 }

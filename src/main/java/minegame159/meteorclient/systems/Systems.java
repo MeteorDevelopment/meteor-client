@@ -13,6 +13,7 @@ import minegame159.meteorclient.systems.friends.Friends;
 import minegame159.meteorclient.systems.macros.Macros;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.profiles.Profiles;
+import minegame159.meteorclient.systems.proxies.Proxies;
 import minegame159.meteorclient.systems.waypoints.Waypoints;
 
 import java.io.File;
@@ -40,6 +41,7 @@ public class Systems {
         add(new Accounts());
         add(new Waypoints());
         add(new Profiles());
+        add(new Proxies());
 
         for (System<?> system : systems.values()) {
             if (system != config) system.init();

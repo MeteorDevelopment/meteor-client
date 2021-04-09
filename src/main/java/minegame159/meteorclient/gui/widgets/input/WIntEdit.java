@@ -26,6 +26,8 @@ public class WIntEdit extends WHorizontalList {
         this.value = value;
         this.sliderMin = sliderMin;
         this.sliderMax = sliderMax;
+
+        if (sliderMin == 0 && sliderMax == 0) hasSlider = false;
     }
 
     @Override

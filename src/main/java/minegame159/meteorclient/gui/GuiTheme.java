@@ -9,6 +9,7 @@ import minegame159.meteorclient.gui.renderer.packer.GuiTexture;
 import minegame159.meteorclient.gui.screens.AccountsScreen;
 import minegame159.meteorclient.gui.screens.ModuleScreen;
 import minegame159.meteorclient.gui.screens.ModulesScreen;
+import minegame159.meteorclient.gui.screens.ProxiesScreen;
 import minegame159.meteorclient.gui.tabs.TabScreen;
 import minegame159.meteorclient.gui.utils.CharFilter;
 import minegame159.meteorclient.gui.utils.SettingsWidgetFactory;
@@ -192,6 +193,16 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
     public WidgetScreen accountsScreen() {
         return new AccountsScreen(this);
     }
+
+    public WidgetScreen proxiesScreen() {
+        return new ProxiesScreen(this);
+    }
+    
+    // Colors
+
+    public abstract Color textColor();
+
+    public abstract Color textSecondaryColor();
 
     // Other
 

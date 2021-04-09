@@ -8,7 +8,6 @@ package minegame159.meteorclient.gui.screens;
 import minegame159.meteorclient.gui.GuiTheme;
 import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.gui.WindowScreen;
-import minegame159.meteorclient.gui.themes.meteor.widgets.WMeteorAccount;
 import minegame159.meteorclient.gui.widgets.WAccount;
 import minegame159.meteorclient.gui.widgets.containers.WContainer;
 import minegame159.meteorclient.gui.widgets.containers.WHorizontalList;
@@ -35,7 +34,7 @@ public class AccountsScreen extends WindowScreen {
     private void initWidgets() {
         // Accounts
         for (Account<?> account : Accounts.get()) {
-            WAccount wAccount = add(new WMeteorAccount(this, account)).expandX().widget();
+            WAccount wAccount = add(theme.account(this, account)).expandX().widget();
             wAccount.refreshScreenAction = () -> {
                 clear();
                 initWidgets();
