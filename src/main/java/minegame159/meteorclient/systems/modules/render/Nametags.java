@@ -40,6 +40,7 @@ import net.minecraft.entity.decoration.ItemFrameEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.GameMode;
 
@@ -332,45 +333,39 @@ public class Nametags extends Module {
     private final double[] itemWidths = new double[6];
     private final Color RED = new Color(255, 15, 15);
     private final Map<Enchantment, Integer> enchantmentsToShowScale = new HashMap<>();
-    private final ArrayList<Entity> entityList = new ArrayList<>();
+    private final List<Entity> entityList = new ArrayList<>();
 
     public Nametags() {
         super(Categories.Render, "nametags", "Displays customizable nametags above players.");
     }
 
     @EventHandler
-    private void onTick(TickEvent.Pre event) {
-        boolean notFreecamActive = !Modules.get().isActive(Freecam.class);
-
+    private void onTick(TickEvent.Post event) {
         entityList.clear();
 
-        mc.world.getEntities().forEach(e -> {
-            if (!entities.get().containsKey(e.getType())) return;
+        Vec3d cameraPos = mc.gameRenderer.getCamera().getPos();
 
-            EntityType<?> type = e.getType();
+        mc.world.getEntities().forEach(entity -> {
+            EntityType<?> type = entity.getType();
+            if (!entities.get().containsKey(type)) return;
+
             if (type == EntityType.PLAYER) {
-                if (notFreecamActive && e == mc.cameraEntity) return;
-                if (!yourself.get() && e == mc.player) return;
+                if (!yourself.get() && entity == mc.player) return;
             }
 
-            if (culling.get()) {
-                if (e.getPos().distanceTo(mc.cameraEntity.getPos()) < maxCullRange.get()) entityList.add(e);
-            } else {
-                entityList.add(e);
+            if (!culling.get() || entity.getPos().distanceTo(cameraPos) < maxCullRange.get()) {
+                entityList.add(entity);
             }
         });
 
-        entityList.sort(Comparator.comparing(e -> e.distanceTo(mc.cameraEntity)));
+        entityList.sort(Comparator.comparing(e -> e.squaredDistanceTo(cameraPos)));
     }
 
     @EventHandler
     private void onRender2D(Render2DEvent event) {
+        int count = getRenderCount();
 
-        int renderCount = culling.get() ? maxCullCount.get() : entityList.size() - 1;
-        renderCount = MathHelper.clamp(renderCount, 0, entityList.size() - 1);
-
-        for (int i = 0; i < renderCount; i++) {
-            if (entityList.size() < 1) return;
+        for (int i = 0; i < count; i++) {
             Entity entity = entityList.get(i);
 
             pos.set(entity, event.tickDelta);
@@ -386,6 +381,18 @@ public class Nametags extends Module {
                 else if (entity instanceof LivingEntity) renderGenericNametag((LivingEntity) entity);
             }
         }
+    }
+
+    private int getRenderCount() {
+        int count = culling.get() ? maxCullCount.get() : entityList.size();
+        count = MathHelper.clamp(count, 0, entityList.size());
+
+        return count;
+    }
+
+    @Override
+    public String getInfoString() {
+        return Integer.toString(getRenderCount());
     }
 
     private double getHeight(Entity entity) {
