@@ -43,8 +43,6 @@ public class ModuleScreen extends WindowScreen {
 
             Cell<WWidget> cell = add(widget);
             if (widget instanceof WContainer) cell.expandX();
-
-            add(theme.horizontalSeparator()).expandX();
         }
 
         // Bind
