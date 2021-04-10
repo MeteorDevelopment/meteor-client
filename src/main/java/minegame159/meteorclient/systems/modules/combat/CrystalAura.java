@@ -902,13 +902,13 @@ public class CrystalAura extends Module {
                     blockPos.getZ() + 0.5 + direction.getVector().getZ() * 1.0 / 2.0) : block.add(0.5, 1.0, 0.5));
             Rotations.rotate(rotation[0], rotation[1], 25, () -> {
                 if (cancelCrystalMode.get() == CancelCrystalMode.Instant){mc.player.networkHandler.sendPacket(new PlayerInteractBlockC2SPacket(hand, new BlockHitResult(mc.player.getPos(), direction, new BlockPos(block), false)));}
-			else {mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(mc.player.getPos(), direction, blockPos, false));}
+                else {mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(mc.player.getPos(), direction, blockPos, false));}
                 if (swing.get()) mc.player.swingHand(hand);
                 else mc.player.networkHandler.sendPacket(new HandSwingC2SPacket(hand));
             });
         } else {
             if (cancelCrystalMode.get() == CancelCrystalMode.Instant) {mc.player.networkHandler.sendPacket(new PlayerInteractBlockC2SPacket(hand, new BlockHitResult(mc.player.getPos(), direction, new BlockPos(block), false)));}
-		else {mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(mc.player.getPos(), direction, new BlockPos(block), false));}
+            else {mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(mc.player.getPos(), direction, new BlockPos(block), false));}
             if (swing.get()) mc.player.swingHand(hand);
             else mc.player.networkHandler.sendPacket(new HandSwingC2SPacket(hand));
         }
