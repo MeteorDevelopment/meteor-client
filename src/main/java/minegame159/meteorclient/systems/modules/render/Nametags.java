@@ -12,6 +12,7 @@ package minegame159.meteorclient.systems.modules.render;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.Render2DEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.rendering.DrawMode;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.rendering.text.TextRenderer;
@@ -38,6 +39,7 @@ import net.minecraft.entity.*;
 import net.minecraft.entity.decoration.ItemFrameEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.GameMode;
 
@@ -84,6 +86,32 @@ public class Nametags extends Module {
             .name("background")
             .description("The color of the nametag background.")
             .defaultValue(new SettingColor(0, 0, 0, 75))
+            .build()
+    );
+
+    private final Setting<Boolean> culling = sgGeneral.add(new BoolSetting.Builder()
+            .name("culling")
+            .description("Only render a certain number of nametags at a certain distance.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Double> maxCullRange = sgGeneral.add(new DoubleSetting.Builder()
+            .name("cull-range")
+            .description("Only render nametags within this distance of your player.")
+            .defaultValue(20.0D)
+            .min(0.0D)
+            .sliderMax(200.0D)
+            .build()
+    );
+
+    private final Setting<Integer> maxCullCount = sgGeneral.add(new IntSetting.Builder()
+            .name("cull-count")
+            .description("Only render this many nametags.")
+            .defaultValue(50)
+            .min(1)
+            .sliderMin(1)
+            .sliderMax(100)
             .build()
     );
 
@@ -304,26 +332,51 @@ public class Nametags extends Module {
     private final double[] itemWidths = new double[6];
     private final Color RED = new Color(255, 15, 15);
     private final Map<Enchantment, Integer> enchantmentsToShowScale = new HashMap<>();
+    private final ArrayList<Entity> entityList = new ArrayList<>();
 
     public Nametags() {
         super(Categories.Render, "nametags", "Displays customizable nametags above players.");
     }
 
     @EventHandler
-    private void onRender2D(Render2DEvent event) {
+    private void onTick(TickEvent.Pre event) {
         boolean notFreecamActive = !Modules.get().isActive(Freecam.class);
 
-        for (Entity entity : mc.world.getEntities()) {
-            if (!entities.get().containsKey(entity.getType())) continue;
-            EntityType<?> type = entity.getType();
+        entityList.clear();
 
+        mc.world.getEntities().forEach(e -> {
+            if (!entities.get().containsKey(e.getType())) return;
+
+            EntityType<?> type = e.getType();
             if (type == EntityType.PLAYER) {
-                if (notFreecamActive && entity == mc.cameraEntity) continue;
-                if (!yourself.get() && entity == mc.player) continue;
+                if (notFreecamActive && e == mc.cameraEntity) return;
+                if (!yourself.get() && e == mc.player) return;
             }
+
+            if (culling.get()) {
+                if (e.getPos().distanceTo(mc.cameraEntity.getPos()) < maxCullRange.get()) entityList.add(e);
+            } else {
+                entityList.add(e);
+            }
+        });
+
+        entityList.sort(Comparator.comparing(e -> e.distanceTo(mc.cameraEntity)));
+    }
+
+    @EventHandler
+    private void onRender2D(Render2DEvent event) {
+
+        int renderCount = culling.get() ? maxCullCount.get() : entityList.size() - 1;
+        renderCount = MathHelper.clamp(renderCount, 0, entityList.size() - 1);
+
+        for (int i = 0; i < renderCount; i++) {
+            if (entityList.size() < 1) return;
+            Entity entity = entityList.get(i);
 
             pos.set(entity, event.tickDelta);
             pos.add(0, getHeight(entity), 0);
+
+            EntityType<?> type = entity.getType();
 
             if (NametagUtils.to2D(pos, scale.get())) {
                 if (type == EntityType.PLAYER) renderNametagPlayer((PlayerEntity) entity);
