@@ -82,12 +82,6 @@ public abstract class WidgetScreen extends Screen {
     protected void init() {
         MeteorClient.EVENT_BUS.subscribe(this);
 
-        loopWidgets(root, widget -> {
-            if (widget instanceof WTextBox) {
-                GuiKeyEvents.setPostKeyEvents(((WTextBox) widget).isFocused());
-            }
-        });
-
         closed = false;
     }
 
@@ -179,6 +173,8 @@ public abstract class WidgetScreen extends Screen {
         animProgress += delta / 20 * 14;
         animProgress = Utils.clamp(animProgress, 0, 1);
 
+        GuiKeyEvents.canUseKeys = true;
+
         // Apply projection without scaling
         Utils.unscaledProjection();
         Matrices.begin(new MatrixStack());
@@ -246,7 +242,7 @@ public abstract class WidgetScreen extends Screen {
             });
 
             MeteorClient.EVENT_BUS.unsubscribe(this);
-            GuiKeyEvents.resetPostKeyEvents();
+            GuiKeyEvents.canUseKeys = true;
             if (onClose) mc.openScreen(parent);
         }
     }

@@ -34,7 +34,7 @@ public abstract class KeyboardMixin {
                 ((WidgetScreen) client.currentScreen).keyRepeated(key, j);
             }
 
-            if (GuiKeyEvents.canUseKeys()) {
+            if (GuiKeyEvents.canUseKeys) {
                 Input.setKeyState(key, i != GLFW.GLFW_RELEASE);
 
                 KeyEvent event = MeteorClient.EVENT_BUS.post(KeyEvent.get(key, KeyAction.get(i)));
