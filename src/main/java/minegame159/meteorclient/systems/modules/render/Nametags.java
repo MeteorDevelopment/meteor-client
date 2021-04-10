@@ -343,6 +343,7 @@ public class Nametags extends Module {
     private void onTick(TickEvent.Post event) {
         entityList.clear();
 
+        boolean freecamNotActive = !Modules.get().isActive(Freecam.class);
         Vec3d cameraPos = mc.gameRenderer.getCamera().getPos();
 
         mc.world.getEntities().forEach(entity -> {
@@ -350,7 +351,7 @@ public class Nametags extends Module {
             if (!entities.get().containsKey(type)) return;
 
             if (type == EntityType.PLAYER) {
-                if (!yourself.get() && entity == mc.player) return;
+                if ((!yourself.get() || freecamNotActive) && entity == mc.player) return;
             }
 
             if (!culling.get() || entity.getPos().distanceTo(cameraPos) < maxCullRange.get()) {
