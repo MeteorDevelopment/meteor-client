@@ -8,6 +8,7 @@ package minegame159.meteorclient.gui.widgets.input;
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
 import minegame159.meteorclient.gui.GuiKeyEvents;
+import minegame159.meteorclient.gui.renderer.GuiRenderer;
 import minegame159.meteorclient.gui.utils.CharFilter;
 import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.utils.Utils;
@@ -135,7 +136,7 @@ public abstract class WTextBox extends WWidget {
             return true;
         }
         else if (key == GLFW_KEY_ENTER || key == GLFW_KEY_KP_ENTER) {
-            focused = false;
+            setFocused(false);
 
             if (actionOnUnfocused != null) actionOnUnfocused.run();
             return true;
@@ -210,6 +211,13 @@ public abstract class WTextBox extends WWidget {
         }
 
         return false;
+    }
+
+    @Override
+    public boolean render(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
+        if (isFocused()) GuiKeyEvents.canUseKeys = false;
+
+        return super.render(renderer, mouseX, mouseY, delta);
     }
 
     private int countToNextSpace(boolean toLeft) {
@@ -303,9 +311,6 @@ public abstract class WTextBox extends WWidget {
     }
 
     public void setFocused(boolean focused) {
-        if (!this.focused && focused) GuiKeyEvents.setPostKeyEvents(true);
-        else if (this.focused && !focused) GuiKeyEvents.setPostKeyEvents(false);
-
         if (this.focused && !focused && actionOnUnfocused != null) actionOnUnfocused.run();
 
         this.focused = focused;
