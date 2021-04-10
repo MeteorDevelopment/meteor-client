@@ -75,7 +75,8 @@ public class CrystalAura extends Module {
 
     public enum CancelCrystalMode {
         Sound,
-        Hit
+        Hit,
+		Instant
     }
 
     private final SettingGroup sgPlace = settings.createGroup("Place");
@@ -268,16 +269,9 @@ public class CrystalAura extends Module {
             .build()
     );
 	
-	private final Setting<Boolean> sync = sgBreak.add(new BoolSetting.Builder()
-            .name("sync")
-            .description("Whether or not to sync crystals with server.")
-            .defaultValue(true)
-            .build() 
-    );
-
     private final Setting<CancelCrystalMode> cancelCrystalMode = sgBreak.add(new EnumSetting.Builder<CancelCrystalMode>()
-            .name("sync mode")
-            .description("sync mode to use for removing crystals from the world")
+            .name("cancel-crystal")
+            .description("Mode to use for crystals to be removed from the world. warning: instant mode will cause signifigant desync")
             .defaultValue(CancelCrystalMode.Hit)
             .build()
     );
@@ -566,7 +560,7 @@ public class CrystalAura extends Module {
 
     @EventHandler(priority = EventPriority.HIGH)
     private void onTick(TickEvent.Post event) {
-        if (cancelCrystalMode.get() == CancelCrystalMode.Hit || sync.get() == false) {
+        if (cancelCrystalMode.get() == CancelCrystalMode.Hit || cancelCrystalMode.get() == CancelCrystalMode.Instant) {
             removalQueue.forEach(id -> mc.world.removeEntity(id));
             removalQueue.clear();
         }
@@ -734,7 +728,7 @@ public class CrystalAura extends Module {
 
     @EventHandler(priority = EventPriority.HIGH)
     private void onPlaySound(PlaySoundEvent event) {
-        if (event.sound.getCategory().getName().equals(SoundCategory.BLOCKS.getName()) && event.sound.getId().getPath().equals("entity.generic.explode") && cancelCrystalMode.get() == CancelCrystalMode.Sound && sync.get()) {
+        if (event.sound.getCategory().getName().equals(SoundCategory.BLOCKS.getName()) && event.sound.getId().getPath().equals("entity.generic.explode") && cancelCrystalMode.get() == CancelCrystalMode.Sound) {
             removalQueue.forEach(id -> mc.world.removeEntity(id));
             removalQueue.clear();
         }
@@ -907,13 +901,13 @@ public class CrystalAura extends Module {
                     blockPos.getY() + 0.5 + direction.getVector().getY() * 1.0 / 2.0,
                     blockPos.getZ() + 0.5 + direction.getVector().getZ() * 1.0 / 2.0) : block.add(0.5, 1.0, 0.5));
             Rotations.rotate(rotation[0], rotation[1], 25, () -> {
-                if (sync.get()){mc.player.networkHandler.sendPacket(new PlayerInteractBlockC2SPacket(hand, new BlockHitResult(mc.player.getPos(), direction, new BlockPos(block), false)));}
+                if (cancelCrystalMode.get() == CancelCrystalMode.Instant){mc.player.networkHandler.sendPacket(new PlayerInteractBlockC2SPacket(hand, new BlockHitResult(mc.player.getPos(), direction, new BlockPos(block), false)));}
 				else {mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(mc.player.getPos(), direction, blockPos, false));}
                 if (swing.get()) mc.player.swingHand(hand);
                 else mc.player.networkHandler.sendPacket(new HandSwingC2SPacket(hand));
             });
         } else {
-            if (sync.get()) {mc.player.networkHandler.sendPacket(new PlayerInteractBlockC2SPacket(hand, new BlockHitResult(mc.player.getPos(), direction, new BlockPos(block), false)));}
+            if (cancelCrystalMode.get() == CancelCrystalMode.Instant) {mc.player.networkHandler.sendPacket(new PlayerInteractBlockC2SPacket(hand, new BlockHitResult(mc.player.getPos(), direction, new BlockPos(block), false)));}
 			else {mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(mc.player.getPos(), direction, new BlockPos(block), false));}
             if (swing.get()) mc.player.swingHand(hand);
             else mc.player.networkHandler.sendPacket(new HandSwingC2SPacket(hand));
