@@ -10,6 +10,7 @@ import minegame159.meteorclient.systems.friends.Friend;
 import minegame159.meteorclient.systems.friends.Friends;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
+import minegame159.meteorclient.utils.misc.MeteorPlayers;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.client.network.PlayerListEntry;
@@ -22,19 +23,12 @@ public class BetterTab extends Module {
 
     private final SettingGroup sgDefault = settings.getDefaultGroup();
 
-    private final Setting<Integer> tabSize = sgDefault.add(new IntSetting.Builder()
+    public final Setting<Integer> tabSize = sgDefault.add(new IntSetting.Builder()
             .name("tablist-size")
             .description("Bypasses the 80 player limit on the tablist.")
             .defaultValue(100)
             .min(1)
             .sliderMin(1)
-            .build()
-    );
-
-    private final Setting<Boolean> friends = sgDefault.add(new BoolSetting.Builder()
-            .name("highlight-friends")
-            .description("Highlights friends in the tablist.")
-            .defaultValue(true)
             .build()
     );
 
@@ -52,13 +46,30 @@ public class BetterTab extends Module {
             .build()
     );
 
+    private final Setting<Boolean> friends = sgDefault.add(new BoolSetting.Builder()
+            .name("highlight-friends")
+            .description("Highlights friends in the tablist.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Boolean> meteor = sgDefault.add(new BoolSetting.Builder()
+            .name("meteor-users")
+            .description("Shows if the player is using Meteor.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<SettingColor> meteorColor = sgDefault.add(new ColorSetting.Builder()
+            .name("meteor-color")
+            .description("The color to highlight meteor users with.")
+            .defaultValue(new SettingColor(250, 130, 30))
+            .build()
+    );
+
 
     public BetterTab() {
         super(Categories.Misc, "better-tab", "Various improvements to the tab list.");
-    }
-
-    public int getTabSize() {
-        return isActive() ? tabSize.get() : 80;
     }
 
     public Text getPlayerName(PlayerListEntry playerListEntry) {
@@ -71,10 +82,12 @@ public class BetterTab extends Module {
         if (playerListEntry.getProfile().getId().toString().equals(mc.player.getGameProfile().getId().toString()) && self.get()) {
             color = selfColor.get();
         }
-
-        else if (friends.get()) {
+        else if (friends.get() && Friends.get().get(playerListEntry.getProfile().getName()) != null) {
             Friend friend = Friends.get().get(playerListEntry.getProfile().getName());
             if (friend != null) color = Friends.get().getFriendColor(friend);
+        }
+        else if (meteor.get() && MeteorPlayers.get(playerListEntry.getProfile().getId())) {
+            color = meteorColor.get();
         }
 
         if (color != null) {
