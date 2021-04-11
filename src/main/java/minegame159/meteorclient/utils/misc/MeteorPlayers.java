@@ -85,9 +85,7 @@ public class MeteorPlayers {
         }
     }
 
-    public static boolean get(PlayerEntity player) {
-        UUID uuid = player.getUuid();
-
+    public static boolean get(UUID uuid) {
         if (players.containsKey(uuid)) {
             return players.getBoolean(uuid);
         }
@@ -101,5 +99,9 @@ public class MeteorPlayers {
         }
 
         return false;
+    }
+
+    public static boolean get(PlayerEntity player) {
+        return get(player.getGameProfile().getId());
     }
 }
