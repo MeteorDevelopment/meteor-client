@@ -64,7 +64,7 @@ public class BetterTab extends Module {
     private final Setting<SettingColor> meteorColor = sgDefault.add(new ColorSetting.Builder()
             .name("meteor-color")
             .description("The color to highlight meteor users with.")
-            .defaultValue(new SettingColor(250, 130, 30))
+            .defaultValue(new SettingColor(135, 0, 255))
             .build()
     );
 
