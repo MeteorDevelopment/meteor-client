@@ -389,6 +389,7 @@ public class Modules extends System<Modules> {
         add(new TotemPopNotifier());
         add(new Trigger());
         add(new Burrow());
+        add(new BowAimbot());
     }
 
     private void initPlayer() {
