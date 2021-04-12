@@ -6,10 +6,8 @@
 package minegame159.meteorclient.systems.config;
 
 import com.g00fy2.versioncompare.Version;
-import minegame159.meteorclient.rendering.Fonts;
 import minegame159.meteorclient.systems.System;
 import minegame159.meteorclient.systems.Systems;
-import minegame159.meteorclient.utils.Utils;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.nbt.CompoundTag;
 
@@ -19,6 +17,9 @@ public class Config extends System<Config> {
     private String prefix = ".";
 
     public boolean customFont = true;
+
+    public boolean rainbowPrefix = false;
+    public double rainbowPrefixSpeed, rainbowPrefixSpread;
 
     public boolean chatCommandsInfo = true;
     public boolean deleteChatCommandsInfo = true;
@@ -56,6 +57,9 @@ public class Config extends System<Config> {
         tag.putString("version", version.getOriginalString());
         tag.putString("prefix", prefix);
         tag.putBoolean("customFont", customFont);
+        tag.putBoolean("rainbowPrefix", rainbowPrefix);
+        tag.putDouble("rainbowPrefixSpeed", rainbowPrefixSpeed);
+        tag.putDouble("rainbowPrefixSpread", rainbowPrefixSpread);
         tag.putBoolean("chatCommandsInfo", chatCommandsInfo);
         tag.putBoolean("deleteChatCommandsInfo", deleteChatCommandsInfo);
         tag.putBoolean("sendDataToApi", sendDataToApi);
@@ -68,27 +72,15 @@ public class Config extends System<Config> {
     @Override
     public Config fromTag(CompoundTag tag) {
         prefix = tag.getString("prefix");
-        if (tag.contains("customFont")) customFont = tag.getBoolean("customFont");
+        customFont = !tag.contains("customFont") || tag.getBoolean("customFont");
+        rainbowPrefix = tag.contains("rainbowPrefix") && tag.getBoolean("rainbowPrefix");
+        rainbowPrefixSpeed = tag.getDouble("rainbowPrefixSpeed");
+        rainbowPrefixSpread = tag.getDouble("rainbowPrefixSpread");
         chatCommandsInfo = !tag.contains("chatCommandsInfo") || tag.getBoolean("chatCommandsInfo");
         deleteChatCommandsInfo = !tag.contains("deleteChatCommandsInfo") || tag.getBoolean("deleteChatCommandsInfo");
         sendDataToApi = !tag.contains("sendDataToApi") || tag.getBoolean("sendDataToApi");
         titleScreenCredits = !tag.contains("titleScreenCredits") || tag.getBoolean("titleScreenCredits");
-        windowTitle = !tag.contains("windowTitle") || tag.getBoolean("windowTitle");
-
-        // In 0.2.9 the default font was changed, detect when people load up 0.2.9 for the first time
-        Version lastVer = new Version(tag.getString("version"));
-        Version v029 = new Version("0.2.9");
-
-        if (lastVer.isLowerThan(v029) && version.isAtLeast(v029)) {
-            Fonts.reset();
-        }
-
-        // If you run 0.3.7 for the first time add meteor pvp to server list
-        Version v037 = new Version("0.3.7");
-
-        if (lastVer.isLowerThan(v037) && version.isAtLeast(v037)) {
-            Utils.addMeteorPvpToServerList();
-        }
+        windowTitle = tag.contains("windowTitle") && tag.getBoolean("windowTitle");
 
         return this;
     }

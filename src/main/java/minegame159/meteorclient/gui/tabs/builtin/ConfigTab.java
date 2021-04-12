@@ -61,6 +61,33 @@ public class ConfigTab extends Tab {
             );
 
             sgGeneral.add(new BoolSetting.Builder()
+                    .name("rainbow-prefix")
+                    .description("Makes the [Meteor] prefix on chat info rainbow.")
+                    .defaultValue(true)
+                    .onChanged(aBoolean -> Config.get().rainbowPrefix = aBoolean)
+                    .onModuleActivated(booleanSetting -> booleanSetting.set(Config.get().rainbowPrefix))
+                    .build()
+            );
+
+            sgGeneral.add(new DoubleSetting.Builder()
+                    .name("rainbow-prefix-speed")
+                    .description("The speed of the rainbow prefix cycle.")
+                    .defaultValue(0.005)
+                    .onChanged(value -> Config.get().rainbowPrefixSpeed = value)
+                    .onModuleActivated(setting -> setting.set(Config.get().rainbowPrefixSpeed))
+                    .build()
+            );
+
+            sgGeneral.add(new DoubleSetting.Builder()
+                    .name("rainbow-prefix-spread")
+                    .description("The spread of the rainbow prefix cycle.")
+                    .defaultValue(0.02)
+                    .onChanged(value -> Config.get().rainbowPrefixSpread = value)
+                    .onModuleActivated(setting -> setting.set(Config.get().rainbowPrefixSpread))
+                    .build()
+            );
+
+            sgGeneral.add(new BoolSetting.Builder()
                     .name("chat-commands-info")
                     .description("Sends a chat message when you use chat comamnds (eg toggling module, changing a setting, etc).")
                     .defaultValue(true)
