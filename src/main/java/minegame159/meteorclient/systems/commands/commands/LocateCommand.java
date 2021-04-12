@@ -58,7 +58,7 @@ public class LocateCommand extends Command {
     );
 
     public LocateCommand() {
-        super("locate", "Locates structures");
+        super("locate", "Locates structures", "loc");
     }
 
     @Override
@@ -84,6 +84,31 @@ public class LocateCommand extends Command {
 
             Vec3d coords = new Vec3d(iconNBT.getDouble("x"),iconNBT.getDouble("y"),iconNBT.getDouble("z"));
             BaseText msg = new LiteralText("Buried Treasure located at ");
+            msg.append(ChatUtils.formatCoords(coords));
+            msg.append(".");
+            ChatUtils.info("Locate", msg);
+            return SINGLE_SUCCESS;
+        }));
+
+        builder.then(literal("lodestone").executes(s -> {
+            ItemStack stack = mc.player.inventory.getMainHandStack();
+            if (stack.getItem() != Items.COMPASS) {
+                ChatUtils.prefixError("Locate","You need to hold a lodestone compass");
+                return SINGLE_SUCCESS;
+            }
+            CompoundTag tag = stack.getTag();
+            if (tag == null) {
+                ChatUtils.prefixError("Locate","Couldn't get the NBT data. Are you holding a (highlight)lodestone(default) compass?");
+                return SINGLE_SUCCESS;
+            }
+            CompoundTag nbt1 = tag.getCompound("LodestonePos");
+            if (nbt1 == null) {
+                ChatUtils.prefixError("Locate","Couldn't get the NBT data. Are you holding a (highlight)lodestone(default) compass?");
+                return SINGLE_SUCCESS;
+            }
+
+            Vec3d coords = new Vec3d(nbt1.getDouble("X"),nbt1.getDouble("Y"),nbt1.getDouble("Z"));
+            BaseText msg = new LiteralText("Lodestone at ");
             msg.append(ChatUtils.formatCoords(coords));
             msg.append(".");
             ChatUtils.info("Locate", msg);
