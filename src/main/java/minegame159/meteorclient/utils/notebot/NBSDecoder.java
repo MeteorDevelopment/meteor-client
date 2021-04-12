@@ -1,13 +1,20 @@
-//https://github.com/xxmicloxx/NoteBlockAPI/blob/master/src/main/java/com/xxmicloxx/NoteBlockAPI/NBSDecoder.java
+/*
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
+ * Copyright (c) 2021 Meteor Development.
+ */
 
 package minegame159.meteorclient.utils.notebot;
+
+import minegame159.meteorclient.utils.notebot.nbs.Layer;
+import minegame159.meteorclient.utils.notebot.nbs.Note;
+import minegame159.meteorclient.utils.notebot.nbs.Song;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 import java.util.HashMap;
 
-import minegame159.meteorclient.utils.notebot.nbs.*;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+//https://github.com/xxmicloxx/NoteBlockAPI/blob/master/src/main/java/com/xxmicloxx/NoteBlockAPI/NBSDecoder.java
 
 public class NBSDecoder {
 
