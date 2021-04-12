@@ -173,13 +173,13 @@ public class ChatUtils {
     }
 
     private static Color cycleRainbow() {
-        rainbowHue1 += 0.005;
+        rainbowHue1 += Config.get().rainbowPrefixSpeed;
         if (rainbowHue1 > 1) rainbowHue1 -= 1;
         else if (rainbowHue1 < -1) rainbowHue1 += 1;
 
         double rainbowHue2 = rainbowHue1;
 
-        rainbowHue2 += 0.02;
+        rainbowHue2 += Config.get().rainbowPrefixSpread;
         int c = java.awt.Color.HSBtoRGB((float) rainbowHue2, 1, 1);
 
         rainbow.r = Color.toRGBAR(c);
