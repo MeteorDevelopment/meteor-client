@@ -1,0 +1,19 @@
+{
+    "textures": {
+        "all": "minecraft:block/structure_void",
+        "particle": "minecraft:block/structure_void"
+    },
+    "elements": [
+        {   "from": [ 5, 5, 5 ],
+            "to": [ 11, 11, 11 ],
+            "faces": {
+                "down":  { "texture": "#all", "cullface": "down" },
+                "up":    { "texture": "#all", "cullface": "up" },
+                "north": { "texture": "#all", "cullface": "north" },
+                "south": { "texture": "#all", "cullface": "south" },
+                "west":  { "texture": "#all", "cullface": "west" },
+                "east":  { "texture": "#all", "cullface": "east" }
+            }
+        }
+    ]
+}

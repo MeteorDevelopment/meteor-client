@@ -481,6 +481,7 @@ public class Modules extends System<Modules> {
         add(new Nametags());
         add(new NoRender());
         add(new ParticleBlocker());
+        add(new RenderInvisible());
         add(new Search());
         add(new StorageESP());
         add(new TimeChanger());

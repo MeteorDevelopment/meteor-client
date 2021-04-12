@@ -112,6 +112,7 @@
     "SplashTextResourceSupplierMixin",
     "StatusEffectInstanceAccessor",
     "StatusEffectInstanceMixin",
+    "StructureVoidBlockMixin",
     "TerrainRenderContextMixin",
     "TextHandlerAccessor",
     "TextVisitFactoryMixin",
