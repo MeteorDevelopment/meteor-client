@@ -1,3 +1,8 @@
+/*
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
+ * Copyright (c) 2021 Meteor Development.
+ */
+
 package minegame159.meteorclient.systems.modules.misc;
 
 import meteordevelopment.orbit.EventHandler;
@@ -5,16 +10,19 @@ import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.gui.GuiTheme;
-import minegame159.meteorclient.gui.widgets.*;
+import minegame159.meteorclient.gui.widgets.WLabel;
+import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.gui.widgets.containers.WTable;
 import minegame159.meteorclient.gui.widgets.pressable.WButton;
-import minegame159.meteorclient.systems.modules.Categories;
-import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.rendering.ShapeMode;
 import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.systems.modules.Categories;
+import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.utils.notebot.NBSDecoder;
-import minegame159.meteorclient.utils.notebot.nbs.*;
+import minegame159.meteorclient.utils.notebot.nbs.Layer;
+import minegame159.meteorclient.utils.notebot.nbs.Note;
+import minegame159.meteorclient.utils.notebot.nbs.Song;
 import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.player.Rotations;
@@ -40,7 +48,10 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 
 public class Notebot extends Module {
 
@@ -256,8 +267,7 @@ public class Notebot extends Module {
     private boolean isValidFile(Path file) {
         String extension = FilenameUtils.getExtension(file.toFile().getName());
         if (extension.equals("txt")) return true;
-        else if (extension.equals("nbs")) return true;
-        return false;
+        else return extension.equals("nbs");
     }
 
     public void Play() {

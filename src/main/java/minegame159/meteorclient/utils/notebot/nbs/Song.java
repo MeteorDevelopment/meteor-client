@@ -1,3 +1,8 @@
+/*
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
+ * Copyright (c) 2021 Meteor Development.
+ */
+
 package minegame159.meteorclient.utils.notebot.nbs;
 
 import java.io.File;
@@ -6,14 +11,14 @@ import java.util.HashMap;
 public class Song {
 
     private HashMap<Integer, Layer> layerHashMap = new HashMap<Integer, Layer>();
-    private short songHeight;
-    private short length;
-    private String title;
-    private File path;
-    private String author;
-    private String description;
-    private float speed;
-    private float delay;
+    private final short songHeight;
+    private final short length;
+    private final String title;
+    private final File path;
+    private final String author;
+    private final String description;
+    private final float speed;
+    private final float delay;
 
     public Song(Song other) {
         this.speed = other.getSpeed();
