@@ -121,7 +121,7 @@ public class ProfilesTab extends Tab {
             // Name
             table.add(theme.label("Name:"));
             WTextBox name = table.add(theme.textBox(newProfile ? "" : profile.name)).minWidth(400).expandX().widget();
-            name.action = () -> profile.name = name.get().trim();
+            name.action = () -> profile.name = name.get().trim().replaceAll("/", "-");
             table.row();
 
             table.add(theme.horizontalSeparator()).expandX();
