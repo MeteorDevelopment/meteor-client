@@ -25,6 +25,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BowItem;
+import net.minecraft.item.CrossbowItem;
 import net.minecraft.item.Items;
 import net.minecraft.util.math.Vec3d;
 
@@ -126,7 +127,7 @@ public class BowAimbot extends Module {
             return;
         }
 
-        if (mc.options.keyUse.isPressed() && (mc.player.getMainHandStack().getItem() == Items.BOW || mc.player.getMainHandStack().getItem() == Items.CROSSBOW)) {
+        if (mc.options.keyUse.isPressed() && itemInHand()) {
             if (pauseOnCombat.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing() && !wasPathing) {
                 BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("pause");
                 wasPathing = true;
@@ -145,7 +146,7 @@ public class BowAimbot extends Module {
     }
 
     private boolean itemInHand() {
-        return mc.player.getMainHandStack().getItem() instanceof BowItem;
+        return mc.player.getMainHandStack().getItem() instanceof BowItem || mc.player.getMainHandStack().getItem() instanceof CrossbowItem;
     }
 
     private void aim() {
