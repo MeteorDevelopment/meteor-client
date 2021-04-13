@@ -153,22 +153,19 @@ public class Freecam extends Module {
             BlockPos crossHairPos;
             Vec3d crossHairPosition;
 
-            if (mc.crosshairTarget instanceof BlockHitResult) {
+            if (mc.crosshairTarget instanceof EntityHitResult) {
+                crossHairPos = ((EntityHitResult) mc.crosshairTarget).getEntity().getBlockPos();
+                Rotations.rotate(Rotations.getYaw(crossHairPos), Rotations.getPitch(crossHairPos), 0, null);
+            } else {
                 crossHairPosition = mc.crosshairTarget.getPos();
                 crossHairPos = ((BlockHitResult) mc.crosshairTarget).getBlockPos();
 
                 if (!mc.world.getBlockState(crossHairPos).isAir()) {
-                    mc.player.yaw = (float) Rotations.getYaw(crossHairPosition);
-                    mc.player.pitch = (float) Rotations.getPitch(crossHairPosition);
+                    Rotations.rotate(Rotations.getYaw(crossHairPosition), Rotations.getPitch(crossHairPosition), 0, null);
                 }
-            } else {
-                crossHairPos = ((EntityHitResult) mc.crosshairTarget).getEntity().getBlockPos();
-
-                mc.player.yaw = (float) Rotations.getYaw(crossHairPos);
-                mc.player.pitch = (float) Rotations.getPitch(crossHairPos);
             }
         }
-
+        
         double s = 0.5;
         if (mc.options.keySprint.isPressed()) s = 1;
 
