@@ -366,7 +366,7 @@ public class Nametags extends Module {
     private void onRender2D(Render2DEvent event) {
         int count = getRenderCount();
 
-        for (int i = 0; i < count; i++) {
+        for (int i = count - 1; i > -1; i--) {
             Entity entity = entityList.get(i);
 
             pos.set(entity, event.tickDelta);
