@@ -35,7 +35,7 @@ public class AccountCache implements ISerializable<AccountCache> {
             int[] pixel = new int[4];
 
             if (skinUrl.equals("steve"))
-                skin = ImageIO.read(MinecraftClient.getInstance().getResourceManager().getResource(new Identifier("meteor-client", "steve.png")).getInputStream());
+                skin = ImageIO.read(MinecraftClient.getInstance().getResourceManager().getResource(new Identifier("meteor-client", "textures/steve.png")).getInputStream());
             else skin = ImageIO.read(new URL(skinUrl));
 
             // Whole picture

@@ -6,6 +6,7 @@
 package minegame159.meteorclient.systems.modules.render.hud.modules;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import minegame159.meteorclient.events.render.Render2DEvent;
 import minegame159.meteorclient.rendering.DrawMode;
 import minegame159.meteorclient.rendering.Matrices;
 import minegame159.meteorclient.rendering.Renderer;
@@ -21,19 +22,9 @@ import net.minecraft.item.Items;
 import net.minecraft.util.Identifier;
 
 public class InventoryViewerHud extends HudElement {
-    public enum Background {
-        None,
-        Light,
-        LightTransparent,
-        Dark,
-        DarkTransparent,
-        Flat
-    }
 
-    private static final Identifier TEXTURE_LIGHT = new Identifier("meteor-client", "container_3x9.png");
-    private static final Identifier TEXTURE_LIGHT_TRANSPARENT = new Identifier("meteor-client", "container_3x9-transparent.png");
-    private static final Identifier TEXTURE_DARK = new Identifier("meteor-client", "container_3x9-dark.png");
-    private static final Identifier TEXTURE_DARK_TRANSPARENT = new Identifier("meteor-client", "container_3x9-dark-transparent.png");
+    private static final Identifier TEXTURE = new Identifier("meteor-client", "textures/container.png");
+    private static final Identifier TEXTURE_TRANSPARENT = new Identifier("meteor-client", "textures/container-transparent.png");
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
@@ -41,24 +32,23 @@ public class InventoryViewerHud extends HudElement {
             .name("scale")
             .description("Scale of inventory viewer.")
             .defaultValue(2)
-            .min(1)
-            .max(4)
-            .sliderMin(1)
-            .sliderMax(4)
+            .min(0.1)
+            .sliderMin(0.1)
+            .max(10)
             .build()
     );
 
     private final Setting<Background> background = sgGeneral.add(new EnumSetting.Builder<InventoryViewerHud.Background>()
             .name("background")
             .description("Background of inventory viewer.")
-            .defaultValue(InventoryViewerHud.Background.Light)
+            .defaultValue(Background.Texture)
             .build()
     );
 
-    private final Setting<SettingColor> flatColor = sgGeneral.add(new ColorSetting.Builder()
-            .name("flat-mode-color")
-            .description("Color of background on Flat mode.")
-            .defaultValue(new SettingColor(0, 0, 0, 64))
+    private final Setting<SettingColor> color = sgGeneral.add(new ColorSetting.Builder()
+            .name("background-color")
+            .description("Color of the background.")
+            .defaultValue(new SettingColor(255, 255, 255))
             .build()
     );
 
@@ -84,7 +74,7 @@ public class InventoryViewerHud extends HudElement {
         double x = box.getX();
         double y = box.getY();
 
-        drawBackground((int) x, (int) y);
+        if (background.get() != Background.None) drawBackground((int) x, (int) y);
 
         for (int row = 0; row < 3; row++) {
             for (int i = 0; i < 9; i++) {
@@ -104,33 +94,27 @@ public class InventoryViewerHud extends HudElement {
     private void drawBackground(int x, int y) {
         int w = (int) box.width;
         int h = (int) box.height;
-        
+
         switch(background.get()) {
-            case Light:
-                RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-                mc.getTextureManager().bindTexture(TEXTURE_LIGHT);
-                DrawableHelper.drawTexture(Matrices.getMatrixStack(), x, y, 0, 0, 0, w, h, h, w);
-                break;
-            case LightTransparent:
-                RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-                mc.getTextureManager().bindTexture(TEXTURE_LIGHT_TRANSPARENT);
-                DrawableHelper.drawTexture(Matrices.getMatrixStack(), x, y, 0, 0, 0, w, h, h, w);
-                break;
-            case Dark:
-                RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-                mc.getTextureManager().bindTexture(TEXTURE_DARK);
-                DrawableHelper.drawTexture(Matrices.getMatrixStack(), x, y, 0, 0, 0, w, h, h, w);
-                break;
-            case DarkTransparent:
-                RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-                mc.getTextureManager().bindTexture(TEXTURE_DARK_TRANSPARENT);
+            case Texture:
+            case Outline:
+                RenderSystem.color4f(color.get().r / 255F, color.get().g / 255F, color.get().b / 255F, color.get().a / 255F);
+                mc.getTextureManager().bindTexture(background.get() == Background.Texture ? TEXTURE : TEXTURE_TRANSPARENT);
                 DrawableHelper.drawTexture(Matrices.getMatrixStack(), x, y, 0, 0, 0, w, h, h, w);
                 break;
             case Flat:
                 Renderer.NORMAL.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
-                Renderer.NORMAL.quad(x, y, w, h, flatColor.get());
+                Renderer.NORMAL.quad(x, y, w, h, color.get());
                 Renderer.NORMAL.end();
                 break;
         }
     }
+
+    public enum Background {
+        None,
+        Texture,
+        Outline,
+        Flat
+    }
+
 }

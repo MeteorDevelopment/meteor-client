@@ -53,7 +53,7 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
     @Shadow protected int x;
     @Shadow protected int y;
 
-    private static final Identifier TEXTURE_CONTAINER_BACKGROUND = new Identifier("meteor-client", "container_3x9.png");
+    private static final Identifier TEXTURE_CONTAINER_BACKGROUND = new Identifier("meteor-client", "textures/container.png");
     private static final Identifier TEXTURE_MAP_BACKGROUND = new Identifier("textures/map/map_background.png");
 
     private static final ItemStack[] ITEMS = new ItemStack[27];
