@@ -63,10 +63,10 @@ public class GuiRenderer {
     }
 
     public static void init() {
-        CIRCLE = addTexture(new Identifier("meteor-client", "gui/circle.png"));
-        TRIANGLE = addTexture(new Identifier("meteor-client", "gui/triangle.png"));
-        EDIT = addTexture(new Identifier("meteor-client", "gui/edit.png"));
-        RESET = addTexture(new Identifier("meteor-client", "gui/reset.png"));
+        CIRCLE = addTexture(new Identifier("meteor-client", "textures/icons/gui/circle.png"));
+        TRIANGLE = addTexture(new Identifier("meteor-client", "textures/icons/gui/triangle.png"));
+        EDIT = addTexture(new Identifier("meteor-client", "textures/icons/gui/edit.png"));
+        RESET = addTexture(new Identifier("meteor-client", "textures/icons/gui/reset.png"));
 
         TEXTURE = TEXTURE_PACKER.pack();
     }

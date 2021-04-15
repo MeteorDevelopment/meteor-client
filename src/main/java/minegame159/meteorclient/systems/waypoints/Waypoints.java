@@ -33,7 +33,7 @@ import java.io.*;
 import java.util.*;
 
 public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
-    private static final String[] BUILTIN_ICONS = { "Square", "Circle", "Triangle", "Star", "Diamond" };
+    private static final String[] BUILTIN_ICONS = { "square", "circle", "triangle", "star", "diamond" };
 
     private static final Color BACKGROUND = new Color(0, 0, 0, 75);
     private static final Color TEXT = new Color(255, 255, 255);
@@ -104,14 +104,13 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
     }
 
     public Vec3d getCoords(Waypoint waypoint) {
-
         double x = waypoint.x;
         double y = waypoint.y;
         double z = waypoint.z;
 
         if (waypoint.actualDimension == Dimension.Overworld && Utils.getDimension() == Dimension.Nether) {
-            x = waypoint.x / 8;
-            z = waypoint.z / 8;
+            x = waypoint.x / 8f;
+            z = waypoint.z / 8f;
         } else if (waypoint.actualDimension == Dimension.Nether && Utils.getDimension() == Dimension.Overworld) {
             x = waypoint.x * 8;
             z = waypoint.z * 8;
@@ -238,7 +237,7 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
 
     private void copyIcon(File file) {
         try {
-            InputStream in = Waypoints.class.getResourceAsStream("/assets/meteor-client/waypoint-icons/" + file.getName());
+            InputStream in = Waypoints.class.getResourceAsStream("/assets/meteor-client/textures/icons/waypoints/" + file.getName());
             OutputStream out = new FileOutputStream(file);
 
             byte[] bytes = new byte[256];
