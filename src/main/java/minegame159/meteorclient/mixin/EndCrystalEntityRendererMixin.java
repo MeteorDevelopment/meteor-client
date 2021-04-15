@@ -43,9 +43,8 @@ public abstract class EndCrystalEntityRendererMixin {
     @Inject(method = "render", at = @At("HEAD"), cancellable = true)
     private void render(EndCrystalEntity endCrystalEntity, float f, float g, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, CallbackInfo ci) {
         Chams module = Modules.get().get(Chams.class);
-        if (!module.isActive()) return;
 
-        END_CRYSTAL = RenderLayer.getEntityTranslucent((module.crystals.get() && !module.crystalsTexture.get()) ? Chams.BLANK : TEXTURE);
+        END_CRYSTAL = RenderLayer.getEntityTranslucent((module.isActive() && module.crystals.get() && !module.crystalsTexture.get()) ? Chams.BLANK : TEXTURE);
     }
 
     // Scale
