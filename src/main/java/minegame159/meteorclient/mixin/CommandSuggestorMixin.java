@@ -26,7 +26,7 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import java.util.concurrent.CompletableFuture;
 
 @Mixin(CommandSuggestor.class)
-public abstract class MixinCommandSuggestor {
+public abstract class CommandSuggestorMixin {
 
     @Shadow private ParseResults<CommandSource> parse;
 
