@@ -100,11 +100,10 @@ public class BowAimbot extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        if (mc.player.isDead() || !mc.player.isAlive() || !itemInHand()) return;
-
-        // Target
+        if (playerIsDead() || !itemInHand()) return;
         if (InvUtils.findItemWithCount(Items.ARROW).slot == -1) return;
 
+        // Target
         target = EntityUtils.get(entity -> {
             if (entity == mc.player || entity == mc.cameraEntity) return false;
             if ((entity instanceof LivingEntity && ((LivingEntity) entity).isDead()) || !entity.isAlive()) return false;
@@ -178,5 +177,9 @@ public class BowAimbot extends Module {
         } else {
             Rotations.rotate(Rotations.getYaw(new Vec3d(posX, posY, posZ)), pitch);
         }
+    }
+
+    private boolean playerIsDead() {
+        return mc.player.isDead() || !mc.player.isAlive();
     }
 }
