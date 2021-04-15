@@ -491,7 +491,6 @@ public class Modules extends System<Modules> {
         add(new Xray());
         add(new BossStack());
         add(new ItemHighlight());
-        add(new ModelTweaks());
         add(new LightOverlay());
         add(new Zoom());
         add(new WallHack());

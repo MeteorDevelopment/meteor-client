@@ -93,6 +93,7 @@
     "ParticleManagerMixin",
     "PickaxeItemAccessor",
     "PlayerEntityMixin",
+    "PlayerEntityRendererMixin",
     "PlayerListHudMixin",
     "PlayerMoveC2SPacketAccessor",
     "PlayerMoveC2SPacketMixin",

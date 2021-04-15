@@ -5,54 +5,42 @@
 
 package minegame159.meteorclient.mixin;
 
-import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.entity.RenderEntityEvent;
-import minegame159.meteorclient.mixininterface.ILivingEntityRenderer;
 import minegame159.meteorclient.systems.modules.Modules;
+import minegame159.meteorclient.systems.modules.render.Chams;
 import minegame159.meteorclient.systems.modules.render.Freecam;
 import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.misc.text.TextUtils;
 import minegame159.meteorclient.utils.player.Rotations;
+import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
-import net.minecraft.client.render.entity.feature.FeatureRenderer;
 import net.minecraft.client.render.entity.model.EntityModel;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.scoreboard.AbstractTeam;
-import org.spongepowered.asm.mixin.Final;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
-import java.util.List;
+import static org.lwjgl.opengl.GL11.*;
 
 @Mixin(LivingEntityRenderer.class)
-public abstract class LivingEntityRendererMixin implements ILivingEntityRenderer {
+public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extends EntityModel<T>> {
+    @Shadow @Nullable protected abstract RenderLayer getRenderLayer(T entity, boolean showBody, boolean translucent, boolean showOutline);
+
     //Freecam
     @Redirect(method = "hasLabel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/MinecraftClient;getCameraEntity()Lnet/minecraft/entity/Entity;"))
     private Entity hasLabelGetCameraEntityProxy(MinecraftClient mc) {
         if (Modules.get().isActive(Freecam.class)) return null;
         return mc.getCameraEntity();
-    }
-
-    //Chams
-    @Inject(method = "render", at = @At("HEAD"), cancellable = true)
-    public void renderPre(LivingEntity entity, float yaw, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, CallbackInfo ci) {
-        RenderEntityEvent.Pre event = MeteorClient.EVENT_BUS.post(RenderEntityEvent.Pre.get(entity));
-        if (event.isCancelled()) ci.cancel();
-    }
-
-    @Inject(method = "render", at = @At("RETURN"), cancellable = true)
-    public void renderPost(LivingEntity entity, float yaw, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, CallbackInfo ci) {
-        RenderEntityEvent.Post event = MeteorClient.EVENT_BUS.post(RenderEntityEvent.Post.get(entity));
-        if (event.isCancelled()) ci.cancel();
     }
 
     //3rd Person Rotation
@@ -81,37 +69,63 @@ public abstract class LivingEntityRendererMixin implements ILivingEntityRenderer
         return player.getScoreboardTeam();
     }
 
-    //Model Tweaks
-    @Shadow protected EntityModel<Entity> model;
-    @Shadow protected abstract void setupTransforms(LivingEntity entity, MatrixStack matrices, float animationProgress, float bodyYaw, float tickDelta);
-    @Shadow protected abstract void scale(LivingEntity entity, MatrixStack matrices, float amount);
-    @Shadow protected abstract boolean isVisible(LivingEntity entity);
-    @Shadow protected abstract float getAnimationCounter(LivingEntity entity, float tickDelta);
-    @Shadow @Final protected List<FeatureRenderer<LivingEntity, EntityModel<LivingEntity>>> features;
+    //Chams
 
-    @Inject(method = "render", at = @At("HEAD"), cancellable = true)
-    private void render(LivingEntity livingEntity, float f, float g, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, CallbackInfo ci) {
-        RenderEntityEvent.LiveEntity event = MeteorClient.EVENT_BUS.post(RenderEntityEvent.LiveEntity.get(model, livingEntity, features, f, g, matrixStack, vertexConsumerProvider, i));
-        if (event.isCancelled()) ci.cancel();
+    //Depth
+    @Inject(method = "render", at = @At("HEAD"))
+    private void renderHead(T livingEntity, float f, float g, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, CallbackInfo ci) {
+        Chams chams = Modules.get().get(Chams.class);
+
+        if (chams.isActive() && chams.shouldRender(livingEntity)) {
+            glEnable(GL_POLYGON_OFFSET_FILL);
+            glPolygonOffset(1.0f, -1100000.0f);
+        }
     }
 
-    @Override
-    public void setupTransformsInterface(LivingEntity entity, MatrixStack matrices, float animationProgress, float bodyYaw, float tickDelta) {
-        setupTransforms(entity, matrices, animationProgress, bodyYaw, tickDelta);
+    @Inject(method = "render", at = @At("TAIL"))
+    private void renderTail(T livingEntity, float f, float g, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, CallbackInfo ci) {
+        Chams chams = Modules.get().get(Chams.class);
+
+        if (chams.isActive() && chams.shouldRender(livingEntity)) {
+            glPolygonOffset(1.0f, 1100000.0f);
+            glDisable(GL_POLYGON_OFFSET_FILL);
+        }
     }
 
-    @Override
-    public void scaleInterface(LivingEntity entity, MatrixStack matrices, float amount) {
-        scale(entity, matrices, amount);
+    //Player stuff below
+
+    // Scale
+    @ModifyArgs(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/math/MatrixStack;scale(FFF)V"))
+    private void modifyScale(Args args, T livingEntity, float f, float g, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i) {
+        Chams module = Modules.get().get(Chams.class);
+        if (!module.isActive() || !module.players.get() || !(livingEntity instanceof PlayerEntity)) return;
+        if (module.ignoreSelf.get() && livingEntity == MinecraftClient.getInstance().player) return;
+
+        args.set(0, -module.playersScale.get().floatValue());
+        args.set(1, -module.playersScale.get().floatValue());
+        args.set(2, module.playersScale.get().floatValue());
     }
 
-    @Override
-    public boolean isVisibleInterface(LivingEntity entity) {
-        return isVisible(entity);
+    @SuppressWarnings("UnresolvedMixinReference")
+    @ModifyArgs(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/entity/model/EntityModel;render(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumer;IIFFFF)V"))
+    private void modifyColor(Args args, T livingEntity, float f, float g, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i) {
+        Chams module = Modules.get().get(Chams.class);
+        if (!module.isActive() || !module.players.get() || !(livingEntity instanceof PlayerEntity)) return;
+        if (module.ignoreSelf.get() && livingEntity == MinecraftClient.getInstance().player) return;
+
+        Color color = module.useNameColor.get() ? TextUtils.getMostPopularColor(livingEntity.getDisplayName()) : module.playersColor.get();
+        args.set(4, color.r / 255f);
+        args.set(5, color.g / 255f);
+        args.set(6, color.b / 255f);
+        args.set(7, module.playersColor.get().a / 255f);
     }
 
-    @Override
-    public float getAnimationCounterInterface(LivingEntity entity, float tickDelta) {
-        return getAnimationCounter(entity, tickDelta);
+    @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/entity/LivingEntityRenderer;getRenderLayer(Lnet/minecraft/entity/LivingEntity;ZZZ)Lnet/minecraft/client/render/RenderLayer;"))
+    private RenderLayer getRenderLayer(LivingEntityRenderer<T, M> livingEntityRenderer, T livingEntity, boolean showBody, boolean translucent, boolean showOutline) {
+        Chams module = Modules.get().get(Chams.class);
+        if (!module.isActive() || !module.players.get() || !(livingEntity instanceof PlayerEntity) || module.playersTexture.get()) return getRenderLayer(livingEntity, showBody, translucent, showOutline);
+        if (module.ignoreSelf.get() && livingEntity == MinecraftClient.getInstance().player) return getRenderLayer(livingEntity, showBody, translucent, showOutline);
+
+        return RenderLayer.getItemEntityTranslucentCull(Chams.BLANK);
     }
 }
