@@ -143,10 +143,6 @@ public class BowAimbot extends Module {
         return null;
     }
 
-    private Entity getTarget() {
-        return
-    }
-
     private boolean itemInHand() {
         return mc.player.getMainHandStack().getItem() instanceof BowItem || mc.player.getMainHandStack().getItem() instanceof CrossbowItem;
     }
