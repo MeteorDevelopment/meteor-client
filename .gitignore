@@ -1,7 +1,11 @@
 *.DS_Store
 .gradle
 .idea
-build
+build/classes
+build/generated
+build/loom-cache
+build/resources
+build/tmp
 out
 run
 bin

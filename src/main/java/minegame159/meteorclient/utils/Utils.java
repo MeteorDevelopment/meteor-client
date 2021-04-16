@@ -29,6 +29,7 @@ import net.minecraft.item.*;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
@@ -381,6 +382,25 @@ public class Utils {
         if (value < min) return min;
         if (value > max) return max;
         return value;
+    }
+    
+    public static void addItem(ItemStack item) {
+		for(int i = 0; i < 10; i++)
+		{
+			if(!mc.player.inventory.getStack(i).isEmpty())
+				continue;
+			
+			mc.player.networkHandler.sendPacket(
+				new CreativeInventoryActionC2SPacket(36 + i, item));
+		}
+		for(int i = 9; i < 36; i++)
+		{
+			if(!mc.player.inventory.getStack(i).isEmpty())
+				continue;
+			
+			mc.player.networkHandler.sendPacket(
+				new CreativeInventoryActionC2SPacket(i, item));
+		}
     }
 
     public static void addEnchantment(ItemStack itemStack, Enchantment enchantment, int level) {
