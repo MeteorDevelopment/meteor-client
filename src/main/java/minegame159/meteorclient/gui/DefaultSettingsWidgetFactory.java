@@ -50,6 +50,7 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
         factories.put(StringSetting.class, (table, setting) -> stringW(table, (StringSetting) setting));
         factories.put(BlockSetting.class, (table, setting) -> blockW(table, (BlockSetting) setting));
         factories.put(KeybindSetting.class, (table, setting) -> keybindW(table, (KeybindSetting) setting));
+        factories.put(GenericSetting.class, (table, setting) -> genericW(table, (GenericSetting<?>) setting));
         factories.put(BlockListSetting.class, (table, setting) -> blockListW(table, (BlockListSetting) setting));
         factories.put(ItemListSetting.class, (table, setting) -> itemListW(table, (ItemListSetting) setting));
         factories.put(EntityTypeListSetting.class, (table, setting) -> entityTypeListW(table, (EntityTypeListSetting) setting));
@@ -60,6 +61,7 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
         factories.put(SoundEventListSetting.class, (table, setting) -> soundEventListW(table, (SoundEventListSetting) setting));
         factories.put(StatusEffectSetting.class, (table, setting) -> statusEffectW(table, (StatusEffectSetting) setting));
         factories.put(StorageBlockListSetting.class, (table, setting) -> storageBlockListW(table, (StorageBlockListSetting) setting));
+        factories.put(BlockDataSetting.class, (table, setting) -> blockDataSettingW(table, (BlockDataSetting<?>) setting));
     }
 
     @Override
@@ -174,6 +176,13 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
         setting.widget = keybind;
     }
 
+    private void genericW(WTable table, GenericSetting<?> setting) {
+        WButton edit = table.add(theme.button(GuiRenderer.EDIT)).widget();
+        edit.action = () -> mc.openScreen(setting.get().createScreen(theme));
+
+        reset(table, setting, null);
+    }
+
     private void blockListW(WTable table, BlockListSetting setting) {
         selectW(table, setting, () -> mc.openScreen(new BlockListSettingScreen(theme, setting)));
     }
@@ -212,6 +221,13 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
 
     private void storageBlockListW(WTable table, StorageBlockListSetting setting) {
         selectW(table, setting, () -> mc.openScreen(new StorageBlockListSettingScreen(theme, setting)));
+    }
+
+    private void blockDataSettingW(WTable table, BlockDataSetting<?> setting) {
+        WButton button = table.add(theme.button(GuiRenderer.EDIT)).expandCellX().widget();
+        button.action = () -> mc.openScreen(new BlockDataSettingScreen(theme, setting));
+
+        reset(table, setting, null);
     }
 
     // Other

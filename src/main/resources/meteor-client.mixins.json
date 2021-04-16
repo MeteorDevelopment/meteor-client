@@ -40,6 +40,7 @@
     "ClientPlayerEntityMixin",
     "ClientPlayerInteractionManagerAccessor",
     "ClientPlayerInteractionManagerMixin",
+    "ClientPlayNetworkHandlerAccessor",
     "ClientPlayNetworkHandlerMixin",
     "ClientWorldMixin",
     "CloseHandledScreenC2SPacketAccessor",
@@ -119,6 +120,7 @@
     "TitleScreenMixin",
     "TridentItemMixin",
     "Vec3dMixin",
+    "WorldChunkMixin",
     "WorldRendererAccessor",
     "WorldRendererMixin"
   ],

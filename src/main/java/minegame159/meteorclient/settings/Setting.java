@@ -6,8 +6,8 @@
 package minegame159.meteorclient.settings;
 
 import minegame159.meteorclient.systems.modules.Module;
+import minegame159.meteorclient.utils.misc.IGetter;
 import minegame159.meteorclient.utils.misc.ISerializable;
-import minegame159.meteorclient.utils.misc.Lazy;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
@@ -20,7 +20,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public abstract class Setting<T> implements Lazy<T>, ISerializable<T> {
+public abstract class Setting<T> implements IGetter<T>, ISerializable<T> {
     private static final List<String> NO_SUGGESTIONS = new ArrayList<>(0);
 
     public final String name, title, description;

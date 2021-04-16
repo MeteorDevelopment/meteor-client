@@ -5,11 +5,12 @@
 
 package minegame159.meteorclient.utils.render.color;
 
+import minegame159.meteorclient.utils.misc.ICopyable;
 import minegame159.meteorclient.utils.misc.ISerializable;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.math.Vec3d;
 
-public class Color implements ISerializable<Color> {
+public class Color implements ICopyable<Color>, ISerializable<Color> {
     public int r, g, b, a;
 
     public Color() {
@@ -150,6 +151,7 @@ public class Color implements ISerializable<Color> {
         validate();
     }
 
+    @Override
     public void set(Color value) {
         r = value.r;
         g = value.g;
@@ -157,6 +159,11 @@ public class Color implements ISerializable<Color> {
         a = value.a;
 
         validate();
+    }
+
+    @Override
+    public Color copy() {
+        return new Color(r, g, b, a);
     }
 
     public void validate() {

@@ -128,6 +128,13 @@ public class MeshBuilder {
         quad(x, y, 0, x + width, y, 0, x + width, y + height, 0, x, y + height, 0, color);
     }
 
+    public void horizontalQuad(double x1, double z1, double x2, double z2, double y, Color color) {
+        quad(x1, y, z1, x1, y, z2, x2, y, z2, x2, y, z1, color);
+    }
+    public void verticalQuad(double x1, double y1, double z1, double x2, double y2, double z2, Color color) {
+        quad(x1, y1, z1, x1, y2, z1, x2, y2, z2, x2, y1, z2, color);
+    }
+
     public void gradientQuad(double x1, double y1, double z1, double x2, double y2, double z2, double x3, double y3, double z3, double x4, double y4, double z4, Color startColor, Color endColor) {
         pos(x1, y1, z1).color(startColor).endVertex();
         pos(x2, y2, z2).color(endColor).endVertex();
