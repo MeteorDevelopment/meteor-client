@@ -458,6 +458,7 @@ public class Modules extends System<Modules> {
         add(new Step());
         add(new Velocity());
         add(new AntiVoid());
+        add(new Sneak());
     }
 
     private void initRender() {
