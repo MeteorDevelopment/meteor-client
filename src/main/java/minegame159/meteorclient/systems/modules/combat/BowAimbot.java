@@ -159,6 +159,9 @@ public class BowAimbot extends Module {
         double posY = target.getPos().getY() + (target.getPos().getY() - target.prevY) * distance;
         double posZ = target.getPos().getZ() + (target.getPos().getZ() - target.prevZ) * distance;
 
+        // Adjusting for hitbox heights
+        posY -= 1.9f - target.getHeight();
+
         double relativeX = posX - mc.player.getX();
         double relativeY = posY - mc.player.getY();
         double relativeZ = posZ - mc.player.getZ();
