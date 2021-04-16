@@ -9,6 +9,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import minegame159.meteorclient.mixin.ClientPlayNetworkHandlerAccessor;
 import minegame159.meteorclient.mixin.MinecraftClientAccessor;
 import minegame159.meteorclient.mixin.MinecraftServerAccessor;
 import minegame159.meteorclient.mixininterface.IMinecraftClient;
@@ -64,6 +65,10 @@ public class Utils {
         DecimalFormatSymbols dfs = new DecimalFormatSymbols();
         dfs.setDecimalSeparator('.');
         df.setDecimalFormatSymbols(dfs);
+    }
+
+    public static int getRenderDistance() {
+        return Math.max(mc.options.viewDistance, ((ClientPlayNetworkHandlerAccessor) mc.getNetworkHandler()).getChunkLoadDistance());
     }
 
     public static void addMeteorPvpToServerList() {

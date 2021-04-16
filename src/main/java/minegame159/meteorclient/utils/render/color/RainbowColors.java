@@ -15,15 +15,16 @@ import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.systems.waypoints.Waypoint;
 import minegame159.meteorclient.systems.waypoints.Waypoints;
+import minegame159.meteorclient.utils.misc.UnorderedArrayList;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static minegame159.meteorclient.utils.Utils.mc;
 
 public class RainbowColors {
-    private static final List<Setting<SettingColor>> colorSettings = new ArrayList<>();
-    private static final List<SettingColor> colors = new ArrayList<>();
+    private static final List<Setting<SettingColor>> colorSettings = new UnorderedArrayList<>();
+    private static final List<SettingColor> colors = new UnorderedArrayList<>();
+    private static final List<Runnable> listeners = new UnorderedArrayList<>();
 
     public static void init() {
         MeteorClient.EVENT_BUS.subscribe(RainbowColors.class);
@@ -39,6 +40,10 @@ public class RainbowColors {
 
     public static void add(SettingColor color) {
         colors.add(color);
+    }
+
+    public static void register(Runnable runnable) {
+        listeners.add(runnable);
     }
 
     @EventHandler
@@ -62,5 +67,7 @@ public class RainbowColors {
                 }
             }
         }
+
+        for (Runnable listener : listeners) listener.run();
     }
 }

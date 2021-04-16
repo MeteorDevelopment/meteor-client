@@ -5,6 +5,6 @@
 
 package minegame159.meteorclient.utils.misc;
 
-public interface Lazy<T> {
+public interface IGetter<T> {
     T get();
 }

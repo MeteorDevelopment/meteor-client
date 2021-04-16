@@ -65,6 +65,11 @@ public class SettingColor extends Color {
     }
 
     @Override
+    public Color copy() {
+        return new SettingColor(r, g, b, a, rainbowSpeed);
+    }
+
+    @Override
     public CompoundTag toTag() {
         CompoundTag tag = super.toTag();
 
