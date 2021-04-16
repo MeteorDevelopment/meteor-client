@@ -103,21 +103,7 @@ public class BowAimbot extends Module {
         if (playerIsDead() || !itemInHand()) return;
         if (InvUtils.findItemWithCount(Items.ARROW).slot == -1) return;
 
-        // Target
-        target = EntityUtils.get(entity -> {
-            if (entity == mc.player || entity == mc.cameraEntity) return false;
-            if ((entity instanceof LivingEntity && ((LivingEntity) entity).isDead()) || !entity.isAlive()) return false;
-            if (entity.distanceTo(mc.player) > range.get()) return false;
-            if (!entities.get().getBoolean(entity.getType())) return false;
-            if (!nametagged.get() && entity.hasCustomName()) return false;
-            if (!PlayerUtils.canSeeEntity(entity)) return false;
-            if (entity instanceof PlayerEntity) {
-                if (((PlayerEntity) entity).isCreative()) return false;
-                if (!friends.get() && !Friends.get().attack((PlayerEntity) entity)) return false;
-            }
-            return !(entity instanceof AnimalEntity) || babies.get() || !((AnimalEntity) entity).isBaby();
-        }, priority.get());
-
+        target = getTarget();
         if (target == null) {
             if (wasPathing) {
                 BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume");
@@ -142,6 +128,22 @@ public class BowAimbot extends Module {
             return target.getType().getName().getString();
         }
         return null;
+    }
+
+    private Entity getTarget() {
+        return EntityUtils.get(entity -> {
+            if (entity == mc.player || entity == mc.cameraEntity) return false;
+            if ((entity instanceof LivingEntity && ((LivingEntity) entity).isDead()) || !entity.isAlive()) return false;
+            if (entity.distanceTo(mc.player) > range.get()) return false;
+            if (!entities.get().getBoolean(entity.getType())) return false;
+            if (!nametagged.get() && entity.hasCustomName()) return false;
+            if (!PlayerUtils.canSeeEntity(entity)) return false;
+            if (entity instanceof PlayerEntity) {
+                if (((PlayerEntity) entity).isCreative()) return false;
+                if (!friends.get() && !Friends.get().attack((PlayerEntity) entity)) return false;
+            }
+            return !(entity instanceof AnimalEntity) || babies.get() || !((AnimalEntity) entity).isBaby();
+        }, priority.get());
     }
 
     private boolean itemInHand() {
