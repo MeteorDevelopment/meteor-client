@@ -426,6 +426,7 @@ public class Modules extends System<Modules> {
         add(new AutoGap());
         add(new AutoEat());
         add(new PotionSaver());
+        add(new BowAimbot());
     }
 
     private void initMovement() {
