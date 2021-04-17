@@ -6,6 +6,10 @@
 package minegame159.meteorclient.utils;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.brigadier.exceptions.*;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
@@ -384,23 +388,24 @@ public class Utils {
         return value;
     }
     
-    public static void addItem(ItemStack item) {
-		for(int i = 0; i < 10; i++)
+    public static int addItem(ItemStack item) {
+		for(int i = 0; i < 36; i++)
 		{
+			int f = i;
+            if(i <= 8)
+            {
+            	f = i;
+            	i =+ 36;
+            }
 			if(!mc.player.inventory.getStack(i).isEmpty())
 				continue;
-			
-			mc.player.networkHandler.sendPacket(
-				new CreativeInventoryActionC2SPacket(36 + i, item));
+    		mc.player.networkHandler.sendPacket(new CreativeInventoryActionC2SPacket(i, item));
+    		if(f <= 8)
+    			i = f;
+    		return 1;
+            
 		}
-		for(int i = 9; i < 36; i++)
-		{
-			if(!mc.player.inventory.getStack(i).isEmpty())
-				continue;
-			
-			mc.player.networkHandler.sendPacket(
-				new CreativeInventoryActionC2SPacket(i, item));
-		}
+		return 0;
     }
 
     public static void addEnchantment(ItemStack itemStack, Enchantment enchantment, int level) {

@@ -28,24 +28,13 @@ public class GiveCommand extends Command {
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
-        builder.then(argument("item", ItemStackArgumentType.itemStack()).then(argument("number", IntegerArgumentType.integer()).then(argument("nbt", NbtTagArgumentType.nbtTag()).executes(context -> {
+        builder.then(argument("item", ItemStackArgumentType.itemStack()).then(argument("number", IntegerArgumentType.integer()).executes(context -> {
             if (!mc.player.isCreative()) throw NOT_IN_CREATIVE.create();
 
             ItemStack item = new ItemStack(context.getArgument("item", Item.class),context.getArgument("number", int.class));
-            String nbt = context.getArgument("nbt", String.class);
-			try
-			{
-				CompoundTag tag = StringNbtReader.parse(nbt);
-				item.setTag(tag);
-				
-			}catch(CommandSyntaxException e)
-			{
-				SimpleCommandExceptionType commandExeption = new SimpleCommandExceptionType(new LiteralText(e.getMessage()));
-				throw commandExeption.create();
-			}
             Utils.addItem(item);
             
             return SINGLE_SUCCESS;
-        }))));
+        })));
     }
 }
