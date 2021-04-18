@@ -22,20 +22,18 @@ public class Main {
 
         int option = JOptionPane.showOptionDialog(
                 null,
-                "To install Meteor Client you need to put it in your mods folder along with Fabric API. Then run Fabric for latest Minecraft version.",
+                "To install Meteor Client you need to put it in your mods folder and run Fabric for latest Minecraft version.",
                 "Meteor Client",
                 JOptionPane.YES_NO_CANCEL_OPTION,
                 JOptionPane.ERROR_MESSAGE,
                 null,
-                new String[] { "Open Fabric link", "Open Fabric API link", "Open mods folder" },
+                new String[] { "Open Fabric link", "Open mods folder" },
                 null
         );
 
         if (option == 0) {
             openUrl("http://fabricmc.net");
         } else if (option == 1) {
-            openUrl("http://www.curseforge.com/minecraft/mc-mods/fabric-api");
-        } else if (option == 2) {
             String os = System.getProperty("os.name").toLowerCase();
 
             try {
