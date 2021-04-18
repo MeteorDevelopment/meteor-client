@@ -7,7 +7,6 @@ package minegame159.meteorclient.utils.misc.input;
 
 import minegame159.meteorclient.mixin.KeyBindingAccessor;
 import net.minecraft.client.options.KeyBinding;
-import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.util.InputUtil;
 import org.lwjgl.glfw.GLFW;
 
@@ -34,10 +33,6 @@ public class KeyBinds {
 
         System.arraycopy(binds, 0, newBinds, 0, binds.length);
         newBinds[binds.length] = OPEN_CLICK_GUI;
-
-        for (KeyBinding bind : newBinds) {
-            System.out.println(I18n.translate(bind.getTranslationKey()));
-        }
 
         return newBinds;
     }

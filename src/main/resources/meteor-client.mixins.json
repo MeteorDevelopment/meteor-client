@@ -2,6 +2,7 @@
   "required": true,
   "package": "minegame159.meteorclient.mixin",
   "compatibilityLevel": "JAVA_8",
+  "plugin": "minegame159.meteorclient.MixinPlugin",
   "client": [
     "AbstractBlockAccessor",
     "AbstractBlockMixin",
@@ -92,6 +93,7 @@
     "ModelPredicateProviderRegistryMixin",
     "MouseMixin",
     "MultiplayerScreenMixin",
+    "NamespaceResourceManagerMixin",
     "PacketInflaterMixin",
     "ParticleManagerMixin",
     "PickaxeItemAccessor",
@@ -103,6 +105,7 @@
     "PlayerPositionLookS2CPacketAccessor",
     "ProjectileEntityAccessor",
     "ProjectileInGroundAccessor",
+    "ReloadableResourceManagerImplMixin",
     "RenderLayersMixin",
     "RenderTickCounterMixin",
     "ScreenMixin",
