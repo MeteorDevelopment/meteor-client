@@ -7,7 +7,6 @@ package minegame159.meteorclient.utils.misc.input;
 
 import minegame159.meteorclient.gui.GuiKeyEvents;
 import minegame159.meteorclient.utils.misc.CursorStyle;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.options.KeyBinding;
 import org.lwjgl.glfw.GLFW;
@@ -26,13 +25,12 @@ public class Input {
         if (button >= 0 && button < buttons.length) buttons[button] = pressed;
     }
 
-    public static void setKeyState(KeyBinding key, boolean pressed) {
-        setKeyState(KeyBindingHelper.getBoundKeyOf(key).getCode(), pressed);
+    public static void setKeyState(KeyBinding bind, boolean pressed) {
+        setKeyState(KeyBinds.getKey(bind), pressed);
     }
 
-    public static boolean isPressed(KeyBinding keyBinding) {
-        int key = KeyBindingHelper.getBoundKeyOf(keyBinding).getCode();
-        return isKeyPressed(key);
+    public static boolean isPressed(KeyBinding bind) {
+        return isKeyPressed(KeyBinds.getKey(bind));
     }
 
     public static boolean isKeyPressed(int key) {

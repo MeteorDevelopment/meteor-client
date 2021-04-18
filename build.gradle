@@ -38,8 +38,8 @@ dependencies {
 	mappings "net.fabricmc:yarn:${project.yarn_version}:v2"
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
-	// Fabric API
-	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.api_version}"
+	// Fabric API Indigo Renderer (only used in mixins)
+	modImplementation fabricApi.module("fabric-renderer-indigo", project.api_version)
 
 	// For XRay compatibility
 	modImplementation "com.github.CaffeineMC:sodium-fabric:1.16.x~stable-SNAPSHOT"
