@@ -356,7 +356,7 @@ public class Modules extends System<Modules> {
     }
 
     private void initCombat() {
-        add(new AimAssist());
+        add(new Aimbot());
         add(new AnchorAura());
         add(new AntiAnvil());
         add(new AntiAnchor());
@@ -426,7 +426,6 @@ public class Modules extends System<Modules> {
         add(new AutoGap());
         add(new AutoEat());
         add(new PotionSaver());
-        add(new BowAimbot());
     }
 
     private void initMovement() {
