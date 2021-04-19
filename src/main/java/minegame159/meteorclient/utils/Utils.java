@@ -387,7 +387,7 @@ public class Utils {
         if (value > max) return max;
         return value;
     }
-    
+
     public static void addEnchantment(ItemStack itemStack, Enchantment enchantment, int level) {
         CompoundTag tag = itemStack.getOrCreateTag();
         ListTag listTag;
