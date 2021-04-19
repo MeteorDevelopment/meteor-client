@@ -71,6 +71,7 @@ public class EntityTypeListSettingScreen extends WindowScreen {
             if (!setting.onlyAttackable || EntityUtils.isAttackable(entityType)) {
                 switch (entityType.getSpawnGroup()) {
                     case CREATURE:       hasAnimal++; break;
+                    case WATER_AMBIENT:
                     case WATER_CREATURE: hasWaterAnimal++; break;
                     case MONSTER:        hasMonster++; break;
                     case AMBIENT:        hasAmbient++; break;
@@ -138,6 +139,7 @@ public class EntityTypeListSettingScreen extends WindowScreen {
                         animalsE.add(entityType);
                         addEntityType(animalsT, animalsC, entityType);
                         break;
+                    case WATER_AMBIENT:
                     case WATER_CREATURE:
                         waterAnimalsE.add(entityType);
                         addEntityType(waterAnimalsT, waterAnimalsC, entityType);
@@ -227,6 +229,7 @@ public class EntityTypeListSettingScreen extends WindowScreen {
                 setting.get().put(entityType, true);
                 switch (entityType.getSpawnGroup()) {
                     case CREATURE:       if (hasAnimal == 0) tableCheckbox.checked = true; hasAnimal++; break;
+                    case WATER_AMBIENT:
                     case WATER_CREATURE: if (hasWaterAnimal == 0) tableCheckbox.checked = true; hasWaterAnimal++; break;
                     case MONSTER:        if (hasMonster == 0) tableCheckbox.checked = true; hasMonster++; break;
                     case AMBIENT:        if (hasAmbient == 0) tableCheckbox.checked = true; hasAmbient++; break;
@@ -236,6 +239,7 @@ public class EntityTypeListSettingScreen extends WindowScreen {
                 if (setting.get().removeBoolean(entityType)) {
                     switch (entityType.getSpawnGroup()) {
                         case CREATURE:       hasAnimal--; if (hasAnimal == 0) tableCheckbox.checked = false; break;
+                        case WATER_AMBIENT:
                         case WATER_CREATURE: hasWaterAnimal--; if (hasWaterAnimal == 0) tableCheckbox.checked = false; break;
                         case MONSTER:        hasMonster--; if (hasMonster == 0) tableCheckbox.checked = false; break;
                         case AMBIENT:        hasAmbient--; if (hasAmbient == 0) tableCheckbox.checked = false; break;

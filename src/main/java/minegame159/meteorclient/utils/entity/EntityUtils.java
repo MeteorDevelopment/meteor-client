@@ -45,6 +45,7 @@ public class EntityUtils {
 
         switch (entity.getType().getSpawnGroup()) {
             case CREATURE:       return animals;
+            case WATER_AMBIENT:
             case WATER_CREATURE: return waterAnmals;
             case MONSTER:        return monsters;
             case AMBIENT:        return ambient;
