@@ -30,15 +30,17 @@ public class Sneak extends Module {
 
     @Override
     public void onDeactivate() {
+        mc.options.keySneak.setPressed(false);
         mc.player.setSneaking(false);
     }
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
         if (packet.get()) {
+            if (mc.options.keySneak.isPressed()) mc.options.keySneak.setPressed(false);
             mc.getNetworkHandler().sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
         } else {
-            mc.player.setSneaking(true);
+            mc.options.keySneak.setPressed(true);
         }
     }
 
