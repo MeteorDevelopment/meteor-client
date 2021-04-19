@@ -388,26 +388,6 @@ public class Utils {
         return value;
     }
     
-    public static int addItem(ItemStack item) {
-		for(int i = 0; i < 36; i++)
-		{
-			int f = i;
-            if(i <= 8)
-            {
-            	f = i;
-            	i =+ 36;
-            }
-			if(!mc.player.inventory.getStack(i).isEmpty())
-				continue;
-    		mc.player.networkHandler.sendPacket(new CreativeInventoryActionC2SPacket(i, item));
-    		if(f <= 8)
-    			i = f;
-    		return 1;
-            
-		}
-		return 0;
-    }
-
     public static void addEnchantment(ItemStack itemStack, Enchantment enchantment, int level) {
         CompoundTag tag = itemStack.getOrCreateTag();
         ListTag listTag;
