@@ -12,6 +12,7 @@ import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
+import net.minecraft.block.BlockState;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -19,6 +20,7 @@ import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.shape.VoxelShape;
 
 public class ClickTP extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -49,7 +51,14 @@ public class ClickTP extends Module {
 
                 if (mc.world.getBlockState(pos).onUse(mc.world, mc.player, Hand.MAIN_HAND, (BlockHitResult) hitResult) != ActionResult.PASS) return;
 
-                mc.player.updatePosition(pos.getX() + 0.5 + side.getOffsetX(), pos.getY() + side.getOffsetY(), pos.getZ() + 0.5 + side.getOffsetZ());
+                BlockState state = mc.world.getBlockState(pos);
+
+                VoxelShape shape = state.getCollisionShape(mc.world, pos);
+                if (shape.isEmpty()) shape = state.getOutlineShape(mc.world, pos);
+
+                double height = shape.isEmpty() ? 1 : shape.getMax(Direction.Axis.Y);
+
+                mc.player.updatePosition(pos.getX() + 0.5 + side.getOffsetX(), pos.getY() + height, pos.getZ() + 0.5 + side.getOffsetZ());
             }
         }
     }
