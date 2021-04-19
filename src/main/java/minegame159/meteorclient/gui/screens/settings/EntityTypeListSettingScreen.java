@@ -79,6 +79,8 @@ public class EntityTypeListSettingScreen extends WindowScreen {
             }
         }
 
+        boolean first = animals == null;
+
         // Animals
         List<EntityType<?>> animalsE = new ArrayList<>();
         WCheckbox animalsC = theme.checkbox(hasAnimal > 0);
@@ -175,21 +177,23 @@ public class EntityTypeListSettingScreen extends WindowScreen {
         if (ambientT.cells.size() == 0) list.cells.remove(ambientCell);
         if (miscT.cells.size() == 0) list.cells.remove(miscCell);
 
-        int totalCount = (hasWaterAnimal + waterAnimals.cells.size() + monsters.cells.size() + ambient.cells.size() + misc.cells.size()) / 2;
+        if (first) {
+            int totalCount = (hasWaterAnimal + waterAnimals.cells.size() + monsters.cells.size() + ambient.cells.size() + misc.cells.size()) / 2;
 
-        if (totalCount <= 20) {
-            if (animalsT.cells.size() > 0) animals.setExpanded(true);
-            if (waterAnimalsT.cells.size() > 0) waterAnimals.setExpanded(true);
-            if (monstersT.cells.size() > 0) monsters.setExpanded(true);
-            if (ambientT.cells.size() > 0) ambient.setExpanded(true);
-            if (miscT.cells.size() > 0) misc.setExpanded(true);
-        }
-        else {
-            if (animalsT.cells.size() > 0) animals.setExpanded(false);
-            if (waterAnimalsT.cells.size() > 0) waterAnimals.setExpanded(false);
-            if (monstersT.cells.size() > 0) monsters.setExpanded(false);
-            if (ambientT.cells.size() > 0) ambient.setExpanded(false);
-            if (miscT.cells.size() > 0) misc.setExpanded(false);
+            if (totalCount <= 20) {
+                if (animalsT.cells.size() > 0) animals.setExpanded(true);
+                if (waterAnimalsT.cells.size() > 0) waterAnimals.setExpanded(true);
+                if (monstersT.cells.size() > 0) monsters.setExpanded(true);
+                if (ambientT.cells.size() > 0) ambient.setExpanded(true);
+                if (miscT.cells.size() > 0) misc.setExpanded(true);
+            }
+            else {
+                if (animalsT.cells.size() > 0) animals.setExpanded(false);
+                if (waterAnimalsT.cells.size() > 0) waterAnimals.setExpanded(false);
+                if (monstersT.cells.size() > 0) monsters.setExpanded(false);
+                if (ambientT.cells.size() > 0) ambient.setExpanded(false);
+                if (miscT.cells.size() > 0) misc.setExpanded(false);
+            }
         }
     }
 
