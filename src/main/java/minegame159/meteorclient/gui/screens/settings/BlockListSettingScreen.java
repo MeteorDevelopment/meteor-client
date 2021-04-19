@@ -8,6 +8,7 @@ package minegame159.meteorclient.gui.screens.settings;
 import minegame159.meteorclient.gui.GuiTheme;
 import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.mixin.IdentifierAccessor;
+import minegame159.meteorclient.settings.BlockListSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.utils.misc.Names;
 import net.minecraft.block.Block;
@@ -16,6 +17,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 public class BlockListSettingScreen extends LeftRightListSettingScreen<Block> {
     private static final Identifier ID = new Identifier("minecraft", "");
@@ -26,7 +28,10 @@ public class BlockListSettingScreen extends LeftRightListSettingScreen<Block> {
 
     @Override
     protected boolean includeValue(Block value) {
-        return value != Blocks.AIR;
+        Predicate<Block> filter = ((BlockListSetting) setting).filter;
+
+        if (filter == null) return value != Blocks.AIR;
+        return filter.test(value);
     }
 
     @Override

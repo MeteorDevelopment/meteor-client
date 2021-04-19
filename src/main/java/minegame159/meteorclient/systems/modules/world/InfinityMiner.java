@@ -24,6 +24,7 @@ import minegame159.meteorclient.systems.modules.movement.NoFall;
 import minegame159.meteorclient.systems.modules.player.*;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.FluidBlock;
 import net.minecraft.item.ToolItem;
 import net.minecraft.network.packet.s2c.play.DisconnectS2CPacket;
 import net.minecraft.text.LiteralText;
@@ -51,6 +52,7 @@ public class InfinityMiner extends Module {
             .name("target-block")
             .description("The target block to mine.")
             .defaultValue(Blocks.ANCIENT_DEBRIS)
+            .filter(this::filter)
             .build()
     );
 
@@ -58,6 +60,7 @@ public class InfinityMiner extends Module {
             .name("repair-block")
             .description("The block mined to repair your pickaxe.")
             .defaultValue(Blocks.NETHER_QUARTZ_ORE)
+            .filter(this::filter)
             .build()
     );
 
@@ -100,6 +103,10 @@ public class InfinityMiner extends Module {
 
     public InfinityMiner() {
         super(Categories.World, "infinity-miner", "Allows you to essentially mine forever.");
+    }
+
+    private boolean filter(Block block) {
+        return block != Blocks.AIR && block.getDefaultState().getHardness(mc.world, null) != -1 && !(block instanceof FluidBlock);
     }
 
     @Override
