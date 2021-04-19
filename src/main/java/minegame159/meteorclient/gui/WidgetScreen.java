@@ -23,6 +23,8 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.LiteralText;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 import static minegame159.meteorclient.utils.Utils.*;
@@ -47,6 +49,8 @@ public abstract class WidgetScreen extends Screen {
     private double lastMouseX, lastMouseY;
 
     public double animProgress;
+
+    private List<Runnable> onClosed;
 
     public WidgetScreen(GuiTheme theme, String title) {
         super(new LiteralText(title));
@@ -83,6 +87,11 @@ public abstract class WidgetScreen extends Screen {
         MeteorClient.EVENT_BUS.subscribe(this);
 
         closed = false;
+    }
+
+    public void onClosed(Runnable action) {
+        if (onClosed == null) onClosed = new ArrayList<>(2);
+        onClosed.add(action);
     }
 
     @Override
@@ -243,6 +252,11 @@ public abstract class WidgetScreen extends Screen {
 
             MeteorClient.EVENT_BUS.unsubscribe(this);
             GuiKeyEvents.canUseKeys = true;
+
+            if (onClosed != null) {
+                for (Runnable action : onClosed) action.run();
+            }
+
             if (onClose) mc.openScreen(parent);
         }
     }

@@ -165,7 +165,12 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
         WItem item = list.add(theme.item(setting.get().asItem().getDefaultStack())).widget();
 
         WButton select = list.add(theme.button("Select")).widget();
-        select.action = () -> mc.openScreen(new BlockSettingScreen(theme, setting));
+        select.action = () -> {
+            BlockSettingScreen screen = new BlockSettingScreen(theme, setting);
+            screen.onClosed(() -> item.set(setting.get().asItem().getDefaultStack()));
+
+            mc.openScreen(screen);
+        };
 
         reset(table, setting, () -> item.set(setting.get().asItem().getDefaultStack()));
     }
