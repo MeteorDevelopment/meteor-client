@@ -62,7 +62,7 @@ public class SodiumBlockRendererMixin {
     private void onRenderModel(BlockRenderView world, BlockState state, BlockPos pos, BakedModel model, ModelQuadSinkDelegate builder, boolean cull, long seed, CallbackInfoReturnable<Boolean> cir) {
         Xray xray = Modules.get().get(Xray.class);
 
-        if (xray.isActive() && xray.isBlocked(state.getBlock())) {
+        if (xray.isActive() && xray.isBlocked(state.getBlock(), pos)) {
             cir.setReturnValue(false);
         }
     }

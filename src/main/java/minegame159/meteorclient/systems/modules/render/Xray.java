@@ -10,6 +10,7 @@ import minegame159.meteorclient.events.render.RenderBlockEntityEvent;
 import minegame159.meteorclient.events.world.AmbientOcclusionEvent;
 import minegame159.meteorclient.events.world.ChunkOcclusionEvent;
 import minegame159.meteorclient.settings.BlockListSetting;
+import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.systems.modules.Categories;
@@ -40,6 +41,16 @@ public class Xray extends Module {
             .build()
     );
 
+    private final Setting<Boolean> antixraybypass = sgGeneral.add(new BoolSetting.Builder()
+            .name("Anti-Xray Bypass")
+            .description("Only shows blocks that have at least one face exposed to air, This will only show the ores that are in caves!")
+            .defaultValue(false)
+            .onChanged(blocks2 -> {
+                if (isActive()) mc.worldRenderer.reload();
+            })
+            .build()
+    );
+
     public Xray() {
         super(Categories.Render, "xray", "Only renders specified blocks. Good for mining.");
     }
@@ -60,7 +71,7 @@ public class Xray extends Module {
 
     @EventHandler
     private void onRenderBlockEntity(RenderBlockEntityEvent event) {
-        if (isBlocked(event.blockEntity.getCachedState().getBlock())) event.cancel();
+        if (isBlocked(event.blockEntity.getCachedState().getBlock(), event.blockEntity.getPos())) event.cancel();
     }
 
     @EventHandler
@@ -75,10 +86,10 @@ public class Xray extends Module {
 
     public boolean modifyDrawSide(BlockState state, BlockView view, BlockPos pos, Direction facing, boolean returns) {
         if (returns) {
-            if (isBlocked(state.getBlock())) return false;
+            if (isBlocked(state.getBlock(), pos)) return false;
         }
         else {
-            if (!isBlocked(state.getBlock())) {
+            if (!isBlocked(state.getBlock(), pos)) {
                 BlockPos adjPos = pos.offset(facing);
                 BlockState adjState = view.getBlockState(adjPos);
 
@@ -89,7 +100,25 @@ public class Xray extends Module {
         return returns;
     }
 
-    public boolean isBlocked(Block block) {
-        return !blocks.get().contains(block);
+    // Checks if the given BlockPos has at least one face exposed to air
+    private boolean isExposedToAir(BlockPos pos) {
+        BlockPos.Mutable posStart = new BlockPos.Mutable(pos.getX(), pos.getY(), pos.getZ());
+        return mc.world.getBlockState(posStart.add(1,0,0)).getBlock().is(Blocks.AIR) ||
+                mc.world.getBlockState(posStart.add(-1,0,0)).getBlock().is(Blocks.AIR) ||
+                mc.world.getBlockState(posStart.add(0,0,1)).getBlock().is(Blocks.AIR) ||
+                mc.world.getBlockState(posStart.add(0,1,0)).getBlock().is(Blocks.AIR) ||
+                mc.world.getBlockState(posStart.add(0,-1,0)).getBlock().is(Blocks.AIR) ||
+                mc.world.getBlockState(posStart.add(0,0,-1)).getBlock().is(Blocks.AIR);
+
+    }
+
+    public boolean isBlocked(Block block, BlockPos pos) {
+        if (antixraybypass.get()) {
+            if (isExposedToAir(pos)) {
+                return !blocks.get().contains(block);
+            } else {
+                return true;
+            }
+        } else { return !blocks.get().contains(block); }
     }
 }
