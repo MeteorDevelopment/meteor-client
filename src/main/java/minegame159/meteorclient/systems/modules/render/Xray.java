@@ -41,7 +41,7 @@ public class Xray extends Module {
             .build()
     );
 
-    private final Setting<Boolean> antixraybypass = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> antiXrayBypass = sgGeneral.add(new BoolSetting.Builder()
             .name("Anti-Xray Bypass")
             .description("Only shows blocks that have at least one face exposed to air, This will only show the ores that are in caves!")
             .defaultValue(false)
@@ -113,7 +113,7 @@ public class Xray extends Module {
     }
 
     public boolean isBlocked(Block block, BlockPos pos) {
-        if (antixraybypass.get()) {
+        if (antiXrayBypass.get()) {
             if (isExposedToAir(pos)) {
                 return !blocks.get().contains(block);
             } else {
