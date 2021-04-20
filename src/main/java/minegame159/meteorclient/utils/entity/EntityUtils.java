@@ -112,8 +112,8 @@ public class EntityUtils {
         double e1yaw = Math.abs(Rotations.getYaw(e1) - mc.player.yaw);
         double e2yaw = Math.abs(Rotations.getYaw(e2) - mc.player.yaw);
 
-        double e1pitch = Math.abs(Rotations.getPitch(e1));
-        double e2pitch = Math.abs(Rotations.getPitch(e2));
+        double e1pitch = Math.abs(Rotations.getPitch(e1) - mc.player.pitch);
+        double e2pitch = Math.abs(Rotations.getPitch(e2) - mc.player.pitch);
 
         return Double.compare(Math.sqrt(e1yaw * e1yaw + e1pitch * e1pitch), Math.sqrt(e2yaw * e2yaw + e2pitch * e2pitch));
     }
