@@ -26,7 +26,7 @@ public class DisconnectedScreenMixin extends ScreenMixin {
     private int reasonHeight;
 
     private ButtonWidget reconnectBtn;
-    private boolean timerActive = true;
+    private boolean timerActive = false;
     private double time = Modules.get().get(AutoReconnect.class).time.get() * 20;
 
     @Inject(method = "init", at = @At("TAIL"))
