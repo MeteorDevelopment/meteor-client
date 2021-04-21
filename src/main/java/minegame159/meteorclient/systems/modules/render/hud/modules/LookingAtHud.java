@@ -12,6 +12,7 @@ import minegame159.meteorclient.systems.modules.render.hud.HUD;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
 public class LookingAtHud extends DoubleTextHudElement {
@@ -41,9 +42,9 @@ public class LookingAtHud extends DoubleTextHudElement {
 
         if (mc.crosshairTarget.getType() == HitResult.Type.BLOCK) {
             String name = mc.world.getBlockState(((BlockHitResult) mc.crosshairTarget).getBlockPos()).getBlock().getName().getString();
-            Vec3d pos = mc.crosshairTarget.getPos();
+            BlockPos pos = ((BlockHitResult) mc.crosshairTarget).getBlockPos();
 
-            return blockPosition.get() ? String.format("%s [%d, %d, %d]", name, (int) pos.x, (int) pos.y, (int) pos.z) : name;
+            return blockPosition.get() ? String.format("%s [%d, %d, %d]", name, pos.getX(), pos.getY(), pos.getZ()) : name;
         }
         else if (mc.crosshairTarget.getType() == HitResult.Type.ENTITY) {
             String name = ((EntityHitResult) mc.crosshairTarget).getEntity().getDisplayName().getString();
