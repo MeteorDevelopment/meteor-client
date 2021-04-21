@@ -19,7 +19,6 @@ import minegame159.meteorclient.utils.misc.Vec3;
 import minegame159.meteorclient.utils.misc.input.KeyAction;
 import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.Rotations;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
@@ -214,17 +213,17 @@ public class Freecam extends Module {
     private void onKey(KeyEvent event) {
         boolean cancel = true;
 
-        if (KeyBindingHelper.getBoundKeyOf(mc.options.keyForward).getCode() == event.key) {
+        if (mc.options.keyForward.matchesKey(event.key, 0)) {
             forward = event.action != KeyAction.Release;
-        } else if (KeyBindingHelper.getBoundKeyOf(mc.options.keyBack).getCode() == event.key) {
+        } else if (mc.options.keyBack.matchesKey(event.key, 0)) {
             backward = event.action != KeyAction.Release;
-        } else if (KeyBindingHelper.getBoundKeyOf(mc.options.keyRight).getCode() == event.key) {
+        } else if (mc.options.keyRight.matchesKey(event.key, 0)) {
             right = event.action != KeyAction.Release;
-        } else if (KeyBindingHelper.getBoundKeyOf(mc.options.keyLeft).getCode() == event.key) {
+        } else if (mc.options.keyLeft.matchesKey(event.key, 0)) {
             left = event.action != KeyAction.Release;
-        } else if (KeyBindingHelper.getBoundKeyOf(mc.options.keyJump).getCode() == event.key) {
+        } else if (mc.options.keyJump.matchesKey(event.key, 0)) {
             up = event.action != KeyAction.Release;
-        } else if (KeyBindingHelper.getBoundKeyOf(mc.options.keySneak).getCode() == event.key) {
+        } else if (mc.options.keySneak.matchesKey(event.key, 0)) {
             down = event.action != KeyAction.Release;
         } else {
             cancel = false;

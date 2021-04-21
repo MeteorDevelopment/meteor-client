@@ -12,7 +12,9 @@ import minegame159.meteorclient.gui.widgets.containers.WTable;
 import minegame159.meteorclient.gui.widgets.input.WTextBox;
 import minegame159.meteorclient.gui.widgets.pressable.WButton;
 import minegame159.meteorclient.settings.BlockSetting;
+import minegame159.meteorclient.utils.misc.Names;
 import net.minecraft.block.Block;
+import net.minecraft.block.Blocks;
 import net.minecraft.util.registry.Registry;
 import org.apache.commons.lang3.StringUtils;
 
@@ -45,7 +47,16 @@ public class BlockSettingScreen extends WindowScreen {
 
     private void initWidgets() {
         for (Block block : Registry.BLOCK) {
-            WItemWithLabel item = theme.itemWithLabel(block.asItem().getDefaultStack());
+            if (setting.filter != null) {
+                if (!setting.filter.test(block)) continue;
+            }
+            else {
+                if (block == Blocks.AIR) continue;
+            }
+
+            if (skipValue(block)) continue;
+
+            WItemWithLabel item = theme.itemWithLabel(block.asItem().getDefaultStack(), Names.get(block));
             if (!filterText.isEmpty()) {
                 if (!StringUtils.containsIgnoreCase(item.getLabelText(), filterText)) continue;
             }
@@ -59,5 +70,9 @@ public class BlockSettingScreen extends WindowScreen {
 
             table.row();
         }
+    }
+
+    protected boolean skipValue(Block value) {
+        return Registry.BLOCK.getId(value).getPath().endsWith("_wall_banner");
     }
 }

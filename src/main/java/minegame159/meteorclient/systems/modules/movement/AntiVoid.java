@@ -40,7 +40,9 @@ public class AntiVoid extends Module {
 
     @Override
     public void onDeactivate() {
-        if (!wasFlightEnabled && mode.get() == Mode.Flight && Utils.canUpdate()) Modules.get().get(Flight.class).toggle();
+        if (!wasFlightEnabled && mode.get() == Mode.Flight && Utils.canUpdate() && Modules.get().isActive(Flight.class)) {
+            Modules.get().get(Flight.class).toggle();
+        }
     }
 
     @EventHandler
