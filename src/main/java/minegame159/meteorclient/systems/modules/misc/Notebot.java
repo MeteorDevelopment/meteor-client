@@ -28,11 +28,15 @@ import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.player.Rotations;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import minegame159.meteorclient.utils.world.BlockUtils;
+
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.Material;
 import net.minecraft.block.NoteBlock;
+import net.minecraft.block.enums.Instrument;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
+import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -55,6 +59,23 @@ import java.util.List;
 
 public class Notebot extends Module {
 
+    public enum InstrumentType {
+        Any,
+        Harp,
+        Bass,
+        Bells,
+        Flute,
+        Chimes,
+        Guitar,
+        Xylophone,
+        Iron_Xylophone,
+        Cow_Bell,
+        Didgeridoo,
+        Bit,
+        Banjo,
+        Pling
+    }
+
     private enum Stage {
         None,
         SetUp,
@@ -73,6 +94,13 @@ public class Notebot extends Module {
             .min(0)
             .sliderMax(20)
             .build()
+    );
+
+    private final Setting<InstrumentType> instrument = sgGeneral.add(new EnumSetting.Builder<InstrumentType>()
+        .name("instrument")
+        .description("Select which instrument will be played")
+        .defaultValue(InstrumentType.Any)
+        .build()
     );
 
     private final Setting<Boolean> moveNotes = sgGeneral.add(new BoolSetting.Builder()
@@ -432,6 +460,7 @@ public class Notebot extends Module {
                     float reach = mc.interactionManager.getReachDistance();
                     reach = reach*reach; //^2
                     if (pos.getSquaredDistance(mc.player.getPos(),false) > reach) continue;
+                    if (!isValidScanSpot(pos) || !isValidInstrument(pos)) continue;
                     scannedNoteblocks.add(pos);
                 }
             }
@@ -462,9 +491,40 @@ public class Notebot extends Module {
                 Stop();
             }
             if (song.containsKey(currentNote)) {
-                mc.player.playSound(SoundEvents.BLOCK_NOTE_BLOCK_HARP, 2f, (float) Math.pow(2.0D, (song.get(currentNote) - 12) / 12.0D));
+                mc.player.playSound(getInstrumentSound(), 2f, (float) Math.pow(2.0D, (song.get(currentNote) - 12) / 12.0D));
             }
             currentNote++;
+        }
+    }
+
+    private SoundEvent getInstrumentSound() {
+        switch (instrument.get()) {
+            case Bass:
+                return SoundEvents.BLOCK_NOTE_BLOCK_BASS;
+            case Bells:
+                return SoundEvents.BLOCK_NOTE_BLOCK_BELL;
+            case Flute:
+                return SoundEvents.BLOCK_NOTE_BLOCK_FLUTE;
+            case Chimes:
+                return SoundEvents.BLOCK_NOTE_BLOCK_CHIME;
+            case Guitar:
+                return SoundEvents.BLOCK_NOTE_BLOCK_GUITAR;
+            case Xylophone:
+                return SoundEvents.BLOCK_NOTE_BLOCK_XYLOPHONE;
+            case Iron_Xylophone:
+                return SoundEvents.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE;
+            case Cow_Bell:
+                return SoundEvents.BLOCK_NOTE_BLOCK_COW_BELL;
+            case Didgeridoo:
+                return SoundEvents.BLOCK_NOTE_BLOCK_DIDGERIDOO;
+            case Bit:
+                return SoundEvents.BLOCK_NOTE_BLOCK_BIT;
+            case Banjo:
+                return SoundEvents.BLOCK_NOTE_BLOCK_BANJO;
+            case Pling:
+                return SoundEvents.BLOCK_NOTE_BLOCK_PLING;
+            default:
+                return SoundEvents.BLOCK_NOTE_BLOCK_HARP;
         }
     }
 
@@ -503,7 +563,7 @@ public class Notebot extends Module {
             Disable();
             return;
         }
-        if (mc.world.getBlockState(pos.down()).getBlock() == Blocks.NOTE_BLOCK) {
+        if (!isValidEmptySpot(pos) || !isValidInstrument(pos)) {
             offset++;
             return;
         }
@@ -581,6 +641,103 @@ public class Notebot extends Module {
         } catch (NullPointerException e) {
             e.printStackTrace();
         }
+    }
+
+    private boolean isValidEmptySpot(BlockPos pos) {
+        if (!mc.world.getBlockState(pos).isAir()) return false;
+        if (!mc.world.getBlockState(pos.up()).isAir()) return false;
+        if (mc.world.getBlockState(pos.down()).getBlock() == Blocks.NOTE_BLOCK) return false;
+        return true;
+    }
+
+    private boolean isValidScanSpot(BlockPos pos) {
+        if (mc.world.getBlockState(pos).getBlock() != Blocks.NOTE_BLOCK) return false;
+        if (!mc.world.getBlockState(pos.up()).isAir()) return false;
+        return true;
+    }
+
+    private boolean isValidInstrument(BlockPos pos) {
+        switch (instrument.get()) {
+            case Any:
+                return true;
+
+            case Harp: {
+                BlockState state = mc.world.getBlockState(pos);
+                if (state.getBlock() == Blocks.NOTE_BLOCK) {
+                    if (state.get(NoteBlock.INSTRUMENT) == Instrument.HARP) return true;
+                    else return false;
+                } else {
+                    BlockState block = mc.world.getBlockState(pos.down());
+                    if (block.getMaterial() == Material.WOOD) return false;
+                    else if (block.getMaterial() == Material.AGGREGATE) return false;
+                    else if (block.getMaterial() == Material.GLASS) return false;
+                    else if (block.getMaterial() == Material.STONE) return false;
+                    else if (block.getBlock() == Blocks.GOLD_BLOCK) return false;
+                    else if (block.getBlock() == Blocks.CLAY) return false;
+                    else if (block.getBlock() == Blocks.PACKED_ICE) return false;
+                    else if (block.getMaterial() == Material.WOOL) return false;
+                    else if (block.getBlock() == Blocks.BONE_BLOCK) return false;
+                    else if (block.getBlock() == Blocks.IRON_BLOCK) return false;
+                    else if (block.getBlock() == Blocks.SOUL_SAND) return false;
+                    else if (block.getBlock() == Blocks.PUMPKIN) return false;
+                    else if (block.getBlock() == Blocks.EMERALD_BLOCK) return false;
+                    else if (block.getBlock() == Blocks.HAY_BLOCK) return false;
+                    else if (block.getBlock() == Blocks.GLOWSTONE) return false;
+                    else return true;
+                }
+            }
+            case Banjo: {
+                BlockState block = mc.world.getBlockState(pos.down());
+                return (block.getBlock() == Blocks.HAY_BLOCK);
+            }
+            case Bass: {
+                BlockState block = mc.world.getBlockState(pos.down());
+                return (block.getMaterial() == Material.WOOD);
+            }
+            case Bells: {
+                BlockState block = mc.world.getBlockState(pos.down());
+                return (block.getBlock() == Blocks.GOLD_BLOCK);
+            }
+            case Bit: {
+                BlockState block = mc.world.getBlockState(pos.down());
+                return (block.getBlock() == Blocks.EMERALD_BLOCK);
+            }
+            case Chimes: {
+                BlockState block = mc.world.getBlockState(pos.down());
+                return (block.getBlock() == Blocks.PACKED_ICE);
+            }
+            case Cow_Bell: {
+                BlockState block = mc.world.getBlockState(pos.down());
+                return (block.getBlock() == Blocks.SOUL_SAND);
+            }
+            case Didgeridoo: {
+                BlockState block = mc.world.getBlockState(pos.down());
+                return (block.getBlock() == Blocks.PUMPKIN);
+            }
+            case Flute: {
+                BlockState block = mc.world.getBlockState(pos.down());
+                return (block.getBlock() == Blocks.CLAY);
+            }
+            case Guitar: {
+                BlockState block = mc.world.getBlockState(pos.down());
+                return (block.getMaterial() == Material.WOOL);
+            }
+            case Iron_Xylophone: {
+                BlockState block = mc.world.getBlockState(pos.down());
+                return (block.getBlock() == Blocks.IRON_BLOCK);
+            }
+            case Pling: {
+                BlockState block = mc.world.getBlockState(pos.down());
+                return (block.getBlock() == Blocks.GLOWSTONE);
+            }
+            case Xylophone: {
+                BlockState block = mc.world.getBlockState(pos.down());
+                return (block.getBlock() == Blocks.BONE_BLOCK);
+            }
+            default:
+                return false;
+        }
+
     }
 
     // Stolen from crystal aura :)
