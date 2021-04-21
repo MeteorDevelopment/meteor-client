@@ -664,8 +664,7 @@ public class Notebot extends Module {
             case Harp: {
                 BlockState state = mc.world.getBlockState(pos);
                 if (state.getBlock() == Blocks.NOTE_BLOCK) {
-                    if (state.get(NoteBlock.INSTRUMENT) == Instrument.HARP) return true;
-                    else return false;
+                    return (state.get(NoteBlock.INSTRUMENT) == Instrument.HARP);
                 } else {
                     BlockState block = mc.world.getBlockState(pos.down());
                     if (block.getMaterial() == Material.WOOD) return false;
