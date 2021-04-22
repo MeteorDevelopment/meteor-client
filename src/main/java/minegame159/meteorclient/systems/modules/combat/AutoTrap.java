@@ -219,7 +219,7 @@ public class AutoTrap extends Module {
                 break;
             case Always:
                 for (BlockPos pos : placePositions) {
-                    if (pos == placePositions.get(placePositions.size() - 1)) {
+                    if (pos == placePositions.get(placePositions.size() - 1) && renderPlace.get()) {
                         Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, pos, placeSideColor.get(), placeLineColor.get(), shapeMode.get(), 0);
                     } else {
                         Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, pos, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
