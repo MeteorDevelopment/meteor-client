@@ -5,23 +5,22 @@
 
 package minegame159.meteorclient.systems.modules.render.hud.modules;
 
-import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.settings.DoubleSetting;
+import minegame159.meteorclient.settings.EnumSetting;
+import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.systems.modules.render.hud.HUD;
 import minegame159.meteorclient.systems.modules.render.hud.HudRenderer;
-import minegame159.meteorclient.utils.render.color.SettingColor;
+import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.util.math.MathHelper;
 
 public class CompassHud extends HudElement {
-    public enum Mode {
-        Axis,
-        Pole
-    }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<Mode> mod = sgGeneral.add(new EnumSetting.Builder<CompassHud.Mode>()
-            .name("mode")
-            .description("The mode of the compass.")
+    private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<CompassHud.Mode>()
+            .name("type")
+            .description("Which type of axis to show.")
             .defaultValue(CompassHud.Mode.Pole)
             .build()
     );
@@ -29,62 +28,58 @@ public class CompassHud extends HudElement {
     private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
             .name("scale")
             .description("The scale of compass.")
-            .defaultValue(1)
+            .defaultValue(2.5)
             .sliderMin(1)
             .sliderMax(5)
             .build()
     );
 
-    private final Setting<SettingColor> northColor = sgGeneral.add(new ColorSetting.Builder()
-            .name("north-color")
-            .description("The color of north axis.")
-            .defaultValue(new SettingColor(225, 45, 45))
-            .build()
-    );
-
-    private final Setting<SettingColor> otherColor = sgGeneral.add(new ColorSetting.Builder()
-            .name("other-color")
-            .description("The color of other axis.")
-            .defaultValue(new SettingColor(225, 225, 255))
-            .build()
-    );
+    private final Color NORTH = new Color(225, 45, 45);
+    private double yaw, pitch;
 
     public CompassHud(HUD hud) {
-        super(hud, "compass", "Displays your rotation as a 3D compass.");
+        super(hud, "compass", "Displays a compass.");
     }
 
     @Override
     public void update(HudRenderer renderer) {
+        if (!isInEditor()) pitch = mc.player.pitch;
+        else pitch = 90;
+
+        pitch = MathHelper.clamp(pitch + 30, -90, 90);
+        pitch = Math.toRadians(pitch);
+
+        if (!isInEditor()) yaw = mc.player.yaw;
+        else yaw = 180;
+
+        yaw = MathHelper.wrapDegrees(yaw);
+        yaw = Math.toRadians(yaw);
+
         box.setSize(100 *  scale.get(), 100 *  scale.get());
     }
 
     @Override
     public void render(HudRenderer renderer) {
-        double x = box.getX();
-        double y = box.getY();
+        double x = box.getX() + (box.width / 2);
+        double y = box.getY() + (box.height / 2);
 
         for (Direction dir : Direction.values()) {
-            double pos = getPosOnCompass(dir);
-            renderer.text(mod.get() == Mode.Axis ? dir.getAlternate() : dir.name(), (x + (box.width / 2.0)) + getX(pos), (y + (box.height / 2.0)) + getY(pos), (dir == Direction.N) ? northColor.get() : otherColor.get());
+            String axis = mode.get() == Mode.Axis ? dir.getAlternate() : dir.name();
+
+            renderer.text(axis, (x + getX(dir)) - (renderer.textWidth(axis) / 2), (y + getY(dir)) - (renderer.textHeight() / 2), dir == Direction.N ? NORTH : hud.primaryColor.get());
         }
     }
 
-    private double getX(double rad) {
-        return Math.sin(rad) * (scale.get() * 40);
+    private double getX(Direction dir) {
+        return Math.sin(getPosOnCompass(dir)) * scale.get() * 40;
     }
 
-    private double getY(double rad) {
-        double pitch = 0;
-        if (!isInEditor()) pitch = mc.player.pitch;
-
-        return Math.cos(rad) * Math.sin(Math.toRadians(MathHelper.clamp(pitch + 30.0f, -90.0f, 90.0f))) * (scale.get() * 40);
+    private double getY(Direction dir) {
+        return Math.cos(getPosOnCompass(dir)) * Math.sin(pitch) * scale.get() * 40;
     }
 
     private double getPosOnCompass(Direction dir) {
-        double yaw = 0;
-        if (!isInEditor()) yaw = mc.player.yaw;
-
-        return Math.toRadians(MathHelper.wrapDegrees(yaw)) + dir.ordinal() * 1.5707963267948966;
+        return yaw + dir.ordinal() * Math.PI / 2;
     }
 
     private enum Direction {
@@ -103,4 +98,9 @@ public class CompassHud extends HudElement {
             return alternate;
         }
     }
+
+    public enum Mode {
+        Axis, Pole
+    }
+
 }
