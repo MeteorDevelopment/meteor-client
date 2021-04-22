@@ -6,10 +6,15 @@
 package minegame159.meteorclient.systems.modules.combat;
 
 import meteordevelopment.orbit.EventHandler;
+import meteordevelopment.orbit.EventPriority;
+import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.events.world.TickEvent;
+import minegame159.meteorclient.rendering.Renderer;
+import minegame159.meteorclient.rendering.ShapeMode;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
+import minegame159.meteorclient.utils.render.color.SettingColor;
 import minegame159.meteorclient.utils.world.BlockIterator;
 import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.block.Block;
@@ -29,6 +34,7 @@ public class HoleFiller extends Module {
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgRender = settings.createGroup("Render");
 
     private final Setting<Integer> horizontalRadius = sgGeneral.add(new IntSetting.Builder()
             .name("horizontal-radius")
@@ -68,6 +74,36 @@ public class HoleFiller extends Module {
             .name("rotate")
             .description("Automatically rotates towards the holes being filled.")
             .defaultValue(true)
+            .build()
+    );
+
+    // Render
+
+    private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
+            .name("render")
+            .description("Renders a block overlay where the obsidian will be placed.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
+            .name("shape-mode")
+            .description("How the shapes are rendered.")
+            .defaultValue(ShapeMode.Both)
+            .build()
+    );
+
+    private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()
+            .name("side-color")
+            .description("The color of the sides of the blocks being rendered.")
+            .defaultValue(new SettingColor(204, 0, 0, 45))
+            .build()
+    );
+
+    private final Setting<SettingColor> lineColor = sgRender.add(new ColorSetting.Builder()
+            .name("line-color")
+            .description("The color of the lines of the blocks being rendered.")
+            .defaultValue(new SettingColor(204, 0, 0, 255))
             .build()
     );
 
@@ -134,6 +170,12 @@ public class HoleFiller extends Module {
         }
 
         return -1;
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
+    private void onRender(RenderEvent event) {
+        if (!render.get() || blockPos == null || blockPos.getY() == -1 || mc.world.getBlockState(blockPos).isAir()) return;
+        Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, blockPos, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
     }
 
     private BlockPos.Mutable add(int x, int y, int z) {
