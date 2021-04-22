@@ -15,6 +15,10 @@ public class WatermarkHud extends DoubleTextHudElement {
 
     @Override
     protected String getRight() {
-        return Config.get().version.getOriginalString();
+        if (Config.get().devBuild.isEmpty()) {
+            return Config.get().version.getOriginalString();
+        }
+
+        return Config.get().version.getOriginalString() + " " + Config.get().devBuild;
     }
 }

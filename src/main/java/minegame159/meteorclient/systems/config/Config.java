@@ -9,11 +9,12 @@ import com.g00fy2.versioncompare.Version;
 import minegame159.meteorclient.systems.System;
 import minegame159.meteorclient.systems.Systems;
 import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.metadata.ModMetadata;
 import net.minecraft.nbt.CompoundTag;
 
 public class Config extends System<Config> {
-    public final Version version = new Version("0.4.2");
-    public String devBuild;
+    public final Version version;
+    public final String devBuild;
     private String prefix = ".";
 
     public boolean customFont = true;
@@ -34,7 +35,10 @@ public class Config extends System<Config> {
     public Config() {
         super("config");
 
-        devBuild = FabricLoader.getInstance().getModContainer("meteor-client").get().getMetadata().getCustomValue("meteor-client:devbuild").getAsString();
+        ModMetadata metadata = FabricLoader.getInstance().getModContainer("meteor-client").get().getMetadata();
+
+        version = new Version(metadata.getVersion().getFriendlyString());
+        devBuild = metadata.getCustomValue("meteor-client:devbuild").getAsString();
     }
 
     public static Config get() {
