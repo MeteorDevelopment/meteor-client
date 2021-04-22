@@ -26,21 +26,21 @@ public class NoSlow extends Module {
 
     private final Setting<Boolean> web = sgGeneral.add(new BoolSetting.Builder()
             .name("web")
-            .description("Whether or not cobwebs will slow you.")
+            .description("Whether or not cobwebs will not slow you down.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> soulSand = sgGeneral.add(new BoolSetting.Builder()
             .name("soul-sand")
-            .description("Whether or not Soul Sand will slow you.")
+            .description("Whether or not Soul Sand will not slow you down.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> slimeBlock = sgGeneral.add(new BoolSetting.Builder()
             .name("slime-block")
-            .description("Whether or not slime blocks will slow you.")
+            .description("Whether or not slime blocks will not slow you down.")
             .defaultValue(true)
             .build()
     );
@@ -48,6 +48,13 @@ public class NoSlow extends Module {
     private final Setting<Boolean> airStrict = sgGeneral.add(new BoolSetting.Builder()
             .name("air-strict")
             .description("Will attempt to bypass anti-cheats like 2b2t's. Only works while in air.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> sneaking = sgGeneral.add(new BoolSetting.Builder()
+            .name("sneaking")
+            .description("Whether or not sneaking will not slow you down.")
             .defaultValue(false)
             .build()
     );
@@ -94,5 +101,9 @@ public class NoSlow extends Module {
 
     public boolean slimeBlock() {
         return isActive() && slimeBlock.get();
+    }
+
+    public boolean sneaking() {
+        return isActive() && sneaking.get();
     }
 }

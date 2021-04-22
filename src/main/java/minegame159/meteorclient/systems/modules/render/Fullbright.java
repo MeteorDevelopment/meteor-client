@@ -51,7 +51,7 @@ public class Fullbright extends Module {
                 prevGamma = mc.options.gamma;
             }
             else if (timesEnabled == 0 && lastTimesEnabled > 0) {
-                mc.options.gamma = prevGamma;
+                mc.options.gamma = prevGamma == 16 ? 1 : prevGamma;
             }
 
             if (timesEnabled > 0) {

@@ -49,6 +49,7 @@
     "CommandSuggestorMixin",
     "CrashReportMixin",
     "CreativeInventoryScreenAccessor",
+    "CrossbowItemAccessor",
     "CustomPayloadC2SPacketAccessor",
     "DefaultSkinHelperMixin",
     "DimensionTypeAccessor",
