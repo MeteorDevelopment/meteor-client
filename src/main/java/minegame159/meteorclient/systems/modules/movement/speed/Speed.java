@@ -138,6 +138,8 @@ public class Speed extends Module {
 
     public Speed() {
         super(Categories.Movement, "speed", "Modifies your movement speed when moving on the ground.");
+
+        onSpeedModeChanged(speedMode.get());
     }
 
     @Override
