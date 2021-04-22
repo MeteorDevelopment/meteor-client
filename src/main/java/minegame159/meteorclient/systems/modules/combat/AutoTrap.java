@@ -136,6 +136,27 @@ public class AutoTrap extends Module {
             .build()
     );
 
+    private final Setting<Boolean> renderPlace = sgRender.add(new BoolSetting.Builder()
+            .name("render-placed")
+            .description("Renders a block overlay over the blocks that were just placed. Requires Render Mode set to \"Always\".")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<SettingColor> placeSideColor = sgRender.add(new ColorSetting.Builder()
+            .name("place-side-color")
+            .description("The color of the sides of the blocks placed being rendered.")
+            .defaultValue(new SettingColor(255, 255, 255, 10))
+            .build()
+    );
+
+    private final Setting<SettingColor> placeLineColor = sgRender.add(new ColorSetting.Builder()
+            .name("place-line-color")
+            .description("The color of the lines of the blocks placed being rendered.")
+            .defaultValue(new SettingColor(255, 255, 255, 255))
+            .build()
+    );
+
     private PlayerEntity target;
     private final List<BlockPos> placePositions = new ArrayList<>();
     private boolean placed;
@@ -197,7 +218,13 @@ public class AutoTrap extends Module {
                 Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, placePositions.get(placePositions.size() - 1), sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                 break;
             case Always:
-                for (BlockPos pos : placePositions) Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, pos, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                for (BlockPos pos : placePositions) {
+                    if (pos == placePositions.get(placePositions.size() - 1)) {
+                        Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, pos, placeSideColor.get(), placeLineColor.get(), shapeMode.get(), 0);
+                    } else {
+                        Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, pos, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                    }
+                }
                 break;
         }
     }
