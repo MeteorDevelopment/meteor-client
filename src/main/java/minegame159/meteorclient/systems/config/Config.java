@@ -37,7 +37,10 @@ public class Config extends System<Config> {
 
         ModMetadata metadata = FabricLoader.getInstance().getModContainer("meteor-client").get().getMetadata();
 
-        version = new Version(metadata.getVersion().getFriendlyString());
+        String versionString = metadata.getVersion().getFriendlyString();
+        if (versionString.contains("-")) versionString = versionString.split("-")[0];
+
+        version = new Version(versionString);
         devBuild = metadata.getCustomValue("meteor-client:devbuild").getAsString();
     }
 
