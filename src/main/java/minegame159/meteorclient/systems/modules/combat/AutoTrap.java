@@ -43,6 +43,11 @@ public class AutoTrap extends Module {
         None
     }
 
+    public enum RenderMode {
+        Always,
+        Placing
+    }
+
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgRender = settings.createGroup("Render");
 
@@ -100,6 +105,13 @@ public class AutoTrap extends Module {
             .name("render")
             .description("Renders a block overlay where the obsidian will be placed.")
             .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<RenderMode> renderMode = sgRender.add(new EnumSetting.Builder<RenderMode>()
+            .name("render-mode")
+            .defaultValue(RenderMode.Always)
+            .description("When to render the block overlay.")
             .build()
     );
 
@@ -180,7 +192,14 @@ public class AutoTrap extends Module {
     @EventHandler
     private void onRender(RenderEvent event) {
         if (!render.get() || placePositions.isEmpty()) return;
-        for (BlockPos pos : placePositions) Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, pos, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+        switch (renderMode.get()) {
+            case Placing:
+                Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, placePositions.get(placePositions.size() - 1), sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                break;
+            case Always:
+                for (BlockPos pos : placePositions) Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, pos, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                break;
+        }
     }
 
     private void findPlacePos(PlayerEntity target) {

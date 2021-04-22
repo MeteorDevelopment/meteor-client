@@ -139,7 +139,7 @@ public class KillAura extends Module {
 
     private final Setting<Boolean> targetMultiple = sgGeneral.add(new BoolSetting.Builder()
             .name("target-multiple")
-            .description("Target multiple entities at once")
+            .description("Targets multiple entities at once.")
             .defaultValue(false)
             .build()
     );
