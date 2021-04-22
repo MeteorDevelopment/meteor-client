@@ -19,6 +19,7 @@ import minegame159.meteorclient.utils.misc.Vec3;
 import minegame159.meteorclient.utils.misc.input.KeyAction;
 import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.Rotations;
+import net.minecraft.client.options.Perspective;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
@@ -81,6 +82,8 @@ public class Freecam extends Module {
     public final Vec3 pos = new Vec3();
     public final Vec3 prevPos = new Vec3();
 
+    private Perspective perspective;
+
     public float yaw, pitch;
     public float prevYaw, prevPitch;
 
@@ -94,6 +97,8 @@ public class Freecam extends Module {
     public void onActivate() {
         yaw = mc.player.yaw;
         pitch = mc.player.pitch;
+
+        perspective = mc.options.getPerspective();
 
         pos.set(mc.gameRenderer.getCamera().getPos());
         prevPos.set(mc.gameRenderer.getCamera().getPos());
@@ -115,6 +120,7 @@ public class Freecam extends Module {
     @Override
     public void onDeactivate() {
         if (reloadChunks.get()) mc.worldRenderer.reload();
+        mc.options.setPerspective(perspective);
     }
 
     @EventHandler
@@ -138,6 +144,7 @@ public class Freecam extends Module {
     @EventHandler
     private void onTick(TickEvent.Post event) {
         if (mc.cameraEntity.isInsideWall()) mc.getCameraEntity().noClip = true;
+        if (!perspective.isFirstPerson()) mc.options.setPerspective(Perspective.FIRST_PERSON);
 
         if (mc.currentScreen != null) return;
 

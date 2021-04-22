@@ -149,7 +149,7 @@ public class KillAura extends Module {
     private final Setting<RotationMode> rotationMode = sgRotations.add(new EnumSetting.Builder<RotationMode>()
             .name("rotation-mode")
             .description("Determines when you should rotate towards the target.")
-            .defaultValue(RotationMode.OnHit)
+            .defaultValue(RotationMode.Always)
             .build()
     );
 
@@ -164,7 +164,7 @@ public class KillAura extends Module {
 
     private final Setting<Boolean> smartDelay = sgDelay.add(new BoolSetting.Builder()
             .name("smart-delay")
-            .description("Smart delay.")
+            .description("Uses the vanilla cooldown to attack entities.")
             .defaultValue(true)
             .build()
     );
