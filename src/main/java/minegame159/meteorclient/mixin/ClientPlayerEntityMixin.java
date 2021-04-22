@@ -6,6 +6,7 @@
 package minegame159.meteorclient.mixin;
 
 import baritone.api.BaritoneAPI;
+import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.entity.player.SendMessageEvent;
@@ -19,8 +20,10 @@ import minegame159.meteorclient.systems.modules.player.Portals;
 import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.world.ClientWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -31,7 +34,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ClientPlayerEntity.class)
-public abstract class ClientPlayerEntityMixin {
+public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity {
+    public ClientPlayerEntityMixin(ClientWorld world, GameProfile profile) {
+        super(world, profile);
+    }
+
     @Shadow @Final public ClientPlayNetworkHandler networkHandler;
 
     @Shadow public abstract void sendChatMessage(String string);
@@ -80,6 +87,13 @@ public abstract class ClientPlayerEntityMixin {
     @Inject(method = "isSneaking", at = @At("HEAD"), cancellable = true)
     private void onIsSneaking(CallbackInfoReturnable<Boolean> info) {
         if (Modules.get().isActive(Scaffold.class)) info.setReturnValue(false);
+    }
+
+    @Inject(method = "shouldSlowDown", at = @At("HEAD"), cancellable = true)
+    private void onShouldSlowDown(CallbackInfoReturnable<Boolean> info) {
+        if (Modules.get().get(NoSlow.class).sneaking()) {
+            info.setReturnValue(shouldLeaveSwimmingPose());
+        }
     }
 
     // Rotations
