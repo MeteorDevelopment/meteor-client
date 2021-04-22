@@ -242,9 +242,9 @@ public class HudTab extends Tab {
             if (dragging) {
                 dragging = false;
 
-                if (!dragged && hoveredModule != null) {
-                    if (!selectedElements.isEmpty()) selectedElements.clear();
-                    hoveredModule.toggle();
+                if (!dragged && !selectedElements.isEmpty()) {
+                    selectedElements.forEach(HudElement::toggle);
+                    selectedElements.clear();
                 }
 
                 if (selectedElements.size() <= 1) selectedElements.clear();
