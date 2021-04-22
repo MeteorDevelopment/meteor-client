@@ -76,7 +76,7 @@ public class SBlockData implements ICopyable<SBlockData>, ISerializable<SBlockDa
 
     @Override
     public SBlockData copy() {
-        return new SBlockData(shapeMode, new SettingColor(lineColor), new SettingColor(sideColor), tracer, tracerColor);
+        return new SBlockData(shapeMode, new SettingColor(lineColor), new SettingColor(sideColor), tracer, new SettingColor(tracerColor));
     }
 
     @Override
