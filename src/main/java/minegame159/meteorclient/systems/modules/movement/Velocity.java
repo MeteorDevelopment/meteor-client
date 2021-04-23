@@ -36,6 +36,13 @@ public class Velocity extends Module {
             .build()
     );
 
+    public final Setting<Boolean> noPush = sgDefault.add(new BoolSetting.Builder()
+            .name("no-push")
+            .description("Attempts to stop getting pushed out of blocks.")
+            .defaultValue(true)
+            .build()
+    );
+
     private final Setting<Double> horizontal = sgDefault.add(new DoubleSetting.Builder()
             .name("horizontal-multiplier")
             .description("How much velocity you will take horizontally.")
