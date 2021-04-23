@@ -89,7 +89,6 @@ public class ElytraFlightMode {
         lastForwardPressed = true;
         if (settings.useFireworks.get()) {
             int slot = InvUtils.findItemInHotbar(Items.FIREWORK_ROCKET);
-            int prevSlot = mc.player.inventory.selectedSlot;
 
             if (!mc.player.isFallFlying()) return;
             if (slot == -1 && mc.player.getOffHandStack().getItem() != Items.FIREWORK_ROCKET) return;
@@ -97,10 +96,11 @@ public class ElytraFlightMode {
             if (ticksLeft <= 0) {
                 ticksLeft = settings.autoPilotFireworkDelay.get() * 20;
                 if (slot != -1) {
+                    int prevSlot = mc.player.inventory.selectedSlot;
                     mc.player.inventory.selectedSlot = slot;
                     mc.interactionManager.interactItem(mc.player, mc.world, hand);
                     mc.player.swingHand(hand);
-                    if (settings.autoPilotFireworkGhosthand.get()) mc.player.inventory.selectedSlot = prevSlot;
+                    mc.player.inventory.selectedSlot = prevSlot;
                 } else if (mc.player.getOffHandStack().getItem() == Items.FIREWORK_ROCKET) {
                     mc.interactionManager.interactItem(mc.player, mc.world, hand);
                     mc.player.swingHand(hand);
