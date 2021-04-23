@@ -105,8 +105,6 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
         }
     }
 
-
-
     // Rotations
 
     @Inject(method = "sendMovementPackets", at = @At("HEAD"))
