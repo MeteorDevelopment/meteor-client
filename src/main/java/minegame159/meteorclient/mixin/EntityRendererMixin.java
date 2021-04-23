@@ -14,6 +14,7 @@ import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.FallingBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -38,6 +39,7 @@ public abstract class EntityRendererMixin<T extends Entity> implements IEntityRe
     @Inject(method = "shouldRender", at = @At("HEAD"), cancellable = true)
     private void shouldRender(T entity, Frustum frustum, double x, double y, double z, CallbackInfoReturnable<Boolean> cir) {
         if (Modules.get().get(NoRender.class).noEntity(entity)) cir.cancel();
+        if (Modules.get().get(NoRender.class).noFallingBlocks() && entity instanceof FallingBlockEntity) cir.cancel();
     }
 
     @Override
