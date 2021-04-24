@@ -31,6 +31,7 @@ public class Config extends System<Config> {
     public int rotationHoldTicks = 9;
 
     public boolean windowTitle = false;
+    public String titleText = "Meteor Client {version}";
 
     public Config() {
         super("config");
@@ -57,6 +58,12 @@ public class Config extends System<Config> {
         return prefix;
     }
 
+    public void setTitleText(String titleText) {
+        this.titleText = titleText;
+    }
+
+    public String getTitleText(){return titleText;}
+
     @Override
     public CompoundTag toTag() {
         CompoundTag tag = new CompoundTag();
@@ -72,6 +79,7 @@ public class Config extends System<Config> {
         tag.putBoolean("sendDataToApi", sendDataToApi);
         tag.putBoolean("titleScreenCredits", titleScreenCredits);
         tag.putBoolean("windowTitle", windowTitle);
+        tag.putString("titleText", titleText);
 
         return tag;
     }
@@ -88,6 +96,7 @@ public class Config extends System<Config> {
         sendDataToApi = !tag.contains("sendDataToApi") || tag.getBoolean("sendDataToApi");
         titleScreenCredits = !tag.contains("titleScreenCredits") || tag.getBoolean("titleScreenCredits");
         windowTitle = tag.contains("windowTitle") && tag.getBoolean("windowTitle");
+        titleText = tag.getString("titleText");
 
         return this;
     }
