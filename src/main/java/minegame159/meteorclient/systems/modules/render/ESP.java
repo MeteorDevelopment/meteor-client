@@ -69,7 +69,7 @@ public class ESP extends Module {
 
     public final Setting<Boolean> useNameColor = sgColors.add(new BoolSetting.Builder()
             .name("use-name-color")
-            .description("Uses players displayname color for the ESP color (good for minigames).")
+            .description("Uses players displayname color for the ESP color.")
             .defaultValue(false)
             .build()
     );
