@@ -11,11 +11,9 @@ import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixin.PlayerMoveC2SPacketAccessor;
 import minegame159.meteorclient.mixininterface.IPlayerMoveC2SPacket;
-import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
-import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.entity.EntityUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.player.PlayerUtils;
@@ -92,6 +90,7 @@ public class NoFall extends Module {
     private boolean placedWater;
     private boolean centeredPlayer;
     private int fallHeightBaritone;
+    private double x, z;
 
     public NoFall() {
         super(Categories.Movement, "no-fall", "Prevents you from taking fall damage.");
@@ -167,12 +166,13 @@ public class NoFall extends Module {
                 // Place water
                 int slot = InvUtils.findItemInHotbar(Items.WATER_BUCKET);
 
-                if (anchor.get() && !centeredPlayer)
-                    PlayerUtils.centerPlayer();
-                    centeredPlayer = true;
-
                 if (anchor.get()) {
-                    ((IVec3d) mc.player.getVelocity()).setXZ(0, 0);
+                    if (!centeredPlayer || x != mc.player.getX() || z != mc.player.getZ()) {
+                        PlayerUtils.centerPlayer();
+                        x = mc.player.getX();
+                        z = mc.player.getZ();
+                        centeredPlayer = true;
+                    }
                 }
 
                 if (slot != -1) {
