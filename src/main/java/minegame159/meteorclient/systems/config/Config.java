@@ -6,6 +6,8 @@
 package minegame159.meteorclient.systems.config;
 
 import com.g00fy2.versioncompare.Version;
+import minegame159.meteorclient.gui.tabs.builtin.ConfigTab;
+import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.System;
 import minegame159.meteorclient.systems.Systems;
 import net.fabricmc.loader.api.FabricLoader;
@@ -15,23 +17,20 @@ import net.minecraft.nbt.CompoundTag;
 public class Config extends System<Config> {
     public final Version version;
     public final String devBuild;
-    private String prefix = ".";
+    private String prefix;
 
-    public boolean customFont = true;
+    public boolean customFont;
+    public boolean sendDataToApi;
+    public int rotationHoldTicks;
 
-    public boolean rainbowPrefix = false;
+    public boolean chatCommandsInfo;
+    public boolean deleteChatCommandsInfo;
+    public boolean rainbowPrefix;
     public double rainbowPrefixSpeed, rainbowPrefixSpread;
 
-    public boolean chatCommandsInfo = true;
-    public boolean deleteChatCommandsInfo = true;
-
-    public boolean sendDataToApi = true;
-    public boolean titleScreenCredits = true;
-
-    public int rotationHoldTicks = 9;
-
-    public boolean windowTitle = false;
-    public String titleText = "Meteor Client {version}";
+    public boolean titleScreenCredits;
+    public boolean customWindowTitle;
+    public String customWindowTitleText;
 
     public Config() {
         super("config");
@@ -61,37 +60,59 @@ public class Config extends System<Config> {
     @Override
     public CompoundTag toTag() {
         CompoundTag tag = new CompoundTag();
-
         tag.putString("version", version.getOriginalString());
-        tag.putString("prefix", prefix);
+
         tag.putBoolean("customFont", customFont);
+        tag.putBoolean("sendDataToApi", sendDataToApi);
+        tag.putInt("rotationHoldTicks", rotationHoldTicks);
+
+        tag.putString("prefix", prefix);
+        tag.putBoolean("chatCommandsInfo", chatCommandsInfo);
+        tag.putBoolean("deleteChatCommandsInfo", deleteChatCommandsInfo);
         tag.putBoolean("rainbowPrefix", rainbowPrefix);
         tag.putDouble("rainbowPrefixSpeed", rainbowPrefixSpeed);
         tag.putDouble("rainbowPrefixSpread", rainbowPrefixSpread);
-        tag.putBoolean("chatCommandsInfo", chatCommandsInfo);
-        tag.putBoolean("deleteChatCommandsInfo", deleteChatCommandsInfo);
-        tag.putBoolean("sendDataToApi", sendDataToApi);
+
         tag.putBoolean("titleScreenCredits", titleScreenCredits);
-        tag.putBoolean("windowTitle", windowTitle);
-        tag.putString("titleText", titleText);
+        tag.putBoolean("customWindowTitle", customWindowTitle);
+        tag.putString("customWindowTitleText", customWindowTitleText);
 
         return tag;
     }
 
     @Override
     public Config fromTag(CompoundTag tag) {
-        prefix = tag.getString("prefix");
-        customFont = !tag.contains("customFont") || tag.getBoolean("customFont");
-        rainbowPrefix = tag.contains("rainbowPrefix") && tag.getBoolean("rainbowPrefix");
-        rainbowPrefixSpeed = tag.getDouble("rainbowPrefixSpeed");
-        rainbowPrefixSpread = tag.getDouble("rainbowPrefixSpread");
-        chatCommandsInfo = !tag.contains("chatCommandsInfo") || tag.getBoolean("chatCommandsInfo");
-        deleteChatCommandsInfo = !tag.contains("deleteChatCommandsInfo") || tag.getBoolean("deleteChatCommandsInfo");
-        sendDataToApi = !tag.contains("sendDataToApi") || tag.getBoolean("sendDataToApi");
-        titleScreenCredits = !tag.contains("titleScreenCredits") || tag.getBoolean("titleScreenCredits");
-        windowTitle = tag.contains("windowTitle") && tag.getBoolean("windowTitle");
-        titleText = tag.getString("titleText");
+        customFont = getBoolean(tag, "customFont", ConfigTab.ConfigScreen.customFont);
+        sendDataToApi = getBoolean(tag, "sendDataToApi", ConfigTab.ConfigScreen.sendDataToApi);
+        rotationHoldTicks = getInt(tag, "rotationHoldTicks", ConfigTab.ConfigScreen.rotationHoldTicks);
+
+        prefix = getString(tag, "prefix", ConfigTab.ConfigScreen.prefix);
+        chatCommandsInfo = getBoolean(tag, "chatCommandsInfo", ConfigTab.ConfigScreen.chatCommandsInfo);
+        deleteChatCommandsInfo = getBoolean(tag, "deleteChatCommandsInfo", ConfigTab.ConfigScreen.deleteChatCommandsInfo);
+        rainbowPrefix = getBoolean(tag, "rainbowPrefix", ConfigTab.ConfigScreen.rainbowPrefix);
+        rainbowPrefixSpeed = getDouble(tag, "rainbowPrefixSpeed", ConfigTab.ConfigScreen.rainbowPrefixSpeed);
+        rainbowPrefixSpread = getDouble(tag, "rainbowPrefixSpread", ConfigTab.ConfigScreen.rainbowPrefixSpread);
+
+        titleScreenCredits = getBoolean(tag, "titleScreenCredits", ConfigTab.ConfigScreen.titleScreenCredits);
+        customWindowTitle = getBoolean(tag, "customWindowTitle", ConfigTab.ConfigScreen.customWindowTitle);
+        customWindowTitleText = getString(tag, "customWindowTitleText", ConfigTab.ConfigScreen.customWindowTitleText);
 
         return this;
+    }
+
+    private boolean getBoolean(CompoundTag tag, String key, Setting<Boolean> setting) {
+        return tag.contains(key) ? tag.getBoolean(key) : setting.getDefaultValue();
+    }
+
+    private String getString(CompoundTag tag, String key, Setting<String> setting) {
+        return tag.contains(key) ? tag.getString(key) : setting.getDefaultValue();
+    }
+
+    private double getDouble(CompoundTag tag, String key, Setting<Double> setting) {
+        return tag.contains(key) ? tag.getDouble(key) : setting.getDefaultValue();
+    }
+
+    private int getInt(CompoundTag tag, String key, Setting<Integer> setting) {
+        return tag.contains(key) ? tag.getInt(key) : setting.getDefaultValue();
     }
 }

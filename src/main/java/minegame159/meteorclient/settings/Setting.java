@@ -59,8 +59,13 @@ public abstract class Setting<T> implements IGetter<T>, ISerializable<T> {
         value = defaultValue;
         if (callbacks) changed();
     }
+
     public void reset() {
         reset(true);
+    }
+
+    public T getDefaultValue() {
+        return defaultValue;
     }
 
     public boolean parse(String str) {

@@ -128,7 +128,7 @@ public class Burrow extends Module {
             return;
         }
 
-        if (!PlayerUtils.isInHole() && onlyInHole.get()) {
+        if (!PlayerUtils.isInHole(false) && onlyInHole.get()) {
             ChatUtils.moduleError(this, "Not in a hole, disabling.");
             toggle();
             return;
