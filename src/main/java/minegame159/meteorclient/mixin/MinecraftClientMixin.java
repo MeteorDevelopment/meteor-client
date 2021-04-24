@@ -114,7 +114,7 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
 
     @Inject(method = "getWindowTitle", at = @At("HEAD"), cancellable = true)
     private void getTitle(CallbackInfoReturnable<String> cir) {
-        if (Config.get() != null && Config.get().windowTitle) cir.setReturnValue("Meteor Client " + Config.get().version.getOriginalString());
+        if (Config.get() != null && Config.get().windowTitle) cir.setReturnValue(Config.get().getTitleText().replace("{version}", ((Config.get().version.getOriginalString() == null) ? "" : Config.get().version.getOriginalString())));
     }
 
     // Interface
