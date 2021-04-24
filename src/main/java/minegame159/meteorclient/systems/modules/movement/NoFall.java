@@ -84,7 +84,7 @@ public class NoFall extends Module {
 
     private final Setting<Boolean> anchor = sgGeneral.add(new BoolSetting.Builder()
             .name("anchor")
-            .description("Centers the player and reduces when using bucket mode.")
+            .description("Centers the player and reduces movement when using bucket mode.")
             .defaultValue(true)
             .build()
     );
