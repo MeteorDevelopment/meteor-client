@@ -55,6 +55,10 @@ public class ProxiesScreen extends WindowScreen {
         for (Proxy proxy : Proxies.get()) {
             int index = i;
 
+            // Name
+            WLabel name = table.add(theme.label(proxy.name)).widget();
+            name.color = theme.textColor();
+
             // Enabled
             WCheckbox enabled = table.add(theme.checkbox(proxy.enabled)).widget();
             checkboxes.add(enabled);
@@ -130,6 +134,12 @@ public class ProxiesScreen extends WindowScreen {
             // Optional
             add(theme.horizontalSeparator("Optional")).expandX().widget();
             WTable optional = add(theme.table()).expandX().widget();
+
+            // Name
+            optional.add(theme.label("Proxy Name:"));
+            WTextBox name = optional.add(theme.textBox(proxy.name)).expandX().widget();
+            name.action = () -> proxy.name = name.get();
+            optional.row();
 
             //   Username
             optional.add(theme.label("Username:"));
