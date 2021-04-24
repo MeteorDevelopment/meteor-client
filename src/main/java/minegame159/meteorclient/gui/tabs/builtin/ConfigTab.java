@@ -148,8 +148,8 @@ public class ConfigTab extends Tab {
                     .name("title-text")
                     .description("The text it displays in the window title.")
                     .defaultValue("Meteor Client {version}")
-                    .onChanged(Config.get()::setTitleText)
-                    .onModuleActivated(stringSetting -> stringSetting.set(Config.get().getTitleText()))
+                    .onChanged(titleText -> Config.get().titleText = titleText)
+                    .onModuleActivated(stringSetting -> stringSetting.set(Config.get().titleText))
                     .build()
             );
 

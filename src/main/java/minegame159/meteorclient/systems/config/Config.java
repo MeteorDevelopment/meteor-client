@@ -58,12 +58,6 @@ public class Config extends System<Config> {
         return prefix;
     }
 
-    public void setTitleText(String titleText) {
-        this.titleText = titleText;
-    }
-
-    public String getTitleText(){return titleText;}
-
     @Override
     public CompoundTag toTag() {
         CompoundTag tag = new CompoundTag();
