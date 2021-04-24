@@ -172,7 +172,7 @@ public class NoFall extends Module {
                     centeredPlayer = true;
 
                 if (anchor.get()) {
-                    ((IVec3d) mc.player.getVelocity()).set(0, mc.player.getVelocity().y, 0);
+                    ((IVec3d) mc.player.getVelocity()).setXZ(0, 0);
                 }
 
                 if (slot != -1) {
