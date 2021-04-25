@@ -55,10 +55,6 @@ public class ProxiesScreen extends WindowScreen {
         for (Proxy proxy : Proxies.get()) {
             int index = i;
 
-            // Name
-            WLabel name = table.add(theme.label(proxy.name)).widget();
-            name.color = theme.textColor();
-
             // Enabled
             WCheckbox enabled = table.add(theme.checkbox(proxy.enabled)).widget();
             checkboxes.add(enabled);
@@ -69,6 +65,10 @@ public class ProxiesScreen extends WindowScreen {
                 for (WCheckbox checkbox : checkboxes) checkbox.checked = false;
                 checkboxes.get(index).checked = checked;
             };
+
+            // Name
+            WLabel name = table.add(theme.label(proxy.name)).widget();
+            name.color = theme.textColor();
 
             // Type
             WLabel type = table.add(theme.label("(" + proxy.type + ")")).widget();
@@ -112,6 +112,12 @@ public class ProxiesScreen extends WindowScreen {
             // General
             WTable general = add(theme.table()).expandX().widget();
 
+            //   Name
+            general.add(theme.label("Proxy Name:"));
+            WTextBox name = general.add(theme.textBox(proxy.name)).expandX().widget();
+            name.action = () -> proxy.name = name.get();
+            general.row();
+
             //   Type
             general.add(theme.label("Type:"));
             WDropdown<ProxyType> type = general.add(theme.dropdown(proxy.type)).widget();
@@ -134,12 +140,6 @@ public class ProxiesScreen extends WindowScreen {
             // Optional
             add(theme.horizontalSeparator("Optional")).expandX().widget();
             WTable optional = add(theme.table()).expandX().widget();
-
-            // Name
-            optional.add(theme.label("Proxy Name:"));
-            WTextBox name = optional.add(theme.textBox(proxy.name)).expandX().widget();
-            name.action = () -> proxy.name = name.get();
-            optional.row();
 
             //   Username
             optional.add(theme.label("Username:"));
