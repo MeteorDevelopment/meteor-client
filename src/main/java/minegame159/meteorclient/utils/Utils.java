@@ -191,12 +191,16 @@ public class Utils {
             return folder.getName();
         }
 
-        // Multiplayer
-        String name = mc.isConnectedToRealms() ? "realms" : mc.getCurrentServerEntry().address;
-        if (SystemUtils.IS_OS_WINDOWS) {
-            name = name.replace(":", "_");
+        if (mc.getCurrentServerEntry() != null) {
+            // Multiplayer
+            String name = mc.isConnectedToRealms() ? "realms" : mc.getCurrentServerEntry().address;
+            if (SystemUtils.IS_OS_WINDOWS) {
+                name = name.replace(":", "_");
+            }
+            return name;
         }
-        return name;
+
+        return "";
     }
 
     public static String nameToTitle(String name) {

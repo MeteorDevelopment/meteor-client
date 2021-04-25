@@ -14,9 +14,8 @@ import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.mixininterface.IMinecraftClient;
 import minegame159.meteorclient.systems.config.Config;
-import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.misc.Placeholders;
 import minegame159.meteorclient.utils.network.OnlinePlayers;
-import net.minecraft.SharedConstants;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.Mouse;
 import net.minecraft.client.gui.screen.Screen;
@@ -114,18 +113,7 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
     private String setTitle(String original) {
         if (Config.get() == null || !Config.get().customWindowTitle) return original;
 
-        String title = Config.get().customWindowTitleText
-                .replace("{version}", (Config.get().version.getOriginalString() != null ? Config.get().version.getOriginalString() : ""))
-                .replace("{mc_version}", SharedConstants.getGameVersion().getName())
-                .replace("{username}", (MinecraftClient.getInstance().player != null) ? MinecraftClient.getInstance().player.getGameProfile().getName() : "")
-                .replace("{server}", MinecraftClient.getInstance().world != null ? getServer() : "");
-
-        return title;
-    }
-
-    private String getServer() {
-        if (MinecraftClient.getInstance().isInSingleplayer()) return "SinglePlayer";
-        else return Utils.getWorldName();
+        return Placeholders.apply(Config.get().customWindowTitleText);
     }
 
     // Interface
