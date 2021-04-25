@@ -47,9 +47,11 @@ public class Keybind implements ISerializable<Keybind>, ICopyable<Keybind> {
     }
 
     @Override
-    public void set(Keybind value) {
+    public Keybind set(Keybind value) {
         this.isKey = value.isKey;
         this.value = value.value;
+
+        return this;
     }
 
     public boolean matches(boolean isKey, int value) {

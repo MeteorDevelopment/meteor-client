@@ -25,25 +25,18 @@ import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 @Mixin(Screen.class)
 public abstract class ScreenMixin {
 
-    @Shadow
-    public int width;
+    @Shadow public int width, height;
 
     @Shadow
-    public int height;
+    protected <T extends AbstractButtonWidget> T addButton(T button) {
+        return null;
+    }
 
     @Inject(method = "renderBackground(Lnet/minecraft/client/util/math/MatrixStack;)V", at = @At("HEAD"), cancellable = true)
     private void onRenderBackground(CallbackInfo info) {
         if (Utils.canUpdate() && Modules.get().get(NoRender.class).noGuiBackground())
             info.cancel();
     }
-
-    @Shadow
-    protected <T extends AbstractButtonWidget> T addButton(final T button) {
-        return null;
-    }
-
-    @Shadow
-    public void tick() {}
 
     @ModifyArgs(method = "renderTooltip(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/item/ItemStack;II)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/Screen;renderTooltip(Lnet/minecraft/client/util/math/MatrixStack;Ljava/util/List;II)V"))
     private void getList(Args args, MatrixStack matrixStack, ItemStack itemStack, int x, int y) {

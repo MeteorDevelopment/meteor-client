@@ -48,10 +48,10 @@ public class CombatHud extends HudElement {
     private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
             .name("scale")
             .description("Scale of combat info.")
-            .defaultValue(2)
+            .defaultValue(3)
             .min(1)
             .sliderMin(1)
-            .sliderMax(4)
+            .sliderMax(5)
             .build()
     );
 
@@ -172,7 +172,7 @@ public class CombatHud extends HudElement {
     private PlayerEntity playerEntity;
 
     public CombatHud(HUD hud) {
-        super(hud, "combat-info", "Displays information about your combat target.");
+        super(hud, "combat-info", "Displays information about your combat target.", false);
     }
 
     @Override
@@ -387,8 +387,8 @@ public class CombatHud extends HudElement {
             int absorbWidth = (int) (totalAbsorbWidth * absorbPrecent);
 
             Renderer.NORMAL.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
-            Renderer.NORMAL.gradientQuad(x, y, healthWidth, 7, healthColor1.get(), healthColor2.get());
-            Renderer.NORMAL.gradientQuad(x + healthWidth, y, absorbWidth, 7, healthColor2.get(), healthColor3.get());
+            Renderer.NORMAL.quad(x, y, healthWidth, 7, healthColor1.get(), healthColor2.get(), healthColor1.get(), healthColor2.get());
+            Renderer.NORMAL.quad(x + healthWidth, y, absorbWidth, 7, healthColor2.get(), healthColor3.get(), healthColor2.get(), healthColor3.get());
             Renderer.NORMAL.end();
 
             String healthText = String.valueOf(Math.round(totalHealth * 10.0) / 10.0);

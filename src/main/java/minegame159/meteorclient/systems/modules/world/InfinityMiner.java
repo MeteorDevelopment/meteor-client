@@ -72,25 +72,29 @@ public class InfinityMiner extends Module {
             .min(.05)
             .sliderMin(.05)
             .sliderMax(.95)
-            .build());
+            .build()
+    );
 
     public final Setting<Boolean> smartModuleToggle = sgAutoToggles.add(new BoolSetting.Builder()
             .name("smart-module-toggle")
             .description("Will automatically enable helpful modules.")
             .defaultValue(true)
-            .build());
+            .build()
+    );
 
     public final Setting<Boolean> autoWalkHome = sgExtras.add(new BoolSetting.Builder()
             .name("walk-home")
             .description("Will walk 'home' when your inventory is full.")
             .defaultValue(false)
-            .build());
+            .build()
+    );
 
     public final Setting<Boolean> autoLogOut = sgExtras.add(new BoolSetting.Builder()
             .name("log-out")
             .description("Logs out when your inventory is full. Will walk home FIRST if walk home is enabled.")
             .defaultValue(false)
-            .build());
+            .build()
+    );
 
     private Mode currentMode = Mode.Still;
     private Mode secondaryMode;
@@ -265,9 +269,9 @@ public class InfinityMiner extends Module {
     private void requestLogout(Mode mode) {
         if (mc.player != null) {
             if (mode == Mode.Home)
-                mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(new LiteralText("Infinity Miner: Inventory is Full and You Are Home")));
+                mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(new LiteralText("[Infinity Miner] Inventory is Full and You Are Home")));
             else
-                mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(new LiteralText("Infinity Miner: Inventory is Full")));
+                mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(new LiteralText("[Infinity Miner] Inventory is Full")));
         }
     }
 

@@ -43,6 +43,11 @@ public class AutoTrap extends Module {
         None
     }
 
+    public enum RenderMode {
+        Always,
+        Placing
+    }
+
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgRender = settings.createGroup("Render");
 
@@ -103,6 +108,13 @@ public class AutoTrap extends Module {
             .build()
     );
 
+    private final Setting<RenderMode> renderMode = sgRender.add(new EnumSetting.Builder<RenderMode>()
+            .name("render-mode")
+            .defaultValue(RenderMode.Always)
+            .description("When to render the block overlay.")
+            .build()
+    );
+
     private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
             .name("shape-mode")
             .description("How the shapes are rendered.")
@@ -121,6 +133,27 @@ public class AutoTrap extends Module {
             .name("line-color")
             .description("The color of the lines of the blocks being rendered.")
             .defaultValue(new SettingColor(204, 0, 0, 255))
+            .build()
+    );
+
+    private final Setting<Boolean> renderPlace = sgRender.add(new BoolSetting.Builder()
+            .name("render-placed")
+            .description("Renders a block overlay over the blocks that were just placed. Requires Render Mode set to \"Always\".")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<SettingColor> placeSideColor = sgRender.add(new ColorSetting.Builder()
+            .name("place-side-color")
+            .description("The color of the sides of the blocks placed being rendered.")
+            .defaultValue(new SettingColor(255, 255, 255, 10))
+            .build()
+    );
+
+    private final Setting<SettingColor> placeLineColor = sgRender.add(new ColorSetting.Builder()
+            .name("place-line-color")
+            .description("The color of the lines of the blocks placed being rendered.")
+            .defaultValue(new SettingColor(255, 255, 255, 255))
             .build()
     );
 
@@ -180,7 +213,20 @@ public class AutoTrap extends Module {
     @EventHandler
     private void onRender(RenderEvent event) {
         if (!render.get() || placePositions.isEmpty()) return;
-        for (BlockPos pos : placePositions) Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, pos, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+        switch (renderMode.get()) {
+            case Placing:
+                Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, placePositions.get(placePositions.size() - 1), sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                break;
+            case Always:
+                for (BlockPos pos : placePositions) {
+                    if (pos == placePositions.get(placePositions.size() - 1) && renderPlace.get()) {
+                        Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, pos, placeSideColor.get(), placeLineColor.get(), shapeMode.get(), 0);
+                    } else {
+                        Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, pos, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                    }
+                }
+                break;
+        }
     }
 
     private void findPlacePos(PlayerEntity target) {

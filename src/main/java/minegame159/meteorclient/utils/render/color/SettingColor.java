@@ -56,12 +56,11 @@ public class SettingColor extends Color {
     }
 
     @Override
-    public void set(Color value) {
+    public SettingColor set(Color value) {
         super.set(value);
+        if (value instanceof SettingColor) rainbowSpeed = ((SettingColor) value).rainbowSpeed;
 
-        if (value instanceof SettingColor) {
-            rainbowSpeed = ((SettingColor) value).rainbowSpeed;
-        }
+        return this;
     }
 
     @Override

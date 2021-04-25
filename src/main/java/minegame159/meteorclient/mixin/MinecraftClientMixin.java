@@ -14,6 +14,7 @@ import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.mixininterface.IMinecraftClient;
 import minegame159.meteorclient.systems.config.Config;
+import minegame159.meteorclient.utils.misc.Placeholders;
 import minegame159.meteorclient.utils.network.OnlinePlayers;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.Mouse;
@@ -26,12 +27,8 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import javax.annotation.Nullable;
 import java.util.concurrent.CompletableFuture;
@@ -112,9 +109,11 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
         return completableFuture;
     }
 
-    @Inject(method = "getWindowTitle", at = @At("HEAD"), cancellable = true)
-    private void getTitle(CallbackInfoReturnable<String> cir) {
-        if (Config.get() != null && Config.get().windowTitle) cir.setReturnValue("Meteor Client " + Config.get().version.getOriginalString());
+    @ModifyArg(method = "updateWindowTitle", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/Window;setTitle(Ljava/lang/String;)V"))
+    private String setTitle(String original) {
+        if (Config.get() == null || !Config.get().customWindowTitle) return original;
+
+        return Placeholders.apply(Config.get().customWindowTitleText);
     }
 
     // Interface

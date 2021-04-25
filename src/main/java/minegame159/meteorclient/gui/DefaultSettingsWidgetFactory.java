@@ -176,7 +176,7 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
     }
 
     private void keybindW(WTable table, KeybindSetting setting) {
-        WKeybind keybind = table.add(theme.keybind(setting.get(), setting.getDefault().getValue())).expandX().widget();
+        WKeybind keybind = table.add(theme.keybind(setting.get(), setting.getDefaultValue().getValue())).expandX().widget();
         keybind.action = setting::changed;
         setting.widget = keybind;
     }

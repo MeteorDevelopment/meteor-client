@@ -8,6 +8,7 @@ package minegame159.meteorclient.systems.modules.player;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.settings.BoolSetting;
+import minegame159.meteorclient.settings.ItemListSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.systems.modules.Categories;
@@ -16,10 +17,22 @@ import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class AutoMend extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+
+    private final Setting<List<Item>> blacklist = sgGeneral.add(new ItemListSetting.Builder()
+            .name("blacklist")
+            .description("Item blacklist.")
+            .defaultValue(new ArrayList<>(0))
+            .filter(Item::isDamageable)
+            .build()
+    );
 
     private final Setting<Boolean> force = sgGeneral.add(new BoolSetting.Builder()
             .name("force")
@@ -85,6 +98,7 @@ public class AutoMend extends Module {
     private int getSlot() {
         for (int i = 0; i < mc.player.inventory.main.size(); i++) {
             ItemStack itemStack = mc.player.inventory.getStack(i);
+            if (blacklist.get().contains(itemStack.getItem())) continue;
 
             if (EnchantmentHelper.getLevel(Enchantments.MENDING, itemStack) > 0 && itemStack.getDamage() > 0) {
                 return i;

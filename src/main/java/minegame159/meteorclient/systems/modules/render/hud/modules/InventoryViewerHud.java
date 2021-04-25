@@ -6,7 +6,6 @@
 package minegame159.meteorclient.systems.modules.render.hud.modules;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import minegame159.meteorclient.events.render.Render2DEvent;
 import minegame159.meteorclient.rendering.DrawMode;
 import minegame159.meteorclient.rendering.Matrices;
 import minegame159.meteorclient.rendering.Renderer;
@@ -31,7 +30,7 @@ public class InventoryViewerHud extends HudElement {
     private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
             .name("scale")
             .description("Scale of inventory viewer.")
-            .defaultValue(2)
+            .defaultValue(3)
             .min(0.1)
             .sliderMin(0.1)
             .max(10)
@@ -81,7 +80,7 @@ public class InventoryViewerHud extends HudElement {
                 ItemStack stack = getStack(9 + row * 9 + i);
                 if (stack == null) continue;
 
-                RenderUtils.drawItem(stack, (int) (x / scale.get() + 8 + i * 18), (int) (y / scale.get() + 7 + row * 18), scale.get(), true);
+                RenderUtils.drawItem(stack, (int) (x + (8 + i * 18) * scale.get()), (int) (y + (7 + row * 18) * scale.get()), scale.get(), true);
             }
         }
     }

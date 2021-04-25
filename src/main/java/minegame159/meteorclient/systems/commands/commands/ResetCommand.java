@@ -12,6 +12,7 @@ import minegame159.meteorclient.systems.commands.Command;
 import minegame159.meteorclient.systems.commands.arguments.ModuleArgumentType;
 import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.systems.modules.Modules;
+import minegame159.meteorclient.systems.modules.render.hud.HUD;
 import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.command.CommandSource;
 
@@ -52,6 +53,9 @@ public class ResetCommand extends Command {
                     Modules.get().getAll().forEach(module -> module.keybind.set(true, -1));
                     return SINGLE_SUCCESS;
                 }))
-        );
+        ).then(literal("hud").executes(context -> {
+            Modules.get().get(HUD.class).reset.run();
+            return SINGLE_SUCCESS;
+        }));
     }
 }

@@ -163,17 +163,10 @@ public class ElytraFly extends Module {
 
     public final Setting<Double> autoPilotFireworkDelay = sgAutopilot.add(new DoubleSetting.Builder()
             .name("firework-delay")
-            .description("The delay in seconds in between shooting fireworks for Firework mode.")
+            .description("The delay in seconds in between using fireworks if \"Use Fireworks\" is enabled.")
             .min(1)
             .defaultValue(10)
             .sliderMax(20)
-            .build()
-    );
-
-    public final Setting<Boolean> autoPilotFireworkGhosthand = sgAutopilot.add(new BoolSetting.Builder()
-            .name("firework-ghost-hand")
-            .description("Doesn't switch to your firework slot client-side.")
-            .defaultValue(false)
             .build()
     );
 
