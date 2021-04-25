@@ -8,6 +8,7 @@ package minegame159.meteorclient.systems.modules.player;
 import baritone.api.BaritoneAPI;
 import baritone.api.pathing.goals.GoalXZ;
 import meteordevelopment.orbit.EventHandler;
+import minegame159.meteorclient.events.game.OpenScreenEvent;
 import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.gui.GuiTheme;
 import minegame159.meteorclient.gui.widgets.WLabel;
@@ -23,7 +24,8 @@ import minegame159.meteorclient.systems.waypoints.Waypoint;
 import minegame159.meteorclient.systems.waypoints.Waypoints;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.player.ChatUtils;
-import net.minecraft.network.packet.s2c.play.HealthUpdateS2CPacket;
+
+import net.minecraft.client.gui.screen.DeathScreen;
 import net.minecraft.text.BaseText;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.math.Vec3d;
@@ -64,12 +66,8 @@ public class DeathPosition extends Module {
     }
 
     @EventHandler
-    private void onPacketReceive(PacketEvent.Receive event) {
-        if (event.packet instanceof HealthUpdateS2CPacket) {
-            HealthUpdateS2CPacket packet = (HealthUpdateS2CPacket) event.packet;
-
-            if (packet.getHealth() <= 0) onDeath();
-        }
+    private void onOpenScreen(OpenScreenEvent event) {
+        if (event.screen instanceof DeathScreen) onDeath();
     }
 
     @Override
@@ -93,6 +91,7 @@ public class DeathPosition extends Module {
     }
 
     private void onDeath() {
+        if (mc.player == null) return;
         dmgPos = mc.player.getPos();
         deathPos.put("x", dmgPos.x);
         deathPos.put("z", dmgPos.z);
