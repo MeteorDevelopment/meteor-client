@@ -6,6 +6,7 @@
 package minegame159.meteorclient.utils.world;
 
 import meteordevelopment.orbit.EventHandler;
+import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.game.GameLeftEvent;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.utils.player.Rotations;
@@ -30,6 +31,10 @@ public class BlockUtils {
     private static final ArrayList<Vec3d> cuboidBlocks = new ArrayList<>();
 
     public static final Map<Integer, BlockBreakingInfo> breakingBlocks = new HashMap<>();
+
+    public static void init() {
+        MeteorClient.EVENT_BUS.subscribe(BlockUtils.class);
+    }
 
     @EventHandler
     private void onGameLeft(GameLeftEvent event) {
